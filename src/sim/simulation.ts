@@ -1,50 +1,35 @@
-import * as v from "../math/vec2.js";
-import { computeVelocity } from "./autopilot.js";
-import type { ShipConfig, ShipState } from "./types.js";
+import { add, scale, vec } from "../math";
+import type { Autopilot } from "./autopilot";
+import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";
 
-export interface SimConfig {
-  attacker: ShipConfig;
-  target: ShipConfig;
+export interface Simulation {
+  step(dt: number): void;
+  snapshot(): SimSnapshot;
+  reset(config: SimConfig): void;
 }
 
-export class Simulation {
-  time: number;
-  attacker: ShipState;
-  target: ShipState;
+export class SimulationImpl implements Simulation {
+  private readonly autopilot: Autopilot;
+  private time: number;
+  private attacker: ShipState;
+  private target: ShipState;
 
-  constructor(config: SimConfig) {
+  constructor({ autopilot, simConfig }: { autopilot: Autopilot; simConfig: SimConfig }) {
+    this.autopilot = autopilot;
     this.time = 0;
-    this.attacker = asState(config.attacker);
-    this.target = asState(config.target);
+    this.attacker = asState(simConfig.attacker);
+    this.target = asState(simConfig.target);
     this.updateVelocities();
   }
 
-  private updateVelocities() {
-    // If the attacker is matching, compute the target first so the match
-    // uses the current target velocity. Otherwise compute attacker first.
-    if (this.attacker.mode === "match") {
-      this.target.velocity = computeVelocity(this.target, this.attacker);
-      this.attacker.velocity = computeVelocity(this.attacker, this.target);
-    } else {
-      this.attacker.velocity = computeVelocity(this.attacker, this.target);
-      this.target.velocity = computeVelocity(this.target, this.attacker);
-    }
-  }
-
-  step(dt: number) {
+  step(dt: number): void {
     this.updateVelocities();
-    this.attacker.position = v.add(
-      this.attacker.position,
-      v.scale(this.attacker.velocity, dt),
-    );
-    this.target.position = v.add(
-      this.target.position,
-      v.scale(this.target.velocity, dt),
-    );
+    this.attacker.position = add(this.attacker.position, scale(this.attacker.velocity, dt));
+    this.target.position = add(this.target.position, scale(this.target.velocity, dt));
     this.time += dt;
   }
 
-  snapshot() {
+  snapshot(): SimSnapshot {
     return {
       time: this.time,
       attacker: this.attacker,
@@ -52,14 +37,26 @@ export class Simulation {
     };
   }
 
-  reset(config: SimConfig) {
+  reset(config: SimConfig): void {
     this.time = 0;
     this.attacker = asState(config.attacker);
     this.target = asState(config.target);
     this.updateVelocities();
   }
+
+  private updateVelocities(): void {
+    // If the attacker is matching, compute the target first so the match
+    // uses the current target velocity. Otherwise compute attacker first.
+    if (this.attacker.mode === "match") {
+      this.target.velocity = this.autopilot.computeVelocity(this.target, this.attacker);
+      this.attacker.velocity = this.autopilot.computeVelocity(this.attacker, this.target);
+    } else {
+      this.attacker.velocity = this.autopilot.computeVelocity(this.attacker, this.target);
+      this.target.velocity = this.autopilot.computeVelocity(this.target, this.attacker);
+    }
+  }
 }
 
 function asState(config: ShipConfig): ShipState {
-  return { ...config, velocity: v.vec(0, 0) };
+  return { ...config, velocity: vec(0, 0) };
 }

@@ -1,20 +1,38 @@
-import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim/types.js";
-import { findBestDistance } from "../sim/hitChance.js";
-import type { SimConfig } from "../sim/simulation.js";
-import type { EngagementFrame, HitChanceBreakdown, ShipConfig, TurretSpec } from "../sim/types.js";
-import * as v from "../math/vec2.js";
+import { vec } from "../math";
+import {
+  SIG_RESOLUTIONS,
+  type EngagementFrame,
+  type HitChance,
+  type HitChanceBreakdown,
+  type ShipConfig,
+  type SigResolutionClass,
+  type SimConfig,
+  type TurretSpec,
+} from "../sim";
 
-interface Callbacks {
-  onReset: () => void;
-  onPlayPause: () => void;
-  onSpeedChange: (speed: number) => void;
+export interface ControlsCallbacks {
+  readonly onReset: () => void;
+  readonly onPlayPause: () => void;
+  readonly onSpeedChange: (speed: number) => void;
 }
 
-export class Controls {
-  private els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
-  private callbacks?: Callbacks;
+export interface Controls {
+  getTurret(): TurretSpec;
+  getTargetSig(): number;
+  getConfig(): SimConfig;
+  getSpeed(): number;
+  update(frame: EngagementFrame, hit: HitChanceBreakdown): void;
+  setPlaying(playing: boolean): void;
+  setCallbacks(callbacks: ControlsCallbacks): void;
+}
 
-  constructor() {
+export class DomControls implements Controls {
+  private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
+  private readonly hitChance: HitChance;
+  private callbacks?: ControlsCallbacks;
+
+  constructor({ hitChance }: { hitChance: HitChance }) {
+    this.hitChance = hitChance;
     this.els = {
       tracking: el("tracking"),
       sigRes: el("sigRes"),
@@ -45,10 +63,6 @@ export class Controls {
     this.bind();
   }
 
-  setCallbacks(callbacks: Callbacks) {
-    this.callbacks = callbacks;
-  }
-
   getTurret(): TurretSpec {
     return {
       tracking: num(this.els.tracking),
@@ -66,7 +80,7 @@ export class Controls {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
     const attacker: ShipConfig = {
       id: "attacker",
-      position: v.vec(0, 0),
+      position: vec(0, 0),
       maxSpeed: num(this.els.attackerSpeed),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
@@ -74,7 +88,7 @@ export class Controls {
     };
     const target: ShipConfig = {
       id: "target",
-      position: v.vec(0, initialDistance),
+      position: vec(0, initialDistance),
       maxSpeed: num(this.els.targetSpeed),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
@@ -87,13 +101,9 @@ export class Controls {
     return num(this.els.simSpeed);
   }
 
-  update(frame: EngagementFrame, hit: HitChanceBreakdown) {
-    const trackPenalty = Number.isFinite(hit.trackingTerm)
-      ? (0.5 ** hit.trackingTerm) * 100
-      : 0;
-    const rangePenalty = Number.isFinite(hit.rangeTerm)
-      ? (0.5 ** hit.rangeTerm) * 100
-      : 0;
+  update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
+    const trackPenalty = Number.isFinite(hit.trackingTerm) ? (0.5 ** hit.trackingTerm) * 100 : 0;
+    const rangePenalty = Number.isFinite(hit.rangeTerm) ? (0.5 ** hit.rangeTerm) * 100 : 0;
 
     setText(this.els.resDistance, formatDistance(frame.distance));
     setText(this.els.resTransversal, `${frame.transversalSpeed.toFixed(1)} m/s`);
@@ -106,15 +116,19 @@ export class Controls {
     (this.els.resHitCard as HTMLElement).style.borderColor = hitChanceColor(hit.chance);
   }
 
-  setPlaying(playing: boolean) {
+  setPlaying(playing: boolean): void {
     (this.els.play as HTMLButtonElement).textContent = playing ? "Pause" : "Play";
   }
 
-  private setBestInitialDistance() {
+  setCallbacks(callbacks: ControlsCallbacks): void {
+    this.callbacks = callbacks;
+  }
+
+  private setBestInitialDistance(): void {
     const turret = this.getTurret();
     const targetSig = this.getTargetSig();
     const targetSpeed = num(this.els.targetSpeed);
-    const best = findBestDistance(targetSpeed, turret, targetSig);
+    const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
 
     (this.els.initialDistance as HTMLInputElement).value = String(Math.round(best));
 
@@ -122,7 +136,7 @@ export class Controls {
     (this.els.targetRange as HTMLInputElement).value = String(Math.round(best));
   }
 
-  private bind() {
+  private bind(): void {
     (this.els.play as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onPlayPause());
     (this.els.reset as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onReset());
     (this.els.simSpeed as HTMLSelectElement).addEventListener("change", () => {
@@ -161,7 +175,7 @@ function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number 
   return Number.isNaN(n) ? 0 : n;
 }
 
-function setText(el: HTMLElement, text: string) {
+function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
 }
 

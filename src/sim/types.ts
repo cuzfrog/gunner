@@ -1,4 +1,4 @@
-import type { Vec2 } from "../math/vec2.js";
+import type { Vec2 } from "../math";
 
 export const SIG_RESOLUTIONS = { S: 40, M: 125, L: 400, XL: 2000 } as const;
 export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
@@ -10,41 +10,54 @@ export type AutopilotMode =
   | "retreat"
   | "match";
 
+export type OrbitDirection = "cw" | "ccw";
+
 export interface ShipConfig {
-  id: "attacker" | "target";
+  readonly id: "attacker" | "target";
   position: Vec2;
-  maxSpeed: number;
-  mode: AutopilotMode;
-  desiredRange: number;
-  orbitDirection?: "cw" | "ccw";
+  readonly maxSpeed: number;
+  readonly mode: AutopilotMode;
+  readonly desiredRange: number;
+  readonly orbitDirection?: OrbitDirection;
 }
 
 export interface ShipState extends ShipConfig {
   velocity: Vec2;
 }
 
+export interface SimConfig {
+  readonly attacker: ShipConfig;
+  readonly target: ShipConfig;
+}
+
+export interface SimSnapshot {
+  readonly time: number;
+  readonly attacker: ShipState;
+  readonly target: ShipState;
+}
+
 export interface TurretSpec {
-  tracking: number; // rad/s (old-system tracking speed)
-  sigResolution: number; // m
-  optimal: number; // m
-  falloff: number; // m
+  readonly tracking: number; // rad/s (old-system tracking speed)
+  readonly sigResolution: number; // m
+  readonly optimal: number; // m
+  readonly falloff: number; // m
 }
 
 export interface EngagementFrame {
-  time: number;
-  attacker: ShipState;
-  target: ShipState;
-  relPosition: Vec2; // target.pos - attacker.pos
-  distance: number; // m
-  relVelocity: Vec2; // target.vel - attacker.vel
-  radialVelocity: number; // m/s, positive = target moving away along LOS
-  transversalVelocity: Vec2; // m/s
-  transversalSpeed: number; // m/s
-  angularVelocity: number; // rad/s
+  readonly time: number;
+  readonly attacker: ShipState;
+  readonly target: ShipState;
+  readonly relPosition: Vec2; // target.pos - attacker.pos
+  readonly distance: number; // m
+  readonly relVelocity: Vec2; // target.vel - attacker.vel
+  readonly radialVelocity: number; // m/s, positive = target moving away along LOS
+  readonly transversalVelocity: Vec2; // m/s
+  readonly transversalSpeed: number; // m/s
+  readonly angularVelocity: number; // rad/s
 }
 
 export interface HitChanceBreakdown {
-  chance: number; // 0..1
-  trackingTerm: number;
-  rangeTerm: number;
+  readonly chance: number; // 0..1
+  readonly trackingTerm: number;
+  readonly rangeTerm: number;
 }

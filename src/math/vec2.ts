@@ -13,8 +13,6 @@ export const scale = (v: Vec2, s: number): Vec2 => ({ x: v.x * s, y: v.y * s });
 
 export const dot = (a: Vec2, b: Vec2): number => a.x * b.x + a.y * b.y;
 
-export const len2 = (v: Vec2): number => dot(v, v);
-
 export const len = (v: Vec2): number => Math.hypot(v.x, v.y);
 
 export const dist = (a: Vec2, b: Vec2): number => len(sub(a, b));
@@ -37,6 +35,3 @@ export const perpCW = (v: Vec2): Vec2 => ({
 });
 
 export const angle = (v: Vec2): number => Math.atan2(v.y, v.x);
-
-export const fromPolar = (r: number, theta: number): Vec2 =>
-  ({ x: r * Math.cos(theta), y: r * Math.sin(theta) });

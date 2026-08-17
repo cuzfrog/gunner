@@ -1,53 +1,21 @@
-import { Simulation } from "./sim/simulation.js";
-import { computeEngagement } from "./sim/kinematics.js";
-import { computeHitChance } from "./sim/hitChance.js";
-import { Controls } from "./ui/controls.js";
-import { Renderer } from "./ui/renderer.js";
-import { Loop } from "./ui/loop.js";
+import { asValue } from "awilix";
+import { registerAppModule } from "./app";
+import { container } from "./container";
+import { registerSimModule } from "./sim";
+import { registerUiModule } from "./ui";
 
-function main() {
-  const canvas = document.getElementById("scene") as HTMLCanvasElement | null;
-  if (!canvas) throw new Error("Canvas element not found");
+function main(): void {
+  const canvas = document.getElementById("scene");
+  if (!(canvas instanceof HTMLCanvasElement)) throw new Error("Canvas element not found");
 
-  const controls = new Controls();
-  const turret = controls.getTurret();
-  const targetSig = controls.getTargetSig();
-  const sim = new Simulation(controls.getConfig());
+  container.register({ canvas: asValue(canvas) });
+  registerSimModule(container);
+  registerUiModule(container);
+  container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
+  registerSimModule(container);
+  registerAppModule(container);
 
-  const renderer = new Renderer(canvas);
-
-  const update = () => {
-    const snapshot = sim.snapshot();
-    const frame = computeEngagement(snapshot.attacker, snapshot.target, snapshot.time);
-    const turretNow = controls.getTurret();
-    const hit = computeHitChance(frame, turretNow, controls.getTargetSig());
-    renderer.draw(snapshot, frame, hit, turretNow);
-    controls.update(frame, hit);
-  };
-
-  const loop = new Loop((dt) => {
-    sim.step(dt);
-    update();
-  });
-
-  loop.setSpeed(controls.getSpeed());
-
-  controls.setCallbacks({
-    onReset: () => {
-      sim.reset(controls.getConfig());
-      loop.reset();
-      update();
-    },
-    onPlayPause: () => {
-      loop.toggle();
-      controls.setPlaying(loop.isRunning());
-    },
-    onSpeedChange: (speed) => {
-      loop.setSpeed(speed);
-    },
-  });
-
-  update();
+  container.cradle.app.start();
 }
 
 main();
