@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVE Gun Tracking Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Saira:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>EVE Gun Tracking Calculator</h1>
+      <span class="subtitle">2D tactical simulation</span>
+    </header>
+
+    <main class="main">
+      <section class="panel attacker-panel">
+        <h2>Attacker / Turret</h2>
+        <label>
+          <span>Tracking speed (rad/s)</span>
+          <input type="number" id="tracking" value="0.32" step="any" min="0">
+        </label>
+        <label>
+          <span>Turret sig. resolution</span>
+          <select id="sigRes">
+            <option value="S" selected>S (40 m)</option>
+            <option value="M">M (125 m)</option>
+            <option value="L">L (400 m)</option>
+            <option value="XL">XL (2000 m)</option>
+          </select>
+        </label>
+        <label>
+          <span>Optimal range (m)</span>
+          <input type="number" id="optimal" value="5000" step="any" min="0">
+        </label>
+        <label>
+          <span>Falloff range (m)</span>
+          <input type="number" id="falloff" value="5000" step="any" min="0">
+        </label>
+
+        <h2>Attacker ship</h2>
+        <p class="hint">The attacker always sits at the center.</p>
+        <label>
+          <span>Max speed (m/s)</span>
+          <input type="number" id="attacker-speed" value="0" step="any" min="0">
+        </label>
+        <label>
+          <span>Mode</span>
+          <select id="attacker-mode">
+            <option value="keepAtRange" selected>Keep at range</option>
+            <option value="approach">Approach</option>
+            <option value="retreat">Go farther</option>
+            <option value="match">Match direction</option>
+            <option value="orbit">Orbit</option>
+          </select>
+        </label>
+        <label>
+          <span>Desired range (m)</span>
+          <input type="number" id="attacker-range" value="5000" step="any" min="0">
+        </label>
+      </section>
+
+      <section class="canvas-section">
+        <canvas id="scene" width="800" height="600"></canvas>
+        <div class="controls">
+          <button id="play" class="primary">Play</button>
+          <button id="reset">Reset</button>
+          <label>
+            <span>Speed</span>
+            <select id="sim-speed">
+              <option value="0.25">0.25x</option>
+              <option value="0.5">0.5x</option>
+              <option value="1">1x</option>
+              <option value="2">2x</option>
+              <option value="4" selected>4x</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel target-panel">
+        <h2>Target ship</h2>
+        <label>
+          <span>Initial distance (m)</span>
+          <input type="number" id="initial-distance" value="5000" step="any" min="1">
+        </label>
+        <label>
+          <span>Max speed (m/s)</span>
+          <input type="number" id="target-speed" value="1000" step="any" min="0">
+        </label>
+        <label>
+          <span>Mode</span>
+          <select id="target-mode">
+            <option value="orbit" selected>Orbit</option>
+            <option value="keepAtRange">Keep at range</option>
+            <option value="approach">Approach</option>
+            <option value="retreat">Go farther</option>
+            <option value="match">Match direction</option>
+          </select>
+        </label>
+        <label>
+          <span>Desired range (m)</span>
+          <input type="number" id="target-range" value="5000" step="any" min="0">
+        </label>
+
+        <h2>Target profile</h2>
+        <label>
+          <span>Signature radius (m)</span>
+          <input type="number" id="target-sig" value="40" step="any" min="1">
+        </label>
+      </section>
+    </main>
+
+    <section class="results">
+      <div class="result-card">
+        <span class="label">Distance</span>
+        <span class="value" id="res-distance">0 m</span>
+      </div>
+      <div class="result-card">
+        <span class="label">Transversal</span>
+        <span class="value" id="res-transversal">0 m/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label">Angular</span>
+        <span class="value" id="res-angular">0 rad/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label">Radial</span>
+        <span class="value" id="res-radial">0 m/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label">Tracking penalty</span>
+        <span class="value" id="res-track-pen">0%</span>
+      </div>
+      <div class="result-card">
+        <span class="label">Range penalty</span>
+        <span class="value" id="res-range-pen">0%</span>
+      </div>
+      <div class="result-card hit-chance" id="res-hit-card">
+        <span class="label">Hit chance</span>
+        <span class="value" id="res-hit">0%</span>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

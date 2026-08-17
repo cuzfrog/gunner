@@ -1,0 +1,222 @@
+:root {
+  --bg-deep: #05080c;
+  --bg-panel: #101418;
+  --bg-inset: #0a0f14;
+  --border-dim: rgba(92, 203, 203, 0.25);
+  --accent-teal: #5ccbcb;
+  --accent-blue: #30b2e6;
+  --accent-orange: #f67c0f;
+  --danger-red: #d81f27;
+  --optimal-green: #9cc954;
+  --warn-yellow: #fce447;
+  --text-primary: #e8eef0;
+  --text-secondary: #9fb3b8;
+  --text-dim: #5d7078;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: "Saira", sans-serif;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header {
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 20px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.header .subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 260px 1fr 260px;
+  gap: 16px;
+  align-items: start;
+}
+
+.panel,
+.canvas-section,
+.results {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  padding: 14px;
+}
+
+.panel h2,
+.canvas-section h2 {
+  margin: 0 0 12px;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 6px;
+}
+
+.panel label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.panel span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.panel .hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: -6px 0 10px;
+  text-transform: none;
+}
+
+.panel input,
+.panel select {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 14px;
+  border-radius: 2px;
+}
+
+.panel input:focus,
+.panel select:focus {
+  outline: none;
+  border-color: var(--accent-teal);
+}
+
+.canvas-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.controls button,
+.controls select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.controls button.primary {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.controls button:hover,
+.controls select:hover {
+  border-color: var(--accent-teal);
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.result-card {
+  text-align: center;
+  border: 1px solid var(--border-dim);
+  padding: 10px;
+  border-radius: 2px;
+}
+
+.result-card .label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.result-card .value {
+  display: block;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.result-card.hit-chance {
+  border-color: var(--accent-teal);
+}
+
+.result-card.hit-chance .value {
+  font-size: 28px;
+  font-family: "Chakra Petch", sans-serif;
+}
+
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
