@@ -1,5 +1,5 @@
 import { add, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
-import type { AutopilotMode, ShipState } from "./types";
+import type { ShipState } from "./types";
 
 export interface Autopilot {
   computeVelocity(ship: ShipState, other: ShipState): Vec2;
@@ -37,17 +37,6 @@ const ORBIT_RANGE_GAIN = 0.5;
 const KEEP_RANGE_GAIN = 2.0;
 const APPROACH_STOP_RANGE = 100; // m
 
-function contending(mode: AutopilotMode): boolean {
-  return mode === "keepAtRange" || mode === "orbit";
-}
-
-function resolvedRange(ship: ShipState, other: ShipState): number {
-  if (contending(other.mode) && other.maxSpeed > ship.maxSpeed) {
-    return Math.max(other.desiredRange, 1);
-  }
-  return Math.max(ship.desiredRange, 1);
-}
-
 function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
   // From-center vector is the opposite of to-other; it points from the
   // reference ship (orbit center) to this ship.
@@ -55,13 +44,11 @@ function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): 
 
   const tHat = (ship.orbitDirection ?? "cw") === "cw" ? perpCW(fromCenterHat) : perpCCW(fromCenterHat);
 
-  const desiredRange = resolvedRange(ship, other);
+  const desiredRange = Math.max(ship.desiredRange, 1);
   const openingRate = (ORBIT_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
 
   const otherOutward = dot(other.velocity, toOtherHat);
-  const radialSpeed = contending(other.mode)
-    ? Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate))
-    : Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate - otherOutward));
+  const radialSpeed = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate - otherOutward));
 
   const radialVel = scale(fromCenterHat, radialSpeed);
   const tangentialSpeed = Math.sqrt(ship.maxSpeed * ship.maxSpeed - radialSpeed * radialSpeed);
@@ -71,21 +58,11 @@ function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): 
 }
 
 function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
-  const desiredRange = resolvedRange(ship, other);
-  const radialSpeed = commandedRadialSpeed(ship, other, d, toOtherHat, desiredRange);
-  return scale(toOtherHat, radialSpeed);
-}
-
-function commandedRadialSpeed(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2, desiredRange: number): number {
-  if (contending(other.mode)) {
-    const error = (d - desiredRange) / desiredRange;
-    const control = Math.max(-1, Math.min(1, KEEP_RANGE_GAIN * error));
-    return ship.maxSpeed * control;
-  }
-
+  const desiredRange = Math.max(ship.desiredRange, 1);
   const otherOutward = dot(other.velocity, toOtherHat);
   const openingRate = (KEEP_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
-  return Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, otherOutward - openingRate));
+  const radialSpeed = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, otherOutward - openingRate));
+  return scale(toOtherHat, radialSpeed);
 }
 
 function approach(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
