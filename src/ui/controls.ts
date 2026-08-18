@@ -10,6 +10,7 @@ import {
 } from "../sim";
 import type { I18n, Language } from "./i18n";
 import type { SettingsStore, UserSettings } from "./settings";
+import { USER_SETTINGS_VERSION } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -36,6 +37,8 @@ export class DomControls implements Controls {
   private readonly settingsStore: SettingsStore;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
+  private playing = false;
+  private shareStatusTimeout?: ReturnType<typeof setTimeout>;
 
   constructor({
     hitChance,
@@ -93,6 +96,7 @@ export class DomControls implements Controls {
     } else {
       this.i18n.translateDocument();
       this.setBestInitialDistance();
+      this.setPlaying(false);
     }
     this.bind();
   }
@@ -149,6 +153,7 @@ export class DomControls implements Controls {
   }
 
   setPlaying(playing: boolean): void {
+    this.playing = playing;
     (this.els.play as HTMLButtonElement).textContent = this.i18n.t(
       playing ? "button.pause" : "button.play",
     );
@@ -160,7 +165,7 @@ export class DomControls implements Controls {
 
   private getSettings(): UserSettings {
     return {
-      version: 2,
+      version: USER_SETTINGS_VERSION,
       tracking: this.trackingInput.rad,
       trackingUnit: this.trackingInput.unit,
       sigRes: (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass,
@@ -203,6 +208,7 @@ export class DomControls implements Controls {
     this.updateUnitToggle();
     this.updateLanguageToggle();
     this.renderProfiles();
+    this.setPlaying(this.playing);
   }
 
   private setBestInitialDistance(): void {
@@ -210,6 +216,7 @@ export class DomControls implements Controls {
     const targetSig = this.getTargetSig();
     const targetSpeed = num(this.els.targetSpeed);
     const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
+    if (!Number.isFinite(best) || best <= 0) return;
 
     (this.els.initialDistance as HTMLInputElement).value = String(Math.round(best));
 
@@ -254,9 +261,12 @@ export class DomControls implements Controls {
   }
 
   private setLanguage(language: Language): void {
+    const selected = (this.els.profileSelect as HTMLSelectElement).value;
     this.i18n.setLanguage(language);
     this.i18n.translateDocument();
     this.updateLanguageToggle();
+    this.renderProfiles(selected);
+    this.setPlaying(this.playing);
     this.persist();
   }
 
@@ -270,7 +280,7 @@ export class DomControls implements Controls {
     this.settingsStore.save(this.getSettings());
   }
 
-  private renderProfiles(): void {
+  private renderProfiles(selected = ""): void {
     const names = this.settingsStore.listProfiles();
     const select = this.els.profileSelect as HTMLSelectElement;
     select.innerHTML = "";
@@ -284,6 +294,7 @@ export class DomControls implements Controls {
       option.textContent = name;
       select.appendChild(option);
     }
+    select.value = selected;
   }
 
   private saveProfile(): void {
@@ -301,6 +312,7 @@ export class DomControls implements Controls {
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
     this.loadSettings(profile);
+    (this.els.profileSelect as HTMLSelectElement).value = name;
     this.callbacks?.onConfigChange();
   }
 
@@ -315,7 +327,8 @@ export class DomControls implements Controls {
   private async shareLink(): Promise<void> {
     const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), navigator.clipboard);
     setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
-    setTimeout(() => setText(this.els.shareStatus, ""), 2000);
+    if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
+    this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
   private bind(): void {
@@ -368,7 +381,7 @@ function el(id: string): HTMLElement {
 function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number {
   const value = (input as HTMLInputElement).value;
   const n = parseFloat(value);
-  return Number.isNaN(n) ? 0 : n;
+  return Number.isNaN(n) ? 0 : Math.max(0, n);
 }
 
 function setText(el: HTMLElement, text: string): void {
