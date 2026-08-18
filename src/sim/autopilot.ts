@@ -1,4 +1,5 @@
 import { add, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
+import { timeConstant } from "./dynamics";
 import type { ShipState } from "./types";
 
 export interface Autopilot {
@@ -48,7 +49,9 @@ function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): 
   const openingRate = (ORBIT_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
 
   const otherOutward = dot(other.velocity, toOtherHat);
-  const radialSpeed = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate - otherOutward));
+  const tangentialVelocity = dot(ship.velocity, tHat);
+  const lagLead = (timeConstant(ship.mass, ship.inertiaModifier) * tangentialVelocity * tangentialVelocity) / d;
+  const radialSpeed = clampSpeed(openingRate - otherOutward - lagLead, ship.maxSpeed);
 
   const radialVel = scale(fromCenterHat, radialSpeed);
   const tangentialSpeed = Math.sqrt(ship.maxSpeed * ship.maxSpeed - radialSpeed * radialSpeed);
@@ -61,7 +64,7 @@ function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: V
   const desiredRange = Math.max(ship.desiredRange, 1);
   const otherOutward = dot(other.velocity, toOtherHat);
   const openingRate = (KEEP_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
-  const radialSpeed = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, otherOutward - openingRate));
+  const radialSpeed = clampSpeed(otherOutward - openingRate, ship.maxSpeed);
   return scale(toOtherHat, radialSpeed);
 }
 
@@ -80,4 +83,8 @@ function match(ship: ShipState, other: ShipState): Vec2 {
   const dir = scale(other.velocity, 1 / otherSpeed);
   const speed = Math.min(ship.maxSpeed, otherSpeed);
   return scale(dir, speed);
+}
+
+function clampSpeed(value: number, maxSpeed: number): number {
+  return Math.max(-maxSpeed, Math.min(maxSpeed, value));
 }

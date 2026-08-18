@@ -6,12 +6,16 @@ export interface ShipMotion {
   readonly velocity: Vec2;
 }
 
+export function timeConstant(mass: number, inertiaModifier: number): number {
+  return mass * inertiaModifier * 1e-6;
+}
+
 export function integrateShip(state: ShipState, commandedVelocity: Vec2, dt: number): ShipMotion {
   const clampedCommand = clampToMaxSpeed(commandedVelocity, state.maxSpeed);
   if (dt <= 0) {
     return { position: state.position, velocity: state.velocity };
   }
-  const tau = state.mass * state.inertiaModifier * 1e-6;
+  const tau = timeConstant(state.mass, state.inertiaModifier);
   if (tau <= 0) {
     return { position: add(state.position, scale(clampedCommand, dt)), velocity: clampedCommand };
   }

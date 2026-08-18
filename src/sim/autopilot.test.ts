@@ -1,6 +1,6 @@
-import { add, dist, dot, len, scale, vec } from "../math";
+import { add, dist, dot, len, perpCCW, perpCW, scale, vec } from "../math";
 import { AutopilotImpl } from "./autopilot";
-import type { AutopilotMode, ShipState } from "./types";
+import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
 
 const autopilot = new AutopilotImpl();
 const DT = 0.1;
@@ -12,9 +12,10 @@ function makeShip(
   mode: AutopilotMode,
   maxSpeed: number,
   desiredRange = 5000,
+  mass = 1,
+  inertiaModifier = 1e-6,
+  orbitDirection: OrbitDirection = "cw",
 ): ShipState {
-  const mass = id === "attacker" ? 1_200_000 : 10_000_000;
-  const inertiaModifier = id === "attacker" ? 3 : 0.45;
   return {
     id,
     position: vec(pos[0], pos[1]),
@@ -24,7 +25,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
-    orbitDirection: "cw",
+    orbitDirection,
   };
 }
 
@@ -204,6 +205,54 @@ describe("AutopilotImpl", () => {
       expect(len(farVel)).toBeCloseTo(1000, 5);
       expect(farVel.x).toBeCloseTo(0, 5);
       expect(farVel.y).toBeCloseTo(1000, 5);
+    });
+
+    test("feeds forward inward lead against dynamics lag", () => {
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "cw");
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = vec(1, 0);
+      const tHat = perpCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1400);
+      const command = autopilot.computeVelocity(ship, other);
+      const expectedTangential = 1361.29;
+      expect(dot(command, fromCenterHat)).toBeCloseTo(-630, 1);
+      expect(dot(command, tHat)).toBeCloseTo(expectedTangential, 1);
+      expect(len(command)).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("lag compensation is inward for both orbit directions", () => {
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "ccw");
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = vec(1, 0);
+      const tHat = perpCCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1400);
+      const command = autopilot.computeVelocity(ship, other);
+      expect(dot(command, fromCenterHat)).toBeCloseTo(-630, 1);
+      expect(len(command)).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("no lead with instant dynamics", () => {
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = vec(1, 0);
+      const tHat = perpCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1400);
+      const command = autopilot.computeVelocity(ship, other);
+      expect(command.x).toBeCloseTo(0, 5);
+      expect(command.y).toBeCloseTo(-1500, 5);
+      expect(len(command)).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("lead saturates at the speed budget", () => {
+      const ship = makeShip("target", [1000, 0], "orbit", 1500, 1000, 10_000_000, 0.45, "cw");
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = vec(1, 0);
+      const tHat = perpCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1500);
+      const command = autopilot.computeVelocity(ship, other);
+      expect(command.x).toBeCloseTo(-1500, 5);
+      expect(command.y).toBeCloseTo(0, 5);
+      expect(len(command)).toBeLessThanOrEqual(ship.maxSpeed);
     });
   });
 });

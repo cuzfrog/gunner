@@ -1,5 +1,5 @@
 import { len, vec } from "../math";
-import { integrateShip } from "./dynamics";
+import { integrateShip, timeConstant } from "./dynamics";
 import type { ShipState } from "./types";
 
 function ship(extra: Partial<ShipState> = {}): ShipState {
@@ -15,6 +15,13 @@ function ship(extra: Partial<ShipState> = {}): ShipState {
     ...extra,
   };
 }
+
+describe("timeConstant", () => {
+  test("known ship configurations produce expected tau", () => {
+    expect(timeConstant(1_200_000, 3)).toBeCloseTo(3.6, 10);
+    expect(timeConstant(10_000_000, 0.45)).toBeCloseTo(4.5, 10);
+  });
+});
 
 describe("integrateShip", () => {
   test("exponential convergence from standstill", () => {
