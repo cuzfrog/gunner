@@ -64,8 +64,7 @@ describe("integrateShip", () => {
     const result = integrateShip(state, command, 2);
     const speed = len(result.velocity);
     expect(speed).toBeGreaterThan(0);
-    expect(speed).toBeLessThan(100 * Math.sqrt(2));
-    expect(speed).toBeLessThan(141);
+    expect(speed).toBeLessThanOrEqual(100);
   });
 
   test("command clamp prevents exceeding maxSpeed", () => {

@@ -27,6 +27,5 @@ function clampToMaxSpeed(velocity: Vec2, maxSpeed: number): Vec2 {
   const budget = Math.max(0, maxSpeed);
   const speed = len(velocity);
   if (speed <= budget) return velocity;
-  if (speed === 0) return vec(0, 0);
   return scale(velocity, budget / speed);
 }
