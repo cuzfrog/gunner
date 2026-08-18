@@ -1,4 +1,3 @@
-import { vec } from "../math";
 import {
   SIG_RESOLUTIONS,
   type EngagementFrame,
@@ -12,6 +11,7 @@ import {
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
+  readonly onConfigChange: () => void;
   readonly onPlayPause: () => void;
   readonly onSpeedChange: (speed: number) => void;
 }
@@ -80,7 +80,6 @@ export class DomControls implements Controls {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
     const attacker: ShipConfig = {
       id: "attacker",
-      position: vec(0, 0),
       maxSpeed: num(this.els.attackerSpeed),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
@@ -88,13 +87,12 @@ export class DomControls implements Controls {
     };
     const target: ShipConfig = {
       id: "target",
-      position: vec(0, initialDistance),
       maxSpeed: num(this.els.targetSpeed),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
       orbitDirection: "cw",
     };
-    return { attacker, target };
+    return { attacker, target, initialDistance };
   }
 
   getSpeed(): number {
@@ -158,7 +156,7 @@ export class DomControls implements Controls {
       "targetSig",
     ];
     for (const id of inputs) {
-      this.els[id].addEventListener("input", () => this.callbacks?.onReset());
+      this.els[id].addEventListener("input", () => this.callbacks?.onConfigChange());
     }
   }
 }
