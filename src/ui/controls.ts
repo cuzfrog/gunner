@@ -8,6 +8,7 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
+import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -29,12 +30,16 @@ export interface Controls {
 export class DomControls implements Controls {
   private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
   private readonly hitChance: HitChance;
+  private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
 
   constructor({ hitChance }: { hitChance: HitChance }) {
     this.hitChance = hitChance;
+    this.trackingInput = new TrackingInput();
     this.els = {
       tracking: el("tracking"),
+      trackingUnitRad: el("tracking-unit-rad"),
+      trackingUnitScore: el("tracking-unit-score"),
       sigRes: el("sigRes"),
       optimal: el("optimal"),
       falloff: el("falloff"),
@@ -65,7 +70,7 @@ export class DomControls implements Controls {
 
   getTurret(): TurretSpec {
     return {
-      tracking: num(this.els.tracking),
+      tracking: this.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
@@ -134,12 +139,43 @@ export class DomControls implements Controls {
     (this.els.targetRange as HTMLInputElement).value = String(Math.round(best));
   }
 
+  private currentSigResolution(): number {
+    return SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass];
+  }
+
+  private setTrackingUnit(unit: "rad" | "score"): void {
+    const sigResolution = this.currentSigResolution();
+    const display = this.trackingInput.setUnit(unit, sigResolution);
+    (this.els.tracking as HTMLInputElement).value = String(display);
+    this.updateUnitToggle();
+  }
+
+  private updateTrackingFromInput(): void {
+    const value = num(this.els.tracking);
+    const sigResolution = this.currentSigResolution();
+    const display = this.trackingInput.setDisplayValue(value, sigResolution);
+    (this.els.tracking as HTMLInputElement).value = String(display);
+  }
+
+  private updateTrackingForSigResolution(): void {
+    const sigResolution = this.currentSigResolution();
+    const display = this.trackingInput.displayValue(sigResolution);
+    (this.els.tracking as HTMLInputElement).value = String(display);
+  }
+
+  private updateUnitToggle(): void {
+    (this.els.trackingUnitRad as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "rad");
+    (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "score");
+  }
+
   private bind(): void {
     (this.els.play as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onPlayPause());
     (this.els.reset as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onReset());
     (this.els.simSpeed as HTMLSelectElement).addEventListener("change", () => {
       this.callbacks?.onSpeedChange(this.getSpeed());
     });
+    (this.els.trackingUnitRad as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("rad"));
+    (this.els.trackingUnitScore as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("score"));
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -156,7 +192,11 @@ export class DomControls implements Controls {
       "targetSig",
     ];
     for (const id of inputs) {
-      this.els[id].addEventListener("input", () => this.callbacks?.onConfigChange());
+      this.els[id].addEventListener("input", () => {
+        if (id === "tracking") this.updateTrackingFromInput();
+        if (id === "sigRes") this.updateTrackingForSigResolution();
+        this.callbacks?.onConfigChange();
+      });
     }
   }
 }
