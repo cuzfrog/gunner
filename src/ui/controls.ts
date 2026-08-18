@@ -482,6 +482,7 @@ export class DomControls implements Controls {
     select.value = module ? module.id : "";
 
     if (updateStats) {
+      (this.els[`${side}Inertia`] as HTMLInputElement).value = String(profile.inertiaModifier);
       this.updatePropulsionStats(side);
     } else {
       this.updateHullHint(side, module);
@@ -528,7 +529,7 @@ export class DomControls implements Controls {
     const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
     const profile = this.findProfileByName(value);
     if (profile) {
-      this.applyHull(side, profile, undefined, true);
+      this.applyProfile(side, profile, true);
     } else {
       this.setHullValidation(side, false);
     }
@@ -543,13 +544,29 @@ export class DomControls implements Controls {
     }
     const profile = this.findProfileByName(value);
     if (profile) {
-      this.applyHull(side, profile, undefined, true);
+      this.applyProfile(side, profile, true);
       return;
     }
     this.setHullValidation(side, true);
     this.clearHull(side, false, false);
     this.persist();
     this.callbacks?.onConfigChange();
+  }
+
+  private applyProfile(
+    side: "attacker" | "target",
+    profile: ShipProfile,
+    persist: boolean,
+  ): void {
+    const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const isSameHull = currentProfile?.name === profile.name;
+    const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
+    this.applyHull(side, profile, propulsionId, persist, !isSameHull);
+  }
+
+  private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
+    const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
+    return isPropulsionId(value) ? value : undefined;
   }
 
   private onPropulsionChange(side: "attacker" | "target"): void {
@@ -621,7 +638,6 @@ export class DomControls implements Controls {
 
     (this.els[`${side}Speed`] as HTMLInputElement).value = String(stats.maxSpeed);
     (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
-    (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
     if (side === "target") {
       (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
     }

@@ -256,6 +256,72 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-mass").value).toBe("2000000");
   });
 
+  test("changing propulsion to none does not overwrite a manual inertia edit", () => {
+    buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const propulsion = getFake(globalThis.document, "target-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    getFake(globalThis.document, "target-inertia").value = "99";
+    getFake(globalThis.document, "target-inertia").trigger("input");
+
+    propulsion.value = "";
+    propulsion.trigger("change");
+
+    expect(getFake(globalThis.document, "target-inertia").value).toBe("99");
+  });
+
+  test("reselecting the same hull keeps the fitted propulsion and stats", () => {
+    buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const propulsion = getFake(globalThis.document, "attacker-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    const speedWithMwd = getFake(globalThis.document, "attacker-speed").value;
+    const massWithMwd = getFake(globalThis.document, "attacker-mass").value;
+
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    expect(getFake(globalThis.document, "attacker-propulsion").value).toBe("mwd-5mn");
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(speedWithMwd);
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(massWithMwd);
+  });
+
+  test("reselecting the same hull preserves manually edited stats", () => {
+    buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const propulsion = getFake(globalThis.document, "attacker-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    getFake(globalThis.document, "attacker-inertia").value = "99";
+    getFake(globalThis.document, "attacker-inertia").trigger("input");
+    getFake(globalThis.document, "attacker-speed").value = "1234";
+    getFake(globalThis.document, "attacker-speed").trigger("input");
+
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    expect(getFake(globalThis.document, "attacker-propulsion").value).toBe("mwd-5mn");
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe("99");
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe("1234");
+  });
+
   test("load with an unknown hull leaves inputs saved and the hull selection empty", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
