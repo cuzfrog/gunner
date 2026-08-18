@@ -4,7 +4,7 @@ import { join } from "node:path";
 await import("./build");
 
 const server = Bun.serve({
-  port: 0,
+  port: 56789,
   async fetch(request) {
     const url = new URL(request.url);
     const pathname = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
