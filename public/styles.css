@@ -244,6 +244,59 @@ canvas {
   color: var(--accent-orange);
 }
 
+.profile-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+}
+
+.profile-name-input,
+.profile-select {
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 13px;
+  border-radius: 2px;
+}
+
+.profile-name-input {
+  width: 160px;
+}
+
+.profile-select {
+  width: 140px;
+}
+
+.profile-bar button {
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.profile-bar button:hover {
+  border-color: var(--accent-teal);
+  color: var(--text-primary);
+}
+
+.share-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
 @media (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;

@@ -9,6 +9,7 @@ import {
   type TurretSpec,
 } from "../sim";
 import { TrackingInput } from "./trackingInput";
+import type { SettingsStore, UserSettings } from "./settings";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -30,11 +31,13 @@ export interface Controls {
 export class DomControls implements Controls {
   private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
   private readonly hitChance: HitChance;
+  private readonly settingsStore: SettingsStore;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
 
-  constructor({ hitChance }: { hitChance: HitChance }) {
+  constructor({ hitChance, settingsStore }: { hitChance: HitChance; settingsStore: SettingsStore }) {
     this.hitChance = hitChance;
+    this.settingsStore = settingsStore;
     this.trackingInput = new TrackingInput();
     this.els = {
       tracking: el("tracking"),
@@ -51,9 +54,15 @@ export class DomControls implements Controls {
       targetMode: el("target-mode"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
+      simSpeed: el("sim-speed"),
+      profileName: el("profile-name"),
+      profileSave: el("profile-save"),
+      profileSelect: el("profile-select"),
+      profileDelete: el("profile-delete"),
+      shareLink: el("share-link"),
+      shareStatus: el("share-status"),
       play: el("play"),
       reset: el("reset"),
-      simSpeed: el("sim-speed"),
       resDistance: el("res-distance"),
       resTransversal: el("res-transversal"),
       resAngular: el("res-angular"),
@@ -64,7 +73,12 @@ export class DomControls implements Controls {
       resHitCard: el("res-hit-card"),
     };
 
-    this.setBestInitialDistance();
+    const saved = this.settingsStore.load();
+    if (saved) {
+      this.loadSettings(saved);
+    } else {
+      this.setBestInitialDistance();
+    }
     this.bind();
   }
 
@@ -127,6 +141,49 @@ export class DomControls implements Controls {
     this.callbacks = callbacks;
   }
 
+  private getSettings(): UserSettings {
+    return {
+      version: 1,
+      tracking: this.trackingInput.rad,
+      trackingUnit: this.trackingInput.unit,
+      sigRes: (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass,
+      optimal: num(this.els.optimal),
+      falloff: num(this.els.falloff),
+      attackerSpeed: num(this.els.attackerSpeed),
+      attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
+      attackerRange: num(this.els.attackerRange),
+      initialDistance: num(this.els.initialDistance),
+      targetSpeed: num(this.els.targetSpeed),
+      targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
+      targetRange: num(this.els.targetRange),
+      targetSig: num(this.els.targetSig),
+      simSpeed: num(this.els.simSpeed),
+    };
+  }
+
+  private loadSettings(settings: UserSettings): void {
+    const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
+    this.trackingInput.setRadValue(settings.tracking, sigResolution);
+    this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
+
+    (this.els.sigRes as HTMLSelectElement).value = settings.sigRes;
+    (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
+    (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
+    (this.els.attackerSpeed as HTMLInputElement).value = String(settings.attackerSpeed);
+    (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
+    (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
+    (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
+    (this.els.targetSpeed as HTMLInputElement).value = String(settings.targetSpeed);
+    (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
+    (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
+    (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
+    (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
+
+    this.displayTrackingInput();
+    this.updateUnitToggle();
+    this.renderProfiles();
+  }
+
   private setBestInitialDistance(): void {
     const turret = this.getTurret();
     const targetSig = this.getTargetSig();
@@ -148,6 +205,7 @@ export class DomControls implements Controls {
     const display = this.trackingInput.setUnit(unit, sigResolution);
     (this.els.tracking as HTMLInputElement).value = String(display);
     this.updateUnitToggle();
+    this.persist();
   }
 
   private updateTrackingFromInput(): void {
@@ -163,9 +221,67 @@ export class DomControls implements Controls {
     (this.els.tracking as HTMLInputElement).value = String(display);
   }
 
+  private displayTrackingInput(): void {
+    const sigResolution = this.currentSigResolution();
+    const display = this.trackingInput.displayValue(sigResolution);
+    (this.els.tracking as HTMLInputElement).value = String(display);
+  }
+
   private updateUnitToggle(): void {
     (this.els.trackingUnitRad as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "rad");
     (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "score");
+  }
+
+  private persist(): void {
+    this.settingsStore.save(this.getSettings());
+  }
+
+  private renderProfiles(): void {
+    const names = this.settingsStore.listProfiles();
+    const select = this.els.profileSelect as HTMLSelectElement;
+    select.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select profile...";
+    select.appendChild(placeholder);
+    for (const name of names) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    }
+  }
+
+  private saveProfile(): void {
+    const name = (this.els.profileName as HTMLInputElement).value.trim();
+    if (!name) return;
+    this.settingsStore.saveProfile(name, this.getSettings());
+    (this.els.profileName as HTMLInputElement).value = "";
+    this.renderProfiles();
+    (this.els.profileSelect as HTMLSelectElement).value = name;
+  }
+
+  private loadProfile(): void {
+    const name = (this.els.profileSelect as HTMLSelectElement).value;
+    if (!name) return;
+    const profile = this.settingsStore.loadProfile(name);
+    if (!profile) return;
+    this.loadSettings(profile);
+    this.callbacks?.onConfigChange();
+  }
+
+  private deleteProfile(): void {
+    const name = (this.els.profileSelect as HTMLSelectElement).value;
+    if (!name) return;
+    this.settingsStore.deleteProfile(name);
+    this.renderProfiles();
+    (this.els.profileSelect as HTMLSelectElement).value = "";
+  }
+
+  private async shareLink(): Promise<void> {
+    const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), navigator.clipboard);
+    setText(this.els.shareStatus, ok ? "Copied" : "Failed");
+    setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
   private bind(): void {
@@ -176,6 +292,10 @@ export class DomControls implements Controls {
     });
     (this.els.trackingUnitRad as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("rad"));
     (this.els.trackingUnitScore as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("score"));
+    (this.els.profileSave as HTMLButtonElement).addEventListener("click", () => this.saveProfile());
+    (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
+    (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
+    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -195,6 +315,7 @@ export class DomControls implements Controls {
       this.els[id].addEventListener("input", () => {
         if (id === "tracking") this.updateTrackingFromInput();
         if (id === "sigRes") this.updateTrackingForSigResolution();
+        this.persist();
         this.callbacks?.onConfigChange();
       });
     }

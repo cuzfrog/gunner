@@ -1,0 +1,129 @@
+import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
+import { LocalSettingsStore, USER_SETTINGS_VERSION, type UserSettings } from "./settings";
+
+const DEFAULT_SETTINGS: UserSettings = {
+  version: USER_SETTINGS_VERSION,
+  tracking: 0.32,
+  trackingUnit: "rad",
+  sigRes: "S",
+  optimal: 5000,
+  falloff: 5000,
+  attackerSpeed: 0,
+  attackerMode: "keepAtRange",
+  attackerRange: 5000,
+  initialDistance: 5000,
+  targetSpeed: 1000,
+  targetMode: "orbit",
+  targetRange: 5000,
+  targetSig: 40,
+  simSpeed: 4,
+};
+
+function fakeStorage(): StorageProvider {
+  const data = new Map<string, string>();
+  return {
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => data.set(key, value),
+    removeItem: (key) => data.delete(key),
+  };
+}
+
+function fakeLocation(href: string): LocationProvider {
+  let currentHref = href;
+  return {
+    get href() {
+      return currentHref;
+    },
+    replace: (url) => {
+      currentHref = url;
+    },
+  };
+}
+
+function fakeClipboard(): ClipboardProvider {
+  let lastText = "";
+  return {
+    writeText: async (text) => {
+      lastText = text;
+    },
+  };
+}
+
+describe("LocalSettingsStore", () => {
+  test("load returns null when storage and url are empty", () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("save and load round-trips settings", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    store.save(DEFAULT_SETTINGS);
+    const loaded = store.load();
+    expect(loaded).toEqual(DEFAULT_SETTINGS);
+  });
+
+  test("load decodes settings from the URL and ignores local storage", () => {
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/?c=eyJ2ZXJzaW9uIjoxLCJ0cmFja2luZyI6MC4xOCwidHJhY2tpbmdVbml0IjoicmFkIiwic2lnUmVzIjoiTSIsIm9wdGltYWwiOjMwMDAsImZhbGxvZmYiOjIwMDAsImF0dGFja2VyU3BlZWQiOjUwMCwiYXR0YWNrZXJNb2RlIjoib3JiaXQiLCJhdHRhY2tlclJhbmdlIjozMDAwLCJpbml0aWFsRGlzdGFuY2UiOjMwMDAsInRhcmdldFNwZWVkIjo4MDAsInRhcmdldE1vZGUiOiJtYXRjaCIsInRhcmdldFJhbmdlIjozMDAwLCJ0YXJnZXRTaWciOjEyNSwic2ltU3BlZWQiOjJ9");
+    const store = new LocalSettingsStore({ storage, location });
+    storage.setItem("gunner-settings-v1", JSON.stringify(DEFAULT_SETTINGS));
+    const loaded = store.load();
+    expect(loaded).toEqual({
+      version: 1,
+      tracking: 0.18,
+      trackingUnit: "rad",
+      sigRes: "M",
+      optimal: 3000,
+      falloff: 2000,
+      attackerSpeed: 500,
+      attackerMode: "orbit",
+      attackerRange: 3000,
+      initialDistance: 3000,
+      targetSpeed: 800,
+      targetMode: "match",
+      targetRange: 3000,
+      targetSig: 125,
+      simSpeed: 2,
+    });
+  });
+
+  test("saveProfile and loadProfile round-trip", () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_SETTINGS);
+    expect(store.listProfiles()).toEqual(["brawler"]);
+    expect(store.loadProfile("brawler")).toEqual(DEFAULT_SETTINGS);
+  });
+
+  test("deleteProfile removes the profile", () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("a", DEFAULT_SETTINGS);
+    store.saveProfile("b", DEFAULT_SETTINGS);
+    store.deleteProfile("a");
+    expect(store.listProfiles()).toEqual(["b"]);
+    expect(store.loadProfile("a")).toBeNull();
+  });
+
+  test("encodeUrl and decodeUrl round-trip", () => {
+    const location = fakeLocation("http://localhost/index.html");
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const url = store.encodeUrl(DEFAULT_SETTINGS);
+    const decodedStore = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) });
+    const decoded = decodedStore.decodeUrl();
+    expect(decoded).toEqual(DEFAULT_SETTINGS);
+  });
+
+  test("writeUrlToClipboard writes a full URL", async () => {
+    const location = fakeLocation("http://localhost/index.html");
+    const clipboard = fakeClipboard();
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS, clipboard);
+    expect(ok).toBe(true);
+  });
+
+  test("writeUrlToClipboard returns false without a clipboard", async () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS);
+    expect(ok).toBe(false);
+  });
+});
