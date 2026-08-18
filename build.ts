@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync } from "node:fs";
+import { cpSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const result = await Bun.build({
@@ -16,7 +16,13 @@ if (!result.success) {
 }
 
 mkdirSync("dist", { recursive: true });
-cpSync(join("public", "index.html"), join("dist", "index.html"), { force: true });
-cpSync(join("public", "styles.css"), join("dist", "styles.css"), { force: true });
+
+const PUBLIC_DIRECTORY = "public";
+const DISTRIBUTION_DIRECTORY = "dist";
+for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
+  const src = join(PUBLIC_DIRECTORY, entry.name);
+  const dst = join(DISTRIBUTION_DIRECTORY, entry.name);
+  cpSync(src, dst, { force: true, recursive: true });
+}
 
 console.log("Build complete.");
