@@ -5,14 +5,15 @@ import type { ShipConfig, SimConfig } from "./types";
 
 const autopilot = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 
-function shipConfig(id: ShipConfig["id"], mode: ShipConfig["mode"], x = 0, y = 0): ShipConfig {
-  return { id, position: vec(x, y), maxSpeed: 100, mode, desiredRange: 5000 };
+function shipConfig(id: ShipConfig["id"], mode: ShipConfig["mode"]): ShipConfig {
+  return { id, maxSpeed: 100, mode, desiredRange: 5000 };
 }
 
 function simConfig(attackerMode: ShipConfig["mode"]): SimConfig {
   return {
     attacker: shipConfig("attacker", attackerMode),
-    target: shipConfig("target", "orbit", 0, 5000),
+    target: shipConfig("target", "orbit"),
+    initialDistance: 5000,
   };
 }
 
@@ -38,6 +39,19 @@ describe("SimulationImpl", () => {
     expect(snapshot.time).toBe(0);
     expect(snapshot.target.position).toEqual(vec(0, 5000));
     expect(snapshot.attacker.position).toEqual(vec(0, 0));
+  });
+
+  test("update keeps time and reapplies parameters", () => {
+    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    autopilot.computeVelocity.mockImplementation(() => vec(0, 0));
+    sim.step(2);
+    const before = sim.snapshot();
+    sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "match"), initialDistance: 3000 });
+    const after = sim.snapshot();
+    expect(after.time).toBe(before.time);
+    expect(after.attacker.mode).toBe("match");
+    expect(after.attacker.position).toEqual(before.attacker.position);
+    expect(after.target.position).toEqual(vec(0, 3000));
   });
 
   test("computes attacker velocity before target velocity by default", () => {

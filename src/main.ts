@@ -9,7 +9,6 @@ function main(): void {
   if (!(canvas instanceof HTMLCanvasElement)) throw new Error("Canvas element not found");
 
   container.register({ canvas: asValue(canvas) });
-  registerSimModule(container);
   registerUiModule(container);
   container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerSimModule(container);
