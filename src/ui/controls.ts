@@ -8,8 +8,9 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
-import { TrackingInput } from "./trackingInput";
+import type { I18n, Language } from "./i18n";
 import type { SettingsStore, UserSettings } from "./settings";
+import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -31,12 +32,22 @@ export interface Controls {
 export class DomControls implements Controls {
   private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
   private readonly hitChance: HitChance;
+  private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
 
-  constructor({ hitChance, settingsStore }: { hitChance: HitChance; settingsStore: SettingsStore }) {
+  constructor({
+    hitChance,
+    i18n,
+    settingsStore,
+  }: {
+    hitChance: HitChance;
+    i18n: I18n;
+    settingsStore: SettingsStore;
+  }) {
     this.hitChance = hitChance;
+    this.i18n = i18n;
     this.settingsStore = settingsStore;
     this.trackingInput = new TrackingInput();
     this.els = {
@@ -61,6 +72,9 @@ export class DomControls implements Controls {
       profileDelete: el("profile-delete"),
       shareLink: el("share-link"),
       shareStatus: el("share-status"),
+      langEn: el("lang-en"),
+      langZh: el("lang-zh"),
+      langJa: el("lang-ja"),
       play: el("play"),
       reset: el("reset"),
       resDistance: el("res-distance"),
@@ -77,6 +91,7 @@ export class DomControls implements Controls {
     if (saved) {
       this.loadSettings(saved);
     } else {
+      this.i18n.translateDocument();
       this.setBestInitialDistance();
     }
     this.bind();
@@ -134,7 +149,9 @@ export class DomControls implements Controls {
   }
 
   setPlaying(playing: boolean): void {
-    (this.els.play as HTMLButtonElement).textContent = playing ? "Pause" : "Play";
+    (this.els.play as HTMLButtonElement).textContent = this.i18n.t(
+      playing ? "button.pause" : "button.play",
+    );
   }
 
   setCallbacks(callbacks: ControlsCallbacks): void {
@@ -143,7 +160,7 @@ export class DomControls implements Controls {
 
   private getSettings(): UserSettings {
     return {
-      version: 1,
+      version: 2,
       tracking: this.trackingInput.rad,
       trackingUnit: this.trackingInput.unit,
       sigRes: (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass,
@@ -158,6 +175,7 @@ export class DomControls implements Controls {
       targetRange: num(this.els.targetRange),
       targetSig: num(this.els.targetSig),
       simSpeed: num(this.els.simSpeed),
+      language: this.i18n.current(),
     };
   }
 
@@ -179,8 +197,11 @@ export class DomControls implements Controls {
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
     (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
 
+    this.i18n.setLanguage(settings.language);
+    this.i18n.translateDocument();
     this.displayTrackingInput();
     this.updateUnitToggle();
+    this.updateLanguageToggle();
     this.renderProfiles();
   }
 
@@ -232,6 +253,19 @@ export class DomControls implements Controls {
     (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "score");
   }
 
+  private setLanguage(language: Language): void {
+    this.i18n.setLanguage(language);
+    this.i18n.translateDocument();
+    this.updateLanguageToggle();
+    this.persist();
+  }
+
+  private updateLanguageToggle(): void {
+    (this.els.langEn as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "en");
+    (this.els.langZh as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "zh");
+    (this.els.langJa as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "ja");
+  }
+
   private persist(): void {
     this.settingsStore.save(this.getSettings());
   }
@@ -242,7 +276,7 @@ export class DomControls implements Controls {
     select.innerHTML = "";
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = "Select profile...";
+    placeholder.textContent = this.i18n.t("select.profile");
     select.appendChild(placeholder);
     for (const name of names) {
       const option = document.createElement("option");
@@ -280,7 +314,7 @@ export class DomControls implements Controls {
 
   private async shareLink(): Promise<void> {
     const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), navigator.clipboard);
-    setText(this.els.shareStatus, ok ? "Copied" : "Failed");
+    setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
     setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
@@ -292,6 +326,9 @@ export class DomControls implements Controls {
     });
     (this.els.trackingUnitRad as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("rad"));
     (this.els.trackingUnitScore as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("score"));
+    (this.els.langEn as HTMLButtonElement).addEventListener("click", () => this.setLanguage("en"));
+    (this.els.langZh as HTMLButtonElement).addEventListener("click", () => this.setLanguage("zh"));
+    (this.els.langJa as HTMLButtonElement).addEventListener("click", () => this.setLanguage("ja"));
     (this.els.profileSave as HTMLButtonElement).addEventListener("click", () => this.saveProfile());
     (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());

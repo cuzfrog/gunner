@@ -1,6 +1,7 @@
 import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
+import type { Language } from "./i18n";
 
-export const USER_SETTINGS_VERSION = 1 as const;
+export const USER_SETTINGS_VERSION = 2 as const;
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -18,6 +19,7 @@ export interface UserSettings {
   targetRange: number;
   targetSig: number;
   simSpeed: number;
+  language: Language;
 }
 
 export interface StorageProvider {
@@ -47,8 +49,8 @@ export interface SettingsStore {
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
 }
 
-const SETTINGS_KEY = "gunner-settings-v1";
-const PROFILES_KEY = "gunner-profiles-v1";
+const SETTINGS_KEY = "gunner-settings-v2";
+const PROFILES_KEY = "gunner-profiles-v2";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -173,7 +175,8 @@ function isUserSettings(value: unknown): value is UserSettings {
     isAutopilotMode(s.targetMode) &&
     typeof s.targetRange === "number" &&
     typeof s.targetSig === "number" &&
-    typeof s.simSpeed === "number"
+    typeof s.simSpeed === "number" &&
+    isLanguage(s.language)
   );
 }
 
@@ -192,6 +195,10 @@ function isSigResolutionClass(value: unknown): value is SigResolutionClass {
 
 function isAutopilotMode(value: unknown): value is AutopilotMode {
   return value === "orbit" || value === "keepAtRange" || value === "approach" || value === "retreat" || value === "match";
+}
+
+function isLanguage(value: unknown): value is Language {
+  return value === "en" || value === "zh" || value === "ja";
 }
 
 function encodeBase64(value: unknown): string {
