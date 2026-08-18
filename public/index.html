@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EVE Gun Tracking Calculator</title>
+  <title>EVE Tactic Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Saira:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <div class="container">
     <header class="header">
       <div class="header-left">
-        <h1 data-i18n="app.title">EVE Gun Tracking Calculator</h1>
+        <h1 data-i18n="app.title">EVE Tactic Simulator</h1>
         <span class="subtitle" data-i18n="app.subtitle">2D tactical simulation</span>
       </div>
       <div class="header-right">
@@ -44,7 +44,7 @@
 
     <main class="main">
       <section class="panel attacker-panel">
-        <h2 data-i18n="section.attackerTurret">Attacker / Turret</h2>
+        <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
           <span class="tracking-label-row">
             <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
@@ -107,6 +107,7 @@
               <option value="1">1x</option>
               <option value="2">2x</option>
               <option value="4" selected>4x</option>
+              <option value="8">8x</option>
             </select>
           </label>
         </div>

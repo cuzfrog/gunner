@@ -9,7 +9,7 @@ export interface I18n {
 
 export const I18N_DICTIONARY = {
   "app.title": {
-    en: "EVE Gun Tracking Calculator",
+    en: "EVE Tactic Simulator",
     zh: "EVE 火炮追踪计算器",
     ja: "EVE ガン追跡計算機",
   },
