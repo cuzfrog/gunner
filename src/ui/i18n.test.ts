@@ -30,32 +30,47 @@ function fakeDocument(): Document {
   } as unknown as Document;
 }
 
+let originalDocument: Document | undefined;
+
 describe("I18nImpl", () => {
+  beforeEach(() => {
+    originalDocument = globalThis.document;
+    globalThis.document = fakeDocument() as unknown as Document;
+  });
+
+  afterEach(() => {
+    if (originalDocument === undefined) {
+      delete (globalThis as Record<string, unknown>).document;
+    } else {
+      globalThis.document = originalDocument;
+    }
+  });
+
   test("translates known keys", () => {
-    const i18n = new I18nImpl("en", fakeDocument());
+    const i18n = new I18nImpl();
     expect(i18n.t("label.trackingSpeed")).toBe("Tracking speed");
   });
 
   test("returns the key when it is not in the dictionary", () => {
-    const i18n = new I18nImpl("en", fakeDocument());
+    const i18n = new I18nImpl();
     expect(i18n.t("unknown.key")).toBe("unknown.key");
   });
 
   test("switches to Chinese", () => {
-    const i18n = new I18nImpl("en", fakeDocument());
+    const i18n = new I18nImpl();
     i18n.setLanguage("zh" as Language);
     expect(i18n.current()).toBe("zh" as Language);
     expect(i18n.t("label.trackingSpeed")).toBe("跟踪速度");
   });
 
   test("switches to Japanese", () => {
-    const i18n = new I18nImpl("en", fakeDocument());
+    const i18n = new I18nImpl();
     i18n.setLanguage("ja" as Language);
     expect(i18n.t("label.trackingSpeed")).toBe("追跡速度");
   });
 
   test("uses full language names in every language", () => {
-    const i18n = new I18nImpl("en", fakeDocument());
+    const i18n = new I18nImpl();
     expect(i18n.t("lang.en")).toBe("English");
     expect(i18n.t("lang.zh")).toBe("中文");
     expect(i18n.t("lang.ja")).toBe("日本語");

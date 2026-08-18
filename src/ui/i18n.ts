@@ -34,9 +34,9 @@ export const I18N_DICTIONARY = {
     ja: "日本語",
   },
   "section.attackerTurret": {
-    en: "Attacker / Turret",
-    zh: "攻击者 / 炮塔",
-    ja: "攻撃者 / タレット",
+    en: "Attacker",
+    zh: "攻击者",
+    ja: "攻撃者",
   },
   "label.trackingSpeed": {
     en: "Tracking speed",
@@ -229,9 +229,9 @@ export class I18nImpl implements I18n {
   private readonly document: Document;
   private language: Language;
 
-  constructor(initial: Language = "en", document: Document = globalThis.document) {
-    this.language = initial;
-    this.document = document;
+  constructor() {
+    this.language = "en";
+    this.document = globalThis.document;
     this.document.documentElement.lang = this.language;
   }
 
