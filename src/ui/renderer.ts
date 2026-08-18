@@ -73,8 +73,12 @@ export class CanvasRenderer implements Renderer {
 
   private drawGrid(): void {
     const spacing = 10000; // 10 km grid
-    const min = sub(this.camera.center, scale(vec(1, 1), this.canvas.width / this.camera.scale));
-    const max = add(this.camera.center, scale(vec(1, 1), this.canvas.width / this.camera.scale));
+    const half = scale(
+      vec(this.canvas.width, this.canvas.height),
+      0.5 / this.camera.scale,
+    );
+    const min = sub(this.camera.center, half);
+    const max = add(this.camera.center, half);
     const startX = Math.floor(min.x / spacing) * spacing;
     const endX = Math.ceil(max.x / spacing) * spacing;
     const startY = Math.floor(min.y / spacing) * spacing;
