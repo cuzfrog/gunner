@@ -1,5 +1,4 @@
-import { add, len, scale, sub, vec } from "../math";
-import type { Vec2 } from "../math";
+import { add, len, scale, sub, vec, type Vec2 } from "../math";
 import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";

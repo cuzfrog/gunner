@@ -1,4 +1,4 @@
-import { len, vec } from "../math";
+import { dist, len, vec } from "../math";
 import type { Autopilot } from "./autopilot";
 import { SimulationImpl } from "./simulation";
 import type { ShipConfig, SimConfig } from "./types";
@@ -57,7 +57,7 @@ describe("SimulationImpl", () => {
     const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange", 2_000_000, 1) });
     sim.step(0.1);
     const snapshot = sim.snapshot();
-    expect(len(snapshot.target.velocity)).toBeLessThan(len(vec(100, 50)));
+    expect(len(snapshot.target.velocity)).toBeLessThan(100);
     expect(len(snapshot.target.velocity)).toBeGreaterThan(0);
   });
 
@@ -72,17 +72,18 @@ describe("SimulationImpl", () => {
   });
 
   test("update keeps time and reapplies parameters without resetting velocity", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
-    autopilot.computeVelocity.mockImplementation(() => vec(0, 0));
+    autopilot.computeVelocity.mockImplementation((ship) => (ship.id === "attacker" ? vec(0, 100) : vec(0, 0)));
+    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("approach") });
     sim.step(2);
     const before = sim.snapshot();
+    expect(len(before.attacker.velocity)).toBeGreaterThan(0);
     sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "match"), initialDistance: 3000 });
     const after = sim.snapshot();
     expect(after.time).toBe(before.time);
     expect(after.attacker.mode).toBe("match");
     expect(after.attacker.position).toEqual(before.attacker.position);
     expect(after.attacker.velocity).toEqual(before.attacker.velocity);
-    expect(after.target.position).toEqual(vec(0, 3000));
+    expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(3000, 6);
   });
 
   test("computes attacker command before target command by default", () => {
