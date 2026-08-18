@@ -116,7 +116,8 @@ export class LocalSettingsStore implements SettingsStore {
     if (!encoded) return null;
     const settings = parseUserSettings(decodeBase64(encoded));
     if (!settings) return null;
-    this.location.replace(url.pathname + url.search);
+    url.searchParams.delete(URL_PARAM);
+    this.location.replace(url.toString());
     return settings;
   }
 
@@ -162,20 +163,20 @@ function isUserSettings(value: unknown): value is UserSettings {
   const s = value as Record<string, unknown>;
   return (
     s.version === USER_SETTINGS_VERSION &&
-    typeof s.tracking === "number" &&
+    isFiniteNumber(s.tracking) &&
     (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
     isSigResolutionClass(s.sigRes) &&
-    typeof s.optimal === "number" &&
-    typeof s.falloff === "number" &&
-    typeof s.attackerSpeed === "number" &&
+    isFiniteNumber(s.optimal) &&
+    isFiniteNumber(s.falloff) &&
+    isFiniteNumber(s.attackerSpeed) &&
     isAutopilotMode(s.attackerMode) &&
-    typeof s.attackerRange === "number" &&
-    typeof s.initialDistance === "number" &&
-    typeof s.targetSpeed === "number" &&
+    isFiniteNumber(s.attackerRange) &&
+    isFiniteNumber(s.initialDistance) &&
+    isFiniteNumber(s.targetSpeed) &&
     isAutopilotMode(s.targetMode) &&
-    typeof s.targetRange === "number" &&
-    typeof s.targetSig === "number" &&
-    typeof s.simSpeed === "number" &&
+    isFiniteNumber(s.targetRange) &&
+    isFiniteNumber(s.targetSig) &&
+    isFiniteNumber(s.simSpeed) &&
     isLanguage(s.language)
   );
 }
@@ -201,17 +202,34 @@ function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 function encodeBase64(value: unknown): string {
   const json = JSON.stringify(value);
   if (typeof Buffer !== "undefined") {
     return Buffer.from(json).toString("base64url");
   }
-  return btoa(json);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function decodeBase64(encoded: string): string {
   if (typeof Buffer !== "undefined") {
     return Buffer.from(encoded, "base64url").toString("utf8");
   }
-  return atob(encoded);
+  const normalized = encoded.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = (4 - (normalized.length % 4)) % 4;
+  const padded = normalized.padEnd(normalized.length + padding, "=");
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
 }
