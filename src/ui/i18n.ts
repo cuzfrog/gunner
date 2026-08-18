@@ -168,6 +168,11 @@ export const I18N_DICTIONARY = {
     zh: "配置名称",
     ja: "プロファイル名",
   },
+  "label.author": {
+    en: "Author:",
+    zh: "作者：",
+    ja: "作者：",
+  },
   "select.profile": {
     en: "Select profile...",
     zh: "选择配置...",

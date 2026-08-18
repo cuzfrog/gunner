@@ -36,10 +36,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   border-bottom: 1px solid var(--border-dim);
   margin-bottom: 16px;
   padding-bottom: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .header h1 {
@@ -54,13 +69,19 @@ body {
 .header .subtitle {
   color: var(--text-secondary);
   font-size: 12px;
-  margin-left: 8px;
 }
 
 .lang-toggle {
   display: flex;
   gap: 4px;
-  margin-left: auto;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .lang-toggle button {
@@ -120,13 +141,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 3px;
-}
-
-.panel .hint {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin: -6px 0 10px;
-  text-transform: none;
 }
 
 .panel input,
@@ -323,18 +337,6 @@ canvas {
   font-size: 11px;
   color: var(--text-secondary);
   margin-left: auto;
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-dim);
-  color: var(--text-secondary);
-  font-size: 12px;
 }
 
 .author-portrait {
