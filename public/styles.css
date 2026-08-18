@@ -211,6 +211,31 @@ canvas {
   font-family: "Chakra Petch", sans-serif;
 }
 
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.author-portrait {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-dim);
+}
+
+.author-name {
+  font-family: "Chakra Petch", sans-serif;
+  letter-spacing: 0.05em;
+}
+
 @media (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;
