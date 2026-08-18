@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   targetRange: 5000,
   targetSig: 40,
   simSpeed: 4,
+  language: "en",
 };
 
 function fakeStorage(): StorageProvider {
@@ -65,12 +66,12 @@ describe("LocalSettingsStore", () => {
 
   test("load decodes settings from the URL and ignores local storage", () => {
     const storage = fakeStorage();
-    const location = fakeLocation("http://localhost/?c=eyJ2ZXJzaW9uIjoxLCJ0cmFja2luZyI6MC4xOCwidHJhY2tpbmdVbml0IjoicmFkIiwic2lnUmVzIjoiTSIsIm9wdGltYWwiOjMwMDAsImZhbGxvZmYiOjIwMDAsImF0dGFja2VyU3BlZWQiOjUwMCwiYXR0YWNrZXJNb2RlIjoib3JiaXQiLCJhdHRhY2tlclJhbmdlIjozMDAwLCJpbml0aWFsRGlzdGFuY2UiOjMwMDAsInRhcmdldFNwZWVkIjo4MDAsInRhcmdldE1vZGUiOiJtYXRjaCIsInRhcmdldFJhbmdlIjozMDAwLCJ0YXJnZXRTaWciOjEyNSwic2ltU3BlZWQiOjJ9");
+    const location = fakeLocation("http://localhost/?c=eyJ2ZXJzaW9uIjoyLCJ0cmFja2luZyI6MC4xOCwidHJhY2tpbmdVbml0IjoicmFkIiwic2lnUmVzIjoiTSIsIm9wdGltYWwiOjMwMDAsImZhbGxvZmYiOjIwMDAsImF0dGFja2VyU3BlZWQiOjUwMCwiYXR0YWNrZXJNb2RlIjoib3JiaXQiLCJhdHRhY2tlclJhbmdlIjozMDAwLCJpbml0aWFsRGlzdGFuY2UiOjMwMDAsInRhcmdldFNwZWVkIjo4MDAsInRhcmdldE1vZGUiOiJtYXRjaCIsInRhcmdldFJhbmdlIjozMDAwLCJ0YXJnZXRTaWciOjEyNSwic2ltU3BlZWQiOjIsImxhbmd1YWdlIjoiamEifQ");
     const store = new LocalSettingsStore({ storage, location });
-    storage.setItem("gunner-settings-v1", JSON.stringify(DEFAULT_SETTINGS));
+    storage.setItem("gunner-settings-v2", JSON.stringify(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual({
-      version: 1,
+      version: 2,
       tracking: 0.18,
       trackingUnit: "rad",
       sigRes: "M",
@@ -85,6 +86,7 @@ describe("LocalSettingsStore", () => {
       targetRange: 3000,
       targetSig: 125,
       simSpeed: 2,
+      language: "ja",
     });
   });
 

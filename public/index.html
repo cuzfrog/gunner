@@ -13,36 +13,41 @@
 <body>
   <div class="container">
     <header class="header">
-      <h1>EVE Gun Tracking Calculator</h1>
-      <span class="subtitle">2D tactical simulation</span>
+      <h1 data-i18n="app.title">EVE Gun Tracking Calculator</h1>
+      <span class="subtitle" data-i18n="app.subtitle">2D tactical simulation</span>
+      <nav class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" id="lang-en" data-lang="en" class="active" data-i18n="lang.en">EN</button>
+        <button type="button" id="lang-zh" data-lang="zh" data-i18n="lang.zh">中</button>
+        <button type="button" id="lang-ja" data-lang="ja" data-i18n="lang.ja">日</button>
+      </nav>
     </header>
 
     <section class="profile-bar">
-      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input">
-      <button type="button" id="profile-save">Save</button>
+      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName">
+      <button type="button" id="profile-save" data-i18n="button.save">Save</button>
       <select id="profile-select" class="profile-select">
-        <option value="">Select profile...</option>
+        <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
-      <button type="button" id="profile-delete">Delete</button>
-      <button type="button" id="share-link">Copy link</button>
+      <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
+      <button type="button" id="share-link" data-i18n="button.copyLink">Copy link</button>
       <span id="share-status" class="share-status"></span>
     </section>
 
     <main class="main">
       <section class="panel attacker-panel">
-        <h2>Attacker / Turret</h2>
+        <h2 data-i18n="section.attackerTurret">Attacker / Turret</h2>
         <label>
           <span class="tracking-label-row">
-            <span id="tracking-label-text">Tracking speed</span>
+            <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
               <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
-              <button type="button" id="tracking-unit-score" data-tracking-unit="score">Score</button>
+              <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
           <input type="number" id="tracking" value="0.32" step="any" min="0">
         </label>
         <label>
-          <span>Turret sig. resolution</span>
+          <span data-i18n="label.turretSigResolution">Turret sig. resolution</span>
           <select id="sigRes">
             <option value="S" selected>S (40 m)</option>
             <option value="M">M (125 m)</option>
@@ -51,32 +56,32 @@
           </select>
         </label>
         <label>
-          <span>Optimal range (m)</span>
+          <span data-i18n="label.optimalRange">Optimal range (m)</span>
           <input type="number" id="optimal" value="5000" step="any" min="0">
         </label>
         <label>
-          <span>Falloff range (m)</span>
+          <span data-i18n="label.falloffRange">Falloff range (m)</span>
           <input type="number" id="falloff" value="5000" step="any" min="0">
         </label>
 
-        <h2>Attacker ship</h2>
-        <p class="hint">The attacker always sits at the center.</p>
+        <h2 data-i18n="section.attackerShip">Attacker ship</h2>
+        <p class="hint" data-i18n="hint.attackerCenter">The attacker always sits at the center.</p>
         <label>
-          <span>Max speed (m/s)</span>
+          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="attacker-speed" value="0" step="any" min="0">
         </label>
         <label>
-          <span>Mode</span>
+          <span data-i18n="label.mode">Mode</span>
           <select id="attacker-mode">
-            <option value="keepAtRange" selected>Keep at range</option>
-            <option value="approach">Approach</option>
-            <option value="retreat">Go farther</option>
-            <option value="match">Match direction</option>
-            <option value="orbit">Orbit</option>
+            <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
+            <option value="approach" data-i18n="mode.approach">Approach</option>
+            <option value="retreat" data-i18n="mode.retreat">Go farther</option>
+            <option value="match" data-i18n="mode.match">Match direction</option>
+            <option value="orbit" data-i18n="mode.orbit">Orbit</option>
           </select>
         </label>
         <label>
-          <span>Desired range (m)</span>
+          <span data-i18n="label.desiredRange">Desired range (m)</span>
           <input type="number" id="attacker-range" value="5000" step="any" min="0">
         </label>
       </section>
@@ -84,50 +89,49 @@
       <section class="canvas-section">
         <canvas id="scene" width="800" height="600"></canvas>
         <div class="controls">
-          <button id="play" class="primary">Play</button>
-          <button id="reset">Reset</button>
+          <button id="play" class="primary" data-i18n="button.play">Play</button>
+          <button id="reset" data-i18n="button.reset">Reset</button>
           <label>
-            <span>Speed</span>
+            <span data-i18n="label.simulationSpeed">Speed</span>
             <select id="sim-speed">
               <option value="0.25">0.25x</option>
               <option value="0.5">0.5x</option>
               <option value="1">1x</option>
               <option value="2">2x</option>
               <option value="4" selected>4x</option>
-              <option value="8">8x</option>
             </select>
           </label>
         </div>
       </section>
 
       <section class="panel target-panel">
-        <h2>Target ship</h2>
+        <h2 data-i18n="section.targetShip">Target ship</h2>
         <label>
-          <span>Initial distance (m)</span>
+          <span data-i18n="label.initialDistance">Initial distance (m)</span>
           <input type="number" id="initial-distance" value="5000" step="any" min="1">
         </label>
         <label>
-          <span>Max speed (m/s)</span>
+          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="target-speed" value="1000" step="any" min="0">
         </label>
         <label>
-          <span>Mode</span>
+          <span data-i18n="label.mode">Mode</span>
           <select id="target-mode">
-            <option value="orbit" selected>Orbit</option>
-            <option value="keepAtRange">Keep at range</option>
-            <option value="approach">Approach</option>
-            <option value="retreat">Go farther</option>
-            <option value="match">Match direction</option>
+            <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
+            <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
+            <option value="approach" data-i18n="mode.approach">Approach</option>
+            <option value="retreat" data-i18n="mode.retreat">Go farther</option>
+            <option value="match" data-i18n="mode.match">Match direction</option>
           </select>
         </label>
         <label>
-          <span>Desired range (m)</span>
+          <span data-i18n="label.desiredRange">Desired range (m)</span>
           <input type="number" id="target-range" value="5000" step="any" min="0">
         </label>
 
-        <h2>Target profile</h2>
+        <h2 data-i18n="section.targetProfile">Target profile</h2>
         <label>
-          <span>Signature radius (m)</span>
+          <span data-i18n="label.signatureRadius">Signature radius (m)</span>
           <input type="number" id="target-sig" value="40" step="any" min="1">
         </label>
       </section>
@@ -135,31 +139,31 @@
 
     <section class="results">
       <div class="result-card">
-        <span class="label">Distance</span>
+        <span class="label" data-i18n="result.distance">Distance</span>
         <span class="value" id="res-distance">0 m</span>
       </div>
       <div class="result-card">
-        <span class="label">Transversal</span>
+        <span class="label" data-i18n="result.transversal">Transversal</span>
         <span class="value" id="res-transversal">0 m/s</span>
       </div>
       <div class="result-card">
-        <span class="label">Angular</span>
+        <span class="label" data-i18n="result.angular">Angular</span>
         <span class="value" id="res-angular">0 rad/s</span>
       </div>
       <div class="result-card">
-        <span class="label">Radial</span>
+        <span class="label" data-i18n="result.radial">Radial</span>
         <span class="value" id="res-radial">0 m/s</span>
       </div>
       <div class="result-card">
-        <span class="label">Tracking penalty</span>
+        <span class="label" data-i18n="result.trackingPenalty">Tracking penalty</span>
         <span class="value" id="res-track-pen">0%</span>
       </div>
       <div class="result-card">
-        <span class="label">Range penalty</span>
+        <span class="label" data-i18n="result.rangePenalty">Range penalty</span>
         <span class="value" id="res-range-pen">0%</span>
       </div>
       <div class="result-card hit-chance" id="res-hit-card">
-        <span class="label">Hit chance</span>
+        <span class="label" data-i18n="result.hitChance">Hit chance</span>
         <span class="value" id="res-hit">0%</span>
       </div>
     </section>

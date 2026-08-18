@@ -33,6 +33,10 @@ body {
 }
 
 .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   border-bottom: 1px solid var(--border-dim);
   margin-bottom: 16px;
   padding-bottom: 12px;
@@ -50,6 +54,30 @@ body {
 .header .subtitle {
   color: var(--text-secondary);
   font-size: 12px;
+  margin-left: 8px;
+}
+
+.lang-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.lang-toggle button {
+  padding: 4px 10px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.lang-toggle button.active {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
 }
 
 .main {
