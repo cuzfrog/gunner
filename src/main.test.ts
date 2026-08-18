@@ -51,13 +51,42 @@ class FakeElement {
   }
 }
 
+type Mocked = ReturnType<typeof vi.fn>;
+
+interface FakeContext {
+  fillStyle: string;
+  strokeStyle: string;
+  lineWidth: number;
+  font: string;
+  textAlign: string;
+  textBaseline: string;
+  fillRect: Mocked;
+  strokeRect: Mocked;
+  clearRect: Mocked;
+  beginPath: Mocked;
+  closePath: Mocked;
+  moveTo: Mocked;
+  lineTo: Mocked;
+  arc: Mocked;
+  stroke: Mocked;
+  fill: Mocked;
+  save: Mocked;
+  restore: Mocked;
+  translate: Mocked;
+  rotate: Mocked;
+  setLineDash: Mocked;
+  fillText: Mocked;
+  measureText: Mocked;
+}
+
 class FakeCanvas extends FakeElement {
   width = 800;
   height = 600;
-  getContext = vi.fn((_: string) => fakeRenderingContext());
+  ctx: FakeContext = fakeRenderingContext();
+  getContext = vi.fn((_: string) => this.ctx as unknown as CanvasRenderingContext2D);
 }
 
-function fakeRenderingContext(): CanvasRenderingContext2D {
+function fakeRenderingContext(): FakeContext {
   return {
     fillStyle: "",
     strokeStyle: "",
@@ -82,7 +111,7 @@ function fakeRenderingContext(): CanvasRenderingContext2D {
     setLineDash: vi.fn(),
     fillText: vi.fn(),
     measureText: vi.fn(() => ({ width: 0 })),
-  } as unknown as CanvasRenderingContext2D;
+  };
 }
 
 function fakeDocument(): Document {
@@ -156,8 +185,17 @@ describe("main", () => {
     restoreGlobals();
   });
 
-  test("wires the container and starts the app without DI errors", async () => {
+  test("wires the container and re-renders the canvas in the selected language", async () => {
     await expect(import("./main")).resolves.toBeDefined();
     expect(container.cradle.app).toBeDefined();
+
+    const scene = globalThis.document.getElementById("scene") as unknown as FakeCanvas;
+    const ctx = scene.ctx;
+    ctx.fillText.mockClear();
+
+    const langZh = globalThis.document.getElementById("lang-zh") as unknown as FakeElement;
+    langZh.trigger("click");
+
+    expect(ctx.fillText.mock.calls.some((call) => String(call[0]).includes("距离"))).toBe(true);
   });
 });

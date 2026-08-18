@@ -272,6 +272,7 @@ export class DomControls implements Controls {
     this.renderProfiles(selected);
     this.setPlaying(this.playing);
     this.persist();
+    this.callbacks?.onConfigChange();
   }
 
   private updateLanguageToggle(): void {

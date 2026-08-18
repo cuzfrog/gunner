@@ -68,11 +68,6 @@ export const I18N_DICTIONARY = {
     zh: "攻击者舰船",
     ja: "攻撃艦船",
   },
-  "hint.attackerCenter": {
-    en: "The attacker always sits at the center.",
-    zh: "攻击者始终位于中心。",
-    ja: "攻撃者は常に中心に配置されます。",
-  },
   "label.maxSpeed": {
     en: "Max speed (m/s)",
     zh: "最大速度 (m/s)",
