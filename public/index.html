@@ -75,8 +75,21 @@
 
         <h2 data-i18n="section.attackerShip">Attacker ship</h2>
         <label>
+          <span data-i18n="label.hull">Ship</span>
+          <input type="text" id="attacker-hull" list="hull-options"
+                 autocomplete="off" autocapitalize="off" spellcheck="false"
+                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <span class="hull-hint" id="attacker-hull-hint"></span>
+        </label>
+        <label>
           <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="attacker-speed" value="0" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.propulsion">Propulsion</span>
+          <select id="attacker-propulsion" disabled>
+            <option value="" data-i18n="propulsion.none">None</option>
+          </select>
         </label>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>
@@ -124,12 +137,25 @@
       <section class="panel target-panel">
         <h2 data-i18n="section.targetShip">Target ship</h2>
         <label>
+          <span data-i18n="label.hull">Ship</span>
+          <input type="text" id="target-hull" list="hull-options"
+                 autocomplete="off" autocapitalize="off" spellcheck="false"
+                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <span class="hull-hint" id="target-hull-hint"></span>
+        </label>
+        <label>
           <span data-i18n="label.initialDistance">Initial distance (m)</span>
           <input type="number" id="initial-distance" value="5000" step="any" min="1">
         </label>
         <label>
           <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="target-speed" value="1000" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.propulsion">Propulsion</span>
+          <select id="target-propulsion" disabled>
+            <option value="" data-i18n="propulsion.none">None</option>
+          </select>
         </label>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>
@@ -193,6 +219,8 @@
       </div>
     </section>
   </div>
+
+  <datalist id="hull-options"></datalist>
 
   <script type="module" src="./main.js"></script>
 </body>

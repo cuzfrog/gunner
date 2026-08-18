@@ -1,4 +1,13 @@
 import {
+  effectiveStats,
+  fittingOptions,
+  isPropulsionId,
+  SHIP_PROFILES,
+  type PropulsionId,
+  type PropulsionModule,
+  type ShipProfile,
+} from "../ships";
+import {
   SIG_RESOLUTIONS,
   type EngagementFrame,
   type HitChance,
@@ -40,6 +49,8 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private attackerProfile?: ShipProfile;
+  private targetProfile?: ShipProfile;
 
   constructor({
     hitChance,
@@ -64,12 +75,19 @@ export class DomControls implements Controls {
       sigRes: el("sigRes"),
       optimal: el("optimal"),
       falloff: el("falloff"),
+      hullOptions: el("hull-options"),
+      attackerHull: el("attacker-hull"),
+      attackerHullHint: el("attacker-hull-hint"),
+      attackerPropulsion: el("attacker-propulsion"),
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
       initialDistance: el("initial-distance"),
+      targetHull: el("target-hull"),
+      targetHullHint: el("target-hull-hint"),
+      targetPropulsion: el("target-propulsion"),
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
@@ -97,6 +115,8 @@ export class DomControls implements Controls {
       resHit: el("res-hit"),
       resHitCard: el("res-hit-card"),
     };
+
+    this.populateHullDatalist();
 
     const saved = this.settingsStore.load();
     if (saved) {
@@ -188,6 +208,8 @@ export class DomControls implements Controls {
       attackerRange: num(this.els.attackerRange),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
+      attackerHull: this.attackerProfile?.name,
+      attackerPropulsion: this.propulsionSetting("attacker"),
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
       targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
@@ -195,12 +217,21 @@ export class DomControls implements Controls {
       targetMass: num(this.els.targetMass),
       targetInertia: num(this.els.targetInertia),
       targetSig: Math.max(num(this.els.targetSig), 1),
+      targetHull: this.targetProfile?.name,
+      targetPropulsion: this.propulsionSetting("target"),
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
   }
 
+  private propulsionSetting(side: "attacker" | "target"): PropulsionId | undefined {
+    const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
+    return isPropulsionId(value) ? value : undefined;
+  }
+
   private loadSettings(settings: UserSettings): void {
+    this.i18n.setLanguage(settings.language);
+
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
     this.trackingInput.setRadValue(settings.tracking, sigResolution);
     this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
@@ -222,7 +253,9 @@ export class DomControls implements Controls {
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
     (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
 
-    this.i18n.setLanguage(settings.language);
+    this.loadHull("attacker", settings.attackerHull, settings.attackerPropulsion);
+    this.loadHull("target", settings.targetHull, settings.targetPropulsion);
+
     this.i18n.translateDocument();
     this.displayTrackingInput();
     this.updateUnitToggle();
@@ -286,6 +319,7 @@ export class DomControls implements Controls {
     this.i18n.translateDocument();
     this.updateLanguageToggle();
     this.renderProfiles(selected);
+    this.renderAllPropulsionOptions();
     this.setPlaying(this.playing);
     this.persist();
     this.callbacks?.onConfigChange();
@@ -368,6 +402,13 @@ export class DomControls implements Controls {
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
     (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
 
+    (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
+    (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
+    (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
+    (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
+    (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
+    (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
+
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
       "sigRes",
@@ -400,6 +441,192 @@ export class DomControls implements Controls {
     if (m >= 10000) return `${(m / 1000).toFixed(1)} ${this.i18n.t("unit.kilometer")}`;
     return `${Math.round(m)} ${this.i18n.t("unit.meter")}`;
   }
+
+  private populateHullDatalist(): void {
+    const datalist = this.els.hullOptions as HTMLDataListElement;
+    datalist.innerHTML = "";
+    for (const profile of SHIP_PROFILES) {
+      const option = document.createElement("option");
+      option.value = profile.name;
+      option.label = `${profile.hullType} · ${profile.faction}`;
+      datalist.appendChild(option);
+    }
+  }
+
+  private findProfileByName(name: string): ShipProfile | undefined {
+    const normalized = name.trim().toLowerCase();
+    return SHIP_PROFILES.find((p) => p.name.toLowerCase() === normalized);
+  }
+
+  private findPropulsionModule(profile: ShipProfile, id: string): PropulsionModule | undefined {
+    if (!isPropulsionId(id)) return undefined;
+    return fittingOptions(profile).find((m) => m.id === id);
+  }
+
+  private applyHull(
+    side: "attacker" | "target",
+    profile: ShipProfile,
+    propulsionId?: PropulsionId,
+    persist = false,
+    updateStats = true,
+  ): void {
+    if (side === "attacker") this.attackerProfile = profile;
+    else this.targetProfile = profile;
+
+    (this.els[`${side}Hull`] as HTMLInputElement).value = profile.name;
+    this.setHullValidation(side, false);
+    this.renderPropulsionOptions(side);
+
+    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    const module = propulsionId ? this.findPropulsionModule(profile, propulsionId) : undefined;
+    select.value = module ? module.id : "";
+
+    if (updateStats) {
+      this.updatePropulsionStats(side);
+    } else {
+      this.updateHullHint(side, module);
+    }
+    if (persist) {
+      this.persist();
+      this.callbacks?.onConfigChange();
+    }
+  }
+
+  private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
+    if (side === "attacker") this.attackerProfile = undefined;
+    else this.targetProfile = undefined;
+
+    if (resetInput) {
+      (this.els[`${side}Hull`] as HTMLInputElement).value = "";
+    }
+    this.updateHullHint(side);
+    this.renderPropulsionOptions(side);
+    if (persist) {
+      this.persist();
+      this.callbacks?.onConfigChange();
+    }
+  }
+
+  private loadHull(
+    side: "attacker" | "target",
+    hullName?: string,
+    propulsionId?: PropulsionId,
+  ): void {
+    if (!hullName) {
+      this.clearHull(side, true, false);
+      return;
+    }
+    const profile = this.findProfileByName(hullName);
+    if (!profile) {
+      this.clearHull(side, true, false);
+      return;
+    }
+    this.applyHull(side, profile, propulsionId, false, false);
+  }
+
+  private onHullInput(side: "attacker" | "target"): void {
+    const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
+    const profile = this.findProfileByName(value);
+    if (profile) {
+      this.applyHull(side, profile, undefined, true);
+    } else {
+      this.setHullValidation(side, false);
+    }
+  }
+
+  private onHullChange(side: "attacker" | "target"): void {
+    const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
+    if (value === "") {
+      this.setHullValidation(side, false);
+      this.clearHull(side, false, true);
+      return;
+    }
+    const profile = this.findProfileByName(value);
+    if (profile) {
+      this.applyHull(side, profile, undefined, true);
+      return;
+    }
+    this.setHullValidation(side, true);
+    this.clearHull(side, false, false);
+    this.persist();
+    this.callbacks?.onConfigChange();
+  }
+
+  private onPropulsionChange(side: "attacker" | "target"): void {
+    if (side === "attacker" && !this.attackerProfile) return;
+    if (side === "target" && !this.targetProfile) return;
+    this.updatePropulsionStats(side);
+    this.persist();
+    this.callbacks?.onConfigChange();
+  }
+
+  private setHullValidation(side: "attacker" | "target", isInvalid: boolean): void {
+    (this.els[`${side}Hull`] as HTMLInputElement).classList.toggle("hull-invalid", isInvalid);
+  }
+
+  private updateHullHint(side: "attacker" | "target", module?: PropulsionModule): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) {
+      setText(this.els[`${side}HullHint`], "");
+      return;
+    }
+    let text = `${profile.hullType} · ${profile.faction}`;
+    if (side === "target" && module?.kind === "microwarpdrive") {
+      text += ` (sig ×${1 + module.sigBloom})`;
+    }
+    setText(this.els[`${side}HullHint`], text);
+  }
+
+  private renderAllPropulsionOptions(): void {
+    this.renderPropulsionOptions("attacker", (this.els.attackerPropulsion as HTMLSelectElement).value);
+    this.renderPropulsionOptions("target", (this.els.targetPropulsion as HTMLSelectElement).value);
+  }
+
+  private renderPropulsionOptions(side: "attacker" | "target", selectedId = ""): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    select.innerHTML = "";
+
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = this.i18n.t("propulsion.none");
+    select.appendChild(none);
+
+    if (!profile) {
+      select.disabled = true;
+      select.value = "";
+      return;
+    }
+
+    const modules = fittingOptions(profile);
+    select.disabled = modules.length === 0;
+    for (const module of modules) {
+      const option = document.createElement("option");
+      option.value = module.id;
+      option.textContent = propulsionOptionLabel(side, module);
+      select.appendChild(option);
+    }
+
+    const selected = modules.some((m) => m.id === selectedId) ? selectedId : "";
+    select.value = selected;
+  }
+
+  private updatePropulsionStats(side: "attacker" | "target"): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return;
+
+    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    const module = this.findPropulsionModule(profile, select.value);
+    const stats = effectiveStats(profile, module);
+
+    (this.els[`${side}Speed`] as HTMLInputElement).value = String(stats.maxSpeed);
+    (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
+    (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+    if (side === "target") {
+      (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
+    }
+    this.updateHullHint(side, module);
+  }
 }
 
 function el(id: string): HTMLElement {
@@ -424,4 +651,11 @@ function hitChanceColor(chance: number): string {
   if (chance >= 0.25) return "#fce447";
   if (chance >= 0.05) return "#f67c0f";
   return "#d81f27";
+}
+
+function propulsionOptionLabel(side: "attacker" | "target", module: PropulsionModule): string {
+  if (side === "target" && module.kind === "microwarpdrive") {
+    return `${module.label} (sig ×${1 + module.sigBloom})`;
+  }
+  return module.label;
 }

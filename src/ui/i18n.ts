@@ -68,6 +68,26 @@ export const I18N_DICTIONARY = {
     zh: "攻击者舰船",
     ja: "攻撃艦船",
   },
+  "label.hull": {
+    en: "Ship",
+    zh: "舰船",
+    ja: "艦船",
+  },
+  "label.propulsion": {
+    en: "Propulsion",
+    zh: "推进模块",
+    ja: "推進モジュール",
+  },
+  "propulsion.none": {
+    en: "None",
+    zh: "无",
+    ja: "なし",
+  },
+  "hint.hullSearch": {
+    en: "Type ship name…",
+    zh: "输入舰船名称…",
+    ja: "艦船名を入力…",
+  },
   "label.maxSpeed": {
     en: "Max speed (m/s)",
     zh: "最大速度 (m/s)",
