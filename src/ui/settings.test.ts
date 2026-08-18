@@ -116,9 +116,76 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v3", JSON.stringify(v2));
+    storage.setItem("gunner-settings-v4", JSON.stringify(v2));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
+  });
+
+  test("load rejects a version-3 payload", () => {
+    const storage = fakeStorage();
+    const v3 = {
+      version: 3,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    storage.setItem("gunner-settings-v4", JSON.stringify(v3));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("save and load round-trip v4 with hull and propulsion selections", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const withHull: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      targetHull: "Caldari Shuttle",
+    };
+    store.save(withHull);
+    expect(store.load()).toEqual(withHull);
+  });
+
+  test("load rejects an invalid propulsion id", () => {
+    const storage = fakeStorage();
+    storage.setItem(
+      "gunner-settings-v4",
+      JSON.stringify({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" }),
+    );
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load rejects an empty hull name", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-settings-v4", JSON.stringify({ ...DEFAULT_SETTINGS, attackerHull: "" }));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load accepts settings without the optional hull and propulsion fields", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-settings-v4", JSON.stringify(DEFAULT_SETTINGS));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.load();
+    expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
   test("saveProfile and loadProfile round-trip", () => {
@@ -189,14 +256,14 @@ describe("LocalSettingsStore", () => {
 
   test("load ignores stored settings with invalid values", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v3", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
+    storage.setItem("gunner-settings-v4", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load falls back to local storage when the URL is invalid", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v3", JSON.stringify(DEFAULT_SETTINGS));
+    storage.setItem("gunner-settings-v4", JSON.stringify(DEFAULT_SETTINGS));
     const location = fakeLocation("http://localhost/?c=INVALID");
     const store = new LocalSettingsStore({ storage, location });
     expect(store.load()).toEqual(DEFAULT_SETTINGS);

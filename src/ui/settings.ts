@@ -1,7 +1,8 @@
 import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
+import { isPropulsionId, type PropulsionId } from "../ships";
 import type { Language } from "./i18n";
 
-export const USER_SETTINGS_VERSION = 3 as const;
+export const USER_SETTINGS_VERSION = 4 as const;
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -22,6 +23,10 @@ export interface UserSettings {
   targetMass: number;
   targetInertia: number;
   targetSig: number;
+  attackerHull?: string;
+  attackerPropulsion?: PropulsionId;
+  targetHull?: string;
+  targetPropulsion?: PropulsionId;
   simSpeed: number;
   language: Language;
 }
@@ -53,8 +58,8 @@ export interface SettingsStore {
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
 }
 
-const SETTINGS_KEY = "gunner-settings-v3";
-const PROFILES_KEY = "gunner-profiles-v3";
+const SETTINGS_KEY = "gunner-settings-v4";
+const PROFILES_KEY = "gunner-profiles-v4";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -200,6 +205,10 @@ function isUserSettings(value: unknown): value is UserSettings {
     isNonNegative(s.targetMass) &&
     isNonNegative(s.targetInertia) &&
     isPositive(s.targetSig) &&
+    isOptionalNonEmptyString(s.attackerHull) &&
+    isOptionalPropulsionId(s.attackerPropulsion) &&
+    isOptionalNonEmptyString(s.targetHull) &&
+    isOptionalPropulsionId(s.targetPropulsion) &&
     isPositive(s.simSpeed) &&
     isLanguage(s.language)
   );
@@ -215,6 +224,14 @@ function isAutopilotMode(value: unknown): value is AutopilotMode {
 
 function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
+}
+
+function isOptionalNonEmptyString(value: unknown): value is string | undefined {
+  return value === undefined || (typeof value === "string" && value.length > 0);
+}
+
+function isOptionalPropulsionId(value: unknown): value is PropulsionId | undefined {
+  return value === undefined || isPropulsionId(value);
 }
 
 function isFiniteNumber(value: unknown): value is number {

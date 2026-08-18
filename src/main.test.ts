@@ -1,7 +1,7 @@
 import { container } from "./container";
 
 const DEFAULT_SETTINGS = {
-  version: 3 as const,
+  version: 4 as const,
   tracking: 0.32,
   trackingUnit: "rad" as const,
   sigRes: "S" as const,
@@ -136,7 +136,7 @@ function fakeDocument(): Document {
 function fakeLocalStorage(): Storage {
   return {
     getItem: vi.fn((key: string) => {
-      if (key === "gunner-settings-v3") return JSON.stringify(DEFAULT_SETTINGS);
+      if (key === "gunner-settings-v4") return JSON.stringify(DEFAULT_SETTINGS);
       return null;
     }),
     setItem: vi.fn(),
