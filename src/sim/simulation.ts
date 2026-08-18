@@ -1,6 +1,7 @@
 import { add, len, scale, sub, vec } from "../math";
 import type { Vec2 } from "../math";
 import type { Autopilot } from "./autopilot";
+import { integrateShip } from "./dynamics";
 import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";
 
 export interface Simulation {
@@ -21,13 +22,12 @@ export class SimulationImpl implements Simulation {
     this.time = 0;
     this.attacker = asState(simConfig.attacker, vec(0, 0));
     this.target = asState(simConfig.target, vec(0, simConfig.initialDistance));
-    this.updateVelocities();
   }
 
   step(dt: number): void {
-    this.updateVelocities();
-    this.attacker.position = add(this.attacker.position, scale(this.attacker.velocity, dt));
-    this.target.position = add(this.target.position, scale(this.target.velocity, dt));
+    const commands = this.computeCommands();
+    this.attacker = { ...this.attacker, ...integrateShip(this.attacker, commands.attacker, dt) };
+    this.target = { ...this.target, ...integrateShip(this.target, commands.target, dt) };
     this.time += dt;
   }
 
@@ -43,14 +43,12 @@ export class SimulationImpl implements Simulation {
     this.time = 0;
     this.attacker = asState(config.attacker, vec(0, 0));
     this.target = asState(config.target, vec(0, config.initialDistance));
-    this.updateVelocities();
   }
 
   update(config: SimConfig): void {
     this.attacker = withConfig(this.attacker, config.attacker);
     this.target = withConfig(this.target, config.target);
     this.target.position = this.placeTarget(this.attacker.position, this.target.position, config.initialDistance);
-    this.updateVelocities();
   }
 
   private placeTarget(attackerPosition: Vec2, targetPosition: Vec2, initialDistance: number): Vec2 {
@@ -60,14 +58,15 @@ export class SimulationImpl implements Simulation {
     return add(attackerPosition, scale(dir, initialDistance));
   }
 
-  private updateVelocities(): void {
+  private computeCommands(): { attacker: Vec2; target: Vec2 } {
     if (this.attacker.mode === "match") {
-      this.target.velocity = this.autopilot.computeVelocity(this.target, this.attacker);
-      this.attacker.velocity = this.autopilot.computeVelocity(this.attacker, this.target);
-    } else {
-      this.attacker.velocity = this.autopilot.computeVelocity(this.attacker, this.target);
-      this.target.velocity = this.autopilot.computeVelocity(this.target, this.attacker);
+      const target = this.autopilot.computeVelocity(this.target, this.attacker);
+      const attacker = this.autopilot.computeVelocity(this.attacker, this.target);
+      return { attacker, target };
     }
+    const attacker = this.autopilot.computeVelocity(this.attacker, this.target);
+    const target = this.autopilot.computeVelocity(this.target, this.attacker);
+    return { attacker, target };
   }
 }
 
