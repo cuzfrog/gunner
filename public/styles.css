@@ -211,6 +211,39 @@ canvas {
   font-family: "Chakra Petch", sans-serif;
 }
 
+.tracking-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tracking-label-row #tracking-label-text {
+  text-transform: uppercase;
+}
+
+.tracking-unit-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.tracking-unit-toggle button {
+  padding: 2px 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.tracking-unit-toggle button.active {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
 @media (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;

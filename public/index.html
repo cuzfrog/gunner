@@ -20,7 +20,13 @@
       <section class="panel attacker-panel">
         <h2>Attacker / Turret</h2>
         <label>
-          <span>Tracking speed (rad/s)</span>
+          <span class="tracking-label-row">
+            <span id="tracking-label-text">Tracking speed</span>
+            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
+              <button type="button" id="tracking-unit-score" data-tracking-unit="score">Score</button>
+            </span>
+          </span>
           <input type="number" id="tracking" value="0.32" step="any" min="0">
         </label>
         <label>

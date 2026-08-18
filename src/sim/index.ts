@@ -16,3 +16,5 @@ export type {
 } from "./types";
 export { SIG_RESOLUTIONS } from "./types";
 export { registerSimModule } from "./module";
+export { toTrackingRadPerSecond, toTrackingScore } from "./trackingScore";
+export type { TrackingUnit } from "./trackingScore";
