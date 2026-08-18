@@ -12,6 +12,11 @@ export class TrackingInput {
     return this.currentUnit;
   }
 
+  setRadValue(rad: number, sigResolution: number): number {
+    this.radValue = rad;
+    return this.displayValue(sigResolution);
+  }
+
   setUnit(unit: TrackingUnit, sigResolution: number): number {
     if (this.currentUnit === unit) return this.displayValue(sigResolution);
     this.currentUnit = unit;
