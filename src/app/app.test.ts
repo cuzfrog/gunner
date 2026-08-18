@@ -36,7 +36,7 @@ const ship: ShipState = {
   mode: "orbit",
   desiredRange: 5000,
 };
-const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship };
+const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship, commands: { attacker: vec(0, 0), target: vec(0, 0) } };
 const frame: EngagementFrame = {
   time: 0,
   attacker: ship,

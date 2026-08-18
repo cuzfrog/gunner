@@ -61,6 +61,22 @@ describe("SimulationImpl", () => {
     expect(len(snapshot.target.velocity)).toBeGreaterThan(0);
   });
 
+  test("snapshot exposes the commanded velocities produced for the current states", () => {
+    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    expect(sim.snapshot().commands).toEqual({ attacker: vec(0, 0), target: vec(100, 0) });
+  });
+
+  test("snapshot commands are recomputed from the configuration applied by update", () => {
+    autopilot.computeVelocity.mockImplementation((ship) => vec(ship.desiredRange, 0));
+    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    sim.step(1);
+    sim.update({
+      ...simConfig("keepAtRange"),
+      attacker: { ...shipConfig("attacker", "keepAtRange"), desiredRange: 3000 },
+    });
+    expect(sim.snapshot().commands.attacker).toEqual(vec(3000, 0));
+  });
+
   test("reset restores time and initial positions", () => {
     const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
     sim.step(1);

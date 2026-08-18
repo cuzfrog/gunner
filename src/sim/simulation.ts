@@ -35,6 +35,7 @@ export class SimulationImpl implements Simulation {
       time: this.time,
       attacker: this.attacker,
       target: this.target,
+      commands: this.computeCommands(),
     };
   }
 

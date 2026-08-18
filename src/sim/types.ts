@@ -37,6 +37,9 @@ export interface SimSnapshot {
   readonly time: number;
   readonly attacker: ShipState;
   readonly target: ShipState;
+  // Autopilot velocity commands for the current states: what the dynamics
+  // engine tracks, shown alongside the actual state for debugging.
+  readonly commands: { readonly attacker: Vec2; readonly target: Vec2 };
 }
 
 export interface TurretSpec {
