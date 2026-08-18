@@ -9,15 +9,19 @@ const DEFAULT_INPUTS: Record<string, string> = {
   sigRes: "S",
   optimal: "5000",
   falloff: "5000",
-  attackerSpeed: "0",
-  attackerMode: "keepAtRange",
-  attackerRange: "5000",
-  initialDistance: "5000",
-  targetSpeed: "1000",
-  targetMode: "orbit",
-  targetRange: "5000",
-  targetSig: "40",
-  simSpeed: "4",
+  "attacker-speed": "0",
+  "attacker-mass": "1200000",
+  "attacker-inertia": "3",
+  "attacker-mode": "keepAtRange",
+  "attacker-range": "5000",
+  "initial-distance": "5000",
+  "target-speed": "1000",
+  "target-mass": "10000000",
+  "target-inertia": "0.45",
+  "target-mode": "orbit",
+  "target-range": "5000",
+  "target-sig": "40",
+  "sim-speed": "4",
 };
 
 class FakeElement {
@@ -100,6 +104,16 @@ describe("DomControls", () => {
 
   afterEach(() => {
     globalThis.document = undefined as unknown as Document;
+  });
+
+  test("getConfig maps all ship inputs including mass and inertia", () => {
+    const document = globalThis.document;
+    const { controls } = buildControls(document);
+    const config = controls.getConfig();
+    expect(config.attacker.mass).toBe(1_200_000);
+    expect(config.attacker.inertiaModifier).toBe(3);
+    expect(config.target.mass).toBe(10_000_000);
+    expect(config.target.inertiaModifier).toBe(0.45);
   });
 
   test("saving clamps an empty initial distance to 1", () => {

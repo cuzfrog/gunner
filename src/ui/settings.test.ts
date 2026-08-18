@@ -11,10 +11,14 @@ const DEFAULT_SETTINGS: UserSettings = {
   attackerSpeed: 0,
   attackerMode: "keepAtRange",
   attackerRange: 5000,
+  attackerMass: 1_200_000,
+  attackerInertia: 3,
   initialDistance: 5000,
   targetSpeed: 1000,
   targetMode: "orbit",
   targetRange: 5000,
+  targetMass: 10_000_000,
+  targetInertia: 0.45,
   targetSig: 40,
   simSpeed: 4,
   language: "en",
@@ -71,7 +75,7 @@ describe("LocalSettingsStore", () => {
     storage.setItem("gunner-settings-v2", JSON.stringify(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual({
-      version: 2,
+      version: 3,
       tracking: 0.18,
       trackingUnit: "rad",
       sigRes: "M",
@@ -80,14 +84,44 @@ describe("LocalSettingsStore", () => {
       attackerSpeed: 500,
       attackerMode: "orbit",
       attackerRange: 3000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
       initialDistance: 3000,
       targetSpeed: 800,
       targetMode: "match",
       targetRange: 3000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
       targetSig: 125,
       simSpeed: 2,
       language: "ja",
     });
+  });
+
+  test("load migrates version 2 settings from local storage", () => {
+    const storage = fakeStorage();
+    const v2 = {
+      version: 2,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    storage.setItem("gunner-settings-v2", JSON.stringify(v2));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.load();
+    expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
   test("saveProfile and loadProfile round-trip", () => {
