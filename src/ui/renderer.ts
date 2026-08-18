@@ -47,6 +47,8 @@ export class CanvasRenderer implements Renderer {
     this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
     this.drawVelocityVector(snapshot.attacker, COLORS.attacker);
     this.drawVelocityVector(snapshot.target, COLORS.target);
+    this.drawCommandedVector(snapshot.attacker.position, snapshot.commands.attacker, COLORS.attacker);
+    this.drawCommandedVector(snapshot.target.position, snapshot.commands.target, COLORS.target);
     this.drawTransversalVector(snapshot.target.position, frame.transversalVelocity);
     this.drawShip(snapshot.attacker, COLORS.attacker, true);
     this.drawShip(snapshot.target, COLORS.target, false);
@@ -149,6 +151,18 @@ export class CanvasRenderer implements Renderer {
     const heading = angle(ship.velocity);
     const end = add(start, vec(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
     this.drawArrow(start, end, color);
+  }
+
+  private drawCommandedVector(position: Vec2, commanded: Vec2, color: string): void {
+    const speed = len(commanded);
+    if (speed < 0.01) return;
+    const start = this.worldToScreen(position);
+    const arrowLen = speed * VECTOR_SCALE * this.camera.scale;
+    const heading = angle(commanded);
+    const end = add(start, vec(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
+    this.ctx.setLineDash([5, 5]);
+    this.drawArrow(start, end, color);
+    this.ctx.setLineDash([]);
   }
 
   private drawTransversalVector(position: Vec2, transversal: Vec2): void {
