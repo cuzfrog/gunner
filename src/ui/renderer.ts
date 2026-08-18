@@ -1,5 +1,6 @@
 import { add, angle, dist, len, scale, sub, vec, type Vec2 } from "../math";
 import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "../sim";
+import type { I18n } from "./i18n";
 
 export interface Renderer {
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void;
@@ -27,10 +28,12 @@ interface Camera {
 export class CanvasRenderer implements Renderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
+  private readonly i18n: I18n;
   private camera: Camera = { center: vec(0, 0), scale: 1 };
 
-  constructor({ canvas }: { canvas: HTMLCanvasElement }) {
+  constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
+    this.i18n = i18n;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D context not available");
     this.ctx = ctx;
@@ -73,8 +76,12 @@ export class CanvasRenderer implements Renderer {
 
   private drawGrid(): void {
     const spacing = 10000; // 10 km grid
-    const min = sub(this.camera.center, scale(vec(1, 1), this.canvas.width / this.camera.scale));
-    const max = add(this.camera.center, scale(vec(1, 1), this.canvas.width / this.camera.scale));
+    const half = scale(
+      vec(this.canvas.width, this.canvas.height),
+      0.5 / this.camera.scale,
+    );
+    const min = sub(this.camera.center, half);
+    const max = add(this.camera.center, half);
     const startX = Math.floor(min.x / spacing) * spacing;
     const endX = Math.ceil(max.x / spacing) * spacing;
     const startY = Math.floor(min.y / spacing) * spacing;
@@ -131,7 +138,7 @@ export class CanvasRenderer implements Renderer {
     this.ctx.setLineDash([]);
 
     const mid = scale(add(sa, sb), 0.5);
-    this.drawTextAt(mid.x, mid.y, formatDistance(distance), COLORS.text, true);
+    this.drawTextAt(mid.x, mid.y, this.formatDistance(distance), COLORS.text, true);
   }
 
   private drawVelocityVector(ship: ShipState, color: string): void {
@@ -210,14 +217,14 @@ export class CanvasRenderer implements Renderer {
 
   private drawReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
     const lines = [
-      `T +${formatTime(frame.time)}`,
-      `Range: ${formatDistance(frame.distance)}`,
-      `Angular: ${frame.angularVelocity.toFixed(4)} rad/s`,
-      `Transversal: ${frame.transversalSpeed.toFixed(1)} m/s`,
-      `Radial: ${frame.radialVelocity.toFixed(1)} m/s`,
-      `Optimal: ${formatDistance(turret.optimal)}`,
-      `Falloff: ${turret.falloff > 0 ? formatDistance(turret.falloff) : "none"}`,
-      `Hit chance: ${(hit.chance * 100).toFixed(1)}%`,
+      `${this.i18n.t("readout.time")}${formatTime(frame.time)}`,
+      `${this.i18n.t("readout.range")}${this.formatDistance(frame.distance)}`,
+      `${this.i18n.t("readout.angular")}${frame.angularVelocity.toFixed(4)} rad/s`,
+      `${this.i18n.t("readout.transversal")}${frame.transversalSpeed.toFixed(1)} m/s`,
+      `${this.i18n.t("readout.radial")}${frame.radialVelocity.toFixed(1)} m/s`,
+      `${this.i18n.t("readout.optimal")}${this.formatDistance(turret.optimal)}`,
+      `${this.i18n.t("readout.falloff")}${turret.falloff > 0 ? this.formatDistance(turret.falloff) : this.i18n.t("readout.none")}`,
+      `${this.i18n.t("readout.hitChance")}${(hit.chance * 100).toFixed(1)}%`,
     ];
 
     this.ctx.font = '14px "Share Tech Mono", monospace';
@@ -241,11 +248,11 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fillStyle = color;
     this.ctx.fillText(text, x, y);
   }
-}
 
-function formatDistance(m: number): string {
-  if (m >= 10000) return `${(m / 1000).toFixed(1)} km`;
-  return `${Math.round(m)} m`;
+  private formatDistance(m: number): string {
+    if (m >= 10000) return `${(m / 1000).toFixed(1)} ${this.i18n.t("unit.kilometer")}`;
+    return `${Math.round(m)} ${this.i18n.t("unit.meter")}`;
+  }
 }
 
 function formatTime(s: number): string {

@@ -14,7 +14,6 @@ export type OrbitDirection = "cw" | "ccw";
 
 export interface ShipConfig {
   readonly id: "attacker" | "target";
-  position: Vec2;
   readonly maxSpeed: number;
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
@@ -22,12 +21,14 @@ export interface ShipConfig {
 }
 
 export interface ShipState extends ShipConfig {
+  position: Vec2;
   velocity: Vec2;
 }
 
 export interface SimConfig {
   readonly attacker: ShipConfig;
   readonly target: ShipConfig;
+  readonly initialDistance: number;
 }
 
 export interface SimSnapshot {

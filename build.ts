@@ -12,16 +12,16 @@ if (!result.success) {
   for (const log of result.logs) {
     console.error(log);
   }
-  process.exit(1);
+  throw new Error("Build failed");
 }
 
 mkdirSync("dist", { recursive: true });
 
-const publicDir = "public";
-const distDir = "dist";
-for (const entry of readdirSync(publicDir, { withFileTypes: true })) {
-  const src = join(publicDir, entry.name);
-  const dst = join(distDir, entry.name);
+const PUBLIC_DIRECTORY = "public";
+const DISTRIBUTION_DIRECTORY = "dist";
+for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
+  const src = join(PUBLIC_DIRECTORY, entry.name);
+  const dst = join(DISTRIBUTION_DIRECTORY, entry.name);
   cpSync(src, dst, { force: true, recursive: true });
 }
 

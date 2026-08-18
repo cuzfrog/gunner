@@ -1,8 +1,10 @@
-import { len, vec } from "../math";
+import { add, dist, dot, len, scale, vec } from "../math";
 import { AutopilotImpl } from "./autopilot";
 import type { AutopilotMode, ShipState } from "./types";
 
 const autopilot = new AutopilotImpl();
+const DT = 0.1;
+const STEPS = 1000;
 
 function makeShip(
   id: "attacker" | "target",
@@ -20,6 +22,22 @@ function makeShip(
     desiredRange,
     orbitDirection: "cw",
   };
+}
+
+function stepBoth(attacker: ShipState, target: ShipState, dt: number): void {
+  const attackerVel = autopilot.computeVelocity(attacker, target);
+  const targetVel = autopilot.computeVelocity(target, attacker);
+  attacker.velocity = attackerVel;
+  target.velocity = targetVel;
+  attacker.position = add(attacker.position, scale(attackerVel, dt));
+  target.position = add(target.position, scale(targetVel, dt));
+}
+
+function runBoth(attacker: ShipState, target: ShipState, dt: number, steps: number): number {
+  for (let i = 0; i < steps; i++) {
+    stepBoth(attacker, target, dt);
+  }
+  return dist(attacker.position, target.position);
 }
 
 describe("AutopilotImpl", () => {
@@ -62,5 +80,146 @@ describe("AutopilotImpl", () => {
     other.velocity = vec(1000, 0);
     const vel = autopilot.computeVelocity(ship, other);
     expect(len(vel)).toBe(500);
+  });
+
+  describe("keepAtRange", () => {
+    test("slower attacker yields to faster target's desired range", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1300, 10000);
+      const target = makeShip("target", [0, 12000], "keepAtRange", 1500, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(14500);
+      expect(finalDistance).toBeLessThan(15500);
+    });
+
+    test("faster attacker holds its own desired range", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1500, 10000);
+      const target = makeShip("target", [0, 12000], "keepAtRange", 1300, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(9500);
+      expect(finalDistance).toBeLessThan(10500);
+    });
+
+    test("equal speed keepers settle between desired ranges", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1300, 10000);
+      const target = makeShip("target", [0, 16000], "keepAtRange", 1300, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(10000);
+      expect(finalDistance).toBeLessThan(15000);
+    });
+
+    test("keeper holds its setpoint against a faster approacher", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1500, 15000);
+      const target = makeShip("target", [0, 12000], "approach", 1300, 5000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(14500);
+      expect(finalDistance).toBeLessThan(15500);
+    });
+
+    test("keeper closes on a retreating target at the speed difference", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1500, 15000);
+      const target = makeShip("target", [0, 50000], "retreat", 800, 5000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(14500);
+      expect(finalDistance).toBeLessThan(15500);
+    });
+
+    test("yields only when opponent is keepAtRange and strictly faster", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1000, 10000);
+      const fasterKeeper = makeShip("target", [0, 15000], "keepAtRange", 1200, 15000);
+      const slowerKeeper = makeShip("target", [0, 15000], "keepAtRange", 800, 15000);
+      const equalKeeper = makeShip("target", [0, 15000], "keepAtRange", 1000, 15000);
+      const approacher = makeShip("target", [0, 15000], "approach", 1200, 15000);
+
+      expect(len(autopilot.computeVelocity(ship, fasterKeeper))).toBe(0);
+      expect(autopilot.computeVelocity(ship, slowerKeeper).y).toBeGreaterThan(500);
+      expect(autopilot.computeVelocity(ship, equalKeeper).y).toBeGreaterThan(500);
+      expect(autopilot.computeVelocity(ship, approacher).y).toBeGreaterThan(500);
+    });
+
+    test("feedforward cancels opponent radial velocity", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1500, 15000);
+      const approacher = makeShip("target", [0, 15000], "approach", 1300, 5000);
+      approacher.velocity = vec(0, -1300);
+      expect(autopilot.computeVelocity(ship, approacher).y).toBeCloseTo(-1300, 5);
+
+      const closer = makeShip("target", [0, 12000], "approach", 1300, 5000);
+      closer.velocity = vec(0, -1300);
+      expect(autopilot.computeVelocity(ship, closer).y).toBeCloseTo(-1500, 5);
+
+      const retreater = makeShip("target", [0, 15000], "retreat", 800, 5000);
+      retreater.velocity = vec(0, 800);
+      expect(autopilot.computeVelocity(ship, retreater).y).toBeCloseTo(800, 5);
+    });
+  });
+
+  describe("orbit", () => {
+    test("resolved range yields only to a strictly faster contending opponent", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1300, 10000);
+      const fasterOrbit = makeShip("target", [0, 12000], "orbit", 1500, 15000);
+      const slowerOrbit = makeShip("target", [0, 12000], "orbit", 1200, 15000);
+      const equalOrbit = makeShip("target", [0, 12000], "orbit", 1300, 15000);
+      const approacher = makeShip("target", [0, 12000], "approach", 1500, 15000);
+      const fasterKeeper = makeShip("target", [0, 12000], "keepAtRange", 1500, 15000);
+
+      expect(autopilot.computeVelocity(ship, fasterOrbit).y).toBeLessThan(-500);
+      expect(autopilot.computeVelocity(ship, fasterKeeper).y).toBeLessThan(-500);
+      expect(autopilot.computeVelocity(ship, slowerOrbit).y).toBeGreaterThan(500);
+      expect(autopilot.computeVelocity(ship, equalOrbit).y).toBeGreaterThan(500);
+      expect(autopilot.computeVelocity(ship, approacher).y).toBeGreaterThan(500);
+    });
+
+    test("slower keeper yields to faster orbit's desired range", () => {
+      const attacker = makeShip("attacker", [0, 0], "keepAtRange", 1300, 10000);
+      const target = makeShip("target", [0, 12000], "orbit", 1500, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(14500);
+      expect(finalDistance).toBeLessThan(15500);
+    });
+
+    test("faster orbit holds its own desired range against slower keeper", () => {
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1500, 10000);
+      const target = makeShip("target", [0, 12000], "keepAtRange", 1300, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(9500);
+      expect(finalDistance).toBeLessThan(10500);
+    });
+
+    test("equal-speed approacher does not tackle orbit", () => {
+      const attacker = makeShip("attacker", [0, 0], "approach", 1300, 5000);
+      const target = makeShip("target", [0, 12000], "orbit", 1300, 12000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(11500);
+      expect(finalDistance).toBeLessThan(12500);
+    });
+
+    test("faster orbit holds its radius against retreater", () => {
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1500, 10000);
+      const target = makeShip("target", [0, 10000], "retreat", 800, 10000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(9500);
+      expect(finalDistance).toBeLessThan(10500);
+    });
+
+    test("faster orbit wins range contest against slower orbit", () => {
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1500, 10000);
+      const target = makeShip("target", [0, 12000], "orbit", 1300, 15000);
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(9500);
+      expect(finalDistance).toBeLessThan(10500);
+    });
+
+    test("orbit tangential budget shrinks as radial demand grows", () => {
+      const nearShip = makeShip("attacker", [0, 0], "orbit", 1000, 10000);
+      const nearOther = makeShip("target", [0, 12000], "orbit", 1200, 15000);
+      const nearVel = autopilot.computeVelocity(nearShip, nearOther);
+      expect(len(nearVel)).toBeCloseTo(1000, 5);
+
+      const farShip = makeShip("attacker", [0, 0], "orbit", 1000, 10000);
+      const farOther = makeShip("target", [0, 30000], "orbit", 800, 5000);
+      const farVel = autopilot.computeVelocity(farShip, farOther);
+      expect(len(farVel)).toBeCloseTo(1000, 5);
+      expect(farVel.x).toBeCloseTo(0, 5);
+      expect(farVel.y).toBeCloseTo(1000, 5);
+    });
   });
 });

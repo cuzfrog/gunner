@@ -1,5 +1,5 @@
 import { vec } from "../math";
-import type { EngagementFrame, HitChance, HitChanceBreakdown, Kinematics, ShipState, SimConfig, Simulation, SimSnapshot, TurretSpec } from "../sim";
+import type { EngagementFrame, HitChance, HitChanceBreakdown, Kinematics, ShipConfig, ShipState, SimConfig, Simulation, SimSnapshot, TurretSpec } from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
@@ -12,7 +12,7 @@ const controls = vi.mocked<Controls>({
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
 });
-const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn() });
+const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn() });
 const hitChance = vi.mocked<HitChance>({ compute: vi.fn(), findBestDistance: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn() });
@@ -49,9 +49,11 @@ const frame: EngagementFrame = {
 };
 const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+const shipConfig: ShipConfig = { id: "attacker", maxSpeed: 0, mode: "orbit", desiredRange: 5000 };
 const config: SimConfig = {
-  attacker: { ...ship, id: "attacker" },
-  target: { ...ship, id: "target", position: vec(0, 5000) },
+  attacker: shipConfig,
+  target: { ...shipConfig, id: "target" },
+  initialDistance: 5000,
 };
 
 describe("AppImpl", () => {
@@ -93,6 +95,14 @@ describe("AppImpl", () => {
     callbacks().onReset();
     expect(simulation.reset).toHaveBeenCalledWith(config);
     expect(loop.reset).toHaveBeenCalled();
+    expect(renderer.draw).toHaveBeenCalledTimes(2);
+  });
+
+  test("config change updates the simulation and renders without restarting the loop", () => {
+    app.start();
+    callbacks().onConfigChange();
+    expect(simulation.update).toHaveBeenCalledWith(config);
+    expect(loop.reset).not.toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
 

@@ -39,6 +39,10 @@ export class AppImpl implements App {
         this.loop.reset();
         this.renderFrame();
       },
+      onConfigChange: () => {
+        this.simulation.update(this.controls.getConfig());
+        this.renderFrame();
+      },
       onPlayPause: () => {
         this.loop.toggle();
         this.controls.setPlaying(this.loop.isRunning());

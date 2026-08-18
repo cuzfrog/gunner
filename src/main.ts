@@ -9,10 +9,19 @@ function main(): void {
   if (!(canvas instanceof HTMLCanvasElement)) throw new Error("Canvas element not found");
 
   container.register({ canvas: asValue(canvas) });
-  registerSimModule(container);
+  container.register({
+    storage: asValue(localStorage),
+    location: asValue({
+      get href() {
+        return window.location.href;
+      },
+      replace: (url: string) => window.history.replaceState(null, "", url),
+    }),
+    clipboard: asValue(window.navigator.clipboard),
+  });
   registerUiModule(container);
-  container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerSimModule(container);
+  container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerAppModule(container);
 
   container.cradle.app.start();
