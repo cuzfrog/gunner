@@ -13,6 +13,8 @@ sealed:
   - module.ts
   - simulation.test.ts
   - simulation.ts
+  - trackingScore.test.ts
+  - trackingScore.ts
   - types.ts
 ---
 

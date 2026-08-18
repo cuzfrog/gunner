@@ -5,7 +5,7 @@ import type { SimConfig } from "./types";
 
 const simConfig: SimConfig = {
   attacker: { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange", desiredRange: 10_000 },
-  target: { id: "target", maxSpeed: 1500, mass: 10_000_000, inertiaModifier: 0.45, mode: "orbit", desiredRange: 14_000 },
+  target: { id: "target", maxSpeed: 1500, mass: 10_000_000, inertiaModifier: 0.45, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw" },
   initialDistance: 5000,
 };
 
