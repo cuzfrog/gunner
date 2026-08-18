@@ -3,11 +3,6 @@ import type { Language } from "./i18n";
 
 export const USER_SETTINGS_VERSION = 3 as const;
 
-const DEFAULT_ATTACKER_MASS = 1_200_000;
-const DEFAULT_ATTACKER_INERTIA = 3;
-const DEFAULT_TARGET_MASS = 10_000_000;
-const DEFAULT_TARGET_INERTIA = 0.45;
-
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
   tracking: number;
@@ -58,8 +53,8 @@ export interface SettingsStore {
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
 }
 
-const SETTINGS_KEY = "gunner-settings-v2";
-const PROFILES_KEY = "gunner-profiles-v2";
+const SETTINGS_KEY = "gunner-settings-v3";
+const PROFILES_KEY = "gunner-profiles-v3";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -150,7 +145,7 @@ export class LocalSettingsStore implements SettingsStore {
 function parseUserSettings(raw: string): UserSettings | null {
   try {
     const parsed: unknown = JSON.parse(raw);
-    return coerceUserSettings(parsed);
+    return isUserSettings(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -159,11 +154,10 @@ function parseUserSettings(raw: string): UserSettings | null {
 function parseProfiles(raw: string): Record<string, UserSettings> {
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    if (!isProfileStorage(parsed)) return {};
     const result: Record<string, UserSettings> = {};
-    const storage = parsed as Record<string, unknown>;
-    for (const name of Object.keys(storage)) {
-      const settings = coerceUserSettings(storage[name]);
+    for (const name of Object.keys(parsed)) {
+      const settings = isUserSettings(parsed[name]) ? parsed[name] : null;
       if (settings) result[name] = settings;
     }
     return result;
@@ -180,72 +174,8 @@ function tryParseEncoded(encoded: string): UserSettings | null {
   }
 }
 
-function coerceUserSettings(value: unknown): UserSettings | null {
-  if (isUserSettings(value)) return value;
-  if (isV2Settings(value)) return migrateToV3(value);
-  return null;
-}
-
-const V2_FIELDS = [
-  "tracking",
-  "trackingUnit",
-  "sigRes",
-  "optimal",
-  "falloff",
-  "attackerSpeed",
-  "attackerMode",
-  "attackerRange",
-  "initialDistance",
-  "targetSpeed",
-  "targetMode",
-  "targetRange",
-  "targetSig",
-  "simSpeed",
-  "language",
-] as const;
-
-function isV2Settings(value: unknown): value is Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  if (s.version !== 2) return false;
-  for (const key of V2_FIELDS) {
-    if (!(key in s)) return false;
-  }
-  return true;
-}
-
-function migrateToV3(value: Record<string, unknown>): UserSettings {
-  const migrated = {
-    ...value,
-    version: USER_SETTINGS_VERSION,
-    attackerMass: DEFAULT_ATTACKER_MASS,
-    attackerInertia: DEFAULT_ATTACKER_INERTIA,
-    targetMass: DEFAULT_TARGET_MASS,
-    targetInertia: DEFAULT_TARGET_INERTIA,
-  } as unknown;
-  if (isUserSettings(migrated)) return migrated;
-  return {
-    version: USER_SETTINGS_VERSION,
-    tracking: 0.32,
-    trackingUnit: "rad",
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 0,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: DEFAULT_ATTACKER_MASS,
-    attackerInertia: DEFAULT_ATTACKER_INERTIA,
-    initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: DEFAULT_TARGET_MASS,
-    targetInertia: DEFAULT_TARGET_INERTIA,
-    targetSig: 40,
-    simSpeed: 4,
-    language: "en",
-  };
+function isProfileStorage(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 function isUserSettings(value: unknown): value is UserSettings {

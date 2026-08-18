@@ -24,6 +24,24 @@ const DEFAULT_SETTINGS: UserSettings = {
   language: "en",
 };
 
+const URL_SETTINGS: UserSettings = {
+  ...DEFAULT_SETTINGS,
+  tracking: 0.18,
+  sigRes: "M",
+  optimal: 3000,
+  falloff: 2000,
+  attackerSpeed: 500,
+  attackerMode: "orbit",
+  attackerRange: 3000,
+  initialDistance: 3000,
+  targetSpeed: 800,
+  targetMode: "match",
+  targetRange: 3000,
+  targetSig: 125,
+  simSpeed: 2,
+  language: "ja",
+};
+
 function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
   return {
@@ -70,35 +88,15 @@ describe("LocalSettingsStore", () => {
 
   test("load decodes settings from the URL and ignores local storage", () => {
     const storage = fakeStorage();
-    const location = fakeLocation("http://localhost/?c=eyJ2ZXJzaW9uIjoyLCJ0cmFja2luZyI6MC4xOCwidHJhY2tpbmdVbml0IjoicmFkIiwic2lnUmVzIjoiTSIsIm9wdGltYWwiOjMwMDAsImZhbGxvZmYiOjIwMDAsImF0dGFja2VyU3BlZWQiOjUwMCwiYXR0YWNrZXJNb2RlIjoib3JiaXQiLCJhdHRhY2tlclJhbmdlIjozMDAwLCJpbml0aWFsRGlzdGFuY2UiOjMwMDAsInRhcmdldFNwZWVkIjo4MDAsInRhcmdldE1vZGUiOiJtYXRjaCIsInRhcmdldFJhbmdlIjozMDAwLCJ0YXJnZXRTaWciOjEyNSwic2ltU3BlZWQiOjIsImxhbmd1YWdlIjoiamEifQ");
-    const store = new LocalSettingsStore({ storage, location });
-    storage.setItem("gunner-settings-v2", JSON.stringify(DEFAULT_SETTINGS));
+    const encoder = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const url = encoder.encodeUrl(URL_SETTINGS);
+    const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
+    storage.setItem("gunner-settings-v3", JSON.stringify(DEFAULT_SETTINGS));
     const loaded = store.load();
-    expect(loaded).toEqual({
-      version: 3,
-      tracking: 0.18,
-      trackingUnit: "rad",
-      sigRes: "M",
-      optimal: 3000,
-      falloff: 2000,
-      attackerSpeed: 500,
-      attackerMode: "orbit",
-      attackerRange: 3000,
-      attackerMass: 1_200_000,
-      attackerInertia: 3,
-      initialDistance: 3000,
-      targetSpeed: 800,
-      targetMode: "match",
-      targetRange: 3000,
-      targetMass: 10_000_000,
-      targetInertia: 0.45,
-      targetSig: 125,
-      simSpeed: 2,
-      language: "ja",
-    });
+    expect(loaded).toEqual(URL_SETTINGS);
   });
 
-  test("load migrates version 2 settings from local storage", () => {
+  test("load rejects a version-2 payload", () => {
     const storage = fakeStorage();
     const v2 = {
       version: 2,
@@ -118,10 +116,9 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v2", JSON.stringify(v2));
+    storage.setItem("gunner-settings-v3", JSON.stringify(v2));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
-    const loaded = store.load();
-    expect(loaded).toEqual(DEFAULT_SETTINGS);
+    expect(store.load()).toBeNull();
   });
 
   test("saveProfile and loadProfile round-trip", () => {
@@ -192,14 +189,14 @@ describe("LocalSettingsStore", () => {
 
   test("load ignores stored settings with invalid values", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v2", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
+    storage.setItem("gunner-settings-v3", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load falls back to local storage when the URL is invalid", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v2", JSON.stringify(DEFAULT_SETTINGS));
+    storage.setItem("gunner-settings-v3", JSON.stringify(DEFAULT_SETTINGS));
     const location = fakeLocation("http://localhost/?c=INVALID");
     const store = new LocalSettingsStore({ storage, location });
     expect(store.load()).toEqual(DEFAULT_SETTINGS);
