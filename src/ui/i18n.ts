@@ -19,19 +19,19 @@ export const I18N_DICTIONARY = {
     ja: "2D 戦術シミュレーション",
   },
   "lang.en": {
-    en: "EN",
-    zh: "EN",
-    ja: "EN",
+    en: "English",
+    zh: "English",
+    ja: "English",
   },
   "lang.zh": {
-    en: "中",
-    zh: "中",
-    ja: "中",
+    en: "中文",
+    zh: "中文",
+    ja: "中文",
   },
   "lang.ja": {
-    en: "日",
-    zh: "日",
-    ja: "日",
+    en: "日本語",
+    zh: "日本語",
+    ja: "日本語",
   },
   "section.attackerTurret": {
     en: "Attacker / Turret",

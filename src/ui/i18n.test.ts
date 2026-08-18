@@ -53,4 +53,11 @@ describe("I18nImpl", () => {
     i18n.setLanguage("ja" as Language);
     expect(i18n.t("label.trackingSpeed")).toBe("追跡速度");
   });
+
+  test("uses full language names in every language", () => {
+    const i18n = new I18nImpl("en", fakeDocument());
+    expect(i18n.t("lang.en")).toBe("English");
+    expect(i18n.t("lang.zh")).toBe("中文");
+    expect(i18n.t("lang.ja")).toBe("日本語");
+  });
 });
