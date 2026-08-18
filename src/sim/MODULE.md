@@ -1,6 +1,7 @@
 ---
 sealed:
   - autopilot.test.ts
+  - autopilot-dynamics.test.ts
   - autopilot.ts
   - dynamics.test.ts
   - dynamics.ts
