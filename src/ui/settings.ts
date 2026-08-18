@@ -114,7 +114,7 @@ export class LocalSettingsStore implements SettingsStore {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
-    const settings = parseUserSettings(decodeBase64(encoded));
+    const settings = tryParseEncoded(encoded);
     if (!settings) return null;
     url.searchParams.delete(URL_PARAM);
     this.location.replace(url.toString());
@@ -155,6 +155,14 @@ function parseProfiles(raw: string): Record<string, UserSettings> {
     return {};
   } catch {
     return {};
+  }
+}
+
+function tryParseEncoded(encoded: string): UserSettings | null {
+  try {
+    return parseUserSettings(decodeBase64(encoded));
+  } catch {
+    return null;
   }
 }
 
