@@ -89,8 +89,6 @@ export const HULL_TIERS: Record<string, HullTier | null> = {
   "Transport Ships": "medium",
 } as const;
 
-function hullTierOf(hullType: string): HullTier | null {
+export function hullTierOf(hullType: string): HullTier | null {
   return HULL_TIERS[hullType] ?? null;
 }
-
-export { hullTierOf as _hullTierOf };

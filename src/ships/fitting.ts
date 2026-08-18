@@ -1,9 +1,9 @@
 import type { HullTier, PropulsionModule, ShipProfile } from "./types";
 import { PROPULSION_MODULES } from "./propulsion";
-import { _hullTierOf } from "./tiers";
+import { hullTierOf } from "./tiers";
 
 export function fittingOptions(profile: ShipProfile): readonly PropulsionModule[] {
-  const shipTier = _hullTierOf(profile.hullType);
+  const shipTier = hullTierOf(profile.hullType);
   if (!shipTier) return [];
 
   const options: PropulsionModule[] = [];

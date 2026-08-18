@@ -1,11 +1,16 @@
 ---
-gated:
+no-new-exports:
   - types.ts
   - tiers.ts
   - propulsion.ts
   - fitting.ts
   - effectiveStats.ts
   - profiles.ts
+  - index.ts
+  - tiers.test.ts
+  - propulsion.test.ts
+  - fitting.test.ts
+  - effectiveStats.test.ts
 ---
 
 # ships
