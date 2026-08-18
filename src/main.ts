@@ -20,8 +20,8 @@ function main(): void {
     clipboard: asValue(window.navigator.clipboard),
   });
   registerUiModule(container);
-  container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerSimModule(container);
+  container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerAppModule(container);
 
   container.cradle.app.start();
