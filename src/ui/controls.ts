@@ -145,7 +145,7 @@ export class DomControls implements Controls {
     const trackPenalty = Number.isFinite(hit.trackingTerm) ? (0.5 ** hit.trackingTerm) * 100 : 0;
     const rangePenalty = Number.isFinite(hit.rangeTerm) ? (0.5 ** hit.rangeTerm) * 100 : 0;
 
-    setText(this.els.resDistance, formatDistance(frame.distance));
+    setText(this.els.resDistance, this.formatDistance(frame.distance));
     setText(this.els.resTransversal, `${frame.transversalSpeed.toFixed(1)} m/s`);
     setText(this.els.resAngular, `${frame.angularVelocity.toFixed(4)} rad/s`);
     setText(this.els.resRadial, `${frame.radialVelocity.toFixed(1)} m/s`);
@@ -374,6 +374,11 @@ export class DomControls implements Controls {
       });
     }
   }
+
+  private formatDistance(m: number): string {
+    if (m >= 10000) return `${(m / 1000).toFixed(1)} ${this.i18n.t("unit.kilometer")}`;
+    return `${Math.round(m)} ${this.i18n.t("unit.meter")}`;
+  }
 }
 
 function el(id: string): HTMLElement {
@@ -390,11 +395,6 @@ function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number 
 
 function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
-}
-
-function formatDistance(m: number): string {
-  if (m >= 10000) return `${(m / 1000).toFixed(1)} km`;
-  return `${Math.round(m)} m`;
 }
 
 function hitChanceColor(chance: number): string {
