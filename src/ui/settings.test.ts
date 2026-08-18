@@ -136,6 +136,18 @@ describe("LocalSettingsStore", () => {
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
+  test("decodeUrl strips the c parameter without navigating", () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const url = store.encodeUrl(DEFAULT_SETTINGS);
+    const decodedLocation = fakeLocation(url);
+    const decodedStore = new LocalSettingsStore({ storage: fakeStorage(), location: decodedLocation });
+    const decoded = decodedStore.decodeUrl();
+    expect(decoded).toEqual(DEFAULT_SETTINGS);
+    const cleaned = new URL(url);
+    cleaned.searchParams.delete("c");
+    expect(decodedLocation.href).toBe(cleaned.toString());
+  });
+
   test("decodeUrl rejects settings with a non-positive initialDistance", () => {
     const bad = { ...DEFAULT_SETTINGS, initialDistance: 0 };
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });

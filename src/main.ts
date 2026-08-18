@@ -11,7 +11,12 @@ function main(): void {
   container.register({ canvas: asValue(canvas) });
   container.register({
     storage: asValue(localStorage),
-    location: asValue(window.location),
+    location: asValue({
+      get href() {
+        return window.location.href;
+      },
+      replace: (url: string) => window.history.replaceState(null, "", url),
+    }),
     clipboard: asValue(window.navigator.clipboard),
   });
   registerUiModule(container);
