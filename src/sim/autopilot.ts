@@ -1,5 +1,5 @@
-import { add, len, norm, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
-import type { ShipState } from "./types";
+import { add, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
+import type { AutopilotMode, ShipState } from "./types";
 
 export interface Autopilot {
   computeVelocity(ship: ShipState, other: ShipState): Vec2;
@@ -18,9 +18,9 @@ export class AutopilotImpl implements Autopilot {
 
     switch (ship.mode) {
       case "orbit":
-        return orbit(ship, d, toOtherHat);
+        return orbit(ship, other, d, toOtherHat);
       case "keepAtRange":
-        return keepAtRange(ship, d, toOtherHat);
+        return keepAtRange(ship, other, d, toOtherHat);
       case "approach":
         return approach(ship, d, toOtherHat);
       case "retreat":
@@ -37,26 +37,55 @@ const ORBIT_RANGE_GAIN = 0.5;
 const KEEP_RANGE_GAIN = 2.0;
 const APPROACH_STOP_RANGE = 100; // m
 
-function orbit(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
+function contending(mode: AutopilotMode): boolean {
+  return mode === "keepAtRange" || mode === "orbit";
+}
+
+function resolvedRange(ship: ShipState, other: ShipState): number {
+  if (contending(other.mode) && other.maxSpeed > ship.maxSpeed) {
+    return Math.max(other.desiredRange, 1);
+  }
+  return Math.max(ship.desiredRange, 1);
+}
+
+function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
   // From-center vector is the opposite of to-other; it points from the
   // reference ship (orbit center) to this ship.
   const fromCenterHat = scale(toOtherHat, -1);
 
   const tHat = (ship.orbitDirection ?? "cw") === "cw" ? perpCW(fromCenterHat) : perpCCW(fromCenterHat);
 
-  const desiredRange = Math.max(ship.desiredRange, 1);
-  const error = (d - desiredRange) / desiredRange;
+  const desiredRange = resolvedRange(ship, other);
+  const openingRate = (ORBIT_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
 
-  // Negative error term pulls the ship toward the desired range.
-  const dir = norm(add(tHat, scale(fromCenterHat, -ORBIT_RANGE_GAIN * error)));
-  return scale(dir, ship.maxSpeed);
+  const otherOutward = dot(other.velocity, toOtherHat);
+  const radialSpeed = contending(other.mode)
+    ? Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate))
+    : Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, openingRate - otherOutward));
+
+  const radialVel = scale(fromCenterHat, radialSpeed);
+  const tangentialSpeed = Math.sqrt(ship.maxSpeed * ship.maxSpeed - radialSpeed * radialSpeed);
+  const tangentialVel = scale(tHat, tangentialSpeed);
+
+  return add(radialVel, tangentialVel);
 }
 
-function keepAtRange(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
-  const desiredRange = Math.max(ship.desiredRange, 1);
-  const error = (d - desiredRange) / desiredRange;
-  const control = Math.max(-1, Math.min(1, KEEP_RANGE_GAIN * error));
-  return scale(toOtherHat, ship.maxSpeed * control);
+function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
+  const desiredRange = resolvedRange(ship, other);
+  const radialSpeed = commandedRadialSpeed(ship, other, d, toOtherHat, desiredRange);
+  return scale(toOtherHat, radialSpeed);
+}
+
+function commandedRadialSpeed(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2, desiredRange: number): number {
+  if (contending(other.mode)) {
+    const error = (d - desiredRange) / desiredRange;
+    const control = Math.max(-1, Math.min(1, KEEP_RANGE_GAIN * error));
+    return ship.maxSpeed * control;
+  }
+
+  const otherOutward = dot(other.velocity, toOtherHat);
+  const openingRate = (KEEP_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
+  return Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, otherOutward - openingRate));
 }
 
 function approach(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {

@@ -34,9 +34,9 @@ export const I18N_DICTIONARY = {
     ja: "日本語",
   },
   "section.attackerTurret": {
-    en: "Attacker / Turret",
-    zh: "攻击者 / 炮塔",
-    ja: "攻撃者 / タレット",
+    en: "Attacker",
+    zh: "攻击者",
+    ja: "攻撃者",
   },
   "label.trackingSpeed": {
     en: "Tracking speed",
@@ -67,11 +67,6 @@ export const I18N_DICTIONARY = {
     en: "Attacker ship",
     zh: "攻击者舰船",
     ja: "攻撃艦船",
-  },
-  "hint.attackerCenter": {
-    en: "The attacker always sits at the center.",
-    zh: "攻击者始终位于中心。",
-    ja: "攻撃者は常に中心に配置されます。",
   },
   "label.maxSpeed": {
     en: "Max speed (m/s)",
@@ -173,6 +168,11 @@ export const I18N_DICTIONARY = {
     zh: "配置名称",
     ja: "プロファイル名",
   },
+  "label.author": {
+    en: "Author:",
+    zh: "作者：",
+    ja: "作者：",
+  },
   "select.profile": {
     en: "Select profile...",
     zh: "选择配置...",
@@ -223,15 +223,70 @@ export const I18N_DICTIONARY = {
     zh: "命中率",
     ja: "命中確率",
   },
+  "readout.time": {
+    en: "T +",
+    zh: "T +",
+    ja: "T +",
+  },
+  "readout.range": {
+    en: "Range: ",
+    zh: "距离：",
+    ja: "距離：",
+  },
+  "readout.angular": {
+    en: "Angular: ",
+    zh: "角速度：",
+    ja: "角速度：",
+  },
+  "readout.transversal": {
+    en: "Transversal: ",
+    zh: "横向速度：",
+    ja: "横断速度：",
+  },
+  "readout.radial": {
+    en: "Radial: ",
+    zh: "径向速度：",
+    ja: "放射速度：",
+  },
+  "readout.optimal": {
+    en: "Optimal: ",
+    zh: "最佳射程：",
+    ja: "最適射程：",
+  },
+  "readout.falloff": {
+    en: "Falloff: ",
+    zh: "衰减射程：",
+    ja: "フォールオフ射程：",
+  },
+  "readout.hitChance": {
+    en: "Hit chance: ",
+    zh: "命中率：",
+    ja: "命中確率：",
+  },
+  "readout.none": {
+    en: "none",
+    zh: "无",
+    ja: "なし",
+  },
+  "unit.meter": {
+    en: "m",
+    zh: "m",
+    ja: "m",
+  },
+  "unit.kilometer": {
+    en: "km",
+    zh: "km",
+    ja: "km",
+  },
 } as const;
 
 export class I18nImpl implements I18n {
   private readonly document: Document;
   private language: Language;
 
-  constructor(initial: Language = "en", document: Document = globalThis.document) {
-    this.language = initial;
-    this.document = document;
+  constructor() {
+    this.language = "en";
+    this.document = globalThis.document;
     this.document.documentElement.lang = this.language;
   }
 

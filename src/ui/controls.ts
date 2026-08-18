@@ -9,7 +9,7 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import type { SettingsStore, UserSettings } from "./settings";
+import type { ClipboardProvider, SettingsStore, UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
@@ -35,6 +35,7 @@ export class DomControls implements Controls {
   private readonly hitChance: HitChance;
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
+  private readonly clipboard: ClipboardProvider;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -44,14 +45,17 @@ export class DomControls implements Controls {
     hitChance,
     i18n,
     settingsStore,
+    clipboard,
   }: {
     hitChance: HitChance;
     i18n: I18n;
     settingsStore: SettingsStore;
+    clipboard: ClipboardProvider;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
     this.settingsStore = settingsStore;
+    this.clipboard = clipboard;
     this.trackingInput = new TrackingInput();
     this.els = {
       tracking: el("tracking"),
@@ -141,7 +145,7 @@ export class DomControls implements Controls {
     const trackPenalty = Number.isFinite(hit.trackingTerm) ? (0.5 ** hit.trackingTerm) * 100 : 0;
     const rangePenalty = Number.isFinite(hit.rangeTerm) ? (0.5 ** hit.rangeTerm) * 100 : 0;
 
-    setText(this.els.resDistance, formatDistance(frame.distance));
+    setText(this.els.resDistance, this.formatDistance(frame.distance));
     setText(this.els.resTransversal, `${frame.transversalSpeed.toFixed(1)} m/s`);
     setText(this.els.resAngular, `${frame.angularVelocity.toFixed(4)} rad/s`);
     setText(this.els.resRadial, `${frame.radialVelocity.toFixed(1)} m/s`);
@@ -174,11 +178,11 @@ export class DomControls implements Controls {
       attackerSpeed: num(this.els.attackerSpeed),
       attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
-      initialDistance: num(this.els.initialDistance),
+      initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
       targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       targetRange: num(this.els.targetRange),
-      targetSig: num(this.els.targetSig),
+      targetSig: Math.max(num(this.els.targetSig), 1),
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
@@ -268,6 +272,7 @@ export class DomControls implements Controls {
     this.renderProfiles(selected);
     this.setPlaying(this.playing);
     this.persist();
+    this.callbacks?.onConfigChange();
   }
 
   private updateLanguageToggle(): void {
@@ -325,7 +330,7 @@ export class DomControls implements Controls {
   }
 
   private async shareLink(): Promise<void> {
-    const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), navigator.clipboard);
+    const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), this.clipboard);
     setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
     if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
     this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
@@ -370,6 +375,11 @@ export class DomControls implements Controls {
       });
     }
   }
+
+  private formatDistance(m: number): string {
+    if (m >= 10000) return `${(m / 1000).toFixed(1)} ${this.i18n.t("unit.kilometer")}`;
+    return `${Math.round(m)} ${this.i18n.t("unit.meter")}`;
+  }
 }
 
 function el(id: string): HTMLElement {
@@ -386,11 +396,6 @@ function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number 
 
 function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
-}
-
-function formatDistance(m: number): string {
-  if (m >= 10000) return `${(m / 1000).toFixed(1)} km`;
-  return `${Math.round(m)} m`;
 }
 
 function hitChanceColor(chance: number): string {

@@ -171,4 +171,11 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toEqual(DEFAULT_SETTINGS);
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
+
+  test("decodeUrl returns null for a malformed c parameter", () => {
+    const location = fakeLocation("http://localhost/?c=%25");
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    expect(store.decodeUrl()).toBeNull();
+    expect(location.href).toBe("http://localhost/?c=%25");
+  });
 });
