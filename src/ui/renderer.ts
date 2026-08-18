@@ -45,9 +45,11 @@ export class CanvasRenderer implements Renderer {
     this.drawGrid();
     this.drawRangeRings(snapshot.attacker.position, turret);
     this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
-    this.drawVelocityVector(snapshot.attacker, COLORS.attacker);
-    this.drawVelocityVector(snapshot.target, COLORS.target);
-    this.drawTransversalVector(snapshot.target.position, frame.transversalVelocity);
+    this.drawWorldVector(snapshot.attacker.position, snapshot.attacker.velocity, COLORS.attacker);
+    this.drawWorldVector(snapshot.target.position, snapshot.target.velocity, COLORS.target);
+    this.drawWorldVector(snapshot.attacker.position, snapshot.commands.attacker, COLORS.attacker, [5, 5]);
+    this.drawWorldVector(snapshot.target.position, snapshot.commands.target, COLORS.target, [5, 5]);
+    this.drawWorldVector(snapshot.target.position, frame.transversalVelocity, COLORS.transversal);
     this.drawShip(snapshot.attacker, COLORS.attacker, true);
     this.drawShip(snapshot.target, COLORS.target, false);
     this.drawReadouts(frame, hit, turret);
@@ -141,24 +143,16 @@ export class CanvasRenderer implements Renderer {
     this.drawTextAt(mid.x, mid.y, this.formatDistance(distance), COLORS.text, true);
   }
 
-  private drawVelocityVector(ship: ShipState, color: string): void {
-    const speed = len(ship.velocity);
-    if (speed < 0.01) return;
-    const start = this.worldToScreen(ship.position);
-    const arrowLen = speed * VECTOR_SCALE * this.camera.scale;
-    const heading = angle(ship.velocity);
-    const end = add(start, vec(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
-    this.drawArrow(start, end, color);
-  }
-
-  private drawTransversalVector(position: Vec2, transversal: Vec2): void {
-    const speed = len(transversal);
+  private drawWorldVector(position: Vec2, vector: Vec2, color: string, dash: number[] = []): void {
+    const speed = len(vector);
     if (speed < 0.01) return;
     const start = this.worldToScreen(position);
     const arrowLen = speed * VECTOR_SCALE * this.camera.scale;
-    const heading = angle(transversal);
+    const heading = angle(vector);
     const end = add(start, vec(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
-    this.drawArrow(start, end, COLORS.transversal);
+    this.ctx.setLineDash(dash);
+    this.drawArrow(start, end, color);
+    this.ctx.setLineDash([]);
   }
 
   private drawArrow(a: Vec2, b: Vec2, color: string): void {

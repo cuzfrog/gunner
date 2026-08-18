@@ -15,6 +15,8 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "attacker" | "target";
   readonly maxSpeed: number;
+  readonly mass: number;
+  readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
   readonly orbitDirection?: OrbitDirection;
@@ -35,6 +37,9 @@ export interface SimSnapshot {
   readonly time: number;
   readonly attacker: ShipState;
   readonly target: ShipState;
+  // Autopilot velocity commands for the current states: what the dynamics
+  // engine tracks, shown alongside the actual state for debugging.
+  readonly commands: { readonly attacker: Vec2; readonly target: Vec2 };
 }
 
 export interface TurretSpec {

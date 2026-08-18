@@ -6,6 +6,7 @@
     "build": "bun run build.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "trace": "bun run scripts/sim-trace.ts",
     "preview": "bun run build.ts && bun run preview.ts"
   },
   "dependencies": {

@@ -65,10 +65,14 @@ export class DomControls implements Controls {
       optimal: el("optimal"),
       falloff: el("falloff"),
       attackerSpeed: el("attacker-speed"),
+      attackerMass: el("attacker-mass"),
+      attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
       initialDistance: el("initial-distance"),
       targetSpeed: el("target-speed"),
+      targetMass: el("target-mass"),
+      targetInertia: el("target-inertia"),
       targetMode: el("target-mode"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
@@ -123,6 +127,8 @@ export class DomControls implements Controls {
     const attacker: ShipConfig = {
       id: "attacker",
       maxSpeed: num(this.els.attackerSpeed),
+      mass: num(this.els.attackerMass),
+      inertiaModifier: num(this.els.attackerInertia),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
       orbitDirection: "cw",
@@ -130,6 +136,8 @@ export class DomControls implements Controls {
     const target: ShipConfig = {
       id: "target",
       maxSpeed: num(this.els.targetSpeed),
+      mass: num(this.els.targetMass),
+      inertiaModifier: num(this.els.targetInertia),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
       orbitDirection: "cw",
@@ -178,10 +186,14 @@ export class DomControls implements Controls {
       attackerSpeed: num(this.els.attackerSpeed),
       attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
+      attackerMass: num(this.els.attackerMass),
+      attackerInertia: num(this.els.attackerInertia),
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
       targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       targetRange: num(this.els.targetRange),
+      targetMass: num(this.els.targetMass),
+      targetInertia: num(this.els.targetInertia),
       targetSig: Math.max(num(this.els.targetSig), 1),
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
@@ -197,10 +209,14 @@ export class DomControls implements Controls {
     (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
     (this.els.attackerSpeed as HTMLInputElement).value = String(settings.attackerSpeed);
+    (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
+    (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = String(settings.targetSpeed);
+    (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
+    (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
     (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
@@ -358,10 +374,14 @@ export class DomControls implements Controls {
       "optimal",
       "falloff",
       "attackerSpeed",
+      "attackerMass",
+      "attackerInertia",
       "attackerMode",
       "attackerRange",
       "initialDistance",
       "targetSpeed",
+      "targetMass",
+      "targetInertia",
       "targetMode",
       "targetRange",
       "targetSig",

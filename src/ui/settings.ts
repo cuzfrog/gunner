@@ -1,7 +1,7 @@
 import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
 import type { Language } from "./i18n";
 
-export const USER_SETTINGS_VERSION = 2 as const;
+export const USER_SETTINGS_VERSION = 3 as const;
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -13,10 +13,14 @@ export interface UserSettings {
   attackerSpeed: number;
   attackerMode: AutopilotMode;
   attackerRange: number;
+  attackerMass: number;
+  attackerInertia: number;
   initialDistance: number;
   targetSpeed: number;
   targetMode: AutopilotMode;
   targetRange: number;
+  targetMass: number;
+  targetInertia: number;
   targetSig: number;
   simSpeed: number;
   language: Language;
@@ -49,8 +53,8 @@ export interface SettingsStore {
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
 }
 
-const SETTINGS_KEY = "gunner-settings-v2";
-const PROFILES_KEY = "gunner-profiles-v2";
+const SETTINGS_KEY = "gunner-settings-v3";
+const PROFILES_KEY = "gunner-profiles-v3";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -141,8 +145,7 @@ export class LocalSettingsStore implements SettingsStore {
 function parseUserSettings(raw: string): UserSettings | null {
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (isUserSettings(parsed)) return parsed;
-    return null;
+    return isUserSettings(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -151,8 +154,13 @@ function parseUserSettings(raw: string): UserSettings | null {
 function parseProfiles(raw: string): Record<string, UserSettings> {
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (isProfileStorage(parsed)) return parsed;
-    return {};
+    if (!isProfileStorage(parsed)) return {};
+    const result: Record<string, UserSettings> = {};
+    for (const name of Object.keys(parsed)) {
+      const settings = isUserSettings(parsed[name]) ? parsed[name] : null;
+      if (settings) result[name] = settings;
+    }
+    return result;
   } catch {
     return {};
   }
@@ -164,6 +172,10 @@ function tryParseEncoded(encoded: string): UserSettings | null {
   } catch {
     return null;
   }
+}
+
+function isProfileStorage(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 function isUserSettings(value: unknown): value is UserSettings {
@@ -179,23 +191,18 @@ function isUserSettings(value: unknown): value is UserSettings {
     isNonNegative(s.attackerSpeed) &&
     isAutopilotMode(s.attackerMode) &&
     isNonNegative(s.attackerRange) &&
+    isNonNegative(s.attackerMass) &&
+    isNonNegative(s.attackerInertia) &&
     isPositive(s.initialDistance) &&
     isNonNegative(s.targetSpeed) &&
     isAutopilotMode(s.targetMode) &&
     isNonNegative(s.targetRange) &&
+    isNonNegative(s.targetMass) &&
+    isNonNegative(s.targetInertia) &&
     isPositive(s.targetSig) &&
     isPositive(s.simSpeed) &&
     isLanguage(s.language)
   );
-}
-
-function isProfileStorage(value: unknown): value is Record<string, UserSettings> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  for (const name of Object.keys(s)) {
-    if (!isUserSettings(s[name])) return false;
-  }
-  return true;
 }
 
 function isSigResolutionClass(value: unknown): value is SigResolutionClass {

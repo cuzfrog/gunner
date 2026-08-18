@@ -79,6 +79,14 @@
           <input type="number" id="attacker-speed" value="0" step="any" min="0">
         </label>
         <label>
+          <span data-i18n="label.mass">Mass (kg)</span>
+          <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.inertiaModifier">Inertia modifier (s/kg)</span>
+          <input type="number" id="attacker-inertia" value="3" step="any" min="0">
+        </label>
+        <label>
           <span data-i18n="label.mode">Mode</span>
           <select id="attacker-mode">
             <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
@@ -122,6 +130,14 @@
         <label>
           <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="target-speed" value="1000" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.mass">Mass (kg)</span>
+          <input type="number" id="target-mass" value="10000000" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.inertiaModifier">Inertia modifier (s/kg)</span>
+          <input type="number" id="target-inertia" value="0.45" step="any" min="0">
         </label>
         <label>
           <span data-i18n="label.mode">Mode</span>

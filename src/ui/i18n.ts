@@ -73,6 +73,16 @@ export const I18N_DICTIONARY = {
     zh: "最大速度 (m/s)",
     ja: "最大速度 (m/s)",
   },
+  "label.mass": {
+    en: "Mass (kg)",
+    zh: "质量 (kg)",
+    ja: "質量 (kg)",
+  },
+  "label.inertiaModifier": {
+    en: "Inertia modifier (s/kg)",
+    zh: "惯性修正 (s/kg)",
+    ja: "慣性修正係数 (s/kg)",
+  },
   "label.mode": {
     en: "Mode",
     zh: "模式",
