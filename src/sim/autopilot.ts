@@ -1,4 +1,4 @@
-import { add, len, norm, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
+import { add, dot, len, norm, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
 import type { ShipState } from "./types";
 
 export interface Autopilot {
@@ -20,7 +20,7 @@ export class AutopilotImpl implements Autopilot {
       case "orbit":
         return orbit(ship, d, toOtherHat);
       case "keepAtRange":
-        return keepAtRange(ship, d, toOtherHat);
+        return keepAtRange(ship, other, d, toOtherHat);
       case "approach":
         return approach(ship, d, toOtherHat);
       case "retreat":
@@ -52,11 +52,28 @@ function orbit(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
   return scale(dir, ship.maxSpeed);
 }
 
-function keepAtRange(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
-  const desiredRange = Math.max(ship.desiredRange, 1);
+function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
+  const desiredRange = effectiveDesiredRange(ship, other);
+  const radialSpeed = commandedRadialSpeed(ship, other, d, toOtherHat);
+  return scale(toOtherHat, radialSpeed);
+}
+
+function effectiveDesiredRange(ship: ShipState, other: ShipState): number {
+  if (other.mode === "keepAtRange" && other.maxSpeed > ship.maxSpeed) {
+    return Math.max(other.desiredRange, 1);
+  }
+  return Math.max(ship.desiredRange, 1);
+}
+
+function commandedRadialSpeed(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): number {
+  const desiredRange = effectiveDesiredRange(ship, other);
+  if (other.mode !== "keepAtRange") {
+    const openingRate = (KEEP_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
+    return Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, dot(other.velocity, toOtherHat) - openingRate));
+  }
   const error = (d - desiredRange) / desiredRange;
   const control = Math.max(-1, Math.min(1, KEEP_RANGE_GAIN * error));
-  return scale(toOtherHat, ship.maxSpeed * control);
+  return ship.maxSpeed * control;
 }
 
 function approach(ship: ShipState, d: number, toOtherHat: Vec2): Vec2 {
