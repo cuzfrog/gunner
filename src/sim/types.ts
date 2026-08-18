@@ -15,6 +15,8 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "attacker" | "target";
   readonly maxSpeed: number;
+  readonly mass: number;
+  readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
   readonly orbitDirection?: OrbitDirection;

@@ -9,6 +9,8 @@ const still: ShipState = {
   position: vec(0, 0),
   velocity: vec(0, 0),
   maxSpeed: 0,
+  mass: 1_200_000,
+  inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 5000,
 };
@@ -19,6 +21,8 @@ function ship(pos: [number, number], vel: [number, number]): ShipState {
     position: vec(pos[0], pos[1]),
     velocity: vec(vel[0], vel[1]),
     maxSpeed: Math.hypot(vel[0], vel[1]),
+    mass: 1_200_000,
+    inertiaModifier: 3,
     mode: "orbit",
     desiredRange: 5000,
   };

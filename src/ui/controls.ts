@@ -123,6 +123,8 @@ export class DomControls implements Controls {
     const attacker: ShipConfig = {
       id: "attacker",
       maxSpeed: num(this.els.attackerSpeed),
+      mass: 1_200_000,
+      inertiaModifier: 3,
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
       orbitDirection: "cw",
@@ -130,6 +132,8 @@ export class DomControls implements Controls {
     const target: ShipConfig = {
       id: "target",
       maxSpeed: num(this.els.targetSpeed),
+      mass: 10_000_000,
+      inertiaModifier: 0.45,
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
       orbitDirection: "cw",

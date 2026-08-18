@@ -13,11 +13,15 @@ function makeShip(
   maxSpeed: number,
   desiredRange = 5000,
 ): ShipState {
+  const mass = id === "attacker" ? 1_200_000 : 10_000_000;
+  const inertiaModifier = id === "attacker" ? 3 : 0.45;
   return {
     id,
     position: vec(pos[0], pos[1]),
     velocity: vec(0, 0),
     maxSpeed,
+    mass,
+    inertiaModifier,
     mode,
     desiredRange,
     orbitDirection: "cw",

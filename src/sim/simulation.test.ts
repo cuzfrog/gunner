@@ -6,7 +6,7 @@ import type { ShipConfig, SimConfig } from "./types";
 const autopilot = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 
 function shipConfig(id: ShipConfig["id"], mode: ShipConfig["mode"]): ShipConfig {
-  return { id, maxSpeed: 100, mode, desiredRange: 5000 };
+  return { id, maxSpeed: 100, mass: 1_200_000, inertiaModifier: 3, mode, desiredRange: 5000 };
 }
 
 function simConfig(attackerMode: ShipConfig["mode"]): SimConfig {

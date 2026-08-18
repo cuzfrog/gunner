@@ -16,6 +16,8 @@ const dummyShip: ShipState = {
   position: vec(0, 0),
   velocity: vec(0, 0),
   maxSpeed: 0,
+  mass: 1_200_000,
+  inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 0,
 };
