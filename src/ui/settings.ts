@@ -163,20 +163,20 @@ function isUserSettings(value: unknown): value is UserSettings {
   const s = value as Record<string, unknown>;
   return (
     s.version === USER_SETTINGS_VERSION &&
-    isFiniteNumber(s.tracking) &&
+    isNonNegative(s.tracking) &&
     (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
     isSigResolutionClass(s.sigRes) &&
-    isFiniteNumber(s.optimal) &&
-    isFiniteNumber(s.falloff) &&
-    isFiniteNumber(s.attackerSpeed) &&
+    isNonNegative(s.optimal) &&
+    isNonNegative(s.falloff) &&
+    isNonNegative(s.attackerSpeed) &&
     isAutopilotMode(s.attackerMode) &&
-    isFiniteNumber(s.attackerRange) &&
-    isFiniteNumber(s.initialDistance) &&
-    isFiniteNumber(s.targetSpeed) &&
+    isNonNegative(s.attackerRange) &&
+    isPositive(s.initialDistance) &&
+    isNonNegative(s.targetSpeed) &&
     isAutopilotMode(s.targetMode) &&
-    isFiniteNumber(s.targetRange) &&
-    isFiniteNumber(s.targetSig) &&
-    isFiniteNumber(s.simSpeed) &&
+    isNonNegative(s.targetRange) &&
+    isPositive(s.targetSig) &&
+    isPositive(s.simSpeed) &&
     isLanguage(s.language)
   );
 }
@@ -204,6 +204,14 @@ function isLanguage(value: unknown): value is Language {
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isNonNegative(value: unknown): value is number {
+  return isFiniteNumber(value) && value >= 0;
+}
+
+function isPositive(value: unknown): value is number {
+  return isFiniteNumber(value) && value > 0;
 }
 
 function encodeBase64(value: unknown): string {

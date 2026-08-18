@@ -128,4 +128,35 @@ describe("LocalSettingsStore", () => {
     const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS);
     expect(ok).toBe(false);
   });
+
+  test("decodeUrl rejects invalid settings and does not replace the URL", () => {
+    const location = fakeLocation("http://localhost/?c=INVALID");
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    expect(store.decodeUrl()).toBeNull();
+    expect(location.href).toBe("http://localhost/?c=INVALID");
+  });
+
+  test("decodeUrl rejects settings with a non-positive initialDistance", () => {
+    const bad = { ...DEFAULT_SETTINGS, initialDistance: 0 };
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const url = store.encodeUrl(bad);
+    const decoded = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    expect(decoded).toBeNull();
+  });
+
+  test("load ignores stored settings with invalid values", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-settings-v2", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load falls back to local storage when the URL is invalid", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-settings-v2", JSON.stringify(DEFAULT_SETTINGS));
+    const location = fakeLocation("http://localhost/?c=INVALID");
+    const store = new LocalSettingsStore({ storage, location });
+    expect(store.load()).toEqual(DEFAULT_SETTINGS);
+    expect(location.href).toBe("http://localhost/?c=INVALID");
+  });
 });

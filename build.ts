@@ -12,7 +12,7 @@ if (!result.success) {
   for (const log of result.logs) {
     console.error(log);
   }
-  process.exit(1);
+  throw new Error("Build failed");
 }
 
 mkdirSync("dist", { recursive: true });
