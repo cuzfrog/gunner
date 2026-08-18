@@ -6,7 +6,7 @@
     "build": "bun run build.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "preview": "python3 -m http.server -d dist 8080"
+    "preview": "bun run preview.ts"
   },
   "dependencies": {
     "awilix": "13.0.5"
