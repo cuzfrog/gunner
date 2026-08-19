@@ -12,5 +12,6 @@ describe("build", () => {
     expect(existsSync(join("dist", "styles.css"))).toBe(true);
     expect(existsSync(join("dist", "favicon.svg"))).toBe(true);
     expect(existsSync(join("dist", "author-portrait.jpg"))).toBe(true);
+    expect(existsSync(join("dist", "corporation-emblem.png"))).toBe(true);
   });
 });

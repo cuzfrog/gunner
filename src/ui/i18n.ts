@@ -219,6 +219,11 @@ export const I18N_DICTIONARY = {
     zh: "作者：",
     ja: "作者：",
   },
+  "label.corp": {
+    en: "Corp:",
+    zh: "公司：",
+    ja: "コーポ：",
+  },
   "select.profile": {
     en: "Select profile...",
     zh: "选择配置...",

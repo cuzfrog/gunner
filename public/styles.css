@@ -1092,8 +1092,28 @@ canvas {
   white-space: nowrap;
 }
 
-.footer-author .author-label {
+.author-emblems {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.corporation-emblem {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex: none;
+}
+
+.footer-author .author-label,
+.footer-author .corp-label {
   color: var(--text-dim);
+}
+
+.footer-author .author-name,
+.footer-author .corp-name {
+  font-family: "Chakra Petch", sans-serif;
+  letter-spacing: 0.05em;
 }
 
 @media (max-width: 1100px) {
@@ -1103,9 +1123,9 @@ canvas {
   }
 
   .footer-author {
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
   }
 }
 
