@@ -1,17 +1,18 @@
 ---
-sealed:
-  - types.ts
-  - tiers.ts
-  - propulsion.ts
-  - fitting.ts
-  - effectiveStats.ts
-  - profiles.ts
-  - index.ts
-  - tiers.test.ts
-  - propulsion.test.ts
-  - fitting.test.ts
+no-new-exports:
   - effectiveStats.test.ts
+  - effectiveStats.ts
+  - fitting.test.ts
+  - fitting.ts
+  - index.ts
+  - profiles.ts
+  - propulsion.test.ts
+  - propulsion.ts
+  - tiers.test.ts
+  - tiers.ts
+  - types.ts
 ---
+
 
 # ships
 
