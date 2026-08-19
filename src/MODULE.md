@@ -2,7 +2,10 @@
 no-new-exports:
   - container.ts
   - main.ts
+  - build.test.ts
+  - main.test.ts
 ---
+
 
 # src
 

@@ -5,7 +5,15 @@ no-new-exports:
   - loop.ts
   - module.ts
   - renderer.ts
+  - controls.test.ts
+  - i18n.test.ts
+  - i18n.ts
+  - settings.test.ts
+  - settings.ts
+  - trackingInput.test.ts
+  - trackingInput.ts
 ---
+
 
 
 # ui
