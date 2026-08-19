@@ -83,6 +83,7 @@ export class DomControls implements Controls {
       attackerPropulsionOptions: el("attacker-propulsion-options"),
       attackerSkills: el("attacker-skills"),
       attackerSkillOptions: el("attacker-skill-options"),
+      attackerSkillSummary: el("attacker-skill-summary"),
       attackerOverload: el("attacker-overload"),
       attackerOverloadButton: el("attacker-overload-button"),
       attackerSpeed: el("attacker-speed"),
@@ -97,6 +98,7 @@ export class DomControls implements Controls {
       targetPropulsionOptions: el("target-propulsion-options"),
       targetSkills: el("target-skills"),
       targetSkillOptions: el("target-skill-options"),
+      targetSkillSummary: el("target-skill-summary"),
       targetOverload: el("target-overload"),
       targetOverloadButton: el("target-overload-button"),
       targetSpeed: el("target-speed"),
@@ -748,6 +750,7 @@ export class DomControls implements Controls {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
+    setText(this.els[`${side}SkillSummary`], skillOptionLabel(this.i18n, level));
   }
 
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {

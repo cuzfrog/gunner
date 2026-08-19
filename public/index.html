@@ -81,30 +81,33 @@
                  data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </label>
-        <label>
-          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
-          <input type="number" id="attacker-speed" value="0" step="any" min="0">
-        </label>
-        <div class="field-group">
-          <span class="field-label" data-i18n="label.propulsion">Propulsion</span>
+        <div class="field-group propulsion-group">
+          <span class="field-label-row">
+            <span class="field-label" data-i18n="label.maxSpeed">Max speed (m/s)</span>
+            <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+            </button>
+          </span>
           <select id="attacker-propulsion" hidden disabled>
             <option value="" data-i18n="propulsion.none">None</option>
           </select>
           <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
             <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
           </div>
-        </div>
-        <div class="skill-overload-row">
-          <div class="skill-control">
-            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="attacker-skills" hidden></select>
-            <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
-          </div>
-          <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
-          </button>
+          <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed (m/s)">
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
+        <details class="collapsible skill-section">
+          <summary>
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-summary-row">
+              <span class="skill-summary-value" id="attacker-skill-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </summary>
+          <select id="attacker-skills" hidden></select>
+          <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+        </details>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>
           <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
@@ -158,30 +161,33 @@
           <span data-i18n="label.initialDistance">Initial distance (m)</span>
           <input type="number" id="initial-distance" value="5000" step="any" min="1">
         </label>
-        <label>
-          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
-          <input type="number" id="target-speed" value="1000" step="any" min="0">
-        </label>
-        <div class="field-group">
-          <span class="field-label" data-i18n="label.propulsion">Propulsion</span>
+        <div class="field-group propulsion-group">
+          <span class="field-label-row">
+            <span class="field-label" data-i18n="label.maxSpeed">Max speed (m/s)</span>
+            <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+            </button>
+          </span>
           <select id="target-propulsion" hidden disabled>
             <option value="" data-i18n="propulsion.none">None</option>
           </select>
           <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
             <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
           </div>
-        </div>
-        <div class="skill-overload-row">
-          <div class="skill-control">
-            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="target-skills" hidden></select>
-            <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
-          </div>
-          <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
-          </button>
+          <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed (m/s)">
           <input type="checkbox" id="target-overload" hidden checked>
         </div>
+        <details class="collapsible skill-section">
+          <summary>
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-summary-row">
+              <span class="skill-summary-value" id="target-skill-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </summary>
+          <select id="target-skills" hidden></select>
+          <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+        </details>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>
           <input type="number" id="target-mass" value="10000000" step="any" min="0">

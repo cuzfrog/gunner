@@ -586,6 +586,69 @@ describe("DomControls", () => {
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
     expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
   });
+
+  test("shows the current skill level in the collapsible summary on a fresh start", () => {
+    buildControls(globalThis.document);
+    expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 5");
+  });
+
+  test("clicking a visible skill tuner button updates the collapsible summary", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const button = findVisibleButton(globalThis.document, "attacker-skill-options", "0");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 0");
+  });
+
+  test("loadSettings restores the skill level into the collapsible summary", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 2,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 4,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 2");
+    expect(getFake(globalThis.document, "target-skill-summary").textContent).toBe("skill.level 4");
+  });
+
+  test("language change refreshes the skill summary", () => {
+    const { i18n } = buildControls(globalThis.document);
+    i18n.t.mockImplementation((key: string) => (key === "skill.level" ? "Skill" : key));
+
+    const langZh = getFake(globalThis.document, "lang-zh");
+    langZh.trigger("click");
+
+    expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("Skill 5");
+  });
 });
 
 function findVisibleButton(document: Document, groupId: string, value: string): FakeElement {

@@ -103,8 +103,8 @@ body {
 
 .main {
   display: grid;
-  grid-template-columns: 260px 1fr 260px;
-  gap: 16px;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
+  gap: 20px;
   align-items: start;
 }
 
@@ -169,17 +169,6 @@ body {
   color: var(--text-dim);
   border-color: rgba(92, 203, 203, 0.12);
   cursor: not-allowed;
-}
-
-.skill-overload-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.skill-overload-row label {
-  margin-bottom: 0;
 }
 
 .checkbox-label {
@@ -300,15 +289,23 @@ canvas {
   font-family: "Chakra Petch", sans-serif;
 }
 
-.tracking-label-row {
+.panel .field-label-row,
+.panel .tracking-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 4px;
 }
 
-.tracking-label-row #tracking-label-text {
-  text-transform: uppercase;
+.panel .field-label-row .field-label,
+.panel .tracking-label-row #tracking-label-text {
+  margin-bottom: 0;
+}
+
+.panel .tracking-label-row .tracking-unit-toggle {
+  display: flex;
+  margin-bottom: 0;
 }
 
 .tracking-unit-toggle {
@@ -403,13 +400,8 @@ canvas {
   display: none;
 }
 
-.field-group,
-.skill-control {
+.field-group {
   margin-bottom: 10px;
-}
-
-.skill-overload-row .skill-control {
-  margin-bottom: 0;
 }
 
 .field-label {
@@ -485,16 +477,89 @@ canvas {
   pointer-events: none;
 }
 
+.propulsion-group .segmented-control {
+  margin-bottom: 6px;
+}
+
 .overload-button {
-  align-self: end;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 8px;
+  width: 32px;
+  height: 26px;
+  padding: 0;
+  flex: none;
+}
+
+.overload-button.active {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+  background: rgba(246, 124, 15, 0.12);
+  box-shadow: 0 0 8px rgba(246, 124, 15, 0.35);
 }
 
 .overload-button svg {
   display: block;
+}
+
+.collapsible {
+  margin-bottom: 10px;
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  background: var(--bg-inset);
+}
+
+.collapsible summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible summary:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: -1px;
+}
+
+.collapsible summary .field-label {
+  margin-bottom: 0;
+}
+
+.panel .collapsible .skill-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.panel .collapsible .skill-summary-value {
+  margin-bottom: 0;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  color: var(--accent-teal);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.collapsible .chevron {
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+
+.collapsible[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.collapsible .skill-tuner {
+  padding: 4px 8px 8px;
 }
 
 @media (max-width: 900px) {
