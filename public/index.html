@@ -16,6 +16,7 @@
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
+        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.1.0</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -81,15 +82,33 @@
           </span>
           <input type="number" id="tracking" value="0.32" step="any" min="0">
         </label>
-        <label>
-          <span data-i18n="label.turretSigResolution">Turret sig. resolution</span>
-          <select id="sigRes">
+        <div class="field-group sigres-group">
+          <span class="field-label" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+
+          <select id="sigRes" hidden>
             <option value="S" selected>S (40 m)</option>
             <option value="M">M (125 m)</option>
             <option value="L">L (400 m)</option>
             <option value="XL">XL (2000 m)</option>
           </select>
-        </label>
+
+          <div class="segmented-control choice-selector sigres-selector"
+               id="sig-res-options" role="group"
+               data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+            <button type="button" data-value="S"  class="active" aria-pressed="true"  title="S (40 m)">
+              <span class="sigres-class">S</span><span class="sigres-value">(40 m)</span>
+            </button>
+            <button type="button" data-value="M"  aria-pressed="false" title="M (125 m)">
+              <span class="sigres-class">M</span><span class="sigres-value">(125 m)</span>
+            </button>
+            <button type="button" data-value="L"  aria-pressed="false" title="L (400 m)">
+              <span class="sigres-class">L</span><span class="sigres-value">(400 m)</span>
+            </button>
+            <button type="button" data-value="XL" aria-pressed="false" title="XL (2000 m)">
+              <span class="sigres-class">XL</span><span class="sigres-value">(2000 m)</span>
+            </button>
+          </div>
+        </div>
         <div class="field-row">
           <label>
             <span data-i18n="label.optimalRange">Optimal range</span>
@@ -143,13 +162,14 @@
           </label>
         </div>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.mode">Mode</span>
-            <select id="attacker-mode">
+          <div class="field-group mode-group">
+            <span class="field-label" data-i18n="label.mode">Mode</span>
+            <select id="attacker-mode" class="mode-select"
+                    data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
               <option value="orbit" data-i18n="mode.orbit">Orbit</option>
             </select>
-          </label>
+          </div>
           <label>
             <span data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
@@ -158,26 +178,53 @@
             </span>
           </label>
         </div>
-        <details class="collapsible skill-section">
-          <summary>
-            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+        <div class="slider-field maneuver-field">
+          <span class="slider-label-row">
+            <span data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
+            <button type="button" class="info-hint"
+                    data-i18n-title="hint.maneuverAggressivity"
+                    data-i18n-aria-label="hint.maneuverAggressivity"
+                    title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
+                    aria-label="About maneuver aggressivity">?</button>
+            <output class="slider-value" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
+          </span>
+          <input type="hidden" id="maneuver-aggressivity" value="1">
+          <input type="range" id="maneuver-aggressivity-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
+        </div>
+        <div class="field-group skill-section skill-select" id="attacker-skill-field">
+          <button type="button" class="skill-trigger" id="attacker-skill-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="attacker-skill-popup">
+            <span class="skill-label" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
-              <span class="skill-summary-value" id="attacker-skill-summary">5</span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              <span class="skill-summary-value" id="attacker-skill-summary">Level 5</span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
             </span>
-          </summary>
+          </button>
           <select id="attacker-skills" hidden></select>
-          <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
-        </details>
+          <div class="skill-popup" id="attacker-skill-popup" hidden>
+            <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+          </div>
+        </div>
       </section>
 
       <section class="canvas-section">
         <canvas id="scene" width="800" height="600"></canvas>
+
         <div class="controls">
-          <button id="play" class="primary">Play</button>
-          <button id="reset" data-i18n="button.reset">Reset</button>
-          <label>
-            <span data-i18n="label.simulationSpeed">Speed</span>
+          <div class="playback-controls">
+            <button id="play" class="primary">Play</button>
+            <button id="reset" data-i18n="button.reset">Reset</button>
+          </div>
+
+          <div class="control-field grid-brightness-control">
+            <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
+            <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.2"
+                   style="--fill: 20%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
+            <output class="slider-value" id="grid-brightness-value" for="grid-brightness-slider">20%</output>
+          </div>
+
+          <div class="control-field speed-control">
+            <label for="sim-speed" data-i18n="label.simulationSpeed">Speed</label>
             <select id="sim-speed">
               <option value="0.25">0.25x</option>
               <option value="0.5">0.5x</option>
@@ -186,7 +233,7 @@
               <option value="4" selected>4x</option>
               <option value="8">8x</option>
             </select>
-          </label>
+          </div>
         </div>
       </section>
 
@@ -242,13 +289,14 @@
           </label>
         </div>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.mode">Mode</span>
-            <select id="target-mode">
+          <div class="field-group mode-group">
+            <span class="field-label" data-i18n="label.mode">Mode</span>
+            <select id="target-mode" class="mode-select"
+                    data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
               <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
             </select>
-          </label>
+          </div>
           <label>
             <span data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
@@ -257,17 +305,20 @@
             </span>
           </label>
         </div>
-        <details class="collapsible skill-section">
-          <summary>
-            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+        <div class="field-group skill-section skill-select" id="target-skill-field">
+          <button type="button" class="skill-trigger" id="target-skill-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="target-skill-popup">
+            <span class="skill-label" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
-              <span class="skill-summary-value" id="target-skill-summary">5</span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              <span class="skill-summary-value" id="target-skill-summary">Level 5</span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
             </span>
-          </summary>
+          </button>
           <select id="target-skills" hidden></select>
-          <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
-        </details>
+          <div class="skill-popup" id="target-skill-popup" hidden>
+            <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -281,7 +332,7 @@
         <h3 data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
         <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
         <a class="footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
-          <span data-i18n="footer.mech.kinematics.link">EVE University: Velocity</span>
+          <span data-i18n="footer.mech.kinematics.link">Velocity</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
         </a>
       </div>
@@ -290,7 +341,7 @@
         <h3 data-i18n="footer.mech.speed.heading">Speed</h3>
         <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
         <a class="footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
-          <span data-i18n="footer.mech.speed.link">EVE University: Propulsion equipment</span>
+          <span data-i18n="footer.mech.speed.link">Propulsion</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
         </a>
       </div>
@@ -299,13 +350,13 @@
         <h3 data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
         <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
         <a class="footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
-          <span data-i18n="footer.mech.hitChance.link">EVE University: Turret mechanics</span>
+          <span data-i18n="footer.mech.hitChance.link">Turret mechanics</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
         </a>
       </div>
 
       <div class="footer-author">
-        <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="28" height="28">
+        <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="36" height="36">
         <span class="footer-author-line">
           <span class="author-label" data-i18n="label.author">Author:</span>
           <span class="author-name">Keos Cuzi</span>

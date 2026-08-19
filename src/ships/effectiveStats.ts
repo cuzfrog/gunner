@@ -1,3 +1,4 @@
+import { fittedMassFactor } from "./fittedMass";
 import type { PropulsionModule, ShipProfile, SkillLevel, StatConditions } from "./types";
 
 export interface ShipStats {
@@ -22,20 +23,21 @@ export function effectiveStats(
   const overloaded = conditions?.overloaded ?? false;
   const navFactor = skillSpeedFactor(level);
   const inertiaFactor = skillInertiaFactor(level);
+  const hullMass = profile.mass * fittedMassFactor(profile.hullType);
 
   if (!module) {
     return {
-      mass: profile.mass,
+      mass: hullMass,
       inertiaModifier: profile.inertiaModifier * inertiaFactor,
       maxSpeed: profile.baseSpeed * navFactor,
       sigRadius: profile.sigRadius,
     };
   }
 
-  const speedMass = profile.mass + module.massAddition;
+  const speedMass = hullMass + module.massAddition;
   const moduleSpeed = moduleSpeedBonus(module, level, overloaded);
   const maxSpeed = profile.baseSpeed * navFactor * (1 + (moduleSpeed * module.thrust) / speedMass);
-  const mass = profile.mass + module.massAddition * module.activeMassMultiplier;
+  const mass = hullMass + module.massAddition * module.activeMassMultiplier;
   const sigRadius = profile.sigRadius * (1 + module.sigBloom);
 
   return {

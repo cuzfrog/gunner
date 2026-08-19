@@ -14,6 +14,8 @@ export interface UserSettings {
   attackerSpeed: number;
   attackerMode: AutopilotMode;
   attackerRange: number;
+  maneuverAggressivity?: number;
+  gridBrightness?: number;
   attackerMass: number;
   attackerInertia: number;
   attackerSkillLevel?: SkillLevel;
@@ -60,10 +62,15 @@ export interface SettingsStore {
   encodeUrl(settings: UserSettings): string;
   decodeUrl(): UserSettings | null;
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
+  hasForeignUrlSettings(): boolean;
+  loadSelectedProfile(): { name: string; baseline: UserSettings } | null;
+  saveSelectedProfile(name: string, baseline: UserSettings): void;
+  clearSelectedProfile(): void;
 }
 
 const SETTINGS_KEY = "gunner-settings-v5";
 const PROFILES_KEY = "gunner-profiles-v5";
+const SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -78,9 +85,7 @@ export class LocalSettingsStore implements SettingsStore {
   load(): UserSettings | null {
     const urlSettings = this.decodeUrl();
     if (urlSettings) return urlSettings;
-    const raw = this.storage.getItem(SETTINGS_KEY);
-    if (!raw) return null;
-    return parseUserSettings(raw);
+    return this.loadLocalSettings();
   }
 
   save(settings: UserSettings): void {
@@ -115,6 +120,10 @@ export class LocalSettingsStore implements SettingsStore {
     } else {
       this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
     }
+    const selected = this.loadSelectedProfile();
+    if (selected?.name === name) {
+      this.clearSelectedProfile();
+    }
   }
 
   encodeUrl(settings: UserSettings): string {
@@ -127,11 +136,7 @@ export class LocalSettingsStore implements SettingsStore {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
-    const settings = tryParseEncoded(encoded);
-    if (!settings) return null;
-    url.searchParams.delete(URL_PARAM);
-    this.location.replace(url.toString());
-    return settings;
+    return tryParseEncoded(encoded);
   }
 
   async writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean> {
@@ -144,10 +149,44 @@ export class LocalSettingsStore implements SettingsStore {
     }
   }
 
+  hasForeignUrlSettings(): boolean {
+    const urlSettings = this.decodeUrl();
+    if (!urlSettings) return false;
+    const localSettings = this.loadLocalSettings();
+    return !localSettings || JSON.stringify(urlSettings) !== JSON.stringify(localSettings);
+  }
+
+  loadSelectedProfile(): { name: string; baseline: UserSettings } | null {
+    const raw = this.storage.getItem(SELECTED_PROFILE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return isSelectedProfile(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveSelectedProfile(name: string, baseline: UserSettings): void {
+    if (!name) throw new Error("selected profile name cannot be empty");
+    const selected: { name: string; baseline: UserSettings } = { name, baseline };
+    this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
+  }
+
+  clearSelectedProfile(): void {
+    this.storage.removeItem(SELECTED_PROFILE_KEY);
+  }
+
   private loadProfiles(): Record<string, UserSettings> {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return {};
     return parseProfiles(raw);
+  }
+
+  private loadLocalSettings(): UserSettings | null {
+    const raw = this.storage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    return parseUserSettings(raw);
   }
 }
 
@@ -187,6 +226,12 @@ function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+function isSelectedProfile(value: unknown): value is { name: string; baseline: UserSettings } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return typeof s.name === "string" && s.name.length > 0 && isUserSettings(s.baseline);
+}
+
 function isUserSettings(value: unknown): value is UserSettings {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
@@ -200,6 +245,8 @@ function isUserSettings(value: unknown): value is UserSettings {
     isNonNegative(s.attackerSpeed) &&
     isAutopilotMode(s.attackerMode) &&
     isNonNegative(s.attackerRange) &&
+    isOptionalNonNegative(s.maneuverAggressivity) &&
+    isOptionalUnitInterval(s.gridBrightness) &&
     isNonNegative(s.attackerMass) &&
     isNonNegative(s.attackerInertia) &&
     isOptionalSkillLevel(s.attackerSkillLevel) &&
@@ -252,6 +299,14 @@ function isOptionalSkillLevel(value: unknown): value is SkillLevel | undefined {
 
 function isOptionalBoolean(value: unknown): value is boolean | undefined {
   return value === undefined || typeof value === "boolean";
+}
+
+function isOptionalNonNegative(value: unknown): value is number | undefined {
+  return value === undefined || (isFiniteNumber(value) && value >= 0);
+}
+
+function isOptionalUnitInterval(value: unknown): value is number | undefined {
+  return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
 function isFiniteNumber(value: unknown): value is number {

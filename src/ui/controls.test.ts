@@ -1,5 +1,5 @@
 import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
-import { SHIP_PROFILES, effectiveStats, fittingOptions } from "../ships";
+import { SHIP_PROFILES, effectiveStats, fittedMassFactor, fittingOptions } from "../ships";
 import type { ShipProfile } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -19,6 +19,8 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "attacker-inertia": "3",
   "attacker-mode": "keepAtRange",
   "attacker-range": "5000",
+  "maneuver-aggressivity": "1",
+  "grid-brightness-slider": "0.2",
   "initial-distance": "5000",
   "target-hull": "",
   "target-speed": "1000",
@@ -35,12 +37,17 @@ const DEFAULT_INPUTS: Record<string, string> = {
 class FakeElement {
   value = "";
   checked = false;
+  hidden = false;
   textContent = "";
   innerHTML = "";
   placeholder = "";
   disabled = false;
   label = "";
-  style: Record<string, string> = {};
+  style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
+    setProperty(this: Record<string, string>, name: string, value: string) {
+      this[name] = value;
+    },
+  }) as Record<string, string> & { setProperty(name: string, value: string): void };
   classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
@@ -70,10 +77,17 @@ class FakeElement {
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
   }
+
+  focus = vi.fn();
+
+  closest(): FakeElement | null {
+    return null;
+  }
 }
 
 function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
+  const documentHandlers: Record<string, Array<(event: { type: string; target?: FakeElement }) => void>> = {};
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
@@ -82,6 +96,14 @@ function fakeDocument(): Document {
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
     createElement: () => new FakeElement() as unknown as HTMLElement,
+    addEventListener: (event: string, handler: (event: { type: string; target?: FakeElement }) => void) => {
+      documentHandlers[event] ??= [];
+      documentHandlers[event].push(handler);
+    },
+    removeEventListener: () => {},
+    dispatchEvent: (event: { type: string; target?: FakeElement }) => {
+      documentHandlers[event.type]?.forEach((handler) => handler(event));
+    },
   } as unknown as Document;
 }
 
@@ -95,6 +117,24 @@ function setInputValues(document: Document): void {
   }
   getFake(document, "attacker-overload").checked = true;
   getFake(document, "target-overload").checked = true;
+
+  addChoiceButtons(document, "sig-res-options", ["S", "M", "L", "XL"], "S");
+
+  getFake(document, "attacker-skill-popup").hidden = true;
+  getFake(document, "target-skill-popup").hidden = true;
+  getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
+  getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
+}
+
+function addChoiceButtons(document: Document, groupId: string, values: string[], selected: string): void {
+  const group = getFake(document, groupId);
+  for (const value of values) {
+    const button = new FakeElement();
+    button.setAttribute("data-value", value);
+    button.setAttribute("aria-pressed", String(value === selected));
+    if (value === selected) button.classList.toggle("active", true);
+    group.appendChild(button);
+  }
 }
 
 function fakeLocation(href = "http://localhost/"): LocationProvider {
@@ -109,7 +149,16 @@ function fakeLocation(href = "http://localhost/"): LocationProvider {
   };
 }
 
-function buildControls(document: Document, savedSettings: UserSettings | null = null) {
+interface SelectedProfile {
+  name: string;
+  baseline: UserSettings;
+}
+
+function buildControls(
+  document: Document,
+  savedSettings: UserSettings | null = null,
+  options: { selectedProfile?: SelectedProfile | null; hasForeignUrlSettings?: boolean; listProfiles?: string[] } = {},
+) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
     compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })),
@@ -124,13 +173,17 @@ function buildControls(document: Document, savedSettings: UserSettings | null = 
   const settingsStore = vi.mocked<SettingsStore>({
     load: vi.fn(() => savedSettings),
     save: vi.fn(),
-    listProfiles: vi.fn(() => []),
+    listProfiles: vi.fn(() => options.listProfiles ?? []),
     saveProfile: vi.fn(),
     loadProfile: vi.fn(() => null),
     deleteProfile: vi.fn(),
-    encodeUrl: vi.fn(() => ""),
+    hasForeignUrlSettings: vi.fn(() => options.hasForeignUrlSettings ?? false),
+    encodeUrl: vi.fn(() => "http://localhost/"),
     decodeUrl: vi.fn(() => null),
     writeUrlToClipboard: vi.fn(async () => true),
+    loadSelectedProfile: vi.fn(() => options.selectedProfile ?? null),
+    saveSelectedProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
   });
   const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
@@ -206,6 +259,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 5,
@@ -235,6 +289,46 @@ describe("DomControls", () => {
     expect(settingsStore.loadProfile).toHaveBeenCalledWith("brawler");
     expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
     expect(location.href).toBe(encodedUrl);
+  });
+
+  test("selecting a saved profile persists its settings for the next session", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 8000,
+      falloff: 6000,
+      attackerSpeed: 1500,
+      attackerMode: "orbit",
+      attackerRange: 7000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 7000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 7000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
   });
 
   test("selecting the empty profile option does not update the URL", () => {
@@ -541,6 +635,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 2,
@@ -564,6 +659,41 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-overload").checked).toBe(false);
     expect(getFake(globalThis.document, "target-skills").value).toBe("4");
     expect(getFake(globalThis.document, "target-overload").checked).toBe(true);
+  });
+
+  test("loading saved settings on startup persists them for the next session", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 8000,
+      falloff: 6000,
+      attackerSpeed: 1500,
+      attackerMode: "orbit",
+      attackerRange: 7000,
+      maneuverAggressivity: 2,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 7000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 7000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, settings);
+
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
   });
 
   test("fresh start with no saved settings disables both overload checkboxes", () => {
@@ -659,12 +789,12 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
-  test("shows the current skill level in the collapsible summary on a fresh start", () => {
+  test("shows the current skill level in the trigger summary on a fresh start", () => {
     buildControls(globalThis.document);
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 5");
   });
 
-  test("clicking a visible skill tuner button updates the collapsible summary", () => {
+  test("clicking a visible skill tuner button updates the trigger summary", () => {
     buildControls(globalThis.document);
     const rifter = rifterProfile();
 
@@ -678,7 +808,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 0");
   });
 
-  test("loadSettings restores the skill level into the collapsible summary", () => {
+  test("loadSettings restores the skill level into the trigger summary", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -689,6 +819,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 2,
@@ -724,7 +855,7 @@ describe("DomControls", () => {
 
   test("update colors the hit chance value based on chance", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 1000, relVelocity: { x: 0, y: 0 }, radialVelocity: 0, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 0, angularVelocity: 0 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
@@ -756,7 +887,29 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-mass").value = String(activeMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
-    const shipMass = Math.max(0, activeMass - module.massAddition * module.activeMassMultiplier);
+    const factor = fittedMassFactor(rifter.hullType);
+    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
+    const adjusted: ShipProfile = { ...rifter, mass: shipMass };
+    const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+  });
+
+  test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const module = mwd5mnForRifter();
+
+    getFake(globalThis.document, "target-hull").value = "Rifter";
+    getFake(globalThis.document, "target-hull").trigger("change");
+    getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
+    getFake(globalThis.document, "target-propulsion").trigger("change");
+
+    const displayedMass = Number(getFake(globalThis.document, "target-mass").value) + 1_000_000;
+    getFake(globalThis.document, "target-mass").value = String(displayedMass);
+    getFake(globalThis.document, "target-mass").trigger("input");
+
+    const factor = fittedMassFactor(rifter.hullType);
+    const shipMass = (displayedMass - module.massAddition * module.activeMassMultiplier) / factor;
     const adjusted: ShipProfile = { ...rifter, mass: shipMass };
     const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
@@ -774,6 +927,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 5,
@@ -818,6 +972,139 @@ describe("DomControls", () => {
 
     expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
     expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
+  test("save button returns to normal after saving changes to a loaded profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const tracking = getFake(globalThis.document, "tracking");
+    tracking.value = "0.5";
+    tracking.trigger("input");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+
+    saveButton.trigger("click");
+
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
+  test("save button does not highlight immediately after loading a profile with unrounded speed", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 1320.1375,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000.5678,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
+  test("save button highlights when typing a different existing profile name while a profile is selected", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const selected: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const other: UserSettings = { ...selected, optimal: 9999 };
+    settingsStore.loadProfile.mockImplementation((name: string) => (name === "kiter" ? selected : name === "brawler" ? other : null));
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "kiter";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    saveButton.classList.toggle.mockClear();
+
+    const nameInput = getFake(globalThis.document, "profile-name");
+    nameInput.value = "brawler";
+    nameInput.trigger("input");
+
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
   test("save button highlights when tracking unit, language, or hull changes after loading a profile", () => {
@@ -879,9 +1166,80 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
+  test("getConfig passes maneuver aggressivity through to the attacker", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "maneuver-aggressivity").value = "2";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(2, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0.5";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.5, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "1";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(1, 6);
+  });
+
+  test("getConfig clamps maneuver aggressivity to [0.01, 100]", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0.001";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "-5";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "500";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(100, 6);
+  });
+
+  test("dragging the maneuver aggressivity slider updates the hidden value and display", () => {
+    buildControls(globalThis.document);
+    const slider = getFake(globalThis.document, "maneuver-aggressivity-slider");
+    slider.value = "0.25";
+    slider.trigger("input");
+
+    expect(getFake(globalThis.document, "maneuver-aggressivity").value).toBe("0.1");
+    expect(getFake(globalThis.document, "maneuver-aggressivity-value").textContent).toBe("0.10");
+    expect(slider.value).toBe("0.25");
+  });
+
+  test("loadSettings defaults missing maneuverAggressivity to 1", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+    expect(getFake(globalThis.document, "maneuver-aggressivity").value).toBe("1");
+    const { controls } = buildControls(globalThis.document, settings);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(1, 6);
+  });
+
   test("update formats long numbers with commas", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 12345, relVelocity: { x: 0, y: 0 }, radialVelocity: 1234.5, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
@@ -891,6 +1249,489 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "res-angular").textContent).toBe("0.1234 rad/s");
     expect(getFake(globalThis.document, "res-radial").textContent).toBe("1,234.5 m/s");
     expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
+  });
+
+  test("selecting a saved profile persists the selection and baseline", () => {
+    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+  });
+
+  test("loading saved settings restores the last selected profile and baseline", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("brawler");
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+  });
+
+  test("loading settings from a foreign URL clears the stored selection and leaves the dropdown empty", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      hasForeignUrlSettings: true,
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("");
+    expect(settingsStore.clearSelectedProfile).toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+  });
+
+  test("loading settings from a URL matching local storage restores the last selected profile", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      hasForeignUrlSettings: false,
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("brawler");
+    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+  });
+
+  test("changing an input keeps the URL in the address bar", () => {
+    const { settingsStore, location } = buildControls(globalThis.document);
+    const encodedUrl = "http://localhost/?c=ENCODED";
+    settingsStore.encodeUrl.mockReturnValue(encodedUrl);
+
+    getFake(globalThis.document, "optimal").value = "6000";
+    getFake(globalThis.document, "optimal").trigger("input");
+
+    expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ optimal: 6000 }));
+    expect(location.href).toBe(encodedUrl);
+  });
+
+  test("saving a profile persists it as the selected profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const nameInput = getFake(globalThis.document, "profile-name");
+    nameInput.value = "brawler";
+    nameInput.trigger("input");
+
+    getFake(globalThis.document, "profile-save").trigger("click");
+
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
+  });
+
+  test("deleting a profile delegates to the store and clears the dropdown", () => {
+    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+    settingsStore.saveSelectedProfile.mockClear();
+    settingsStore.clearSelectedProfile.mockClear();
+
+    getFake(globalThis.document, "profile-delete").trigger("click");
+
+    expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
+    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+    expect(select.value).toBe("");
+  });
+
+  test("getGridBrightness returns the slider value clamped to [0, 1]", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "grid-brightness-slider").value = "0.63";
+    expect(controls.getGridBrightness()).toBeCloseTo(0.63, 6);
+
+    getFake(globalThis.document, "grid-brightness-slider").value = "-0.5";
+    expect(controls.getGridBrightness()).toBe(0);
+
+    getFake(globalThis.document, "grid-brightness-slider").value = "1.5";
+    expect(controls.getGridBrightness()).toBe(1);
+  });
+
+  test("dragging the grid brightness slider updates the output, fill, and persisted settings", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const slider = getFake(globalThis.document, "grid-brightness-slider");
+    slider.value = "0.63";
+    slider.trigger("input");
+
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("63%");
+    expect(slider.style["--fill"]).toBe("63%");
+    const calls = settingsStore.save.mock.calls;
+    const [saved] = calls[calls.length - 1];
+    expect(saved.gridBrightness).toBe(0.63);
+  });
+
+  test("changing the grid brightness slider calls the display change callback", () => {
+    const { controls } = buildControls(globalThis.document);
+    const onDisplayChange = vi.fn();
+    controls.setCallbacks({
+      onReset: () => {},
+      onConfigChange: () => {},
+      onDisplayChange,
+      onPlayPause: () => {},
+      onSpeedChange: () => {},
+    });
+
+    const slider = getFake(globalThis.document, "grid-brightness-slider");
+    slider.value = "0.5";
+    slider.trigger("input");
+
+    expect(onDisplayChange).toHaveBeenCalled();
+  });
+
+  test("loadSettings restores the grid brightness slider and output", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      gridBrightness: 0.75,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "grid-brightness-slider").value).toBe("0.75");
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("75%");
+  });
+
+  test("loadSettings defaults missing gridBrightness to 0.2", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("20%");
+  });
+
+  test("clicking a sigRes button updates the hidden select and tracking display", () => {
+    const { controls } = buildControls(globalThis.document);
+    const button = findVisibleButton(globalThis.document, "sig-res-options", "M");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "sigRes").value).toBe("M");
+    expect(button.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    expect(controls.getTurret().sigResolution).toBe(125);
+  });
+
+  test("selecting attacker mode from the dropdown updates getConfig", () => {
+    const { controls } = buildControls(globalThis.document);
+    const select = getFake(globalThis.document, "attacker-mode");
+    select.value = "orbit";
+    select.trigger("input");
+    expect(controls.getConfig().attacker.mode).toBe("orbit");
+  });
+
+  test("selecting target mode from the dropdown updates getConfig", () => {
+    const { controls } = buildControls(globalThis.document);
+    const select = getFake(globalThis.document, "target-mode");
+    select.value = "keepAtRange";
+    select.trigger("input");
+    expect(controls.getConfig().target.mode).toBe("keepAtRange");
+  });
+
+  test("loadSettings restores the sigRes active button and aria-pressed state", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "XL",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "orbit",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "keepAtRange",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    const sigResButton = findVisibleButton(globalThis.document, "sig-res-options", "XL");
+    expect(sigResButton.getAttribute("aria-pressed")).toBe("true");
+    expect(sigResButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    const sigResSButton = findVisibleButton(globalThis.document, "sig-res-options", "S");
+    expect(sigResSButton.getAttribute("aria-pressed")).toBe("false");
+    expect(sigResSButton.classList.toggle).toHaveBeenLastCalledWith("active", false);
+  });
+
+  test("clicking the skill trigger opens and closes the popup", () => {
+    const { controls } = buildControls(globalThis.document);
+    const trigger = getFake(globalThis.document, "attacker-skill-trigger");
+    const popup = getFake(globalThis.document, "attacker-skill-popup");
+
+    trigger.trigger("click");
+    expect(popup.hidden).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+
+    trigger.trigger("click");
+    expect(popup.hidden).toBe(true);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("selecting a skill level inside the popup closes it, updates the hidden select, and returns focus", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const levelTwo = getFake(globalThis.document, "attacker-skill-options").children.find(
+      (child) => child.getAttribute("data-value") === "2",
+    );
+    if (!levelTwo) throw new Error("Missing skill level 2 button");
+    levelTwo.trigger("click");
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skills").value).toBe("2");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").focus).toHaveBeenCalled();
+  });
+
+  test("opening one skill popup closes the other", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(false);
+
+    getFake(globalThis.document, "target-skill-trigger").trigger("click");
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "target-skill-popup").hidden).toBe(false);
+  });
+
+  test("pointerdown outside the skill popup closes it", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const outside = new FakeElement();
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("pointerdown inside the skill popup does not close it", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const inside = new FakeElement();
+    const field = getFake(globalThis.document, "attacker-skill-field");
+    inside.closest = () => field;
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(false);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("Escape closes the skill popup and focuses the trigger", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").focus).toHaveBeenCalled();
   });
 });
 

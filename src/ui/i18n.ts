@@ -134,6 +134,26 @@ export const I18N_DICTIONARY = {
     zh: "期望距离",
     ja: "希望射程",
   },
+  "label.maneuverAggressivity": {
+    en: "Maneuver aggressivity",
+    zh: "机动激进程度",
+    ja: "機動の積極さ",
+  },
+  "hint.maneuverAggressivity": {
+    en: "Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly.",
+    zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；较低值更严格保持距离。",
+    ja: "設定距離への接近時の反応的ブレーキを制御します。高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。低い値ほど距離を厳密に保ちます。",
+  },
+  "label.gridBrightness": {
+    en: "Grid brightness",
+    zh: "网格亮度",
+    ja: "グリッドの明るさ",
+  },
+  "label.version": {
+    en: "Version",
+    zh: "版本",
+    ja: "バージョン",
+  },
   "label.initialDistance": {
     en: "Initial distance",
     zh: "初始距离",
@@ -315,9 +335,9 @@ export const I18N_DICTIONARY = {
     ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。加速度は指数関数的に最大速度に近づく。",
   },
   "footer.mech.kinematics.link": {
-    en: "EVE University: Velocity",
-    zh: "EVE University: Velocity",
-    ja: "EVE University: Velocity",
+    en: "Velocity",
+    zh: "Velocity",
+    ja: "Velocity",
   },
   "footer.mech.speed.heading": {
     en: "Speed",
@@ -330,9 +350,9 @@ export const I18N_DICTIONARY = {
     ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。",
   },
   "footer.mech.speed.link": {
-    en: "EVE University: Propulsion equipment",
-    zh: "EVE University: Propulsion equipment",
-    ja: "EVE University: Propulsion equipment",
+    en: "Propulsion",
+    zh: "Propulsion",
+    ja: "Propulsion",
   },
   "footer.mech.hitChance.heading": {
     en: "Hit chance",
@@ -345,9 +365,9 @@ export const I18N_DICTIONARY = {
     ja: "命中確率 = 0.5^(追跡項 + 射程項)。追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。",
   },
   "footer.mech.hitChance.link": {
-    en: "EVE University: Turret mechanics",
-    zh: "EVE University: Turret mechanics",
-    ja: "EVE University: Turret mechanics",
+    en: "Turret mechanics",
+    zh: "Turret mechanics",
+    ja: "Turret mechanics",
   },
   "unit.meter": {
     en: "m",

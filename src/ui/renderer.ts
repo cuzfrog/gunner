@@ -3,12 +3,12 @@ import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, Turre
 import type { I18n } from "./i18n";
 
 export interface Renderer {
+  setGridBrightness(brightness: number): void;
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void;
 }
 
 const COLORS = {
   bg: "#05080c",
-  grid: "rgba(92, 203, 203, 0.08)",
   attacker: "#5ccbcb",
   target: "#f67c0f",
   transversal: "#fce447",
@@ -18,6 +18,10 @@ const COLORS = {
   optimalRing: "#9cc954",
   falloffRing: "#f67c0f",
 } as const;
+
+const GRID_RGB = "92, 203, 203";
+const GRID_MAX_ALPHA = 0.4;
+const DEFAULT_GRID_BRIGHTNESS = 0.2;
 
 const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
 const MIN_SEPARATION_PX = 140;
@@ -35,6 +39,7 @@ export class CanvasRenderer implements Renderer {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly i18n: I18n;
   private camera: Camera = { center: vec(0, 0), scale: 1 };
+  private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
@@ -44,7 +49,13 @@ export class CanvasRenderer implements Renderer {
     this.ctx = ctx;
   }
 
+  setGridBrightness(brightness: number): void {
+    if (!Number.isFinite(brightness)) return;
+    this.gridBrightness = Math.max(0, Math.min(1, brightness));
+  }
+
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
+    this.syncBufferSize();
     this.updateCamera(snapshot, turret);
     this.clear();
     this.drawGrid();
@@ -90,6 +101,15 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
+  private syncBufferSize(): void {
+    const { clientWidth, clientHeight } = this.canvas;
+    if (!clientWidth || !clientHeight) return;
+    if (this.canvas.width !== clientWidth || this.canvas.height !== clientHeight) {
+      this.canvas.width = clientWidth;
+      this.canvas.height = clientHeight;
+    }
+  }
+
   private drawGrid(): void {
     const spacing = 10000; // 10 km grid
     const half = scale(
@@ -103,7 +123,8 @@ export class CanvasRenderer implements Renderer {
     const startY = Math.floor(min.y / spacing) * spacing;
     const endY = Math.ceil(max.y / spacing) * spacing;
 
-    this.ctx.strokeStyle = COLORS.grid;
+    const alpha = Math.round(this.gridBrightness * GRID_MAX_ALPHA * 100) / 100;
+    this.ctx.strokeStyle = `rgba(${GRID_RGB}, ${alpha})`;
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let x = startX; x <= endX; x += spacing) {

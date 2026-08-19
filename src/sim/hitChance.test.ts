@@ -20,6 +20,7 @@ const dummyShip: ShipState = {
   inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 0,
+  aggressivity: 1,
 };
 
 function frame(distance: number, angularVelocity: number): EngagementFrame {

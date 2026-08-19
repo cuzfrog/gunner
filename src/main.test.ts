@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS = {
   attackerSpeed: 0,
   attackerMode: "keepAtRange" as const,
   attackerRange: 5000,
+  gridBrightness: 0.2,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,
@@ -30,6 +31,7 @@ const DEFAULT_SETTINGS = {
 class FakeElement {
   value = "";
   checked = false;
+  hidden = false;
   disabled = false;
   textContent = "";
   innerHTML = "";
@@ -64,6 +66,12 @@ class FakeElement {
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
   }
+
+  focus = vi.fn();
+
+  closest(): FakeElement | null {
+    return null;
+  }
 }
 
 type Mocked = ReturnType<typeof vi.fn>;
@@ -97,6 +105,8 @@ interface FakeContext {
 class FakeCanvas extends FakeElement {
   width = 800;
   height = 600;
+  clientWidth = 0;
+  clientHeight = 0;
   ctx: FakeContext = fakeRenderingContext();
   getContext = vi.fn((_: string) => this.ctx as unknown as CanvasRenderingContext2D);
 }
@@ -141,6 +151,8 @@ function fakeDocument(): Document {
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
     createElement: () => new FakeElement() as unknown as HTMLElement,
+    addEventListener: () => {},
+    removeEventListener: () => {},
   } as unknown as Document;
 }
 

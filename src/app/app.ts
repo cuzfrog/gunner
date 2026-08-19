@@ -43,6 +43,7 @@ export class AppImpl implements App {
         this.simulation.update(this.controls.getConfig());
         this.renderFrame();
       },
+      onDisplayChange: () => this.renderFrame(),
       onPlayPause: () => {
         this.loop.toggle();
         this.controls.setPlaying(this.loop.isRunning());
@@ -62,6 +63,7 @@ export class AppImpl implements App {
     const frame = this.kinematics.computeEngagement(snapshot.attacker, snapshot.target, snapshot.time);
     const turret = this.controls.getTurret();
     const hit = this.hitChance.compute(frame, turret, this.controls.getTargetSig());
+    this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.draw(snapshot, frame, hit, turret);
     this.controls.update(frame, hit);
   }

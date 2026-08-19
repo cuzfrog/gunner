@@ -1,5 +1,6 @@
 import {
   effectiveStats,
+  fittedMassFactor,
   fittingOptions,
   isPropulsionId,
   SHIP_PROFILES,
@@ -19,13 +20,13 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
-import { USER_SETTINGS_VERSION } from "./settings";
+import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
   readonly onConfigChange: () => void;
+  readonly onDisplayChange: () => void;
   readonly onPlayPause: () => void;
   readonly onSpeedChange: (speed: number) => void;
 }
@@ -35,6 +36,7 @@ export interface Controls {
   getTargetSig(): number;
   getConfig(): SimConfig;
   getSpeed(): number;
+  getGridBrightness(): number;
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
@@ -51,6 +53,7 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private openSkillSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
   private selectedProfile: UserSettings | null = null;
@@ -79,6 +82,7 @@ export class DomControls implements Controls {
       trackingUnitRad: el("tracking-unit-rad"),
       trackingUnitScore: el("tracking-unit-score"),
       sigRes: el("sigRes"),
+      sigResOptions: el("sig-res-options"),
       optimal: el("optimal"),
       falloff: el("falloff"),
       hullOptions: el("hull-options"),
@@ -89,6 +93,8 @@ export class DomControls implements Controls {
       attackerSkills: el("attacker-skills"),
       attackerSkillOptions: el("attacker-skill-options"),
       attackerSkillSummary: el("attacker-skill-summary"),
+      attackerSkillTrigger: el("attacker-skill-trigger"),
+      attackerSkillPopup: el("attacker-skill-popup"),
       attackerOverload: el("attacker-overload"),
       attackerOverloadButton: el("attacker-overload-button"),
       attackerSpeed: el("attacker-speed"),
@@ -96,6 +102,9 @@ export class DomControls implements Controls {
       attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
+      maneuverAggressivity: el("maneuver-aggressivity"),
+      maneuverAggressivitySlider: el("maneuver-aggressivity-slider"),
+      maneuverAggressivityValue: el("maneuver-aggressivity-value"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
@@ -104,6 +113,8 @@ export class DomControls implements Controls {
       targetSkills: el("target-skills"),
       targetSkillOptions: el("target-skill-options"),
       targetSkillSummary: el("target-skill-summary"),
+      targetSkillTrigger: el("target-skill-trigger"),
+      targetSkillPopup: el("target-skill-popup"),
       targetOverload: el("target-overload"),
       targetOverloadButton: el("target-overload-button"),
       targetSpeed: el("target-speed"),
@@ -131,15 +142,32 @@ export class DomControls implements Controls {
       resTrackPen: el("res-track-pen"),
       resRangePen: el("res-range-pen"),
       resHit: el("res-hit"),
+      gridBrightnessSlider: el("grid-brightness-slider"),
+      gridBrightnessValue: el("grid-brightness-value"),
     };
 
     this.populateHullDatalist();
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
 
+    this.restoreSavedState();
+    this.bind();
+  }
+
+  private restoreSavedState(): void {
+    const fromUrl = this.settingsStore.hasForeignUrlSettings();
+    if (fromUrl) {
+      this.settingsStore.clearSelectedProfile();
+    }
     const saved = this.settingsStore.load();
     if (saved) {
-      this.loadSettings(saved);
+      const selected = fromUrl ? null : this.settingsStore.loadSelectedProfile();
+      const selectedName = selected && this.settingsStore.listProfiles().includes(selected.name) ? selected.name : "";
+      this.loadSettings(saved, selectedName);
+      if (selectedName && selected) {
+        this.selectedProfile = selected.baseline;
+      }
+      this.updateSaveButtonState();
     } else {
       this.i18n.translateDocument();
       this.setDefaultSkillAndOverload();
@@ -148,9 +176,10 @@ export class DomControls implements Controls {
       this.updateUnitToggle();
       this.updateLanguageToggle();
       this.setBestInitialDistance();
+      this.updateManeuverAggressivityDisplay();
+      this.updateGridBrightnessDisplay(DEFAULT_GRID_BRIGHTNESS);
       this.setPlaying(false);
     }
-    this.bind();
   }
 
   getTurret(): TurretSpec {
@@ -168,6 +197,7 @@ export class DomControls implements Controls {
 
   getConfig(): SimConfig {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
+    const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement);
     const attacker: ShipConfig = {
       id: "attacker",
       maxSpeed: num(this.els.attackerSpeed),
@@ -175,6 +205,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.attackerInertia),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
+      aggressivity,
       orbitDirection: "cw",
     };
     const target: ShipConfig = {
@@ -184,6 +215,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.targetInertia),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
+      aggressivity: AGGRESSIVITY_MIN,
       orbitDirection: "cw",
     };
     return { attacker, target, initialDistance };
@@ -191,6 +223,12 @@ export class DomControls implements Controls {
 
   getSpeed(): number {
     return num(this.els.simSpeed);
+  }
+
+  getGridBrightness(): number {
+    const value = Number.parseFloat((this.els.gridBrightnessSlider as HTMLInputElement).value);
+    if (!Number.isFinite(value)) return DEFAULT_GRID_BRIGHTNESS;
+    return Math.max(0, Math.min(1, value));
   }
 
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
@@ -215,6 +253,48 @@ export class DomControls implements Controls {
     );
   }
 
+  private onManeuverAggressivityChange(): void {
+    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const pos = Number.parseFloat(slider.value);
+    const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
+    this.updateManeuverAggressivityDisplay(value);
+    this.updateSaveButtonState();
+    this.persist();
+    this.callbacks?.onConfigChange();
+  }
+
+  private updateManeuverAggressivityDisplay(value?: number): void {
+    const input = this.els.maneuverAggressivity as HTMLInputElement;
+    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const output = this.els.maneuverAggressivityValue;
+    const current = value ?? parseManeuverAggressivity(input);
+    input.value = String(current);
+    setText(output, current.toFixed(2));
+    const pos = positionFromAggressivity(current);
+    slider.value = String(pos);
+    if ("setProperty" in slider.style) {
+      slider.style.setProperty("--fill", `${pos * 100}%`);
+    }
+  }
+
+  private onGridBrightnessChange(): void {
+    this.updateGridBrightnessDisplay();
+    this.updateSaveButtonState();
+    this.persist();
+    this.callbacks?.onDisplayChange();
+  }
+
+  private updateGridBrightnessDisplay(value?: number): void {
+    const slider = this.els.gridBrightnessSlider as HTMLInputElement;
+    const output = this.els.gridBrightnessValue;
+    const current = value ?? this.getGridBrightness();
+    slider.value = String(current);
+    setText(output, `${Math.round(current * 100)}%`);
+    if ("setProperty" in slider.style) {
+      slider.style.setProperty("--fill", `${current * 100}%`);
+    }
+  }
+
   setCallbacks(callbacks: ControlsCallbacks): void {
     this.callbacks = callbacks;
   }
@@ -230,6 +310,8 @@ export class DomControls implements Controls {
       attackerSpeed: num(this.els.attackerSpeed),
       attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
+      maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement),
+      gridBrightness: this.getGridBrightness(),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
       attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
@@ -257,7 +339,7 @@ export class DomControls implements Controls {
     return isPropulsionId(value) ? value : undefined;
   }
 
-  private loadSettings(settings: UserSettings): void {
+  private loadSettings(settings: UserSettings, selectedName = ""): void {
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -265,6 +347,7 @@ export class DomControls implements Controls {
     this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
 
     (this.els.sigRes as HTMLSelectElement).value = settings.sigRes;
+    this.setChoiceGroup(this.els.sigResOptions, settings.sigRes);
     (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
     (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
@@ -272,6 +355,8 @@ export class DomControls implements Controls {
     (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
+    (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
+    (this.els.gridBrightnessSlider as HTMLInputElement).value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
@@ -294,8 +379,11 @@ export class DomControls implements Controls {
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
-    this.renderProfiles();
+    this.renderProfiles(selectedName);
     this.setPlaying(this.playing);
+    this.updateManeuverAggressivityDisplay();
+    this.updateGridBrightnessDisplay();
+    this.persist();
   }
 
   private setBestInitialDistance(): void {
@@ -354,6 +442,7 @@ export class DomControls implements Controls {
 
   private setLanguage(language: Language): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
+    this.closeAllSkillPopups();
     this.i18n.setLanguage(language);
     this.i18n.translateDocument();
     this.updateLanguageToggle();
@@ -378,7 +467,13 @@ export class DomControls implements Controls {
   }
 
   private persist(): void {
-    this.settingsStore.save(this.getSettings());
+    const settings = this.getSettings();
+    this.settingsStore.save(settings);
+    this.syncUrl(settings);
+  }
+
+  private syncUrl(settings = this.getSettings()): void {
+    this.location.replace(this.settingsStore.encodeUrl(settings));
   }
 
   private renderProfiles(selected = ""): void {
@@ -399,13 +494,15 @@ export class DomControls implements Controls {
   }
 
   private saveProfile(): void {
+    const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    if (!name) return;
+    const profileName = name || selected;
+    if (!profileName) return;
     const settings = this.getSettings();
-    this.settingsStore.saveProfile(name, settings);
+    this.settingsStore.saveProfile(profileName, settings);
+    this.settingsStore.saveSelectedProfile(profileName, settings);
     (this.els.profileName as HTMLInputElement).value = "";
-    this.renderProfiles();
-    (this.els.profileSelect as HTMLSelectElement).value = name;
+    this.renderProfiles(profileName);
     this.selectedProfile = settings;
     this.updateSaveButtonState();
   }
@@ -415,10 +512,9 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings(profile);
-    (this.els.profileSelect as HTMLSelectElement).value = name;
-    this.selectedProfile = profile;
-    this.syncUrl();
+    this.loadSettings(profile, name);
+    this.selectedProfile = this.getSettings();
+    this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
   }
@@ -428,7 +524,6 @@ export class DomControls implements Controls {
     if (!name) return;
     this.settingsStore.deleteProfile(name);
     this.renderProfiles();
-    (this.els.profileSelect as HTMLSelectElement).value = "";
     this.selectedProfile = null;
     this.updateSaveButtonState();
   }
@@ -436,14 +531,15 @@ export class DomControls implements Controls {
   private updateSaveButtonState(): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    const saved = selected ? this.selectedProfile : name ? this.settingsStore.loadProfile(name) : null;
+    let saved: UserSettings | null = null;
+    if (name && name !== selected) {
+      saved = this.settingsStore.loadProfile(name);
+    } else if (selected) {
+      saved = this.selectedProfile;
+    }
     const current = this.getSettings();
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
-  }
-
-  private syncUrl(): void {
-    this.location.replace(this.settingsStore.encodeUrl(this.getSettings()));
   }
 
   private async shareLink(): Promise<void> {
@@ -483,6 +579,11 @@ export class DomControls implements Controls {
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
     (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
 
+    (this.els.attackerSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("attacker"));
+    (this.els.targetSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("target"));
+
+    this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes as HTMLSelectElement, ["S", "M", "L", "XL"]);
+
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
       "sigRes",
@@ -512,6 +613,12 @@ export class DomControls implements Controls {
         this.callbacks?.onConfigChange();
       });
     }
+
+    (this.els.maneuverAggressivitySlider as HTMLInputElement).addEventListener("input", () => this.onManeuverAggressivityChange());
+    (this.els.gridBrightnessSlider as HTMLInputElement).addEventListener("input", () => this.onGridBrightnessChange());
+
+    document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
+    document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
   }
 
   private formatDistance(m: number): string {
@@ -766,7 +873,8 @@ export class DomControls implements Controls {
     const conditions = this.skillConditions(side);
     const module = this.currentPropulsionModule(side);
     if (!module) return effectiveStats(profile, undefined, conditions).maxSpeed;
-    const shipMass = Math.max(0, activeMass - module.massAddition * module.activeMassMultiplier);
+    const factor = fittedMassFactor(profile.hullType);
+    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
     const adjustedProfile: ShipProfile = { ...profile, mass: shipMass };
     return effectiveStats(adjustedProfile, module, conditions).maxSpeed;
   }
@@ -822,7 +930,60 @@ export class DomControls implements Controls {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
-    setText(this.els[`${side}SkillSummary`], skillOptionLabel(this.i18n, level));
+    const summary = skillOptionLabel(this.i18n, level);
+    setText(this.els[`${side}SkillSummary`], summary);
+  }
+
+  private toggleSkillPopup(side: "attacker" | "target"): void {
+    if (this.openSkillSide === side) {
+      this.closeSkillPopup(side);
+      return;
+    }
+    if (this.openSkillSide !== null && this.openSkillSide !== side) {
+      this.closeSkillPopup(this.openSkillSide);
+    }
+    this.openSkillPopup(side);
+  }
+
+  private openSkillPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
+    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.openSkillSide = side;
+    const active = Array.from((this.els[`${side}SkillOptions`] as HTMLElement).children).find(
+      (button) => button.getAttribute("aria-pressed") === "true",
+    ) as HTMLButtonElement | undefined;
+    active?.focus();
+  }
+
+  private closeSkillPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
+    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (this.openSkillSide === side) this.openSkillSide = null;
+  }
+
+  private closeAllSkillPopups(): void {
+    if (this.openSkillSide) this.closeSkillPopup(this.openSkillSide);
+  }
+
+  private onDocumentPointerDown(event: PointerEvent): void {
+    if (this.openSkillSide === null) return;
+    const target = event.target as Element | null;
+    if (typeof target?.closest === "function") {
+      const inside = target.closest("#attacker-skill-field, #target-skill-field");
+      if (inside) return;
+    }
+    this.closeAllSkillPopups();
+  }
+
+  private onDocumentKeyDown(event: KeyboardEvent): void {
+    if (event.key !== "Escape" || this.openSkillSide === null) return;
+    const side = this.openSkillSide;
+    this.closeSkillPopup(side);
+    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
   }
 
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {
@@ -863,6 +1024,8 @@ export class DomControls implements Controls {
     this.setSkillActive(side, level);
     (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
     this.els[`${side}Skills`].dispatchEvent(new Event("change"));
+    this.closeSkillPopup(side);
+    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
   }
 
   private onOverloadButtonClick(side: "attacker" | "target"): void {
@@ -909,6 +1072,53 @@ export class DomControls implements Controls {
     select.value = selected;
     this.setSkillActive(side, skillLevelFromString(selected));
   }
+
+  private bindChoiceGroup(group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): void {
+    for (const button of Array.from(group.children)) {
+      button.addEventListener("click", () => this.onChoiceButtonClick(group, select, button, values));
+    }
+  }
+
+  private onChoiceButtonClick(
+    group: HTMLElement,
+    select: HTMLSelectElement,
+    button: Element,
+    values: readonly string[],
+  ): void {
+    const value = button.getAttribute("data-value") ?? "";
+    if (!values.includes(value)) return;
+    select.value = value;
+    this.setChoiceGroup(group, value);
+    select.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  private setChoiceGroup(group: HTMLElement, value: string): void {
+    for (const button of Array.from(group.children)) {
+      const active = button.getAttribute("data-value") === value;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+  }
+}
+
+const AGGRESSIVITY_MIN = 0.01;
+const AGGRESSIVITY_MAX = 100;
+const DEFAULT_GRID_BRIGHTNESS = 0.2;
+
+function aggressivityFromPosition(pos: number): number {
+  const clamped = Math.max(0, Math.min(1, pos));
+  return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
+}
+
+function positionFromAggressivity(value: number): number {
+  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
+  return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
+}
+
+function parseManeuverAggressivity(input: HTMLInputElement): number {
+  const value = Number.parseFloat(input.value);
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
 }
 
 function el(id: string): HTMLElement {

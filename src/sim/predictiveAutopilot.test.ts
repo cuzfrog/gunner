@@ -1,6 +1,6 @@
 import { len, vec } from "../math";
 import type { Autopilot } from "./autopilot";
-import { NaiveAutopilot } from "./autopilot";
+import { ReactiveAutopilot } from "./autopilot";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
@@ -27,6 +27,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
+    aggressivity: 1,
     orbitDirection,
   };
 }
@@ -103,13 +104,30 @@ describe("PredictiveAutopilot", () => {
     expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
 
-  test("command never exceeds max speed", () => {
-    const autopilot = makePredictive(new NaiveAutopilot());
+  test("command after refinement stays within the max speed disk", () => {
+    const autopilot = makePredictive(new ReactiveAutopilot());
     const attacker = makeShip("attacker", [0, 0], 300, "keepAtRange", 5000);
     const target = makeShip("target", [0, 5000], 300, "orbit", 5000);
     const cmd = autopilot.computeVelocity(attacker, target, 0);
 
     expect(len(cmd)).toBeLessThanOrEqual(300 + 1e-9);
+  });
+
+  test("replans when the attacker's aggressivity changes", () => {
+    const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
+    const spy = vi.spyOn(kinematics, "computeEngagement");
+
+    const autopilot = makePredictive(targetSteering);
+    const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 5000);
+    const target = makeShip("target", [0, 5000], 1000, "keepAtRange", 5000);
+
+    autopilot.computeVelocity(attacker, target, 0);
+    const afterFirstPlan = spy.mock.calls.length;
+
+    const changedAttacker = { ...attacker, aggressivity: 0.1 };
+    autopilot.computeVelocity(changedAttacker, target, 0.5);
+    expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
 
   test("steers toward desired range when transverse speed is already zero", () => {
@@ -125,24 +143,38 @@ describe("PredictiveAutopilot", () => {
     expect(Math.abs(cmd.x)).toBeLessThan(100);
   });
 
-  test("reduces mean angular velocity versus the naive attacker in the Harbinger-Thrasher engagement", () => {
+  test("with a low aggressivity it closes on a far target even when transverse motion is absent", () => {
+    const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
+    const autopilot = makePredictive(targetSteering);
+
+    const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 10000);
+    const target = makeShip("target", [0, 14000], 0, "keepAtRange", 10000);
+    const rangeFocusedAttacker = { ...attacker, aggressivity: 0.01 };
+    const cmd = autopilot.computeVelocity(rangeFocusedAttacker, target, 0);
+
+    expect(cmd.y).toBeGreaterThan(900);
+    expect(Math.abs(cmd.x)).toBeLessThan(100);
+  });
+
+  test("reduces mean angular velocity versus the reactive baseline in the Harbinger-Thrasher engagement", () => {
     const attackerConfig: ShipConfig = {
-      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000,
+      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1,
     };
     const targetConfig: ShipConfig = {
-      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw",
+      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw",
     };
     const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
 
-    const naive = new NaiveAutopilot();
+    const reactive = new ReactiveAutopilot();
     const kinematicsForSim = new KinematicsImpl();
-    const baseline = new SimulationImpl({ attackerSteering: naive, targetSteering: naive, simConfig });
-    const predictive = new PredictiveAutopilot({ targetSteering: new NaiveAutopilot(), kinematics: kinematicsForSim });
-    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new NaiveAutopilot(), simConfig });
+    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, simConfig });
+    const predictive = new PredictiveAutopilot({ targetSteering: new ReactiveAutopilot(), kinematics: kinematicsForSim });
+    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), simConfig });
 
     const dt = 0.25;
     const steps = Math.round(120 / dt);
-    let meanNaive = 0;
+    let meanBaseline = 0;
     let meanPredictive = 0;
     for (let i = 0; i < steps; i++) {
       baseline.step(dt);
@@ -151,13 +183,13 @@ describe("PredictiveAutopilot", () => {
       const predSnap = predictiveSim.snapshot();
       const baseFrame = kinematicsForSim.computeEngagement(baseSnap.attacker, baseSnap.target, baseSnap.time);
       const predFrame = kinematicsForSim.computeEngagement(predSnap.attacker, predSnap.target, predSnap.time);
-      meanNaive += baseFrame.angularVelocity;
+      meanBaseline += baseFrame.angularVelocity;
       meanPredictive += predFrame.angularVelocity;
     }
-    meanNaive /= steps;
+    meanBaseline /= steps;
     meanPredictive /= steps;
 
     expect(meanPredictive).toBeGreaterThan(0);
-    expect(meanPredictive).toBeLessThan(0.7 * meanNaive);
+    expect(meanPredictive).toBeLessThan(0.7 * meanBaseline);
   });
 });

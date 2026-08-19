@@ -2,6 +2,7 @@
 
 - When milestone is reached, update version in `package.json`.
 - Keep your PR comments concise and clear. Reply in a review thread.
+- Bump up semantic version accordingly.
 
 ### branching
 - Main branch: `main`

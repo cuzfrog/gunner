@@ -1,8 +1,8 @@
-import { add, dist, dot, len, perpCCW, perpCW, scale, vec, type Vec2 } from "../math";
-import { NaiveAutopilot } from "./autopilot";
+import { add, dist, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
+import { ReactiveAutopilot } from "./autopilot";
 import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
 
-const autopilot = new NaiveAutopilot();
+const autopilot = new ReactiveAutopilot();
 const DT = 0.1;
 const STEPS = 1000;
 
@@ -16,6 +16,7 @@ function makeShip(
   desiredRange = 5000,
   mass = 1,
   inertiaModifier = 1e-6,
+  aggressivity = 1,
   orbitDirection: OrbitDirection = "cw",
 ): ShipState {
   return {
@@ -27,6 +28,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
+    aggressivity,
     orbitDirection,
   };
 }
@@ -47,7 +49,7 @@ function runBoth(attacker: ShipState, target: ShipState, dt: number, steps: numb
   return dist(attacker.position, target.position);
 }
 
-describe("NaiveAutopilot", () => {
+describe("ReactiveAutopilot", () => {
   test("orbit points tangentially around the reference", () => {
     const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
     const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
@@ -119,6 +121,36 @@ describe("NaiveAutopilot", () => {
       retreater.velocity = vec(0, 800);
       expect(command(ship, retreater).y).toBeCloseTo(800, 5);
     });
+
+    test("braking reduces the closing command for a ship with real dynamics", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, 1);
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      ship.velocity = vec(0, 300);
+
+      expect(command(ship, other).y).toBeCloseTo(100, 5);
+      expect(command(makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, 100), other).y).toBeCloseTo(400, 5);
+    });
+
+    test("instant-dynamics ships are unchanged by braking", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 1, 1e-6, 0.01);
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      ship.velocity = vec(0, 300);
+
+      expect(command(ship, other).y).toBeCloseTo(400, 5);
+      expect(command(makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 1, 1e-6, 100), other).y).toBeCloseTo(400, 5);
+    });
+
+    test("keep-at-range damping is monotonic across the aggressivity bar", () => {
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      const make = (aggressivity: number) =>
+        makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, aggressivity);
+
+      const low = command(make(0.01), other).y;
+      const mid = command(make(1), other).y;
+      const high = command(make(100), other).y;
+      expect(low).toBeLessThanOrEqual(mid);
+      expect(mid).toBeLessThanOrEqual(high);
+    });
   });
 
   describe("orbit", () => {
@@ -177,7 +209,7 @@ describe("NaiveAutopilot", () => {
     });
 
     test("feeds forward inward lead against dynamics lag", () => {
-      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "cw");
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, 1, "cw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCW(fromCenterHat);
@@ -190,7 +222,7 @@ describe("NaiveAutopilot", () => {
     });
 
     test("lag compensation is inward for both orbit directions", () => {
-      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "ccw");
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, 1, "ccw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCCW(fromCenterHat);
@@ -213,7 +245,7 @@ describe("NaiveAutopilot", () => {
     });
 
     test("lead saturates at the speed budget", () => {
-      const ship = makeShip("target", [1000, 0], "orbit", 1500, 1000, 10_000_000, 0.45, "cw");
+      const ship = makeShip("target", [1000, 0], "orbit", 1500, 1000, 10_000_000, 0.45, 1, "cw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCW(fromCenterHat);
@@ -223,5 +255,92 @@ describe("NaiveAutopilot", () => {
       expect(commandVec.y).toBeCloseTo(0, 5);
       expect(len(commandVec)).toBeLessThanOrEqual(ship.maxSpeed);
     });
+
+    test("commands full speed for a clean orbit", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(len(cmd)).toBeCloseTo(ship.maxSpeed, 5);
+    });
+
+    test("co-moving tangential pair produces no inward radial command", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      const tHat = perpCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1000);
+      other.velocity = scale(tHat, 1000);
+      const cmd = command(ship, other);
+      expect(dot(cmd, fromCenterHat)).toBeCloseTo(0, 5);
+      expect(len(cmd)).toBeCloseTo(ship.maxSpeed, 5);
+    });
+
+    test("catches up to a center moving radially away", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      other.velocity = scale(fromCenterHat, 800);
+      const cmd = command(ship, other);
+      const outward = dot(cmd, fromCenterHat);
+      expect(outward).toBeGreaterThanOrEqual(800);
+      expect(outward).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("holds its range around a tangentially fleeing center", () => {
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1000, 5000, 1, 1e-6, 1, "cw");
+      const target = makeShip("target", [0, 5000], "orbit", 1000, 5000, 1, 1e-6, 1, "ccw");
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(4900);
+      expect(finalDistance).toBeLessThan(5100);
+    });
+
+    test("braking reduces the inward radial command when closing on the orbit radius", () => {
+      const ship = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 1);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      ship.velocity = scale(fromCenterHat, -300);
+
+      const damped = command(ship, other);
+      expect(dot(damped, fromCenterHat)).toBeCloseTo(-700, 1);
+
+      const undamped = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      undamped.velocity = ship.velocity;
+      expect(dot(command(undamped, other), fromCenterHat)).toBeCloseTo(-1000, 1);
+    });
+
+    test("braking vanishes for purely tangential and stationary states", () => {
+      const ship = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 1);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      const tHat = perpCW(fromCenterHat);
+
+      ship.velocity = scale(tHat, 1000);
+      const tangentialCmd = command(ship, other);
+      const aggressiveTangential = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      aggressiveTangential.velocity = ship.velocity;
+      expect(command(aggressiveTangential, other)).toEqual(tangentialCmd);
+
+      ship.velocity = vec(0, 0);
+      const stationaryCmd = command(ship, other);
+      const strictStationary = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.01);
+      strictStationary.velocity = ship.velocity;
+      expect(command(strictStationary, other)).toEqual(stationaryCmd);
+    });
+
+    test("aggressivity below the minimum clamps to critical damping", () => {
+      const fromCenterHat = vec(0, 1);
+      const shipLow = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.001);
+      const shipMin = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.01);
+      const shipHigh = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const v = scale(fromCenterHat, -300);
+      shipLow.velocity = v;
+      shipMin.velocity = v;
+      shipHigh.velocity = v;
+
+      expect(command(shipLow, other)).toEqual(command(shipMin, other));
+      expect(dot(command(shipHigh, other), fromCenterHat)).toBeCloseTo(-1000, 1);
+    });
+
   });
 });
