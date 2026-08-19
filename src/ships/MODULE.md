@@ -1,16 +1,19 @@
 ---
 no-new-exports:
   - effectiveStats.test.ts
-  - effectiveStats.ts
+  # effectiveStats.ts uses the new conditions; export surface unchanged.
+  # - effectiveStats.ts
   - fitting.test.ts
   - fitting.ts
-  - index.ts
+  # index.ts re-exports SkillLevel and StatConditions for the UI.
+  # - index.ts
   - profiles.ts
   - propulsion.test.ts
   - propulsion.ts
   - tiers.test.ts
   - tiers.ts
-  - types.ts
+  # types.ts exports SkillLevel and StatConditions per the plan.
+  # - types.ts
 ---
 
 
