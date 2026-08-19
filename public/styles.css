@@ -116,8 +116,7 @@ body {
   padding: 12px;
 }
 
-.panel h2,
-.canvas-section h2 {
+.panel h2 {
   margin: 0 0 10px;
   font-family: "Chakra Petch", sans-serif;
   font-size: 12px;
@@ -498,18 +497,14 @@ canvas {
 }
 
 .segmented-control.disabled,
-.skill-tuner.disabled,
 .overload-button:disabled,
-.segmented-control button:disabled,
-.skill-tuner button:disabled {
+.segmented-control button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .segmented-control.disabled,
-.skill-tuner.disabled,
-.segmented-control button:disabled,
-.skill-tuner button:disabled {
+.segmented-control button:disabled {
   pointer-events: none;
 }
 

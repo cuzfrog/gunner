@@ -140,6 +140,8 @@ export class DomControls implements Controls {
       this.setDefaultSkillAndOverload();
       this.setOverloadDisabled("attacker");
       this.setOverloadDisabled("target");
+      this.updateUnitToggle();
+      this.updateLanguageToggle();
       this.setBestInitialDistance();
       this.setPlaying(false);
     }
@@ -336,8 +338,12 @@ export class DomControls implements Controls {
   }
 
   private updateUnitToggle(): void {
-    (this.els.trackingUnitRad as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "rad");
-    (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", this.trackingInput.unit === "score");
+    const radActive = this.trackingInput.unit === "rad";
+    const scoreActive = this.trackingInput.unit === "score";
+    (this.els.trackingUnitRad as HTMLButtonElement).classList.toggle("active", radActive);
+    (this.els.trackingUnitRad as HTMLButtonElement).setAttribute("aria-pressed", String(radActive));
+    (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", scoreActive);
+    (this.els.trackingUnitScore as HTMLButtonElement).setAttribute("aria-pressed", String(scoreActive));
   }
 
   private setLanguage(language: Language): void {
@@ -355,9 +361,13 @@ export class DomControls implements Controls {
   }
 
   private updateLanguageToggle(): void {
-    (this.els.langEn as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "en");
-    (this.els.langZh as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "zh");
-    (this.els.langJa as HTMLButtonElement).classList.toggle("active", this.i18n.current() === "ja");
+    const current = this.i18n.current();
+    (this.els.langEn as HTMLButtonElement).classList.toggle("active", current === "en");
+    (this.els.langEn as HTMLButtonElement).setAttribute("aria-pressed", String(current === "en"));
+    (this.els.langZh as HTMLButtonElement).classList.toggle("active", current === "zh");
+    (this.els.langZh as HTMLButtonElement).setAttribute("aria-pressed", String(current === "zh"));
+    (this.els.langJa as HTMLButtonElement).classList.toggle("active", current === "ja");
+    (this.els.langJa as HTMLButtonElement).setAttribute("aria-pressed", String(current === "ja"));
   }
 
   private persist(): void {
