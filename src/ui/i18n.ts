@@ -335,9 +335,9 @@ export const I18N_DICTIONARY = {
     ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。加速度は指数関数的に最大速度に近づく。",
   },
   "footer.mech.kinematics.link": {
-    en: "EVE University: Velocity",
-    zh: "EVE University: Velocity",
-    ja: "EVE University: Velocity",
+    en: "Velocity",
+    zh: "Velocity",
+    ja: "Velocity",
   },
   "footer.mech.speed.heading": {
     en: "Speed",
@@ -350,9 +350,9 @@ export const I18N_DICTIONARY = {
     ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。",
   },
   "footer.mech.speed.link": {
-    en: "EVE University: Propulsion equipment",
-    zh: "EVE University: Propulsion equipment",
-    ja: "EVE University: Propulsion equipment",
+    en: "Propulsion equipment",
+    zh: "Propulsion equipment",
+    ja: "Propulsion equipment",
   },
   "footer.mech.hitChance.heading": {
     en: "Hit chance",
@@ -365,9 +365,9 @@ export const I18N_DICTIONARY = {
     ja: "命中確率 = 0.5^(追跡項 + 射程項)。追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。",
   },
   "footer.mech.hitChance.link": {
-    en: "EVE University: Turret mechanics",
-    zh: "EVE University: Turret mechanics",
-    ja: "EVE University: Turret mechanics",
+    en: "Turret mechanics",
+    zh: "Turret mechanics",
+    ja: "Turret mechanics",
   },
   "unit.meter": {
     en: "m",

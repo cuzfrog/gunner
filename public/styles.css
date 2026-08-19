@@ -47,27 +47,16 @@ body {
 
 .header-left {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
 }
 
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-}
-
-.version-badge {
-  padding: 1px 5px;
-  background: rgba(92, 203, 203, 0.08);
-  border: 1px solid rgba(92, 203, 203, 0.35);
-  border-radius: 2px;
-  color: var(--text-dim);
+.version-text {
   font-family: "Share Tech Mono", monospace;
-  font-size: 9px;
-  line-height: 14px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-dim);
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
@@ -201,6 +190,12 @@ body {
   padding: 5px 24px;
 }
 
+.panel select.mode-select {
+  text-align: left;
+  text-align-last: left;
+  padding: 5px 24px 5px 8px;
+}
+
 .panel input:focus-visible,
 .panel select:focus-visible,
 .profile-bar :focus-visible,
@@ -254,9 +249,9 @@ canvas {
 }
 
 .controls {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -265,21 +260,25 @@ canvas {
 }
 
 .playback-controls,
-.simulation-controls,
 .control-field {
   display: flex;
   align-items: center;
 }
 
 .playback-controls {
-  flex: none;
   gap: 10px;
+  grid-column: 1;
+  justify-self: start;
 }
 
-.simulation-controls {
-  min-width: 0;
-  margin-left: auto;
-  gap: 12px;
+.grid-brightness-control {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.speed-control {
+  grid-column: 3;
+  justify-self: end;
 }
 
 .control-field {
@@ -728,31 +727,36 @@ canvas {
 
 .sigres-selector button {
   flex: 1 1 0;
-  padding-right: 4px;
-  padding-left: 4px;
-}
-
-.field-row > .mode-group {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 3px 2px 4px;
+  line-height: 1.2;
 }
 
-.mode-selector {
-  flex-wrap: nowrap;
+.panel .sigres-selector button span {
+  margin-bottom: 0;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-.mode-selector button {
-  padding-right: 4px;
-  padding-left: 4px;
-  font-size: 10px;
-  letter-spacing: 0.03em;
+.sigres-class {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 11px;
 }
 
-.mode-selector button[data-value="orbit"] {
-  flex: 0.8 1 0;
+.sigres-value {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
 }
 
-.mode-selector button[data-value="keepAtRange"] {
-  flex: 1.2 1 0;
+.sigres-selector button.active .sigres-value,
+.sigres-selector button:hover:not(:disabled) .sigres-value {
+  color: inherit;
 }
 
 .segmented-control button,
@@ -871,61 +875,57 @@ canvas {
   display: block;
 }
 
-.collapsible {
-  margin-bottom: 6px;
-  border: 0;
-}
-
-.collapsible[open] {
-  border-bottom: 1px solid var(--border-dim);
-}
-
-.collapsible summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 4px;
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-}
-
-.collapsible summary::-webkit-details-marker {
-  display: none;
-}
-
-.collapsible summary:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: -1px;
-}
-
-.collapsible summary .field-label {
-  margin-bottom: 0;
-}
-
 .panel .skill-section {
   margin-top: auto;
   margin-bottom: 0;
 }
 
-.panel .collapsible[open]:last-child {
-  border-bottom: 0;
+.skill-select {
+  position: relative;
 }
 
-.panel .collapsible:last-child .skill-tuner {
-  padding-bottom: 4px;
+.skill-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  min-height: 28px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font: inherit;
 }
 
-.panel .collapsible .skill-summary-row {
+.panel .skill-trigger span {
+  margin-bottom: 0;
+}
+
+.skill-trigger-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skill-trigger:hover { border-color: var(--accent-teal); }
+
+.skill-trigger:focus-visible,
+.skill-popup button:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: -1px;
+}
+
+.skill-summary-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 0;
 }
 
-.panel .collapsible .skill-summary-value {
-  margin-bottom: 0;
+.skill-summary-value {
   font-family: "Share Tech Mono", monospace;
   font-size: 11px;
   color: var(--accent-teal);
@@ -933,17 +933,30 @@ canvas {
   letter-spacing: 0;
 }
 
-.collapsible .chevron {
+.skill-trigger .chevron {
   color: var(--text-secondary);
   transition: transform 0.15s ease;
 }
 
-.collapsible[open] .chevron {
+.skill-trigger[aria-expanded="true"] .chevron {
   transform: rotate(180deg);
 }
 
-.collapsible .skill-tuner {
-  padding: 4px 4px 8px;
+.skill-popup {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+}
+
+.skill-popup .skill-tuner {
+  flex-wrap: nowrap;
 }
 
 @media (max-width: 1100px) {
@@ -992,16 +1005,24 @@ canvas {
     grid-template-columns: 1fr;
   }
 
-  .simulation-controls {
-    width: 100%;
-    margin-left: 0;
-    justify-content: space-between;
+  .controls {
+    grid-template-columns: 1fr;
     gap: 8px;
+    justify-items: start;
+  }
+
+  .playback-controls,
+  .grid-brightness-control,
+  .speed-control {
+    grid-column: 1;
+    justify-self: start;
   }
 
   .grid-brightness-control input[type="range"] {
     width: 72px;
   }
+
+  .grid-brightness-control label { display: none; }
 }
 
 .footer {

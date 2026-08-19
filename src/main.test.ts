@@ -31,12 +31,13 @@ const DEFAULT_SETTINGS = {
 class FakeElement {
   value = "";
   checked = false;
+  hidden = false;
   disabled = false;
   textContent = "";
   innerHTML = "";
   placeholder = "";
   style: Record<string, string> = {};
-  classList = { toggle: vi.fn() };
+  classList = { toggle: vi.fn(), contains: vi.fn(() => false) };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
@@ -64,6 +65,16 @@ class FakeElement {
 
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
+  }
+
+  focus(): void {}
+
+  closest(): FakeElement | null {
+    return null;
+  }
+
+  querySelector(): FakeElement | null {
+    return null;
   }
 }
 
@@ -142,6 +153,8 @@ function fakeDocument(): Document {
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
     createElement: () => new FakeElement() as unknown as HTMLElement,
+    addEventListener: () => {},
+    removeEventListener: () => {},
   } as unknown as Document;
 }
 

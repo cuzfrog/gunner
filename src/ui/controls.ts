@@ -53,6 +53,7 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private openSkillSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
   private selectedProfile: UserSettings | null = null;
@@ -92,13 +93,14 @@ export class DomControls implements Controls {
       attackerSkills: el("attacker-skills"),
       attackerSkillOptions: el("attacker-skill-options"),
       attackerSkillSummary: el("attacker-skill-summary"),
+      attackerSkillTrigger: el("attacker-skill-trigger"),
+      attackerSkillPopup: el("attacker-skill-popup"),
       attackerOverload: el("attacker-overload"),
       attackerOverloadButton: el("attacker-overload-button"),
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
-      attackerModeOptions: el("attacker-mode-options"),
       attackerRange: el("attacker-range"),
       maneuverAggressivity: el("maneuver-aggressivity"),
       maneuverAggressivitySlider: el("maneuver-aggressivity-slider"),
@@ -111,13 +113,14 @@ export class DomControls implements Controls {
       targetSkills: el("target-skills"),
       targetSkillOptions: el("target-skill-options"),
       targetSkillSummary: el("target-skill-summary"),
+      targetSkillTrigger: el("target-skill-trigger"),
+      targetSkillPopup: el("target-skill-popup"),
       targetOverload: el("target-overload"),
       targetOverloadButton: el("target-overload-button"),
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
       targetMode: el("target-mode"),
-      targetModeOptions: el("target-mode-options"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
       simSpeed: el("sim-speed"),
@@ -351,7 +354,6 @@ export class DomControls implements Controls {
     (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
     (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
-    this.setChoiceGroup(this.els.attackerModeOptions, settings.attackerMode);
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
     (this.els.gridBrightnessSlider as HTMLInputElement).value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
@@ -360,7 +362,6 @@ export class DomControls implements Controls {
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
     (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
-    this.setChoiceGroup(this.els.targetModeOptions, settings.targetMode);
     (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
     (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
@@ -441,6 +442,7 @@ export class DomControls implements Controls {
 
   private setLanguage(language: Language): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
+    this.closeAllSkillPopups();
     this.i18n.setLanguage(language);
     this.i18n.translateDocument();
     this.updateLanguageToggle();
@@ -577,9 +579,10 @@ export class DomControls implements Controls {
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
     (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
 
+    (this.els.attackerSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("attacker"));
+    (this.els.targetSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("target"));
+
     this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes as HTMLSelectElement, ["S", "M", "L", "XL"]);
-    this.bindChoiceGroup(this.els.attackerModeOptions, this.els.attackerMode as HTMLSelectElement, ["keepAtRange", "orbit"]);
-    this.bindChoiceGroup(this.els.targetModeOptions, this.els.targetMode as HTMLSelectElement, ["orbit", "keepAtRange"]);
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -613,6 +616,9 @@ export class DomControls implements Controls {
 
     (this.els.maneuverAggressivitySlider as HTMLInputElement).addEventListener("input", () => this.onManeuverAggressivityChange());
     (this.els.gridBrightnessSlider as HTMLInputElement).addEventListener("input", () => this.onGridBrightnessChange());
+
+    document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
+    document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
   }
 
   private formatDistance(m: number): string {
@@ -927,6 +933,58 @@ export class DomControls implements Controls {
     setText(this.els[`${side}SkillSummary`], skillOptionLabel(this.i18n, level));
   }
 
+  private toggleSkillPopup(side: "attacker" | "target"): void {
+    if (this.openSkillSide === side) {
+      this.closeSkillPopup(side);
+      return;
+    }
+    if (this.openSkillSide !== null && this.openSkillSide !== side) {
+      this.closeSkillPopup(this.openSkillSide);
+    }
+    this.openSkillPopup(side);
+  }
+
+  private openSkillPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
+    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.openSkillSide = side;
+    const active = Array.from((this.els[`${side}SkillOptions`] as HTMLElement).children).find(
+      (button) => button.getAttribute("aria-pressed") === "true",
+    ) as HTMLButtonElement | undefined;
+    active?.focus();
+  }
+
+  private closeSkillPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
+    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (this.openSkillSide === side) this.openSkillSide = null;
+  }
+
+  private closeAllSkillPopups(): void {
+    if (this.openSkillSide) this.closeSkillPopup(this.openSkillSide);
+  }
+
+  private onDocumentPointerDown(event: PointerEvent): void {
+    if (this.openSkillSide === null) return;
+    const target = event.target;
+    if (target instanceof Element) {
+      const inside = target.closest("#attacker-skill-field, #target-skill-field");
+      if (inside) return;
+    }
+    this.closeAllSkillPopups();
+  }
+
+  private onDocumentKeyDown(event: KeyboardEvent): void {
+    if (event.key !== "Escape" || this.openSkillSide === null) return;
+    const side = this.openSkillSide;
+    this.closeSkillPopup(side);
+    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+  }
+
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {
     const input = this.els[`${side}Overload`] as HTMLInputElement;
     const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
@@ -965,6 +1023,7 @@ export class DomControls implements Controls {
     this.setSkillActive(side, level);
     (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
     this.els[`${side}Skills`].dispatchEvent(new Event("change"));
+    this.closeSkillPopup(side);
   }
 
   private onOverloadButtonClick(side: "attacker" | "target"): void {

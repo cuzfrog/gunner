@@ -37,6 +37,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
 class FakeElement {
   value = "";
   checked = false;
+  hidden = false;
   textContent = "";
   innerHTML = "";
   placeholder = "";
@@ -47,7 +48,7 @@ class FakeElement {
       this[name] = value;
     },
   }) as Record<string, string> & { setProperty(name: string, value: string): void };
-  classList = { toggle: vi.fn() };
+  classList = { toggle: vi.fn(), contains: vi.fn(() => false) };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
@@ -76,6 +77,16 @@ class FakeElement {
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
   }
+
+  focus(): void {}
+
+  closest(): FakeElement | null {
+    return null;
+  }
+
+  querySelector(): FakeElement | null {
+    return null;
+  }
 }
 
 function fakeDocument(): Document {
@@ -88,6 +99,8 @@ function fakeDocument(): Document {
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
     createElement: () => new FakeElement() as unknown as HTMLElement,
+    addEventListener: () => {},
+    removeEventListener: () => {},
   } as unknown as Document;
 }
 
@@ -103,8 +116,11 @@ function setInputValues(document: Document): void {
   getFake(document, "target-overload").checked = true;
 
   addChoiceButtons(document, "sig-res-options", ["S", "M", "L", "XL"], "S");
-  addChoiceButtons(document, "attacker-mode-options", ["keepAtRange", "orbit"], "keepAtRange");
-  addChoiceButtons(document, "target-mode-options", ["orbit", "keepAtRange"], "orbit");
+
+  getFake(document, "attacker-skill-popup").hidden = true;
+  getFake(document, "target-skill-popup").hidden = true;
+  getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
+  getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
 }
 
 function addChoiceButtons(document: Document, groupId: string, values: string[], selected: string): void {
@@ -1584,19 +1600,23 @@ describe("DomControls", () => {
     expect(controls.getTurret().sigResolution).toBe(125);
   });
 
-  test("clicking attacker mode button updates getConfig", () => {
+  test("selecting attacker mode from the dropdown updates getConfig", () => {
     const { controls } = buildControls(globalThis.document);
-    findVisibleButton(globalThis.document, "attacker-mode-options", "orbit").trigger("click");
+    const select = getFake(globalThis.document, "attacker-mode");
+    select.value = "orbit";
+    select.trigger("input");
     expect(controls.getConfig().attacker.mode).toBe("orbit");
   });
 
-  test("clicking target mode button updates getConfig", () => {
+  test("selecting target mode from the dropdown updates getConfig", () => {
     const { controls } = buildControls(globalThis.document);
-    findVisibleButton(globalThis.document, "target-mode-options", "keepAtRange").trigger("click");
+    const select = getFake(globalThis.document, "target-mode");
+    select.value = "keepAtRange";
+    select.trigger("input");
     expect(controls.getConfig().target.mode).toBe("keepAtRange");
   });
 
-  test("loadSettings restores the active buttons and aria-pressed state", () => {
+  test("loadSettings restores the sigRes active button and aria-pressed state", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -1627,17 +1647,39 @@ describe("DomControls", () => {
     buildControls(globalThis.document, settings);
 
     const sigResButton = findVisibleButton(globalThis.document, "sig-res-options", "XL");
-    const attackerButton = findVisibleButton(globalThis.document, "attacker-mode-options", "orbit");
-    const targetButton = findVisibleButton(globalThis.document, "target-mode-options", "keepAtRange");
     expect(sigResButton.getAttribute("aria-pressed")).toBe("true");
-    expect(attackerButton.getAttribute("aria-pressed")).toBe("true");
-    expect(targetButton.getAttribute("aria-pressed")).toBe("true");
     expect(sigResButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
-    expect(attackerButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
-    expect(targetButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
     const sigResSButton = findVisibleButton(globalThis.document, "sig-res-options", "S");
     expect(sigResSButton.getAttribute("aria-pressed")).toBe("false");
     expect(sigResSButton.classList.toggle).toHaveBeenLastCalledWith("active", false);
+  });
+
+  test("clicking the skill trigger opens and closes the popup", () => {
+    const { controls } = buildControls(globalThis.document);
+    const trigger = getFake(globalThis.document, "attacker-skill-trigger");
+    const popup = getFake(globalThis.document, "attacker-skill-popup");
+
+    trigger.trigger("click");
+    expect(popup.hidden).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+
+    trigger.trigger("click");
+    expect(popup.hidden).toBe(true);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("selecting a skill level inside the popup closes it and updates the hidden select", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const levelTwo = getFake(globalThis.document, "attacker-skill-options").children.find(
+      (child) => child.getAttribute("data-value") === "2",
+    );
+    if (!levelTwo) throw new Error("Missing skill level 2 button");
+    levelTwo.trigger("click");
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skills").value).toBe("2");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
   });
 });
 
