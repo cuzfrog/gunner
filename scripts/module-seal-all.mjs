@@ -179,13 +179,14 @@ function sealModule(modDir, descriptorFileName, descriptorName, allModuleDirs) {
   }
 
   const parsed = parseFrontmatter(raw);
-  const existingSealed = normalizeSealed(parsed.frontmatter.sealed);
+  const gateKey = chooseGateKey(parsed.frontmatter);
+  const existingSealed = normalizeSealed(parsed.frontmatter[gateKey]);
   const directFiles = listDirectFiles(modDir, descriptorName, allModuleDirs);
   const mergedSealed = mergePreservingOrder(existingSealed, directFiles);
 
   if (arraysEqual(existingSealed, mergedSealed)) return undefined;
 
-  const newContent = serializeModule(parsed, mergedSealed);
+  const newContent = serializeModule(parsed, gateKey, mergedSealed);
 
   return { path: modPath, content: newContent, files: mergedSealed };
 }
@@ -196,6 +197,7 @@ function createModuleDescriptor(dir, descriptorName) {
 
   const content = serializeModule(
     { prelude: "---\n", frontmatter: {}, body: "\n" },
+    "sealed",
     directFiles,
   );
 
@@ -283,8 +285,14 @@ function parseInlineList(raw) {
   return inner.split(",").map((s) => s.trim().replace(/^['"]|['"]$/g, ""));
 }
 
-function serializeModule(parsed, sealed) {
-  const fm = { ...parsed.frontmatter, sealed };
+function chooseGateKey(frontmatter) {
+  if (frontmatter["no-new-exports"] !== undefined) return "no-new-exports";
+  if (frontmatter.readonly !== undefined) return "readonly";
+  return "sealed";
+}
+
+function serializeModule(parsed, gateKey, sealed) {
+  const fm = { ...parsed.frontmatter, [gateKey]: sealed };
 
   let yaml = parsed.prelude;
   for (const [key, value] of Object.entries(fm)) {
