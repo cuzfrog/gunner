@@ -118,21 +118,6 @@ export const I18N_DICTIONARY = {
     zh: "保持距离",
     ja: "距離を保つ",
   },
-  "mode.approach": {
-    en: "Approach",
-    zh: "接近",
-    ja: "接近",
-  },
-  "mode.retreat": {
-    en: "Go farther",
-    zh: "远离",
-    ja: "離脱",
-  },
-  "mode.match": {
-    en: "Match direction",
-    zh: "匹配方向",
-    ja: "方向を合わせる",
-  },
   "label.desiredRange": {
     en: "Desired range (m)",
     zh: "期望距离 (m)",
