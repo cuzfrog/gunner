@@ -434,13 +434,15 @@ export class DomControls implements Controls {
   }
 
   private saveProfile(): void {
+    const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    if (!name) return;
+    const profileName = name || selected;
+    if (!profileName) return;
     const settings = this.getSettings();
-    this.settingsStore.saveProfile(name, settings);
+    this.settingsStore.saveProfile(profileName, settings);
     (this.els.profileName as HTMLInputElement).value = "";
     this.renderProfiles();
-    (this.els.profileSelect as HTMLSelectElement).value = name;
+    (this.els.profileSelect as HTMLSelectElement).value = profileName;
     this.selectedProfile = settings;
     this.updateSaveButtonState();
   }

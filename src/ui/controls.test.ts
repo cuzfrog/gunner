@@ -847,6 +847,54 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
   });
 
+  test("save button returns to normal after saving changes to a loaded profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const tracking = getFake(globalThis.document, "tracking");
+    tracking.value = "0.5";
+    tracking.trigger("input");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+
+    saveButton.trigger("click");
+
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
   test("save button does not highlight immediately after loading a profile with unrounded speed", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const profile: UserSettings = {
