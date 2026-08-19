@@ -61,9 +61,10 @@ export interface SettingsStore {
   encodeUrl(settings: UserSettings): string;
   decodeUrl(): UserSettings | null;
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
-  isUrlLoad(): boolean;
+  hasForeignUrlSettings(): boolean;
   loadSelectedProfile(): { name: string; baseline: UserSettings } | null;
-  saveSelectedProfile(name: string, baseline: UserSettings | null): void;
+  saveSelectedProfile(name: string, baseline: UserSettings): void;
+  clearSelectedProfile(): void;
 }
 
 const SETTINGS_KEY = "gunner-settings-v5";
@@ -120,7 +121,7 @@ export class LocalSettingsStore implements SettingsStore {
     }
     const selected = this.loadSelectedProfile();
     if (selected?.name === name) {
-      this.saveSelectedProfile("", null);
+      this.clearSelectedProfile();
     }
   }
 
@@ -147,7 +148,7 @@ export class LocalSettingsStore implements SettingsStore {
     }
   }
 
-  isUrlLoad(): boolean {
+  hasForeignUrlSettings(): boolean {
     const urlSettings = this.decodeUrl();
     if (!urlSettings) return false;
     const localSettings = this.loadLocalSettings();
@@ -165,13 +166,14 @@ export class LocalSettingsStore implements SettingsStore {
     }
   }
 
-  saveSelectedProfile(name: string, baseline: UserSettings | null): void {
-    if (!name || !baseline) {
-      this.storage.removeItem(SELECTED_PROFILE_KEY);
-      return;
-    }
+  saveSelectedProfile(name: string, baseline: UserSettings): void {
+    if (!name) throw new Error("selected profile name cannot be empty");
     const selected: { name: string; baseline: UserSettings } = { name, baseline };
     this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
+  }
+
+  clearSelectedProfile(): void {
+    this.storage.removeItem(SELECTED_PROFILE_KEY);
   }
 
   private loadProfiles(): Record<string, UserSettings> {

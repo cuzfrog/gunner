@@ -374,36 +374,36 @@ describe("LocalSettingsStore", () => {
     expect(decoded).toEqual(settings);
   });
 
-  test("isUrlLoad returns true when the URL carries settings different from local", () => {
+  test("hasForeignUrlSettings returns true when the URL carries settings different from local", () => {
     const storage = fakeStorage();
     const different: UserSettings = { ...DEFAULT_SETTINGS, optimal: 9999 };
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const url = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).encodeUrl(different);
     const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
-    expect(store.isUrlLoad()).toBe(true);
+    expect(store.hasForeignUrlSettings()).toBe(true);
     expect(store.load()).toEqual(different);
   });
 
-  test("isUrlLoad returns false when the URL matches local storage", () => {
+  test("hasForeignUrlSettings returns false when the URL matches local storage", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const url = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).encodeUrl(DEFAULT_SETTINGS);
     const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
-    expect(store.isUrlLoad()).toBe(false);
+    expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
-  test("isUrlLoad returns false for an invalid URL parameter", () => {
+  test("hasForeignUrlSettings returns false for an invalid URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/?c=INVALID") });
-    expect(store.isUrlLoad()).toBe(false);
+    expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
-  test("isUrlLoad returns false when there is no URL parameter", () => {
+  test("hasForeignUrlSettings returns false when there is no URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
-    expect(store.isUrlLoad()).toBe(false);
+    expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("saveSelectedProfile and loadSelectedProfile round-trip a name and baseline", () => {
@@ -413,11 +413,16 @@ describe("LocalSettingsStore", () => {
     expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_SETTINGS });
   });
 
-  test("saveSelectedProfile with an empty name removes the stored selection", () => {
+  test("clearSelectedProfile removes the stored selection", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
-    store.saveSelectedProfile("", null);
+    store.clearSelectedProfile();
     expect(store.loadSelectedProfile()).toBeNull();
+  });
+
+  test("saveSelectedProfile rejects an empty name", () => {
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    expect(() => store.saveSelectedProfile("", DEFAULT_SETTINGS)).toThrow("selected profile name cannot be empty");
   });
 
   test("loadSelectedProfile returns null for an invalid baseline", () => {

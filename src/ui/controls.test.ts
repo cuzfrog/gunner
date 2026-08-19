@@ -118,7 +118,7 @@ interface SelectedProfile {
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
-  options: { selectedProfile?: SelectedProfile | null; isUrlLoad?: boolean; listProfiles?: string[] } = {},
+  options: { selectedProfile?: SelectedProfile | null; hasForeignUrlSettings?: boolean; listProfiles?: string[] } = {},
 ) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
@@ -138,12 +138,13 @@ function buildControls(
     saveProfile: vi.fn(),
     loadProfile: vi.fn(() => null),
     deleteProfile: vi.fn(),
-    isUrlLoad: vi.fn(() => options.isUrlLoad ?? false),
+    hasForeignUrlSettings: vi.fn(() => options.hasForeignUrlSettings ?? false),
     encodeUrl: vi.fn(() => "http://localhost/"),
     decodeUrl: vi.fn(() => null),
     writeUrlToClipboard: vi.fn(async () => true),
     loadSelectedProfile: vi.fn(() => options.selectedProfile ?? null),
     saveSelectedProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
   });
   const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
@@ -1286,7 +1287,7 @@ describe("DomControls", () => {
     expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
   });
 
-  test("loading settings from a URL does not restore the last selected profile", () => {
+  test("loading settings from a foreign URL clears the stored selection and leaves the dropdown empty", () => {
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -1316,14 +1317,58 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    buildControls(globalThis.document, profile, {
-      isUrlLoad: true,
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      hasForeignUrlSettings: true,
       selectedProfile: { name: "brawler", baseline: profile },
       listProfiles: ["brawler"],
     });
 
     const select = getFake(globalThis.document, "profile-select");
     expect(select.value).toBe("");
+    expect(settingsStore.clearSelectedProfile).toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+  });
+
+  test("loading settings from a URL matching local storage restores the last selected profile", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      hasForeignUrlSettings: false,
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("brawler");
+    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
   });
 
   test("changing an input keeps the URL in the address bar", () => {
@@ -1351,7 +1396,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
   });
 
-  test("deleting a profile clears the selected profile", () => {
+  test("deleting a profile delegates to the store and clears the dropdown", () => {
     const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
@@ -1388,11 +1433,13 @@ describe("DomControls", () => {
     select.value = "brawler";
     select.trigger("change");
     settingsStore.saveSelectedProfile.mockClear();
+    settingsStore.clearSelectedProfile.mockClear();
 
     getFake(globalThis.document, "profile-delete").trigger("click");
 
     expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
-    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("", null);
+    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
     expect(select.value).toBe("");
   });
 });

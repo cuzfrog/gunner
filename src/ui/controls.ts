@@ -140,11 +140,19 @@ export class DomControls implements Controls {
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
 
-    const fromUrl = this.settingsStore.isUrlLoad();
+    this.restoreSavedState();
+    this.bind();
+  }
+
+  private restoreSavedState(): void {
+    const fromUrl = this.settingsStore.hasForeignUrlSettings();
+    if (fromUrl) {
+      this.settingsStore.clearSelectedProfile();
+    }
     const saved = this.settingsStore.load();
     if (saved) {
       const selected = fromUrl ? null : this.settingsStore.loadSelectedProfile();
-      const selectedName = selected && this.settingsStore.listProfiles().includes(selected.name) ? selected.name : undefined;
+      const selectedName = selected && this.settingsStore.listProfiles().includes(selected.name) ? selected.name : "";
       this.loadSettings(saved, selectedName);
       if (selectedName && selected) {
         this.selectedProfile = selected.baseline;
@@ -161,7 +169,6 @@ export class DomControls implements Controls {
       this.updateManeuverAggressivityDisplay();
       this.setPlaying(false);
     }
-    this.bind();
   }
 
   getTurret(): TurretSpec {
@@ -296,7 +303,7 @@ export class DomControls implements Controls {
     return isPropulsionId(value) ? value : undefined;
   }
 
-  private loadSettings(settings: UserSettings, selectedName?: string | null): void {
+  private loadSettings(settings: UserSettings, selectedName = ""): void {
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -334,7 +341,7 @@ export class DomControls implements Controls {
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
-    this.renderProfiles(selectedName ?? "");
+    this.renderProfiles(selectedName);
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
     this.persist();
@@ -478,7 +485,6 @@ export class DomControls implements Controls {
     this.settingsStore.deleteProfile(name);
     this.renderProfiles();
     this.selectedProfile = null;
-    this.settingsStore.saveSelectedProfile("", null);
     this.updateSaveButtonState();
   }
 
