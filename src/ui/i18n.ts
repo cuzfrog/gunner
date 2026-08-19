@@ -180,9 +180,9 @@ export const I18N_DICTIONARY = {
     ja: "速度",
   },
   "button.play": {
-    en: "Play",
-    zh: "播放",
-    ja: "再生",
+    en: "Simulate",
+    zh: "模拟",
+    ja: "シミュレート",
   },
   "button.pause": {
     en: "Pause",
