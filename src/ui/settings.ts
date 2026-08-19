@@ -219,7 +219,7 @@ function isSigResolutionClass(value: unknown): value is SigResolutionClass {
 }
 
 function isAutopilotMode(value: unknown): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange" || value === "approach" || value === "retreat" || value === "match";
+  return value === "orbit" || value === "keepAtRange";
 }
 
 function isLanguage(value: unknown): value is Language {

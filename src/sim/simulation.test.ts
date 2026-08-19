@@ -25,6 +25,10 @@ function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inerti
   };
 }
 
+function makeSim(config: SimConfig): SimulationImpl {
+  return new SimulationImpl({ autopilot, simConfig: config });
+}
+
 describe("SimulationImpl", () => {
   beforeEach(() => {
     autopilot.computeVelocity.mockClear();
@@ -32,7 +36,7 @@ describe("SimulationImpl", () => {
   });
 
   test("step integrates positions by command * dt and advances time with instant dynamics", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    const sim = makeSim(simConfig("keepAtRange"));
     sim.step(2);
     const snapshot = sim.snapshot();
     expect(snapshot.time).toBe(2);
@@ -44,7 +48,7 @@ describe("SimulationImpl", () => {
   });
 
   test("step integrates with dynamics lag", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange", 2_000_000, 1) });
+    const sim = makeSim(simConfig("keepAtRange", 2_000_000, 1));
     const tau = 2;
     const dt = 2;
     sim.step(dt);
@@ -54,7 +58,7 @@ describe("SimulationImpl", () => {
   });
 
   test("snapshot exposes actual velocity, not commanded", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange", 2_000_000, 1) });
+    const sim = makeSim(simConfig("keepAtRange", 2_000_000, 1));
     sim.step(0.1);
     const snapshot = sim.snapshot();
     expect(len(snapshot.target.velocity)).toBeLessThan(100);
@@ -62,13 +66,13 @@ describe("SimulationImpl", () => {
   });
 
   test("snapshot exposes the commanded velocities produced for the current states", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    const sim = makeSim(simConfig("keepAtRange"));
     expect(sim.snapshot().commands).toEqual({ attacker: vec(0, 0), target: vec(100, 0) });
   });
 
   test("snapshot commands are recomputed from the configuration applied by update", () => {
     autopilot.computeVelocity.mockImplementation((ship) => vec(ship.desiredRange, 0));
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    const sim = makeSim(simConfig("keepAtRange"));
     sim.step(1);
     sim.update({
       ...simConfig("keepAtRange"),
@@ -78,7 +82,7 @@ describe("SimulationImpl", () => {
   });
 
   test("reset restores time and initial positions", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("keepAtRange") });
+    const sim = makeSim(simConfig("keepAtRange"));
     sim.step(1);
     sim.reset(simConfig("keepAtRange"));
     const snapshot = sim.snapshot();
@@ -89,30 +93,25 @@ describe("SimulationImpl", () => {
 
   test("update keeps time and reapplies parameters without resetting velocity", () => {
     autopilot.computeVelocity.mockImplementation((ship) => (ship.id === "attacker" ? vec(0, 100) : vec(0, 0)));
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("approach") });
+    const sim = makeSim(simConfig("orbit"));
     sim.step(2);
     const before = sim.snapshot();
     expect(len(before.attacker.velocity)).toBeGreaterThan(0);
-    sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "match"), initialDistance: 3000 });
+    sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "keepAtRange"), initialDistance: 3000 });
     const after = sim.snapshot();
     expect(after.time).toBe(before.time);
-    expect(after.attacker.mode).toBe("match");
+    expect(after.attacker.mode).toBe("keepAtRange");
     expect(after.attacker.position).toEqual(before.attacker.position);
     expect(after.attacker.velocity).toEqual(before.attacker.velocity);
     expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(3000, 6);
   });
 
-  test("computes attacker command before target command by default", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("orbit") });
+  test("computes attacker command before target command", () => {
+    const sim = makeSim(simConfig("orbit"));
     expect(autopilot.computeVelocity).not.toHaveBeenCalled();
     sim.step(1);
     expect(autopilot.computeVelocity.mock.calls.map(([ship]) => ship.id)).toEqual(["attacker", "target"]);
-  });
-
-  test("computes target command first when attacker is matching", () => {
-    const sim = new SimulationImpl({ autopilot, simConfig: simConfig("match") });
-    expect(autopilot.computeVelocity).not.toHaveBeenCalled();
-    sim.step(1);
-    expect(autopilot.computeVelocity.mock.calls.map(([ship]) => ship.id)).toEqual(["target", "attacker"]);
+    expect(autopilot.computeVelocity.mock.calls[0][2]).toBe(0);
+    expect(autopilot.computeVelocity.mock.calls[1][2]).toBe(0);
   });
 });

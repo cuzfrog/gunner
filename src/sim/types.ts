@@ -3,12 +3,7 @@ import type { Vec2 } from "../math";
 export const SIG_RESOLUTIONS = { S: 40, M: 125, L: 400, XL: 2000 } as const;
 export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
 
-export type AutopilotMode =
-  | "orbit"
-  | "keepAtRange"
-  | "approach"
-  | "retreat"
-  | "match";
+export type AutopilotMode = "orbit" | "keepAtRange";
 
 export type OrbitDirection = "cw" | "ccw";
 

@@ -59,13 +59,8 @@ export class SimulationImpl implements Simulation {
   }
 
   private computeCommands(): { attacker: Vec2; target: Vec2 } {
-    if (this.attacker.mode === "match") {
-      const target = this.autopilot.computeVelocity(this.target, this.attacker);
-      const attacker = this.autopilot.computeVelocity(this.attacker, this.target);
-      return { attacker, target };
-    }
-    const attacker = this.autopilot.computeVelocity(this.attacker, this.target);
-    const target = this.autopilot.computeVelocity(this.target, this.attacker);
+    const attacker = this.autopilot.computeVelocity(this.attacker, this.target, this.time);
+    const target = this.autopilot.computeVelocity(this.target, this.attacker, this.time);
     return { attacker, target };
   }
 }

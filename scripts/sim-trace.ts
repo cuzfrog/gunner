@@ -16,7 +16,7 @@ interface TraceParams {
   config: SimConfig;
 }
 
-const AUTOPILOT_MODES: readonly string[] = ["orbit", "keepAtRange", "approach", "retreat", "match"];
+const AUTOPILOT_MODES: readonly string[] = ["orbit", "keepAtRange"];
 
 function parseParams(args: string[]): TraceParams {
   const draft = {

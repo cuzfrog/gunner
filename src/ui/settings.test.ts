@@ -35,7 +35,7 @@ const URL_SETTINGS: UserSettings = {
   attackerRange: 3000,
   initialDistance: 3000,
   targetSpeed: 800,
-  targetMode: "match",
+  targetMode: "keepAtRange",
   targetRange: 3000,
   targetSig: 125,
   simSpeed: 2,
