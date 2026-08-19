@@ -101,6 +101,21 @@ function setInputValues(document: Document): void {
   }
   getFake(document, "attacker-overload").checked = true;
   getFake(document, "target-overload").checked = true;
+
+  addChoiceButtons(document, "sig-res-options", ["S", "M", "L", "XL"], "S");
+  addChoiceButtons(document, "attacker-mode-options", ["keepAtRange", "orbit"], "keepAtRange");
+  addChoiceButtons(document, "target-mode-options", ["orbit", "keepAtRange"], "orbit");
+}
+
+function addChoiceButtons(document: Document, groupId: string, values: string[], selected: string): void {
+  const group = getFake(document, groupId);
+  for (const value of values) {
+    const button = new FakeElement();
+    button.setAttribute("data-value", value);
+    button.setAttribute("aria-pressed", String(value === selected));
+    if (value === selected) button.classList.toggle("active", true);
+    group.appendChild(button);
+  }
 }
 
 function fakeLocation(href = "http://localhost/"): LocationProvider {
@@ -1557,6 +1572,72 @@ describe("DomControls", () => {
     buildControls(globalThis.document, settings);
 
     expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("20%");
+  });
+
+  test("clicking a sigRes button updates the hidden select and tracking display", () => {
+    const { controls } = buildControls(globalThis.document);
+    const button = findVisibleButton(globalThis.document, "sig-res-options", "M");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "sigRes").value).toBe("M");
+    expect(button.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    expect(controls.getTurret().sigResolution).toBe(125);
+  });
+
+  test("clicking attacker mode button updates getConfig", () => {
+    const { controls } = buildControls(globalThis.document);
+    findVisibleButton(globalThis.document, "attacker-mode-options", "orbit").trigger("click");
+    expect(controls.getConfig().attacker.mode).toBe("orbit");
+  });
+
+  test("clicking target mode button updates getConfig", () => {
+    const { controls } = buildControls(globalThis.document);
+    findVisibleButton(globalThis.document, "target-mode-options", "keepAtRange").trigger("click");
+    expect(controls.getConfig().target.mode).toBe("keepAtRange");
+  });
+
+  test("loadSettings restores the active buttons and aria-pressed state", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "XL",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "orbit",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "keepAtRange",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    const sigResButton = findVisibleButton(globalThis.document, "sig-res-options", "XL");
+    const attackerButton = findVisibleButton(globalThis.document, "attacker-mode-options", "orbit");
+    const targetButton = findVisibleButton(globalThis.document, "target-mode-options", "keepAtRange");
+    expect(sigResButton.getAttribute("aria-pressed")).toBe("true");
+    expect(attackerButton.getAttribute("aria-pressed")).toBe("true");
+    expect(targetButton.getAttribute("aria-pressed")).toBe("true");
+    expect(sigResButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    expect(attackerButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    expect(targetButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
+    const sigResSButton = findVisibleButton(globalThis.document, "sig-res-options", "S");
+    expect(sigResSButton.getAttribute("aria-pressed")).toBe("false");
+    expect(sigResSButton.classList.toggle).toHaveBeenLastCalledWith("active", false);
   });
 });
 

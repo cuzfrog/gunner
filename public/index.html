@@ -14,7 +14,10 @@
   <div class="container">
     <header class="header">
       <div class="header-left">
-        <h1>Gunner</h1>
+        <div class="header-title">
+          <h1>Gunner</h1>
+          <span class="version-badge" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.1.0</span>
+        </div>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
       </div>
       <div class="header-right">
@@ -81,15 +84,25 @@
           </span>
           <input type="number" id="tracking" value="0.32" step="any" min="0">
         </label>
-        <label>
-          <span data-i18n="label.turretSigResolution">Turret sig. resolution</span>
-          <select id="sigRes">
+        <div class="field-group sigres-group">
+          <span class="field-label" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+
+          <select id="sigRes" hidden>
             <option value="S" selected>S (40 m)</option>
             <option value="M">M (125 m)</option>
             <option value="L">L (400 m)</option>
             <option value="XL">XL (2000 m)</option>
           </select>
-        </label>
+
+          <div class="segmented-control choice-selector sigres-selector"
+               id="sig-res-options" role="group"
+               data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+            <button type="button" data-value="S" class="active" aria-pressed="true" title="S (40 m)">S</button>
+            <button type="button" data-value="M" aria-pressed="false" title="M (125 m)">M</button>
+            <button type="button" data-value="L" aria-pressed="false" title="L (400 m)">L</button>
+            <button type="button" data-value="XL" aria-pressed="false" title="XL (2000 m)">XL</button>
+          </div>
+        </div>
         <div class="field-row">
           <label>
             <span data-i18n="label.optimalRange">Optimal range</span>
@@ -143,13 +156,23 @@
           </label>
         </div>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.mode">Mode</span>
-            <select id="attacker-mode">
+          <div class="field-group mode-group">
+            <span class="field-label" data-i18n="label.mode">Mode</span>
+
+            <select id="attacker-mode" hidden>
               <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
               <option value="orbit" data-i18n="mode.orbit">Orbit</option>
             </select>
-          </label>
+
+            <div class="segmented-control choice-selector mode-selector"
+                 id="attacker-mode-options" role="group"
+                 data-i18n-aria-label="label.mode" aria-label="Mode">
+              <button type="button" data-value="keepAtRange" class="active" aria-pressed="true"
+                      data-i18n="mode.keepAtRange" data-i18n-title="mode.keepAtRange" title="Keep at range">Keep at range</button>
+              <button type="button" data-value="orbit" aria-pressed="false"
+                      data-i18n="mode.orbit" data-i18n-title="mode.orbit" title="Orbit">Orbit</button>
+            </div>
+          </div>
           <label>
             <span data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
@@ -158,7 +181,7 @@
             </span>
           </label>
         </div>
-        <div class="slider-field">
+        <div class="slider-field maneuver-field">
           <span class="slider-label-row">
             <span data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
             <button type="button" class="info-hint"
@@ -186,29 +209,32 @@
 
       <section class="canvas-section">
         <canvas id="scene" width="800" height="600"></canvas>
+
         <div class="controls">
-          <button id="play" class="primary">Play</button>
-          <button id="reset" data-i18n="button.reset">Reset</button>
-          <label>
-            <span data-i18n="label.simulationSpeed">Speed</span>
-            <select id="sim-speed">
-              <option value="0.25">0.25x</option>
-              <option value="0.5">0.5x</option>
-              <option value="1">1x</option>
-              <option value="2">2x</option>
-              <option value="4" selected>4x</option>
-              <option value="8">8x</option>
-            </select>
-          </label>
-        </div>
-        <div class="canvas-options">
-          <div class="slider-field">
-            <span class="slider-label-row">
-              <span data-i18n="label.gridBrightness">Grid brightness</span>
+          <div class="playback-controls">
+            <button id="play" class="primary">Play</button>
+            <button id="reset" data-i18n="button.reset">Reset</button>
+          </div>
+
+          <div class="simulation-controls">
+            <div class="control-field speed-control">
+              <label for="sim-speed" data-i18n="label.simulationSpeed">Speed</label>
+              <select id="sim-speed">
+                <option value="0.25">0.25x</option>
+                <option value="0.5">0.5x</option>
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="4" selected>4x</option>
+                <option value="8">8x</option>
+              </select>
+            </div>
+
+            <div class="control-field grid-brightness-control">
+              <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
+              <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.2"
+                     style="--fill: 20%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
               <output class="slider-value" id="grid-brightness-value" for="grid-brightness-slider">20%</output>
-            </span>
-            <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.2"
-                   style="--fill: 20%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
+            </div>
           </div>
         </div>
       </section>
@@ -265,13 +291,23 @@
           </label>
         </div>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.mode">Mode</span>
-            <select id="target-mode">
+          <div class="field-group mode-group">
+            <span class="field-label" data-i18n="label.mode">Mode</span>
+
+            <select id="target-mode" hidden>
               <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
               <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
             </select>
-          </label>
+
+            <div class="segmented-control choice-selector mode-selector"
+                 id="target-mode-options" role="group"
+                 data-i18n-aria-label="label.mode" aria-label="Mode">
+              <button type="button" data-value="orbit" class="active" aria-pressed="true"
+                      data-i18n="mode.orbit" data-i18n-title="mode.orbit" title="Orbit">Orbit</button>
+              <button type="button" data-value="keepAtRange" aria-pressed="false"
+                      data-i18n="mode.keepAtRange" data-i18n-title="mode.keepAtRange" title="Keep at range">Keep at range</button>
+            </div>
+          </div>
           <label>
             <span data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">

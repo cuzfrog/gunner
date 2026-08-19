@@ -47,9 +47,29 @@ body {
 
 .header-left {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.header-title {
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  flex: none;
+}
+
+.version-badge {
+  padding: 1px 5px;
+  background: rgba(92, 203, 203, 0.08);
+  border: 1px solid rgba(92, 203, 203, 0.35);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .header-right {
@@ -235,12 +255,47 @@ canvas {
 
 .controls {
   display: flex;
-  gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .canvas-section .controls {
   margin-top: auto;
+}
+
+.playback-controls,
+.simulation-controls,
+.control-field {
+  display: flex;
+  align-items: center;
+}
+
+.playback-controls {
+  flex: none;
+  gap: 10px;
+}
+
+.simulation-controls {
+  min-width: 0;
+  margin-left: auto;
+  gap: 12px;
+}
+
+.control-field {
+  min-width: 0;
+  gap: 6px;
+}
+
+.control-field label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .controls button,
@@ -263,8 +318,10 @@ canvas {
   background-image: var(--dropdown-arrow);
   background-repeat: no-repeat;
   background-position: right 8px center;
-  text-align: center;
-  padding: 8px 24px;
+  min-width: 82px;
+  padding: 8px 24px 8px 8px;
+  text-align: left;
+  text-align-last: left;
 }
 
 .controls button.primary {
@@ -275,15 +332,6 @@ canvas {
 .controls button:hover,
 .controls select:hover {
   border-color: var(--accent-teal);
-}
-
-.controls label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  font-size: 12px;
-  color: var(--text-secondary);
 }
 
 .results {
@@ -491,25 +539,46 @@ canvas {
   margin-bottom: 6px;
 }
 
-.panel .slider-label-row,
-.canvas-options .slider-label-row {
+.panel .slider-label-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
 }
 
-.panel .slider-label-row > span,
-.canvas-options .slider-label-row > span {
+.panel .slider-label-row > span {
   margin-bottom: 0;
 }
 
-.panel .slider-value,
-.canvas-options .slider-value {
+.panel .slider-value {
   margin-left: auto;
   font-family: "Share Tech Mono", monospace;
   font-size: 12px;
   color: var(--accent-teal);
+}
+
+.panel .maneuver-field {
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.panel .maneuver-field .slider-label-row {
+  margin-bottom: 2px;
+}
+
+.grid-brightness-control input[type="range"] {
+  width: 96px;
+  flex: none;
+}
+
+.grid-brightness-control .slider-value {
+  min-width: 3ch;
+  margin-left: 0;
+  color: var(--accent-teal);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  line-height: 1;
+  text-align: right;
 }
 
 .info-hint {
@@ -534,7 +603,7 @@ canvas {
 }
 
 .panel input[type="range"],
-.canvas-options input[type="range"] {
+.controls input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -545,7 +614,7 @@ canvas {
 }
 
 .panel input[type="range"]::-webkit-slider-runnable-track,
-.canvas-options input[type="range"]::-webkit-slider-runnable-track {
+.controls input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   background: linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) var(--fill, 0%));
   border: 1px solid var(--border-dim);
@@ -553,7 +622,7 @@ canvas {
 }
 
 .panel input[type="range"]::-webkit-slider-thumb,
-.canvas-options input[type="range"]::-webkit-slider-thumb {
+.controls input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
   height: 16px;
@@ -565,7 +634,7 @@ canvas {
 }
 
 .panel input[type="range"]::-moz-range-track,
-.canvas-options input[type="range"]::-moz-range-track {
+.controls input[type="range"]::-moz-range-track {
   height: 4px;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
@@ -573,14 +642,14 @@ canvas {
 }
 
 .panel input[type="range"]::-moz-range-progress,
-.canvas-options input[type="range"]::-moz-range-progress {
+.controls input[type="range"]::-moz-range-progress {
   height: 4px;
   background: var(--accent-teal);
   border-radius: 2px;
 }
 
 .panel input[type="range"]::-moz-range-thumb,
-.canvas-options input[type="range"]::-moz-range-thumb {
+.controls input[type="range"]::-moz-range-thumb {
   width: 10px;
   height: 14px;
   background: var(--bg-panel);
@@ -590,9 +659,9 @@ canvas {
 }
 
 .panel input[type="range"]:hover::-webkit-slider-thumb,
-.canvas-options input[type="range"]:hover::-webkit-slider-thumb { border-color: var(--accent-blue); }
+.controls input[type="range"]:hover::-webkit-slider-thumb { border-color: var(--accent-blue); }
 .panel input[type="range"]:hover::-moz-range-thumb,
-.canvas-options input[type="range"]:hover::-moz-range-thumb { border-color: var(--accent-blue); }
+.controls input[type="range"]:hover::-moz-range-thumb { border-color: var(--accent-blue); }
 
 .panel-divider {
   border: 0;
@@ -643,6 +712,47 @@ canvas {
 
 .skill-tuner {
   flex-wrap: nowrap;
+}
+
+.choice-selector {
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.choice-selector button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.sigres-selector button {
+  flex: 1 1 0;
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.field-row > .mode-group {
+  min-width: 0;
+}
+
+.mode-selector {
+  flex-wrap: nowrap;
+}
+
+.mode-selector button {
+  padding-right: 4px;
+  padding-left: 4px;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.mode-selector button[data-value="orbit"] {
+  flex: 0.8 1 0;
+}
+
+.mode-selector button[data-value="keepAtRange"] {
+  flex: 1.2 1 0;
 }
 
 .segmented-control button,
@@ -880,6 +990,17 @@ canvas {
 @media (max-width: 480px) {
   .field-row {
     grid-template-columns: 1fr;
+  }
+
+  .simulation-controls {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .grid-brightness-control input[type="range"] {
+    width: 72px;
   }
 }
 

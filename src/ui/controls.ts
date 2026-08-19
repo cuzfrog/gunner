@@ -81,6 +81,7 @@ export class DomControls implements Controls {
       trackingUnitRad: el("tracking-unit-rad"),
       trackingUnitScore: el("tracking-unit-score"),
       sigRes: el("sigRes"),
+      sigResOptions: el("sig-res-options"),
       optimal: el("optimal"),
       falloff: el("falloff"),
       hullOptions: el("hull-options"),
@@ -97,6 +98,7 @@ export class DomControls implements Controls {
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
+      attackerModeOptions: el("attacker-mode-options"),
       attackerRange: el("attacker-range"),
       maneuverAggressivity: el("maneuver-aggressivity"),
       maneuverAggressivitySlider: el("maneuver-aggressivity-slider"),
@@ -115,6 +117,7 @@ export class DomControls implements Controls {
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
       targetMode: el("target-mode"),
+      targetModeOptions: el("target-mode-options"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
       simSpeed: el("sim-speed"),
@@ -341,12 +344,14 @@ export class DomControls implements Controls {
     this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
 
     (this.els.sigRes as HTMLSelectElement).value = settings.sigRes;
+    this.setChoiceGroup(this.els.sigResOptions, settings.sigRes);
     (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
     (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
     (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
     (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
+    this.setChoiceGroup(this.els.attackerModeOptions, settings.attackerMode);
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
     (this.els.gridBrightnessSlider as HTMLInputElement).value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
@@ -355,6 +360,7 @@ export class DomControls implements Controls {
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
     (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
+    this.setChoiceGroup(this.els.targetModeOptions, settings.targetMode);
     (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
     (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
@@ -570,6 +576,10 @@ export class DomControls implements Controls {
     (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
     (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
+
+    this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes as HTMLSelectElement, ["S", "M", "L", "XL"]);
+    this.bindChoiceGroup(this.els.attackerModeOptions, this.els.attackerMode as HTMLSelectElement, ["keepAtRange", "orbit"]);
+    this.bindChoiceGroup(this.els.targetModeOptions, this.els.targetMode as HTMLSelectElement, ["orbit", "keepAtRange"]);
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -1000,6 +1010,33 @@ export class DomControls implements Controls {
     }
     select.value = selected;
     this.setSkillActive(side, skillLevelFromString(selected));
+  }
+
+  private bindChoiceGroup(group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): void {
+    for (const button of Array.from(group.children)) {
+      button.addEventListener("click", () => this.onChoiceButtonClick(group, select, button, values));
+    }
+  }
+
+  private onChoiceButtonClick(
+    group: HTMLElement,
+    select: HTMLSelectElement,
+    button: Element,
+    values: readonly string[],
+  ): void {
+    const value = button.getAttribute("data-value") ?? "";
+    if (!values.includes(value)) return;
+    select.value = value;
+    this.setChoiceGroup(group, value);
+    select.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  private setChoiceGroup(group: HTMLElement, value: string): void {
+    for (const button of Array.from(group.children)) {
+      const active = button.getAttribute("data-value") === value;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
   }
 }
 

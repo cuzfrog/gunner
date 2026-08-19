@@ -149,6 +149,11 @@ export const I18N_DICTIONARY = {
     zh: "网格亮度",
     ja: "グリッドの明るさ",
   },
+  "label.version": {
+    en: "Version",
+    zh: "版本",
+    ja: "バージョン",
+  },
   "label.initialDistance": {
     en: "Initial distance",
     zh: "初始距离",
