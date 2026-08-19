@@ -754,19 +754,11 @@ canvas {
   max-width: 100%;
 }
 
-.sigres-selector button.active {
-  background: rgba(246, 124, 15, 0.12);
-}
-
 .sigres-selector button.active .sigres-class,
 .sigres-selector button:hover:not(:disabled) .sigres-class,
 .sigres-selector button.active .sigres-value,
 .sigres-selector button:hover:not(:disabled) .sigres-value {
   color: inherit;
-}
-
-.sigres-selector button.active .sigres-class {
-  font-weight: 700;
 }
 
 .segmented-control button,
@@ -920,6 +912,7 @@ canvas {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 .skill-trigger:hover { border-color: var(--accent-teal); }
