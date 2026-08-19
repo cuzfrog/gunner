@@ -14,6 +14,7 @@ const COLORS = {
   transversal: "#fce447",
   los: "rgba(92, 203, 203, 0.5)",
   text: "#e8eef0",
+  scrim: "rgba(5, 8, 12, 0.7)",
   optimalRing: "#9cc954",
   falloffRing: "#f67c0f",
 } as const;
@@ -223,22 +224,22 @@ export class CanvasRenderer implements Renderer {
 
     this.ctx.textAlign = "left";
     this.ctx.textBaseline = "top";
-    let y = 14;
+    let y = 10;
     for (const line of lines) {
       this.drawTextAt(12, y, line, COLORS.text, false);
-      y += 22;
+      y += 17;
     }
   }
 
   private drawTextAt(x: number, y: number, text: string, color: string, center = false): void {
-    this.ctx.font = '16px "Share Tech Mono", monospace';
+    this.ctx.font = '13px "Share Tech Mono", monospace';
     this.ctx.textAlign = center ? "center" : "left";
     this.ctx.textBaseline = center ? "middle" : "top";
-    this.ctx.fillStyle = COLORS.bg;
+    this.ctx.fillStyle = COLORS.scrim;
     const metrics = this.ctx.measureText(text);
     const padding = 4;
-    const lineHeight = 20;
-    this.ctx.fillRect(x - (center ? metrics.width / 2 + padding : 0), y - (center ? lineHeight / 2 : 0), metrics.width + padding * 2, lineHeight);
+    const lineHeight = 16;
+    this.ctx.fillRect(x - (center ? metrics.width / 2 + padding : padding), y - (center ? lineHeight / 2 : 0), metrics.width + padding * 2, lineHeight);
     this.ctx.fillStyle = color;
     this.ctx.fillText(text, x, y);
   }

@@ -1,4 +1,4 @@
-import type { HitChance } from "../sim";
+import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
 import { SHIP_PROFILES, effectiveStats, fittingOptions } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -652,6 +652,26 @@ describe("DomControls", () => {
     langZh.trigger("click");
 
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("Skill 5");
+  });
+
+  test("update colors the hit chance value based on chance", () => {
+    const { controls } = buildControls(globalThis.document);
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 1000, relVelocity: { x: 0, y: 0 }, radialVelocity: 0, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 0, angularVelocity: 0 };
+
+    controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
+    expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
+    expect(getFake(globalThis.document, "res-hit").style.color).toBe("#9cc954");
+
+    controls.update(frame, { chance: 0.3, trackingTerm: 1.5, rangeTerm: 1.5 });
+    expect(getFake(globalThis.document, "res-hit").style.color).toBe("#fce447");
+  });
+
+  test("disabled overload button is not visually active on a fresh start", () => {
+    buildControls(globalThis.document);
+    const button = getFake(globalThis.document, "attacker-overload-button");
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    expect(button.classList.toggle).toHaveBeenLastCalledWith("active", false);
   });
 });
 

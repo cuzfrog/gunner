@@ -29,7 +29,7 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 12px;
 }
 
 .header {
@@ -37,10 +37,10 @@ body {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   border-bottom: 1px solid var(--border-dim);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .header-left {
@@ -54,7 +54,7 @@ body {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .header h1 {
@@ -104,22 +104,21 @@ body {
 .main {
   display: grid;
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
-  gap: 20px;
+  gap: 14px;
   align-items: start;
 }
 
 .panel,
-.canvas-section,
-.results {
+.canvas-section {
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 14px;
+  padding: 12px;
 }
 
 .panel h2,
 .canvas-section h2 {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-family: "Chakra Petch", sans-serif;
   font-size: 12px;
   color: var(--text-secondary);
@@ -129,9 +128,27 @@ body {
   padding-bottom: 6px;
 }
 
+.attacker-panel h2 {
+  color: var(--accent-teal);
+  border-bottom-color: rgba(92, 203, 203, 0.4);
+}
+
+.attacker-panel {
+  border-left: 2px solid var(--accent-teal);
+}
+
+.target-panel h2 {
+  color: var(--accent-orange);
+  border-bottom-color: rgba(246, 124, 15, 0.4);
+}
+
+.target-panel {
+  border-left: 2px solid var(--accent-orange);
+}
+
 .panel label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .panel span {
@@ -146,19 +163,23 @@ body {
 .panel input,
 .panel select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 5px 8px;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
   font-size: 14px;
   border-radius: 2px;
+  min-height: 28px;
 }
 
-.panel input:focus,
-.panel select:focus {
-  outline: none;
-  border-color: var(--accent-teal);
+.panel input:focus-visible,
+.panel select:focus-visible,
+.profile-bar :focus-visible,
+.controls :focus-visible,
+.lang-toggle button:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: -1px;
 }
 
 .panel input.hull-invalid {
@@ -169,23 +190,6 @@ body {
   color: var(--text-dim);
   border-color: rgba(92, 203, 203, 0.12);
   cursor: not-allowed;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: auto;
-  height: auto;
-  margin: 0;
-}
-
-.checkbox-label span {
-  margin-bottom: 0;
 }
 
 .panel .hull-hint {
@@ -200,7 +204,7 @@ body {
 .canvas-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 canvas {
@@ -229,6 +233,7 @@ canvas {
   padding: 8px 14px;
   cursor: pointer;
   border-radius: 2px;
+  min-height: 32px;
 }
 
 .controls button.primary {
@@ -253,16 +258,20 @@ canvas {
 .results {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 16px;
-  margin-bottom: 16px;
+  gap: 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .result-card {
+  display: flex;
+  flex-direction: column;
   text-align: center;
-  border: 1px solid var(--border-dim);
-  padding: 10px;
-  border-radius: 2px;
+  padding: 2px 12px;
+}
+
+.result-card + .result-card {
+  border-left: 1px solid var(--border-dim);
 }
 
 .result-card .label {
@@ -271,18 +280,15 @@ canvas {
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .result-card .value {
   display: block;
   font-family: "Share Tech Mono", monospace;
   font-size: 18px;
+  line-height: 28px;
   color: var(--text-primary);
-}
-
-.result-card.hit-chance {
-  border-color: var(--accent-teal);
 }
 
 .result-card.hit-chance .value {
@@ -290,7 +296,6 @@ canvas {
   font-family: "Chakra Petch", sans-serif;
 }
 
-.panel .field-label-row,
 .panel .tracking-label-row {
   display: flex;
   align-items: center;
@@ -299,7 +304,6 @@ canvas {
   margin-bottom: 4px;
 }
 
-.panel .field-label-row .field-label,
 .panel .tracking-label-row #tracking-label-text {
   margin-bottom: 0;
 }
@@ -335,22 +339,23 @@ canvas {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
-  padding: 10px 12px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border-dim);
-  border-radius: 2px;
+  padding: 6px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-dim);
+  border-radius: 0;
 }
 
 .profile-name-input,
 .profile-select {
-  padding: 6px 8px;
+  padding: 0 8px;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
   font-size: 13px;
   border-radius: 2px;
+  min-height: 30px;
 }
 
 .profile-name-input {
@@ -362,7 +367,7 @@ canvas {
 }
 
 .profile-bar button {
-  padding: 6px 12px;
+  padding: 0 12px;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   color: var(--text-secondary);
@@ -371,6 +376,7 @@ canvas {
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 2px;
+  min-height: 30px;
 }
 
 .profile-bar button:hover {
@@ -381,7 +387,7 @@ canvas {
 .share-status {
   font-size: 11px;
   color: var(--text-secondary);
-  margin-left: auto;
+  margin-left: 4px;
 }
 
 .author-portrait {
@@ -402,7 +408,7 @@ canvas {
 }
 
 .field-group {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .field-label {
@@ -414,11 +420,31 @@ canvas {
   margin-bottom: 3px;
 }
 
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.field-row > label {
+  min-width: 0;
+}
+
+.panel-divider {
+  border: 0;
+  border-top: 1px solid var(--border-dim);
+  margin: 8px 0;
+}
+
 .segmented-control,
 .skill-tuner {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
+}
+
+.skill-tuner {
+  flex-wrap: nowrap;
 }
 
 .segmented-control button,
@@ -487,22 +513,45 @@ canvas {
   pointer-events: none;
 }
 
-.propulsion-group .segmented-control {
-  margin-bottom: 6px;
+.propulsion-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 2px;
+  align-items: stretch;
+}
+
+.propulsion-group .field-label {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.propulsion-group .propulsion-selector {
+  grid-column: 1;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.propulsion-group .overload-button {
+  grid-column: 2;
+  align-self: stretch;
+}
+
+.propulsion-group > input[type="number"] {
+  grid-column: 1 / -1;
+  margin-top: 2px;
 }
 
 .propulsion-selector button {
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .overload-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 8px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 6px;
   flex: none;
 }
 
@@ -518,10 +567,12 @@ canvas {
 }
 
 .collapsible {
-  margin-bottom: 10px;
-  border-top: 1px solid var(--border-dim);
+  margin-bottom: 6px;
+  border: 0;
+}
+
+.collapsible[open] {
   border-bottom: 1px solid var(--border-dim);
-  background: transparent;
 }
 
 .collapsible summary {
@@ -529,7 +580,7 @@ canvas {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 4px;
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -574,7 +625,7 @@ canvas {
 }
 
 .collapsible .skill-tuner {
-  padding: 4px 8px 8px;
+  padding: 4px 4px 8px;
 }
 
 @media (max-width: 1100px) {
@@ -590,6 +641,28 @@ canvas {
   }
 
   .results {
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .results::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .results::-webkit-scrollbar-thumb {
+    background: var(--border-dim);
+    border-radius: 2px;
+  }
+
+  .result-card {
+    flex: 0 0 auto;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
   }
 }

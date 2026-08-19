@@ -126,7 +126,6 @@ export class DomControls implements Controls {
       resTrackPen: el("res-track-pen"),
       resRangePen: el("res-range-pen"),
       resHit: el("res-hit"),
-      resHitCard: el("res-hit-card"),
     };
 
     this.populateHullDatalist();
@@ -199,7 +198,7 @@ export class DomControls implements Controls {
     setText(this.els.resRangePen, `${rangePenalty.toFixed(1)}%`);
     setText(this.els.resHit, `${(hit.chance * 100).toFixed(1)}%`);
 
-    (this.els.resHitCard as HTMLElement).style.borderColor = hitChanceColor(hit.chance);
+    (this.els.resHit as HTMLElement).style.color = hitChanceColor(hit.chance);
   }
 
   setPlaying(playing: boolean): void {
@@ -707,6 +706,9 @@ export class DomControls implements Controls {
     const overload = this.els[`${side}Overload`] as HTMLInputElement;
     const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
     const disabled = propulsion.value === "" || propulsion.disabled;
+    const active = !disabled && overload.checked;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
     overload.disabled = disabled;
     button.disabled = disabled;
     button.setAttribute("aria-disabled", String(disabled));

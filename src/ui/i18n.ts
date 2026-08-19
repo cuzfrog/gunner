@@ -88,11 +88,6 @@ export const I18N_DICTIONARY = {
     zh: "超载",
     ja: "オーバーヒート",
   },
-  "label.overloadShort": {
-    en: "OL",
-    zh: "超载",
-    ja: "OH",
-  },
 
   "hint.hullSearch": {
     en: "Type ship name…",
