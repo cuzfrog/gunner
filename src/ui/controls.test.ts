@@ -2,7 +2,7 @@ import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "
 import { SHIP_PROFILES, effectiveStats, fittingOptions } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, SettingsStore, UserSettings } from "./settings";
+import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 
 const DEFAULT_INPUTS: Record<string, string> = {
@@ -96,6 +96,18 @@ function setInputValues(document: Document): void {
   getFake(document, "target-overload").checked = true;
 }
 
+function fakeLocation(href = "http://localhost/"): LocationProvider {
+  let currentHref = href;
+  return {
+    get href() {
+      return currentHref;
+    },
+    replace: (url) => {
+      currentHref = url;
+    },
+  };
+}
+
 function buildControls(document: Document, savedSettings: UserSettings | null = null) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
@@ -120,8 +132,9 @@ function buildControls(document: Document, savedSettings: UserSettings | null = 
     writeUrlToClipboard: vi.fn(async () => true),
   });
   const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
-  const controls = new DomControls({ hitChance, i18n, settingsStore, clipboard });
-  return { hitChance, i18n, settingsStore, clipboard, controls };
+  const location = fakeLocation();
+  const controls = new DomControls({ hitChance, i18n, settingsStore, clipboard, location });
+  return { hitChance, i18n, settingsStore, clipboard, location, controls };
 }
 
 function rifterProfile() {
@@ -178,6 +191,60 @@ describe("DomControls", () => {
     const [settings, passedClipboard] = settingsStore.writeUrlToClipboard.mock.calls[0];
     expect(settings.version).toBe(USER_SETTINGS_VERSION);
     expect(passedClipboard).toBe(clipboard);
+  });
+
+  test("selecting a saved profile updates the URL to the encoded shareable link", () => {
+    const { settingsStore, location } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const encodedUrl = "http://localhost/?c=ENCODED_PROFILE";
+    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.encodeUrl.mockReturnValue(encodedUrl);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(settingsStore.loadProfile).toHaveBeenCalledWith("brawler");
+    expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(location.href).toBe(encodedUrl);
+  });
+
+  test("selecting the empty profile option does not update the URL", () => {
+    const { settingsStore, location } = buildControls(globalThis.document);
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "";
+    select.trigger("change");
+
+    expect(settingsStore.loadProfile).not.toHaveBeenCalled();
+    expect(settingsStore.encodeUrl).not.toHaveBeenCalled();
+    expect(location.href).toBe("http://localhost/");
   });
 
   test("selecting a hull populates base stats and enables tier-correct propulsion options", () => {

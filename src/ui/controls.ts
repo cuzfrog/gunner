@@ -19,7 +19,7 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, SettingsStore, UserSettings } from "./settings";
+import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
@@ -46,6 +46,7 @@ export class DomControls implements Controls {
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
   private readonly clipboard: ClipboardProvider;
+  private readonly location: LocationProvider;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -58,16 +59,19 @@ export class DomControls implements Controls {
     i18n,
     settingsStore,
     clipboard,
+    location,
   }: {
     hitChance: HitChance;
     i18n: I18n;
     settingsStore: SettingsStore;
     clipboard: ClipboardProvider;
+    location: LocationProvider;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
     this.settingsStore = settingsStore;
     this.clipboard = clipboard;
+    this.location = location;
     this.trackingInput = new TrackingInput();
     this.els = {
       tracking: el("tracking"),
@@ -407,6 +411,7 @@ export class DomControls implements Controls {
     if (!profile) return;
     this.loadSettings(profile);
     (this.els.profileSelect as HTMLSelectElement).value = name;
+    this.syncUrl();
     this.callbacks?.onConfigChange();
   }
 
@@ -416,6 +421,10 @@ export class DomControls implements Controls {
     this.settingsStore.deleteProfile(name);
     this.renderProfiles();
     (this.els.profileSelect as HTMLSelectElement).value = "";
+  }
+
+  private syncUrl(): void {
+    this.location.replace(this.settingsStore.encodeUrl(this.getSettings()));
   }
 
   private async shareLink(): Promise<void> {
