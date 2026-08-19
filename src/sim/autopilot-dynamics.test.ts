@@ -1,5 +1,5 @@
 import { dist, len } from "../math";
-import { NaiveAutopilot } from "./autopilot";
+import { ReactiveAutopilot } from "./autopilot";
 import { SimulationImpl } from "./simulation";
 import type { SimConfig } from "./types";
 
@@ -13,7 +13,7 @@ const DT = 1 / 60;
 const STEPS = 180 * 60;
 
 function runToSteadyState(): ReturnType<SimulationImpl["snapshot"]> {
-  const steering = new NaiveAutopilot();
+  const steering = new ReactiveAutopilot();
   const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig });
   for (let i = 0; i < STEPS; i++) {
     sim.step(DT);

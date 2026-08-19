@@ -1,6 +1,6 @@
 import { len, vec } from "../math";
 import type { Autopilot } from "./autopilot";
-import { NaiveAutopilot } from "./autopilot";
+import { ReactiveAutopilot } from "./autopilot";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
@@ -105,7 +105,7 @@ describe("PredictiveAutopilot", () => {
   });
 
   test("command never exceeds max speed", () => {
-    const autopilot = makePredictive(new NaiveAutopilot());
+    const autopilot = makePredictive(new ReactiveAutopilot());
     const attacker = makeShip("attacker", [0, 0], 300, "keepAtRange", 5000);
     const target = makeShip("target", [0, 5000], 300, "orbit", 5000);
     const cmd = autopilot.computeVelocity(attacker, target, 0);
@@ -135,15 +135,15 @@ describe("PredictiveAutopilot", () => {
     };
     const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
 
-    const naive = new NaiveAutopilot();
+    const reactive = new ReactiveAutopilot();
     const kinematicsForSim = new KinematicsImpl();
-    const baseline = new SimulationImpl({ attackerSteering: naive, targetSteering: naive, simConfig });
-    const predictive = new PredictiveAutopilot({ targetSteering: new NaiveAutopilot(), kinematics: kinematicsForSim });
-    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new NaiveAutopilot(), simConfig });
+    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, simConfig });
+    const predictive = new PredictiveAutopilot({ targetSteering: new ReactiveAutopilot(), kinematics: kinematicsForSim });
+    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), simConfig });
 
     const dt = 0.25;
     const steps = Math.round(120 / dt);
-    let meanNaive = 0;
+    let meanBaseline = 0;
     let meanPredictive = 0;
     for (let i = 0; i < steps; i++) {
       baseline.step(dt);
@@ -152,13 +152,13 @@ describe("PredictiveAutopilot", () => {
       const predSnap = predictiveSim.snapshot();
       const baseFrame = kinematicsForSim.computeEngagement(baseSnap.attacker, baseSnap.target, baseSnap.time);
       const predFrame = kinematicsForSim.computeEngagement(predSnap.attacker, predSnap.target, predSnap.time);
-      meanNaive += baseFrame.angularVelocity;
+      meanBaseline += baseFrame.angularVelocity;
       meanPredictive += predFrame.angularVelocity;
     }
-    meanNaive /= steps;
+    meanBaseline /= steps;
     meanPredictive /= steps;
 
     expect(meanPredictive).toBeGreaterThan(0);
-    expect(meanPredictive).toBeLessThan(0.7 * meanNaive);
+    expect(meanPredictive).toBeLessThan(0.7 * meanBaseline);
   });
 });

@@ -6,7 +6,7 @@ export interface Autopilot {
   computeVelocity(ship: ShipState, other: ShipState, time: number): Vec2;
 }
 
-export class NaiveAutopilot implements Autopilot {
+export class ReactiveAutopilot implements Autopilot {
   computeVelocity(ship: ShipState, other: ShipState, _time: number): Vec2 {
     const toOther = sub(other.position, ship.position);
     const d = len(toOther);
@@ -28,29 +28,33 @@ export class NaiveAutopilot implements Autopilot {
   }
 }
 
-const ORBIT_RANGE_GAIN = 0.5;
+const ORBIT_RANGE_GAIN = 20.0;
 const KEEP_RANGE_GAIN = 2.0;
 
 function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {
   // From-center vector is the opposite of to-other; it points from the
   // reference ship (orbit center) to this ship.
-  const fromCenterHat = scale(toOtherHat, -1);
+  const rHat = scale(toOtherHat, -1);
 
-  const tHat = (ship.orbitDirection ?? "cw") === "cw" ? perpCW(fromCenterHat) : perpCCW(fromCenterHat);
+  const tHat = (ship.orbitDirection ?? "cw") === "cw" ? perpCW(rHat) : perpCCW(rHat);
 
   const desiredRange = Math.max(ship.desiredRange, 1);
-  const openingRate = (ORBIT_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
+  const maxSpeed = ship.maxSpeed;
+  const tau = timeConstant(ship.mass, ship.inertiaModifier);
 
-  const otherOutward = dot(other.velocity, toOtherHat);
-  const tangentialVelocity = dot(ship.velocity, tHat);
-  const lagLead = (timeConstant(ship.mass, ship.inertiaModifier) * tangentialVelocity * tangentialVelocity) / d;
-  const radialSpeed = clampSpeed(openingRate - otherOutward - lagLead, ship.maxSpeed);
+  const vtRel = dot(sub(ship.velocity, other.velocity), tHat);
+  const lagLead = (tau * vtRel * vtRel) / d;
+  const rangeCmd = clampSpeed((ORBIT_RANGE_GAIN * maxSpeed * (desiredRange - d)) / desiredRange, maxSpeed);
+  const relRadial = clampSpeed(rangeCmd - lagLead, maxSpeed);
 
-  const radialVel = scale(fromCenterHat, radialSpeed);
-  const tangentialSpeed = Math.sqrt(ship.maxSpeed * ship.maxSpeed - radialSpeed * radialSpeed);
-  const tangentialVel = scale(tHat, tangentialSpeed);
+  const otherOutward = dot(other.velocity, rHat);
+  const outward = clampSpeed(otherOutward + relRadial, maxSpeed);
+  const budget = Math.sqrt(Math.max(maxSpeed * maxSpeed - outward * outward, 0));
+  const relTangential = Math.sqrt(Math.max(maxSpeed * maxSpeed - relRadial * relRadial, 0));
+  const otherTangential = dot(other.velocity, tHat);
+  const tangential = clampSpeed(otherTangential + relTangential, budget);
 
-  return add(radialVel, tangentialVel);
+  return add(scale(rHat, outward), scale(tHat, tangential));
 }
 
 function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): Vec2 {

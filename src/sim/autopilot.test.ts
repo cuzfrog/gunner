@@ -1,8 +1,8 @@
-import { add, dist, dot, len, perpCCW, perpCW, scale, vec, type Vec2 } from "../math";
-import { NaiveAutopilot } from "./autopilot";
+import { add, dist, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
+import { ReactiveAutopilot } from "./autopilot";
 import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
 
-const autopilot = new NaiveAutopilot();
+const autopilot = new ReactiveAutopilot();
 const DT = 0.1;
 const STEPS = 1000;
 
@@ -48,7 +48,7 @@ function runBoth(attacker: ShipState, target: ShipState, dt: number, steps: numb
   return dist(attacker.position, target.position);
 }
 
-describe("NaiveAutopilot", () => {
+describe("ReactiveAutopilot", () => {
   test("orbit points tangentially around the reference", () => {
     const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
     const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
@@ -223,6 +223,44 @@ describe("NaiveAutopilot", () => {
       expect(commandVec.x).toBeCloseTo(-1500, 5);
       expect(commandVec.y).toBeCloseTo(0, 5);
       expect(len(commandVec)).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("commands full speed for a clean orbit", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(len(cmd)).toBeCloseTo(ship.maxSpeed, 5);
+    });
+
+    test("co-moving tangential pair produces no inward radial command", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      const tHat = perpCW(fromCenterHat);
+      ship.velocity = scale(tHat, 1000);
+      other.velocity = scale(tHat, 1000);
+      const cmd = command(ship, other);
+      expect(dot(cmd, fromCenterHat)).toBeCloseTo(0, 5);
+      expect(len(cmd)).toBeCloseTo(ship.maxSpeed, 5);
+    });
+
+    test("catches up to a center moving radially away", () => {
+      const ship = makeShip("target", [0, 5000], "orbit", 1000, 5000);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      other.velocity = scale(fromCenterHat, 800);
+      const cmd = command(ship, other);
+      const outward = dot(cmd, fromCenterHat);
+      expect(outward).toBeGreaterThanOrEqual(800);
+      expect(outward).toBeLessThanOrEqual(ship.maxSpeed);
+    });
+
+    test("holds its range around a tangentially fleeing center", () => {
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1000, 5000, 1, 1e-6, "cw");
+      const target = makeShip("target", [0, 5000], "orbit", 1000, 5000, 1, 1e-6, "ccw");
+      const finalDistance = runBoth(attacker, target, DT, STEPS);
+      expect(finalDistance).toBeGreaterThan(4900);
+      expect(finalDistance).toBeLessThan(5100);
     });
   });
 });

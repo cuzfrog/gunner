@@ -1,5 +1,5 @@
 import { asClass, type AwilixContainer } from "awilix";
-import { NaiveAutopilot } from "./autopilot";
+import { ReactiveAutopilot } from "./autopilot";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
@@ -9,7 +9,7 @@ export function registerSimModule(cradle: AwilixContainer<object>): void {
   cradle.register({
     kinematics: asClass(KinematicsImpl).singleton(),
     hitChance: asClass(HitChanceImpl).singleton(),
-    targetSteering: asClass(NaiveAutopilot).singleton(),
+    targetSteering: asClass(ReactiveAutopilot).singleton(),
     attackerSteering: asClass(PredictiveAutopilot).singleton(),
     simulation: asClass(SimulationImpl).singleton(),
   });
