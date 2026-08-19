@@ -16,15 +16,17 @@ interface TraceParams {
   config: SimConfig;
 }
 
-const AUTOPILOT_MODES: readonly string[] = ["orbit", "keepAtRange"];
+const AUTOPILOT_MODES: readonly AutopilotMode[] = ["orbit", "keepAtRange"];
+const DEFAULT_ATTACKER_MODE: AutopilotMode = "keepAtRange";
+const DEFAULT_TARGET_MODE: AutopilotMode = "orbit";
 
 function parseParams(args: string[]): TraceParams {
   const draft = {
     durationSeconds: 120,
     sampleSeconds: 1,
     initialDistance: 5000,
-    attacker: { maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange" as AutopilotMode, desiredRange: 5000 },
-    target: { maxSpeed: 1000, mass: 10_000_000, inertiaModifier: 0.45, mode: "orbit" as AutopilotMode, desiredRange: 5000 },
+    attacker: { maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: DEFAULT_ATTACKER_MODE, desiredRange: 5000 },
+    target: { maxSpeed: 1000, mass: 10_000_000, inertiaModifier: 0.45, mode: DEFAULT_TARGET_MODE, desiredRange: 5000 },
   };
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
@@ -91,9 +93,13 @@ function parseNumber(flag: string, raw: string): number {
   return value;
 }
 
+function isAutopilotMode(raw: string): raw is AutopilotMode {
+  return AUTOPILOT_MODES.some((mode) => mode === raw);
+}
+
 function parseMode(raw: string): AutopilotMode {
-  if (!AUTOPILOT_MODES.includes(raw)) throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
-  return raw as AutopilotMode;
+  if (!isAutopilotMode(raw)) throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
+  return raw;
 }
 
 function trace(params: TraceParams): void {
@@ -138,8 +144,10 @@ function scenarioSummary(params: TraceParams): string {
   const { attacker, target } = params.config;
   const tau = (mass: number, inertia: number) => (mass * inertia * 1e-6).toFixed(2);
   return [
-    `attacker: mode=${attacker.mode} speed=${attacker.maxSpeed} range=${attacker.desiredRange} tau=${tau(attacker.mass, attacker.inertiaModifier)}s`,
-    `target:   mode=${target.mode} speed=${target.maxSpeed} range=${target.desiredRange} tau=${tau(target.mass, target.inertiaModifier)}s`,
+    `attacker: mode=${attacker.mode} speed=${attacker.maxSpeed} range=${attacker.desiredRange} ` +
+      `tau=${tau(attacker.mass, attacker.inertiaModifier)}s`,
+    `target:   mode=${target.mode} speed=${target.maxSpeed} range=${target.desiredRange} ` +
+      `tau=${tau(target.mass, target.inertiaModifier)}s`,
     `initial distance=${params.config.initialDistance} duration=${params.durationSeconds}s dt=${FIXED_DT}s`,
   ].join("\n");
 }
