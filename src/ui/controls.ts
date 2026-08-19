@@ -805,6 +805,7 @@ export class DomControls implements Controls {
     button.setAttribute("data-value", value);
     button.setAttribute("aria-pressed", "false");
     button.textContent = text;
+    button.setAttribute("title", text);
     button.addEventListener("click", onClick);
     container.appendChild(button);
     return button;

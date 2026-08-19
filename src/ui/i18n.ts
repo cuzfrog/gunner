@@ -88,6 +88,11 @@ export const I18N_DICTIONARY = {
     zh: "超载",
     ja: "オーバーヒート",
   },
+  "label.overloadShort": {
+    en: "OL",
+    zh: "超载",
+    ja: "OH",
+  },
   "propulsion.none": {
     en: "None",
     zh: "无",

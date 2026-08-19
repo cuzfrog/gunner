@@ -543,6 +543,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-propulsion").value).toBe("mwd-5mn");
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
+    expect(button.getAttribute("title")).toContain("5MN Microwarpdrive I");
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
   });
