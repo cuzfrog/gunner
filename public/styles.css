@@ -399,6 +399,104 @@ canvas {
   letter-spacing: 0.05em;
 }
 
+[hidden] {
+  display: none;
+}
+
+.field-group,
+.skill-control {
+  margin-bottom: 10px;
+}
+
+.skill-overload-row .skill-control {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.segmented-control,
+.skill-tuner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.segmented-control button,
+.skill-tuner button,
+.overload-button {
+  padding: 6px 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.segmented-control button,
+.skill-tuner button {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-tuner button {
+  padding: 6px 0;
+}
+
+.segmented-control button.active,
+.skill-tuner button.active,
+.overload-button.active {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.segmented-control button:hover:not(:disabled),
+.skill-tuner button:hover:not(:disabled),
+.overload-button:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.segmented-control.disabled,
+.skill-tuner.disabled,
+.overload-button:disabled,
+.segmented-control button:disabled,
+.skill-tuner button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segmented-control.disabled,
+.skill-tuner.disabled,
+.segmented-control button:disabled,
+.skill-tuner button:disabled {
+  pointer-events: none;
+}
+
+.overload-button {
+  align-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+}
+
+.overload-button svg {
+  display: block;
+}
+
 @media (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;

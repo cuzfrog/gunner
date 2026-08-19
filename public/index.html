@@ -14,7 +14,7 @@
   <div class="container">
     <header class="header">
       <div class="header-left">
-        <h1 data-i18n="app.title">Gunner</h1>
+        <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
       </div>
       <div class="header-right">
@@ -85,21 +85,25 @@
           <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="attacker-speed" value="0" step="any" min="0">
         </label>
-        <label>
-          <span data-i18n="label.propulsion">Propulsion</span>
-          <select id="attacker-propulsion" disabled>
+        <div class="field-group">
+          <span class="field-label" data-i18n="label.propulsion">Propulsion</span>
+          <select id="attacker-propulsion" hidden disabled>
             <option value="" data-i18n="propulsion.none">None</option>
           </select>
-        </label>
+          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
+            <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
+          </div>
+        </div>
         <div class="skill-overload-row">
-          <label>
-            <span data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="attacker-skills"></select>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="attacker-overload" checked>
-            <span data-i18n="label.overload">Overload</span>
-          </label>
+          <div class="skill-control">
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <select id="attacker-skills" hidden></select>
+            <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+          </div>
+          <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+          </button>
+          <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>
@@ -158,21 +162,25 @@
           <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
           <input type="number" id="target-speed" value="1000" step="any" min="0">
         </label>
-        <label>
-          <span data-i18n="label.propulsion">Propulsion</span>
-          <select id="target-propulsion" disabled>
+        <div class="field-group">
+          <span class="field-label" data-i18n="label.propulsion">Propulsion</span>
+          <select id="target-propulsion" hidden disabled>
             <option value="" data-i18n="propulsion.none">None</option>
           </select>
-        </label>
+          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
+            <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
+          </div>
+        </div>
         <div class="skill-overload-row">
-          <label>
-            <span data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="target-skills"></select>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="target-overload" checked>
-            <span data-i18n="label.overload">Overload</span>
-          </label>
+          <div class="skill-control">
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <select id="target-skills" hidden></select>
+            <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+          </div>
+          <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+          </button>
+          <input type="checkbox" id="target-overload" hidden checked>
         </div>
         <label>
           <span data-i18n="label.mass">Mass (kg)</span>

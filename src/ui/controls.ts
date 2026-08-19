@@ -80,8 +80,11 @@ export class DomControls implements Controls {
       attackerHull: el("attacker-hull"),
       attackerHullHint: el("attacker-hull-hint"),
       attackerPropulsion: el("attacker-propulsion"),
+      attackerPropulsionOptions: el("attacker-propulsion-options"),
       attackerSkills: el("attacker-skills"),
+      attackerSkillOptions: el("attacker-skill-options"),
       attackerOverload: el("attacker-overload"),
+      attackerOverloadButton: el("attacker-overload-button"),
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
@@ -91,8 +94,11 @@ export class DomControls implements Controls {
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
       targetPropulsion: el("target-propulsion"),
+      targetPropulsionOptions: el("target-propulsion-options"),
       targetSkills: el("target-skills"),
+      targetSkillOptions: el("target-skill-options"),
       targetOverload: el("target-overload"),
+      targetOverloadButton: el("target-overload-button"),
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
@@ -271,12 +277,10 @@ export class DomControls implements Controls {
     this.loadHull("target", settings.targetHull, settings.targetPropulsion);
 
     this.i18n.translateDocument();
-    this.renderSkillOptions("attacker");
-    this.renderSkillOptions("target");
-    (this.els.attackerSkills as HTMLSelectElement).value = String(settings.attackerSkillLevel ?? 5);
-    (this.els.attackerOverload as HTMLInputElement).checked = settings.attackerOverload ?? true;
-    (this.els.targetSkills as HTMLSelectElement).value = String(settings.targetSkillLevel ?? 5);
-    (this.els.targetOverload as HTMLInputElement).checked = settings.targetOverload ?? true;
+    this.renderSkillOptions("attacker", settings.attackerSkillLevel ?? 5);
+    this.renderSkillOptions("target", settings.targetSkillLevel ?? 5);
+    this.setOverloadActive("attacker", settings.attackerOverload ?? true);
+    this.setOverloadActive("target", settings.targetOverload ?? true);
     this.setOverloadDisabled("attacker");
     this.setOverloadDisabled("target");
     this.displayTrackingInput();
@@ -431,11 +435,13 @@ export class DomControls implements Controls {
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
     (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
     (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
+    (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
     (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
     (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
+    (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -503,16 +509,12 @@ export class DomControls implements Controls {
 
     (this.els[`${side}Hull`] as HTMLInputElement).value = profile.name;
     this.setHullValidation(side, false);
-    this.renderPropulsionOptions(side);
-
-    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
-    const module = propulsionId ? this.findPropulsionModule(profile, propulsionId) : undefined;
-    select.value = module ? module.id : "";
+    this.renderPropulsionOptions(side, propulsionId);
 
     if (updateStats) {
       this.updatePropulsionStats(side, true);
     } else {
-      this.updateHullHint(side, module);
+      this.updateHullHint(side, this.currentPropulsionModule(side));
     }
     if (persist) {
       this.persist();
@@ -596,6 +598,13 @@ export class DomControls implements Controls {
     return isPropulsionId(value) ? value : undefined;
   }
 
+  private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const id = this.currentPropulsionId(side);
+    if (!profile || !id) return undefined;
+    return this.findPropulsionModule(profile, id);
+  }
+
   private onPropulsionChange(side: "attacker" | "target"): void {
     if (side === "attacker" && !this.attackerProfile) return;
     if (side === "target" && !this.targetProfile) return;
@@ -623,37 +632,52 @@ export class DomControls implements Controls {
   }
 
   private renderAllPropulsionOptions(): void {
-    this.renderPropulsionOptions("attacker", (this.els.attackerPropulsion as HTMLSelectElement).value);
-    this.renderPropulsionOptions("target", (this.els.targetPropulsion as HTMLSelectElement).value);
+    this.renderPropulsionOptions("attacker", this.currentPropulsionId("attacker") ?? "");
+    this.renderPropulsionOptions("target", this.currentPropulsionId("target") ?? "");
   }
 
   private renderPropulsionOptions(side: "attacker" | "target", selectedId = ""): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    const group = this.els[`${side}PropulsionOptions`] as HTMLElement;
     select.innerHTML = "";
+    group.innerHTML = "";
+    group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
 
-    const none = document.createElement("option");
-    none.value = "";
-    none.textContent = this.i18n.t("propulsion.none");
-    select.appendChild(none);
+    const noneOption = document.createElement("option");
+    noneOption.value = "";
+    noneOption.textContent = this.i18n.t("propulsion.none");
+    select.appendChild(noneOption);
 
-    if (!profile) {
-      select.disabled = true;
-      select.value = "";
-      return;
+    const disabled = !profile;
+    select.disabled = disabled;
+    group.classList.toggle("disabled", disabled);
+    const noneButton = this.createButton(group, "", this.i18n.t("propulsion.none"), () => this.onPropulsionButtonClick(side, ""));
+    noneButton.disabled = disabled;
+    noneButton.setAttribute("aria-disabled", String(disabled));
+
+    let selected = "";
+    if (profile) {
+      const modules = fittingOptions(profile);
+      select.disabled = modules.length === 0;
+      group.classList.toggle("disabled", modules.length === 0);
+      const moduleDisabled = modules.length === 0;
+      for (const module of modules) {
+        const option = document.createElement("option");
+        option.value = module.id;
+        option.textContent = propulsionOptionLabel(side, module);
+        select.appendChild(option);
+        const button = this.createButton(group, module.id, propulsionOptionLabel(side, module), () => this.onPropulsionButtonClick(side, module.id));
+        button.disabled = moduleDisabled;
+        button.setAttribute("aria-disabled", "false");
+      }
+      selected = modules.some((m) => m.id === selectedId) ? selectedId : "";
+      noneButton.disabled = moduleDisabled;
+      noneButton.setAttribute("aria-disabled", String(moduleDisabled));
     }
 
-    const modules = fittingOptions(profile);
-    select.disabled = modules.length === 0;
-    for (const module of modules) {
-      const option = document.createElement("option");
-      option.value = module.id;
-      option.textContent = propulsionOptionLabel(side, module);
-      select.appendChild(option);
-    }
-
-    const selected = modules.some((m) => m.id === selectedId) ? selectedId : "";
     select.value = selected;
+    this.setPropulsionActive(side, selected);
     this.setOverloadDisabled(side);
   }
 
@@ -689,7 +713,11 @@ export class DomControls implements Controls {
   private setOverloadDisabled(side: "attacker" | "target"): void {
     const propulsion = this.els[`${side}Propulsion`] as HTMLSelectElement;
     const overload = this.els[`${side}Overload`] as HTMLInputElement;
-    overload.disabled = propulsion.value === "" || (propulsion as HTMLSelectElement).disabled;
+    const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
+    const disabled = propulsion.value === "" || propulsion.disabled;
+    overload.disabled = disabled;
+    button.disabled = disabled;
+    button.setAttribute("aria-disabled", String(disabled));
   }
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
@@ -701,23 +729,102 @@ export class DomControls implements Controls {
   }
 
   private setDefaultSkillAndOverload(): void {
-    (this.els.attackerSkills as HTMLSelectElement).value = "5";
-    (this.els.attackerOverload as HTMLInputElement).checked = true;
-    (this.els.targetSkills as HTMLSelectElement).value = "5";
-    (this.els.targetOverload as HTMLInputElement).checked = true;
+    this.setSkillLevel("attacker", 5);
+    this.setSkillLevel("target", 5);
+    this.setOverloadActive("attacker", true);
+    this.setOverloadActive("target", true);
   }
 
-  private renderSkillOptions(side: "attacker" | "target"): void {
+  private setSkillLevel(side: "attacker" | "target", level: SkillLevel): void {
+    (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
+    this.setSkillActive(side, level);
+  }
+
+  private setSkillActive(side: "attacker" | "target", level: SkillLevel): void {
+    const group = this.els[`${side}SkillOptions`] as HTMLElement;
+    const value = String(level);
+    for (const button of group.children) {
+      const active = button.getAttribute("data-value") === value;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+  }
+
+  private setOverloadActive(side: "attacker" | "target", active: boolean): void {
+    const input = this.els[`${side}Overload`] as HTMLInputElement;
+    const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
+    input.checked = active;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+
+  private setPropulsionActive(side: "attacker" | "target", propulsionId: string): void {
+    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    const group = this.els[`${side}PropulsionOptions`] as HTMLElement;
+    select.value = propulsionId;
+    for (const button of group.children) {
+      const active = button.getAttribute("data-value") === propulsionId;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+  }
+
+  private currentSkillLevel(side: "attacker" | "target"): SkillLevel | undefined {
+    const value = (this.els[`${side}Skills`] as HTMLSelectElement).value;
+    if (value === "") return undefined;
+    const level = skillLevelFromString(value);
+    if (level === 0 && value !== "0") return undefined;
+    return level;
+  }
+
+  private onPropulsionButtonClick(side: "attacker" | "target", propulsionId: string): void {
+    if (side === "attacker" && !this.attackerProfile) return;
+    if (side === "target" && !this.targetProfile) return;
+    this.setPropulsionActive(side, propulsionId);
+    this.els[`${side}Propulsion`].dispatchEvent(new Event("change"));
+  }
+
+  private onSkillButtonClick(side: "attacker" | "target", level: SkillLevel): void {
+    this.setSkillActive(side, level);
+    (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
+    this.els[`${side}Skills`].dispatchEvent(new Event("change"));
+  }
+
+  private onOverloadButtonClick(side: "attacker" | "target"): void {
+    const input = this.els[`${side}Overload`] as HTMLInputElement;
+    this.setOverloadActive(side, !input.checked);
+    input.dispatchEvent(new Event("change"));
+  }
+
+  private createButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("data-value", value);
+    button.setAttribute("aria-pressed", "false");
+    button.textContent = text;
+    button.addEventListener("click", onClick);
+    container.appendChild(button);
+    return button;
+  }
+
+  private renderSkillOptions(side: "attacker" | "target", selectedValue: SkillLevel = this.currentSkillLevel(side) ?? 5): void {
     const select = this.els[`${side}Skills`] as HTMLSelectElement;
-    const current = select.value;
+    const group = this.els[`${side}SkillOptions`] as HTMLElement;
+    const selected = String(selectedValue);
     select.innerHTML = "";
+    group.innerHTML = "";
+    group.setAttribute("aria-label", this.i18n.t("label.skillLevel"));
     for (let level = 0; level <= 5; level++) {
+      const skill = level as SkillLevel;
       const option = document.createElement("option");
       option.value = String(level);
-      option.textContent = skillOptionLabel(this.i18n, level as SkillLevel);
+      option.textContent = skillOptionLabel(this.i18n, skill);
       select.appendChild(option);
+      const button = this.createButton(group, String(level), String(level), () => this.onSkillButtonClick(side, skill));
+      button.title = skillOptionLabel(this.i18n, skill);
     }
-    select.value = current || "5";
+    select.value = selected;
+    this.setSkillActive(side, skillLevelFromString(selected));
   }
 }
 

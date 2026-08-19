@@ -8,15 +8,10 @@ export interface I18n {
 }
 
 export const I18N_DICTIONARY = {
-  "app.title": {
-    en: "EVE Tactic Simulator",
-    zh: "EVE 火炮追踪计算器",
-    ja: "EVE ガン追跡計算機",
-  },
   "app.subtitle": {
-    en: "2D tactical simulation",
-    zh: "2D 战术模拟",
-    ja: "2D 戦術シミュレーション",
+    en: "EVE Online 2D tactical simulator",
+    zh: "EVE Online 2D 战术模拟器",
+    ja: "EVE Online 2D 戦術シミュレーター",
   },
   "lang.en": {
     en: "English",
@@ -343,6 +338,14 @@ export class I18nImpl implements I18n {
     for (const element of this.document.querySelectorAll("[data-i18n-placeholder]")) {
       const key = element.getAttribute("data-i18n-placeholder");
       if (key) (element as HTMLInputElement).placeholder = this.t(key);
+    }
+    for (const element of this.document.querySelectorAll("[data-i18n-aria-label]")) {
+      const key = element.getAttribute("data-i18n-aria-label");
+      if (key) element.setAttribute("aria-label", this.t(key));
+    }
+    for (const element of this.document.querySelectorAll("[data-i18n-title]")) {
+      const key = element.getAttribute("data-i18n-title");
+      if (key) (element as HTMLElement).title = this.t(key);
     }
   }
 }

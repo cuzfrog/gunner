@@ -62,6 +62,10 @@ class FakeElement {
     this.handlers[event]?.forEach((handler) => handler());
   }
 
+  dispatchEvent(event: { type: string }): void {
+    this.trigger(event.type);
+  }
+
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
   }
@@ -524,4 +528,69 @@ describe("DomControls", () => {
     expect(saved.attackerInertia).toBe(expected.inertiaModifier);
     expect(saved.attackerSkillLevel).toBe(0);
   });
+
+  test("clicking a visible propulsion button updates the hidden select and recomputes stats", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const button = findVisibleButton(globalThis.document, "target-propulsion-options", "mwd-5mn");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "target-propulsion").value).toBe("mwd-5mn");
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+    expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
+    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+  });
+
+  test("clicking a visible skill tuner button updates the hidden select and recomputes speed", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const button = findVisibleButton(globalThis.document, "attacker-skill-options", "0");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "attacker-skills").value).toBe("0");
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+    expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
+    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(String(expected.maxSpeed));
+  });
+
+  test("clicking the overload icon button toggles the hidden checkbox and recomputes speed", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const propulsion = getFake(globalThis.document, "target-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    const button = getFake(globalThis.document, "target-overload-button");
+    button.trigger("click");
+
+    expect(getFake(globalThis.document, "target-overload").checked).toBe(false);
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    expect(button.classList.toggle).toHaveBeenCalledWith("active", false);
+    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+  });
 });
+
+function findVisibleButton(document: Document, groupId: string, value: string): FakeElement {
+  const group = getFake(document, groupId);
+  const button = group.children.find((child) => child.getAttribute("data-value") === value);
+  if (!button) throw new Error(`Missing visible button ${value} in ${groupId}`);
+  return button;
+}
