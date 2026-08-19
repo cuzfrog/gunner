@@ -525,7 +525,8 @@ canvas {
   align-items: end;
 }
 
-.field-row > label {
+.field-row > label,
+.field-row > div {
   min-width: 0;
 }
 
@@ -543,6 +544,23 @@ canvas {
 
 .panel .slider-label-row > span {
   margin-bottom: 0;
+}
+
+.panel .field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.panel .field-label-row > span,
+.panel .field-label-row > label,
+.panel .field-label-row > label > span {
+  margin-bottom: 0;
+}
+
+.panel .field-label-row > label > span {
+  display: inline;
 }
 
 .panel .slider-value {

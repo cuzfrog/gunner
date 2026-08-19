@@ -106,6 +106,15 @@ describe("I18nImpl", () => {
     expect(i18n.t("hint.maneuverAggressivity")).toContain("機動");
   });
 
+  test("translates the initial distance hint in every language", () => {
+    const i18n = new I18nImpl();
+    expect(i18n.t("hint.initialDistance")).toContain("reset");
+    i18n.setLanguage("zh" as Language);
+    expect(i18n.t("hint.initialDistance")).toContain("重置");
+    i18n.setLanguage("ja" as Language);
+    expect(i18n.t("hint.initialDistance")).toContain("リセット");
+  });
+
   test("translateDocument sets text, placeholder, aria-label and title from data attributes", () => {
     const label = new FakeElement();
     label.setAttribute("data-i18n", "label.overload");

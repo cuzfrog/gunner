@@ -144,6 +144,11 @@ export const I18N_DICTIONARY = {
     zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；较低值更严格保持距离。",
     ja: "設定距離への接近時の反応的ブレーキを制御します。高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。低い値ほど距離を厳密に保ちます。",
   },
+  "hint.initialDistance": {
+    en: "Changes apply on reset.",
+    zh: "更改在重置时生效。",
+    ja: "変更はリセット時に適用されます。",
+  },
   "label.gridBrightness": {
     en: "Grid brightness",
     zh: "网格亮度",

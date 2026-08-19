@@ -247,13 +247,22 @@
           <span class="hull-hint" id="target-hull-hint"></span>
         </label>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.initialDistance">Initial distance</span>
+          <div class="field-group">
+            <span class="field-label-row">
+              <label for="initial-distance">
+                <span data-i18n="label.initialDistance">Initial distance</span>
+              </label>
+              <button type="button" class="info-hint"
+                      data-i18n-title="hint.initialDistance"
+                      data-i18n-aria-label="hint.initialDistance"
+                      title="Changes apply on reset."
+                      aria-label="About initial distance">?</button>
+            </span>
             <span class="input-with-unit">
               <input type="number" id="initial-distance" value="5000" step="any" min="1">
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
-          </label>
+          </div>
           <label>
             <span data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">

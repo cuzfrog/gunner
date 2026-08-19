@@ -1,4 +1,4 @@
-import { add, len, scale, sub, vec, type Vec2 } from "../math";
+import { vec, type Vec2 } from "../math";
 import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";
@@ -54,14 +54,6 @@ export class SimulationImpl implements Simulation {
   update(config: SimConfig): void {
     this.attacker = withConfig(this.attacker, config.attacker);
     this.target = withConfig(this.target, config.target);
-    this.target.position = this.placeTarget(this.attacker.position, this.target.position, config.initialDistance);
-  }
-
-  private placeTarget(attackerPosition: Vec2, targetPosition: Vec2, initialDistance: number): Vec2 {
-    const offset = sub(targetPosition, attackerPosition);
-    const distance = len(offset);
-    const dir = distance > 0 ? scale(offset, 1 / distance) : vec(0, 1);
-    return add(attackerPosition, scale(dir, initialDistance));
   }
 
   private computeCommands(): { attacker: Vec2; target: Vec2 } {
