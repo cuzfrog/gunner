@@ -6,6 +6,7 @@ import {
   type PropulsionId,
   type PropulsionModule,
   type ShipProfile,
+  type SkillLevel,
 } from "../ships";
 import {
   SIG_RESOLUTIONS,
@@ -79,6 +80,8 @@ export class DomControls implements Controls {
       attackerHull: el("attacker-hull"),
       attackerHullHint: el("attacker-hull-hint"),
       attackerPropulsion: el("attacker-propulsion"),
+      attackerSkills: el("attacker-skills"),
+      attackerOverload: el("attacker-overload"),
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
@@ -88,6 +91,8 @@ export class DomControls implements Controls {
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
       targetPropulsion: el("target-propulsion"),
+      targetSkills: el("target-skills"),
+      targetOverload: el("target-overload"),
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
@@ -117,12 +122,15 @@ export class DomControls implements Controls {
     };
 
     this.populateHullDatalist();
+    this.renderSkillOptions("attacker");
+    this.renderSkillOptions("target");
 
     const saved = this.settingsStore.load();
     if (saved) {
       this.loadSettings(saved);
     } else {
       this.i18n.translateDocument();
+      this.setDefaultSkillAndOverload();
       this.setBestInitialDistance();
       this.setPlaying(false);
     }
@@ -208,6 +216,8 @@ export class DomControls implements Controls {
       attackerRange: num(this.els.attackerRange),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
+      attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
+      attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
       attackerPropulsion: this.propulsionSetting("attacker"),
       initialDistance: Math.max(num(this.els.initialDistance), 1),
@@ -216,6 +226,8 @@ export class DomControls implements Controls {
       targetRange: num(this.els.targetRange),
       targetMass: num(this.els.targetMass),
       targetInertia: num(this.els.targetInertia),
+      targetSkillLevel: skillLevelFromString((this.els.targetSkills as HTMLSelectElement).value),
+      targetOverload: (this.els.targetOverload as HTMLInputElement).checked,
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
       targetPropulsion: this.propulsionSetting("target"),
@@ -257,6 +269,14 @@ export class DomControls implements Controls {
     this.loadHull("target", settings.targetHull, settings.targetPropulsion);
 
     this.i18n.translateDocument();
+    this.renderSkillOptions("attacker");
+    this.renderSkillOptions("target");
+    (this.els.attackerSkills as HTMLSelectElement).value = String(settings.attackerSkillLevel ?? 5);
+    (this.els.attackerOverload as HTMLInputElement).checked = settings.attackerOverload ?? true;
+    (this.els.targetSkills as HTMLSelectElement).value = String(settings.targetSkillLevel ?? 5);
+    (this.els.targetOverload as HTMLInputElement).checked = settings.targetOverload ?? true;
+    this.setOverloadDisabled("attacker");
+    this.setOverloadDisabled("target");
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
@@ -320,6 +340,8 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.renderSkillOptions("attacker");
+    this.renderSkillOptions("target");
     this.setPlaying(this.playing);
     this.persist();
     this.callbacks?.onConfigChange();
@@ -405,9 +427,13 @@ export class DomControls implements Controls {
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
+    (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
+    (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
     (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
+    (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
+    (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
 
     const inputs: (keyof typeof this.els)[] = [
       "tracking",
@@ -482,8 +508,7 @@ export class DomControls implements Controls {
     select.value = module ? module.id : "";
 
     if (updateStats) {
-      (this.els[`${side}Inertia`] as HTMLInputElement).value = String(profile.inertiaModifier);
-      this.updatePropulsionStats(side);
+      this.updatePropulsionStats(side, true);
     } else {
       this.updateHullHint(side, module);
     }
@@ -573,6 +598,7 @@ export class DomControls implements Controls {
     if (side === "attacker" && !this.attackerProfile) return;
     if (side === "target" && !this.targetProfile) return;
     this.updatePropulsionStats(side);
+    this.setOverloadDisabled(side);
     this.persist();
     this.callbacks?.onConfigChange();
   }
@@ -626,22 +652,70 @@ export class DomControls implements Controls {
 
     const selected = modules.some((m) => m.id === selectedId) ? selectedId : "";
     select.value = selected;
+    this.setOverloadDisabled(side);
   }
 
-  private updatePropulsionStats(side: "attacker" | "target"): void {
+  private updatePropulsionStats(side: "attacker" | "target", updateInertia = false): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
 
     const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
     const module = this.findPropulsionModule(profile, select.value);
-    const stats = effectiveStats(profile, module);
+    const conditions = this.skillConditions(side);
+    const stats = effectiveStats(profile, module, conditions);
 
     (this.els[`${side}Speed`] as HTMLInputElement).value = String(stats.maxSpeed);
     (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
+    if (updateInertia) {
+      (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+    }
     if (side === "target") {
       (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
     }
     this.updateHullHint(side, module);
+  }
+
+  private skillConditions(side: "attacker" | "target"): { skillLevel: SkillLevel; overloaded: boolean } {
+    const skill = side === "attacker" ? this.els.attackerSkills : this.els.targetSkills;
+    const overload = side === "attacker" ? this.els.attackerOverload : this.els.targetOverload;
+    return {
+      skillLevel: skillLevelFromString((skill as HTMLSelectElement).value),
+      overloaded: (overload as HTMLInputElement).checked,
+    };
+  }
+
+  private setOverloadDisabled(side: "attacker" | "target"): void {
+    const propulsion = this.els[`${side}Propulsion`] as HTMLSelectElement;
+    const overload = this.els[`${side}Overload`] as HTMLInputElement;
+    overload.disabled = propulsion.value === "" || (propulsion as HTMLSelectElement).disabled;
+  }
+
+  private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
+    if (side === "attacker" && !this.attackerProfile) return;
+    if (side === "target" && !this.targetProfile) return;
+    this.updatePropulsionStats(side, updateInertia);
+    this.persist();
+    this.callbacks?.onConfigChange();
+  }
+
+  private setDefaultSkillAndOverload(): void {
+    (this.els.attackerSkills as HTMLSelectElement).value = "5";
+    (this.els.attackerOverload as HTMLInputElement).checked = true;
+    (this.els.targetSkills as HTMLSelectElement).value = "5";
+    (this.els.targetOverload as HTMLInputElement).checked = true;
+  }
+
+  private renderSkillOptions(side: "attacker" | "target"): void {
+    const select = this.els[`${side}Skills`] as HTMLSelectElement;
+    const current = select.value;
+    select.innerHTML = "";
+    for (let level = 0; level <= 5; level++) {
+      const option = document.createElement("option");
+      option.value = String(level);
+      option.textContent = skillOptionLabel(this.i18n, level as SkillLevel);
+      select.appendChild(option);
+    }
+    select.value = current || "5";
   }
 }
 
@@ -674,4 +748,14 @@ function propulsionOptionLabel(side: "attacker" | "target", module: PropulsionMo
     return `${module.label} (sig ×${1 + module.sigBloom})`;
   }
   return module.label;
+}
+
+function skillLevelFromString(value: string): SkillLevel {
+  const level = Number.parseInt(value, 10);
+  if (level === 0 || level === 1 || level === 2 || level === 3 || level === 4 || level === 5) return level;
+  return 0;
+}
+
+function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
+  return `${i18n.t("skill.level")} ${level}`;
 }
