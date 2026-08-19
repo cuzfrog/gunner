@@ -13,12 +13,16 @@ const DEFAULT_SETTINGS: UserSettings = {
   attackerRange: 5000,
   attackerMass: 1_200_000,
   attackerInertia: 3,
+  attackerSkillLevel: 5,
+  attackerOverload: true,
   initialDistance: 5000,
   targetSpeed: 1000,
   targetMode: "orbit",
   targetRange: 5000,
   targetMass: 10_000_000,
   targetInertia: 0.45,
+  targetSkillLevel: 5,
+  targetOverload: true,
   targetSig: 40,
   simSpeed: 4,
   language: "en",
@@ -116,7 +120,7 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v4", JSON.stringify(v2));
+    storage.setItem("gunner-settings-v5", JSON.stringify(v2));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
@@ -145,12 +149,12 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v4", JSON.stringify(v3));
+    storage.setItem("gunner-settings-v5", JSON.stringify(v3));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
-  test("save and load round-trip v4 with hull and propulsion selections", () => {
+  test("save and load round-trip v5 with hull and propulsion selections", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     const withHull: UserSettings = {
@@ -166,7 +170,7 @@ describe("LocalSettingsStore", () => {
   test("load rejects an invalid propulsion id", () => {
     const storage = fakeStorage();
     storage.setItem(
-      "gunner-settings-v4",
+      "gunner-settings-v5",
       JSON.stringify({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" }),
     );
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
@@ -175,14 +179,14 @@ describe("LocalSettingsStore", () => {
 
   test("load rejects an empty hull name", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v4", JSON.stringify({ ...DEFAULT_SETTINGS, attackerHull: "" }));
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerHull: "" }));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load accepts settings without the optional hull and propulsion fields", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v4", JSON.stringify(DEFAULT_SETTINGS));
+    storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
@@ -256,14 +260,14 @@ describe("LocalSettingsStore", () => {
 
   test("load ignores stored settings with invalid values", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v4", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load falls back to local storage when the URL is invalid", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-settings-v4", JSON.stringify(DEFAULT_SETTINGS));
+    storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const location = fakeLocation("http://localhost/?c=INVALID");
     const store = new LocalSettingsStore({ storage, location });
     expect(store.load()).toEqual(DEFAULT_SETTINGS);
@@ -275,5 +279,62 @@ describe("LocalSettingsStore", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location });
     expect(store.decodeUrl()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=%25");
+  });
+
+  test("load accepts settings without skill and overload fields", () => {
+    const storage = fakeStorage();
+    const partial: UserSettings = { ...DEFAULT_SETTINGS };
+    delete partial.attackerSkillLevel;
+    delete partial.attackerOverload;
+    delete partial.targetSkillLevel;
+    delete partial.targetOverload;
+    storage.setItem("gunner-settings-v5", JSON.stringify(partial));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toEqual(partial);
+  });
+
+  test("load rejects an out-of-range skill level", () => {
+    const storage = fakeStorage();
+    const bad = { ...DEFAULT_SETTINGS, attackerSkillLevel: 6 };
+    storage.setItem("gunner-settings-v5", JSON.stringify(bad));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load rejects a non-boolean overload value", () => {
+    const storage = fakeStorage();
+    const bad = { ...DEFAULT_SETTINGS, targetOverload: "yes" };
+    storage.setItem("gunner-settings-v5", JSON.stringify(bad));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("save and load round-trip skill level 0 and unchecked overload", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerSkillLevel: 0,
+      attackerOverload: false,
+      targetSkillLevel: 0,
+      targetOverload: false,
+    };
+    store.save(settings);
+    expect(store.load()).toEqual(settings);
+  });
+
+  test("encodeUrl and decodeUrl round-trip skill and overload fields", () => {
+    const location = fakeLocation("http://localhost/index.html");
+    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerSkillLevel: 0,
+      attackerOverload: false,
+      targetSkillLevel: 3,
+      targetOverload: true,
+    };
+    const url = store.encodeUrl(settings);
+    const decoded = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    expect(decoded).toEqual(settings);
   });
 });

@@ -1,8 +1,8 @@
 import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
-import { isPropulsionId, type PropulsionId } from "../ships";
+import { isPropulsionId, type PropulsionId, type SkillLevel } from "../ships";
 import type { Language } from "./i18n";
 
-export const USER_SETTINGS_VERSION = 4 as const;
+export const USER_SETTINGS_VERSION = 5 as const;
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -16,6 +16,8 @@ export interface UserSettings {
   attackerRange: number;
   attackerMass: number;
   attackerInertia: number;
+  attackerSkillLevel?: SkillLevel;
+  attackerOverload?: boolean;
   initialDistance: number;
   targetSpeed: number;
   targetMode: AutopilotMode;
@@ -23,6 +25,8 @@ export interface UserSettings {
   targetMass: number;
   targetInertia: number;
   targetSig: number;
+  targetSkillLevel?: SkillLevel;
+  targetOverload?: boolean;
   attackerHull?: string;
   attackerPropulsion?: PropulsionId;
   targetHull?: string;
@@ -58,8 +62,8 @@ export interface SettingsStore {
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
 }
 
-const SETTINGS_KEY = "gunner-settings-v4";
-const PROFILES_KEY = "gunner-profiles-v4";
+const SETTINGS_KEY = "gunner-settings-v5";
+const PROFILES_KEY = "gunner-profiles-v5";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -198,12 +202,16 @@ function isUserSettings(value: unknown): value is UserSettings {
     isNonNegative(s.attackerRange) &&
     isNonNegative(s.attackerMass) &&
     isNonNegative(s.attackerInertia) &&
+    isOptionalSkillLevel(s.attackerSkillLevel) &&
+    isOptionalBoolean(s.attackerOverload) &&
     isPositive(s.initialDistance) &&
     isNonNegative(s.targetSpeed) &&
     isAutopilotMode(s.targetMode) &&
     isNonNegative(s.targetRange) &&
     isNonNegative(s.targetMass) &&
     isNonNegative(s.targetInertia) &&
+    isOptionalSkillLevel(s.targetSkillLevel) &&
+    isOptionalBoolean(s.targetOverload) &&
     isPositive(s.targetSig) &&
     isOptionalNonEmptyString(s.attackerHull) &&
     isOptionalPropulsionId(s.attackerPropulsion) &&
@@ -232,6 +240,18 @@ function isOptionalNonEmptyString(value: unknown): value is string | undefined {
 
 function isOptionalPropulsionId(value: unknown): value is PropulsionId | undefined {
   return value === undefined || isPropulsionId(value);
+}
+
+function isSkillLevel(value: unknown): value is SkillLevel {
+  return value === 0 || value === 1 || value === 2 || value === 3 || value === 4 || value === 5;
+}
+
+function isOptionalSkillLevel(value: unknown): value is SkillLevel | undefined {
+  return value === undefined || isSkillLevel(value);
+}
+
+function isOptionalBoolean(value: unknown): value is boolean | undefined {
+  return value === undefined || typeof value === "boolean";
 }
 
 function isFiniteNumber(value: unknown): value is number {

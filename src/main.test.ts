@@ -1,7 +1,7 @@
 import { container } from "./container";
 
 const DEFAULT_SETTINGS = {
-  version: 4 as const,
+  version: 5 as const,
   tracking: 0.32,
   trackingUnit: "rad" as const,
   sigRes: "S" as const,
@@ -12,12 +12,16 @@ const DEFAULT_SETTINGS = {
   attackerRange: 5000,
   attackerMass: 1_200_000,
   attackerInertia: 3,
+  attackerSkillLevel: 5,
+  attackerOverload: true,
   initialDistance: 5000,
   targetSpeed: 1000,
   targetMode: "orbit" as const,
   targetRange: 5000,
   targetMass: 10_000_000,
   targetInertia: 0.45,
+  targetSkillLevel: 5,
+  targetOverload: true,
   targetSig: 40,
   simSpeed: 4,
   language: "en" as const,
@@ -136,7 +140,7 @@ function fakeDocument(): Document {
 function fakeLocalStorage(): Storage {
   return {
     getItem: vi.fn((key: string) => {
-      if (key === "gunner-settings-v4") return JSON.stringify(DEFAULT_SETTINGS);
+      if (key === "gunner-settings-v5") return JSON.stringify(DEFAULT_SETTINGS);
       return null;
     }),
     setItem: vi.fn(),
