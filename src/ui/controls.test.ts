@@ -239,6 +239,46 @@ describe("DomControls", () => {
     expect(location.href).toBe(encodedUrl);
   });
 
+  test("selecting a saved profile persists its settings for the next session", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 8000,
+      falloff: 6000,
+      attackerSpeed: 1500,
+      attackerMode: "orbit",
+      attackerRange: 7000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 7000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 7000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+  });
+
   test("selecting the empty profile option does not update the URL", () => {
     const { settingsStore, location } = buildControls(globalThis.document);
     const select = getFake(globalThis.document, "profile-select");
@@ -567,6 +607,41 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-overload").checked).toBe(false);
     expect(getFake(globalThis.document, "target-skills").value).toBe("4");
     expect(getFake(globalThis.document, "target-overload").checked).toBe(true);
+  });
+
+  test("loading saved settings on startup persists them for the next session", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 8000,
+      falloff: 6000,
+      attackerSpeed: 1500,
+      attackerMode: "orbit",
+      attackerRange: 7000,
+      maneuverAggressivity: 2,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 7000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 7000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, settings);
+
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
   });
 
   test("fresh start with no saved settings disables both overload checkboxes", () => {

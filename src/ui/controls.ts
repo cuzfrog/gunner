@@ -331,6 +331,7 @@ export class DomControls implements Controls {
     this.renderProfiles();
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
+    this.persist();
   }
 
   private setBestInitialDistance(): void {
