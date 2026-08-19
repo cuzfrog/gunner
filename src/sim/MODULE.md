@@ -11,12 +11,15 @@ no-new-exports:
   - kinematics.test.ts
   - kinematics.ts
   - module.ts
+  - predictiveAutopilot.test.ts
+  - predictiveAutopilot.ts
   - simulation.test.ts
   - simulation.ts
   - trackingScore.test.ts
   - trackingScore.ts
   - types.ts
 ---
+
 
 
 # sim
