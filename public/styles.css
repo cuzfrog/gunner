@@ -161,6 +161,25 @@ body {
   border-color: var(--accent-teal);
 }
 
+.panel input.hull-invalid {
+  border-color: var(--danger-red);
+}
+
+.panel select:disabled {
+  color: var(--text-dim);
+  border-color: rgba(92, 203, 203, 0.12);
+  cursor: not-allowed;
+}
+
+.panel .hull-hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .canvas-section {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - app.test.ts
   - app.ts
   - index.ts

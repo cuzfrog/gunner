@@ -1,0 +1,35 @@
+export type HullTier = "small" | "medium" | "large" | "capital";
+
+export type PropulsionKind = "afterburner" | "microwarpdrive";
+
+export type PropulsionId =
+  | "ab-1mn"
+  | "ab-10mn"
+  | "ab-100mn"
+  | "ab-10000mn"
+  | "mwd-5mn"
+  | "mwd-50mn"
+  | "mwd-500mn"
+  | "mwd-50000mn";
+
+export interface ShipProfile {
+  readonly name: string;
+  readonly faction: string;
+  readonly hullType: string;
+  readonly mass: number;
+  readonly inertiaModifier: number;
+  readonly baseSpeed: number;
+  readonly sigRadius: number;
+}
+
+export interface PropulsionModule {
+  readonly id: PropulsionId;
+  readonly kind: PropulsionKind;
+  readonly sizeTier: HullTier;
+  readonly label: string;
+  readonly thrust: number;
+  readonly massAddition: number;
+  readonly speedBonus: number;
+  readonly sigBloom: number;
+  readonly activeMassMultiplier: number;
+}

@@ -68,6 +68,26 @@ export const I18N_DICTIONARY = {
     zh: "攻击者舰船",
     ja: "攻撃艦船",
   },
+  "label.hull": {
+    en: "Ship",
+    zh: "舰船",
+    ja: "艦船",
+  },
+  "label.propulsion": {
+    en: "Propulsion",
+    zh: "推进模块",
+    ja: "推進モジュール",
+  },
+  "propulsion.none": {
+    en: "None",
+    zh: "无",
+    ja: "なし",
+  },
+  "hint.hullSearch": {
+    en: "Type ship name…",
+    zh: "输入舰船名称…",
+    ja: "艦船名を入力…",
+  },
   "label.maxSpeed": {
     en: "Max speed (m/s)",
     zh: "最大速度 (m/s)",
@@ -97,21 +117,6 @@ export const I18N_DICTIONARY = {
     en: "Keep at range",
     zh: "保持距离",
     ja: "距離を保つ",
-  },
-  "mode.approach": {
-    en: "Approach",
-    zh: "接近",
-    ja: "接近",
-  },
-  "mode.retreat": {
-    en: "Go farther",
-    zh: "远离",
-    ja: "離脱",
-  },
-  "mode.match": {
-    en: "Match direction",
-    zh: "匹配方向",
-    ja: "方向を合わせる",
   },
   "label.desiredRange": {
     en: "Desired range (m)",

@@ -27,7 +27,7 @@ export function integrateShip(state: ShipState, commandedVelocity: Vec2, dt: num
   };
 }
 
-function clampToMaxSpeed(velocity: Vec2, maxSpeed: number): Vec2 {
+export function clampToMaxSpeed(velocity: Vec2, maxSpeed: number): Vec2 {
   const budget = Math.max(0, maxSpeed);
   const speed = len(velocity);
   if (speed <= budget) return velocity;
