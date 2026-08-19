@@ -131,6 +131,8 @@ export class DomControls implements Controls {
     } else {
       this.i18n.translateDocument();
       this.setDefaultSkillAndOverload();
+      this.setOverloadDisabled("attacker");
+      this.setOverloadDisabled("target");
       this.setBestInitialDistance();
       this.setPlaying(false);
     }
@@ -691,10 +693,10 @@ export class DomControls implements Controls {
   }
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
-    if (side === "attacker" && !this.attackerProfile) return;
-    if (side === "target" && !this.targetProfile) return;
     this.updatePropulsionStats(side, updateInertia);
     this.persist();
+    if (side === "attacker" && !this.attackerProfile) return;
+    if (side === "target" && !this.targetProfile) return;
     this.callbacks?.onConfigChange();
   }
 

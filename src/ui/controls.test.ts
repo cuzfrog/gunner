@@ -490,4 +490,38 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-skills").value).toBe("4");
     expect(getFake(globalThis.document, "target-overload").checked).toBe(true);
   });
+
+  test("fresh start with no saved settings disables both overload checkboxes", () => {
+    buildControls(globalThis.document);
+    expect(getFake(globalThis.document, "attacker-overload").disabled).toBe(true);
+    expect(getFake(globalThis.document, "target-overload").disabled).toBe(true);
+  });
+
+  test("changing the skill level persists without a hull selected", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const skills = getFake(globalThis.document, "attacker-skills");
+    skills.value = "2";
+    skills.trigger("change");
+    const [saved] = settingsStore.save.mock.calls[0];
+    expect(saved.attackerSkillLevel).toBe(2);
+  });
+
+  test("changing the skill level with a hull selected persists the recomputed stats", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const skills = getFake(globalThis.document, "attacker-skills");
+    skills.value = "0";
+    skills.trigger("change");
+
+    const rifter = rifterProfile();
+    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
+    const calls = settingsStore.save.mock.calls;
+    const [saved] = calls[calls.length - 1];
+    expect(saved.attackerSpeed).toBe(expected.maxSpeed);
+    expect(saved.attackerInertia).toBe(expected.inertiaModifier);
+    expect(saved.attackerSkillLevel).toBe(0);
+  });
 });
