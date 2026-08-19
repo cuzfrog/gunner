@@ -930,7 +930,12 @@ export class DomControls implements Controls {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
-    setText(this.els[`${side}SkillSummary`], skillOptionLabel(this.i18n, level));
+    const summary = skillOptionLabel(this.i18n, level);
+    setText(this.els[`${side}SkillSummary`], summary);
+    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).setAttribute(
+      "aria-label",
+      `${this.i18n.t("label.skillLevel")} ${summary}`,
+    );
   }
 
   private toggleSkillPopup(side: "attacker" | "target"): void {

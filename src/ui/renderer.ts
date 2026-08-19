@@ -55,6 +55,7 @@ export class CanvasRenderer implements Renderer {
   }
 
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
+    this.syncBufferSize();
     this.updateCamera(snapshot, turret);
     this.clear();
     this.drawGrid();
@@ -98,6 +99,15 @@ export class CanvasRenderer implements Renderer {
   private clear(): void {
     this.ctx.fillStyle = COLORS.bg;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  private syncBufferSize(): void {
+    const { clientWidth, clientHeight } = this.canvas;
+    if (!clientWidth || !clientHeight) return;
+    if (this.canvas.width !== clientWidth || this.canvas.height !== clientHeight) {
+      this.canvas.width = clientWidth;
+      this.canvas.height = clientHeight;
+    }
   }
 
   private drawGrid(): void {

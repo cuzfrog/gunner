@@ -105,6 +105,8 @@ interface FakeContext {
 class FakeCanvas extends FakeElement {
   width = 800;
   height = 600;
+  clientWidth = 0;
+  clientHeight = 0;
   ctx: FakeContext = fakeRenderingContext();
   getContext = vi.fn((_: string) => this.ctx as unknown as CanvasRenderingContext2D);
 }

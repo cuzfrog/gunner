@@ -57,11 +57,13 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[] } {
   }) as unknown as CanvasRenderingContext2D & { strokeStyles: string[] };
 }
 
-function fakeCanvas(): HTMLCanvasElement {
+function fakeCanvas(clientWidth = 0, clientHeight = 0): HTMLCanvasElement {
   const ctx = fakeContext();
   return {
     width: 800,
     height: 600,
+    clientWidth,
+    clientHeight,
     getContext: () => ctx,
   } as unknown as HTMLCanvasElement;
 }
@@ -132,5 +134,13 @@ describe("CanvasRenderer", () => {
     const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
     renderer.setGridBrightness(0.5);
     expect(gridColorOf(renderer, canvas)).toBe("rgba(92, 203, 203, 0.2)");
+  });
+
+  test("draw resizes the canvas buffer to match the displayed size", () => {
+    const canvas = fakeCanvas(1000, 400);
+    const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+    renderer.draw(snapshot, frame, hit, turret);
+    expect(canvas.width).toBe(1000);
+    expect(canvas.height).toBe(400);
   });
 });
