@@ -7,7 +7,7 @@ no-new-exports:
   - dynamics.ts
   - hitChance.test.ts
   - hitChance.ts
-  - index.ts
+  # - index.ts (temporarily lifted to export ReactiveAutopilot for sim-trace)
   - kinematics.test.ts
   - kinematics.ts
   - module.ts

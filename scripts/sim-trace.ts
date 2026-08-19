@@ -1,6 +1,6 @@
-import { asValue, createContainer, InjectionMode } from "awilix";
+import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import { len, type Vec2 } from "../src/math";
-import { registerSimModule, type AutopilotMode, type Kinematics, type SimConfig, type Simulation } from "../src/sim";
+import { ReactiveAutopilot, registerSimModule, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type Simulation } from "../src/sim";
 
 const FIXED_DT = 1 / 60;
 const REFERENCE_RANGE_WEIGHT = 0.003;
@@ -11,9 +11,12 @@ interface TraceCradle {
   kinematics: Kinematics;
 }
 
+type MutableShipConfig = { -readonly [K in keyof ShipConfig]: ShipConfig[K] };
+
 interface TraceParams {
   durationSeconds: number;
   sampleSeconds: number;
+  attackerSteering: "predictive" | "reactive";
   config: SimConfig;
 }
 
@@ -21,13 +24,43 @@ const AUTOPILOT_MODES: readonly AutopilotMode[] = ["orbit", "keepAtRange"];
 const DEFAULT_ATTACKER_MODE: AutopilotMode = "keepAtRange";
 const DEFAULT_TARGET_MODE: AutopilotMode = "orbit";
 
+const DEFAULT_ATTACKER: MutableShipConfig = {
+  id: "attacker",
+  maxSpeed: 0,
+  mass: 1_200_000,
+  inertiaModifier: 3,
+  mode: DEFAULT_ATTACKER_MODE,
+  desiredRange: 5000,
+  rangeWeight: 0.003,
+  orbitDirection: "cw",
+};
+
+const DEFAULT_TARGET: MutableShipConfig = {
+  id: "target",
+  maxSpeed: 1000,
+  mass: 10_000_000,
+  inertiaModifier: 0.45,
+  mode: DEFAULT_TARGET_MODE,
+  desiredRange: 5000,
+  rangeWeight: 0.003,
+  orbitDirection: "cw",
+};
+
 function parseParams(args: string[]): TraceParams {
-  const draft = {
+  const draft: {
+    durationSeconds: number;
+    sampleSeconds: number;
+    attackerSteering: "predictive" | "reactive";
+    initialDistance: number;
+    attacker: MutableShipConfig;
+    target: MutableShipConfig;
+  } = {
     durationSeconds: 120,
     sampleSeconds: 1,
+    attackerSteering: "predictive",
     initialDistance: 5000,
-    attacker: { maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: DEFAULT_ATTACKER_MODE, desiredRange: 5000, rangeWeight: 0.003 },
-    target: { maxSpeed: 1000, mass: 10_000_000, inertiaModifier: 0.45, mode: DEFAULT_TARGET_MODE, desiredRange: 5000, rangeWeight: 0.003 },
+    attacker: { ...DEFAULT_ATTACKER },
+    target: { ...DEFAULT_TARGET },
   };
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
@@ -61,6 +94,9 @@ function parseParams(args: string[]): TraceParams {
       case "--attacker-range-weight":
         draft.attacker.rangeWeight = parseRangeWeight(flag, raw);
         break;
+      case "--attacker-steering":
+        draft.attackerSteering = parseAttackerSteering(raw);
+        break;
       case "--target-speed":
         draft.target.maxSpeed = parseNumber(flag, raw);
         break;
@@ -83,9 +119,10 @@ function parseParams(args: string[]): TraceParams {
   return {
     durationSeconds: draft.durationSeconds,
     sampleSeconds: draft.sampleSeconds,
+    attackerSteering: draft.attackerSteering,
     config: {
-      attacker: { id: "attacker", ...draft.attacker },
-      target: { id: "target", ...draft.target },
+      attacker: draft.attacker,
+      target: draft.target,
       initialDistance: draft.initialDistance,
     },
   };
@@ -103,6 +140,13 @@ function parseRangeWeight(flag: string, raw: string): number {
   return value;
 }
 
+function parseAttackerSteering(raw: string): "predictive" | "reactive" {
+  if (raw !== "predictive" && raw !== "reactive") {
+    throw new Error(`--attacker-steering must be "predictive" or "reactive", got "${raw}"`);
+  }
+  return raw;
+}
+
 function isAutopilotMode(raw: string): raw is AutopilotMode {
   return AUTOPILOT_MODES.some((mode) => mode === raw);
 }
@@ -115,6 +159,9 @@ function parseMode(raw: string): AutopilotMode {
 function trace(params: TraceParams): void {
   const container = createContainer<TraceCradle>({ injectionMode: InjectionMode.PROXY });
   registerSimModule(container);
+  if (params.attackerSteering === "reactive") {
+    container.register({ attackerSteering: asClass(ReactiveAutopilot).singleton() });
+  }
   container.register({ simConfig: asValue(params.config) });
   const simulation = container.cradle.simulation;
   const kinematics = container.cradle.kinematics;
@@ -155,7 +202,7 @@ function scenarioSummary(params: TraceParams): string {
   const tau = (mass: number, inertia: number) => (mass * inertia * 1e-6).toFixed(2);
   return [
     `attacker: mode=${attacker.mode} speed=${attacker.maxSpeed} range=${attacker.desiredRange} ` +
-      `rangeWeight=${attacker.rangeWeight} ` +
+      `rangeWeight=${attacker.rangeWeight} steering=${params.attackerSteering} ` +
       `tau=${tau(attacker.mass, attacker.inertiaModifier)}s`,
     `target:   mode=${target.mode} speed=${target.maxSpeed} range=${target.desiredRange} ` +
       `rangeWeight=${target.rangeWeight} ` +
@@ -170,7 +217,7 @@ const USAGE = `Usage: bun run trace -- [flags]
   --distance <m>          initial distance between ships (default 5000)
   --attacker-speed <m/s>  --attacker-mode <mode>    --attacker-range <m>
   --attacker-mass <kg>    --attacker-inertia <modifier>
-  --attacker-range-weight <value>
+  --attacker-range-weight <value>  --attacker-steering <predictive|reactive>
   --target-speed <m/s>    --target-mode <mode>      --target-range <m>
   --target-mass <kg>      --target-inertia <modifier>
 Modes: ${AUTOPILOT_MODES.join(", ")}`;
