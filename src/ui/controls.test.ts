@@ -825,6 +825,91 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
   });
 
+  test("save button does not highlight immediately after loading a profile with unrounded speed", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 1320.1375,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000.5678,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
+  test("save button highlights when typing a different existing profile name while a profile is selected", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const selected: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const other: UserSettings = { ...selected, optimal: 9999 };
+    settingsStore.loadProfile.mockImplementation((name: string) => (name === "kiter" ? selected : name === "brawler" ? other : null));
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "kiter";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    saveButton.classList.toggle.mockClear();
+
+    const nameInput = getFake(globalThis.document, "profile-name");
+    nameInput.value = "brawler";
+    nameInput.trigger("input");
+
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+  });
+
   test("save button highlights when tracking unit, language, or hull changes after loading a profile", () => {
     const rifter = rifterProfile();
     const module = mwd5mnForRifter();
@@ -903,6 +988,17 @@ describe("DomControls", () => {
 
     getFake(globalThis.document, "maneuver-aggressivity").value = "500";
     expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.00003, 6);
+  });
+
+  test("dragging the maneuver aggressivity slider updates the hidden value and display", () => {
+    buildControls(globalThis.document);
+    const slider = getFake(globalThis.document, "maneuver-aggressivity-slider");
+    slider.value = "0.25";
+    slider.trigger("input");
+
+    expect(getFake(globalThis.document, "maneuver-aggressivity").value).toBe("0.1");
+    expect(getFake(globalThis.document, "maneuver-aggressivity-value").textContent).toBe("0.10");
+    expect(slider.value).toBe("0.25");
   });
 
   test("loadSettings defaults missing maneuverAggressivity to 1", () => {

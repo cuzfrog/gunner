@@ -97,6 +97,8 @@ export class DomControls implements Controls {
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
       maneuverAggressivity: el("maneuver-aggressivity"),
+      maneuverAggressivitySlider: el("maneuver-aggressivity-slider"),
+      maneuverAggressivityValue: el("maneuver-aggressivity-value"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
@@ -149,6 +151,7 @@ export class DomControls implements Controls {
       this.updateUnitToggle();
       this.updateLanguageToggle();
       this.setBestInitialDistance();
+      this.updateManeuverAggressivityDisplay();
       this.setPlaying(false);
     }
     this.bind();
@@ -217,6 +220,30 @@ export class DomControls implements Controls {
     (this.els.play as HTMLButtonElement).textContent = this.i18n.t(
       playing ? "button.pause" : "button.play",
     );
+  }
+
+  private onManeuverAggressivityChange(): void {
+    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const pos = Number.parseFloat(slider.value);
+    const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
+    this.updateManeuverAggressivityDisplay(value);
+    this.updateSaveButtonState();
+    this.persist();
+    this.callbacks?.onConfigChange();
+  }
+
+  private updateManeuverAggressivityDisplay(value?: number): void {
+    const input = this.els.maneuverAggressivity as HTMLInputElement;
+    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const output = this.els.maneuverAggressivityValue;
+    const current = value ?? parseManeuverAggressivity(input);
+    input.value = String(current);
+    setText(output, current.toFixed(2));
+    const pos = positionFromAggressivity(current);
+    slider.value = String(pos);
+    if ("setProperty" in slider.style) {
+      slider.style.setProperty("--fill", `${pos * 100}%`);
+    }
   }
 
   setCallbacks(callbacks: ControlsCallbacks): void {
@@ -302,6 +329,7 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles();
     this.setPlaying(this.playing);
+    this.updateManeuverAggressivityDisplay();
   }
 
   private setBestInitialDistance(): void {
@@ -423,7 +451,7 @@ export class DomControls implements Controls {
     if (!profile) return;
     this.loadSettings(profile);
     (this.els.profileSelect as HTMLSelectElement).value = name;
-    this.selectedProfile = profile;
+    this.selectedProfile = this.getSettings();
     this.syncUrl();
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
@@ -442,7 +470,12 @@ export class DomControls implements Controls {
   private updateSaveButtonState(): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    const saved = selected ? this.selectedProfile : name ? this.settingsStore.loadProfile(name) : null;
+    let saved: UserSettings | null = null;
+    if (name && name !== selected) {
+      saved = this.settingsStore.loadProfile(name);
+    } else if (selected) {
+      saved = this.selectedProfile;
+    }
     const current = this.getSettings();
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
@@ -499,7 +532,6 @@ export class DomControls implements Controls {
       "attackerInertia",
       "attackerMode",
       "attackerRange",
-      "maneuverAggressivity",
       "initialDistance",
       "targetSpeed",
       "targetMass",
@@ -519,6 +551,8 @@ export class DomControls implements Controls {
         this.callbacks?.onConfigChange();
       });
     }
+
+    (this.els.maneuverAggressivitySlider as HTMLInputElement).addEventListener("input", () => this.onManeuverAggressivityChange());
   }
 
   private formatDistance(m: number): string {
@@ -919,11 +953,23 @@ export class DomControls implements Controls {
 }
 
 const REFERENCE_RANGE_WEIGHT = 0.003;
+const AGGRESSIVITY_MIN = 0.01;
+const AGGRESSIVITY_MAX = 100;
+
+function aggressivityFromPosition(pos: number): number {
+  const clamped = Math.max(0, Math.min(1, pos));
+  return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
+}
+
+function positionFromAggressivity(value: number): number {
+  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
+  return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
+}
 
 function parseManeuverAggressivity(input: HTMLInputElement): number {
   const value = Number.parseFloat(input.value);
   if (!Number.isFinite(value) || value <= 0) return 1;
-  return Math.max(0.01, Math.min(100, value));
+  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
 }
 
 function el(id: string): HTMLElement {
