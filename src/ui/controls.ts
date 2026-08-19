@@ -1117,7 +1117,7 @@ function positionFromAggressivity(value: number): number {
 
 function parseManeuverAggressivity(input: HTMLInputElement): number {
   const value = Number.parseFloat(input.value);
-  if (!Number.isFinite(value) || value <= 0) return 1;
+  if (!Number.isFinite(value)) return 1;
   return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
 }
 
