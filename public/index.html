@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EVE Tactic Simulator</title>
+  <title>Gunner - EVE Tactic Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Saira:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -14,25 +14,20 @@
   <div class="container">
     <header class="header">
       <div class="header-left">
-        <h1 data-i18n="app.title">EVE Tactic Simulator</h1>
-        <span class="subtitle" data-i18n="app.subtitle">2D tactical simulation</span>
+        <h1>Gunner</h1>
+        <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
       </div>
       <div class="header-right">
-        <nav class="lang-toggle" role="group" aria-label="Language">
+        <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
           <button type="button" id="lang-en" data-lang="en" class="active" data-i18n="lang.en">English</button>
           <button type="button" id="lang-zh" data-lang="zh" data-i18n="lang.zh">中文</button>
           <button type="button" id="lang-ja" data-lang="ja" data-i18n="lang.ja">日本語</button>
         </nav>
-        <div class="author">
-          <span class="author-label" data-i18n="label.author">Author:</span>
-          <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="32" height="32">
-          <span class="author-name">Keos Cuzi</span>
-        </div>
       </div>
     </header>
 
     <section class="profile-bar">
-      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName">
+      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName" maxlength="32">
       <button type="button" id="profile-save" data-i18n="button.save">Save</button>
       <select id="profile-select" class="profile-select">
         <option value="" data-i18n="select.profile">Select profile...</option>
@@ -41,166 +36,6 @@
       <button type="button" id="share-link" data-i18n="button.copyLink">Copy link</button>
       <span id="share-status" class="share-status"></span>
     </section>
-
-    <main class="main">
-      <section class="panel attacker-panel">
-        <h2 data-i18n="section.attackerTurret">Attacker</h2>
-        <label>
-          <span class="tracking-label-row">
-            <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
-            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
-              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
-              <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
-            </span>
-          </span>
-          <input type="number" id="tracking" value="0.32" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.turretSigResolution">Turret sig. resolution</span>
-          <select id="sigRes">
-            <option value="S" selected>S (40 m)</option>
-            <option value="M">M (125 m)</option>
-            <option value="L">L (400 m)</option>
-            <option value="XL">XL (2000 m)</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="label.optimalRange">Optimal range (m)</span>
-          <input type="number" id="optimal" value="5000" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.falloffRange">Falloff range (m)</span>
-          <input type="number" id="falloff" value="5000" step="any" min="0">
-        </label>
-
-        <h2 data-i18n="section.attackerShip">Attacker ship</h2>
-        <label>
-          <span data-i18n="label.hull">Ship</span>
-          <input type="text" id="attacker-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-          <span class="hull-hint" id="attacker-hull-hint"></span>
-        </label>
-        <label>
-          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
-          <input type="number" id="attacker-speed" value="0" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.propulsion">Propulsion</span>
-          <select id="attacker-propulsion" disabled>
-            <option value="" data-i18n="propulsion.none">None</option>
-          </select>
-        </label>
-        <div class="skill-overload-row">
-          <label>
-            <span data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="attacker-skills"></select>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="attacker-overload" checked>
-            <span data-i18n="label.overload">Overload</span>
-          </label>
-        </div>
-        <label>
-          <span data-i18n="label.mass">Mass (kg)</span>
-          <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.inertiaModifier">Inertia modifier (s/kg)</span>
-          <input type="number" id="attacker-inertia" value="3" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.mode">Mode</span>
-          <select id="attacker-mode">
-            <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
-            <option value="orbit" data-i18n="mode.orbit">Orbit</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="label.desiredRange">Desired range (m)</span>
-          <input type="number" id="attacker-range" value="5000" step="any" min="0">
-        </label>
-      </section>
-
-      <section class="canvas-section">
-        <canvas id="scene" width="800" height="600"></canvas>
-        <div class="controls">
-          <button id="play" class="primary">Play</button>
-          <button id="reset" data-i18n="button.reset">Reset</button>
-          <label>
-            <span data-i18n="label.simulationSpeed">Speed</span>
-            <select id="sim-speed">
-              <option value="0.25">0.25x</option>
-              <option value="0.5">0.5x</option>
-              <option value="1">1x</option>
-              <option value="2">2x</option>
-              <option value="4" selected>4x</option>
-              <option value="8">8x</option>
-            </select>
-          </label>
-        </div>
-      </section>
-
-      <section class="panel target-panel">
-        <h2 data-i18n="section.targetShip">Target ship</h2>
-        <label>
-          <span data-i18n="label.hull">Ship</span>
-          <input type="text" id="target-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-          <span class="hull-hint" id="target-hull-hint"></span>
-        </label>
-        <label>
-          <span data-i18n="label.initialDistance">Initial distance (m)</span>
-          <input type="number" id="initial-distance" value="5000" step="any" min="1">
-        </label>
-        <label>
-          <span data-i18n="label.maxSpeed">Max speed (m/s)</span>
-          <input type="number" id="target-speed" value="1000" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.propulsion">Propulsion</span>
-          <select id="target-propulsion" disabled>
-            <option value="" data-i18n="propulsion.none">None</option>
-          </select>
-        </label>
-        <div class="skill-overload-row">
-          <label>
-            <span data-i18n="label.skillLevel">Pilot skills</span>
-            <select id="target-skills"></select>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="target-overload" checked>
-            <span data-i18n="label.overload">Overload</span>
-          </label>
-        </div>
-        <label>
-          <span data-i18n="label.mass">Mass (kg)</span>
-          <input type="number" id="target-mass" value="10000000" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.inertiaModifier">Inertia modifier (s/kg)</span>
-          <input type="number" id="target-inertia" value="0.45" step="any" min="0">
-        </label>
-        <label>
-          <span data-i18n="label.mode">Mode</span>
-          <select id="target-mode">
-            <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
-            <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
-          </select>
-        </label>
-        <label>
-          <span data-i18n="label.desiredRange">Desired range (m)</span>
-          <input type="number" id="target-range" value="5000" step="any" min="0">
-        </label>
-
-        <h2 data-i18n="section.targetProfile">Target profile</h2>
-        <label>
-          <span data-i18n="label.signatureRadius">Signature radius (m)</span>
-          <input type="number" id="target-sig" value="40" step="any" min="1">
-        </label>
-      </section>
-    </main>
 
     <section class="results">
       <div class="result-card">
@@ -227,11 +62,256 @@
         <span class="label" data-i18n="result.rangePenalty">Range penalty</span>
         <span class="value" id="res-range-pen">0%</span>
       </div>
-      <div class="result-card hit-chance" id="res-hit-card">
+      <div class="result-card hit-chance">
         <span class="label" data-i18n="result.hitChance">Hit chance</span>
         <span class="value" id="res-hit">0%</span>
       </div>
     </section>
+
+    <main class="main">
+      <section class="panel attacker-panel">
+        <h2 data-i18n="section.attackerTurret">Attacker</h2>
+        <label>
+          <span class="tracking-label-row">
+            <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
+              <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
+            </span>
+          </span>
+          <input type="number" id="tracking" value="0.32" step="any" min="0">
+        </label>
+        <label>
+          <span data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+          <select id="sigRes">
+            <option value="S" selected>S (40 m)</option>
+            <option value="M">M (125 m)</option>
+            <option value="L">L (400 m)</option>
+            <option value="XL">XL (2000 m)</option>
+          </select>
+        </label>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.optimalRange">Optimal range</span>
+            <span class="input-with-unit">
+              <input type="number" id="optimal" value="5000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+          <label>
+            <span data-i18n="label.falloffRange">Falloff range</span>
+            <span class="input-with-unit">
+              <input type="number" id="falloff" value="5000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+        </div>
+
+        <hr class="panel-divider">
+
+        <label>
+          <span data-i18n="label.hull">Ship</span>
+          <input type="text" id="attacker-hull" list="hull-options"
+                 autocomplete="off" autocapitalize="off" spellcheck="false"
+                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <span class="hull-hint" id="attacker-hull-hint"></span>
+        </label>
+        <div class="field-group propulsion-group">
+          <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
+          <select id="attacker-propulsion" hidden disabled></select>
+          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2 5 13h5l-1 9 8-11h-5l1-9z"/></svg>
+          </button>
+          <span class="input-with-unit">
+            <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <span class="input-suffix" aria-hidden="true">m/s</span>
+          </span>
+          <input type="checkbox" id="attacker-overload" hidden checked>
+        </div>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.mass">Mass</span>
+            <span class="input-with-unit">
+              <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">kg</span>
+            </span>
+          </label>
+          <label>
+            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <input type="number" id="attacker-inertia" value="3" step="any" min="0">
+          </label>
+        </div>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.mode">Mode</span>
+            <select id="attacker-mode">
+              <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
+              <option value="orbit" data-i18n="mode.orbit">Orbit</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="input-with-unit">
+              <input type="number" id="attacker-range" value="5000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+        </div>
+        <details class="collapsible skill-section">
+          <summary>
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-summary-row">
+              <span class="skill-summary-value" id="attacker-skill-summary">5</span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </summary>
+          <select id="attacker-skills" hidden></select>
+          <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+        </details>
+      </section>
+
+      <section class="canvas-section">
+        <canvas id="scene" width="800" height="600"></canvas>
+        <div class="controls">
+          <button id="play" class="primary">Play</button>
+          <button id="reset" data-i18n="button.reset">Reset</button>
+          <label>
+            <span data-i18n="label.simulationSpeed">Speed</span>
+            <select id="sim-speed">
+              <option value="0.25">0.25x</option>
+              <option value="0.5">0.5x</option>
+              <option value="1">1x</option>
+              <option value="2">2x</option>
+              <option value="4" selected>4x</option>
+              <option value="8">8x</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel target-panel">
+        <h2 data-i18n="section.targetShip">Target</h2>
+        <label>
+          <span data-i18n="label.hull">Ship</span>
+          <input type="text" id="target-hull" list="hull-options"
+                 autocomplete="off" autocapitalize="off" spellcheck="false"
+                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <span class="hull-hint" id="target-hull-hint"></span>
+        </label>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.initialDistance">Initial distance</span>
+            <span class="input-with-unit">
+              <input type="number" id="initial-distance" value="5000" step="any" min="1">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+          <label>
+            <span data-i18n="label.signatureRadius">Signature radius</span>
+            <span class="input-with-unit">
+              <input type="number" id="target-sig" value="40" step="any" min="1">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+        </div>
+        <div class="field-group propulsion-group">
+          <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
+          <select id="target-propulsion" hidden disabled></select>
+          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2 5 13h5l-1 9 8-11h-5l1-9z"/></svg>
+          </button>
+          <span class="input-with-unit">
+            <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <span class="input-suffix" aria-hidden="true">m/s</span>
+          </span>
+          <input type="checkbox" id="target-overload" hidden checked>
+        </div>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.mass">Mass</span>
+            <span class="input-with-unit">
+              <input type="number" id="target-mass" value="10000000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">kg</span>
+            </span>
+          </label>
+          <label>
+            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <input type="number" id="target-inertia" value="0.45" step="any" min="0">
+          </label>
+        </div>
+        <div class="field-row">
+          <label>
+            <span data-i18n="label.mode">Mode</span>
+            <select id="target-mode">
+              <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
+              <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="input-with-unit">
+              <input type="number" id="target-range" value="5000" step="any" min="0">
+              <span class="input-suffix" aria-hidden="true">m</span>
+            </span>
+          </label>
+        </div>
+        <details class="collapsible skill-section">
+          <summary>
+            <span class="field-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-summary-row">
+              <span class="skill-summary-value" id="target-skill-summary">5</span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </summary>
+          <select id="target-skills" hidden></select>
+          <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-about">
+        <h3 data-i18n="footer.about.heading">About Gunner</h3>
+        <p data-i18n="footer.about.text">Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.</p>
+      </div>
+
+      <div class="footer-mechanism" data-accent="teal">
+        <h3 data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
+        <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.kinematics.link">EVE University: Velocity</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-mechanism" data-accent="blue">
+        <h3 data-i18n="footer.mech.speed.heading">Speed</h3>
+        <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.speed.link">EVE University: Propulsion equipment</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-mechanism" data-accent="orange">
+        <h3 data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
+        <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.hitChance.link">EVE University: Turret mechanics</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-author">
+        <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="28" height="28">
+        <span class="footer-author-line">
+          <span class="author-label" data-i18n="label.author">Author:</span>
+          <span class="author-name">Keos Cuzi</span>
+        </span>
+      </div>
+    </footer>
   </div>
 
   <datalist id="hull-options"></datalist>

@@ -29,11 +29,14 @@ const DEFAULT_SETTINGS = {
 
 class FakeElement {
   value = "";
+  checked = false;
+  disabled = false;
   textContent = "";
   innerHTML = "";
   placeholder = "";
   style: Record<string, string> = {};
   classList = { toggle: vi.fn() };
+  children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
 
@@ -54,8 +57,12 @@ class FakeElement {
     this.handlers[event]?.forEach((handler) => handler());
   }
 
-  appendChild(_child: unknown): void {
-    // no-op: tests do not inspect the rendered profile list.
+  dispatchEvent(event: { type: string }): void {
+    this.trigger(event.type);
+  }
+
+  appendChild(child: unknown): void {
+    this.children.push(child as FakeElement);
   }
 }
 

@@ -8,15 +8,10 @@ export interface I18n {
 }
 
 export const I18N_DICTIONARY = {
-  "app.title": {
-    en: "EVE Tactic Simulator",
-    zh: "EVE 火炮追踪计算器",
-    ja: "EVE ガン追跡計算機",
-  },
   "app.subtitle": {
-    en: "2D tactical simulation",
-    zh: "2D 战术模拟",
-    ja: "2D 戦術シミュレーション",
+    en: "EVE Online 2D tactical simulator",
+    zh: "EVE Online 2D 战术模拟器",
+    ja: "EVE Online 2D 戦術シミュレーター",
   },
   "lang.en": {
     en: "English",
@@ -54,14 +49,14 @@ export const I18N_DICTIONARY = {
     ja: "タレット信号半径",
   },
   "label.optimalRange": {
-    en: "Optimal range (m)",
-    zh: "最佳射程 (m)",
-    ja: "最適射程 (m)",
+    en: "Optimal range",
+    zh: "最佳射程",
+    ja: "最適射程",
   },
   "label.falloffRange": {
-    en: "Falloff range (m)",
-    zh: "衰减射程 (m)",
-    ja: "フォールオフ射程 (m)",
+    en: "Falloff range",
+    zh: "衰减射程",
+    ja: "フォールオフ射程",
   },
   "section.attackerShip": {
     en: "Attacker ship",
@@ -93,30 +88,31 @@ export const I18N_DICTIONARY = {
     zh: "超载",
     ja: "オーバーヒート",
   },
-  "propulsion.none": {
-    en: "None",
-    zh: "无",
-    ja: "なし",
+  "label.language": {
+    en: "Language",
+    zh: "语言",
+    ja: "言語",
   },
+
   "hint.hullSearch": {
     en: "Type ship name…",
     zh: "输入舰船名称…",
     ja: "艦船名を入力…",
   },
   "label.maxSpeed": {
-    en: "Max speed (m/s)",
-    zh: "最大速度 (m/s)",
-    ja: "最大速度 (m/s)",
+    en: "Max speed",
+    zh: "最大速度",
+    ja: "最大速度",
   },
   "label.mass": {
-    en: "Mass (kg)",
-    zh: "质量 (kg)",
-    ja: "質量 (kg)",
+    en: "Mass",
+    zh: "质量",
+    ja: "質量",
   },
   "label.inertiaModifier": {
-    en: "Inertia modifier (s/kg)",
-    zh: "惯性修正 (s/kg)",
-    ja: "慣性修正係数 (s/kg)",
+    en: "Inertia modifier",
+    zh: "惯性修正",
+    ja: "慣性修正係数",
   },
   "label.mode": {
     en: "Mode",
@@ -134,19 +130,19 @@ export const I18N_DICTIONARY = {
     ja: "距離を保つ",
   },
   "label.desiredRange": {
-    en: "Desired range (m)",
-    zh: "期望距离 (m)",
-    ja: "希望射程 (m)",
+    en: "Desired range",
+    zh: "期望距离",
+    ja: "希望射程",
   },
   "label.initialDistance": {
-    en: "Initial distance (m)",
-    zh: "初始距离 (m)",
-    ja: "初期距離 (m)",
+    en: "Initial distance",
+    zh: "初始距离",
+    ja: "初期距離",
   },
   "section.targetShip": {
-    en: "Target ship",
-    zh: "目标舰船",
-    ja: "ターゲット艦船",
+    en: "Target",
+    zh: "目标",
+    ja: "ターゲット",
   },
   "section.targetProfile": {
     en: "Target profile",
@@ -154,9 +150,9 @@ export const I18N_DICTIONARY = {
     ja: "ターゲットプロファイル",
   },
   "label.signatureRadius": {
-    en: "Signature radius (m)",
-    zh: "信号半径 (m)",
-    ja: "信号半径 (m)",
+    en: "Signature radius",
+    zh: "信号半径",
+    ja: "信号半径",
   },
   "label.simulationSpeed": {
     en: "Speed",
@@ -298,6 +294,61 @@ export const I18N_DICTIONARY = {
     zh: "无",
     ja: "なし",
   },
+  "footer.about.heading": {
+    en: "About Gunner",
+    zh: "关于 Gunner",
+    ja: "Gunner について",
+  },
+  "footer.about.text": {
+    en: "Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.",
+    zh: "Gunner 是一个 EVE Online 2D 战术模拟器，模拟两艘舰船的运动，并计算攻击方炮塔对目标的命中表现。",
+    ja: "Gunner は EVE Online の 2D 戦術シミュレーターです。2 隻の艦船の動きを再現し、攻撃側のタレットの命中性能を計算します。",
+  },
+  "footer.mech.kinematics.heading": {
+    en: "Kinematics",
+    zh: "运动学",
+    ja: "運動学",
+  },
+  "footer.mech.kinematics.text": {
+    en: "Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.",
+    zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述目标相对运动，加速度按指数趋近最大速度。",
+    ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。加速度は指数関数的に最大速度に近づく。",
+  },
+  "footer.mech.kinematics.link": {
+    en: "EVE University: Velocity",
+    zh: "EVE University: Velocity",
+    ja: "EVE University: Velocity",
+  },
+  "footer.mech.speed.heading": {
+    en: "Speed",
+    zh: "速度",
+    ja: "速度",
+  },
+  "footer.mech.speed.text": {
+    en: "Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.",
+    zh: "最大速度 = 船体基础速度 × 推进模块加成（加力 / 微曲）× 技能修正；超载进一步提升。",
+    ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。",
+  },
+  "footer.mech.speed.link": {
+    en: "EVE University: Propulsion equipment",
+    zh: "EVE University: Propulsion equipment",
+    ja: "EVE University: Propulsion equipment",
+  },
+  "footer.mech.hitChance.heading": {
+    en: "Hit chance",
+    zh: "命中率",
+    ja: "命中確率",
+  },
+  "footer.mech.hitChance.text": {
+    en: "Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.",
+    zh: "命中率 = 0.5^(追踪项 + 射程项)。追踪项来自角速度、炮塔跟踪、信号半径；射程项来自超出最佳射程的距离。",
+    ja: "命中確率 = 0.5^(追跡項 + 射程項)。追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。",
+  },
+  "footer.mech.hitChance.link": {
+    en: "EVE University: Turret mechanics",
+    zh: "EVE University: Turret mechanics",
+    ja: "EVE University: Turret mechanics",
+  },
   "unit.meter": {
     en: "m",
     zh: "m",
@@ -343,6 +394,14 @@ export class I18nImpl implements I18n {
     for (const element of this.document.querySelectorAll("[data-i18n-placeholder]")) {
       const key = element.getAttribute("data-i18n-placeholder");
       if (key) (element as HTMLInputElement).placeholder = this.t(key);
+    }
+    for (const element of this.document.querySelectorAll("[data-i18n-aria-label]")) {
+      const key = element.getAttribute("data-i18n-aria-label");
+      if (key) element.setAttribute("aria-label", this.t(key));
+    }
+    for (const element of this.document.querySelectorAll("[data-i18n-title]")) {
+      const key = element.getAttribute("data-i18n-title");
+      if (key) (element as HTMLElement).title = this.t(key);
     }
   }
 }

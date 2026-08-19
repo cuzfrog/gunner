@@ -2,6 +2,8 @@ import { I18nImpl, type Language } from "./i18n";
 
 class FakeElement {
   private _text = "";
+  private _title = "";
+  private _placeholder = "";
   private _attributes = new Map<string, string>();
 
   getAttribute(name: string): string | null {
@@ -19,11 +21,26 @@ class FakeElement {
   set textContent(value: string) {
     this._text = value;
   }
+
+  get title(): string {
+    return this._title;
+  }
+
+  set title(value: string) {
+    this._title = value;
+  }
+
+  get placeholder(): string {
+    return this._placeholder;
+  }
+
+  set placeholder(value: string) {
+    this._placeholder = value;
+  }
 }
 
-function fakeDocument(): Document {
+function fakeDocument(elements: FakeElement[] = []): Document {
   const docEl = { lang: "en" as string };
-  const elements: FakeElement[] = [];
   return {
     documentElement: docEl as unknown as HTMLElement,
     querySelectorAll: () => elements as unknown as NodeListOf<Element>,
@@ -74,5 +91,25 @@ describe("I18nImpl", () => {
     expect(i18n.t("lang.en")).toBe("English");
     expect(i18n.t("lang.zh")).toBe("中文");
     expect(i18n.t("lang.ja")).toBe("日本語");
+  });
+
+  test("translateDocument sets text, placeholder, aria-label and title from data attributes", () => {
+    const label = new FakeElement();
+    label.setAttribute("data-i18n", "label.overload");
+    const input = new FakeElement();
+    input.setAttribute("data-i18n-placeholder", "hint.hullSearch");
+    const group = new FakeElement();
+    group.setAttribute("data-i18n-aria-label", "label.propulsion");
+    const button = new FakeElement();
+    button.setAttribute("data-i18n-title", "label.overload");
+    globalThis.document = fakeDocument([label, input, group, button]) as unknown as Document;
+
+    const i18n = new I18nImpl();
+    i18n.translateDocument();
+
+    expect(label.textContent).toBe("Overload");
+    expect(input.placeholder).toBe("Type ship name…");
+    expect(group.getAttribute("aria-label")).toBe("Propulsion");
+    expect(button.title).toBe("Overload");
   });
 });
