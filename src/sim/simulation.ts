@@ -11,13 +11,19 @@ export interface Simulation {
 }
 
 export class SimulationImpl implements Simulation {
-  private readonly autopilot: Autopilot;
+  private readonly attackerSteering: Autopilot;
+  private readonly targetSteering: Autopilot;
   private time: number;
   private attacker: ShipState;
   private target: ShipState;
 
-  constructor({ autopilot, simConfig }: { autopilot: Autopilot; simConfig: SimConfig }) {
-    this.autopilot = autopilot;
+  constructor({ attackerSteering, targetSteering, simConfig }: {
+    attackerSteering: Autopilot;
+    targetSteering: Autopilot;
+    simConfig: SimConfig;
+  }) {
+    this.attackerSteering = attackerSteering;
+    this.targetSteering = targetSteering;
     this.time = 0;
     this.attacker = asState(simConfig.attacker, vec(0, 0));
     this.target = asState(simConfig.target, vec(0, simConfig.initialDistance));
@@ -59,8 +65,8 @@ export class SimulationImpl implements Simulation {
   }
 
   private computeCommands(): { attacker: Vec2; target: Vec2 } {
-    const attacker = this.autopilot.computeVelocity(this.attacker, this.target, this.time);
-    const target = this.autopilot.computeVelocity(this.target, this.attacker, this.time);
+    const attacker = this.attackerSteering.computeVelocity(this.attacker, this.target, this.time);
+    const target = this.targetSteering.computeVelocity(this.target, this.attacker, this.time);
     return { attacker, target };
   }
 }

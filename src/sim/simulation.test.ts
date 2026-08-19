@@ -3,7 +3,8 @@ import type { Autopilot } from "./autopilot";
 import { SimulationImpl } from "./simulation";
 import type { ShipConfig, SimConfig } from "./types";
 
-const autopilot = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 
 const INSTANT_MASS = 1;
 const INSTANT_INERTIA = 1e-6;
@@ -26,13 +27,15 @@ function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inerti
 }
 
 function makeSim(config: SimConfig): SimulationImpl {
-  return new SimulationImpl({ autopilot, simConfig: config });
+  return new SimulationImpl({ attackerSteering, targetSteering, simConfig: config });
 }
 
 describe("SimulationImpl", () => {
   beforeEach(() => {
-    autopilot.computeVelocity.mockClear();
-    autopilot.computeVelocity.mockImplementation((ship) => (ship.id === "target" ? vec(100, 0) : vec(0, 0)));
+    attackerSteering.computeVelocity.mockClear();
+    attackerSteering.computeVelocity.mockImplementation(() => vec(0, 0));
+    targetSteering.computeVelocity.mockClear();
+    targetSteering.computeVelocity.mockImplementation(() => vec(100, 0));
   });
 
   test("step integrates positions by command * dt and advances time with instant dynamics", () => {
@@ -71,7 +74,7 @@ describe("SimulationImpl", () => {
   });
 
   test("snapshot commands are recomputed from the configuration applied by update", () => {
-    autopilot.computeVelocity.mockImplementation((ship) => vec(ship.desiredRange, 0));
+    attackerSteering.computeVelocity.mockImplementation((ship) => vec(ship.desiredRange, 0));
     const sim = makeSim(simConfig("keepAtRange"));
     sim.step(1);
     sim.update({
@@ -92,7 +95,7 @@ describe("SimulationImpl", () => {
   });
 
   test("update keeps time and reapplies parameters without resetting velocity", () => {
-    autopilot.computeVelocity.mockImplementation((ship) => (ship.id === "attacker" ? vec(0, 100) : vec(0, 0)));
+    attackerSteering.computeVelocity.mockImplementation(() => vec(0, 100));
     const sim = makeSim(simConfig("orbit"));
     sim.step(2);
     const before = sim.snapshot();
@@ -106,12 +109,22 @@ describe("SimulationImpl", () => {
     expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(3000, 6);
   });
 
-  test("computes attacker command before target command", () => {
+  test("computes attacker command before target command and passes the current time", () => {
+    const order: string[] = [];
+    attackerSteering.computeVelocity.mockImplementation((ship) => {
+      order.push(ship.id);
+      return vec(0, 0);
+    });
+    targetSteering.computeVelocity.mockImplementation((ship) => {
+      order.push(ship.id);
+      return vec(100, 0);
+    });
+
     const sim = makeSim(simConfig("orbit"));
-    expect(autopilot.computeVelocity).not.toHaveBeenCalled();
     sim.step(1);
-    expect(autopilot.computeVelocity.mock.calls.map(([ship]) => ship.id)).toEqual(["attacker", "target"]);
-    expect(autopilot.computeVelocity.mock.calls[0][2]).toBe(0);
-    expect(autopilot.computeVelocity.mock.calls[1][2]).toBe(0);
+
+    expect(order).toEqual(["attacker", "target"]);
+    expect(attackerSteering.computeVelocity.mock.calls[0][2]).toBe(0);
+    expect(targetSteering.computeVelocity.mock.calls[0][2]).toBe(0);
   });
 });

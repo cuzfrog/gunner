@@ -3,7 +3,8 @@ import type { Autopilot } from "./autopilot";
 import { NaiveAutopilot } from "./autopilot";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
-import type { OrbitDirection, ShipState } from "./types";
+import { SimulationImpl } from "./simulation";
+import type { OrbitDirection, ShipConfig, ShipState, SimConfig } from "./types";
 
 const kinematics = new KinematicsImpl();
 
@@ -105,5 +106,35 @@ describe("PredictiveAutopilot", () => {
 
     expect(cmd.y).toBeGreaterThan(500);
     expect(Math.abs(cmd.x)).toBeLessThan(100);
+  });
+
+  test("reduces mean angular velocity versus the naive attacker in the Harbinger-Thrasher engagement", () => {
+    const attackerConfig: ShipConfig = { id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000 };
+    const targetConfig: ShipConfig = { id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw" };
+    const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
+
+    const naive = new NaiveAutopilot();
+    const kinematicsForSim = new KinematicsImpl();
+    const baseline = new SimulationImpl({ attackerSteering: naive, targetSteering: naive, simConfig });
+    const predictive = new PredictiveAutopilot({ targetSteering: new NaiveAutopilot(), kinematics: kinematicsForSim });
+    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new NaiveAutopilot(), simConfig });
+
+    const dt = 0.25;
+    const steps = Math.round(120 / dt);
+    let meanNaive = 0;
+    let meanPredictive = 0;
+    for (let i = 0; i < steps; i++) {
+      baseline.step(dt);
+      predictiveSim.step(dt);
+      const baseFrame = kinematicsForSim.computeEngagement(baseline.snapshot().attacker, baseline.snapshot().target, baseline.snapshot().time);
+      const predFrame = kinematicsForSim.computeEngagement(predictiveSim.snapshot().attacker, predictiveSim.snapshot().target, predictiveSim.snapshot().time);
+      meanNaive += baseFrame.angularVelocity;
+      meanPredictive += predFrame.angularVelocity;
+    }
+    meanNaive /= steps;
+    meanPredictive /= steps;
+
+    expect(meanPredictive).toBeGreaterThan(0);
+    expect(meanPredictive).toBeLessThan(0.7 * meanNaive);
   });
 });

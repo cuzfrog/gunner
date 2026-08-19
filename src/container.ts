@@ -6,7 +6,8 @@ import type { Controls, Loop, Renderer } from "./ui";
 export interface AppCradle {
   canvas: HTMLCanvasElement;
   simConfig: SimConfig;
-  autopilot: Autopilot;
+  attackerSteering: Autopilot;
+  targetSteering: Autopilot;
   kinematics: Kinematics;
   hitChance: HitChance;
   simulation: Simulation;

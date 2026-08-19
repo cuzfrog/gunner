@@ -13,7 +13,8 @@ const DT = 1 / 60;
 const STEPS = 180 * 60;
 
 function runToSteadyState(): ReturnType<SimulationImpl["snapshot"]> {
-  const sim = new SimulationImpl({ autopilot: new NaiveAutopilot(), simConfig });
+  const steering = new NaiveAutopilot();
+  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig });
   for (let i = 0; i < STEPS; i++) {
     sim.step(DT);
   }
