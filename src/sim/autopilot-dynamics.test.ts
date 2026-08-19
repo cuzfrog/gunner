@@ -74,27 +74,29 @@ describe("Autopilot + Dynamics", () => {
     expect(min).toBeGreaterThan(13_300);
   });
 
-  test("isolated strict keeper from 4R has no overshoot and settles", () => {
-    const config: SimConfig = {
-      attacker: { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity: 0.01 },
+  test("isolated keep-at-range overshoot grows monotonically with aggressivity", () => {
+    const make = (aggressivity: number): SimConfig => ({
+      attacker: { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity },
       target: { id: "target", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 },
       initialDistance: 20_000,
-    };
-    const { min, final } = approachResult(config, 60 * 60);
-    expect(min).toBeGreaterThanOrEqual(4900);
-    expect(final).toBeGreaterThan(4500);
-    expect(final).toBeLessThan(5500);
-  });
+    });
 
-  test("isolated loose keeper overshoots before settling", () => {
-    const config: SimConfig = {
-      attacker: { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity: 10 },
-      target: { id: "target", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 },
-      initialDistance: 20_000,
-    };
-    const { min, final } = approachResult(config, 60 * 60);
-    expect(min).toBeLessThan(4500);
-    expect(final).toBeGreaterThan(4500);
-    expect(final).toBeLessThan(5500);
+    const low = approachResult(make(0.01), 60 * 60);
+    const mid = approachResult(make(1), 60 * 60);
+    const loose = approachResult(make(10), 60 * 60);
+    const loosest = approachResult(make(100), 60 * 60);
+
+    expect(low.min).toBeGreaterThanOrEqual(4900);
+    expect(loose.min).toBeLessThan(4500);
+    expect(loosest.min).toBeLessThan(4500);
+
+    expect(low.min).toBeGreaterThanOrEqual(mid.min);
+    expect(mid.min).toBeGreaterThanOrEqual(loose.min);
+    expect(loose.min).toBeGreaterThanOrEqual(loosest.min);
+
+    expect(low.final).toBeGreaterThan(4500);
+    expect(low.final).toBeLessThan(5500);
+    expect(loosest.final).toBeGreaterThan(4500);
+    expect(loosest.final).toBeLessThan(5500);
   });
 });

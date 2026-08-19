@@ -1,7 +1,6 @@
 import { add, dist, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
 import { ReactiveAutopilot } from "./autopilot";
-import { SimulationImpl } from "./simulation";
-import type { AutopilotMode, OrbitDirection, ShipConfig, ShipState } from "./types";
+import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
 
 const autopilot = new ReactiveAutopilot();
 const DT = 0.1;
@@ -343,35 +342,5 @@ describe("ReactiveAutopilot", () => {
       expect(dot(command(shipHigh, other), fromCenterHat)).toBeCloseTo(-1000, 1);
     });
 
-    test("whole-bar keep-at-range monotonicity", () => {
-      const result = (aggressivity: number) => {
-        const steering = new ReactiveAutopilot();
-        const target: ShipConfig = { id: "target", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 };
-        const keeper: ShipConfig = { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity };
-        const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig: { attacker: keeper, target, initialDistance: 20000 } });
-        const dt = 1 / 60;
-        const steps = 60 * 60;
-        let min = Number.POSITIVE_INFINITY;
-        for (let i = 0; i < steps; i++) {
-          sim.step(dt);
-          const snapshot = sim.snapshot();
-          const d = dist(snapshot.attacker.position, snapshot.target.position);
-          if (d < min) min = d;
-        }
-        return { min, final: dist(sim.snapshot().attacker.position, sim.snapshot().target.position) };
-      };
-
-      const low = result(0.01);
-      const mid = result(1);
-      const high = result(100);
-
-      expect(low.min).toBeGreaterThanOrEqual(mid.min);
-      expect(mid.min).toBeGreaterThanOrEqual(high.min);
-      expect(low.min).toBeGreaterThanOrEqual(4900);
-      expect(low.final).toBeGreaterThan(4500);
-      expect(low.final).toBeLessThan(5500);
-      expect(high.final).toBeGreaterThan(4500);
-      expect(high.final).toBeLessThan(5500);
-    });
   });
 });

@@ -1183,6 +1183,12 @@ describe("DomControls", () => {
     getFake(globalThis.document, "maneuver-aggressivity").value = "0.001";
     expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
 
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "-5";
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
+
     getFake(globalThis.document, "maneuver-aggressivity").value = "500";
     expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(100, 6);
   });
