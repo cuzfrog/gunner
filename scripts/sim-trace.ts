@@ -3,6 +3,7 @@ import { len, type Vec2 } from "../src/math";
 import { registerSimModule, type AutopilotMode, type Kinematics, type SimConfig, type Simulation } from "../src/sim";
 
 const FIXED_DT = 1 / 60;
+const REFERENCE_RANGE_WEIGHT = 0.003;
 
 interface TraceCradle {
   simConfig: SimConfig;
@@ -57,6 +58,9 @@ function parseParams(args: string[]): TraceParams {
       case "--attacker-inertia":
         draft.attacker.inertiaModifier = parseNumber(flag, raw);
         break;
+      case "--attacker-aggressivity":
+        draft.attacker.rangeWeight = REFERENCE_RANGE_WEIGHT / parseManeuverAggressivity(flag, raw);
+        break;
       case "--target-speed":
         draft.target.maxSpeed = parseNumber(flag, raw);
         break;
@@ -91,6 +95,12 @@ function parseNumber(flag: string, raw: string): number {
   const value = Number(raw);
   if (!Number.isFinite(value)) throw new Error(`${flag} expects a number, got "${raw}"`);
   return value;
+}
+
+function parseManeuverAggressivity(flag: string, raw: string): number {
+  const value = parseNumber(flag, raw);
+  if (value <= 0) throw new Error(`${flag} must be positive, got "${raw}"`);
+  return Math.max(0.01, Math.min(100, value));
 }
 
 function isAutopilotMode(raw: string): raw is AutopilotMode {
@@ -145,8 +155,10 @@ function scenarioSummary(params: TraceParams): string {
   const tau = (mass: number, inertia: number) => (mass * inertia * 1e-6).toFixed(2);
   return [
     `attacker: mode=${attacker.mode} speed=${attacker.maxSpeed} range=${attacker.desiredRange} ` +
+      `aggressivity=${(REFERENCE_RANGE_WEIGHT / attacker.rangeWeight).toFixed(2)} ` +
       `tau=${tau(attacker.mass, attacker.inertiaModifier)}s`,
     `target:   mode=${target.mode} speed=${target.maxSpeed} range=${target.desiredRange} ` +
+      `aggressivity=${(REFERENCE_RANGE_WEIGHT / target.rangeWeight).toFixed(2)} ` +
       `tau=${tau(target.mass, target.inertiaModifier)}s`,
     `initial distance=${params.config.initialDistance} duration=${params.durationSeconds}s dt=${FIXED_DT}s`,
   ].join("\n");
@@ -158,6 +170,7 @@ const USAGE = `Usage: bun run trace -- [flags]
   --distance <m>          initial distance between ships (default 5000)
   --attacker-speed <m/s>  --attacker-mode <mode>    --attacker-range <m>
   --attacker-mass <kg>    --attacker-inertia <modifier>
+  --attacker-aggressivity <value>
   --target-speed <m/s>    --target-mode <mode>      --target-range <m>
   --target-mass <kg>      --target-inertia <modifier>
 Modes: ${AUTOPILOT_MODES.join(", ")}`;

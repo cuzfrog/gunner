@@ -2,7 +2,7 @@
 no-new-exports:
   - autopilot.test.ts
   - autopilot-dynamics.test.ts
-  # - autopilot.ts (temporarily disabled for NaiveAutopilot -> ReactiveAutopilot rename)
+  - autopilot.ts
   - dynamics.test.ts
   - dynamics.ts
   - hitChance.test.ts
