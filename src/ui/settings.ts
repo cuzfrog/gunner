@@ -257,7 +257,7 @@ function isOptionalBoolean(value: unknown): value is boolean | undefined {
 }
 
 function isOptionalNonNegative(value: unknown): value is number | undefined {
-  return value === undefined || (isFiniteNumber(value) && (value as number) >= 0);
+  return value === undefined || (isFiniteNumber(value) && value >= 0);
 }
 
 function isFiniteNumber(value: unknown): value is number {

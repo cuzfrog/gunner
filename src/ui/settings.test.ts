@@ -295,6 +295,14 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toEqual(partial);
   });
 
+  test("save and load round-trips a non-default maneuverAggressivity", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const settings: UserSettings = { ...DEFAULT_SETTINGS, maneuverAggressivity: 2.5 };
+    store.save(settings);
+    expect(store.load()).toEqual(settings);
+  });
+
   test("load accepts settings without maneuverAggressivity", () => {
     const storage = fakeStorage();
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
