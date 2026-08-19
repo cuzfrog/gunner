@@ -20,6 +20,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "attacker-mode": "keepAtRange",
   "attacker-range": "5000",
   "maneuver-aggressivity": "1",
+  "grid-brightness-slider": "0.2",
   "initial-distance": "5000",
   "target-hull": "",
   "target-speed": "1000",
@@ -41,7 +42,11 @@ class FakeElement {
   placeholder = "";
   disabled = false;
   label = "";
-  style: Record<string, string> = {};
+  style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
+    setProperty(this: Record<string, string>, name: string, value: string) {
+      this[name] = value;
+    },
+  }) as Record<string, string> & { setProperty(name: string, value: string): void };
   classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
@@ -1441,6 +1446,117 @@ describe("DomControls", () => {
     expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
     expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
     expect(select.value).toBe("");
+  });
+
+  test("getGridBrightness returns the slider value clamped to [0, 1]", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "grid-brightness-slider").value = "0.63";
+    expect(controls.getGridBrightness()).toBeCloseTo(0.63, 6);
+
+    getFake(globalThis.document, "grid-brightness-slider").value = "-0.5";
+    expect(controls.getGridBrightness()).toBe(0);
+
+    getFake(globalThis.document, "grid-brightness-slider").value = "1.5";
+    expect(controls.getGridBrightness()).toBe(1);
+  });
+
+  test("dragging the grid brightness slider updates the output, fill, and persisted settings", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const slider = getFake(globalThis.document, "grid-brightness-slider");
+    slider.value = "0.63";
+    slider.trigger("input");
+
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("63%");
+    expect(slider.style["--fill"]).toBe("63%");
+    const calls = settingsStore.save.mock.calls;
+    const [saved] = calls[calls.length - 1];
+    expect(saved.gridBrightness).toBe(0.63);
+  });
+
+  test("changing the grid brightness slider calls the display change callback", () => {
+    const { controls } = buildControls(globalThis.document);
+    const onDisplayChange = vi.fn();
+    controls.setCallbacks({
+      onReset: () => {},
+      onConfigChange: () => {},
+      onDisplayChange,
+      onPlayPause: () => {},
+      onSpeedChange: () => {},
+    });
+
+    const slider = getFake(globalThis.document, "grid-brightness-slider");
+    slider.value = "0.5";
+    slider.trigger("input");
+
+    expect(onDisplayChange).toHaveBeenCalled();
+  });
+
+  test("loadSettings restores the grid brightness slider and output", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      gridBrightness: 0.75,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "grid-brightness-slider").value).toBe("0.75");
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("75%");
+  });
+
+  test("loadSettings defaults missing gridBrightness to 0.2", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("20%");
   });
 });
 

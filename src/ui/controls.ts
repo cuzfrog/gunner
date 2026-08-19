@@ -26,6 +26,7 @@ import { TrackingInput } from "./trackingInput";
 export interface ControlsCallbacks {
   readonly onReset: () => void;
   readonly onConfigChange: () => void;
+  readonly onDisplayChange: () => void;
   readonly onPlayPause: () => void;
   readonly onSpeedChange: (speed: number) => void;
 }
@@ -35,6 +36,7 @@ export interface Controls {
   getTargetSig(): number;
   getConfig(): SimConfig;
   getSpeed(): number;
+  getGridBrightness(): number;
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
@@ -134,6 +136,8 @@ export class DomControls implements Controls {
       resTrackPen: el("res-track-pen"),
       resRangePen: el("res-range-pen"),
       resHit: el("res-hit"),
+      gridBrightnessSlider: el("grid-brightness-slider"),
+      gridBrightnessValue: el("grid-brightness-value"),
     };
 
     this.populateHullDatalist();
@@ -167,6 +171,7 @@ export class DomControls implements Controls {
       this.updateLanguageToggle();
       this.setBestInitialDistance();
       this.updateManeuverAggressivityDisplay();
+      this.updateGridBrightnessDisplay(DEFAULT_GRID_BRIGHTNESS);
       this.setPlaying(false);
     }
   }
@@ -212,6 +217,12 @@ export class DomControls implements Controls {
 
   getSpeed(): number {
     return num(this.els.simSpeed);
+  }
+
+  getGridBrightness(): number {
+    const value = Number.parseFloat((this.els.gridBrightnessSlider as HTMLInputElement).value);
+    if (!Number.isFinite(value)) return DEFAULT_GRID_BRIGHTNESS;
+    return Math.max(0, Math.min(1, value));
   }
 
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
@@ -260,6 +271,24 @@ export class DomControls implements Controls {
     }
   }
 
+  private onGridBrightnessChange(): void {
+    this.updateGridBrightnessDisplay();
+    this.updateSaveButtonState();
+    this.persist();
+    this.callbacks?.onDisplayChange();
+  }
+
+  private updateGridBrightnessDisplay(value?: number): void {
+    const slider = this.els.gridBrightnessSlider as HTMLInputElement;
+    const output = this.els.gridBrightnessValue;
+    const current = value ?? this.getGridBrightness();
+    slider.value = String(current);
+    setText(output, `${Math.round(current * 100)}%`);
+    if ("setProperty" in slider.style) {
+      slider.style.setProperty("--fill", `${current * 100}%`);
+    }
+  }
+
   setCallbacks(callbacks: ControlsCallbacks): void {
     this.callbacks = callbacks;
   }
@@ -276,6 +305,7 @@ export class DomControls implements Controls {
       attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
       maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement),
+      gridBrightness: this.getGridBrightness(),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
       attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
@@ -319,6 +349,7 @@ export class DomControls implements Controls {
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
+    (this.els.gridBrightnessSlider as HTMLInputElement).value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
@@ -344,6 +375,7 @@ export class DomControls implements Controls {
     this.renderProfiles(selectedName);
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
+    this.updateGridBrightnessDisplay();
     this.persist();
   }
 
@@ -570,6 +602,7 @@ export class DomControls implements Controls {
     }
 
     (this.els.maneuverAggressivitySlider as HTMLInputElement).addEventListener("input", () => this.onManeuverAggressivityChange());
+    (this.els.gridBrightnessSlider as HTMLInputElement).addEventListener("input", () => this.onGridBrightnessChange());
   }
 
   private formatDistance(m: number): string {
@@ -973,6 +1006,7 @@ export class DomControls implements Controls {
 const REFERENCE_RANGE_WEIGHT = 0.003;
 const AGGRESSIVITY_MIN = 0.01;
 const AGGRESSIVITY_MAX = 100;
+const DEFAULT_GRID_BRIGHTNESS = 0.2;
 
 function aggressivityFromPosition(pos: number): number {
   const clamped = Math.max(0, Math.min(1, pos));

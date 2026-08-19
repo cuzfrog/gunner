@@ -8,6 +8,7 @@ const controls = vi.mocked<Controls>({
   getTargetSig: vi.fn(),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
+  getGridBrightness: vi.fn(),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
@@ -15,7 +16,7 @@ const controls = vi.mocked<Controls>({
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn() });
 const hitChance = vi.mocked<HitChance>({ compute: vi.fn(), findBestDistance: vi.fn() });
-const renderer = vi.mocked<Renderer>({ draw: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),
@@ -69,6 +70,7 @@ describe("AppImpl", () => {
     controls.getTurret.mockReturnValue(turret);
     controls.getTargetSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
+    controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
     app = new AppImpl({ controls, simulation, kinematics, hitChance, renderer, loop });
   });
@@ -82,6 +84,8 @@ describe("AppImpl", () => {
     expect(loop.setTickHandler).toHaveBeenCalled();
     expect(loop.setSpeed).toHaveBeenCalledWith(1);
     expect(controls.setCallbacks).toHaveBeenCalled();
+    expect(controls.getGridBrightness).toHaveBeenCalled();
+    expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
     expect(controls.update).toHaveBeenCalledWith(frame, hit);
   });
@@ -107,6 +111,16 @@ describe("AppImpl", () => {
     expect(simulation.update).toHaveBeenCalledWith(config);
     expect(loop.reset).not.toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalledTimes(2);
+  });
+
+  test("display change sets grid brightness and re-renders without stepping the simulation", () => {
+    controls.getGridBrightness.mockReturnValue(0.63);
+    app.start();
+    const before = renderer.draw.mock.calls.length;
+    callbacks().onDisplayChange();
+    expect(renderer.setGridBrightness).toHaveBeenLastCalledWith(0.63);
+    expect(renderer.draw).toHaveBeenCalledTimes(before + 1);
+    expect(simulation.step).not.toHaveBeenCalled();
   });
 
   test("play/pause toggles the loop and reflects its state in the controls", () => {

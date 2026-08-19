@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS = {
   attackerSpeed: 0,
   attackerMode: "keepAtRange" as const,
   attackerRange: 5000,
+  gridBrightness: 0.2,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,

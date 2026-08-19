@@ -15,6 +15,7 @@ export interface UserSettings {
   attackerMode: AutopilotMode;
   attackerRange: number;
   maneuverAggressivity?: number;
+  gridBrightness?: number;
   attackerMass: number;
   attackerInertia: number;
   attackerSkillLevel?: SkillLevel;
@@ -245,6 +246,7 @@ function isUserSettings(value: unknown): value is UserSettings {
     isAutopilotMode(s.attackerMode) &&
     isNonNegative(s.attackerRange) &&
     isOptionalNonNegative(s.maneuverAggressivity) &&
+    isOptionalUnitInterval(s.gridBrightness) &&
     isNonNegative(s.attackerMass) &&
     isNonNegative(s.attackerInertia) &&
     isOptionalSkillLevel(s.attackerSkillLevel) &&
@@ -301,6 +303,10 @@ function isOptionalBoolean(value: unknown): value is boolean | undefined {
 
 function isOptionalNonNegative(value: unknown): value is number | undefined {
   return value === undefined || (isFiniteNumber(value) && value >= 0);
+}
+
+function isOptionalUnitInterval(value: unknown): value is number | undefined {
+  return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
 function isFiniteNumber(value: unknown): value is number {

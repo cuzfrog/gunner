@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   attackerMode: "keepAtRange",
   attackerRange: 5000,
   maneuverAggressivity: 1,
+  gridBrightness: 0.2,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,
@@ -312,6 +313,15 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toEqual(partial);
   });
 
+  test("load accepts settings without gridBrightness", () => {
+    const storage = fakeStorage();
+    const partial: UserSettings = { ...DEFAULT_SETTINGS };
+    delete partial.gridBrightness;
+    storage.setItem("gunner-settings-v5", JSON.stringify(partial));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toEqual(partial);
+  });
+
   test("save and load round-trips a non-default maneuverAggressivity", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
@@ -372,6 +382,32 @@ describe("LocalSettingsStore", () => {
     const url = store.encodeUrl(settings);
     const decoded = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toEqual(settings);
+  });
+
+  test("save and load round-trip a custom gridBrightness", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const settings: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0.75 };
+    store.save(settings);
+    expect(store.load()).toEqual(settings);
+  });
+
+  test("load accepts gridBrightness at the interval endpoints", () => {
+    const storage = fakeStorage();
+    const zero: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0 };
+    const one: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 1 };
+    storage.setItem("gunner-settings-v5", JSON.stringify(zero));
+    expect(new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).load()).toEqual(zero);
+    storage.setItem("gunner-settings-v5", JSON.stringify(one));
+    expect(new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).load()).toEqual(one);
+  });
+
+  test("load rejects a gridBrightness outside [0, 1]", () => {
+    const storage = fakeStorage();
+    const bad = { ...DEFAULT_SETTINGS, gridBrightness: 1.5 };
+    storage.setItem("gunner-settings-v5", JSON.stringify(bad));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
   });
 
   test("hasForeignUrlSettings returns true when the URL carries settings different from local", () => {

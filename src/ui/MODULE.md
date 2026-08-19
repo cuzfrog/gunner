@@ -12,6 +12,7 @@ no-new-exports:
   - settings.ts
   - trackingInput.test.ts
   - trackingInput.ts
+  - renderer.test.ts
 ---
 
 
