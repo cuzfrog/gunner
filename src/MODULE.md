@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - container.ts
   - main.ts
 ---

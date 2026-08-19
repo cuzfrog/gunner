@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - controls.ts
   - index.ts
   - loop.ts

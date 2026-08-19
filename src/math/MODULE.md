@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - index.ts
   - vec2.test.ts
   - vec2.ts

@@ -197,7 +197,7 @@ function createModuleDescriptor(dir, descriptorName) {
 
   const content = serializeModule(
     { prelude: "---\n", frontmatter: {}, body: "\n" },
-    "sealed",
+    "no-new-exports",
     directFiles,
   );
 

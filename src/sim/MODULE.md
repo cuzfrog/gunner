@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - autopilot.test.ts
   - autopilot-dynamics.test.ts
   - autopilot.ts
