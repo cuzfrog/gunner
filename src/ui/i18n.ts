@@ -140,9 +140,9 @@ export const I18N_DICTIONARY = {
     ja: "初期距離 (m)",
   },
   "section.targetShip": {
-    en: "Target ship",
-    zh: "目标舰船",
-    ja: "ターゲット艦船",
+    en: "Target",
+    zh: "目标",
+    ja: "ターゲット",
   },
   "section.targetProfile": {
     en: "Target profile",
