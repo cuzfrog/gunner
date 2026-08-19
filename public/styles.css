@@ -752,6 +752,9 @@ canvas {
   font-size: 9px;
   color: var(--text-dim);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .sigres-selector button.active .sigres-value,

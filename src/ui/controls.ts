@@ -970,8 +970,8 @@ export class DomControls implements Controls {
 
   private onDocumentPointerDown(event: PointerEvent): void {
     if (this.openSkillSide === null) return;
-    const target = event.target;
-    if (target instanceof Element) {
+    const target = event.target as Element | null;
+    if (typeof target?.closest === "function") {
       const inside = target.closest("#attacker-skill-field, #target-skill-field");
       if (inside) return;
     }
@@ -1024,6 +1024,7 @@ export class DomControls implements Controls {
     (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
     this.els[`${side}Skills`].dispatchEvent(new Event("change"));
     this.closeSkillPopup(side);
+    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
   }
 
   private onOverloadButtonClick(side: "attacker" | "target"): void {

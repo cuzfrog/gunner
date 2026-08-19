@@ -37,7 +37,7 @@ class FakeElement {
   innerHTML = "";
   placeholder = "";
   style: Record<string, string> = {};
-  classList = { toggle: vi.fn(), contains: vi.fn(() => false) };
+  classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
@@ -67,13 +67,9 @@ class FakeElement {
     this.children.push(child as FakeElement);
   }
 
-  focus(): void {}
+  focus = vi.fn();
 
   closest(): FakeElement | null {
-    return null;
-  }
-
-  querySelector(): FakeElement | null {
     return null;
   }
 }

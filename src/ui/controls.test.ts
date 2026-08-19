@@ -48,7 +48,7 @@ class FakeElement {
       this[name] = value;
     },
   }) as Record<string, string> & { setProperty(name: string, value: string): void };
-  classList = { toggle: vi.fn(), contains: vi.fn(() => false) };
+  classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
@@ -78,19 +78,16 @@ class FakeElement {
     this.children.push(child as FakeElement);
   }
 
-  focus(): void {}
+  focus = vi.fn();
 
   closest(): FakeElement | null {
-    return null;
-  }
-
-  querySelector(): FakeElement | null {
     return null;
   }
 }
 
 function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
+  const documentHandlers: Record<string, Array<(event: { type: string; target?: FakeElement }) => void>> = {};
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
@@ -99,8 +96,14 @@ function fakeDocument(): Document {
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
     createElement: () => new FakeElement() as unknown as HTMLElement,
-    addEventListener: () => {},
+    addEventListener: (event: string, handler: (event: { type: string; target?: FakeElement }) => void) => {
+      documentHandlers[event] ??= [];
+      documentHandlers[event].push(handler);
+    },
     removeEventListener: () => {},
+    dispatchEvent: (event: { type: string; target?: FakeElement }) => {
+      documentHandlers[event.type]?.forEach((handler) => handler(event));
+    },
   } as unknown as Document;
 }
 
@@ -786,12 +789,12 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
-  test("shows the current skill level in the collapsible summary on a fresh start", () => {
+  test("shows the current skill level in the trigger summary on a fresh start", () => {
     buildControls(globalThis.document);
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 5");
   });
 
-  test("clicking a visible skill tuner button updates the collapsible summary", () => {
+  test("clicking a visible skill tuner button updates the trigger summary", () => {
     buildControls(globalThis.document);
     const rifter = rifterProfile();
 
@@ -805,7 +808,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("skill.level 0");
   });
 
-  test("loadSettings restores the skill level into the collapsible summary", () => {
+  test("loadSettings restores the skill level into the trigger summary", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -1668,7 +1671,7 @@ describe("DomControls", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
-  test("selecting a skill level inside the popup closes it and updates the hidden select", () => {
+  test("selecting a skill level inside the popup closes it, updates the hidden select, and returns focus", () => {
     buildControls(globalThis.document);
     getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
     const levelTwo = getFake(globalThis.document, "attacker-skill-options").children.find(
@@ -1680,6 +1683,49 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
     expect(getFake(globalThis.document, "attacker-skills").value).toBe("2");
     expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").focus).toHaveBeenCalled();
+  });
+
+  test("opening one skill popup closes the other", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(false);
+
+    getFake(globalThis.document, "target-skill-trigger").trigger("click");
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "target-skill-popup").hidden).toBe(false);
+  });
+
+  test("pointerdown outside the skill popup closes it", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const outside = new FakeElement();
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("pointerdown inside the skill popup does not close it", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    const inside = new FakeElement();
+    const field = getFake(globalThis.document, "attacker-skill-field");
+    inside.closest = () => field;
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(false);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("Escape closes the skill popup and focuses the trigger", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+    globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+
+    expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+    expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
+    expect(getFake(globalThis.document, "attacker-skill-trigger").focus).toHaveBeenCalled();
   });
 });
 
