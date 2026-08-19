@@ -105,7 +105,7 @@ body {
   display: grid;
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .panel,
@@ -114,6 +114,11 @@ body {
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   padding: 12px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .panel h2 {
@@ -200,6 +205,10 @@ body {
   letter-spacing: 0;
 }
 
+.panel .hull-hint:empty {
+  display: none;
+}
+
 .canvas-section {
   display: flex;
   flex-direction: column;
@@ -219,6 +228,10 @@ canvas {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.canvas-section .controls {
+  margin-top: auto;
 }
 
 .controls button,
@@ -257,7 +270,7 @@ canvas {
 .results {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0;
+  gap: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -266,11 +279,14 @@ canvas {
   display: flex;
   flex-direction: column;
   text-align: center;
-  padding: 2px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  padding: 8px 12px;
 }
 
-.result-card + .result-card {
-  border-left: 1px solid var(--border-dim);
+.result-card.hit-chance {
+  border-color: var(--accent-teal);
 }
 
 .result-card .label {
@@ -423,6 +439,7 @@ canvas {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  align-items: end;
 }
 
 .field-row > label {
@@ -433,6 +450,40 @@ canvas {
   border: 0;
   border-top: 1px solid var(--border-dim);
   margin: 8px 0;
+}
+
+.panel .input-with-unit {
+  position: relative;
+  display: block;
+  margin-bottom: 0;
+}
+
+.panel .input-with-unit input {
+  padding-right: 32px;
+}
+
+.panel .input-suffix {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 0;
+}
+
+.panel input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.panel input[type="number"]::-webkit-outer-spin-button,
+.panel input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .segmented-control,
@@ -449,12 +500,12 @@ canvas {
 .segmented-control button,
 .skill-tuner button,
 .overload-button {
-  padding: 6px 8px;
+  padding: 3px 8px;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-secondary);
   font-family: "Chakra Petch", sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 2px;
@@ -470,7 +521,7 @@ canvas {
 }
 
 .skill-tuner button {
-  padding: 6px 0;
+  padding: 3px 0;
 }
 
 .segmented-control button.active,
@@ -524,6 +575,7 @@ canvas {
   grid-column: 1;
   flex-wrap: nowrap;
   overflow: hidden;
+  min-height: 22px;
 }
 
 .propulsion-group .overload-button {
@@ -531,7 +583,7 @@ canvas {
   align-self: stretch;
 }
 
-.propulsion-group > input[type="number"] {
+.propulsion-group > .input-with-unit {
   grid-column: 1 / -1;
   margin-top: 2px;
 }
@@ -544,8 +596,8 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 24px;
+  min-height: 24px;
   padding: 0 6px;
   flex: none;
 }
@@ -592,6 +644,19 @@ canvas {
 
 .collapsible summary .field-label {
   margin-bottom: 0;
+}
+
+.panel .skill-section {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+.panel .collapsible[open]:last-child {
+  border-bottom: 0;
+}
+
+.panel .collapsible:last-child .skill-tuner {
+  padding-bottom: 4px;
 }
 
 .panel .collapsible .skill-summary-row {
@@ -653,6 +718,14 @@ canvas {
   .result-card {
     flex: 0 0 auto;
     min-width: 80px;
+  }
+
+  .panel .skill-section {
+    margin-top: 0;
+  }
+
+  .canvas-section .controls {
+    margin-top: 0;
   }
 }
 

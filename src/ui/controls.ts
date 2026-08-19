@@ -665,16 +665,22 @@ export class DomControls implements Controls {
       select.disabled = modules.length === 0;
       group.classList.toggle("disabled", modules.length === 0);
       const moduleDisabled = modules.length === 0;
-      for (const module of modules) {
-        const option = document.createElement("option");
-        option.value = module.id;
-        option.textContent = propulsionOptionLabel(module);
-        select.appendChild(option);
-        const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
-        button.disabled = moduleDisabled;
-        button.setAttribute("aria-disabled", "false");
+      if (modules.length === 0) {
+        this.createPlaceholderButton(group);
+      } else {
+        for (const module of modules) {
+          const option = document.createElement("option");
+          option.value = module.id;
+          option.textContent = propulsionOptionLabel(module);
+          select.appendChild(option);
+          const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
+          button.disabled = moduleDisabled;
+          button.setAttribute("aria-disabled", "false");
+        }
       }
       selected = modules.some((m) => m.id === selectedId) ? selectedId : (modules[0]?.id ?? "");
+    } else {
+      this.createPlaceholderButton(group);
     }
 
     select.value = selected;
@@ -810,6 +816,13 @@ export class DomControls implements Controls {
     button.setAttribute("title", text);
     button.addEventListener("click", onClick);
     container.appendChild(button);
+    return button;
+  }
+
+  private createPlaceholderButton(container: HTMLElement): HTMLButtonElement {
+    const button = this.createButton(container, "placeholder", "—", () => {});
+    button.disabled = true;
+    button.setAttribute("aria-disabled", "true");
     return button;
   }
 

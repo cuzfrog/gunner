@@ -49,14 +49,14 @@ export const I18N_DICTIONARY = {
     ja: "タレット信号半径",
   },
   "label.optimalRange": {
-    en: "Optimal range (m)",
-    zh: "最佳射程 (m)",
-    ja: "最適射程 (m)",
+    en: "Optimal range",
+    zh: "最佳射程",
+    ja: "最適射程",
   },
   "label.falloffRange": {
-    en: "Falloff range (m)",
-    zh: "衰减射程 (m)",
-    ja: "フォールオフ射程 (m)",
+    en: "Falloff range",
+    zh: "衰减射程",
+    ja: "フォールオフ射程",
   },
   "section.attackerShip": {
     en: "Attacker ship",
@@ -100,19 +100,19 @@ export const I18N_DICTIONARY = {
     ja: "艦船名を入力…",
   },
   "label.maxSpeed": {
-    en: "Max speed (m/s)",
-    zh: "最大速度 (m/s)",
-    ja: "最大速度 (m/s)",
+    en: "Max speed",
+    zh: "最大速度",
+    ja: "最大速度",
   },
   "label.mass": {
-    en: "Mass (kg)",
-    zh: "质量 (kg)",
-    ja: "質量 (kg)",
+    en: "Mass",
+    zh: "质量",
+    ja: "質量",
   },
   "label.inertiaModifier": {
-    en: "Inertia modifier (s/kg)",
-    zh: "惯性修正 (s/kg)",
-    ja: "慣性修正係数 (s/kg)",
+    en: "Inertia modifier",
+    zh: "惯性修正",
+    ja: "慣性修正係数",
   },
   "label.mode": {
     en: "Mode",
@@ -130,14 +130,14 @@ export const I18N_DICTIONARY = {
     ja: "距離を保つ",
   },
   "label.desiredRange": {
-    en: "Desired range (m)",
-    zh: "期望距离 (m)",
-    ja: "希望射程 (m)",
+    en: "Desired range",
+    zh: "期望距离",
+    ja: "希望射程",
   },
   "label.initialDistance": {
-    en: "Initial distance (m)",
-    zh: "初始距离 (m)",
-    ja: "初期距離 (m)",
+    en: "Initial distance",
+    zh: "初始距离",
+    ja: "初期距離",
   },
   "section.targetShip": {
     en: "Target",
@@ -150,9 +150,9 @@ export const I18N_DICTIONARY = {
     ja: "ターゲットプロファイル",
   },
   "label.signatureRadius": {
-    en: "Signature radius (m)",
-    zh: "信号半径 (m)",
-    ja: "信号半径 (m)",
+    en: "Signature radius",
+    zh: "信号半径",
+    ja: "信号半径",
   },
   "label.simulationSpeed": {
     en: "Speed",
