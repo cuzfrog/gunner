@@ -294,6 +294,61 @@ export const I18N_DICTIONARY = {
     zh: "无",
     ja: "なし",
   },
+  "footer.about.heading": {
+    en: "About Gunner",
+    zh: "关于 Gunner",
+    ja: "Gunner について",
+  },
+  "footer.about.text": {
+    en: "Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.",
+    zh: "Gunner 是一个 EVE Online 2D 战术模拟器，模拟两艘舰船的运动，并计算攻击方炮塔对目标的命中表现。",
+    ja: "Gunner は EVE Online の 2D 戦術シミュレーターです。2 隻の艦船の動きを再現し、攻撃側のタレットの命中性能を計算します。",
+  },
+  "footer.mech.kinematics.heading": {
+    en: "Kinematics",
+    zh: "运动学",
+    ja: "運動学",
+  },
+  "footer.mech.kinematics.text": {
+    en: "Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.",
+    zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述目标相对运动，加速度按指数趋近最大速度。",
+    ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。加速度は指数関数的に最大速度に近づく。",
+  },
+  "footer.mech.kinematics.link": {
+    en: "EVE University: Velocity",
+    zh: "EVE University: Velocity",
+    ja: "EVE University: Velocity",
+  },
+  "footer.mech.speed.heading": {
+    en: "Speed",
+    zh: "速度",
+    ja: "速度",
+  },
+  "footer.mech.speed.text": {
+    en: "Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.",
+    zh: "最大速度 = 船体基础速度 × 推进模块加成（加力 / 微曲）× 技能修正；超载进一步提升。",
+    ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。",
+  },
+  "footer.mech.speed.link": {
+    en: "EVE University: Propulsion equipment",
+    zh: "EVE University: Propulsion equipment",
+    ja: "EVE University: Propulsion equipment",
+  },
+  "footer.mech.hitChance.heading": {
+    en: "Hit chance",
+    zh: "命中率",
+    ja: "命中確率",
+  },
+  "footer.mech.hitChance.text": {
+    en: "Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.",
+    zh: "命中率 = 0.5^(追踪项 + 射程项)。追踪项来自角速度、炮塔跟踪、信号半径；射程项来自超出最佳射程的距离。",
+    ja: "命中確率 = 0.5^(追跡項 + 射程項)。追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。",
+  },
+  "footer.mech.hitChance.link": {
+    en: "EVE University: Turret mechanics",
+    zh: "EVE University: Turret mechanics",
+    ja: "EVE University: Turret mechanics",
+  },
   "unit.meter": {
     en: "m",
     zh: "m",

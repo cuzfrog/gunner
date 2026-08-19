@@ -23,16 +23,11 @@
           <button type="button" id="lang-zh" data-lang="zh" data-i18n="lang.zh">中文</button>
           <button type="button" id="lang-ja" data-lang="ja" data-i18n="lang.ja">日本語</button>
         </nav>
-        <div class="author">
-          <span class="author-label" data-i18n="label.author">Author:</span>
-          <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="32" height="32">
-          <span class="author-name">Keos Cuzi</span>
-        </div>
       </div>
     </header>
 
     <section class="profile-bar">
-      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName">
+      <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName" maxlength="32">
       <button type="button" id="profile-save" data-i18n="button.save">Save</button>
       <select id="profile-select" class="profile-select">
         <option value="" data-i18n="select.profile">Select profile...</option>
@@ -275,6 +270,48 @@
         </details>
       </section>
     </main>
+
+    <footer class="footer">
+      <div class="footer-about">
+        <h3 data-i18n="footer.about.heading">About Gunner</h3>
+        <p data-i18n="footer.about.text">Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.</p>
+      </div>
+
+      <div class="footer-mechanism" data-accent="teal">
+        <h3 data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
+        <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.kinematics.link">EVE University: Velocity</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-mechanism" data-accent="blue">
+        <h3 data-i18n="footer.mech.speed.heading">Speed</h3>
+        <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.speed.link">EVE University: Propulsion equipment</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-mechanism" data-accent="orange">
+        <h3 data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
+        <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
+        <a class="footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="footer.mech.hitChance.link">EVE University: Turret mechanics</span>
+          <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+
+      <div class="footer-author">
+        <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="28" height="28">
+        <span class="footer-author-line">
+          <span class="author-label" data-i18n="label.author">Author:</span>
+          <span class="author-name">Keos Cuzi</span>
+        </span>
+      </div>
+    </footer>
   </div>
 
   <datalist id="hull-options"></datalist>

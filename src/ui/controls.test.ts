@@ -1,5 +1,6 @@
 import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
 import { SHIP_PROFILES, effectiveStats, fittingOptions } from "../ships";
+import type { ShipProfile } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
@@ -739,6 +740,157 @@ describe("DomControls", () => {
     const button = getFake(globalThis.document, "attacker-overload-button");
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(button.classList.toggle).toHaveBeenLastCalledWith("active", false);
+  });
+
+  test("manually changing target mass updates speed for the fitted propulsion module", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const module = mwd5mnForRifter();
+
+    getFake(globalThis.document, "target-hull").value = "Rifter";
+    getFake(globalThis.document, "target-hull").trigger("change");
+    getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
+    getFake(globalThis.document, "target-propulsion").trigger("change");
+
+    const activeMass = 5_000_000;
+    getFake(globalThis.document, "target-mass").value = String(activeMass);
+    getFake(globalThis.document, "target-mass").trigger("input");
+
+    const shipMass = Math.max(0, activeMass - module.massAddition * module.activeMassMultiplier);
+    const adjusted: ShipProfile = { ...rifter, mass: shipMass };
+    const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+  });
+
+  test("save button highlights when the current settings differ from the selected profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+
+    getFake(globalThis.document, "optimal").value = "9999";
+    getFake(globalThis.document, "optimal").trigger("input");
+
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+  });
+
+  test("save button returns to normal color after the profile is saved", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const nameInput = getFake(globalThis.document, "profile-name");
+    nameInput.value = "brawler";
+    nameInput.trigger("input");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+
+    saveButton.trigger("click");
+
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(saveButton.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+  });
+
+  test("save button highlights when tracking unit, language, or hull changes after loading a profile", () => {
+    const rifter = rifterProfile();
+    const module = mwd5mnForRifter();
+    const stats = effectiveStats(rifter, module, { skillLevel: 5, overloaded: true });
+    const speed = Number(formatNumber(stats.maxSpeed));
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: speed,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: stats.mass,
+      attackerInertia: stats.inertiaModifier,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: speed,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: stats.mass,
+      targetInertia: stats.inertiaModifier,
+      targetSig: stats.sigRadius,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetHull: "Rifter",
+      targetPropulsion: "mwd-5mn",
+      simSpeed: 4,
+      language: "en",
+    };
+
+    const { settingsStore } = buildControls(globalThis.document);
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
+    saveButton.classList.toggle.mockClear();
+
+    getFake(globalThis.document, "tracking-unit-score").trigger("click");
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+
+    saveButton.classList.toggle.mockClear();
+    getFake(globalThis.document, "lang-zh").trigger("click");
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+
+    saveButton.classList.toggle.mockClear();
+    getFake(globalThis.document, "attacker-hull").value = "Thrasher";
+    getFake(globalThis.document, "attacker-hull").trigger("input");
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+  });
+
+  test("update formats long numbers with commas", () => {
+    const { controls } = buildControls(globalThis.document);
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 12345, relVelocity: { x: 0, y: 0 }, radialVelocity: 1234.5, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 1234.5, angularVelocity: 0.1234 };
+
+    controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
+
+    expect(getFake(globalThis.document, "res-distance").textContent).toBe("12.3 unit.kilometer");
+    expect(getFake(globalThis.document, "res-transversal").textContent).toBe("1,234.5 m/s");
+    expect(getFake(globalThis.document, "res-angular").textContent).toBe("0.1234 rad/s");
+    expect(getFake(globalThis.document, "res-radial").textContent).toBe("1,234.5 m/s");
+    expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
   });
 });
 

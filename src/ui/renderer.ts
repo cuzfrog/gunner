@@ -20,6 +20,10 @@ const COLORS = {
 } as const;
 
 const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
+const MIN_SEPARATION_PX = 140;
+const MIN_VIEW_RADIUS = 250;
+const FAR_MARGIN = 1.25;
+const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
 
 interface Camera {
   readonly center: Vec2;
@@ -51,8 +55,10 @@ export class CanvasRenderer implements Renderer {
     this.drawWorldVector(snapshot.attacker.position, snapshot.commands.attacker, COLORS.attacker, [5, 5]);
     this.drawWorldVector(snapshot.target.position, snapshot.commands.target, COLORS.target, [5, 5]);
     this.drawWorldVector(snapshot.target.position, frame.transversalVelocity, COLORS.transversal);
-    this.drawShip(snapshot.attacker, COLORS.attacker, true);
-    this.drawShip(snapshot.target, COLORS.target, false);
+    this.drawShip(snapshot.attacker, COLORS.attacker);
+    this.drawShip(snapshot.target, COLORS.target);
+    this.drawSpeedLabel(snapshot.attacker, COLORS.attacker, -20);
+    this.drawSpeedLabel(snapshot.target, COLORS.target, 20);
     this.drawReadouts(frame, hit, turret);
   }
 
@@ -60,8 +66,15 @@ export class CanvasRenderer implements Renderer {
     const { attacker, target } = snapshot;
     const center = scale(add(attacker.position, target.position), 0.5);
     const distance = dist(attacker.position, target.position);
-    const viewRadius = Math.max(distance, turret.optimal + turret.falloff, attacker.desiredRange, target.desiredRange, 500) * 1.25;
-    const cameraScale = Math.min(this.canvas.width, this.canvas.height) / (2 * viewRadius);
+    const minDim = Math.min(this.canvas.width, this.canvas.height);
+
+    const farRadius = Math.max(turret.optimal + turret.falloff, attacker.desiredRange, target.desiredRange, 500);
+    const farScale = minDim / (2 * farRadius * FAR_MARGIN);
+
+    const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
+    const closeScale = minDim / (2 * closeRadius);
+
+    const cameraScale = Math.min(Math.max(farScale, closeScale), farScale * MAX_ZOOM_FACTOR);
     this.camera = { center, scale: cameraScale };
   }
 
@@ -175,10 +188,10 @@ export class CanvasRenderer implements Renderer {
     this.ctx.fill();
   }
 
-  private drawShip(ship: ShipState, color: string, isAttacker: boolean): void {
+  private drawShip(ship: ShipState, color: string): void {
     const p = this.worldToScreen(ship.position);
     const heading = len(ship.velocity) > 0.01 ? angle(ship.velocity) : -Math.PI / 2;
-    const size = isAttacker ? 8 : 7;
+    const size = 8;
 
     this.ctx.save();
     this.ctx.translate(p.x, p.y);
@@ -187,39 +200,34 @@ export class CanvasRenderer implements Renderer {
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = 2;
 
-    if (isAttacker) {
-      // Chevron triangle pointing in the direction of travel.
-      this.ctx.beginPath();
-      this.ctx.moveTo(size, 0);
-      this.ctx.lineTo(-size, size * 0.75);
-      this.ctx.lineTo(-size * 0.5, 0);
-      this.ctx.lineTo(-size, -size * 0.75);
-      this.ctx.closePath();
-      this.ctx.fill();
-    } else {
-      // Diamond for the target.
-      this.ctx.beginPath();
-      this.ctx.moveTo(size, 0);
-      this.ctx.lineTo(0, size);
-      this.ctx.lineTo(-size, 0);
-      this.ctx.lineTo(0, -size);
-      this.ctx.closePath();
-      this.ctx.stroke();
-    }
+    // Chevron triangle pointing in the direction of travel.
+    this.ctx.beginPath();
+    this.ctx.moveTo(size, 0);
+    this.ctx.lineTo(-size, size * 0.75);
+    this.ctx.lineTo(-size * 0.5, 0);
+    this.ctx.lineTo(-size, -size * 0.75);
+    this.ctx.closePath();
+    this.ctx.fill();
 
     this.ctx.restore();
+  }
+
+  private drawSpeedLabel(ship: ShipState, color: string, dy: number): void {
+    const p = this.worldToScreen(ship.position);
+    const speed = Math.round(len(ship.velocity));
+    this.drawTextAt(p.x, p.y + dy, `${formatWithCommas(speed)} m/s`, color, true, 11);
   }
 
   private drawReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
     const lines = [
       `${this.i18n.t("readout.time")}${formatTime(frame.time)}`,
       `${this.i18n.t("readout.range")}${this.formatDistance(frame.distance)}`,
-      `${this.i18n.t("readout.angular")}${frame.angularVelocity.toFixed(4)} rad/s`,
-      `${this.i18n.t("readout.transversal")}${frame.transversalSpeed.toFixed(1)} m/s`,
-      `${this.i18n.t("readout.radial")}${frame.radialVelocity.toFixed(1)} m/s`,
+      `${this.i18n.t("readout.angular")}${formatWithCommas(frame.angularVelocity, 4)} rad/s`,
+      `${this.i18n.t("readout.transversal")}${formatWithCommas(frame.transversalSpeed, 1)} m/s`,
+      `${this.i18n.t("readout.radial")}${formatWithCommas(frame.radialVelocity, 1)} m/s`,
       `${this.i18n.t("readout.optimal")}${this.formatDistance(turret.optimal)}`,
       `${this.i18n.t("readout.falloff")}${turret.falloff > 0 ? this.formatDistance(turret.falloff) : this.i18n.t("readout.none")}`,
-      `${this.i18n.t("readout.hitChance")}${(hit.chance * 100).toFixed(1)}%`,
+      `${this.i18n.t("readout.hitChance")}${formatWithCommas(hit.chance * 100, 1)}%`,
     ];
 
     this.ctx.textAlign = "left";
@@ -231,22 +239,22 @@ export class CanvasRenderer implements Renderer {
     }
   }
 
-  private drawTextAt(x: number, y: number, text: string, color: string, center = false): void {
-    this.ctx.font = '13px "Share Tech Mono", monospace';
+  private drawTextAt(x: number, y: number, text: string, color: string, center = false, fontSize = 13): void {
+    this.ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
     this.ctx.textAlign = center ? "center" : "left";
     this.ctx.textBaseline = center ? "middle" : "top";
     this.ctx.fillStyle = COLORS.scrim;
     const metrics = this.ctx.measureText(text);
     const padding = 4;
-    const lineHeight = 16;
+    const lineHeight = fontSize + 3;
     this.ctx.fillRect(x - (center ? metrics.width / 2 + padding : padding), y - (center ? lineHeight / 2 : 0), metrics.width + padding * 2, lineHeight);
     this.ctx.fillStyle = color;
     this.ctx.fillText(text, x, y);
   }
 
   private formatDistance(m: number): string {
-    if (m >= 10000) return `${(m / 1000).toFixed(1)} ${this.i18n.t("unit.kilometer")}`;
-    return `${Math.round(m)} ${this.i18n.t("unit.meter")}`;
+    if (m >= 10000) return `${formatWithCommas(m / 1000, 1)} ${this.i18n.t("unit.kilometer")}`;
+    return `${formatWithCommas(Math.round(m))} ${this.i18n.t("unit.meter")}`;
   }
 }
 
@@ -254,4 +262,8 @@ function formatTime(s: number): string {
   const m = Math.floor(s / 60);
   const sec = s % 60;
   return `${m}:${sec.toFixed(1).padStart(4, "0")}`;
+}
+
+function formatWithCommas(value: number, decimals = 0): string {
+  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
