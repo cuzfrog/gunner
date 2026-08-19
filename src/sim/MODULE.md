@@ -26,4 +26,4 @@ no-new-exports:
 
 Engagement simulation domain: ship autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper.
 
-DI wiring: `module.ts` registers `autopilot`, `kinematics`, `hitChance` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.
+DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the naive autopilot, `kinematics`, `hitChance` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.

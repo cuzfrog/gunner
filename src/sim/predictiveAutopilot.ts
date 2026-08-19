@@ -1,8 +1,8 @@
-import { add, dot, len, scale, sub, vec, type Vec2 } from "../math";
+import { add, len, scale, sub, vec, type Vec2 } from "../math";
 import type { Autopilot } from "./autopilot";
 import { clampToMaxSpeed, integrateShip } from "./dynamics";
 import type { Kinematics } from "./kinematics";
-import type { ShipState } from "./types";
+import type { ShipConfig, ShipState } from "./types";
 
 const REPLAN_INTERVAL = 2; // s
 const HORIZON_MARGIN = 1.2;
@@ -24,6 +24,8 @@ export class PredictiveAutopilot implements Autopilot {
   private readonly kinematics: Kinematics;
   private heldCommand: Vec2 | null = null;
   private lastPlanTime = Number.NEGATIVE_INFINITY;
+  private lastShipConfig: ShipConfig | null = null;
+  private lastOtherConfig: ShipConfig | null = null;
 
   constructor({ targetSteering, kinematics }: { targetSteering: Autopilot; kinematics: Kinematics }) {
     this.targetSteering = targetSteering;
@@ -31,11 +33,15 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   computeVelocity(ship: ShipState, other: ShipState, time: number): Vec2 {
-    if (this.heldCommand !== null && time >= this.lastPlanTime && time < this.lastPlanTime + REPLAN_INTERVAL) {
+    const configChanged = this.lastShipConfig === null || this.lastOtherConfig === null ||
+      !shipConfigsEqual(this.lastShipConfig, ship) || !shipConfigsEqual(this.lastOtherConfig, other);
+    if (this.heldCommand !== null && !configChanged && time >= this.lastPlanTime && time < this.lastPlanTime + REPLAN_INTERVAL) {
       return this.heldCommand;
     }
     this.heldCommand = this.plan(ship, other, time);
     this.lastPlanTime = time;
+    this.lastShipConfig = toShipConfig(ship);
+    this.lastOtherConfig = toShipConfig(other);
     return this.heldCommand;
   }
 
@@ -95,12 +101,15 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   private costGradient(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): Vec2 {
-    const cost = this.rolloutCost(ship, other, command, time, horizon);
-    const probeX = clampToMaxSpeed(add(command, vec(POLISH_PROBE, 0)), ship.maxSpeed);
-    const probeY = clampToMaxSpeed(add(command, vec(0, POLISH_PROBE)), ship.maxSpeed);
-    const costX = this.rolloutCost(ship, other, probeX, time, horizon);
-    const costY = this.rolloutCost(ship, other, probeY, time, horizon);
-    return vec((costX - cost) / POLISH_PROBE, (costY - cost) / POLISH_PROBE);
+    const probeXPlus = clampToMaxSpeed(add(command, vec(POLISH_PROBE, 0)), ship.maxSpeed);
+    const probeXMinus = clampToMaxSpeed(add(command, vec(-POLISH_PROBE, 0)), ship.maxSpeed);
+    const probeYPlus = clampToMaxSpeed(add(command, vec(0, POLISH_PROBE)), ship.maxSpeed);
+    const probeYMinus = clampToMaxSpeed(add(command, vec(0, -POLISH_PROBE)), ship.maxSpeed);
+    const costXPlus = this.rolloutCost(ship, other, probeXPlus, time, horizon);
+    const costXMinus = this.rolloutCost(ship, other, probeXMinus, time, horizon);
+    const costYPlus = this.rolloutCost(ship, other, probeYPlus, time, horizon);
+    const costYMinus = this.rolloutCost(ship, other, probeYMinus, time, horizon);
+    return vec((costXPlus - costXMinus) / (2 * POLISH_PROBE), (costYPlus - costYMinus) / (2 * POLISH_PROBE));
   }
 }
 
@@ -119,6 +128,23 @@ function planningHorizon(ship: ShipState, other: ShipState): number {
 function move(state: ShipState, command: Vec2, dt: number): ShipState {
   const motion = integrateShip(state, command, dt);
   return { ...state, ...motion };
+}
+
+function toShipConfig(ship: ShipState): ShipConfig {
+  return {
+    id: ship.id,
+    maxSpeed: ship.maxSpeed,
+    mass: ship.mass,
+    inertiaModifier: ship.inertiaModifier,
+    mode: ship.mode,
+    desiredRange: ship.desiredRange,
+    orbitDirection: ship.orbitDirection,
+  };
+}
+
+function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
+  return a.id === b.id && a.maxSpeed === b.maxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
+    a.mode === b.mode && a.desiredRange === b.desiredRange && a.orbitDirection === b.orbitDirection;
 }
 
 function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | null): Vec2[] {

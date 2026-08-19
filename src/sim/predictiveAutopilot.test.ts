@@ -86,6 +86,23 @@ describe("PredictiveAutopilot", () => {
     expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
 
+  test("replans when ship configuration changes", () => {
+    const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    targetSteering.computeVelocity.mockReturnValue(vec(1000, 0));
+    const spy = vi.spyOn(kinematics, "computeEngagement");
+
+    const autopilot = makePredictive(targetSteering);
+    const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 5000);
+    const target = makeShip("target", [0, 5000], 1000, "keepAtRange", 5000);
+
+    autopilot.computeVelocity(attacker, target, 0);
+    const afterFirstPlan = spy.mock.calls.length;
+
+    const changedAttacker = { ...attacker, desiredRange: 15000 };
+    autopilot.computeVelocity(changedAttacker, target, 0.5);
+    expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
+  });
+
   test("command never exceeds max speed", () => {
     const autopilot = makePredictive(new NaiveAutopilot());
     const attacker = makeShip("attacker", [0, 0], 300, "keepAtRange", 5000);
@@ -109,8 +126,12 @@ describe("PredictiveAutopilot", () => {
   });
 
   test("reduces mean angular velocity versus the naive attacker in the Harbinger-Thrasher engagement", () => {
-    const attackerConfig: ShipConfig = { id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000 };
-    const targetConfig: ShipConfig = { id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw" };
+    const attackerConfig: ShipConfig = {
+      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000,
+    };
+    const targetConfig: ShipConfig = {
+      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw",
+    };
     const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
 
     const naive = new NaiveAutopilot();
@@ -126,8 +147,10 @@ describe("PredictiveAutopilot", () => {
     for (let i = 0; i < steps; i++) {
       baseline.step(dt);
       predictiveSim.step(dt);
-      const baseFrame = kinematicsForSim.computeEngagement(baseline.snapshot().attacker, baseline.snapshot().target, baseline.snapshot().time);
-      const predFrame = kinematicsForSim.computeEngagement(predictiveSim.snapshot().attacker, predictiveSim.snapshot().target, predictiveSim.snapshot().time);
+      const baseSnap = baseline.snapshot();
+      const predSnap = predictiveSim.snapshot();
+      const baseFrame = kinematicsForSim.computeEngagement(baseSnap.attacker, baseSnap.target, baseSnap.time);
+      const predFrame = kinematicsForSim.computeEngagement(predSnap.attacker, predSnap.target, predSnap.time);
       meanNaive += baseFrame.angularVelocity;
       meanPredictive += predFrame.angularVelocity;
     }
