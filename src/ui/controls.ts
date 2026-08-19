@@ -205,7 +205,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.attackerInertia),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
-      rangeWeight: REFERENCE_RANGE_WEIGHT / aggressivity,
+      aggressivity,
       orbitDirection: "cw",
     };
     const target: ShipConfig = {
@@ -215,7 +215,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.targetInertia),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
-      rangeWeight: REFERENCE_RANGE_WEIGHT,
+      aggressivity: AGGRESSIVITY_MIN,
       orbitDirection: "cw",
     };
     return { attacker, target, initialDistance };
@@ -1101,7 +1101,6 @@ export class DomControls implements Controls {
   }
 }
 
-const REFERENCE_RANGE_WEIGHT = 0.003;
 const AGGRESSIVITY_MIN = 0.01;
 const AGGRESSIVITY_MAX = 100;
 const DEFAULT_GRID_BRIGHTNESS = 0.2;

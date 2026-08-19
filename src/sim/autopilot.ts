@@ -45,7 +45,9 @@ function orbit(ship: ShipState, other: ShipState, d: number, toOtherHat: Vec2): 
   const vtRel = dot(sub(ship.velocity, other.velocity), tHat);
   const lagLead = (tau * vtRel * vtRel) / d;
   const rangeCmd = clampSpeed((ORBIT_RANGE_GAIN * maxSpeed * (desiredRange - d)) / desiredRange, maxSpeed);
-  const relRadial = clampSpeed(rangeCmd - lagLead, maxSpeed);
+  const vrRel = dot(sub(ship.velocity, other.velocity), rHat);
+  const kd = dampingGain(ship, ORBIT_RANGE_GAIN);
+  const relRadial = clampSpeed(rangeCmd - kd * vrRel - lagLead, maxSpeed);
 
   const otherOutward = dot(other.velocity, rHat);
   const outward = clampSpeed(otherOutward + relRadial, maxSpeed);
@@ -61,10 +63,28 @@ function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: V
   const desiredRange = Math.max(ship.desiredRange, 1);
   const otherOutward = dot(other.velocity, toOtherHat);
   const openingRate = (KEEP_RANGE_GAIN * ship.maxSpeed * (desiredRange - d)) / desiredRange;
-  const radialSpeed = clampSpeed(otherOutward - openingRate, ship.maxSpeed);
+  const vrRel = dot(sub(ship.velocity, other.velocity), toOtherHat);
+  const kd = dampingGain(ship, KEEP_RANGE_GAIN);
+  const radialSpeed = clampSpeed(otherOutward - openingRate - kd * vrRel, ship.maxSpeed);
   return scale(toOtherHat, radialSpeed);
 }
 
 function clampSpeed(value: number, maxSpeed: number): number {
   return Math.max(-maxSpeed, Math.min(maxSpeed, value));
+}
+
+const AGGRESSIVITY_MIN = 0.01;
+const AGGRESSIVITY_MAX = 100;
+
+function dampingGain(ship: ShipState, gain: number): number {
+  const zeta = zetaFromAggressivity(ship.aggressivity);
+  const tau = timeConstant(ship.mass, ship.inertiaModifier);
+  const natural = Math.sqrt((tau * gain * ship.maxSpeed) / Math.max(ship.desiredRange, 1));
+  return Math.max(2 * zeta * natural - 1, 0);
+}
+
+function zetaFromAggressivity(aggressivity: number): number {
+  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, aggressivity));
+  const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
+  return Math.max(0, Math.min(1, (Math.log10(AGGRESSIVITY_MAX) - Math.log10(clamped)) / span));
 }

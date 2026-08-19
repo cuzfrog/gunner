@@ -855,7 +855,7 @@ describe("DomControls", () => {
 
   test("update colors the hit chance value based on chance", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, rangeWeight: 0.003, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 1000, relVelocity: { x: 0, y: 0 }, radialVelocity: 0, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 0, angularVelocity: 0 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
@@ -1166,25 +1166,25 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
-  test("getConfig converts maneuver aggressivity to attacker rangeWeight", () => {
+  test("getConfig passes maneuver aggressivity through to the attacker", () => {
     const { controls } = buildControls(globalThis.document);
     getFake(globalThis.document, "maneuver-aggressivity").value = "2";
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.0015, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(2, 6);
 
     getFake(globalThis.document, "maneuver-aggressivity").value = "0.5";
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.006, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.5, 6);
 
     getFake(globalThis.document, "maneuver-aggressivity").value = "1";
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.003, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(1, 6);
   });
 
   test("getConfig clamps maneuver aggressivity to [0.01, 100]", () => {
     const { controls } = buildControls(globalThis.document);
     getFake(globalThis.document, "maneuver-aggressivity").value = "0.001";
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.3, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(0.01, 6);
 
     getFake(globalThis.document, "maneuver-aggressivity").value = "500";
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.00003, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(100, 6);
   });
 
   test("dragging the maneuver aggressivity slider updates the hidden value and display", () => {
@@ -1228,12 +1228,12 @@ describe("DomControls", () => {
     buildControls(globalThis.document, settings);
     expect(getFake(globalThis.document, "maneuver-aggressivity").value).toBe("1");
     const { controls } = buildControls(globalThis.document, settings);
-    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.003, 6);
+    expect(controls.getConfig().attacker.aggressivity).toBeCloseTo(1, 6);
   });
 
   test("update formats long numbers with commas", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, rangeWeight: 0.003, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 12345, relVelocity: { x: 0, y: 0 }, radialVelocity: 1234.5, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });

@@ -3,7 +3,6 @@ import { len, type Vec2 } from "../src/math";
 import { ReactiveAutopilot, registerSimModule, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type Simulation } from "../src/sim";
 
 const FIXED_DT = 1 / 60;
-const REFERENCE_RANGE_WEIGHT = 0.003;
 
 interface TraceCradle {
   simConfig: SimConfig;
@@ -31,7 +30,7 @@ const DEFAULT_ATTACKER: MutableShipConfig = {
   inertiaModifier: 3,
   mode: DEFAULT_ATTACKER_MODE,
   desiredRange: 5000,
-  rangeWeight: 0.003,
+  aggressivity: 1,
   orbitDirection: "cw",
 };
 
@@ -42,7 +41,7 @@ const DEFAULT_TARGET: MutableShipConfig = {
   inertiaModifier: 0.45,
   mode: DEFAULT_TARGET_MODE,
   desiredRange: 5000,
-  rangeWeight: 0.003,
+  aggressivity: 0.01,
   orbitDirection: "cw",
 };
 
@@ -91,8 +90,8 @@ function parseParams(args: string[]): TraceParams {
       case "--attacker-inertia":
         draft.attacker.inertiaModifier = parseNumber(flag, raw);
         break;
-      case "--attacker-range-weight":
-        draft.attacker.rangeWeight = parseRangeWeight(flag, raw);
+      case "--attacker-aggressivity":
+        draft.attacker.aggressivity = parseAggressivity(flag, raw);
         break;
       case "--attacker-steering":
         draft.attackerSteering = parseAttackerSteering(raw);
@@ -134,7 +133,7 @@ function parseNumber(flag: string, raw: string): number {
   return value;
 }
 
-function parseRangeWeight(flag: string, raw: string): number {
+function parseAggressivity(flag: string, raw: string): number {
   const value = parseNumber(flag, raw);
   if (value <= 0) throw new Error(`${flag} must be positive, got "${raw}"`);
   return value;
@@ -202,10 +201,10 @@ function scenarioSummary(params: TraceParams): string {
   const tau = (mass: number, inertia: number) => (mass * inertia * 1e-6).toFixed(2);
   return [
     `attacker: mode=${attacker.mode} speed=${attacker.maxSpeed} range=${attacker.desiredRange} ` +
-      `rangeWeight=${attacker.rangeWeight} steering=${params.attackerSteering} ` +
+      `aggressivity=${attacker.aggressivity} steering=${params.attackerSteering} ` +
       `tau=${tau(attacker.mass, attacker.inertiaModifier)}s`,
     `target:   mode=${target.mode} speed=${target.maxSpeed} range=${target.desiredRange} ` +
-      `rangeWeight=${target.rangeWeight} ` +
+      `aggressivity=${target.aggressivity} ` +
       `tau=${tau(target.mass, target.inertiaModifier)}s`,
     `initial distance=${params.config.initialDistance} duration=${params.durationSeconds}s dt=${FIXED_DT}s`,
   ].join("\n");
@@ -217,7 +216,7 @@ const USAGE = `Usage: bun run trace -- [flags]
   --distance <m>          initial distance between ships (default 5000)
   --attacker-speed <m/s>  --attacker-mode <mode>    --attacker-range <m>
   --attacker-mass <kg>    --attacker-inertia <modifier>
-  --attacker-range-weight <value>  --attacker-steering <predictive|reactive>
+  --attacker-aggressivity <value>  --attacker-steering <predictive|reactive>
   --target-speed <m/s>    --target-mode <mode>      --target-range <m>
   --target-mass <kg>      --target-inertia <modifier>
 Modes: ${AUTOPILOT_MODES.join(", ")}`;

@@ -77,7 +77,7 @@ const ship: ShipState = {
   inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 5000,
-  rangeWeight: 0.003,
+  aggressivity: 1,
 };
 
 const snapshot: SimSnapshot = {

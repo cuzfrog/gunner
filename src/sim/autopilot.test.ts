@@ -1,6 +1,7 @@
 import { add, dist, dot, len, perpCCW, perpCW, scale, sub, vec, type Vec2 } from "../math";
 import { ReactiveAutopilot } from "./autopilot";
-import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
+import { SimulationImpl } from "./simulation";
+import type { AutopilotMode, OrbitDirection, ShipConfig, ShipState } from "./types";
 
 const autopilot = new ReactiveAutopilot();
 const DT = 0.1;
@@ -16,6 +17,7 @@ function makeShip(
   desiredRange = 5000,
   mass = 1,
   inertiaModifier = 1e-6,
+  aggressivity = 1,
   orbitDirection: OrbitDirection = "cw",
 ): ShipState {
   return {
@@ -27,7 +29,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
-    rangeWeight: 0.003,
+    aggressivity,
     orbitDirection,
   };
 }
@@ -120,6 +122,36 @@ describe("ReactiveAutopilot", () => {
       retreater.velocity = vec(0, 800);
       expect(command(ship, retreater).y).toBeCloseTo(800, 5);
     });
+
+    test("braking reduces the closing command for a ship with real dynamics", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, 1);
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      ship.velocity = vec(0, 300);
+
+      expect(command(ship, other).y).toBeCloseTo(100, 5);
+      expect(command(makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, 100), other).y).toBeCloseTo(400, 5);
+    });
+
+    test("instant-dynamics ships are unchanged by braking", () => {
+      const ship = makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 1, 1e-6, 0.01);
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      ship.velocity = vec(0, 300);
+
+      expect(command(ship, other).y).toBeCloseTo(400, 5);
+      expect(command(makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 1, 1e-6, 100), other).y).toBeCloseTo(400, 5);
+    });
+
+    test("keep-at-range damping is monotonic across the aggressivity bar", () => {
+      const other = makeShip("target", [0, 1200], "keepAtRange", 0, 1000);
+      const make = (aggressivity: number) =>
+        makeShip("attacker", [0, 0], "keepAtRange", 1000, 1000, 2_000_000, 1, aggressivity);
+
+      const low = command(make(0.01), other).y;
+      const mid = command(make(1), other).y;
+      const high = command(make(100), other).y;
+      expect(low).toBeLessThanOrEqual(mid);
+      expect(mid).toBeLessThanOrEqual(high);
+    });
   });
 
   describe("orbit", () => {
@@ -178,7 +210,7 @@ describe("ReactiveAutopilot", () => {
     });
 
     test("feeds forward inward lead against dynamics lag", () => {
-      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "cw");
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, 1, "cw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCW(fromCenterHat);
@@ -191,7 +223,7 @@ describe("ReactiveAutopilot", () => {
     });
 
     test("lag compensation is inward for both orbit directions", () => {
-      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, "ccw");
+      const ship = makeShip("target", [14000, 0], "orbit", 1500, 14000, 10_000_000, 0.45, 1, "ccw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCCW(fromCenterHat);
@@ -214,7 +246,7 @@ describe("ReactiveAutopilot", () => {
     });
 
     test("lead saturates at the speed budget", () => {
-      const ship = makeShip("target", [1000, 0], "orbit", 1500, 1000, 10_000_000, 0.45, "cw");
+      const ship = makeShip("target", [1000, 0], "orbit", 1500, 1000, 10_000_000, 0.45, 1, "cw");
       const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
       const fromCenterHat = vec(1, 0);
       const tHat = perpCW(fromCenterHat);
@@ -256,11 +288,90 @@ describe("ReactiveAutopilot", () => {
     });
 
     test("holds its range around a tangentially fleeing center", () => {
-      const attacker = makeShip("attacker", [0, 0], "orbit", 1000, 5000, 1, 1e-6, "cw");
-      const target = makeShip("target", [0, 5000], "orbit", 1000, 5000, 1, 1e-6, "ccw");
+      const attacker = makeShip("attacker", [0, 0], "orbit", 1000, 5000, 1, 1e-6, 1, "cw");
+      const target = makeShip("target", [0, 5000], "orbit", 1000, 5000, 1, 1e-6, 1, "ccw");
       const finalDistance = runBoth(attacker, target, DT, STEPS);
       expect(finalDistance).toBeGreaterThan(4900);
       expect(finalDistance).toBeLessThan(5100);
+    });
+
+    test("braking reduces the inward radial command when closing on the orbit radius", () => {
+      const ship = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 1);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      ship.velocity = scale(fromCenterHat, -300);
+
+      const damped = command(ship, other);
+      expect(dot(damped, fromCenterHat)).toBeCloseTo(-700, 1);
+
+      const undamped = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      undamped.velocity = ship.velocity;
+      expect(dot(command(undamped, other), fromCenterHat)).toBeCloseTo(-1000, 1);
+    });
+
+    test("braking vanishes for purely tangential and stationary states", () => {
+      const ship = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 1);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const fromCenterHat = scale(sub(ship.position, other.position), 1 / dist(ship.position, other.position));
+      const tHat = perpCW(fromCenterHat);
+
+      ship.velocity = scale(tHat, 1000);
+      const tangentialCmd = command(ship, other);
+      const aggressiveTangential = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      aggressiveTangential.velocity = ship.velocity;
+      expect(command(aggressiveTangential, other)).toEqual(tangentialCmd);
+
+      ship.velocity = vec(0, 0);
+      const stationaryCmd = command(ship, other);
+      const strictStationary = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.01);
+      strictStationary.velocity = ship.velocity;
+      expect(command(strictStationary, other)).toEqual(stationaryCmd);
+    });
+
+    test("aggressivity below the minimum clamps to critical damping", () => {
+      const fromCenterHat = vec(0, 1);
+      const shipLow = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.001);
+      const shipMin = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 0.01);
+      const shipHigh = makeShip("target", [0, 12000], "orbit", 1000, 10000, 2_000_000, 1, 100);
+      const other = makeShip("attacker", [0, 0], "orbit", 0, 5000);
+      const v = scale(fromCenterHat, -300);
+      shipLow.velocity = v;
+      shipMin.velocity = v;
+      shipHigh.velocity = v;
+
+      expect(command(shipLow, other)).toEqual(command(shipMin, other));
+      expect(dot(command(shipHigh, other), fromCenterHat)).toBeCloseTo(-1000, 1);
+    });
+
+    test("whole-bar keep-at-range monotonicity", () => {
+      const result = (aggressivity: number) => {
+        const steering = new ReactiveAutopilot();
+        const target: ShipConfig = { id: "target", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 };
+        const keeper: ShipConfig = { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity };
+        const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig: { attacker: keeper, target, initialDistance: 20000 } });
+        const dt = 1 / 60;
+        const steps = 60 * 60;
+        let min = Number.POSITIVE_INFINITY;
+        for (let i = 0; i < steps; i++) {
+          sim.step(dt);
+          const snapshot = sim.snapshot();
+          const d = dist(snapshot.attacker.position, snapshot.target.position);
+          if (d < min) min = d;
+        }
+        return { min, final: dist(sim.snapshot().attacker.position, sim.snapshot().target.position) };
+      };
+
+      const low = result(0.01);
+      const mid = result(1);
+      const high = result(100);
+
+      expect(low.min).toBeGreaterThanOrEqual(mid.min);
+      expect(mid.min).toBeGreaterThanOrEqual(high.min);
+      expect(low.min).toBeGreaterThanOrEqual(4900);
+      expect(low.final).toBeGreaterThan(4500);
+      expect(low.final).toBeLessThan(5500);
+      expect(high.final).toBeGreaterThan(4500);
+      expect(high.final).toBeLessThan(5500);
     });
   });
 });

@@ -11,6 +11,7 @@ const FINE_WINDOW = 15; // s
 const FINE_STEP = 0.5; // s
 const COARSE_STEP = 2; // s
 const DISCOUNT_PER_SECOND = 0.97;
+const REFERENCE_RANGE_WEIGHT = 0.003;
 const DIRECTION_COUNT = 12;
 const REFINEMENT_ITERATIONS = 6;
 const REFINEMENT_PROBE = 50; // m/s
@@ -74,7 +75,7 @@ export class PredictiveAutopilot implements Autopilot {
       weight *= DISCOUNT_PER_SECOND ** dt;
       const frame = this.kinematics.computeEngagement(attacker, target, time + elapsed);
       const rangeDeviation = (frame.distance - ship.desiredRange) / Math.max(ship.desiredRange, 1);
-      cost += weight * (frame.angularVelocity * frame.angularVelocity + ship.rangeWeight * rangeDeviation * rangeDeviation) * dt;
+      cost += weight * (frame.angularVelocity * frame.angularVelocity + (REFERENCE_RANGE_WEIGHT / ship.aggressivity) * rangeDeviation * rangeDeviation) * dt;
     }
     return cost;
   }
@@ -138,14 +139,14 @@ function toShipConfig(ship: ShipState): ShipConfig {
     inertiaModifier: ship.inertiaModifier,
     mode: ship.mode,
     desiredRange: ship.desiredRange,
-    rangeWeight: ship.rangeWeight,
+    aggressivity: ship.aggressivity,
     orbitDirection: ship.orbitDirection,
   };
 }
 
 function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
   return a.id === b.id && a.maxSpeed === b.maxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
-    a.mode === b.mode && a.desiredRange === b.desiredRange && a.rangeWeight === b.rangeWeight && a.orbitDirection === b.orbitDirection;
+    a.mode === b.mode && a.desiredRange === b.desiredRange && a.aggressivity === b.aggressivity && a.orbitDirection === b.orbitDirection;
 }
 
 function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | null): Vec2[] {

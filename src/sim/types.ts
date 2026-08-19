@@ -14,7 +14,7 @@ export interface ShipConfig {
   readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
-  readonly rangeWeight: number;
+  readonly aggressivity: number;
   readonly orbitDirection?: OrbitDirection;
 }
 

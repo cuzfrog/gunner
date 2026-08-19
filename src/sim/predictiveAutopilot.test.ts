@@ -27,7 +27,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
-    rangeWeight: 0.003,
+    aggressivity: 1,
     orbitDirection,
   };
 }
@@ -113,7 +113,7 @@ describe("PredictiveAutopilot", () => {
     expect(len(cmd)).toBeLessThanOrEqual(300 + 1e-9);
   });
 
-  test("replans when the attacker's rangeWeight changes", () => {
+  test("replans when the attacker's aggressivity changes", () => {
     const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
     targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
     const spy = vi.spyOn(kinematics, "computeEngagement");
@@ -125,7 +125,7 @@ describe("PredictiveAutopilot", () => {
     autopilot.computeVelocity(attacker, target, 0);
     const afterFirstPlan = spy.mock.calls.length;
 
-    const changedAttacker = { ...attacker, rangeWeight: 0.1 };
+    const changedAttacker = { ...attacker, aggressivity: 0.1 };
     autopilot.computeVelocity(changedAttacker, target, 0.5);
     expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
@@ -143,15 +143,15 @@ describe("PredictiveAutopilot", () => {
     expect(Math.abs(cmd.x)).toBeLessThan(100);
   });
 
-  test("with a high rangeWeight it closes on a far target even when transverse motion is absent", () => {
+  test("with a low aggressivity it closes on a far target even when transverse motion is absent", () => {
     const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
     targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
     const autopilot = makePredictive(targetSteering);
 
     const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 10000);
     const target = makeShip("target", [0, 14000], 0, "keepAtRange", 10000);
-    const aggressiveAttacker = { ...attacker, rangeWeight: 100 };
-    const cmd = autopilot.computeVelocity(aggressiveAttacker, target, 0);
+    const rangeFocusedAttacker = { ...attacker, aggressivity: 0.01 };
+    const cmd = autopilot.computeVelocity(rangeFocusedAttacker, target, 0);
 
     expect(cmd.y).toBeGreaterThan(900);
     expect(Math.abs(cmd.x)).toBeLessThan(100);
@@ -159,10 +159,10 @@ describe("PredictiveAutopilot", () => {
 
   test("reduces mean angular velocity versus the reactive baseline in the Harbinger-Thrasher engagement", () => {
     const attackerConfig: ShipConfig = {
-      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, rangeWeight: 0.003,
+      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1,
     };
     const targetConfig: ShipConfig = {
-      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, rangeWeight: 0.003, orbitDirection: "cw",
+      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw",
     };
     const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
 
