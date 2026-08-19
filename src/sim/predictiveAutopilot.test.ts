@@ -126,7 +126,7 @@ describe("PredictiveAutopilot", () => {
     expect(Math.abs(cmd.x)).toBeLessThan(100);
   });
 
-  test("reduces mean angular velocity versus the naive attacker in the Harbinger-Thrasher engagement", () => {
+  test("reduces mean angular velocity versus the reactive baseline in the Harbinger-Thrasher engagement", () => {
     const attackerConfig: ShipConfig = {
       id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, rangeWeight: 0.003,
     };
