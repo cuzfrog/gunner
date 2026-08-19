@@ -104,13 +104,30 @@ describe("PredictiveAutopilot", () => {
     expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
 
-  test("command never exceeds max speed", () => {
+  test("command after refinement stays within the max speed disk", () => {
     const autopilot = makePredictive(new ReactiveAutopilot());
     const attacker = makeShip("attacker", [0, 0], 300, "keepAtRange", 5000);
     const target = makeShip("target", [0, 5000], 300, "orbit", 5000);
     const cmd = autopilot.computeVelocity(attacker, target, 0);
 
     expect(len(cmd)).toBeLessThanOrEqual(300 + 1e-9);
+  });
+
+  test("replans when the attacker's rangeWeight changes", () => {
+    const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
+    const spy = vi.spyOn(kinematics, "computeEngagement");
+
+    const autopilot = makePredictive(targetSteering);
+    const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 5000);
+    const target = makeShip("target", [0, 5000], 1000, "keepAtRange", 5000);
+
+    autopilot.computeVelocity(attacker, target, 0);
+    const afterFirstPlan = spy.mock.calls.length;
+
+    const changedAttacker = { ...attacker, rangeWeight: 0.1 };
+    autopilot.computeVelocity(changedAttacker, target, 0.5);
+    expect(spy.mock.calls.length).toBeGreaterThan(afterFirstPlan);
   });
 
   test("steers toward desired range when transverse speed is already zero", () => {
@@ -123,6 +140,20 @@ describe("PredictiveAutopilot", () => {
     const cmd = autopilot.computeVelocity(attacker, target, 0);
 
     expect(cmd.y).toBeGreaterThan(500);
+    expect(Math.abs(cmd.x)).toBeLessThan(100);
+  });
+
+  test("with a high rangeWeight it closes on a far target even when transverse motion is absent", () => {
+    const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    targetSteering.computeVelocity.mockReturnValue(vec(0, 0));
+    const autopilot = makePredictive(targetSteering);
+
+    const attacker = makeShip("attacker", [0, 0], 1000, "keepAtRange", 10000);
+    const target = makeShip("target", [0, 14000], 0, "keepAtRange", 10000);
+    const aggressiveAttacker = { ...attacker, rangeWeight: 100 };
+    const cmd = autopilot.computeVelocity(aggressiveAttacker, target, 0);
+
+    expect(cmd.y).toBeGreaterThan(900);
     expect(Math.abs(cmd.x)).toBeLessThan(100);
   });
 

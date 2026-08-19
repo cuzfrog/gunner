@@ -11,12 +11,11 @@ const FINE_WINDOW = 15; // s
 const FINE_STEP = 0.5; // s
 const COARSE_STEP = 2; // s
 const DISCOUNT_PER_SECOND = 0.97;
-const RANGE_WEIGHT = 0.003;
 const DIRECTION_COUNT = 12;
-const SPEED_FRACTIONS = [0.5, 1] as const;
-const POLISH_ITERATIONS = 3;
-const POLISH_PROBE = 50; // m/s
-const POLISH_STEP = 200; // m/s
+const REFINEMENT_ITERATIONS = 6;
+const REFINEMENT_PROBE = 50; // m/s
+const REFINEMENT_INITIAL_STEP = 400; // m/s
+const REFINEMENT_MIN_STEP = 1; // m/s
 const HORIZON_EPSILON = 1e-9;
 
 export class PredictiveAutopilot implements Autopilot {
@@ -57,7 +56,7 @@ export class PredictiveAutopilot implements Autopilot {
         bestCommand = candidate;
       }
     }
-    return this.polish(ship, other, bestCommand, time, horizon);
+    return this.refine(ship, other, bestCommand, time, horizon);
   }
 
   private rolloutCost(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): number {
@@ -75,41 +74,42 @@ export class PredictiveAutopilot implements Autopilot {
       weight *= DISCOUNT_PER_SECOND ** dt;
       const frame = this.kinematics.computeEngagement(attacker, target, time + elapsed);
       const rangeDeviation = (frame.distance - ship.desiredRange) / Math.max(ship.desiredRange, 1);
-      cost += weight * (frame.angularVelocity * frame.angularVelocity + RANGE_WEIGHT * rangeDeviation * rangeDeviation) * dt;
+      cost += weight * (frame.angularVelocity * frame.angularVelocity + ship.rangeWeight * rangeDeviation * rangeDeviation) * dt;
     }
     return cost;
   }
 
-  private polish(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): Vec2 {
+  private refine(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): Vec2 {
     let current = command;
     let currentCost = this.rolloutCost(ship, other, current, time, horizon);
-    for (let i = 0; i < POLISH_ITERATIONS; i++) {
+    for (let i = 0; i < REFINEMENT_ITERATIONS; i++) {
       const gradient = this.costGradient(ship, other, current, time, horizon);
       const gradientLen = len(gradient);
       if (gradientLen === 0) return current;
-      const step = scale(gradient, -POLISH_STEP / gradientLen);
-      const next = clampToMaxSpeed(add(current, step), ship.maxSpeed);
-      const nextCost = this.rolloutCost(ship, other, next, time, horizon);
-      if (nextCost < currentCost) {
-        current = next;
-        currentCost = nextCost;
-      } else {
-        return current;
+      let step = REFINEMENT_INITIAL_STEP;
+      let improved = false;
+      while (step >= REFINEMENT_MIN_STEP) {
+        const next = clampToMaxSpeed(add(current, scale(gradient, -step / gradientLen)), ship.maxSpeed);
+        const nextCost = this.rolloutCost(ship, other, next, time, horizon);
+        if (nextCost < currentCost) {
+          current = next;
+          currentCost = nextCost;
+          improved = true;
+          break;
+        }
+        step /= 2;
       }
+      if (!improved) return current;
     }
     return current;
   }
 
   private costGradient(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): Vec2 {
-    const probeXPlus = clampToMaxSpeed(add(command, vec(POLISH_PROBE, 0)), ship.maxSpeed);
-    const probeXMinus = clampToMaxSpeed(add(command, vec(-POLISH_PROBE, 0)), ship.maxSpeed);
-    const probeYPlus = clampToMaxSpeed(add(command, vec(0, POLISH_PROBE)), ship.maxSpeed);
-    const probeYMinus = clampToMaxSpeed(add(command, vec(0, -POLISH_PROBE)), ship.maxSpeed);
-    const costXPlus = this.rolloutCost(ship, other, probeXPlus, time, horizon);
-    const costXMinus = this.rolloutCost(ship, other, probeXMinus, time, horizon);
-    const costYPlus = this.rolloutCost(ship, other, probeYPlus, time, horizon);
-    const costYMinus = this.rolloutCost(ship, other, probeYMinus, time, horizon);
-    return vec((costXPlus - costXMinus) / (2 * POLISH_PROBE), (costYPlus - costYMinus) / (2 * POLISH_PROBE));
+    const costXPlus = this.rolloutCost(ship, other, add(command, vec(REFINEMENT_PROBE, 0)), time, horizon);
+    const costXMinus = this.rolloutCost(ship, other, add(command, vec(-REFINEMENT_PROBE, 0)), time, horizon);
+    const costYPlus = this.rolloutCost(ship, other, add(command, vec(0, REFINEMENT_PROBE)), time, horizon);
+    const costYMinus = this.rolloutCost(ship, other, add(command, vec(0, -REFINEMENT_PROBE)), time, horizon);
+    return vec((costXPlus - costXMinus) / (2 * REFINEMENT_PROBE), (costYPlus - costYMinus) / (2 * REFINEMENT_PROBE));
   }
 }
 
@@ -149,7 +149,7 @@ function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
 }
 
 function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | null): Vec2[] {
-  const candidates: Vec2[] = [vec(0, 0)];
+  const candidates: Vec2[] = [];
   if (previous !== null) {
     candidates.push(previous);
   }
@@ -157,12 +157,16 @@ function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | n
   if (opponentSpeed > 0) {
     candidates.push(clampToMaxSpeed(scale(other.velocity, ship.maxSpeed / opponentSpeed), ship.maxSpeed));
   }
+  const toOther = sub(other.position, ship.position);
+  const toOtherDistance = len(toOther);
+  if (toOtherDistance > 0) {
+    const toOtherHat = scale(toOther, 1 / toOtherDistance);
+    candidates.push(scale(toOtherHat, ship.maxSpeed));
+    candidates.push(scale(toOtherHat, -ship.maxSpeed));
+  }
   for (let i = 0; i < DIRECTION_COUNT; i++) {
     const angle = (2 * Math.PI * i) / DIRECTION_COUNT;
-    for (const fraction of SPEED_FRACTIONS) {
-      const speed = ship.maxSpeed * fraction;
-      candidates.push(vec(speed * Math.cos(angle), speed * Math.sin(angle)));
-    }
+    candidates.push(vec(ship.maxSpeed * Math.cos(angle), ship.maxSpeed * Math.sin(angle)));
   }
   return candidates;
 }
