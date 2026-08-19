@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   attackerSpeed: 0,
   attackerMode: "keepAtRange",
   attackerRange: 5000,
+  maneuverAggressivity: 1,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,
@@ -37,6 +38,7 @@ const URL_SETTINGS: UserSettings = {
   attackerSpeed: 500,
   attackerMode: "orbit",
   attackerRange: 3000,
+  maneuverAggressivity: 1,
   initialDistance: 3000,
   targetSpeed: 800,
   targetMode: "keepAtRange",
@@ -288,6 +290,15 @@ describe("LocalSettingsStore", () => {
     delete partial.attackerOverload;
     delete partial.targetSkillLevel;
     delete partial.targetOverload;
+    storage.setItem("gunner-settings-v5", JSON.stringify(partial));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toEqual(partial);
+  });
+
+  test("load accepts settings without maneuverAggressivity", () => {
+    const storage = fakeStorage();
+    const partial: UserSettings = { ...DEFAULT_SETTINGS };
+    delete partial.maneuverAggressivity;
     storage.setItem("gunner-settings-v5", JSON.stringify(partial));
     const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toEqual(partial);

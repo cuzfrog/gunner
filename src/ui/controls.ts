@@ -96,6 +96,7 @@ export class DomControls implements Controls {
       attackerInertia: el("attacker-inertia"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
+      maneuverAggressivity: el("maneuver-aggressivity"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
@@ -168,6 +169,7 @@ export class DomControls implements Controls {
 
   getConfig(): SimConfig {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
+    const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement);
     const attacker: ShipConfig = {
       id: "attacker",
       maxSpeed: num(this.els.attackerSpeed),
@@ -175,7 +177,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.attackerInertia),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
-      rangeWeight: REFERENCE_RANGE_WEIGHT,
+      rangeWeight: REFERENCE_RANGE_WEIGHT / aggressivity,
       orbitDirection: "cw",
     };
     const target: ShipConfig = {
@@ -232,6 +234,7 @@ export class DomControls implements Controls {
       attackerSpeed: num(this.els.attackerSpeed),
       attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
+      maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
       attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
@@ -274,6 +277,7 @@ export class DomControls implements Controls {
     (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
+    (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
@@ -495,6 +499,7 @@ export class DomControls implements Controls {
       "attackerInertia",
       "attackerMode",
       "attackerRange",
+      "maneuverAggressivity",
       "initialDistance",
       "targetSpeed",
       "targetMass",
@@ -914,6 +919,12 @@ export class DomControls implements Controls {
 }
 
 const REFERENCE_RANGE_WEIGHT = 0.003;
+
+function parseManeuverAggressivity(input: HTMLInputElement): number {
+  const value = Number.parseFloat(input.value);
+  if (!Number.isFinite(value) || value <= 0) return 1;
+  return Math.max(0.01, Math.min(100, value));
+}
 
 function el(id: string): HTMLElement {
   const e = document.getElementById(id);

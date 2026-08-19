@@ -19,6 +19,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "attacker-inertia": "3",
   "attacker-mode": "keepAtRange",
   "attacker-range": "5000",
+  "maneuver-aggressivity": "1",
   "initial-distance": "5000",
   "target-hull": "",
   "target-speed": "1000",
@@ -206,6 +207,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 5,
@@ -541,6 +543,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 2,
@@ -689,6 +692,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 2,
@@ -774,6 +778,7 @@ describe("DomControls", () => {
       attackerSpeed: 0,
       attackerMode: "keepAtRange",
       attackerRange: 5000,
+      maneuverAggressivity: 1,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 5,
@@ -877,6 +882,60 @@ describe("DomControls", () => {
     getFake(globalThis.document, "attacker-hull").value = "Thrasher";
     getFake(globalThis.document, "attacker-hull").trigger("input");
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+  });
+
+  test("getConfig converts maneuver aggressivity to attacker rangeWeight", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "maneuver-aggressivity").value = "2";
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.0015, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0.5";
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.006, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "1";
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.003, 6);
+  });
+
+  test("getConfig clamps maneuver aggressivity to [0.01, 100]", () => {
+    const { controls } = buildControls(globalThis.document);
+    getFake(globalThis.document, "maneuver-aggressivity").value = "0.001";
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.3, 6);
+
+    getFake(globalThis.document, "maneuver-aggressivity").value = "500";
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.00003, 6);
+  });
+
+  test("loadSettings defaults missing maneuverAggressivity to 1", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, settings);
+    expect(getFake(globalThis.document, "maneuver-aggressivity").value).toBe("1");
+    const { controls } = buildControls(globalThis.document, settings);
+    expect(controls.getConfig().attacker.rangeWeight).toBeCloseTo(0.003, 6);
   });
 
   test("update formats long numbers with commas", () => {

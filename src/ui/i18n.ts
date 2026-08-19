@@ -134,6 +134,16 @@ export const I18N_DICTIONARY = {
     zh: "期望距离",
     ja: "希望射程",
   },
+  "label.maneuverAggressivity": {
+    en: "Maneuver aggressivity",
+    zh: "机动激进程度",
+    ja: "機動の積極さ",
+  },
+  "hint.maneuverAggressivity": {
+    en: "How aggressively the attacker maneuvers to cut the target's traversal. Higher values favor maneuvering over holding the desired range; 1 is the reference behavior; lower values hold the range more strictly.",
+    zh: "攻击者机动切断目标横向运动的积极程度。较高值更倾向于机动而不是严格保持期望距离；1 是参考行为；较低值更严格保持距离。",
+    ja: "攻撃側が目標の横断運動を切るためにどれだけ積極的に機動するか。高い値ほど、望む距離を保つより機動を優先します。1 が基準動作で、低い値ほど距離を厳密に保ちます。",
+  },
   "label.initialDistance": {
     en: "Initial distance",
     zh: "初始距离",

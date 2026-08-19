@@ -93,6 +93,18 @@ describe("I18nImpl", () => {
     expect(i18n.t("lang.ja")).toBe("日本語");
   });
 
+  test("translates maneuver aggressivity label and hint in every language", () => {
+    const i18n = new I18nImpl();
+    expect(i18n.t("label.maneuverAggressivity")).toBe("Maneuver aggressivity");
+    expect(i18n.t("hint.maneuverAggressivity")).toContain("aggressively");
+    i18n.setLanguage("zh" as Language);
+    expect(i18n.t("label.maneuverAggressivity")).toBe("机动激进程度");
+    expect(i18n.t("hint.maneuverAggressivity")).toContain("机动");
+    i18n.setLanguage("ja" as Language);
+    expect(i18n.t("label.maneuverAggressivity")).toBe("機動の積極さ");
+    expect(i18n.t("hint.maneuverAggressivity")).toContain("機動");
+  });
+
   test("translateDocument sets text, placeholder, aria-label and title from data attributes", () => {
     const label = new FakeElement();
     label.setAttribute("data-i18n", "label.overload");
