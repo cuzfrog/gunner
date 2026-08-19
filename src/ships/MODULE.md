@@ -1,5 +1,5 @@
 ---
-no-new-exports:
+sealed:
   - types.ts
   - tiers.ts
   - propulsion.ts
