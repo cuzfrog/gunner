@@ -350,9 +350,9 @@ export const I18N_DICTIONARY = {
     ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。",
   },
   "footer.mech.speed.link": {
-    en: "Propulsion equipment",
-    zh: "Propulsion equipment",
-    ja: "Propulsion equipment",
+    en: "Propulsion",
+    zh: "Propulsion",
+    ja: "Propulsion",
   },
   "footer.mech.hitChance.heading": {
     en: "Hit chance",
