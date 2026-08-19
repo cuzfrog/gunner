@@ -61,10 +61,14 @@ export interface SettingsStore {
   encodeUrl(settings: UserSettings): string;
   decodeUrl(): UserSettings | null;
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
+  isUrlLoad(): boolean;
+  loadSelectedProfile(): { name: string; baseline: UserSettings } | null;
+  saveSelectedProfile(name: string, baseline: UserSettings | null): void;
 }
 
 const SETTINGS_KEY = "gunner-settings-v5";
 const PROFILES_KEY = "gunner-profiles-v5";
+const SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
@@ -79,9 +83,7 @@ export class LocalSettingsStore implements SettingsStore {
   load(): UserSettings | null {
     const urlSettings = this.decodeUrl();
     if (urlSettings) return urlSettings;
-    const raw = this.storage.getItem(SETTINGS_KEY);
-    if (!raw) return null;
-    return parseUserSettings(raw);
+    return this.loadLocalSettings();
   }
 
   save(settings: UserSettings): void {
@@ -116,6 +118,10 @@ export class LocalSettingsStore implements SettingsStore {
     } else {
       this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
     }
+    const selected = this.loadSelectedProfile();
+    if (selected?.name === name) {
+      this.saveSelectedProfile("", null);
+    }
   }
 
   encodeUrl(settings: UserSettings): string {
@@ -128,11 +134,7 @@ export class LocalSettingsStore implements SettingsStore {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
-    const settings = tryParseEncoded(encoded);
-    if (!settings) return null;
-    url.searchParams.delete(URL_PARAM);
-    this.location.replace(url.toString());
-    return settings;
+    return tryParseEncoded(encoded);
   }
 
   async writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean> {
@@ -145,10 +147,43 @@ export class LocalSettingsStore implements SettingsStore {
     }
   }
 
+  isUrlLoad(): boolean {
+    const urlSettings = this.decodeUrl();
+    if (!urlSettings) return false;
+    const localSettings = this.loadLocalSettings();
+    return !localSettings || JSON.stringify(urlSettings) !== JSON.stringify(localSettings);
+  }
+
+  loadSelectedProfile(): { name: string; baseline: UserSettings } | null {
+    const raw = this.storage.getItem(SELECTED_PROFILE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return isSelectedProfile(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveSelectedProfile(name: string, baseline: UserSettings | null): void {
+    if (!name || !baseline) {
+      this.storage.removeItem(SELECTED_PROFILE_KEY);
+      return;
+    }
+    const selected: { name: string; baseline: UserSettings } = { name, baseline };
+    this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
+  }
+
   private loadProfiles(): Record<string, UserSettings> {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return {};
     return parseProfiles(raw);
+  }
+
+  private loadLocalSettings(): UserSettings | null {
+    const raw = this.storage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    return parseUserSettings(raw);
   }
 }
 
@@ -186,6 +221,12 @@ function tryParseEncoded(encoded: string): UserSettings | null {
 
 function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function isSelectedProfile(value: unknown): value is { name: string; baseline: UserSettings } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return typeof s.name === "string" && s.name.length > 0 && isUserSettings(s.baseline);
 }
 
 function isUserSettings(value: unknown): value is UserSettings {

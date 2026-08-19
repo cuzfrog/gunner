@@ -110,7 +110,16 @@ function fakeLocation(href = "http://localhost/"): LocationProvider {
   };
 }
 
-function buildControls(document: Document, savedSettings: UserSettings | null = null) {
+interface SelectedProfile {
+  name: string;
+  baseline: UserSettings;
+}
+
+function buildControls(
+  document: Document,
+  savedSettings: UserSettings | null = null,
+  options: { selectedProfile?: SelectedProfile | null; isUrlLoad?: boolean; listProfiles?: string[] } = {},
+) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
     compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })),
@@ -125,13 +134,16 @@ function buildControls(document: Document, savedSettings: UserSettings | null = 
   const settingsStore = vi.mocked<SettingsStore>({
     load: vi.fn(() => savedSettings),
     save: vi.fn(),
-    listProfiles: vi.fn(() => []),
+    listProfiles: vi.fn(() => options.listProfiles ?? []),
     saveProfile: vi.fn(),
     loadProfile: vi.fn(() => null),
     deleteProfile: vi.fn(),
-    encodeUrl: vi.fn(() => ""),
+    isUrlLoad: vi.fn(() => options.isUrlLoad ?? false),
+    encodeUrl: vi.fn(() => "http://localhost/"),
     decodeUrl: vi.fn(() => null),
     writeUrlToClipboard: vi.fn(async () => true),
+    loadSelectedProfile: vi.fn(() => options.selectedProfile ?? null),
+    saveSelectedProfile: vi.fn(),
   });
   const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
@@ -1191,6 +1203,197 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "res-angular").textContent).toBe("0.1234 rad/s");
     expect(getFake(globalThis.document, "res-radial").textContent).toBe("1,234.5 m/s");
     expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
+  });
+
+  test("selecting a saved profile persists the selection and baseline", () => {
+    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+  });
+
+  test("loading saved settings restores the last selected profile and baseline", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, profile, {
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("brawler");
+    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+  });
+
+  test("loading settings from a URL does not restore the last selected profile", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    buildControls(globalThis.document, profile, {
+      isUrlLoad: true,
+      selectedProfile: { name: "brawler", baseline: profile },
+      listProfiles: ["brawler"],
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("");
+  });
+
+  test("changing an input keeps the URL in the address bar", () => {
+    const { settingsStore, location } = buildControls(globalThis.document);
+    const encodedUrl = "http://localhost/?c=ENCODED";
+    settingsStore.encodeUrl.mockReturnValue(encodedUrl);
+
+    getFake(globalThis.document, "optimal").value = "6000";
+    getFake(globalThis.document, "optimal").trigger("input");
+
+    expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ optimal: 6000 }));
+    expect(location.href).toBe(encodedUrl);
+  });
+
+  test("saving a profile persists it as the selected profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const nameInput = getFake(globalThis.document, "profile-name");
+    nameInput.value = "brawler";
+    nameInput.trigger("input");
+
+    getFake(globalThis.document, "profile-save").trigger("click");
+
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
+  });
+
+  test("deleting a profile clears the selected profile", () => {
+    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(profile);
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+    settingsStore.saveSelectedProfile.mockClear();
+
+    getFake(globalThis.document, "profile-delete").trigger("click");
+
+    expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("", null);
+    expect(select.value).toBe("");
   });
 });
 

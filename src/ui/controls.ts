@@ -20,8 +20,7 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
-import { USER_SETTINGS_VERSION } from "./settings";
+import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -141,9 +140,16 @@ export class DomControls implements Controls {
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
 
+    const fromUrl = this.settingsStore.isUrlLoad();
     const saved = this.settingsStore.load();
     if (saved) {
-      this.loadSettings(saved);
+      const selected = fromUrl ? null : this.settingsStore.loadSelectedProfile();
+      const selectedName = selected && this.settingsStore.listProfiles().includes(selected.name) ? selected.name : undefined;
+      this.loadSettings(saved, selectedName);
+      if (selectedName && selected) {
+        this.selectedProfile = selected.baseline;
+      }
+      this.updateSaveButtonState();
     } else {
       this.i18n.translateDocument();
       this.setDefaultSkillAndOverload();
@@ -290,7 +296,7 @@ export class DomControls implements Controls {
     return isPropulsionId(value) ? value : undefined;
   }
 
-  private loadSettings(settings: UserSettings): void {
+  private loadSettings(settings: UserSettings, selectedName?: string | null): void {
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -328,7 +334,7 @@ export class DomControls implements Controls {
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
-    this.renderProfiles();
+    this.renderProfiles(selectedName ?? "");
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
     this.persist();
@@ -414,7 +420,13 @@ export class DomControls implements Controls {
   }
 
   private persist(): void {
-    this.settingsStore.save(this.getSettings());
+    const settings = this.getSettings();
+    this.settingsStore.save(settings);
+    this.syncUrl(settings);
+  }
+
+  private syncUrl(settings = this.getSettings()): void {
+    this.location.replace(this.settingsStore.encodeUrl(settings));
   }
 
   private renderProfiles(selected = ""): void {
@@ -441,9 +453,9 @@ export class DomControls implements Controls {
     if (!profileName) return;
     const settings = this.getSettings();
     this.settingsStore.saveProfile(profileName, settings);
+    this.settingsStore.saveSelectedProfile(profileName, settings);
     (this.els.profileName as HTMLInputElement).value = "";
-    this.renderProfiles();
-    (this.els.profileSelect as HTMLSelectElement).value = profileName;
+    this.renderProfiles(profileName);
     this.selectedProfile = settings;
     this.updateSaveButtonState();
   }
@@ -453,10 +465,9 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings(profile);
-    (this.els.profileSelect as HTMLSelectElement).value = name;
+    this.loadSettings(profile, name);
     this.selectedProfile = this.getSettings();
-    this.syncUrl();
+    this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
   }
@@ -466,8 +477,8 @@ export class DomControls implements Controls {
     if (!name) return;
     this.settingsStore.deleteProfile(name);
     this.renderProfiles();
-    (this.els.profileSelect as HTMLSelectElement).value = "";
     this.selectedProfile = null;
+    this.settingsStore.saveSelectedProfile("", null);
     this.updateSaveButtonState();
   }
 
@@ -483,10 +494,6 @@ export class DomControls implements Controls {
     const current = this.getSettings();
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
-  }
-
-  private syncUrl(): void {
-    this.location.replace(this.settingsStore.encodeUrl(this.getSettings()));
   }
 
   private async shareLink(): Promise<void> {
