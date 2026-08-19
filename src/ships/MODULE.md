@@ -4,6 +4,8 @@ no-new-exports:
   - effectiveStats.ts
   - fitting.test.ts
   - fitting.ts
+  - fittedMass.test.ts
+  - fittedMass.ts
   - index.ts
   - profiles.ts
   - propulsion.test.ts
@@ -12,6 +14,7 @@ no-new-exports:
   - tiers.ts
   - types.ts
 ---
+
 
 
 # ships

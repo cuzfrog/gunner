@@ -1,5 +1,5 @@
 import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
-import { SHIP_PROFILES, effectiveStats, fittingOptions } from "../ships";
+import { SHIP_PROFILES, effectiveStats, fittedMassFactor, fittingOptions } from "../ships";
 import type { ShipProfile } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -760,7 +760,29 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-mass").value = String(activeMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
-    const shipMass = Math.max(0, activeMass - module.massAddition * module.activeMassMultiplier);
+    const factor = fittedMassFactor(rifter.hullType);
+    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
+    const adjusted: ShipProfile = { ...rifter, mass: shipMass };
+    const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+  });
+
+  test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const module = mwd5mnForRifter();
+
+    getFake(globalThis.document, "target-hull").value = "Rifter";
+    getFake(globalThis.document, "target-hull").trigger("change");
+    getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
+    getFake(globalThis.document, "target-propulsion").trigger("change");
+
+    const displayedMass = Number(getFake(globalThis.document, "target-mass").value) + 1_000_000;
+    getFake(globalThis.document, "target-mass").value = String(displayedMass);
+    getFake(globalThis.document, "target-mass").trigger("input");
+
+    const factor = fittedMassFactor(rifter.hullType);
+    const shipMass = (displayedMass - module.massAddition * module.activeMassMultiplier) / factor;
     const adjusted: ShipProfile = { ...rifter, mass: shipMass };
     const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));

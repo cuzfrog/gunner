@@ -1,5 +1,6 @@
 import {
   effectiveStats,
+  fittedMassFactor,
   fittingOptions,
   isPropulsionId,
   SHIP_PROFILES,
@@ -807,7 +808,8 @@ export class DomControls implements Controls {
     const conditions = this.skillConditions(side);
     const module = this.currentPropulsionModule(side);
     if (!module) return effectiveStats(profile, undefined, conditions).maxSpeed;
-    const shipMass = Math.max(0, activeMass - module.massAddition * module.activeMassMultiplier);
+    const factor = fittedMassFactor(profile.hullType);
+    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
     const adjustedProfile: ShipProfile = { ...profile, mass: shipMass };
     return effectiveStats(adjustedProfile, module, conditions).maxSpeed;
   }

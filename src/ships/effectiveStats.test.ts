@@ -25,7 +25,7 @@ const battleship: ShipProfile = {
 describe("effectiveStats", () => {
   test("returns base hull values without a module", () => {
     expect(effectiveStats(frigate)).toEqual({
-      mass: 1_000_000,
+      mass: 1_030_000,
       inertiaModifier: 3,
       maxSpeed: 400,
       sigRadius: 35,
@@ -35,8 +35,8 @@ describe("effectiveStats", () => {
   test("frigate with 5MN MWD reaches six times speed, mass and signature", () => {
     const mwd5 = fittingOptions(frigate).find((m) => m.id === "mwd-5mn")!;
     const stats = effectiveStats(frigate, mwd5);
-    expect(stats.maxSpeed).toBeCloseTo(2400, 0);
-    expect(stats.mass).toBe(3_500_000);
+    expect(stats.maxSpeed).toBeCloseTo(2361, 0);
+    expect(stats.mass).toBe(3_530_000);
     expect(stats.inertiaModifier).toBe(3);
     expect(stats.sigRadius).toBe(210);
   });
@@ -44,23 +44,23 @@ describe("effectiveStats", () => {
   test("frigate with 1MN AB adds only module mass and a modest speed bonus", () => {
     const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(frigate, ab1);
-    expect(stats.maxSpeed).toBeCloseTo(860, 0);
-    expect(stats.mass).toBe(1_500_000);
+    expect(stats.maxSpeed).toBeCloseTo(851, 0);
+    expect(stats.mass).toBe(1_530_000);
     expect(stats.sigRadius).toBe(35);
   });
 
   test("frigate with an overfit 10MN AB gains a larger speed bonus and more mass", () => {
     const ab10 = fittingOptions(frigate).find((m) => m.id === "ab-10mn")!;
     const stats = effectiveStats(frigate, ab10);
-    expect(stats.maxSpeed).toBeCloseTo(1550, 0);
-    expect(stats.mass).toBe(6_000_000);
+    expect(stats.maxSpeed).toBeCloseTo(1544, 0);
+    expect(stats.mass).toBe(6_030_000);
   });
 
   test("battleship with 500MN MWD follows the same rules at capital scale", () => {
     const mwd500 = fittingOptions(battleship).find((m) => m.id === "mwd-500mn")!;
     const stats = effectiveStats(battleship, mwd500);
-    expect(stats.maxSpeed).toBeCloseTo(600, 0);
-    expect(stats.mass).toBe(350_000_000);
+    expect(stats.maxSpeed).toBeCloseTo(590, 0);
+    expect(stats.mass).toBe(353_000_000);
   });
 
   test.each([[0, 400, 3], [1, 420, 2.793], [2, 440, 2.592], [3, 460, 2.397], [4, 480, 2.208], [5, 500, 2.025]] as const)(
@@ -69,7 +69,7 @@ describe("effectiveStats", () => {
       const stats = effectiveStats(frigate, undefined, conditions(level));
       expect(stats.maxSpeed).toBeCloseTo(expectedSpeed, 3);
       expect(stats.inertiaModifier).toBeCloseTo(expectedInertia, 3);
-      expect(stats.mass).toBe(frigate.mass);
+      expect(stats.mass).toBe(1_030_000);
       expect(stats.sigRadius).toBe(frigate.sigRadius);
     },
   );
@@ -86,8 +86,8 @@ describe("effectiveStats", () => {
     };
     const ab1 = fittingOptions(profile).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(profile, ab1, { skillLevel: 5, overloaded: true });
-    expect(stats.maxSpeed).toBeCloseTo(1466.37, 2);
-    expect(stats.mass).toBe(1_650_000);
+    expect(stats.maxSpeed).toBeCloseTo(1445.04, 2);
+    expect(stats.mass).toBe(1_684_500);
     expect(stats.inertiaModifier).toBeCloseTo(2.025, 3);
     expect(stats.sigRadius).toBe(35);
   });
@@ -95,15 +95,15 @@ describe("effectiveStats", () => {
   test("skills scale the afterburner bonus by navigation and acceleration control", () => {
     const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(frigate, ab1, conditions(5));
-    expect(stats.maxSpeed).toBeCloseTo(1398.4375, 3);
-    expect(stats.mass).toBe(1_500_000);
+    expect(stats.maxSpeed).toBeCloseTo(1380.821, 3);
+    expect(stats.mass).toBe(1_530_000);
   });
 
   test("overload multiplies the propulsion speed bonus and leaves mass and signature alone", () => {
     const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(frigate, ab1, { skillLevel: 0, overloaded: true });
-    expect(stats.maxSpeed).toBeCloseTo(1090, 0);
-    expect(stats.mass).toBe(1_500_000);
+    expect(stats.maxSpeed).toBeCloseTo(1076, 0);
+    expect(stats.mass).toBe(1_530_000);
     expect(stats.sigRadius).toBe(35);
   });
 
@@ -111,6 +111,33 @@ describe("effectiveStats", () => {
     const withOverload = effectiveStats(frigate, undefined, { skillLevel: 5, overloaded: true });
     const withoutOverload = effectiveStats(frigate, undefined, { skillLevel: 5, overloaded: false });
     expect(withOverload).toEqual(withoutOverload);
+  });
+
+  test("shuttle hull does not receive a fitted mass factor", () => {
+    const shuttle: ShipProfile = {
+      name: "Test Shuttle",
+      faction: "Test",
+      hullType: "Shuttles",
+      mass: 1_600_000,
+      inertiaModifier: 2.8,
+      baseSpeed: 500,
+      sigRadius: 25,
+    };
+    const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
+    const stats = effectiveStats(shuttle, ab1);
+    expect(stats.mass).toBe(2_100_000);
+    expect(stats.maxSpeed).toBeCloseTo(911, 0);
+  });
+
+  test("fitted mass factor lowers propulsion speed bonus but leaves base speed unchanged", () => {
+    const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
+    const fitted = effectiveStats(frigate, ab1);
+    const unfitted = effectiveStats({ ...frigate, hullType: "Unknown Hulls" }, ab1);
+    expect(fitted.mass).toBeGreaterThan(unfitted.mass);
+    expect(fitted.maxSpeed).toBeLessThan(unfitted.maxSpeed);
+    expect(effectiveStats(frigate, undefined).maxSpeed).toBe(
+      effectiveStats({ ...frigate, hullType: "Unknown Hulls" }, undefined).maxSpeed,
+    );
   });
 });
 
