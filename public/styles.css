@@ -922,10 +922,6 @@ canvas {
   white-space: nowrap;
 }
 
-.panel .skill-trigger .skill-summary-row {
-  flex: 0 0 auto;
-}
-
 .skill-trigger:hover { border-color: var(--accent-teal); }
 
 .skill-trigger:focus-visible,
@@ -938,6 +934,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 0 0 auto;
 }
 
 .skill-summary-row .skill-summary-value {
@@ -946,6 +943,7 @@ canvas {
   color: var(--accent-teal);
   text-transform: uppercase;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .skill-trigger .chevron {

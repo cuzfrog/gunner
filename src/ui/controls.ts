@@ -932,10 +932,6 @@ export class DomControls implements Controls {
     }
     const summary = skillOptionLabel(this.i18n, level);
     setText(this.els[`${side}SkillSummary`], summary);
-    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).setAttribute(
-      "aria-label",
-      `${this.i18n.t("label.skillLevel")} ${summary}`,
-    );
   }
 
   private toggleSkillPopup(side: "attacker" | "target"): void {
