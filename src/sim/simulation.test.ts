@@ -15,7 +15,7 @@ function shipConfig(
   mass = INSTANT_MASS,
   inertiaModifier = INSTANT_INERTIA,
 ): ShipConfig {
-  return { id, maxSpeed: 100, mass, inertiaModifier, mode, desiredRange: 5000 };
+  return { id, maxSpeed: 100, mass, inertiaModifier, mode, desiredRange: 5000, rangeWeight: 0.003 };
 }
 
 function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inertiaModifier = INSTANT_INERTIA): SimConfig {

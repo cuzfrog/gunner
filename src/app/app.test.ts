@@ -35,6 +35,7 @@ const ship: ShipState = {
   inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 5000,
+  rangeWeight: 0.003,
 };
 const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship, commands: { attacker: vec(0, 0), target: vec(0, 0) } };
 const frame: EngagementFrame = {
@@ -51,7 +52,7 @@ const frame: EngagementFrame = {
 };
 const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipConfig: ShipConfig = { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000 };
+const shipConfig: ShipConfig = { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, rangeWeight: 0.003 };
 const config: SimConfig = {
   attacker: shipConfig,
   target: { ...shipConfig, id: "target" },

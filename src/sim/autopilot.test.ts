@@ -27,6 +27,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
+    rangeWeight: 0.003,
     orbitDirection,
   };
 }

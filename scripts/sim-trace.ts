@@ -25,8 +25,8 @@ function parseParams(args: string[]): TraceParams {
     durationSeconds: 120,
     sampleSeconds: 1,
     initialDistance: 5000,
-    attacker: { maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: DEFAULT_ATTACKER_MODE, desiredRange: 5000 },
-    target: { maxSpeed: 1000, mass: 10_000_000, inertiaModifier: 0.45, mode: DEFAULT_TARGET_MODE, desiredRange: 5000 },
+    attacker: { maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: DEFAULT_ATTACKER_MODE, desiredRange: 5000, rangeWeight: 0.003 },
+    target: { maxSpeed: 1000, mass: 10_000_000, inertiaModifier: 0.45, mode: DEFAULT_TARGET_MODE, desiredRange: 5000, rangeWeight: 0.003 },
   };
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];

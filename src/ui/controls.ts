@@ -175,6 +175,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.attackerInertia),
       mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
+      rangeWeight: REFERENCE_RANGE_WEIGHT,
       orbitDirection: "cw",
     };
     const target: ShipConfig = {
@@ -184,6 +185,7 @@ export class DomControls implements Controls {
       inertiaModifier: num(this.els.targetInertia),
       mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
+      rangeWeight: REFERENCE_RANGE_WEIGHT,
       orbitDirection: "cw",
     };
     return { attacker, target, initialDistance };
@@ -910,6 +912,8 @@ export class DomControls implements Controls {
     this.setSkillActive(side, skillLevelFromString(selected));
   }
 }
+
+const REFERENCE_RANGE_WEIGHT = 0.003;
 
 function el(id: string): HTMLElement {
   const e = document.getElementById(id);

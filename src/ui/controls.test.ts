@@ -724,7 +724,7 @@ describe("DomControls", () => {
 
   test("update colors the hit chance value based on chance", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, rangeWeight: 0.003, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 1000, relVelocity: { x: 0, y: 0 }, radialVelocity: 0, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 0, angularVelocity: 0 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
@@ -881,7 +881,7 @@ describe("DomControls", () => {
 
   test("update formats long numbers with commas", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, rangeWeight: 0.003, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
     const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 12345, relVelocity: { x: 0, y: 0 }, radialVelocity: 1234.5, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });

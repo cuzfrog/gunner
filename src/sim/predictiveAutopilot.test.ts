@@ -27,6 +27,7 @@ function makeShip(
     inertiaModifier,
     mode,
     desiredRange,
+    rangeWeight: 0.003,
     orbitDirection,
   };
 }
@@ -127,10 +128,10 @@ describe("PredictiveAutopilot", () => {
 
   test("reduces mean angular velocity versus the naive attacker in the Harbinger-Thrasher engagement", () => {
     const attackerConfig: ShipConfig = {
-      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000,
+      id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, rangeWeight: 0.003,
     };
     const targetConfig: ShipConfig = {
-      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, orbitDirection: "cw",
+      id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, rangeWeight: 0.003, orbitDirection: "cw",
     };
     const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
 

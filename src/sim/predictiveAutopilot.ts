@@ -138,13 +138,14 @@ function toShipConfig(ship: ShipState): ShipConfig {
     inertiaModifier: ship.inertiaModifier,
     mode: ship.mode,
     desiredRange: ship.desiredRange,
+    rangeWeight: ship.rangeWeight,
     orbitDirection: ship.orbitDirection,
   };
 }
 
 function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
   return a.id === b.id && a.maxSpeed === b.maxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
-    a.mode === b.mode && a.desiredRange === b.desiredRange && a.orbitDirection === b.orbitDirection;
+    a.mode === b.mode && a.desiredRange === b.desiredRange && a.rangeWeight === b.rangeWeight && a.orbitDirection === b.orbitDirection;
 }
 
 function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | null): Vec2[] {

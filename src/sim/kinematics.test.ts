@@ -13,6 +13,7 @@ const still: ShipState = {
   inertiaModifier: 3,
   mode: "orbit",
   desiredRange: 5000,
+  rangeWeight: 0.003,
 };
 
 function ship(pos: [number, number], vel: [number, number]): ShipState {
@@ -25,6 +26,7 @@ function ship(pos: [number, number], vel: [number, number]): ShipState {
     inertiaModifier: 3,
     mode: "orbit",
     desiredRange: 5000,
+    rangeWeight: 0.003,
   };
 }
 
