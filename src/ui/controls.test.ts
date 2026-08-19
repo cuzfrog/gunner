@@ -13,6 +13,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "attacker-hull": "",
   "attacker-speed": "0",
   "attacker-propulsion": "",
+  "attacker-skills": "5",
   "attacker-mass": "1200000",
   "attacker-inertia": "3",
   "attacker-mode": "keepAtRange",
@@ -21,6 +22,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "target-hull": "",
   "target-speed": "1000",
   "target-propulsion": "",
+  "target-skills": "5",
   "target-mass": "10000000",
   "target-inertia": "0.45",
   "target-mode": "orbit",
@@ -31,6 +33,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
 
 class FakeElement {
   value = "";
+  checked = false;
   textContent = "";
   innerHTML = "";
   placeholder = "";
@@ -85,6 +88,8 @@ function setInputValues(document: Document): void {
   for (const [id, value] of Object.entries(DEFAULT_INPUTS)) {
     getFake(document, id).value = value;
   }
+  getFake(document, "attacker-overload").checked = true;
+  getFake(document, "target-overload").checked = true;
 }
 
 function buildControls(document: Document, savedSettings: UserSettings | null = null) {
@@ -174,7 +179,7 @@ describe("DomControls", () => {
   test("selecting a hull populates base stats and enables tier-correct propulsion options", () => {
     buildControls(globalThis.document);
     const rifter = rifterProfile();
-    const base = effectiveStats(rifter);
+    const base = effectiveStats(rifter, undefined, { skillLevel: 5, overloaded: true });
 
     const input = getFake(globalThis.document, "attacker-hull");
     input.value = "rifter";
@@ -203,7 +208,7 @@ describe("DomControls", () => {
     propulsion.value = "mwd-5mn";
     propulsion.trigger("change");
 
-    const expected = effectiveStats(rifter, mwd5mnForRifter());
+    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
     expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
@@ -352,5 +357,137 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
     expect(getFake(globalThis.document, "attacker-speed").value).toBe("1234");
     expect(getFake(globalThis.document, "attacker-mass").value).toBe("2000000");
+  });
+
+  test("changing the skill level recomputes speed and inertia without a module", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const skills = getFake(globalThis.document, "attacker-skills");
+    skills.value = "0";
+    skills.trigger("change");
+
+    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
+  });
+
+  test("changing the skill level recomputes speed and inertia with a fitted module", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const propulsion = getFake(globalThis.document, "target-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    const skills = getFake(globalThis.document, "target-skills");
+    skills.value = "0";
+    skills.trigger("change");
+
+    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 0, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-inertia").value).toBe(String(expected.inertiaModifier));
+  });
+
+  test("toggling overload recomputes speed while leaving mass and signature unchanged", () => {
+    buildControls(globalThis.document);
+    const rifter = rifterProfile();
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const propulsion = getFake(globalThis.document, "target-propulsion");
+    propulsion.value = "mwd-5mn";
+    propulsion.trigger("change");
+
+    const overload = getFake(globalThis.document, "target-overload");
+    overload.checked = false;
+    overload.trigger("change");
+
+    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
+    expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
+  });
+
+  test("overload checkbox is disabled without a propulsion module and enabled when one is selected", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const overload = getFake(globalThis.document, "attacker-overload");
+    const propulsion = getFake(globalThis.document, "attacker-propulsion");
+    expect(overload.disabled).toBe(true);
+
+    propulsion.value = "ab-1mn";
+    propulsion.trigger("change");
+
+    expect(overload.disabled).toBe(false);
+
+    propulsion.value = "";
+    propulsion.trigger("change");
+
+    expect(overload.disabled).toBe(true);
+  });
+
+  test("reselecting the same hull keeps the skill level and overload state", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const skills = getFake(globalThis.document, "attacker-skills");
+    skills.value = "0";
+    skills.trigger("change");
+    const overload = getFake(globalThis.document, "attacker-overload");
+    overload.checked = false;
+    overload.trigger("change");
+
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    expect(getFake(globalThis.document, "attacker-skills").value).toBe("0");
+    expect(getFake(globalThis.document, "attacker-overload").checked).toBe(false);
+  });
+
+  test("loadSettings restores skill level and overload state", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 2,
+      attackerOverload: false,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 4,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "attacker-skills").value).toBe("2");
+    expect(getFake(globalThis.document, "attacker-overload").checked).toBe(false);
+    expect(getFake(globalThis.document, "target-skills").value).toBe("4");
+    expect(getFake(globalThis.document, "target-overload").checked).toBe(true);
   });
 });

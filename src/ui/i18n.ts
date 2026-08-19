@@ -78,6 +78,21 @@ export const I18N_DICTIONARY = {
     zh: "推进模块",
     ja: "推進モジュール",
   },
+  "label.skillLevel": {
+    en: "Pilot skills",
+    zh: "飞行员技能",
+    ja: "パイロットスキル",
+  },
+  "skill.level": {
+    en: "Level",
+    zh: "等级",
+    ja: "レベル",
+  },
+  "label.overload": {
+    en: "Overload",
+    zh: "超载",
+    ja: "オーバーヒート",
+  },
   "propulsion.none": {
     en: "None",
     zh: "无",

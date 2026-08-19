@@ -22,6 +22,13 @@ export interface ShipProfile {
   readonly sigRadius: number;
 }
 
+export type SkillLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface StatConditions {
+  readonly skillLevel: SkillLevel;
+  readonly overloaded: boolean;
+}
+
 export interface PropulsionModule {
   readonly id: PropulsionId;
   readonly kind: PropulsionKind;
