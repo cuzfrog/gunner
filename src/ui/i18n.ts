@@ -93,11 +93,7 @@ export const I18N_DICTIONARY = {
     zh: "超载",
     ja: "OH",
   },
-  "propulsion.none": {
-    en: "None",
-    zh: "无",
-    ja: "なし",
-  },
+
   "hint.hullSearch": {
     en: "Type ship name…",
     zh: "输入舰船名称…",

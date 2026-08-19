@@ -183,22 +183,23 @@ describe("DomControls", () => {
   test("selecting a hull populates base stats and enables tier-correct propulsion options", () => {
     buildControls(globalThis.document);
     const rifter = rifterProfile();
-    const base = effectiveStats(rifter, undefined, { skillLevel: 5, overloaded: true });
+    const first = fittingOptions(rifter)[0];
+    const expected = effectiveStats(rifter, first, { skillLevel: 5, overloaded: true });
 
     const input = getFake(globalThis.document, "attacker-hull");
     input.value = "rifter";
     input.trigger("input");
 
     expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
-    expect(getFake(globalThis.document, "attacker-speed").value).toBe(String(base.maxSpeed));
-    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(base.mass));
-    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(base.inertiaModifier));
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(expected.mass));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
     expect(getFake(globalThis.document, "attacker-hull-hint").textContent).toContain("Standard Frigates");
 
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
     expect(propulsion.disabled).toBe(false);
     const ids = propulsion.children.map((c) => c.value);
-    expect(ids).toEqual(["", "ab-1mn", "mwd-5mn", "ab-10mn"]);
+    expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn"]);
   });
 
   test("choosing an MWD updates target speed, mass and signature radius", () => {
@@ -213,7 +214,7 @@ describe("DomControls", () => {
     propulsion.trigger("change");
 
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
     expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
     expect(getFake(globalThis.document, "target-hull-hint").textContent).toContain("sig ×6");
@@ -265,7 +266,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-mass").value).toBe("2000000");
   });
 
-  test("changing propulsion to none does not overwrite a manual inertia edit", () => {
+  test("changing propulsion does not overwrite a manual inertia edit", () => {
     buildControls(globalThis.document);
 
     const hullInput = getFake(globalThis.document, "target-hull");
@@ -279,7 +280,7 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-inertia").value = "99";
     getFake(globalThis.document, "target-inertia").trigger("input");
 
-    propulsion.value = "";
+    propulsion.value = "ab-1mn";
     propulsion.trigger("change");
 
     expect(getFake(globalThis.document, "target-inertia").value).toBe("99");
@@ -370,12 +371,16 @@ describe("DomControls", () => {
     hullInput.value = "Rifter";
     hullInput.trigger("change");
 
+    const propulsion = getFake(globalThis.document, "attacker-propulsion");
+    propulsion.value = "";
+    propulsion.trigger("change");
+
     const skills = getFake(globalThis.document, "attacker-skills");
     skills.value = "0";
     skills.trigger("change");
 
     const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
-    expect(getFake(globalThis.document, "attacker-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
   });
 
@@ -394,7 +399,7 @@ describe("DomControls", () => {
     skills.trigger("change");
 
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 0, overloaded: true });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-inertia").value).toBe(String(expected.inertiaModifier));
   });
 
@@ -413,25 +418,23 @@ describe("DomControls", () => {
     overload.trigger("change");
 
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
     expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
   });
 
   test("overload checkbox is disabled without a propulsion module and enabled when one is selected", () => {
     buildControls(globalThis.document);
-    const hullInput = getFake(globalThis.document, "attacker-hull");
-    hullInput.value = "Rifter";
-    hullInput.trigger("change");
-
     const overload = getFake(globalThis.document, "attacker-overload");
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
     expect(overload.disabled).toBe(true);
 
-    propulsion.value = "ab-1mn";
-    propulsion.trigger("change");
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
 
     expect(overload.disabled).toBe(false);
+    expect(propulsion.value).toBe("ab-1mn");
 
     propulsion.value = "";
     propulsion.trigger("change");
@@ -521,10 +524,10 @@ describe("DomControls", () => {
     skills.trigger("change");
 
     const rifter = rifterProfile();
-    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
+    const expected = effectiveStats(rifter, fittingOptions(rifter)[0], { skillLevel: 0, overloaded: true });
     const calls = settingsStore.save.mock.calls;
     const [saved] = calls[calls.length - 1];
-    expect(saved.attackerSpeed).toBe(expected.maxSpeed);
+    expect(saved.attackerSpeed).toBe(Number(formatNumber(expected.maxSpeed)));
     expect(saved.attackerInertia).toBe(expected.inertiaModifier);
     expect(saved.attackerSkillLevel).toBe(0);
   });
@@ -543,9 +546,9 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-propulsion").value).toBe("mwd-5mn");
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
-    expect(button.getAttribute("title")).toContain("5MN Microwarpdrive I");
+    expect(button.getAttribute("title")).toBe("5MN");
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
   test("clicking a visible skill tuner button updates the hidden select and recomputes speed", () => {
@@ -562,8 +565,8 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skills").value).toBe("0");
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
-    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
-    expect(getFake(globalThis.document, "attacker-speed").value).toBe(String(expected.maxSpeed));
+    const expected = effectiveStats(rifter, fittingOptions(rifter)[0], { skillLevel: 0, overloaded: true });
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
   test("clicking the overload icon button toggles the hidden checkbox and recomputes speed", () => {
@@ -585,7 +588,7 @@ describe("DomControls", () => {
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", false);
     const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(String(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
   test("shows the current skill level in the collapsible summary on a fresh start", () => {
@@ -657,4 +660,8 @@ function findVisibleButton(document: Document, groupId: string, value: string): 
   const button = group.children.find((child) => child.getAttribute("data-value") === value);
   if (!button) throw new Error(`Missing visible button ${value} in ${groupId}`);
   return button;
+}
+
+function formatNumber(value: number, decimals = 2): string {
+  return String(Number(value.toFixed(decimals)));
 }

@@ -42,6 +42,37 @@
       <span id="share-status" class="share-status"></span>
     </section>
 
+    <section class="results">
+      <div class="result-card">
+        <span class="label" data-i18n="result.distance">Distance</span>
+        <span class="value" id="res-distance">0 m</span>
+      </div>
+      <div class="result-card">
+        <span class="label" data-i18n="result.transversal">Transversal</span>
+        <span class="value" id="res-transversal">0 m/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label" data-i18n="result.angular">Angular</span>
+        <span class="value" id="res-angular">0 rad/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label" data-i18n="result.radial">Radial</span>
+        <span class="value" id="res-radial">0 m/s</span>
+      </div>
+      <div class="result-card">
+        <span class="label" data-i18n="result.trackingPenalty">Tracking penalty</span>
+        <span class="value" id="res-track-pen">0%</span>
+      </div>
+      <div class="result-card">
+        <span class="label" data-i18n="result.rangePenalty">Range penalty</span>
+        <span class="value" id="res-range-pen">0%</span>
+      </div>
+      <div class="result-card hit-chance" id="res-hit-card">
+        <span class="label" data-i18n="result.hitChance">Hit chance</span>
+        <span class="value" id="res-hit">0%</span>
+      </div>
+    </section>
+
     <main class="main">
       <section class="panel attacker-panel">
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
@@ -73,7 +104,7 @@
           <input type="number" id="falloff" value="5000" step="any" min="0">
         </label>
 
-        <h2 data-i18n="section.attackerShip">Attacker ship</h2>
+        <h2></h2>
         <label>
           <span data-i18n="label.hull">Ship</span>
           <input type="text" id="attacker-hull" list="hull-options"
@@ -85,16 +116,12 @@
           <span class="field-label-row">
             <span class="field-label" data-i18n="label.maxSpeed">Max speed (m/s)</span>
             <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 22C7 20 4 15 6 10C7 7 9 5 12 2C14 5 16 7 17 10C19 15 16 20 12 22ZM12 18C10 18 9 16.5 9 15C9 13.4 10.4 12 12 10.5C13.6 12 15 13.4 15 15C15 16.5 13.8 18 12 18Z"/></svg>
               <span data-i18n="label.overloadShort" aria-hidden="true">OL</span>
             </button>
           </span>
-          <select id="attacker-propulsion" hidden disabled>
-            <option value="" data-i18n="propulsion.none">None</option>
-          </select>
-          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
-            <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
-          </div>
+          <select id="attacker-propulsion" hidden disabled></select>
+          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
           <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed (m/s)">
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
@@ -166,16 +193,12 @@
           <span class="field-label-row">
             <span class="field-label" data-i18n="label.maxSpeed">Max speed (m/s)</span>
             <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2L4 14H10L11 22L20 10H14L13 2Z"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 22C7 20 4 15 6 10C7 7 9 5 12 2C14 5 16 7 17 10C19 15 16 20 12 22ZM12 18C10 18 9 16.5 9 15C9 13.4 10.4 12 12 10.5C13.6 12 15 13.4 15 15C15 16.5 13.8 18 12 18Z"/></svg>
               <span data-i18n="label.overloadShort" aria-hidden="true">OL</span>
             </button>
           </span>
-          <select id="target-propulsion" hidden disabled>
-            <option value="" data-i18n="propulsion.none">None</option>
-          </select>
-          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion">
-            <button type="button" value="" data-i18n="propulsion.none" class="active">None</button>
-          </div>
+          <select id="target-propulsion" hidden disabled></select>
+          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
           <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed (m/s)">
           <input type="checkbox" id="target-overload" hidden checked>
         </div>
@@ -210,44 +233,12 @@
           <input type="number" id="target-range" value="5000" step="any" min="0">
         </label>
 
-        <h2 data-i18n="section.targetProfile">Target profile</h2>
         <label>
           <span data-i18n="label.signatureRadius">Signature radius (m)</span>
           <input type="number" id="target-sig" value="40" step="any" min="1">
         </label>
       </section>
     </main>
-
-    <section class="results">
-      <div class="result-card">
-        <span class="label" data-i18n="result.distance">Distance</span>
-        <span class="value" id="res-distance">0 m</span>
-      </div>
-      <div class="result-card">
-        <span class="label" data-i18n="result.transversal">Transversal</span>
-        <span class="value" id="res-transversal">0 m/s</span>
-      </div>
-      <div class="result-card">
-        <span class="label" data-i18n="result.angular">Angular</span>
-        <span class="value" id="res-angular">0 rad/s</span>
-      </div>
-      <div class="result-card">
-        <span class="label" data-i18n="result.radial">Radial</span>
-        <span class="value" id="res-radial">0 m/s</span>
-      </div>
-      <div class="result-card">
-        <span class="label" data-i18n="result.trackingPenalty">Tracking penalty</span>
-        <span class="value" id="res-track-pen">0%</span>
-      </div>
-      <div class="result-card">
-        <span class="label" data-i18n="result.rangePenalty">Range penalty</span>
-        <span class="value" id="res-range-pen">0%</span>
-      </div>
-      <div class="result-card hit-chance" id="res-hit-card">
-        <span class="label" data-i18n="result.hitChance">Hit chance</span>
-        <span class="value" id="res-hit">0%</span>
-      </div>
-    </section>
   </div>
 
   <datalist id="hull-options"></datalist>

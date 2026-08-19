@@ -261,13 +261,13 @@ export class DomControls implements Controls {
     (this.els.sigRes as HTMLSelectElement).value = settings.sigRes;
     (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
-    (this.els.attackerSpeed as HTMLInputElement).value = String(settings.attackerSpeed);
+    (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
     (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
     (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
-    (this.els.targetSpeed as HTMLInputElement).value = String(settings.targetSpeed);
+    (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
     (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
@@ -646,17 +646,9 @@ export class DomControls implements Controls {
     group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
 
-    const noneOption = document.createElement("option");
-    noneOption.value = "";
-    noneOption.textContent = this.i18n.t("propulsion.none");
-    select.appendChild(noneOption);
-
     const disabled = !profile;
     select.disabled = disabled;
     group.classList.toggle("disabled", disabled);
-    const noneButton = this.createButton(group, "", this.i18n.t("propulsion.none"), () => this.onPropulsionButtonClick(side, ""));
-    noneButton.disabled = disabled;
-    noneButton.setAttribute("aria-disabled", String(disabled));
 
     let selected = "";
     if (profile) {
@@ -667,15 +659,13 @@ export class DomControls implements Controls {
       for (const module of modules) {
         const option = document.createElement("option");
         option.value = module.id;
-        option.textContent = propulsionOptionLabel(side, module);
+        option.textContent = propulsionOptionLabel(module);
         select.appendChild(option);
-        const button = this.createButton(group, module.id, propulsionOptionLabel(side, module), () => this.onPropulsionButtonClick(side, module.id));
+        const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
         button.disabled = moduleDisabled;
         button.setAttribute("aria-disabled", "false");
       }
-      selected = modules.some((m) => m.id === selectedId) ? selectedId : "";
-      noneButton.disabled = moduleDisabled;
-      noneButton.setAttribute("aria-disabled", String(moduleDisabled));
+      selected = modules.some((m) => m.id === selectedId) ? selectedId : (modules[0]?.id ?? "");
     }
 
     select.value = selected;
@@ -692,7 +682,7 @@ export class DomControls implements Controls {
     const conditions = this.skillConditions(side);
     const stats = effectiveStats(profile, module, conditions);
 
-    (this.els[`${side}Speed`] as HTMLInputElement).value = String(stats.maxSpeed);
+    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(stats.maxSpeed);
     (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
     if (updateInertia) {
       (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
@@ -856,11 +846,8 @@ function hitChanceColor(chance: number): string {
   return "#d81f27";
 }
 
-function propulsionOptionLabel(side: "attacker" | "target", module: PropulsionModule): string {
-  if (side === "target" && module.kind === "microwarpdrive") {
-    return `${module.label} (sig ×${1 + module.sigBloom})`;
-  }
-  return module.label;
+function propulsionOptionLabel(module: PropulsionModule): string {
+  return module.id.replace(/^.*-/, "").toUpperCase();
 }
 
 function skillLevelFromString(value: string): SkillLevel {
@@ -871,4 +858,8 @@ function skillLevelFromString(value: string): SkillLevel {
 
 function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
   return `${i18n.t("skill.level")} ${level}`;
+}
+
+function formatNumber(value: number, decimals = 2): string {
+  return String(Number(value.toFixed(decimals)));
 }

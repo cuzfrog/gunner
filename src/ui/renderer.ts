@@ -221,24 +221,24 @@ export class CanvasRenderer implements Renderer {
       `${this.i18n.t("readout.hitChance")}${(hit.chance * 100).toFixed(1)}%`,
     ];
 
-    this.ctx.font = '14px "Share Tech Mono", monospace';
     this.ctx.textAlign = "left";
     this.ctx.textBaseline = "top";
-    let y = 12;
+    let y = 14;
     for (const line of lines) {
       this.drawTextAt(12, y, line, COLORS.text, false);
-      y += 18;
+      y += 22;
     }
   }
 
   private drawTextAt(x: number, y: number, text: string, color: string, center = false): void {
-    this.ctx.font = '12px "Share Tech Mono", monospace';
+    this.ctx.font = '16px "Share Tech Mono", monospace';
     this.ctx.textAlign = center ? "center" : "left";
     this.ctx.textBaseline = center ? "middle" : "top";
     this.ctx.fillStyle = COLORS.bg;
     const metrics = this.ctx.measureText(text);
     const padding = 4;
-    this.ctx.fillRect(x - (center ? metrics.width / 2 + padding : 0), y - (center ? 8 : 0), metrics.width + padding * 2, 16);
+    const lineHeight = 20;
+    this.ctx.fillRect(x - (center ? metrics.width / 2 + padding : 0), y - (center ? lineHeight / 2 : 0), metrics.width + padding * 2, lineHeight);
     this.ctx.fillStyle = color;
     this.ctx.fillText(text, x, y);
   }
