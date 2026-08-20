@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
-import { isPropulsionId, type PropulsionId, type SkillLevel } from "../ships";
+import type { PropulsionId, Ships, SkillLevel } from "../ships";
 import type { Language } from "./i18n";
 
 export const USER_SETTINGS_VERSION = 5 as const;
@@ -78,10 +78,12 @@ const URL_PARAM = "c";
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
+  private readonly ships: Ships;
 
-  constructor({ storage, location }: { storage: StorageProvider; location: LocationProvider }) {
+  constructor({ storage, location, ships }: { storage: StorageProvider; location: LocationProvider; ships: Ships }) {
     this.storage = storage;
     this.location = location;
+    this.ships = ships;
   }
 
   load(): UserSettings | null {
@@ -97,7 +99,7 @@ export class LocalSettingsStore implements SettingsStore {
   listProfiles(): string[] {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return [];
-    const parsed = parseProfiles(raw);
+    const parsed = this.parseProfiles(raw);
     return Object.keys(parsed).sort();
   }
 
@@ -138,7 +140,7 @@ export class LocalSettingsStore implements SettingsStore {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
-    return tryParseEncoded(encoded);
+    return this.tryParseEncoded(encoded);
   }
 
   async writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean> {
@@ -164,7 +166,7 @@ export class LocalSettingsStore implements SettingsStore {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!isSelectedProfile(parsed)) return null;
-      const baseline = toProfileSettings(parsed.baseline);
+      const baseline = this.toProfileSettings(parsed.baseline);
       if (!baseline) return null;
       return { name: parsed.name, baseline };
     } catch {
@@ -185,45 +187,94 @@ export class LocalSettingsStore implements SettingsStore {
   private loadProfiles(): Record<string, ProfileSettings> {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return {};
-    return parseProfiles(raw);
+    return this.parseProfiles(raw);
   }
 
   private loadLocalSettings(): UserSettings | null {
     const raw = this.storage.getItem(SETTINGS_KEY);
     if (!raw) return null;
-    return parseUserSettings(raw);
+    return this.parseUserSettings(raw);
   }
-}
 
-function parseUserSettings(raw: string): UserSettings | null {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return isUserSettings(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function parseProfiles(raw: string): Record<string, ProfileSettings> {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!isProfileStorage(parsed)) return {};
-    const result: Record<string, ProfileSettings> = {};
-    for (const name of Object.keys(parsed)) {
-      const settings = toProfileSettings(parsed[name]);
-      if (settings) result[name] = settings;
+  private parseUserSettings(raw: string): UserSettings | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return this.isUserSettings(parsed) ? parsed : null;
+    } catch {
+      return null;
     }
-    return result;
-  } catch {
-    return {};
   }
-}
 
-function tryParseEncoded(encoded: string): UserSettings | null {
-  try {
-    return parseUserSettings(decodeBase64(encoded));
-  } catch {
-    return null;
+  private parseProfiles(raw: string): Record<string, ProfileSettings> {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isProfileStorage(parsed)) return {};
+      const result: Record<string, ProfileSettings> = {};
+      for (const name of Object.keys(parsed)) {
+        const settings = this.toProfileSettings(parsed[name]);
+        if (settings) result[name] = settings;
+      }
+      return result;
+    } catch {
+      return {};
+    }
+  }
+
+  private tryParseEncoded(encoded: string): UserSettings | null {
+    try {
+      return this.parseUserSettings(decodeBase64(encoded));
+    } catch {
+      return null;
+    }
+  }
+
+  private isUserSettings(value: unknown): value is UserSettings {
+    return this.isProfileSettings(value) && isLanguage((value as Record<string, unknown>).language);
+  }
+
+  private isProfileSettings(value: unknown): value is ProfileSettings {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+    const s = value as Record<string, unknown>;
+    return (
+      s.version === USER_SETTINGS_VERSION &&
+      isNonNegative(s.tracking) &&
+      (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
+      isSigResolutionClass(s.sigRes) &&
+      isNonNegative(s.optimal) &&
+      isNonNegative(s.falloff) &&
+      isNonNegative(s.attackerSpeed) &&
+      isAutopilotMode(s.attackerMode) &&
+      isNonNegative(s.attackerRange) &&
+      isOptionalNonNegative(s.maneuverAggressivity) &&
+      isOptionalUnitInterval(s.gridBrightness) &&
+      isNonNegative(s.attackerMass) &&
+      isNonNegative(s.attackerInertia) &&
+      isOptionalSkillLevel(s.attackerSkillLevel) &&
+      isOptionalBoolean(s.attackerOverload) &&
+      isPositive(s.initialDistance) &&
+      isNonNegative(s.targetSpeed) &&
+      isAutopilotMode(s.targetMode) &&
+      isNonNegative(s.targetRange) &&
+      isNonNegative(s.targetMass) &&
+      isNonNegative(s.targetInertia) &&
+      isOptionalSkillLevel(s.targetSkillLevel) &&
+      isOptionalBoolean(s.targetOverload) &&
+      isPositive(s.targetSig) &&
+      isOptionalNonEmptyString(s.attackerHull) &&
+      this.isOptionalPropulsionId(s.attackerPropulsion) &&
+      isOptionalNonEmptyString(s.targetHull) &&
+      this.isOptionalPropulsionId(s.targetPropulsion) &&
+      isPositive(s.simSpeed)
+    );
+  }
+
+  private isOptionalPropulsionId(value: unknown): value is PropulsionId | undefined {
+    return value === undefined || this.ships.parsePropulsionId(value) !== undefined;
+  }
+
+  private toProfileSettings(value: unknown): ProfileSettings | null {
+    if (!this.isProfileSettings(value)) return null;
+    return stripLanguage(value);
   }
 }
 
@@ -235,51 +286,6 @@ function isSelectedProfile(value: unknown): value is { name: string; baseline: u
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
   return typeof s.name === "string" && s.name.length > 0 && !!s.baseline && typeof s.baseline === "object" && !Array.isArray(s.baseline);
-}
-
-function isUserSettings(value: unknown): value is UserSettings {
-  return isProfileSettings(value) && isLanguage((value as Record<string, unknown>).language);
-}
-
-function isProfileSettings(value: unknown): value is ProfileSettings {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  return (
-    s.version === USER_SETTINGS_VERSION &&
-    isNonNegative(s.tracking) &&
-    (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
-    isSigResolutionClass(s.sigRes) &&
-    isNonNegative(s.optimal) &&
-    isNonNegative(s.falloff) &&
-    isNonNegative(s.attackerSpeed) &&
-    isAutopilotMode(s.attackerMode) &&
-    isNonNegative(s.attackerRange) &&
-    isOptionalNonNegative(s.maneuverAggressivity) &&
-    isOptionalUnitInterval(s.gridBrightness) &&
-    isNonNegative(s.attackerMass) &&
-    isNonNegative(s.attackerInertia) &&
-    isOptionalSkillLevel(s.attackerSkillLevel) &&
-    isOptionalBoolean(s.attackerOverload) &&
-    isPositive(s.initialDistance) &&
-    isNonNegative(s.targetSpeed) &&
-    isAutopilotMode(s.targetMode) &&
-    isNonNegative(s.targetRange) &&
-    isNonNegative(s.targetMass) &&
-    isNonNegative(s.targetInertia) &&
-    isOptionalSkillLevel(s.targetSkillLevel) &&
-    isOptionalBoolean(s.targetOverload) &&
-    isPositive(s.targetSig) &&
-    isOptionalNonEmptyString(s.attackerHull) &&
-    isOptionalPropulsionId(s.attackerPropulsion) &&
-    isOptionalNonEmptyString(s.targetHull) &&
-    isOptionalPropulsionId(s.targetPropulsion) &&
-    isPositive(s.simSpeed)
-  );
-}
-
-function toProfileSettings(value: unknown): ProfileSettings | null {
-  if (!isProfileSettings(value)) return null;
-  return stripLanguage(value);
 }
 
 function stripLanguage(value: ProfileSettings): ProfileSettings {
@@ -301,10 +307,6 @@ function isLanguage(value: unknown): value is Language {
 
 function isOptionalNonEmptyString(value: unknown): value is string | undefined {
   return value === undefined || (typeof value === "string" && value.length > 0);
-}
-
-function isOptionalPropulsionId(value: unknown): value is PropulsionId | undefined {
-  return value === undefined || isPropulsionId(value);
 }
 
 function isSkillLevel(value: unknown): value is SkillLevel {

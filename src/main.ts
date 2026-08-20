@@ -1,6 +1,7 @@
 import { asValue } from "awilix";
 import { registerAppModule } from "./app";
 import { container } from "./container";
+import { registerShipsModule } from "./ships";
 import { registerSimModule } from "./sim";
 import { registerUiModule } from "./ui";
 
@@ -19,6 +20,7 @@ function main(): void {
     }),
     clipboard: asValue(window.navigator.clipboard),
   });
+  registerShipsModule(container);
   registerUiModule(container);
   registerSimModule(container);
   container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });

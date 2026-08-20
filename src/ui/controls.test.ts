@@ -1,6 +1,5 @@
 import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
-import { SHIP_PROFILES, effectiveStats, fittedMassFactor, fittingOptions } from "../ships";
-import type { ShipProfile } from "../ships";
+import type { PropulsionId, PropulsionModule, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import type { ClipboardProvider, LocationProvider, ProfileSettings, SettingsStore, UserSettings } from "./settings";
@@ -33,6 +32,162 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "target-sig": "40",
   "sim-speed": "4",
 };
+
+const RIFTER: ShipProfile = {
+  name: "Rifter",
+  faction: "Minmatar Republic",
+  hullType: "Standard Frigates",
+  mass: 1_000_000,
+  inertiaModifier: 3,
+  baseSpeed: 365,
+  sigRadius: 36,
+};
+
+const THRASHER: ShipProfile = {
+  name: "Thrasher",
+  faction: "Minmatar Republic",
+  hullType: "Standard Destroyers",
+  mass: 1_500_000,
+  inertiaModifier: 2.5,
+  baseSpeed: 300,
+  sigRadius: 70,
+};
+
+const MERLIN: ShipProfile = {
+  name: "Merlin",
+  faction: "Caldari State",
+  hullType: "Standard Frigates",
+  mass: 1_100_000,
+  inertiaModifier: 3,
+  baseSpeed: 350,
+  sigRadius: 33,
+};
+
+const AB1MN: PropulsionModule = {
+  id: "ab-1mn",
+  kind: "afterburner",
+  sizeTier: "small",
+  label: "1MN Afterburner I",
+  thrust: 1.5e6,
+  massAddition: 500_000,
+  speedBonus: 1.15,
+  sigBloom: 0,
+  activeMassMultiplier: 1,
+};
+
+const MWD5MN: PropulsionModule = {
+  id: "mwd-5mn",
+  kind: "microwarpdrive",
+  sizeTier: "small",
+  label: "5MN Microwarpdrive I",
+  thrust: 1.5e6,
+  massAddition: 500_000,
+  speedBonus: 5,
+  sigBloom: 5,
+  activeMassMultiplier: 5,
+};
+
+const AB10MN: PropulsionModule = {
+  id: "ab-10mn",
+  kind: "afterburner",
+  sizeTier: "medium",
+  label: "10MN Afterburner I",
+  thrust: 15e6,
+  massAddition: 5_000_000,
+  speedBonus: 1.15,
+  sigBloom: 0,
+  activeMassMultiplier: 1,
+};
+
+const RIFTER_FITTING_OPTIONS: readonly PropulsionModule[] = [AB1MN, MWD5MN, AB10MN];
+const VALID_PROPULSION_IDS: readonly PropulsionId[] = ["ab-1mn", "mwd-5mn", "ab-10mn"];
+
+const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_030_000, inertiaModifier: 3, maxSpeed: 400, sigRadius: 36 };
+const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_030_000, inertiaModifier: 2, maxSpeed: 500, sigRadius: 36 };
+const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_530_000, inertiaModifier: 3, maxSpeed: 600, sigRadius: 36 };
+const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_530_000, inertiaModifier: 2, maxSpeed: 800, sigRadius: 36 };
+const RIFTER_MWD_SKILL0: ShipStats = { mass: 3_530_000, inertiaModifier: 3, maxSpeed: 1200, sigRadius: 210 };
+const RIFTER_MWD_SKILL5: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 1500, sigRadius: 210 };
+const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 2361, sigRadius: 210 };
+const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
+
+function mockStatsFor(profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }): ShipStats {
+  if (profile.name === "Rifter") {
+    if (!module) return conditions?.skillLevel === 0 ? RIFTER_BASE_SKILL0 : RIFTER_BASE_SKILL5;
+    if (module.id === "ab-1mn") return conditions?.skillLevel === 0 ? RIFTER_AB1_SKILL0 : RIFTER_AB1_SKILL5;
+    if (module.id === "mwd-5mn") {
+      if (conditions?.skillLevel === 0) return RIFTER_MWD_SKILL0;
+      return conditions?.overloaded ? RIFTER_MWD_SKILL5_OVERLOADED : RIFTER_MWD_SKILL5;
+    }
+    if (module.id === "ab-10mn") return RIFTER_AB1_SKILL5;
+  }
+  return THRASHER_BASE;
+}
+
+interface HullView {
+  readonly name: string;
+  readonly hullType: string;
+  readonly faction: string;
+}
+
+const HULL_VIEW_RIFTER: Record<Language, HullView> = {
+  en: { name: "Rifter", hullType: "Standard Frigates", faction: "Minmatar Republic" },
+  zh: { name: "裂谷级", hullType: "护卫舰", faction: "米玛塔尔" },
+  ja: { name: "リフター", hullType: "フリゲート", faction: "ミンマター共和国" },
+};
+
+const HULL_VIEW_MERLIN: Record<Language, HullView> = {
+  en: { name: "Merlin", hullType: "Standard Frigates", faction: "Caldari State" },
+  zh: { name: "小鹰级", hullType: "护卫舰", faction: "加达里" },
+  ja: { name: "マーリン", hullType: "フリゲート", faction: "カルダリ連合" },
+};
+
+const HULLS_BY_LANGUAGE: Record<Language, HullView[]> = {
+  en: [HULL_VIEW_RIFTER.en, HULL_VIEW_MERLIN.en],
+  zh: [HULL_VIEW_RIFTER.zh, HULL_VIEW_MERLIN.zh],
+  ja: [HULL_VIEW_RIFTER.ja, HULL_VIEW_MERLIN.ja],
+};
+
+function createMockShips() {
+  const findHullInputMap = new Map<string, ShipProfile>([
+    ["rifter", RIFTER],
+    ["裂谷级", RIFTER],
+    ["リフター", RIFTER],
+    ["thrasher", THRASHER],
+    ["merlin", MERLIN],
+    ["小鹰级", MERLIN],
+    ["マーリン", MERLIN],
+  ]);
+
+  const mockShips = vi.mocked<Ships>({
+    hulls: vi.fn((language: Language) => HULLS_BY_LANGUAGE[language]),
+    hullView: vi.fn((profile: ShipProfile, language: Language) => {
+      if (profile.name === "Rifter") return HULL_VIEW_RIFTER[language];
+      if (profile.name === "Merlin") return HULL_VIEW_MERLIN[language];
+      return { name: profile.name, hullType: profile.hullType, faction: profile.faction };
+    }),
+    findHull: vi.fn((name: string) => findHullInputMap.get(name.trim().toLowerCase())),
+    parsePropulsionId: vi.fn((value: unknown) => {
+      if (typeof value !== "string") return undefined;
+      return VALID_PROPULSION_IDS.includes(value as PropulsionId) ? (value as PropulsionId) : undefined;
+    }),
+    fittingOptions: vi.fn((profile: ShipProfile) => (profile.name === "Rifter" ? RIFTER_FITTING_OPTIONS : [AB1MN, MWD5MN])),
+    fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
+    effectiveStats: vi.fn((profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
+    maxSpeedForMass: vi.fn((profile: ShipProfile, mass: number, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+  });
+
+  mockShips.fittingOption.mockImplementation((profile: ShipProfile, id: PropulsionId) => {
+    const options = mockShips.fittingOptions(profile);
+    return options.find((m: PropulsionModule) => m.id === id);
+  });
+
+  return mockShips;
+}
+
+function createMockShips_fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined {
+  return RIFTER_FITTING_OPTIONS.find((m) => m.id === id) ?? [AB1MN, MWD5MN].find((m) => m.id === id);
+}
 
 class FakeElement {
   value = "";
@@ -203,20 +358,11 @@ function buildControls(
     saveSelectedProfile: vi.fn(),
     clearSelectedProfile: vi.fn(),
   });
+  const ships = createMockShips();
   const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, clipboard, location });
-  return { hitChance, i18n, settingsStore, clipboard, location, controls };
-}
-
-function rifterProfile() {
-  const found = SHIP_PROFILES.find((p) => p.name === "Rifter");
-  if (!found) throw new Error("Rifter profile missing");
-  return found;
-}
-
-function mwd5mnForRifter() {
-  return fittingOptions(rifterProfile()).find((m) => m.id === "mwd-5mn")!;
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, clipboard, location });
+  return { hitChance, i18n, settingsStore, ships, clipboard, location, controls };
 }
 
 describe("DomControls", () => {
@@ -362,9 +508,9 @@ describe("DomControls", () => {
 
   test("selecting a hull populates base stats and enables tier-correct propulsion options", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
-    const first = fittingOptions(rifter)[0];
-    const expected = effectiveStats(rifter, first, { skillLevel: 5, overloaded: true });
+    const rifter = RIFTER;
+    const first = RIFTER_FITTING_OPTIONS[0];
+    const expected = mockStatsFor(rifter, first, { skillLevel: 5, overloaded: true });
 
     const input = getFake(globalThis.document, "attacker-hull");
     input.value = "rifter";
@@ -384,7 +530,7 @@ describe("DomControls", () => {
 
   test("choosing an MWD updates target speed, mass and signature radius", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
 
     getFake(globalThis.document, "target-hull").value = "Rifter";
     getFake(globalThis.document, "target-hull").trigger("input");
@@ -393,7 +539,7 @@ describe("DomControls", () => {
     propulsion.value = "mwd-5mn";
     propulsion.trigger("change");
 
-    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
+    const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
     expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
@@ -546,7 +692,7 @@ describe("DomControls", () => {
 
   test("changing the skill level recomputes speed and inertia without a module", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
@@ -559,14 +705,14 @@ describe("DomControls", () => {
     skills.value = "0";
     skills.trigger("change");
 
-    const expected = effectiveStats(rifter, undefined, { skillLevel: 0, overloaded: true });
+    const expected = mockStatsFor(rifter, undefined, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
   });
 
   test("changing the skill level recomputes speed and inertia with a fitted module", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
     const hullInput = getFake(globalThis.document, "target-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
@@ -578,14 +724,14 @@ describe("DomControls", () => {
     skills.value = "0";
     skills.trigger("change");
 
-    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 0, overloaded: true });
+    const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-inertia").value).toBe(String(expected.inertiaModifier));
   });
 
   test("toggling overload recomputes speed while leaving mass and signature unchanged", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
     const hullInput = getFake(globalThis.document, "target-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
@@ -597,7 +743,7 @@ describe("DomControls", () => {
     overload.checked = false;
     overload.trigger("change");
 
-    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
+    const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 5, overloaded: false });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
     expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
@@ -739,8 +885,8 @@ describe("DomControls", () => {
     skills.value = "0";
     skills.trigger("change");
 
-    const rifter = rifterProfile();
-    const expected = effectiveStats(rifter, fittingOptions(rifter)[0], { skillLevel: 0, overloaded: true });
+    const rifter = RIFTER;
+    const expected = mockStatsFor(rifter, RIFTER_FITTING_OPTIONS[0], { skillLevel: 0, overloaded: true });
     const calls = settingsStore.save.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.attackerSpeed).toBe(Number(formatNumber(expected.maxSpeed)));
@@ -750,7 +896,7 @@ describe("DomControls", () => {
 
   test("clicking a visible propulsion button updates the hidden select and recomputes stats", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
 
     const hullInput = getFake(globalThis.document, "target-hull");
     hullInput.value = "Rifter";
@@ -763,13 +909,13 @@ describe("DomControls", () => {
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
     expect(button.getAttribute("title")).toBe("5MN");
-    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: true });
+    const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
   test("clicking a visible skill tuner button updates the hidden select and recomputes speed", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
 
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
@@ -781,13 +927,13 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skills").value).toBe("0");
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", true);
-    const expected = effectiveStats(rifter, fittingOptions(rifter)[0], { skillLevel: 0, overloaded: true });
+    const expected = mockStatsFor(rifter, RIFTER_FITTING_OPTIONS[0], { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
   test("clicking the overload icon button toggles the hidden checkbox and recomputes speed", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
 
     const hullInput = getFake(globalThis.document, "target-hull");
     hullInput.value = "Rifter";
@@ -803,7 +949,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-overload").checked).toBe(false);
     expect(button.getAttribute("aria-pressed")).toBe("false");
     expect(button.classList.toggle).toHaveBeenCalledWith("active", false);
-    const expected = effectiveStats(rifter, mwd5mnForRifter(), { skillLevel: 5, overloaded: false });
+    const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 5, overloaded: false });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
   });
 
@@ -814,7 +960,7 @@ describe("DomControls", () => {
 
   test("clicking a visible skill tuner button updates the trigger summary", () => {
     buildControls(globalThis.document);
-    const rifter = rifterProfile();
+    const rifter = RIFTER;
 
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
@@ -892,45 +1038,39 @@ describe("DomControls", () => {
   });
 
   test("manually changing target mass updates speed for the fitted propulsion module", () => {
-    buildControls(globalThis.document);
-    const rifter = rifterProfile();
-    const module = mwd5mnForRifter();
+    const { ships } = buildControls(globalThis.document);
 
     getFake(globalThis.document, "target-hull").value = "Rifter";
     getFake(globalThis.document, "target-hull").trigger("change");
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
+
+    ships.maxSpeedForMass.mockReturnValue(1234.56);
 
     const activeMass = 5_000_000;
     getFake(globalThis.document, "target-mass").value = String(activeMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
-    const factor = fittedMassFactor(rifter.hullType);
-    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
-    const adjusted: ShipProfile = { ...rifter, mass: shipMass };
-    const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1234.56));
+    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
-    buildControls(globalThis.document);
-    const rifter = rifterProfile();
-    const module = mwd5mnForRifter();
+    const { ships } = buildControls(globalThis.document);
 
     getFake(globalThis.document, "target-hull").value = "Rifter";
     getFake(globalThis.document, "target-hull").trigger("change");
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
 
+    ships.maxSpeedForMass.mockReturnValueOnce(1500.5);
+
     const displayedMass = Number(getFake(globalThis.document, "target-mass").value) + 1_000_000;
     getFake(globalThis.document, "target-mass").value = String(displayedMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
-    const factor = fittedMassFactor(rifter.hullType);
-    const shipMass = (displayedMass - module.massAddition * module.activeMassMultiplier) / factor;
-    const adjusted: ShipProfile = { ...rifter, mass: shipMass };
-    const expected = effectiveStats(adjusted, module, { skillLevel: 5, overloaded: true });
-    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1500.5));
+    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("save button highlights when the current settings differ from the selected profile", () => {
@@ -1126,9 +1266,9 @@ describe("DomControls", () => {
   });
 
   test("save button highlights when tracking unit changes after loading a profile", () => {
-    const rifter = rifterProfile();
-    const module = mwd5mnForRifter();
-    const stats = effectiveStats(rifter, module, { skillLevel: 5, overloaded: true });
+    const rifter = RIFTER;
+    const module = MWD5MN;
+    const stats = mockStatsFor(rifter, module, { skillLevel: 5, overloaded: true });
     const speed = Number(formatNumber(stats.maxSpeed));
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
@@ -1218,9 +1358,9 @@ describe("DomControls", () => {
   });
 
   test("save button highlights when hull changes after loading a profile", () => {
-    const rifter = rifterProfile();
-    const module = mwd5mnForRifter();
-    const stats = effectiveStats(rifter, module, { skillLevel: 5, overloaded: true });
+    const rifter = RIFTER;
+    const module = MWD5MN;
+    const stats = mockStatsFor(rifter, module, { skillLevel: 5, overloaded: true });
     const speed = Number(formatNumber(stats.maxSpeed));
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
@@ -1996,14 +2136,16 @@ describe("DomControls", () => {
   });
 
   describe("ship name i18n", () => {
-    test("datalist option values localize per language and revert in English", () => {
+    test("datalist option values and labels localize per language and revert in English", () => {
       buildControls(globalThis.document, null, { language: "zh" });
 
       const options = getFake(globalThis.document, "hull-options").children;
       const rifter = options.find((o) => o.value === "裂谷级");
       const merlin = options.find((o) => o.value === "小鹰级");
       expect(rifter).toBeTruthy();
+      expect(rifter!.label).toBe(`${HULL_VIEW_RIFTER.zh.hullType} · ${HULL_VIEW_RIFTER.zh.faction}`);
       expect(merlin).toBeTruthy();
+      expect(merlin!.label).toBe(`${HULL_VIEW_MERLIN.zh.hullType} · ${HULL_VIEW_MERLIN.zh.faction}`);
 
       getFake(globalThis.document, "lang-en").trigger("click");
 
@@ -2011,6 +2153,8 @@ describe("DomControls", () => {
       expect(enOptions.some((o) => o.value === "Rifter")).toBe(true);
       expect(enOptions.some((o) => o.value === "Merlin")).toBe(true);
       expect(enOptions.some((o) => o.value === "裂谷级")).toBe(false);
+      const enRifter = enOptions.find((o) => o.value === "Rifter");
+      expect(enRifter!.label).toBe(`${HULL_VIEW_RIFTER.en.hullType} · ${HULL_VIEW_RIFTER.en.faction}`);
     });
 
     test("hull input displays the localized name after loading a profile with a canonical hull", () => {
