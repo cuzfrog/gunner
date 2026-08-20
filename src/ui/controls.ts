@@ -1,8 +1,10 @@
 import {
   effectiveStats,
+  factionDisplayName,
   findShipProfileByName,
   fittedMassFactor,
   fittingOptions,
+  hullTypeDisplayName,
   isPropulsionId,
   SHIP_PROFILES,
   shipDisplayName,
@@ -452,6 +454,8 @@ export class DomControls implements Controls {
     this.renderAllPropulsionOptions();
     this.populateHullDatalist();
     this.refreshHullInputs();
+    this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
+    this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
     this.setPlaying(this.playing);
@@ -782,7 +786,8 @@ export class DomControls implements Controls {
       setText(this.els[`${side}HullHint`], "");
       return;
     }
-    let text = `${profile.hullType} · ${profile.faction}`;
+    const language = this.i18n.current();
+    let text = `${hullTypeDisplayName(profile.hullType, language)} · ${factionDisplayName(profile.faction, language)}`;
     if (side === "target" && module?.kind === "microwarpdrive") {
       text += ` (sig ×${1 + module.sigBloom})`;
     }

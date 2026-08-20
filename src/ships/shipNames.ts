@@ -1,4 +1,6 @@
 import { SHIP_PROFILES } from "./profiles";
+import { FACTION_NAMES } from "./faction-i18n";
+import { HULL_TYPE_NAMES } from "./hull-types-i18n";
 import { SHIP_NAMES } from "./ship-names-i18n";
 import type { ShipProfile } from "./types";
 
@@ -6,6 +8,14 @@ export type ShipNameLanguage = "en" | "zh" | "ja";
 
 export function shipDisplayName(name: string, language: ShipNameLanguage): string {
   return SHIP_NAMES[name]?.[language] || name;
+}
+
+export function hullTypeDisplayName(hullType: string, language: ShipNameLanguage): string {
+  return HULL_TYPE_NAMES[hullType]?.[language] || hullType;
+}
+
+export function factionDisplayName(faction: string, language: ShipNameLanguage): string {
+  return FACTION_NAMES[faction]?.[language] || faction;
 }
 
 export function findShipProfileByName(input: string): ShipProfile | undefined {

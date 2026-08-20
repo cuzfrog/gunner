@@ -1,4 +1,28 @@
-import { findShipProfileByName, shipDisplayName } from "./shipNames";
+import { factionDisplayName, findShipProfileByName, hullTypeDisplayName, shipDisplayName } from "./shipNames";
+
+describe("hullTypeDisplayName", () => {
+  test("returns the localized hull type when available", () => {
+    expect(hullTypeDisplayName("Standard Frigates", "zh")).toBe("护卫舰");
+    expect(hullTypeDisplayName("Standard Frigates", "ja")).toBe("フリゲート");
+    expect(hullTypeDisplayName("Standard Frigates", "en")).toBe("Standard Frigates");
+  });
+
+  test("falls back to the canonical hull type for unknown values", () => {
+    expect(hullTypeDisplayName("Unknown Hull", "zh")).toBe("Unknown Hull");
+  });
+});
+
+describe("factionDisplayName", () => {
+  test("returns the localized faction when available", () => {
+    expect(factionDisplayName("Minmatar Republic", "zh")).toBe("米玛塔尔");
+    expect(factionDisplayName("Minmatar Republic", "ja")).toBe("ミンマター共和国");
+    expect(factionDisplayName("Minmatar Republic", "en")).toBe("Minmatar Republic");
+  });
+
+  test("falls back to the canonical faction for unknown values", () => {
+    expect(factionDisplayName("Unknown Faction", "zh")).toBe("Unknown Faction");
+  });
+});
 
 describe("shipDisplayName", () => {
   test("returns the localized name when available", () => {

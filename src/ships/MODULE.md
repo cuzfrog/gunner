@@ -8,11 +8,11 @@ no-new-exports:
   - fittedMass.ts
   - faction-i18n.ts
   - hull-types-i18n.ts
-  # - index.ts  # Re-exports shipDisplayName, findShipProfileByName, ShipNameLanguage
+  # - index.ts  # Re-exports shipDisplayName, hullTypeDisplayName, factionDisplayName, findShipProfileByName, ShipNameLanguage
   - profiles.ts
-  - ship-names-i18n.ts
   - propulsion.test.ts
   - propulsion.ts
+  - ship-names-i18n.ts
   # - shipNames.ts  # Ship name i18n lookup, cross-boundary utility
   - tiers.test.ts
   - tiers.ts

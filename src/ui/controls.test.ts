@@ -2135,6 +2135,23 @@ describe("DomControls", () => {
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerHull).toBe("Rifter");
     });
+
+    test("hull hint shows localized hull type and faction and refreshes on language switch", () => {
+      buildControls(globalThis.document, null, { language: "zh" });
+
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "裂谷级";
+      hullInput.trigger("change");
+
+      const hint = getFake(globalThis.document, "attacker-hull-hint");
+      expect(hint.textContent).toContain("护卫舰");
+      expect(hint.textContent).toContain("米玛塔尔");
+
+      getFake(globalThis.document, "lang-ja").trigger("click");
+
+      expect(hint.textContent).toContain("フリゲート");
+      expect(hint.textContent).toContain("ミンマター共和国");
+    });
   });
 });
 
