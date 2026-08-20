@@ -370,7 +370,7 @@ export class DomControls implements Controls {
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
     (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
     (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
-    (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
+    (this.els.attackerInertia as HTMLInputElement).value = formatNumber(settings.attackerInertia, 6);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
@@ -378,7 +378,7 @@ export class DomControls implements Controls {
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
-    (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
+    (this.els.targetInertia as HTMLInputElement).value = formatNumber(settings.targetInertia, 6);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
     (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
@@ -989,7 +989,7 @@ export class DomControls implements Controls {
         (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
       }
       if (updateInertia) {
-        (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+        (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
       }
       if (side === "target" && updateSig) {
         (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
@@ -1018,7 +1018,7 @@ export class DomControls implements Controls {
       (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
     }
     if (updateInertia) {
-      (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+      (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
     }
     if (side === "target" && updateSig) {
       (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));

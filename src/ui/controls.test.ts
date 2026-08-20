@@ -596,7 +596,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(expected.mass));
-    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
     expect(getFake(globalThis.document, "attacker-hull-hint").textContent).toContain("Standard Frigates");
 
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
@@ -784,7 +784,7 @@ describe("DomControls", () => {
 
     const expected = mockStatsFor(rifter, undefined, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
-    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
   });
 
   test("changing the skill level recomputes speed and inertia with a fitted module", () => {
@@ -803,7 +803,7 @@ describe("DomControls", () => {
 
     const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
-    expect(getFake(globalThis.document, "target-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "target-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
   });
 
   test("toggling overload recomputes speed while leaving mass and signature unchanged", () => {
@@ -967,7 +967,7 @@ describe("DomControls", () => {
     const calls = settingsStore.save.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.attackerSpeed).toBe(Number(formatNumber(expected.maxSpeed)));
-    expect(saved.attackerInertia).toBe(expected.inertiaModifier);
+    expect(saved.attackerInertia).toBe(Number(formatNumber(expected.inertiaModifier, 6)));
     expect(saved.attackerSkillLevel).toBe(0);
   });
 
