@@ -22,6 +22,9 @@ export interface FittingModuleStats {
   readonly sigBonusPercent?: number;
   readonly sigDrawbackPercent?: number;
   readonly agilityDrawbackPercent?: number;
+  readonly turretTrackingPercent?: number;
+  readonly turretOptimalPercent?: number;
+  readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
 }
 
@@ -37,6 +40,26 @@ export interface ChargeStats {
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
 }
+
+export interface TurretScriptStats {
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+}
+
+
+export const SCRIPTS = {
+  "Optimal Range Script": {
+    "trackingMultiplier": 0,
+    "optimalMultiplier": 2,
+    "falloffMultiplier": 2
+  },
+  "Tracking Speed Script": {
+    "trackingMultiplier": 2,
+    "optimalMultiplier": 0,
+    "falloffMultiplier": 0
+  }
+} as unknown as Readonly<Record<string, TurretScriptStats>>;
 
 
 export const FITTING_MODULES = {
@@ -119,6 +142,31 @@ export const FITTING_MODULES = {
   "Inertial Stabilizers II": {
     "agilityMultiplier": 0.8,
     "sigBonusPercent": 11
+  },
+  "'Basic' Tracking Enhancer": {
+    "turretTrackingPercent": 6,
+    "turretOptimalPercent": 5,
+    "turretFalloffPercent": 10
+  },
+  "Tracking Computer I": {
+    "turretTrackingPercent": 10,
+    "turretOptimalPercent": 5,
+    "turretFalloffPercent": 10
+  },
+  "Tracking Computer II": {
+    "turretTrackingPercent": 15,
+    "turretOptimalPercent": 7.5,
+    "turretFalloffPercent": 15
+  },
+  "Tracking Enhancer I": {
+    "turretTrackingPercent": 7,
+    "turretOptimalPercent": 7.25,
+    "turretFalloffPercent": 14.5
+  },
+  "Tracking Enhancer II": {
+    "turretTrackingPercent": 9.5,
+    "turretOptimalPercent": 10,
+    "turretFalloffPercent": 20
   },
   "Nanofiber Internal Structure I": {
     "speedBonusPercent": 7.75,
@@ -236,6 +284,21 @@ export const FITTING_MODULES = {
       "massAddition": 5000000,
       "sigBloom": 0
     }
+  },
+  "Optical Compact Tracking Computer": {
+    "turretTrackingPercent": 12,
+    "turretOptimalPercent": 6,
+    "turretFalloffPercent": 12
+  },
+  "F-12 Enduring Tracking Computer": {
+    "turretTrackingPercent": 12,
+    "turretOptimalPercent": 6,
+    "turretFalloffPercent": 12
+  },
+  "Fourier Compact Tracking Enhancer": {
+    "turretTrackingPercent": 8,
+    "turretOptimalPercent": 8.25,
+    "turretFalloffPercent": 16.5
   },
   "Large Azeotropic Restrained Shield Extender": {
     "sigRadiusAdd": 15
@@ -377,6 +440,11 @@ export const FITTING_MODULES = {
       "sigBloom": 4.75
     }
   },
+  "Domination Tracking Enhancer": {
+    "turretTrackingPercent": 10,
+    "turretOptimalPercent": 10.5,
+    "turretFalloffPercent": 21
+  },
   "Domination 100MN Afterburner": {
     "propulsion": {
       "kind": "afterburner",
@@ -503,6 +571,11 @@ export const FITTING_MODULES = {
   "Domination Nanofiber Structure": {
     "speedBonusPercent": 9.5,
     "agilityMultiplier": 0.84
+  },
+  "Shadow Serpentis Tracking Computer": {
+    "turretTrackingPercent": 17.5,
+    "turretOptimalPercent": 8,
+    "turretFalloffPercent": 16
   },
   "Mizuro's Modified 100MN Afterburner": {
     "propulsion": {
@@ -664,6 +737,46 @@ export const FITTING_MODULES = {
       "sigBloom": 3.9
     }
   },
+  "Mizuro's Modified Tracking Enhancer": {
+    "turretTrackingPercent": 12.5,
+    "turretOptimalPercent": 11,
+    "turretFalloffPercent": 22
+  },
+  "Hakim's Modified Tracking Enhancer": {
+    "turretTrackingPercent": 15,
+    "turretOptimalPercent": 11.5,
+    "turretFalloffPercent": 23
+  },
+  "Gotan's Modified Tracking Enhancer": {
+    "turretTrackingPercent": 17.5,
+    "turretOptimalPercent": 12,
+    "turretFalloffPercent": 24
+  },
+  "Tobias' Modified Tracking Enhancer": {
+    "turretTrackingPercent": 20,
+    "turretOptimalPercent": 12.5,
+    "turretFalloffPercent": 25
+  },
+  "Brynn's Modified Tracking Computer": {
+    "turretTrackingPercent": 18.4,
+    "turretOptimalPercent": 8.7,
+    "turretFalloffPercent": 17.4
+  },
+  "Tuvan's Modified Tracking Computer": {
+    "turretTrackingPercent": 19.3,
+    "turretOptimalPercent": 9.1,
+    "turretFalloffPercent": 18.2
+  },
+  "Setele's Modified Tracking Computer": {
+    "turretTrackingPercent": 20.1,
+    "turretOptimalPercent": 9.5,
+    "turretFalloffPercent": 19
+  },
+  "Cormack's Modified Tracking Computer": {
+    "turretTrackingPercent": 21,
+    "turretOptimalPercent": 9.9,
+    "turretFalloffPercent": 19.8
+  },
   "Republic Fleet 5MN Microwarpdrive": {
     "propulsion": {
       "kind": "microwarpdrive",
@@ -784,12 +897,22 @@ export const FITTING_MODULES = {
       "sigBloom": 0
     }
   },
+  "Federation Navy Tracking Computer": {
+    "turretTrackingPercent": 17.5,
+    "turretOptimalPercent": 8,
+    "turretFalloffPercent": 16
+  },
   "Republic Fleet Overdrive Injector": {
     "speedBonusPercent": 12.5
   },
   "Republic Fleet Nanofiber Structure": {
     "speedBonusPercent": 9.5,
     "agilityMultiplier": 0.84
+  },
+  "Republic Fleet Tracking Enhancer": {
+    "turretTrackingPercent": 10,
+    "turretOptimalPercent": 10.5,
+    "turretFalloffPercent": 21
   },
   "Gistii C-Type 1MN Afterburner": {
     "propulsion": {
@@ -1299,6 +1422,11 @@ export const FITTING_MODULES = {
       "sigBloom": 0
     }
   },
+  "'Marketeer' Tracking Computer": {
+    "turretTrackingPercent": 15,
+    "turretOptimalPercent": 7.5,
+    "turretFalloffPercent": 15
+  },
   "'Abatis' 100mm Steel Plates": {
     "massAddition": 35000
   },
@@ -1337,6 +1465,33 @@ export const FITTING_MODULES = {
   },
   "Large Core Defense Capacitor Safeguard I": {
     "sigDrawbackPercent": 10
+  },
+  "Large Energy Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Large Energy Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Large Energy Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Large Hybrid Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Large Hybrid Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Large Hybrid Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Large Projectile Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Large Projectile Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Large Projectile Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
   },
   "Large Low Friction Nozzle Joints I": {
     "agilityMultiplier": 0.883
@@ -1411,6 +1566,33 @@ export const FITTING_MODULES = {
   },
   "Large Hyperspatial Velocity Optimizer II": {
     "sigDrawbackPercent": 10
+  },
+  "Large Energy Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Large Energy Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Large Energy Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Large Hybrid Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Large Hybrid Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Large Hybrid Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Large Projectile Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Large Projectile Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Large Projectile Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
   },
   "Large EM Shield Reinforcer II": {
     "sigDrawbackPercent": 10
@@ -1661,6 +1843,168 @@ export const FITTING_MODULES = {
   },
   "Capital Warp Core Optimizer II": {
     "sigDrawbackPercent": 10
+  },
+  "Small Energy Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Medium Energy Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Capital Energy Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Small Energy Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Medium Energy Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Capital Energy Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Small Energy Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Medium Energy Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Capital Energy Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Small Energy Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Medium Energy Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Capital Energy Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Small Energy Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Medium Energy Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Capital Energy Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Small Energy Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Medium Energy Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Capital Energy Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Small Hybrid Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Medium Hybrid Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Capital Hybrid Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Small Hybrid Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Medium Hybrid Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Capital Hybrid Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Small Hybrid Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Medium Hybrid Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Capital Hybrid Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Small Hybrid Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Medium Hybrid Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Capital Hybrid Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Small Hybrid Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Medium Hybrid Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Capital Hybrid Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Small Hybrid Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Medium Hybrid Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Capital Hybrid Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Small Projectile Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Medium Projectile Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Capital Projectile Ambit Extension I": {
+    "turretFalloffPercent": 15
+  },
+  "Small Projectile Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Medium Projectile Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Capital Projectile Ambit Extension II": {
+    "turretFalloffPercent": 20
+  },
+  "Small Projectile Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Medium Projectile Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Capital Projectile Locus Coordinator I": {
+    "turretOptimalPercent": 15
+  },
+  "Small Projectile Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Medium Projectile Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Capital Projectile Locus Coordinator II": {
+    "turretOptimalPercent": 20
+  },
+  "Small Projectile Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Medium Projectile Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Capital Projectile Metastasis Adjuster I": {
+    "turretTrackingPercent": 15
+  },
+  "Small Projectile Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Medium Projectile Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
+  },
+  "Capital Projectile Metastasis Adjuster II": {
+    "turretTrackingPercent": 20
   },
   "Small EM Shield Reinforcer I": {
     "sigDrawbackPercent": 10
@@ -2354,6 +2698,11 @@ export const FITTING_MODULES = {
   "Roden’s Modified Nanofiber Internal Structure": {
     "speedBonusPercent": 10,
     "agilityMultiplier": 0.835
+  },
+  "Imperial Navy 'Atonement' Tracking Enhancer": {
+    "turretTrackingPercent": 9.5,
+    "turretOptimalPercent": 10,
+    "turretFalloffPercent": 20
   },
   "Lorharyth’s Modified Inertial Stabilizer": {
     "agilityMultiplier": 0.775,

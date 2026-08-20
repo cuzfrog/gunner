@@ -30,6 +30,8 @@ const MODULE_GROUPS = new Set([
   38, // Shield Extender
   46, // Propulsion Module
   78, // Reinforced Bulkhead
+  211, // Tracking Enhancer
+  213, // Tracking Computer
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
@@ -46,6 +48,8 @@ const MODULE_GROUPS = new Set([
   786, // Rig Electronic Systems
   1308, // Rig Anchor
 ]);
+
+const SCRIPT_GROUPS = new Set([907]);
 
 const TURRET_GROUPS = new Set([53, 55, 74]);
 
@@ -129,6 +133,9 @@ interface FittingModuleStats {
   readonly sigBonusPercent?: number;
   readonly sigDrawbackPercent?: number;
   readonly agilityDrawbackPercent?: number;
+  readonly turretTrackingPercent?: number;
+  readonly turretOptimalPercent?: number;
+  readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
 }
 
@@ -143,6 +150,12 @@ interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+}
+
+interface TurretScriptStats {
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
 }
 
 function optionalNumber(value: number | undefined): number | undefined {
@@ -192,6 +205,15 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   const sigBonusPercent = optionalNumber(values.get("signatureRadiusBonus"));
   if (sigBonusPercent !== undefined) stats.sigBonusPercent = sigBonusPercent;
 
+  const turretTrackingPercent = optionalNumber(values.get("trackingSpeedBonus"));
+  if (turretTrackingPercent !== undefined) stats.turretTrackingPercent = turretTrackingPercent;
+
+  const turretOptimalPercent = optionalNumber(values.get("maxRangeBonus"));
+  if (turretOptimalPercent !== undefined) stats.turretOptimalPercent = turretOptimalPercent;
+
+  const turretFalloffPercent = optionalNumber(values.get("falloffBonus"));
+  if (turretFalloffPercent !== undefined) stats.turretFalloffPercent = turretFalloffPercent;
+
   const drawback = values.get("drawback") ?? 0;
   if (effects.has(RIG_SIG_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
     stats.sigDrawbackPercent = drawback;
@@ -213,6 +235,7 @@ async function main() {
   const fittingModules: Record<string, FittingModuleStats> = {};
   const turrets: Record<string, TurretStats> = {};
   const charges: Record<string, ChargeStats> = {};
+  const scripts: Record<string, TurretScriptStats> = {};
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
@@ -242,6 +265,20 @@ async function main() {
           trackingMultiplier,
           rangeMultiplier,
           falloffMultiplier,
+        };
+      }
+      continue;
+    }
+
+    if (SCRIPT_GROUPS.has(type.groupID)) {
+      const tracking = values.get("trackingSpeedBonusBonus");
+      const optimal = values.get("maxRangeBonusBonus");
+      const falloff = values.get("falloffBonusBonus");
+      if (tracking !== undefined || optimal !== undefined || falloff !== undefined) {
+        scripts[type["typeName_en-us"]] = {
+          trackingMultiplier: 1 + (tracking ?? 0) / 100,
+          optimalMultiplier: 1 + (optimal ?? 0) / 100,
+          falloffMultiplier: 1 + (falloff ?? 0) / 100,
         };
       }
       continue;
@@ -277,6 +314,9 @@ export interface FittingModuleStats {
   readonly sigBonusPercent?: number;
   readonly sigDrawbackPercent?: number;
   readonly agilityDrawbackPercent?: number;
+  readonly turretTrackingPercent?: number;
+  readonly turretOptimalPercent?: number;
+  readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
 }
 
@@ -293,11 +333,22 @@ export interface ChargeStats {
   readonly falloffMultiplier?: number;
 }
 
+export interface TurretScriptStats {
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+}
+
+`;
+
+  const scriptDefinitions = `export const SCRIPTS = ${JSON.stringify(scripts, null, 2)} as unknown as Readonly<Record<string, TurretScriptStats>>;
+
 `;
 
   const lines: string[] = [
     header,
     typeDefinitions,
+    scriptDefinitions,
     `export const FITTING_MODULES = ${JSON.stringify(fittingModules, null, 2)} as unknown as Readonly<Record<string, FittingModuleStats>>;`,
     ``,
     `export const TURRETS = ${JSON.stringify(turrets, null, 2)} as unknown as Readonly<Record<string, TurretStats>>;`,
@@ -308,7 +359,9 @@ export interface ChargeStats {
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
-  console.log(`Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges to ${OUT_FILE}`);
+  console.log(
+    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} scripts to ${OUT_FILE}`,
+  );
 }
 
 main().catch((error) => {

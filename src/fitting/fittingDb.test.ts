@@ -1,4 +1,4 @@
-import { CHARGES, FITTING_MODULES, TURRETS } from "./fittingDb";
+import { CHARGES, FITTING_MODULES, SCRIPTS, TURRETS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -91,6 +91,36 @@ describe("fittingDb", () => {
       trackingMultiplier: 0.75,
       rangeMultiplier: 1.4,
       falloffMultiplier: 1.4,
+    });
+  });
+
+  test("includes tracking enhancer and computer turret bonus percents", () => {
+    expect(FITTING_MODULES["Tracking Enhancer II"]).toEqual({
+      turretTrackingPercent: 9.5,
+      turretOptimalPercent: 10,
+      turretFalloffPercent: 20,
+    });
+    expect(FITTING_MODULES["Tracking Computer II"]).toEqual({
+      turretTrackingPercent: 15,
+      turretOptimalPercent: 7.5,
+      turretFalloffPercent: 15,
+    });
+  });
+
+  test("includes weapon rig tracking bonus percent", () => {
+    expect(FITTING_MODULES["Medium Energy Metastasis Adjuster II"]).toEqual({ turretTrackingPercent: 20 });
+  });
+
+  test("includes tracking computer scripts", () => {
+    expect(SCRIPTS["Tracking Speed Script"]).toEqual({
+      trackingMultiplier: 2,
+      optimalMultiplier: 0,
+      falloffMultiplier: 0,
+    });
+    expect(SCRIPTS["Optimal Range Script"]).toEqual({
+      trackingMultiplier: 0,
+      optimalMultiplier: 2,
+      falloffMultiplier: 2,
     });
   });
 });
