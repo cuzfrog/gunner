@@ -371,7 +371,7 @@ function isOptionalPropulsionStats(value: unknown): value is PropulsionStats | u
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom) && isPositive(s.activeMassMultiplier);
+  return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom);
 }
 
 function encodeBase64(value: unknown): string {

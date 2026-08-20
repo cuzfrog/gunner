@@ -23,10 +23,10 @@ const frigateProfile: ShipProfile = {
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
-  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0, activeMassMultiplier: 1 },
-  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5, activeMassMultiplier: 5 },
-  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0, activeMassMultiplier: 1 },
-  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0, activeMassMultiplier: 1 },
+  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
+  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 },
 ];
 
 const ships = vi.mocked<Ships>({
@@ -46,7 +46,6 @@ const db: FittingDb = {
         speedBonus: 5,
         massAddition: 500_000,
         sigBloom: 5,
-        activeMassMultiplier: 5,
       },
     },
     "100MN Y-S8 Compact Afterburner": {
@@ -57,7 +56,6 @@ const db: FittingDb = {
         speedBonus: 1.25,
         massAddition: 50_000_000,
         sigBloom: 0,
-        activeMassMultiplier: 1,
       },
     },
     "Inertial Stabilizers II": { massAddition: 200, agilityMultiplier: 0.8 },

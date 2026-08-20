@@ -24,10 +24,9 @@ export function fittedStats(
   const overloaded = conditions?.overloaded ?? false;
   const navFactor = navigationSpeedFactor(level);
   const inertiaFactor = inertiaSkillFactor(level);
-  const mass = fitted.mass + (propulsion ? propulsion.massAddition * propulsion.activeMassMultiplier : 0);
-  const speedMass = fitted.mass + (propulsion ? propulsion.massAddition : 0);
+  const mass = fitted.mass + (propulsion ? propulsion.massAddition : 0);
   const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
-  const maxSpeed = profile.baseSpeed * fitted.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / speedMass : 1);
+  const maxSpeed = profile.baseSpeed * fitted.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const inertiaModifier = profile.inertiaModifier * fitted.inertiaMultiplier * inertiaFactor;
   const sigRadius = (profile.sigRadius + fitted.sigRadiusAdd) * (1 + (propulsion ? propulsion.sigBloom : 0));
 
@@ -60,7 +59,7 @@ export function maxSpeedForFittedMass(
 
   if (!propulsion) return profile.baseSpeed * fitted.speedMultiplier * navFactor;
 
-  const prePropulsionMass = Math.max(0, mass - propulsion.massAddition * propulsion.activeMassMultiplier);
+  const prePropulsionMass = Math.max(0, mass - propulsion.massAddition);
   const speedMass = prePropulsionMass + propulsion.massAddition;
   const moduleSpeed = propulsionSpeedBonus(propulsion, level, overloaded);
   return profile.baseSpeed * fitted.speedMultiplier * navFactor * (1 + (moduleSpeed * propulsion.thrust) / speedMass);
@@ -95,5 +94,5 @@ function inertiaSkillFactor(level: SkillLevel): number {
 function propulsionSpeedBonus(propulsion: PropulsionStats, level: SkillLevel, overloaded: boolean): number {
   const accFactor = 1 + ACCELERATION_CONTROL_BONUS_PER_LEVEL * level;
   const overloadFactor = overloaded ? PROPULSION_OVERLOAD_FACTOR : 1;
-  return propulsion.speedBonus * navigationSpeedFactor(level) * accFactor * overloadFactor;
+  return propulsion.speedBonus * accFactor * overloadFactor;
 }

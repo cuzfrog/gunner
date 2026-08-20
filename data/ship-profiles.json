@@ -2144,8 +2144,8 @@
       "calibration": "400"
     },
     "navigation": {
-      "maxVelocity": "80 m/sec",
-      "inertiaModifier": "0.036",
+      "maxVelocity": "60 m/sec",
+      "inertiaModifier": "0.034",
       "warpSpeed": "1.5 AU/s",
       "baseTimeToWarp": "109.795 s"
     },
@@ -5642,7 +5642,7 @@
     },
     "structure": {
       "structureHP": "1,125 HP",
-      "mass": "1,175,000 kg",
+      "mass": "1,750,000 kg",
       "volume": "52,000 m3",
       "cargoCapacity": "450 m3",
       "frigateEscapeBay": ""
@@ -8908,7 +8908,7 @@
       "calibration": "0"
     },
     "navigation": {
-      "maxVelocity": "80 m/sec",
+      "maxVelocity": "81 m/sec",
       "inertiaModifier": "0.063",
       "warpSpeed": "1.5 AU/s",
       "baseTimeToWarp": "71.62 s"
@@ -9826,7 +9826,7 @@
     },
     "navigation": {
       "maxVelocity": "100 m/sec",
-      "inertiaModifier": "0.77",
+      "inertiaModifier": "0.077",
       "warpSpeed": "3 AU/s",
       "baseTimeToWarp": "16.76 s"
     },
@@ -13592,7 +13592,7 @@
     },
     "navigation": {
       "maxVelocity": "65 m/sec",
-      "inertiaModifier": "0.032",
+      "inertiaModifier": "0.0315",
       "warpSpeed": "1.5 AU/s",
       "baseTimeToWarp": "102 s"
     },
@@ -14744,7 +14744,7 @@
     },
     "structure": {
       "structureHP": "830 HP",
-      "mass": "1,115,000 kg",
+      "mass": "1,150,000 kg",
       "volume": "55,000 m³",
       "cargoCapacity": "350 m³",
       "frigateEscapeBay": ""
@@ -17485,7 +17485,7 @@
       "calibration": "400"
     },
     "navigation": {
-      "maxVelocity": "313 m/s",
+      "maxVelocity": "283 m/s",
       "inertiaModifier": "2.9",
       "warpSpeed": "5 AU/s",
       "baseTimeToWarp": "4.19 s"
@@ -27236,7 +27236,7 @@
     },
     "navigation": {
       "maxVelocity": "110 m/sec",
-      "inertiaModifier": "0.71",
+      "inertiaModifier": "0.071",
       "warpSpeed": "3 AU/s",
       "baseTimeToWarp": "14.76 s"
     },
@@ -29332,7 +29332,7 @@
     },
     "navigation": {
       "maxVelocity": "300 m/sec",
-      "inertiaModifier": "1",
+      "inertiaModifier": "1000",
       "warpSpeed": "5 AU/s",
       "baseTimeToWarp": "0.01 s"
     },

@@ -64,7 +64,6 @@ const FITTED_PROPULSION = {
   speedBonus: 1.15,
   massAddition: 500_000,
   sigBloom: 0,
-  activeMassMultiplier: 1,
 };
 
 const FITTED_HULL_SUMMARY: FittedHullSummary = {

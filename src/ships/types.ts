@@ -34,7 +34,6 @@ export interface PropulsionStats {
   readonly speedBonus: number;
   readonly massAddition: number;
   readonly sigBloom: number;
-  readonly activeMassMultiplier: number;
 }
 
 export interface PropulsionModule extends PropulsionStats {

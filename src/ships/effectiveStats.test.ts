@@ -36,7 +36,7 @@ describe("effectiveStats", () => {
     const mwd5 = fittingOptions(frigate).find((m) => m.id === "mwd-5mn")!;
     const stats = effectiveStats(frigate, mwd5);
     expect(stats.maxSpeed).toBeCloseTo(2361, 0);
-    expect(stats.mass).toBe(3_530_000);
+    expect(stats.mass).toBe(1_530_000);
     expect(stats.inertiaModifier).toBe(3);
     expect(stats.sigRadius).toBe(210);
   });
@@ -60,7 +60,7 @@ describe("effectiveStats", () => {
     const mwd500 = fittingOptions(battleship).find((m) => m.id === "mwd-500mn")!;
     const stats = effectiveStats(battleship, mwd500);
     expect(stats.maxSpeed).toBeCloseTo(590, 0);
-    expect(stats.mass).toBe(353_000_000);
+    expect(stats.mass).toBe(153_000_000);
   });
 
   test.each([[0, 400, 3], [1, 420, 2.793], [2, 440, 2.592], [3, 460, 2.397], [4, 480, 2.208], [5, 500, 2.025]] as const)(
@@ -86,7 +86,7 @@ describe("effectiveStats", () => {
     };
     const ab1 = fittingOptions(profile).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(profile, ab1, { skillLevel: 5, overloaded: true });
-    expect(stats.maxSpeed).toBeCloseTo(1445.04, 2);
+    expect(stats.maxSpeed).toBeCloseTo(1241.03, 2);
     expect(stats.mass).toBe(1_684_500);
     expect(stats.inertiaModifier).toBeCloseTo(2.025, 3);
     expect(stats.sigRadius).toBe(35);
@@ -95,7 +95,7 @@ describe("effectiveStats", () => {
   test("skills scale the afterburner bonus by navigation and acceleration control", () => {
     const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
     const stats = effectiveStats(frigate, ab1, conditions(5));
-    expect(stats.maxSpeed).toBeCloseTo(1380.821, 3);
+    expect(stats.maxSpeed).toBeCloseTo(1204.657, 3);
     expect(stats.mass).toBe(1_530_000);
   });
 
@@ -164,7 +164,7 @@ describe("fittedStats", () => {
   test("with MWD multiplies signature and active mass", () => {
     const mwd5 = fittingOptions(frigate).find((m) => m.id === "mwd-5mn")!;
     const stats = fittedStats(frigate, fitted, mwd5, conditions(0));
-    expect(stats.mass).toBe(3_750_000);
+    expect(stats.mass).toBe(1_750_000);
     expect(stats.sigRadius).toBe(300);
   });
 

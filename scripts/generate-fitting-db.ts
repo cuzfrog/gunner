@@ -91,7 +91,6 @@ function buildPropulsionStats(attrs: Record<string, number | undefined>, name: s
   speedBonus: number;
   massAddition: number;
   sigBloom: number;
-  activeMassMultiplier: number;
 } {
   const massAddition = attrs.massAddition ?? 0;
   const speedFactor = attrs.speedFactor ?? 0;
@@ -105,7 +104,6 @@ function buildPropulsionStats(attrs: Record<string, number | undefined>, name: s
     speedBonus: speedFactor / 100,
     massAddition,
     sigBloom,
-    activeMassMultiplier: kind === "microwarpdrive" ? 5 : 1,
   };
 }
 
@@ -173,7 +171,6 @@ interface FittingModuleStats {
     readonly speedBonus: number;
     readonly massAddition: number;
     readonly sigBloom: number;
-    readonly activeMassMultiplier: number;
   };
 }
 
@@ -246,7 +243,6 @@ async function main() {
   readonly speedBonus: number;
   readonly massAddition: number;
   readonly sigBloom: number;
-  readonly activeMassMultiplier: number;
 }
 
 export interface FittingModuleStats {
