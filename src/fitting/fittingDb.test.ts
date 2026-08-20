@@ -15,6 +15,7 @@ describe("fittingDb", () => {
     expect(ab!.thrust).toBe(1_500_000);
     expect(ab!.massAddition).toBe(500_000);
     expect(ab!.sigBloom).toBe(0);
+    expect(ab!.activeMassMultiplier).toBe(1);
 
     const mwd = FITTING_MODULES["5MN Microwarpdrive I"]?.propulsion;
     expect(mwd).toBeDefined();
@@ -24,6 +25,7 @@ describe("fittingDb", () => {
     expect(mwd!.thrust).toBe(1_500_000);
     expect(mwd!.massAddition).toBe(500_000);
     expect(mwd!.sigBloom).toBe(5);
+    expect(mwd!.activeMassMultiplier).toBe(5);
   });
 
   test("includes 100MN afterburner for the Harbinger sample", () => {

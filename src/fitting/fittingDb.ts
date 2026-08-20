@@ -53,7 +53,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5,
       "massAddition": 500000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "1MN Afterburner II": {
@@ -86,7 +86,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 500000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "'Basic' Reinforced Bulkheads": {
@@ -177,7 +177,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 50000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "100MN Monopropellant Enduring Afterburner": {
@@ -199,7 +199,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "5MN Y-T8 Compact Microwarpdrive": {
@@ -210,7 +210,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50MN Cold-Gas Enduring Microwarpdrive": {
@@ -221,7 +221,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 5000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "1MN Y-S8 Compact Afterburner": {
@@ -328,7 +328,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5,
       "massAddition": 5000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Microwarpdrive I": {
@@ -339,7 +339,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5,
       "massAddition": 50000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "10MN Afterburner I": {
@@ -394,7 +394,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 5000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Microwarpdrive II": {
@@ -405,7 +405,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 50000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Domination 100MN Afterburner": {
@@ -482,7 +482,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 50000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Shadow Serpentis 500MN Microwarpdrive": {
@@ -493,7 +493,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 50000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Domination 50MN Microwarpdrive": {
@@ -504,7 +504,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 5000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Shadow Serpentis 50MN Microwarpdrive": {
@@ -515,7 +515,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 5000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Domination 5MN Microwarpdrive": {
@@ -526,7 +526,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Shadow Serpentis 5MN Microwarpdrive": {
@@ -537,7 +537,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Domination Nanofiber Structure": {
@@ -597,7 +597,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 50000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Hakim's Modified 500MN Microwarpdrive": {
@@ -608,7 +608,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 50000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gotan's Modified 500MN Microwarpdrive": {
@@ -619,7 +619,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 50000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Tobias' Modified 500MN Microwarpdrive": {
@@ -630,7 +630,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 50000000,
       "sigBloom": 3.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Brynn's Modified 100MN Afterburner": {
@@ -685,7 +685,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 50000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Tuvan's Modified 500MN Microwarpdrive": {
@@ -696,7 +696,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 50000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Setele's Modified 500MN Microwarpdrive": {
@@ -707,7 +707,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 50000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Cormack's Modified 500MN Microwarpdrive": {
@@ -718,7 +718,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 50000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Republic Fleet 5MN Microwarpdrive": {
@@ -729,7 +729,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Republic Fleet 1MN Afterburner": {
@@ -751,7 +751,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 5000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Republic Fleet 10MN Afterburner": {
@@ -773,7 +773,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 50000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Republic Fleet 100MN Afterburner": {
@@ -795,7 +795,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Federation Navy 1MN Afterburner": {
@@ -817,7 +817,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 5000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Federation Navy 10MN Afterburner": {
@@ -839,7 +839,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 50000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Federation Navy 100MN Afterburner": {
@@ -1086,7 +1086,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 500000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Corelum C-Type 50MN Microwarpdrive": {
@@ -1097,7 +1097,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 5000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Core C-Type 500MN Microwarpdrive": {
@@ -1108,7 +1108,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 50000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Coreli B-Type 5MN Microwarpdrive": {
@@ -1119,7 +1119,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 500000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Corelum B-Type 50MN Microwarpdrive": {
@@ -1130,7 +1130,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 5000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Core B-Type 500MN Microwarpdrive": {
@@ -1141,7 +1141,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 50000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Coreli A-Type 5MN Microwarpdrive": {
@@ -1152,7 +1152,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 500000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Corelum A-Type 50MN Microwarpdrive": {
@@ -1163,7 +1163,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 5000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Core A-Type 500MN Microwarpdrive": {
@@ -1174,7 +1174,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 50000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Core X-Type 500MN Microwarpdrive": {
@@ -1185,7 +1185,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 50000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistii C-Type 5MN Microwarpdrive": {
@@ -1196,7 +1196,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 500000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistum C-Type 50MN Microwarpdrive": {
@@ -1207,7 +1207,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 5000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gist C-Type 500MN Microwarpdrive": {
@@ -1218,7 +1218,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.14,
       "massAddition": 50000000,
       "sigBloom": 4.3,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistii B-Type 5MN Microwarpdrive": {
@@ -1229,7 +1229,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 500000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistum B-Type 50MN Microwarpdrive": {
@@ -1240,7 +1240,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 5000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gist B-Type 500MN Microwarpdrive": {
@@ -1251,7 +1251,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.16,
       "massAddition": 50000000,
       "sigBloom": 4.1,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistii A-Type 5MN Microwarpdrive": {
@@ -1262,7 +1262,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 500000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gistum A-Type 50MN Microwarpdrive": {
@@ -1273,7 +1273,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 5000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gist A-Type 500MN Microwarpdrive": {
@@ -1284,7 +1284,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.18,
       "massAddition": 50000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gist X-Type 500MN Microwarpdrive": {
@@ -1295,7 +1295,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 50000000,
       "sigBloom": 3.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "100mm Steel Plates II": {
@@ -1366,7 +1366,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 500000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50MN Digital Booster Microwarpdrive": {
@@ -1377,7 +1377,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 5000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Digital Booster Microwarpdrive": {
@@ -1388,7 +1388,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 50000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Synthetic Hull Conversion Reinforced Bulkheads": {
@@ -3321,7 +3321,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50MN Y-T8 Compact Microwarpdrive": {
@@ -3332,7 +3332,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 5000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50MN Quad LiF Restrained Microwarpdrive": {
@@ -3343,7 +3343,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 5000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Y-T8 Compact Microwarpdrive": {
@@ -3354,7 +3354,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 50000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Quad LiF Restrained Microwarpdrive": {
@@ -3365,7 +3365,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 50000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "25000mm Steel Plates I": {
@@ -3466,7 +3466,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5,
       "massAddition": 500000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50000MN Y-T8 Compact Microwarpdrive": {
@@ -3477,7 +3477,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50000MN Quad LiF Restrained Microwarpdrive": {
@@ -3488,7 +3488,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50000MN Cold-Gas Enduring Microwarpdrive": {
@@ -3499,7 +3499,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.05,
       "massAddition": 500000000,
       "sigBloom": 5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "50000MN Microwarpdrive II": {
@@ -3510,7 +3510,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 500000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Domination 50000MN Microwarpdrive": {
@@ -3521,7 +3521,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000000,
       "sigBloom": 4.5,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Shadow Serpentis 50000MN Microwarpdrive": {
@@ -3532,7 +3532,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.12,
       "massAddition": 500000000,
       "sigBloom": 4.75,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "CONCORD 25000mm Steel Plates": {
@@ -3576,7 +3576,7 @@ export const FITTING_MODULES = {
       "speedBonus": 0,
       "massAddition": 0,
       "sigBloom": 0,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "5MN Abyssal Microwarpdrive": {
@@ -3587,7 +3587,7 @@ export const FITTING_MODULES = {
       "speedBonus": 0,
       "massAddition": 0,
       "sigBloom": 0,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "500MN Abyssal Microwarpdrive": {
@@ -3598,7 +3598,7 @@ export const FITTING_MODULES = {
       "speedBonus": 0,
       "massAddition": 0,
       "sigBloom": 0,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "1MN Abyssal Afterburner": {
@@ -3665,7 +3665,7 @@ export const FITTING_MODULES = {
       "speedBonus": 0,
       "massAddition": 0,
       "sigBloom": 0,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Asine's Modified 5MN Microwarpdrive": {
@@ -3676,7 +3676,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 500000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Ramaku's Modified 5MN Microwarpdrive": {
@@ -3687,7 +3687,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 500000,
       "sigBloom": 3.7,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Sila's Modified 50MN Microwarpdrive": {
@@ -3698,7 +3698,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 5000000,
       "sigBloom": 3.7,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Gara's Modified 50MN Microwarpdrive": {
@@ -3709,7 +3709,7 @@ export const FITTING_MODULES = {
       "speedBonus": 5.2,
       "massAddition": 5000000,
       "sigBloom": 3.9,
-      "activeMassMultiplier": 1
+      "activeMassMultiplier": 5
     }
   },
   "Asine's Modified 1MN Afterburner": {

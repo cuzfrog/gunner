@@ -97,14 +97,15 @@ function buildPropulsionStats(attrs: Record<string, number | undefined>, name: s
   const speedFactor = attrs.speedFactor ?? 0;
   const speedBoostFactor = attrs.speedBoostFactor ?? 0;
   const sigBloom = (attrs.signatureRadiusBonus ?? 0) / 100;
+  const kind = kindFromPropulsionName(name);
   return {
-    kind: kindFromPropulsionName(name),
+    kind,
     sizeTier: sizeTierFromPropulsionName(name),
     thrust: speedBoostFactor,
     speedBonus: speedFactor / 100,
     massAddition,
     sigBloom,
-    activeMassMultiplier: 1,
+    activeMassMultiplier: kind === "microwarpdrive" ? 5 : 1,
   };
 }
 
