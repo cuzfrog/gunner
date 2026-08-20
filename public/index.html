@@ -10,13 +10,21 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JFVYDV0Z8P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JFVYDV0Z8P');
+</script>
 <body>
   <div class="container">
     <header class="header">
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.1.0</span>
+        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.1.1</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -36,6 +44,7 @@
       <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
       <button type="button" id="share-link" data-i18n="button.copyLink">Copy link</button>
       <span id="share-status" class="share-status"></span>
+      <span class="profile-tip" data-i18n="profile.tip">If you like this tool, may consider tip me in the game, thank you!</span>
     </section>
 
     <section class="results">
@@ -212,7 +221,7 @@
 
         <div class="controls">
           <div class="playback-controls">
-            <button id="play" class="primary">Play</button>
+            <button id="play" class="primary">Start</button>
             <button id="reset" data-i18n="button.reset">Reset</button>
           </div>
 
@@ -247,13 +256,22 @@
           <span class="hull-hint" id="target-hull-hint"></span>
         </label>
         <div class="field-row">
-          <label>
-            <span data-i18n="label.initialDistance">Initial distance</span>
+          <div class="field-group">
+            <span class="field-label-row">
+              <label for="initial-distance">
+                <span data-i18n="label.initialDistance">Initial distance</span>
+              </label>
+              <button type="button" class="info-hint"
+                      data-i18n-title="hint.initialDistance"
+                      data-i18n-aria-label="hint.initialDistance"
+                      title="Changes apply on reset."
+                      aria-label="About initial distance">?</button>
+            </span>
             <span class="input-with-unit">
               <input type="number" id="initial-distance" value="5000" step="any" min="1">
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
-          </label>
+          </div>
           <label>
             <span data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
@@ -325,7 +343,7 @@
     <footer class="footer">
       <div class="footer-about">
         <h3 data-i18n="footer.about.heading">About Gunner</h3>
-        <p data-i18n="footer.about.text">Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.</p>
+        <p data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
       </div>
 
       <div class="footer-mechanism" data-accent="teal">
@@ -356,10 +374,17 @@
       </div>
 
       <div class="footer-author">
-        <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="36" height="36">
+        <div class="author-emblems">
+          <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="36" height="36">
+          <img src="corporation-emblem.png" alt="Ascendance Rising" class="corporation-emblem" width="36" height="36">
+        </div>
         <span class="footer-author-line">
           <span class="author-label" data-i18n="label.author">Author:</span>
           <span class="author-name">Keos Cuzi</span>
+        </span>
+        <span class="footer-author-line">
+          <span class="corp-label" data-i18n="label.corp">Corp:</span>
+          <span class="corp-name">Ascendance Rising</span>
         </span>
       </div>
     </footer>

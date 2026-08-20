@@ -102,11 +102,14 @@ describe("SimulationImpl", () => {
     expect(len(before.attacker.velocity)).toBeGreaterThan(0);
     sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "keepAtRange"), initialDistance: 3000 });
     const after = sim.snapshot();
+    const beforeDistance = dist(before.attacker.position, before.target.position);
     expect(after.time).toBe(before.time);
     expect(after.attacker.mode).toBe("keepAtRange");
     expect(after.attacker.position).toEqual(before.attacker.position);
     expect(after.attacker.velocity).toEqual(before.attacker.velocity);
-    expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(3000, 6);
+    expect(after.target.position).toEqual(before.target.position);
+    expect(after.target.velocity).toEqual(before.target.velocity);
+    expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(beforeDistance, 6);
   });
 
   test("computes attacker command before target command and passes the current time", () => {

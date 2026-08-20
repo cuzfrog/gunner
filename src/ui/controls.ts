@@ -453,7 +453,7 @@ export class DomControls implements Controls {
     this.setPlaying(this.playing);
     this.persist();
     this.updateSaveButtonState();
-    this.callbacks?.onConfigChange();
+    this.callbacks?.onDisplayChange();
   }
 
   private updateLanguageToggle(): void {
@@ -516,7 +516,7 @@ export class DomControls implements Controls {
     this.selectedProfile = this.getSettings();
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
-    this.callbacks?.onConfigChange();
+    this.callbacks?.onReset();
   }
 
   private deleteProfile(): void {
@@ -584,11 +584,18 @@ export class DomControls implements Controls {
 
     this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes as HTMLSelectElement, ["S", "M", "L", "XL"]);
 
-    const inputs: (keyof typeof this.els)[] = [
-      "tracking",
-      "sigRes",
-      "optimal",
-      "falloff",
+    const displayInputs: (keyof typeof this.els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
+    for (const id of displayInputs) {
+      this.els[id].addEventListener("input", () => {
+        if (id === "tracking") this.updateTrackingFromInput();
+        if (id === "sigRes") this.updateTrackingForSigResolution();
+        this.updateSaveButtonState();
+        this.persist();
+        this.callbacks?.onDisplayChange();
+      });
+    }
+
+    const shipInputs: (keyof typeof this.els)[] = [
       "attackerSpeed",
       "attackerMass",
       "attackerInertia",
@@ -600,12 +607,9 @@ export class DomControls implements Controls {
       "targetInertia",
       "targetMode",
       "targetRange",
-      "targetSig",
     ];
-    for (const id of inputs) {
+    for (const id of shipInputs) {
       this.els[id].addEventListener("input", () => {
-        if (id === "tracking") this.updateTrackingFromInput();
-        if (id === "sigRes") this.updateTrackingForSigResolution();
         if (id === "attackerMass") this.updateSpeedFromMass("attacker");
         if (id === "targetMass") this.updateSpeedFromMass("target");
         this.updateSaveButtonState();

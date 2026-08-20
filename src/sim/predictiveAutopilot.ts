@@ -20,15 +20,15 @@ const REFINEMENT_MIN_STEP = 1; // m/s
 const HORIZON_EPSILON = 1e-9;
 
 export class PredictiveAutopilot implements Autopilot {
-  private readonly targetSteering: Autopilot;
+  private readonly reactiveSteering: Autopilot;
   private readonly kinematics: Kinematics;
   private heldCommand: Vec2 | null = null;
   private lastPlanTime = Number.NEGATIVE_INFINITY;
   private lastShipConfig: ShipConfig | null = null;
   private lastOtherConfig: ShipConfig | null = null;
 
-  constructor({ targetSteering, kinematics }: { targetSteering: Autopilot; kinematics: Kinematics }) {
-    this.targetSteering = targetSteering;
+  constructor({ reactiveSteering, kinematics }: { reactiveSteering: Autopilot; kinematics: Kinematics }) {
+    this.reactiveSteering = reactiveSteering;
     this.kinematics = kinematics;
   }
 
@@ -68,14 +68,19 @@ export class PredictiveAutopilot implements Autopilot {
     let weight = 1;
     while (elapsed < horizon - HORIZON_EPSILON) {
       const dt = Math.min(elapsed < FINE_WINDOW ? FINE_STEP : COARSE_STEP, horizon - elapsed);
-      const targetCommand = this.targetSteering.computeVelocity(target, attacker, time + elapsed);
-      attacker = move(attacker, command, dt);
+      const targetCommand = this.reactiveSteering.computeVelocity(target, attacker, time + elapsed);
+      const attackerCommand = elapsed < REPLAN_INTERVAL
+        ? command
+        : this.reactiveSteering.computeVelocity(attacker, target, time + elapsed);
+      attacker = move(attacker, attackerCommand, dt);
       target = move(target, targetCommand, dt);
       elapsed += dt;
       weight *= DISCOUNT_PER_SECOND ** dt;
       const frame = this.kinematics.computeEngagement(attacker, target, time + elapsed);
       const rangeDeviation = (frame.distance - ship.desiredRange) / Math.max(ship.desiredRange, 1);
-      cost += weight * (frame.angularVelocity * frame.angularVelocity + (REFERENCE_RANGE_WEIGHT / ship.aggressivity) * rangeDeviation * rangeDeviation) * dt;
+      const rangeCost = frame.angularVelocity * frame.angularVelocity +
+        (REFERENCE_RANGE_WEIGHT / ship.aggressivity) * rangeDeviation * rangeDeviation;
+      cost += weight * rangeCost * dt;
     }
     return cost;
   }

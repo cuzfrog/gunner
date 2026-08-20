@@ -66,6 +66,7 @@ describe("I18nImpl", () => {
   test("translates known keys", () => {
     const i18n = new I18nImpl();
     expect(i18n.t("label.trackingSpeed")).toBe("Tracking speed");
+    expect(i18n.t("button.play")).toBe("Start");
   });
 
   test("returns the key when it is not in the dictionary", () => {
@@ -103,6 +104,15 @@ describe("I18nImpl", () => {
     i18n.setLanguage("ja" as Language);
     expect(i18n.t("label.maneuverAggressivity")).toBe("機動の積極さ");
     expect(i18n.t("hint.maneuverAggressivity")).toContain("機動");
+  });
+
+  test("translates the initial distance hint in every language", () => {
+    const i18n = new I18nImpl();
+    expect(i18n.t("hint.initialDistance")).toContain("reset");
+    i18n.setLanguage("zh" as Language);
+    expect(i18n.t("hint.initialDistance")).toContain("重置");
+    i18n.setLanguage("ja" as Language);
+    expect(i18n.t("hint.initialDistance")).toContain("リセット");
   });
 
   test("translateDocument sets text, placeholder, aria-label and title from data attributes", () => {

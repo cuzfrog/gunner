@@ -144,6 +144,11 @@ export const I18N_DICTIONARY = {
     zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；较低值更严格保持距离。",
     ja: "設定距離への接近時の反応的ブレーキを制御します。高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。低い値ほど距離を厳密に保ちます。",
   },
+  "hint.initialDistance": {
+    en: "Changes apply on reset.",
+    zh: "更改在重置时生效。",
+    ja: "変更はリセット時に適用されます。",
+  },
   "label.gridBrightness": {
     en: "Grid brightness",
     zh: "网格亮度",
@@ -180,9 +185,9 @@ export const I18N_DICTIONARY = {
     ja: "速度",
   },
   "button.play": {
-    en: "Play",
-    zh: "播放",
-    ja: "再生",
+    en: "Start",
+    zh: "开始",
+    ja: "開始",
   },
   "button.pause": {
     en: "Pause",
@@ -219,10 +224,20 @@ export const I18N_DICTIONARY = {
     zh: "作者：",
     ja: "作者：",
   },
+  "label.corp": {
+    en: "Corp:",
+    zh: "公司：",
+    ja: "コーポ：",
+  },
   "select.profile": {
     en: "Select profile...",
     zh: "选择配置...",
     ja: "プロファイルを選択...",
+  },
+  "profile.tip": {
+    en: "If you like this tool, may consider tip me in the game, thank you!",
+    zh: "如果喜欢这个工具，可以在游戏中打赏我，谢谢！",
+    ja: "このツールが気に入ったら、ゲーム内でチップをくれると嬉しいです、ありがとう！",
   },
   "status.copied": {
     en: "Copied",
@@ -320,9 +335,9 @@ export const I18N_DICTIONARY = {
     ja: "Gunner について",
   },
   "footer.about.text": {
-    en: "Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.",
-    zh: "Gunner 是一个 EVE Online 2D 战术模拟器，模拟两艘舰船的运动，并计算攻击方炮塔对目标的命中表现。",
-    ja: "Gunner は EVE Online の 2D 戦術シミュレーターです。2 隻の艦船の動きを再現し、攻撃側のタレットの命中性能を計算します。",
+    en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.",
+    zh: "我写这个工具是为了帮助自己理解舰船战斗的动态，并在战斗中建立信心。和你一样，我热爱这款游戏。",
+    ja: "このツールは、艦船戦闘のダイナミクスを理解し、戦闘での自信を高めるために作りました。あなたと同じく、私もこのゲームが大好きです。",
   },
   "footer.mech.kinematics.heading": {
     en: "Kinematics",

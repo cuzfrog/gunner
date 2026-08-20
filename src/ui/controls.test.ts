@@ -1733,6 +1733,122 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skill-trigger").getAttribute("aria-expanded")).toBe("false");
     expect(getFake(globalThis.document, "attacker-skill-trigger").focus).toHaveBeenCalled();
   });
+
+  describe("callback routing", () => {
+    const brawler: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 1000,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+
+    function callbackMocks() {
+      return {
+        onReset: vi.fn(),
+        onConfigChange: vi.fn(),
+        onDisplayChange: vi.fn(),
+        onPlayPause: vi.fn(),
+        onSpeedChange: vi.fn(),
+      };
+    }
+
+    test("turret inputs fire onDisplayChange and not onConfigChange", () => {
+      const { controls } = buildControls(globalThis.document);
+      const callbacks = callbackMocks();
+      controls.setCallbacks(callbacks);
+
+      getFake(globalThis.document, "tracking").value = "0.5";
+      getFake(globalThis.document, "tracking").trigger("input");
+      findVisibleButton(globalThis.document, "sig-res-options", "M").trigger("click");
+      getFake(globalThis.document, "optimal").value = "6000";
+      getFake(globalThis.document, "optimal").trigger("input");
+      getFake(globalThis.document, "falloff").value = "6000";
+      getFake(globalThis.document, "falloff").trigger("input");
+
+      expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(4);
+      expect(callbacks.onConfigChange).not.toHaveBeenCalled();
+      expect(callbacks.onReset).not.toHaveBeenCalled();
+    });
+
+    test("target signature input fires onDisplayChange and not onConfigChange", () => {
+      const { controls } = buildControls(globalThis.document);
+      const callbacks = callbackMocks();
+      controls.setCallbacks(callbacks);
+
+      getFake(globalThis.document, "target-sig").value = "50";
+      getFake(globalThis.document, "target-sig").trigger("input");
+
+      expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(1);
+      expect(callbacks.onConfigChange).not.toHaveBeenCalled();
+      expect(callbacks.onReset).not.toHaveBeenCalled();
+    });
+
+    test("ship and scenario inputs fire onConfigChange and not onDisplayChange", () => {
+      const { controls } = buildControls(globalThis.document);
+      const callbacks = callbackMocks();
+      controls.setCallbacks(callbacks);
+
+      getFake(globalThis.document, "attacker-speed").value = "1500";
+      getFake(globalThis.document, "attacker-speed").trigger("input");
+      getFake(globalThis.document, "attacker-mass").value = "2000000";
+      getFake(globalThis.document, "attacker-mass").trigger("input");
+      getFake(globalThis.document, "attacker-mode").value = "orbit";
+      getFake(globalThis.document, "attacker-mode").trigger("input");
+      getFake(globalThis.document, "initial-distance").value = "8000";
+      getFake(globalThis.document, "initial-distance").trigger("input");
+
+      expect(callbacks.onConfigChange).toHaveBeenCalledTimes(4);
+      expect(callbacks.onDisplayChange).not.toHaveBeenCalled();
+      expect(callbacks.onReset).not.toHaveBeenCalled();
+    });
+
+    test("language toggle fires onDisplayChange and not onConfigChange", () => {
+      const { controls } = buildControls(globalThis.document);
+      const callbacks = callbackMocks();
+      controls.setCallbacks(callbacks);
+
+      getFake(globalThis.document, "lang-zh").trigger("click");
+
+      expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(1);
+      expect(callbacks.onConfigChange).not.toHaveBeenCalled();
+      expect(callbacks.onReset).not.toHaveBeenCalled();
+    });
+
+    test("profile load fires onReset and not onConfigChange", () => {
+      const { controls, settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+      settingsStore.loadProfile.mockReturnValue(brawler);
+      const callbacks = callbackMocks();
+      controls.setCallbacks(callbacks);
+
+      const select = getFake(globalThis.document, "profile-select");
+      select.value = "brawler";
+      select.trigger("change");
+
+      expect(callbacks.onReset).toHaveBeenCalledTimes(1);
+      expect(callbacks.onConfigChange).not.toHaveBeenCalled();
+      expect(callbacks.onDisplayChange).not.toHaveBeenCalled();
+    });
+  });
 });
 
 function findVisibleButton(document: Document, groupId: string, value: string): FakeElement {
