@@ -1,8 +1,8 @@
 import { ShipsImpl } from "./ships";
 import { fittingOptions } from "./fitting";
-import { effectiveStats } from "./effectiveStats";
+import { effectiveStats, fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { SHIP_PROFILES } from "./profiles";
-import type { PropulsionId, ShipProfile } from "./types";
+import type { FittedHull, PropulsionId, ShipProfile } from "./types";
 
 const rifter = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
 const ab1 = fittingOptions(rifter).find((m) => m.id === "ab-1mn")!;
@@ -76,5 +76,19 @@ describe("ShipsImpl", () => {
     const withModule = ships.effectiveStats(rifter, mwd5, { skillLevel: 5, overloaded: true });
     const speed = ships.maxSpeedForMass(rifter, withModule.mass, mwd5, { skillLevel: 5, overloaded: true });
     expect(speed).toBeCloseTo(withModule.maxSpeed, 6);
+  });
+
+  test("fittedStats delegates to the exact core and includes multipliers", () => {
+    const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigRadiusAdd: 15 };
+    const expected = fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false });
+    expect(ships.fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false })).toEqual(expected);
+  });
+
+  test("maxSpeedForFittedMass matches fittedStats at the active mass", () => {
+    const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigRadiusAdd: 0 };
+    const stats = ships.fittedStats(rifter, fitted, mwd5, { skillLevel: 0, overloaded: false });
+    const speed = ships.maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false });
+    expect(speed).toBeCloseTo(stats.maxSpeed, 6);
+    expect(speed).toBeCloseTo(maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false }), 6);
   });
 });

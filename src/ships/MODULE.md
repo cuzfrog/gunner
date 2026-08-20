@@ -1,25 +1,25 @@
 ---
 no-new-exports:
   - effectiveStats.test.ts
-  - effectiveStats.ts
+  # - effectiveStats.ts  # shared stat engine gains fittedStats/maxSpeedForFittedMass for the fitting import feature
   - fitting.test.ts
   - fitting.ts
   - fittedMass.test.ts
   - fittedMass.ts
   - faction-i18n.ts
   - hull-types-i18n.ts
-  - index.ts  # Controlled public boundary: re-exports the Ships abstraction, types, and module registration only
-  - module.ts
+  # - index.ts  # controlled public boundary re-exports new cross-boundary FittedHull/PropulsionStats types
+  # - module.ts
   - profiles.ts
   - propulsion.test.ts
   - propulsion.ts
   - ship-names-i18n.ts
   - shipNames.ts
   - ships.test.ts
-  - ships.ts
+  # - ships.ts  # Ships interface gains fittedStats/maxSpeedForFittedMass
   - tiers.test.ts
   - tiers.ts
-  - types.ts
+  # - types.ts  # gains FittedHull and PropulsionStats cross-boundary types
 ---
 
 

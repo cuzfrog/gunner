@@ -104,6 +104,8 @@ function makeShips(): Ships {
     fittingOption: vi.fn(),
     effectiveStats: vi.fn(),
     maxSpeedForMass: vi.fn(),
+    fittedStats: vi.fn(),
+    maxSpeedForFittedMass: vi.fn(),
   });
 }
 

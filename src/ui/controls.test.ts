@@ -1,5 +1,5 @@
 import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import type { ClipboardProvider, LocationProvider, ProfileSettings, SettingsStore, UserSettings } from "./settings";
@@ -111,7 +111,11 @@ const RIFTER_MWD_SKILL5: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxS
 const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 2361, sigRadius: 210 };
 const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
 
-function mockStatsFor(profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }): ShipStats {
+interface MockedPropulsion extends PropulsionStats {
+  readonly id?: PropulsionId;
+}
+
+function mockStatsFor(profile: ShipProfile, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }): ShipStats {
   if (profile.name === "Rifter") {
     if (!module) return conditions?.skillLevel === 0 ? RIFTER_BASE_SKILL0 : RIFTER_BASE_SKILL5;
     if (module.id === "ab-1mn") return conditions?.skillLevel === 0 ? RIFTER_AB1_SKILL0 : RIFTER_AB1_SKILL5;
@@ -173,8 +177,10 @@ function createMockShips() {
     }),
     fittingOptions: vi.fn((profile: ShipProfile) => (profile.name === "Rifter" ? RIFTER_FITTING_OPTIONS : [AB1MN, MWD5MN])),
     fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
-    effectiveStats: vi.fn((profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
-    maxSpeedForMass: vi.fn((profile: ShipProfile, mass: number, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+    effectiveStats: vi.fn((profile: ShipProfile, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
+    maxSpeedForMass: vi.fn((profile: ShipProfile, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+    fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
+    maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
   });
 
   mockShips.fittingOption.mockImplementation((profile: ShipProfile, id: PropulsionId) => {

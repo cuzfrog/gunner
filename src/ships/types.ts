@@ -29,14 +29,24 @@ export interface StatConditions {
   readonly overloaded: boolean;
 }
 
-export interface PropulsionModule {
+export interface PropulsionStats {
+  readonly thrust: number;
+  readonly speedBonus: number;
+  readonly massAddition: number;
+  readonly sigBloom: number;
+  readonly activeMassMultiplier: number;
+}
+
+export interface PropulsionModule extends PropulsionStats {
   readonly id: PropulsionId;
   readonly kind: PropulsionKind;
   readonly sizeTier: HullTier;
   readonly label: string;
-  readonly thrust: number;
-  readonly massAddition: number;
-  readonly speedBonus: number;
-  readonly sigBloom: number;
-  readonly activeMassMultiplier: number;
+}
+
+export interface FittedHull {
+  readonly mass: number;
+  readonly speedMultiplier: number;
+  readonly inertiaMultiplier: number;
+  readonly sigRadiusAdd: number;
 }
