@@ -81,6 +81,7 @@ function fakeLocation(href: string): LocationProvider {
 function fakeClipboard(): ClipboardProvider {
   let lastText = "";
   return {
+    readText: async () => lastText,
     writeText: async (text) => {
       lastText = text;
     },

@@ -252,6 +252,52 @@ select:disabled {
   display: none;
 }
 
+.hull-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.import-fitting-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  margin: 0;
+  border-radius: 2px;
+  line-height: 0;
+}
+
+.import-fitting-button:hover {
+  color: var(--accent-teal);
+}
+
+.import-fitting-button:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+.import-status {
+  display: block;
+  margin-top: 3px;
+  min-height: 12px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.import-status.error {
+  color: var(--danger-red);
+}
+
+.import-status:empty {
+  display: none;
+}
+
 .canvas-section {
   display: flex;
   flex-direction: column;

@@ -1,3 +1,4 @@
+import type { FittingImport, ImportedFitting } from "../fitting";
 import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
@@ -110,6 +111,14 @@ const RIFTER_MWD_SKILL0: ShipStats = { mass: 3_530_000, inertiaModifier: 3, maxS
 const RIFTER_MWD_SKILL5: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 1500, sigRadius: 210 };
 const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 2361, sigRadius: 210 };
 const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
+
+const IMPORTED_RIFTER: ImportedFitting = {
+  profile: RIFTER,
+  fittingName: "Brawler",
+  fitted: { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigRadiusAdd: 0 },
+  propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
+  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
+};
 
 interface MockedPropulsion extends PropulsionStats {
   readonly id?: PropulsionId;
@@ -366,10 +375,11 @@ function buildControls(
     clearSelectedProfile: vi.fn(),
   });
   const ships = createMockShips();
-  const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
+  const fittingImport = vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+  const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, clipboard, location });
-  return { hitChance, i18n, settingsStore, ships, clipboard, location, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location, controls };
 }
 
 describe("DomControls", () => {
@@ -2324,6 +2334,59 @@ describe("DomControls", () => {
 
       expect(hint.textContent).toContain("フリゲート");
       expect(hint.textContent).toContain("ミンマター共和国");
+    });
+  });
+
+  describe("import fitting", () => {
+    async function flush(): Promise<void> {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    test("attacker import button populates hull, turret and stats from a fitting", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("3530000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("2361");
+      expect(getFake(globalThis.document, "attacker-inertia").value).toBe("2");
+      expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
+      expect(getFake(globalThis.document, "sigRes").value).toBe("S");
+      expect(getFake(globalThis.document, "optimal").value).toBe("600");
+      expect(getFake(globalThis.document, "falloff").value).toBe("3000");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("target import button shows invalid status when the fit cannot be parsed", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      getFake(globalThis.document, "target-import-fitting").trigger("click");
+      await flush();
+      const status = getFake(globalThis.document, "target-import-status");
+      expect(status.textContent).toBe("status.fittingInvalid");
+      expect(status.classList.toggle).toHaveBeenCalledWith("error", true);
+    });
+
+    test("clipboard denial shows the clipboard-denied status", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValueOnce(new Error("denied"));
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("status.clipboardDenied");
+    });
+
+    test("manual hull selection clears the fitted state", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull).toBeUndefined();
     });
   });
 });

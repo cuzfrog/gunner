@@ -19,7 +19,10 @@ function main(): void {
       },
       replace: (url: string) => window.history.replaceState(null, "", url),
     }),
-    clipboard: asValue(window.navigator.clipboard),
+    clipboard: asValue({
+      readText: () => window.navigator.clipboard.readText(),
+      writeText: (text: string) => window.navigator.clipboard.writeText(text),
+    }),
   });
   registerShipsModule(container);
   registerFittingModule(container);

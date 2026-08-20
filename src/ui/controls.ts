@@ -1,4 +1,4 @@
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships, SkillLevel } from "../ships";
+import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -10,8 +10,9 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
+import type { FittingImport, ImportedFitting } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -39,15 +40,19 @@ export class DomControls implements Controls {
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
   private readonly ships: Ships;
+  private readonly fittingImport: FittingImport;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private importStatusTimeout?: ReturnType<typeof setTimeout>;
   private openSkillSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
+  private attackerFittedHull?: FittedHullSummary;
+  private targetFittedHull?: FittedHullSummary;
   private selectedProfile: ProfileSettings | null = null;
 
   constructor({
@@ -55,6 +60,7 @@ export class DomControls implements Controls {
     i18n,
     settingsStore,
     ships,
+    fittingImport,
     clipboard,
     location,
   }: {
@@ -62,6 +68,7 @@ export class DomControls implements Controls {
     i18n: I18n;
     settingsStore: SettingsStore;
     ships: Ships;
+    fittingImport: FittingImport;
     clipboard: ClipboardProvider;
     location: LocationProvider;
   }) {
@@ -69,6 +76,7 @@ export class DomControls implements Controls {
     this.i18n = i18n;
     this.settingsStore = settingsStore;
     this.ships = ships;
+    this.fittingImport = fittingImport;
     this.clipboard = clipboard;
     this.location = location;
     this.trackingInput = new TrackingInput();
@@ -83,6 +91,8 @@ export class DomControls implements Controls {
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
       attackerHullHint: el("attacker-hull-hint"),
+      attackerImportFitting: el("attacker-import-fitting"),
+      attackerImportStatus: el("attacker-import-status"),
       attackerPropulsion: el("attacker-propulsion"),
       attackerPropulsionOptions: el("attacker-propulsion-options"),
       attackerSkills: el("attacker-skills"),
@@ -104,6 +114,8 @@ export class DomControls implements Controls {
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
+      targetImportFitting: el("target-import-fitting"),
+      targetImportStatus: el("target-import-status"),
       targetPropulsion: el("target-propulsion"),
       targetPropulsionOptions: el("target-propulsion-options"),
       targetSkills: el("target-skills"),
@@ -317,6 +329,7 @@ export class DomControls implements Controls {
       attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
       attackerPropulsion: this.propulsionSetting("attacker"),
+      attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
       targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
@@ -328,6 +341,7 @@ export class DomControls implements Controls {
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
       targetPropulsion: this.propulsionSetting("target"),
+      targetFittedHull: this.targetFittedHull,
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
@@ -375,6 +389,13 @@ export class DomControls implements Controls {
     this.setOverloadActive("target", settings.targetOverload ?? true);
     this.setOverloadDisabled("attacker");
     this.setOverloadDisabled("target");
+
+    if (settings.attackerFittedHull) {
+      this.applyImportedFitting("attacker", settings.attackerFittedHull);
+    }
+    if (settings.targetFittedHull) {
+      this.applyImportedFitting("target", settings.targetFittedHull);
+    }
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
@@ -547,6 +568,45 @@ export class DomControls implements Controls {
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
   }
 
+  private async importFitting(side: "attacker" | "target"): Promise<void> {
+    try {
+      const text = await this.clipboard.readText();
+      const conditions = this.skillConditions(side);
+      const imported = this.fittingImport.importFitting(text, conditions);
+      if (!imported) {
+        this.showImportStatus(side, "status.fittingInvalid", true);
+        return;
+      }
+      this.clearFittedHull(side);
+      this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
+      this.applyImportedFitting(side, this.fittedHullSummary(imported));
+      if (side === "attacker") this.applyImportedTurret(imported.turret);
+      this.persist();
+      this.updateSaveButtonState();
+      this.showImportStatus(side, "status.fittingImported", false);
+      this.callbacks?.onConfigChange();
+    } catch {
+      this.showImportStatus(side, "status.clipboardDenied", true);
+    }
+  }
+
+  private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
+    return {
+      fittingName: imported.fittingName,
+      propulsionId: imported.propulsion?.propulsionId,
+      fitted: imported.fitted,
+      propulsion: imported.propulsion,
+    };
+  }
+
+  private showImportStatus(side: "attacker" | "target", key: string, isError: boolean): void {
+    const status = this.els[`${side}ImportStatus`];
+    setText(status, this.i18n.t(key));
+    status.classList.toggle("error", isError);
+    if (this.importStatusTimeout) clearTimeout(this.importStatusTimeout);
+    this.importStatusTimeout = setTimeout(() => setText(status, ""), 2000);
+  }
+
   private async shareLink(): Promise<void> {
     const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), this.clipboard);
     setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
@@ -570,6 +630,9 @@ export class DomControls implements Controls {
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
     (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
+
+    (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
+    (this.els.targetImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("target"));
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
@@ -678,6 +741,7 @@ export class DomControls implements Controls {
   private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
+    this.clearFittedHull(side);
 
     if (resetInput) {
       (this.els[`${side}Hull`] as HTMLInputElement).value = "";
@@ -689,6 +753,11 @@ export class DomControls implements Controls {
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
+  }
+
+  private clearFittedHull(side: "attacker" | "target"): void {
+    if (side === "attacker") this.attackerFittedHull = undefined;
+    else this.targetFittedHull = undefined;
   }
 
   private loadHull(
@@ -745,12 +814,31 @@ export class DomControls implements Controls {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const isSameHull = currentProfile?.name === profile.name;
     const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
+    this.clearFittedHull(side);
     this.applyHull(side, profile, propulsionId, persist, !isSameHull);
   }
 
   private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
     return this.ships.parsePropulsionId(value);
+  }
+
+  private applyImportedFitting(side: "attacker" | "target", summary: FittedHullSummary): void {
+    if (side === "attacker") this.attackerFittedHull = summary;
+    else this.targetFittedHull = summary;
+    this.renderPropulsionOptions(side, summary.propulsionId ?? "");
+    this.updateFittedStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+  }
+
+  private applyImportedTurret(turret: ImportedFitting["turret"]): void {
+    if (!turret) return;
+    const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
+    this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
+    this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
+    (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
+    (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
+    this.displayTrackingInput();
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
@@ -761,8 +849,18 @@ export class DomControls implements Controls {
   }
 
   private onPropulsionChange(side: "attacker" | "target"): void {
-    if (side === "attacker" && !this.attackerProfile) return;
-    if (side === "target" && !this.targetProfile) return;
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return;
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    if (fitted) {
+      const propulsionId = this.currentPropulsionId(side);
+      const propulsion = propulsionId ? this.ships.fittingOption(profile, propulsionId) : undefined;
+      if (propulsion) {
+        const updated = { ...fitted, propulsionId, propulsion };
+        if (side === "attacker") this.attackerFittedHull = updated;
+        else this.targetFittedHull = updated;
+      }
+    }
     this.updatePropulsionStats(side, { updateInertia: false, updateMass: true, updateSig: true });
     this.setOverloadDisabled(side);
     this.updateSaveButtonState();
@@ -774,14 +872,15 @@ export class DomControls implements Controls {
     (this.els[`${side}Hull`] as HTMLInputElement).classList.toggle("hull-invalid", isInvalid);
   }
 
-  private updateHullHint(side: "attacker" | "target", module?: PropulsionModule): void {
+  private updateHullHint(side: "attacker" | "target", module?: PropulsionModule, fittingName?: string): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) {
       setText(this.els[`${side}HullHint`], "");
       return;
     }
     const view = this.ships.hullView(profile, this.i18n.current());
-    let text = `${view.hullType} · ${view.faction}`;
+    const prefix = fittingName ? `${fittingName} · ` : "";
+    let text = `${prefix}${view.hullType} · ${view.faction}`;
     if (side === "target" && module?.kind === "microwarpdrive") {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
@@ -849,6 +948,12 @@ export class DomControls implements Controls {
     side: "attacker" | "target",
     { updateInertia, updateMass, updateSig }: { updateInertia: boolean; updateMass: boolean; updateSig: boolean },
   ): void {
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    if (fitted) {
+      this.updateFittedStats(side, { updateInertia, updateMass, updateSig });
+      return;
+    }
+
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
 
@@ -874,13 +979,57 @@ export class DomControls implements Controls {
     this.updateAlignTime(side);
   }
 
+  private updateFittedStats(
+    side: "attacker" | "target",
+    { updateInertia, updateMass, updateSig }: { updateInertia: boolean; updateMass: boolean; updateSig: boolean },
+  ): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    if (!profile || !fitted) return;
+
+    const propulsion = this.currentFittedPropulsion(side, fitted);
+    const conditions = this.skillConditions(side);
+    const stats = this.ships.fittedStats(profile, fitted.fitted, propulsion, conditions);
+
+    if (updateMass) {
+      (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
+    }
+    if (updateInertia) {
+      (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+    }
+    if (side === "target" && updateSig) {
+      (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
+    }
+
+    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(stats.maxSpeed);
+    this.updateHullHint(side, this.currentFittedPropulsionModule(side, fitted), fitted.fittingName);
+    this.updateAlignTime(side);
+  }
+
+  private currentFittedPropulsion(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionStats | undefined {
+    if (!fitted.propulsionId || !fitted.propulsion) return undefined;
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return undefined;
+    const currentId = this.currentPropulsionId(side);
+    if (currentId === fitted.propulsionId) return fitted.propulsion;
+    return this.ships.fittingOption(profile, currentId ?? fitted.propulsionId);
+  }
+
+  private currentFittedPropulsionModule(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionModule | undefined {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile || !fitted.propulsionId) return undefined;
+    return this.ships.fittingOption(profile, this.currentPropulsionId(side) ?? fitted.propulsionId);
+  }
+
   private updateSpeedFromMass(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
-    const module = this.currentPropulsionModule(side);
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
     const conditions = this.skillConditions(side);
     const mass = num(this.els[`${side}Mass`]);
-    const speed = this.ships.maxSpeedForMass(profile, mass, module, conditions);
+    const speed = fitted
+      ? this.ships.maxSpeedForFittedMass(profile, fitted.fitted, mass, this.currentFittedPropulsion(side, fitted), conditions)
+      : this.ships.maxSpeedForMass(profile, mass, this.currentPropulsionModule(side), conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     this.updateAlignTime(side);
   }

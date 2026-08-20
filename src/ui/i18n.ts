@@ -259,6 +259,26 @@ export const I18N_DICTIONARY = {
     zh: "失败",
     ja: "失敗",
   },
+  "button.importFitting": {
+    en: "Import fitting",
+    zh: "导入装配",
+    ja: "フィッティングをインポート",
+  },
+  "status.fittingImported": {
+    en: "Fitting imported",
+    zh: "装配已导入",
+    ja: "フィッティングをインポートしました",
+  },
+  "status.fittingInvalid": {
+    en: "Invalid fitting",
+    zh: "装配无效",
+    ja: "無効なフィッティング",
+  },
+  "status.clipboardDenied": {
+    en: "Clipboard denied",
+    zh: "剪贴板访问被拒绝",
+    ja: "クリップボードへのアクセスが拒否されました",
+  },
   "result.distance": {
     en: "Distance",
     zh: "距离",

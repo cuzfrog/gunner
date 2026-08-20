@@ -1,9 +1,16 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
-import type { PropulsionId, Ships, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionStats, Ships, SkillLevel } from "../ships";
 import type { Language } from "./i18n";
 import type { TrackingUnit } from "./trackingInput";
 
 export const USER_SETTINGS_VERSION = 5 as const;
+
+export interface FittedHullSummary {
+  readonly fittingName: string;
+  readonly propulsionId?: PropulsionId;
+  readonly fitted: FittedHull;
+  readonly propulsion?: PropulsionStats;
+}
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -34,6 +41,8 @@ export interface UserSettings {
   attackerPropulsion?: PropulsionId;
   targetHull?: string;
   targetPropulsion?: PropulsionId;
+  attackerFittedHull?: FittedHullSummary;
+  targetFittedHull?: FittedHullSummary;
   simSpeed: number;
   language: Language;
 }
@@ -52,6 +61,7 @@ export interface LocationProvider {
 }
 
 export interface ClipboardProvider {
+  readText(): Promise<string>;
   writeText(text: string): Promise<void>;
 }
 
@@ -265,6 +275,8 @@ export class LocalSettingsStore implements SettingsStore {
       this.isOptionalPropulsionId(s.attackerPropulsion) &&
       isOptionalNonEmptyString(s.targetHull) &&
       this.isOptionalPropulsionId(s.targetPropulsion) &&
+      isOptionalFittedHullSummary(s.attackerFittedHull) &&
+      isOptionalFittedHullSummary(s.targetFittedHull) &&
       isPositive(s.simSpeed)
     );
   }
@@ -340,6 +352,26 @@ function isNonNegative(value: unknown): value is number {
 
 function isPositive(value: unknown): value is number {
   return isFiniteNumber(value) && value > 0;
+}
+
+function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return typeof s.fittingName === "string" && s.fittingName.length > 0 && isFittedHull(s.fitted) && isOptionalPropulsionStats(s.propulsion) && (s.propulsionId === undefined || typeof s.propulsionId === "string");
+}
+
+function isFittedHull(value: unknown): value is FittedHull {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return isNonNegative(s.mass) && isPositive(s.speedMultiplier) && isPositive(s.inertiaMultiplier) && isNonNegative(s.sigRadiusAdd);
+}
+
+function isOptionalPropulsionStats(value: unknown): value is PropulsionStats | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom) && isPositive(s.activeMassMultiplier);
 }
 
 function encodeBase64(value: unknown): string {

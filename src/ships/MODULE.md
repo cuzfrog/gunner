@@ -8,7 +8,7 @@ no-new-exports:
   - fittedMass.ts
   - faction-i18n.ts
   - hull-types-i18n.ts
-  # - index.ts  # controlled public boundary re-exports new cross-boundary FittedHull/PropulsionStats types
+  # - index.ts  # controlled public boundary re-exports new cross-boundary FittedHull/PropulsionStats/PropulsionKind types
   # - module.ts
   - profiles.ts
   - propulsion.test.ts
