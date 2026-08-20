@@ -120,6 +120,43 @@ const IMPORTED_RIFTER: ImportedFitting = {
   turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
 };
 
+const SAVED_FITTED_SETTINGS: UserSettings = {
+  version: USER_SETTINGS_VERSION,
+  tracking: 0.32,
+  trackingUnit: "rad",
+  sigRes: "S",
+  optimal: 5000,
+  falloff: 5000,
+  attackerSpeed: 0,
+  attackerMode: "keepAtRange",
+  attackerRange: 5000,
+  maneuverAggressivity: 1,
+  gridBrightness: 0.2,
+  attackerMass: 1_200_000,
+  attackerInertia: 3,
+  attackerSkillLevel: 5,
+  attackerOverload: true,
+  attackerHull: "Rifter",
+  attackerPropulsion: "mwd-5mn",
+  attackerFittedHull: {
+    fittingName: "Brawler",
+    propulsionId: "mwd-5mn",
+    fitted: IMPORTED_RIFTER.fitted,
+    propulsion: IMPORTED_RIFTER.propulsion,
+  },
+  initialDistance: 5000,
+  targetSpeed: 1000,
+  targetMode: "orbit",
+  targetRange: 5000,
+  targetMass: 10_000_000,
+  targetInertia: 0.45,
+  targetSkillLevel: 5,
+  targetOverload: true,
+  targetSig: 40,
+  simSpeed: 4,
+  language: "en",
+};
+
 interface MockedPropulsion extends PropulsionStats {
   readonly id?: PropulsionId;
 }
@@ -2387,6 +2424,28 @@ describe("DomControls", () => {
       hullInput.trigger("change");
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull).toBeUndefined();
+    });
+
+    test("loadSettings restores a fitted hull and recomputes stats", () => {
+      buildControls(globalThis.document, SAVED_FITTED_SETTINGS);
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("3530000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("2361");
+      expect(getFake(globalThis.document, "attacker-hull-hint").textContent).toContain("Brawler");
+    });
+
+    test("changing propulsion updates the fitted summary and recomputes stats", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const propulsion = getFake(globalThis.document, "attacker-propulsion");
+      propulsion.value = "ab-1mn";
+      propulsion.trigger("change");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("800");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull?.propulsionId).toBe("ab-1mn");
     });
   });
 });

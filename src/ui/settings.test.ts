@@ -1,6 +1,6 @@
-import type { PropulsionId, Ships } from "../ships";
+import type { FittedHull, PropulsionId, Ships } from "../ships";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
-import { LocalSettingsStore, USER_SETTINGS_VERSION, type ProfileSettings, type UserSettings } from "./settings";
+import { LocalSettingsStore, USER_SETTINGS_VERSION, type FittedHullSummary, type ProfileSettings, type UserSettings } from "./settings";
 
 const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
@@ -56,6 +56,23 @@ function profileFrom(settings: UserSettings): ProfileSettings {
 }
 
 const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
+
+const FITTED_HULL: FittedHull = { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigRadiusAdd: 0 };
+
+const FITTED_PROPULSION = {
+  thrust: 1_500_000,
+  speedBonus: 1.15,
+  massAddition: 500_000,
+  sigBloom: 0,
+  activeMassMultiplier: 1,
+};
+
+const FITTED_HULL_SUMMARY: FittedHullSummary = {
+  fittingName: "Brawler",
+  propulsionId: "ab-1mn",
+  fitted: FITTED_HULL,
+  propulsion: FITTED_PROPULSION,
+};
 
 function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
@@ -192,6 +209,18 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toBeNull();
   });
 
+  test("save and load round-trip v5 with fitted hull summaries", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    const withFitted: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFittedHull: FITTED_HULL_SUMMARY,
+      targetFittedHull: FITTED_HULL_SUMMARY,
+    };
+    store.save(withFitted);
+    expect(store.load()).toEqual(withFitted);
+  });
+
   test("save and load round-trip v5 with hull and propulsion selections", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
@@ -228,6 +257,13 @@ describe("LocalSettingsStore", () => {
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
+  });
+
+  test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const { language: _, ...profile } = { ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY };
+    store.saveProfile("brawler", profile);
+    expect(store.loadProfile("brawler")).toEqual(profile);
   });
 
   test("saveProfile and loadProfile round-trip", () => {
@@ -285,6 +321,15 @@ describe("LocalSettingsStore", () => {
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual(["sniper"]);
     expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_PROFILE });
+  });
+
+  test("encodeUrl and decodeUrl round-trip fitted hull summaries", () => {
+    const location = fakeLocation("http://localhost/index.html");
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
+    const withFitted: UserSettings = { ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY };
+    const url = store.encodeUrl(withFitted);
+    const decoded = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    expect(decoded).toEqual(withFitted);
   });
 
   test("encodeUrl and decodeUrl round-trip", () => {
