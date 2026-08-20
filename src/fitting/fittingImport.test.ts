@@ -84,18 +84,18 @@ describe("FittingImportImpl", () => {
   });
 
   test("returns undefined for non-EFT text", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     expect(importer.importFitting("not a fitting", conditions)).toBeUndefined();
   });
 
   test("returns undefined when hull is unknown", () => {
     ships.findHull.mockReturnValue(undefined);
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     expect(importer.importFitting("[Unknown Hull, fit]\n5MN Microwarpdrive I", conditions)).toBeUndefined();
   });
 
   test("resolves hull and fitting name", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting("[Harbinger, Brawler]\n5MN Microwarpdrive I", conditions);
     expect(result).toBeDefined();
     expect(result!.profile).toBe(profile);
@@ -103,7 +103,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("sums flat mass from plates and bulkheads", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Tank]\n1600mm Steel Plates II\nReinforced Bulkheads II`,
       conditions,
@@ -112,13 +112,13 @@ describe("FittingImportImpl", () => {
   });
 
   test("adds shield extender signature radius", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
     expect(result!.fitted.sigRadiusAdd).toBe(7);
   });
 
   test("applies stacking penalty to two agility modules", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
@@ -131,7 +131,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Heavy]\nMedium Higgs Anchor I\n1600mm Steel Plates II`,
       conditions,
@@ -142,7 +142,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("maps exact propulsion to a generic propulsion id", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, AB]\n100MN Y-S8 Compact Afterburner`,
       conditions,
@@ -154,7 +154,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("skips unknown module names", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\n1600mm Steel Plates II\nUnknown module that does not exist\nMedium Shield Extender II`,
       conditions,
@@ -164,7 +164,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("resolves the first turret and charge", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M\nMedium Shield Extender II`,
       conditions,
@@ -177,7 +177,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret skill level scales tracking, optimal and falloff", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M`,
       skillConditions,
@@ -188,7 +188,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret without charge uses base stats", () => {
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II\nHeavy Pulse Laser II, Conflagration M`,
       conditions,
@@ -199,7 +199,7 @@ describe("FittingImportImpl", () => {
 
   test("maps small turret to S sig resolution class", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
-    const importer = new FittingImportImpl(ships, db);
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Rifter, AC]\n200mm AutoCannon II, EMP S`,
       conditions,

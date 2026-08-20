@@ -39,10 +39,13 @@ export interface FittingImport {
 }
 
 export class FittingImportImpl implements FittingImport {
-  constructor(
-    private readonly ships: Ships,
-    private readonly db: FittingDb,
-  ) {}
+  private readonly ships: Ships;
+  private readonly db: FittingDb;
+
+  constructor({ ships, fittingDb }: { ships: Ships; fittingDb: FittingDb }) {
+    this.ships = ships;
+    this.db = fittingDb;
+  }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
     const parsed = parseEft(text);
