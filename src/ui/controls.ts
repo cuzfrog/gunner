@@ -47,7 +47,6 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
-  private importStatusTimeout?: ReturnType<typeof setTimeout>;
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
@@ -92,6 +91,7 @@ export class DomControls implements Controls {
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
       attackerHullHint: el("attacker-hull-hint"),
+      attackerFittingName: el("attacker-fitting-name"),
       attackerImportFitting: el("attacker-import-fitting"),
       attackerImportStatus: el("attacker-import-status"),
       attackerPastePopup: el("attacker-paste-popup"),
@@ -117,6 +117,7 @@ export class DomControls implements Controls {
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
+      targetFittingName: el("target-fitting-name"),
       targetImportFitting: el("target-import-fitting"),
       targetImportStatus: el("target-import-status"),
       targetPastePopup: el("target-paste-popup"),
@@ -475,6 +476,8 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.updateFittingName("attacker");
+    this.updateFittingName("target");
     this.populateHullDatalist();
     this.refreshHullInputs();
     this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
@@ -623,8 +626,6 @@ export class DomControls implements Controls {
     const status = this.els[`${side}ImportStatus`];
     setText(status, this.i18n.t(key));
     status.classList.toggle("error", isError);
-    if (this.importStatusTimeout) clearTimeout(this.importStatusTimeout);
-    this.importStatusTimeout = setTimeout(() => setText(status, ""), 2000);
   }
 
   private async shareLink(): Promise<void> {
@@ -781,6 +782,7 @@ export class DomControls implements Controls {
   private clearFittedHull(side: "attacker" | "target"): void {
     if (side === "attacker") this.attackerFittedHull = undefined;
     else this.targetFittedHull = undefined;
+    this.updateFittingName(side);
   }
 
   private loadHull(
@@ -851,6 +853,7 @@ export class DomControls implements Controls {
     else this.targetFittedHull = summary;
     this.renderPropulsionOptions(side, summary.propulsionId ?? "");
     this.updateFittedStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+    this.updateFittingName(side);
   }
 
   private applyImportedTurret(turret: ImportedFitting["turret"]): void {
@@ -895,19 +898,30 @@ export class DomControls implements Controls {
     (this.els[`${side}Hull`] as HTMLInputElement).classList.toggle("hull-invalid", isInvalid);
   }
 
-  private updateHullHint(side: "attacker" | "target", module?: PropulsionModule, fittingName?: string): void {
+  private updateHullHint(side: "attacker" | "target", module?: PropulsionModule): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) {
       setText(this.els[`${side}HullHint`], "");
       return;
     }
     const view = this.ships.hullView(profile, this.i18n.current());
-    const prefix = fittingName ? `${fittingName} · ` : "";
-    let text = `${prefix}${view.hullType} · ${view.faction}`;
+    let text = `${view.hullType} · ${view.faction}`;
     if (side === "target" && module?.kind === "microwarpdrive") {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
     setText(this.els[`${side}HullHint`], text);
+  }
+
+  private updateFittingName(side: "attacker" | "target"): void {
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const element = this.els[`${side}FittingName`];
+    if (fitted?.fittingName) {
+      setText(element, `${this.i18n.t("status.fittingImported")}: ${fitted.fittingName}`);
+      element.hidden = false;
+    } else {
+      setText(element, "");
+      element.hidden = true;
+    }
   }
 
   private refreshHullInputs(): void {
@@ -1025,7 +1039,8 @@ export class DomControls implements Controls {
     }
 
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(stats.maxSpeed);
-    this.updateHullHint(side, this.currentFittedPropulsionModule(side, fitted), fitted.fittingName);
+    this.updateHullHint(side, this.currentFittedPropulsionModule(side, fitted));
+    this.updateFittingName(side);
     this.updateAlignTime(side);
   }
 

@@ -341,6 +341,8 @@ function setInputValues(document: Document): void {
   getFake(document, "target-skill-popup").hidden = true;
   getFake(document, "attacker-paste-popup").hidden = true;
   getFake(document, "target-paste-popup").hidden = true;
+  getFake(document, "attacker-fitting-name").hidden = true;
+  getFake(document, "target-fitting-name").hidden = true;
   getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
 }
@@ -2393,6 +2395,8 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "sigRes").value).toBe("S");
       expect(getFake(globalThis.document, "optimal").value).toBe("600");
       expect(getFake(globalThis.document, "falloff").value).toBe("3000");
+      expect(getFake(globalThis.document, "attacker-fitting-name").textContent).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
     });
@@ -2501,6 +2505,8 @@ describe("DomControls", () => {
       hullInput.trigger("change");
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull).toBeUndefined();
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-hull-hint").textContent).not.toContain("Brawler");
     });
 
     test("loadSettings restores a fitted hull and recomputes stats", () => {
@@ -2508,7 +2514,8 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
-      expect(getFake(globalThis.document, "attacker-hull-hint").textContent).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").textContent).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
     });
 
     test("changing propulsion updates the fitted summary and recomputes stats", async () => {
