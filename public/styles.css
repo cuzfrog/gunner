@@ -104,6 +104,25 @@ body {
   color: var(--accent-teal);
 }
 
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.github-link:hover {
+  color: var(--accent-teal);
+}
+
+.github-link:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+.github-link svg {
+  display: block;
+}
+
 .main {
   display: grid;
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);

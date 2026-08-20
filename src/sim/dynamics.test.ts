@@ -1,5 +1,5 @@
 import { Vec2 } from "./vec2";
-import { integrateShip, timeConstant } from "./dynamics";
+import { alignTime, integrateShip, timeConstant } from "./dynamics";
 import type { ShipState } from "./types";
 
 function ship(extra: Partial<ShipState> = {}): ShipState {
@@ -21,6 +21,13 @@ describe("timeConstant", () => {
   test("known ship configurations produce expected tau", () => {
     expect(timeConstant(1_200_000, 3)).toBeCloseTo(3.6, 10);
     expect(timeConstant(10_000_000, 0.45)).toBeCloseTo(4.5, 10);
+  });
+});
+
+describe("alignTime", () => {
+  test("equals ln(4) times the time constant", () => {
+    expect(alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
+    expect(alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);
   });
 });
 

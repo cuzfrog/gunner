@@ -1,5 +1,6 @@
 export { ReactiveAutopilot } from "./autopilot";
 export type { Autopilot } from "./autopilot";
+export { alignTime } from "./dynamics";
 export type { HitChance } from "./hitChance";
 export type { Kinematics } from "./kinematics";
 export type { Simulation } from "./simulation";

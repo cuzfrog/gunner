@@ -4,10 +4,10 @@ no-new-exports:
   - autopilot-dynamics.test.ts
   - autopilot.ts
   - dynamics.test.ts
-  - dynamics.ts
+  # - dynamics.ts  # exports alignTime per ui-improvements; domain utility exposed through index
   - hitChance.test.ts
   - hitChance.ts
-  - index.ts
+  # - index.ts  # re-exports alignTime as a cross-boundary domain utility
   - kinematics.test.ts
   - kinematics.ts
   - module.ts

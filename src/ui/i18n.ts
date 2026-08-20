@@ -93,6 +93,11 @@ export const I18N_DICTIONARY = {
     zh: "语言",
     ja: "言語",
   },
+  "label.github": {
+    en: "GitHub repository",
+    zh: "GitHub 仓库",
+    ja: "GitHub リポジトリ",
+  },
 
   "hint.hullSearch": {
     en: "Type ship name…",
@@ -163,6 +168,11 @@ export const I18N_DICTIONARY = {
     en: "Initial distance",
     zh: "初始距离",
     ja: "初期距離",
+  },
+  "label.alignTime": {
+    en: "Align Time",
+    zh: "对齐时间",
+    ja: "アライン時間",
   },
   "section.targetShip": {
     en: "Target",
@@ -393,6 +403,11 @@ export const I18N_DICTIONARY = {
     en: "km",
     zh: "km",
     ja: "km",
+  },
+  "unit.second": {
+    en: "s",
+    zh: "s",
+    ja: "s",
   },
 } as const;
 
