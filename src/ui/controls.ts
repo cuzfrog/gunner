@@ -855,7 +855,7 @@ export class DomControls implements Controls {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const isSameHull = currentProfile?.name === profile.name;
     const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
-    this.clearFittedHull(side);
+    if (!isSameHull) this.clearFittedHull(side);
     this.applyHull(side, profile, propulsionId, persist, !isSameHull);
   }
 

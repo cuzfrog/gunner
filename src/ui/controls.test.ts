@@ -605,6 +605,24 @@ describe("DomControls", () => {
     expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn"]);
   });
 
+  test("selecting a different hull after the first refreshes mass, inertia and speed", () => {
+    buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("input");
+
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(RIFTER_AB1_SKILL5.mass));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(RIFTER_AB1_SKILL5.inertiaModifier, 6));
+
+    hullInput.value = "Thrasher";
+    hullInput.trigger("input");
+
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(THRASHER_BASE.mass));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(THRASHER_BASE.inertiaModifier, 6));
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(THRASHER_BASE.maxSpeed));
+  });
+
   test("choosing an MWD updates target speed, mass and signature radius", () => {
     buildControls(globalThis.document);
     const rifter = RIFTER;
@@ -2509,6 +2527,57 @@ describe("DomControls", () => {
       expect(saved.attackerFittedHull).toBeUndefined();
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
       expect(getFake(globalThis.document, "attacker-hull-hint").textContent).not.toContain("Brawler");
+    });
+
+    test("reselecting the same hull after an import keeps the fitted state active", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
+      const [savedAfterReselect] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterReselect.attackerFittedHull?.fittingName).toBe("Brawler");
+
+      const skills = getFake(globalThis.document, "attacker-skills");
+      skills.value = "0";
+      skills.trigger("change");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_MWD_SKILL0.maxSpeed));
+      const [savedAfterSkillChange] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterSkillChange.attackerFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("reselecting the same target hull after an import keeps the fitted state active", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "target-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "target-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "target-fitting-name").hidden).toBe(false);
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.targetFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("changing hull after an import leaves the weapon parameters untouched", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
+      expect(getFake(globalThis.document, "sigRes").value).toBe("S");
+      expect(getFake(globalThis.document, "optimal").value).toBe("600");
+      expect(getFake(globalThis.document, "falloff").value).toBe("3000");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
     });
 
     test("loadSettings restores a fitted hull and recomputes stats", () => {
