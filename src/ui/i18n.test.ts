@@ -66,7 +66,7 @@ describe("I18nImpl", () => {
   test("translates known keys", () => {
     const i18n = new I18nImpl();
     expect(i18n.t("label.trackingSpeed")).toBe("Tracking speed");
-    expect(i18n.t("button.play")).toBe("Simulate");
+    expect(i18n.t("button.play")).toBe("Start");
   });
 
   test("returns the key when it is not in the dictionary", () => {

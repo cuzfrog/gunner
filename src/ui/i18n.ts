@@ -185,9 +185,9 @@ export const I18N_DICTIONARY = {
     ja: "速度",
   },
   "button.play": {
-    en: "Simulate",
-    zh: "模拟",
-    ja: "シミュレート",
+    en: "Start",
+    zh: "开始",
+    ja: "開始",
   },
   "button.pause": {
     en: "Pause",
@@ -335,9 +335,9 @@ export const I18N_DICTIONARY = {
     ja: "Gunner について",
   },
   "footer.about.text": {
-    en: "Gunner is an EVE Online 2D tactical simulator. It models two ships in motion and computes turret hit chance.",
-    zh: "Gunner 是一个 EVE Online 2D 战术模拟器，模拟两艘舰船的运动，并计算攻击方炮塔对目标的命中表现。",
-    ja: "Gunner は EVE Online の 2D 戦術シミュレーターです。2 隻の艦船の動きを再現し、攻撃側のタレットの命中性能を計算します。",
+    en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.",
+    zh: "我写这个工具是为了帮助自己理解舰船战斗的动态，并在战斗中建立信心。和你一样，我热爱这款游戏。",
+    ja: "このツールは、艦船戦闘のダイナミクスを理解し、戦闘での自信を高めるために作りました。あなたと同じく、私もこのゲームが大好きです。",
   },
   "footer.mech.kinematics.heading": {
     en: "Kinematics",
