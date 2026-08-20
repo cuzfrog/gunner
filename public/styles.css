@@ -272,11 +272,25 @@ select:disabled {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 12px;
   text-transform: none;
   letter-spacing: 0;
   margin-bottom: 0;
+}
+
+.hull-label-row .fitting-name-label {
+  color: var(--text-dim);
+}
+
+.hull-label-row .fitting-name-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.hull-label-row .fitting-name.error,
+.hull-label-row .fitting-name.error .fitting-name-label,
+.hull-label-row .fitting-name.error .fitting-name-value {
+  color: var(--danger-red);
 }
 
 .hull-label-row .fitting-name[hidden] {

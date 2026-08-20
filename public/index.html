@@ -145,11 +145,13 @@
         <label>
           <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
-            <span class="fitting-name" id="attacker-fitting-name" hidden></span>
             <button type="button" id="attacker-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
+            <span class="fitting-name" id="attacker-fitting-name" hidden>
+              <span class="fitting-name-label"></span><span class="fitting-name-value"></span>
+            </span>
             <span id="attacker-import-status" class="import-status"></span>
             <div class="paste-popup" id="attacker-paste-popup" hidden>
               <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
@@ -271,11 +273,13 @@
         <label>
           <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
-            <span class="fitting-name" id="target-fitting-name" hidden></span>
             <button type="button" id="target-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
+            <span class="fitting-name" id="target-fitting-name" hidden>
+              <span class="fitting-name-label"></span><span class="fitting-name-value"></span>
+            </span>
             <span id="target-import-status" class="import-status"></span>
             <div class="paste-popup" id="target-paste-popup" hidden>
               <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>

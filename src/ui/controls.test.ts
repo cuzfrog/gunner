@@ -2395,7 +2395,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "sigRes").value).toBe("S");
       expect(getFake(globalThis.document, "optimal").value).toBe("600");
       expect(getFake(globalThis.document, "falloff").value).toBe("3000");
-      expect(getFake(globalThis.document, "attacker-fitting-name").textContent).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
@@ -2406,9 +2406,10 @@ describe("DomControls", () => {
       fittingImport.importFitting.mockReturnValue(undefined);
       getFake(globalThis.document, "target-import-fitting").trigger("click");
       await flush();
-      const status = getFake(globalThis.document, "target-import-status");
-      expect(status.textContent).toBe("status.fittingInvalid");
-      expect(status.classList.toggle).toHaveBeenCalledWith("error", true);
+      const fittingName = getFake(globalThis.document, "target-fitting-name");
+      expect(fittingName.innerHTML).toContain("status.fittingInvalid");
+      expect(fittingName.hidden).toBe(false);
+      expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
     });
 
     test("clipboard unavailability opens the paste popup", async () => {
@@ -2417,7 +2418,7 @@ describe("DomControls", () => {
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
       expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(false);
-      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
     });
 
     test("pasting a valid fitting in the popup imports it", async () => {
@@ -2449,7 +2450,10 @@ describe("DomControls", () => {
       } as unknown as Event);
       await flush();
       expect(popup.hidden).toBe(true);
-      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("status.fittingInvalid");
+      const fittingName = getFake(globalThis.document, "attacker-fitting-name");
+      expect(fittingName.innerHTML).toContain("status.fittingInvalid");
+      expect(fittingName.hidden).toBe(false);
+      expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
     });
 
     test("clicking the import button again when the paste popup is open closes it", async () => {
@@ -2514,7 +2518,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
-      expect(getFake(globalThis.document, "attacker-fitting-name").textContent).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
     });
 

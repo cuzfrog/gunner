@@ -47,6 +47,7 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private fittingNameTimeout?: ReturnType<typeof setTimeout>;
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
@@ -590,17 +591,19 @@ export class DomControls implements Controls {
         this.openPastePopup(side);
         return;
       }
-      this.showImportStatus(side, "status.clipboardDenied", true);
+      this.clearFittingNameTimeout();
+      this.showImportError(side, "status.clipboardDenied");
       return;
     }
     await this.importFittingFromText(side, text);
   }
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
+    this.clearFittingNameTimeout();
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
-      this.showImportStatus(side, "status.fittingInvalid", true);
+      this.showImportError(side, "status.fittingInvalid");
       return;
     }
     this.clearFittedHull(side);
@@ -609,7 +612,6 @@ export class DomControls implements Controls {
     if (side === "attacker") this.applyImportedTurret(imported.turret);
     this.persist();
     this.updateSaveButtonState();
-    this.showImportStatus(side, "status.fittingImported", false);
     this.callbacks?.onConfigChange();
   }
 
@@ -622,10 +624,23 @@ export class DomControls implements Controls {
     };
   }
 
-  private showImportStatus(side: "attacker" | "target", key: string, isError: boolean): void {
-    const status = this.els[`${side}ImportStatus`];
-    setText(status, this.i18n.t(key));
-    status.classList.toggle("error", isError);
+  private showImportError(side: "attacker" | "target", key: string): void {
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", true);
+    element.innerHTML = escapeHtml(this.i18n.t(key));
+    element.hidden = false;
+    if (this.fittingNameTimeout) clearTimeout(this.fittingNameTimeout);
+    this.fittingNameTimeout = setTimeout(() => {
+      element.classList.toggle("error", false);
+      this.updateFittingName(side);
+    }, 5000);
+  }
+
+  private clearFittingNameTimeout(): void {
+    if (this.fittingNameTimeout) {
+      clearTimeout(this.fittingNameTimeout);
+      this.fittingNameTimeout = undefined;
+    }
   }
 
   private async shareLink(): Promise<void> {
@@ -914,12 +929,15 @@ export class DomControls implements Controls {
 
   private updateFittingName(side: "attacker" | "target"): void {
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    const element = this.els[`${side}FittingName`];
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", false);
     if (fitted?.fittingName) {
-      setText(element, `${this.i18n.t("status.fittingImported")}: ${fitted.fittingName}`);
+      const label = escapeHtml(`${this.i18n.t("status.fittingImported")}: `);
+      const value = escapeHtml(fitted.fittingName);
+      element.innerHTML = `<span class="fitting-name-label">${label}</span><span class="fitting-name-value">${value}</span>`;
       element.hidden = false;
     } else {
-      setText(element, "");
+      element.innerHTML = "";
       element.hidden = true;
     }
   }
@@ -1423,4 +1441,13 @@ function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
 
 function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
