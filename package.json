@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bun run build.ts",
+    "build": "bun run scripts/build.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "trace": "bun run scripts/sim-trace.ts",
-    "preview": "bun run build.ts && bun run preview.ts",
+    "preview": "bun run preview.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {
