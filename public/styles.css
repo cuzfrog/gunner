@@ -255,7 +255,7 @@ select:disabled {
 .panel .hull-label-row {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 0;
   justify-content: flex-start;
   position: relative;
 }
@@ -267,9 +267,11 @@ select:disabled {
 
 .hull-label-row .fitting-name {
   display: flex;
+  align-items: center;
   flex: 1;
   min-width: 0;
   font-size: 12px;
+  line-height: 1;
   text-transform: none;
   letter-spacing: 0;
   margin-bottom: 0;
@@ -310,7 +312,7 @@ select:disabled {
   color: var(--text-dim);
   cursor: pointer;
   padding: 2px;
-  margin: 0;
+  margin: 0 4px 0 0;
   border-radius: 2px;
   line-height: 0;
 }
