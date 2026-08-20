@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
 // Build, then serve dist/ on the first available port.
-await import("./scripts/build");
+await import("./build");
 
 const server = Bun.serve({
   port: 56789,
