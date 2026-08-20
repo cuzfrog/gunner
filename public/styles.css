@@ -255,23 +255,20 @@ select:disabled {
 .panel .hull-label-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   justify-content: flex-start;
   position: relative;
 }
 
-.panel .hull-label-row > span {
+.panel .hull-label-row > span:not(.fitting-name) {
   display: inline;
   margin-bottom: 0;
 }
 
 .hull-label-row .fitting-name {
-  display: inline-block;
-  flex: 1 1 auto;
+  display: flex;
+  flex: 1;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 12px;
   text-transform: none;
   letter-spacing: 0;
@@ -279,10 +276,17 @@ select:disabled {
 }
 
 .hull-label-row .fitting-name-label {
+  flex: none;
   color: var(--text-dim);
+  white-space: nowrap;
 }
 
 .hull-label-row .fitting-name-value {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--text-primary);
   font-weight: 500;
 }

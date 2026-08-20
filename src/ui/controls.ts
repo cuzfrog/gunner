@@ -627,7 +627,8 @@ export class DomControls implements Controls {
   private showImportError(side: "attacker" | "target", key: string): void {
     const element = this.els[`${side}FittingName`] as HTMLElement;
     element.classList.toggle("error", true);
-    element.innerHTML = escapeHtml(this.i18n.t(key));
+    const value = escapeHtml(this.i18n.t(key));
+    element.innerHTML = `<span class="fitting-name-value">${value}</span>`;
     element.hidden = false;
     if (this.fittingNameTimeout) clearTimeout(this.fittingNameTimeout);
     this.fittingNameTimeout = setTimeout(() => {
