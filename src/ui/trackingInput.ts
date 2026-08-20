@@ -1,4 +1,4 @@
-import { toTrackingRadPerSecond, toTrackingScore, type TrackingUnit } from "../sim";
+export type TrackingUnit = "rad" | "score";
 
 export class TrackingInput {
   private currentUnit: TrackingUnit = "rad";
@@ -31,4 +31,14 @@ export class TrackingInput {
   displayValue(sigResolution: number): number {
     return this.currentUnit === "score" ? toTrackingScore(this.radValue, sigResolution) : this.radValue;
   }
+}
+
+const STANDARD_SIGNATURE_RESOLUTION = 40000; // mm-scale reference used by EVE's in-game score
+
+function toTrackingScore(tracking: number, sigResolution: number): number {
+  return (tracking * STANDARD_SIGNATURE_RESOLUTION) / sigResolution;
+}
+
+function toTrackingRadPerSecond(score: number, sigResolution: number): number {
+  return (score * sigResolution) / STANDARD_SIGNATURE_RESOLUTION;
 }

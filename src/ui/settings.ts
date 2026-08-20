@@ -1,6 +1,7 @@
-import type { AutopilotMode, SigResolutionClass, TrackingUnit } from "../sim";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { PropulsionId, Ships, SkillLevel } from "../ships";
 import type { Language } from "./i18n";
+import type { TrackingUnit } from "./trackingInput";
 
 export const USER_SETTINGS_VERSION = 5 as const;
 

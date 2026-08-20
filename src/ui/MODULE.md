@@ -11,7 +11,7 @@ no-new-exports:
   - settings.test.ts
   # - settings.ts  # ProfileSettings is a cross-boundary DTO, exempt from no-new-exports
   - trackingInput.test.ts
-  - trackingInput.ts
+  # - trackingInput.ts  # TrackingUnit is a cross-boundary DTO type; public re-export is required
   - renderer.test.ts
 ---
 

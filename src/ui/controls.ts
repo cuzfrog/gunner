@@ -11,7 +11,7 @@ import {
 } from "../sim";
 import type { I18n, Language } from "./i18n";
 import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
-import { TrackingInput } from "./trackingInput";
+import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -397,7 +397,7 @@ export class DomControls implements Controls {
     return SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass];
   }
 
-  private setTrackingUnit(unit: "rad" | "score"): void {
+  private setTrackingUnit(unit: TrackingUnit): void {
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.setUnit(unit, sigResolution);
     (this.els.tracking as HTMLInputElement).value = String(display);
