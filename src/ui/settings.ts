@@ -47,7 +47,7 @@ export interface UserSettings {
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language">;
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit">;
 
 export interface StorageProvider {
   getItem(key: string): string | null;
@@ -122,7 +122,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   saveProfile(name: string, settings: ProfileSettings): void {
     const profiles = this.loadProfiles();
-    profiles[name] = stripLanguage(settings);
+    profiles[name] = stripDisplayPreferences(settings);
     this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
   }
 
@@ -193,7 +193,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   saveSelectedProfile(name: string, baseline: ProfileSettings): void {
     if (!name) throw new Error("selected profile name cannot be empty");
-    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripLanguage(baseline) };
+    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripDisplayPreferences(baseline) };
     this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
   }
 
@@ -246,7 +246,8 @@ export class LocalSettingsStore implements SettingsStore {
   }
 
   private isUserSettings(value: unknown): value is UserSettings {
-    return this.isProfileSettings(value) && isLanguage((value as Record<string, unknown>).language);
+    const s = value as Record<string, unknown>;
+    return this.isProfileSettings(value) && isLanguage(s.language) && (s.trackingUnit === "rad" || s.trackingUnit === "score");
   }
 
   private isProfileSettings(value: unknown): value is ProfileSettings {
@@ -255,7 +256,6 @@ export class LocalSettingsStore implements SettingsStore {
     return (
       s.version === USER_SETTINGS_VERSION &&
       isNonNegative(s.tracking) &&
-      (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
       isSigResolutionClass(s.sigRes) &&
       isNonNegative(s.optimal) &&
       isNonNegative(s.falloff) &&
@@ -293,7 +293,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   private toProfileSettings(value: unknown): ProfileSettings | null {
     if (!this.isProfileSettings(value)) return null;
-    return stripLanguage(value);
+    return stripDisplayPreferences(value);
   }
 }
 
@@ -307,8 +307,8 @@ function isSelectedProfile(value: unknown): value is { name: string; baseline: u
   return typeof s.name === "string" && s.name.length > 0 && !!s.baseline && typeof s.baseline === "object" && !Array.isArray(s.baseline);
 }
 
-function stripLanguage(value: ProfileSettings): ProfileSettings {
-  const { language: _, ...rest } = value as Record<string, unknown>;
+function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
+  const { language: _, trackingUnit: __, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 

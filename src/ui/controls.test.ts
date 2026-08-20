@@ -374,7 +374,7 @@ interface SelectedProfile {
 }
 
 function asProfile(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
@@ -1360,7 +1360,7 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
-  test("save button highlights when tracking unit changes after loading a profile", () => {
+  test("save button does not highlight when tracking unit changes after loading a profile", () => {
     const rifter = RIFTER;
     const module = MWD5MN;
     const stats = mockStatsFor(rifter, module, { skillLevel: 5, overloaded: true });
@@ -1407,7 +1407,48 @@ describe("DomControls", () => {
     saveButton.classList.toggle.mockClear();
 
     getFake(globalThis.document, "tracking-unit-score").trigger("click");
-    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", false);
+  });
+
+  test("loading a profile preserves the current tracking unit", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+    getFake(globalThis.document, "tracking-unit-score").trigger("click");
+    expect(getFake(globalThis.document, "tracking").value).toBe("320");
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(getFake(globalThis.document, "tracking").value).toBe("320");
   });
 
   test("save button does not highlight when language changes after loading a profile", () => {
@@ -1804,7 +1845,7 @@ describe("DomControls", () => {
     expect(location.href).toBe(encodedUrl);
   });
 
-  test("saving a profile persists it as the selected profile without language", () => {
+  test("saving a profile persists it as the selected profile without display preferences", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const nameInput = getFake(globalThis.document, "profile-name");
     nameInput.value = "brawler";
@@ -1817,7 +1858,9 @@ describe("DomControls", () => {
     expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", savedProfile);
     expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", selectedBaseline);
     expect(savedProfile).not.toHaveProperty("language");
+    expect(savedProfile).not.toHaveProperty("trackingUnit");
     expect(selectedBaseline).not.toHaveProperty("language");
+    expect(selectedBaseline).not.toHaveProperty("trackingUnit");
     expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
   });
 

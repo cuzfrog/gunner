@@ -51,7 +51,7 @@ const URL_SETTINGS: UserSettings = {
 };
 
 function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
@@ -258,7 +258,7 @@ describe("LocalSettingsStore", () => {
 
   test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
     const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const { language: _, ...profile } = { ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY };
+    const profile = profileFrom({ ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY });
     store.saveProfile("brawler", profile);
     expect(store.loadProfile("brawler")).toEqual(profile);
   });
@@ -270,24 +270,27 @@ describe("LocalSettingsStore", () => {
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
-  test("saveProfile strips a language field from the stored profile", () => {
+  test("saveProfile strips display preference fields from the stored profile", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_SETTINGS);
     const raw = storage.getItem("gunner-profiles-v5")!;
-    expect(JSON.parse(raw).brawler).toEqual(DEFAULT_PROFILE);
+    const stored = JSON.parse(raw).brawler;
+    expect(stored).toEqual(DEFAULT_PROFILE);
+    expect(stored).not.toHaveProperty("language");
+    expect(stored).not.toHaveProperty("trackingUnit");
   });
 
-  test("loadProfile strips a legacy language field from stored profiles", () => {
+  test("loadProfile strips legacy display preference fields from stored profiles", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
-  test("loadSelectedProfile strips a legacy language field from the baseline", () => {
+  test("loadSelectedProfile strips legacy display preference fields from the baseline", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });

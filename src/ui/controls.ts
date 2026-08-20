@@ -547,7 +547,7 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings({ ...profile, language: this.i18n.current() }, name);
+    this.loadSettings({ ...profile, language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
     this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
@@ -1375,7 +1375,7 @@ function setText(el: HTMLElement, text: string): void {
 }
 
 function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
