@@ -894,7 +894,7 @@ export class DomControls implements Controls {
     if (Number.isFinite(t) && t > 0) {
       const value = `${t.toFixed(1)}${this.i18n.t("unit.second")}`;
       suffix.textContent = value;
-      input.title = `${this.i18n.t("label.alignTime")}: ${value}. ${this.i18n.t("hint.alignTime")}`;
+      input.title = `${this.i18n.t("label.alignTime")}: ${value}`;
     } else {
       suffix.textContent = "";
       input.title = "";

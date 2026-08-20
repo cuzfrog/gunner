@@ -398,11 +398,12 @@ describe("DomControls", () => {
     mass.value = "2400000";
     mass.trigger("input");
     expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
-    expect(inertia.title).toContain("hint.alignTime");
+    expect(inertia.title).toContain(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
 
     inertia.value = "1.5";
     inertia.trigger("input");
     expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
+    expect(inertia.title).toContain(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
   });
 
   test("saving clamps an empty initial distance to 1", () => {
