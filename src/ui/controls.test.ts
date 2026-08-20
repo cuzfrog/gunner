@@ -1,4 +1,4 @@
-import type { EngagementFrame, HitChance, HitChanceBreakdown, ShipState } from "../sim";
+import { Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -1019,8 +1019,8 @@ describe("DomControls", () => {
 
   test("update colors the hit chance value based on chance", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
-    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 1000, relVelocity: { x: 0, y: 0 }, radialVelocity: 0, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 0, angularVelocity: 0 };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
+    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
     expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
@@ -1520,8 +1520,8 @@ describe("DomControls", () => {
 
   test("update formats long numbers with commas", () => {
     const { controls } = buildControls(globalThis.document);
-    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } };
-    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: { x: 0, y: 0 }, distance: 12345, relVelocity: { x: 0, y: 0 }, radialVelocity: 1234.5, transversalVelocity: { x: 0, y: 0 }, transversalSpeed: 1234.5, angularVelocity: 0.1234 };
+    const ship: ShipState = { id: "attacker", maxSpeed: 0, mass: 0, inertiaModifier: 0, mode: "orbit", desiredRange: 0, aggressivity: 1, position: new Vec2(0, 0), velocity: new Vec2(0, 0) };
+    const frame: EngagementFrame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 12345, relVelocity: new Vec2(0, 0), radialVelocity: 1234.5, transversalVelocity: new Vec2(0, 0), transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
     controls.update(frame, { chance: 0.95, trackingTerm: 0.5, rangeTerm: 0.5 });
 

@@ -1,5 +1,4 @@
-import { add, angle, dist, len, scale, sub, vec, type Vec2 } from "../math";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "../sim";
+import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
 import type { I18n } from "./i18n";
 
 export interface Renderer {
@@ -38,7 +37,7 @@ export class CanvasRenderer implements Renderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly i18n: I18n;
-  private camera: Camera = { center: vec(0, 0), scale: 1 };
+  private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
@@ -75,8 +74,8 @@ export class CanvasRenderer implements Renderer {
 
   private updateCamera(snapshot: SimSnapshot, turret: TurretSpec): void {
     const { attacker, target } = snapshot;
-    const center = scale(add(attacker.position, target.position), 0.5);
-    const distance = dist(attacker.position, target.position);
+    const center = attacker.position.add(target.position).scale(0.5);
+    const distance = attacker.position.dist(target.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
 
     const farRadius = Math.max(turret.optimal + turret.falloff, attacker.desiredRange, target.desiredRange, 500);
@@ -90,10 +89,7 @@ export class CanvasRenderer implements Renderer {
   }
 
   private worldToScreen(p: Vec2): Vec2 {
-    return vec(
-      this.canvas.width / 2 + (p.x - this.camera.center.x) * this.camera.scale,
-      this.canvas.height / 2 - (p.y - this.camera.center.y) * this.camera.scale,
-    );
+    return new Vec2(this.canvas.width / 2 + (p.x - this.camera.center.x) * this.camera.scale, this.canvas.height / 2 - (p.y - this.camera.center.y) * this.camera.scale);
   }
 
   private clear(): void {
@@ -112,12 +108,9 @@ export class CanvasRenderer implements Renderer {
 
   private drawGrid(): void {
     const spacing = 10000; // 10 km grid
-    const half = scale(
-      vec(this.canvas.width, this.canvas.height),
-      0.5 / this.camera.scale,
-    );
-    const min = sub(this.camera.center, half);
-    const max = add(this.camera.center, half);
+    const half = new Vec2(this.canvas.width, this.canvas.height).scale(0.5 / this.camera.scale);
+    const min = this.camera.center.sub(half);
+    const max = this.camera.center.add(half);
     const startX = Math.floor(min.x / spacing) * spacing;
     const endX = Math.ceil(max.x / spacing) * spacing;
     const startY = Math.floor(min.y / spacing) * spacing;
@@ -128,14 +121,14 @@ export class CanvasRenderer implements Renderer {
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let x = startX; x <= endX; x += spacing) {
-      const a = this.worldToScreen(vec(x, min.y));
-      const b = this.worldToScreen(vec(x, max.y));
+      const a = this.worldToScreen(new Vec2(x, min.y));
+      const b = this.worldToScreen(new Vec2(x, max.y));
       this.ctx.moveTo(a.x, a.y);
       this.ctx.lineTo(b.x, b.y);
     }
     for (let y = startY; y <= endY; y += spacing) {
-      const a = this.worldToScreen(vec(min.x, y));
-      const b = this.worldToScreen(vec(max.x, y));
+      const a = this.worldToScreen(new Vec2(min.x, y));
+      const b = this.worldToScreen(new Vec2(max.x, y));
       this.ctx.moveTo(a.x, a.y);
       this.ctx.lineTo(b.x, b.y);
     }
@@ -174,17 +167,17 @@ export class CanvasRenderer implements Renderer {
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
-    const mid = scale(add(sa, sb), 0.5);
+    const mid = sa.add(sb).scale(0.5);
     this.drawTextAt(mid.x, mid.y, this.formatDistance(distance), COLORS.text, true);
   }
 
   private drawWorldVector(position: Vec2, vector: Vec2, color: string, dash: number[] = []): void {
-    const speed = len(vector);
+    const speed = vector.len();
     if (speed < 0.01) return;
     const start = this.worldToScreen(position);
     const arrowLen = speed * VECTOR_SCALE * this.camera.scale;
-    const heading = angle(vector);
-    const end = add(start, vec(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
+    const heading = vector.angle();
+    const end = start.add(new Vec2(arrowLen * Math.cos(heading), -arrowLen * Math.sin(heading)));
     this.ctx.setLineDash(dash);
     this.drawArrow(start, end, color);
     this.ctx.setLineDash([]);
@@ -211,7 +204,7 @@ export class CanvasRenderer implements Renderer {
 
   private drawShip(ship: ShipState, color: string): void {
     const p = this.worldToScreen(ship.position);
-    const heading = len(ship.velocity) > 0.01 ? angle(ship.velocity) : -Math.PI / 2;
+    const heading = ship.velocity.len() > 0.01 ? ship.velocity.angle() : -Math.PI / 2;
     const size = 8;
 
     this.ctx.save();
@@ -235,7 +228,7 @@ export class CanvasRenderer implements Renderer {
 
   private drawSpeedLabel(ship: ShipState, color: string, dy: number): void {
     const p = this.worldToScreen(ship.position);
-    const speed = Math.round(len(ship.velocity));
+    const speed = Math.round(ship.velocity.len());
     this.drawTextAt(p.x, p.y + dy, `${formatWithCommas(speed)} m/s`, color, true, 11);
   }
 

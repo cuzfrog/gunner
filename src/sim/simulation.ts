@@ -1,4 +1,4 @@
-import { vec, type Vec2 } from "../math";
+import { Vec2 } from "./vec2";
 import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
 import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";
@@ -25,8 +25,8 @@ export class SimulationImpl implements Simulation {
     this.attackerSteering = attackerSteering;
     this.targetSteering = targetSteering;
     this.time = 0;
-    this.attacker = asState(simConfig.attacker, vec(0, 0));
-    this.target = asState(simConfig.target, vec(0, simConfig.initialDistance));
+    this.attacker = asState(simConfig.attacker, new Vec2(0, 0));
+    this.target = asState(simConfig.target, new Vec2(0, simConfig.initialDistance));
   }
 
   step(dt: number): void {
@@ -47,8 +47,8 @@ export class SimulationImpl implements Simulation {
 
   reset(config: SimConfig): void {
     this.time = 0;
-    this.attacker = asState(config.attacker, vec(0, 0));
-    this.target = asState(config.target, vec(0, config.initialDistance));
+    this.attacker = asState(config.attacker, new Vec2(0, 0));
+    this.target = asState(config.target, new Vec2(0, config.initialDistance));
   }
 
   update(config: SimConfig): void {
@@ -64,7 +64,7 @@ export class SimulationImpl implements Simulation {
 }
 
 function asState(config: ShipConfig, position: Vec2): ShipState {
-  return { ...config, position, velocity: vec(0, 0) };
+  return { ...config, position, velocity: new Vec2(0, 0) };
 }
 
 function withConfig(state: ShipState, config: ShipConfig): ShipState {

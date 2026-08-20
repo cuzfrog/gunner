@@ -1,6 +1,5 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
-import { len, type Vec2 } from "../src/math";
-import { ReactiveAutopilot, registerSimModule, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type Simulation } from "../src/sim";
+import { ReactiveAutopilot, registerSimModule, Vec2, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type Simulation } from "../src/sim";
 
 const FIXED_DT = 1 / 60;
 
@@ -181,10 +180,10 @@ function trace(params: TraceParams): void {
       frame.distance.toFixed(0),
       frame.radialVelocity.toFixed(1),
       frame.angularVelocity.toFixed(4),
-      len(snapshot.attacker.velocity).toFixed(1),
-      len(snapshot.commands.attacker).toFixed(1),
-      len(snapshot.target.velocity).toFixed(1),
-      len(snapshot.commands.target).toFixed(1),
+      snapshot.attacker.velocity.len().toFixed(1),
+      snapshot.commands.attacker.len().toFixed(1),
+      snapshot.target.velocity.len().toFixed(1),
+      snapshot.commands.target.len().toFixed(1),
       radialComponent(snapshot.commands.target, frame).toFixed(1),
     ];
     console.log(row.join("\t"));

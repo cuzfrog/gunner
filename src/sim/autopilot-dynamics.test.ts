@@ -1,4 +1,4 @@
-import { dist, len } from "../math";
+import type { Vec2 } from "./vec2";
 import { ReactiveAutopilot } from "./autopilot";
 import { SimulationImpl } from "./simulation";
 import type { SimConfig } from "./types";
@@ -38,23 +38,23 @@ function approachResult(config: SimConfig, steps: number): { min: number; final:
   for (let i = 0; i < steps; i++) {
     sim.step(DT);
     const snapshot = sim.snapshot();
-    const d = dist(snapshot.attacker.position, snapshot.target.position);
+    const d = snapshot.attacker.position.dist(snapshot.target.position);
     if (d < min) min = d;
   }
-  return { min, final: dist(sim.snapshot().attacker.position, sim.snapshot().target.position) };
+  return { min, final: sim.snapshot().attacker.position.dist(sim.snapshot().target.position) };
 }
 
 describe("Autopilot + Dynamics", () => {
   test("orbit settles at its commanded radius despite dynamics lag", () => {
     const snapshot = runToSteadyState();
-    const finalDistance = dist(snapshot.attacker.position, snapshot.target.position);
+    const finalDistance = snapshot.attacker.position.dist(snapshot.target.position);
     expect(finalDistance).toBeGreaterThan(13300);
     expect(finalDistance).toBeLessThan(14700);
   });
 
   test("lag compensation consumes speed budget", () => {
     const snapshot = runToSteadyState();
-    const targetSpeed = len(snapshot.target.velocity);
+    const targetSpeed = snapshot.target.velocity.len();
     expect(targetSpeed).toBeGreaterThan(1200);
     expect(targetSpeed).toBeLessThan(1450);
   });

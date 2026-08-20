@@ -16,4 +16,5 @@ export type {
   TurretSpec,
 } from "./types";
 export { SIG_RESOLUTIONS } from "./types";
+export { Vec2 } from "./vec2";
 export { registerSimModule } from "./module";

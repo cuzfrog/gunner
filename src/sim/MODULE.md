@@ -16,6 +16,8 @@ no-new-exports:
   - simulation.test.ts
   - simulation.ts
   - types.ts
+  - vec2.test.ts
+  - vec2.ts
 ---
 
 

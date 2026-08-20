@@ -1,4 +1,4 @@
-import type { Vec2 } from "../math";
+import type { Vec2 } from "./vec2";
 
 export const SIG_RESOLUTIONS = { S: 40, M: 125, L: 400, XL: 2000 } as const;
 export type SigResolutionClass = keyof typeof SIG_RESOLUTIONS;
