@@ -3,6 +3,7 @@ import type { App } from "./app";
 import type { Autopilot, HitChance, Kinematics, SimConfig, Simulation } from "./sim";
 import type { Controls, Loop, Renderer } from "./ui";
 import type { Ships } from "./ships";
+import type { FittingDb, FittingImport } from "./fitting";
 
 export interface AppCradle {
   canvas: HTMLCanvasElement;
@@ -17,6 +18,8 @@ export interface AppCradle {
   renderer: Renderer;
   loop: Loop;
   app: App;
+  fittingDb: FittingDb;
+  fittingImport: FittingImport;
 }
 
 // PROXY injection: classes destructure the cradle by property name, which
