@@ -3,7 +3,7 @@ import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBr
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, LocationProvider, ProfileSettings, SettingsStore, UserSettings } from "./settings";
+import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 
 const DEFAULT_INPUTS: Record<string, string> = {
@@ -265,7 +265,7 @@ class FakeElement {
   }) as Record<string, string> & { setProperty(name: string, value: string): void };
   classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
-  private readonly handlers: Record<string, Array<() => void>> = {};
+  private readonly handlers: Record<string, Array<(event?: unknown) => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
 
   getAttribute(name: string): string | null {
@@ -276,17 +276,17 @@ class FakeElement {
     this.attributes[name] = value;
   }
 
-  addEventListener(event: string, handler: () => void): void {
+  addEventListener(event: string, handler: (event?: unknown) => void): void {
     this.handlers[event] ??= [];
     this.handlers[event].push(handler);
   }
 
-  trigger(event: string): void {
-    this.handlers[event]?.forEach((handler) => handler());
+  trigger(event: string, data?: unknown): void {
+    this.handlers[event]?.forEach((handler) => handler(data));
   }
 
-  dispatchEvent(event: { type: string }): void {
-    this.trigger(event.type);
+  dispatchEvent(event: { type: string; [key: string]: unknown } | Event): void {
+    this.trigger(event.type, event as { type: string; [key: string]: unknown });
   }
 
   appendChild(child: unknown): void {
@@ -294,6 +294,8 @@ class FakeElement {
   }
 
   focus = vi.fn();
+
+  blur = vi.fn();
 
   closest(): FakeElement | null {
     return null;
@@ -337,6 +339,8 @@ function setInputValues(document: Document): void {
 
   getFake(document, "attacker-skill-popup").hidden = true;
   getFake(document, "target-skill-popup").hidden = true;
+  getFake(document, "attacker-paste-popup").hidden = true;
+  getFake(document, "target-paste-popup").hidden = true;
   getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
 }
@@ -2403,12 +2407,88 @@ describe("DomControls", () => {
       expect(status.classList.toggle).toHaveBeenCalledWith("error", true);
     });
 
-    test("clipboard denial shows the clipboard-denied status", async () => {
+    test("clipboard unavailability opens the paste popup", async () => {
       const { clipboard } = buildControls(globalThis.document);
-      clipboard.readText.mockRejectedValueOnce(new Error("denied"));
+      clipboard.readText.mockRejectedValueOnce(new ClipboardUnavailableError());
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
-      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("status.clipboardDenied");
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("");
+    });
+
+    test("pasting a valid fitting in the popup imports it", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => "[Rifter, Test Fit]" },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(popup.hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    });
+
+    test("pasting an invalid fitting in the popup shows invalid status", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => "garbage" },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(popup.hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-import-status").textContent).toBe("status.fittingInvalid");
+    });
+
+    test("clicking the import button again when the paste popup is open closes it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      const button = getFake(globalThis.document, "attacker-import-fitting");
+      button.trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(false);
+      button.trigger("click");
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+    });
+
+    test("Escape closes the paste popup and focuses the import button", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-import-fitting").focus).toHaveBeenCalled();
+    });
+
+    test("pointerdown outside the paste popup closes it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const outside = new FakeElement();
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+    });
+
+    test("pointerdown inside the paste popup does not close it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const inside = new FakeElement();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      inside.closest = () => popup;
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+      expect(popup.hidden).toBe(false);
     });
 
     test("manual hull selection clears the fitted state", async () => {

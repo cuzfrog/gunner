@@ -143,18 +143,22 @@
         <hr class="panel-divider">
 
         <label>
-          <span class="hull-label-row">
+          <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
             <button type="button" id="attacker-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-          </span>
+            <span id="attacker-import-status" class="import-status"></span>
+            <div class="paste-popup" id="attacker-paste-popup" hidden>
+              <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
+              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
+            </div>
+          </div>
           <input type="text" id="attacker-hull" list="hull-options"
                  autocomplete="off" autocapitalize="off" spellcheck="false"
                  data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
           <span class="hull-hint" id="attacker-hull-hint"></span>
-          <span id="attacker-import-status" class="import-status"></span>
         </label>
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
@@ -264,18 +268,22 @@
       <section class="panel target-panel">
         <h2 data-i18n="section.targetShip">Target</h2>
         <label>
-          <span class="hull-label-row">
+          <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
             <button type="button" id="target-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-          </span>
+            <span id="target-import-status" class="import-status"></span>
+            <div class="paste-popup" id="target-paste-popup" hidden>
+              <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
+              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
+            </div>
+          </div>
           <input type="text" id="target-hull" list="hull-options"
                  autocomplete="off" autocapitalize="off" spellcheck="false"
                  data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
           <span class="hull-hint" id="target-hull-hint"></span>
-          <span id="target-import-status" class="import-status"></span>
         </label>
         <div class="field-row">
           <div class="field-group">

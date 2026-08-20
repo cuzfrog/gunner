@@ -60,6 +60,12 @@ export interface LocationProvider {
   replace(url: string): void;
 }
 
+export class ClipboardUnavailableError extends Error {
+  constructor() {
+    super("Clipboard unavailable");
+  }
+}
+
 export interface ClipboardProvider {
   readText(): Promise<string>;
   writeText(text: string): Promise<void>;

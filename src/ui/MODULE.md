@@ -1,7 +1,7 @@
 ---
 no-new-exports:
   - controls.ts
-  - index.ts
+  # - index.ts  # ClipboardProvider/LocationProvider/StorageProvider and ClipboardUnavailableError are cross-boundary DI contracts used by the root container and composition root
   - loop.ts
   - module.ts
   - renderer.ts

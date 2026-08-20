@@ -4,7 +4,7 @@ import { container } from "./container";
 import { registerFittingModule } from "./fitting";
 import { registerShipsModule } from "./ships";
 import { registerSimModule } from "./sim";
-import { registerUiModule } from "./ui";
+import { ClipboardUnavailableError, registerUiModule } from "./ui";
 
 function main(): void {
   const canvas = document.getElementById("scene");
@@ -20,7 +20,7 @@ function main(): void {
       replace: (url: string) => window.history.replaceState(null, "", url),
     }),
     clipboard: asValue({
-      readText: () => window.navigator.clipboard.readText(),
+      readText: readClipboardText,
       writeText: (text: string) => window.navigator.clipboard.writeText(text),
     }),
   });
@@ -35,3 +35,14 @@ function main(): void {
 }
 
 main();
+
+async function readClipboardText(): Promise<string> {
+  try {
+    if (window.navigator.clipboard?.readText) {
+      return await window.navigator.clipboard.readText();
+    }
+  } catch {
+    // Fall through to ClipboardUnavailableError.
+  }
+  throw new ClipboardUnavailableError();
+}

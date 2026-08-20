@@ -12,7 +12,7 @@ import {
 } from "../sim";
 import type { FittingImport, ImportedFitting } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -49,6 +49,7 @@ export class DomControls implements Controls {
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
   private importStatusTimeout?: ReturnType<typeof setTimeout>;
   private openSkillSide: "attacker" | "target" | null = null;
+  private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
   private attackerFittedHull?: FittedHullSummary;
@@ -93,6 +94,8 @@ export class DomControls implements Controls {
       attackerHullHint: el("attacker-hull-hint"),
       attackerImportFitting: el("attacker-import-fitting"),
       attackerImportStatus: el("attacker-import-status"),
+      attackerPastePopup: el("attacker-paste-popup"),
+      attackerPasteInput: el("attacker-paste-input"),
       attackerPropulsion: el("attacker-propulsion"),
       attackerPropulsionOptions: el("attacker-propulsion-options"),
       attackerSkills: el("attacker-skills"),
@@ -116,6 +119,8 @@ export class DomControls implements Controls {
       targetHullHint: el("target-hull-hint"),
       targetImportFitting: el("target-import-fitting"),
       targetImportStatus: el("target-import-status"),
+      targetPastePopup: el("target-paste-popup"),
+      targetPasteInput: el("target-paste-input"),
       targetPropulsion: el("target-propulsion"),
       targetPropulsionOptions: el("target-propulsion-options"),
       targetSkills: el("target-skills"),
@@ -569,25 +574,40 @@ export class DomControls implements Controls {
   }
 
   private async importFitting(side: "attacker" | "target"): Promise<void> {
+    if (this.openPasteSide === side) {
+      this.closePastePopup(side);
+      return;
+    }
+    if (this.openPasteSide !== null) this.closeAllPastePopups();
+    let text: string;
     try {
-      const text = await this.clipboard.readText();
-      const conditions = this.skillConditions(side);
-      const imported = this.fittingImport.importFitting(text, conditions);
-      if (!imported) {
-        this.showImportStatus(side, "status.fittingInvalid", true);
+      text = await this.clipboard.readText();
+    } catch (error) {
+      if (error instanceof ClipboardUnavailableError) {
+        this.openPastePopup(side);
         return;
       }
-      this.clearFittedHull(side);
-      this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
-      this.applyImportedFitting(side, this.fittedHullSummary(imported));
-      if (side === "attacker") this.applyImportedTurret(imported.turret);
-      this.persist();
-      this.updateSaveButtonState();
-      this.showImportStatus(side, "status.fittingImported", false);
-      this.callbacks?.onConfigChange();
-    } catch {
       this.showImportStatus(side, "status.clipboardDenied", true);
+      return;
     }
+    await this.importFittingFromText(side, text);
+  }
+
+  private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
+    const conditions = this.skillConditions(side);
+    const imported = this.fittingImport.importFitting(text, conditions);
+    if (!imported) {
+      this.showImportStatus(side, "status.fittingInvalid", true);
+      return;
+    }
+    this.clearFittedHull(side);
+    this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
+    this.applyImportedFitting(side, this.fittedHullSummary(imported));
+    if (side === "attacker") this.applyImportedTurret(imported.turret);
+    this.persist();
+    this.updateSaveButtonState();
+    this.showImportStatus(side, "status.fittingImported", false);
+    this.callbacks?.onConfigChange();
   }
 
   private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
@@ -633,6 +653,9 @@ export class DomControls implements Controls {
 
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
     (this.els.targetImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("target"));
+
+    (this.els.attackerPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
+    (this.els.targetPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
@@ -1140,21 +1163,61 @@ export class DomControls implements Controls {
     if (this.openSkillSide) this.closeSkillPopup(this.openSkillSide);
   }
 
+  private openPastePopup(side: "attacker" | "target"): void {
+    if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
+    const popup = this.els[`${side}PastePopup`] as HTMLElement;
+    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    popup.hidden = false;
+    this.openPasteSide = side;
+    input.focus();
+  }
+
+  private closePastePopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}PastePopup`] as HTMLElement;
+    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    popup.hidden = true;
+    input.blur();
+    if (this.openPasteSide === side) this.openPasteSide = null;
+  }
+
+  private closeAllPastePopups(): void {
+    if (this.openPasteSide) this.closePastePopup(this.openPasteSide);
+  }
+
+  private onPastePopupPaste(event: ClipboardEvent, side: "attacker" | "target"): void {
+    const text = event.clipboardData?.getData("text/plain");
+    if (!text) return;
+    event.preventDefault();
+    this.closePastePopup(side);
+    void this.importFittingFromText(side, text);
+  }
+
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null) return;
+    if (this.openSkillSide === null && this.openPasteSide === null) return;
     const target = event.target as Element | null;
-    if (typeof target?.closest === "function") {
-      const inside = target.closest("#attacker-skill-field, #target-skill-field");
-      if (inside) return;
+    if (typeof target?.closest !== "function") return;
+    if (this.openSkillSide !== null) {
+      const insideSkill = target.closest("#attacker-skill-field, #target-skill-field");
+      if (!insideSkill) this.closeAllSkillPopups();
     }
-    this.closeAllSkillPopups();
+    if (this.openPasteSide !== null) {
+      const insidePaste = target.closest("#attacker-paste-popup, #target-paste-popup, #attacker-import-fitting, #target-import-fitting");
+      if (!insidePaste) this.closeAllPastePopups();
+    }
   }
 
   private onDocumentKeyDown(event: KeyboardEvent): void {
-    if (event.key !== "Escape" || this.openSkillSide === null) return;
-    const side = this.openSkillSide;
-    this.closeSkillPopup(side);
-    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+    if (event.key !== "Escape") return;
+    if (this.openSkillSide !== null) {
+      const side = this.openSkillSide;
+      this.closeSkillPopup(side);
+      (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+    }
+    if (this.openPasteSide !== null) {
+      const side = this.openPasteSide;
+      this.closePastePopup(side);
+      (this.els[`${side}ImportFitting`] as HTMLButtonElement).focus();
+    }
   }
 
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {

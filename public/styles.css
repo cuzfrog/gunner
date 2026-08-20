@@ -257,6 +257,7 @@ select:disabled {
   align-items: center;
   gap: 6px;
   justify-content: flex-start;
+  position: relative;
 }
 
 .panel .hull-label-row > span {
@@ -301,6 +302,53 @@ select:disabled {
 
 .import-status:empty {
   display: none;
+}
+
+.hull-label-row .import-status {
+  display: inline;
+  margin: 0;
+  min-height: 0;
+}
+
+.hull-label-row .import-status:empty {
+  display: none;
+}
+
+.paste-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: 260px;
+}
+
+.paste-popup .paste-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  opacity: 0;
+}
+
+.paste-popup .paste-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .canvas-section {

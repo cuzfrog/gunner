@@ -264,6 +264,11 @@ export const I18N_DICTIONARY = {
     zh: "从剪贴板导入",
     ja: "クリップボードからインポート",
   },
+  "hint.pasteFitting": {
+    en: "Clipboard blocked. Press Ctrl+V to paste fitting.",
+    zh: "剪贴板被阻止。按 Ctrl+V 粘贴装配。",
+    ja: "クリップボードがブロックされました。Ctrl+V でフィッティングを貼り付けてください。",
+  },
   "status.fittingImported": {
     en: "Fitting imported",
     zh: "装配已导入",
