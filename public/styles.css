@@ -255,13 +255,10 @@ select:disabled {
 .panel .hull-label-row {
   display: flex;
   align-items: center;
-  gap: 0;
-  justify-content: flex-start;
   position: relative;
 }
 
 .panel .hull-label-row > span:not(.fitting-name) {
-  display: inline;
   margin-bottom: 0;
 }
 
@@ -275,6 +272,13 @@ select:disabled {
   text-transform: none;
   letter-spacing: 0;
   margin-bottom: 0;
+}
+
+.hull-label-row .fitting-name span {
+  margin-bottom: 0;
+  font-size: inherit;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .hull-label-row .fitting-name-label {
@@ -326,26 +330,13 @@ select:disabled {
   outline-offset: 2px;
 }
 
-.import-status {
-  display: block;
-  margin-top: 3px;
-  min-height: 12px;
+.hull-label-row .import-status {
   font-size: 10px;
   color: var(--text-dim);
 }
 
-.import-status.error {
+.hull-label-row .import-status.error {
   color: var(--danger-red);
-}
-
-.import-status:empty {
-  display: none;
-}
-
-.hull-label-row .import-status {
-  display: inline;
-  margin: 0;
-  min-height: 0;
 }
 
 .hull-label-row .import-status:empty {
