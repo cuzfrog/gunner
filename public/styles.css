@@ -646,7 +646,7 @@ canvas {
 .profile-tip {
   margin-left: auto;
   font-size: 14px;
-  color: var(--warn-yellow);
+  color: var(--accent-teal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
