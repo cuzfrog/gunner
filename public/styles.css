@@ -487,6 +487,15 @@ canvas {
   margin-left: 4px;
 }
 
+.profile-tip {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--warn-yellow);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .author-portrait {
   width: 36px;
   height: 36px;
