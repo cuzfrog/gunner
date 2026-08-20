@@ -1,0 +1,33 @@
+[Phobos, Killmail 137862313]
+
+Heavy Neutron Blaster II, Void M
+M-36 Enduring Warp Disruption Field Generator, Focused Warp Scrambling Script
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Pitfall Compact Warp Disruption Field Generator
+
+Medium Cap Battery II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+50MN Y-T8 Compact Microwarpdrive
+Fleeting Compact Stasis Webifier
+
+Multispectrum Energized Membrane II
+Reactive Armor Hardener
+Abyssal Magnetic Field Stabilizer
+Medium Ancillary Armor Repairer
+Medium Armor Repairer II
+Corpii C-Type Multispectrum Coating
+
+Medium Explosive Armor Reinforcer II
+Medium Trimark Armor Pump II
+
+
+Mobile Small Warp Disruptor II x1
+Navy Cap Booster 800 x7
+Caldari Navy Antimatter Charge M x1000
+Null M x1000
+Nanite Repair Paste x243
+Void M x2000
+Void M x384
+Focused Warp Disruption Script x1

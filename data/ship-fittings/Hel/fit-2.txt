@@ -1,0 +1,58 @@
+[Hel, Killmail 137809231]
+
+Fighter Support Unit II
+Fighter Support Unit II
+Fighter Support Unit II
+Auto Targeting System II
+Fighter Support Unit II
+Auto Targeting System II
+
+Shadow Serpentis Sensor Booster, Scan Resolution Script
+Sentient Omnidirectional Tracking Link, Tracking Speed Script
+500MN Abyssal Microwarpdrive
+Omnidirectional Tracking Link II, Tracking Speed Script
+Sentient Omnidirectional Tracking Link, Optimal Range Script
+Sentient Omnidirectional Tracking Link, Tracking Speed Script
+Shadow Serpentis Sensor Booster, Scan Resolution Script
+
+Mutated Drone Damage Amplifier
+Mutated Drone Damage Amplifier
+Mutated Drone Damage Amplifier
+Mutated Drone Damage Amplifier
+Shadow Serpentis Inertial Stabilizers
+
+Capital Hyperspatial Velocity Optimizer II
+Capital Hyperspatial Velocity Optimizer II
+Capital Hyperspatial Velocity Optimizer II
+
+
+Prototype Hyperspatial Accelerator, Navy Cap Booster 3200
+50000MN Microwarpdrive II, Navy Cap Booster 3200
+CONCORD Capital Shield Booster, Navy Cap Booster 3200
+Navy Cap Booster 3200 x136
+Drone Damage Amplifier II, Navy Cap Booster 3200
+Capacitor Flux Coil II, Navy Cap Booster 3200
+Networked Sensor Array, Navy Cap Booster 3200
+Dread Guristas Multispectrum Shield Hardener, Navy Cap Booster 3200
+IFFA Compact Damage Control, Navy Cap Booster 3200
+Dread Guristas EM Shield Hardener, Navy Cap Booster 3200
+Dread Guristas Drone Damage Amplifier, Navy Cap Booster 3200
+Auto Targeting System II, Navy Cap Booster 3200
+Rapid Deployment Charge x300
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Shield Command Burst II, Navy Cap Booster 3200
+Skirmish Command Burst II, Navy Cap Booster 3200
+Dread Guristas Cloaking Device, Navy Cap Booster 3200
+Shadow Serpentis Inertial Stabilizers, Navy Cap Booster 3200
+10000MN Monopropellant Enduring Afterburner, Navy Cap Booster 3200
+Multispectrum Shield Hardener II, Navy Cap Booster 3200
+Corpus X-Type Heavy Energy Neutralizer, Navy Cap Booster 3200
+Corpus X-Type Heavy Energy Neutralizer, Navy Cap Booster 3200
+Cap Booster 3200 x37
+Omnidirectional Tracking Enhancer II, Navy Cap Booster 3200
+Shadow Serpentis Sensor Booster, Navy Cap Booster 3200
+Drone Navigation Computer II, Navy Cap Booster 3200
+Dark Blood Large EMP Smartbomb, Navy Cap Booster 3200
+Dark Blood Large EMP Smartbomb, Navy Cap Booster 3200
+Omnidirectional Tracking Link II, Navy Cap Booster 3200
+Hydrogen Isotopes x127352

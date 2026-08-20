@@ -1,0 +1,30 @@
+[Vulture, Killmail 137858142]
+
+Shield Command Burst II, Active Shielding Charge
+Shield Command Burst II, Shield Extension Charge
+Improved Cloaking Device II
+Shield Command Burst II, Shield Harmonizing Charge
+Civilian Gatling Autocannon
+Small Tractor Beam II
+Information Command Burst II, Sensor Optimization Charge
+
+Large Shield Extender II
+Large Shield Extender II
+Pithum C-Type EM Shield Amplifier
+Pithum C-Type EM Shield Amplifier
+Explosive Shield Amplifier II
+100MN Afterburner II
+
+Damage Control II
+Power Diagnostic System II
+Power Diagnostic System II
+Power Diagnostic System II
+
+Medium Command Processor I
+Medium Command Processor I
+
+
+Shield Extension Charge x14654
+Shield Harmonizing Charge x14654
+Sensor Optimization Charge x14654
+Active Shielding Charge x14654

@@ -1,0 +1,34 @@
+[Tempest, Killmail 137866034]
+
+'Vehemence' Compact Large EMP Smartbomb
+'Notos' Compact Large Proton Smartbomb
+Heavy Infectious Scoped Energy Neutralizer
+Heavy Infectious Scoped Energy Neutralizer
+Heavy Infectious Scoped Energy Neutralizer
+Prototype Cloaking Device I
+Core Probe Launcher I
+Heavy Infectious Scoped Energy Neutralizer
+
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Fleeting Compact Stasis Webifier
+500MN Y-T8 Compact Microwarpdrive
+100MN Y-S8 Compact Afterburner
+Large Micro Jump Drive
+
+Type-D Restrained Overdrive Injector
+Compact Multispectrum Energized Membrane
+Type-D Restrained Overdrive Injector
+Warp Core Stabilizer I
+IFFA Compact Damage Control
+Type-D Restrained Overdrive Injector
+
+Large Hyperspatial Velocity Optimizer I
+Large Higgs Anchor I
+Large Hyperspatial Velocity Optimizer I
+
+
+Imperial Navy Acolyte x5
+Vespa EC-600 x5
+
+
+Sisters Core Scanner Probe x16

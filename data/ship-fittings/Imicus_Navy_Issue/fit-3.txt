@@ -1,0 +1,82 @@
+[Imicus Navy Issue, Killmail 137864794]
+
+Improved Cloaking Device II
+Core Probe Launcher I, Core Scanner Probe I
+
+Relic Analyzer II
+Data Analyzer II
+5MN Quad LiF Restrained Microwarpdrive
+
+Reactive Armor Hardener
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Small I-a Enduring Armor Repairer
+
+Small Transverse Bulkhead II
+Small Transverse Bulkhead II
+Small Transverse Bulkhead II
+
+
+Salvage Drone II x3
+Salvage Drone II x1
+
+
+Charred Micro Circuit x82
+Accelerant Decryptor x1
+Datacore - Laser Physics x10
+Jury Rigging x2
+Talocan Molecule Binder x1
+Laser Physics x1
+Null S x1000
+Tranquil Gamma Filament x1
+Burned Logic Circuit x47
+Calm Firestorm Filament x1
+Armor Plates x39
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+Talocan Partition Plates x1
+Intact Armor Plates x3
+Positron Cord x98
+Positron Cord x246
+Process Decryptor x3
+Talocan Stasis Inverter x1
+Takmahl Diamond Rod x1
+Contaminated Nanite Compound x33
+Elemental Crux x14
+Metal Scraps x1
+Power Circuit x6
+Datacore - Mechanical Engineering x4
+Datacore - Mechanical Engineering x1
+Guristas Graviton Hardening x1
+High-Tech Data Chip x1
+Parity Decryptor x4
+Defective Current Pump x62
+Takmahl Magnetic Slab x1
+Damaged Artificial Neural Network x56
+Noise-5 'Needlejack' Filament x4
+Artificial Neural Network x7
+Takmahl Gyro Ballast x1
+Interface Circuit x7
+Attainment Decryptor x1
+Micro Circuit x2
+Auxiliary Parts x58
+Nanite Compound x1
+LM-Composite Molecular Condenser x4
+Core Scanner Probe I x8
+Stasis Webifier II, Null S
+Symmetry Decryptor x3
+Talocan Solid Atomizer x1
+Calm Gamma Filament x2
+1MN Afterburner II, Null S
+Medium Micro Jump Drive Blueprint x1
+Carbon x10
+Carbon x2
+Augmentation Decryptor x2
+Armor Rigging x1
+Void S x954
+Small Cap Battery II, Null S
+Calm Dark Filament x1
+Tripped Power Circuit x7
+Tripped Power Circuit x76
+Fried Interface Circuit x133
+Fried Interface Circuit x10

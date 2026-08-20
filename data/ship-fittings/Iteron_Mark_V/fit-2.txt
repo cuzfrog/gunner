@@ -1,0 +1,49 @@
+[Iteron Mark V, Killmail 137868511]
+
+Prototype Cloaking Device I
+Interdiction Nullifier I
+
+Medium Shield Extender I
+Medium Shield Extender I
+EM Shield Hardener I
+Multispectrum Shield Hardener I
+
+Expanded Cargohold II
+Inertial Stabilizers II
+Inertial Stabilizers II
+Warp Core Stabilizer II
+Expanded Cargohold II
+
+Medium Cargohold Optimization I
+Medium Auxiliary Thrusters I
+Medium Cargohold Optimization I
+
+
+Thermosetting Polymer Reaction Formula x1
+Warrior I Blueprint x1
+Warrior I Blueprint x4
+Datacore - Electronic Engineering x5
+Sylramic Fibers Reaction Formula x1
+Sylramic Fibers Reaction Formula x1
+Oxy-Organic Solvents Reaction Formula x1
+Hexite Reaction Formula x1
+Valkyrie I Blueprint x1
+Valkyrie I Blueprint x9
+Tungsten Carbide Reaction Formula x1
+Tungsten Carbide Reaction Formula x1
+Fernite Alloy Reaction Formula x1
+Carbon Polymers Reaction Formula x1
+Sulfuric Acid Reaction Formula x1
+Reinforced Carbon Fiber Reaction Formula x2
+Reinforced Carbon Fiber x20000
+Ceramic Powder Reaction Formula x1
+Berserker I Blueprint x1
+Berserker I Blueprint x2
+Pressurized Oxidizers Reaction Formula x1
+Pressurized Oxidizers x20000
+Rolled Tungsten Alloy Reaction Formula x1
+Datacore - Graviton Physics x5
+Warrior II Blueprint x2
+Carbon Fiber Reaction Formula x1
+Fernite Carbide Reaction Formula x1
+Fernite Carbide Reaction Formula x1

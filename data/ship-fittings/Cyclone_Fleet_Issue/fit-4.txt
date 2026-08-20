@@ -1,0 +1,37 @@
+[Cyclone Fleet Issue, Killmail 137864075]
+
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Drone Link Augmentor I
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Drone Link Augmentor I
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+
+Multispectrum Shield Hardener II
+Large F-S9 Regolith Compact Shield Extender
+Multispectrum Shield Hardener II
+Large Shield Extender II
+100MN Monopropellant Enduring Afterburner
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Nanofiber Internal Structure II
+Ballistic Control System II
+
+Medium Hydraulic Bay Thrusters I
+Medium EM Shield Reinforcer II
+Medium Ancillary Current Router I
+
+
+Imperial Navy Infiltrator x2
+Imperial Navy Infiltrator x3
+
+
+Caldari Navy Nova Heavy Missile x2379
+Caldari Navy Nova Heavy Missile x3479
+Mjolnir Fury Heavy Missile x3213
+Caldari Navy Mjolnir Heavy Missile x2960
+Scourge Fury Heavy Missile x557

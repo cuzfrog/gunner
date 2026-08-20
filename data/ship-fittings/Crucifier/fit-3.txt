@@ -1,0 +1,22 @@
+[Crucifier, Killmail 137861941]
+
+DDO Scoped Tracking Disruptor I, Tracking Speed Disruption Script
+DDO Scoped Tracking Disruptor I, Optimal Range Disruption Script
+10MN Y-S8 Compact Afterburner
+DDO Scoped Tracking Disruptor I, Optimal Range Disruption Script
+
+Micro Auxiliary Power Core I
+F-89 Compact Signal Amplifier
+Micro Auxiliary Power Core I
+
+Small Particle Dispersion Projector I
+Small Ionic Field Projector I
+Small Particle Dispersion Projector I
+
+
+Missile Precision Disruption Script x3
+Missile Range Disruption Script x3
+Optimal Range Disruption Script x6
+Tracking Speed Disruption Script x1
+Tracking Speed Disruption Script x1
+C-IR Compact Guidance Disruptor, Missile Precision Disruption Script

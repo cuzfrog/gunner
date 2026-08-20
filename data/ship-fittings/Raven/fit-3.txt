@@ -1,0 +1,31 @@
+[Raven, Killmail 137868190]
+
+Prototype 'Arbalest' Torpedo Launcher
+'Noose' Cruise Missile Launcher, Scourge Cruise Missile
+Prototype 'Arbalest' Torpedo Launcher
+Prototype 'Arbalest' Torpedo Launcher
+Prototype 'Arbalest' Torpedo Launcher
+'Noose' Cruise Missile Launcher, Scourge Cruise Missile
+
+Large Cap Battery II
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+X-Large C5-L Compact Shield Booster
+Large Shield Extender II
+500MN Cold-Gas Enduring Microwarpdrive
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
+Capacitor Flux Coil II
+
+Large Semiconductor Memory Cell I
+Large Semiconductor Memory Cell I
+
+
+Caldari Navy Nova Torpedo x48
+Caldari Navy Inferno Torpedo x2488
+Caldari Navy Mjolnir Torpedo x1164
+Scourge Cruise Missile x7026

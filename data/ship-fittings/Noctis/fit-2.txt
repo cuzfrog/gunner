@@ -1,0 +1,71 @@
+[Noctis, Killmail 137857440]
+
+Salvager I
+Small Tractor Beam II
+Small Tractor Beam II
+Salvager I
+Salvager I
+Salvager I
+Small Tractor Beam II
+Improved Cloaking Device II
+
+Sensor Booster II, Scan Resolution Script
+50MN Quad LiF Restrained Microwarpdrive
+
+Signal Amplifier II
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+
+Medium Salvage Tackle II
+Medium Salvage Tackle II
+Medium Salvage Tackle II
+
+
+Hornet EC-300 x5
+
+
+Defensive Control Node x47
+Defensive Control Node x3
+Sleeper Data Library x170
+Fused Nanomechanical Engines x16
+Fused Nanomechanical Engines x8
+Logic Circuit x1
+Electromechanical Hull Sheeting x95
+Electromechanical Hull Sheeting x671
+Jump Drive Control Nexus x31
+Jump Drive Control Nexus x3
+Ancient Radar Decorrelator x32
+Neural Network Analyzer x185
+Neurovisual Input Matrix x558
+Neurovisual Input Matrix x147
+Salvager I
+Powdered C-540 Graphite x112
+Powdered C-540 Graphite x16
+Power Circuit x12
+Cartesian Temporal Coordinator x15
+Cartesian Temporal Coordinator x20
+Small Tractor Beam I
+Central System Controller x45
+Central System Controller x5
+Synthetic Aperture Ladar Receiver x5
+Emergent Combat Analyzer x4
+Emergent Combat Analyzer x11
+Resonance Calibration Matrix x27
+Modified Fluid Router x425
+Modified Fluid Router x44
+Reinforced Metal Scraps x104
+Reinforced Metal Scraps x211
+Faraday Force Magnetometer x19
+'Wetu' Mobile Depot x1
+Ancient Coordinates Database x118
+Mobile Tractor Unit x1
+Thermoelectric Catalysts x8
+Thermoelectric Catalysts x11
+Emergent Combat Intelligence x24
+Emergent Combat Intelligence x4
+Sleeper Drone AI Nexus x33
+Melted Nanoribbons x42
+Melted Nanoribbons x2
+Heuristic Selfassemblers x27
+Heuristic Selfassemblers x8
+Scorched Microgravimeter x39

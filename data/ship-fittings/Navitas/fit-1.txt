@@ -1,0 +1,18 @@
+[Navitas, Killmail 137857182]
+
+Civilian Gatling Railgun
+Core Probe Launcher I
+
+Civilian Relic Analyzer
+Civilian Data Analyzer
+
+Civilian Mining Laser Upgrade
+
+
+Core Scanner Probe I x8
+Gas Passkey x1
+Civilian Data Analyzer, Core Scanner Probe I
+Core Probe Launcher I, Core Scanner Probe I
+Expanded Probe Launcher I, Core Scanner Probe I
+Minmatar Frigate x1
+Civilian Relic Analyzer, Core Scanner Probe I

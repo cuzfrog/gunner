@@ -1,0 +1,342 @@
+[Nomad, Killmail 137808891]
+
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+
+
+Valkyrie SW-600 x7
+Vespa EC-600 x17
+Hammerhead II x182
+Hornet EC-300 x38
+Ogre I x33
+Acolyte II x5
+Hobgoblin SD-300 x5
+Ogre II x8
+Warrior SW-300 x10
+Warden II x5
+Hobgoblin II x133
+Valkyrie II x5
+Warrior II x39
+
+
+Depleted Uranium M x100
+Variegated Asteroid Mining Crystal Type B II x4
+Variegated Asteroid Mining Crystal Type B II x161
+Arbalest Compact Light Missile Launcher, Depleted Uranium M
+Medium Compact Pb-Acid Cap Battery, Depleted Uranium M
+Heavy Ion Blaster II, Depleted Uranium M
+Cladistic-15 'Krai Veles' Filament x34
+5MN Cold-Gas Enduring Microwarpdrive, Depleted Uranium M
+Gistum B-Type 50MN Microwarpdrive, Depleted Uranium M
+Suppressed Targeting System I, Depleted Uranium M
+Rocket Launcher II, Depleted Uranium M
+Gatling Pulse Laser II, Depleted Uranium M
+Smashed Trigger Unit x42
+Data Analyzer II, Depleted Uranium M
+Proximity-15 'Extraction' Filament x28
+Heat Sink II, Depleted Uranium M
+Iridium Charge M x7663
+Neural Network Analyzer x84
+650mm Medium Carbine Howitzer I, Depleted Uranium M
+Co-Processor II, Depleted Uranium M
+Mobile Tractor Unit x1
+Ice Harvester Upgrade II, Depleted Uranium M
+Drone Damage Amplifier II, Depleted Uranium M
+Compact EM Shield Amplifier, Depleted Uranium M
+Loki Defensive - Covert Reconfiguration x4
+Porpoise x1
+280mm Howitzer Artillery II, Depleted Uranium M
+Caldari Navy Large Shield Extender, Depleted Uranium M
+Medium Ancillary Shield Booster, Depleted Uranium M
+J5 Enduring Warp Disruptor, Depleted Uranium M
+Inferno Rage Heavy Assault Missile x21050
+Compact Thermal Shield Amplifier, Depleted Uranium M
+Drone Link Augmentor II, Depleted Uranium M
+Titanium Sabot M x200
+Trigger Unit x10
+Medium C5-L Compact Shield Booster, Depleted Uranium M
+Dual 150mm Prototype Gauss Gun, Depleted Uranium M
+5MN Quad LiF Restrained Microwarpdrive, Depleted Uranium M
+Caldari Navy Nova Heavy Assault Missile x2415
+Multispectrum Energized Membrane II, Depleted Uranium M
+Industrial Cynosural Field Generator, Depleted Uranium M
+Tremor S x4702
+Shield Command Burst II, Depleted Uranium M
+Svipul x2
+Festival Launcher, Depleted Uranium M
+Synthetic Aperture Ladar Receiver x13
+Nova Rage Heavy Assault Missile x9334
+Scan Rangefinding Array II, Depleted Uranium M
+Ancient Coordinates Database x22
+Medium Engine Thermal Shielding II, Depleted Uranium M
+Navy Cap Booster 400 x162
+Phased Plasma M x100
+Ice Command Center x1
+Prospect x1
+Foundation Wisdom Background x7
+Strip Miner I, Depleted Uranium M
+Oceanic Command Center x1
+Cap Recharger II, Depleted Uranium M
+720mm Carbine Howitzer I, Depleted Uranium M
+Peripheral Compact Target Painter, Depleted Uranium M
+Central System Controller x2
+Thermoelectric Catalysts x2
+Medium Murky Compact Remote Shield Booster, Depleted Uranium M
+Cap Booster 50 x50
+Phased Scoped Target Painter, Depleted Uranium M
+Multispectrum Shield Hardener II, Depleted Uranium M
+Nova Javelin Heavy Assault Missile x2230
+Void M x4945
+Medium Capacitor Control Circuit II, Depleted Uranium M
+Proteus Offensive - Drone Synthesis Projector x2
+Scorched Microgravimeter x4
+Medium Industrial Core I, Depleted Uranium M
+Large Shield Extender II, Depleted Uranium M
+True Sansha Power Diagnostic System, Depleted Uranium M
+Drone Cerebral Fragment x11
+Mjolnir Rage Heavy Assault Missile x2473
+Light Neutron Blaster II, Depleted Uranium M
+Multispectral ECM II, Depleted Uranium M
+Cap Booster 800 x10
+Metal Scraps x12
+Navy Cap Booster 50 x149
+Domination Silver Tag x1
+Inferno Javelin Heavy Assault Missile x21208
+Medium Core Defense Field Extender II, Depleted Uranium M
+Medium Dynamic Fuel Valve II, Depleted Uranium M
+Active Shielding Charge x5205
+Mjolnir Light Missile x10084
+Medium Warhead Rigor Catalyst II, Depleted Uranium M
+Scorch S x18
+Scorch S x3
+Compact Thermal Shield Hardener, Depleted Uranium M
+Mining Equipment Preservation Charge x10000
+Drone Navigation Computer II, Depleted Uranium M
+Neurovisual Input Matrix x65
+Overdrive Injector System II, Depleted Uranium M
+Micro Jump Field Generator, Depleted Uranium M
+Caldari Navy Antimatter Charge M x5420
+Artificial Neural Network x7
+Dread Guristas Warp Scrambler, Depleted Uranium M
+Powdered C-540 Graphite x43
+Republic Fleet Large Cap Battery, Depleted Uranium M
+Covert Ops Cloaking Device II, Depleted Uranium M
+Pithum B-Type Medium Remote Shield Booster, Depleted Uranium M
+Succubus x1
+Scourge Rage Rocket x2000
+Sisters Core Scanner Probe x108
+Caldari Navy Scourge Heavy Assault Missile x1857
+Barrage M x7156
+Mjolnir Auto-Targeting Heavy Missile I x100
+Hail M x6500
+Imperial Navy Major Insignia I x11
+Loki Propulsion - Intercalated Nanofibers x1
+Sisters Core Probe Launcher, Depleted Uranium M
+Induced Compact Multispectral ECM, Depleted Uranium M
+Home-5 'Pochven' Filament x10
+Conflagration S x16
+Conflagration S x3
+Javelin S x9991
+Small Compact Pb-Acid Cap Battery, Depleted Uranium M
+Compact Kinetic Shield Amplifier, Depleted Uranium M
+Loki Offensive - Launcher Efficiency Configuration x1
+Fleeting Compact Stasis Webifier, Depleted Uranium M
+Loki Core - Dissolution Sequencer x1
+400mm Rolled Tungsten Compact Plates, Depleted Uranium M
+Scan Resolution Script x4
+Plasma Command Center x1
+Emergent Combat Analyzer x6
+Hail S x8640
+Inferno Light Missile x2313
+Malediction x1
+Initiated Compact Warp Scrambler, Depleted Uranium M
+Missile Guidance Enhancer II, Depleted Uranium M
+Medium Asteroid Ore Compressor I, Depleted Uranium M
+EM Shield Amplifier II, Depleted Uranium M
+DDO Scoped Tracking Disruptor I, Depleted Uranium M
+Gas Cloud Harvester II, Depleted Uranium M
+Republic Fleet Firetail x2
+Expanded Cargohold II, Depleted Uranium M
+500MN Cold-Gas Enduring Microwarpdrive, Depleted Uranium M
+Cynosural Field Generator I, Depleted Uranium M
+Counterbalanced Compact Gyrostabilizer, Depleted Uranium M
+Tracking Speed Script x1
+10MN Monopropellant Enduring Afterburner, Depleted Uranium M
+Warp Disruptor II, Depleted Uranium M
+Emergent Combat Intelligence x1
+Nova Heavy Missile x200
+Republic Fleet EMP M x28110
+Mjolnir Rage Rocket x2000
+1600mm Rolled Tungsten Compact Plates, Depleted Uranium M
+Complex Asteroid Mining Crystal Type B II x2
+Complex Asteroid Mining Crystal Type B II x14
+Targeting Range Dampening Script x5
+Gas Command Center x1
+'Meditation' Medium Armor Repairer I, Depleted Uranium M
+Medium Gas Compressor I, Depleted Uranium M
+Melted Nanoribbons x10
+Limited 'Limos' Rapid Light Missile Launcher, Depleted Uranium M
+Imperial Navy Colonel Insignia I x7
+Coherent Asteroid Mining Crystal Type B II x20
+125mm Railgun II, Depleted Uranium M
+Reactor Control Unit II, Depleted Uranium M
+Ligature Integrated Analyzer, Depleted Uranium M
+Sleipnir x1
+Sisters Combat Scanner Probe x16
+Assault Damage Control II, Depleted Uranium M
+Proteus Core - Augmented Fusion Reactor x1
+Fused Nanomechanical Engines x11
+Ice Harvester II, Depleted Uranium M
+X-Large Ancillary Shield Booster, Depleted Uranium M
+Medium Rocket Fuel Cache Partition II, Depleted Uranium M
+Electromechanical Hull Sheeting x122
+Small I-a Enduring Armor Repairer, Depleted Uranium M
+Simple Asteroid Mining Crystal Type B II x16
+Proteus x2
+Gyrostabilizer II, Depleted Uranium M
+Heuristic Selfassemblers x1
+Cartesian Temporal Coordinator x1
+Burned Logic Circuit x71
+Modified Fluid Router x72
+Power Diagnostic System II, Depleted Uranium M
+Jump Drive Control Nexus x2
+Tracking Enhancer II, Depleted Uranium M
+Halting Compact Ladar ECM, Depleted Uranium M
+Imperial Navy Multispectrum Energized Membrane, Depleted Uranium M
+Sleeper Data Library x84
+Mining Survey Chipset II, Depleted Uranium M
+Medium Auxiliary Nano Pump I, Depleted Uranium M
+Stasis Webifier II, Depleted Uranium M
+Signal Amplifier II, Depleted Uranium M
+Micro Auxiliary Power Core II, Depleted Uranium M
+Charred Micro Circuit x26
+Domination Carbonized Lead S x1000
+10MN Y-S8 Compact Afterburner, Depleted Uranium M
+Tracking Computer II, Depleted Uranium M
+Mining Laser Field Enhancement Charge x8555
+Cap Booster 400 x31
+Loki Offensive - Support Processor x3
+Domination Copper Tag x3
+M51 Benefactor Compact Shield Recharger, Depleted Uranium M
+Thermal Shield Amplifier II, Depleted Uranium M
+150mm Light AutoCannon II, Depleted Uranium M
+Drone Capillary Fluid x34
+Enormous Freight Container x5
+Mining Foreman Burst II, Depleted Uranium M
+Medium Automated Structural Restoration, Depleted Uranium M
+Heavy Water x79393
+Faraday Force Magnetometer x4
+Thruster Console x30
+Armor Plates x1
+5MN Y-T8 Compact Microwarpdrive, Depleted Uranium M
+Ballistic Control System II, Depleted Uranium M
+1MN Y-S8 Compact Afterburner, Depleted Uranium M
+Small Tractor Beam II, Depleted Uranium M
+Proteus Propulsion - Hyperspatial Optimization x2
+Crown Imperial Firework x700
+Scourge Rage Heavy Assault Missile x5185
+Medium Auxiliary Thrusters II, Depleted Uranium M
+Warp Scrambler II, Depleted Uranium M
+Scourge Heavy Assault Missile x100
+Resonance Calibration Matrix x4
+Nanite Repair Paste x1260
+Abyssal Warp Scrambler, Depleted Uranium M
+Abyssal Warp Scrambler, Depleted Uranium M
+Improved Cloaking Device II, Depleted Uranium M
+Spike S x9070
+Capacitor Power Relay II, Depleted Uranium M
+Dread Guristas Drone Damage Amplifier, Depleted Uranium M
+X5 Enduring Stasis Webifier, Depleted Uranium M
+Umbra Scoped Radar ECM, Depleted Uranium M
+Upgraded 'Malkuth' Heavy Assault Missile Launcher I, Depleted Uranium M
+Carbon x1
+Lava Command Center x1
+Mining Laser Optimization Charge x8555
+Scourge Heavy Missile x100
+Inferno Rage Rocket x1997
+Domination Stasis Webifier, Depleted Uranium M
+Damage Control II, Depleted Uranium M
+EMP S x100
+Miner II, Depleted Uranium M
+Abyssal Warp Disruptor, Depleted Uranium M
+Inferno Auto-Targeting Heavy Missile I x200
+Nanofiber Internal Structure II, Depleted Uranium M
+Fried Interface Circuit x66
+Defensive Control Node x3
+Salvager II, Depleted Uranium M
+Pith X-Type Large Shield Booster, Depleted Uranium M
+Compact EM Shield Hardener, Depleted Uranium M
+1MN Monopropellant Enduring Afterburner, Depleted Uranium M
+Huginn x1
+Inertial Stabilizers II, Depleted Uranium M
+Temperate Command Center x1
+Domination Nuclear S x2000
+Outrider x2
+Small Gremlin Compact Energy Neutralizer, Depleted Uranium M
+Alloyed Tritanium Bar x110
+Mining Laser Efficiency Charge x8555
+Republic Fleet Phased Plasma S x9996
+Reinforced Bulkheads II, Depleted Uranium M
+200mm AutoCannon II, Depleted Uranium M
+Imperial Navy Sergeant Insignia III x31
+Logic Circuit x10
+Mega Pulse Laser II, Depleted Uranium M
+Caldari Navy Mjolnir Heavy Assault Missile x2453
+Medium Warhead Flare Catalyst II, Depleted Uranium M
+Medium Processor Overclocking Unit I, Depleted Uranium M
+Null M x14515
+Storm Command Center x1
+Dual 180mm AutoCannon II, Depleted Uranium M
+Republic Fleet Depleted Uranium S x1484
+Proteus Defensive - Covert Reconfiguration x2
+Fourier Compact Tracking Enhancer, Depleted Uranium M
+Single-crystal Superalloy I-beam x2
+Liquid Ozone x2538
+425mm AutoCannon II, Depleted Uranium M
+Arch Angel Carbonized Lead S x1000
+Thukker Large Cap Battery, Depleted Uranium M
+Quake S x5000
+Loki x4
+Capacitor Flux Coil II, Depleted Uranium M
+Heavy Assault Missile Launcher II, Depleted Uranium M
+Scan Pinpointing Array II, Depleted Uranium M
+Proteus Core - Friction Extension Processor x1
+Pacifier x1
+Modulated Strip Miner II, Depleted Uranium M
+Prototype Cloaking Device I, Depleted Uranium M
+Damaged Artificial Neural Network x87
+Shield Harmonizing Charge x5205
+Sensor Booster II, Depleted Uranium M
+Hulk x5
+Medium Targeting Systems Stabilizer II, Depleted Uranium M
+Gas Cloud Scoop II, Depleted Uranium M
+Nuclear M x200
+Federation Navy 100MN Afterburner, Depleted Uranium M
+Skiff x2
+Parallel Enduring Target Painter, Depleted Uranium M
+Prowler x3
+Medium Ancillary Current Router II, Depleted Uranium M
+Loki Core - Augmented Nuclear Reactor x3
+50MN Cold-Gas Enduring Microwarpdrive, Depleted Uranium M
+Reinforced Metal Scraps x65
+Passive Targeting Array I, Depleted Uranium M
+Modulated Deep Core Miner II, Depleted Uranium M
+Phased Muon Scoped Sensor Dampener, Depleted Uranium M
+Relic Analyzer II, Depleted Uranium M
+Mjolnir Javelin Heavy Assault Missile x1135
+Federation Navy 10MN Afterburner, Depleted Uranium M
+Scourge Javelin Heavy Assault Missile x3295
+J5b Enduring Warp Scrambler, Depleted Uranium M
+Loki Propulsion - Wake Limiter x3
+Barrage S x31463
+Jaguar x1
+Sleeper Drone AI Nexus x8
+Mining Laser Upgrade II, Depleted Uranium M
+Micro Circuit x2
+Barren Command Center x1
+50MN Y-T8 Compact Microwarpdrive, Depleted Uranium M
+Tripped Power Circuit x30
+Phased Plasma S x100
+Ice Mining Laser II, Depleted Uranium M
+Hydrogen Isotopes x346704

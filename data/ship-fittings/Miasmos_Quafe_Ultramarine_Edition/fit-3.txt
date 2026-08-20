@@ -1,0 +1,156 @@
+[Miasmos Quafe Ultramarine Edition, Killmail 88862885]
+
+Medium Shield Extender I
+5MN Microwarpdrive I
+Medium Shield Extender I
+Medium Shield Extender I
+
+Type-D Restrained Overdrive Injector
+Type-D Restrained Overdrive Injector
+Type-D Restrained Overdrive Injector
+
+
+Acolyte I x111
+Warrior I x1
+Hammerhead I x2
+Mining Drone I x21
+Hobgoblin I x5
+Salvage Drone I x17
+
+
+Mjolnir Rocket x200
+Suppressed Targeting System I, Mjolnir Rocket
+1MN Afterburner I, Mjolnir Rocket
+Focused Medium Beam Laser I, Mjolnir Rocket
+Sodium Firework CXIV x300
+Remote Sensor Booster I, Mjolnir Rocket
+'Vehemence' Compact Small EMP Smartbomb, Mjolnir Rocket
+Small Knave Scoped Energy Nosferatu, Mjolnir Rocket
+J5 Enduring Warp Disruptor, Mjolnir Rocket
+Ultraviolet S x3
+Inferno Rocket x100
+Civilian Stasis Webifier, Mjolnir Rocket
+Particle Bore Compact Mining Laser, Mjolnir Rocket
+Prototype Iris Probe Launcher, Mjolnir Rocket
+Festival Launcher, Mjolnir Rocket
+Fleeting Compact Stasis Webifier, Mjolnir Rocket
+125mm Gatling AutoCannon I, Mjolnir Rocket
+Council Diplomatic Shuttle x1
+Tracking Computer I, Mjolnir Rocket
+Hypnos Compact Signal Distortion Amplifier I, Mjolnir Rocket
+Microwave S x4
+Peripheral Compact Target Painter, Mjolnir Rocket
+Miner I, Mjolnir Rocket
+F-12 Enduring Tracking Computer, Mjolnir Rocket
+Civilian Warp Disruptor, Mjolnir Rocket
+Core Scanner Probe I x11
+'Basic' Layered Energized Membrane, Mjolnir Rocket
+Compact Explosive Shield Hardener, Mjolnir Rocket
+Remote Tracking Computer I, Mjolnir Rocket
+Standard S x5
+Rocket Launcher I, Mjolnir Rocket
+1MN Civilian Afterburner, Mjolnir Rocket
+Gas Cloud Scoop II, Mjolnir Rocket
+Multifrequency S x5
+Remote Sensor Dampener I, Mjolnir Rocket
+Sensor Booster I, Mjolnir Rocket
+Ta3 Compact Ship Scanner, Mjolnir Rocket
+Conductive Polymer x2
+Iron Charge S x207
+Apotheosis x1
+Small Radiative Scoped Remote Capacitor Transmitter, Mjolnir Rocket
+Small Tractor Beam I, Mjolnir Rocket
+Civilian Relic Analyzer, Mjolnir Rocket
+Induced Compact Multispectral ECM, Mjolnir Rocket
+Infrared S x7
+Explosive Shield Hardener I, Mjolnir Rocket
+Contaminated Lorentz Fluid x1
+Civilian Data Analyzer, Mjolnir Rocket
+Inferno Light Missile x157
+Alumel-Wired Enduring Sensor Booster, Mjolnir Rocket
+Metal Scraps x169
+Smashed Trigger Unit x1
+Melted Capacitor Console x1
+Miner II, Mjolnir Rocket
+Small Focused Modulated Energy Beam I, Mjolnir Rocket
+Compact Kinetic Shield Hardener, Mjolnir Rocket
+Dual Light Beam Laser I, Mjolnir Rocket
+Small Coaxial Compact Remote Armor Repairer, Mjolnir Rocket
+Small 'Hope' Hull Reconstructor I, Mjolnir Rocket
+Small Focused Afocal Pulse Laser I, Mjolnir Rocket
+Ship Scanner I, Mjolnir Rocket
+Civilian Small Remote Armor Repairer, Mjolnir Rocket
+Sanshas Microwave S x1
+Small Proton Smartbomb I, Mjolnir Rocket
+Small I-a Enduring Armor Repairer, Mjolnir Rocket
+Small Remote Capacitor Transmitter I, Mjolnir Rocket
+Barium Firework x200
+Burned Logic Circuit x15
+Small F-RX Compact Capacitor Booster, Mjolnir Rocket
+Armor Plates x3
+Tracking Disruptor I, Mjolnir Rocket
+10MN Afterburner I, Mjolnir Rocket
+Small Graviton Smartbomb I, Mjolnir Rocket
+Charred Micro Circuit x1
+Cargo Scanner I, Mjolnir Rocket
+Kernite Mining Crystal I x8
+Small Armor Repairer I, Mjolnir Rocket
+Small Gremlin Compact Energy Neutralizer, Mjolnir Rocket
+Mark I Compact Reactor Control Unit, Mjolnir Rocket
+Sodium Firework x200
+Small Capacitor Booster I, Mjolnir Rocket
+1MN Y-S8 Compact Afterburner, Mjolnir Rocket
+Small Hull Repairer I, Mjolnir Rocket
+EP-S Gaussian Scoped Mining Laser, Mjolnir Rocket
+Eutectic Compact Cap Recharger, Mjolnir Rocket
+Civilian Gatling Pulse Laser, Mjolnir Rocket
+Broken Drone Transceiver x4
+Small Cap Battery I, Mjolnir Rocket
+Kernite x16
+X5 Enduring Stasis Webifier, Mjolnir Rocket
+Malfunctioning Shield Emitter x1
+Medium Capacitor Booster I, Mjolnir Rocket
+Burst Jammer I, Mjolnir Rocket
+Small Solace Scoped Remote Armor Repairer, Mjolnir Rocket
+Dual Afocal Light Laser I, Mjolnir Rocket
+Small Compact Pb-Acid Cap Battery, Mjolnir Rocket
+Copper Firework x200
+Radio S x5
+Fried Interface Circuit x5
+Warp Disruptor I, Mjolnir Rocket
+Gatling Anode Particle Stream I, Mjolnir Rocket
+Copper Firework CXIV x300
+Gatling Pulse Laser I, Mjolnir Rocket
+Small I-ax Enduring Remote Armor Repairer, Mjolnir Rocket
+Alloyed Tritanium Bar x1
+Civilian Shield Booster, Mjolnir Rocket
+'Concussion' Compact Small Graviton Smartbomb, Mjolnir Rocket
+Small Focused Modulated Pulse Energy Beam I, Mjolnir Rocket
+Dual Afocal Pulse Laser I, Mjolnir Rocket
+'Micro' Cap Battery, Mjolnir Rocket
+Nova Rocket x191
+Civilian Salvager, Mjolnir Rocket
+Contaminated Nanite Compound x7
+Civilian Miner, Mjolnir Rocket
+Civilian Miner, Mjolnir Rocket
+Stasis Webifier I, Mjolnir Rocket
+Defective Current Pump x1
+Baker Nunn Enduring Tracking Disruptor I, Mjolnir Rocket
+Gravimetric ECM I, Mjolnir Rocket
+Small Energy Neutralizer I, Mjolnir Rocket
+Languid Enduring Ladar ECM, Mjolnir Rocket
+Mjolnir Light Missile x350
+Small Energy Nosferatu I, Mjolnir Rocket
+Thermal Shield Hardener I, Mjolnir Rocket
+Gas Cloud Scoop I, Mjolnir Rocket
+Civilian Armor Repairer, Mjolnir Rocket
+Titanium Sabot S x7
+Gatling Afocal Laser I, Mjolnir Rocket
+Barium Firework CXIV x300
+J5b Enduring Warp Scrambler, Mjolnir Rocket
+Tangled Power Conduit x4
+Small Focused Modal Pulse Laser I, Mjolnir Rocket
+Small ACM Compact Armor Repairer, Mjolnir Rocket
+Core Probe Launcher I, Mjolnir Rocket
+Multispectral ECM I, Mjolnir Rocket
+Tripped Power Circuit x3

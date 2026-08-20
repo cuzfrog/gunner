@@ -1,0 +1,55 @@
+[Rorqual, Killmail 137812140]
+
+Shield Command Burst II, Shield Extension Charge
+Imperial Navy Large EMP Smartbomb
+Imperial Navy Large EMP Smartbomb
+Mining Foreman Burst II, Mining Laser Field Enhancement Charge
+Mining Foreman Burst II, Mining Laser Optimization Charge
+Capital Asteroid Ore Compressor I
+Pulse Activated Nexus Invulnerability Core
+Capital Industrial Core II
+
+Pith X-Type Shield Boost Amplifier
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital Ancillary Shield Booster, Cap Booster 3200
+Pithum C-Type Multispectrum Shield Hardener
+Capital Capacitor Booster II, Navy Cap Booster 3200
+CONCORD Capital Shield Booster
+Pithum C-Type Multispectrum Shield Hardener
+
+Caldari Navy Power Diagnostic System
+Reactor Control Unit II
+Reactor Control Unit II
+Shadow Serpentis Damage Control
+
+Capital EM Shield Reinforcer II
+Capital Core Defense Capacitor Safeguard II
+Capital Core Defense Capacitor Safeguard II
+
+
+Acolyte II x10
+Caldari Navy Warden x1
+Caldari Navy Warden x3
+Valkyrie II x8
+Valkyrie II x2
+Federation Navy Garde x15
+Republic Fleet Berserker x6
+Infiltrator II x17
+Vespa II x5
+Warrior II x10
+Republic Fleet Bouncer x5
+
+
+Zainou 'Gnome' Shield Management SM-705 x1
+Heavy Water x64707
+Cap Booster 3200 x85
+Shield Extension Charge x896
+Mining Laser Field Enhancement Charge x10039
+Zainou 'Gnome' Shield Operation SP-905 x1
+Nanite Repair Paste x1313
+Mining Laser Optimization Charge x10031
+Agency 'Hardshell' TB7 Dose III x2
+Synth Blue Pill Booster x2
+Heavy Water x2000
+Oxygen Isotopes x179603
+Heavy Water x86559

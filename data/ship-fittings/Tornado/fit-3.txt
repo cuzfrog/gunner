@@ -1,0 +1,31 @@
+[Tornado, Killmail 137868294]
+
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+
+Tracking Computer II, Optimal Range Script
+Sensor Booster II, Targeting Range Script
+Tracking Computer II, Optimal Range Script
+Medium Micro Jump Drive
+Sensor Booster II, Targeting Range Script
+
+Inertial Stabilizers II
+Inertial Stabilizers II
+Gyrostabilizer II
+Reactor Control Unit II
+
+Medium Projectile Collision Accelerator I
+Medium Ionic Field Projector II
+Medium Hyperspatial Velocity Optimizer II
+
+
+Tracking Speed Script x2
+Republic Fleet Fusion L x840
+Republic Fleet EMP L x928
+Scan Resolution Script x2

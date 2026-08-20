@@ -1,0 +1,60 @@
+[Revenant, Killmail 129746511]
+
+Strategos' Modified Fighter Support Unit
+Strategos' Modified Fighter Support Unit
+Strategos' Modified Fighter Support Unit
+Unit P-343554's Modified Fighter Support Unit
+Unit P-343554's Modified Fighter Support Unit
+Strategos' Modified Fighter Support Unit
+
+Unit P-343554's Modified Omnidirectional Tracking Link, Optimal Range Script
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Cormack's Modified Sensor Booster, Scan Resolution Script
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Core X-Type 500MN Microwarpdrive
+
+Shadow Serpentis Inertial Stabilizers
+Mutated Drone Damage Amplifier
+Mutated Drone Damage Amplifier
+Experimental Hyperspatial Accelerator
+Mutated Drone Damage Amplifier
+Shadow Serpentis Inertial Stabilizers
+
+Capital Hyperspatial Velocity Optimizer II
+Capital Hyperspatial Velocity Optimizer II
+Capital Hyperspatial Velocity Optimizer II
+
+
+Enduring Conductors x23
+Restrained Compounds x29
+Helium Isotopes x188078
+Enduring Electronics x25
+Ample Compounds x21
+Ample Electronics x46
+Compact Compounds x68
+Ample Conductors x93
+Restrained Conductors x28
+Scoped Compounds x41
+Compact Electronics x21
+Scoped Electronics x31
+Scan Resolution Script x2
+Pithum A-Type Multispectrum Shield Hardener, Scan Resolution Script
+Tracking Speed Script x5
+Sentient Sensor Booster, Scan Resolution Script
+ECCM Script x1
+ECCM Script x2
+Drone Navigation Computer II, Scan Resolution Script
+Drone Navigation Computer II, Scan Resolution Script
+Mobile Depot x1
+Pith X-Type EM Shield Hardener, Scan Resolution Script
+Inertial Stabilizers II, Scan Resolution Script
+Optimal Range Script x1
+Optimal Range Script x4
+Pith X-Type Kinetic Shield Hardener, Scan Resolution Script
+Experimental Hyperspatial Accelerator, Scan Resolution Script
+Experimental Hyperspatial Accelerator, Scan Resolution Script
+Shadow Serpentis Inertial Stabilizers, Scan Resolution Script
+Helium Isotopes x152797
+Nestor x1

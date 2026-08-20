@@ -1,0 +1,45 @@
+[Nyx, Killmail 137732724]
+
+Fighter Support Unit II
+Armor Command Burst II, Armor Reinforcement Charge
+Armor Command Burst II, Armor Energizing Charge
+Energy Neutralization Burst Projector
+Fighter Support Unit II
+Networked Sensor Array
+
+10000MN Afterburner II
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital Capacitor Booster II
+Shadow Serpentis Sensor Booster
+Sentient Drone Navigation Computer
+
+CONCORD 25000mm Steel Plates
+Corpum A-Type Multispectrum Energized Membrane
+Syndicate Damage Control
+CONCORD 25000mm Steel Plates
+Centum A-Type Multispectrum Energized Membrane
+Corpum A-Type Multispectrum Energized Membrane
+CONCORD 25000mm Steel Plates
+
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+
+
+Armor Energizing Charge x300
+Cap Booster 3200 x55
+Navy Cap Booster 3200 x135
+Antipharmakon Aeolis x3
+Armor Reinforcement Charge x300
+Rapid Repair Charge x300
+Armored Command Mindlink x1
+Antipharmakon Aeolis x1
+ECCM Script x1
+Heavy Water x700
+Antipharmakon Kosybo x1
+Nanite Repair Paste x380
+Inherent Implants 'Squire' Capacitor Management EM-806 x1
+Agency 'Pyrolancea' DB7 Dose III x1
+Synth Mindflood Booster x1
+Heavy Water x5954
+Prowler x1

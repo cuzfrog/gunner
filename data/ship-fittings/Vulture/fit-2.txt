@@ -1,0 +1,40 @@
+[Vulture, Killmail 137855280]
+
+Shield Command Burst II, Active Shielding Charge
+Information Command Burst I, Sensor Optimization Charge
+Shield Command Burst II, Shield Extension Charge
+Shield Command Burst II, Shield Harmonizing Charge
+Auto Targeting System I
+Auto Targeting System I
+Civilian Gatling Railgun
+
+Large Shield Extender II
+50MN Y-T8 Compact Microwarpdrive
+Multispectrum Shield Hardener II
+Target Painter II
+EM Shield Amplifier II
+Large Shield Extender II
+
+Damage Control II
+Power Diagnostic System II
+Power Diagnostic System II
+Power Diagnostic System II
+
+Medium Command Processor I
+Medium Command Processor I
+
+
+Warrior I x3
+Warrior I x2
+
+
+Cladistic-15 'Krai Perun' Filament x2
+Active Shielding Charge x900
+Proximity-15 'Extraction' Filament x1
+Mobile Tractor Unit x1
+Home-15 'Pochven' Filament x2
+Shield Extension Charge x900
+Cladistic-15 'Krai Svarog' Filament x3
+Shield Harmonizing Charge x900
+Cladistic-15 'Krai Veles' Filament x3
+Sensor Optimization Charge x900

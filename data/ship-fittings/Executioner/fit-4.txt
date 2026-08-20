@@ -1,0 +1,14 @@
+[Executioner, Killmail 137864884]
+
+Gatling Pulse Laser I, Radio S
+Small Gremlin Compact Energy Neutralizer
+Gatling Pulse Laser I, Radio S
+Gatling Pulse Laser I, Radio S
+
+1MN Afterburner I
+Stasis Webifier I
+Warp Scrambler I
+
+Damage Control I
+Small Armor Repairer I
+Heat Sink I

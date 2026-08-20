@@ -1,0 +1,54 @@
+[Armageddon Navy Issue, Killmail 137824694]
+
+'Arbalest' Cruise Launcher I, Guristas Inferno Cruise Missile
+'Arbalest' Rapid Heavy Missile Launcher I, Guristas Nova Heavy Missile
+Heavy Knave Scoped Energy Nosferatu
+'Arbalest' Rapid Heavy Missile Launcher I, Guristas Nova Heavy Missile
+Heavy Infectious Scoped Energy Neutralizer
+'Arbalest' Rapid Heavy Missile Launcher I, Guristas Nova Heavy Missile
+'Arbalest' Rapid Heavy Missile Launcher I, Guristas Nova Heavy Missile
+
+Warp Scrambler II
+Heavy Jigoro Enduring Stasis Grappler
+Fleeting Compact Stasis Webifier
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+100MN Monopropellant Enduring Afterburner
+
+Large Armor Repairer II
+Ballistic Control System II
+Corelum C-Type EM Energized Membrane
+Corpum C-Type Thermal Energized Membrane
+Damage Control II
+True Sansha Kinetic Energized Membrane
+Large Abyssal Armor Plates
+
+Large Warhead Calefaction Catalyst I
+Large Trimark Armor Pump I
+Large Explosive Armor Reinforcer I
+
+
+Wasp EC-900 x1
+Salvage Drone I x1
+'Integrated' Hobgoblin x3
+'Integrated' Hobgoblin x4
+'Integrated' Hammerhead x1
+'Integrated' Hammerhead x2
+Vespa EC-600 x1
+Vespa EC-600 x1
+Medium Hull Maintenance Bot I x1
+'Integrated' Ogre x4
+'Integrated' Ogre x1
+
+
+AIR Repairer Booster III x1
+Mjolnir Heavy Missile x12229
+Navy Cap Booster 800 x15
+Guristas Inferno Cruise Missile x964
+Agency 'Pyrolancea' DB9 Dose IV x1
+Guristas Nova Heavy Missile x654
+Nanite Repair Paste x482
+Mjolnir Cruise Missile x8
+Agency 'Pyrolancea' DB7 Dose III x3
+Mobile Micro Jump Unit x1
+Agency 'Hardshell' TB7 Dose III x2
+Probe x1

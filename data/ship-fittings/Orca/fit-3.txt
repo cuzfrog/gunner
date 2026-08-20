@@ -1,0 +1,41 @@
+[Orca, Killmail 137850062]
+
+Small Tractor Beam II
+Mining Foreman Burst II
+Improved Cloaking Device II
+Mining Foreman Burst II
+
+500MN Y-T8 Compact Microwarpdrive
+EM Shield Amplifier II
+Drone Navigation Computer II
+Thermal Shield Amplifier II
+Large Shield Extender II
+
+Damage Control II
+Reactor Control Unit II
+
+Large Drone Mining Augmentor II
+Large Drone Mining Augmentor II
+Large Drone Mining Augmentor I
+
+
+Ice Harvesting Drone I x1
+Acolyte II x2
+Acolyte II x3
+Mining Drone II x5
+Infiltrator II x5
+Mining Drone I x5
+Ice Harvesting Drone I x1
+
+
+Large Industrial Core II, Mining Laser Optimization Charge
+Large Industrial Core I, Mining Laser Optimization Charge
+Drone Damage Amplifier II, Mining Laser Optimization Charge
+Large Moon Ore Compressor I, Mining Laser Optimization Charge
+Mining Laser Optimization Charge x1700
+Large Ice Compressor I, Mining Laser Optimization Charge
+Mining Laser Field Enhancement Charge x1700
+Large Remote Shield Booster II, Mining Laser Optimization Charge
+Venture x1
+Mining Laser Field Enhancement Charge x300
+Mining Laser Optimization Charge x300

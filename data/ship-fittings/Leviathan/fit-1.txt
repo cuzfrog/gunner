@@ -1,0 +1,96 @@
+[Leviathan, Killmail 137735238]
+
+Corpus X-Type Heavy Energy Nosferatu
+Heavy Energy Nosferatu II
+Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Bosonic Field Generator
+Corpus X-Type Heavy Energy Nosferatu
+Dark Blood Heavy Energy Nosferatu
+Heavy Energy Nosferatu II
+Heavy Energy Nosferatu II
+
+Pithum A-Type Multispectrum Shield Hardener
+CONCORD Capital Shield Extender
+Capital Shield Extender II
+CONCORD Capital Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+Pith X-Type EM Shield Hardener
+CONCORD Capital Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+
+Caldari Navy Power Diagnostic System
+Caldari Navy Power Diagnostic System
+Caldari Navy Power Diagnostic System
+Caldari Navy Power Diagnostic System
+Shadow Serpentis Damage Control
+
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+
+
+Centum A-Type EM Energized Membrane, ECCM Script
+ECCM Script x2
+Thermal Shield Hardener II, ECCM Script
+Missile Range Script x2
+Exotic Dancers, Male x3
+'Wetu' Mobile Depot x1
+Centum A-Type Kinetic Energized Membrane, ECCM Script
+Multispectrum Shield Hardener II, ECCM Script
+Centum A-Type Thermal Energized Membrane, ECCM Script
+Heavy Energy Neutralizer II, ECCM Script
+Kinetic Shield Hardener II, ECCM Script
+Thermal Armor Hardener II, ECCM Script
+EM Shield Hardener II, ECCM Script
+Shield Explosive Resistance Script x1
+Missile Guidance Enhancer II, ECCM Script
+Centus X-Type EM Armor Hardener, ECCM Script
+Kinetic Armor Hardener II, ECCM Script
+Heavy F-RX Compact Capacitor Booster, ECCM Script
+Pithum A-Type Thermal Shield Amplifier, ECCM Script
+Shield Kinetic Resistance Script x1
+Scourge Fury XL Cruise Missile x2500
+Centus X-Type Kinetic Armor Hardener, ECCM Script
+Pithum A-Type Kinetic Shield Amplifier, ECCM Script
+Pith X-Type Thermal Shield Hardener, ECCM Script
+Explosive Shield Hardener II, ECCM Script
+Standard Crash Booster x3
+Guristas Scourge XL Cruise Missile x2500
+Imperial Navy Multispectrum Energized Membrane, ECCM Script
+Improved Mindflood Booster x5
+Scan Resolution Script x2
+Shield Thermal Resistance Script x1
+Caldari Navy Mjolnir Light Missile x1000
+Scourge Precision XL Cruise Missile x1000
+Capacitor Power Relay II, ECCM Script
+Cap Recharger II, ECCM Script
+Large EMP Smartbomb II, ECCM Script
+EM Armor Hardener II, ECCM Script
+Explosive Armor Hardener II, ECCM Script
+Capital Flex Shield Hardener II, ECCM Script
+Pithum A-Type Explosive Shield Amplifier, ECCM Script
+Guristas Mjolnir XL Cruise Missile x1000
+Shield EM Resistance Script x1
+Capacitor Flux Coil II, ECCM Script
+Prototype Cloaking Device I, ECCM Script
+500MN Microwarpdrive II, ECCM Script
+Pith X-Type Explosive Shield Hardener, ECCM Script
+Small Cap Battery II, ECCM Script
+Guristas Nova XL Cruise Missile x910
+Dread Guristas Cloaking Device, ECCM Script
+Missile Precision Script x2
+Pith X-Type Kinetic Shield Hardener, ECCM Script
+Missile Guidance Computer II, ECCM Script
+Targeting Range Script x2
+Mobile Cynosural Inhibitor x1
+Sensor Booster II, ECCM Script
+Navy Cap Booster 3200 x61
+Navy Cap Booster 3200 x383
+Mobile Cynosural Inhibitor x3
+Caldari Phenomena Generator, Navy Cap Booster 3200
+Mobile Cynosural Beacon x2
+Mobile Large Warp Disruptor II x4
+Mobile Depot x2
+Strontium Clathrates x8030
+Nitrogen Isotopes x1093802
+Strontium Clathrates x2662
