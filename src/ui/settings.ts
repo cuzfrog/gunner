@@ -370,7 +370,13 @@ function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary
 function isFittedHull(value: unknown): value is FittedHull {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  return isNonNegative(s.mass) && isPositive(s.speedMultiplier) && isPositive(s.inertiaMultiplier) && isNonNegative(s.sigRadiusAdd);
+  return (
+    isNonNegative(s.mass) &&
+    isPositive(s.speedMultiplier) &&
+    isPositive(s.inertiaMultiplier) &&
+    isPositive(s.sigMultiplier) &&
+    isNonNegative(s.sigRadiusAdd)
+  );
 }
 
 function isOptionalPropulsionStats(value: unknown): value is PropulsionStats | undefined {

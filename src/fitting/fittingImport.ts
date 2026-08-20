@@ -78,6 +78,7 @@ function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFi
   const massPercentages: number[] = [];
   const speedPercents: number[] = [];
   const agilityMultipliers: number[] = [];
+  const sigPercents: number[] = [];
   let sigRadiusAdd = 0;
   let propulsionName: string | undefined;
 
@@ -95,18 +96,23 @@ function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFi
     if (stats.massBonusPercentage) massPercentages.push(stats.massBonusPercentage / 100);
     if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
     if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
+    if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
     if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
+    if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
+    if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
   }
 
   const massPercentMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
   const speedMultiplier = applyStackingPenalty(speedPercents.map((p) => 1 + p));
   const inertiaMultiplier = applyStackingPenalty(agilityMultipliers);
+  const sigMultiplier = applyStackingPenalty(sigPercents.map((p) => 1 + p));
 
   return {
     fitted: {
       mass: profile.mass * massPercentMultiplier + flatMass,
       speedMultiplier,
       inertiaMultiplier,
+      sigMultiplier,
       sigRadiusAdd,
     },
     propulsionName,
@@ -199,3 +205,5 @@ function applyStackingPenalty(multipliers: number[]): number {
   }
   return product;
 }
+
+export { applyStackingPenalty as _applyStackingPenalty };

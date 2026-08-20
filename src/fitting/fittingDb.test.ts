@@ -1,9 +1,13 @@
 import { CHARGES, FITTING_MODULES, TURRETS } from "./fittingDb";
 
 describe("fittingDb", () => {
-  test("includes known plates with accurate flat mass", () => {
+  test("includes known plates with accurate flat mass and no item mass fallback", () => {
     expect(FITTING_MODULES["1600mm Steel Plates II"]).toEqual({ massAddition: 3_750_000 });
     expect(FITTING_MODULES["800mm Steel Plates II"]).toEqual({ massAddition: 1_450_000 });
+  });
+
+  test("bulkheads add agility penalty but no mass", () => {
+    expect(FITTING_MODULES["Reinforced Bulkheads II"]).toEqual({ agilityMultiplier: 1.05 });
   });
 
   test("includes small afterburner and microwarpdrive with exact SDE values", () => {
@@ -39,19 +43,32 @@ describe("fittingDb", () => {
     expect(FITTING_MODULES["Medium Shield Extender II"]).toEqual({ sigRadiusAdd: 7 });
   });
 
-  test("includes inertia and speed modules with multipliers", () => {
-    expect(FITTING_MODULES["Inertial Stabilizers II"]).toEqual({ massAddition: 200, agilityMultiplier: 0.8 });
+  test("includes inertia modules with agility multiplier and stacking-penalized signature bonus", () => {
+    expect(FITTING_MODULES["Inertial Stabilizers II"]).toEqual({ agilityMultiplier: 0.8, sigBonusPercent: 11 });
+  });
+
+  test("includes speed and agility modules without item mass fallback", () => {
     expect(FITTING_MODULES["Nanofiber Internal Structure II"]).toEqual({
-      massAddition: 100,
       speedBonusPercent: 9.5,
       agilityMultiplier: 0.8425,
     });
   });
 
-  test("includes turret base stats with charge size", () => {
+  test("includes overdrive speed bonus", () => {
+    expect(FITTING_MODULES["Overdrive Injector System II"]).toEqual({ speedBonusPercent: 12.5 });
+  });
+
+  test("includes armor rig agility drawback", () => {
+    expect(FITTING_MODULES["Medium Trimark Armor Pump II"]).toEqual({ agilityDrawbackPercent: 10 });
+  });
+
+  test("includes shield rig signature drawback", () => {
+    expect(FITTING_MODULES["Medium Core Defense Field Extender I"]).toEqual({ sigDrawbackPercent: 10 });
+  });
+
+  test("includes turret base stats with charge size and no sig resolution", () => {
     expect(TURRETS["Heavy Pulse Laser II"]).toEqual({
       tracking: 26,
-      sigResolution: 40_000,
       optimal: 12_600,
       falloff: 5_000,
       chargeSize: 2,

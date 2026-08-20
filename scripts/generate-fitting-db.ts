@@ -1,34 +1,39 @@
+import { homedir } from "node:os";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const SDE_DIR = process.env.SDE_DIR ?? "/tmp/eve-sde";
+const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingDb.ts");
 
 interface SdeType {
-  _key: number;
-  name: { en: string };
+  typeID: number;
+  "typeName_en-us": string;
   groupID: number;
-  mass?: number;
-  published: boolean;
+  published: number;
 }
 
 interface SdeDogmaAttribute {
-  _key: number;
+  attributeID: number;
   name: string;
 }
 
+interface SdeDogmaEffect {
+  effectID: number;
+}
+
 interface SdeTypeDogma {
-  _key: number;
   dogmaAttributes: readonly { attributeID: number; value: number }[];
+  dogmaEffects: readonly SdeDogmaEffect[];
 }
 
 const MODULE_GROUPS = new Set([
-  38,  // Shield Extender
-  46,  // Propulsion Module
-  78,  // Reinforced Bulkhead
+  38, // Shield Extender
+  46, // Propulsion Module
+  78, // Reinforced Bulkhead
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
+  764, // Overdrive Injector System
   773, // Rig Armor
   774, // Rig Shield
   775, // Rig Energy Weapon
@@ -52,15 +57,47 @@ const CHARGE_GROUPS = new Set([
   1987, 1989,
 ]);
 
-async function loadJsonl<T>(file: string): Promise<T[]> {
-  const text = await readFile(join(SDE_DIR, file), "utf8");
-  return text.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+const RIG_SIG_DRAWBACK_EFFECT = 2716;
+const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
+
+async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
+  const files = (await readdir(SDE_DIR))
+    .filter((file) => file.startsWith(prefix) && file.endsWith(".json"))
+    .sort();
+  const all: Record<string, T> = {};
+  for (const file of files) {
+    const text = await readFile(join(SDE_DIR, file), "utf8");
+    Object.assign(all, JSON.parse(text) as Record<string, T>);
+  }
+  return all;
 }
 
-function toMap<T extends { _key: number }>(items: T[]): Map<number, T> {
-  const map = new Map<number, T>();
-  for (const item of items) map.set(item._key, item);
+function buildAttributeNameMap(attributes: Record<string, SdeDogmaAttribute>): Map<number, string> {
+  const map = new Map<number, string>();
+  for (const attribute of Object.values(attributes)) {
+    if (!map.has(attribute.attributeID)) map.set(attribute.attributeID, attribute.name);
+  }
   return map;
+}
+
+function buildAttributeValues(
+  attributeNames: Map<number, string>,
+  typeDogma: SdeTypeDogma | undefined,
+): Map<string, number> {
+  const values = new Map<string, number>();
+  if (!typeDogma) return values;
+  for (const { attributeID, value } of typeDogma.dogmaAttributes) {
+    const name = attributeNames.get(attributeID);
+    if (name) values.set(name, value);
+  }
+  return values;
+}
+
+function buildEffectSet(typeDogma: SdeTypeDogma | undefined): Set<number> {
+  const effects = new Set<number>();
+  if (!typeDogma) return effects;
+  for (const { effectID } of typeDogma.dogmaEffects) effects.add(effectID);
+  return effects;
 }
 
 function sizeTierFromPropulsionName(name: string): "small" | "medium" | "large" | "capital" {
@@ -74,88 +111,13 @@ function kindFromPropulsionName(name: string): "afterburner" | "microwarpdrive" 
   return /microwarpdrive|mwd/i.test(name) ? "microwarpdrive" : "afterburner";
 }
 
-function getAttr(attrs: Map<number, SdeDogmaAttribute>, typeDogma: SdeTypeDogma | undefined, names: string[]): Record<string, number | undefined> {
-  const result: Record<string, number | undefined> = {};
-  if (!typeDogma) return result;
-  for (const { attributeID, value } of typeDogma.dogmaAttributes) {
-    const name = attrs.get(attributeID)?.name;
-    if (name && names.includes(name)) result[name] = value;
-  }
-  return result;
-}
-
-function buildPropulsionStats(attrs: Record<string, number | undefined>, name: string): {
-  kind: "afterburner" | "microwarpdrive";
-  sizeTier: "small" | "medium" | "large" | "capital";
-  thrust: number;
-  speedBonus: number;
-  massAddition: number;
-  sigBloom: number;
-} {
-  const massAddition = attrs.massAddition ?? 0;
-  const speedFactor = attrs.speedFactor ?? 0;
-  const speedBoostFactor = attrs.speedBoostFactor ?? 0;
-  const sigBloom = (attrs.signatureRadiusBonus ?? 0) / 100;
-  const kind = kindFromPropulsionName(name);
-  return {
-    kind,
-    sizeTier: sizeTierFromPropulsionName(name),
-    thrust: speedBoostFactor,
-    speedBonus: speedFactor / 100,
-    massAddition,
-    sigBloom,
-  };
-}
-
-function buildModuleStats(
-  type: SdeType,
-  attrs: Map<number, SdeDogmaAttribute>,
-  typeDogma: SdeTypeDogma | undefined,
-): { massAddition: number | undefined; stats: FittingModuleStats } | undefined {
-  const at = getAttr(attrs, typeDogma, [
-    "massAddition",
-    "massBonusPercentage",
-    "agilityMultiplier",
-    "agilityBonus",
-    "velocityBonus",
-    "implantBonusVelocity",
-    "signatureRadiusAdd",
-    "signatureRadiusBonus",
-    "speedFactor",
-    "speedBoostFactor",
-  ]);
-
-  if (type.groupID === 46) {
-    const propulsion = buildPropulsionStats(at, type.name.en);
-    return { massAddition: propulsion.massAddition, stats: { propulsion } };
-  }
-
-  const rawMass = at.massAddition ?? type.mass;
-  const massAddition = typeof rawMass === "number" && rawMass !== 0 ? rawMass : undefined;
-  const sigRadiusAdd = at.signatureRadiusAdd;
-
-  const speedBonusRaw = at.velocityBonus ?? at.implantBonusVelocity;
-  const speedBonusPercent = typeof speedBonusRaw === "number" && speedBonusRaw !== 0 ? speedBonusRaw : undefined;
-
-  const agilityBonusRaw = at.agilityMultiplier ?? at.agilityBonus;
-  const agilityMultiplier = typeof agilityBonusRaw === "number" && agilityBonusRaw !== 0 ? 1 + agilityBonusRaw / 100 : undefined;
-
-  const massBonusPercentage = typeof at.massBonusPercentage === "number" && at.massBonusPercentage !== 0 ? at.massBonusPercentage : undefined;
-
-  if (
-    massAddition === undefined &&
-    speedBonusPercent === undefined &&
-    agilityMultiplier === undefined &&
-    massBonusPercentage === undefined &&
-    sigRadiusAdd === undefined
-  ) {
-    return undefined;
-  }
-
-  return {
-    massAddition,
-    stats: { massAddition, massBonusPercentage, speedBonusPercent, agilityMultiplier, sigRadiusAdd },
-  };
+interface FittingPropulsionStats {
+  readonly kind: "afterburner" | "microwarpdrive";
+  readonly sizeTier: "small" | "medium" | "large" | "capital";
+  readonly thrust: number;
+  readonly speedBonus: number;
+  readonly massAddition: number;
+  readonly sigBloom: number;
 }
 
 interface FittingModuleStats {
@@ -164,19 +126,14 @@ interface FittingModuleStats {
   readonly speedBonusPercent?: number;
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
-  readonly propulsion?: {
-    readonly kind: "afterburner" | "microwarpdrive";
-    readonly sizeTier: "small" | "medium" | "large" | "capital";
-    readonly thrust: number;
-    readonly speedBonus: number;
-    readonly massAddition: number;
-    readonly sigBloom: number;
-  };
+  readonly sigBonusPercent?: number;
+  readonly sigDrawbackPercent?: number;
+  readonly agilityDrawbackPercent?: number;
+  readonly propulsion?: FittingPropulsionStats;
 }
 
 interface TurretStats {
   readonly tracking: number;
-  readonly sigResolution: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
@@ -188,54 +145,120 @@ interface ChargeStats {
   readonly falloffMultiplier?: number;
 }
 
+function optionalNumber(value: number | undefined): number | undefined {
+  if (value === undefined || !Number.isFinite(value) || value === 0) return undefined;
+  return value;
+}
+
+function buildPropulsionStats(values: Map<string, number>, type: SdeType): FittingModuleStats {
+  const massAddition = values.get("massAddition") ?? 0;
+  const speedFactor = values.get("speedFactor") ?? 0;
+  const speedBoostFactor = values.get("speedBoostFactor") ?? 0;
+  const sigBloom = (values.get("signatureRadiusBonus") ?? 0) / 100;
+  const name = type["typeName_en-us"];
+  return {
+    propulsion: {
+      kind: kindFromPropulsionName(name),
+      sizeTier: sizeTierFromPropulsionName(name),
+      thrust: speedBoostFactor,
+      speedBonus: speedFactor / 100,
+      massAddition,
+      sigBloom,
+    },
+  };
+}
+
+function buildModuleStats(values: Map<string, number>, effects: Set<number>): FittingModuleStats | undefined {
+  const stats: Record<string, unknown> = {};
+
+  const massAddition = optionalNumber(values.get("massAddition"));
+  if (massAddition !== undefined) stats.massAddition = massAddition;
+
+  const massBonusPercentage = optionalNumber(values.get("massBonusPercentage"));
+  if (massBonusPercentage !== undefined) stats.massBonusPercentage = massBonusPercentage;
+
+  const speedBonusRaw = values.get("velocityBonus") ?? values.get("implantBonusVelocity");
+  const speedBonusPercent = optionalNumber(speedBonusRaw);
+  if (speedBonusPercent !== undefined) stats.speedBonusPercent = speedBonusPercent;
+
+  const agilityBonusRaw = values.get("agilityMultiplier") ?? values.get("agilityBonus");
+  if (agilityBonusRaw !== undefined && Number.isFinite(agilityBonusRaw) && agilityBonusRaw !== 0) {
+    stats.agilityMultiplier = 1 + agilityBonusRaw / 100;
+  }
+
+  const sigRadiusAdd = optionalNumber(values.get("signatureRadiusAdd"));
+  if (sigRadiusAdd !== undefined) stats.sigRadiusAdd = sigRadiusAdd;
+
+  const sigBonusPercent = optionalNumber(values.get("signatureRadiusBonus"));
+  if (sigBonusPercent !== undefined) stats.sigBonusPercent = sigBonusPercent;
+
+  const drawback = values.get("drawback") ?? 0;
+  if (effects.has(RIG_SIG_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
+    stats.sigDrawbackPercent = drawback;
+  }
+  if (effects.has(RIG_AGILITY_DRAWBACK_EFFECT) && Number.isFinite(drawback) && drawback !== 0) {
+    stats.agilityDrawbackPercent = drawback;
+  }
+
+  if (Object.keys(stats).length === 0) return undefined;
+  return stats as FittingModuleStats;
+}
+
 async function main() {
-  const sdeTypes = toMap(await loadJsonl<SdeType>("types.jsonl"));
-  const groups = toMap(await loadJsonl<{ _key: number; name: { en: string }; categoryID: number }>("groups.jsonl"));
-  const sdeAttrs = toMap(await loadJsonl<SdeDogmaAttribute>("dogmaAttributes.jsonl"));
-  const typeDogmas = toMap(await loadJsonl<SdeTypeDogma>("typeDogma.jsonl"));
+  const types = await loadMerged<SdeType>("types.");
+  const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
+  const attributes = await loadMerged<SdeDogmaAttribute>("dogmaattributes.");
+  const attributeNames = buildAttributeNameMap(attributes);
 
   const fittingModules: Record<string, FittingModuleStats> = {};
   const turrets: Record<string, TurretStats> = {};
   const charges: Record<string, ChargeStats> = {};
 
-  for (const [id, type] of sdeTypes) {
+  for (const type of Object.values(types)) {
     if (!type.published) continue;
-    const group = groups.get(type.groupID);
-    const typeDogma = typeDogmas.get(id);
+    const typeDogma = typedogmas[String(type.typeID)];
+    const values = buildAttributeValues(attributeNames, typeDogma);
 
     if (TURRET_GROUPS.has(type.groupID)) {
-      const at = getAttr(sdeAttrs, typeDogma, ["trackingSpeed", "optimalSigRadius", "maxRange", "falloff", "chargeSize"]);
-      if (at.trackingSpeed !== undefined && at.optimalSigRadius !== undefined && at.maxRange !== undefined) {
-        turrets[type.name.en] = {
-          tracking: at.trackingSpeed,
-          sigResolution: at.optimalSigRadius,
-          optimal: at.maxRange,
-          falloff: at.falloff ?? 0,
-          chargeSize: at.chargeSize ?? 1,
+      const tracking = values.get("trackingSpeed");
+      const optimal = values.get("maxRange");
+      if (tracking !== undefined && optimal !== undefined) {
+        turrets[type["typeName_en-us"]] = {
+          tracking,
+          optimal,
+          falloff: values.get("falloff") ?? 0,
+          chargeSize: values.get("chargeSize") ?? 1,
         };
       }
       continue;
     }
 
     if (CHARGE_GROUPS.has(type.groupID)) {
-      const at = getAttr(sdeAttrs, typeDogma, ["weaponRangeMultiplier", "trackingSpeedMultiplier", "fallofMultiplier"]);
-      if (at.weaponRangeMultiplier !== undefined || at.trackingSpeedMultiplier !== undefined || at.fallofMultiplier !== undefined) {
-        charges[type.name.en] = {
-          trackingMultiplier: at.trackingSpeedMultiplier,
-          rangeMultiplier: at.weaponRangeMultiplier,
-          falloffMultiplier: at.fallofMultiplier,
+      const trackingMultiplier = values.get("trackingSpeedMultiplier");
+      const rangeMultiplier = values.get("weaponRangeMultiplier");
+      const falloffMultiplier = values.get("fallofMultiplier");
+      if (trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined) {
+        charges[type["typeName_en-us"]] = {
+          trackingMultiplier,
+          rangeMultiplier,
+          falloffMultiplier,
         };
       }
       continue;
     }
 
     if (MODULE_GROUPS.has(type.groupID)) {
-      const result = buildModuleStats(type, sdeAttrs, typeDogma);
-      if (result) fittingModules[type.name.en] = result.stats;
+      const effects = buildEffectSet(typeDogma);
+      if (type.groupID === 46) {
+        fittingModules[type["typeName_en-us"]] = buildPropulsionStats(values, type);
+      } else {
+        const stats = buildModuleStats(values, effects);
+        if (stats) fittingModules[type["typeName_en-us"]] = stats;
+      }
     }
   }
 
-  const header = `// Generated from EVE Online SDE (${new Date().toISOString().split("T")[0]}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
+  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${new Date().toISOString().split("T")[0]}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
   readonly sizeTier: HullTier;
@@ -251,12 +274,14 @@ export interface FittingModuleStats {
   readonly speedBonusPercent?: number;
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
+  readonly sigBonusPercent?: number;
+  readonly sigDrawbackPercent?: number;
+  readonly agilityDrawbackPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
 }
 
 export interface TurretStats {
   readonly tracking: number;
-  readonly sigResolution: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
@@ -281,11 +306,12 @@ export interface ChargeStats {
     ``,
   ];
 
+  await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   console.log(`Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges to ${OUT_FILE}`);
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((error) => {
+  console.error(error);
   process.exit(1);
 });

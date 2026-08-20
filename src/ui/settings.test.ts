@@ -57,7 +57,7 @@ function profileFrom(settings: UserSettings): ProfileSettings {
 
 const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
 
-const FITTED_HULL: FittedHull = { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigRadiusAdd: 0 };
+const FITTED_HULL: FittedHull = { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
 
 const FITTED_PROPULSION = {
   thrust: 1_500_000,
@@ -382,6 +382,14 @@ describe("LocalSettingsStore", () => {
   test("load ignores stored settings with invalid values", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load rejects stored settings with a fitted hull missing sigMultiplier", () => {
+    const storage = fakeStorage();
+    const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, sigMultiplier: undefined } };
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });

@@ -28,7 +28,7 @@ export function fittedStats(
   const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
   const maxSpeed = profile.baseSpeed * fitted.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const inertiaModifier = profile.inertiaModifier * fitted.inertiaMultiplier * inertiaFactor;
-  const sigRadius = (profile.sigRadius + fitted.sigRadiusAdd) * (1 + (propulsion ? propulsion.sigBloom : 0));
+  const sigRadius = (profile.sigRadius + fitted.sigRadiusAdd) * fitted.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
 
   return {
     mass,
@@ -79,6 +79,7 @@ function approximateFittedHull(profile: ShipProfile): FittedHull {
     mass: profile.mass * fittedMassFactor(profile.hullType),
     speedMultiplier: 1,
     inertiaMultiplier: 1,
+    sigMultiplier: 1,
     sigRadiusAdd: 0,
   };
 }

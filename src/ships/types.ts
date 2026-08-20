@@ -47,5 +47,6 @@ export interface FittedHull {
   readonly mass: number;
   readonly speedMultiplier: number;
   readonly inertiaMultiplier: number;
+  readonly sigMultiplier: number;
   readonly sigRadiusAdd: number;
 }

@@ -1,6 +1,5 @@
-import type { FittedHull, PropulsionId, PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
-import type { SigResolutionClass } from "../sim";
-import { FittingImportImpl, type FittingDb } from "./fittingImport";
+import type { PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
+import { FittingImportImpl, _applyStackingPenalty, type FittingDb } from "./fittingImport";
 
 const profile: ShipProfile = {
   name: "Harbinger",
@@ -37,7 +36,7 @@ const ships = vi.mocked<Ships>({
 const db: FittingDb = {
   modules: {
     "1600mm Steel Plates II": { massAddition: 3_750_000 },
-    "Reinforced Bulkheads II": { massAddition: 750_000 },
+    "Reinforced Bulkheads II": { agilityMultiplier: 1.05 },
     "5MN Microwarpdrive I": {
       propulsion: {
         kind: "microwarpdrive",
@@ -58,17 +57,20 @@ const db: FittingDb = {
         sigBloom: 0,
       },
     },
-    "Inertial Stabilizers II": { massAddition: 200, agilityMultiplier: 0.8 },
-    "Nanofiber Internal Structure II": { massAddition: 100, speedBonusPercent: 9.5, agilityMultiplier: 0.8425 },
+    "Inertial Stabilizers II": { agilityMultiplier: 0.8, sigBonusPercent: 11 },
+    "Nanofiber Internal Structure II": { speedBonusPercent: 9.5, agilityMultiplier: 0.8425 },
     "Medium Shield Extender II": { sigRadiusAdd: 7 },
     "Medium Higgs Anchor I": { massBonusPercentage: 100, agilityMultiplier: 0.45, speedBonusPercent: -75 },
+    "Overdrive Injector System II": { speedBonusPercent: 12.5 },
+    "Medium Trimark Armor Pump II": { agilityDrawbackPercent: 10 },
+    "Medium Core Defense Field Extender I": { sigDrawbackPercent: 10 },
   },
   turrets: {
-    "Heavy Pulse Laser II": { tracking: 26, sigResolution: 40_000, optimal: 12_600, falloff: 5_000, chargeSize: 2 },
-    "200mm AutoCannon II": { tracking: 315, sigResolution: 40_000, optimal: 1_200, falloff: 5_160, chargeSize: 1 },
+    "Heavy Pulse Laser II": { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2 },
+    "200mm AutoCannon II": { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1 },
   },
   charges: {
-    "Conflagration M": { trackingMultiplier: 0.7, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+    "Conflagration M": { trackingMultiplier: 0.7, rangeMultiplier: 0.5 },
     "EMP S": { rangeMultiplier: 0.5 },
   },
 };
@@ -76,6 +78,11 @@ const db: FittingDb = {
 const conditions: StatConditions = { skillLevel: 0, overloaded: false };
 
 const skillConditions: StatConditions = { skillLevel: 4, overloaded: false };
+
+function stackingPenaltyForTwo(first: number, second: number): number {
+  const penalty = Math.exp(-1 / 7.1289);
+  return first * (1 + (second - 1) * penalty);
+}
 
 describe("FittingImportImpl", () => {
   beforeEach(() => {
@@ -102,19 +109,21 @@ describe("FittingImportImpl", () => {
     expect(result!.fittingName).toBe("Brawler");
   });
 
-  test("sums flat mass from plates and bulkheads", () => {
+  test("sums flat mass from plates without bulkhead item mass fallback", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(
       `[Harbinger, Tank]\n1600mm Steel Plates II\nReinforced Bulkheads II`,
       conditions,
     );
-    expect(result!.fitted.mass).toBe(profile.mass + 3_750_000 + 750_000);
+    expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(1.05, 6);
   });
 
   test("adds shield extender signature radius", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
     expect(result!.fitted.sigRadiusAdd).toBe(7);
+    expect(result!.fitted.sigMultiplier).toBe(1);
   });
 
   test("applies stacking penalty to two agility modules", () => {
@@ -125,9 +134,65 @@ describe("FittingImportImpl", () => {
     );
     const first = 0.8;
     const second = 0.8425;
-    const penalty = Math.exp(-1 / 7.1289);
-    const expected = first * (1 + (second - 1) * penalty);
+    const expected = stackingPenaltyForTwo(first, second);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(expected, 6);
+  });
+
+  test("two inertial stabilizers apply stacking-penalized signature bonus", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
+      conditions,
+    );
+    const first = 1.11;
+    const second = 1.11;
+    const expected = stackingPenaltyForTwo(first, second);
+    expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
+  });
+
+  test("three trimarks stack-penalize agility drawback", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Armor]\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
+      conditions,
+    );
+    const expected = _applyStackingPenalty([1.1, 1.1, 1.1]);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(expected, 6);
+    expect(result!.fitted.sigMultiplier).toBe(1);
+  });
+
+  test("shield extender rig multiplies signature by 1.1", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(`[Harbinger, Shield Rig]\nMedium Core Defense Field Extender I`, conditions);
+    const expected = _applyStackingPenalty([1.1]);
+    expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
+    expect(result!.fitted.inertiaMultiplier).toBe(1);
+  });
+
+  test("inertial stabilizer and trimarks share the same agility stacking chain", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Mixed]\nInertial Stabilizers II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
+      conditions,
+    );
+    const expected = _applyStackingPenalty([0.8, 1.1, 1.1, 1.1]);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(expected, 6);
+  });
+
+  test("inertial stabilizer and shield rig share the same signature stacking chain", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Sig Rig]\nInertial Stabilizers II\nMedium Core Defense Field Extender I`,
+      conditions,
+    );
+    const expected = _applyStackingPenalty([1.11, 1.1]);
+    expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
+  });
+
+  test("overdrive applies speed bonus percent", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
@@ -137,7 +202,7 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.fitted.mass).toBeCloseTo(profile.mass * 2 + 3_750_000, 6);
-    expect(result!.fitted.speedMultiplier).toBeCloseTo(1 + (0.25 - 1) * 1, 6);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(0.25, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.45, 6);
   });
 
