@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "trace": "bun run scripts/sim-trace.ts",
-    "preview": "bun run build.ts && bun run preview.ts"
+    "preview": "bun run build.ts && bun run preview.ts",
+    "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {
     "awilix": "13.0.5"
