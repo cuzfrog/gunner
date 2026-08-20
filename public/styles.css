@@ -252,11 +252,16 @@ select:disabled {
   display: none;
 }
 
-.hull-label-row {
+.panel .hull-label-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+
+.panel .hull-label-row > span {
+  display: inline;
+  margin-bottom: 0;
 }
 
 .import-fitting-button {

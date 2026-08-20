@@ -260,9 +260,9 @@ export const I18N_DICTIONARY = {
     ja: "失敗",
   },
   "button.importFitting": {
-    en: "Import fitting",
-    zh: "导入装配",
-    ja: "フィッティングをインポート",
+    en: "Import from clipboard",
+    zh: "从剪贴板导入",
+    ja: "クリップボードからインポート",
   },
   "status.fittingImported": {
     en: "Fitting imported",
