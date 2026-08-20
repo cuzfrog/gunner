@@ -384,26 +384,25 @@ describe("DomControls", () => {
     expect(config.target.inertiaModifier).toBe(0.45);
   });
 
-  test("initial load sets align time in the inertia input title", () => {
+  test("initial load displays align time as an input suffix", () => {
     buildControls(globalThis.document);
-    const attackerInertia = getFake(globalThis.document, "attacker-inertia");
-    const targetInertia = getFake(globalThis.document, "target-inertia");
-    expect(attackerInertia.title).toContain(`${alignTime(1_200_000, 3).toFixed(1)}unit.second`);
-    expect(targetInertia.title).toContain(`${alignTime(10_000_000, 0.45).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(1_200_000, 3).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "target-align-time").textContent).toBe(`${alignTime(10_000_000, 0.45).toFixed(1)}unit.second`);
   });
 
-  test("editing mass or inertia updates the align time title", () => {
+  test("editing mass or inertia updates the align time suffix and title", () => {
     buildControls(globalThis.document);
     const mass = getFake(globalThis.document, "attacker-mass");
     const inertia = getFake(globalThis.document, "attacker-inertia");
 
     mass.value = "2400000";
     mass.trigger("input");
-    expect(inertia.title).toContain(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
+    expect(inertia.title).toContain("hint.alignTime");
 
     inertia.value = "1.5";
     inertia.trigger("input");
-    expect(inertia.title).toContain(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
   });
 
   test("saving clamps an empty initial distance to 1", () => {
