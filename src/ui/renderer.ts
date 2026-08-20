@@ -10,6 +10,7 @@ const COLORS = {
   bg: "#05080c",
   attacker: "#5ccbcb",
   target: "#f67c0f",
+  command: "#e8eef0",
   transversal: "#fce447",
   los: "rgba(92, 203, 203, 0.5)",
   text: "#e8eef0",
@@ -62,8 +63,8 @@ export class CanvasRenderer implements Renderer {
     this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
     this.drawWorldVector(snapshot.attacker.position, snapshot.attacker.velocity, COLORS.attacker);
     this.drawWorldVector(snapshot.target.position, snapshot.target.velocity, COLORS.target);
-    this.drawWorldVector(snapshot.attacker.position, snapshot.commands.attacker, COLORS.attacker, [5, 5]);
-    this.drawWorldVector(snapshot.target.position, snapshot.commands.target, COLORS.target, [5, 5]);
+    this.drawIntendedDirection(snapshot.attacker.position, snapshot.commands.attacker);
+    this.drawIntendedDirection(snapshot.target.position, snapshot.commands.target);
     this.drawWorldVector(snapshot.target.position, frame.transversalVelocity, COLORS.transversal);
     this.drawShip(snapshot.attacker, COLORS.attacker);
     this.drawShip(snapshot.target, COLORS.target);
@@ -181,6 +182,25 @@ export class CanvasRenderer implements Renderer {
     this.ctx.setLineDash(dash);
     this.drawArrow(start, end, color);
     this.ctx.setLineDash([]);
+  }
+
+  private drawIntendedDirection(position: Vec2, vector: Vec2): void {
+    const speed = vector.len();
+    if (speed < 0.01) return;
+    const start = this.worldToScreen(position);
+    const lineLen = speed * VECTOR_SCALE * this.camera.scale;
+    const heading = vector.angle();
+    const end = start.add(new Vec2(lineLen * Math.cos(heading), -lineLen * Math.sin(heading)));
+    this.ctx.save();
+    this.ctx.strokeStyle = COLORS.command;
+    this.ctx.lineWidth = 1;
+    this.ctx.setLineDash([2, 4]);
+    this.ctx.lineCap = "round";
+    this.ctx.beginPath();
+    this.ctx.moveTo(start.x, start.y);
+    this.ctx.lineTo(end.x, end.y);
+    this.ctx.stroke();
+    this.ctx.restore();
   }
 
   private drawArrow(a: Vec2, b: Vec2, color: string): void {

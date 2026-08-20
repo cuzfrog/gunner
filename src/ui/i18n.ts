@@ -93,6 +93,11 @@ export const I18N_DICTIONARY = {
     zh: "语言",
     ja: "言語",
   },
+  "label.github": {
+    en: "GitHub repository",
+    zh: "GitHub 仓库",
+    ja: "GitHub リポジトリ",
+  },
 
   "hint.hullSearch": {
     en: "Type ship name…",
@@ -143,6 +148,11 @@ export const I18N_DICTIONARY = {
     en: "Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly.",
     zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；较低值更严格保持距离。",
     ja: "設定距離への接近時の反応的ブレーキを制御します。高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。低い値ほど距離を厳密に保ちます。",
+  },
+  "hint.alignTime": {
+    en: "Align time: seconds to accelerate from standstill to 75% of max speed. Equals ln(4) × mass × inertia modifier × 1e-6. Lower is more agile.",
+    zh: "对齐时间：从静止加速到最大速度 75% 所需的秒数。等于 ln(4) × 质量 × 惯性修正 × 1e-6。越低越灵活。",
+    ja: "アライン時間：静止状態から最大速度の75%に達するまでの秒数。ln(4) × 質量 × 慣性修正係数 × 1e-6 に等しい。低いほど機敏。",
   },
   "hint.initialDistance": {
     en: "Changes apply on reset.",
@@ -393,6 +403,11 @@ export const I18N_DICTIONARY = {
     en: "km",
     zh: "km",
     ja: "km",
+  },
+  "unit.second": {
+    en: "s",
+    zh: "s",
+    ja: "s",
   },
 } as const;
 

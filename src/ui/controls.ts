@@ -1,6 +1,7 @@
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships, SkillLevel } from "../ships";
 import {
   SIG_RESOLUTIONS,
+  alignTime,
   type EngagementFrame,
   type HitChance,
   type HitChanceBreakdown,
@@ -94,6 +95,7 @@ export class DomControls implements Controls {
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
+      attackerAlignTime: el("attacker-align-time"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
       maneuverAggressivity: el("maneuver-aggressivity"),
@@ -114,6 +116,7 @@ export class DomControls implements Controls {
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
+      targetAlignTime: el("target-align-time"),
       targetMode: el("target-mode"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
@@ -146,6 +149,8 @@ export class DomControls implements Controls {
 
     this.restoreSavedState();
     this.bind();
+    this.updateAlignTime("attacker");
+    this.updateAlignTime("target");
   }
 
   private restoreSavedState(): void {
@@ -377,6 +382,8 @@ export class DomControls implements Controls {
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
     this.updateGridBrightnessDisplay();
+    this.updateAlignTime("attacker");
+    this.updateAlignTime("target");
     this.persist();
   }
 
@@ -610,6 +617,8 @@ export class DomControls implements Controls {
       this.els[id].addEventListener("input", () => {
         if (id === "attackerMass") this.updateSpeedFromMass("attacker");
         if (id === "targetMass") this.updateSpeedFromMass("target");
+        if (id === "attackerMass" || id === "attackerInertia") this.updateAlignTime("attacker");
+        if (id === "targetMass" || id === "targetInertia") this.updateAlignTime("target");
         this.updateSaveButtonState();
         this.persist();
         this.callbacks?.onConfigChange();
@@ -862,6 +871,7 @@ export class DomControls implements Controls {
     const speed = this.ships.maxSpeedForMass(profile, num(this.els[`${side}Mass`]), module, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     this.updateHullHint(side, module);
+    this.updateAlignTime(side);
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
@@ -872,6 +882,19 @@ export class DomControls implements Controls {
     const mass = num(this.els[`${side}Mass`]);
     const speed = this.ships.maxSpeedForMass(profile, mass, module, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    this.updateAlignTime(side);
+  }
+
+  private updateAlignTime(side: "attacker" | "target"): void {
+    const mass = num(this.els[`${side}Mass`]);
+    const inertia = num(this.els[`${side}Inertia`]);
+    const t = alignTime(mass, inertia);
+    const output = this.els[`${side}AlignTime`];
+    if (Number.isFinite(t) && t > 0) {
+      output.textContent = `${t.toFixed(1)}${this.i18n.t("unit.second")}`;
+    } else {
+      output.textContent = "";
+    }
   }
 
   private skillConditions(side: "attacker" | "target"): { skillLevel: SkillLevel; overloaded: boolean } {
