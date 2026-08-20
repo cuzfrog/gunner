@@ -100,19 +100,19 @@ const AB10MN: PropulsionModule = {
 const RIFTER_FITTING_OPTIONS: readonly PropulsionModule[] = [AB1MN, MWD5MN, AB10MN];
 const VALID_PROPULSION_IDS: readonly PropulsionId[] = ["ab-1mn", "mwd-5mn", "ab-10mn"];
 
-const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_030_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36 };
-const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_030_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 };
-const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_530_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36 };
-const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_530_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36 };
-const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_530_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210 };
-const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_530_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210 };
-const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_530_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210 };
-const THRASHER_BASE: ShipStats = { mass: 1_575_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
+const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36 };
+const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 };
+const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36 };
+const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36 };
+const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210 };
+const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210 };
+const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210 };
+const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
 
 const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
-  fitted: { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
   propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
   turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
 };
@@ -220,10 +220,8 @@ function createMockShips() {
     }),
     fittingOptions: vi.fn((profile: ShipProfile) => (profile.name === "Rifter" ? RIFTER_FITTING_OPTIONS : [AB1MN, MWD5MN])),
     fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
-    effectiveStats: vi.fn((profile: ShipProfile, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
-    maxSpeedForMass: vi.fn((profile: ShipProfile, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
-    fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
-    maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+    fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
+    maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
   });
 
   mockShips.fittingOption.mockImplementation((profile: ShipProfile, id: PropulsionId) => {
@@ -1124,14 +1122,14 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
 
-    ships.maxSpeedForMass.mockReturnValue(1234.56);
+    ships.maxSpeedForFittedMass.mockReturnValue(1234.56);
 
     const activeMass = 5_000_000;
     getFake(globalThis.document, "target-mass").value = String(activeMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1234.56));
-    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
@@ -1142,14 +1140,14 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
 
-    ships.maxSpeedForMass.mockReturnValueOnce(1500.5);
+    ships.maxSpeedForFittedMass.mockReturnValueOnce(1500.5);
 
     const displayedMass = Number(getFake(globalThis.document, "target-mass").value) + 1_000_000;
     getFake(globalThis.document, "target-mass").value = String(displayedMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1500.5));
-    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("save button highlights when the current settings differ from the selected profile", () => {
@@ -2388,7 +2386,7 @@ describe("DomControls", () => {
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
-      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
       expect(getFake(globalThis.document, "attacker-inertia").value).toBe("2");
       expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
@@ -2516,7 +2514,7 @@ describe("DomControls", () => {
     test("loadSettings restores a fitted hull and recomputes stats", () => {
       buildControls(globalThis.document, SAVED_FITTED_SETTINGS);
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
-      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
       expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
@@ -2530,7 +2528,7 @@ describe("DomControls", () => {
       const propulsion = getFake(globalThis.document, "attacker-propulsion");
       propulsion.value = "ab-1mn";
       propulsion.trigger("change");
-      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1530000");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("1420.75");
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull?.propulsionId).toBe("ab-1mn");

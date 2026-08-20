@@ -1,4 +1,3 @@
-import { fittedMassFactor } from "./fittedMass";
 import type { FittedHull, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
 export interface ShipStats {
@@ -16,19 +15,20 @@ const PROPULSION_OVERLOAD_FACTOR = 1.5;
 
 export function fittedStats(
   profile: ShipProfile,
-  fitted: FittedHull,
+  fitted?: FittedHull,
   propulsion?: PropulsionStats,
   conditions?: StatConditions,
 ): ShipStats {
+  const hull = fitted ?? nakedHull(profile);
   const level = conditions?.skillLevel ?? 0;
   const overloaded = conditions?.overloaded ?? false;
   const navFactor = navigationSpeedFactor(level);
   const inertiaFactor = inertiaSkillFactor(level);
-  const mass = (fitted.mass + (propulsion ? propulsion.massAddition : 0)) * fitted.massMultiplier;
+  const mass = (hull.mass + (propulsion ? propulsion.massAddition : 0)) * hull.massMultiplier;
   const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
-  const maxSpeed = profile.baseSpeed * fitted.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
-  const inertiaModifier = profile.inertiaModifier * fitted.inertiaMultiplier * inertiaFactor;
-  const sigRadius = (profile.sigRadius + fitted.sigRadiusAdd) * fitted.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
+  const maxSpeed = profile.baseSpeed * hull.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
+  const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
+  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
 
   return {
     mass,
@@ -38,45 +38,28 @@ export function fittedStats(
   };
 }
 
-export function effectiveStats(
-  profile: ShipProfile,
-  propulsion?: PropulsionStats,
-  conditions?: StatConditions,
-): ShipStats {
-  return fittedStats(profile, approximateFittedHull(profile), propulsion, conditions);
-}
-
 export function maxSpeedForFittedMass(
   profile: ShipProfile,
-  fitted: FittedHull,
+  fitted: FittedHull | undefined,
   mass: number,
   propulsion?: PropulsionStats,
   conditions?: StatConditions,
 ): number {
+  const hull = fitted ?? nakedHull(profile);
   const level = conditions?.skillLevel ?? 0;
   const overloaded = conditions?.overloaded ?? false;
   const navFactor = navigationSpeedFactor(level);
 
-  if (!propulsion) return profile.baseSpeed * fitted.speedMultiplier * navFactor;
+  if (!propulsion) return profile.baseSpeed * hull.speedMultiplier * navFactor;
 
-  const prePropulsionMass = Math.max(0, mass - propulsion.massAddition);
-  const speedMass = prePropulsionMass + propulsion.massAddition;
+  const speedMass = Math.max(mass, propulsion.massAddition);
   const moduleSpeed = propulsionSpeedBonus(propulsion, level, overloaded);
-  return profile.baseSpeed * fitted.speedMultiplier * navFactor * (1 + (moduleSpeed * propulsion.thrust) / speedMass);
+  return profile.baseSpeed * hull.speedMultiplier * navFactor * (1 + (moduleSpeed * propulsion.thrust) / speedMass);
 }
 
-export function maxSpeedForMass(
-  profile: ShipProfile,
-  mass: number,
-  propulsion?: PropulsionStats,
-  conditions?: StatConditions,
-): number {
-  return maxSpeedForFittedMass(profile, approximateFittedHull(profile), mass, propulsion, conditions);
-}
-
-function approximateFittedHull(profile: ShipProfile): FittedHull {
+function nakedHull(profile: ShipProfile): FittedHull {
   return {
-    mass: profile.mass * fittedMassFactor(profile.hullType),
+    mass: profile.mass,
     massMultiplier: 1,
     speedMultiplier: 1,
     inertiaMultiplier: 1,

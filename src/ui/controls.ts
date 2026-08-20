@@ -767,7 +767,7 @@ export class DomControls implements Controls {
     this.renderPropulsionOptions(side, propulsionId);
 
     if (updateStats) {
-      this.updatePropulsionStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+      this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
     } else {
       this.updateHullHint(side, this.currentPropulsionModule(side));
     }
@@ -868,8 +868,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerFittedHull = summary;
     else this.targetFittedHull = summary;
     this.renderPropulsionOptions(side, summary.propulsionId ?? "");
-    this.updateFittedStats(side, { updateInertia: true, updateMass: true, updateSig: true });
-    this.updateFittingName(side);
+    this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
   }
 
   private applyImportedTurret(turret: ImportedFitting["turret"]): void {
@@ -903,7 +902,7 @@ export class DomControls implements Controls {
         else this.targetFittedHull = updated;
       }
     }
-    this.updatePropulsionStats(side, { updateInertia: false, updateMass: true, updateSig: true });
+    this.updateShipStats(side, { updateInertia: false, updateMass: true, updateSig: true });
     this.setOverloadDisabled(side);
     this.updateSaveButtonState();
     this.persist();
@@ -1000,26 +999,24 @@ export class DomControls implements Controls {
     this.setOverloadDisabled(side);
   }
 
-  private updatePropulsionStats(
+  private updateShipStats(
     side: "attacker" | "target",
     { updateInertia, updateMass, updateSig }: { updateInertia: boolean; updateMass: boolean; updateSig: boolean },
   ): void {
-    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    if (fitted) {
-      this.updateFittedStats(side, { updateInertia, updateMass, updateSig });
-      return;
-    }
-
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
 
-    const module = this.currentPropulsionModule(side);
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
+    const hintModule = fitted ? this.currentFittedPropulsionModule(side, fitted) : this.currentPropulsionModule(side);
     const conditions = this.skillConditions(side);
+    let mass = num(this.els[`${side}Mass`]);
 
     if (updateMass || updateInertia || (side === "target" && updateSig)) {
-      const stats = this.ships.effectiveStats(profile, module, conditions);
+      const stats = this.ships.fittedStats(profile, fitted?.fitted, propulsion, conditions);
       if (updateMass) {
-        (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
+        mass = stats.mass;
+        (this.els[`${side}Mass`] as HTMLInputElement).value = String(mass);
       }
       if (updateInertia) {
         (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
@@ -1029,37 +1026,10 @@ export class DomControls implements Controls {
       }
     }
 
-    const speed = this.ships.maxSpeedForMass(profile, num(this.els[`${side}Mass`]), module, conditions);
+    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
-    this.updateHullHint(side, module);
-    this.updateAlignTime(side);
-  }
-
-  private updateFittedStats(
-    side: "attacker" | "target",
-    { updateInertia, updateMass, updateSig }: { updateInertia: boolean; updateMass: boolean; updateSig: boolean },
-  ): void {
-    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    if (!profile || !fitted) return;
-
-    const propulsion = this.currentFittedPropulsion(side, fitted);
-    const conditions = this.skillConditions(side);
-    const stats = this.ships.fittedStats(profile, fitted.fitted, propulsion, conditions);
-
-    if (updateMass) {
-      (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
-    }
-    if (updateInertia) {
-      (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
-    }
-    if (side === "target" && updateSig) {
-      (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
-    }
-
-    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(stats.maxSpeed);
-    this.updateHullHint(side, this.currentFittedPropulsionModule(side, fitted));
-    this.updateFittingName(side);
+    this.updateHullHint(side, hintModule);
+    if (fitted) this.updateFittingName(side);
     this.updateAlignTime(side);
   }
 
@@ -1084,9 +1054,8 @@ export class DomControls implements Controls {
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
     const conditions = this.skillConditions(side);
     const mass = num(this.els[`${side}Mass`]);
-    const speed = fitted
-      ? this.ships.maxSpeedForFittedMass(profile, fitted.fitted, mass, this.currentFittedPropulsion(side, fitted), conditions)
-      : this.ships.maxSpeedForMass(profile, mass, this.currentPropulsionModule(side), conditions);
+    const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
+    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     this.updateAlignTime(side);
   }
@@ -1130,7 +1099,7 @@ export class DomControls implements Controls {
   }
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
-    this.updatePropulsionStats(side, { updateInertia, updateMass: false, updateSig: false });
+    this.updateShipStats(side, { updateInertia, updateMass: false, updateSig: false });
     this.updateSaveButtonState();
     this.persist();
     if (side === "attacker" && !this.attackerProfile) return;
