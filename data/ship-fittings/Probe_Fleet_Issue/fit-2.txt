@@ -1,0 +1,74 @@
+[Probe Fleet Issue, Killmail 137860287]
+
+Light Missile Launcher I, Scourge Light Missile
+Light Missile Launcher I, Inferno Light Missile
+Expanded Probe Launcher I, Core Scanner Probe I
+
+Data Analyzer I
+Relic Analyzer I
+Type-E Enduring Cargo Scanner
+5MN Cold-Gas Enduring Microwarpdrive
+
+Small Armor Repairer I
+Type-D Restrained Inertial Stabilizers
+100mm Crystalline Carbonide Restrained Plates
+
+Small Emission Scope Sharpener I
+Small Memetic Algorithm Bank I
+
+
+Scorched Telemetry Processor x44
+Telemetry Processor x4
+Large Micro Jump Drive Blueprint x1
+Accelerant Decryptor x4
+Power Couplings x314
+Electronic Link x131
+Datacore - Caldari Starship Engineering x16
+Calm Exotic Filament x1
+Burned Logic Circuit x47
+Calm Firestorm Filament x2
+Armor Plates x25
+Talocan Ignition Device x1
+Spatial Attunement Unit x2
+Process Decryptor x2
+Spare Parts x239
+High-Tech Manufacturing Tools x1
+Elemental Crux x16
+Datacore - Electromagnetic Physics x7
+Charred Micro Circuit x38
+Alignment Sequencer x37
+Datacore - Rocket Science x15
+Datacore - Mechanical Engineering x23
+Takmahl Biodroid Controller x1
+Small Ancillary Armor Repairer Blueprint x1
+Scourge Light Missile x150
+High-Tech Data Chip x1
+Parity Decryptor x3
+Amarr Encryption Methods x1
+Force Cable x84
+Damaged Artificial Neural Network x45
+Armor Blocks x47
+Noise-5 'Needlejack' Filament x3
+Artificial Neural Network x5
+Calm Electrical Filament x1
+Launcher Rigging x1
+Signal-5 'Needlejack' Filament x3
+Calm Dark Filament x1
+Ward Console x50
+Datacore - Nanite Engineering x22
+Inferno Light Missile x150
+Datacore - Amarrian Starship Engineering x11
+Symmetry Decryptor x2
+Interface Circuit x7
+Carbon x19
+Datacore - Quantum Physics x18
+Intact Shield Emitter x4
+Augmentation Decryptor x6
+Atavum x3
+High-Tech Scanner x3
+Optimized Augmentation Decryptor x1
+Micro Circuit x4
+Logic Circuit x8
+Tripped Power Circuit x50
+Fried Interface Circuit x44
+Datacore - Hydromagnetic Physics x3

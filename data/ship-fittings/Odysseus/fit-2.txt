@@ -1,0 +1,130 @@
+[Odysseus, Killmail 137799091]
+
+Gistum B-Type Medium Remote Shield Booster
+Medium Asymmetric Enduring Remote Shield Booster
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Medium Asymmetric Enduring Remote Shield Booster
+Covert Ops Cloaking Device II
+Medium Asymmetric Enduring Remote Shield Booster
+
+Scan Rangefinding Array I
+50MN Microwarpdrive I
+Medium Capacitor Booster II, Cap Booster 800
+Medium Capacitor Booster II, Cap Booster 800
+Scan Rangefinding Array I
+
+800mm Crystalline Carbonide Restrained Plates
+Damage Control II
+Reactor Control Unit II
+Reactor Control Unit II
+Reactive Armor Hardener
+Large ACM Compact Armor Repairer
+
+Medium Ancillary Current Router I
+Medium Ancillary Current Router I
+Medium Ancillary Current Router II
+
+
+Republic Fleet Valkyrie x4
+Federation Navy Hammerhead x6
+Caldari Navy Vespa x6
+
+
+Capital Semiconductor Memory Cell II Blueprint x1
+Enhanced Ward Console x2
+Artificial Neural Network x77
+Defective Current Pump x167
+Telemetry Processor x3
+Armor Plates x152
+Datacore - Mechanical Engineering x131
+Datacore - Graviton Physics x8
+Datacore - Molecular Engineering x95
+Datacore - Electromagnetic Physics x9
+Datacore - Laser Physics x37
+Covert Research Tools x4
+Logic Circuit x54
+Burned Logic Circuit x442
+Single-crystal Superalloy I-beam x42
+Takmahl Cohere Cord x1
+Datacore - High Energy Physics x43
+Datacore - Minmatar Starship Engineering x46
+Plasma Physics x1
+Intact Armor Plates x13
+Tripped Power Circuit x554
+Electric Conduit x107
+High-Tech Manufacturing Tools x4
+Datacore - Nanite Engineering x65
+High-Tech Data Chip x6
+Symmetry Decryptor x6
+Current Pump x15
+Nanite Compound x22
+Ward Console x44
+Noise-5 'Needlejack' Filament x6
+Sleeper Data Library x7
+Datacore - Quantum Physics x13
+Interface Circuit x29
+Mid-grade Wedge Delta Blueprint x1
+Analog Panel x27
+Auxiliary Parts x166
+Contaminated Nanite Compound x179
+Datacore - Hydromagnetic Physics x11
+Ancient Coordinates Database x1
+Melted Capacitor Console x63
+Smashed Trigger Unit x376
+Charred Micro Circuit x292
+Fried Interface Circuit x381
+18th Tier Overseer's Personal Effects x1
+Damaged Artificial Neural Network x501
+High-Tech Scanner x4
+Small Ancillary Armor Repairer Blueprint x1
+Optimized Attainment Decryptor x3
+Trigger Unit x46
+'Wetu' Mobile Depot Blueprint x1
+Process Decryptor x3
+Lorentz Fluid x9
+Construction Alloy x205
+Gardan's Private Key x1
+Mechanic Parts x361
+Micro Circuit x40
+Broken Drone Transceiver x51
+Calm Exotic Filament x1
+Tangled Power Conduit x87
+Contaminated Lorentz Fluid x73
+Elemental Crux x52
+Metal Scraps x2
+Malfunctioning Shield Emitter x112
+Carbon x60
+Datacore - Nuclear Physics x75
+Datacore - Amarrian Starship Engineering x27
+Parity Decryptor x9
+Sleeper Drone AI Nexus x1
+Attainment Decryptor x2
+Conductive Thermoplastic x5
+Conductive Polymer x53
+Cap Booster 800 x880
+Impetus Console x30
+Thruster Console x288
+Force Cable x46
+Scorched Telemetry Processor x44
+Data Processor x126
+Energy Cells x341
+Datacore - Rocket Science x34
+Sleeper Profound Research Notes x1
+Spatial Attunement Unit x13
+Neural Network Analyzer x20
+Blood Raider Power Redistributor x1
+Power Circuit x35
+Alloyed Tritanium Bar x410
+Triglavian Survey Database x315
+Triglavian Survey Database x397
+Medium Projectile Collision Accelerator II Blueprint x1
+Optimized Augmentation Decryptor x1
+Augmentation Decryptor x18
+Intact Shield Emitter x4
+Accelerant Decryptor x10
+Mobile Tractor Unit x1
+Zero-Point Condensate x44
+Crystalline Isogen-10 x65
+Mobile Depot x1
+Cap Booster 800 x19
+Sisters Core Scanner Probe x8

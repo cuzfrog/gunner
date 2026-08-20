@@ -1,4 +1,4 @@
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships, SkillLevel } from "../ships";
+import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -10,8 +10,9 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
+import type { FittingImport, ImportedFitting } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -39,15 +40,20 @@ export class DomControls implements Controls {
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
   private readonly ships: Ships;
+  private readonly fittingImport: FittingImport;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
   private readonly trackingInput: TrackingInput;
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
+  private fittingNameTimeout?: ReturnType<typeof setTimeout>;
   private openSkillSide: "attacker" | "target" | null = null;
+  private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
+  private attackerFittedHull?: FittedHullSummary;
+  private targetFittedHull?: FittedHullSummary;
   private selectedProfile: ProfileSettings | null = null;
 
   constructor({
@@ -55,6 +61,7 @@ export class DomControls implements Controls {
     i18n,
     settingsStore,
     ships,
+    fittingImport,
     clipboard,
     location,
   }: {
@@ -62,6 +69,7 @@ export class DomControls implements Controls {
     i18n: I18n;
     settingsStore: SettingsStore;
     ships: Ships;
+    fittingImport: FittingImport;
     clipboard: ClipboardProvider;
     location: LocationProvider;
   }) {
@@ -69,6 +77,7 @@ export class DomControls implements Controls {
     this.i18n = i18n;
     this.settingsStore = settingsStore;
     this.ships = ships;
+    this.fittingImport = fittingImport;
     this.clipboard = clipboard;
     this.location = location;
     this.trackingInput = new TrackingInput();
@@ -83,6 +92,11 @@ export class DomControls implements Controls {
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
       attackerHullHint: el("attacker-hull-hint"),
+      attackerFittingName: el("attacker-fitting-name"),
+      attackerImportFitting: el("attacker-import-fitting"),
+      attackerImportStatus: el("attacker-import-status"),
+      attackerPastePopup: el("attacker-paste-popup"),
+      attackerPasteInput: el("attacker-paste-input"),
       attackerPropulsion: el("attacker-propulsion"),
       attackerPropulsionOptions: el("attacker-propulsion-options"),
       attackerSkills: el("attacker-skills"),
@@ -104,6 +118,11 @@ export class DomControls implements Controls {
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
       targetHullHint: el("target-hull-hint"),
+      targetFittingName: el("target-fitting-name"),
+      targetImportFitting: el("target-import-fitting"),
+      targetImportStatus: el("target-import-status"),
+      targetPastePopup: el("target-paste-popup"),
+      targetPasteInput: el("target-paste-input"),
       targetPropulsion: el("target-propulsion"),
       targetPropulsionOptions: el("target-propulsion-options"),
       targetSkills: el("target-skills"),
@@ -317,6 +336,7 @@ export class DomControls implements Controls {
       attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
       attackerPropulsion: this.propulsionSetting("attacker"),
+      attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
       targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
@@ -328,6 +348,7 @@ export class DomControls implements Controls {
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
       targetPropulsion: this.propulsionSetting("target"),
+      targetFittedHull: this.targetFittedHull,
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
@@ -351,7 +372,7 @@ export class DomControls implements Controls {
     (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
     (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
     (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
-    (this.els.attackerInertia as HTMLInputElement).value = String(settings.attackerInertia);
+    (this.els.attackerInertia as HTMLInputElement).value = formatNumber(settings.attackerInertia, 6);
     (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
     (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
     (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
@@ -359,7 +380,7 @@ export class DomControls implements Controls {
     (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
     (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
     (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
-    (this.els.targetInertia as HTMLInputElement).value = String(settings.targetInertia);
+    (this.els.targetInertia as HTMLInputElement).value = formatNumber(settings.targetInertia, 6);
     (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
     (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
     (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
@@ -375,6 +396,13 @@ export class DomControls implements Controls {
     this.setOverloadActive("target", settings.targetOverload ?? true);
     this.setOverloadDisabled("attacker");
     this.setOverloadDisabled("target");
+
+    if (settings.attackerFittedHull) {
+      this.applyImportedFitting("attacker", settings.attackerFittedHull);
+    }
+    if (settings.targetFittedHull) {
+      this.applyImportedFitting("target", settings.targetFittedHull);
+    }
     this.displayTrackingInput();
     this.updateUnitToggle();
     this.updateLanguageToggle();
@@ -449,6 +477,8 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.updateFittingName("attacker");
+    this.updateFittingName("target");
     this.populateHullDatalist();
     this.refreshHullInputs();
     this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
@@ -517,7 +547,7 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings({ ...profile, language: this.i18n.current() }, name);
+    this.loadSettings({ ...profile, language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
     this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
@@ -547,6 +577,73 @@ export class DomControls implements Controls {
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
   }
 
+  private async importFitting(side: "attacker" | "target"): Promise<void> {
+    if (this.openPasteSide === side) {
+      this.closePastePopup(side);
+      return;
+    }
+    if (this.openPasteSide !== null) this.closeAllPastePopups();
+    let text: string;
+    try {
+      text = await this.clipboard.readText();
+    } catch (error) {
+      if (error instanceof ClipboardUnavailableError) {
+        this.openPastePopup(side);
+        return;
+      }
+      this.clearFittingNameTimeout();
+      this.showImportError(side, "status.clipboardDenied");
+      return;
+    }
+    await this.importFittingFromText(side, text);
+  }
+
+  private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
+    this.clearFittingNameTimeout();
+    const conditions = this.skillConditions(side);
+    const imported = this.fittingImport.importFitting(text, conditions);
+    if (!imported) {
+      this.showImportError(side, "status.fittingInvalid");
+      return;
+    }
+    this.clearFittedHull(side);
+    this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
+    this.applyImportedFitting(side, this.fittedHullSummary(imported));
+    if (side === "attacker") this.applyImportedTurret(imported.turret);
+    this.persist();
+    this.updateSaveButtonState();
+    this.callbacks?.onConfigChange();
+  }
+
+  private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
+    return {
+      fittingName: imported.fittingName,
+      propulsionId: imported.propulsion?.propulsionId,
+      fitted: imported.fitted,
+      propulsion: imported.propulsion,
+    };
+  }
+
+  private showImportError(side: "attacker" | "target", key: string): void {
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", true);
+    const value = escapeHtml(this.i18n.t(key));
+    element.innerHTML = `<span class="fitting-name-value">${value}</span>`;
+    element.hidden = false;
+    if (this.fittingNameTimeout) clearTimeout(this.fittingNameTimeout);
+    this.fittingNameTimeout = setTimeout(() => {
+      element.classList.toggle("error", false);
+      this.updateFittingName(side);
+    }, 5000);
+  }
+
+  private clearFittingNameTimeout(): void {
+    if (this.fittingNameTimeout) {
+      clearTimeout(this.fittingNameTimeout);
+      this.fittingNameTimeout = undefined;
+    }
+  }
+
   private async shareLink(): Promise<void> {
     const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), this.clipboard);
     setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
@@ -570,6 +667,12 @@ export class DomControls implements Controls {
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
     (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
+
+    (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
+    (this.els.targetImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("target"));
+
+    (this.els.attackerPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
+    (this.els.targetPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
@@ -664,7 +767,7 @@ export class DomControls implements Controls {
     this.renderPropulsionOptions(side, propulsionId);
 
     if (updateStats) {
-      this.updatePropulsionStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+      this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
     } else {
       this.updateHullHint(side, this.currentPropulsionModule(side));
     }
@@ -678,6 +781,7 @@ export class DomControls implements Controls {
   private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
+    this.clearFittedHull(side);
 
     if (resetInput) {
       (this.els[`${side}Hull`] as HTMLInputElement).value = "";
@@ -689,6 +793,12 @@ export class DomControls implements Controls {
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
+  }
+
+  private clearFittedHull(side: "attacker" | "target"): void {
+    if (side === "attacker") this.attackerFittedHull = undefined;
+    else this.targetFittedHull = undefined;
+    this.updateFittingName(side);
   }
 
   private loadHull(
@@ -745,12 +855,31 @@ export class DomControls implements Controls {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const isSameHull = currentProfile?.name === profile.name;
     const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
+    if (!isSameHull) this.clearFittedHull(side);
     this.applyHull(side, profile, propulsionId, persist, !isSameHull);
   }
 
   private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
     return this.ships.parsePropulsionId(value);
+  }
+
+  private applyImportedFitting(side: "attacker" | "target", summary: FittedHullSummary): void {
+    if (side === "attacker") this.attackerFittedHull = summary;
+    else this.targetFittedHull = summary;
+    this.renderPropulsionOptions(side, summary.propulsionId ?? "");
+    this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+  }
+
+  private applyImportedTurret(turret: ImportedFitting["turret"]): void {
+    if (!turret) return;
+    const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
+    this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
+    this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
+    (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
+    (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
+    this.displayTrackingInput();
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
@@ -761,9 +890,19 @@ export class DomControls implements Controls {
   }
 
   private onPropulsionChange(side: "attacker" | "target"): void {
-    if (side === "attacker" && !this.attackerProfile) return;
-    if (side === "target" && !this.targetProfile) return;
-    this.updatePropulsionStats(side, { updateInertia: false, updateMass: true, updateSig: true });
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return;
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    if (fitted) {
+      const propulsionId = this.currentPropulsionId(side);
+      const propulsion = propulsionId ? this.ships.fittingOption(profile, propulsionId) : undefined;
+      if (propulsion) {
+        const updated = { ...fitted, propulsionId, propulsion };
+        if (side === "attacker") this.attackerFittedHull = updated;
+        else this.targetFittedHull = updated;
+      }
+    }
+    this.updateShipStats(side, { updateInertia: false, updateMass: true, updateSig: true });
     this.setOverloadDisabled(side);
     this.updateSaveButtonState();
     this.persist();
@@ -786,6 +925,21 @@ export class DomControls implements Controls {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
     setText(this.els[`${side}HullHint`], text);
+  }
+
+  private updateFittingName(side: "attacker" | "target"): void {
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", false);
+    if (fitted?.fittingName) {
+      const label = escapeHtml(`${this.i18n.t("status.fittingImported")}: `);
+      const value = escapeHtml(fitted.fittingName);
+      element.innerHTML = `<span class="fitting-name-label">${label}</span><span class="fitting-name-value">${value}</span>`;
+      element.hidden = false;
+    } else {
+      element.innerHTML = "";
+      element.hidden = true;
+    }
   }
 
   private refreshHullInputs(): void {
@@ -845,42 +999,63 @@ export class DomControls implements Controls {
     this.setOverloadDisabled(side);
   }
 
-  private updatePropulsionStats(
+  private updateShipStats(
     side: "attacker" | "target",
     { updateInertia, updateMass, updateSig }: { updateInertia: boolean; updateMass: boolean; updateSig: boolean },
   ): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
 
-    const module = this.currentPropulsionModule(side);
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
+    const hintModule = fitted ? this.currentFittedPropulsionModule(side, fitted) : this.currentPropulsionModule(side);
     const conditions = this.skillConditions(side);
+    let mass = num(this.els[`${side}Mass`]);
 
     if (updateMass || updateInertia || (side === "target" && updateSig)) {
-      const stats = this.ships.effectiveStats(profile, module, conditions);
+      const stats = this.ships.fittedStats(profile, fitted?.fitted, propulsion, conditions);
       if (updateMass) {
-        (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
+        mass = stats.mass;
+        (this.els[`${side}Mass`] as HTMLInputElement).value = String(mass);
       }
       if (updateInertia) {
-        (this.els[`${side}Inertia`] as HTMLInputElement).value = String(stats.inertiaModifier);
+        (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
       }
       if (side === "target" && updateSig) {
         (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
       }
     }
 
-    const speed = this.ships.maxSpeedForMass(profile, num(this.els[`${side}Mass`]), module, conditions);
+    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
-    this.updateHullHint(side, module);
+    this.updateHullHint(side, hintModule);
+    if (fitted) this.updateFittingName(side);
     this.updateAlignTime(side);
+  }
+
+  private currentFittedPropulsion(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionStats | undefined {
+    if (!fitted.propulsionId || !fitted.propulsion) return undefined;
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return undefined;
+    const currentId = this.currentPropulsionId(side);
+    if (currentId === fitted.propulsionId) return fitted.propulsion;
+    return this.ships.fittingOption(profile, currentId ?? fitted.propulsionId);
+  }
+
+  private currentFittedPropulsionModule(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionModule | undefined {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile || !fitted.propulsionId) return undefined;
+    return this.ships.fittingOption(profile, this.currentPropulsionId(side) ?? fitted.propulsionId);
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
-    const module = this.currentPropulsionModule(side);
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
     const conditions = this.skillConditions(side);
     const mass = num(this.els[`${side}Mass`]);
-    const speed = this.ships.maxSpeedForMass(profile, mass, module, conditions);
+    const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
+    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     this.updateAlignTime(side);
   }
@@ -924,7 +1099,7 @@ export class DomControls implements Controls {
   }
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
-    this.updatePropulsionStats(side, { updateInertia, updateMass: false, updateSig: false });
+    this.updateShipStats(side, { updateInertia, updateMass: false, updateSig: false });
     this.updateSaveButtonState();
     this.persist();
     if (side === "attacker" && !this.attackerProfile) return;
@@ -991,21 +1166,61 @@ export class DomControls implements Controls {
     if (this.openSkillSide) this.closeSkillPopup(this.openSkillSide);
   }
 
+  private openPastePopup(side: "attacker" | "target"): void {
+    if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
+    const popup = this.els[`${side}PastePopup`] as HTMLElement;
+    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    popup.hidden = false;
+    this.openPasteSide = side;
+    input.focus();
+  }
+
+  private closePastePopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}PastePopup`] as HTMLElement;
+    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    popup.hidden = true;
+    input.blur();
+    if (this.openPasteSide === side) this.openPasteSide = null;
+  }
+
+  private closeAllPastePopups(): void {
+    if (this.openPasteSide) this.closePastePopup(this.openPasteSide);
+  }
+
+  private onPastePopupPaste(event: ClipboardEvent, side: "attacker" | "target"): void {
+    const text = event.clipboardData?.getData("text/plain");
+    if (!text) return;
+    event.preventDefault();
+    this.closePastePopup(side);
+    void this.importFittingFromText(side, text);
+  }
+
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null) return;
+    if (this.openSkillSide === null && this.openPasteSide === null) return;
     const target = event.target as Element | null;
-    if (typeof target?.closest === "function") {
-      const inside = target.closest("#attacker-skill-field, #target-skill-field");
-      if (inside) return;
+    if (typeof target?.closest !== "function") return;
+    if (this.openSkillSide !== null) {
+      const insideSkill = target.closest("#attacker-skill-field, #target-skill-field");
+      if (!insideSkill) this.closeAllSkillPopups();
     }
-    this.closeAllSkillPopups();
+    if (this.openPasteSide !== null) {
+      const insidePaste = target.closest("#attacker-paste-popup, #target-paste-popup, #attacker-import-fitting, #target-import-fitting");
+      if (!insidePaste) this.closeAllPastePopups();
+    }
   }
 
   private onDocumentKeyDown(event: KeyboardEvent): void {
-    if (event.key !== "Escape" || this.openSkillSide === null) return;
-    const side = this.openSkillSide;
-    this.closeSkillPopup(side);
-    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+    if (event.key !== "Escape") return;
+    if (this.openSkillSide !== null) {
+      const side = this.openSkillSide;
+      this.closeSkillPopup(side);
+      (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+    }
+    if (this.openPasteSide !== null) {
+      const side = this.openPasteSide;
+      this.closePastePopup(side);
+      (this.els[`${side}ImportFitting`] as HTMLButtonElement).focus();
+    }
   }
 
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {
@@ -1160,7 +1375,7 @@ function setText(el: HTMLElement, text: string): void {
 }
 
 function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
@@ -1196,4 +1411,13 @@ function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
 
 function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

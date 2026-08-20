@@ -1,0 +1,32 @@
+[Thanatos, Killmail 137847446]
+
+Fighter Support Unit I
+Fighter Support Unit I
+Cynosural Field Generator I
+Networked Sensor Array
+Fighter Support Unit I
+
+Multispectrum Shield Hardener II
+Capital Shield Extender I
+EM Shield Hardener II
+Capital Shield Extender II
+Omnidirectional Tracking Link II, Tracking Speed Script
+
+Damage Control II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Imperial Navy Drone Damage Amplifier
+Inertial Stabilizers II
+Imperial Navy Drone Damage Amplifier
+
+Capital Hyperspatial Velocity Optimizer I
+Capital Hyperspatial Velocity Optimizer I
+Capital Hyperspatial Velocity Optimizer I
+
+
+Mobile Depot x2
+Reinforced Bulkheads II
+Multispectrum Energized Membrane II
+Warp Core Stabilizer I
+Liquid Ozone x1000
+Oxygen Isotopes x7860

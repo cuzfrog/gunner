@@ -1,0 +1,35 @@
+[Marshal, Killmail 137760258]
+
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Corpus X-Type Heavy Energy Neutralizer
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Caldari Navy Torpedo Launcher, Mjolnir Rage Torpedo
+Large EMP Smartbomb II
+
+Gist X-Type 500MN Microwarpdrive
+Xarasier X-Large Ancillary Shield Booster, Navy Cap Booster 400
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Thukker Large Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+Thukker Large Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+
+Syndicate Damage Control
+Republic Fleet Ballistic Control System
+Corpum A-Type Multispectrum Energized Membrane
+Corpum A-Type Multispectrum Energized Membrane
+Republic Fleet Ballistic Control System
+Imperial Navy 1600mm Steel Plates
+Corpum A-Type Multispectrum Energized Membrane
+
+Large Core Defense Field Extender II
+Large Processor Overclocking Unit II
+
+
+Navy Cap Booster 800 x14
+Navy Cap Booster 400 x28
+Mjolnir Rage Torpedo x2248
+Wolf x1

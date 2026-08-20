@@ -1,0 +1,60 @@
+[Heron, Killmail 137868561]
+
+Core Probe Launcher I, Sisters Core Scanner Probe
+Prototype Cloaking Device I
+
+Scan Rangefinding Array I
+Scan Rangefinding Array I
+Relic Analyzer II
+Data Analyzer II
+5MN Quad LiF Restrained Microwarpdrive
+
+Warp Core Stabilizer II
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I
+
+
+Scorched Telemetry Processor x49
+Enhanced Ward Console x2
+Metal Scraps x7
+Calm Exotic Filament x1
+Damaged Artificial Neural Network x44
+Telemetry Processor x2
+Burned Logic Circuit x23
+Armor Plates x52
+Intact Armor Plates x4
+Spatial Attunement Unit x4
+Positron Cord x50
+Elemental Crux x110
+Charred Micro Circuit x114
+Power Circuit x3
+Power Circuit x8
+Sisters Core Scanner Probe x8
+Signal-5 'Needlejack' Filament x1
+Force Cable x109
+Capital Particle Dispersion Projector II Blueprint x1
+Heat Depressor x71
+Noise-5 'Needlejack' Filament x1
+Artificial Neural Network x11
+Small Projectile Locus Coordinator II Blueprint x1
+Micro Circuit x5
+Micro Circuit x5
+Auxiliary Parts x37
+Ward Console x44
+Nanite Compound x1
+Contaminated Nanite Compound x92
+Interface Circuit x10
+Carbon x24
+Carbon x4
+Malfunctioning Shield Emitter x20
+Gallente Encryption Methods x1
+Intact Shield Emitter x8
+Defective Current Pump x41
+Yan Jung Info Matrix x1
+Calm Dark Filament x2
+Current Pump x11
+Tripped Power Circuit x24
+Tripped Power Circuit x55
+Fried Interface Circuit x5
+Fried Interface Circuit x39

@@ -1,0 +1,39 @@
+[Dominix Navy Issue, Killmail 137861494]
+
+Large Remote Armor Repairer II
+Large Ancillary Remote Armor Repairer, Nanite Repair Paste
+Large Remote Capacitor Transmitter II
+Large Remote Armor Repairer II
+Large Remote Armor Repairer II
+Large Remote Capacitor Transmitter II
+
+Heavy Capacitor Booster II, Navy Cap Booster 3200
+Heavy Capacitor Booster II, Navy Cap Booster 3200
+Sensor Booster II
+Large Cap Battery II
+Sensor Booster II
+Large Cap Battery II
+
+1600mm Steel Plates II
+Thermal Armor Hardener II
+1600mm Steel Plates II
+Explosive Armor Hardener II
+Kinetic Armor Hardener II
+EM Armor Hardener II
+Reactive Armor Hardener
+
+Large Remote Repair Augmentor I
+Large Remote Repair Augmentor I
+Large Explosive Armor Reinforcer II
+
+
+Praetor II x1
+Praetor II x8
+Infiltrator II x10
+
+
+ECCM Script x2
+Scan Resolution Script x2
+Nanite Repair Paste x576
+Navy Cap Booster 3200 x2
+Navy Cap Booster 3200 x6

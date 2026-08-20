@@ -1,0 +1,28 @@
+[Vherokior Probe, Killmail 46264141]
+
+Core Probe Launcher I, Core Scanner Probe I
+150mm Light AutoCannon I, Republic Fleet Phased Plasma S
+Rocket Launcher I, Inferno Rocket
+
+Data Analyzer I
+Cargo Scanner II
+Relic Analyzer I
+5MN Cold-Gas Enduring Microwarpdrive
+
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+
+Small Memetic Algorithm Bank I
+Small Emission Scope Sharpener I
+
+
+Hobgoblin I x4
+Salvage Drone I x1
+Mining Drone I x2
+
+
+Core Scanner Probe I x13
+Core Scanner Probe I x3
+Republic Fleet Phased Plasma S x250
+Inferno Rocket x283

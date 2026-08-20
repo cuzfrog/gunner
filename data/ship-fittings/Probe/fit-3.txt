@@ -1,0 +1,15 @@
+[Probe, Killmail 137867195]
+
+Core Probe Launcher I, Core Scanner Probe I
+
+Data Analyzer I
+Relic Analyzer I
+5MN Microwarpdrive I
+Scan Rangefinding Array I
+
+Expanded Cargohold I
+Inertial Stabilizers I
+Expanded Cargohold I
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I

@@ -1,5 +1,4 @@
-import { fittedMassFactor } from "./fittedMass";
-import type { PropulsionModule, ShipProfile, SkillLevel, StatConditions } from "./types";
+import type { FittedHull, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
 export interface ShipStats {
   readonly mass: number;
@@ -10,54 +9,75 @@ export interface ShipStats {
 
 const NAVIGATION_SPEED_BONUS_PER_LEVEL = 0.05;
 const ACCELERATION_CONTROL_BONUS_PER_LEVEL = 0.05;
-const EVASIVE_MANEUVERING_INERTIA_BONUS_PER_LEVEL = 0.05;
-const SPACESHIP_COMMAND_INERTIA_BONUS_PER_LEVEL = 0.02;
+const EVASIVE_MANEUVERING_BONUS_PER_LEVEL = 0.05;
+const SPACESHIP_COMMAND_BONUS_PER_LEVEL = 0.02;
 const PROPULSION_OVERLOAD_FACTOR = 1.5;
 
-export function effectiveStats(
+export function fittedStats(
   profile: ShipProfile,
-  module?: PropulsionModule,
+  fitted?: FittedHull,
+  propulsion?: PropulsionStats,
   conditions?: StatConditions,
 ): ShipStats {
+  const hull = fitted ?? nakedHull(profile);
   const level = conditions?.skillLevel ?? 0;
   const overloaded = conditions?.overloaded ?? false;
-  const navFactor = skillSpeedFactor(level);
-  const inertiaFactor = skillInertiaFactor(level);
-  const hullMass = profile.mass * fittedMassFactor(profile.hullType);
-
-  if (!module) {
-    return {
-      mass: hullMass,
-      inertiaModifier: profile.inertiaModifier * inertiaFactor,
-      maxSpeed: profile.baseSpeed * navFactor,
-      sigRadius: profile.sigRadius,
-    };
-  }
-
-  const speedMass = hullMass + module.massAddition;
-  const moduleSpeed = moduleSpeedBonus(module, level, overloaded);
-  const maxSpeed = profile.baseSpeed * navFactor * (1 + (moduleSpeed * module.thrust) / speedMass);
-  const mass = hullMass + module.massAddition * module.activeMassMultiplier;
-  const sigRadius = profile.sigRadius * (1 + module.sigBloom);
+  const navFactor = navigationSpeedFactor(level);
+  const inertiaFactor = inertiaSkillFactor(level);
+  const mass = (hull.mass + (propulsion ? propulsion.massAddition : 0)) * hull.massMultiplier;
+  const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
+  const maxSpeed = profile.baseSpeed * hull.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
+  const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
+  const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
 
   return {
     mass,
-    inertiaModifier: profile.inertiaModifier * inertiaFactor,
+    inertiaModifier,
     maxSpeed,
     sigRadius,
   };
 }
 
-function skillSpeedFactor(level: SkillLevel): number {
+export function maxSpeedForFittedMass(
+  profile: ShipProfile,
+  fitted: FittedHull | undefined,
+  mass: number,
+  propulsion?: PropulsionStats,
+  conditions?: StatConditions,
+): number {
+  const hull = fitted ?? nakedHull(profile);
+  const level = conditions?.skillLevel ?? 0;
+  const overloaded = conditions?.overloaded ?? false;
+  const navFactor = navigationSpeedFactor(level);
+
+  if (!propulsion) return profile.baseSpeed * hull.speedMultiplier * navFactor;
+
+  const speedMass = Math.max(mass, propulsion.massAddition);
+  const moduleSpeed = propulsionSpeedBonus(propulsion, level, overloaded);
+  return profile.baseSpeed * hull.speedMultiplier * navFactor * (1 + (moduleSpeed * propulsion.thrust) / speedMass);
+}
+
+function nakedHull(profile: ShipProfile): FittedHull {
+  return {
+    mass: profile.mass,
+    massMultiplier: 1,
+    speedMultiplier: 1,
+    inertiaMultiplier: 1,
+    sigMultiplier: 1,
+    sigRadiusAdd: 0,
+  };
+}
+
+function navigationSpeedFactor(level: SkillLevel): number {
   return 1 + NAVIGATION_SPEED_BONUS_PER_LEVEL * level;
 }
 
-function skillInertiaFactor(level: SkillLevel): number {
-  return (1 - EVASIVE_MANEUVERING_INERTIA_BONUS_PER_LEVEL * level) * (1 - SPACESHIP_COMMAND_INERTIA_BONUS_PER_LEVEL * level);
+function inertiaSkillFactor(level: SkillLevel): number {
+  return (1 - EVASIVE_MANEUVERING_BONUS_PER_LEVEL * level) * (1 - SPACESHIP_COMMAND_BONUS_PER_LEVEL * level);
 }
 
-function moduleSpeedBonus(module: PropulsionModule, level: SkillLevel, overloaded: boolean): number {
+function propulsionSpeedBonus(propulsion: PropulsionStats, level: SkillLevel, overloaded: boolean): number {
   const accFactor = 1 + ACCELERATION_CONTROL_BONUS_PER_LEVEL * level;
   const overloadFactor = overloaded ? PROPULSION_OVERLOAD_FACTOR : 1;
-  return module.speedBonus * skillSpeedFactor(level) * accFactor * overloadFactor;
+  return propulsion.speedBonus * accFactor * overloadFactor;
 }

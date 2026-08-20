@@ -1,6 +1,6 @@
-import type { PropulsionId, Ships } from "../ships";
+import type { FittedHull, PropulsionId, Ships } from "../ships";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
-import { LocalSettingsStore, USER_SETTINGS_VERSION, type ProfileSettings, type UserSettings } from "./settings";
+import { LocalSettingsStore, USER_SETTINGS_VERSION, type FittedHullSummary, type ProfileSettings, type UserSettings } from "./settings";
 
 const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
@@ -51,11 +51,27 @@ const URL_SETTINGS: UserSettings = {
 };
 
 function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
 const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
+
+const FITTED_HULL: FittedHull = { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+
+const FITTED_PROPULSION = {
+  thrust: 1_500_000,
+  speedBonus: 1.15,
+  massAddition: 500_000,
+  sigBloom: 0,
+};
+
+const FITTED_HULL_SUMMARY: FittedHullSummary = {
+  fittingName: "Brawler",
+  propulsionId: "ab-1mn",
+  fitted: FITTED_HULL,
+  propulsion: FITTED_PROPULSION,
+};
 
 function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
@@ -81,6 +97,7 @@ function fakeLocation(href: string): LocationProvider {
 function fakeClipboard(): ClipboardProvider {
   let lastText = "";
   return {
+    readText: async () => lastText,
     writeText: async (text) => {
       lastText = text;
     },
@@ -102,8 +119,8 @@ function makeShips(): Ships {
     }),
     fittingOptions: vi.fn(),
     fittingOption: vi.fn(),
-    effectiveStats: vi.fn(),
-    maxSpeedForMass: vi.fn(),
+    fittedStats: vi.fn(),
+    maxSpeedForFittedMass: vi.fn(),
   });
 }
 
@@ -189,6 +206,18 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toBeNull();
   });
 
+  test("save and load round-trip v5 with fitted hull summaries", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    const withFitted: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFittedHull: FITTED_HULL_SUMMARY,
+      targetFittedHull: FITTED_HULL_SUMMARY,
+    };
+    store.save(withFitted);
+    expect(store.load()).toEqual(withFitted);
+  });
+
   test("save and load round-trip v5 with hull and propulsion selections", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
@@ -227,6 +256,13 @@ describe("LocalSettingsStore", () => {
     expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
+  test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const profile = profileFrom({ ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY });
+    store.saveProfile("brawler", profile);
+    expect(store.loadProfile("brawler")).toEqual(profile);
+  });
+
   test("saveProfile and loadProfile round-trip", () => {
     const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
@@ -234,24 +270,27 @@ describe("LocalSettingsStore", () => {
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
-  test("saveProfile strips a language field from the stored profile", () => {
+  test("saveProfile strips display preference fields from the stored profile", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_SETTINGS);
     const raw = storage.getItem("gunner-profiles-v5")!;
-    expect(JSON.parse(raw).brawler).toEqual(DEFAULT_PROFILE);
+    const stored = JSON.parse(raw).brawler;
+    expect(stored).toEqual(DEFAULT_PROFILE);
+    expect(stored).not.toHaveProperty("language");
+    expect(stored).not.toHaveProperty("trackingUnit");
   });
 
-  test("loadProfile strips a legacy language field from stored profiles", () => {
+  test("loadProfile strips legacy display preference fields from stored profiles", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
-  test("loadSelectedProfile strips a legacy language field from the baseline", () => {
+  test("loadSelectedProfile strips legacy display preference fields from the baseline", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
@@ -282,6 +321,15 @@ describe("LocalSettingsStore", () => {
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual(["sniper"]);
     expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_PROFILE });
+  });
+
+  test("encodeUrl and decodeUrl round-trip fitted hull summaries", () => {
+    const location = fakeLocation("http://localhost/index.html");
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
+    const withFitted: UserSettings = { ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY };
+    const url = store.encodeUrl(withFitted);
+    const decoded = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    expect(decoded).toEqual(withFitted);
   });
 
   test("encodeUrl and decodeUrl round-trip", () => {
@@ -337,6 +385,24 @@ describe("LocalSettingsStore", () => {
     storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
+  });
+
+  test("load rejects stored settings with a fitted hull missing sigMultiplier", () => {
+    const storage = fakeStorage();
+    const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, sigMultiplier: undefined } };
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    expect(store.load()).toBeNull();
+  });
+
+  test("load defaults a fitted hull missing massMultiplier to one", () => {
+    const storage = fakeStorage();
+    const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, massMultiplier: undefined } };
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerFittedHull!.fitted.massMultiplier).toBe(1);
   });
 
   test("load falls back to local storage when the URL is invalid", () => {

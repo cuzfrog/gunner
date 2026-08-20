@@ -1,0 +1,36 @@
+[Tempest, Killmail 137861735]
+
+Heavy Knave Scoped Energy Nosferatu
+Improved Cloaking Device II
+Heavy Infectious Scoped Energy Neutralizer
+Core Probe Launcher I, Sisters Core Scanner Probe
+Heavy Infectious Scoped Energy Neutralizer
+Heavy Knave Scoped Energy Nosferatu
+Heavy Knave Scoped Energy Nosferatu
+Heavy Infectious Scoped Energy Neutralizer
+
+500MN Microwarpdrive I
+Multispectral ECM II
+100MN Afterburner I
+Large F-S9 Regolith Compact Shield Extender
+Large Micro Jump Drive
+
+Nanofiber Internal Structure II
+Inertial Stabilizers II
+Nanofiber Internal Structure II
+Inertial Stabilizers II
+Nanofiber Internal Structure II
+Inertial Stabilizers II
+
+Large Higgs Anchor I
+Large Low Friction Nozzle Joints I
+Large Polycarbon Engine Housing I
+
+
+Hornet EC-300 x15
+
+
+Sisters Core Scanner Probe x8
+Heavy Knave Scoped Energy Nosferatu, Sisters Core Scanner Probe
+Scan Resolution Script x1
+Sensor Booster II, Sisters Core Scanner Probe

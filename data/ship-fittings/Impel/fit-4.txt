@@ -1,0 +1,55 @@
+[Impel, Killmail 137846247]
+
+Interdiction Nullifier I
+Improved Cloaking Device II
+
+Large Shield Extender II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Inertial Stabilizers II
+Damage Control II
+Warp Core Stabilizer II
+Inertial Stabilizers II
+Nanofiber Internal Structure II
+Inertial Stabilizers II
+Inertial Stabilizers II
+
+Medium Hyperspatial Velocity Optimizer II
+Medium Hyperspatial Velocity Optimizer II
+
+
+Republic Fleet Berserker x5
+Berserker II x5
+Imperial Navy Praetor x5
+Caldari Navy Wasp x10
+Praetor II x5
+
+
+Optimal Range Script x2
+Drone Damage Amplifier II, Optimal Range Script
+Signal Amplifier II, Optimal Range Script
+Co-Processor II, Optimal Range Script
+Cladistic-5 'Krai Perun' Filament x4
+100MN Afterburner II, Optimal Range Script
+Ishtar x1
+Medium Processor Overclocking Unit II, Optimal Range Script
+Agency 'Overclocker' SB5 Dose II x3
+Targeting Range Script x1
+Sensor Booster II, Optimal Range Script
+Synth Mindflood Booster x5
+Drone Link Augmentor II, Optimal Range Script
+Omnidirectional Tracking Link II, Optimal Range Script
+Tracking Speed Script x2
+Nanite Repair Paste x76
+Medium Ionic Field Projector II, Optimal Range Script
+Mobile Depot x1
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Sisters Core Scanner Probe x16
+Cladistic-5 'Krai Svarog' Filament x3
+Proximity-5 'Extraction' Filament x3
+Pax Amarria x1
+Cladistic-5 'Krai Perun' Filament x3
+Expanded Cargohold II, Sisters Core Scanner Probe
+Expanded Cargohold II, Sisters Core Scanner Probe
+Cladistic-5 'Krai Veles' Filament x3
+Glorification-1 'Devana' Filament x5

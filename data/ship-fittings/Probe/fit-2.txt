@@ -1,0 +1,29 @@
+[Probe, Killmail 137867853]
+
+Core Probe Launcher I, Core Scanner Probe I
+
+5MN Quad LiF Restrained Microwarpdrive
+Data Analyzer I
+Relic Analyzer I
+Scan Rangefinding Array I
+
+Type-D Restrained Nanofiber Structure
+Type-D Restrained Inertial Stabilizers
+Type-D Restrained Inertial Stabilizers
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I
+
+
+Core Scanner Probe I x8
+Trigger Unit x1
+Alloyed Tritanium Bar x25
+Burned Logic Circuit x19
+Logic Circuit x3
+Smashed Trigger Unit x23
+Charred Micro Circuit x45
+Thruster Console x36
+Impetus Console x4
+Carbon x2
+Tripped Power Circuit x41
+Fried Interface Circuit x35

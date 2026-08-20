@@ -1,14 +1,14 @@
 {
   "name": "gunner",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bun run build.ts",
+    "build": "bun run scripts/build.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "trace": "bun run scripts/sim-trace.ts",
-    "preview": "bun run build.ts && bun run preview.ts",
+    "preview": "bun run scripts/preview.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {

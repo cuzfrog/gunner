@@ -1,0 +1,40 @@
+[Minokawa, Killmail 137796368]
+
+Corpum A-Type Medium Energy Nosferatu
+Capital Ancillary Remote Shield Booster, Navy Cap Booster 3200
+Shield Command Burst II, Active Shielding Charge
+CONCORD Capital Remote Shield Booster
+CONCORD Capital Remote Shield Booster
+Triage Module II
+
+Pith X-Type Shield Boost Amplifier
+Capital Capacitor Booster II
+Pithum A-Type EM Shield Amplifier
+Gistum B-Type Multispectrum Shield Hardener
+Pith X-Type Shield Boost Amplifier
+CONCORD Capital Shield Booster
+Capital Ancillary Shield Booster, Navy Cap Booster 3200
+
+Dread Guristas Co-Processor
+Dark Blood Power Diagnostic System
+Dark Blood Power Diagnostic System
+Damage Control II
+
+Capital EM Shield Reinforcer II
+Capital Thermal Shield Reinforcer II
+Capital Thermal Shield Reinforcer II
+
+
+Heavy Shield Maintenance Bot II x5
+Acolyte II x5
+Heavy Hull Maintenance Bot II x5
+Vespa EC-600 x2
+Vespa EC-600 x3
+Hornet EC-300 x5
+Heavy Armor Maintenance Bot II x5
+
+
+Strontium Clathrates x492
+Nitrogen Isotopes x107042
+Navy Cap Booster 3200 x86
+Navy Cap Booster 3200 x6

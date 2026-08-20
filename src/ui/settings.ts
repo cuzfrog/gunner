@@ -1,9 +1,16 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
-import type { PropulsionId, Ships, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionStats, Ships, SkillLevel } from "../ships";
 import type { Language } from "./i18n";
 import type { TrackingUnit } from "./trackingInput";
 
 export const USER_SETTINGS_VERSION = 5 as const;
+
+export interface FittedHullSummary {
+  readonly fittingName: string;
+  readonly propulsionId?: PropulsionId;
+  readonly fitted: FittedHull;
+  readonly propulsion?: PropulsionStats;
+}
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -34,11 +41,13 @@ export interface UserSettings {
   attackerPropulsion?: PropulsionId;
   targetHull?: string;
   targetPropulsion?: PropulsionId;
+  attackerFittedHull?: FittedHullSummary;
+  targetFittedHull?: FittedHullSummary;
   simSpeed: number;
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language">;
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit">;
 
 export interface StorageProvider {
   getItem(key: string): string | null;
@@ -51,7 +60,14 @@ export interface LocationProvider {
   replace(url: string): void;
 }
 
+export class ClipboardUnavailableError extends Error {
+  constructor() {
+    super("Clipboard unavailable");
+  }
+}
+
 export interface ClipboardProvider {
+  readText(): Promise<string>;
   writeText(text: string): Promise<void>;
 }
 
@@ -106,7 +122,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   saveProfile(name: string, settings: ProfileSettings): void {
     const profiles = this.loadProfiles();
-    profiles[name] = stripLanguage(settings);
+    profiles[name] = stripDisplayPreferences(settings);
     this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
   }
 
@@ -177,7 +193,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   saveSelectedProfile(name: string, baseline: ProfileSettings): void {
     if (!name) throw new Error("selected profile name cannot be empty");
-    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripLanguage(baseline) };
+    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripDisplayPreferences(baseline) };
     this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
   }
 
@@ -230,7 +246,8 @@ export class LocalSettingsStore implements SettingsStore {
   }
 
   private isUserSettings(value: unknown): value is UserSettings {
-    return this.isProfileSettings(value) && isLanguage((value as Record<string, unknown>).language);
+    const s = value as Record<string, unknown>;
+    return this.isProfileSettings(value) && isLanguage(s.language) && (s.trackingUnit === "rad" || s.trackingUnit === "score");
   }
 
   private isProfileSettings(value: unknown): value is ProfileSettings {
@@ -239,7 +256,6 @@ export class LocalSettingsStore implements SettingsStore {
     return (
       s.version === USER_SETTINGS_VERSION &&
       isNonNegative(s.tracking) &&
-      (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
       isSigResolutionClass(s.sigRes) &&
       isNonNegative(s.optimal) &&
       isNonNegative(s.falloff) &&
@@ -265,6 +281,8 @@ export class LocalSettingsStore implements SettingsStore {
       this.isOptionalPropulsionId(s.attackerPropulsion) &&
       isOptionalNonEmptyString(s.targetHull) &&
       this.isOptionalPropulsionId(s.targetPropulsion) &&
+      isOptionalFittedHullSummary(s.attackerFittedHull) &&
+      isOptionalFittedHullSummary(s.targetFittedHull) &&
       isPositive(s.simSpeed)
     );
   }
@@ -275,7 +293,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   private toProfileSettings(value: unknown): ProfileSettings | null {
     if (!this.isProfileSettings(value)) return null;
-    return stripLanguage(value);
+    return stripDisplayPreferences(value);
   }
 }
 
@@ -289,8 +307,8 @@ function isSelectedProfile(value: unknown): value is { name: string; baseline: u
   return typeof s.name === "string" && s.name.length > 0 && !!s.baseline && typeof s.baseline === "object" && !Array.isArray(s.baseline);
 }
 
-function stripLanguage(value: ProfileSettings): ProfileSettings {
-  const { language: _, ...rest } = value as Record<string, unknown>;
+function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
+  const { language: _, trackingUnit: __, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 
@@ -340,6 +358,34 @@ function isNonNegative(value: unknown): value is number {
 
 function isPositive(value: unknown): value is number {
   return isFiniteNumber(value) && value > 0;
+}
+
+function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return typeof s.fittingName === "string" && s.fittingName.length > 0 && isFittedHull(s.fitted) && isOptionalPropulsionStats(s.propulsion) && (s.propulsionId === undefined || typeof s.propulsionId === "string");
+}
+
+function isFittedHull(value: unknown): value is FittedHull {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  if (s.massMultiplier === undefined) s.massMultiplier = 1;
+  return (
+    isNonNegative(s.mass) &&
+    isPositive(s.massMultiplier) &&
+    isPositive(s.speedMultiplier) &&
+    isPositive(s.inertiaMultiplier) &&
+    isPositive(s.sigMultiplier) &&
+    isNonNegative(s.sigRadiusAdd)
+  );
+}
+
+function isOptionalPropulsionStats(value: unknown): value is PropulsionStats | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom);
 }
 
 function encodeBase64(value: unknown): string {

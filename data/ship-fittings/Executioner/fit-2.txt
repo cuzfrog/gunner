@@ -1,0 +1,22 @@
+[Executioner, Killmail 137867577]
+
+Dual Anode Light Particle Stream I, Standard S
+Dual Anode Light Particle Stream I, Standard S
+Dual Anode Light Particle Stream I, Standard S
+
+Medium Shield Extender I
+5MN Quad LiF Restrained Microwarpdrive
+Faint Scoped Warp Disruptor
+
+Micro Auxiliary Power Core I
+Type-D Restrained Overdrive Injector
+Damage Control I
+
+Small Core Defense Field Extender I
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+
+
+Republic Mobility Booster I x1
+Republic Fleet Midshipman Insignia I x1
+Republic Fleet High Captain Insignia I x1

@@ -1,4 +1,5 @@
 import { container } from "./container";
+import { ClipboardUnavailableError } from "./ui";
 
 const DEFAULT_SETTINGS = {
   version: 5 as const,
@@ -171,7 +172,7 @@ function fakeWindow(): Window {
   return {
     location: { href: "http://localhost/" },
     history: { replaceState: vi.fn() },
-    navigator: { clipboard: { writeText: vi.fn(async () => {}) } },
+    navigator: { clipboard: { readText: vi.fn(), writeText: vi.fn(async () => {}) } },
   } as unknown as Window;
 }
 
@@ -224,5 +225,27 @@ describe("main", () => {
     langZh.trigger("click");
 
     expect(ctx.fillText.mock.calls.some((call) => String(call[0]).includes("距离"))).toBe(true);
+  });
+
+  test("clipboard readText returns the text when the Clipboard API succeeds", async () => {
+    await import("./main");
+    const win = (globalThis as Record<string, unknown>).window as { navigator: { clipboard: { readText: Mocked } } };
+    win.navigator.clipboard.readText.mockResolvedValue("[Rifter, Pasted]");
+    const text = await container.cradle.clipboard.readText();
+    expect(text).toBe("[Rifter, Pasted]");
+  });
+
+  test("clipboard readText throws ClipboardUnavailableError when the Clipboard API is missing", async () => {
+    await import("./main");
+    const win = (globalThis as Record<string, unknown>).window as { navigator: { clipboard: { readText?: Mocked } } };
+    win.navigator.clipboard.readText = undefined;
+    await expect(container.cradle.clipboard.readText()).rejects.toThrow(ClipboardUnavailableError);
+  });
+
+  test("clipboard readText throws ClipboardUnavailableError when the Clipboard API rejects", async () => {
+    await import("./main");
+    const win = (globalThis as Record<string, unknown>).window as { navigator: { clipboard: { readText: Mocked } } };
+    win.navigator.clipboard.readText.mockRejectedValue(new Error("denied"));
+    await expect(container.cradle.clipboard.readText()).rejects.toThrow(ClipboardUnavailableError);
   });
 });

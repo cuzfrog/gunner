@@ -1,0 +1,33 @@
+[Drekavac, Killmail 137865356]
+
+Heavy Entropic Disintegrator II, Occult M
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+
+Medium Cap Battery II
+10MN Y-S8 Compact Afterburner
+Tracking Computer II, Tracking Speed Script
+50MN Quad LiF Restrained Microwarpdrive
+
+Multispectrum Energized Membrane II
+Entropic Radiation Sink II
+Multispectrum Energized Membrane II
+1600mm Steel Plates II
+Explosive Energized Membrane II
+Damage Control II
+Reactive Armor Hardener
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Sisters Core Scanner Probe x16
+Core Probe Launcher II, Sisters Core Scanner Probe
+Tetryon Exotic Plasma M x2500
+Occult M x2988
+Optimal Range Script x1
+Mystic M x2500
+Meson Exotic Plasma M x2500
+Baryon Exotic Plasma M x2500

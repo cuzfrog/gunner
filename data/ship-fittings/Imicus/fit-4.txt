@@ -1,0 +1,53 @@
+[Imicus, Killmail 137867532]
+
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+
+Data Analyzer I
+Relic Analyzer I
+Cargo Scanner II
+1MN Afterburner I
+
+Inertial Stabilizers II
+Overdrive Injector System II
+Inertial Stabilizers II
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I
+
+
+Salvage Drone II x4
+
+
+Accelerant Decryptor x2
+Current Amplifier x26
+Burned Logic Circuit x86
+Logic Circuit x7
+Broken Drone Transceiver x19
+Broken Drone Transceiver x17
+Lorentz Fluid x2
+Process Decryptor x1
+High-Tech Manufacturing Tools x1
+Charred Micro Circuit x81
+Power Circuit x1
+Datacore - Mechanical Engineering x5
+Yan Jung Void Machine x1
+Datacore - Gallentean Starship Engineering x2
+Conductive Polymer x32
+Signal-5 'Needlejack' Filament x2
+High-Tech Data Chip x1
+Parity Decryptor x1
+Datacore - Electromagnetic Physics x2
+Second-hand Parts x14
+Damaged Artificial Neural Network x16
+Noise-5 'Needlejack' Filament x1
+Artificial Neural Network x4
+Calm Exotic Filament x1
+Contaminated Lorentz Fluid x30
+Drone Transceiver x6
+Symmetry Decryptor x2
+Large Semiconductor Memory Cell II Blueprint x1
+Carbon x9
+Malfunctioning Shield Emitter x66
+Yan Jung Vellum Etch x2
+Tripped Power Circuit x37
+Fried Interface Circuit x53

@@ -1,0 +1,34 @@
+[Vexor Navy Issue, Killmail 137867384]
+
+Small Energy Nosferatu II
+Heavy Ion Blaster II, Null M
+Heavy Neutron Blaster II, Void M
+Heavy Ion Blaster II, Void M
+
+Medium Capacitor Booster II, Navy Cap Booster 800
+50MN Microwarpdrive II
+Warp Scrambler II
+Stasis Webifier II
+
+Medium Ancillary Armor Repairer, Nanite Repair Paste
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+Magnetic Field Stabilizer II
+Medium Armor Repairer II
+Magnetic Field Stabilizer II
+
+Medium Auxiliary Nano Pump II
+Medium Explosive Armor Reinforcer II
+Medium Auxiliary Nano Pump II
+
+
+Valkyrie SW-600 x5
+Imperial Navy Acolyte x5
+Imperial Navy Infiltrator x5
+
+
+Navy Cap Booster 800 x16
+Null M x1380
+Nanite Repair Paste x118
+Agency 'Overclocker' SB7 Dose III x1
+Void M x1380

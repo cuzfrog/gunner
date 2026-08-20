@@ -1,0 +1,29 @@
+[Tholos, Killmail 137859591]
+
+Rocket Launcher II, Inferno Rage Rocket
+Covert Ops Cloaking Device II
+200mm AutoCannon II, Hail S
+Small Breacher Pod Launcher, SCARAB Breacher Pod S
+200mm AutoCannon II, Hail S
+Rocket Launcher II, Inferno Rage Rocket
+
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+Multispectrum Shield Hardener II
+10MN Y-S8 Compact Afterburner
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+Dread Guristas Warp Scrambler
+Dread Guristas Stasis Webifier
+
+Micro Auxiliary Power Core II
+Nanofiber Internal Structure II
+
+Small EM Shield Reinforcer I
+Small Ancillary Current Router II
+Small Core Defense Operational Solidifier II
+
+
+SCARAB Breacher Pod S x1966
+Navy Cap Booster 50 x28
+Hail S x2266
+Barrage S x2500
+Inferno Rage Rocket x2052

@@ -1,0 +1,50 @@
+[Lif, Killmail 137763044]
+
+Capital Ancillary Remote Shield Booster, Navy Cap Booster 3200
+Capital Ancillary Remote Armor Repairer, Nanite Repair Paste
+Shield Command Burst II, Shield Extension Charge
+CONCORD Capital Remote Armor Repairer
+Triage Module II
+Domination Capital Remote Shield Booster
+
+Pithum C-Type Multispectrum Shield Hardener
+Capital Cap Battery II
+CONCORD Capital Shield Booster
+Pith X-Type Shield Boost Amplifier
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Pithum C-Type Multispectrum Shield Hardener
+
+Shadow Serpentis Damage Control
+Dark Blood Power Diagnostic System
+Dark Blood Power Diagnostic System
+Dark Blood Power Diagnostic System
+Dark Blood Power Diagnostic System
+
+Capital EM Shield Reinforcer II
+Capital Core Defense Operational Solidifier II
+Capital Core Defense Capacitor Safeguard II
+
+
+Heavy Shield Maintenance Bot II x5
+Heavy Hull Maintenance Bot II x7
+Hornet EC-300 x5
+Heavy Armor Maintenance Bot II x7
+
+
+Active Shielding Charge x500
+Antipharmakon Aeolis x3
+Liquid Ozone x3005
+Shield Extension Charge x200
+Mobile Depot x1
+Warp Core Stabilizer II, Active Shielding Charge
+Shield Harmonizing Charge x197
+Capacitor Power Relay II, Active Shielding Charge
+Nanite Repair Paste x344
+Cap Recharger II, Active Shielding Charge
+Agency 'Hardshell' TB7 Dose III x4
+Navy Cap Booster 3200 x11
+Strontium Clathrates x675
+Hydrogen Isotopes x104921
+Navy Cap Booster 3200 x65
+Strontium Clathrates x1250
+Amarr Shuttle x1

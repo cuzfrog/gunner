@@ -1,0 +1,233 @@
+{
+  "downloaded": [
+    {
+      "name": "Algos Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/91849/render",
+      "safeName": "Algos_Navy_Issue"
+    },
+    {
+      "name": "Alligator",
+      "imageUrl": "https://images.evetech.net/types/78366/render",
+      "safeName": "Alligator"
+    },
+    {
+      "name": "Anhinga",
+      "imageUrl": "https://images.evetech.net/types/89807/render",
+      "safeName": "Anhinga"
+    },
+    {
+      "name": "Azariel",
+      "imageUrl": "https://images.evetech.net/types/78576/render",
+      "safeName": "Azariel"
+    },
+    {
+      "name": "Babaroga",
+      "imageUrl": "https://images.evetech.net/types/88001/render",
+      "safeName": "Babaroga"
+    },
+    {
+      "name": "Bane",
+      "imageUrl": "https://images.evetech.net/types/77283/render",
+      "safeName": "Bane"
+    },
+    {
+      "name": "Boobook",
+      "imageUrl": "https://images.evetech.net/types/64034/render/?size=256",
+      "safeName": "Boobook"
+    },
+    {
+      "name": "Civilian Amarr Shuttle",
+      "imageUrl": "https://images.evetech.net/types/27299/render/?size=256",
+      "safeName": "Civilian_Amarr_Shuttle"
+    },
+    {
+      "name": "Civilian Caldari Shuttle",
+      "imageUrl": "https://images.evetech.net/types/27301/render/?size=256",
+      "safeName": "Civilian_Caldari_Shuttle"
+    },
+    {
+      "name": "Civilian Gallente Shuttle",
+      "imageUrl": "https://images.evetech.net/types/27303/render/?size=256",
+      "safeName": "Civilian_Gallente_Shuttle"
+    },
+    {
+      "name": "Civilian Minmatar Shuttle",
+      "imageUrl": "https://images.evetech.net/types/27305/render/?size=256",
+      "safeName": "Civilian_Minmatar_Shuttle"
+    },
+    {
+      "name": "Corax Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/91857/render",
+      "safeName": "Corax_Navy_Issue"
+    },
+    {
+      "name": "Cybele",
+      "imageUrl": "https://images.evetech.net/types/77726/render",
+      "safeName": "Cybele"
+    },
+    {
+      "name": "Cyclone Fleet Issue",
+      "imageUrl": "https://images.evetech.net/types/72811/render",
+      "safeName": "Cyclone_Fleet_Issue"
+    },
+    {
+      "name": "Dragoon Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/91775/render",
+      "safeName": "Dragoon_Navy_Issue"
+    },
+    {
+      "name": "Ferox Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/72812/render",
+      "safeName": "Ferox_Navy_Issue"
+    },
+    {
+      "name": "Gaia",
+      "imageUrl": "https://images.evetech.net/types/92824/render",
+      "safeName": "Gaia"
+    },
+    {
+      "name": "Gecko",
+      "imageUrl": "https://images.evetech.net/types/17918/render/?size=256",
+      "safeName": "Gecko"
+    },
+    {
+      "name": "Hubris",
+      "imageUrl": "https://images.evetech.net/types/77281/render",
+      "safeName": "Hubris"
+    },
+    {
+      "name": "InterBus Shuttle",
+      "imageUrl": "https://images.evetech.net/types/30842/render/?size=256",
+      "safeName": "InterBus_Shuttle"
+    },
+    {
+      "name": "Karura",
+      "imageUrl": "https://images.evetech.net/types/77284/render",
+      "safeName": "Karura"
+    },
+    {
+      "name": "Khizriel",
+      "imageUrl": "https://images.evetech.net/types/78369/render",
+      "safeName": "Khizriel"
+    },
+    {
+      "name": "Mamba",
+      "imageUrl": "https://images.evetech.net/types/78367/render",
+      "safeName": "Mamba"
+    },
+    {
+      "name": "Moreau YC128 Campaign Bus",
+      "imageUrl": "https://images.evetech.net/types/92283/render",
+      "safeName": "Moreau_YC128_Campaign_Bus"
+    },
+    {
+      "name": "Moros Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/73792/render",
+      "safeName": "Moros_Navy_Issue"
+    },
+    {
+      "name": "Myrmidon Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/72869/render",
+      "safeName": "Myrmidon_Navy_Issue"
+    },
+    {
+      "name": "Odysseus",
+      "imageUrl": "https://images.evetech.net/types/89607/render",
+      "safeName": "Odysseus"
+    },
+    {
+      "name": "Outrider",
+      "imageUrl": "https://images.evetech.net/types/89649/render",
+      "safeName": "Outrider"
+    },
+    {
+      "name": "Perseverance",
+      "imageUrl": "https://images.evetech.net/types/91174/render",
+      "safeName": "Perseverance"
+    },
+    {
+      "name": "Phoenix Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/73793/render",
+      "safeName": "Phoenix_Navy_Issue"
+    },
+    {
+      "name": "Pioneer",
+      "imageUrl": "https://images.evetech.net/types/89240/render",
+      "safeName": "Pioneer"
+    },
+    {
+      "name": "Pioneer Consortium Issue",
+      "imageUrl": "https://images.evetech.net/types/89647/render",
+      "safeName": "Pioneer_Consortium_Issue"
+    },
+    {
+      "name": "Prophecy Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/72872/render",
+      "safeName": "Prophecy_Navy_Issue"
+    },
+    {
+      "name": "Revelation Navy Issue",
+      "imageUrl": "https://images.evetech.net/types/73790/render",
+      "safeName": "Revelation_Navy_Issue"
+    },
+    {
+      "name": "Roden YC128 Campaign Bus",
+      "imageUrl": "https://images.evetech.net/types/92284/render",
+      "safeName": "Roden_YC128_Campaign_Bus"
+    },
+    {
+      "name": "Salvation",
+      "imageUrl": "https://images.evetech.net/types/92822/render",
+      "safeName": "Salvation"
+    },
+    {
+      "name": "Sarathiel",
+      "imageUrl": "https://images.evetech.net/types/87381/render",
+      "safeName": "Sarathiel"
+    },
+    {
+      "name": "Shapash",
+      "imageUrl": "https://images.evetech.net/types/78414/render",
+      "safeName": "Shapash"
+    },
+    {
+      "name": "Simurgh",
+      "imageUrl": "https://images.evetech.net/types/92823/render",
+      "safeName": "Simurgh"
+    },
+    {
+      "name": "Skua",
+      "imageUrl": "https://images.evetech.net/types/89808/render",
+      "safeName": "Skua"
+    },
+    {
+      "name": "Talwar Fleet Issue",
+      "imageUrl": "https://images.evetech.net/types/91858/render",
+      "safeName": "Talwar_Fleet_Issue"
+    },
+    {
+      "name": "Tenzin YC128 Campaign Bus",
+      "imageUrl": "https://images.evetech.net/types/92282/render",
+      "safeName": "Tenzin_YC128_Campaign_Bus"
+    },
+    {
+      "name": "Valravn",
+      "imageUrl": "https://images.evetech.net/types/77288/render",
+      "safeName": "Valravn"
+    },
+    {
+      "name": "Vherokior Probe",
+      "imageUrl": "https://images.evetech.net/types/32989/render/?size=256",
+      "safeName": "Vherokior_Probe"
+    },
+    {
+      "name": "Ymir",
+      "imageUrl": "https://images.evetech.net/types/92825/render",
+      "safeName": "Ymir"
+    }
+  ],
+  "needManual": [
+    "Herald",
+    "Penitence"
+  ]
+}

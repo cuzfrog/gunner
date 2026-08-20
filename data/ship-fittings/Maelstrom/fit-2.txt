@@ -1,0 +1,51 @@
+[Maelstrom, Killmail 137868756]
+
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+800mm Heavy 'Scout' Repeating Cannon I, Republic Fleet Depleted Uranium L
+Auto Targeting System I
+
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+Tracking Computer II, Optimal Range Script
+Stalwart Restrained Shield Boost Amplifier
+Large Shield Booster II
+Large Cap Battery II
+500MN Quad LiF Restrained Microwarpdrive
+
+Gyrostabilizer II
+Capacitor Flux Coil II
+Gyrostabilizer II
+Gyrostabilizer II
+Capacitor Flux Coil II
+
+Large Capacitor Control Circuit I
+Large Semiconductor Memory Cell I
+Large Capacitor Control Circuit I
+
+
+Warrior I x3
+Berserker I x1
+Warrior I x2
+
+
+Compact EM Shield Hardener, Depleted Uranium S
+Metal Scraps x2
+Metal Scraps x3
+Mobile Tractor Unit x1
+Depleted Uranium S x100
+Gloom Enduring Radar ECM, Depleted Uranium S
+Small Clarity Ward Enduring Shield Booster, Depleted Uranium S
+Optimal Range Script x1
+Small S95a Scoped Remote Shield Booster, Depleted Uranium S
+Parallel Enduring Target Painter, Depleted Uranium S
+EP-S Gaussian Scoped Mining Laser, Depleted Uranium S
+Republic Fleet Phased Plasma L x961
+EMP S x100
+Republic Fleet Depleted Uranium L x2844
+Faint Epsilon Scoped Warp Scrambler, Depleted Uranium S
+Faint Scoped Warp Disruptor, Depleted Uranium S
+Small C5-L Compact Shield Booster, Depleted Uranium S

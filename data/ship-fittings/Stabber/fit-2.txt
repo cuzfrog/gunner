@@ -1,0 +1,25 @@
+[Stabber, Killmail 137867133]
+
+Improved Cloaking Device II
+Expanded Probe Launcher I, Sisters Combat Scanner Probe
+
+Medium Capacitor Booster II, Navy Cap Booster 800
+50MN Quad LiF Restrained Microwarpdrive
+100MN Monopropellant Enduring Afterburner
+
+Nanofiber Internal Structure II
+Reactor Control Unit II
+Nanofiber Internal Structure II
+Overdrive Injector System II
+
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+
+
+Sisters Combat Scanner Probe x8
+Navy Cap Booster 400 x20
+Sisters Core Scanner Probe x16
+Signal-5 'Needlejack' Filament x3
+Cladistic-5 'Krai Perun' Filament x1
+Nanite Repair Paste x100

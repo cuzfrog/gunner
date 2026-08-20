@@ -1,0 +1,33 @@
+[Nidhoggur, Killmail 137859590]
+
+Integrated Sensor Array
+Heavy Energy Neutralizer II
+Large Plasma Smartbomb II
+Fighter Support Unit I
+Fighter Support Unit I
+
+Omnidirectional Tracking Link II, Tracking Speed Script
+50000MN Cold-Gas Enduring Microwarpdrive
+Omnidirectional Tracking Link II, Tracking Speed Script
+Drone Navigation Computer II
+Drone Navigation Computer II
+Capital Capacitor Booster I, Navy Cap Booster 3200
+
+25000mm Steel Plates II
+Dark Blood Multispectrum Energized Membrane
+Reactive Armor Hardener
+25000mm Steel Plates II
+Dark Blood Multispectrum Energized Membrane
+
+Capital Core Defense Capacitor Safeguard I
+Capital Core Defense Capacitor Safeguard II
+Capital Core Defense Capacitor Safeguard II
+
+
+Hydrogen Isotopes x2911
+ECCM Script x2
+Optimal Range Script x2
+Scan Resolution Script x2
+Targeting Range Script x2
+Navy Cap Booster 3200 x18
+Navy Cap Booster 3200 x5

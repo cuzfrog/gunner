@@ -1,0 +1,85 @@
+[Tayra, Killmail 137868749]
+
+Compact Explosive Shield Amplifier
+10MN Monopropellant Enduring Afterburner
+Compact Kinetic Shield Amplifier
+Multispectrum Shield Hardener I
+
+Expanded Cargohold II
+Expanded Cargohold II
+Damage Control I
+Expanded Cargohold II
+
+Medium Cargohold Optimization I
+Medium Cargohold Optimization I
+Medium Cargohold Optimization I
+
+
+Infiltrator I x1
+Infiltrator I x1
+Mining Drone I x1
+Mining Drone I x3
+Warrior I x1
+Warrior I x4
+
+
+Small Ancillary Armor Repairer, Core Scanner Probe I
+Core Scanner Probe I x16
+Rocket Launcher II, Core Scanner Probe I
+Nova Rage Rocket x768
+Sunesis x1
+5MN Y-T8 Compact Microwarpdrive, Core Scanner Probe I
+Small Armor Repairer II, Core Scanner Probe I
+Dual Light Beam Laser II, Core Scanner Probe I
+Dual Light Beam Laser II, Core Scanner Probe I
+Agency 'Hardshell' TB5 Dose II x2
+Caldari Shuttle Blueprint x1
+Damage Control II, Core Scanner Probe I
+Multispectrum Energized Membrane II, Core Scanner Probe I
+Inferno Javelin Rocket x1200
+Spike M x6433
+Small Shield Extender II, Core Scanner Probe I
+Assault Damage Control II, Core Scanner Probe I
+Initiated Compact Warp Disruptor, Core Scanner Probe I
+Aurora S x12
+Tritanium x33134
+400mm Rolled Tungsten Compact Plates, Core Scanner Probe I
+Mining Laser Upgrade I, Core Scanner Probe I
+Mining Survey Chipset II, Core Scanner Probe I
+Moa Blueprint x1
+Scourge Rage Rocket x1200
+Caldari Shuttle Blueprint x1
+1MN Monopropellant Enduring Afterburner, Core Scanner Probe I
+Scan Rangefinding Array I, Core Scanner Probe I
+Pioneer Consortium Issue x1
+Small Gremlin Compact Energy Neutralizer, Core Scanner Probe I
+Scourge Javelin Rocket x1200
+Small Ghoul Compact Energy Nosferatu, Core Scanner Probe I
+Thrasher Blueprint x1
+Venture Blueprint x1
+Coercer Navy Issue x2
+Imperial Navy Radio S x12
+Interdiction Nullifier I, Core Scanner Probe I
+Warp Scrambler II, Core Scanner Probe I
+Malediction x1
+1MN Afterburner II, Core Scanner Probe I
+Nanite Repair Paste x200
+Stasis Webifier II, Core Scanner Probe I
+Nova Javelin Rocket x1200
+400mm Steel Plates II, Core Scanner Probe I
+5MN Quad LiF Restrained Microwarpdrive, Core Scanner Probe I
+Multispectrum Coating II, Core Scanner Probe I
+Imperial Navy Standard S x12
+Improved Cloaking Device II, Core Scanner Probe I
+Nanofiber Internal Structure II, Core Scanner Probe I
+Nanofiber Internal Structure II, Core Scanner Probe I
+Miner II, Core Scanner Probe I
+Mjolnir Javelin Rocket x1200
+Inertial Stabilizers II, Core Scanner Probe I
+Inferno Rage Rocket x1164
+Gleam S x1
+Gleam S x23
+Standard Exile Booster x2
+Multispectrum Shield Hardener II, Core Scanner Probe I
+Core Probe Launcher I, Core Scanner Probe I
+Mjolnir Rage Rocket x3224

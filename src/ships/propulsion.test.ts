@@ -7,20 +7,18 @@ describe("PROPULSION_MODULES", () => {
     expect(ids.size).toBe(8);
   });
 
-  test("afterburners have no signature bloom and no active mass multiplier", () => {
+  test("afterburners have no signature bloom", () => {
     for (const module of PROPULSION_MODULES) {
       if (module.kind === "afterburner") {
         expect(module.sigBloom).toBe(0);
-        expect(module.activeMassMultiplier).toBe(1);
       }
     }
   });
 
-  test("microwarpdrives bloom signature and multiply active mass", () => {
+  test("microwarpdrives bloom signature", () => {
     for (const module of PROPULSION_MODULES) {
       if (module.kind === "microwarpdrive") {
         expect(module.sigBloom).toBe(5);
-        expect(module.activeMassMultiplier).toBe(5);
       }
     }
   });

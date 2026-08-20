@@ -1,0 +1,45 @@
+[Imicus Navy Issue, Killmail 137857525]
+
+Light Ion Blaster I, Iridium Charge S
+Expanded Probe Launcher I
+Prototype Cloaking Device I
+
+Data Analyzer I
+Warp Scrambler I
+Relic Analyzer I
+5MN Quad LiF Restrained Microwarpdrive
+
+Drone Damage Amplifier I
+Nanofiber Internal Structure I
+Damage Control I
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+Small Gravity Capacitor Upgrade I
+Small Emission Scope Sharpener I
+
+
+Warrior I x4
+Hobgoblin I x4
+
+
+Burned Logic Circuit x26
+Logic Circuit x9
+Contaminated Nanite Compound x7
+Artificial Neural Network x2
+Artificial Neural Network x5
+Charred Micro Circuit x40
+Damaged Artificial Neural Network x7
+Damaged Artificial Neural Network x25
+Iridium Charge S x180
+Armor Plates x5
+Combat Scanner Probe I x8
+Nanite Compound x1
+Nanite Repair Paste x2
+Interface Circuit x2
+Carbon x5
+Carbon x2
+Defective Current Pump x44
+Defective Current Pump x35
+Tripped Power Circuit x9
+Fried Interface Circuit x26
+Fried Interface Circuit x20

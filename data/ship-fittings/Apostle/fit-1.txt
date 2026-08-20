@@ -1,0 +1,47 @@
+[Apostle, Killmail 137824315]
+
+Armor Command Burst II, Armor Energizing Charge
+Capital I-ax Enduring Remote Armor Repairer
+Armor Command Burst II, Armor Reinforcement Charge
+Capital Inductive Compact Remote Capacitor Transmitter
+Capital I-ax Enduring Remote Armor Repairer
+Triage Module II
+
+Republic Fleet Large Cap Battery
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Republic Fleet Large Cap Battery
+Capital Compact Pb-Acid Cap Battery
+
+Centum C-Type Multispectrum Energized Membrane
+Core X-Type EM Armor Hardener
+Centum C-Type Multispectrum Energized Membrane
+Core X-Type Explosive Armor Hardener
+Capital I-a Enduring Armor Repairer
+Capital I-a Enduring Armor Repairer
+Core X-Type Kinetic Armor Hardener
+
+Capital Remote Repair Augmentor I
+Capital Auxiliary Nano Pump I
+Capital Auxiliary Nano Pump I
+
+
+Heavy Shield Maintenance Bot II x5
+Heavy Hull Maintenance Bot II x5
+Hornet EC-300 x5
+Wasp EC-900 x5
+Vespa EC-600 x5
+Heavy Armor Maintenance Bot II x5
+Warrior II x5
+
+
+Strontium Clathrates x27
+Imperial Navy Cap Recharger, Rapid Repair Charge
+Improved Exile Booster x2
+Agency 'Hardshell' TB9 Dose IV x1
+Helium Isotopes x50000
+Improved Mindflood Booster x2
+'Vehemence' Compact Large EMP Smartbomb, Rapid Repair Charge
+Rapid Repair Charge x300
+Strontium Clathrates x1082
+Helium Isotopes x63912
+Navy Cap Booster 3200 x87

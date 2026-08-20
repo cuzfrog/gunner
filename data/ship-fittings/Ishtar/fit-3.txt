@@ -1,0 +1,33 @@
+[Ishtar, Killmail 137868106]
+
+Small Knave Scoped Energy Nosferatu
+Small Energy Nosferatu II
+Small Knave Scoped Energy Nosferatu
+Medium Ghoul Compact Energy Nosferatu
+
+10MN Monopropellant Enduring Afterburner
+Republic Fleet Medium Cap Battery
+Dread Guristas Warp Scrambler
+Small Capacitor Booster II
+
+Medium Ancillary Armor Repairer
+1600mm Crystalline Carbonide Restrained Plates
+Medium Armor Repairer II
+Explosive Armor Hardener II
+Assault Damage Control II
+Reactive Armor Hardener
+
+Medium EM Armor Reinforcer I
+Medium Ancillary Current Router II
+
+
+Hornet II x3
+Hornet II x2
+Praetor II x3
+Wasp II x4
+Wasp II x1
+Hornet EC-300 x5
+
+
+Navy Cap Booster 400 x6
+Nanite Repair Paste x256

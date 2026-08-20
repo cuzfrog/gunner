@@ -1,8 +1,9 @@
+import type { FittingImport, ImportedFitting } from "../fitting";
 import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, LocationProvider, ProfileSettings, SettingsStore, UserSettings } from "./settings";
+import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 
 const DEFAULT_INPUTS: Record<string, string> = {
@@ -72,7 +73,6 @@ const AB1MN: PropulsionModule = {
   massAddition: 500_000,
   speedBonus: 1.15,
   sigBloom: 0,
-  activeMassMultiplier: 1,
 };
 
 const MWD5MN: PropulsionModule = {
@@ -84,7 +84,6 @@ const MWD5MN: PropulsionModule = {
   massAddition: 500_000,
   speedBonus: 5,
   sigBloom: 5,
-  activeMassMultiplier: 5,
 };
 
 const AB10MN: PropulsionModule = {
@@ -96,22 +95,70 @@ const AB10MN: PropulsionModule = {
   massAddition: 5_000_000,
   speedBonus: 1.15,
   sigBloom: 0,
-  activeMassMultiplier: 1,
 };
 
 const RIFTER_FITTING_OPTIONS: readonly PropulsionModule[] = [AB1MN, MWD5MN, AB10MN];
 const VALID_PROPULSION_IDS: readonly PropulsionId[] = ["ab-1mn", "mwd-5mn", "ab-10mn"];
 
-const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_030_000, inertiaModifier: 3, maxSpeed: 400, sigRadius: 36 };
-const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_030_000, inertiaModifier: 2, maxSpeed: 500, sigRadius: 36 };
-const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_530_000, inertiaModifier: 3, maxSpeed: 600, sigRadius: 36 };
-const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_530_000, inertiaModifier: 2, maxSpeed: 800, sigRadius: 36 };
-const RIFTER_MWD_SKILL0: ShipStats = { mass: 3_530_000, inertiaModifier: 3, maxSpeed: 1200, sigRadius: 210 };
-const RIFTER_MWD_SKILL5: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 1500, sigRadius: 210 };
-const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 3_530_000, inertiaModifier: 2, maxSpeed: 2361, sigRadius: 210 };
+const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36 };
+const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 };
+const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36 };
+const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36 };
+const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210 };
+const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210 };
+const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210 };
 const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
 
-function mockStatsFor(profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }): ShipStats {
+const IMPORTED_RIFTER: ImportedFitting = {
+  profile: RIFTER,
+  fittingName: "Brawler",
+  fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
+  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
+};
+
+const SAVED_FITTED_SETTINGS: UserSettings = {
+  version: USER_SETTINGS_VERSION,
+  tracking: 0.32,
+  trackingUnit: "rad",
+  sigRes: "S",
+  optimal: 5000,
+  falloff: 5000,
+  attackerSpeed: 0,
+  attackerMode: "keepAtRange",
+  attackerRange: 5000,
+  maneuverAggressivity: 1,
+  gridBrightness: 0.2,
+  attackerMass: 1_200_000,
+  attackerInertia: 3,
+  attackerSkillLevel: 5,
+  attackerOverload: true,
+  attackerHull: "Rifter",
+  attackerPropulsion: "mwd-5mn",
+  attackerFittedHull: {
+    fittingName: "Brawler",
+    propulsionId: "mwd-5mn",
+    fitted: IMPORTED_RIFTER.fitted,
+    propulsion: IMPORTED_RIFTER.propulsion,
+  },
+  initialDistance: 5000,
+  targetSpeed: 1000,
+  targetMode: "orbit",
+  targetRange: 5000,
+  targetMass: 10_000_000,
+  targetInertia: 0.45,
+  targetSkillLevel: 5,
+  targetOverload: true,
+  targetSig: 40,
+  simSpeed: 4,
+  language: "en",
+};
+
+interface MockedPropulsion extends PropulsionStats {
+  readonly id?: PropulsionId;
+}
+
+function mockStatsFor(profile: ShipProfile, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }): ShipStats {
   if (profile.name === "Rifter") {
     if (!module) return conditions?.skillLevel === 0 ? RIFTER_BASE_SKILL0 : RIFTER_BASE_SKILL5;
     if (module.id === "ab-1mn") return conditions?.skillLevel === 0 ? RIFTER_AB1_SKILL0 : RIFTER_AB1_SKILL5;
@@ -173,8 +220,8 @@ function createMockShips() {
     }),
     fittingOptions: vi.fn((profile: ShipProfile) => (profile.name === "Rifter" ? RIFTER_FITTING_OPTIONS : [AB1MN, MWD5MN])),
     fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
-    effectiveStats: vi.fn((profile: ShipProfile, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
-    maxSpeedForMass: vi.fn((profile: ShipProfile, mass: number, module?: PropulsionModule, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+    fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
+    maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
   });
 
   mockShips.fittingOption.mockImplementation((profile: ShipProfile, id: PropulsionId) => {
@@ -216,7 +263,7 @@ class FakeElement {
   }) as Record<string, string> & { setProperty(name: string, value: string): void };
   classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
-  private readonly handlers: Record<string, Array<() => void>> = {};
+  private readonly handlers: Record<string, Array<(event?: unknown) => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
 
   getAttribute(name: string): string | null {
@@ -227,17 +274,17 @@ class FakeElement {
     this.attributes[name] = value;
   }
 
-  addEventListener(event: string, handler: () => void): void {
+  addEventListener(event: string, handler: (event?: unknown) => void): void {
     this.handlers[event] ??= [];
     this.handlers[event].push(handler);
   }
 
-  trigger(event: string): void {
-    this.handlers[event]?.forEach((handler) => handler());
+  trigger(event: string, data?: unknown): void {
+    this.handlers[event]?.forEach((handler) => handler(data));
   }
 
-  dispatchEvent(event: { type: string }): void {
-    this.trigger(event.type);
+  dispatchEvent(event: { type: string; [key: string]: unknown } | Event): void {
+    this.trigger(event.type, event as { type: string; [key: string]: unknown });
   }
 
   appendChild(child: unknown): void {
@@ -245,6 +292,8 @@ class FakeElement {
   }
 
   focus = vi.fn();
+
+  blur = vi.fn();
 
   closest(): FakeElement | null {
     return null;
@@ -288,6 +337,10 @@ function setInputValues(document: Document): void {
 
   getFake(document, "attacker-skill-popup").hidden = true;
   getFake(document, "target-skill-popup").hidden = true;
+  getFake(document, "attacker-paste-popup").hidden = true;
+  getFake(document, "target-paste-popup").hidden = true;
+  getFake(document, "attacker-fitting-name").hidden = true;
+  getFake(document, "target-fitting-name").hidden = true;
   getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
 }
@@ -321,7 +374,7 @@ interface SelectedProfile {
 }
 
 function asProfile(settings: UserSettings): ProfileSettings {
-  const { language: _, ...rest } = settings;
+  const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
 }
 
@@ -360,10 +413,11 @@ function buildControls(
     clearSelectedProfile: vi.fn(),
   });
   const ships = createMockShips();
-  const clipboard = vi.mocked<ClipboardProvider>({ writeText: vi.fn(async () => {}) });
+  const fittingImport = vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+  const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, clipboard, location });
-  return { hitChance, i18n, settingsStore, ships, clipboard, location, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location, controls };
 }
 
 describe("DomControls", () => {
@@ -542,13 +596,31 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
     expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(expected.mass));
-    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
     expect(getFake(globalThis.document, "attacker-hull-hint").textContent).toContain("Standard Frigates");
 
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
     expect(propulsion.disabled).toBe(false);
     const ids = propulsion.children.map((c) => c.value);
     expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn"]);
+  });
+
+  test("selecting a different hull after the first refreshes mass, inertia and speed", () => {
+    buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("input");
+
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(RIFTER_AB1_SKILL5.mass));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(RIFTER_AB1_SKILL5.inertiaModifier, 6));
+
+    hullInput.value = "Thrasher";
+    hullInput.trigger("input");
+
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe(String(THRASHER_BASE.mass));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(THRASHER_BASE.inertiaModifier, 6));
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(THRASHER_BASE.maxSpeed));
   });
 
   test("choosing an MWD updates target speed, mass and signature radius", () => {
@@ -730,7 +802,7 @@ describe("DomControls", () => {
 
     const expected = mockStatsFor(rifter, undefined, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
-    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
   });
 
   test("changing the skill level recomputes speed and inertia with a fitted module", () => {
@@ -749,7 +821,7 @@ describe("DomControls", () => {
 
     const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 0, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
-    expect(getFake(globalThis.document, "target-inertia").value).toBe(String(expected.inertiaModifier));
+    expect(getFake(globalThis.document, "target-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
   });
 
   test("toggling overload recomputes speed while leaving mass and signature unchanged", () => {
@@ -913,7 +985,7 @@ describe("DomControls", () => {
     const calls = settingsStore.save.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.attackerSpeed).toBe(Number(formatNumber(expected.maxSpeed)));
-    expect(saved.attackerInertia).toBe(expected.inertiaModifier);
+    expect(saved.attackerInertia).toBe(Number(formatNumber(expected.inertiaModifier, 6)));
     expect(saved.attackerSkillLevel).toBe(0);
   });
 
@@ -1068,14 +1140,14 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
 
-    ships.maxSpeedForMass.mockReturnValue(1234.56);
+    ships.maxSpeedForFittedMass.mockReturnValue(1234.56);
 
     const activeMass = 5_000_000;
     getFake(globalThis.document, "target-mass").value = String(activeMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1234.56));
-    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
@@ -1086,14 +1158,14 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-propulsion").value = "mwd-5mn";
     getFake(globalThis.document, "target-propulsion").trigger("change");
 
-    ships.maxSpeedForMass.mockReturnValueOnce(1500.5);
+    ships.maxSpeedForFittedMass.mockReturnValueOnce(1500.5);
 
     const displayedMass = Number(getFake(globalThis.document, "target-mass").value) + 1_000_000;
     getFake(globalThis.document, "target-mass").value = String(displayedMass);
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1500.5));
-    expect(ships.maxSpeedForMass).toHaveBeenCalledWith(RIFTER, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
   });
 
   test("save button highlights when the current settings differ from the selected profile", () => {
@@ -1288,7 +1360,7 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
-  test("save button highlights when tracking unit changes after loading a profile", () => {
+  test("save button does not highlight when tracking unit changes after loading a profile", () => {
     const rifter = RIFTER;
     const module = MWD5MN;
     const stats = mockStatsFor(rifter, module, { skillLevel: 5, overloaded: true });
@@ -1335,7 +1407,48 @@ describe("DomControls", () => {
     saveButton.classList.toggle.mockClear();
 
     getFake(globalThis.document, "tracking-unit-score").trigger("click");
-    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", false);
+  });
+
+  test("loading a profile preserves the current tracking unit", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+    getFake(globalThis.document, "tracking-unit-score").trigger("click");
+    expect(getFake(globalThis.document, "tracking").value).toBe("320");
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(getFake(globalThis.document, "tracking").value).toBe("320");
   });
 
   test("save button does not highlight when language changes after loading a profile", () => {
@@ -1732,7 +1845,7 @@ describe("DomControls", () => {
     expect(location.href).toBe(encodedUrl);
   });
 
-  test("saving a profile persists it as the selected profile without language", () => {
+  test("saving a profile persists it as the selected profile without display preferences", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const nameInput = getFake(globalThis.document, "profile-name");
     nameInput.value = "brawler";
@@ -1745,7 +1858,9 @@ describe("DomControls", () => {
     expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", savedProfile);
     expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", selectedBaseline);
     expect(savedProfile).not.toHaveProperty("language");
+    expect(savedProfile).not.toHaveProperty("trackingUnit");
     expect(selectedBaseline).not.toHaveProperty("language");
+    expect(selectedBaseline).not.toHaveProperty("trackingUnit");
     expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
   });
 
@@ -2318,6 +2433,217 @@ describe("DomControls", () => {
 
       expect(hint.textContent).toContain("フリゲート");
       expect(hint.textContent).toContain("ミンマター共和国");
+    });
+  });
+
+  describe("import fitting", () => {
+    async function flush(): Promise<void> {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    test("attacker import button populates hull, turret and stats from a fitting", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
+      expect(getFake(globalThis.document, "attacker-inertia").value).toBe("2");
+      expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
+      expect(getFake(globalThis.document, "sigRes").value).toBe("S");
+      expect(getFake(globalThis.document, "optimal").value).toBe("600");
+      expect(getFake(globalThis.document, "falloff").value).toBe("3000");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("target import button shows invalid status when the fit cannot be parsed", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      getFake(globalThis.document, "target-import-fitting").trigger("click");
+      await flush();
+      const fittingName = getFake(globalThis.document, "target-fitting-name");
+      expect(fittingName.innerHTML).toContain("status.fittingInvalid");
+      expect(fittingName.hidden).toBe(false);
+      expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
+    });
+
+    test("clipboard unavailability opens the paste popup", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValueOnce(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
+    });
+
+    test("pasting a valid fitting in the popup imports it", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => "[Rifter, Test Fit]" },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(popup.hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    });
+
+    test("pasting an invalid fitting in the popup shows invalid status", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => "garbage" },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(popup.hidden).toBe(true);
+      const fittingName = getFake(globalThis.document, "attacker-fitting-name");
+      expect(fittingName.innerHTML).toContain("status.fittingInvalid");
+      expect(fittingName.hidden).toBe(false);
+      expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
+    });
+
+    test("clicking the import button again when the paste popup is open closes it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      const button = getFake(globalThis.document, "attacker-import-fitting");
+      button.trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(false);
+      button.trigger("click");
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+    });
+
+    test("Escape closes the paste popup and focuses the import button", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-import-fitting").focus).toHaveBeenCalled();
+    });
+
+    test("pointerdown outside the paste popup closes it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const outside = new FakeElement();
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-paste-popup").hidden).toBe(true);
+    });
+
+    test("pointerdown inside the paste popup does not close it", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const inside = new FakeElement();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      inside.closest = () => popup;
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+      expect(popup.hidden).toBe(false);
+    });
+
+    test("manual hull selection clears the fitted state", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull).toBeUndefined();
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-hull-hint").textContent).not.toContain("Brawler");
+    });
+
+    test("reselecting the same hull after an import keeps the fitted state active", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
+      const [savedAfterReselect] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterReselect.attackerFittedHull?.fittingName).toBe("Brawler");
+
+      const skills = getFake(globalThis.document, "attacker-skills");
+      skills.value = "0";
+      skills.trigger("change");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_MWD_SKILL0.maxSpeed));
+      const [savedAfterSkillChange] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterSkillChange.attackerFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("reselecting the same target hull after an import keeps the fitted state active", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "target-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "target-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "target-fitting-name").hidden).toBe(false);
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.targetFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("changing hull after an import leaves the weapon parameters untouched", async () => {
+      const { fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+
+      expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
+      expect(getFake(globalThis.document, "sigRes").value).toBe("S");
+      expect(getFake(globalThis.document, "optimal").value).toBe("600");
+      expect(getFake(globalThis.document, "falloff").value).toBe("3000");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
+    });
+
+    test("loadSettings restores a fitted hull and recomputes stats", () => {
+      buildControls(globalThis.document, SAVED_FITTED_SETTINGS);
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
+    });
+
+    test("changing propulsion updates the fitted summary and recomputes stats", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const propulsion = getFake(globalThis.document, "attacker-propulsion");
+      propulsion.value = "ab-1mn";
+      propulsion.trigger("change");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("1420.75");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull?.propulsionId).toBe("ab-1mn");
     });
   });
 });

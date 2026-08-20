@@ -1,0 +1,41 @@
+[Golem, Killmail 137857712]
+
+Torpedo Launcher II, Caldari Navy Scourge Torpedo
+Torpedo Launcher II, Caldari Navy Scourge Torpedo
+Small Tractor Beam I
+Torpedo Launcher II, Caldari Navy Scourge Torpedo
+Torpedo Launcher II, Caldari Navy Scourge Torpedo
+Bastion Module I
+Small Tractor Beam I
+Salvager I
+
+Multispectrum Shield Hardener II
+Stalwart Restrained Shield Boost Amplifier
+Large Micro Jump Drive
+Gist X-Type Large Shield Booster
+EM Shield Hardener II
+Large Cap Battery II
+Missile Guidance Computer II
+
+Ballistic Control System II
+Missile Guidance Enhancer II
+Ballistic Control System II
+Ballistic Control System II
+
+Large Capacitor Control Circuit I
+Large Capacitor Control Circuit I
+
+
+Hornet II x4
+Hornet II x1
+Hobgoblin II x1
+
+
+Inferno Rage Torpedo x4500
+Scourge Rage Torpedo x2180
+Mobile Tractor Unit x1
+Missile Range Script x1
+Nova Rage Torpedo x1348
+Caldari Navy Scourge Torpedo x2448
+Caldari Navy Mjolnir Torpedo x2391
+Mjolnir Rage Torpedo x3116

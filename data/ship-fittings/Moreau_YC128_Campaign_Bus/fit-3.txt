@@ -1,0 +1,196 @@
+[Moreau YC128 Campaign Bus, Killmail 135838023]
+
+Interdiction Nullifier I
+Covert Ops Cloaking Device II
+
+5MN Cold-Gas Enduring Microwarpdrive
+
+Inertial Stabilizers II
+Inertial Stabilizers II
+Inertial Stabilizers II
+Warp Core Stabilizer I
+
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+
+
+Drone Damage Amplifier I Blueprint x1
+Drake Blueprint x1
+Kinetic Shield Hardener I Blueprint x1
+Civilian Data Analyzer Blueprint x1
+Nova Rocket Blueprint x1
+Nova Light Missile Blueprint x2
+Midband Emission Limiter Blueprint x3
+Warrior I Blueprint x2
+Large Shield Extender I Blueprint x1
+Scourge Heavy Assault Missile Blueprint x1
+Medium EM Shield Reinforcer I Blueprint x1
+Nova Torpedo Blueprint x1
+Nova Torpedo Blueprint x1
+Nova Heavy Assault Missile Blueprint x1
+Target Painter I Blueprint x1
+Inferno Heavy Missile Blueprint x1
+Inferno Heavy Missile Blueprint x1
+Tracking Enhancer I Blueprint x1
+Small Ancillary Armor Repairer Blueprint x2
+Acolyte I Blueprint x1
+Acolyte I Blueprint x1
+Medium Core Defense Field Extender I Blueprint x1
+Inferno Heavy Missile Blueprint x2
+Inferno Heavy Missile Blueprint x1
+Supratidal Entropic Disintegrator I Blueprint x1
+Simple Asteroid Mining Crystal Type A I Blueprint x1
+Venture Blueprint x1
+Salvager I Blueprint x1
+Inferno Heavy Assault Missile Blueprint x1
+Small EM Shield Reinforcer I Blueprint x1
+Small Drone Repair Augmentor I Blueprint x1
+Venture Blueprint x1
+Hornet I Blueprint x1
+Hornet I Blueprint x1
+Incursus Blueprint x1
+Kryos Blueprint x1
+Heavy Missile Launcher I Blueprint x1
+Mjolnir Rocket Blueprint x1
+Kryos Blueprint x1
+Kryos Blueprint x1
+Heavy Missile Launcher I Blueprint x3
+Small Core Defense Charge Economizer I Blueprint x1
+Small Capacitor Booster I Blueprint x1
+Infiltrator I Blueprint x1
+Medium Cap Battery I Blueprint x1
+Epithal Blueprint x1
+Small Core Defense Operational Solidifier I Blueprint x1
+Explosive Shield Hardener I Blueprint x1
+Missile Guidance Enhancer I Blueprint x1
+Epithal Blueprint x1
+5MN Microwarpdrive I Blueprint x1
+Procurer Blueprint x1
+Medium Shield Extender I Blueprint x1
+Antimatter Charge M Blueprint x1
+Maulus Blueprint x1
+Thrasher Blueprint x1
+Sanctified Vidette Filament Blueprint x2
+Caracal Blueprint x1
+Power Diagnostic System I Blueprint x1
+Hobgoblin I Blueprint x1
+Hobgoblin I Blueprint x2
+Small Core Defense Capacitor Safeguard I Blueprint x1
+Large Cap Battery I Blueprint x1
+Core Scanner Probe I Blueprint x1
+Thermal Shield Hardener I Blueprint x1
+Narrowband Emission Limiter Blueprint x2
+Narrowband Emission Limiter Blueprint x2
+Small Drone Mining Augmentor I Blueprint x1
+Atron Blueprint x1
+Sentinel MZ Filament Blueprint x1
+Quantum Microprocessor Blueprint x1
+Imicus Blueprint x1
+Small Core Defense Field Extender I Blueprint x1
+Rocket Launcher I Blueprint x1
+Rocket Launcher I Blueprint x1
+Inferno Cruise Missile Blueprint x1
+Mining Laser Upgrade I Blueprint x1
+Ligature Integrated Analyzer Blueprint x1
+Midband Emission Amplifier Blueprint x1
+Heavy Capacitor Booster I Blueprint x1
+Nova Heavy Missile Blueprint x1
+Large Memetic Algorithm Bank II Blueprint x1
+Warrior TP-300 Blueprint x1
+75mm Gatling Rail I Blueprint x1
+Small Cap Battery I Blueprint x1
+Data Analyzer I Blueprint x1
+Ship Scanner I Blueprint x1
+Heron Blueprint x1
+Pioneer Blueprint x1
+Station Container Blueprint x2
+Station Container Blueprint x2
+Tetryon Exotic Plasma S Blueprint x1
+Torpedo Launcher I Blueprint x1
+Expanded Probe Launcher I Blueprint x1
+Heron Blueprint x3
+Heron Blueprint x4
+Light Ion Blaster I Blueprint x1
+Bantam Blueprint x1
+Scourge Cruise Missile Blueprint x1
+Azdaja Redoubt Filament Blueprint x2
+Azdaja Redoubt Filament Blueprint x1
+Signal Amplifier I Blueprint x2
+Missile Guidance Computer I Blueprint x1
+Warp Disruptor I Blueprint x1
+Small Tractor Beam I Blueprint x1
+Medium Sentry Damage Augmentor I Blueprint x1
+1MN Afterburner I Blueprint x1
+Relic Analyzer I Blueprint x1
+Medium Kinetic Shield Reinforcer I Blueprint x1
+Miner I Blueprint x1
+Miner I Blueprint x2
+Small Tractor Beam I Blueprint x2
+Small Tractor Beam I Blueprint x2
+Retriever Blueprint x1
+Medium Explosive Shield Reinforcer I Blueprint x1
+Miner I Blueprint x1
+Combat Scanner Probe I Blueprint x1
+Light Electron Blaster I Blueprint x1
+Mid-grade Ascendancy Omega Blueprint x1
+Dragoon Blueprint x1
+Catalyst Blueprint x1
+Hornet EC-300 Blueprint x1
+Griffin Blueprint x1
+Reactor Control Unit I Blueprint x1
+Inferno Light Missile Blueprint x1
+Inferno Light Missile Blueprint x1
+Buzzard Blueprint x8
+Buzzard Blueprint x7
+Large Core Defense Field Extender I Blueprint x1
+Heavy Fleeting Compact Warp Disruptor Blueprint x1
+Wideband Emission Limiter Blueprint x1
+10MN Afterburner I Blueprint x1
+Cruise Missile Launcher I Blueprint x1
+Kestrel Blueprint x1
+Ice Harvester Upgrade I Blueprint x1
+Medium Capacitor Booster I Blueprint x1
+Core Probe Launcher I Blueprint x1
+Small Shield Extender I Blueprint x1
+Passive Targeter I Blueprint x2
+Scourge Light Missile Blueprint x1
+Scourge Light Missile Blueprint x1
+Conflux Eyrie Filament Blueprint x1
+Acolyte TD-300 Blueprint x1
+Valkyrie I Blueprint x1
+Nova Cruise Missile Blueprint x1
+Rapid Heavy Missile Launcher I Blueprint x1
+Nova Torpedo Blueprint x1
+Nova Torpedo Blueprint x1
+Small Kinetic Shield Reinforcer I Blueprint x1
+150mm Light AutoCannon I Blueprint x1
+Mid-grade Ascendancy Beta Blueprint x1
+Scourge Heavy Missile Blueprint x1
+Medium Thermal Shield Reinforcer I Blueprint x1
+Inferno Rocket Blueprint x2
+Miasmos Blueprint x1
+Mjolnir Heavy Missile Blueprint x1
+Antimatter Charge S Blueprint x1
+Mjolnir Light Missile Blueprint x1
+Mjolnir Light Missile Blueprint x1
+Small Thermal Shield Reinforcer I Blueprint x1
+Inferno Rocket Blueprint x1
+EM Shield Hardener I Blueprint x1
+Mjolnir Heavy Missile Blueprint x1
+Inferno Auto-Targeting Heavy Missile I Blueprint x1
+Warp Core Stabilizer I Blueprint x1
+Warp Core Stabilizer I Blueprint x1
+Small Core Defense Field Purger I Blueprint x1
+Covetor Blueprint x1
+Mjolnir Heavy Assault Missile Blueprint x1
+Strip Miner I Blueprint x1
+Scourge Rocket Blueprint x1
+Small Core Defense Field Purger I Blueprint x1
+Plutonium Charge S Blueprint x1
+Multispectrum Shield Hardener I Blueprint x1
+Simple Asteroid Mining Crystal Type A I Blueprint x1
+Tristan Blueprint x2
+Hammerhead I Blueprint x1
+Antimatter Charge L Blueprint x1
+Interdiction Nullifier I Blueprint x1

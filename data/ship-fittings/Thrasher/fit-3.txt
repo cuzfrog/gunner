@@ -1,0 +1,26 @@
+[Thrasher, Killmail 137868931]
+
+280mm Howitzer Artillery I, Republic Fleet Fusion S
+280mm Howitzer Artillery I, EMP S
+280mm Howitzer Artillery I, Republic Fleet Fusion S
+280mm Howitzer Artillery I, EMP S
+280mm Howitzer Artillery I, EMP S
+280mm Howitzer Artillery I, EMP S
+280mm Howitzer Artillery I, EMP S
+
+F-90 Compact Sensor Booster, Scan Resolution Script
+5MN Y-T8 Compact Microwarpdrive
+Faint Scoped Warp Disruptor
+
+Damage Control II
+Counterbalanced Compact Gyrostabilizer
+
+Small Transverse Bulkhead I
+Small Transverse Bulkhead I
+Small Projectile Collision Accelerator I
+
+
+Republic Fleet Phased Plasma S x560
+Republic Fleet EMP S x546
+EMP S x900
+Republic Fleet Fusion S x518

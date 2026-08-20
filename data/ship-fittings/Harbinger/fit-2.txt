@@ -1,0 +1,82 @@
+[Harbinger, Killmail 137855788]
+
+Core Probe Launcher I, Sisters Core Scanner Probe
+Heavy Beam Laser II, Gleam M
+Heavy Beam Laser II, Gleam M
+Heavy Beam Laser II, Gleam M
+Heavy Beam Laser II, Gleam M
+Heavy Beam Laser II, Gleam M
+Heavy Beam Laser II, Gleam M
+
+Cap Recharger II
+10MN Afterburner I
+Medium Cap Battery II
+Cap Recharger II
+
+Capacitor Power Relay II
+Heat Sink II
+Heat Sink II
+Medium Armor Repairer II
+Damage Control II
+Heat Sink II
+
+Medium Auxiliary Nano Pump I
+Medium Capacitor Control Circuit I
+Medium Capacitor Control Circuit I
+
+
+Acolyte TD-300 x2
+Acolyte TD-300 x2
+
+
+Aurora M x5
+Aurora M x1
+Expired Harvest Damage Booster I x1
+5MN Y-T8 Compact Microwarpdrive, Aurora M
+Cap Booster 150 x4
+Heavy Afocal Laser I, Aurora M
+Ultraviolet M x1
+Sisters Core Scanner Probe x8
+Mark I Compact Reactor Control Unit, Aurora M
+Upgraded EM Coating I, Aurora M
+'Concussion' Compact Medium Graviton Smartbomb, Aurora M
+Scorch S x3
+200mm Rolled Tungsten Compact Plates, Aurora M
+IFFA Compact Damage Control, Aurora M
+Medium Automated Structural Restoration, Aurora M
+Heavy Knave Scoped Energy Nosferatu, Aurora M
+Conflagration M x2
+Conflagration M x4
+Amarr Light Marines x1
+Imperial Navy Microwave L x2
+Imperial Navy Microwave L x1
+J5 Enduring Warp Disruptor, Aurora M
+ML-3 Compact Mining Survey Chipset, Aurora M
+Gamma M x1
+Gamma M x1
+400mm Crystalline Carbonide Restrained Plates, Aurora M
+Particle Bore Compact Mining Laser, Aurora M
+Compact Explosive Shield Amplifier, Aurora M
+Blood Gamma S x1
+F-90 Compact Sensor Booster, Aurora M
+Suppressed Targeting System I, Aurora M
+Heavy Modulated Energy Beam I, Aurora M
+Mark I Compact Capacitor Power Relay, Aurora M
+Ultraviolet S x1
+X-Large Abyssal Shield Booster, Aurora M
+EP-S Gaussian Scoped Mining Laser, Aurora M
+Medium S95a Scoped Remote Shield Booster, Aurora M
+Eutectic Compact Cap Recharger, Aurora M
+Eutectic Compact Cap Recharger, Aurora M
+Metal Scraps x8
+Metal Scraps x4
+Gleam L x1
+Crimson Scythes Firework x200
+Medium ACM Compact Armor Repairer, Aurora M
+Type-D Restrained Capacitor Power Relay, Aurora M
+Small Radiative Scoped Remote Capacitor Transmitter, Aurora M
+Ultraviolet L x1
+Gamma S x1
+Scorch M x6
+Scorch M x7
+Medium Inductive Compact Remote Capacitor Transmitter, Aurora M

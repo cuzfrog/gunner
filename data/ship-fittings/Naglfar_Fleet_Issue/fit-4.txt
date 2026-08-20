@@ -1,0 +1,58 @@
+[Naglfar Fleet Issue, Killmail 137812813]
+
+Siege Module II
+Hexa 2500mm Repeating Cannon II, Hail XL
+Dread Guristas Large Graviton Smartbomb
+Hexa 2500mm Repeating Cannon II, Hail XL
+Heavy Infectious Scoped Energy Neutralizer
+Hexa 2500mm Repeating Cannon II, Hail XL
+
+Heavy Stasis Grappler II
+Tracking Computer II, Tracking Speed Script
+Multispectrum Shield Hardener II
+Tracking Computer II, Tracking Speed Script
+Capital Cap Battery II
+Capital Capacitor Booster II, Cap Booster 3200
+Capital Clarity Ward Enduring Shield Booster
+
+Republic Fleet Tracking Enhancer
+
+Capital EM Shield Reinforcer II
+Capital Core Defense Capacitor Safeguard II
+Capital Core Defense Capacitor Safeguard II
+
+
+Standard Drop Booster x7
+Dread Guristas Co-Processor, Tracking Speed Script
+Inertial Stabilizers II, Tracking Speed Script
+Mobile Depot x1
+Tracking Speed Script x1
+Arch Angel EMP XL x6140
+Improved Blue Pill Booster x1
+Overdrive Injector System II, Tracking Speed Script
+Overdrive Injector System II, Tracking Speed Script
+Co-Processor II, Tracking Speed Script
+Tracking Computer II, Tracking Speed Script
+J5 Enduring Warp Disruptor, Tracking Speed Script
+Capacitor Flux Coil II, Tracking Speed Script
+Capacitor Flux Coil II, Tracking Speed Script
+Domination Gyrostabilizer, Tracking Speed Script
+Domination Gyrostabilizer, Tracking Speed Script
+Small Tractor Beam I, Tracking Speed Script
+Prototype Cloaking Device I, Tracking Speed Script
+Pith X-Type Explosive Shield Hardener, Tracking Speed Script
+Republic Fleet Shield Boost Amplifier, Tracking Speed Script
+Pith X-Type Thermal Shield Hardener, Tracking Speed Script
+Heavy Warp Disruptor I, Tracking Speed Script
+Nanofiber Internal Structure II, Tracking Speed Script
+Barrage XL x6442
+Agency 'Hardshell' TB5 Dose II x1
+Heavy Infectious Scoped Energy Neutralizer, Tracking Speed Script
+Hail XL x3798
+Parallel Enduring Target Painter, Tracking Speed Script
+Multispectrum Shield Hardener II, Tracking Speed Script
+Strontium Clathrates x2416
+Cap Booster 3200 x62
+Capital Ancillary Shield Booster, Cap Booster 3200
+Mastodon x1
+Mastodon x1

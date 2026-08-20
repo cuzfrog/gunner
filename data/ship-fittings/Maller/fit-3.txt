@@ -1,0 +1,25 @@
+[Maller, Killmail 137865549]
+
+Core Probe Launcher I, Core Scanner Probe I
+Prototype Cloaking Device I
+
+500MN Y-T8 Compact Microwarpdrive
+Large Compact Pb-Acid Cap Battery
+
+Nanofiber Internal Structure II
+Overdrive Injector System II
+Inertial Stabilizers II
+Overdrive Injector System II
+Inertial Stabilizers II
+Power Diagnostic System II
+
+Medium Particle Dispersion Augmentor I
+Medium Auxiliary Thrusters I
+Medium Higgs Anchor I
+
+
+Hornet EC-300 x3
+
+
+Border-5 'Pochven' Filament x1
+Proximity-5 'Extraction' Filament x1

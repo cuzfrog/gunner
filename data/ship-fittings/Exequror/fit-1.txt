@@ -1,0 +1,32 @@
+[Exequror, Killmail 137866330]
+
+Small Ancillary Remote Armor Repairer, Nanite Repair Paste
+Medium Remote Armor Repairer II
+Medium Remote Armor Repairer II
+
+Sensor Booster II
+10MN Y-S8 Compact Afterburner
+Medium Compact Pb-Acid Cap Battery
+Medium Compact Pb-Acid Cap Battery
+
+Damage Control II
+Explosive Energized Membrane II
+Thermal Energized Membrane II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+
+Medium Ancillary Current Router I
+Medium Capacitor Control Circuit I
+Medium Ancillary Current Router I
+
+
+Medium Armor Maintenance Bot I x2
+Medium Armor Maintenance Bot I x2
+Light Armor Maintenance Bot I x1
+
+
+ECCM Script x1
+Scan Resolution Script x1
+Nanite Repair Paste x84
+Targeting Range Script x1

@@ -1,8 +1,8 @@
 import { ShipsImpl } from "./ships";
 import { fittingOptions } from "./fitting";
-import { effectiveStats } from "./effectiveStats";
+import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { SHIP_PROFILES } from "./profiles";
-import type { PropulsionId, ShipProfile } from "./types";
+import type { FittedHull, PropulsionId, ShipProfile } from "./types";
 
 const rifter = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
 const ab1 = fittingOptions(rifter).find((m) => m.id === "ab-1mn")!;
@@ -51,30 +51,34 @@ describe("ShipsImpl", () => {
     expect(ships.fittingOption(rifter, "mwd-500mn" as PropulsionId)).toBeUndefined();
   });
 
-  test("effectiveStats delegates to the existing computation", () => {
-    const expected = effectiveStats(rifter, mwd5, { skillLevel: 5, overloaded: true });
-    expect(ships.effectiveStats(rifter, mwd5, { skillLevel: 5, overloaded: true })).toEqual(expected);
+  test("fittedStats with undefined fitted delegates to the naked hull", () => {
+    const expected = fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true });
+    expect(ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true })).toEqual(expected);
   });
 
-  test("maxSpeedForMass returns the base max speed when no module is fitted", () => {
-    const expected = effectiveStats(rifter, undefined, { skillLevel: 5, overloaded: true });
-    expect(ships.maxSpeedForMass(rifter, 1_000_000, undefined, { skillLevel: 5, overloaded: true })).toBe(expected.maxSpeed);
+  test("maxSpeedForFittedMass with undefined fitted matches the core at the active mass", () => {
+    const stats = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true });
+    const speed = ships.maxSpeedForFittedMass(rifter, undefined, stats.mass, mwd5, { skillLevel: 5, overloaded: true });
+    expect(speed).toBeCloseTo(stats.maxSpeed, 6);
+    expect(speed).toBeCloseTo(maxSpeedForFittedMass(rifter, undefined, stats.mass, mwd5, { skillLevel: 5, overloaded: true }), 6);
   });
 
-  test("maxSpeedForMass reverses fitted mass and recomputes speed for a module", () => {
-    const activeMass = 3_000_000;
-    const speed = ships.maxSpeedForMass(rifter, activeMass, mwd5, { skillLevel: 5, overloaded: true });
+  test("maxSpeedForFittedMass with undefined fitted returns a positive speed when the active mass is very low", () => {
+    const speed = ships.maxSpeedForFittedMass(rifter, undefined, 0, mwd5, { skillLevel: 5, overloaded: true });
     expect(speed).toBeGreaterThan(0);
   });
 
-  test("maxSpeedForMass returns base max speed when the mass is too low to support the module", () => {
-    const speed = ships.maxSpeedForMass(rifter, 0, mwd5, { skillLevel: 5, overloaded: true });
-    expect(speed).toBeGreaterThan(0);
+  test("fittedStats with a fitted hull delegates to the exact core and includes multipliers", () => {
+    const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
+    const expected = fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false });
+    expect(ships.fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false })).toEqual(expected);
   });
 
-  test("maxSpeedForMass matches effectiveStats when the mass equals the active fitted mass", () => {
-    const withModule = ships.effectiveStats(rifter, mwd5, { skillLevel: 5, overloaded: true });
-    const speed = ships.maxSpeedForMass(rifter, withModule.mass, mwd5, { skillLevel: 5, overloaded: true });
-    expect(speed).toBeCloseTo(withModule.maxSpeed, 6);
+  test("maxSpeedForFittedMass with a fitted hull matches the core at the active mass", () => {
+    const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
+    const stats = ships.fittedStats(rifter, fitted, mwd5, { skillLevel: 0, overloaded: false });
+    const speed = ships.maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false });
+    expect(speed).toBeCloseTo(stats.maxSpeed, 6);
+    expect(speed).toBeCloseTo(maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false }), 6);
   });
 });

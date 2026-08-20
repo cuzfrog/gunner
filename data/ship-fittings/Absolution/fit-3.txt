@@ -1,0 +1,26 @@
+[Absolution, Killmail 137853460]
+
+Core Probe Launcher II, Core Scanner Probe I
+Armor Command Burst II, Armor Reinforcement Charge
+Information Command Burst II, Electronic Hardening Charge
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Rapid Repair Charge
+
+Ta3 Compact Ship Scanner
+50MN Quad LiF Restrained Microwarpdrive
+Medium Micro Jump Drive
+
+Nanofiber Internal Structure II
+Multispectrum Energized Membrane II
+Damage Control II
+Imperial Navy 1600mm Steel Plates
+Reactive Armor Hardener
+Nanofiber Internal Structure II
+Multispectrum Energized Membrane II
+
+Medium Command Processor I
+Medium Command Processor I
+
+
+Core Scanner Probe I x8
+Nanite Repair Paste x98

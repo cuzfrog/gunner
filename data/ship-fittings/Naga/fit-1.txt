@@ -1,0 +1,39 @@
+[Naga, Killmail 137866849]
+
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Javelin L
+425mm Railgun II, Caldari Navy Uranium Charge L
+
+Tracking Computer II, Tracking Speed Script
+Sensor Booster II, Targeting Range Script
+Tracking Computer II, Tracking Speed Script
+Sensor Booster II, Scan Resolution Script
+Tracking Computer II, Tracking Speed Script
+Sensor Booster II, Scan Resolution Script
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+
+Medium Hybrid Locus Coordinator I
+Medium Hybrid Locus Coordinator I
+Medium Hybrid Metastasis Adjuster I
+
+
+Caldari Navy Lead Charge L x1024
+Caldari Navy Antimatter Charge L x1003
+Optimal Range Script x2
+Optimal Range Script x1
+Spike L x1178
+Caldari Navy Iridium Charge L x1300
+Scan Resolution Script x1
+Caldari Navy Uranium Charge L x642
+Javelin L x1214
+Targeting Range Script x1
+Targeting Range Script x1
+Caldari Navy Iron Charge L x1567

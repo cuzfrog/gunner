@@ -1,0 +1,45 @@
+[Nighthawk, Killmail 137839188]
+
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Shield Command Burst II, Shield Harmonizing Charge
+Shield Command Burst II, Shield Extension Charge
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Information Command Burst II, Sensor Optimization Charge
+
+Multispectrum Shield Hardener II
+Pithum C-Type EM Shield Amplifier
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+Large Shield Extender II
+Large Shield Extender II
+
+Damage Control II
+Overdrive Injector System II
+Capacitor Power Relay II
+Nanofiber Internal Structure II
+
+Medium Core Defense Field Extender II
+Medium Command Processor I
+
+
+Caldari Navy Nova Heavy Missile x2000
+Mjolnir Fury Heavy Missile x626
+Electronic Hardening Charge x543
+Caldari Navy Scourge Heavy Missile x1712
+Caldari Navy Inferno Heavy Missile x2084
+Active Shielding Charge x293
+Caldari Navy Mjolnir Heavy Missile x2024
+Electronic Superiority Charge x543
+Information Command Burst II, Caldari Navy Nova Heavy Missile
+Information Command Burst II, Caldari Navy Nova Heavy Missile
+Agency 'Overclocker' SB5 Dose II x1
+Shield Command Burst II, Caldari Navy Nova Heavy Missile
+Overdrive Injector System II, Caldari Navy Nova Heavy Missile
+Nova Fury Heavy Missile x688
+Sensor Optimization Charge x244
+Scourge Fury Heavy Missile x1021
+Nanite Repair Paste x200
+Inferno Fury Heavy Missile x700
+Synth Mindflood Booster x1
