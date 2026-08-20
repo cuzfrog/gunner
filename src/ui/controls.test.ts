@@ -3,7 +3,7 @@ import { SHIP_PROFILES, effectiveStats, fittedMassFactor, fittingOptions } from 
 import type { ShipProfile } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
-import type { ClipboardProvider, LocationProvider, SettingsStore, UserSettings } from "./settings";
+import type { ClipboardProvider, LocationProvider, ProfileSettings, SettingsStore, UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 
 const DEFAULT_INPUTS: Record<string, string> = {
@@ -151,7 +151,12 @@ function fakeLocation(href = "http://localhost/"): LocationProvider {
 
 interface SelectedProfile {
   name: string;
-  baseline: UserSettings;
+  baseline: ProfileSettings;
+}
+
+function asProfile(settings: UserSettings): ProfileSettings {
+  const { language: _, ...rest } = settings;
+  return rest;
 }
 
 function buildControls(
@@ -279,7 +284,7 @@ describe("DomControls", () => {
       language: "en",
     };
     const encodedUrl = "http://localhost/?c=ENCODED_PROFILE";
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
     settingsStore.encodeUrl.mockReturnValue(encodedUrl);
 
     const select = getFake(globalThis.document, "profile-select");
@@ -322,7 +327,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -944,7 +949,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1003,7 +1008,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1051,7 +1056,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1091,7 +1096,7 @@ describe("DomControls", () => {
       language: "en",
     };
     const other: UserSettings = { ...selected, optimal: 9999 };
-    settingsStore.loadProfile.mockImplementation((name: string) => (name === "kiter" ? selected : name === "brawler" ? other : null));
+    settingsStore.loadProfile.mockImplementation((name: string) => (name === "kiter" ? asProfile(selected) : name === "brawler" ? asProfile(other) : null));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "kiter";
@@ -1107,7 +1112,7 @@ describe("DomControls", () => {
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
   });
 
-  test("save button highlights when tracking unit, language, or hull changes after loading a profile", () => {
+  test("save button highlights when tracking unit changes after loading a profile", () => {
     const rifter = rifterProfile();
     const module = mwd5mnForRifter();
     const stats = effectiveStats(rifter, module, { skillLevel: 5, overloaded: true });
@@ -1144,7 +1149,7 @@ describe("DomControls", () => {
     };
 
     const { settingsStore } = buildControls(globalThis.document);
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1155,15 +1160,138 @@ describe("DomControls", () => {
 
     getFake(globalThis.document, "tracking-unit-score").trigger("click");
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+  });
 
+  test("save button does not highlight when language changes after loading a profile", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "en",
+    };
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
     saveButton.classList.toggle.mockClear();
+
     getFake(globalThis.document, "lang-zh").trigger("click");
-    expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+    expect(saveButton.classList.toggle).not.toHaveBeenCalledWith("unsaved", true);
+  });
 
+  test("save button highlights when hull changes after loading a profile", () => {
+    const rifter = rifterProfile();
+    const module = mwd5mnForRifter();
+    const stats = effectiveStats(rifter, module, { skillLevel: 5, overloaded: true });
+    const speed = Number(formatNumber(stats.maxSpeed));
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: speed,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: stats.mass,
+      attackerInertia: stats.inertiaModifier,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: speed,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: stats.mass,
+      targetInertia: stats.inertiaModifier,
+      targetSig: stats.sigRadius,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetHull: "Rifter",
+      targetPropulsion: "mwd-5mn",
+      simSpeed: 4,
+      language: "en",
+    };
+
+    const { settingsStore } = buildControls(globalThis.document);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    const saveButton = getFake(globalThis.document, "profile-save");
     saveButton.classList.toggle.mockClear();
+
     getFake(globalThis.document, "attacker-hull").value = "Thrasher";
     getFake(globalThis.document, "attacker-hull").trigger("input");
     expect(saveButton.classList.toggle).toHaveBeenCalledWith("unsaved", true);
+  });
+
+  test("loading a profile does not call setLanguage with the profile's stored language", () => {
+    const { i18n, settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      simSpeed: 4,
+      language: "ja",
+    };
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+    const select = getFake(globalThis.document, "profile-select");
+    select.value = "brawler";
+    select.trigger("change");
+
+    expect(i18n.setLanguage).toHaveBeenCalledWith("en");
+    expect(i18n.setLanguage).not.toHaveBeenCalledWith("ja");
   });
 
   test("getConfig passes maneuver aggressivity through to the attacker", () => {
@@ -1282,7 +1410,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1322,7 +1450,7 @@ describe("DomControls", () => {
       language: "en",
     };
     const { settingsStore } = buildControls(globalThis.document, profile, {
-      selectedProfile: { name: "brawler", baseline: profile },
+      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
       listProfiles: ["brawler"],
     });
 
@@ -1364,7 +1492,7 @@ describe("DomControls", () => {
     };
     const { settingsStore } = buildControls(globalThis.document, profile, {
       hasForeignUrlSettings: true,
-      selectedProfile: { name: "brawler", baseline: profile },
+      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
       listProfiles: ["brawler"],
     });
 
@@ -1406,7 +1534,7 @@ describe("DomControls", () => {
     };
     const { settingsStore } = buildControls(globalThis.document, profile, {
       hasForeignUrlSettings: false,
-      selectedProfile: { name: "brawler", baseline: profile },
+      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
       listProfiles: ["brawler"],
     });
 
@@ -1428,7 +1556,7 @@ describe("DomControls", () => {
     expect(location.href).toBe(encodedUrl);
   });
 
-  test("saving a profile persists it as the selected profile", () => {
+  test("saving a profile persists it as the selected profile without language", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const nameInput = getFake(globalThis.document, "profile-name");
     nameInput.value = "brawler";
@@ -1436,8 +1564,12 @@ describe("DomControls", () => {
 
     getFake(globalThis.document, "profile-save").trigger("click");
 
-    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
-    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
+    const [, savedProfile] = settingsStore.saveProfile.mock.calls[0];
+    const [, selectedBaseline] = settingsStore.saveSelectedProfile.mock.calls[0];
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", savedProfile);
+    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", selectedBaseline);
+    expect(savedProfile).not.toHaveProperty("language");
+    expect(selectedBaseline).not.toHaveProperty("language");
     expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
   });
 
@@ -1472,7 +1604,7 @@ describe("DomControls", () => {
       simSpeed: 4,
       language: "en",
     };
-    settingsStore.loadProfile.mockReturnValue(profile);
+    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
@@ -1836,7 +1968,7 @@ describe("DomControls", () => {
 
     test("profile load fires onReset and not onConfigChange", () => {
       const { controls, settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
-      settingsStore.loadProfile.mockReturnValue(brawler);
+      settingsStore.loadProfile.mockReturnValue(asProfile(brawler));
       const callbacks = callbackMocks();
       controls.setCallbacks(callbacks);
 

@@ -37,6 +37,8 @@ export interface UserSettings {
   language: Language;
 }
 
+export type ProfileSettings = Omit<UserSettings, "language">;
+
 export interface StorageProvider {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
@@ -56,15 +58,15 @@ export interface SettingsStore {
   load(): UserSettings | null;
   save(settings: UserSettings): void;
   listProfiles(): string[];
-  saveProfile(name: string, settings: UserSettings): void;
-  loadProfile(name: string): UserSettings | null;
+  saveProfile(name: string, settings: ProfileSettings): void;
+  loadProfile(name: string): ProfileSettings | null;
   deleteProfile(name: string): void;
   encodeUrl(settings: UserSettings): string;
   decodeUrl(): UserSettings | null;
   writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
   hasForeignUrlSettings(): boolean;
-  loadSelectedProfile(): { name: string; baseline: UserSettings } | null;
-  saveSelectedProfile(name: string, baseline: UserSettings): void;
+  loadSelectedProfile(): { name: string; baseline: ProfileSettings } | null;
+  saveSelectedProfile(name: string, baseline: ProfileSettings): void;
   clearSelectedProfile(): void;
 }
 
@@ -99,13 +101,13 @@ export class LocalSettingsStore implements SettingsStore {
     return Object.keys(parsed).sort();
   }
 
-  saveProfile(name: string, settings: UserSettings): void {
+  saveProfile(name: string, settings: ProfileSettings): void {
     const profiles = this.loadProfiles();
-    profiles[name] = settings;
+    profiles[name] = stripLanguage(settings);
     this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
   }
 
-  loadProfile(name: string): UserSettings | null {
+  loadProfile(name: string): ProfileSettings | null {
     const profiles = this.loadProfiles();
     const profile = profiles[name];
     if (!profile) return null;
@@ -156,20 +158,23 @@ export class LocalSettingsStore implements SettingsStore {
     return !localSettings || JSON.stringify(urlSettings) !== JSON.stringify(localSettings);
   }
 
-  loadSelectedProfile(): { name: string; baseline: UserSettings } | null {
+  loadSelectedProfile(): { name: string; baseline: ProfileSettings } | null {
     const raw = this.storage.getItem(SELECTED_PROFILE_KEY);
     if (!raw) return null;
     try {
       const parsed: unknown = JSON.parse(raw);
-      return isSelectedProfile(parsed) ? parsed : null;
+      if (!isSelectedProfile(parsed)) return null;
+      const baseline = toProfileSettings(parsed.baseline);
+      if (!baseline) return null;
+      return { name: parsed.name, baseline };
     } catch {
       return null;
     }
   }
 
-  saveSelectedProfile(name: string, baseline: UserSettings): void {
+  saveSelectedProfile(name: string, baseline: ProfileSettings): void {
     if (!name) throw new Error("selected profile name cannot be empty");
-    const selected: { name: string; baseline: UserSettings } = { name, baseline };
+    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripLanguage(baseline) };
     this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
   }
 
@@ -177,7 +182,7 @@ export class LocalSettingsStore implements SettingsStore {
     this.storage.removeItem(SELECTED_PROFILE_KEY);
   }
 
-  private loadProfiles(): Record<string, UserSettings> {
+  private loadProfiles(): Record<string, ProfileSettings> {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return {};
     return parseProfiles(raw);
@@ -199,13 +204,13 @@ function parseUserSettings(raw: string): UserSettings | null {
   }
 }
 
-function parseProfiles(raw: string): Record<string, UserSettings> {
+function parseProfiles(raw: string): Record<string, ProfileSettings> {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isProfileStorage(parsed)) return {};
-    const result: Record<string, UserSettings> = {};
+    const result: Record<string, ProfileSettings> = {};
     for (const name of Object.keys(parsed)) {
-      const settings = isUserSettings(parsed[name]) ? parsed[name] : null;
+      const settings = toProfileSettings(parsed[name]);
       if (settings) result[name] = settings;
     }
     return result;
@@ -226,13 +231,17 @@ function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-function isSelectedProfile(value: unknown): value is { name: string; baseline: UserSettings } {
+function isSelectedProfile(value: unknown): value is { name: string; baseline: unknown } {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  return typeof s.name === "string" && s.name.length > 0 && isUserSettings(s.baseline);
+  return typeof s.name === "string" && s.name.length > 0 && !!s.baseline && typeof s.baseline === "object" && !Array.isArray(s.baseline);
 }
 
 function isUserSettings(value: unknown): value is UserSettings {
+  return isProfileSettings(value) && isLanguage((value as Record<string, unknown>).language);
+}
+
+function isProfileSettings(value: unknown): value is ProfileSettings {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
   return (
@@ -264,9 +273,18 @@ function isUserSettings(value: unknown): value is UserSettings {
     isOptionalPropulsionId(s.attackerPropulsion) &&
     isOptionalNonEmptyString(s.targetHull) &&
     isOptionalPropulsionId(s.targetPropulsion) &&
-    isPositive(s.simSpeed) &&
-    isLanguage(s.language)
+    isPositive(s.simSpeed)
   );
+}
+
+function toProfileSettings(value: unknown): ProfileSettings | null {
+  if (!isProfileSettings(value)) return null;
+  return stripLanguage(value);
+}
+
+function stripLanguage(value: ProfileSettings): ProfileSettings {
+  const { language: _, ...rest } = value as Record<string, unknown>;
+  return rest as ProfileSettings;
 }
 
 function isSigResolutionClass(value: unknown): value is SigResolutionClass {

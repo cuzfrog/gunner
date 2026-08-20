@@ -20,7 +20,7 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type SettingsStore, type UserSettings } from "./settings";
+import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -56,7 +56,7 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
-  private selectedProfile: UserSettings | null = null;
+  private selectedProfile: ProfileSettings | null = null;
 
   constructor({
     hitChance,
@@ -498,12 +498,12 @@ export class DomControls implements Controls {
     const name = (this.els.profileName as HTMLInputElement).value.trim();
     const profileName = name || selected;
     if (!profileName) return;
-    const settings = this.getSettings();
-    this.settingsStore.saveProfile(profileName, settings);
-    this.settingsStore.saveSelectedProfile(profileName, settings);
+    const profile = profileSettingsOf(this.getSettings());
+    this.settingsStore.saveProfile(profileName, profile);
+    this.settingsStore.saveSelectedProfile(profileName, profile);
     (this.els.profileName as HTMLInputElement).value = "";
     this.renderProfiles(profileName);
-    this.selectedProfile = settings;
+    this.selectedProfile = profile;
     this.updateSaveButtonState();
   }
 
@@ -512,8 +512,8 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings(profile, name);
-    this.selectedProfile = this.getSettings();
+    this.loadSettings({ ...profile, language: this.i18n.current() }, name);
+    this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
     this.callbacks?.onReset();
@@ -531,13 +531,13 @@ export class DomControls implements Controls {
   private updateSaveButtonState(): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    let saved: UserSettings | null = null;
+    let saved: ProfileSettings | null = null;
     if (name && name !== selected) {
       saved = this.settingsStore.loadProfile(name);
     } else if (selected) {
       saved = this.selectedProfile;
     }
-    const current = this.getSettings();
+    const current = profileSettingsOf(this.getSettings());
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
   }
@@ -1141,8 +1141,13 @@ function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
 }
 
-function settingsEqual(a: UserSettings, b: UserSettings): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+function profileSettingsOf(settings: UserSettings): ProfileSettings {
+  const { language: _, ...rest } = settings;
+  return rest;
+}
+
+function settingsEqual(a: ProfileSettings, b: ProfileSettings): boolean {
+  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
 }
 
 function formatWithCommas(value: number, decimals = 0): string {

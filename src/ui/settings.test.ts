@@ -1,5 +1,5 @@
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
-import { LocalSettingsStore, USER_SETTINGS_VERSION, type UserSettings } from "./settings";
+import { LocalSettingsStore, USER_SETTINGS_VERSION, type ProfileSettings, type UserSettings } from "./settings";
 
 const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
@@ -48,6 +48,13 @@ const URL_SETTINGS: UserSettings = {
   simSpeed: 2,
   language: "ja",
 };
+
+function profileFrom(settings: UserSettings): ProfileSettings {
+  const { language: _, ...rest } = settings;
+  return rest;
+}
+
+const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
 
 function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
@@ -197,15 +204,37 @@ describe("LocalSettingsStore", () => {
 
   test("saveProfile and loadProfile round-trip", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
+    store.saveProfile("brawler", DEFAULT_PROFILE);
     expect(store.listProfiles()).toEqual(["brawler"]);
-    expect(store.loadProfile("brawler")).toEqual(DEFAULT_SETTINGS);
+    expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("saveProfile strips a language field from the stored profile", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_SETTINGS);
+    const raw = storage.getItem("gunner-profiles-v5")!;
+    expect(JSON.parse(raw).brawler).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("loadProfile strips a legacy language field from stored profiles", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("loadSelectedProfile strips a legacy language field from the baseline", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadSelectedProfile()).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("deleteProfile removes the profile", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("a", DEFAULT_SETTINGS);
-    store.saveProfile("b", DEFAULT_SETTINGS);
+    store.saveProfile("a", DEFAULT_PROFILE);
+    store.saveProfile("b", DEFAULT_PROFILE);
     store.deleteProfile("a");
     expect(store.listProfiles()).toEqual(["b"]);
     expect(store.loadProfile("a")).toBeNull();
@@ -213,8 +242,8 @@ describe("LocalSettingsStore", () => {
 
   test("deleteProfile clears the selected profile when it is the deleted one", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    store.saveProfile("brawler", DEFAULT_PROFILE);
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual([]);
     expect(store.loadSelectedProfile()).toBeNull();
@@ -222,12 +251,12 @@ describe("LocalSettingsStore", () => {
 
   test("deleteProfile leaves the selected profile alone when it is a different one", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
-    store.saveProfile("sniper", DEFAULT_SETTINGS);
-    store.saveSelectedProfile("sniper", DEFAULT_SETTINGS);
+    store.saveProfile("brawler", DEFAULT_PROFILE);
+    store.saveProfile("sniper", DEFAULT_PROFILE);
+    store.saveSelectedProfile("sniper", DEFAULT_PROFILE);
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual(["sniper"]);
-    expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_SETTINGS });
+    expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_PROFILE });
   });
 
   test("encodeUrl and decodeUrl round-trip", () => {
@@ -444,21 +473,21 @@ describe("LocalSettingsStore", () => {
 
   test("saveSelectedProfile and loadSelectedProfile round-trip a name and baseline", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     const selected = store.loadSelectedProfile();
-    expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_SETTINGS });
+    expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("clearSelectedProfile removes the stored selection", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.clearSelectedProfile();
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("saveSelectedProfile rejects an empty name", () => {
     const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    expect(() => store.saveSelectedProfile("", DEFAULT_SETTINGS)).toThrow("selected profile name cannot be empty");
+    expect(() => store.saveSelectedProfile("", DEFAULT_PROFILE)).toThrow("selected profile name cannot be empty");
   });
 
   test("loadSelectedProfile returns null for an invalid baseline", () => {
