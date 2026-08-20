@@ -107,23 +107,16 @@ body {
 .github-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 3px 6px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border-dim);
-  border-radius: 2px;
   color: var(--text-secondary);
-  line-height: 1;
 }
 
 .github-link:hover {
-  border-color: var(--accent-teal);
   color: var(--accent-teal);
 }
 
 .github-link:focus-visible {
   outline: 1px solid var(--accent-teal);
-  outline-offset: -1px;
+  outline-offset: 2px;
 }
 
 .github-link svg {
@@ -603,20 +596,6 @@ canvas {
   font-family: "Share Tech Mono", monospace;
   font-size: 12px;
   color: var(--accent-teal);
-}
-
-.panel .align-time {
-  margin-left: auto;
-  font-family: "Share Tech Mono", monospace;
-  font-size: 12px;
-  color: var(--accent-teal);
-  text-transform: none;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-
-.panel .align-time:empty {
-  display: none;
 }
 
 .panel .maneuver-field {

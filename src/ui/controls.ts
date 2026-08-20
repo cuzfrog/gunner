@@ -95,7 +95,6 @@ export class DomControls implements Controls {
       attackerSpeed: el("attacker-speed"),
       attackerMass: el("attacker-mass"),
       attackerInertia: el("attacker-inertia"),
-      attackerAlignTime: el("attacker-align-time"),
       attackerMode: el("attacker-mode"),
       attackerRange: el("attacker-range"),
       maneuverAggressivity: el("maneuver-aggressivity"),
@@ -116,7 +115,6 @@ export class DomControls implements Controls {
       targetSpeed: el("target-speed"),
       targetMass: el("target-mass"),
       targetInertia: el("target-inertia"),
-      targetAlignTime: el("target-align-time"),
       targetMode: el("target-mode"),
       targetRange: el("target-range"),
       targetSig: el("target-sig"),
@@ -889,11 +887,11 @@ export class DomControls implements Controls {
     const mass = num(this.els[`${side}Mass`]);
     const inertia = num(this.els[`${side}Inertia`]);
     const t = alignTime(mass, inertia);
-    const output = this.els[`${side}AlignTime`];
+    const input = this.els[`${side}Inertia`] as HTMLInputElement;
     if (Number.isFinite(t) && t > 0) {
-      output.textContent = `${t.toFixed(1)}${this.i18n.t("unit.second")}`;
+      input.title = `${this.i18n.t("label.alignTime")}: ${t.toFixed(1)}${this.i18n.t("unit.second")}`;
     } else {
-      output.textContent = "";
+      input.title = "";
     }
   }
 

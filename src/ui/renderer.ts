@@ -28,6 +28,8 @@ const MIN_SEPARATION_PX = 140;
 const MIN_VIEW_RADIUS = 250;
 const FAR_MARGIN = 1.25;
 const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
+const SHIP_ICON_SIZE = 8;
+const DIRECTION_LINE_LENGTH = SHIP_ICON_SIZE * 4; // 2x the icon's 16px nose-to-tail length
 
 interface Camera {
   readonly center: Vec2;
@@ -185,12 +187,10 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawIntendedDirection(position: Vec2, vector: Vec2): void {
-    const speed = vector.len();
-    if (speed < 0.01) return;
+    if (vector.len() < 0.01) return;
     const start = this.worldToScreen(position);
-    const lineLen = speed * VECTOR_SCALE * this.camera.scale;
     const heading = vector.angle();
-    const end = start.add(new Vec2(lineLen * Math.cos(heading), -lineLen * Math.sin(heading)));
+    const end = start.add(new Vec2(DIRECTION_LINE_LENGTH * Math.cos(heading), -DIRECTION_LINE_LENGTH * Math.sin(heading)));
     this.ctx.save();
     this.ctx.strokeStyle = COLORS.command;
     this.ctx.lineWidth = 1;
@@ -225,7 +225,6 @@ export class CanvasRenderer implements Renderer {
   private drawShip(ship: ShipState, color: string): void {
     const p = this.worldToScreen(ship.position);
     const heading = ship.velocity.len() > 0.01 ? ship.velocity.angle() : -Math.PI / 2;
-    const size = 8;
 
     this.ctx.save();
     this.ctx.translate(p.x, p.y);
@@ -236,10 +235,10 @@ export class CanvasRenderer implements Renderer {
 
     // Chevron triangle pointing in the direction of travel.
     this.ctx.beginPath();
-    this.ctx.moveTo(size, 0);
-    this.ctx.lineTo(-size, size * 0.75);
-    this.ctx.lineTo(-size * 0.5, 0);
-    this.ctx.lineTo(-size, -size * 0.75);
+    this.ctx.moveTo(SHIP_ICON_SIZE, 0);
+    this.ctx.lineTo(-SHIP_ICON_SIZE, SHIP_ICON_SIZE * 0.75);
+    this.ctx.lineTo(-SHIP_ICON_SIZE * 0.5, 0);
+    this.ctx.lineTo(-SHIP_ICON_SIZE, -SHIP_ICON_SIZE * 0.75);
     this.ctx.closePath();
     this.ctx.fill();
 
