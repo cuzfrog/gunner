@@ -87,16 +87,24 @@ body {
   gap: 4px;
 }
 
-.lang-toggle button {
-  padding: 4px 10px;
+.lang-toggle button,
+.tracking-unit-toggle button,
+.segmented-control button,
+.skill-tuner button,
+.overload-button,
+.profile-bar button {
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-secondary);
   font-family: "Chakra Petch", sans-serif;
-  font-size: 12px;
-  white-space: nowrap;
   cursor: pointer;
   border-radius: 2px;
+}
+
+.lang-toggle button {
+  padding: 4px 10px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .lang-toggle button.active {
@@ -112,11 +120,6 @@ body {
 
 .github-link:hover {
   color: var(--accent-teal);
-}
-
-.github-link:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: 2px;
 }
 
 .github-link svg {
@@ -190,7 +193,7 @@ body {
 .panel select {
   width: 100%;
   padding: 5px 8px;
-  background: var(--bg-inset);
+  background-color: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
@@ -199,13 +202,19 @@ body {
   min-height: 28px;
 }
 
-.panel select {
+.panel select,
+.controls select,
+.profile-select {
   -webkit-appearance: none;
   appearance: none;
   background-image: var(--dropdown-arrow);
   background-repeat: no-repeat;
   background-position: right 8px center;
+}
+
+.panel select {
   text-align: center;
+  text-align-last: center;
   padding: 5px 24px;
 }
 
@@ -219,9 +228,21 @@ body {
 .panel select:focus-visible,
 .profile-bar :focus-visible,
 .controls :focus-visible,
-.lang-toggle button:focus-visible {
+.lang-toggle button:focus-visible,
+.segmented-control button:focus-visible,
+.skill-tuner button:focus-visible,
+.tracking-unit-toggle button:focus-visible,
+.overload-button:focus-visible,
+.skill-trigger:focus-visible,
+.skill-popup button:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: -1px;
+}
+
+.github-link:focus-visible,
+.import-fitting-button:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
 }
 
 .panel input.hull-invalid {
@@ -233,10 +254,6 @@ body {
   border-color: rgba(92, 203, 203, 0.12);
   background-image: var(--dropdown-arrow-disabled);
   cursor: not-allowed;
-}
-
-select:disabled {
-  background-image: var(--dropdown-arrow-disabled);
 }
 
 .panel .hull-hint {
@@ -323,11 +340,6 @@ select:disabled {
 
 .import-fitting-button:hover {
   color: var(--accent-teal);
-}
-
-.import-fitting-button:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: 2px;
 }
 
 .hull-label-row .import-status {
@@ -442,7 +454,7 @@ canvas {
 
 .controls button,
 .controls select {
-  background: var(--bg-inset);
+  background-color: var(--bg-inset);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Chakra Petch", sans-serif;
@@ -455,11 +467,6 @@ canvas {
 }
 
 .controls select {
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: var(--dropdown-arrow);
-  background-repeat: no-repeat;
-  background-position: right 8px center;
   min-width: 82px;
   padding: 8px 24px 8px 8px;
   text-align: left;
@@ -480,8 +487,7 @@ canvas {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
 .result-card {
@@ -544,14 +550,8 @@ canvas {
 
 .tracking-unit-toggle button {
   padding: 2px 8px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border-dim);
-  color: var(--text-secondary);
-  font-family: "Chakra Petch", sans-serif;
   font-size: 10px;
   text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 2px;
 }
 
 .tracking-unit-toggle button.active {
@@ -573,7 +573,7 @@ canvas {
 .profile-name-input,
 .profile-select {
   padding: 0 8px;
-  background: var(--bg-panel);
+  background-color: var(--bg-panel);
   border: 1px solid var(--border-dim);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
@@ -588,25 +588,16 @@ canvas {
 
 .profile-select {
   width: 240px;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: var(--dropdown-arrow);
-  background-repeat: no-repeat;
-  background-position: right 8px center;
   text-align: center;
+  text-align-last: center;
   padding: 0 24px;
 }
 
 .profile-bar button {
   padding: 0 12px;
   background: var(--bg-panel);
-  border: 1px solid var(--border-dim);
-  color: var(--text-secondary);
-  font-family: "Chakra Petch", sans-serif;
   font-size: 12px;
   text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 2px;
   min-height: 30px;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -636,7 +627,6 @@ canvas {
 
 .profile-tip {
   margin-left: auto;
-  font-size: 14px;
   color: var(--accent-teal);
   white-space: nowrap;
   overflow: hidden;
@@ -665,15 +655,6 @@ canvas {
   margin-bottom: 6px;
 }
 
-.field-label {
-  display: block;
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 3px;
-}
-
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -687,7 +668,6 @@ canvas {
 }
 
 .slider-field {
-  width: 100%;
   margin-bottom: 6px;
 }
 
@@ -728,7 +708,6 @@ canvas {
 
 .panel .maneuver-field {
   margin-top: 2px;
-  margin-bottom: 6px;
 }
 
 .panel .maneuver-field .slider-label-row {
@@ -771,8 +750,7 @@ canvas {
   border-color: var(--accent-teal);
 }
 
-.panel input[type="range"],
-.controls input[type="range"] {
+:is(.panel, .controls) input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -782,16 +760,14 @@ canvas {
   cursor: pointer;
 }
 
-.panel input[type="range"]::-webkit-slider-runnable-track,
-.controls input[type="range"]::-webkit-slider-runnable-track {
+:is(.panel, .controls) input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   background: linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) var(--fill, 0%));
   border: 1px solid var(--border-dim);
   border-radius: 2px;
 }
 
-.panel input[type="range"]::-webkit-slider-thumb,
-.controls input[type="range"]::-webkit-slider-thumb {
+:is(.panel, .controls) input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
   height: 16px;
@@ -802,23 +778,20 @@ canvas {
   box-shadow: 0 0 6px rgba(92, 203, 203, 0.35);
 }
 
-.panel input[type="range"]::-moz-range-track,
-.controls input[type="range"]::-moz-range-track {
+:is(.panel, .controls) input[type="range"]::-moz-range-track {
   height: 4px;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
 }
 
-.panel input[type="range"]::-moz-range-progress,
-.controls input[type="range"]::-moz-range-progress {
+:is(.panel, .controls) input[type="range"]::-moz-range-progress {
   height: 4px;
   background: var(--accent-teal);
   border-radius: 2px;
 }
 
-.panel input[type="range"]::-moz-range-thumb,
-.controls input[type="range"]::-moz-range-thumb {
+:is(.panel, .controls) input[type="range"]::-moz-range-thumb {
   width: 10px;
   height: 14px;
   background: var(--bg-panel);
@@ -827,10 +800,10 @@ canvas {
   box-shadow: 0 0 6px rgba(92, 203, 203, 0.35);
 }
 
-.panel input[type="range"]:hover::-webkit-slider-thumb,
-.controls input[type="range"]:hover::-webkit-slider-thumb { border-color: var(--accent-blue); }
-.panel input[type="range"]:hover::-moz-range-thumb,
-.controls input[type="range"]:hover::-moz-range-thumb { border-color: var(--accent-blue); }
+:is(.panel, .controls) input[type="range"]:hover::-webkit-slider-thumb,
+:is(.panel, .controls) input[type="range"]:hover::-moz-range-thumb {
+  border-color: var(--accent-blue);
+}
 
 .panel-divider {
   border: 0;
@@ -840,7 +813,6 @@ canvas {
 
 .panel .input-with-unit {
   position: relative;
-  display: block;
   margin-bottom: 0;
 }
 
@@ -859,7 +831,6 @@ canvas {
   pointer-events: none;
   text-transform: none;
   letter-spacing: 0;
-  margin-bottom: 0;
 }
 
 .panel input[type="number"] {
@@ -872,15 +843,16 @@ canvas {
   margin: 0;
 }
 
-.segmented-control,
-.skill-tuner {
+.segmented-control {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
 }
 
 .skill-tuner {
+  display: flex;
   flex-wrap: nowrap;
+  gap: 2px;
 }
 
 .choice-selector {
@@ -939,14 +911,8 @@ canvas {
 .skill-tuner button,
 .overload-button {
   padding: 3px 8px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border-dim);
-  color: var(--text-secondary);
-  font-family: "Chakra Petch", sans-serif;
   font-size: 11px;
   text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 2px;
 }
 
 .segmented-control button,
@@ -975,14 +941,6 @@ canvas {
 .overload-button:hover:not(:disabled) {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
-}
-
-.segmented-control button:focus-visible,
-.skill-tuner button:focus-visible,
-.tracking-unit-toggle button:focus-visible,
-.overload-button:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: -1px;
 }
 
 .segmented-control.disabled,
@@ -1041,8 +999,6 @@ canvas {
 }
 
 .overload-button.active {
-  border-color: var(--accent-orange);
-  color: var(--accent-orange);
   background: rgba(246, 124, 15, 0.12);
   box-shadow: 0 0 8px rgba(246, 124, 15, 0.35);
 }
@@ -1091,12 +1047,6 @@ canvas {
 
 .skill-trigger:hover { border-color: var(--accent-teal); }
 
-.skill-trigger:focus-visible,
-.skill-popup button:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: -1px;
-}
-
 .panel .skill-trigger .skill-summary-row {
   display: flex;
   align-items: center;
@@ -1133,72 +1083,6 @@ canvas {
   border-radius: 2px;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.45);
   padding: 6px;
-}
-
-.skill-popup .skill-tuner {
-  flex-wrap: nowrap;
-}
-
-@media (max-width: 1100px) {
-  .main {
-    grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
-    gap: 12px;
-  }
-}
-
-@media (max-width: 900px) {
-  .main {
-    grid-template-columns: 1fr;
-  }
-
-  .results {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
-
-  .results::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .results::-webkit-scrollbar-thumb {
-    background: var(--border-dim);
-    border-radius: 2px;
-  }
-
-  .result-card {
-    flex: 0 0 auto;
-    min-width: 80px;
-  }
-
-  .panel .skill-section {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .field-row {
-    grid-template-columns: 1fr;
-  }
-
-  .controls {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    justify-items: start;
-  }
-
-  .playback-controls,
-  .grid-brightness-control,
-  .speed-control {
-    grid-column: 1;
-    justify-self: start;
-  }
-
-  .grid-brightness-control input[type="range"] {
-    width: 72px;
-  }
-
-  .grid-brightness-control label { display: none; }
 }
 
 .footer {
@@ -1291,20 +1175,73 @@ canvas {
 }
 
 @media (max-width: 1100px) {
+  .main {
+    grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
+    gap: 12px;
+  }
+
   .footer {
     grid-template-columns: 1fr 1fr;
     gap: 14px 24px;
   }
+}
 
-  .footer-author {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .results {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .results::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .results::-webkit-scrollbar-thumb {
+    background: var(--border-dim);
+    border-radius: 2px;
+  }
+
+  .result-card {
+    flex: 0 0 auto;
+    min-width: 80px;
+  }
+
+  .panel .skill-section {
+    margin-top: 0;
   }
 }
 
 @media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    justify-items: start;
+  }
+
+  .playback-controls,
+  .grid-brightness-control,
+  .speed-control {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .grid-brightness-control input[type="range"] {
+    width: 72px;
+  }
+
+  .grid-brightness-control label { display: none; }
+
   .footer {
     grid-template-columns: 1fr;
   }
 }
+
