@@ -48,12 +48,13 @@ describe("fittingDb", () => {
     });
   });
 
-  test("includes turret base stats", () => {
+  test("includes turret base stats with charge size", () => {
     expect(TURRETS["Heavy Pulse Laser II"]).toEqual({
       tracking: 26,
       sigResolution: 40_000,
       optimal: 12_600,
       falloff: 5_000,
+      chargeSize: 2,
     });
   });
 
@@ -61,12 +62,13 @@ describe("fittingDb", () => {
     expect(CHARGES["Conflagration M"]).toEqual({
       trackingMultiplier: 0.7,
       rangeMultiplier: 0.5,
-      falloffMultiplier: 1,
     });
     expect(CHARGES["Scorch M"]).toEqual({
       trackingMultiplier: 0.75,
       rangeMultiplier: 1.4,
-      falloffMultiplier: 1,
+    });
+    expect(CHARGES["Imperial Navy Multifrequency M"]).toEqual({
+      rangeMultiplier: 0.5,
     });
     expect(CHARGES["Null M"]).toEqual({
       trackingMultiplier: 0.75,

@@ -141,13 +141,13 @@ function buildModuleStats(
   const agilityBonusRaw = at.agilityMultiplier ?? at.agilityBonus;
   const agilityMultiplier = typeof agilityBonusRaw === "number" && agilityBonusRaw !== 0 ? 1 + agilityBonusRaw / 100 : undefined;
 
-  const massBonusPercent = typeof at.massBonusPercentage === "number" && at.massBonusPercentage !== 0 ? at.massBonusPercentage : undefined;
+  const massBonusPercentage = typeof at.massBonusPercentage === "number" && at.massBonusPercentage !== 0 ? at.massBonusPercentage : undefined;
 
   if (
     massAddition === undefined &&
     speedBonusPercent === undefined &&
     agilityMultiplier === undefined &&
-    massBonusPercent === undefined &&
+    massBonusPercentage === undefined &&
     sigRadiusAdd === undefined
   ) {
     return undefined;
@@ -155,13 +155,13 @@ function buildModuleStats(
 
   return {
     massAddition,
-    stats: { massAddition, massBonusPercent, speedBonusPercent, agilityMultiplier, sigRadiusAdd },
+    stats: { massAddition, massBonusPercentage, speedBonusPercent, agilityMultiplier, sigRadiusAdd },
   };
 }
 
 interface FittingModuleStats {
   readonly massAddition?: number;
-  readonly massBonusPercent?: number;
+  readonly massBonusPercentage?: number;
   readonly speedBonusPercent?: number;
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
@@ -181,12 +181,13 @@ interface TurretStats {
   readonly sigResolution: number;
   readonly optimal: number;
   readonly falloff: number;
+  readonly chargeSize: number;
 }
 
 interface ChargeStats {
-  readonly trackingMultiplier: number;
-  readonly rangeMultiplier: number;
-  readonly falloffMultiplier: number;
+  readonly trackingMultiplier?: number;
+  readonly rangeMultiplier?: number;
+  readonly falloffMultiplier?: number;
 }
 
 async function main() {
@@ -205,13 +206,14 @@ async function main() {
     const typeDogma = typeDogmas.get(id);
 
     if (TURRET_GROUPS.has(type.groupID)) {
-      const at = getAttr(sdeAttrs, typeDogma, ["trackingSpeed", "optimalSigRadius", "maxRange", "falloff"]);
+      const at = getAttr(sdeAttrs, typeDogma, ["trackingSpeed", "optimalSigRadius", "maxRange", "falloff", "chargeSize"]);
       if (at.trackingSpeed !== undefined && at.optimalSigRadius !== undefined && at.maxRange !== undefined) {
         turrets[type.name.en] = {
           tracking: at.trackingSpeed,
           sigResolution: at.optimalSigRadius,
           optimal: at.maxRange,
           falloff: at.falloff ?? 0,
+          chargeSize: at.chargeSize ?? 1,
         };
       }
       continue;
@@ -221,9 +223,9 @@ async function main() {
       const at = getAttr(sdeAttrs, typeDogma, ["weaponRangeMultiplier", "trackingSpeedMultiplier", "fallofMultiplier"]);
       if (at.weaponRangeMultiplier !== undefined || at.trackingSpeedMultiplier !== undefined || at.fallofMultiplier !== undefined) {
         charges[type.name.en] = {
-          trackingMultiplier: at.trackingSpeedMultiplier ?? 1,
-          rangeMultiplier: at.weaponRangeMultiplier ?? 1,
-          falloffMultiplier: at.fallofMultiplier ?? 1,
+          trackingMultiplier: at.trackingSpeedMultiplier,
+          rangeMultiplier: at.weaponRangeMultiplier,
+          falloffMultiplier: at.fallofMultiplier,
         };
       }
       continue;
@@ -248,7 +250,7 @@ async function main() {
 
 export interface FittingModuleStats {
   readonly massAddition?: number;
-  readonly massBonusPercent?: number;
+  readonly massBonusPercentage?: number;
   readonly speedBonusPercent?: number;
   readonly agilityMultiplier?: number;
   readonly sigRadiusAdd?: number;
@@ -260,12 +262,13 @@ export interface TurretStats {
   readonly sigResolution: number;
   readonly optimal: number;
   readonly falloff: number;
+  readonly chargeSize: number;
 }
 
 export interface ChargeStats {
-  readonly trackingMultiplier: number;
-  readonly rangeMultiplier: number;
-  readonly falloffMultiplier: number;
+  readonly trackingMultiplier?: number;
+  readonly rangeMultiplier?: number;
+  readonly falloffMultiplier?: number;
 }
 
 `;
