@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "trace": "bun run scripts/sim-trace.ts",
-    "preview": "bun run preview.ts",
+    "preview": "bun run scripts/preview.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {
