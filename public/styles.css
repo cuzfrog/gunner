@@ -627,7 +627,7 @@ canvas {
 
 .profile-tip {
   margin-left: auto;
-  color: var(--accent-teal);
+  color: var(--accent-blue);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
