@@ -79,13 +79,13 @@ describe("ShipsImpl", () => {
   });
 
   test("fittedStats delegates to the exact core and includes multipliers", () => {
-    const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
+    const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
     const expected = fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false });
     expect(ships.fittedStats(rifter, fitted, ab1, { skillLevel: 0, overloaded: false })).toEqual(expected);
   });
 
   test("maxSpeedForFittedMass matches fittedStats at the active mass", () => {
-    const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
+    const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
     const stats = ships.fittedStats(rifter, fitted, mwd5, { skillLevel: 0, overloaded: false });
     const speed = ships.maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false });
     expect(speed).toBeCloseTo(stats.maxSpeed, 6);

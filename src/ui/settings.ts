@@ -370,8 +370,10 @@ function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary
 function isFittedHull(value: unknown): value is FittedHull {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
+  if (s.massMultiplier === undefined) s.massMultiplier = 1;
   return (
     isNonNegative(s.mass) &&
+    isPositive(s.massMultiplier) &&
     isPositive(s.speedMultiplier) &&
     isPositive(s.inertiaMultiplier) &&
     isPositive(s.sigMultiplier) &&

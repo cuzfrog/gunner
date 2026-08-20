@@ -57,7 +57,7 @@ function profileFrom(settings: UserSettings): ProfileSettings {
 
 const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
 
-const FITTED_HULL: FittedHull = { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+const FITTED_HULL: FittedHull = { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
 
 const FITTED_PROPULSION = {
   thrust: 1_500_000,
@@ -392,6 +392,16 @@ describe("LocalSettingsStore", () => {
     storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
     const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
+  });
+
+  test("load defaults a fitted hull missing massMultiplier to one", () => {
+    const storage = fakeStorage();
+    const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, massMultiplier: undefined } };
+    storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerFittedHull!.fitted.massMultiplier).toBe(1);
   });
 
   test("load falls back to local storage when the URL is invalid", () => {

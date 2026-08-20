@@ -112,7 +112,7 @@ const THRASHER_BASE: ShipStats = { mass: 1_575_000, inertiaModifier: 2.5, maxSpe
 const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
-  fitted: { mass: 1_500_000, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  fitted: { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
   propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
   turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
 };

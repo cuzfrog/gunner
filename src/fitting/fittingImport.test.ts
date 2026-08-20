@@ -64,6 +64,9 @@ const db: FittingDb = {
     "Overdrive Injector System II": { speedBonusPercent: 12.5 },
     "Medium Trimark Armor Pump II": { agilityDrawbackPercent: 10 },
     "Medium Core Defense Field Extender I": { sigDrawbackPercent: 10 },
+    "Tracking Enhancer II": { turretTrackingPercent: 9.5, turretOptimalPercent: 10, turretFalloffPercent: 20 },
+    "Tracking Computer II": { turretTrackingPercent: 15, turretOptimalPercent: 7.5, turretFalloffPercent: 15 },
+    "Medium Energy Metastasis Adjuster II": { turretTrackingPercent: 20 },
   },
   turrets: {
     "Heavy Pulse Laser II": { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2 },
@@ -72,6 +75,10 @@ const db: FittingDb = {
   charges: {
     "Conflagration M": { trackingMultiplier: 0.7, rangeMultiplier: 0.5 },
     "EMP S": { rangeMultiplier: 0.5 },
+  },
+  scripts: {
+    "Tracking Speed Script": { trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
+    "Optimal Range Script": { trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
   },
 };
 
@@ -201,7 +208,8 @@ describe("FittingImportImpl", () => {
       `[Harbinger, Heavy]\nMedium Higgs Anchor I\n1600mm Steel Plates II`,
       conditions,
     );
-    expect(result!.fitted.mass).toBeCloseTo(profile.mass * 2 + 3_750_000, 6);
+    expect(result!.fitted.mass).toBe(profile.mass + 3_750_000);
+    expect(result!.fitted.massMultiplier).toBeCloseTo(2, 6);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(0.25, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.45, 6);
   });
@@ -260,6 +268,72 @@ describe("FittingImportImpl", () => {
     );
     expect(result!.turret!.optimal).toBe(12_600);
     expect(result!.turret!.tracking).toBe((26 * 125) / 40_000);
+  });
+
+  test("three metastasis rigs stack-penalize tracking", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Rigs]
+Heavy Pulse Laser II, Conflagration M
+Medium Energy Metastasis Adjuster II
+Medium Energy Metastasis Adjuster II
+Medium Energy Metastasis Adjuster II`,
+      conditions,
+    );
+    const trackingBonus = _applyStackingPenalty([1.2, 1.2, 1.2]);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * trackingBonus * 125) / 40_000, 3);
+    expect(result!.turret!.optimal).toBeCloseTo(12_600 * 0.5, 6);
+    expect(result!.turret!.falloff).toBeCloseTo(5_000, 6);
+  });
+
+  test("tracking enhancer, tracking computer and rig share one stacking chain per attribute", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Tracking]
+Heavy Pulse Laser II, Conflagration M
+Tracking Enhancer II
+Tracking Computer II
+Medium Energy Metastasis Adjuster II`,
+      conditions,
+    );
+    const trackingBonus = _applyStackingPenalty([1.2, 1.15, 1.095]);
+    const optimalBonus = _applyStackingPenalty([1.075, 1.1]);
+    const falloffBonus = _applyStackingPenalty([1.15, 1.2]);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * trackingBonus * 125) / 40_000, 3);
+    expect(result!.turret!.optimal).toBeCloseTo(12_600 * 0.5 * optimalBonus, 6);
+    expect(result!.turret!.falloff).toBeCloseTo(5_000 * falloffBonus, 6);
+  });
+
+  test("tracking speed script doubles tracking and zeros range bonuses from a tracking computer", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Scripted]
+Heavy Pulse Laser II, Conflagration M
+Tracking Computer II, Tracking Speed Script`,
+      conditions,
+    );
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 1.3 * 125) / 40_000, 6);
+    expect(result!.turret!.optimal).toBeCloseTo(12_600 * 0.5, 6);
+    expect(result!.turret!.falloff).toBeCloseTo(5_000, 6);
+  });
+
+  test("offline turret line is skipped and a later online turret is resolved", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Offline]\nHeavy Pulse Laser II /OFFLINE\n200mm AutoCannon II, EMP S`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.sigResolutionClass).toBe("S");
+  });
+
+  test("all-offline propulsion is not applied", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const result = importer.importFitting(
+      `[Harbinger, Offline]\n100MN Y-S8 Compact Afterburner /OFFLINE\n5MN Microwarpdrive I /OFFLINE`,
+      conditions,
+    );
+    expect(result!.propulsion).toBeUndefined();
   });
 
   test("maps small turret to S sig resolution class", () => {

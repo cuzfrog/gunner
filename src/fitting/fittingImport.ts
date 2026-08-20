@@ -11,7 +11,7 @@ import type {
 } from "../ships";
 import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
-import type { ChargeStats, FittingModuleStats, TurretStats } from "./fittingDb";
+import type { ChargeStats, FittingModuleStats, TurretScriptStats, TurretStats } from "./fittingDb";
 
 export interface ImportedTurret {
   readonly tracking: number;
@@ -32,6 +32,7 @@ export interface FittingDb {
   readonly modules: Readonly<Record<string, FittingModuleStats>>;
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
+  readonly scripts: Readonly<Record<string, TurretScriptStats>>;
 }
 
 export interface FittingImport {
@@ -102,14 +103,15 @@ function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFi
     if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
   }
 
-  const massPercentMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
+  const massMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
   const speedMultiplier = applyStackingPenalty(speedPercents.map((p) => 1 + p));
   const inertiaMultiplier = applyStackingPenalty(agilityMultipliers);
   const sigMultiplier = applyStackingPenalty(sigPercents.map((p) => 1 + p));
 
   return {
     fitted: {
-      mass: profile.mass * massPercentMultiplier + flatMass,
+      mass: profile.mass + flatMass,
+      massMultiplier,
       speedMultiplier,
       inertiaMultiplier,
       sigMultiplier,
@@ -140,6 +142,7 @@ function resolvePropulsion(
 
 function findFirstPropulsion(parsed: ParsedFitting, db: FittingDb): string | undefined {
   for (const line of parsed.modules) {
+    if (line.offline) continue;
     const stats = db.modules[line.name];
     if (stats?.propulsion) return line.name;
   }
@@ -157,26 +160,71 @@ function findGenericPropulsionId(
 }
 
 function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number): ImportedTurret | undefined {
+  const trackingPercents: number[] = [];
+  const optimalPercents: number[] = [];
+  const falloffPercents: number[] = [];
+  let turret: TurretStats | undefined;
+  let charge: ChargeStats | undefined;
+
   for (const line of parsed.modules) {
-    const turret = db.turrets[line.name];
-    if (!turret) continue;
+    if (line.offline) continue;
 
-    const charge = line.charge ? db.charges[line.charge] : undefined;
-    const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
-    const sigRes = SIG_RESOLUTIONS[sigResClass];
+    const lineTurret = db.turrets[line.name];
+    if (lineTurret && !turret) {
+      turret = lineTurret;
+      charge = line.charge ? db.charges[line.charge] : undefined;
+      continue;
+    }
 
-    const trackingScore = turret.tracking * (charge?.trackingMultiplier ?? 1) * (1 + TRACKING_SKILL_BONUS * skillLevel);
-    const optimal = turret.optimal * (charge?.rangeMultiplier ?? 1) * (1 + OPTIMAL_SKILL_BONUS * skillLevel);
-    const falloff = turret.falloff * (charge?.falloffMultiplier ?? 1) * (1 + FALLOFF_SKILL_BONUS * skillLevel);
-
-    return {
-      tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
-      sigResolutionClass: sigResClass,
-      optimal,
-      falloff,
-    };
+    const stats = db.modules[line.name];
+    if (!stats) continue;
+    const script = line.charge ? db.scripts[line.charge] : undefined;
+    collectTurretPercents(stats, script, trackingPercents, optimalPercents, falloffPercents);
   }
-  return undefined;
+
+  if (!turret) return undefined;
+
+  const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
+  const sigRes = SIG_RESOLUTIONS[sigResClass];
+  const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
+  const skillOptimalMultiplier = 1 + OPTIMAL_SKILL_BONUS * skillLevel;
+  const skillFalloffMultiplier = 1 + FALLOFF_SKILL_BONUS * skillLevel;
+
+  const trackingBonus = applyStackingPenalty(trackingPercents.map((p) => 1 + p / 100));
+  const optimalBonus = applyStackingPenalty(optimalPercents.map((p) => 1 + p / 100));
+  const falloffBonus = applyStackingPenalty(falloffPercents.map((p) => 1 + p / 100));
+
+  const trackingScore = turret.tracking * (charge?.trackingMultiplier ?? 1) * skillTrackingMultiplier * trackingBonus;
+  const optimal = turret.optimal * (charge?.rangeMultiplier ?? 1) * skillOptimalMultiplier * optimalBonus;
+  const falloff = turret.falloff * (charge?.falloffMultiplier ?? 1) * skillFalloffMultiplier * falloffBonus;
+
+  return {
+    tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+    sigResolutionClass: sigResClass,
+    optimal,
+    falloff,
+  };
+}
+
+function collectTurretPercents(
+  stats: FittingModuleStats,
+  script: TurretScriptStats | undefined,
+  trackingPercents: number[],
+  optimalPercents: number[],
+  falloffPercents: number[],
+): void {
+  if (stats.turretTrackingPercent) {
+    const percent = stats.turretTrackingPercent * (script?.trackingMultiplier ?? 1);
+    if (percent !== 0) trackingPercents.push(percent);
+  }
+  if (stats.turretOptimalPercent) {
+    const percent = stats.turretOptimalPercent * (script?.optimalMultiplier ?? 1);
+    if (percent !== 0) optimalPercents.push(percent);
+  }
+  if (stats.turretFalloffPercent) {
+    const percent = stats.turretFalloffPercent * (script?.falloffMultiplier ?? 1);
+    if (percent !== 0) falloffPercents.push(percent);
+  }
 }
 
 const TRACKING_SKILL_BONUS = 0.05;

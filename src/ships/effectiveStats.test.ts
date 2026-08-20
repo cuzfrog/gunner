@@ -142,7 +142,7 @@ describe("effectiveStats", () => {
 });
 
 describe("fittedStats", () => {
-  const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
+  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
 
   test("without propulsion applies multipliers to speed, inertia and signature", () => {
     const stats = fittedStats(frigate, fitted, undefined, conditions(5));
@@ -181,10 +181,17 @@ describe("fittedStats", () => {
     expect(stats.mass).toBe(1_750_000);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
   });
+
+  test("mass multiplier applies to hull and propulsion mass together", () => {
+    const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
+    const higgsFitted: FittedHull = { ...fitted, massMultiplier: 2 };
+    const stats = fittedStats(frigate, higgsFitted, ab1, conditions(0));
+    expect(stats.mass).toBe(3_500_000);
+  });
 });
 
 describe("maxSpeedForFittedMass", () => {
-  const fitted: FittedHull = { mass: 1_250_000, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
+  const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 0 };
 
   test("without propulsion ignores the provided mass", () => {
     expect(maxSpeedForFittedMass(frigate, fitted, 0)).toBeCloseTo(440, 6);

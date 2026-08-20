@@ -45,6 +45,7 @@ export interface PropulsionModule extends PropulsionStats {
 
 export interface FittedHull {
   readonly mass: number;
+  readonly massMultiplier: number;
   readonly speedMultiplier: number;
   readonly inertiaMultiplier: number;
   readonly sigMultiplier: number;

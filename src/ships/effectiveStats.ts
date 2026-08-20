@@ -24,7 +24,7 @@ export function fittedStats(
   const overloaded = conditions?.overloaded ?? false;
   const navFactor = navigationSpeedFactor(level);
   const inertiaFactor = inertiaSkillFactor(level);
-  const mass = fitted.mass + (propulsion ? propulsion.massAddition : 0);
+  const mass = (fitted.mass + (propulsion ? propulsion.massAddition : 0)) * fitted.massMultiplier;
   const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
   const maxSpeed = profile.baseSpeed * fitted.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const inertiaModifier = profile.inertiaModifier * fitted.inertiaMultiplier * inertiaFactor;
@@ -77,6 +77,7 @@ export function maxSpeedForMass(
 function approximateFittedHull(profile: ShipProfile): FittedHull {
   return {
     mass: profile.mass * fittedMassFactor(profile.hullType),
+    massMultiplier: 1,
     speedMultiplier: 1,
     inertiaMultiplier: 1,
     sigMultiplier: 1,
