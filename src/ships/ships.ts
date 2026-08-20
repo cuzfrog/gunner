@@ -13,7 +13,7 @@ import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipP
 
 export type { ShipNameLanguage } from "./shipNames";
 export type { ShipStats } from "./effectiveStats";
-export type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
+export type { FittedHull, HullTier, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
 export interface HullView {
   readonly name: string;
