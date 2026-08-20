@@ -1,9 +1,11 @@
 import {
   effectiveStats,
+  findShipProfileByName,
   fittedMassFactor,
   fittingOptions,
   isPropulsionId,
   SHIP_PROFILES,
+  shipDisplayName,
   type PropulsionId,
   type PropulsionModule,
   type ShipProfile,
@@ -448,6 +450,8 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.populateHullDatalist();
+    this.refreshHullInputs();
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
     this.setPlaying(this.playing);
@@ -632,18 +636,14 @@ export class DomControls implements Controls {
 
   private populateHullDatalist(): void {
     const datalist = this.els.hullOptions as HTMLDataListElement;
+    const language = this.i18n.current();
     datalist.innerHTML = "";
     for (const profile of SHIP_PROFILES) {
       const option = document.createElement("option");
-      option.value = profile.name;
+      option.value = shipDisplayName(profile.name, language);
       option.label = `${profile.hullType} · ${profile.faction}`;
       datalist.appendChild(option);
     }
-  }
-
-  private findProfileByName(name: string): ShipProfile | undefined {
-    const normalized = name.trim().toLowerCase();
-    return SHIP_PROFILES.find((p) => p.name.toLowerCase() === normalized);
   }
 
   private findPropulsionModule(profile: ShipProfile, id: string): PropulsionModule | undefined {
@@ -661,7 +661,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerProfile = profile;
     else this.targetProfile = profile;
 
-    (this.els[`${side}Hull`] as HTMLInputElement).value = profile.name;
+    (this.els[`${side}Hull`] as HTMLInputElement).value = shipDisplayName(profile.name, this.i18n.current());
     this.setHullValidation(side, false);
     this.renderPropulsionOptions(side, propulsionId);
 
@@ -702,7 +702,7 @@ export class DomControls implements Controls {
       this.clearHull(side, true, false);
       return;
     }
-    const profile = this.findProfileByName(hullName);
+    const profile = findShipProfileByName(hullName);
     if (!profile) {
       this.clearHull(side, true, false);
       return;
@@ -712,7 +712,7 @@ export class DomControls implements Controls {
 
   private onHullInput(side: "attacker" | "target"): void {
     const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
-    const profile = this.findProfileByName(value);
+    const profile = findShipProfileByName(value);
     if (profile) {
       this.applyProfile(side, profile, true);
     } else {
@@ -727,7 +727,7 @@ export class DomControls implements Controls {
       this.clearHull(side, false, true);
       return;
     }
-    const profile = this.findProfileByName(value);
+    const profile = findShipProfileByName(value);
     if (profile) {
       this.applyProfile(side, profile, true);
       return;
@@ -787,6 +787,16 @@ export class DomControls implements Controls {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
     setText(this.els[`${side}HullHint`], text);
+  }
+
+  private refreshHullInputs(): void {
+    const language = this.i18n.current();
+    if (this.attackerProfile) {
+      (this.els.attackerHull as HTMLInputElement).value = shipDisplayName(this.attackerProfile.name, language);
+    }
+    if (this.targetProfile) {
+      (this.els.targetHull as HTMLInputElement).value = shipDisplayName(this.targetProfile.name, language);
+    }
   }
 
   private renderAllPropulsionOptions(): void {

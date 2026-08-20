@@ -39,10 +39,20 @@ class FakeElement {
   checked = false;
   hidden = false;
   textContent = "";
-  innerHTML = "";
+  private _innerHTML = "";
   placeholder = "";
   disabled = false;
   label = "";
+
+  get innerHTML(): string {
+    return this._innerHTML;
+  }
+
+  set innerHTML(value: string) {
+    this._innerHTML = value;
+    this.children = [];
+  }
+
   style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
     setProperty(this: Record<string, string>, name: string, value: string) {
       this[name] = value;
@@ -162,16 +172,19 @@ function asProfile(settings: UserSettings): ProfileSettings {
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
-  options: { selectedProfile?: SelectedProfile | null; hasForeignUrlSettings?: boolean; listProfiles?: string[] } = {},
+  options: { selectedProfile?: SelectedProfile | null; hasForeignUrlSettings?: boolean; listProfiles?: string[]; language?: Language } = {},
 ) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
     compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })),
     findBestDistance: vi.fn(() => 5000),
   });
+  let currentLanguage: Language = options.language ?? "en";
   const i18n = vi.mocked<I18n>({
-    current: vi.fn((): Language => "en"),
-    setLanguage: vi.fn(),
+    current: vi.fn((): Language => currentLanguage),
+    setLanguage: vi.fn((language: Language) => {
+      currentLanguage = language;
+    }),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
@@ -1979,6 +1992,148 @@ describe("DomControls", () => {
       expect(callbacks.onReset).toHaveBeenCalledTimes(1);
       expect(callbacks.onConfigChange).not.toHaveBeenCalled();
       expect(callbacks.onDisplayChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("ship name i18n", () => {
+    test("datalist option values localize per language and revert in English", () => {
+      buildControls(globalThis.document, null, { language: "zh" });
+
+      const options = getFake(globalThis.document, "hull-options").children;
+      const rifter = options.find((o) => o.value === "裂谷级");
+      const merlin = options.find((o) => o.value === "小鹰级");
+      expect(rifter).toBeTruthy();
+      expect(merlin).toBeTruthy();
+
+      getFake(globalThis.document, "lang-en").trigger("click");
+
+      const enOptions = getFake(globalThis.document, "hull-options").children;
+      expect(enOptions.some((o) => o.value === "Rifter")).toBe(true);
+      expect(enOptions.some((o) => o.value === "Merlin")).toBe(true);
+      expect(enOptions.some((o) => o.value === "裂谷级")).toBe(false);
+    });
+
+    test("hull input displays the localized name after loading a profile with a canonical hull", () => {
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh", listProfiles: ["brawler"] });
+      const profile: UserSettings = {
+        version: USER_SETTINGS_VERSION,
+        tracking: 0.32,
+        trackingUnit: "rad",
+        sigRes: "S",
+        optimal: 5000,
+        falloff: 5000,
+        attackerSpeed: 1000,
+        attackerMode: "keepAtRange",
+        attackerRange: 5000,
+        maneuverAggressivity: 1,
+        attackerMass: 1_200_000,
+        attackerInertia: 3,
+        attackerSkillLevel: 5,
+        attackerOverload: true,
+        attackerHull: "Rifter",
+        attackerPropulsion: "mwd-5mn",
+        initialDistance: 5000,
+        targetSpeed: 1000,
+        targetMode: "orbit",
+        targetRange: 5000,
+        targetMass: 10_000_000,
+        targetInertia: 0.45,
+        targetSkillLevel: 5,
+        targetOverload: true,
+        targetSig: 40,
+        simSpeed: 4,
+        language: "en",
+      };
+      settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+      const select = getFake(globalThis.document, "profile-select");
+      select.value = "brawler";
+      select.trigger("change");
+
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("裂谷级");
+    });
+
+    test("language switch refreshes hull inputs and datalist without lighting the SAVE button", () => {
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "en", listProfiles: ["brawler"] });
+      const profile: UserSettings = {
+        version: USER_SETTINGS_VERSION,
+        tracking: 0.32,
+        trackingUnit: "rad",
+        sigRes: "S",
+        optimal: 5000,
+        falloff: 5000,
+        attackerSpeed: 1000,
+        attackerMode: "keepAtRange",
+        attackerRange: 5000,
+        maneuverAggressivity: 1,
+        attackerMass: 1_200_000,
+        attackerInertia: 3,
+        attackerSkillLevel: 5,
+        attackerOverload: true,
+        attackerHull: "Rifter",
+        attackerPropulsion: "mwd-5mn",
+        initialDistance: 5000,
+        targetSpeed: 1000,
+        targetMode: "orbit",
+        targetRange: 5000,
+        targetMass: 10_000_000,
+        targetInertia: 0.45,
+        targetSkillLevel: 5,
+        targetOverload: true,
+        targetSig: 40,
+        simSpeed: 4,
+        language: "en",
+      };
+      settingsStore.loadProfile.mockReturnValue(asProfile(profile));
+
+      const select = getFake(globalThis.document, "profile-select");
+      select.value = "brawler";
+      select.trigger("change");
+
+      const saveButton = getFake(globalThis.document, "profile-save");
+      saveButton.classList.toggle.mockClear();
+
+      getFake(globalThis.document, "attacker-hull").value = "Rifter";
+      getFake(globalThis.document, "attacker-hull").trigger("change");
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+
+      getFake(globalThis.document, "lang-zh").trigger("click");
+
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("裂谷级");
+      const options = getFake(globalThis.document, "hull-options").children;
+      expect(options.some((o) => o.value === "裂谷级")).toBe(true);
+      expect(saveButton.classList.toggle).not.toHaveBeenCalledWith("unsaved", true);
+    });
+
+    test("typing a localized hull name resolves the hull and saveProfile still receives the canonical English attackerHull", () => {
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh" });
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "裂谷级";
+      hullInput.trigger("change");
+
+      expect(hullInput.value).toBe("裂谷级");
+
+      const nameInput = getFake(globalThis.document, "profile-name");
+      nameInput.value = "brawler";
+      nameInput.trigger("input");
+
+      getFake(globalThis.document, "profile-save").trigger("click");
+
+      const [, savedProfile] = settingsStore.saveProfile.mock.calls[0];
+      expect(savedProfile).toMatchObject({ attackerHull: "Rifter" });
+    });
+
+    test("typing a canonical English name in a non-English UI resolves and persists the canonical attackerHull", () => {
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh" });
+      settingsStore.save.mockClear();
+
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+
+      expect(hullInput.value).toBe("裂谷级");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerHull).toBe("Rifter");
     });
   });
 });

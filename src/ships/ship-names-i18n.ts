@@ -1,5 +1,5 @@
 // Generated from CCP Static Data Export (SDE) localization data.
-// Query: SHIP_NAMES[englishName][language] || englishName
+// Query: SHIP_NAMES[englishName]?.[language] || englishName
 
 export const SHIP_NAMES: Readonly<Record<string, Readonly<Record<"en" | "zh" | "ja", string>>>> = {
   "Abaddon": {

@@ -6,11 +6,14 @@ no-new-exports:
   - fitting.ts
   - fittedMass.test.ts
   - fittedMass.ts
-  - index.ts
-  - profiles-i18n.ts
+  - faction-i18n.ts
+  - hull-types-i18n.ts
+  # - index.ts  # Re-exports shipDisplayName, findShipProfileByName, ShipNameLanguage
   - profiles.ts
+  - ship-names-i18n.ts
   - propulsion.test.ts
   - propulsion.ts
+  # - shipNames.ts  # Ship name i18n lookup, cross-boundary utility
   - tiers.test.ts
   - tiers.ts
   - types.ts
@@ -20,4 +23,4 @@ no-new-exports:
 
 # ships
 
-Static ship profile data and propulsion fitting math. Generated `profiles.ts` holds parsed EVE hull statistics; `profiles-i18n.ts` adds Chinese (Simplified) and Japanese localized ship names sourced from the CCP SDE localization data; the other files expose tier mapping, module catalog, fitting eligibility, and effective mass/speed/signature calculations used by the UI controls.
+Static ship profile data and propulsion fitting math. Generated `profiles.ts` holds parsed EVE hull statistics; `ship-names-i18n.ts`, `hull-types-i18n.ts`, and `faction-i18n.ts` provide Chinese (Simplified) and Japanese localized ship, hull type, and faction names sourced from the CCP SDE localization data; the other files expose tier mapping, module catalog, fitting eligibility, and effective mass/speed/signature calculations used by the UI controls.

@@ -5,3 +5,4 @@ export { PROPULSION_MODULES, isPropulsionId } from "./propulsion";
 export { fittingOptions } from "./fitting";
 export { effectiveStats } from "./effectiveStats";
 export { fittedMassFactor } from "./fittedMass";
+export { findShipProfileByName, shipDisplayName, type ShipNameLanguage } from "./shipNames";
