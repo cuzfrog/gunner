@@ -1,14 +1,4 @@
-import {
-  effectiveStats,
-  fittedMassFactor,
-  fittingOptions,
-  isPropulsionId,
-  SHIP_PROFILES,
-  type PropulsionId,
-  type PropulsionModule,
-  type ShipProfile,
-  type SkillLevel,
-} from "../ships";
+import type { PropulsionId, PropulsionModule, ShipProfile, Ships, SkillLevel } from "../ships";
 import {
   SIG_RESOLUTIONS,
   type EngagementFrame,
@@ -20,8 +10,8 @@ import {
   type TurretSpec,
 } from "../sim";
 import type { I18n, Language } from "./i18n";
-import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type SettingsStore, type UserSettings } from "./settings";
-import { TrackingInput } from "./trackingInput";
+import { USER_SETTINGS_VERSION, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -47,6 +37,7 @@ export class DomControls implements Controls {
   private readonly hitChance: HitChance;
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
+  private readonly ships: Ships;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
   private readonly trackingInput: TrackingInput;
@@ -56,24 +47,27 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
-  private selectedProfile: UserSettings | null = null;
+  private selectedProfile: ProfileSettings | null = null;
 
   constructor({
     hitChance,
     i18n,
     settingsStore,
+    ships,
     clipboard,
     location,
   }: {
     hitChance: HitChance;
     i18n: I18n;
     settingsStore: SettingsStore;
+    ships: Ships;
     clipboard: ClipboardProvider;
     location: LocationProvider;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
     this.settingsStore = settingsStore;
+    this.ships = ships;
     this.clipboard = clipboard;
     this.location = location;
     this.trackingInput = new TrackingInput();
@@ -336,7 +330,7 @@ export class DomControls implements Controls {
 
   private propulsionSetting(side: "attacker" | "target"): PropulsionId | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
-    return isPropulsionId(value) ? value : undefined;
+    return this.ships.parsePropulsionId(value);
   }
 
   private loadSettings(settings: UserSettings, selectedName = ""): void {
@@ -403,7 +397,7 @@ export class DomControls implements Controls {
     return SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass];
   }
 
-  private setTrackingUnit(unit: "rad" | "score"): void {
+  private setTrackingUnit(unit: TrackingUnit): void {
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.setUnit(unit, sigResolution);
     (this.els.tracking as HTMLInputElement).value = String(display);
@@ -448,6 +442,10 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.populateHullDatalist();
+    this.refreshHullInputs();
+    this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
+    this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
     this.setPlaying(this.playing);
@@ -498,12 +496,12 @@ export class DomControls implements Controls {
     const name = (this.els.profileName as HTMLInputElement).value.trim();
     const profileName = name || selected;
     if (!profileName) return;
-    const settings = this.getSettings();
-    this.settingsStore.saveProfile(profileName, settings);
-    this.settingsStore.saveSelectedProfile(profileName, settings);
+    const profile = profileSettingsOf(this.getSettings());
+    this.settingsStore.saveProfile(profileName, profile);
+    this.settingsStore.saveSelectedProfile(profileName, profile);
     (this.els.profileName as HTMLInputElement).value = "";
     this.renderProfiles(profileName);
-    this.selectedProfile = settings;
+    this.selectedProfile = profile;
     this.updateSaveButtonState();
   }
 
@@ -512,8 +510,8 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings(profile, name);
-    this.selectedProfile = this.getSettings();
+    this.loadSettings({ ...profile, language: this.i18n.current() }, name);
+    this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
     this.callbacks?.onReset();
@@ -531,13 +529,13 @@ export class DomControls implements Controls {
   private updateSaveButtonState(): void {
     const selected = (this.els.profileSelect as HTMLSelectElement).value;
     const name = (this.els.profileName as HTMLInputElement).value.trim();
-    let saved: UserSettings | null = null;
+    let saved: ProfileSettings | null = null;
     if (name && name !== selected) {
       saved = this.settingsStore.loadProfile(name);
     } else if (selected) {
       saved = this.selectedProfile;
     }
-    const current = this.getSettings();
+    const current = profileSettingsOf(this.getSettings());
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
     (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
   }
@@ -632,23 +630,14 @@ export class DomControls implements Controls {
 
   private populateHullDatalist(): void {
     const datalist = this.els.hullOptions as HTMLDataListElement;
+    const language = this.i18n.current();
     datalist.innerHTML = "";
-    for (const profile of SHIP_PROFILES) {
+    for (const view of this.ships.hulls(language)) {
       const option = document.createElement("option");
-      option.value = profile.name;
-      option.label = `${profile.hullType} · ${profile.faction}`;
+      option.value = view.name;
+      option.label = `${view.hullType} · ${view.faction}`;
       datalist.appendChild(option);
     }
-  }
-
-  private findProfileByName(name: string): ShipProfile | undefined {
-    const normalized = name.trim().toLowerCase();
-    return SHIP_PROFILES.find((p) => p.name.toLowerCase() === normalized);
-  }
-
-  private findPropulsionModule(profile: ShipProfile, id: string): PropulsionModule | undefined {
-    if (!isPropulsionId(id)) return undefined;
-    return fittingOptions(profile).find((m) => m.id === id);
   }
 
   private applyHull(
@@ -661,7 +650,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerProfile = profile;
     else this.targetProfile = profile;
 
-    (this.els[`${side}Hull`] as HTMLInputElement).value = profile.name;
+    (this.els[`${side}Hull`] as HTMLInputElement).value = this.ships.hullView(profile, this.i18n.current()).name;
     this.setHullValidation(side, false);
     this.renderPropulsionOptions(side, propulsionId);
 
@@ -702,7 +691,7 @@ export class DomControls implements Controls {
       this.clearHull(side, true, false);
       return;
     }
-    const profile = this.findProfileByName(hullName);
+    const profile = this.ships.findHull(hullName);
     if (!profile) {
       this.clearHull(side, true, false);
       return;
@@ -712,7 +701,7 @@ export class DomControls implements Controls {
 
   private onHullInput(side: "attacker" | "target"): void {
     const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
-    const profile = this.findProfileByName(value);
+    const profile = this.ships.findHull(value);
     if (profile) {
       this.applyProfile(side, profile, true);
     } else {
@@ -727,7 +716,7 @@ export class DomControls implements Controls {
       this.clearHull(side, false, true);
       return;
     }
-    const profile = this.findProfileByName(value);
+    const profile = this.ships.findHull(value);
     if (profile) {
       this.applyProfile(side, profile, true);
       return;
@@ -752,14 +741,14 @@ export class DomControls implements Controls {
 
   private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
-    return isPropulsionId(value) ? value : undefined;
+    return this.ships.parsePropulsionId(value);
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const id = this.currentPropulsionId(side);
     if (!profile || !id) return undefined;
-    return this.findPropulsionModule(profile, id);
+    return this.ships.fittingOption(profile, id);
   }
 
   private onPropulsionChange(side: "attacker" | "target"): void {
@@ -782,11 +771,22 @@ export class DomControls implements Controls {
       setText(this.els[`${side}HullHint`], "");
       return;
     }
-    let text = `${profile.hullType} · ${profile.faction}`;
+    const view = this.ships.hullView(profile, this.i18n.current());
+    let text = `${view.hullType} · ${view.faction}`;
     if (side === "target" && module?.kind === "microwarpdrive") {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
     setText(this.els[`${side}HullHint`], text);
+  }
+
+  private refreshHullInputs(): void {
+    const language = this.i18n.current();
+    if (this.attackerProfile) {
+      (this.els.attackerHull as HTMLInputElement).value = this.ships.hullView(this.attackerProfile, language).name;
+    }
+    if (this.targetProfile) {
+      (this.els.targetHull as HTMLInputElement).value = this.ships.hullView(this.targetProfile, language).name;
+    }
   }
 
   private renderAllPropulsionOptions(): void {
@@ -808,7 +808,8 @@ export class DomControls implements Controls {
 
     let selected = "";
     if (profile) {
-      const modules = fittingOptions(profile);
+      const modules = this.ships.fittingOptions(profile);
+      const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
       select.disabled = modules.length === 0;
       group.classList.toggle("disabled", modules.length === 0);
       const moduleDisabled = modules.length === 0;
@@ -825,7 +826,7 @@ export class DomControls implements Controls {
           button.setAttribute("aria-disabled", "false");
         }
       }
-      selected = modules.some((m) => m.id === selectedId) ? selectedId : (modules[0]?.id ?? "");
+      selected = selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId) ? selectedPropulsionId : (modules[0]?.id ?? "");
     } else {
       this.createPlaceholderButton(group);
     }
@@ -842,12 +843,11 @@ export class DomControls implements Controls {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
 
-    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
-    const module = this.findPropulsionModule(profile, select.value);
+    const module = this.currentPropulsionModule(side);
     const conditions = this.skillConditions(side);
 
     if (updateMass || updateInertia || (side === "target" && updateSig)) {
-      const stats = effectiveStats(profile, module, conditions);
+      const stats = this.ships.effectiveStats(profile, module, conditions);
       if (updateMass) {
         (this.els[`${side}Mass`] as HTMLInputElement).value = String(stats.mass);
       }
@@ -859,28 +859,19 @@ export class DomControls implements Controls {
       }
     }
 
-    const speed = this.computeSpeedFromMass(side);
+    const speed = this.ships.maxSpeedForMass(profile, num(this.els[`${side}Mass`]), module, conditions);
     (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     this.updateHullHint(side, module);
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    if (!profile || !this.currentPropulsionModule(side)) return;
-    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(this.computeSpeedFromMass(side));
-  }
-
-  private computeSpeedFromMass(side: "attacker" | "target"): number {
-    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    if (!profile) return 0;
-    const activeMass = num(this.els[`${side}Mass`]);
-    const conditions = this.skillConditions(side);
+    if (!profile) return;
     const module = this.currentPropulsionModule(side);
-    if (!module) return effectiveStats(profile, undefined, conditions).maxSpeed;
-    const factor = fittedMassFactor(profile.hullType);
-    const shipMass = Math.max(0, (activeMass - module.massAddition * module.activeMassMultiplier) / factor);
-    const adjustedProfile: ShipProfile = { ...profile, mass: shipMass };
-    return effectiveStats(adjustedProfile, module, conditions).maxSpeed;
+    const conditions = this.skillConditions(side);
+    const mass = num(this.els[`${side}Mass`]);
+    const speed = this.ships.maxSpeedForMass(profile, mass, module, conditions);
+    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
   }
 
   private skillConditions(side: "attacker" | "target"): { skillLevel: SkillLevel; overloaded: boolean } {
@@ -1141,8 +1132,13 @@ function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
 }
 
-function settingsEqual(a: UserSettings, b: UserSettings): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+function profileSettingsOf(settings: UserSettings): ProfileSettings {
+  const { language: _, ...rest } = settings;
+  return rest;
+}
+
+function settingsEqual(a: ProfileSettings, b: ProfileSettings): boolean {
+  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
 }
 
 function formatWithCommas(value: number, decimals = 0): string {

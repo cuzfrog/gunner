@@ -1,5 +1,6 @@
+import type { PropulsionId, Ships } from "../ships";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
-import { LocalSettingsStore, USER_SETTINGS_VERSION, type UserSettings } from "./settings";
+import { LocalSettingsStore, USER_SETTINGS_VERSION, type ProfileSettings, type UserSettings } from "./settings";
 
 const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
@@ -49,6 +50,13 @@ const URL_SETTINGS: UserSettings = {
   language: "ja",
 };
 
+function profileFrom(settings: UserSettings): ProfileSettings {
+  const { language: _, ...rest } = settings;
+  return rest;
+}
+
+const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
+
 function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
   return {
@@ -79,15 +87,39 @@ function fakeClipboard(): ClipboardProvider {
   };
 }
 
+const VALID_PROPULSION_IDS: readonly string[] = ["ab-1mn", "ab-10mn", "ab-100mn", "ab-10000mn", "mwd-5mn", "mwd-50mn", "mwd-500mn", "mwd-50000mn"];
+
+let ships: Ships;
+
+function makeShips(): Ships {
+  return vi.mocked<Ships>({
+    hulls: vi.fn(),
+    hullView: vi.fn(),
+    findHull: vi.fn(),
+    parsePropulsionId: vi.fn((value: unknown) => {
+      if (typeof value !== "string") return undefined;
+      return VALID_PROPULSION_IDS.includes(value) ? (value as PropulsionId) : undefined;
+    }),
+    fittingOptions: vi.fn(),
+    fittingOption: vi.fn(),
+    effectiveStats: vi.fn(),
+    maxSpeedForMass: vi.fn(),
+  });
+}
+
+beforeEach(() => {
+  ships = makeShips();
+});
+
 describe("LocalSettingsStore", () => {
   test("load returns null when storage and url are empty", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("save and load round-trips settings", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     store.save(DEFAULT_SETTINGS);
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
@@ -95,9 +127,9 @@ describe("LocalSettingsStore", () => {
 
   test("load decodes settings from the URL and ignores local storage", () => {
     const storage = fakeStorage();
-    const encoder = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const encoder = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const url = encoder.encodeUrl(URL_SETTINGS);
-    const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation(url) });
     storage.setItem("gunner-settings-v3", JSON.stringify(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual(URL_SETTINGS);
@@ -124,7 +156,7 @@ describe("LocalSettingsStore", () => {
       language: "en",
     };
     storage.setItem("gunner-settings-v5", JSON.stringify(v2));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
@@ -153,13 +185,13 @@ describe("LocalSettingsStore", () => {
       language: "en",
     };
     storage.setItem("gunner-settings-v5", JSON.stringify(v3));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("save and load round-trip v5 with hull and propulsion selections", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const withHull: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerHull: "Rifter",
@@ -176,65 +208,87 @@ describe("LocalSettingsStore", () => {
       "gunner-settings-v5",
       JSON.stringify({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" }),
     );
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load rejects an empty hull name", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, attackerHull: "" }));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("load accepts settings without the optional hull and propulsion fields", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
   test("saveProfile and loadProfile round-trip", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_PROFILE);
     expect(store.listProfiles()).toEqual(["brawler"]);
-    expect(store.loadProfile("brawler")).toEqual(DEFAULT_SETTINGS);
+    expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("saveProfile strips a language field from the stored profile", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_SETTINGS);
+    const raw = storage.getItem("gunner-profiles-v5")!;
+    expect(JSON.parse(raw).brawler).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("loadProfile strips a legacy language field from stored profiles", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-profiles-v5", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
+  });
+
+  test("loadSelectedProfile strips a legacy language field from the baseline", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja" } }));
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadSelectedProfile()).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("deleteProfile removes the profile", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("a", DEFAULT_SETTINGS);
-    store.saveProfile("b", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("a", DEFAULT_PROFILE);
+    store.saveProfile("b", DEFAULT_PROFILE);
     store.deleteProfile("a");
     expect(store.listProfiles()).toEqual(["b"]);
     expect(store.loadProfile("a")).toBeNull();
   });
 
   test("deleteProfile clears the selected profile when it is the deleted one", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_PROFILE);
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual([]);
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("deleteProfile leaves the selected profile alone when it is a different one", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveProfile("brawler", DEFAULT_SETTINGS);
-    store.saveProfile("sniper", DEFAULT_SETTINGS);
-    store.saveSelectedProfile("sniper", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveProfile("brawler", DEFAULT_PROFILE);
+    store.saveProfile("sniper", DEFAULT_PROFILE);
+    store.saveSelectedProfile("sniper", DEFAULT_PROFILE);
     store.deleteProfile("brawler");
     expect(store.listProfiles()).toEqual(["sniper"]);
-    expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_SETTINGS });
+    expect(store.loadSelectedProfile()).toEqual({ name: "sniper", baseline: DEFAULT_PROFILE });
   });
 
   test("encodeUrl and decodeUrl round-trip", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
-    const decodedStore = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) });
+    const decodedStore = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation(url) });
     const decoded = decodedStore.decodeUrl();
     expect(decoded).toEqual(DEFAULT_SETTINGS);
   });
@@ -242,29 +296,29 @@ describe("LocalSettingsStore", () => {
   test("writeUrlToClipboard writes a full URL", async () => {
     const location = fakeLocation("http://localhost/index.html");
     const clipboard = fakeClipboard();
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
     const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS, clipboard);
     expect(ok).toBe(true);
   });
 
   test("writeUrlToClipboard returns false without a clipboard", async () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS);
     expect(ok).toBe(false);
   });
 
   test("decodeUrl rejects invalid settings and does not replace the URL", () => {
     const location = fakeLocation("http://localhost/?c=INVALID");
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
     expect(store.decodeUrl()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
   test("decodeUrl returns valid settings and does not replace the URL", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
     const decodedLocation = fakeLocation(url);
-    const decodedStore = new LocalSettingsStore({ storage: fakeStorage(), location: decodedLocation });
+    const decodedStore = new LocalSettingsStore({ ships, storage: fakeStorage(), location: decodedLocation });
     const decoded = decodedStore.decodeUrl();
     expect(decoded).toEqual(DEFAULT_SETTINGS);
     expect(decodedLocation.href).toBe(url);
@@ -272,16 +326,16 @@ describe("LocalSettingsStore", () => {
 
   test("decodeUrl rejects settings with a non-positive initialDistance", () => {
     const bad = { ...DEFAULT_SETTINGS, initialDistance: 0 };
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const url = store.encodeUrl(bad);
-    const decoded = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    const decoded = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toBeNull();
   });
 
   test("load ignores stored settings with invalid values", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
@@ -289,14 +343,14 @@ describe("LocalSettingsStore", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
     const location = fakeLocation("http://localhost/?c=INVALID");
-    const store = new LocalSettingsStore({ storage, location });
+    const store = new LocalSettingsStore({ ships, storage, location });
     expect(store.load()).toEqual(DEFAULT_SETTINGS);
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
   test("decodeUrl returns null for a malformed c parameter", () => {
     const location = fakeLocation("http://localhost/?c=%25");
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
     expect(store.decodeUrl()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=%25");
   });
@@ -309,7 +363,7 @@ describe("LocalSettingsStore", () => {
     delete partial.targetSkillLevel;
     delete partial.targetOverload;
     storage.setItem("gunner-settings-v5", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toEqual(partial);
   });
 
@@ -318,13 +372,13 @@ describe("LocalSettingsStore", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.gridBrightness;
     storage.setItem("gunner-settings-v5", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toEqual(partial);
   });
 
   test("save and load round-trips a non-default maneuverAggressivity", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const settings: UserSettings = { ...DEFAULT_SETTINGS, maneuverAggressivity: 2.5 };
     store.save(settings);
     expect(store.load()).toEqual(settings);
@@ -335,7 +389,7 @@ describe("LocalSettingsStore", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.maneuverAggressivity;
     storage.setItem("gunner-settings-v5", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toEqual(partial);
   });
 
@@ -343,7 +397,7 @@ describe("LocalSettingsStore", () => {
     const storage = fakeStorage();
     const bad = { ...DEFAULT_SETTINGS, attackerSkillLevel: 6 };
     storage.setItem("gunner-settings-v5", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
@@ -351,13 +405,13 @@ describe("LocalSettingsStore", () => {
     const storage = fakeStorage();
     const bad = { ...DEFAULT_SETTINGS, targetOverload: "yes" };
     storage.setItem("gunner-settings-v5", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
   test("save and load round-trip skill level 0 and unchecked overload", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerSkillLevel: 0,
@@ -371,7 +425,7 @@ describe("LocalSettingsStore", () => {
 
   test("encodeUrl and decodeUrl round-trip skill and overload fields", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerSkillLevel: 0,
@@ -380,13 +434,13 @@ describe("LocalSettingsStore", () => {
       targetOverload: true,
     };
     const url = store.encodeUrl(settings);
-    const decoded = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    const decoded = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toEqual(settings);
   });
 
   test("save and load round-trip a custom gridBrightness", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     const settings: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0.75 };
     store.save(settings);
     expect(store.load()).toEqual(settings);
@@ -397,16 +451,16 @@ describe("LocalSettingsStore", () => {
     const zero: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0 };
     const one: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 1 };
     storage.setItem("gunner-settings-v5", JSON.stringify(zero));
-    expect(new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).load()).toEqual(zero);
+    expect(new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") }).load()).toEqual(zero);
     storage.setItem("gunner-settings-v5", JSON.stringify(one));
-    expect(new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).load()).toEqual(one);
+    expect(new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") }).load()).toEqual(one);
   });
 
   test("load rejects a gridBrightness outside [0, 1]", () => {
     const storage = fakeStorage();
     const bad = { ...DEFAULT_SETTINGS, gridBrightness: 1.5 };
     storage.setItem("gunner-settings-v5", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
@@ -414,8 +468,8 @@ describe("LocalSettingsStore", () => {
     const storage = fakeStorage();
     const different: UserSettings = { ...DEFAULT_SETTINGS, optimal: 9999 };
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
-    const url = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).encodeUrl(different);
-    const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
+    const url = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") }).encodeUrl(different);
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation(url) });
     expect(store.hasForeignUrlSettings()).toBe(true);
     expect(store.load()).toEqual(different);
   });
@@ -423,53 +477,53 @@ describe("LocalSettingsStore", () => {
   test("hasForeignUrlSettings returns false when the URL matches local storage", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
-    const url = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") }).encodeUrl(DEFAULT_SETTINGS);
-    const store = new LocalSettingsStore({ storage, location: fakeLocation(url) });
+    const url = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") }).encodeUrl(DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation(url) });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("hasForeignUrlSettings returns false for an invalid URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/?c=INVALID") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/?c=INVALID") });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("hasForeignUrlSettings returns false when there is no URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v5", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("saveSelectedProfile and loadSelectedProfile round-trip a name and baseline", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     const selected = store.loadSelectedProfile();
-    expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_SETTINGS });
+    expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("clearSelectedProfile removes the stored selection", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    store.saveSelectedProfile("brawler", DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.clearSelectedProfile();
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("saveSelectedProfile rejects an empty name", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    expect(() => store.saveSelectedProfile("", DEFAULT_SETTINGS)).toThrow("selected profile name cannot be empty");
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    expect(() => store.saveSelectedProfile("", DEFAULT_PROFILE)).toThrow("selected profile name cannot be empty");
   });
 
   test("loadSelectedProfile returns null for an invalid baseline", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-selected-profile-v5", JSON.stringify({ name: "brawler", baseline: { version: 2 } }));
-    const store = new LocalSettingsStore({ storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("loadSelectedProfile returns null when no profile is selected", () => {
-    const store = new LocalSettingsStore({ storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ ships, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toBeNull();
   });
 });

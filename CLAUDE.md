@@ -85,6 +85,7 @@ Minimal visibility or public surface of a type or a module. This ensures loose c
 - do not ignore tech debt you encountered, fix them at the end of your current work.
 - avoid worktrees.
 - avoid direct usage of `console`, use our interface abstraction `Console` instead. So that tests can supply a mock console and don't need to mock global objects.
+- do not remove outstanding file or changes, these could be added by the user.
 
 ## Best practices
 - write down your plan before execution (but do not enter plan mode, it will block your further execution).

@@ -1,4 +1,4 @@
-import { vec } from "../math";
+import { Vec2 } from "./vec2";
 import { KinematicsImpl } from "./kinematics";
 import type { ShipState } from "./types";
 
@@ -6,8 +6,8 @@ const kinematics = new KinematicsImpl();
 
 const still: ShipState = {
   id: "attacker",
-  position: vec(0, 0),
-  velocity: vec(0, 0),
+  position: new Vec2(0, 0),
+  velocity: new Vec2(0, 0),
   maxSpeed: 0,
   mass: 1_200_000,
   inertiaModifier: 3,
@@ -19,8 +19,8 @@ const still: ShipState = {
 function ship(pos: [number, number], vel: [number, number]): ShipState {
   return {
     id: "target",
-    position: vec(pos[0], pos[1]),
-    velocity: vec(vel[0], vel[1]),
+    position: new Vec2(pos[0], pos[1]),
+    velocity: new Vec2(vel[0], vel[1]),
     maxSpeed: Math.hypot(vel[0], vel[1]),
     mass: 1_200_000,
     inertiaModifier: 3,

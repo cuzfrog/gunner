@@ -1,4 +1,4 @@
-import { dist, len, vec } from "../math";
+import { Vec2 } from "./vec2";
 import type { Autopilot } from "./autopilot";
 import { SimulationImpl } from "./simulation";
 import type { ShipConfig, SimConfig } from "./types";
@@ -33,9 +33,9 @@ function makeSim(config: SimConfig): SimulationImpl {
 describe("SimulationImpl", () => {
   beforeEach(() => {
     attackerSteering.computeVelocity.mockClear();
-    attackerSteering.computeVelocity.mockImplementation(() => vec(0, 0));
+    attackerSteering.computeVelocity.mockImplementation(() => new Vec2(0, 0));
     targetSteering.computeVelocity.mockClear();
-    targetSteering.computeVelocity.mockImplementation(() => vec(100, 0));
+    targetSteering.computeVelocity.mockImplementation(() => new Vec2(100, 0));
   });
 
   test("step integrates positions by command * dt and advances time with instant dynamics", () => {
@@ -45,9 +45,9 @@ describe("SimulationImpl", () => {
     expect(snapshot.time).toBe(2);
     expect(snapshot.target.position.x).toBeCloseTo(200, 6);
     expect(snapshot.target.position.y).toBeCloseTo(5000, 6);
-    expect(snapshot.attacker.position).toEqual(vec(0, 0));
-    expect(snapshot.attacker.velocity).toEqual(vec(0, 0));
-    expect(snapshot.target.velocity).toEqual(vec(100, 0));
+    expect(snapshot.attacker.position).toEqual(new Vec2(0, 0));
+    expect(snapshot.attacker.velocity).toEqual(new Vec2(0, 0));
+    expect(snapshot.target.velocity).toEqual(new Vec2(100, 0));
   });
 
   test("step integrates with dynamics lag", () => {
@@ -64,24 +64,24 @@ describe("SimulationImpl", () => {
     const sim = makeSim(simConfig("keepAtRange", 2_000_000, 1));
     sim.step(0.1);
     const snapshot = sim.snapshot();
-    expect(len(snapshot.target.velocity)).toBeLessThan(100);
-    expect(len(snapshot.target.velocity)).toBeGreaterThan(0);
+    expect(snapshot.target.velocity.len()).toBeLessThan(100);
+    expect(snapshot.target.velocity.len()).toBeGreaterThan(0);
   });
 
   test("snapshot exposes the commanded velocities produced for the current states", () => {
     const sim = makeSim(simConfig("keepAtRange"));
-    expect(sim.snapshot().commands).toEqual({ attacker: vec(0, 0), target: vec(100, 0) });
+    expect(sim.snapshot().commands).toEqual({ attacker: new Vec2(0, 0), target: new Vec2(100, 0) });
   });
 
   test("snapshot commands are recomputed from the configuration applied by update", () => {
-    attackerSteering.computeVelocity.mockImplementation((ship) => vec(ship.desiredRange, 0));
+    attackerSteering.computeVelocity.mockImplementation((ship) => new Vec2(ship.desiredRange, 0));
     const sim = makeSim(simConfig("keepAtRange"));
     sim.step(1);
     sim.update({
       ...simConfig("keepAtRange"),
       attacker: { ...shipConfig("attacker", "keepAtRange"), desiredRange: 3000 },
     });
-    expect(sim.snapshot().commands.attacker).toEqual(vec(3000, 0));
+    expect(sim.snapshot().commands.attacker).toEqual(new Vec2(3000, 0));
   });
 
   test("reset restores time and initial positions", () => {
@@ -90,37 +90,37 @@ describe("SimulationImpl", () => {
     sim.reset(simConfig("keepAtRange"));
     const snapshot = sim.snapshot();
     expect(snapshot.time).toBe(0);
-    expect(snapshot.target.position).toEqual(vec(0, 5000));
-    expect(snapshot.attacker.position).toEqual(vec(0, 0));
+    expect(snapshot.target.position).toEqual(new Vec2(0, 5000));
+    expect(snapshot.attacker.position).toEqual(new Vec2(0, 0));
   });
 
   test("update keeps time and reapplies parameters without resetting velocity", () => {
-    attackerSteering.computeVelocity.mockImplementation(() => vec(0, 100));
+    attackerSteering.computeVelocity.mockImplementation(() => new Vec2(0, 100));
     const sim = makeSim(simConfig("orbit"));
     sim.step(2);
     const before = sim.snapshot();
-    expect(len(before.attacker.velocity)).toBeGreaterThan(0);
+    expect(before.attacker.velocity.len()).toBeGreaterThan(0);
     sim.update({ ...simConfig("keepAtRange"), attacker: shipConfig("attacker", "keepAtRange"), initialDistance: 3000 });
     const after = sim.snapshot();
-    const beforeDistance = dist(before.attacker.position, before.target.position);
+    const beforeDistance = before.attacker.position.dist(before.target.position);
     expect(after.time).toBe(before.time);
     expect(after.attacker.mode).toBe("keepAtRange");
     expect(after.attacker.position).toEqual(before.attacker.position);
     expect(after.attacker.velocity).toEqual(before.attacker.velocity);
     expect(after.target.position).toEqual(before.target.position);
     expect(after.target.velocity).toEqual(before.target.velocity);
-    expect(dist(after.attacker.position, after.target.position)).toBeCloseTo(beforeDistance, 6);
+    expect(after.attacker.position.dist(after.target.position)).toBeCloseTo(beforeDistance, 6);
   });
 
   test("computes attacker command before target command and passes the current time", () => {
     const order: string[] = [];
     attackerSteering.computeVelocity.mockImplementation((ship) => {
       order.push(ship.id);
-      return vec(0, 0);
+      return new Vec2(0, 0);
     });
     targetSteering.computeVelocity.mockImplementation((ship) => {
       order.push(ship.id);
-      return vec(100, 0);
+      return new Vec2(100, 0);
     });
 
     const sim = makeSim(simConfig("orbit"));

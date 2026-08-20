@@ -1,0 +1,435 @@
+// Generated from CCP Static Data Export (SDE) localization data.
+// Query: HULL_TYPE_NAMES[hullType]?.[language] || hullType
+
+export const HULL_TYPE_NAMES: Readonly<Record<string, Readonly<Record<"en" | "zh" | "ja", string>>>> = {
+  "Assault Frigates": {
+    en: "Assault Frigates",
+    zh: "突击护卫舰",
+    ja: "強襲型フリゲート",
+  },
+  "Black Ops": {
+    en: "Black Ops",
+    zh: "黑隐特勤舰",
+    ja: "秘密工作艦",
+  },
+  "Capital Industrial Ships": {
+    en: "Capital Industrial Ships",
+    zh: "旗舰级工业舰",
+    ja: "採掘支援母艦",
+  },
+  "Carriers": {
+    en: "Carriers",
+    zh: "航空母舰",
+    ja: "艦載機母艦",
+  },
+  "Command Carriers": {
+    en: "Command Carriers",
+    zh: "指挥航母",
+    ja: "指揮型艦載機母艦",
+  },
+  "Command Destroyers": {
+    en: "Command Destroyers",
+    zh: "指挥驱逐舰",
+    ja: "指揮型駆逐艦",
+  },
+  "Command Ships": {
+    en: "Command Ships",
+    zh: "指挥舰",
+    ja: "指揮型巡洋戦艦",
+  },
+  "Corvettes": {
+    en: "Corvettes",
+    zh: "轻型护卫舰",
+    ja: "コルベット艦",
+  },
+  "Covert Ops": {
+    en: "Covert Ops",
+    zh: "隐形特勤舰",
+    ja: "隠密行動艦",
+  },
+  "Dreadnoughts": {
+    en: "Dreadnoughts",
+    zh: "无畏舰",
+    ja: "攻城艦",
+  },
+  "EDENCOM Battleships": {
+    en: "EDENCOM Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "EDENCOM Cruisers": {
+    en: "EDENCOM Cruisers",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "EDENCOM Frigates": {
+    en: "EDENCOM Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Electronic Attack Frigates": {
+    en: "Electronic Attack Frigates",
+    zh: "电子攻击舰",
+    ja: "電子攻撃船",
+  },
+  "Exhumers": {
+    en: "Exhumers",
+    zh: "采掘者",
+    ja: "特化型採掘艦",
+  },
+  "Expedition Command Ships": {
+    en: "Expedition Command Ships",
+    zh: "远征指挥舰",
+    ja: "指揮型探査船",
+  },
+  "Expedition Frigates": {
+    en: "Expedition Frigates",
+    zh: "勘探护卫舰",
+    ja: "長距離フリゲート",
+  },
+  "Faction Battlecruisers": {
+    en: "Faction Battlecruisers",
+    zh: "战斗战列巡洋舰",
+    ja: "戦闘巡洋戦艦",
+  },
+  "Faction Battleships": {
+    en: "Faction Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Faction Cruisers": {
+    en: "Faction Cruisers",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "Faction Destroyers": {
+    en: "Faction Destroyers",
+    zh: "驱逐舰",
+    ja: "駆逐艦",
+  },
+  "Faction Dreadnoughts": {
+    en: "Faction Dreadnoughts",
+    zh: "无畏舰",
+    ja: "攻城艦",
+  },
+  "Faction Frigates": {
+    en: "Faction Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Faction Heavy Drone": {
+    en: "Faction Heavy Drone",
+    zh: "战斗无人机",
+    ja: "戦闘用ドローン",
+  },
+  "Flag Cruiser": {
+    en: "Flag Cruiser",
+    zh: "战地巡洋舰",
+    ja: "指揮巡洋艦",
+  },
+  "Force Auxiliaries": {
+    en: "Force Auxiliaries",
+    zh: "战力辅助舰",
+    ja: "軍事力補強",
+  },
+  "Freighters": {
+    en: "Freighters",
+    zh: "货舰",
+    ja: "超大型輸送艦",
+  },
+  "Haulers": {
+    en: "Haulers",
+    zh: "运载舰",
+    ja: "ハウラー",
+  },
+  "Heavy Assault Cruisers": {
+    en: "Heavy Assault Cruisers",
+    zh: "重型突击巡洋舰",
+    ja: "強襲型巡洋艦",
+  },
+  "Heavy Interdiction Cruisers": {
+    en: "Heavy Interdiction Cruisers",
+    zh: "重型拦截巡洋舰",
+    ja: "ワープ妨害型巡洋艦",
+  },
+  "Industrial Command Ships": {
+    en: "Industrial Command Ships",
+    zh: "工业指挥舰",
+    ja: "指揮型輸送艦",
+  },
+  "Interceptors": {
+    en: "Interceptors",
+    zh: "截击舰",
+    ja: "要撃型フリゲート",
+  },
+  "Interdictors": {
+    en: "Interdictors",
+    zh: "拦截舰",
+    ja: "ワープ妨害型駆逐艦",
+  },
+  "Jump Freighters": {
+    en: "Jump Freighters",
+    zh: "战略货舰",
+    ja: "ジャンプドライブ搭載型輸送艦",
+  },
+  "Lancer Dreadnoughts": {
+    en: "Lancer Dreadnoughts",
+    zh: "枪骑兵级无畏舰",
+    ja: "ランサー攻城艦",
+  },
+  "Logistics Cruisers": {
+    en: "Logistics Cruisers",
+    zh: "后勤舰",
+    ja: "支援型巡洋艦",
+  },
+  "Logistics Frigates": {
+    en: "Logistics Frigates",
+    zh: "后勤护卫舰",
+    ja: "支援型フリゲート",
+  },
+  "Marauders": {
+    en: "Marauders",
+    zh: "掠夺舰",
+    ja: "襲撃型戦艦",
+  },
+  "Mining Barges": {
+    en: "Mining Barges",
+    zh: "采矿驳船",
+    ja: "採掘艦",
+  },
+  "Pirate Faction Battlecruisers": {
+    en: "Pirate Faction Battlecruisers",
+    zh: "战斗战列巡洋舰",
+    ja: "戦闘巡洋戦艦",
+  },
+  "Pirate Faction Battleships": {
+    en: "Pirate Faction Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Pirate Faction Cruisers": {
+    en: "Pirate Faction Cruisers",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "Pirate Faction Destroyers": {
+    en: "Pirate Faction Destroyers",
+    zh: "驱逐舰",
+    ja: "駆逐艦",
+  },
+  "Pirate Faction Dreadnoughts": {
+    en: "Pirate Faction Dreadnoughts",
+    zh: "无畏舰",
+    ja: "攻城艦",
+  },
+  "Pirate Faction Force Auxiliaries": {
+    en: "Pirate Faction Force Auxiliaries",
+    zh: "战力辅助舰",
+    ja: "軍事力補強",
+  },
+  "Pirate Faction Frigates": {
+    en: "Pirate Faction Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Pirate Faction Supercarriers": {
+    en: "Pirate Faction Supercarriers",
+    zh: "超级航母",
+    ja: "大型艦載機母艦",
+  },
+  "Pirate Faction Titans": {
+    en: "Pirate Faction Titans",
+    zh: "泰坦",
+    ja: "タイタン",
+  },
+  "Precursor Battlecruisers": {
+    en: "Precursor Battlecruisers",
+    zh: "战斗战列巡洋舰",
+    ja: "戦闘巡洋戦艦",
+  },
+  "Precursor Battleships": {
+    en: "Precursor Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Precursor Cruisers": {
+    en: "Precursor Cruisers",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "Precursor Destroyers": {
+    en: "Precursor Destroyers",
+    zh: "驱逐舰",
+    ja: "駆逐艦",
+  },
+  "Precursor Dreadnoughts": {
+    en: "Precursor Dreadnoughts",
+    zh: "无畏舰",
+    ja: "攻城艦",
+  },
+  "Precursor Frigates": {
+    en: "Precursor Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Recon Ships": {
+    en: "Recon Ships",
+    zh: "力场侦察舰",
+    ja: "軍事偵察船",
+  },
+  "Shuttles": {
+    en: "Shuttles",
+    zh: "穿梭机",
+    ja: "シャトル",
+  },
+  "Special Edition Assault Frigates": {
+    en: "Special Edition Assault Frigates",
+    zh: "突击护卫舰",
+    ja: "強襲型フリゲート",
+  },
+  "Special Edition Battlecruisers": {
+    en: "Special Edition Battlecruisers",
+    zh: "攻击战列巡洋舰",
+    ja: "強襲巡洋戦艦",
+  },
+  "Special Edition Battleships": {
+    en: "Special Edition Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Special Edition Black Ops": {
+    en: "Special Edition Black Ops",
+    zh: "黑隐特勤舰",
+    ja: "秘密工作艦",
+  },
+  "Special Edition Corvettes": {
+    en: "Special Edition Corvettes",
+    zh: "轻型护卫舰",
+    ja: "コルベット艦",
+  },
+  "Special Edition Covert Ops": {
+    en: "Special Edition Covert Ops",
+    zh: "隐形特勤舰",
+    ja: "隠密行動艦",
+  },
+  "Special Edition Cruisers": {
+    en: "Special Edition Cruisers",
+    zh: "特别版游艇",
+    ja: "特別版ヨット",
+  },
+  "Special Edition Destroyers": {
+    en: "Special Edition Destroyers",
+    zh: "驱逐舰",
+    ja: "駆逐艦",
+  },
+  "Special Edition Electronic Attack Ships": {
+    en: "Special Edition Electronic Attack Ships",
+    zh: "电子攻击舰",
+    ja: "電子攻撃船",
+  },
+  "Special Edition Frigates": {
+    en: "Special Edition Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Special Edition Heavy Assault Cruisers": {
+    en: "Special Edition Heavy Assault Cruisers",
+    zh: "重型突击巡洋舰",
+    ja: "強襲型巡洋艦",
+  },
+  "Special Edition Heavy Interdiction Cruisers": {
+    en: "Special Edition Heavy Interdiction Cruisers",
+    zh: "重型拦截巡洋舰",
+    ja: "ワープ妨害型巡洋艦",
+  },
+  "Special Edition Industrial Ships": {
+    en: "Special Edition Industrial Ships",
+    zh: "运载舰",
+    ja: "ハウラー",
+  },
+  "Special Edition Interceptors": {
+    en: "Special Edition Interceptors",
+    zh: "截击舰",
+    ja: "要撃型フリゲート",
+  },
+  "Special Edition Logistics Cruisers": {
+    en: "Special Edition Logistics Cruisers",
+    zh: "后勤舰",
+    ja: "支援型巡洋艦",
+  },
+  "Special Edition Recon Ships": {
+    en: "Special Edition Recon Ships",
+    zh: "力场侦察舰",
+    ja: "軍事偵察船",
+  },
+  "Special Edition Ships": {
+    en: "Special Edition Ships",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "Special Edition Ships Battleships": {
+    en: "Special Edition Ships Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Special Edition Shuttles": {
+    en: "Special Edition Shuttles",
+    zh: "穿梭机",
+    ja: "シャトル",
+  },
+  "Special Edition Tactical Destroyers": {
+    en: "Special Edition Tactical Destroyers",
+    zh: "战术驱逐舰",
+    ja: "戦術駆逐艦",
+  },
+  "Standard Battlecruisers": {
+    en: "Standard Battlecruisers",
+    zh: "战斗战列巡洋舰",
+    ja: "戦闘巡洋戦艦",
+  },
+  "Standard Battleships": {
+    en: "Standard Battleships",
+    zh: "战列舰",
+    ja: "戦艦",
+  },
+  "Standard Cruisers": {
+    en: "Standard Cruisers",
+    zh: "巡洋舰",
+    ja: "巡洋艦",
+  },
+  "Standard Destroyers": {
+    en: "Standard Destroyers",
+    zh: "驱逐舰",
+    ja: "駆逐艦",
+  },
+  "Standard Frigates": {
+    en: "Standard Frigates",
+    zh: "护卫舰",
+    ja: "フリゲート",
+  },
+  "Strategic Cruisers": {
+    en: "Strategic Cruisers",
+    zh: "战略巡洋舰",
+    ja: "戦略的巡洋艦",
+  },
+  "Supercarriers": {
+    en: "Supercarriers",
+    zh: "超级航母",
+    ja: "大型艦載機母艦",
+  },
+  "Tactical Destroyers": {
+    en: "Tactical Destroyers",
+    zh: "战术驱逐舰",
+    ja: "戦術駆逐艦",
+  },
+  "Titans": {
+    en: "Titans",
+    zh: "泰坦",
+    ja: "タイタン",
+  },
+  "Transport Ships": {
+    en: "Transport Ships",
+    zh: "深层空间运输舰",
+    ja: "深宇宙用特化型輸送艦",
+  },
+};

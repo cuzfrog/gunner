@@ -15,9 +15,9 @@ no-new-exports:
   - predictiveAutopilot.ts
   - simulation.test.ts
   - simulation.ts
-  - trackingScore.test.ts
-  - trackingScore.ts
   - types.ts
+  - vec2.test.ts
+  - vec2.ts
 ---
 
 

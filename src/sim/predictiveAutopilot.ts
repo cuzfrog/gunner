@@ -1,4 +1,4 @@
-import { add, len, scale, sub, vec, type Vec2 } from "../math";
+import { Vec2 } from "./vec2";
 import type { Autopilot } from "./autopilot";
 import { clampToMaxSpeed, integrateShip } from "./dynamics";
 import type { Kinematics } from "./kinematics";
@@ -48,7 +48,7 @@ export class PredictiveAutopilot implements Autopilot {
   private plan(ship: ShipState, other: ShipState, time: number): Vec2 {
     const horizon = planningHorizon(ship, other);
     const previous = this.heldCommand;
-    let bestCommand = vec(0, 0);
+    let bestCommand = new Vec2(0, 0);
     let bestCost = Number.POSITIVE_INFINITY;
     for (const candidate of candidateCommands(ship, other, previous)) {
       const cost = this.rolloutCost(ship, other, candidate, time, horizon);
@@ -90,12 +90,12 @@ export class PredictiveAutopilot implements Autopilot {
     let currentCost = this.rolloutCost(ship, other, current, time, horizon);
     for (let i = 0; i < REFINEMENT_ITERATIONS; i++) {
       const gradient = this.costGradient(ship, other, current, time, horizon);
-      const gradientLen = len(gradient);
+      const gradientLen = gradient.len();
       if (gradientLen === 0) return current;
       let step = REFINEMENT_INITIAL_STEP;
       let improved = false;
       while (step >= REFINEMENT_MIN_STEP) {
-        const next = clampToMaxSpeed(add(current, scale(gradient, -step / gradientLen)), ship.maxSpeed);
+        const next = clampToMaxSpeed(current.add(gradient.scale(-step / gradientLen)), ship.maxSpeed);
         const nextCost = this.rolloutCost(ship, other, next, time, horizon);
         if (nextCost < currentCost) {
           current = next;
@@ -111,16 +111,16 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   private costGradient(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): Vec2 {
-    const costXPlus = this.rolloutCost(ship, other, add(command, vec(REFINEMENT_PROBE, 0)), time, horizon);
-    const costXMinus = this.rolloutCost(ship, other, add(command, vec(-REFINEMENT_PROBE, 0)), time, horizon);
-    const costYPlus = this.rolloutCost(ship, other, add(command, vec(0, REFINEMENT_PROBE)), time, horizon);
-    const costYMinus = this.rolloutCost(ship, other, add(command, vec(0, -REFINEMENT_PROBE)), time, horizon);
-    return vec((costXPlus - costXMinus) / (2 * REFINEMENT_PROBE), (costYPlus - costYMinus) / (2 * REFINEMENT_PROBE));
+    const costXPlus = this.rolloutCost(ship, other, command.add(new Vec2(REFINEMENT_PROBE, 0)), time, horizon);
+    const costXMinus = this.rolloutCost(ship, other, command.add(new Vec2(-REFINEMENT_PROBE, 0)), time, horizon);
+    const costYPlus = this.rolloutCost(ship, other, command.add(new Vec2(0, REFINEMENT_PROBE)), time, horizon);
+    const costYMinus = this.rolloutCost(ship, other, command.add(new Vec2(0, -REFINEMENT_PROBE)), time, horizon);
+    return new Vec2((costXPlus - costXMinus) / (2 * REFINEMENT_PROBE), (costYPlus - costYMinus) / (2 * REFINEMENT_PROBE));
   }
 }
 
 function planningHorizon(ship: ShipState, other: ShipState): number {
-  const d = Math.max(len(sub(other.position, ship.position)), 0);
+  const d = Math.max(other.position.sub(ship.position).len(), 0);
   if (other.maxSpeed <= 0) {
     if (ship.maxSpeed <= 0) return MAX_HORIZON;
     const radialError = Math.abs(d - ship.desiredRange);
@@ -159,20 +159,20 @@ function candidateCommands(ship: ShipState, other: ShipState, previous: Vec2 | n
   if (previous !== null) {
     candidates.push(previous);
   }
-  const opponentSpeed = len(other.velocity);
+  const opponentSpeed = other.velocity.len();
   if (opponentSpeed > 0) {
-    candidates.push(clampToMaxSpeed(scale(other.velocity, ship.maxSpeed / opponentSpeed), ship.maxSpeed));
+    candidates.push(clampToMaxSpeed(other.velocity.scale(ship.maxSpeed / opponentSpeed), ship.maxSpeed));
   }
-  const toOther = sub(other.position, ship.position);
-  const toOtherDistance = len(toOther);
+  const toOther = other.position.sub(ship.position);
+  const toOtherDistance = toOther.len();
   if (toOtherDistance > 0) {
-    const toOtherHat = scale(toOther, 1 / toOtherDistance);
-    candidates.push(scale(toOtherHat, ship.maxSpeed));
-    candidates.push(scale(toOtherHat, -ship.maxSpeed));
+    const toOtherHat = toOther.scale(1 / toOtherDistance);
+    candidates.push(toOtherHat.scale(ship.maxSpeed));
+    candidates.push(toOtherHat.scale(-ship.maxSpeed));
   }
   for (let i = 0; i < DIRECTION_COUNT; i++) {
     const angle = (2 * Math.PI * i) / DIRECTION_COUNT;
-    candidates.push(vec(ship.maxSpeed * Math.cos(angle), ship.maxSpeed * Math.sin(angle)));
+    candidates.push(new Vec2(ship.maxSpeed * Math.cos(angle), ship.maxSpeed * Math.sin(angle)));
   }
   return candidates;
 }

@@ -1,5 +1,4 @@
-import { vec } from "../math";
-import type { EngagementFrame, HitChance, HitChanceBreakdown, Kinematics, ShipConfig, ShipState, SimConfig, Simulation, SimSnapshot, TurretSpec } from "../sim";
+import { Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type Kinematics, type ShipConfig, type ShipState, type SimConfig, type Simulation, type SimSnapshot, type TurretSpec } from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
@@ -29,8 +28,8 @@ const loop = vi.mocked<Loop>({
 
 const ship: ShipState = {
   id: "attacker",
-  position: vec(0, 0),
-  velocity: vec(0, 0),
+  position: new Vec2(0, 0),
+  velocity: new Vec2(0, 0),
   maxSpeed: 0,
   mass: 1_200_000,
   inertiaModifier: 3,
@@ -38,16 +37,16 @@ const ship: ShipState = {
   desiredRange: 5000,
   aggressivity: 1,
 };
-const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship, commands: { attacker: vec(0, 0), target: vec(0, 0) } };
+const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship, commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) } };
 const frame: EngagementFrame = {
   time: 0,
   attacker: ship,
   target: ship,
-  relPosition: vec(0, 5000),
+  relPosition: new Vec2(0, 5000),
   distance: 5000,
-  relVelocity: vec(0, 0),
+  relVelocity: new Vec2(0, 0),
   radialVelocity: 0,
-  transversalVelocity: vec(0, 0),
+  transversalVelocity: new Vec2(0, 0),
   transversalSpeed: 0,
   angularVelocity: 0,
 };

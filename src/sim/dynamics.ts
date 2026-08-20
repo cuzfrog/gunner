@@ -1,4 +1,4 @@
-import { add, len, scale, sub, vec, type Vec2 } from "../math";
+import type { Vec2 } from "./vec2";
 import type { ShipState } from "./types";
 
 export interface ShipMotion {
@@ -17,19 +17,19 @@ export function integrateShip(state: ShipState, commandedVelocity: Vec2, dt: num
   }
   const tau = timeConstant(state.mass, state.inertiaModifier);
   if (tau <= 0) {
-    return { position: add(state.position, scale(clampedCommand, dt)), velocity: clampedCommand };
+    return { position: state.position.add(clampedCommand.scale(dt)), velocity: clampedCommand };
   }
   const e = Math.exp(-dt / tau);
-  const dv = sub(state.velocity, clampedCommand);
+  const dv = state.velocity.sub(clampedCommand);
   return {
-    velocity: add(clampedCommand, scale(dv, e)),
-    position: add(state.position, add(scale(clampedCommand, dt), scale(dv, tau * (1 - e)))),
+    velocity: clampedCommand.add(dv.scale(e)),
+    position: state.position.add(clampedCommand.scale(dt).add(dv.scale(tau * (1 - e)))),
   };
 }
 
 export function clampToMaxSpeed(velocity: Vec2, maxSpeed: number): Vec2 {
   const budget = Math.max(0, maxSpeed);
-  const speed = len(velocity);
+  const speed = velocity.len();
   if (speed <= budget) return velocity;
-  return scale(velocity, budget / speed);
+  return velocity.scale(budget / speed);
 }

@@ -2,6 +2,7 @@ import { createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { App } from "./app";
 import type { Autopilot, HitChance, Kinematics, SimConfig, Simulation } from "./sim";
 import type { Controls, Loop, Renderer } from "./ui";
+import type { Ships } from "./ships";
 
 export interface AppCradle {
   canvas: HTMLCanvasElement;
@@ -11,6 +12,7 @@ export interface AppCradle {
   kinematics: Kinematics;
   hitChance: HitChance;
   simulation: Simulation;
+  ships: Ships;
   controls: Controls;
   renderer: Renderer;
   loop: Loop;

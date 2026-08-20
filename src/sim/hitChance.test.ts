@@ -1,4 +1,4 @@
-import { vec } from "../math";
+import { Vec2 } from "./vec2";
 import { HitChanceImpl } from "./hitChance";
 import type { EngagementFrame, ShipState, TurretSpec } from "./types";
 
@@ -13,8 +13,8 @@ const defaultTurret: TurretSpec = {
 
 const dummyShip: ShipState = {
   id: "target",
-  position: vec(0, 0),
-  velocity: vec(0, 0),
+  position: new Vec2(0, 0),
+  velocity: new Vec2(0, 0),
   maxSpeed: 0,
   mass: 1_200_000,
   inertiaModifier: 3,
@@ -28,11 +28,11 @@ function frame(distance: number, angularVelocity: number): EngagementFrame {
     time: 0,
     attacker: dummyShip,
     target: dummyShip,
-    relPosition: vec(distance, 0),
+    relPosition: new Vec2(distance, 0),
     distance,
-    relVelocity: vec(0, 0),
+    relVelocity: new Vec2(0, 0),
     radialVelocity: 0,
-    transversalVelocity: vec(0, angularVelocity * distance),
+    transversalVelocity: new Vec2(0, angularVelocity * distance),
     transversalSpeed: angularVelocity * distance,
     angularVelocity,
   };
