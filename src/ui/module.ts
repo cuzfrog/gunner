@@ -4,6 +4,7 @@ import { I18nImpl } from "./i18n";
 import { RafLoop } from "./loop";
 import { LocalSettingsStore } from "./settings";
 import { CanvasRenderer } from "./renderer";
+import { DefaultTimer } from "./timer";
 
 export function registerUiModule(cradle: AwilixContainer<object>): void {
   cradle.register({
@@ -12,5 +13,6 @@ export function registerUiModule(cradle: AwilixContainer<object>): void {
     settingsStore: asClass(LocalSettingsStore).singleton(),
     renderer: asClass(CanvasRenderer).singleton(),
     loop: asClass(RafLoop).singleton(),
+    timer: asClass(DefaultTimer).singleton(),
   });
 }

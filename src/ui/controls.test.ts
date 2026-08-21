@@ -6,6 +6,7 @@ import type { I18n, Language } from "./i18n";
 import { serializeProfile } from "./profileText";
 import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
+import type { Timer } from "./timer";
 
 const DEFAULT_INPUTS: Record<string, string> = {
   tracking: "0.32",
@@ -433,6 +434,15 @@ function createMockPresetFittings() {
   });
 }
 
+function createNoOpTimer(): Timer {
+  return {
+    setTimeout: (_callback, _ms) => 1,
+    clearTimeout: () => {},
+    setInterval: (_callback, _ms) => 0,
+    clearInterval: () => {},
+  };
+}
+
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
@@ -472,8 +482,9 @@ function buildControls(
   const presetFittings = createMockPresetFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, controls };
+  const timer = createNoOpTimer();
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, timer });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, timer, controls };
 }
 
 describe("DomControls", () => {
@@ -1166,6 +1177,18 @@ describe("DomControls", () => {
     langZh.trigger("click");
 
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("Skill 5");
+  });
+
+  test("profile tip displays the first active hint on load", () => {
+    buildControls(globalThis.document);
+    expect(getFake(globalThis.document, "profile-tip").textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+  });
+
+  test("language change refreshes the profile hint", () => {
+    buildControls(globalThis.document);
+    const langZh = getFake(globalThis.document, "lang-zh");
+    langZh.trigger("click");
+    expect(getFake(globalThis.document, "profile-tip").textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
   });
 
   test("update colors the hit chance value based on chance", () => {

@@ -254,10 +254,10 @@ export const I18N_DICTIONARY = {
     zh: "选择预设装配...",
     ja: "プリセットフィッティングを選択...",
   },
-  "profile.tip": {
-    en: "If you like this tool, may consider tip me in the game, thank you!",
-    zh: "如果喜欢这个工具，可以在游戏中打赏我，谢谢！",
-    ja: "このツールが気に入ったら、ゲーム内でチップをくれると嬉しいです、ありがとう！",
+  "hint.prefix": {
+    en: "Do you know?",
+    zh: "你知道吗？",
+    ja: "知っていますか？",
   },
   "status.copied": {
     en: "Copied",

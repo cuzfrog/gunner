@@ -15,6 +15,9 @@ import type { I18n, Language } from "./i18n";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
+import { HintRotator, type IHintRotator } from "./hintRotator";
+import { HINT_CANDIDATES } from "./hints";
+import type { TimeoutId, Timer } from "./timer";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -45,11 +48,13 @@ export class DomControls implements Controls {
   private readonly presetFittings: PresetFittings;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
+  private readonly timer: Timer;
   private readonly trackingInput: TrackingInput;
+  private readonly hintRotator: IHintRotator;
   private callbacks?: ControlsCallbacks;
   private playing = false;
-  private shareStatusTimeout?: ReturnType<typeof setTimeout>;
-  private readonly importHintTimeouts: { attacker?: ReturnType<typeof setTimeout>; target?: ReturnType<typeof setTimeout> } = { attacker: undefined, target: undefined };
+  private shareStatusTimeout?: TimeoutId;
+  private readonly importHintTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
@@ -71,6 +76,7 @@ export class DomControls implements Controls {
     presetFittings,
     clipboard,
     location,
+    timer,
   }: {
     hitChance: HitChance;
     i18n: I18n;
@@ -80,6 +86,7 @@ export class DomControls implements Controls {
     presetFittings: PresetFittings;
     clipboard: ClipboardProvider;
     location: LocationProvider;
+    timer: Timer;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
@@ -89,7 +96,15 @@ export class DomControls implements Controls {
     this.presetFittings = presetFittings;
     this.clipboard = clipboard;
     this.location = location;
+    this.timer = timer;
     this.trackingInput = new TrackingInput();
+    this.hintRotator = new HintRotator({
+      element: el("profile-tip"),
+      i18n,
+      candidates: HINT_CANDIDATES,
+      timer,
+      intervalMs: 60_000,
+    });
     this.els = {
       tracking: el("tracking"),
       trackingUnitRad: el("tracking-unit-rad"),
@@ -432,6 +447,7 @@ export class DomControls implements Controls {
     this.updateGridBrightnessDisplay();
     this.updateAlignTime("attacker");
     this.updateAlignTime("target");
+    this.hintRotator.refresh();
     this.persist();
   }
 
@@ -507,6 +523,7 @@ export class DomControls implements Controls {
     this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
+    this.hintRotator.refresh();
     this.setPlaying(this.playing);
     this.persist();
     this.updateSaveButtonState();
@@ -698,7 +715,7 @@ export class DomControls implements Controls {
     element.classList.toggle("error", isError);
     element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
-    this.importHintTimeouts[side] = setTimeout(() => {
+    this.importHintTimeouts[side] = this.timer.setTimeout(() => {
       this.importHintTimeouts[side] = undefined;
       this.clearImportHint(side);
     }, 5000);
@@ -715,7 +732,7 @@ export class DomControls implements Controls {
   private clearImportHintTimeout(side: "attacker" | "target"): void {
     const timeout = this.importHintTimeouts[side];
     if (timeout) {
-      clearTimeout(timeout);
+      this.timer.clearTimeout(timeout);
       this.importHintTimeouts[side] = undefined;
     }
   }
@@ -731,8 +748,8 @@ export class DomControls implements Controls {
 
   private showProfileStatus(key: string): void {
     setText(this.els.shareStatus, this.i18n.t(key));
-    if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
-    this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
+    if (this.shareStatusTimeout) this.timer.clearTimeout(this.shareStatusTimeout);
+    this.shareStatusTimeout = this.timer.setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
   private bind(): void {

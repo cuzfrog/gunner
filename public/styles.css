@@ -647,11 +647,21 @@ canvas {
 }
 
 .profile-tip {
+  display: inline-block;
   margin-left: auto;
   color: var(--accent-blue);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 1.4em;
+  line-height: 1.4em;
+  vertical-align: bottom;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.profile-tip.hint-exit {
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 .author-portrait {

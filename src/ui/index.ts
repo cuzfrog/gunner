@@ -6,3 +6,4 @@ export type { Renderer } from "./renderer";
 export type { SettingsStore, UserSettings, StorageProvider, LocationProvider, ClipboardProvider } from "./settings";
 export { ClipboardUnavailableError } from "./settings";
 export { registerUiModule } from "./module";
+export type { Timer } from "./timer";
