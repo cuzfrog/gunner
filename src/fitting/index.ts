@@ -1,5 +1,8 @@
 export type { FittingDb, FittingImport, ImportedFitting, ImportedTurret } from "./fittingImport";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
 export type { PresetFitting, PresetFittings } from "./presetFittings";
+export { describeFitting } from "./fittingSummary";
+export type { FittingRow, FittingSection, FittingSummary } from "./fittingSummary";
+export type { ModuleSlot } from "./moduleSlots";
 export { ITEM_ICON_IDS } from "./iconIds";
 export { registerFittingModule } from "./module";

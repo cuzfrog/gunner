@@ -34,6 +34,7 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     chargeSize: 1,
     charge: "Titanium Sabot S",
     base: { tracking: 0.315, optimal: 600, falloff: 3000 },
+    moduleName: "150mm Railgun I",
     ...overrides,
   };
 }
@@ -121,6 +122,7 @@ describe("ChargeCatalogImpl", () => {
     expect(next.base).toEqual(base.base);
     expect(next.sigResolutionClass).toBe("S");
     expect(next.chargeSize).toBe(1);
+    expect(next.moduleName).toBe(base.moduleName);
   });
 
   test("withCharge returns input unchanged for unknown charge", () => {

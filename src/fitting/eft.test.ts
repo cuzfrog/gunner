@@ -93,6 +93,19 @@ EMP S x1000
     expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
   });
 
+  test("parses a second quantity block as drones", () => {
+    const text = `[Rifter, Drones]
+1MN Afterburner I
+
+EMP S x1000
+
+Hobgoblin I x3`;
+    const parsed = parseEft(text);
+    expect(parsed!.modules).toEqual([{ name: "1MN Afterburner I", offline: false }]);
+    expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
+    expect(parsed!.drones).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+  });
+
   test("drops lines that match nothing", () => {
     const text = `[Rifter, Garbage]
 1MN Afterburner I

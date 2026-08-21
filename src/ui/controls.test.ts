@@ -143,7 +143,16 @@ const IMPORTED_RIFTER: ImportedFitting = {
   fittingName: "Brawler",
   fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
   propulsion: { ...MWD5MN, propulsionId: "mwd-5mn", propulsionName: "5MN Microwarpdrive I" },
-  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000, chargeSize: 1, charge: "Hail S", base: { tracking: 0.42, optimal: 1200, falloff: 3000 } },
+  turret: {
+    tracking: 0.315,
+    sigResolutionClass: "S",
+    optimal: 600,
+    falloff: 3000,
+    chargeSize: 1,
+    charge: "Hail S",
+    base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
+    moduleName: "200mm AutoCannon I",
+  },
   cargoCharges: [],
 };
 
@@ -152,7 +161,16 @@ const IMPORTED_THRASHER: ImportedFitting = {
   fittingName: "Sniper",
   fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
   propulsion: undefined,
-  turret: { tracking: 0.12, sigResolutionClass: "S", optimal: 9843.75, falloff: 10937.5, chargeSize: 1, charge: "Republic Fleet EMP S", base: { tracking: 0.12, optimal: 19687.5, falloff: 10937.5 } },
+  turret: {
+    tracking: 0.12,
+    sigResolutionClass: "S",
+    optimal: 9843.75,
+    falloff: 10937.5,
+    chargeSize: 1,
+    charge: "Republic Fleet EMP S",
+    base: { tracking: 0.12, optimal: 19687.5, falloff: 10937.5 },
+    moduleName: "280mm Howitzer Artillery I",
+  },
   cargoCharges: [],
 };
 
@@ -3922,6 +3940,7 @@ const ctx = buildControls(globalThis.document);
         chargeSize: 1,
         charge: "Republic Fleet EMP S",
         base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
+        moduleName: "200mm AutoCannon I",
       };
       ctx.chargeCatalog.chargesForSize.mockReturnValue([
         { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },

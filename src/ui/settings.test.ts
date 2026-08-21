@@ -125,7 +125,16 @@ const IMPORTED_RIFTER: ImportedFitting = {
   fittingName: "Brawler",
   fitted: RIFTER_FITTED,
   propulsion: RIFTER_PROPULSION,
-  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000, chargeSize: 1, charge: "Hail S", base: { tracking: 0.42, optimal: 1200, falloff: 3000 } },
+  turret: {
+    tracking: 0.315,
+    sigResolutionClass: "S",
+    optimal: 600,
+    falloff: 3000,
+    chargeSize: 1,
+    charge: "Hail S",
+    base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
+    moduleName: "200mm AutoCannon I",
+  },
   cargoCharges: [],
 };
 

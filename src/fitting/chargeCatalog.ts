@@ -15,6 +15,7 @@ export interface ImportedTurret {
   readonly chargeSize: number;
   readonly charge: string;
   readonly base: ImportedTurretBase;
+  readonly moduleName: string;
 }
 
 export interface CargoCharge {

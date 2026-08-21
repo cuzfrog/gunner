@@ -207,6 +207,7 @@ function resolveTurret(
   const falloffPercents: number[] = [];
   let turret: TurretStats | undefined;
   let chargeName: string | undefined;
+  let moduleName: string | undefined;
 
   for (const line of parsed.modules) {
     if (line.offline) continue;
@@ -215,6 +216,7 @@ function resolveTurret(
     if (lineTurret && !turret) {
       turret = lineTurret;
       chargeName = line.charge;
+      moduleName = line.name;
       continue;
     }
 
@@ -265,6 +267,7 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     charge: selectedCharge,
     base,
+    moduleName: moduleName ?? "Unknown Turret",
   };
 }
 

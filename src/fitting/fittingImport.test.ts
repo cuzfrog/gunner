@@ -319,6 +319,7 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.turret).toBeDefined();
+    expect(result!.turret!.moduleName).toBe("Heavy Pulse Laser II");
     expect(result!.turret!.charge).toBe("Conflagration M");
     expect(result!.turret!.chargeSize).toBe(2);
     expect(result!.turret!.optimal).toBe(12_600 * 0.5);
