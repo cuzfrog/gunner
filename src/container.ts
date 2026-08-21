@@ -3,7 +3,7 @@ import type { App } from "./app";
 import type { Autopilot, HitChance, Kinematics, SimConfig, Simulation } from "./sim";
 import type { ClipboardProvider, Controls, LocationProvider, Loop, Renderer, SavedFittings, StorageProvider, Timer } from "./ui";
 import type { Ships } from "./ships";
-import type { FittingDb, FittingImport, PresetFittings } from "./fitting";
+import type { ChargeCatalog, FittingDb, FittingImport, PresetFittings } from "./fitting";
 
 export interface AppCradle {
   canvas: HTMLCanvasElement;
@@ -19,6 +19,7 @@ export interface AppCradle {
   loop: Loop;
   app: App;
   fittingDb: FittingDb;
+  chargeCatalog: ChargeCatalog;
   fittingImport: FittingImport;
   presetFittings: PresetFittings;
   storage: StorageProvider;

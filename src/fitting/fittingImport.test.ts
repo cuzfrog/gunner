@@ -1,4 +1,5 @@
 import type { PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
+import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, _applyStackingPenalty, type FittingDb } from "./fittingImport";
 
 const profile: ShipProfile = {
@@ -120,6 +121,8 @@ const hullBonusDb: FittingDb = {
   },
 };
 
+const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db });
+
 const conditions: StatConditions = { skillLevel: 0, overloaded: false };
 
 const skillConditions: StatConditions = { skillLevel: 4, overloaded: false };
@@ -136,18 +139,18 @@ describe("FittingImportImpl", () => {
   });
 
   test("returns undefined for non-EFT text", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     expect(importer.importFitting("not a fitting", conditions)).toBeUndefined();
   });
 
   test("returns undefined when hull is unknown", () => {
     ships.findHull.mockReturnValue(undefined);
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     expect(importer.importFitting("[Unknown Hull, fit]\n5MN Microwarpdrive I", conditions)).toBeUndefined();
   });
 
   test("resolves hull and fitting name", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting("[Harbinger, Brawler]\n5MN Microwarpdrive I", conditions);
     expect(result).toBeDefined();
     expect(result!.profile).toBe(profile);
@@ -155,7 +158,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("sums flat mass from plates without bulkhead item mass fallback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Tank]\n1600mm Steel Plates II\nReinforced Bulkheads II`,
       conditions,
@@ -165,14 +168,14 @@ describe("FittingImportImpl", () => {
   });
 
   test("adds shield extender signature radius", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
     expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.fitted.sigMultiplier).toBe(1);
   });
 
   test("applies stacking penalty to two agility modules", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
@@ -184,7 +187,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("two inertial stabilizers apply stacking-penalized signature bonus", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
       conditions,
@@ -196,7 +199,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("three trimarks stack-penalize agility drawback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Armor]\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -207,7 +210,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("shield extender rig multiplies signature by 1.1", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(`[Harbinger, Shield Rig]\nMedium Core Defense Field Extender I`, conditions);
     const expected = _applyStackingPenalty([1.1]);
     expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
@@ -215,7 +218,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and trimarks share the same agility stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\nInertial Stabilizers II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -225,7 +228,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and shield rig share the same signature stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Sig Rig]\nInertial Stabilizers II\nMedium Core Defense Field Extender I`,
       conditions,
@@ -235,13 +238,13 @@ describe("FittingImportImpl", () => {
   });
 
   test("overdrive applies speed bonus percent", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Heavy]\nMedium Higgs Anchor I\n1600mm Steel Plates II`,
       conditions,
@@ -253,7 +256,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("maps exact propulsion to a generic propulsion id", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, AB]\n100MN Y-S8 Compact Afterburner`,
       conditions,
@@ -265,7 +268,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("skips unknown module names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\n1600mm Steel Plates II\nUnknown module that does not exist\nMedium Shield Extender II`,
       conditions,
@@ -275,41 +278,79 @@ describe("FittingImportImpl", () => {
   });
 
   test("resolves the first turret and charge", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M\nMedium Shield Extender II`,
       conditions,
     );
     expect(result!.turret).toBeDefined();
+    expect(result!.turret!.charge).toBe("Conflagration M");
+    expect(result!.turret!.chargeSize).toBe(2);
     expect(result!.turret!.optimal).toBe(12_600 * 0.5);
     expect(result!.turret!.falloff).toBe(5_000);
     expect(result!.turret!.sigResolutionClass).toBe("M");
-    expect(result!.turret!.tracking).toBe((26 * 0.7 * 125) / 40_000);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 125) / 40_000, 10);
+    expect(result!.turret!.base.optimal).toBe(12_600);
+    expect(result!.turret!.base.falloff).toBe(5_000);
+    expect(result!.turret!.base.tracking).toBeCloseTo((26 * 125) / 40_000, 10);
   });
 
   test("turret skill level scales tracking, optimal and falloff", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M`,
       skillConditions,
     );
-    expect(result!.turret!.tracking).toBe((26 * 0.7 * 1.2 * 125) / 40_000);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 1.2 * 125) / 40_000, 10);
     expect(result!.turret!.optimal).toBe(12_600 * 0.5 * 1.2);
     expect(result!.turret!.falloff).toBe(5_000 * 1.2);
   });
 
-  test("turret without charge uses base stats", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+  test("turret without loaded charge selects the usual ammo", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II\nHeavy Pulse Laser II, Conflagration M`,
       conditions,
     );
-    expect(result!.turret!.optimal).toBe(12_600);
-    expect(result!.turret!.tracking).toBe((26 * 125) / 40_000);
+    expect(result!.turret!.charge).toBe("Conflagration M");
+    expect(result!.turret!.chargeSize).toBe(2);
+    expect(result!.turret!.optimal).toBe(12_600 * 0.5);
+    expect(result!.turret!.falloff).toBe(5_000);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 125) / 40_000, 10);
+    expect(result!.turret!.base.optimal).toBe(12_600);
+    expect(result!.turret!.base.falloff).toBe(5_000);
+    expect(result!.turret!.base.tracking).toBeCloseTo((26 * 125) / 40_000, 10);
+  });
+
+  test("unknown loaded charge is replaced by the usual ammo", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Lasers]\nHeavy Pulse Laser II, Mjolnir Rocket`,
+      conditions,
+    );
+    expect(result!.turret!.charge).toBe("Conflagration M");
+    expect(result!.turret!.optimal).toBe(12_600 * 0.5);
+    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 125) / 40_000, 10);
+  });
+
+  test("cargoCharges filters cargo to known charges in EFT order", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Lasers]
+Heavy Pulse Laser II, Conflagration M
+Mjolnir Rocket x400
+EMP S x2000
+Conflagration M x100`,
+      conditions,
+    );
+    expect(result!.cargoCharges).toEqual([
+      { name: "EMP S", quantity: 2000 },
+      { name: "Conflagration M", quantity: 100 },
+    ]);
   });
 
   test("three metastasis rigs stack-penalize tracking", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Rigs]
 Heavy Pulse Laser II, Conflagration M
@@ -325,7 +366,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("tracking enhancer, tracking computer and rig share one stacking chain per attribute", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Tracking]
 Heavy Pulse Laser II, Conflagration M
@@ -343,7 +384,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("tracking speed script doubles tracking and zeros range bonuses from a tracking computer", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Scripted]
 Heavy Pulse Laser II, Conflagration M
@@ -356,7 +397,7 @@ Tracking Computer II, Tracking Speed Script`,
   });
 
   test("offline turret line is skipped and a later online turret is resolved", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Offline]\nHeavy Pulse Laser II /OFFLINE\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -366,7 +407,7 @@ Tracking Computer II, Tracking Speed Script`,
   });
 
   test("all-offline propulsion is not applied", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Harbinger, Offline]\n100MN Y-S8 Compact Afterburner /OFFLINE\n5MN Microwarpdrive I /OFFLINE`,
       conditions,
@@ -376,7 +417,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("maps small turret to S sig resolution class", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
     const result = importer.importFitting(
       `[Rifter, AC]\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -387,7 +428,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("skill-scaled hull velocity and agility bonuses apply", () => {
     ships.findHull.mockReturnValueOnce(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog });
     const result = importer.importFitting("[Vagabond, Bonuses]\n200mm AutoCannon II, EMP S", skillConditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.2, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.84, 6);
@@ -395,7 +436,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("hull velocity and agility bonuses are flat without a skill", () => {
     ships.findHull.mockReturnValueOnce(roleBonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog });
     const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
@@ -403,7 +444,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("hull turret bonuses match turret skill and share the module stacking chain", () => {
     ships.findHull.mockReturnValueOnce(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog });
     const result = importer.importFitting(
       `[Vagabond, Turrets]
 200mm AutoCannon II, EMP S

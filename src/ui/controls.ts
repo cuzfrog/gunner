@@ -10,7 +10,7 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
-import type { FittingImport, ImportedFitting, PresetFittings } from "../fitting";
+import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
 import type { SavedFittings } from "./savedFittings";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
@@ -51,6 +51,7 @@ export class DomControls implements Controls {
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
   private readonly timer: Timer;
+  private readonly chargeCatalog: ChargeCatalog;
   private readonly trackingInput: TrackingInput;
   private readonly hintRotator: IHintRotator;
   private callbacks?: ControlsCallbacks;
@@ -60,6 +61,11 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private openFittingSide: "attacker" | "target" | null = null;
+  private openAmmo = false;
+  private attackerAmmo = "";
+  private attackerTurret?: ImportedTurret;
+  private attackerCargoCharges: readonly CargoCharge[] = [];
+  private attackerAmmoAllExpanded = false;
   private lastCommittedHull: { attacker?: string; target?: string } = {};
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
@@ -82,6 +88,7 @@ export class DomControls implements Controls {
     clipboard,
     location,
     timer,
+    chargeCatalog,
   }: {
     hitChance: HitChance;
     i18n: I18n;
@@ -93,6 +100,7 @@ export class DomControls implements Controls {
     clipboard: ClipboardProvider;
     location: LocationProvider;
     timer: Timer;
+    chargeCatalog: ChargeCatalog;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
@@ -104,6 +112,8 @@ export class DomControls implements Controls {
     this.clipboard = clipboard;
     this.location = location;
     this.timer = timer;
+    this.chargeCatalog = chargeCatalog;
+    this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.trackingInput = new TrackingInput();
     this.hintRotator = new HintRotator({
       element: el("profile-tip"),
@@ -120,6 +130,15 @@ export class DomControls implements Controls {
       sigResOptions: el("sig-res-options"),
       optimal: el("optimal"),
       falloff: el("falloff"),
+      attackerAmmoField: el("attacker-ammo-field"),
+      attackerAmmoTrigger: el("attacker-ammo-trigger"),
+      attackerAmmoSummary: el("attacker-ammo-summary"),
+      attackerAmmoPopup: el("attacker-ammo-popup"),
+      attackerAmmoCargoLabel: el("attacker-ammo-cargo-label"),
+      attackerAmmoCargoList: el("attacker-ammo-cargo-list"),
+      attackerAmmoExpand: el("attacker-ammo-expand"),
+      attackerAmmoAllSection: el("attacker-ammo-all-section"),
+      attackerAmmoAllList: el("attacker-ammo-all-list"),
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
       attackerFittingTrigger: el("attacker-fitting-trigger"),
@@ -208,6 +227,7 @@ export class DomControls implements Controls {
       gridBrightnessValue: el("grid-brightness-value"),
     };
 
+    this.renderAttackerAmmo();
     this.populateHullDatalist();
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
@@ -405,6 +425,7 @@ export class DomControls implements Controls {
       targetFitting: this.targetFitting,
       targetOverrides: this.targetOverrides,
       targetFittedHull: this.targetFittedHull,
+      attackerAmmo: this.attackerAmmo,
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
@@ -420,6 +441,7 @@ export class DomControls implements Controls {
     this.attackerOverrides = settings.attackerOverrides ?? {};
     this.targetFitting = settings.targetFitting;
     this.targetOverrides = settings.targetOverrides ?? {};
+    this.attackerAmmo = settings.attackerAmmo;
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -456,6 +478,8 @@ export class DomControls implements Controls {
     this.setOverloadActive("target", settings.targetOverload ?? true);
     this.setOverloadDisabled("attacker");
     this.setOverloadDisabled("target");
+
+    this.restoreAttackerTurret();
 
     if (settings.attackerFittedHull) {
       this.restoreFittingSummary("attacker", settings.attackerFittedHull);
@@ -611,7 +635,7 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings({ ...profile, language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
+    this.loadSettings({ ...profile, attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1), language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
     this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
@@ -701,7 +725,7 @@ export class DomControls implements Controls {
     }
     this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
     this.applyImportedFitting(side, this.fittedHullSummary(imported));
-    if (side === "attacker") this.applyImportedTurret(imported.turret);
+    if (side === "attacker") this.applyImportedTurret(imported);
     if (persist) {
       this.lastCommittedHull[side] = imported.profile.name;
       this.persist();
@@ -732,7 +756,20 @@ export class DomControls implements Controls {
   private profileFromText(text: string): UserSettings | undefined {
     const parsed = parseProfile(text.trimStart());
     if (!parsed) return undefined;
-    return { ...parsed, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+    const ammo = this.resolveProfileAmmo(parsed);
+    return { ...parsed, attackerAmmo: ammo, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+  }
+
+  private resolveProfileAmmo(parsed: ProfileSettings): string {
+    if (parsed.attackerAmmo) return parsed.attackerAmmo;
+    if (parsed.attackerFitting) {
+      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
+        skillLevel: parsed.attackerSkillLevel ?? 5,
+        overloaded: parsed.attackerOverload ?? true,
+      });
+      if (imported?.turret) return imported.turret.charge;
+    }
+    return this.chargeCatalog.usualForChargeSize(1);
   }
 
   private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
@@ -814,6 +851,8 @@ export class DomControls implements Controls {
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
     (this.els.attackerFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("attacker"));
+    (this.els.attackerAmmoTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleAttackerAmmoPopup());
+    (this.els.attackerAmmoExpand as HTMLButtonElement).addEventListener("click", () => this.onAttackerAmmoExpandClick());
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
     (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
     (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
@@ -932,6 +971,7 @@ export class DomControls implements Controls {
     if (this.openFittingSide !== null) this.closeAllFittingPopups();
     this.closeAllSkillPopups();
     this.closeAllPastePopups();
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
     this.openFittingPopup(side);
   }
 
@@ -1074,6 +1114,7 @@ export class DomControls implements Controls {
     }
     this.updateFittingTrigger(side, false);
     if (this.openFittingSide === side) this.closeFittingPopup(side);
+    if (side === "attacker" && this.openAmmo) this.closeAttackerAmmoPopup();
     this.updateHullHint(side);
     this.renderPropulsionOptions(side);
     if (persist) {
@@ -1088,6 +1129,12 @@ export class DomControls implements Controls {
       this.attackerFittedHull = undefined;
       this.attackerFitting = undefined;
       this.attackerOverrides = {};
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.attackerAmmoAllExpanded = false;
+      (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+      this.renderAttackerAmmo();
     } else {
       this.targetFittedHull = undefined;
       this.targetFitting = undefined;
@@ -1190,15 +1237,221 @@ export class DomControls implements Controls {
     this.updateHullHint(side, this.currentFittedPropulsionModule(side, summary));
   }
 
-  private applyImportedTurret(turret: ImportedFitting["turret"]): void {
-    if (!turret) return;
+  private clearAttackerTurretOverrides(): void {
+    delete this.attackerOverrides.tracking;
+    delete this.attackerOverrides.sigRes;
+    delete this.attackerOverrides.optimal;
+    delete this.attackerOverrides.falloff;
+  }
+
+  private renderAttackerAmmo(): void {
+    const field = this.els.attackerAmmoField as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    const summary = this.els.attackerAmmoSummary as HTMLElement;
+    const hasTurret = this.attackerTurret !== undefined;
+    field.hidden = !hasTurret;
+    trigger.disabled = !hasTurret;
+    setText(summary, hasTurret ? this.attackerAmmo : "—");
+    if (!hasTurret) return;
+    this.renderAttackerAmmoCargoList();
+    this.renderAttackerAmmoAllList();
+    this.renderAttackerAmmoExpand();
+  }
+
+  private renderAttackerAmmoCargoList(): void {
+    const list = this.els.attackerAmmoCargoList as HTMLElement;
+    const label = this.els.attackerAmmoCargoLabel as HTMLElement;
+    list.innerHTML = "";
+    if (!this.attackerTurret) {
+      list.hidden = true;
+      label.hidden = true;
+      return;
+    }
+    const entries = this.ammoCargoEntries();
+    if (entries.length === 0) {
+      list.hidden = true;
+      label.hidden = true;
+      return;
+    }
+    list.hidden = false;
+    label.hidden = false;
+    for (const entry of entries) {
+      const item = this.createAmmoItem(entry.name, entry.name === this.attackerAmmo, this.i18n.t("button.selectAmmo"));
+      if (entry.quantity !== undefined) {
+        const quantity = document.createElement("span");
+        quantity.className = "ammo-item-quantity";
+        quantity.textContent = `x${entry.quantity}`;
+        item.appendChild(quantity);
+      }
+      item.addEventListener("click", () => this.onAttackerAmmoItemClick(entry.name));
+      list.appendChild(item);
+    }
+  }
+
+  private ammoCargoEntries(): { name: string; quantity?: number }[] {
+    const loaded = this.attackerAmmo;
+    const inCargo = this.attackerCargoCharges.some((c) => c.name === loaded);
+    const entries: { name: string; quantity?: number }[] = [];
+    if (!inCargo) entries.push({ name: loaded });
+    for (const charge of this.attackerCargoCharges) {
+      entries.push({ name: charge.name, quantity: charge.quantity });
+    }
+    return entries;
+  }
+
+  private renderAttackerAmmoAllList(): void {
+    const list = this.els.attackerAmmoAllList as HTMLElement;
+    const section = this.els.attackerAmmoAllSection as HTMLElement;
+    list.innerHTML = "";
+    if (!this.attackerTurret) {
+      list.hidden = true;
+      return;
+    }
+    const options = this.chargeCatalog.chargesForSize(this.attackerTurret.chargeSize);
+    if (options.length === 0) {
+      list.hidden = true;
+      return;
+    }
+    list.hidden = false;
+    for (const option of options) {
+      const item = this.createAmmoItem(option.name, option.name === this.attackerAmmo, chargeStatSuffix(option));
+      item.addEventListener("click", () => this.onAttackerAmmoItemClick(option.name));
+      list.appendChild(item);
+    }
+    section.hidden = !this.attackerAmmoAllExpanded;
+  }
+
+  private createAmmoItem(name: string, selected: boolean, title: string): HTMLButtonElement {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "ammo-item";
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(selected));
+    item.title = title;
+    const label = document.createElement("span");
+    label.className = "ammo-item-name";
+    label.textContent = name;
+    label.title = name;
+    item.appendChild(label);
+    return item;
+  }
+
+  private renderAttackerAmmoExpand(): void {
+    const expand = this.els.attackerAmmoExpand as HTMLButtonElement;
+    const key = this.attackerAmmoAllExpanded ? "ammo.hideAll" : "ammo.showAll";
+    expand.setAttribute("data-i18n", key);
+    setText(expand, this.i18n.t(key));
+  }
+
+  private onAttackerAmmoItemClick(name: string): void {
+    if (this.applyAttackerAmmo(name)) this.closeAttackerAmmoPopup();
+  }
+
+  private toggleAttackerAmmoPopup(): void {
+    if (this.openAmmo) {
+      this.closeAttackerAmmoPopup();
+      return;
+    }
+    this.closeAllSkillPopups();
+    this.closeAllPastePopups();
+    this.closeAllFittingPopups();
+    this.openAttackerAmmoPopup();
+  }
+
+  private openAttackerAmmoPopup(): void {
+    if (!this.attackerTurret) return;
+    const popup = this.els.attackerAmmoPopup as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.openAmmo = true;
+    this.renderAttackerAmmo();
+    const selected =
+      ((this.els.attackerAmmoCargoList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null) ??
+      ((this.els.attackerAmmoAllList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null);
+    (selected ?? (this.els.attackerAmmoCargoList as HTMLElement).firstElementChild as HTMLButtonElement | null)?.focus();
+  }
+
+  private closeAttackerAmmoPopup(): void {
+    const popup = this.els.attackerAmmoPopup as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    this.openAmmo = false;
+    trigger.focus();
+  }
+
+  private onAttackerAmmoExpandClick(): void {
+    this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
+    this.renderAttackerAmmo();
+  }
+
+  private applyAttackerAmmo(name: string): boolean {
+    if (!this.attackerTurret) return false;
+    const updated = this.chargeCatalog.withCharge(this.attackerTurret, name);
+    if (updated === this.attackerTurret) return false;
+    this.attackerTurret = updated;
+    this.attackerAmmo = updated.charge;
+    this.clearAttackerTurretOverrides();
+    this.setTurretInputs(updated);
+    this.renderAttackerAmmo();
+    this.persist();
+    this.callbacks?.onConfigChange();
+    return true;
+  }
+
+  private setTurretInputs(turret: ImportedTurret): void {
     const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
-    this.trackingInput.setRadValue(turret.tracking, sigResolution);
-    (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
-    this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
-    (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
-    (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
+    if (this.attackerOverrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    if (this.attackerOverrides.sigRes === undefined) {
+      (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
+      this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
+    }
+    if (this.attackerOverrides.optimal === undefined) (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
+    if (this.attackerOverrides.falloff === undefined) (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
     this.displayTrackingInput();
+  }
+
+  private restoreAttackerTurret(): void {
+    this.attackerAmmoAllExpanded = false;
+    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    if (!this.attackerFitting || !this.attackerProfile) {
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.renderAttackerAmmo();
+      return;
+    }
+    const imported = this.fittingImport.importFitting(this.attackerFitting, this.skillConditions("attacker"));
+    if (!imported?.turret) {
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.renderAttackerAmmo();
+      return;
+    }
+    const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
+    this.attackerTurret = restored;
+    this.attackerCargoCharges = imported.cargoCharges;
+    this.attackerAmmo = restored.charge;
+    this.setTurretInputs(restored);
+    this.renderAttackerAmmo();
+  }
+
+  private applyImportedTurret(imported: ImportedFitting): void {
+    const turret = imported.turret;
+    if (!turret) {
+      (this.els.attackerAmmoField as HTMLElement).hidden = true;
+      return;
+    }
+    this.attackerTurret = turret;
+    this.attackerCargoCharges = imported.cargoCharges;
+    this.attackerAmmo = turret.charge;
+    this.attackerAmmoAllExpanded = false;
+    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    this.clearAttackerTurretOverrides();
+    this.setTurretInputs(turret);
+    this.renderAttackerAmmo();
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
@@ -1437,6 +1690,9 @@ export class DomControls implements Controls {
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
     this.updateShipStats(side, { updateInertia, updateMass: false, updateSig: false });
+    if (side === "attacker" && this.attackerProfile && this.attackerFitting) {
+      this.restoreAttackerTurret();
+    }
     this.updateSaveButtonState();
     this.persist();
     if (side === "attacker" && !this.attackerProfile) return;
@@ -1476,6 +1732,7 @@ export class DomControls implements Controls {
     if (this.openSkillSide !== null && this.openSkillSide !== side) {
       this.closeSkillPopup(this.openSkillSide);
     }
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
     this.openSkillPopup(side);
   }
 
@@ -1505,6 +1762,7 @@ export class DomControls implements Controls {
 
   private openPastePopup(side: "attacker" | "target"): void {
     if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
     const popup = this.els[`${side}PastePopup`] as HTMLElement;
     const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
     popup.hidden = false;
@@ -1533,7 +1791,7 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null) return;
+    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && !this.openAmmo) return;
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function") return;
     if (this.openSkillSide !== null) {
@@ -1548,6 +1806,10 @@ export class DomControls implements Controls {
       const side = this.openFittingSide;
       const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull`);
       if (!insideFitting) this.closeAllFittingPopups();
+    }
+    if (this.openAmmo) {
+      const insideAmmo = target.closest("#attacker-ammo-field");
+      if (!insideAmmo) this.closeAttackerAmmoPopup();
     }
   }
 
@@ -1567,6 +1829,9 @@ export class DomControls implements Controls {
       const side = this.openFittingSide;
       this.closeFittingPopup(side);
       (this.els[`${side}FittingTrigger`] as HTMLButtonElement).focus();
+    }
+    if (this.openAmmo) {
+      this.closeAttackerAmmoPopup();
     }
   }
 
@@ -1767,4 +2032,16 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function chargeStatSuffix(option: ChargeOption): string {
+  const parts = [`range x${formatMultiplier(option.rangeMultiplier)}`, `track x${formatMultiplier(option.trackingMultiplier)}`];
+  if (option.falloffMultiplier !== 1) {
+    parts.splice(1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
+  }
+  return parts.join(" · ");
+}
+
+function formatMultiplier(value: number): string {
+  return String(Number(value.toFixed(2)));
 }

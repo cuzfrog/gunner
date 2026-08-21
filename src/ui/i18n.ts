@@ -259,6 +259,36 @@ export const I18N_DICTIONARY = {
     zh: "选择装配",
     ja: "フィッティングを選択",
   },
+  "button.selectAmmo": {
+    en: "Select ammunition",
+    zh: "选择弹药",
+    ja: "弾薬を選択",
+  },
+  "label.ammo": {
+    en: "Ammo",
+    zh: "弹药",
+    ja: "弾薬",
+  },
+  "ammo.cargoGroup": {
+    en: "In cargo",
+    zh: "货舱内",
+    ja: "カーゴ内",
+  },
+  "ammo.allGroup": {
+    en: "All charges",
+    zh: "全部弹药",
+    ja: "全弾薬",
+  },
+  "ammo.showAll": {
+    en: "Show all",
+    zh: "显示全部",
+    ja: "すべて表示",
+  },
+  "ammo.hideAll": {
+    en: "Show less",
+    zh: "收起",
+    ja: "折りたたむ",
+  },
   "fitting.savedGroup": {
     en: "Saved",
     zh: "已保存",
@@ -273,6 +303,11 @@ export const I18N_DICTIONARY = {
     en: "No fittings for this ship.",
     zh: "该舰船没有装配。",
     ja: "この艦船のフィッティングはありません。",
+  },
+  "ammo.empty": {
+    en: "No ammunition available.",
+    zh: "没有可用的弹药。",
+    ja: "利用可能な弾薬がありません。",
   },
   "button.deleteFitting": {
     en: "Delete fitting",

@@ -1,6 +1,6 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionStats, Ships, SkillLevel } from "../ships";
-import type { FittingImport } from "../fitting";
+import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Language } from "./i18n";
 import type { TrackingUnit } from "./trackingInput";
 
@@ -63,11 +63,12 @@ export interface UserSettings {
   targetOverrides?: Partial<ProfileParamOverrides>;
   attackerFittedHull?: FittedHullSummary;
   targetFittedHull?: FittedHullSummary;
+  attackerAmmo: string;
   simSpeed: number;
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit">;
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "attackerAmmo"> & { attackerAmmo?: string };
 
 export interface StorageProvider {
   getItem(key: string): string | null;
@@ -114,35 +115,38 @@ const MIGRATED_SETTINGS_KEY = "gunner-settings-v5";
 const MIGRATED_PROFILES_KEY = "gunner-profiles-v5";
 const MIGRATED_SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
 const URL_PARAM = "c";
+const DEFAULT_TURRET_CHARGE_SIZE = 1;
 
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
+  private readonly chargeCatalog: ChargeCatalog;
 
   constructor({
     storage,
     location,
     ships,
     fittingImport,
+    chargeCatalog,
   }: {
     storage: StorageProvider;
     location: LocationProvider;
     ships: Ships;
     fittingImport: FittingImport;
+    chargeCatalog: ChargeCatalog;
   }) {
     this.storage = storage;
     this.location = location;
     this.ships = ships;
     this.fittingImport = fittingImport;
+    this.chargeCatalog = chargeCatalog;
   }
 
   load(): UserSettings | null {
     const urlSettings = this.decodeUrl();
     if (urlSettings) return this.applyFittingBasis(urlSettings);
-    const local = this.loadLocalSettings();
-    if (local) return this.applyFittingBasis(local);
     return null;
   }
 
@@ -255,6 +259,9 @@ export class LocalSettingsStore implements SettingsStore {
       const parsed: unknown = JSON.parse(raw);
       if (!this.isUserSettings(parsed)) return null;
       parsed.version = USER_SETTINGS_VERSION;
+      if (parsed.attackerAmmo === undefined) {
+        parsed.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+      }
       return parsed;
     } catch {
       return null;
@@ -326,6 +333,7 @@ export class LocalSettingsStore implements SettingsStore {
       isOptionalFittingText(s.targetFitting) &&
       isOptionalProfileParamOverrides(s.attackerOverrides) &&
       isOptionalProfileParamOverrides(s.targetOverrides) &&
+      isOptionalNonEmptyString(s.attackerAmmo) &&
       isPositive(s.simSpeed)
     );
   }
@@ -337,6 +345,9 @@ export class LocalSettingsStore implements SettingsStore {
   private toProfileSettings(value: unknown): ProfileSettings | null {
     if (!this.isProfileSettings(value)) return null;
     const withVersion = { ...value, version: USER_SETTINGS_VERSION };
+    if (withVersion.attackerAmmo === undefined) {
+      withVersion.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+    }
     return stripDisplayPreferences(withVersion);
   }
 
@@ -405,10 +416,15 @@ export class LocalSettingsStore implements SettingsStore {
       result.targetSig = override.targetSig ?? stats.sigRadius;
     }
     if (side === "attacker" && imported.turret) {
-      result.tracking = override.tracking ?? imported.turret.tracking;
-      result.sigRes = override.sigRes ?? imported.turret.sigResolutionClass;
-      result.optimal = override.optimal ?? imported.turret.optimal;
-      result.falloff = override.falloff ?? imported.turret.falloff;
+      const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
+      const storedAmmo = settings.attackerAmmo;
+      const valid = options.some((c) => c.name === storedAmmo);
+      const turret = valid ? this.chargeCatalog.withCharge(imported.turret, storedAmmo) : imported.turret;
+      result.tracking = override.tracking ?? turret.tracking;
+      result.sigRes = override.sigRes ?? turret.sigResolutionClass;
+      result.optimal = override.optimal ?? turret.optimal;
+      result.falloff = override.falloff ?? turret.falloff;
+      result.attackerAmmo = turret.charge;
     }
     return result;
   }

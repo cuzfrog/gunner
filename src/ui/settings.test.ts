@@ -1,7 +1,15 @@
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships } from "../ships";
-import type { FittingImport, ImportedFitting } from "../fitting";
+import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./settings";
 import { LocalSettingsStore, USER_SETTINGS_VERSION, type FittedHullSummary, type ProfileSettings, type UserSettings } from "./settings";
+
+function base64Url(value: unknown): string {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function urlFor(value: unknown): string {
+  return `http://localhost/?c=${base64Url(value)}`;
+}
 
 const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
@@ -28,6 +36,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   targetSkillLevel: 5,
   targetOverload: true,
   targetSig: 40,
+  attackerAmmo: "Hail S",
   simSpeed: 4,
   language: "en",
 };
@@ -111,7 +120,8 @@ const IMPORTED_RIFTER: ImportedFitting = {
   fittingName: "Brawler",
   fitted: RIFTER_FITTED,
   propulsion: RIFTER_PROPULSION,
-  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
+  turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000, chargeSize: 1, charge: "Hail S", base: { tracking: 0.42, optimal: 1200, falloff: 3000 } },
+  cargoCharges: [],
 };
 
 function fakeStorage(): StorageProvider {
@@ -149,9 +159,18 @@ const VALID_PROPULSION_IDS: readonly string[] = ["ab-1mn", "ab-10mn", "ab-100mn"
 
 let ships: Ships;
 let fittingImport: FittingImport;
+let chargeCatalog: ChargeCatalog;
 
 function makeFittingImport(): FittingImport {
   return vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+}
+
+function makeChargeCatalog(): ChargeCatalog {
+  return vi.mocked<ChargeCatalog>({
+    usualForChargeSize: vi.fn(() => "Hail S"),
+    chargesForSize: vi.fn(() => []),
+    withCharge: vi.fn((turret) => turret),
+  });
 }
 
 function makeShips(): Ships {
@@ -173,34 +192,38 @@ function makeShips(): Ships {
 beforeEach(() => {
   ships = makeShips();
   fittingImport = makeFittingImport();
+  chargeCatalog = makeChargeCatalog();
 });
 
 describe("LocalSettingsStore", () => {
-  test("load returns null when storage and url are empty", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+  test("load returns null when there is no URL, ignoring local storage", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     expect(store.load()).toBeNull();
   });
 
-  test("save and load round-trips settings", () => {
+  test("save and load round-trips settings through the URL", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     store.save(DEFAULT_SETTINGS);
+    location.replace(store.encodeUrl(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
   test("load decodes settings from the URL and ignores local storage", () => {
     const storage = fakeStorage();
-    const encoder = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const encoder = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     const url = encoder.encodeUrl(URL_SETTINGS);
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation(url) });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation(url) });
     storage.setItem("gunner-settings-v3", JSON.stringify(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual(URL_SETTINGS);
   });
 
   test("load rejects a version-2 payload", () => {
-    const storage = fakeStorage();
     const v2 = {
       version: 2,
       tracking: 0.32,
@@ -219,13 +242,11 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v6", JSON.stringify(v2));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v2)) });
     expect(store.load()).toBeNull();
   });
 
   test("load rejects a version-3 payload", () => {
-    const storage = fakeStorage();
     const v3 = {
       version: 3,
       tracking: 0.32,
@@ -248,26 +269,28 @@ describe("LocalSettingsStore", () => {
       simSpeed: 4,
       language: "en",
     };
-    storage.setItem("gunner-settings-v6", JSON.stringify(v3));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v3)) });
     expect(store.load()).toBeNull();
   });
 
   test("save and load round-trip v5 with fitted hull summaries", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const withFitted: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerFittedHull: FITTED_HULL_SUMMARY,
       targetFittedHull: FITTED_HULL_SUMMARY,
     };
     store.save(withFitted);
+    location.replace(store.encodeUrl(withFitted));
     expect(store.load()).toEqual(withFitted);
   });
 
   test("save and load round-trip v5 with hull and propulsion selections", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const withHull: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerHull: "Rifter",
@@ -275,43 +298,47 @@ describe("LocalSettingsStore", () => {
       targetHull: "Caldari Shuttle",
     };
     store.save(withHull);
+    location.replace(store.encodeUrl(withHull));
     expect(store.load()).toEqual(withHull);
   });
 
   test("load rejects an invalid propulsion id", () => {
-    const storage = fakeStorage();
-    storage.setItem(
-      "gunner-settings-v6",
-      JSON.stringify({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" }),
-    );
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("load rejects an empty hull name", () => {
-    const storage = fakeStorage();
-    storage.setItem("gunner-settings-v6", JSON.stringify({ ...DEFAULT_SETTINGS, attackerHull: "" }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerHull: "" })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("load accepts settings without the optional hull and propulsion fields", () => {
-    const storage = fakeStorage();
-    storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    location.replace(store.encodeUrl(DEFAULT_SETTINGS));
     const loaded = store.load();
     expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
 
   test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const profile = profileFrom({ ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY });
     store.saveProfile("brawler", profile);
     expect(store.loadProfile("brawler")).toEqual(profile);
   });
 
   test("saveProfile and loadProfile round-trip", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     expect(store.listProfiles()).toEqual(["brawler"]);
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
@@ -319,7 +346,7 @@ describe("LocalSettingsStore", () => {
 
   test("saveProfile strips display preference fields from the stored profile", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_SETTINGS);
     const raw = storage.getItem("gunner-profiles-v6")!;
     const stored = JSON.parse(raw).brawler;
@@ -331,19 +358,19 @@ describe("LocalSettingsStore", () => {
   test("loadProfile strips legacy display preference fields from stored profiles", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
   test("loadSelectedProfile strips legacy display preference fields from the baseline", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-selected-profile-v6", JSON.stringify({ name: "brawler", baseline: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("deleteProfile removes the profile", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("a", DEFAULT_PROFILE);
     store.saveProfile("b", DEFAULT_PROFILE);
     store.deleteProfile("a");
@@ -352,7 +379,7 @@ describe("LocalSettingsStore", () => {
   });
 
   test("deleteProfile clears the selected profile when it is the deleted one", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.deleteProfile("brawler");
@@ -361,7 +388,7 @@ describe("LocalSettingsStore", () => {
   });
 
   test("deleteProfile leaves the selected profile alone when it is a different one", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     store.saveProfile("sniper", DEFAULT_PROFILE);
     store.saveSelectedProfile("sniper", DEFAULT_PROFILE);
@@ -372,18 +399,18 @@ describe("LocalSettingsStore", () => {
 
   test("encodeUrl and decodeUrl round-trip fitted hull summaries", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     const withFitted: UserSettings = { ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY };
     const url = store.encodeUrl(withFitted);
-    const decoded = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    const decoded = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toEqual(withFitted);
   });
 
   test("encodeUrl and decodeUrl round-trip", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
-    const decodedStore = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) });
+    const decodedStore = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) });
     const decoded = decodedStore.decodeUrl();
     expect(decoded).toEqual(DEFAULT_SETTINGS);
   });
@@ -391,29 +418,29 @@ describe("LocalSettingsStore", () => {
   test("writeUrlToClipboard writes a full URL", async () => {
     const location = fakeLocation("http://localhost/index.html");
     const clipboard = fakeClipboard();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS, clipboard);
     expect(ok).toBe(true);
   });
 
   test("writeUrlToClipboard returns false without a clipboard", async () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const ok = await store.writeUrlToClipboard(DEFAULT_SETTINGS);
     expect(ok).toBe(false);
   });
 
   test("decodeUrl rejects invalid settings and does not replace the URL", () => {
     const location = fakeLocation("http://localhost/?c=INVALID");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     expect(store.decodeUrl()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
   test("decodeUrl returns valid settings and does not replace the URL", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
     const decodedLocation = fakeLocation(url);
-    const decodedStore = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: decodedLocation });
+    const decodedStore = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: decodedLocation });
     const decoded = decodedStore.decodeUrl();
     expect(decoded).toEqual(DEFAULT_SETTINGS);
     expect(decodedLocation.href).toBe(url);
@@ -421,110 +448,124 @@ describe("LocalSettingsStore", () => {
 
   test("decodeUrl rejects settings with a non-positive initialDistance", () => {
     const bad = { ...DEFAULT_SETTINGS, initialDistance: 0 };
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const url = store.encodeUrl(bad);
-    const decoded = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    const decoded = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toBeNull();
   });
 
   test("load ignores stored settings with invalid values", () => {
-    const storage = fakeStorage();
-    storage.setItem("gunner-settings-v6", JSON.stringify({ ...DEFAULT_SETTINGS, targetSig: -1 }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetSig: -1 })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("load rejects stored settings with a fitted hull missing sigMultiplier", () => {
-    const storage = fakeStorage();
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, sigMultiplier: undefined } };
-    storage.setItem("gunner-settings-v6", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("load defaults a fitted hull missing massMultiplier to one", () => {
-    const storage = fakeStorage();
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, massMultiplier: undefined } };
-    storage.setItem("gunner-settings-v6", JSON.stringify({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
+    });
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerFittedHull!.fitted.massMultiplier).toBe(1);
   });
 
-  test("load falls back to local storage when the URL is invalid", () => {
-    const storage = fakeStorage();
-    storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
+  test("load returns null for an invalid URL", () => {
     const location = fakeLocation("http://localhost/?c=INVALID");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location });
-    expect(store.load()).toEqual(DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    expect(store.load()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
   test("decodeUrl returns null for a malformed c parameter", () => {
     const location = fakeLocation("http://localhost/?c=%25");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     expect(store.decodeUrl()).toBeNull();
     expect(location.href).toBe("http://localhost/?c=%25");
   });
 
   test("load accepts settings without skill and overload fields", () => {
-    const storage = fakeStorage();
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.attackerSkillLevel;
     delete partial.attackerOverload;
     delete partial.targetSkillLevel;
     delete partial.targetOverload;
-    storage.setItem("gunner-settings-v6", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    location.replace(store.encodeUrl(partial));
     expect(store.load()).toEqual(partial);
   });
 
   test("load accepts settings without gridBrightness", () => {
-    const storage = fakeStorage();
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.gridBrightness;
-    storage.setItem("gunner-settings-v6", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    location.replace(store.encodeUrl(partial));
     expect(store.load()).toEqual(partial);
   });
 
   test("save and load round-trips a non-default maneuverAggressivity", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = { ...DEFAULT_SETTINGS, maneuverAggressivity: 2.5 };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     expect(store.load()).toEqual(settings);
   });
 
   test("load accepts settings without maneuverAggressivity", () => {
-    const storage = fakeStorage();
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.maneuverAggressivity;
-    storage.setItem("gunner-settings-v6", JSON.stringify(partial));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    location.replace(store.encodeUrl(partial));
     expect(store.load()).toEqual(partial);
   });
 
   test("load rejects an out-of-range skill level", () => {
-    const storage = fakeStorage();
-    const bad = { ...DEFAULT_SETTINGS, attackerSkillLevel: 6 };
-    storage.setItem("gunner-settings-v6", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerSkillLevel: 6 })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("load rejects a non-boolean overload value", () => {
-    const storage = fakeStorage();
-    const bad = { ...DEFAULT_SETTINGS, targetOverload: "yes" };
-    storage.setItem("gunner-settings-v6", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetOverload: "yes" })),
+    });
     expect(store.load()).toBeNull();
   });
 
   test("save and load round-trip skill level 0 and unchecked overload", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerSkillLevel: 0,
@@ -533,12 +574,13 @@ describe("LocalSettingsStore", () => {
       targetOverload: false,
     };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     expect(store.load()).toEqual(settings);
   });
 
   test("encodeUrl and decodeUrl round-trip skill and overload fields", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerSkillLevel: 0,
@@ -547,41 +589,44 @@ describe("LocalSettingsStore", () => {
       targetOverload: true,
     };
     const url = store.encodeUrl(settings);
-    const decoded = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
+    const decoded = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) }).decodeUrl();
     expect(decoded).toEqual(settings);
   });
 
   test("save and load round-trip a custom gridBrightness", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0.75 };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     expect(store.load()).toEqual(settings);
   });
 
   test("save and load round-trip midships mode", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = { ...DEFAULT_SETTINGS, attackerMode: "midships", targetMode: "midships" };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     expect(store.load()).toEqual(settings);
   });
 
   test("load accepts gridBrightness at the interval endpoints", () => {
-    const storage = fakeStorage();
     const zero: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0 };
     const one: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 1 };
-    storage.setItem("gunner-settings-v6", JSON.stringify(zero));
-    expect(new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).load()).toEqual(zero);
-    storage.setItem("gunner-settings-v6", JSON.stringify(one));
-    expect(new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).load()).toEqual(one);
+    expect(new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(zero)) }).load()).toEqual(zero);
+    expect(new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(one)) }).load()).toEqual(one);
   });
 
   test("load rejects a gridBrightness outside [0, 1]", () => {
-    const storage = fakeStorage();
-    const bad = { ...DEFAULT_SETTINGS, gridBrightness: 1.5 };
-    storage.setItem("gunner-settings-v6", JSON.stringify(bad));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog,
+      ships,
+      fittingImport,
+      storage: fakeStorage(),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, gridBrightness: 1.5 })),
+    });
     expect(store.load()).toBeNull();
   });
 
@@ -589,8 +634,8 @@ describe("LocalSettingsStore", () => {
     const storage = fakeStorage();
     const different: UserSettings = { ...DEFAULT_SETTINGS, optimal: 9999 };
     storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
-    const url = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).encodeUrl(different);
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation(url) });
+    const url = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).encodeUrl(different);
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation(url) });
     expect(store.hasForeignUrlSettings()).toBe(true);
     expect(store.load()).toEqual(different);
   });
@@ -598,61 +643,59 @@ describe("LocalSettingsStore", () => {
   test("hasForeignUrlSettings returns false when the URL matches local storage", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
-    const url = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).encodeUrl(DEFAULT_SETTINGS);
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation(url) });
+    const url = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") }).encodeUrl(DEFAULT_SETTINGS);
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation(url) });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("hasForeignUrlSettings returns false for an invalid URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/?c=INVALID") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/?c=INVALID") });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("hasForeignUrlSettings returns false when there is no URL parameter", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-settings-v6", JSON.stringify(DEFAULT_SETTINGS));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     expect(store.hasForeignUrlSettings()).toBe(false);
   });
 
   test("saveSelectedProfile and loadSelectedProfile round-trip a name and baseline", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     const selected = store.loadSelectedProfile();
     expect(selected).toEqual({ name: "brawler", baseline: DEFAULT_PROFILE });
   });
 
   test("clearSelectedProfile removes the stored selection", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveSelectedProfile("brawler", DEFAULT_PROFILE);
     store.clearSelectedProfile();
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("saveSelectedProfile rejects an empty name", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     expect(() => store.saveSelectedProfile("", DEFAULT_PROFILE)).toThrow("selected profile name cannot be empty");
   });
 
   test("loadSelectedProfile returns null for an invalid baseline", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-selected-profile-v6", JSON.stringify({ name: "brawler", baseline: { version: 2 } }));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("loadSelectedProfile returns null when no profile is selected", () => {
-    const store = new LocalSettingsStore({ ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     expect(store.loadSelectedProfile()).toBeNull();
   });
 
   test("load migrates a v5 payload with fitted hull summaries", () => {
-    const storage = fakeStorage();
     const v5 = { ...DEFAULT_SETTINGS, version: 5, attackerFittedHull: FITTED_HULL_SUMMARY };
-    storage.setItem("gunner-settings-v5", JSON.stringify(v5));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(6);
@@ -661,10 +704,8 @@ describe("LocalSettingsStore", () => {
   });
 
   test("load migrates a v5 payload without fitted hull summaries", () => {
-    const storage = fakeStorage();
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
-    storage.setItem("gunner-settings-v5", JSON.stringify(v5));
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(6);
@@ -678,13 +719,15 @@ describe("LocalSettingsStore", () => {
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
 
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerOverrides: { attackerMass: 2_000_000 },
     };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerFitting).toBe(settings.attackerFitting);
@@ -711,7 +754,8 @@ describe("LocalSettingsStore", () => {
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
 
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const stale: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
@@ -724,6 +768,7 @@ describe("LocalSettingsStore", () => {
       falloff: 10,
     };
     store.save(stale);
+    location.replace(store.encodeUrl(stale));
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerMass).toBe(1_500_000);
@@ -742,16 +787,89 @@ describe("LocalSettingsStore", () => {
     ships.maxSpeedForFittedMass = vi.fn((_profile, _fitted, mass) => mass / 500);
 
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerOverrides: { attackerMass: 2_000_000 },
     };
     store.save(settings);
+    location.replace(store.encodeUrl(settings));
     const loaded = store.load();
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerMass).toBe(2_000_000);
     expect(loaded!.attackerSpeed).toBe(4_000);
+  });
+
+  test("load normalizes a v6 payload missing attackerAmmo", () => {
+    const missingAmmo: Record<string, unknown> = { ...DEFAULT_SETTINGS };
+    delete missingAmmo.attackerAmmo;
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerAmmo).toBe("Hail S");
+  });
+
+  test("loadProfile normalizes a profile missing attackerAmmo", () => {
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const { attackerAmmo: _, ...missingAmmo } = DEFAULT_PROFILE;
+    store.saveProfile("brawler", missingAmmo as ProfileSettings);
+    const loaded = store.loadProfile("brawler");
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerAmmo).toBe("Hail S");
+  });
+
+  test("basis re-import applies a stored charge that matches the turret size", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    ships.fittingOption = vi.fn(() => RIFTER_MODULE);
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
+    chargeCatalog.chargesForSize = vi.fn(() => [
+      { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+      { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+    ]);
+    chargeCatalog.withCharge = vi.fn((turret, charge) => ({ ...turret, charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff }));
+
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      attackerAmmo: "Republic Fleet EMP S",
+    };
+    store.save(settings);
+    location.replace(store.encodeUrl(settings));
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerAmmo).toBe("Republic Fleet EMP S");
+    expect(loaded!.tracking).toBe(0.42);
+    expect(loaded!.optimal).toBe(1200);
+    expect(loaded!.falloff).toBe(3000);
+  });
+
+  test("basis re-import falls back to the imported charge when the stored charge is invalid", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    ships.fittingOption = vi.fn(() => RIFTER_MODULE);
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
+    chargeCatalog.chargesForSize = vi.fn(() => [{ name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 }]);
+    chargeCatalog.withCharge = vi.fn((turret) => turret);
+
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      attackerAmmo: "Mjolnir Rocket",
+    };
+    store.save(settings);
+    location.replace(store.encodeUrl(settings));
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerAmmo).toBe("Hail S");
+    expect(loaded!.optimal).toBe(600);
   });
 });

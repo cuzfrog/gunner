@@ -143,6 +143,29 @@
           </label>
         </div>
 
+        <div class="field-group ammo-group" id="attacker-ammo-field" hidden>
+          <button type="button" id="attacker-ammo-trigger" class="ammo-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
+                  data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+                  title="Select ammunition" aria-label="Select ammunition">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#ammo"></use></svg>
+            <span class="ammo-label" data-i18n="label.ammo">Ammo</span>
+            <span class="ammo-summary-row">
+              <span class="ammo-summary-value" id="attacker-ammo-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </span>
+          </button>
+          <div class="ammo-popup" id="attacker-ammo-popup" hidden>
+            <span class="fitting-group-label" id="attacker-ammo-cargo-label" data-i18n="ammo.cargoGroup">In cargo</span>
+            <ul class="ammo-list" id="attacker-ammo-cargo-list" role="listbox"></ul>
+            <button type="button" class="ammo-expand" id="attacker-ammo-expand" data-i18n="ammo.showAll">Show all</button>
+            <div id="attacker-ammo-all-section" hidden>
+              <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
+              <ul class="ammo-list" id="attacker-ammo-all-list" role="listbox"></ul>
+            </div>
+          </div>
+        </div>
+
         <hr class="panel-divider">
 
         <div class="hull-field">

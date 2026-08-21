@@ -207,4 +207,23 @@ describe("profileText", () => {
     const text = `${PROFILE_TEXT_HEADER}\nversion=6\nattacker.fitting:\n---`;
     expect(parseProfile(text)).toBeUndefined();
   });
+
+  test("serializeProfile emits a global ammo line", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, attackerAmmo: "Hail S" };
+    const text = serializeProfile(profile);
+    expect(text).toContain("ammo=Hail S");
+    expect(text).not.toContain("attacker.ammo=");
+  });
+
+  test("parseProfile reads a global ammo line", () => {
+    const text = `${PROFILE_TEXT_HEADER}\nversion=6\nammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
+  });
+
+  test("parseProfile still accepts a legacy attacker.ammo line", () => {
+    const text = `${PROFILE_TEXT_HEADER}\nversion=6\nattacker.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
+  });
 });

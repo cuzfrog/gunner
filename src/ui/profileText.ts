@@ -89,6 +89,7 @@ const GLOBAL_FIELDS: readonly ScalarField[] = [
   "sigRes",
   "optimal",
   "falloff",
+  "attackerAmmo",
   "initialDistance",
   "simSpeed",
   "maneuverAggressivity",
@@ -146,6 +147,7 @@ function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
   for (const field of ALL_FIELDS) {
     map.set(dotKeyForField(field), field);
   }
+  map.set("attacker.ammo", "attackerAmmo");
   return map;
 }
 
@@ -161,6 +163,7 @@ function buildOverrideDotKeyToFullMap(): ReadonlyMap<string, keyof ProfileParamO
 }
 
 function dotKeyForField(field: ScalarField): string {
+  if (field === "attackerAmmo") return "ammo";
   if (field.startsWith("attacker")) return `attacker.${lowerFirst(field.slice("attacker".length))}`;
   if (field.startsWith("target")) return `target.${lowerFirst(field.slice("target".length))}`;
   return field;
@@ -265,6 +268,7 @@ function parseScalarValue(field: ScalarField, value: string): ScalarValue | unde
   if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
   if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
+  if (field === "attackerAmmo") return value;
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
@@ -352,6 +356,7 @@ function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings 
     attackerFitting: raw.attackerFitting,
     attackerOverrides: raw.attackerOverrides,
     attackerFittedHull: raw.attackerFittedHull,
+    attackerAmmo: raw.attackerAmmo,
     targetSkillLevel: raw.targetSkillLevel,
     targetOverload: raw.targetOverload,
     targetHull: raw.targetHull,
