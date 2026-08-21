@@ -3,6 +3,7 @@ import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBr
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
+import { serializeProfile } from "./profileText";
 import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 
@@ -504,14 +505,14 @@ describe("DomControls", () => {
     expect(saved.targetSig).toBe(1);
   });
 
-  test("share link writes the URL to the injected clipboard", async () => {
-    const { settingsStore, clipboard } = buildControls(globalThis.document);
+  test("copy profile writes the serialized profile to the injected clipboard", async () => {
+    const { clipboard } = buildControls(globalThis.document);
     const button = getFake(globalThis.document, "share-link");
     button.trigger("click");
     await Promise.resolve();
-    const [settings, passedClipboard] = settingsStore.writeUrlToClipboard.mock.calls[0];
-    expect(settings.version).toBe(USER_SETTINGS_VERSION);
-    expect(passedClipboard).toBe(clipboard);
+    const [text] = clipboard.writeText.mock.calls[0];
+    expect(text.startsWith("# gunner v1")).toBe(true);
+    expect(getFake(globalThis.document, "share-status").textContent).toBe("status.copied");
   });
 
   test("selecting a saved profile updates the URL to the encoded shareable link", () => {
@@ -2537,6 +2538,47 @@ describe("DomControls", () => {
       expect(fittingName.innerHTML).toContain("status.fittingInvalid");
       expect(fittingName.hidden).toBe(false);
       expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
+    });
+
+    test("pasting a gunner profile in the popup restores both sides", async () => {
+      const { settingsStore } = buildControls(globalThis.document);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      const text = serializeProfile({
+        version: USER_SETTINGS_VERSION,
+        tracking: 0.32,
+        sigRes: "S",
+        optimal: 5000,
+        falloff: 5000,
+        attackerSpeed: 0,
+        attackerMode: "keepAtRange",
+        attackerRange: 5000,
+        attackerMass: 1_200_000,
+        attackerInertia: 3,
+        attackerHull: "Rifter",
+        targetHull: "Thrasher",
+        initialDistance: 5000,
+        targetSpeed: 1000,
+        targetMode: "orbit",
+        targetRange: 5000,
+        targetMass: 10_000_000,
+        targetInertia: 0.45,
+        targetSig: 40,
+        simSpeed: 4,
+      });
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => text },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(popup.hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerHull).toBe("Rifter");
+      expect(saved.targetHull).toBe("Thrasher");
     });
 
     test("clicking the import button again when the paste popup is open closes it", async () => {

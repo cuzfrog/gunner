@@ -14,6 +14,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../fitting"
 import type { I18n, Language } from "./i18n";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
+import { parseProfile, serializeProfile } from "./profileText";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -620,6 +621,10 @@ export class DomControls implements Controls {
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
     this.clearFittingNameTimeout();
+    if (text.trimStart().startsWith("# gunner")) {
+      await this.importProfileFromText(text.trimStart());
+      return;
+    }
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
@@ -640,6 +645,16 @@ export class DomControls implements Controls {
     this.persist();
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
+  }
+
+  private async importProfileFromText(text: string): Promise<void> {
+    const parsed = parseProfile(text);
+    if (!parsed) {
+      this.showImportError("attacker", "status.fittingInvalid");
+      return;
+    }
+    const settings: UserSettings = { ...parsed, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+    this.loadSettings(settings);
   }
 
   private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
@@ -671,9 +686,13 @@ export class DomControls implements Controls {
     }
   }
 
-  private async shareLink(): Promise<void> {
-    const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), this.clipboard);
-    setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
+  private async copyProfile(): Promise<void> {
+    try {
+      await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
+      setText(this.els.shareStatus, this.i18n.t("status.copied"));
+    } catch {
+      setText(this.els.shareStatus, this.i18n.t("status.failed"));
+    }
     if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
     this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
@@ -692,7 +711,7 @@ export class DomControls implements Controls {
     (this.els.profileSave as HTMLButtonElement).addEventListener("click", () => this.saveProfile());
     (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
-    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
+    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.copyProfile());
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
 
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));

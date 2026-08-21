@@ -219,10 +219,15 @@ export const I18N_DICTIONARY = {
     zh: "删除",
     ja: "削除",
   },
-  "button.copyLink": {
-    en: "Copy link",
-    zh: "复制链接",
-    ja: "リンクをコピー",
+  "button.copyProfile": {
+    en: "Copy",
+    zh: "复制",
+    ja: "コピー",
+  },
+  "title.copyProfile": {
+    en: "Copy current profile to clipboard",
+    zh: "复制当前配置到剪贴板",
+    ja: "現在のプロファイルをクリップボードにコピー",
   },
   "label.profileName": {
     en: "Profile name",
