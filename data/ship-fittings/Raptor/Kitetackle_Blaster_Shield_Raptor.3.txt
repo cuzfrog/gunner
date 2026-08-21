@@ -1,0 +1,26 @@
+[Raptor, Kitetackle Blaster Shield Raptor]
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+
+C-IR Compact Guidance Disruptor
+Republic Fleet Medium Shield Extender
+5MN Y-T8 Compact Microwarpdrive
+Initiated Compact Warp Disruptor
+
+Vigor Compact Micro Auxiliary Power Core
+Nanofiber Internal Structure II
+Magnetic Field Stabilizer II
+
+Small Low Friction Nozzle Joints II
+Small EM Shield Reinforcer II
+
+
+Mobile Depot x1
+5MN Y-T8 Compact Microwarpdrive, Null S
+Null S x667
+Caldari Navy Antimatter Charge S x561
+Agency 'Pyrolancea' DB5 Dose II x1
+Nanite Repair Paste x74
+Missile Precision Disruption Script x1
+Void S x1625

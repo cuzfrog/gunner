@@ -1,0 +1,41 @@
+[Vindicator, Kitetackle Armor Vindicator]
+Medium Energy Nosferatu II
+True Sansha Large EMP Smartbomb
+Dark Blood Medium Energy Nosferatu
+True Sansha Large EMP Smartbomb
+Heavy Energy Nosferatu II
+True Sansha Large EMP Smartbomb
+True Sansha Large EMP Smartbomb
+True Sansha Large EMP Smartbomb
+
+Republic Fleet Large Cap Battery
+Heavy Capacitor Booster II, Navy Cap Booster 800
+Abyssal Stasis Webifier
+Republic Fleet Large Cap Battery
+100MN Afterburner II
+
+Corpum A-Type Kinetic Energized Membrane
+Damage Control II
+Coreli A-Type Multispectrum Coating
+Imperial Navy 1600mm Steel Plates
+Centum A-Type Thermal Energized Membrane
+Corelum A-Type Explosive Energized Membrane
+Imperial Navy 1600mm Steel Plates
+
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
+Large Trimark Armor Pump I
+
+
+Acolyte II x3
+Acolyte II x2
+Valkyrie II x5
+Bouncer II x2
+
+
+Improved Mindflood Booster x1
+Navy Cap Booster 800 x34
+Nanite Repair Paste x231
+Signature Radius Suppressor I, Navy Cap Booster 800
+500MN Quad LiF Restrained Microwarpdrive, Navy Cap Booster 800
+Dramiel x1

@@ -1,0 +1,29 @@
+[Rook, Missile Shield Rook]
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Improved Cloaking Device II
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+
+Large Shield Extender II
+Ladar ECM II
+Large Shield Extender II
+Gravimetric ECM II
+50MN Microwarpdrive II
+Radar ECM II
+Magnetometric ECM II
+
+Ballistic Control System II
+Signal Distortion Amplifier II
+Signal Distortion Amplifier II
+
+Medium EM Shield Reinforcer II
+Medium Core Defense Field Extender II
+
+
+Hobgoblin II x4
+Hobgoblin II x1
+
+
+Scourge Fury Heavy Missile x9068
+Nanite Repair Paste x200

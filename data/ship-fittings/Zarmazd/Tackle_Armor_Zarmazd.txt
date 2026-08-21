@@ -1,0 +1,36 @@
+[Zarmazd, Tackle Armor Zarmazd]
+Small Energy Nosferatu II
+Heavy Mutadaptive Remote Armor Repairer II
+Small Energy Nosferatu II
+Small Energy Nosferatu II
+
+Warp Scrambler II
+Republic Fleet Medium Cap Battery
+Fleeting Compact Stasis Webifier
+10MN Y-S8 Compact Afterburner
+
+Imperial Navy Multispectrum Energized Membrane
+Corpum A-Type EM Energized Membrane
+Damage Control II
+Corpum B-Type Kinetic Energized Membrane
+Imperial Navy 1600mm Steel Plates
+Centum A-Type Thermal Energized Membrane
+
+Medium Thermal Armor Reinforcer II
+Medium Trimark Armor Pump II
+
+
+Acolyte II x3
+Acolyte II x2
+Light Armor Maintenance Bot II x3
+Light Armor Maintenance Bot II x2
+Hornet EC-300 x5
+Warrior II x5
+
+
+Targeting Range Script x2
+ECCM Script x2
+Scan Resolution Script x2
+Medium Compact Pb-Acid Cap Battery, Targeting Range Script
+Remote Sensor Booster II, Targeting Range Script
+Sensor Booster II, Targeting Range Script

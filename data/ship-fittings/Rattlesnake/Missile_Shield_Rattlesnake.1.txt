@@ -1,0 +1,39 @@
+[Rattlesnake, Missile Shield Rattlesnake]
+Rapid Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Core Probe Launcher I, Core Scanner Probe I
+Rapid Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Rapid Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Rapid Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Drone Link Augmentor I
+
+Shield Recharger II
+Pithum B-Type EM Shield Amplifier
+Shield Recharger II
+Shield Recharger II
+Republic Fleet Large Shield Extender
+Pithum C-Type Thermal Shield Amplifier
+Shield Recharger II
+
+Drone Damage Amplifier II
+Omnidirectional Tracking Enhancer I
+Drone Damage Amplifier II
+Shield Power Relay II
+Shield Power Relay II
+Shield Power Relay II
+
+Large Core Defense Field Purger I
+Large Core Defense Field Purger I
+Large Core Defense Field Purger I
+
+
+Gecko x1
+Hornet EC-300 x5
+
+
+Core Scanner Probe I x32
+Sleeper Data Library x49
+Neural Network Analyzer x28
+Neural Network Analyzer x12
+Caldari Navy Scourge Heavy Missile x2408
+Ancient Coordinates Database x11
+Sleeper Drone AI Nexus x1

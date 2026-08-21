@@ -1,0 +1,25 @@
+[Rupture, Kitetackle Armor Rupture]
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+Medium Infectious Scoped Energy Neutralizer
+425mm Medium 'Scout' Autocannon I, EMP M
+
+Tracking Computer II
+50MN Quad LiF Restrained Microwarpdrive
+Faint Scoped Warp Disruptor
+X5 Enduring Stasis Webifier
+
+Reactive Armor Hardener
+Medium I-a Enduring Armor Repairer
+Compact Multispectrum Energized Membrane
+Counterbalanced Compact Gyrostabilizer
+Gyrostabilizer II
+
+Medium Auxiliary Nano Pump I
+Medium Explosive Armor Reinforcer I
+Medium Projectile Burst Aerator I
+
+
+EMP M x4520
+Fusion M x4520

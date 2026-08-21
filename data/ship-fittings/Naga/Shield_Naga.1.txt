@@ -1,0 +1,32 @@
+[Naga, Shield Naga]
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+425mm Prototype Gauss Gun, Caldari Navy Tungsten Charge L
+
+Tracking Computer II, Optimal Range Script
+Sensor Booster II, Targeting Range Script
+Small Capacitor Booster II, Cap Booster 200
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+
+Medium Ancillary Current Router I
+Medium Ionic Field Projector I
+Medium Core Defense Field Extender I
+
+
+Tracking Speed Script x1
+Caldari Navy Antimatter Charge L x104
+Standard Drop Booster x3
+Cap Booster 200 x8
+Caldari Navy Iron Charge L x3376
+Caldari Navy Tungsten Charge L x952

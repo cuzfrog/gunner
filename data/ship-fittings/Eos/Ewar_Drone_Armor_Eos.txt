@@ -1,0 +1,40 @@
+[Eos, Ewar Drone Armor Eos]
+'Vehemence' Compact Small EMP Smartbomb
+Skirmish Command Burst II, Rapid Deployment Charge
+'Vehemence' Compact Small EMP Smartbomb
+Drone Link Augmentor II
+Skirmish Command Burst II, Evasive Maneuvers Charge
+
+10MN Afterburner II
+50MN Y-T8 Compact Microwarpdrive
+Target Painter II
+Small Capacitor Booster II, Navy Cap Booster 400
+
+Damage Control II
+EM Armor Hardener II
+Explosive Armor Hardener II
+Multispectrum Energized Membrane II
+1600mm Steel Plates II
+Explosive Armor Hardener II
+1600mm Rolled Tungsten Compact Plates
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Acolyte II x5
+Valkyrie II x3
+Valkyrie II x2
+Hornet EC-300 x5
+Bouncer II x5
+Warrior II x10
+
+
+Armor Energizing Charge x600
+Armor Reinforcement Charge x600
+Evasive Maneuvers Charge x300
+Navy Cap Booster 400 x23
+Nanite Repair Paste x100
+Rapid Deployment Charge x300
+Rapid Repair Charge x600
+Interdiction Maneuvers Charge x600

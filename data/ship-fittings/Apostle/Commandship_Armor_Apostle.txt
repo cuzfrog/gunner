@@ -1,0 +1,36 @@
+[Apostle, Commandship Armor Apostle]
+Capital I-ax Enduring Remote Armor Repairer
+Armor Command Burst II
+Triage Module II
+Capital I-ax Enduring Remote Armor Repairer
+Capital I-ax Enduring Remote Armor Repairer
+Armor Command Burst II
+
+Capital F-RX Compact Capacitor Booster, Cap Booster 3200
+Thukker Large Cap Battery
+Capital Cap Battery II
+Thukker Large Cap Battery
+
+Damage Control II
+Coreli A-Type Multispectrum Coating
+Reactive Armor Hardener
+25000mm Rolled Tungsten Compact Plates
+25000mm Rolled Tungsten Compact Plates
+25000mm Rolled Tungsten Compact Plates
+Coreli A-Type Multispectrum Coating
+
+Capital Trimark Armor Pump I
+Capital Trimark Armor Pump I
+Capital Trimark Armor Pump I
+
+
+Vespa EC-600 x5
+Hornet EC-300 x5
+Warrior II x1
+Warrior II x2
+
+
+Strontium Clathrates x900
+Helium Isotopes x81258
+Navy Cap Booster 3200 x1
+Cap Booster 3200 x57

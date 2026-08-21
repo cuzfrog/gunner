@@ -1,0 +1,49 @@
+[Claymore, Support Missile Shield Claymore]
+Shield Command Burst II, Shield Extension Charge
+Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Shield Command Burst II, Active Shielding Charge
+Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+
+Pithum A-Type Kinetic Shield Amplifier
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Large Shield Extender II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Overdrive Injector System II
+Damage Control II
+Nanofiber Internal Structure II
+Capacitor Power Relay II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Vespa EC-600 x4
+Vespa EC-600 x1
+Warrior II x4
+Warrior II x1
+
+
+Inferno Heavy Missile x120
+Caldari Navy Nova Heavy Missile x200
+Electronic Hardening Charge x596
+Caldari Navy Scourge Heavy Missile x3757
+Caldari Navy Inferno Heavy Missile x130
+Damage Control I, Inferno Heavy Missile
+Electronic Superiority Charge x81
+Shield Extension Charge x82
+Shield Harmonizing Charge x706
+Evasive Maneuvers Charge x300
+Nova Fury Heavy Missile x435
+Sensor Optimization Charge x82
+Scourge Fury Heavy Missile x1650
+Nanite Repair Paste x2
+Rapid Deployment Charge x278
+Inferno Fury Heavy Missile x145
+Interdiction Maneuvers Charge x578
+50MN Y-T8 Compact Microwarpdrive, Inferno Heavy Missile

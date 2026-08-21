@@ -1,0 +1,37 @@
+[Dominix Navy Issue, Logi Armor Dominix Navy Issue]
+Large Remote Armor Repairer II
+Large Remote Armor Repairer II
+Large Ancillary Remote Armor Repairer, Nanite Repair Paste
+Large Remote Capacitor Transmitter II
+Large Remote Capacitor Transmitter II
+Large Remote Armor Repairer II
+
+Heavy Capacitor Booster II, Navy Cap Booster 3200
+Sensor Booster II
+Large Cap Battery II
+Heavy Capacitor Booster II, Navy Cap Booster 3200
+Sensor Booster II
+Large Cap Battery II
+
+1600mm Steel Plates II
+Thermal Armor Hardener II
+1600mm Steel Plates II
+Explosive Armor Hardener II
+Reactive Armor Hardener
+Kinetic Armor Hardener II
+EM Armor Hardener II
+
+Large Remote Repair Augmentor I
+Large Remote Repair Augmentor I
+Large Explosive Armor Reinforcer II
+
+
+Praetor II x2
+Praetor II x7
+Infiltrator II x10
+
+
+ECCM Script x2
+Scan Resolution Script x2
+Nanite Repair Paste x576
+Navy Cap Booster 3200 x8

@@ -1,0 +1,42 @@
+[Revelation, Pulse Armor Revelation]
+Dual Giga Pulse Laser II, Conflagration XL
+Siege Module II
+Dual Giga Pulse Laser II, Conflagration XL
+Dread Guristas Large Graviton Smartbomb
+Dual Giga Pulse Laser II, Conflagration XL
+
+500MN Cold-Gas Enduring Microwarpdrive
+Tracking Computer II, Tracking Speed Script
+Tracking Computer II, Tracking Speed Script
+Capital Capacitor Booster II, Navy Cap Booster 3200
+
+Damage Control II
+Inertial Stabilizers II
+Reactive Armor Hardener
+Inertial Stabilizers II
+Heat Sink II
+Capital Armor Repairer I
+Kinetic Armor Hardener II
+Heat Sink II
+
+Capital Auxiliary Nano Pump I
+Capital Auxiliary Nano Pump I
+Capital Trimark Armor Pump I
+
+
+Conflagration XL x3
+Helium Isotopes x33490
+Strontium Clathrates x102
+Scorch XL x1
+Scorch XL x2
+Heat Sink II, Conflagration XL
+Heat Sink II, Conflagration XL
+Tracking Computer II, Conflagration XL
+Navy Cap Booster 800 x5
+Navy Cap Booster 3200 x6
+Sanshas Standard XL x1
+Nanite Repair Paste x1192
+Strontium Clathrates x80
+Strontium Clathrates x2086
+Helium Isotopes x2317
+Curse x1

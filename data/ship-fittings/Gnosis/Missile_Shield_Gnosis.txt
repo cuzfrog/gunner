@@ -1,0 +1,33 @@
+[Gnosis, Missile Shield Gnosis]
+Prototype 'Arbalest' Rapid Light Missile Launcher, Scourge Light Missile
+Prototype 'Arbalest' Rapid Light Missile Launcher, Scourge Light Missile
+Prototype 'Arbalest' Rapid Light Missile Launcher, Scourge Light Missile
+Prototype 'Arbalest' Rapid Light Missile Launcher, Scourge Light Missile
+Prototype 'Arbalest' Rapid Light Missile Launcher, Scourge Light Missile
+Drone Link Augmentor I
+
+Multispectrum Shield Hardener II
+Missile Guidance Computer II, Missile Range Script
+10MN Monopropellant Enduring Afterburner
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+Multispectrum Shield Hardener II
+
+Ballistic Control System II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Damage Control I
+Ballistic Control System II
+Ballistic Control System II
+
+Medium Processor Overclocking Unit I
+Medium Processor Overclocking Unit I
+Medium Core Defense Field Purger I
+
+
+Warrior II x3
+Warrior II x12
+
+
+Missile Range Script x1
+Scourge Light Missile x875

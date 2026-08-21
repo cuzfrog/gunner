@@ -1,0 +1,18 @@
+[Reaper, AC Shield Reaper]
+125mm Gatling AutoCannon I, Republic Fleet EMP S
+
+Medium C5-L Compact Shield Booster
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+
+Small Ancillary Armor Repairer, Nanite Repair Paste
+IFFA Compact Damage Control
+
+
+Republic Fleet EMP S x500
+Navy Cap Booster 50 x74
+Republic Fleet Depleted Uranium S x500
+Republic Fleet Carbonized Lead S x500
+Republic Fleet Phased Plasma S x500
+Republic Fleet Titanium Sabot S x500
+Republic Fleet Fusion S x500
+Nanite Repair Paste x80

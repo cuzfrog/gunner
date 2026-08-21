@@ -1,0 +1,42 @@
+[Paladin, Ewar Pulse Armor Paladin]
+Federation Navy Bastion Module
+Mega Pulse Laser II, Imperial Navy Multifrequency L
+Mega Pulse Laser II, Imperial Navy Multifrequency L
+Imperial Navy Large EMP Smartbomb
+Mega Pulse Laser II, Imperial Navy Multifrequency L
+Imperial Navy Large EMP Smartbomb
+Dark Blood Heavy Energy Nosferatu
+Mega Pulse Laser II, Imperial Navy Multifrequency L
+
+Republic Fleet Large Cap Battery
+Republic Fleet Large Cap Battery
+Imperial Navy Cap Recharger
+Imperial Navy Cap Recharger
+
+Core X-Type Large Armor Repairer
+Imperial Navy Heat Sink
+Imperial Navy Heat Sink
+Coreli A-Type Multispectrum Coating
+Imperial Navy Heat Sink
+Core X-Type Large Armor Repairer
+Dark Blood Capacitor Power Relay
+
+Large Capacitor Control Circuit II
+Large Capacitor Control Circuit II
+
+
+Imperial Navy Infiltrator x1
+Imperial Navy Infiltrator x1
+Hornet EC-300 x5
+
+
+'Packrat' Mobile Tractor Unit x2
+'Packrat' Mobile Tractor Unit x6
+Sisters Core Scanner Probe x16
+Imperial Navy Multifrequency L x5
+Imperial Navy Multifrequency L x3
+Conflagration L x32
+Conflagration L x2
+Nanite Repair Paste x169
+Scorch L x8
+Scorch L x4

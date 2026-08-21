@@ -1,0 +1,48 @@
+[Vindicator, Kitetackle Blaster Armor Vindicator]
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+
+Shadow Serpentis 500MN Microwarpdrive
+Federation Navy Stasis Webifier
+Caldari Navy Warp Disruptor
+Caldari Navy Warp Disruptor
+Republic Fleet Large Cap Battery
+
+Damage Control II
+Coreli A-Type Multispectrum Coating
+Corpum A-Type Thermal Energized Membrane
+Imperial Navy 1600mm Steel Plates
+Imperial Navy 1600mm Steel Plates
+Centum A-Type Explosive Energized Membrane
+Coreli A-Type Multispectrum Coating
+
+Large Trimark Armor Pump II
+Large Kinetic Armor Reinforcer II
+Large Trimark Armor Pump II
+
+
+Curator II x5
+
+
+Targeting Range Script x1
+Sisters Core Scanner Probe x16
+Heavy Capacitor Booster II, Targeting Range Script
+ECCM Script x1
+Caldari Navy Antimatter Charge L x3360
+Caldari Navy Warp Disruptor, Targeting Range Script
+Federation Navy Stasis Webifier, Targeting Range Script
+Null L x3736
+Void L x4856
+Scan Resolution Script x1
+Nanite Repair Paste x150
+Signature Radius Suppressor I, Targeting Range Script
+Magnetic Field Stabilizer II, Targeting Range Script
+Sensor Booster II, Targeting Range Script
+Reactive Armor Hardener, Targeting Range Script
+Retribution x1

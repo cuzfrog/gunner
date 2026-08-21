@@ -1,0 +1,42 @@
+[Aeon, Commandship Armor Aeon]
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Armor Reinforcement Charge
+Networked Sensor Array
+Improved Cloaking Device II
+Fighter Support Unit II
+Fighter Support Unit II
+
+Sentient Drone Navigation Computer
+Capital F-RX Compact Capacitor Booster
+Federation Navy Omnidirectional Tracking Link
+Federation Navy Drone Navigation Computer
+
+CONCORD 25000mm Steel Plates
+Shadow Serpentis Damage Control
+CONCORD 25000mm Steel Plates
+Corpum A-Type Multispectrum Energized Membrane
+Core A-Type Thermal Armor Hardener
+Corpum A-Type Multispectrum Energized Membrane
+Core A-Type EM Armor Hardener
+CONCORD 25000mm Steel Plates
+
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+
+
+Armor Energizing Charge x5702
+Armor Thermal Resistance Script x1
+Armor Reinforcement Charge x5689
+Federation Navy Omnidirectional Tracking Link, Armor Energizing Charge
+Armor Explosive Resistance Script x1
+Armor EM Resistance Script x1
+Armor Kinetic Resistance Script x1
+Optimal Range Script x2
+Caldari Navy Large Graviton Smartbomb, Armor Energizing Charge
+Scan Resolution Script x2
+Tracking Speed Script x4
+Reactive Armor Hardener, Armor Energizing Charge
+Navy Cap Booster 3200 x32
+Helium Isotopes x156626
+Nereus x1

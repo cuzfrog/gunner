@@ -1,0 +1,54 @@
+[Khizriel, Kitetackle AC Shield Khizriel]
+Skirmish Command Burst II, Rapid Deployment Charge
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+Dread Guristas Warp Disruptor
+Federation Navy 10MN Afterburner
+Caldari Navy Large Shield Extender
+
+Abyssal Gyrostabilizer
+Damage Control II
+Nanofiber Internal Structure II
+Abyssal Gyrostabilizer
+Abyssal Gyrostabilizer
+Domination Nanofiber Structure
+
+Medium Hyperspatial Velocity Optimizer II
+Medium Hyperspatial Velocity Optimizer II
+Medium Hyperspatial Velocity Optimizer II
+
+
+Imperial Navy Acolyte x1
+Republic Fleet Berserker x1
+Imperial Navy Praetor x1
+Hornet EC-300 x5
+Imperial Navy Infiltrator x1
+Republic Fleet Valkyrie x1
+Arabellata SW-900-I x1
+Arabellata SW-900-I x1
+Hornet EC-300 x5
+
+
+Sisters Combat Scanner Probe x8
+Synth Sooth Sayer Booster x3
+Quafe Zero Green Apple x1
+Expanded Probe Launcher I, Sisters Combat Scanner Probe
+Agency 'Pyrolancea' DB7 Dose III x3
+Republic Fleet Phased Plasma M x1500
+Mobile Depot x1
+X-Large Clarity Ward Enduring Shield Booster, Sisters Combat Scanner Probe
+Barrage M x2000
+Border-5 'Pochven' Filament x1
+Type-D Restrained Capacitor Flux Coil, Sisters Combat Scanner Probe
+Noise-5 'Needlejack' Filament x10
+Republic Fleet Fusion M x1500
+Nanite Repair Paste x468
+Republic Fleet EMP M x2000
+Hail M x3056

@@ -1,0 +1,32 @@
+[Porpoise, Shield Porpoise]
+Mining Foreman Burst II, Mining Laser Field Enhancement Charge
+Mining Foreman Burst II, Mining Laser Optimization Charge
+Medium Asteroid Ore Compressor I
+Medium Industrial Core II
+
+Mining Survey Chipset II
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+
+Damage Control II
+Inertial Stabilizers II
+
+Medium EM Shield Reinforcer II
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Acolyte II x5
+Hobgoblin II x5
+Mining Drone II x4
+Mining Drone II x1
+Hornet EC-300 x5
+
+
+Mining Laser Field Enhancement Charge x122
+Mining Laser Efficiency Charge x259
+Compressed Griemeer x138
+Compressed Kernite II-Grade x2051
+Compressed Kernite II-Grade x4659
+Heavy Water x6900

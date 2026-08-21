@@ -1,0 +1,29 @@
+[Tholos, Kitetackle Shield Tholos]
+Small Energy Nosferatu II
+Small Breacher Pod Launcher, SCARAB Breacher Pod S
+Covert Ops Cloaking Device II
+Small Energy Nosferatu II
+
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+1MN Afterburner II
+Multispectrum Shield Hardener II
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+5MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+
+Vigor Compact Micro Auxiliary Power Core
+Nanofiber Internal Structure II
+
+Small Auxiliary Thrusters II
+Small Thermal Shield Reinforcer II
+Small EM Shield Reinforcer II
+
+
+Hornet EC-300 x5
+
+
+Navy Cap Booster 50 x158
+Standard Blue Pill Booster x2
+SCARAB Breacher Pod S x80
+Agency 'Overclocker' SB3 Dose I x3
+Nanite Repair Paste x150

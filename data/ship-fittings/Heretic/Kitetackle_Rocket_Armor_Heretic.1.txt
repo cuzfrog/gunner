@@ -1,0 +1,28 @@
+[Heretic, Kitetackle Rocket Armor Heretic]
+Rocket Launcher II, Scourge Rage Rocket
+Interdiction Sphere Launcher I, Warp Disrupt Probe
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+
+J5b Enduring Warp Scrambler
+5MN Y-T8 Compact Microwarpdrive
+X5 Enduring Stasis Webifier
+
+Damage Control II
+400mm Steel Plates II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+
+Small Bay Loading Accelerator I
+Small Warhead Calefaction Catalyst I
+
+
+Nova Rage Rocket x14
+Scourge Rage Rocket x1639
+Nanite Repair Paste x91
+Inferno Rage Rocket x309
+Warp Disrupt Probe x17
+Mjolnir Rage Rocket x4

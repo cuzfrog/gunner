@@ -1,0 +1,188 @@
+[Anshar, Kitetackle Drone Shield Anshar]
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+
+
+Infiltrator II x10
+Praetor II x10
+Wasp II x6
+Hammerhead II x12
+Ogre II x5
+Hornet EC-300 x30
+'Excavator' Mining Drone x2
+'Excavator' Mining Drone x3
+Berserker II x5
+Acolyte II x7
+Acolyte II x3
+Garde II x7
+Warrior II x37
+Warrior II x3
+Vespa EC-600 x7
+Curator II x27
+Warden II x20
+Hobgoblin II x5
+Hobgoblin II x5
+Mining Drone II x4
+Caldari Navy Vespa x2
+Caldari Navy Vespa x3
+Vespa II x10
+Valkyrie II x25
+Mining Drone I x9
+
+
+Pilgrim x1
+Gas Cloud Harvester I, Complex Asteroid Mining Crystal Type A II
+Gas Cloud Harvester I, Complex Asteroid Mining Crystal Type A II
+Coherent Asteroid Mining Crystal Type A I Blueprint x1
+Large Industrial Core II, Complex Asteroid Mining Crystal Type A II
+Coherent Asteroid Mining Crystal Type A I Blueprint x1
+Drone Link Augmentor I, Complex Asteroid Mining Crystal Type A II
+Ice Harvester Upgrade II, Complex Asteroid Mining Crystal Type A II
+Ice Harvester Upgrade II, Complex Asteroid Mining Crystal Type A II
+Drone Damage Amplifier II, Complex Asteroid Mining Crystal Type A II
+Thermal Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+Large Abyssal Armor Repairer, Complex Asteroid Mining Crystal Type A II
+Large Abyssal Armor Repairer, Complex Asteroid Mining Crystal Type A II
+Caldari Navy Large Shield Extender, Complex Asteroid Mining Crystal Type A II
+Pithum C-Type Thermal Shield Amplifier, Complex Asteroid Mining Crystal Type A II
+Complex Asteroid Mining Crystal Type B I Blueprint x1
+Station Container x1
+Shield Command Burst II, Complex Asteroid Mining Crystal Type A II
+Pulse Activated Nexus Invulnerability Core, Complex Asteroid Mining Crystal Type A II
+Inertial Stabilizers I, Complex Asteroid Mining Crystal Type A II
+Prospect x1
+Drone Link Augmentor II, Complex Asteroid Mining Crystal Type A II
+Drone Link Augmentor II, Complex Asteroid Mining Crystal Type A II
+Strip Miner I, Complex Asteroid Mining Crystal Type A II
+Strip Miner I, Complex Asteroid Mining Crystal Type A II
+Large Moon Ore Compressor I, Complex Asteroid Mining Crystal Type A II
+Enriched Uranium x3405
+Impel x1
+Multispectrum Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+Multispectrum Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+Omnidirectional Tracking Enhancer II, Complex Asteroid Mining Crystal Type A II
+Heavy Energy Neutralizer II, Complex Asteroid Mining Crystal Type A II
+Large Shield Extender II, Complex Asteroid Mining Crystal Type A II
+Large Shield Extender II, Complex Asteroid Mining Crystal Type A II
+Compact Multispectrum Energized Membrane, Complex Asteroid Mining Crystal Type A II
+EM Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+EM Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+Mobile Depot x2
+Complex Asteroid Mining Crystal Type A II x22
+Complex Asteroid Mining Crystal Type A II x2
+Complex Asteroid Mining Crystal Type B I Blueprint x1
+Large Ice Compressor I, Complex Asteroid Mining Crystal Type A II
+Coherent Asteroid Mining Crystal Type A II x2
+Coherent Asteroid Mining Crystal Type A II x12
+Mining Survey Chipset I, Complex Asteroid Mining Crystal Type A II
+Overdrive Injector System II, Complex Asteroid Mining Crystal Type A II
+Covert Ops Cloaking Device II, Complex Asteroid Mining Crystal Type A II
+Covert Ops Cloaking Device II, Complex Asteroid Mining Crystal Type A II
+ORE Strip Miner, Complex Asteroid Mining Crystal Type A II
+ORE Strip Miner, Complex Asteroid Mining Crystal Type A II
+Complex Asteroid Mining Crystal Type A I Blueprint x1
+Pithum C-Type Multispectrum Shield Hardener, Complex Asteroid Mining Crystal Type A II
+Compact Interdiction Nullifier, Complex Asteroid Mining Crystal Type A II
+Capital Ancillary Shield Booster, Complex Asteroid Mining Crystal Type A II
+Mining Laser Optimization Charge Blueprint x1
+50MN Quad LiF Restrained Microwarpdrive, Complex Asteroid Mining Crystal Type A II
+Modulated Deep Core Strip Miner II, Complex Asteroid Mining Crystal Type A II
+Modulated Deep Core Strip Miner II, Complex Asteroid Mining Crystal Type A II
+Complex Asteroid Mining Crystal Type A I Blueprint x1
+400mm Rolled Tungsten Compact Plates, Complex Asteroid Mining Crystal Type A II
+400mm Rolled Tungsten Compact Plates, Complex Asteroid Mining Crystal Type A II
+Small Shield Extender II, Complex Asteroid Mining Crystal Type A II
+Medium Energy Neutralizer II, Complex Asteroid Mining Crystal Type A II
+Medium Energy Neutralizer II, Complex Asteroid Mining Crystal Type A II
+Expanded Cargohold II, Complex Asteroid Mining Crystal Type A II
+Expanded Cargohold II, Complex Asteroid Mining Crystal Type A II
+Improved Cloaking Device II, Complex Asteroid Mining Crystal Type A II
+Improved Cloaking Device II, Complex Asteroid Mining Crystal Type A II
+Capital Moon Ore Compressor I, Complex Asteroid Mining Crystal Type A II
+Complex Asteroid Mining Crystal Type B II x4
+Covert Cynosural Field Generator I, Complex Asteroid Mining Crystal Type A II
+Mercoxit Asteroid Mining Crystal Type A I Blueprint x1
+Hydrogen Fuel Block Blueprint x1
+Mining Laser Field Enhancement Charge Blueprint x1
+Prorator x1
+Syndicate Damage Control, Complex Asteroid Mining Crystal Type A II
+Mercoxit Asteroid Mining Crystal Type A I Blueprint x1
+Caldari Navy Power Diagnostic System, Complex Asteroid Mining Crystal Type A II
+Caldari Navy Power Diagnostic System, Complex Asteroid Mining Crystal Type A II
+Oxygen x100000
+Ice Harvester II, Complex Asteroid Mining Crystal Type A II
+Ice Harvester II, Complex Asteroid Mining Crystal Type A II
+Simple Asteroid Mining Crystal Type B II x2
+Syndicate Reinforced Bulkheads, Complex Asteroid Mining Crystal Type A II
+Damage Control II, Complex Asteroid Mining Crystal Type A II
+Damage Control II, Complex Asteroid Mining Crystal Type A II
+Tracking Enhancer II, Complex Asteroid Mining Crystal Type A II
+Capital Industrial Core II, Complex Asteroid Mining Crystal Type A II
+Mining Survey Chipset II, Complex Asteroid Mining Crystal Type A II
+Mining Survey Chipset II, Complex Asteroid Mining Crystal Type A II
+Explosive Shield Hardener II, Complex Asteroid Mining Crystal Type A II
+Mining Laser Field Enhancement Charge x20125
+Large Gas Compressor I, Complex Asteroid Mining Crystal Type A II
+Shield Power Relay II, Complex Asteroid Mining Crystal Type A II
+Shield Power Relay II, Complex Asteroid Mining Crystal Type A II
+Helium Fuel Block Blueprint x1
+500MN Y-T8 Compact Microwarpdrive, Complex Asteroid Mining Crystal Type A II
+Large Mercoxit Compressor I, Complex Asteroid Mining Crystal Type A II
+Abyssal Ice Harvester, Complex Asteroid Mining Crystal Type A II
+Abyssal Ice Harvester, Complex Asteroid Mining Crystal Type A II
+Warp Core Stabilizer II, Complex Asteroid Mining Crystal Type A II
+Coherent Asteroid Mining Crystal Type A I x2
+Mining Foreman Mindlink x1
+Large Higgs Anchor I, Complex Asteroid Mining Crystal Type A II
+Caldari Navy Cloaking Device, Complex Asteroid Mining Crystal Type A II
+1MN Y-S8 Compact Afterburner, Complex Asteroid Mining Crystal Type A II
+Capital Asteroid Ore Compressor I, Complex Asteroid Mining Crystal Type A II
+10MN Afterburner II, Complex Asteroid Mining Crystal Type A II
+10MN Afterburner II, Complex Asteroid Mining Crystal Type A II
+Gyrostabilizer II, Complex Asteroid Mining Crystal Type A II
+Large Asteroid Ore Compressor I, Complex Asteroid Mining Crystal Type A II
+Mackinaw x4
+50MN Microwarpdrive II, Complex Asteroid Mining Crystal Type A II
+Mining Laser Optimization Charge x17499
+Large EMP Smartbomb II, Complex Asteroid Mining Crystal Type A II
+Large EMP Smartbomb II, Complex Asteroid Mining Crystal Type A II
+Covetor x3
+Small Compact Pb-Acid Cap Battery, Complex Asteroid Mining Crystal Type A II
+Helium Isotopes x20000
+Inertial Stabilizers II, Complex Asteroid Mining Crystal Type A II
+Inertial Stabilizers II, Complex Asteroid Mining Crystal Type A II
+Mining Foreman Burst II, Complex Asteroid Mining Crystal Type A II
+Mining Foreman Burst II, Complex Asteroid Mining Crystal Type A II
+Cynosural Field Generator I, Complex Asteroid Mining Crystal Type A II
+Nitrogen Fuel Block Blueprint x1
+Mining Laser Efficiency Charge x16598
+Capital Capacitor Booster I, Complex Asteroid Mining Crystal Type A II
+CONCORD Capital Shield Booster, Complex Asteroid Mining Crystal Type A II
+ORE Deep Core Strip Miner, Complex Asteroid Mining Crystal Type A II
+Mercoxit Asteroid Mining Crystal Type A II x7
+Mercoxit Asteroid Mining Crystal Type A II x25
+Industrial Jump Portal Generator I Blueprint x1
+Liquid Ozone x84426
+Coherent Asteroid Mining Crystal Type B I Blueprint x1
+Porpoise x1
+Pith X-Type EM Shield Hardener, Complex Asteroid Mining Crystal Type A II
+'Halcyon' Core Equalizer I, Complex Asteroid Mining Crystal Type A II
+Modulated Strip Miner II, Complex Asteroid Mining Crystal Type A II
+Modulated Strip Miner II, Complex Asteroid Mining Crystal Type A II
+Coherent Asteroid Mining Crystal Type B I Blueprint x1
+Oxygen Fuel Block Blueprint x3
+Oxygen Fuel Block Blueprint x5
+Hulk x7
+Capital Capacitor Booster II, Complex Asteroid Mining Crystal Type A II
+Oxygen Isotopes x1531496
+Mining Laser Efficiency Charge Blueprint x1
+Core Probe Launcher I, Complex Asteroid Mining Crystal Type A II
+Pithum C-Type EM Shield Amplifier, Complex Asteroid Mining Crystal Type A II
+Pithum C-Type EM Shield Amplifier, Complex Asteroid Mining Crystal Type A II
+Mechanical Parts x3595
+Mining Laser Upgrade II, Complex Asteroid Mining Crystal Type A II
+Mining Laser Upgrade II, Complex Asteroid Mining Crystal Type A II
+Reactive Armor Hardener, Complex Asteroid Mining Crystal Type A II
+Navy Cap Booster 3200 x114
+Oxygen Isotopes x361760

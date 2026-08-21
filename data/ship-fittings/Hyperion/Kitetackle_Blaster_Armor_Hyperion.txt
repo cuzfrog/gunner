@@ -1,0 +1,40 @@
+[Hyperion, Kitetackle Blaster Armor Hyperion]
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Rapid Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Heavy Stasis Grappler II
+Stasis Webifier II
+500MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Large Ancillary Armor Repairer, Nanite Repair Paste
+Large Armor Repairer II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Reactive Armor Hardener
+
+Large Nanobot Accelerator I
+Large Auxiliary Nano Pump I
+Large Auxiliary Nano Pump I
+
+
+Ogre II x1
+Hobgoblin II x1
+Hobgoblin II x4
+
+
+Caldari Navy Mjolnir Heavy Missile x475
+Caldari Navy Antimatter Charge L x5600
+Null L x4444
+Agency 'Hardshell' TB5 Dose II x1
+Nanite Repair Paste x264
+Navy Cap Booster 3200 x6
+Imperial Navy Slicer x1

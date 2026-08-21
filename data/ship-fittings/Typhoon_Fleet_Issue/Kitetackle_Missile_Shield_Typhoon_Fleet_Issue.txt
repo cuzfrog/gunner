@@ -1,0 +1,47 @@
+[Typhoon Fleet Issue, Kitetackle Missile Shield Typhoon Fleet Issue]
+Rapid Heavy Missile Launcher II, Nova Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Nova Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Nova Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Mjolnir Fury Heavy Missile
+Heavy Energy Neutralizer II
+Heavy Energy Neutralizer II
+
+Missile Guidance Computer II, Missile Precision Script
+Heavy Stasis Grappler II
+Stasis Webifier II
+Warp Scrambler II
+500MN Microwarpdrive II
+
+Reinforced Bulkheads II
+Ballistic Control System II
+Inertial Stabilizers II
+Reinforced Bulkheads II
+Damage Control II
+Inertial Stabilizers II
+Ballistic Control System II
+
+Large Transverse Bulkhead II
+Large Hyperspatial Velocity Optimizer I
+Large Warhead Rigor Catalyst I
+
+
+Ogre II x3
+Wasp II x3
+Vespa II x2
+Vespa II x1
+Hammerhead II x1
+
+
+Caldari Navy Nova Heavy Missile x924
+Synth Crash Booster x3
+Mjolnir Fury Heavy Missile x1050
+Caldari Navy Inferno Heavy Missile x916
+Caldari Navy Mjolnir Heavy Missile x1318
+Proximity-5 'Extraction' Filament x1
+Caldari Navy Nova Heavy Assault Missile x1500
+Nova Fury Heavy Missile x1050
+Nanite Repair Paste x500
+Agency 'Overclocker' SB7 Dose III x1
+Metamorphosis x1

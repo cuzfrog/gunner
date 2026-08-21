@@ -1,0 +1,29 @@
+[Stabber, Ewar Shield Stabber]
+Core Probe Launcher I, Core Scanner Probe I
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Prototype Cloaking Device I
+Small Energy Neutralizer II
+
+Large Shield Extender II
+100MN Y-S8 Compact Afterburner
+Large Shield Extender II
+EM Shield Amplifier II
+
+Overdrive Injector System II
+Damage Control II
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+
+
+Core Scanner Probe I x8
+10K Bounty SCC Encrypted Bond x2
+Nanite Repair Paste x30
+1M Bounty SCC Encrypted Bond x5
+10M Bounty SCC Encrypted Bond x28
+100K Bounty SCC Encrypted Bond x6

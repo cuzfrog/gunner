@@ -1,0 +1,128 @@
+[Revenant, Kitetackle Armor Revenant]
+Setele's Modified Large Plasma Smartbomb
+Armor Command Burst II, Armor Reinforcement Charge
+Skirmish Command Burst II, Rapid Deployment Charge
+Vepas' Modified Large Graviton Smartbomb
+Networked Sensor Array
+Tuvan's Modified Large Plasma Smartbomb
+
+Domination 10000MN Afterburner
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Pithum A-Type Multispectrum Shield Hardener
+Pithum A-Type Multispectrum Shield Hardener
+Pith X-Type EM Shield Hardener
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Federation Navy Drone Navigation Computer
+
+CONCORD 25000mm Steel Plates
+Reactive Armor Hardener
+Unit P-343554's Modified Damage Control
+Corpum A-Type Multispectrum Energized Membrane
+Corpum A-Type Multispectrum Energized Membrane
+CONCORD 25000mm Steel Plates
+
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+
+
+Thermal Armor Hardener II, Armor Energizing Charge
+Corpum A-Type Kinetic Energized Membrane, Armor Energizing Charge
+Armor Energizing Charge x500
+Imperial Navy Large EMP Smartbomb, Armor Energizing Charge
+Navy Cap Booster 3200 x75
+Corpum A-Type EM Energized Membrane, Armor Energizing Charge
+Capacitor Flux Coil II, Armor Energizing Charge
+Mobile Cynosural Inhibitor x2
+Federation Navy Drone Navigation Computer, Armor Energizing Charge
+Heavy F-RX Compact Capacitor Booster, Armor Energizing Charge
+Energy Neutralization Burst Projector, Armor Energizing Charge
+Shield Command Burst II, Armor Energizing Charge
+Skirmish Command Burst II, Armor Energizing Charge
+Corpus X-Type Heavy Energy Neutralizer, Armor Energizing Charge
+Sensor Booster II, Armor Energizing Charge
+Corpus X-Type Explosive Armor Hardener, Armor Energizing Charge
+Explosive Energized Membrane II, Armor Energizing Charge
+Damage Control II, Armor Energizing Charge
+Shield Harmonizing Charge x500
+Equite II x12
+Heavy Energy Neutralizer II, Armor Energizing Charge
+Evasive Maneuvers Charge x500
+Liquid Ozone x3000
+Helium Isotopes x40000
+Mobile Scan Inhibitor x1
+Domination 50000MN Microwarpdrive, Armor Energizing Charge
+500MN Quad LiF Restrained Microwarpdrive, Armor Energizing Charge
+EM Energized Membrane II, Armor Energizing Charge
+Heavy Warp Disruptor II, Armor Energizing Charge
+Kinetic Energized Membrane II, Armor Energizing Charge
+'Halcyon' Core Equalizer I, Armor Energizing Charge
+Reactive Armor Hardener, Armor Energizing Charge
+Imperial Navy Drone Damage Amplifier, Armor Energizing Charge
+Explosive Armor Hardener II, Armor Energizing Charge
+Rapid Repair Charge x500
+Mobile Cynosural Beacon x2
+EM Armor Hardener II, Armor Energizing Charge
+Cap Recharger II, Armor Energizing Charge
+Mantis II x6
+Thermal Energized Membrane II, Armor Energizing Charge
+Electronic Hardening Charge x500
+Federation Navy Omnidirectional Tracking Link, Armor Energizing Charge
+Capital Energy Neutralizer II, Armor Energizing Charge
+Warp Core Stabilizer II, Armor Energizing Charge
+Capacitor Power Relay II, Armor Energizing Charge
+Large Cap Battery II, Armor Energizing Charge
+Sensor Optimization Charge x500
+Electronic Superiority Charge x500
+Stasis Webification Burst Projector, Armor Energizing Charge
+Capital Capacitor Booster II, Armor Energizing Charge
+Inertial Stabilizers II, Armor Energizing Charge
+Centus X-Type Kinetic Armor Hardener, Armor Energizing Charge
+Mobile Large Warp Disruptor II x2
+Heavy Stasis Grappler II, Armor Energizing Charge
+Centus X-Type EM Armor Hardener, Armor Energizing Charge
+Kinetic Armor Hardener II, Armor Energizing Charge
+Active Shielding Charge x500
+Prototype Hyperspatial Accelerator, Armor Energizing Charge
+Mobile Depot x3
+Interdiction Maneuvers Charge x500
+Warp Disruption Burst Projector, Armor Energizing Charge
+Capital Flex Armor Hardener II, Armor Energizing Charge
+Republic Fleet Target Painter, Armor Energizing Charge
+Information Command Burst II, Armor Energizing Charge
+Multispectrum Energized Membrane II, Armor Energizing Charge
+Overdrive Injector System II, Armor Energizing Charge
+ECM Jammer Burst Projector, Armor Energizing Charge
+Caldari Navy Cloaking Device, Armor Energizing Charge
+Multispectrum Shield Hardener II, Armor Energizing Charge
+Armor Command Burst II, Armor Energizing Charge
+Centus X-Type Thermal Armor Hardener, Armor Energizing Charge
+Centum A-Type Explosive Energized Membrane, Armor Energizing Charge
+Capital Cap Battery II, Armor Energizing Charge
+Shield Extension Charge x500
+Nanofiber Internal Structure II, Armor Energizing Charge
+Corpum A-Type Thermal Energized Membrane, Armor Energizing Charge
+Scan Resolution Script x10
+ECCM Script x10
+Armor Kinetic Resistance Script x1
+Optimal Range Script x10
+Quafe Zero Classic x3
+Armor EM Resistance Script x1
+Armor Thermal Resistance Script x1
+Armor Explosive Resistance Script x1
+Nanite Repair Paste x2500
+Tracking Speed Script x10
+Agency 'Overclocker' SB9 Dose IV x3
+Armor Reinforcement Charge x500
+Rapid Deployment Charge x500
+Targeting Range Script x10
+Strong Mindflood Booster x3
+Navy Cap Booster 3200 x17
+Helium Isotopes x49236
+Heavy Water x5000
+Nestor x1
+Sabre x1
+Onyx x1
+Sabre x1
+Hoarder x1
+Falcon x1

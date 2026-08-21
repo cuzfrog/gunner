@@ -1,0 +1,41 @@
+[Lif, Commandship Shield Lif]
+CONCORD Capital Remote Shield Booster
+Shield Command Burst II, Shield Harmonizing Charge
+CONCORD Capital Remote Shield Booster
+Shield Command Burst II, Shield Extension Charge
+CONCORD Capital Remote Shield Booster
+Triage Module II
+
+Pith X-Type Shield Boost Amplifier
+Pithum C-Type Multispectrum Shield Hardener
+Capital Capacitor Booster II, Navy Cap Booster 3200
+CONCORD Capital Shield Booster
+Pith X-Type Shield Boost Amplifier
+Pithum C-Type Multispectrum Shield Hardener
+
+Caldari Navy Power Diagnostic System
+Damage Control II
+Caldari Navy Co-Processor
+Caldari Navy Power Diagnostic System
+Caldari Navy Power Diagnostic System
+
+Capital Core Defense Capacitor Safeguard II
+Capital EM Shield Reinforcer II
+Capital Core Defense Operational Solidifier I
+
+
+Bouncer II x2
+Bouncer II x2
+Heavy Hull Maintenance Bot I x2
+Heavy Hull Maintenance Bot I x3
+Federation Navy Ogre x5
+Hornet EC-300 x5
+
+
+Active Shielding Charge x1200
+Shield Extension Charge x1200
+Shield Harmonizing Charge x1200
+Agency 'Hardshell' TB5 Dose II x1
+Navy Cap Booster 3200 x12
+Strontium Clathrates x1700
+Navy Cap Booster 3200 x74

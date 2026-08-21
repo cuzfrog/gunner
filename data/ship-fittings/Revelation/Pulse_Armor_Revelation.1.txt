@@ -1,0 +1,39 @@
+[Revelation, Pulse Armor Revelation]
+Imperial Navy Large EMP Smartbomb
+Siege Module II
+Quad Mega Pulse Laser II, Conflagration XL
+Dual Giga Pulse Laser II, Conflagration XL
+Quad Mega Pulse Laser II, Conflagration XL
+
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Optical Compact Tracking Computer
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Optical Compact Tracking Computer
+
+True Sansha Heat Sink
+Imperial Navy Heat Sink
+Syndicate Damage Control
+Corpum B-Type Multispectrum Energized Membrane
+Capital I-a Enduring Armor Repairer
+Capital I-a Enduring Armor Repairer
+True Sansha Heat Sink
+Coreli A-Type Multispectrum Coating
+
+Capital Trimark Armor Pump I
+Capital Energy Burst Aerator I
+Capital Ancillary Current Router II
+
+
+Conflagration XL x1
+Conflagration XL x5
+Tracking Speed Script x2
+Strontium Clathrates x555
+Scorch XL x9
+Sanshas Multifrequency XL x3
+Sanshas Multifrequency XL x6
+Strontium Clathrates x1416
+Helium Isotopes x50066
+Helium Isotopes x66
+Strontium Clathrates x554
+Navy Cap Booster 3200 x11
+Dual Giga Pulse Laser II, Navy Cap Booster 3200

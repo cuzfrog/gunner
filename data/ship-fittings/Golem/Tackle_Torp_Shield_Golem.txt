@@ -1,0 +1,37 @@
+[Golem, Tackle Torp Shield Golem]
+Torpedo Launcher II, Caldari Navy Inferno Torpedo
+Core Probe Launcher II, Sisters Core Scanner Probe
+Torpedo Launcher II, Caldari Navy Inferno Torpedo
+Bastion Module I
+Torpedo Launcher II, Caldari Navy Inferno Torpedo
+Federation Navy Large Plasma Smartbomb
+Torpedo Launcher II, Caldari Navy Inferno Torpedo
+Federation Navy Large Plasma Smartbomb
+
+Multispectrum Shield Hardener II
+Imperial Navy Cap Recharger
+Heavy Stasis Grappler II
+Republic Fleet Large Cap Battery
+Target Painter II
+Pith X-Type X-Large Shield Booster
+Cap Recharger II
+
+Capacitor Flux Coil II
+Capacitor Flux Coil II
+Ballistic Control System II
+Ballistic Control System II
+
+Large EM Shield Reinforcer II
+Large Capacitor Control Circuit II
+
+
+Hobgoblin II x2
+Warrior II x8
+
+
+Inferno Rage Torpedo x3121
+Nova Rage Torpedo x1000
+Scourge Rage Torpedo x1000
+Caldari Navy Nova Torpedo x644
+Caldari Navy Scourge Torpedo x1000
+Caldari Navy Inferno Torpedo x1780

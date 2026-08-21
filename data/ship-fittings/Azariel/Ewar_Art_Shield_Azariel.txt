@@ -1,0 +1,116 @@
+[Azariel, Ewar Art Shield Azariel]
+Vepas' Modified Large Graviton Smartbomb
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+'Gjallarhorn' Explosive Doomsday
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+CONCORD Quad 3500mm Siege Artillery, Arch Angel Fusion XL
+
+Pithum A-Type Multispectrum Shield Hardener
+CONCORD Capital Shield Extender
+Dark Blood Capital Capacitor Booster, Navy Cap Booster 3200
+CONCORD Capital Shield Extender
+Tobias' Modified EM Shield Amplifier
+CONCORD Capital Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+
+Hakim's Modified Gyrostabilizer
+Ahremen's Modified Power Diagnostic System
+Unit P-343554's Modified Damage Control
+Setele's Modified Power Diagnostic System
+Hakim's Modified Gyrostabilizer
+Ahremen's Modified Power Diagnostic System
+Ahremen's Modified Power Diagnostic System
+
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+
+
+Imperial Navy Large EMP Smartbomb, Navy Cap Booster 3200
+Navy Cap Booster 3200 x300
+Capacitor Flux Coil II, Navy Cap Booster 3200
+Improved Cloaking Device II, Navy Cap Booster 3200
+Mobile Cynosural Inhibitor x2
+Corpus X-Type Heavy Energy Neutralizer, Navy Cap Booster 3200
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Thermal Shield Hardener II, Navy Cap Booster 3200
+Damage Control II, Navy Cap Booster 3200
+Heavy Energy Neutralizer II, Navy Cap Booster 3200
+Caldari Navy Power Diagnostic System, Navy Cap Booster 3200
+Pith X-Type Explosive Shield Hardener, Navy Cap Booster 3200
+Liquid Ozone x304
+Domination 50000MN Microwarpdrive, Navy Cap Booster 3200
+Bosonic Field Generator, Navy Cap Booster 3200
+500MN Quad LiF Restrained Microwarpdrive, Navy Cap Booster 3200
+Pithum A-Type Explosive Shield Amplifier, Navy Cap Booster 3200
+'Halcyon' Core Equalizer I, Navy Cap Booster 3200
+10000MN Afterburner II, Navy Cap Booster 3200
+CONCORD Hexa 2500mm Repeating Cannon, Navy Cap Booster 3200
+Cap Recharger II, Navy Cap Booster 3200
+CONCORD Capital Shield Extender, Navy Cap Booster 3200
+Warp Core Stabilizer II, Navy Cap Booster 3200
+Capacitor Power Relay II, Navy Cap Booster 3200
+Pithum A-Type Kinetic Shield Amplifier, Navy Cap Booster 3200
+Large Cap Battery II, Navy Cap Booster 3200
+Pith X-Type Thermal Shield Hardener, Navy Cap Booster 3200
+25000mm Steel Plates II, Navy Cap Booster 3200
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Inertial Stabilizers II, Navy Cap Booster 3200
+Pithum A-Type Thermal Shield Amplifier, Navy Cap Booster 3200
+Explosive Shield Hardener II, Navy Cap Booster 3200
+Domination Tracking Enhancer, Navy Cap Booster 3200
+Prototype Hyperspatial Accelerator, Navy Cap Booster 3200
+Mobile Depot x3
+Hydrogen Isotopes x483983
+Jump Portal Generator I, Navy Cap Booster 3200
+Multispectrum Energized Membrane II, Navy Cap Booster 3200
+Overdrive Injector System II, Navy Cap Booster 3200
+Pith X-Type Kinetic Shield Hardener, Navy Cap Booster 3200
+Pithum A-Type EM Shield Amplifier, Navy Cap Booster 3200
+EM Shield Hardener II, Navy Cap Booster 3200
+Caldari Navy Cloaking Device, Navy Cap Booster 3200
+Multispectrum Shield Hardener II, Navy Cap Booster 3200
+Pith X-Type EM Shield Hardener, Navy Cap Booster 3200
+Sentient Sensor Booster, Navy Cap Booster 3200
+Capital Cap Battery II, Navy Cap Booster 3200
+'Geiravor' Explosive Lance, Navy Cap Booster 3200
+Strontium Clathrates x2000
+Nanofiber Internal Structure II, Navy Cap Booster 3200
+Kinetic Shield Hardener II, Navy Cap Booster 3200
+ECCM Script x10
+Arch Angel Phased Plasma XL x6000
+Hail XL x6000
+Arch Angel Proton XL x6000
+Tremor XL x6000
+Arch Angel Carbonized Lead XL x6000
+Quake XL x6000
+Arch Angel EMP XL x6000
+Agency 'Pyrolancea' DB7 Dose III x5
+Quafe Zero Classic x5
+Agency 'Overclocker' SB7 Dose III x5
+Arch Angel Nuclear XL x6000
+Agency 'Pyrolancea' DB9 Dose IV x5
+Scan Resolution Script x10
+Nanite Repair Paste x5000
+Arch Angel Fusion XL x11724
+Agency 'Overclocker' SB9 Dose IV x5
+Barrage XL x6000
+Arch Angel Titanium Sabot XL x6000
+Arch Angel Depleted Uranium XL x12000
+Targeting Range Script x10
+Strong Mindflood Booster x5
+Navy Cap Booster 3200 x44
+Liquid Ozone x5000
+Hydrogen Isotopes x908094
+Strontium Clathrates x8000
+Nestor x1
+Sabre x1
+Sabre x1
+Hoarder x1
+Hoarder x1
+Sabre x1
+Falcon x1
+Onyx x1

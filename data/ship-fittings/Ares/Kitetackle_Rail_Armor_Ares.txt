@@ -1,0 +1,23 @@
+[Ares, Kitetackle Rail Armor Ares]
+Enduring Interdiction Nullifier
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+
+5MN Y-T8 Compact Microwarpdrive
+Faint Scoped Warp Disruptor
+Faint Epsilon Scoped Warp Scrambler
+
+Inertial Stabilizers II
+Nanofiber Internal Structure II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+IFFA Compact Damage Control
+
+Small Auxiliary Thrusters II
+Small Polycarbon Engine Housing II
+
+
+Spike S x1196
+Caldari Navy Thorium Charge S x906
+Javelin S x1500
+Cladistic-5 'Krai Veles' Filament x2
+Nanite Repair Paste x70

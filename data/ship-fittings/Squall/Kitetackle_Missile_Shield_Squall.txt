@@ -1,0 +1,25 @@
+[Squall, Kitetackle Missile Shield Squall]
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Interdiction Nullifier I
+Rapid Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Prototype Cloaking Device I
+
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+50MN Y-T8 Compact Microwarpdrive
+Medium Shield Extender II
+
+Ballistic Control System II
+Inertial Stabilizers II
+Damage Control II
+
+
+Mobile Depot x1
+Medium Core Defense Field Extender I, Caldari Navy Mjolnir Light Missile
+Caldari Navy Mjolnir Light Missile x460
+Caldari Navy Scourge Light Missile x320
+Noise-5 'Needlejack' Filament x3
+Caldari Navy Inferno Light Missile x400
+Caldari Navy Nova Light Missile x400
+Cladistic-5 'Krai Veles' Filament x2

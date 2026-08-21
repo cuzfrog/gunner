@@ -1,0 +1,49 @@
+[Wyvern, Commandship Shield Wyvern]
+Shield Command Burst II, Shield Extension Charge
+Fighter Support Unit II
+Networked Sensor Array
+Fighter Support Unit II
+Improved Cloaking Device II
+Shield Command Burst II, Shield Harmonizing Charge
+
+50000MN Microwarpdrive I
+Pithum A-Type Multispectrum Shield Hardener
+Capital Shield Extender II
+Pithum A-Type Multispectrum Shield Hardener
+Capital Shield Extender II
+Pith X-Type Thermal Shield Hardener
+Pith X-Type EM Shield Hardener
+Capital Capacitor Booster II
+
+Imperial Navy Drone Damage Amplifier
+Shadow Serpentis Damage Control
+Imperial Navy Drone Damage Amplifier
+Dread Guristas Omnidirectional Tracking Enhancer
+
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+Capital Core Defense Field Extender II
+
+
+Mobile Depot x2
+Pithum A-Type EM Shield Amplifier, Shield Extension Charge
+Mobile Observatory x1
+Pithum A-Type Explosive Shield Amplifier, Shield Extension Charge
+Pithum A-Type Kinetic Shield Amplifier, Shield Extension Charge
+Shield Extension Charge x2400
+Shield Harmonizing Charge x2400
+Improved Cloaking Device II, Shield Extension Charge
+'Wetu' Mobile Depot x1
+Pithum A-Type Thermal Shield Amplifier, Shield Extension Charge
+Dark Blood Reactor Control Unit, Navy Cap Booster 3200
+Council Diplomatic Shuttle x8
+Shield Command Burst II, Navy Cap Booster 3200
+Navy Cap Booster 3200 x78
+Capital Ancillary Shield Booster, Navy Cap Booster 3200
+Navy Cap Booster 800 x49
+Capital Capacitor Booster I, Navy Cap Booster 3200
+Nitrogen Isotopes x166666
+Crane x1
+Osprey x1
+Bestower x1
+Endurance x1

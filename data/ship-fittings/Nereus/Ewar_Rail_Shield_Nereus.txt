@@ -1,0 +1,25 @@
+[Nereus, Ewar Rail Shield Nereus]
+Inertial Stabilizers II
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+Inertial Stabilizers II
+
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+Medium Hyperspatial Velocity Optimizer I
+
+
+Expanded Cargohold II, Navy Cap Booster 400
+Civilian Gatling Railgun, Navy Cap Booster 400
+FZ-3a Enduring Gravimetric ECM, Navy Cap Booster 400
+Civilian Miner, Navy Cap Booster 400
+Civilian Gatling Autocannon, Navy Cap Booster 400
+1MN Y-S8 Compact Afterburner, Navy Cap Booster 400
+Umbra Scoped Radar ECM, Navy Cap Booster 400
+Phased Scoped Target Painter, Navy Cap Booster 400
+Navy Cap Booster 400 x22
+Missile Range Script x1
+Small Shield Extender II, Navy Cap Booster 400
+1MN Civilian Afterburner, Navy Cap Booster 400
+Caldari Navy Inferno Light Missile x2000

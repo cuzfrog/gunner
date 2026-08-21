@@ -1,0 +1,44 @@
+[Omen, Kitetackle Pulse Shield Omen]
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+Focused Medium Pulse Laser II, Scorch M
+
+50MN Quad LiF Restrained Microwarpdrive
+Faint Epsilon Scoped Warp Scrambler
+X5 Enduring Stasis Webifier
+
+Heat Sink II
+Damage Control II
+Heat Sink II
+1600mm Rolled Tungsten Compact Plates
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+
+Medium Energy Burst Aerator II
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+
+
+Imperial Navy Multifrequency M x4
+Imperial Navy Multifrequency M x1
+Damage Control II, Imperial Navy Multifrequency M
+Ballistic Control System II, Imperial Navy Multifrequency M
+Faint Epsilon Scoped Warp Scrambler, Imperial Navy Multifrequency M
+Faint Epsilon Scoped Warp Scrambler, Imperial Navy Multifrequency M
+Conflagration M x4
+Conflagration M x1
+Sensor Booster II, Imperial Navy Multifrequency M
+Scourge Light Missile x152
+ECCM Script x1
+Limited 'Limos' Rapid Light Missile Launcher, Imperial Navy Multifrequency M
+Limited 'Limos' Rapid Light Missile Launcher, Imperial Navy Multifrequency M
+Nova Fury Light Missile x3225
+Nova Fury Light Missile x60
+Scan Resolution Script x1
+10MN Afterburner II, Imperial Navy Multifrequency M
+50MN Cold-Gas Enduring Microwarpdrive, Imperial Navy Multifrequency M
+Multispectrum Shield Hardener II, Imperial Navy Multifrequency M
+Compact Multispectrum Shield Hardener, Imperial Navy Multifrequency M
+Large Shield Extender II, Imperial Navy Multifrequency M

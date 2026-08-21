@@ -1,0 +1,47 @@
+[Claymore, Support Missile Shield Claymore]
+Shield Command Burst II, Active Shielding Charge
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Skirmish Command Burst II, Rapid Deployment Charge
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+
+Pithum A-Type Kinetic Shield Amplifier
+Multispectrum Shield Hardener II
+Large Shield Extender II
+Large Shield Extender II
+50MN Cold-Gas Enduring Microwarpdrive
+Large Shield Extender II
+
+Overdrive Injector System II
+Damage Control II
+Nanofiber Internal Structure II
+Capacitor Power Relay II
+
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+
+
+Warrior II x5
+
+
+Caldari Navy Nova Heavy Missile x710
+Electronic Hardening Charge x600
+Caldari Navy Scourge Heavy Missile x1000
+Skirmish Command Burst II, Caldari Navy Nova Heavy Missile
+Caldari Navy Inferno Heavy Missile x630
+Active Shielding Charge x260
+Power Diagnostic System II, Caldari Navy Nova Heavy Missile
+Caldari Navy Mjolnir Heavy Missile x300
+Electronic Superiority Charge x600
+Shield Extension Charge x600
+Shield Harmonizing Charge x543
+Evasive Maneuvers Charge x572
+Shield Command Burst II, Caldari Navy Nova Heavy Missile
+10MN Afterburner II, Caldari Navy Nova Heavy Missile
+Sensor Optimization Charge x600
+Nanite Repair Paste x100
+Rapid Deployment Charge x261
+Information Command Burst II, Caldari Navy Nova Heavy Missile
+Interdiction Maneuvers Charge x600

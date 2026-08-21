@@ -1,0 +1,33 @@
+[Rattlesnake, Missile Shield Rattlesnake]
+Rapid Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Drone Link Augmentor I
+Rapid Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Rapid Heavy Missile Launcher II, Scourge Fury Heavy Missile
+
+Republic Fleet Large Cap Battery
+Republic Fleet Large Cap Battery
+500MN Y-T8 Compact Microwarpdrive
+Drone Navigation Computer I
+Republic Fleet Large Shield Extender
+Dread Guristas Multispectrum Shield Hardener
+Dread Guristas Large Shield Booster
+
+Damage Control II
+Drone Damage Amplifier II
+Capacitor Power Relay II
+Drone Damage Amplifier II
+Capacitor Power Relay II
+Drone Damage Amplifier II
+
+Large Semiconductor Memory Cell I
+Large EM Shield Reinforcer II
+Large Semiconductor Memory Cell II
+
+
+'Integrated' Wasp x3
+Warrior II x1
+
+
+Scourge Fury Heavy Missile x1090

@@ -1,0 +1,471 @@
+[Fenrir, Kitetackle Missile Shield Fenrir]
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+
+
+Republic Fleet Warrior x1
+Hornet EC-300 x27
+Hornet EC-300 x3
+Republic Fleet Valkyrie x2
+Republic Fleet Valkyrie x1
+Valkyrie I x42
+Valkyrie I x265
+Berserker II x19
+Berserker II x23
+Acolyte II x8
+Acolyte II x18
+Warrior II x7
+Warrior II x23
+Hammerhead I x369
+Hammerhead I x36
+Vespa I x327
+Vespa I x48
+Infiltrator I x328
+Infiltrator II x6
+Infiltrator II x4
+Caldari Navy Vespa x2
+Republic Fleet Berserker x2
+Republic Fleet Berserker x5
+Valkyrie II x6
+
+
+Angel Gold Tag x160
+Angel Gold Tag x21
+Fourier Compact Tracking Enhancer, Mjolnir Rocket
+Medium Asymmetric Enduring Remote Shield Booster, Mjolnir Rocket
+Enduring Kinetic Shield Hardener, Mjolnir Rocket
+Enduring Kinetic Shield Hardener, Mjolnir Rocket
+Arbalest Compact Light Missile Launcher, Mjolnir Rocket
+Arbalest Compact Light Missile Launcher, Mjolnir Rocket
+Mjolnir Rocket x16300
+Mjolnir Torpedo x102400
+F-23 Compact Remote Sensor Booster, Mjolnir Rocket
+F-23 Compact Remote Sensor Booster, Mjolnir Rocket
+Domination Overdrive Injector, Mjolnir Rocket
+Pitfall Compact Warp Disruption Field Generator, Mjolnir Rocket
+Pitfall Compact Warp Disruption Field Generator, Mjolnir Rocket
+Large 'Hope' Hull Reconstructor I, Mjolnir Rocket
+Large 'Hope' Hull Reconstructor I, Mjolnir Rocket
+Suppressed Targeting System I, Mjolnir Rocket
+'Arbalest' Cruise Launcher I, Mjolnir Rocket
+Balmer Series Compact Tracking Disruptor I, Mjolnir Rocket
+Balmer Series Compact Tracking Disruptor I, Mjolnir Rocket
+Glorification-1 'Devana' Filament x1
+280mm Carbine Howitzer I, Mjolnir Rocket
+280mm Carbine Howitzer I, Mjolnir Rocket
+Angel Electrum Tag x29
+Domination 100MN Afterburner, Mjolnir Rocket
+Mjolnir Heavy Missile x71600
+Large I-b Polarized Structural Regenerator, Mjolnir Rocket
+Large I-b Polarized Structural Regenerator, Mjolnir Rocket
+Kapteyn Compact Sensor Dampener, Mjolnir Rocket
+Kapteyn Compact Sensor Dampener, Mjolnir Rocket
+Scourge Heavy Assault Missile x64600
+Prototype Compact EM Armor Hardener I, Mjolnir Rocket
+Prototype Compact EM Armor Hardener I, Mjolnir Rocket
+X-Large C5-L Compact Shield Booster, Mjolnir Rocket
+Co-Processor II, Mjolnir Rocket
+Co-Processor II, Mjolnir Rocket
+Nova Cruise Missile x180500
+Drone Damage Amplifier II, Mjolnir Rocket
+Drone Damage Amplifier II, Mjolnir Rocket
+Compact EM Shield Amplifier, Mjolnir Rocket
+200mm Light Carbine Repeating Cannon I, Mjolnir Rocket
+YO-5000 Rapid Heavy Missile Launcher, Mjolnir Rocket
+Dual 650mm Prototype Automatic Cannon, Mjolnir Rocket
+1400mm Gallium Cannon, Mjolnir Rocket
+1400mm Gallium Cannon, Mjolnir Rocket
+Stellar White Gloss - Unlimited x1
+Small Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+Small Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+Compact Thermal Shield Amplifier, Mjolnir Rocket
+Arch Angel Nuclear L x10000
+Inferno Rocket x11700
+Nova Auto-Targeting Cruise Missile I x7100
+Nova Auto-Targeting Cruise Missile I x71600
+Titanium Sabot M x6200
+Titanium Sabot M x49700
+Large Inefficient Hull Repair Unit, Mjolnir Rocket
+Large Inefficient Hull Repair Unit, Mjolnir Rocket
+Medium C5-L Compact Shield Booster, Mjolnir Rocket
+Medium C5-L Compact Shield Booster, Mjolnir Rocket
+Scourge Torpedo x92300
+Clutch Restrained Warp Disruption Field Generator, Mjolnir Rocket
+Clutch Restrained Warp Disruption Field Generator, Mjolnir Rocket
+Large Automated Structural Restoration, Mjolnir Rocket
+Large Automated Structural Restoration, Mjolnir Rocket
+Void M x2628
+Domination Crystal Tag x47
+425mm Medium Carbine Repeating Cannon I, Mjolnir Rocket
+425mm Medium Carbine Repeating Cannon I, Mjolnir Rocket
+Limited 'Limos' Rapid Light Missile Launcher, Mjolnir Rocket
+Dual 425mm Gallium Machine Gun, Mjolnir Rocket
+Inferno Cruise Missile x121600
+Inferno Cruise Missile x18300
+Heavy Karelin Scoped Stasis Grappler, Mjolnir Rocket
+Initiated Compact Warp Disruptor, Mjolnir Rocket
+Initiated Compact Warp Disruptor, Mjolnir Rocket
+Small I-a Enduring Armor Repairer, Mjolnir Rocket
+Cradle of Freedom - Limited x3
+Navy Cap Booster 400 x9
+'Malkuth' Rocket Launcher I, Mjolnir Rocket
+Phased Plasma M x52900
+Experimental Enduring EM Armor Hardener I, Mjolnir Rocket
+Experimental Enduring EM Armor Hardener I, Mjolnir Rocket
+100MN Y-S8 Compact Afterburner, Mjolnir Rocket
+Depleted Uranium L x111800
+Depleted Uranium L x13300
+Inferno Heavy Assault Missile x49300
+Inferno Heavy Assault Missile x8000
+Mjolnir Auto-Targeting Heavy Missile I x27200
+Nova Heavy Assault Missile x52800
+Nova Heavy Assault Missile x6300
+Small Asymmetric Enduring Remote Shield Booster, Mjolnir Rocket
+23rd Tier Overseer's Personal Effects x18
+5MN Cold-Gas Enduring Microwarpdrive, Mjolnir Rocket
+425mm Medium 'Scout' Autocannon I, Mjolnir Rocket
+EMP S x2500
+EMP S x19900
+Medium Murky Compact Remote Shield Booster, Mjolnir Rocket
+Peripheral Compact Target Painter, Mjolnir Rocket
+Peripheral Compact Target Painter, Mjolnir Rocket
+Arch Angel Proton L x3000
+'Notos' Compact Large Proton Smartbomb, Mjolnir Rocket
+'Notos' Compact Large Proton Smartbomb, Mjolnir Rocket
+Large Asymmetric Enduring Remote Shield Booster, Mjolnir Rocket
+Large Asymmetric Enduring Remote Shield Booster, Mjolnir Rocket
+425mm Medium Gallium Machine Gun, Mjolnir Rocket
+Mjolnir Auto-Targeting Light Missile I x600
+Mjolnir Auto-Targeting Light Missile I x7300
+SKINR Design Element Reward x1
+SKINR Design Element Reward x16
+Phased Scoped Target Painter, Mjolnir Rocket
+Phased Scoped Target Painter, Mjolnir Rocket
+Multispectrum Shield Hardener II, Mjolnir Rocket
+Multispectrum Shield Hardener II, Mjolnir Rocket
+F-12 Enduring Tracking Computer, Mjolnir Rocket
+F-12 Enduring Tracking Computer, Mjolnir Rocket
+Juniper Edge Gloss - Limited x3
+Prototype Compact Explosive Armor Hardener I, Mjolnir Rocket
+EMP L x115700
+Gyrostabilizer II, Mjolnir Rocket
+Domination Tracking Enhancer, Mjolnir Rocket
+Metal Scraps x27258
+Metal Scraps x3535
+Carbonized Lead L x124200
+Domination Thermal Shield Amplifier, Mjolnir Rocket
+Domination Explosive Armor Hardener, Mjolnir Rocket
+800mm Crystalline Carbonide Restrained Plates, Mjolnir Rocket
+800mm Crystalline Carbonide Restrained Plates, Mjolnir Rocket
+Titanium Sabot L x103000
+Titanium Sabot L x11200
+Dual 650mm Carbine Repeating Cannon I, Mjolnir Rocket
+1400mm 'Scout' Artillery I, Mjolnir Rocket
+Angel Palladium Tag x137
+Prototype Compact Kinetic Armor Hardener I, Mjolnir Rocket
+Prototype Compact Kinetic Armor Hardener I, Mjolnir Rocket
+Compact Thermal Shield Hardener, Mjolnir Rocket
+Compact Thermal Shield Hardener, Mjolnir Rocket
+100MN Monopropellant Enduring Afterburner, Mjolnir Rocket
+100MN Monopropellant Enduring Afterburner, Mjolnir Rocket
+F-89 Compact Signal Amplifier, Mjolnir Rocket
+Signal-5 'Needlejack' Filament x1
+Scourge Rocket x8300
+Mjolnir Light Missile x14000
+1600mm Crystalline Carbonide Restrained Plates, Mjolnir Rocket
+Faint Epsilon Scoped Warp Scrambler, Mjolnir Rocket
+Faint Epsilon Scoped Warp Scrambler, Mjolnir Rocket
+425mm Medium Prototype Automatic Cannon, Mjolnir Rocket
+Gloom Enduring Radar ECM, Mjolnir Rocket
+Gloom Enduring Radar ECM, Mjolnir Rocket
+000 - Gauss Jannon x11200
+000 - Gauss Jannon x104500
+250mm Light Prototype Siege Cannon, Mjolnir Rocket
+250mm Light Prototype Siege Cannon, Mjolnir Rocket
+Domination Large Armor Repairer, Mjolnir Rocket
+Depleted Uranium M x64000
+50MN Cold-Gas Enduring Microwarpdrive, Mjolnir Rocket
+Barrage M x297
+Baker Nunn Enduring Tracking Disruptor I, Mjolnir Rocket
+EMP M x6700
+EMP M x49400
+Indirect Target Acquisition I, Mjolnir Rocket
+Indirect Target Acquisition I, Mjolnir Rocket
+Arch Angel Phased Plasma L x2000
+Medium I-a Enduring Armor Repairer, Mjolnir Rocket
+Medium I-a Enduring Armor Repairer, Mjolnir Rocket
+200mm Light Gallium Machine Gun, Mjolnir Rocket
+200mm Light Gallium Machine Gun, Mjolnir Rocket
+1400mm Carbine Howitzer I, Mjolnir Rocket
+50MN Quad LiF Restrained Microwarpdrive, Mjolnir Rocket
+50MN Quad LiF Restrained Microwarpdrive, Mjolnir Rocket
+SKINR Sequencer Reward x16
+SKINR Sequencer Reward x1
+Compact Kinetic Shield Amplifier, Mjolnir Rocket
+Arch Angel Carbonized Lead L x16000
+Arch Angel Carbonized Lead L x1000
+Large Murky Compact Remote Shield Booster, Mjolnir Rocket
+Nanofiber Internal Structure II, Mjolnir Rocket
+Nanofiber Internal Structure II, Mjolnir Rocket
+650mm Medium 'Scout' Artillery I, Mjolnir Rocket
+650mm Medium 'Scout' Artillery I, Mjolnir Rocket
+720mm Carbine Howitzer I, Mjolnir Rocket
+Angel Diamond Tag x1008
+Hail S x2566
+Inferno Light Missile x18700
+Initiated Compact Warp Scrambler, Mjolnir Rocket
+Initiated Compact Warp Scrambler, Mjolnir Rocket
+Fleeting Compact Stasis Webifier, Mjolnir Rocket
+Dual 425mm Carbine Repeating Cannon I, Mjolnir Rocket
+650mm Medium Carbine Howitzer I, Mjolnir Rocket
+650mm Medium Carbine Howitzer I, Mjolnir Rocket
+Mjolnir Cruise Missile x131500
+41F Veiled Targeting Unit, Mjolnir Rocket
+41F Veiled Targeting Unit, Mjolnir Rocket
+Cradle of Liberation - Limited x6
+125mm Gatling AutoCannon II, Mjolnir Rocket
+125mm Gatling AutoCannon II, Mjolnir Rocket
+10MN Monopropellant Enduring Afterburner, Mjolnir Rocket
+Warp Disruptor II, Mjolnir Rocket
+280mm 'Scout' Artillery I, Mjolnir Rocket
+280mm 'Scout' Artillery I, Mjolnir Rocket
+Nova Heavy Missile x6600
+Nova Heavy Missile x54100
+Compact Kinetic Shield Hardener, Mjolnir Rocket
+Compact Kinetic Shield Hardener, Mjolnir Rocket
+Faint Scoped Warp Disruptor, Mjolnir Rocket
+Warp Disrupt Probe x2
+'Malkuth' Rapid Heavy Missile Launcher I, Mjolnir Rocket
+'Malkuth' Rapid Heavy Missile Launcher I, Mjolnir Rocket
+Alignment Sequencer x271
+Upgraded 'Malkuth' Rapid Light Missile Launcher, Mjolnir Rocket
+280mm Prototype Siege Cannon, Mjolnir Rocket
+'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Rocket
+Scourge Auto-Targeting Light Missile I x7400
+Scourge Auto-Targeting Light Missile I x300
+200mm Light Prototype Automatic Cannon, Mjolnir Rocket
+Limited 'Limos' Heavy Assault Missile Launcher I, Mjolnir Rocket
+50MN Y-T8 Compact Microwarpdrive, Mjolnir Rocket
+650mm Medium Prototype Siege Cannon, Mjolnir Rocket
+650mm Medium Prototype Siege Cannon, Mjolnir Rocket
+Nova Auto-Targeting Light Missile I x7800
+Inferno Heavy Missile x62600
+Domination Heavy Stasis Grappler, Mjolnir Rocket
+Nova Light Missile x11700
+Nova Light Missile x1200
+X-Large Ancillary Shield Booster, Mjolnir Rocket
+Upgraded 'Malkuth' Torpedo Launcher, Mjolnir Rocket
+Passive Targeting Array I, Mjolnir Rocket
+Passive Targeting Array I, Mjolnir Rocket
+X-Large Shield Booster II, Mjolnir Rocket
+X-Large Shield Booster II, Mjolnir Rocket
+Experimental Enduring Explosive Armor Hardener I, Mjolnir Rocket
+Mjolnir Auto-Targeting Cruise Missile I x63200
+Fusion S x19300
+250mm Light Carbine Howitzer I, Mjolnir Rocket
+250mm Light Carbine Howitzer I, Mjolnir Rocket
+Damage Control II, Mjolnir Rocket
+Large ACM Compact Armor Repairer, Mjolnir Rocket
+Large ACM Compact Armor Repairer, Mjolnir Rocket
+Scourge Cruise Missile x18300
+Scourge Cruise Missile x118400
+Heavy Gunnar Compact Stasis Grappler, Mjolnir Rocket
+Domination Large Shield Booster, Mjolnir Rocket
+Inferno Auto-Targeting Light Missile I x300
+Inferno Auto-Targeting Light Missile I x6200
+Carbonized Lead M x52900
+Carbonized Lead M x6000
+Compact Explosive Shield Amplifier, Mjolnir Rocket
+Alumel-Wired Enduring Sensor Booster, Mjolnir Rocket
+Alumel-Wired Enduring Sensor Booster, Mjolnir Rocket
+Phantom Rose Matte - Unlimited x3
+Arch Angel Titanium Sabot L x2000
+Domination Kinetic Coating, Mjolnir Rocket
+Linked Enduring Remote Sensor Booster, Mjolnir Rocket
+800mm Rolled Tungsten Compact Plates, Mjolnir Rocket
+Prototype Compact Thermal Armor Hardener I, Mjolnir Rocket
+10MN Y-S8 Compact Afterburner, Mjolnir Rocket
+10MN Y-S8 Compact Afterburner, Mjolnir Rocket
+500MN Y-T8 Compact Microwarpdrive, Mjolnir Rocket
+X-Large Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+X-Large Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+J5 Enduring Warp Disruptor, Mjolnir Rocket
+Domination Kinetic Armor Hardener, Mjolnir Rocket
+Heavy Jigoro Enduring Stasis Grappler, Mjolnir Rocket
+Heavy Jigoro Enduring Stasis Grappler, Mjolnir Rocket
+250mm Light Gallium Cannon, Mjolnir Rocket
+Scourge Light Missile x14100
+Syndicated Teal Satin - Limited x3
+Cradle of Faith - Limited x6
+720mm 'Scout' Artillery I, Mjolnir Rocket
+720mm 'Scout' Artillery I, Mjolnir Rocket
+Wartorn Electrum Metallic - Limited x3
+Experimental ZW-4100 Torpedo Launcher, Mjolnir Rocket
+Experimental ZW-4100 Torpedo Launcher, Mjolnir Rocket
+Shield Boost Amplifier I, Mjolnir Rocket
+Proton S x2900
+Proton S x17900
+Medium Automated Structural Restoration, Mjolnir Rocket
+Limited 'Limos' Torpedo Launcher, Mjolnir Rocket
+Limited 'Limos' Torpedo Launcher, Mjolnir Rocket
+Type-D Restrained Overdrive Injector, Mjolnir Rocket
+Type-D Restrained Overdrive Injector, Mjolnir Rocket
+Nova Torpedo x85300
+5MN Y-T8 Compact Microwarpdrive, Mjolnir Rocket
+Shade Compact Radar ECM, Mjolnir Rocket
+1MN Y-S8 Compact Afterburner, Mjolnir Rocket
+Highstroke Scoped Guidance Disruptor, Mjolnir Rocket
+Highstroke Scoped Guidance Disruptor, Mjolnir Rocket
+Scourge Auto-Targeting Heavy Missile I x3500
+Scourge Auto-Targeting Heavy Missile I x26000
+EP-S Gaussian Scoped Mining Laser, Mjolnir Rocket
+Medium S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Medium S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Small Murky Compact Remote Shield Booster, Mjolnir Rocket
+Fermionic Sequencer x69
+Nanite Repair Paste x43
+Nova Auto-Targeting Heavy Missile I x4000
+Nova Auto-Targeting Heavy Missile I x34000
+'Limos' Rapid Heavy Missile Launcher I, Mjolnir Rocket
+'Limos' Rapid Heavy Missile Launcher I, Mjolnir Rocket
+500MN Cold-Gas Enduring Microwarpdrive, Mjolnir Rocket
+500MN Cold-Gas Enduring Microwarpdrive, Mjolnir Rocket
+5MN Quad LiF Restrained Microwarpdrive, Mjolnir Rocket
+Domination Shield Boost Amplifier, Mjolnir Rocket
+Enduring EM Shield Hardener, Mjolnir Rocket
+Advanced 'Limos' Heavy Missile Bay I, Mjolnir Rocket
+Advanced 'Limos' Heavy Missile Bay I, Mjolnir Rocket
+X5 Enduring Stasis Webifier, Mjolnir Rocket
+X5 Enduring Stasis Webifier, Mjolnir Rocket
+Umbra Scoped Radar ECM, Mjolnir Rocket
+Umbra Scoped Radar ECM, Mjolnir Rocket
+'Limos' Cruise Launcher I, Mjolnir Rocket
+'Limos' Cruise Launcher I, Mjolnir Rocket
+Experimental Enduring Kinetic Armor Hardener I, Mjolnir Rocket
+Experimental Enduring Kinetic Armor Hardener I, Mjolnir Rocket
+Angel Platinum Tag x217
+Fusion M x6100
+Fusion M x52000
+500MN Quad LiF Restrained Microwarpdrive, Mjolnir Rocket
+500MN Quad LiF Restrained Microwarpdrive, Mjolnir Rocket
+Scourge Heavy Missile x57700
+Scourge Heavy Missile x5000
+TE-2100 Ample Light Missile Launcher, Mjolnir Rocket
+TE-2100 Ample Light Missile Launcher, Mjolnir Rocket
+Deep Void Matte - Unlimited x5
+C-IR Compact Guidance Disruptor, Mjolnir Rocket
+C-IR Compact Guidance Disruptor, Mjolnir Rocket
+Hail M x2400
+Inferno Auto-Targeting Heavy Missile I x29700
+Inferno Auto-Targeting Heavy Missile I x3700
+Nuclear S x21400
+Nuclear S x2200
+Small C5-L Compact Shield Booster, Mjolnir Rocket
+Small C5-L Compact Shield Booster, Mjolnir Rocket
+720mm Gallium Cannon, Mjolnir Rocket
+Large I-a Enduring Armor Repairer, Mjolnir Rocket
+Large I-a Enduring Armor Repairer, Mjolnir Rocket
+280mm Gallium Cannon, Mjolnir Rocket
+1600mm Rolled Tungsten Compact Plates, Mjolnir Rocket
+Medium Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+Large Compact Pb-Acid Cap Battery, Mjolnir Rocket
+Large Compact Pb-Acid Cap Battery, Mjolnir Rocket
+Compact EM Shield Hardener, Mjolnir Rocket
+Compact EM Shield Hardener, Mjolnir Rocket
+1400mm Prototype Siege Cannon, Mjolnir Rocket
+1400mm Prototype Siege Cannon, Mjolnir Rocket
+Particle Bore Compact Mining Laser, Mjolnir Rocket
+Particle Bore Compact Mining Laser, Mjolnir Rocket
+M51 Benefactor Compact Shield Recharger, Mjolnir Rocket
+Dual 425mm 'Scout' Autocannon I, Mjolnir Rocket
+Fusion L x139000
+650mm Medium Gallium Cannon, Mjolnir Rocket
+Upgraded 'Malkuth' Heavy Assault Missile Launcher I, Mjolnir Rocket
+Upgraded 'Malkuth' Heavy Assault Missile Launcher I, Mjolnir Rocket
+Domination Warp Disruptor, Mjolnir Rocket
+Kerr Sequencer x69
+Large C5-L Compact Shield Booster, Mjolnir Rocket
+Enduring Multispectrum Shield Hardener, Mjolnir Rocket
+XT-9000 Cruise Launcher, Mjolnir Rocket
+XT-9000 Cruise Launcher, Mjolnir Rocket
+Proton M x61200
+Small S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Small S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Type-D Restrained Inertial Stabilizers, Mjolnir Rocket
+Nova Rocket x10800
+Nova Rocket x1600
+Medium Ancillary Armor Repairer, Mjolnir Rocket
+Scourge Auto-Targeting Cruise Missile I x62700
+Depleted Uranium S x2300
+Depleted Uranium S x18000
+DDO Scoped Tracking Disruptor I, Mjolnir Rocket
+DDO Scoped Tracking Disruptor I, Mjolnir Rocket
+EFFA Compact Assault Damage Control, Mjolnir Rocket
+EFFA Compact Assault Damage Control, Mjolnir Rocket
+1MN Monopropellant Enduring Afterburner, Mjolnir Rocket
+1MN Monopropellant Enduring Afterburner, Mjolnir Rocket
+A-211 Enduring Guidance Disruptor, Mjolnir Rocket
+A-211 Enduring Guidance Disruptor, Mjolnir Rocket
+Capacitor Flux Coil II, Mjolnir Rocket
+Capacitor Flux Coil II, Mjolnir Rocket
+Mjolnir Heavy Assault Missile x50100
+Mjolnir Heavy Assault Missile x7400
+Prototype 'Arbalest' Torpedo Launcher, Mjolnir Rocket
+Prototype 'Arbalest' Torpedo Launcher, Mjolnir Rocket
+Cradle of Honor - Limited x3
+Multispectrum Energized Membrane II, Mjolnir Rocket
+Large S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Large S95a Scoped Remote Shield Booster, Mjolnir Rocket
+Small Automated Structural Restoration, Mjolnir Rocket
+'Limos' Rocket Launcher I, Mjolnir Rocket
+'Limos' Rocket Launcher I, Mjolnir Rocket
+Lilac Restoration Matte - Limited x6
+Experimental Enduring Thermal Armor Hardener I, Mjolnir Rocket
+Experimental Enduring Thermal Armor Hardener I, Mjolnir Rocket
+250mm Light 'Scout' Artillery I, Mjolnir Rocket
+Large Azeotropic Restrained Shield Extender, Mjolnir Rocket
+Large Azeotropic Restrained Shield Extender, Mjolnir Rocket
+F-90 Compact Sensor Booster, Mjolnir Rocket
+F-90 Compact Sensor Booster, Mjolnir Rocket
+Coadjunct Scoped Remote Sensor Booster, Mjolnir Rocket
+Coadjunct Scoped Remote Sensor Booster, Mjolnir Rocket
+Enduring Explosive Shield Hardener, Mjolnir Rocket
+Type-D Restrained Nanofiber Structure, Mjolnir Rocket
+Mark I Compact Capacitor Power Relay, Mjolnir Rocket
+Inferno Auto-Targeting Cruise Missile I x68000
+Nuclear M x6400
+Nuclear M x46500
+200mm Light 'Scout' Autocannon I, Mjolnir Rocket
+Counterbalanced Compact Gyrostabilizer, Mjolnir Rocket
+Counterbalanced Compact Gyrostabilizer, Mjolnir Rocket
+Parallel Enduring Target Painter, Mjolnir Rocket
+Arch Angel Depleted Uranium L x4000
+720mm Prototype Siege Cannon, Mjolnir Rocket
+Carbonized Lead S x18800
+Large Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+Large Clarity Ward Enduring Shield Booster, Mjolnir Rocket
+Optical Compact Tracking Computer, Mjolnir Rocket
+Reinforced Metal Scraps x109
+M-36 Enduring Warp Disruption Field Generator, Mjolnir Rocket
+Medium Armor Repairer II, Mjolnir Rocket
+Titanium Sabot S x20500
+Nuclear L x110000
+Enduring Thermal Shield Hardener, Mjolnir Rocket
+J5b Enduring Warp Scrambler, Mjolnir Rocket
+J5b Enduring Warp Scrambler, Mjolnir Rocket
+Inferno Torpedo x121800
+Large F-S9 Regolith Compact Shield Extender, Mjolnir Rocket
+High-grade Savior Alpha Blueprint x1
+High-grade Savior Alpha Blueprint x3
+Proton L x90200
+Proton L x12600
+Compact Multispectrum Shield Hardener, Mjolnir Rocket
+Reactive Armor Hardener, Mjolnir Rocket
+'Malkuth' Heavy Missile Launcher I, Mjolnir Rocket
+'Malkuth' Heavy Missile Launcher I, Mjolnir Rocket
+Compact Explosive Shield Hardener, Mjolnir Rocket
+Compact Explosive Shield Hardener, Mjolnir Rocket
+'Malkuth' Cruise Launcher I, Mjolnir Rocket
+'Malkuth' Cruise Launcher I, Mjolnir Rocket
+Phased Plasma S x19500

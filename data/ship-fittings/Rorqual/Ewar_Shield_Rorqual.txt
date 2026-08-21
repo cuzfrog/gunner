@@ -1,0 +1,59 @@
+[Rorqual, Ewar Shield Rorqual]
+Improved Cloaking Device II
+Pulse Activated Nexus Invulnerability Core
+Mining Foreman Burst II, Mining Laser Optimization Charge
+Capital Industrial Core II
+Capital Asteroid Ore Compressor I
+Industrial Jump Portal Generator I
+Mining Foreman Burst II, Mining Laser Field Enhancement Charge
+Corpus X-Type Heavy Energy Neutralizer
+
+Capital Shield Extender II
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Capital Ancillary Shield Booster, Navy Cap Booster 3200
+Pith X-Type Shield Boost Amplifier
+Pithum C-Type Multispectrum Shield Hardener
+Pithum C-Type Multispectrum Shield Hardener
+500MN Y-T8 Compact Microwarpdrive
+
+Thukker Power Diagnostic System
+Sentient Damage Control
+Thukker Power Diagnostic System
+Thukker Power Diagnostic System
+
+Capital EM Shield Reinforcer II
+Capital Command Processor I
+Capital Core Defense Charge Economizer II
+
+
+Acolyte II x3
+Acolyte II x2
+Praetor II x5
+'Excavator' Mining Drone x3
+'Excavator' Mining Drone x2
+Hobgoblin II x2
+Hobgoblin II x3
+Infiltrator II x3
+Infiltrator II x8
+Hornet EC-300 x4
+Hornet EC-300 x1
+'Dunk' Salvage Drone x2
+'Dunk' Salvage Drone x3
+
+
+Mining Foreman Burst II, Mining Laser Efficiency Charge
+Mining Laser Efficiency Charge x106
+Mobile Tractor Unit x1
+Liquid Ozone x1000
+Endurance x2
+'Wetu' Mobile Depot x1
+Caldari Shuttle x1
+Navy Cap Booster 3200 x20
+Navy Cap Booster 200 x10
+Liquid Ozone x3933
+Astero x1
+Astero x1
+Oxygen Isotopes x210605
+Bustard x1
+Porpoise x1
+Crane x1

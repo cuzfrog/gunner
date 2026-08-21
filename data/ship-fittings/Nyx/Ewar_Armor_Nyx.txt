@@ -1,0 +1,49 @@
+[Nyx, Ewar Armor Nyx]
+Capital Remote Capacitor Transmitter I
+Brokara's Modified Large EMP Smartbomb
+Capital Remote Armor Repairer I
+ECM Jammer Burst Projector
+Thon's Modified Cloaking Device
+Draclira's Modified Heavy Energy Neutralizer
+
+Cap Recharger II
+Cap Recharger II
+Cap Recharger II
+Cap Recharger II
+Setele's Modified Sensor Booster, Scan Resolution Script
+
+Centum A-Type Multispectrum Energized Membrane
+Centus X-Type Explosive Armor Hardener
+Centum A-Type Multispectrum Energized Membrane
+Centus X-Type Thermal Armor Hardener
+Centus X-Type EM Armor Hardener
+Centus X-Type Kinetic Armor Hardener
+Damage Control II
+
+Large Trimark Armor Pump II
+Large Trimark Armor Pump II
+Large Trimark Armor Pump II
+
+
+Parallel Enduring Target Painter, Combat Scanner Probe I
+Combat Scanner Probe I x12
+Liquid Ozone x1005
+Core Scanner Probe I x8
+Capital Remote Capacitor Transmitter I, Combat Scanner Probe I
+Capital Remote Hull Repairer I, Combat Scanner Probe I
+Targeting Range Script x1
+Expanded Probe Launcher I, Combat Scanner Probe I
+Draclira's Modified Heavy Energy Neutralizer, Combat Scanner Probe I
+Capital Remote Shield Booster I, Combat Scanner Probe I
+Capital Remote Shield Booster I, Combat Scanner Probe I
+Capital Remote Armor Repairer I, Combat Scanner Probe I
+Capital Armor Repairer I, Combat Scanner Probe I
+Oxygen Isotopes x54916
+Dragonfly I x12
+Dragonfly I x18
+Cyclops I x4
+Cyclops I x4
+Templar I x12
+Templar I x12
+Mantis I x4
+Oxygen Isotopes x30056

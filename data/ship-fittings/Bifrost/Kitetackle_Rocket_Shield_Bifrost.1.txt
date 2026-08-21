@@ -1,0 +1,37 @@
+[Bifrost, Kitetackle Rocket Shield Bifrost]
+Rocket Launcher II, Mjolnir Javelin Rocket
+Rocket Launcher II, Mjolnir Javelin Rocket
+Rocket Launcher II, Mjolnir Javelin Rocket
+Skirmish Command Burst II, Evasive Maneuvers Charge
+Rocket Launcher II, Mjolnir Javelin Rocket
+Rocket Launcher II, Mjolnir Javelin Rocket
+
+Warp Scrambler II
+Micro Jump Field Generator
+Multispectrum Shield Hardener II
+Medium Shield Extender II
+5MN Y-T8 Compact Microwarpdrive
+
+Damage Control II
+Overdrive Injector System II
+Capacitor Flux Coil II
+
+Small Processor Overclocking Unit I
+Small Core Defense Field Extender II
+
+
+Rocket Launcher II, Nova Rage Rocket
+Nova Rage Rocket x900
+Caldari Navy Nova Rocket x900
+Scourge Javelin Rocket x900
+Scourge Rage Rocket x900
+Light Missile Launcher II, Nova Rage Rocket
+Caldari Navy Scourge Rocket x900
+Nanite Repair Paste x300
+Nova Javelin Rocket x900
+Rapid Deployment Charge x9
+Caldari Navy Mjolnir Rocket x900
+Mjolnir Javelin Rocket x650
+Interdiction Maneuvers Charge x9
+Caldari Navy Inferno Rocket x900
+Mjolnir Rage Rocket x900

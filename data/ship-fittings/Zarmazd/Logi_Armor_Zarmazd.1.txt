@@ -1,0 +1,35 @@
+[Zarmazd, Logi Armor Zarmazd]
+Perun Heavy Mutadaptive Remote Armor Repairer
+Corpii A-Type Small Remote Capacitor Transmitter
+Corpii A-Type Small Remote Capacitor Transmitter
+Corpii A-Type Small Remote Capacitor Transmitter
+
+Sensor Booster II, ECCM Script
+50MN Quad LiF Restrained Microwarpdrive
+10MN Afterburner II
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+
+Corpum B-Type Thermal Energized Membrane
+Damage Control II
+Imperial Navy Multispectrum Energized Membrane
+Federation Navy 1600mm Steel Plates
+Imperial Navy Multispectrum Energized Membrane
+Reactive Armor Hardener
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Medium Armor Maintenance Bot I x5
+Acolyte II x5
+Hornet EC-300 x5
+
+
+Targeting Range Script x1
+Standard Mindflood Booster x1
+Proximity-5 'Extraction' Filament x1
+Synth X-Instinct Booster x3
+Cladistic-5 'Krai Perun' Filament x2
+Scan Resolution Script x1
+Nanite Repair Paste x230
+Navy Cap Booster 400 x35

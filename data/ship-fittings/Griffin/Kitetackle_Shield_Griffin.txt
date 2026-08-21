@@ -1,0 +1,21 @@
+[Griffin, Kitetackle Shield Griffin]
+5MN Quad LiF Restrained Microwarpdrive
+Umbra Scoped Radar ECM
+Warp Scrambler II
+Faint Epsilon Scoped Warp Scrambler
+Umbra Scoped Radar ECM
+
+Signal Distortion Amplifier II
+Signal Distortion Amplifier II
+
+Small Particle Dispersion Projector I
+Small Particle Dispersion Augmentor I
+Small Particle Dispersion Projector I
+
+
+BZ-5 Scoped Gravimetric ECM
+Umbra Scoped Radar ECM
+Umbra Scoped Radar ECM
+Enfeebling Scoped Ladar ECM
+Compulsive Scoped Multispectral ECM
+Hypnos Scoped Magnetometric ECM

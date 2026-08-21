@@ -1,0 +1,33 @@
+[Archon, Support Armor Archon]
+Improved Cloaking Device II
+Sisters Core Probe Launcher, Core Scanner Probe I
+Skirmish Command Burst II, Rapid Deployment Charge
+'Vehemence' Compact Large EMP Smartbomb
+Skirmish Command Burst II, Evasive Maneuvers Charge
+
+Capital Cap Battery II
+10000MN Afterburner I
+500MN Quad LiF Restrained Microwarpdrive
+50000MN Quad LiF Restrained Microwarpdrive
+
+Nanofiber Internal Structure II
+25000mm Steel Plates I
+Overdrive Injector System II
+Overdrive Injector System II
+Overdrive Injector System II
+Nanofiber Internal Structure II
+Overdrive Injector System II
+
+Capital Hyperspatial Velocity Optimizer I
+Capital Hyperspatial Velocity Optimizer I
+Capital Hyperspatial Velocity Optimizer I
+
+
+Limited Hyperspatial Accelerator
+Limited Hyperspatial Accelerator
+Warp Core Stabilizer II
+Inertial Stabilizers II
+Inertial Stabilizers II
+Capacitor Power Relay II
+Capacitor Power Relay II
+Helium Isotopes x2055

@@ -1,0 +1,36 @@
+[Ymir, Commandship Shield Ymir]
+Skirmish Command Burst II, Interdiction Maneuvers Charge
+Fighter Support Unit II
+Integrated Sensor Array
+Skirmish Command Burst II, Rapid Deployment Charge
+Fighter Support Unit II
+Skirmish Command Burst II, Evasive Maneuvers Charge
+
+Capital Capacitor Booster II, Cap Booster 3200
+Capital Micro Jump Field Generator
+Sentient Drone Navigation Computer
+Pithum A-Type Multispectrum Shield Hardener
+Sentient Drone Navigation Computer
+50000MN Microwarpdrive II
+Sentient Drone Navigation Computer
+
+Nanofiber Internal Structure II
+Prototype Hyperspatial Accelerator
+Nanofiber Internal Structure II
+Prototype Hyperspatial Accelerator
+Nanofiber Internal Structure II
+
+Capital Hyperspatial Velocity Optimizer II
+Capital Hyperspatial Velocity Optimizer II
+
+
+Active Shielding Charge x3000
+Cap Booster 3200 x10
+Shield Extension Charge x3000
+Shield Harmonizing Charge x3000
+Evasive Maneuvers Charge x2700
+Shield Command Burst II, Active Shielding Charge
+Rapid Deployment Charge x2700
+Interdiction Maneuvers Charge x2700
+Cap Booster 3200 x70
+Hydrogen Isotopes x212037

@@ -1,0 +1,146 @@
+[Sarathiel, Ewar Torp Armor Sarathiel]
+Domination Torpedo Launcher
+Corpus B-Type Explosive Armor Hardener
+Corpum A-Type Kinetic Energized Membrane
+Dark Blood Thermal Coating
+Domination Ballistic Control System
+Domination 800mm Repeating Cannon
+Zeugma Integrated Analyzer
+Dark Blood Heavy Capacitor Booster
+Gist X-Type X-Large Shield Booster
+True Sansha EM Coating
+CONCORD Capital Armor Repairer
+Republic Fleet Medium Cap Battery
+Sisters Expanded Probe Launcher
+True Sansha Tachyon Beam Laser
+Dread Guristas Ballistic Control System
+Dread Guristas Cloaking Device
+Domination Thermal Armor Hardener
+Domination Overdrive Injector
+Dread Guristas Co-Processor
+Dread Guristas Cruise Missile Launcher
+Corpum A-Type Medium Armor Repairer
+Corpus C-Type Thermal Armor Hardener
+Corpus X-Type Heavy Energy Neutralizer
+Dark Blood Heat Sink
+Corpus X-Type Explosive Armor Hardener
+True Sansha Large Armor Repairer
+Domination Cruise Missile Launcher
+Corpus B-Type Kinetic Armor Hardener
+True Sansha Mega Pulse Laser
+Shadow Serpentis EM Armor Hardener
+Pith X-Type X-Large Shield Booster
+Corpus C-Type Explosive Armor Hardener
+'Chainmail' 200mm Steel Plates
+5MN Abyssal Microwarpdrive
+5MN Abyssal Microwarpdrive
+Corpus B-Type EM Armor Hardener
+Domination Thermal Coating
+Centus A-Type Explosive Armor Hardener
+Domination Gyrostabilizer
+Domination Dual 425mm Autocannon
+Centus C-Type Large Armor Repairer
+Dark Blood Kinetic Coating
+Corpus X-Type Kinetic Armor Hardener
+Domination Rapid Heavy Missile Launcher
+Domination 500MN Microwarpdrive
+Centus C-Type Thermal Armor Hardener
+Dark Blood 25000mm Steel Plates
+True Sansha Dual Heavy Pulse Laser
+Corpus X-Type Heavy Energy Nosferatu
+Corpus C-Type Kinetic Armor Hardener
+Gist X-Type Shield Boost Amplifier
+Corpus X-Type EM Armor Hardener
+Centus A-Type Thermal Armor Hardener
+Gist A-Type Shield Boost Amplifier
+Domination Large Shield Booster
+Dark Blood Thermal Energized Membrane
+Shadow Serpentis Multispectrum Coating
+Pith X-Type Shield Boost Amplifier
+True Sansha Heavy Energy Nosferatu
+Domination 10000MN Afterburner
+X-Large Abyssal Shield Booster
+X-Large Abyssal Shield Booster
+Gist A-Type Large Shield Booster
+True Sansha Explosive Coating
+Centus C-Type Explosive Armor Hardener
+True Sansha Capacitor Power Relay
+Corpus C-Type Heavy Energy Nosferatu
+Corpus A-Type Large Armor Repairer
+Domination Kinetic Coating
+Domination Kinetic Armor Hardener
+Domination Inertial Stabilizers
+Dark Blood Heavy Energy Nosferatu
+Centus C-Type Kinetic Armor Hardener
+Domination EM Armor Hardener
+Dark Blood Large Armor Repairer
+Dark Blood Power Diagnostic System
+True Sansha EM Energized Membrane
+Domination Explosive Coating
+True Sansha Thermal Armor Hardener
+Dark Blood Mega Beam Laser
+Gist X-Type 500MN Microwarpdrive
+Dark Blood Capacitor Power Relay
+Shadow Serpentis 500MN Microwarpdrive
+Pith X-Type Large Shield Booster
+True Sansha Kinetic Armor Hardener
+Corpus X-Type Thermal Armor Hardener
+Domination Nanofiber Structure
+Dark Blood Explosive Energized Membrane
+Dark Blood Heavy Pulse Laser
+True Sansha Thermal Energized Membrane
+Dark Blood Multispectrum Coating
+True Sansha Explosive Armor Hardener
+Pithi A-Type Small Shield Booster
+True Sansha Power Diagnostic System
+True Sansha Kinetic Energized Membrane
+Centus X-Type Kinetic Armor Hardener
+Dark Blood Thermal Armor Hardener
+Domination Large Armor Repairer
+Shadow Serpentis Multispectrum Energized Membrane
+Domination Shield Boost Amplifier
+Dark Blood EM Energized Membrane
+Centus A-Type Kinetic Armor Hardener
+Dark Blood Multispectrum Energized Membrane
+True Sansha Thermal Coating
+Dark Blood Mega Pulse Laser
+Dark Blood Explosive Armor Hardener
+True Sansha Heavy Capacitor Booster
+Dread Guristas 250mm Railgun
+Centii C-Type Multispectrum Coating
+Centus C-Type EM Armor Hardener
+Sentient Remote Sensor Booster
+Domination EM Coating
+Sisters Core Probe Launcher
+Coreli A-Type Small Remote Armor Repairer
+C3-A 'Hivaa Saitsuo' Ballistic Control System
+Core B-Type EM Armor Hardener
+Corpus C-Type EM Armor Hardener
+Domination Dual 650mm Repeating Cannon
+Dark Blood Explosive Coating
+True Sansha EM Armor Hardener
+Corpum A-Type Explosive Energized Membrane
+Federation Navy 100MN Afterburner
+True Sansha Kinetic Coating
+Dark Blood Heavy Energy Neutralizer
+Dread Guristas Dual 250mm Railgun
+Sentient Burst Jammer
+Domination Explosive Armor Hardener
+Domination Multispectrum Coating
+Corpus X-Type Large Armor Repairer
+Shadow Serpentis Explosive Coating
+Dark Blood Kinetic Armor Hardener
+Centus X-Type Thermal Armor Hardener
+True Sansha Multispectrum Coating
+True Sansha Explosive Energized Membrane
+Dread Guristas Multispectral ECM
+Dark Blood Kinetic Energized Membrane
+Dark Blood Dual Heavy Beam Laser
+Dark Blood EM Coating
+Gist B-Type 500MN Microwarpdrive
+Dark Blood Tachyon Beam Laser
+Dark Blood EM Armor Hardener
+Corpum A-Type Thermal Energized Membrane
+Republic Fleet Small Cap Battery
+Hydrogen Isotopes x78236
+Megathron x1

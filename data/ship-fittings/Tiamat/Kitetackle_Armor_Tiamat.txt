@@ -1,0 +1,41 @@
+[Tiamat, Kitetackle Armor Tiamat]
+Corpii A-Type Small Energy Neutralizer
+Corpum A-Type Medium Energy Neutralizer
+'Smokescreen' Covert Ops Cloaking Device II
+Zorya's Heavy Entropic Disintegrator, Occult M
+Corpum A-Type Medium Energy Neutralizer
+
+50MN Abyssal Microwarpdrive
+Abyssal Warp Disruptor
+Medium 'Gattotte' Capacitor Booster, Navy Cap Booster 800
+Abyssal Stasis Webifier
+Corelum A-Type 10MN Afterburner
+
+Corpum A-Type Multispectrum Energized Membrane
+Corpum A-Type Multispectrum Energized Membrane
+Medium Abyssal Armor Repairer
+Medium Abyssal Armor Plates
+Abyssal Entropic Radiation Sink
+
+Medium Ancillary Current Router II
+Medium Auxiliary Nano Pump II
+
+
+Republic Fleet Warrior x8
+Republic Fleet Warrior x2
+
+
+Agency 'Pyrolancea' DB3 Dose I x2
+Agency 'Overclocker' SB9 Dose IV x1
+Agency 'Overclocker' SB5 Dose II x2
+Navy Cap Booster 800 x16
+Occult M x1830
+Agency 'Pyrolancea' DB9 Dose IV x1
+Tetryon Exotic Plasma M x1000
+Agency 'Hardshell' TB9 Dose IV x1
+Mystic M x1995
+Antipharmakon Kosybo x1
+Nanite Repair Paste x99
+Meson Exotic Plasma M x2000
+Agency 'Hardshell' TB7 Dose III x2
+Baryon Exotic Plasma M x2000

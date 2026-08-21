@@ -1,0 +1,27 @@
+[Helios, Kitetackle Shield Helios]
+Sisters Expanded Probe Launcher, Sisters Combat Scanner Probe
+Covert Ops Cloaking Device II
+Interdiction Nullifier I
+
+Scan Pinpointing Array I
+5MN Y-T8 Compact Microwarpdrive
+Scan Pinpointing Array I
+Scan Acquisition Array I
+Scan Rangefinding Array I
+
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+Co-Processor II
+
+Small Gravity Capacitor Upgrade II
+Small Hyperspatial Velocity Optimizer II
+
+
+Sisters Combat Scanner Probe x8
+Data Analyzer I, Sisters Combat Scanner Probe
+Sisters Core Scanner Probe x16
+Cargo Scanner II, Sisters Combat Scanner Probe
+Proximity-5 'Extraction' Filament x1
+Cladistic-5 'Krai Perun' Filament x1
+Nanite Repair Paste x100
+Ship Scanner II, Sisters Combat Scanner Probe

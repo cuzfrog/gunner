@@ -1,0 +1,51 @@
+[Praxis, Kitetackle Missile Armor Praxis]
+Core Probe Launcher I, Core Scanner Probe I
+Rapid Light Missile Launcher I, Mjolnir Light Missile
+Heavy Infectious Scoped Energy Neutralizer
+Rapid Light Missile Launcher I, Mjolnir Light Missile
+Rapid Light Missile Launcher I, Mjolnir Light Missile
+Rapid Light Missile Launcher I, Mjolnir Light Missile
+Rapid Light Missile Launcher I, Mjolnir Light Missile
+
+500MN Y-T8 Compact Microwarpdrive
+Compact Multispectrum Shield Hardener
+Large F-S9 Regolith Compact Shield Extender
+Cetus Scoped Burst Jammer
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+100MN Monopropellant Enduring Afterburner
+Faint Epsilon Scoped Warp Scrambler
+
+Inertial Stabilizers II
+Damage Control II
+1600mm Crystalline Carbonide Restrained Plates
+1600mm Crystalline Carbonide Restrained Plates
+1600mm Crystalline Carbonide Restrained Plates
+1600mm Rolled Tungsten Compact Plates
+1600mm Rolled Tungsten Compact Plates
+
+Large Hyperspatial Velocity Optimizer I
+Large Higgs Anchor I
+Large Hyperspatial Velocity Optimizer I
+
+
+Hobgoblin I x5
+Hammerhead I x2
+Infiltrator I x5
+Warrior I x5
+Valkyrie I x5
+Acolyte I x5
+
+
+Core Scanner Probe I x8
+Mobile Depot x1
+Inferno Light Missile x900
+Mjolnir Light Missile x805
+Overdrive Injector System II, Core Scanner Probe I
+Nova Light Missile x900
+Scourge Light Missile x900
+'Halcyon' Core Equalizer I, Core Scanner Probe I
+Inertial Stabilizers II, Core Scanner Probe I
+Large Higgs Anchor I, Core Scanner Probe I
+Nanofiber Internal Structure II, Core Scanner Probe I
+Rapid Light Missile Launcher I, Core Scanner Probe I
+Navy Cap Booster 3200 x2

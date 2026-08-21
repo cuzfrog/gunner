@@ -1,0 +1,21 @@
+[Sukuuvestaa Heron, Rail Armor Sukuuvestaa Heron]
+75mm Gatling Rail I, Antimatter Charge S
+150mm Railgun I, Antimatter Charge S
+
+Civilian Relic Analyzer
+1MN Afterburner I
+Civilian Data Analyzer
+
+Overdrive Injector System I
+Expanded Cargohold I
+
+
+Core Scanner Probe I x8
+Salvaging x1
+Iridium Charge S x100
+Metal Scraps x1
+Survey x1
+Datacore - Basic Civilian Tech x2
+Gas Passkey x1
+50mm Reinforced Nanofiber Plates I, Core Scanner Probe I
+Antimatter Charge S x187

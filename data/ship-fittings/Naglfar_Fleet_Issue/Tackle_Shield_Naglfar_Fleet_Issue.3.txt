@@ -1,0 +1,41 @@
+[Naglfar Fleet Issue, Tackle Shield Naglfar Fleet Issue]
+Hexa 2500mm Repeating Cannon II, Hail XL
+Quad 800mm Repeating Cannon II, Hail XL
+Siege Module II
+Hexa 2500mm Repeating Cannon II, Hail XL
+True Sansha Large EMP Smartbomb
+Imperial Navy Large EMP Smartbomb
+
+Federation Navy Tracking Computer, Tracking Speed Script
+Pithum C-Type Multispectrum Shield Hardener
+Capital Cap Battery II
+Capital Cap Battery II
+CONCORD Capital Shield Booster
+Domination Heavy Stasis Grappler
+Domination Heavy Warp Scrambler
+
+Republic Fleet Gyrostabilizer
+Republic Fleet Gyrostabilizer
+Republic Fleet Gyrostabilizer
+Republic Fleet Tracking Enhancer
+Republic Fleet Gyrostabilizer
+
+Capital Capacitor Control Circuit I
+Capital Semiconductor Memory Cell I
+Capital Semiconductor Memory Cell I
+
+
+Strontium Clathrates x2079
+Hydrogen Isotopes x8667
+Acceleration Control x1
+Arch Angel EMP XL x102
+True Sansha Cap Recharger, Arch Angel EMP XL
+Type-D Restrained Inertial Stabilizers, Arch Angel EMP XL
+Republic Fleet Target Painter, Arch Angel EMP XL
+Nanofiber Internal Structure I, Arch Angel EMP XL
+Synth Drop Booster x1
+Barrage XL x1811
+Hail XL x6066
+Small C5-L Compact Shield Booster, Arch Angel EMP XL
+'Wetu' Mobile Depot x1
+Hexa 2500mm Repeating Cannon II

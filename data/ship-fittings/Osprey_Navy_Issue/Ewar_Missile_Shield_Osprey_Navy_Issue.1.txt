@@ -1,0 +1,32 @@
+[Osprey Navy Issue, Ewar Missile Shield Osprey Navy Issue]
+Small Energy Nosferatu II
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Small Energy Neutralizer II
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
+
+Large Shield Extender II
+Missile Guidance Computer II, Missile Range Script
+50MN Y-T8 Compact Microwarpdrive
+Large Compact Pb-Acid Cap Battery
+Sensor Booster II, Targeting Range Script
+Missile Guidance Computer II, Missile Range Script
+
+Signal Amplifier II
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+
+Medium Hydraulic Bay Thrusters I
+Medium Rocket Fuel Cache Partition I
+Medium Hydraulic Bay Thrusters I
+
+
+Caldari Navy Nova Heavy Missile x850
+Mjolnir Fury Heavy Missile x1000
+Caldari Navy Scourge Heavy Missile x1120
+Caldari Navy Mjolnir Heavy Missile x1000
+Inferno Fury Heavy Missile x1000
+Scourge Fury Heavy Missile x1000
+Nova Fury Heavy Missile x1000
+Caldari Navy Inferno Heavy Missile x1000
