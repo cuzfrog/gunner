@@ -49,9 +49,25 @@
         <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
       <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
-      <button type="button" id="share-link" data-i18n="button.copyProfile" data-i18n-title="title.copyProfile" title="Copy current profile to clipboard">Copy</button>
-      <button type="button" id="import-profile" data-i18n="button.importProfile" data-i18n-title="title.importProfile" title="Import profile from clipboard">Import</button>
-      <span id="share-status" class="share-status"></span>
+      <button type="button" id="share-link" class="icon-button"
+              data-i18n-title="title.copyProfile" data-i18n-aria-label="button.copyProfile"
+              title="Copy current profile to clipboard" aria-label="Copy">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#copy"></use></svg>
+      </button>
+      <div class="profile-import-field">
+        <button type="button" id="import-profile" class="icon-button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"
+                data-i18n-title="title.importProfile" data-i18n-aria-label="button.importProfile"
+                title="Import profile or fitting from clipboard" aria-label="Import">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
+        </button>
+        <div class="import-side-popup" id="import-side-popup" hidden role="menu"
+             data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
+          <button type="button" id="import-side-attacker" role="menuitem" data-i18n="section.attackerTurret">Attacker</button>
+          <button type="button" id="import-side-target" role="menuitem" data-i18n="section.targetShip">Target</button>
+        </div>
+      </div>
+      <span id="share-status" class="share-status" aria-live="polite"></span>
       <span id="slide-hints" class="slide-hints" aria-live="polite">You can import a ship fitting from clipboard.</span>
     </section>
 

@@ -354,6 +354,16 @@ export const I18N_DICTIONARY = {
     zh: "装配无效",
     ja: "無効なフィッティング",
   },
+  "menu.importSide": {
+    en: "Import fitting as",
+    zh: "将装配导入为",
+    ja: "フィッティングのインポート先",
+  },
+  "status.importInvalid": {
+    en: "No profile or fitting in clipboard",
+    zh: "剪贴板中没有可导入的配置或装配",
+    ja: "クリップボードにプロファイルまたはフィッティングがありません",
+  },
   "status.clipboardDenied": {
     en: "Clipboard denied",
     zh: "剪贴板访问被拒绝",
@@ -365,9 +375,9 @@ export const I18N_DICTIONARY = {
     ja: "インポート",
   },
   "title.importProfile": {
-    en: "Import profile from clipboard",
-    zh: "从剪贴板导入配置",
-    ja: "クリップボードからプロファイルをインポート",
+    en: "Import profile or fitting from clipboard",
+    zh: "从剪贴板导入配置或装配",
+    ja: "クリップボードからプロファイルまたはフィッティングをインポート",
   },
   "status.profileImported": {
     en: "Imported",

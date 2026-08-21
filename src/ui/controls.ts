@@ -1,4 +1,4 @@
-import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
+import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -61,6 +61,8 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private openFittingSide: "attacker" | "target" | null = null;
+  private importSidePopupOpen = false;
+  private pendingImportText?: string;
   private openAmmo = false;
   private attackerAmmo = "";
   private attackerTurret?: ImportedTurret;
@@ -211,6 +213,9 @@ export class DomControls implements Controls {
       profileDelete: el("profile-delete"),
       shareLink: el("share-link"),
       importProfile: el("import-profile"),
+      importSidePopup: el("import-side-popup"),
+      importSideAttacker: el("import-side-attacker"),
+      importSideTarget: el("import-side-target"),
       shareStatus: el("share-status"),
       langEn: el("lang-en"),
       langZh: el("lang-zh"),
@@ -744,6 +749,10 @@ export class DomControls implements Controls {
   }
 
   private async importProfileFromClipboard(): Promise<void> {
+    if (this.importSidePopupOpen) {
+      this.closeImportSidePopup(true);
+      return;
+    }
     let text: string;
     try {
       text = await this.clipboard.readText();
@@ -751,13 +760,50 @@ export class DomControls implements Controls {
       this.showProfileStatus("status.clipboardDenied");
       return;
     }
-    const settings = this.profileFromText(text);
-    if (!settings) {
-      this.showProfileStatus("status.fittingInvalid");
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
+      const settings = this.profileFromText(text);
+      if (!settings) {
+        this.showProfileStatus("status.importInvalid");
+        return;
+      }
+      this.loadSettings(settings);
+      this.showProfileStatus("status.profileImported");
       return;
     }
-    this.loadSettings(settings);
-    this.showProfileStatus("status.profileImported");
+    if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
+      this.showProfileStatus("status.importInvalid");
+      return;
+    }
+    this.openImportSidePopup(text);
+  }
+
+  private openImportSidePopup(text: string): void {
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
+    const popup = this.els.importSidePopup as HTMLElement;
+    const trigger = this.els.importProfile as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.pendingImportText = text;
+    this.importSidePopupOpen = true;
+    (this.els.importSideAttacker as HTMLButtonElement).focus();
+  }
+
+  private closeImportSidePopup(restoreFocus: boolean): void {
+    const popup = this.els.importSidePopup as HTMLElement;
+    const trigger = this.els.importProfile as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    this.pendingImportText = undefined;
+    this.importSidePopupOpen = false;
+    if (restoreFocus) trigger.focus();
+  }
+
+  private async onImportSideClick(side: "attacker" | "target"): Promise<void> {
+    const text = this.pendingImportText;
+    this.closeImportSidePopup(false);
+    if (text === undefined) return;
+    await this.importFittingFromText(side, text);
   }
 
   private profileFromText(text: string): UserSettings | undefined {
@@ -847,6 +893,8 @@ export class DomControls implements Controls {
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
     (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.copyProfile());
     (this.els.importProfile as HTMLButtonElement).addEventListener("click", () => void this.importProfileFromClipboard());
+    (this.els.importSideAttacker as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("attacker"));
+    (this.els.importSideTarget as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("target"));
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
 
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
@@ -1805,7 +1853,7 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && !this.openAmmo) return;
+    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && !this.importSidePopupOpen && !this.openAmmo) return;
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function") return;
     if (this.openSkillSide !== null) {
@@ -1820,6 +1868,10 @@ export class DomControls implements Controls {
       const side = this.openFittingSide;
       const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull`);
       if (!insideFitting) this.closeAllFittingPopups();
+    }
+    if (this.importSidePopupOpen) {
+      const insideImport = target.closest("#import-side-popup, #import-profile");
+      if (!insideImport) this.closeImportSidePopup(false);
     }
     if (this.openAmmo) {
       const insideAmmo = target.closest("#attacker-ammo-field");
@@ -1843,6 +1895,9 @@ export class DomControls implements Controls {
       const side = this.openFittingSide;
       this.closeFittingPopup(side);
       (this.els[`${side}FittingTrigger`] as HTMLButtonElement).focus();
+    }
+    if (this.importSidePopupOpen) {
+      this.closeImportSidePopup(true);
     }
     if (this.openAmmo) {
       this.closeAttackerAmmoPopup();
@@ -2061,3 +2116,5 @@ function chargeStatSuffix(option: ChargeOption): string {
 function formatMultiplier(value: number): string {
   return String(Number(value.toFixed(2)));
 }
+
+const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };

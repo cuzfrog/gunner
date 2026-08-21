@@ -366,6 +366,8 @@ function setInputValues(document: Document): void {
   getFake(document, "target-paste-popup").hidden = true;
   getFake(document, "attacker-fitting-popup").hidden = true;
   getFake(document, "target-fitting-popup").hidden = true;
+  getFake(document, "import-side-popup").hidden = true;
+  getFake(document, "import-profile").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-fitting-name").hidden = true;
   getFake(document, "target-fitting-name").hidden = true;
   getFake(document, "attacker-ammo-field").hidden = true;
@@ -2859,13 +2861,131 @@ describe("DomControls", () => {
       expect(saved.targetHull).toBe("Thrasher");
     });
 
-    test("top import button shows invalid status for non-gunner text", async () => {
-      const { clipboard } = buildControls(globalThis.document);
-      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+    test("top import button opens the side popup for a valid EFT fitting", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => eft);
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(false);
+      expect(getFake(globalThis.document, "import-profile").getAttribute("aria-expanded")).toBe("true");
+      expect(getFake(globalThis.document, "import-side-attacker").focus).toHaveBeenCalled();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
+      expect(getFake(globalThis.document, "target-hull").value).toBe("");
+    });
+
+    test("choosing attacker in the side popup imports the fitting as attacker", async () => {
+      const { fittingImport, settingsStore, savedFittings, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => eft);
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+
+      getFake(globalThis.document, "import-side-attacker").trigger("click");
+      await flush();
+
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "import-profile").getAttribute("aria-expanded")).toBe("false");
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "target-hull").value).toBe("");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe(eft);
+      expect(saved.targetFitting).toBeUndefined();
+      expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    });
+
+    test("choosing target in the side popup imports the fitting as target", async () => {
+      const { fittingImport, settingsStore, savedFittings, clipboard } = buildControls(globalThis.document);
+      const eft = "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive";
+      fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
+      clipboard.readText = vi.fn(async () => eft);
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+
+      getFake(globalThis.document, "import-side-target").trigger("click");
+      await flush();
+
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.targetFitting).toBe(eft);
+      expect(saved.attackerFitting).toBeUndefined();
+      expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Thrasher", name: "Sniper" }));
+    });
+
+    test("top import button shows invalid status for non-gunner non-fitting text", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      clipboard.readText = vi.fn(async () => "hello world");
       getFake(globalThis.document, "import-profile").trigger("click");
       await flush();
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
-      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.fittingInvalid");
+      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.importInvalid");
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+    });
+
+    test("malformed gunner text with embedded fitting does not open the side popup", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(
+        async () => "# gunner v1\nversion=1\nattacker.fitting:\n[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive\n---",
+      );
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.importInvalid");
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+    });
+
+    test("clicking the import profile button again when the side popup is open closes it", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+      const button = getFake(globalThis.document, "import-profile");
+      button.trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(false);
+      button.trigger("click");
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+      expect(button.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    test("Escape closes the side popup and focuses the import profile button", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "import-profile").focus).toHaveBeenCalled();
+    });
+
+    test("pointerdown outside the side popup closes it", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      const outside = new FakeElement();
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+      expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
+    });
+
+    test("pointerdown inside the side popup does not close it", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      const inside = new FakeElement();
+      const popup = getFake(globalThis.document, "import-side-popup");
+      inside.closest = () => popup;
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+      expect(popup.hidden).toBe(false);
     });
 
     test("top import button shows clipboard denied status when reading fails", async () => {
