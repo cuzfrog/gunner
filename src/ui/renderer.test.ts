@@ -175,11 +175,18 @@ describe("CanvasRenderer", () => {
       expect(scale).toBe(0.04);
     });
 
-    test("zooms out below farScale when ships are far apart", () => {
+    test("stays at farScale while ships still fit inside the margin", () => {
       const attacker = shipAt(new Vec2(0, 0), "attacker");
       const target = shipAt(new Vec2(0, 10000), "target");
       const scale = cameraScaleFor(attacker, target);
-      expect(scale).toBeCloseTo(0.014, 10);
+      expect(scale).toBe(0.04);
+    });
+
+    test("zooms out below farScale when ships reach the canvas margin", () => {
+      const attacker = shipAt(new Vec2(0, 0), "attacker");
+      const target = shipAt(new Vec2(0, 30000), "target");
+      const scale = cameraScaleFor(attacker, target);
+      expect(scale).toBeCloseTo(0.028, 10);
     });
 
     test("caps zoom out at farScale / 3 when ships are very far apart", () => {

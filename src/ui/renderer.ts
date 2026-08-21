@@ -27,6 +27,7 @@ const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
 const MIN_SEPARATION_PX = 140;
 const MIN_VIEW_RADIUS = 250;
 const FAR_MARGIN = 1.25;
+const ZOOM_OUT_MARGIN_PX = 80; // keep ships this far from the canvas edge before zooming out
 const MAX_ZOOM_FACTOR = 3; // relative to the far-range fit scale
 const SHIP_ICON_SIZE = 8;
 const DIRECTION_LINE_LENGTH = SHIP_ICON_SIZE * 4; // 2x the icon's 16px nose-to-tail length
@@ -87,7 +88,11 @@ export class CanvasRenderer implements Renderer {
     const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
     const closeScale = minDim / (2 * closeRadius);
 
-    const cameraScale = Math.min(Math.max(farScale / MAX_ZOOM_FACTOR, closeScale), farScale * MAX_ZOOM_FACTOR);
+    const fitScale = distance > 0 ? (minDim - 2 * ZOOM_OUT_MARGIN_PX) / distance : farScale;
+    const cameraScale = Math.min(
+      Math.max(closeScale, farScale / MAX_ZOOM_FACTOR, Math.min(farScale, fitScale)),
+      farScale * MAX_ZOOM_FACTOR
+    );
     this.camera = { center, scale: cameraScale };
   }
 
