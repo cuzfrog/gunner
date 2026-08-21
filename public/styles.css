@@ -500,6 +500,7 @@ body {
   margin-bottom: 6px;
 }
 
+.skill-trigger,
 .ammo-trigger {
   display: flex;
   align-items: center;
@@ -515,25 +516,23 @@ body {
   font: inherit;
 }
 
+.skill-trigger:hover,
+.ammo-trigger:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+}
+
 .ammo-trigger:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
-.ammo-trigger:hover:not(:disabled) {
-  border-color: var(--accent-teal);
-}
-
+.panel .skill-trigger span,
 .panel .ammo-trigger span {
   margin-bottom: 0;
 }
 
-.ammo-trigger svg {
-  display: block;
-  flex: none;
-}
-
-.ammo-label {
+.panel .skill-label,
+.panel .ammo-trigger .ammo-label {
   display: block;
   flex: 1 1 auto;
   min-width: 0;
@@ -548,14 +547,16 @@ body {
   letter-spacing: 0.05em;
 }
 
-.ammo-summary-row {
+.panel .skill-trigger .skill-summary-row,
+.panel .ammo-trigger .ammo-summary-row {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
 }
 
-.ammo-summary-value {
+.skill-summary-row .skill-summary-value,
+.ammo-summary-row .ammo-summary-value {
   font-family: "Share Tech Mono", monospace;
   font-size: 11px;
   color: var(--accent-teal);
@@ -567,11 +568,13 @@ body {
   text-overflow: ellipsis;
 }
 
+.skill-trigger .chevron,
 .ammo-trigger .chevron {
-  color: var(--text-secondary);
+  color: var(--accent-teal);
   transition: transform 0.15s ease;
 }
 
+.skill-trigger[aria-expanded="true"] .chevron,
 .ammo-trigger[aria-expanded="true"] .chevron {
   transform: rotate(180deg);
 }
@@ -1394,62 +1397,6 @@ canvas {
 
 .skill-select {
   position: relative;
-}
-
-.skill-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 3px 8px;
-  background: var(--bg-inset);
-  border: 1px solid var(--border-dim);
-  border-radius: 2px;
-  min-height: 24px;
-  cursor: pointer;
-  color: var(--text-primary);
-  font: inherit;
-}
-
-.panel .skill-trigger span {
-  margin-bottom: 0;
-}
-
-.panel .skill-label {
-  display: block;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
-}
-
-.skill-trigger:hover { border-color: var(--accent-teal); }
-
-.panel .skill-trigger .skill-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-}
-
-.skill-summary-row .skill-summary-value {
-  font-family: "Share Tech Mono", monospace;
-  font-size: 11px;
-  color: var(--accent-teal);
-  text-transform: uppercase;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-
-.skill-trigger .chevron {
-  color: var(--text-secondary);
-  transition: transform 0.15s ease;
-}
-
-.skill-trigger[aria-expanded="true"] .chevron {
-  transform: rotate(180deg);
 }
 
 .skill-popup {
