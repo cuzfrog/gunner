@@ -12,6 +12,7 @@ import {
 } from "../sim";
 import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
+import type { ImageCatalog } from "./imageCatalog";
 import type { SavedFittings } from "./savedFittings";
 import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
@@ -51,6 +52,7 @@ export class DomControls implements Controls {
   private readonly clipboard: ClipboardProvider;
   private readonly timer: Timer;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly imageCatalog: ImageCatalog;
   private readonly trackingInput: TrackingInput;
   private readonly hintRotator: IHintRotator;
   private callbacks?: ControlsCallbacks;
@@ -90,6 +92,7 @@ export class DomControls implements Controls {
     clipboard,
     timer,
     chargeCatalog,
+    imageCatalog,
   }: {
     hitChance: HitChance;
     i18n: I18n;
@@ -101,6 +104,7 @@ export class DomControls implements Controls {
     clipboard: ClipboardProvider;
     timer: Timer;
     chargeCatalog: ChargeCatalog;
+    imageCatalog: ImageCatalog;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
@@ -112,6 +116,7 @@ export class DomControls implements Controls {
     this.clipboard = clipboard;
     this.timer = timer;
     this.chargeCatalog = chargeCatalog;
+    this.imageCatalog = imageCatalog;
     this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.trackingInput = new TrackingInput();
     this.hintRotator = new HintRotator({
@@ -1591,12 +1596,8 @@ export class DomControls implements Controls {
     const module = this.currentPropulsionModule(side);
     popup.innerHTML = "";
     if (!module) return;
-    const label = document.createElement("span");
-    label.setAttribute("class", "fitting-group-label");
-    label.textContent = module.label;
-    popup.appendChild(label);
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    const currentName = fitted?.propulsionName;
+    const currentName = fitted?.propulsionName ?? this.defaultPropulsionName(module);
     for (const name of this.fittingImport.propulsionVariantNames(module)) {
       const item = this.createFittingItem(side, name, name, currentName, () => this.onPropulsionVariantClick(side, name));
       item.setAttribute("data-value", name);

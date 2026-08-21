@@ -3,6 +3,7 @@ import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBr
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
+import type { ImageCatalog } from "./imageCatalog";
 import { serializeProfile } from "./profileText";
 import { ClipboardUnavailableError, type ClipboardProvider, type DisplayPreferences, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings, PROPULSION_NONE } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
@@ -548,9 +549,10 @@ function buildControls(
   const savedFittings = createMockSavedFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const timer = createNoOpTimer();
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((shipName) => `images/ships/${shipName}.webp`), itemIconUrl: vi.fn(() => undefined) });
   options.setup?.({ fittingImport, chargeCatalog });
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, timer, chargeCatalog });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, timer, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, timer, imageCatalog, controls };
 }
 
 describe("DomControls", () => {
@@ -1227,10 +1229,8 @@ describe("DomControls", () => {
     gear.trigger("click");
     expect(popup.hidden).toBe(false);
     expect(gear.getAttribute("aria-expanded")).toBe("true");
-    expect(popup.children.length).toBe(3);
-    expect(popup.children[0].textContent).toBe("10MN Afterburner I");
-    expect(popup.children[0].getAttribute("class")).toBe("fitting-group-label");
-    expect(popup.children[1].getAttribute("data-value")).toBe("10MN Afterburner I");
+    expect(popup.children.length).toBe(2);
+    expect(popup.children[0].getAttribute("data-value")).toBe("10MN Afterburner I");
     gear.trigger("click");
     expect(popup.hidden).toBe(true);
     expect(gear.getAttribute("aria-expanded")).toBe("false");
