@@ -21,7 +21,9 @@ function splitFittingText(text: string): { name: string; body: string } | undefi
   if (headerIndex < 0) return undefined;
   const header = HEADER_LINE.exec(lines[headerIndex].trim());
   if (!header) return undefined;
-  const name = header[1].split(",")[0].trim();
+  const headerRest = header[1];
+  const commaIndex = headerRest.indexOf(",");
+  const name = (commaIndex >= 0 ? headerRest.slice(commaIndex + 1) : headerRest).trim();
   if (name.length === 0) return undefined;
   const body = lines.slice(headerIndex + 1).join("\n").trim();
   return { name, body };
@@ -63,7 +65,7 @@ async function main() {
   readonly body: string;
 }
 \n`;
-  const content = `${header}${typeDefinitions}export const PRESET_FITTINGS = ${JSON.stringify(presetFittings, null, 1)} as unknown as Readonly<Record<string, readonly PresetFitting[]>>;\n`;
+  const content = `${header}${typeDefinitions}export const PRESET_FITTINGS: Readonly<Record<string, readonly PresetFitting[]>> = ${JSON.stringify(presetFittings, null, 1)};\n`;
 
   await writeFile(OUT_FILE, content);
   console.log(`Wrote ${fitCount} fits for ${Object.keys(presetFittings).length} hulls to ${OUT_FILE} (${content.length} bytes)`);
