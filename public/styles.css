@@ -579,6 +579,21 @@ body {
   transform: rotate(180deg);
 }
 
+.panel .ammo-trigger .ammo-label {
+  flex: 0 0 auto;
+}
+
+.panel .ammo-trigger .ammo-summary-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ammo-summary-row .ammo-summary-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+}
+
 .ammo-popup {
   position: absolute;
   top: calc(100% + 4px);
