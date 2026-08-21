@@ -13,7 +13,7 @@ import {
 import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
 import type { SavedFittings } from "./savedFittings";
-import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { HintRotator, type IHintRotator } from "./hintRotator";
@@ -49,7 +49,6 @@ export class DomControls implements Controls {
   private readonly presetFittings: PresetFittings;
   private readonly savedFittings: SavedFittings;
   private readonly clipboard: ClipboardProvider;
-  private readonly location: LocationProvider;
   private readonly timer: Timer;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly trackingInput: TrackingInput;
@@ -89,7 +88,6 @@ export class DomControls implements Controls {
     presetFittings,
     savedFittings,
     clipboard,
-    location,
     timer,
     chargeCatalog,
   }: {
@@ -101,7 +99,6 @@ export class DomControls implements Controls {
     presetFittings: PresetFittings;
     savedFittings: SavedFittings;
     clipboard: ClipboardProvider;
-    location: LocationProvider;
     timer: Timer;
     chargeCatalog: ChargeCatalog;
   }) {
@@ -113,7 +110,6 @@ export class DomControls implements Controls {
     this.presetFittings = presetFittings;
     this.savedFittings = savedFittings;
     this.clipboard = clipboard;
-    this.location = location;
     this.timer = timer;
     this.chargeCatalog = chargeCatalog;
     this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
@@ -250,33 +246,54 @@ export class DomControls implements Controls {
   }
 
   private restoreSavedState(): void {
-    const fromUrl = this.settingsStore.hasForeignUrlSettings();
-    if (fromUrl) {
-      this.settingsStore.clearSelectedProfile();
-    }
-    const saved = this.settingsStore.load();
-    if (saved) {
-      const selected = fromUrl ? null : this.settingsStore.loadSelectedProfile();
-      const selectedName = selected && this.settingsStore.listProfiles().includes(selected.name) ? selected.name : "";
-      this.loadSettings(saved, selectedName);
-      if (selectedName && selected) {
-        this.selectedProfile = selected.baseline;
-      }
+    const startup = this.settingsStore.loadStartupState();
+    if (startup.settings) {
+      this.loadSettings(startup.settings, startup.selectedProfileName ?? "");
+      this.selectedProfile = startup.selectedProfileName ? profileSettingsOf(this.getSettings()) : null;
       this.updateSaveButtonState();
-    } else {
-      this.i18n.translateDocument();
-      this.setDefaultSkillAndOverload();
-      this.setOverloadDisabled("attacker");
-      this.setOverloadDisabled("target");
-      this.updateUnitToggle();
-      this.updateLanguageToggle();
-      this.setBestInitialDistance();
-      this.updateManeuverAggressivityDisplay();
-      this.updateManeuverAggressivityEnabled();
-      this.updateGridBrightnessDisplay(DEFAULT_GRID_BRIGHTNESS);
-      this.setPlaying(false);
-      this.renderAllPropulsionOptions();
+      return;
     }
+    this.applyPreferences(this.settingsStore.loadPreferences());
+    const selectedName = startup.selectedProfileName;
+    const profile = selectedName ? this.settingsStore.loadProfile(selectedName) : null;
+    if (selectedName && profile) {
+      this.loadSettings(this.sessionSettings(profile), selectedName);
+      this.selectedProfile = profileSettingsOf(this.getSettings());
+      this.updateSaveButtonState();
+      return;
+    }
+    this.i18n.translateDocument();
+    this.setDefaultSkillAndOverload();
+    this.setOverloadDisabled("attacker");
+    this.setOverloadDisabled("target");
+    this.updateUnitToggle();
+    this.updateLanguageToggle();
+    this.setBestInitialDistance();
+    this.updateManeuverAggressivityDisplay();
+    this.updateManeuverAggressivityEnabled();
+    this.updateGridBrightnessDisplay();
+    this.setPlaying(false);
+    this.renderAllPropulsionOptions();
+    this.renderProfiles(selectedName ?? "");
+  }
+
+  private applyPreferences(preferences: DisplayPreferences): void {
+    this.i18n.setLanguage(preferences.language);
+    const display = this.trackingInput.setUnit(preferences.trackingUnit, this.currentSigResolution());
+    (this.els.tracking as HTMLInputElement).value = String(display);
+    (this.els.simSpeed as HTMLSelectElement).value = String(preferences.simSpeed);
+    this.updateGridBrightnessDisplay(preferences.gridBrightness);
+  }
+
+  private sessionSettings(profile: ProfileSettings): UserSettings {
+    return {
+      ...profile,
+      attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1),
+      language: this.i18n.current(),
+      trackingUnit: this.trackingInput.unit,
+      simSpeed: num(this.els.simSpeed),
+      gridBrightness: this.getGridBrightness(),
+    };
   }
 
   getTurret(): TurretSpec {
@@ -356,7 +373,7 @@ export class DomControls implements Controls {
     const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
     this.updateManeuverAggressivityDisplay(value);
     this.updateSaveButtonState();
-    this.persist();
+    this.savePreferences();
     this.callbacks?.onConfigChange();
   }
 
@@ -382,7 +399,7 @@ export class DomControls implements Controls {
   private onGridBrightnessChange(): void {
     this.updateGridBrightnessDisplay();
     this.updateSaveButtonState();
-    this.persist();
+    this.savePreferences();
     this.callbacks?.onDisplayChange();
   }
 
@@ -516,7 +533,7 @@ export class DomControls implements Controls {
     this.updateAlignTime("attacker");
     this.updateAlignTime("target");
     this.hintRotator.refresh();
-    this.persist();
+    this.savePreferences();
   }
 
   private setBestInitialDistance(): void {
@@ -541,7 +558,7 @@ export class DomControls implements Controls {
     const display = this.trackingInput.setUnit(unit, sigResolution);
     (this.els.tracking as HTMLInputElement).value = String(display);
     this.updateUnitToggle();
-    this.persist();
+    this.savePreferences();
     this.updateSaveButtonState();
   }
 
@@ -592,7 +609,7 @@ export class DomControls implements Controls {
     this.renderSkillOptions("target");
     this.hintRotator.refresh();
     this.setPlaying(this.playing);
-    this.persist();
+    this.savePreferences();
     this.updateSaveButtonState();
     this.callbacks?.onDisplayChange();
   }
@@ -607,14 +624,13 @@ export class DomControls implements Controls {
     (this.els.langJa as HTMLButtonElement).setAttribute("aria-pressed", String(current === "ja"));
   }
 
-  private persist(): void {
-    const settings = this.getSettings();
-    this.settingsStore.save(settings);
-    this.syncUrl(settings);
-  }
-
-  private syncUrl(settings = this.getSettings()): void {
-    this.location.replace(this.settingsStore.encodeUrl(settings));
+  private savePreferences(): void {
+    this.settingsStore.savePreferences({
+      language: this.i18n.current(),
+      trackingUnit: this.trackingInput.unit,
+      simSpeed: num(this.els.simSpeed),
+      gridBrightness: this.getGridBrightness(),
+    });
   }
 
   private renderProfiles(selected = ""): void {
@@ -641,7 +657,7 @@ export class DomControls implements Controls {
     if (!profileName) return;
     const profile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveProfile(profileName, profile);
-    this.settingsStore.saveSelectedProfile(profileName, profile);
+    this.settingsStore.selectProfile(profileName);
     (this.els.profileName as HTMLInputElement).value = "";
     this.renderProfiles(profileName);
     this.selectedProfile = profile;
@@ -653,9 +669,9 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings({ ...profile, attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1), language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
+    this.loadSettings(this.sessionSettings(profile), name);
     this.selectedProfile = profileSettingsOf(this.getSettings());
-    this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
+    this.settingsStore.selectProfile(name);
     this.updateSaveButtonState();
     this.callbacks?.onReset();
   }
@@ -746,7 +762,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.applyImportedTurret(imported);
     if (persist) {
       this.lastCommittedHull[side] = imported.profile.name;
-      this.persist();
+      this.savePreferences();
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
@@ -816,7 +832,7 @@ export class DomControls implements Controls {
     const parsed = parseProfile(text.trimStart());
     if (!parsed) return undefined;
     const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+    return { ...parsed, attackerAmmo: ammo, language: this.i18n.current(), trackingUnit: this.trackingInput.unit, simSpeed: num(this.els.simSpeed), gridBrightness: this.getGridBrightness() };
   }
 
   private resolveProfileAmmo(parsed: ProfileSettings): string {
@@ -941,7 +957,7 @@ export class DomControls implements Controls {
         if (id === "sigRes") this.updateTrackingForSigResolution();
         this.recordOverrideForDisplayInput(id);
         this.updateSaveButtonState();
-        this.persist();
+        this.savePreferences();
         this.callbacks?.onDisplayChange();
       });
     }
@@ -968,7 +984,7 @@ export class DomControls implements Controls {
         if (id === "attackerMode") this.updateManeuverAggressivityEnabled();
         this.recordOverrideForShipInput(id);
         this.updateSaveButtonState();
-        this.persist();
+        this.savePreferences();
         this.callbacks?.onConfigChange();
       });
     }
@@ -1017,7 +1033,7 @@ export class DomControls implements Controls {
       this.updateHullHint(side, this.currentPropulsionModule(side));
     }
     if (persist) {
-      this.persist();
+      this.savePreferences();
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
@@ -1182,7 +1198,7 @@ export class DomControls implements Controls {
     this.updateHullHint(side);
     this.renderPropulsionOptions(side);
     if (persist) {
-      this.persist();
+      this.savePreferences();
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
@@ -1249,7 +1265,7 @@ export class DomControls implements Controls {
     }
     this.setHullValidation(side, true);
     this.clearHull(side, false, false);
-    this.persist();
+    this.savePreferences();
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
   }
@@ -1275,7 +1291,7 @@ export class DomControls implements Controls {
 
     if (persist) {
       if (autoSelect) this.lastCommittedHull[side] = imported?.profile.name ?? profile.name;
-      this.persist();
+      this.savePreferences();
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
@@ -1452,7 +1468,7 @@ export class DomControls implements Controls {
     this.clearAttackerTurretOverrides();
     this.setTurretInputs(updated);
     this.renderAttackerAmmo();
-    this.persist();
+    this.savePreferences();
     this.callbacks?.onConfigChange();
     return true;
   }
@@ -1550,7 +1566,7 @@ export class DomControls implements Controls {
     this.setOverloadDisabled(side);
     this.updatePropulsionVariantUI(side);
     this.updateSaveButtonState();
-    this.persist();
+    this.savePreferences();
     this.callbacks?.onConfigChange();
   }
 
@@ -1602,7 +1618,7 @@ export class DomControls implements Controls {
     else this.targetFittedHull = updated;
     this.updateShipStats(side, { updateInertia: false, updateMass: true, updateSig: true });
     this.renderPropulsionVariants(side);
-    this.persist();
+    this.savePreferences();
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
   }
@@ -1866,7 +1882,7 @@ export class DomControls implements Controls {
       this.restoreAttackerTurret();
     }
     this.updateSaveButtonState();
-    this.persist();
+    this.savePreferences();
     if (side === "attacker" && !this.attackerProfile) return;
     if (side === "target" && !this.targetProfile) return;
     this.callbacks?.onConfigChange();
@@ -2180,7 +2196,7 @@ function setText(el: HTMLElement, text: string): void {
 }
 
 function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, ...rest } = settings;
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
   return rest;
 }
 

@@ -4,7 +4,7 @@ import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipP
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import { serializeProfile } from "./profileText";
-import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings, PROPULSION_NONE } from "./settings";
+import { ClipboardUnavailableError, type ClipboardProvider, type DisplayPreferences, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings, PROPULSION_NONE } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 import type { SavedFittings } from "./savedFittings";
 import type { Timer } from "./timer";
@@ -418,21 +418,18 @@ function addChoiceButtons(document: Document, groupId: string, values: string[],
   }
 }
 
-function fakeLocation(href = "http://localhost/"): LocationProvider {
-  let currentHref = href;
-  return {
-    get href() {
-      return currentHref;
-    },
-    replace: (url) => {
-      currentHref = url;
-    },
-  };
-}
+const DEFAULT_PREFERENCES: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 };
 
-interface SelectedProfile {
-  name: string;
-  baseline: ProfileSettings;
+type ControlsContext = ReturnType<typeof buildControls>;
+
+function saveAsProfile(ctx: ControlsContext, name = "brawler"): ProfileSettings {
+  const nameInput = getFake(globalThis.document, "profile-name");
+  nameInput.value = name;
+  nameInput.trigger("input");
+  getFake(globalThis.document, "profile-save").trigger("click");
+  const calls = ctx.settingsStore.saveProfile.mock.calls;
+  const [, profile] = calls[calls.length - 1];
+  return profile;
 }
 
 function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
@@ -457,13 +454,12 @@ function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?
     targetInertia: 0.45,
     targetSig: 40,
     attackerAmmo: "Hail S",
-  simSpeed: 4,
     ...overrides,
   });
 }
 
 function asProfile(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, ...rest } = settings;
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
   return rest;
 }
 
@@ -514,7 +510,7 @@ function createMockFittingImport() {
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
-  options: { selectedProfile?: SelectedProfile | null; hasForeignUrlSettings?: boolean; listProfiles?: string[]; language?: Language; setup?(deps: { fittingImport: FittingImport; chargeCatalog: ChargeCatalog }): void } = {},
+  options: { startup?: StartupState; selectedProfileName?: string | null; profile?: ProfileSettings; listProfiles?: string[]; preferences?: DisplayPreferences; language?: Language; setup?(deps: { fittingImport: FittingImport; chargeCatalog: ChargeCatalog }): void } = {},
 ) {
   setInputValues(document);
   const hitChance = vi.mocked<HitChance>({
@@ -531,19 +527,15 @@ function buildControls(
     translateDocument: vi.fn(),
   });
   const settingsStore = vi.mocked<SettingsStore>({
-    load: vi.fn(() => savedSettings),
-    save: vi.fn(),
+    loadStartupState: vi.fn(() => options.startup ?? { settings: savedSettings, selectedProfileName: options.selectedProfileName ?? null }),
     listProfiles: vi.fn(() => options.listProfiles ?? []),
     saveProfile: vi.fn(),
-    loadProfile: vi.fn(() => null),
+    loadProfile: vi.fn(() => options.profile ?? null),
     deleteProfile: vi.fn(),
-    hasForeignUrlSettings: vi.fn(() => options.hasForeignUrlSettings ?? false),
+    selectProfile: vi.fn(),
     encodeUrl: vi.fn(() => "http://localhost/"),
-    decodeUrl: vi.fn(() => null),
-    writeUrlToClipboard: vi.fn(async () => true),
-    loadSelectedProfile: vi.fn(() => options.selectedProfile ?? null),
-    saveSelectedProfile: vi.fn(),
-    clearSelectedProfile: vi.fn(),
+    loadPreferences: vi.fn(() => options.preferences ?? DEFAULT_PREFERENCES),
+    savePreferences: vi.fn(),
   });
   const ships = createMockShips();
   const fittingImport = createMockFittingImport();
@@ -555,11 +547,10 @@ function buildControls(
   const presetFittings = createMockPresetFittings();
   const savedFittings = createMockSavedFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
-  const location = fakeLocation();
   const timer = createNoOpTimer();
   options.setup?.({ fittingImport, chargeCatalog });
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, location, timer, chargeCatalog });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, location, timer, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, timer, chargeCatalog });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, timer, controls };
 }
 
 describe("DomControls", () => {
@@ -602,22 +593,20 @@ describe("DomControls", () => {
     expect(inertia.title).toContain(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
   });
 
-  test("saving clamps an empty initial distance to 1", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+  test("getConfig clamps an empty initial distance to 1", () => {
+    const { controls } = buildControls(globalThis.document);
     const input = getFake(globalThis.document, "initial-distance");
     input.value = "";
     input.trigger("input");
-    const [saved] = settingsStore.save.mock.calls[0];
-    expect(saved.initialDistance).toBe(1);
+    expect(controls.getConfig().initialDistance).toBe(1);
   });
 
   test("saving clamps a zero target signature to 1", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+    const ctx = buildControls(globalThis.document);
     const input = getFake(globalThis.document, "target-sig");
     input.value = "0";
     input.trigger("input");
-    const [saved] = settingsStore.save.mock.calls[0];
-    expect(saved.targetSig).toBe(1);
+    expect(saveAsProfile(ctx).targetSig).toBe(1);
   });
 
   test("copy profile writes the serialized profile to the injected clipboard", async () => {
@@ -630,52 +619,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "share-status").textContent).toBe("status.copied");
   });
 
-  test("selecting a saved profile updates the URL to the encoded shareable link", () => {
-    const { settingsStore, location } = buildControls(globalThis.document);
-    const profile: UserSettings = {
-      version: USER_SETTINGS_VERSION,
-      tracking: 0.32,
-      trackingUnit: "rad",
-      sigRes: "S",
-      optimal: 5000,
-      falloff: 5000,
-      attackerSpeed: 0,
-      attackerMode: "keepAtRange",
-      attackerRange: 5000,
-      maneuverAggressivity: 1,
-      attackerMass: 1_200_000,
-      attackerInertia: 3,
-      attackerSkillLevel: 5,
-      attackerOverload: true,
-      attackerHull: "Rifter",
-      attackerPropulsion: "mwd-5mn",
-      initialDistance: 5000,
-      targetSpeed: 1000,
-      targetMode: "orbit",
-      targetRange: 5000,
-      targetMass: 10_000_000,
-      targetInertia: 0.45,
-      targetSkillLevel: 5,
-      targetOverload: true,
-      targetSig: 40,
-      attackerAmmo: "Hail S",
-  simSpeed: 4,
-      language: "en",
-    };
-    const encodedUrl = "http://localhost/?c=ENCODED_PROFILE";
-    settingsStore.loadProfile.mockReturnValue(asProfile(profile));
-    settingsStore.encodeUrl.mockReturnValue(encodedUrl);
-
-    const select = getFake(globalThis.document, "profile-select");
-    select.value = "brawler";
-    select.trigger("change");
-
-    expect(settingsStore.loadProfile).toHaveBeenCalledWith("brawler");
-    expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
-    expect(location.href).toBe(encodedUrl);
-  });
-
-  test("selecting a saved profile persists its settings for the next session", () => {
+  test("selecting a saved profile applies its settings and marks it selected", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
@@ -704,7 +648,7 @@ describe("DomControls", () => {
       targetOverload: true,
       targetSig: 40,
       attackerAmmo: "Hail S",
-  simSpeed: 4,
+      simSpeed: 4,
       language: "en",
     };
     settingsStore.loadProfile.mockReturnValue(asProfile(profile));
@@ -713,18 +657,19 @@ describe("DomControls", () => {
     select.value = "brawler";
     select.trigger("change");
 
-    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
+    expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    expect(getFake(globalThis.document, "attacker-propulsion").value).toBe("mwd-5mn");
   });
 
-  test("selecting the empty profile option does not update the URL", () => {
-    const { settingsStore, location } = buildControls(globalThis.document);
+  test("selecting the empty profile option does nothing", () => {
+    const { settingsStore } = buildControls(globalThis.document);
     const select = getFake(globalThis.document, "profile-select");
     select.value = "";
     select.trigger("change");
 
     expect(settingsStore.loadProfile).not.toHaveBeenCalled();
-    expect(settingsStore.encodeUrl).not.toHaveBeenCalled();
-    expect(location.href).toBe("http://localhost/");
+    expect(settingsStore.selectProfile).not.toHaveBeenCalled();
   });
 
   test("selecting a hull populates base stats and enables tier-correct propulsion options", () => {
@@ -1067,7 +1012,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-overload").checked).toBe(true);
   });
 
-  test("loading saved settings on startup persists them for the next session", () => {
+  test("loading settings from the URL persists the display preferences", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.5,
@@ -1079,6 +1024,7 @@ describe("DomControls", () => {
       attackerMode: "orbit",
       attackerRange: 7000,
       maneuverAggressivity: 2,
+      gridBrightness: 0.4,
       attackerMass: 1_200_000,
       attackerInertia: 3,
       attackerSkillLevel: 5,
@@ -1095,12 +1041,13 @@ describe("DomControls", () => {
       targetOverload: true,
       targetSig: 40,
       attackerAmmo: "Hail S",
-  simSpeed: 4,
+      simSpeed: 2,
       language: "en",
     };
     const { settingsStore } = buildControls(globalThis.document, settings);
 
-    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    expect(settingsStore.savePreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.4 });
   });
 
   test("fresh start with no saved settings disables both overload checkboxes", () => {
@@ -1109,25 +1056,16 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-overload").disabled).toBe(true);
   });
 
-  test("fresh start without a c= URL does not auto-load local settings or the selected profile", () => {
+  test("fresh start without a URL or selection keeps the defaults and an empty dropdown", () => {
     const { settingsStore } = buildControls(globalThis.document);
-    expect(settingsStore.load).toHaveReturnedWith(null);
-    expect(settingsStore.loadSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.loadStartupState).toHaveReturnedWith({ settings: null, selectedProfileName: null });
+    expect(settingsStore.loadProfile).not.toHaveBeenCalled();
     expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
     expect(getFake(globalThis.document, "profile-select").value).toBe("");
   });
 
-  test("changing the skill level persists without a hull selected", () => {
-    const { settingsStore } = buildControls(globalThis.document);
-    const skills = getFake(globalThis.document, "attacker-skills");
-    skills.value = "2";
-    skills.trigger("change");
-    const [saved] = settingsStore.save.mock.calls[0];
-    expect(saved.attackerSkillLevel).toBe(2);
-  });
-
-  test("changing the skill level with a hull selected persists the recomputed stats", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+  test("changing the skill level with a hull selected recomputes the stats", () => {
+    buildControls(globalThis.document);
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
@@ -1138,11 +1076,9 @@ describe("DomControls", () => {
 
     const rifter = RIFTER;
     const expected = mockStatsFor(rifter, RIFTER_FITTING_OPTIONS[0], { skillLevel: 0, overloaded: true });
-    const calls = settingsStore.save.mock.calls;
-    const [saved] = calls[calls.length - 1];
-    expect(saved.attackerSpeed).toBe(Number(formatNumber(expected.maxSpeed)));
-    expect(saved.attackerInertia).toBe(Number(formatNumber(expected.inertiaModifier, 6)));
-    expect(saved.attackerSkillLevel).toBe(0);
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(expected.maxSpeed));
+    expect(getFake(globalThis.document, "attacker-inertia").value).toBe(formatNumber(expected.inertiaModifier, 6));
+    expect(skills.value).toBe("0");
   });
 
   test("clicking a visible propulsion button updates the hidden select and recomputes stats", () => {
@@ -1192,8 +1128,9 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "target-overload").disabled).toBe(true);
   });
 
-  test("deselecting propulsion persists the none state in saved settings", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+  test("deselecting propulsion clears the fitted state", () => {
+    const ctx = buildControls(globalThis.document);
+    const { clipboard, settingsStore, ships, i18n } = ctx;
 
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
@@ -1203,8 +1140,7 @@ describe("DomControls", () => {
     mwdButton.trigger("click");
     mwdButton.trigger("click");
 
-    const calls = settingsStore.save.mock.calls;
-    const [saved] = calls[calls.length - 1];
+    const saved = saveAsProfile(ctx);
     expect(saved.attackerPropulsion).toBe("none");
   });
 
@@ -1299,7 +1235,8 @@ describe("DomControls", () => {
   });
 
   test("selecting a propulsion variant updates the fitted summary and speed", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+    const ctx = buildControls(globalThis.document);
+    const { clipboard, settingsStore, ships, i18n } = ctx;
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
@@ -1311,19 +1248,20 @@ describe("DomControls", () => {
     expect(compact).toBeDefined();
     compact!.trigger("click");
     expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_AB10_COMPACT_SKILL5.maxSpeed));
-    const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+    const saved = saveAsProfile(ctx);
     expect(saved.attackerFittedHull?.propulsionName).toBe("10MN Y-S8 Compact Afterburner");
     expect(saved.attackerFittedHull?.propulsion?.speedBonus).toBe(1.25);
   });
 
   test("deselecting propulsion clears the fitted variant", () => {
-    const { settingsStore } = buildControls(globalThis.document);
+    const ctx = buildControls(globalThis.document);
+    const { clipboard, settingsStore, ships, i18n } = ctx;
     const hullInput = getFake(globalThis.document, "attacker-hull");
     hullInput.value = "Rifter";
     hullInput.trigger("change");
     findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
     findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
-    const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+    const saved = saveAsProfile(ctx);
     expect(saved.attackerPropulsion).toBe("none");
     expect(saved.attackerFittedHull).toBeUndefined();
   });
@@ -2075,8 +2013,7 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "res-hit").textContent).toBe("95.0%");
   });
 
-  test("selecting a saved profile persists the selection and baseline", () => {
-    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
+  test("loading settings from a URL restores the matching selected profile in the dropdown", () => {
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -2107,13 +2044,14 @@ describe("DomControls", () => {
   simSpeed: 4,
       language: "en",
     };
+    const { settingsStore } = buildControls(globalThis.document, null, { listProfiles: ["brawler"] });
     settingsStore.loadProfile.mockReturnValue(asProfile(profile));
 
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
     select.trigger("change");
 
-    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
+    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
   });
 
   test("loading saved settings restores the last selected profile and baseline", () => {
@@ -2147,18 +2085,16 @@ describe("DomControls", () => {
   simSpeed: 4,
       language: "en",
     };
-    const { settingsStore } = buildControls(globalThis.document, profile, {
-      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
-      listProfiles: ["brawler"],
-    });
+    const buildOptions = { startup: { settings: profile, selectedProfileName: "brawler" } as StartupState, listProfiles: ["brawler"] };
+    const { settingsStore } = buildControls(globalThis.document, null, buildOptions);
 
     const select = getFake(globalThis.document, "profile-select");
     expect(select.value).toBe("brawler");
-    expect(settingsStore.save).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", attackerPropulsion: "mwd-5mn" }));
-    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+    expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    expect(settingsStore.selectProfile).not.toHaveBeenCalled();
   });
 
-  test("loading settings from a foreign URL clears the stored selection and leaves the dropdown empty", () => {
+  test("loading settings from a foreign URL leaves the dropdown empty", () => {
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -2189,19 +2125,16 @@ describe("DomControls", () => {
   simSpeed: 4,
       language: "en",
     };
-    const { settingsStore } = buildControls(globalThis.document, profile, {
-      hasForeignUrlSettings: true,
-      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
+    buildControls(globalThis.document, null, {
+      startup: { settings: profile, selectedProfileName: null },
       listProfiles: ["brawler"],
     });
 
     const select = getFake(globalThis.document, "profile-select");
     expect(select.value).toBe("");
-    expect(settingsStore.clearSelectedProfile).toHaveBeenCalled();
-    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
   });
 
-  test("loading settings from a URL matching local storage restores the last selected profile", () => {
+  test("loading settings from a URL matching the stored selection restores the selected profile", () => {
     const profile: UserSettings = {
       version: USER_SETTINGS_VERSION,
       tracking: 0.32,
@@ -2232,46 +2165,81 @@ describe("DomControls", () => {
   simSpeed: 4,
       language: "en",
     };
-    const { settingsStore } = buildControls(globalThis.document, profile, {
-      hasForeignUrlSettings: false,
-      selectedProfile: { name: "brawler", baseline: asProfile(profile) },
+    buildControls(globalThis.document, null, {
+      startup: { settings: profile, selectedProfileName: "brawler" },
       listProfiles: ["brawler"],
     });
 
     const select = getFake(globalThis.document, "profile-select");
     expect(select.value).toBe("brawler");
-    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
-    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
   });
 
-  test("changing an input keeps the URL in the address bar", () => {
-    const { settingsStore, location } = buildControls(globalThis.document);
-    const encodedUrl = "http://localhost/?c=ENCODED";
-    settingsStore.encodeUrl.mockReturnValue(encodedUrl);
+  test("a plain URL without a c parameter restores the saved selected profile", () => {
+    const profile: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 0,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      maneuverAggressivity: 1,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "mwd-5mn",
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      attackerAmmo: "Hail S",
+  simSpeed: 4,
+      language: "en",
+    };
+    const { settingsStore } = buildControls(globalThis.document, null, {
+      startup: { settings: null, selectedProfileName: "brawler" },
+      listProfiles: ["brawler"],
+      profile: asProfile(profile),
+    });
+
+    const select = getFake(globalThis.document, "profile-select");
+    expect(select.value).toBe("brawler");
+    expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+    expect(settingsStore.loadProfile).toHaveBeenCalledWith("brawler");
+  });
+
+  test("changing an input persists the display preferences", () => {
+    const { settingsStore } = buildControls(globalThis.document);
 
     getFake(globalThis.document, "optimal").value = "6000";
     getFake(globalThis.document, "optimal").trigger("input");
 
-    expect(settingsStore.encodeUrl).toHaveBeenCalledWith(expect.objectContaining({ optimal: 6000 }));
-    expect(location.href).toBe(encodedUrl);
+    expect(settingsStore.savePreferences).toHaveBeenCalledWith(DEFAULT_PREFERENCES);
+    expect(settingsStore.encodeUrl).not.toHaveBeenCalled();
   });
 
-  test("saving a profile persists it as the selected profile without display preferences", () => {
-    const { settingsStore } = buildControls(globalThis.document);
-    const nameInput = getFake(globalThis.document, "profile-name");
-    nameInput.value = "brawler";
-    nameInput.trigger("input");
+  test("saving a profile stores it as the selected profile without display preferences", () => {
+    const ctx = buildControls(globalThis.document);
+    const { settingsStore } = ctx;
 
-    getFake(globalThis.document, "profile-save").trigger("click");
+    const savedProfile = saveAsProfile(ctx, "brawler");
 
-    const [, savedProfile] = settingsStore.saveProfile.mock.calls[0];
-    const [, selectedBaseline] = settingsStore.saveSelectedProfile.mock.calls[0];
-    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", savedProfile);
-    expect(settingsStore.saveSelectedProfile).toHaveBeenCalledWith("brawler", selectedBaseline);
+    expect(ctx.settingsStore.saveProfile).toHaveBeenCalledWith("brawler", savedProfile);
+    expect(ctx.settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
     expect(savedProfile).not.toHaveProperty("language");
     expect(savedProfile).not.toHaveProperty("trackingUnit");
-    expect(selectedBaseline).not.toHaveProperty("language");
-    expect(selectedBaseline).not.toHaveProperty("trackingUnit");
+    expect(savedProfile).not.toHaveProperty("simSpeed");
+    expect(savedProfile).not.toHaveProperty("gridBrightness");
+    expect(savedProfile).toHaveProperty("initialDistance");
     expect(getFake(globalThis.document, "profile-select").value).toBe("brawler");
   });
 
@@ -2312,14 +2280,12 @@ describe("DomControls", () => {
     const select = getFake(globalThis.document, "profile-select");
     select.value = "brawler";
     select.trigger("change");
-    settingsStore.saveSelectedProfile.mockClear();
-    settingsStore.clearSelectedProfile.mockClear();
+    settingsStore.selectProfile.mockClear();
 
     getFake(globalThis.document, "profile-delete").trigger("click");
 
     expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
-    expect(settingsStore.clearSelectedProfile).not.toHaveBeenCalled();
-    expect(settingsStore.saveSelectedProfile).not.toHaveBeenCalled();
+    expect(settingsStore.selectProfile).not.toHaveBeenCalled();
     expect(select.value).toBe("");
   });
 
@@ -2335,7 +2301,7 @@ describe("DomControls", () => {
     expect(controls.getGridBrightness()).toBe(1);
   });
 
-  test("dragging the grid brightness slider updates the output, fill, and persisted settings", () => {
+  test("dragging the grid brightness slider updates the output, fill, and persisted preferences", () => {
     const { settingsStore } = buildControls(globalThis.document);
     const slider = getFake(globalThis.document, "grid-brightness-slider");
     slider.value = "0.63";
@@ -2343,7 +2309,7 @@ describe("DomControls", () => {
 
     expect(getFake(globalThis.document, "grid-brightness-value").textContent).toBe("63%");
     expect(slider.style["--fill"]).toBe("63%");
-    const calls = settingsStore.save.mock.calls;
+    const calls = settingsStore.savePreferences.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.gridBrightness).toBe(0.63);
   });
@@ -2725,7 +2691,7 @@ describe("DomControls", () => {
 
   describe("ship name i18n", () => {
     test("datalist option values are canonical preset hulls in every language", () => {
-      buildControls(globalThis.document, null, { language: "zh" });
+      buildControls(globalThis.document, null, { language: "zh", preferences: { ...DEFAULT_PREFERENCES, language: "zh" } });
 
       const options = getFake(globalThis.document, "hull-options").children;
       expect(options.some((o) => o.value === "Rifter")).toBe(true);
@@ -2742,7 +2708,7 @@ describe("DomControls", () => {
     });
 
     test("hull input displays the localized name after loading a profile with a canonical hull", () => {
-      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh", listProfiles: ["brawler"] });
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh", preferences: { ...DEFAULT_PREFERENCES, language: "zh" }, listProfiles: ["brawler"] });
       const profile: UserSettings = {
         version: USER_SETTINGS_VERSION,
         tracking: 0.32,
@@ -2836,7 +2802,7 @@ describe("DomControls", () => {
     });
 
     test("typing a localized hull name resolves the hull and saveProfile still receives the canonical English attackerHull", () => {
-      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh" });
+      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh", preferences: { ...DEFAULT_PREFERENCES, language: "zh" } });
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "裂谷级";
       hullInput.trigger("change");
@@ -2854,20 +2820,20 @@ describe("DomControls", () => {
     });
 
     test("typing a canonical English name in a non-English UI resolves and persists the canonical attackerHull", () => {
-      const { settingsStore } = buildControls(globalThis.document, null, { language: "zh" });
-      settingsStore.save.mockClear();
+      const ctx = buildControls(globalThis.document, null, { language: "zh", preferences: { ...DEFAULT_PREFERENCES, language: "zh" } });
+      const { fittingImport, clipboard } = ctx;
 
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
 
       expect(hullInput.value).toBe("裂谷级");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerHull).toBe("Rifter");
     });
 
     test("hull hint shows localized hull type and faction and refreshes on language switch", () => {
-      buildControls(globalThis.document, null, { language: "zh" });
+      buildControls(globalThis.document, null, { language: "zh", preferences: { ...DEFAULT_PREFERENCES, language: "zh" } });
 
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "裂谷级";
@@ -2890,7 +2856,8 @@ describe("DomControls", () => {
     }
 
     test("attacker import button populates hull, turret and stats from a fitting", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
@@ -2904,7 +2871,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "falloff").value).toBe("3000");
       expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("status.fittingImported");
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
     });
 
@@ -2964,7 +2931,8 @@ describe("DomControls", () => {
     });
 
     test("pasting a gunner profile in the popup imports only that side's fitting", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
@@ -2978,7 +2946,7 @@ describe("DomControls", () => {
       expect(popup.hidden).toBe(true);
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "target-hull").value).toBe("");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe("[Rifter, Brawler]\n1MN Afterburner II");
       expect(saved.targetFitting).toBeUndefined();
     });
@@ -3003,7 +2971,8 @@ describe("DomControls", () => {
     });
 
     test("side import button imports only the corresponding side from gunner text", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, savedFittings, settingsStore } = ctx;
       const attackerEft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       fittingImport.importFitting.mockImplementation((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : IMPORTED_THRASHER));
       clipboard.readText = vi.fn(async () => attackerEft);
@@ -3016,20 +2985,21 @@ describe("DomControls", () => {
 
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe(attackerEft);
       expect(saved.targetFitting).toBe("[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive");
     });
 
     test("top import button restores the full profile from gunner text", async () => {
-      const { settingsStore, clipboard } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { clipboard } = ctx;
       clipboard.readText = vi.fn(async () => gunnerProfileText({}));
       getFake(globalThis.document, "import-profile").trigger("click");
       await flush();
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
       expect(getFake(globalThis.document, "share-status").textContent).toBe("status.profileImported");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerHull).toBe("Rifter");
       expect(saved.targetHull).toBe("Thrasher");
     });
@@ -3050,7 +3020,8 @@ describe("DomControls", () => {
     });
 
     test("choosing attacker in the side popup imports the fitting as attacker", async () => {
-      const { fittingImport, settingsStore, savedFittings, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, savedFittings } = ctx;
       const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       clipboard.readText = vi.fn(async () => eft);
@@ -3064,14 +3035,15 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "import-profile").getAttribute("aria-expanded")).toBe("false");
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "target-hull").value).toBe("");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe(eft);
       expect(saved.targetFitting).toBeUndefined();
       expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
     });
 
     test("choosing target in the side popup imports the fitting as target", async () => {
-      const { fittingImport, settingsStore, savedFittings, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, savedFittings } = ctx;
       const eft = "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive";
       fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
       clipboard.readText = vi.fn(async () => eft);
@@ -3084,7 +3056,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "import-side-popup").hidden).toBe(true);
       expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.targetFitting).toBe(eft);
       expect(saved.attackerFitting).toBeUndefined();
       expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Thrasher", name: "Sniper" }));
@@ -3258,21 +3230,23 @@ describe("DomControls", () => {
     });
 
     test("manual hull selection clears the fitted state", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, presetFittings, settingsStore } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Thrasher";
       hullInput.trigger("change");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFittedHull).toBeUndefined();
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
       expect(getFake(globalThis.document, "attacker-hull-hint").textContent).not.toContain("Brawler");
     });
 
     test("reselecting the same hull after an import keeps the fitted state active", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, presetFittings, settingsStore } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
@@ -3281,19 +3255,20 @@ describe("DomControls", () => {
       hullInput.trigger("change");
 
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
-      const [savedAfterReselect] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const savedAfterReselect = saveAsProfile(ctx);
       expect(savedAfterReselect.attackerFittedHull?.fittingName).toBe("Brawler");
 
       const skills = getFake(globalThis.document, "attacker-skills");
       skills.value = "0";
       skills.trigger("change");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_MWD_SKILL0.maxSpeed));
-      const [savedAfterSkillChange] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const savedAfterSkillChange = saveAsProfile(ctx);
       expect(savedAfterSkillChange.attackerFittedHull?.fittingName).toBe("Brawler");
     });
 
     test("reselecting the same target hull after an import keeps the fitted state active", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, presetFittings, settingsStore } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "target-import-fitting").trigger("click");
       await flush();
@@ -3302,7 +3277,7 @@ describe("DomControls", () => {
       hullInput.trigger("change");
 
       expect(getFake(globalThis.document, "target-fitting-name").hidden).toBe(false);
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.targetFittedHull?.fittingName).toBe("Brawler");
     });
 
@@ -3331,7 +3306,8 @@ describe("DomControls", () => {
     });
 
     test("changing propulsion updates the fitted summary and recomputes stats", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, presetFittings, settingsStore } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
@@ -3340,7 +3316,7 @@ describe("DomControls", () => {
       propulsion.trigger("change");
       expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("1420.75");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFittedHull?.propulsionId).toBe("ab-1mn");
     });
 
@@ -3408,14 +3384,15 @@ describe("DomControls", () => {
     });
 
     test("importing a fitting records the fitting basis and clears attacker overrides", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, settingsStore } = ctx;
       const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       clipboard.readText = vi.fn(async () => eft);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
 
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe(eft);
       expect(saved.attackerOverrides).toEqual({});
       expect(saved.attackerFittedHull).not.toBeUndefined();
@@ -3423,7 +3400,8 @@ describe("DomControls", () => {
     });
 
     test("editing a fitted field records a side-specific override", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, settingsStore } = ctx;
       const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       clipboard.readText = vi.fn(async () => eft);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
@@ -3434,13 +3412,14 @@ describe("DomControls", () => {
       massInput.value = "2000000";
       massInput.trigger("input");
 
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerOverrides).toEqual({ attackerMass: 2_000_000 });
       expect(saved.attackerFitting).toBe(eft);
     });
 
     test("editing mass does not overwrite a speed override", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, settingsStore } = ctx;
       const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       clipboard.readText = vi.fn(async () => eft);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
@@ -3456,12 +3435,13 @@ describe("DomControls", () => {
       massInput.trigger("input");
 
       expect(speedInput.value).toBe("3500");
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerOverrides).toEqual({ attackerSpeed: 3500, attackerMass: 2_000_000 });
     });
 
     test("importing a different fitting clears the side overrides", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, settingsStore } = ctx;
       const rifterEft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       const thrasherEft = "[Thrasher, Sniper]\n280mm Howitzer Artillery I, Republic Fleet EMP S\n5MN Y-T8 Compact Microwarpdrive";
       clipboard.readText = vi.fn(async () => rifterEft);
@@ -3478,14 +3458,15 @@ describe("DomControls", () => {
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
 
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerOverrides).toEqual({});
       expect(saved.attackerFitting).toBe(thrasherEft);
       expect(saved.attackerFittedHull?.fittingName).toBe("Sniper");
     });
 
     test("saveProfile includes fitting basis and overrides but not display preferences", async () => {
-      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, clipboard, settingsStore } = ctx;
       const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
       clipboard.readText = vi.fn(async () => eft);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
@@ -3504,7 +3485,8 @@ describe("DomControls", () => {
     });
 
     test("imported fitting with a compact propulsion keeps the variant stats", async () => {
-      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport } = ctx;
       fittingImport.importFitting.mockReturnValue({
         ...IMPORTED_RIFTER,
         propulsion: { ...AB10MN_COMPACT, propulsionId: "ab-10mn", propulsionName: "10MN Y-S8 Compact Afterburner" },
@@ -3512,7 +3494,7 @@ describe("DomControls", () => {
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
       expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_AB10_COMPACT_SKILL5.maxSpeed));
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFittedHull?.propulsionName).toBe("10MN Y-S8 Compact Afterburner");
       expect(saved.attackerFittedHull?.propulsion?.speedBonus).toBe(1.25);
     });
@@ -3591,7 +3573,8 @@ describe("DomControls", () => {
     });
 
     test("selecting a new hull with a recent saved fitting auto-imports it", async () => {
-      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { savedFittings, fittingImport } = ctx;
       savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       setRifterHull();
@@ -3599,7 +3582,7 @@ describe("DomControls", () => {
 
       expect(fittingImport.importFitting).toHaveBeenCalledWith(SAVED_RIFTER.text, expect.any(Object));
       expect(savedFittings.record).not.toHaveBeenCalled();
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe(SAVED_RIFTER.text);
     });
 
@@ -3613,7 +3596,8 @@ describe("DomControls", () => {
     });
 
     test("typing an intermediate hull then retyping the original updates stats and does not auto-select", async () => {
-      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { savedFittings, fittingImport } = ctx;
       savedFittings.mostRecentFor.mockReturnValue(undefined);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
 
@@ -3622,7 +3606,6 @@ describe("DomControls", () => {
       hullInput.trigger("change");
       await flush();
       fittingImport.importFitting.mockClear();
-      settingsStore.save.mockClear();
 
       hullInput.value = "Thrasher";
       hullInput.trigger("input");
@@ -3631,12 +3614,13 @@ describe("DomControls", () => {
       await flush();
 
       expect(fittingImport.importFitting).not.toHaveBeenCalled();
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerHull).toBe("Rifter");
     });
 
     test("input then change on a new hull auto-imports the recent fitting", async () => {
-      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { savedFittings, fittingImport } = ctx;
       savedFittings.mostRecentFor.mockImplementation((hull: string) => (hull === "Rifter" ? SAVED_RIFTER : undefined));
       savedFittings.listForHull.mockImplementation((hull: string) => (hull === "Rifter" ? [SAVED_RIFTER] : []));
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
@@ -3647,7 +3631,6 @@ describe("DomControls", () => {
       await flush();
 
       fittingImport.importFitting.mockClear();
-      settingsStore.save.mockClear();
 
       hullInput.value = "Rifter";
       hullInput.trigger("input");
@@ -3656,18 +3639,19 @@ describe("DomControls", () => {
 
       expect(fittingImport.importFitting).toHaveBeenCalledWith(SAVED_RIFTER.text, expect.any(Object));
       expect(savedFittings.record).not.toHaveBeenCalled();
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerFitting).toBe(SAVED_RIFTER.text);
     });
 
     test("auto-select failure still persists the chosen hull", async () => {
-      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { savedFittings, fittingImport } = ctx;
       savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
       fittingImport.importFitting.mockReturnValue(undefined);
       setRifterHull();
       await flush();
 
-      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerHull).toBe("Rifter");
       expect(saved.attackerFittedHull).toBeUndefined();
     });
@@ -3759,14 +3743,15 @@ describe("DomControls", () => {
     });
 
     test("deleting a saved fitting calls remove and does not unapply the current fitting", async () => {
-      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+const ctx = buildControls(globalThis.document);
+      const { savedFittings, fittingImport, settingsStore } = ctx;
       savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
       savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       setRifterHull();
       await flush();
 
-      const [savedAfterImport] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const savedAfterImport = saveAsProfile(ctx);
       expect(savedAfterImport.attackerFitting).toBe(SAVED_RIFTER.text);
 
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
@@ -3775,7 +3760,7 @@ describe("DomControls", () => {
 
       expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
       expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
-      const [savedAfterDelete] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      const savedAfterDelete = saveAsProfile(ctx);
       expect(savedAfterDelete.attackerFitting).toBe(SAVED_RIFTER.text);
     });
 
@@ -3938,7 +3923,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "tracking").value).toBe("0.42");
       expect(getFake(globalThis.document, "optimal").value).toBe("1200");
       expect(getFake(globalThis.document, "falloff").value).toBe("3000");
-      const [saved] = ctx.settingsStore.save.mock.calls[ctx.settingsStore.save.mock.calls.length - 1];
+      const saved = saveAsProfile(ctx);
       expect(saved.attackerAmmo).toBe("Republic Fleet EMP S");
       expect(saved.attackerOverrides).not.toHaveProperty("optimal");
       expect(saved.attackerOverrides).not.toHaveProperty("tracking");

@@ -71,7 +71,7 @@ export function parseProfile(text: string): ProfileSettings | undefined {
     }
 
     const field = DOT_KEY_TO_FIELD.get(dotKey);
-    if (field === undefined) return undefined;
+    if (field === undefined) continue;
     const parsed = parseScalarValue(field, value);
     if (parsed === undefined) return undefined;
     raw = { ...raw, [field]: parsed };
@@ -91,9 +91,7 @@ const GLOBAL_FIELDS: readonly ScalarField[] = [
   "falloff",
   "attackerAmmo",
   "initialDistance",
-  "simSpeed",
   "maneuverAggressivity",
-  "gridBrightness",
 ] as const;
 
 const ATTACKER_FIELDS: readonly ScalarField[] = [
@@ -272,9 +270,8 @@ function parseScalarValue(field: ScalarField, value: string): ScalarValue | unde
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (field === "initialDistance" || field === "simSpeed" || field === "targetSig") return num > 0 ? num : undefined;
+  if (field === "initialDistance" || field === "targetSig") return num > 0 ? num : undefined;
   if (field === "maneuverAggressivity") return num >= 0 ? num : undefined;
-  if (field === "gridBrightness") return num >= 0 && num <= 1 ? num : undefined;
   return num >= 0 ? num : undefined;
 }
 
@@ -305,7 +302,6 @@ function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings 
   const targetMass = raw.targetMass;
   const targetInertia = raw.targetInertia;
   const targetSig = raw.targetSig;
-  const simSpeed = raw.simSpeed;
 
   if (
     version === undefined ||
@@ -324,8 +320,7 @@ function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings 
     targetRange === undefined ||
     targetMass === undefined ||
     targetInertia === undefined ||
-    targetSig === undefined ||
-    simSpeed === undefined
+    targetSig === undefined
   ) {
     return undefined;
   }
@@ -348,7 +343,6 @@ function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings 
     targetMass,
     targetInertia,
     targetSig,
-    simSpeed,
     attackerSkillLevel: raw.attackerSkillLevel,
     attackerOverload: raw.attackerOverload,
     attackerHull: raw.attackerHull,
@@ -365,7 +359,6 @@ function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings 
     targetOverrides: raw.targetOverrides,
     targetFittedHull: raw.targetFittedHull,
     maneuverAggressivity: raw.maneuverAggressivity,
-    gridBrightness: raw.gridBrightness,
   };
 }
 

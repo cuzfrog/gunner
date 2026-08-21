@@ -57,7 +57,6 @@ const FULL_PROFILE: ProfileSettings = {
   attackerMode: "keepAtRange",
   attackerRange: 5000,
   maneuverAggressivity: 1,
-  gridBrightness: 0.2,
   attackerMass: 1_500_000,
   attackerInertia: 2,
   attackerSkillLevel: 5,
@@ -81,7 +80,6 @@ const FULL_PROFILE: ProfileSettings = {
   targetOverrides: { targetMass: 11_000_000 },
   attackerFittedHull: ATTACKER_FITTED_HULL,
   targetFittedHull: TARGET_FITTED_HULL,
-  simSpeed: 4,
 };
 
 const MINIMAL_PROFILE: ProfileSettings = {
@@ -102,7 +100,6 @@ const MINIMAL_PROFILE: ProfileSettings = {
   targetMass: 10_000_000,
   targetInertia: 0.45,
   targetSig: 40,
-  simSpeed: 4,
 };
 
 describe("profileText", () => {
@@ -135,9 +132,15 @@ describe("profileText", () => {
     expect(parseProfile("\n\n[Rifter, Brawler]")).toBeUndefined();
   });
 
-  test("parseProfile returns undefined for an unknown key", () => {
-    const text = `${PROFILE_TEXT_HEADER}\nattacker.mass=1000\nunknown.key=42`;
-    expect(parseProfile(text)).toBeUndefined();
+  test("parseProfile ignores unknown keys for forward compatibility", () => {
+    const text = `${serializeProfile(MINIMAL_PROFILE)}\nunknown.key=42`;
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(MINIMAL_PROFILE);
+  });
+
+  test("parseProfile ignores display preference lines written by older versions", () => {
+    const text = `${serializeProfile(MINIMAL_PROFILE)}\nsim.speed=4\ngrid.brightness=0.2`;
+    expect(parseProfile(text)).toEqual(MINIMAL_PROFILE);
   });
 
   test("parseProfile returns undefined for an invalid override key", () => {

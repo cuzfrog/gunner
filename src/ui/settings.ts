@@ -71,7 +71,19 @@ export interface UserSettings {
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "attackerAmmo"> & { attackerAmmo?: string };
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "attackerAmmo"> & { attackerAmmo?: string };
+
+export interface DisplayPreferences {
+  readonly language: Language;
+  readonly trackingUnit: TrackingUnit;
+  readonly simSpeed: number;
+  readonly gridBrightness: number;
+}
+
+export interface StartupState {
+  readonly settings: UserSettings | null;
+  readonly selectedProfileName: string | null;
+}
 
 export interface StorageProvider {
   getItem(key: string): string | null;
@@ -81,7 +93,6 @@ export interface StorageProvider {
 
 export interface LocationProvider {
   readonly href: string;
-  replace(url: string): void;
 }
 
 export class ClipboardUnavailableError extends Error {
@@ -96,29 +107,25 @@ export interface ClipboardProvider {
 }
 
 export interface SettingsStore {
-  load(): UserSettings | null;
-  save(settings: UserSettings): void;
+  loadStartupState(): StartupState;
   listProfiles(): string[];
   saveProfile(name: string, settings: ProfileSettings): void;
   loadProfile(name: string): ProfileSettings | null;
   deleteProfile(name: string): void;
+  selectProfile(name: string): void;
   encodeUrl(settings: UserSettings): string;
-  decodeUrl(): UserSettings | null;
-  writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean>;
-  hasForeignUrlSettings(): boolean;
-  loadSelectedProfile(): { name: string; baseline: ProfileSettings } | null;
-  saveSelectedProfile(name: string, baseline: ProfileSettings): void;
-  clearSelectedProfile(): void;
+  loadPreferences(): DisplayPreferences;
+  savePreferences(preferences: DisplayPreferences): void;
 }
 
-const SETTINGS_KEY = "gunner-settings-v6";
 const PROFILES_KEY = "gunner-profiles-v6";
 const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
-const MIGRATED_SETTINGS_KEY = "gunner-settings-v5";
 const MIGRATED_PROFILES_KEY = "gunner-profiles-v5";
 const MIGRATED_SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
+const PREFERENCES_KEY = "gunner-prefs-v1";
 const URL_PARAM = "c";
 const DEFAULT_TURRET_CHARGE_SIZE = 1;
+const DEFAULT_PREFERENCES: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 };
 
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
@@ -147,14 +154,15 @@ export class LocalSettingsStore implements SettingsStore {
     this.chargeCatalog = chargeCatalog;
   }
 
-  load(): UserSettings | null {
+  loadStartupState(): StartupState {
     const urlSettings = this.decodeUrl();
-    if (urlSettings) return this.applyFittingBasis(urlSettings);
-    return null;
-  }
-
-  save(settings: UserSettings): void {
-    this.storage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    if (urlSettings) {
+      const settings = this.applyFittingBasis(urlSettings);
+      return { settings, selectedProfileName: this.matchingSelectedProfile(settings) };
+    }
+    const name = this.readSelectedProfileName();
+    if (!name || !this.listProfiles().includes(name)) return { settings: null, selectedProfileName: null };
+    return { settings: null, selectedProfileName: name };
   }
 
   listProfiles(): string[] {
@@ -185,10 +193,16 @@ export class LocalSettingsStore implements SettingsStore {
     } else {
       this.storage.setItem(PROFILES_KEY, JSON.stringify(profiles));
     }
-    const selected = this.loadSelectedProfile();
-    if (selected?.name === name) {
-      this.clearSelectedProfile();
+    const selected = this.readSelectedProfileName();
+    if (selected === name) {
+      this.storage.removeItem(SELECTED_PROFILE_KEY);
+      this.storage.removeItem(MIGRATED_SELECTED_PROFILE_KEY);
     }
+  }
+
+  selectProfile(name: string): void {
+    if (!name) throw new Error("selected profile name cannot be empty");
+    this.storage.setItem(SELECTED_PROFILE_KEY, name);
   }
 
   encodeUrl(settings: UserSettings): string {
@@ -197,64 +211,63 @@ export class LocalSettingsStore implements SettingsStore {
     return url.toString();
   }
 
-  decodeUrl(): UserSettings | null {
+  loadPreferences(): DisplayPreferences {
+    const raw = this.storage.getItem(PREFERENCES_KEY);
+    if (!raw) return { ...DEFAULT_PREFERENCES };
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { ...DEFAULT_PREFERENCES };
+      const s = parsed as Record<string, unknown>;
+      return {
+        language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
+        trackingUnit: s.trackingUnit === "score" ? "score" : DEFAULT_PREFERENCES.trackingUnit,
+        simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
+        gridBrightness: isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined ? s.gridBrightness : DEFAULT_PREFERENCES.gridBrightness,
+      };
+    } catch {
+      return { ...DEFAULT_PREFERENCES };
+    }
+  }
+
+  savePreferences(preferences: DisplayPreferences): void {
+    this.storage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+  }
+
+  private decodeUrl(): UserSettings | null {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
     return this.tryParseEncoded(encoded);
   }
 
-  async writeUrlToClipboard(settings: UserSettings, clipboard?: ClipboardProvider): Promise<boolean> {
-    if (!clipboard) return false;
-    try {
-      await clipboard.writeText(this.encodeUrl(settings));
-      return true;
-    } catch {
-      return false;
-    }
+  private matchingSelectedProfile(urlSettings: UserSettings): string | null {
+    const name = this.readSelectedProfileName();
+    if (!name) return null;
+    const profile = this.loadProfile(name);
+    if (!profile) return null;
+    return profilesEqual(profile, stripDisplayPreferences(urlSettings)) ? name : null;
   }
 
-  hasForeignUrlSettings(): boolean {
-    const urlSettings = this.decodeUrl();
-    if (!urlSettings) return false;
-    const localSettings = this.loadLocalSettings();
-    return !localSettings || JSON.stringify(urlSettings) !== JSON.stringify(localSettings);
-  }
-
-  loadSelectedProfile(): { name: string; baseline: ProfileSettings } | null {
+  private readSelectedProfileName(): string | null {
     const raw = this.storage.getItem(SELECTED_PROFILE_KEY) ?? this.storage.getItem(MIGRATED_SELECTED_PROFILE_KEY);
     if (!raw) return null;
     try {
       const parsed: unknown = JSON.parse(raw);
-      if (!isSelectedProfile(parsed)) return null;
-      const baseline = this.toProfileSettings(parsed.baseline);
-      if (!baseline) return null;
-      return { name: parsed.name, baseline };
+      if (typeof parsed === "string" && parsed.length > 0) return parsed;
+      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+        const name = (parsed as Record<string, unknown>).name;
+        if (typeof name === "string" && name.length > 0) return name;
+      }
     } catch {
-      return null;
+      // Plain name written directly without JSON encoding.
     }
-  }
-
-  saveSelectedProfile(name: string, baseline: ProfileSettings): void {
-    if (!name) throw new Error("selected profile name cannot be empty");
-    const selected: { name: string; baseline: ProfileSettings } = { name, baseline: stripDisplayPreferences(baseline) };
-    this.storage.setItem(SELECTED_PROFILE_KEY, JSON.stringify(selected));
-  }
-
-  clearSelectedProfile(): void {
-    this.storage.removeItem(SELECTED_PROFILE_KEY);
+    return raw.length > 0 ? raw : null;
   }
 
   private loadProfiles(): Record<string, ProfileSettings> {
     const raw = this.storage.getItem(PROFILES_KEY) ?? this.storage.getItem(MIGRATED_PROFILES_KEY);
     if (!raw) return {};
     return this.parseProfiles(raw);
-  }
-
-  private loadLocalSettings(): UserSettings | null {
-    const raw = this.storage.getItem(SETTINGS_KEY) ?? this.storage.getItem(MIGRATED_SETTINGS_KEY);
-    if (!raw) return null;
-    return this.parseUserSettings(raw);
   }
 
   private parseUserSettings(raw: string): UserSettings | null {
@@ -312,7 +325,6 @@ export class LocalSettingsStore implements SettingsStore {
       isAutopilotMode(s.attackerMode) &&
       isNonNegative(s.attackerRange) &&
       isOptionalNonNegative(s.maneuverAggressivity) &&
-      isOptionalUnitInterval(s.gridBrightness) &&
       isNonNegative(s.attackerMass) &&
       isNonNegative(s.attackerInertia) &&
       isOptionalSkillLevel(s.attackerSkillLevel) &&
@@ -336,8 +348,7 @@ export class LocalSettingsStore implements SettingsStore {
       isOptionalFittingText(s.targetFitting) &&
       isOptionalProfileParamOverrides(s.attackerOverrides) &&
       isOptionalProfileParamOverrides(s.targetOverrides) &&
-      isOptionalNonEmptyString(s.attackerAmmo) &&
-      isPositive(s.simSpeed)
+      isOptionalNonEmptyString(s.attackerAmmo)
     );
   }
 
@@ -464,15 +475,13 @@ function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-function isSelectedProfile(value: unknown): value is { name: string; baseline: unknown } {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  return typeof s.name === "string" && s.name.length > 0 && !!s.baseline && typeof s.baseline === "object" && !Array.isArray(s.baseline);
+function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = value as Record<string, unknown>;
+  return rest as ProfileSettings;
 }
 
-function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, ...rest } = value as Record<string, unknown>;
-  return rest as ProfileSettings;
+function profilesEqual(a: ProfileSettings, b: ProfileSettings): boolean {
+  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
 }
 
 function isSigResolutionClass(value: unknown): value is SigResolutionClass {
