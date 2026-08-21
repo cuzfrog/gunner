@@ -27,6 +27,7 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Reinforced Bulkhead": "low",
   "Shield Extender": "low",
   "Tracking Enhancer": "low",
+  "Energized Armor Membrane": "low",
   "Rig Anchor": "rig",
   "Rig Armor": "rig",
   "Rig Core": "rig",
@@ -61,8 +62,14 @@ export function generateModuleSlotsContent(
     missing.sort();
     unmatched.sort();
     const parts: string[] = [];
-    if (missing.length > 0) parts.push(`missing from nameToId: ${missing.map((n) => JSON.stringify(n)).join(", ")}`);
-    if (unmatched.length > 0) parts.push(`unmatched groups: ${unmatched.map((n) => JSON.stringify(n)).join(", ")}`);
+    if (missing.length > 0) {
+      const names = missing.map((n) => JSON.stringify(n)).join(", ");
+      parts.push(`missing from nameToId: ${names}`);
+    }
+    if (unmatched.length > 0) {
+      const names = unmatched.map((n) => JSON.stringify(n)).join(", ");
+      parts.push(`unmatched groups: ${names}`);
+    }
     throw new Error(parts.join("; "));
   }
 

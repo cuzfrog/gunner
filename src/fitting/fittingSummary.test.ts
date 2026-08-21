@@ -1,3 +1,4 @@
+import { parseEft } from "./eft";
 import { describeFitting } from "./fittingSummary";
 import { MODULE_SLOTS } from "./moduleSlots";
 
@@ -68,12 +69,9 @@ describe("describeFitting", () => {
   });
 
   test("fixture modules are all present in the generated slot map", () => {
-    const summary = describeFitting(RIFTER_BRAWLER);
-    for (const section of summary!.sections) {
-      for (const row of section.rows) {
-        if (section.kind === "cargo" || section.kind === "drones") continue;
-        expect(MODULE_SLOTS[row.name]).toBeDefined();
-      }
+    const parsed = parseEft(RIFTER_BRAWLER);
+    for (const line of parsed!.modules) {
+      expect(MODULE_SLOTS[line.name]).toBeDefined();
     }
   });
 });
