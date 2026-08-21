@@ -5,6 +5,8 @@ import type { Language } from "./i18n";
 import type { TrackingUnit } from "./trackingInput";
 
 export const USER_SETTINGS_VERSION = 6 as const;
+export const PROPULSION_NONE = "none" as const;
+export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 
 export interface FittedHullSummary {
   readonly fittingName: string;
@@ -54,9 +56,9 @@ export interface UserSettings {
   targetSkillLevel?: SkillLevel;
   targetOverload?: boolean;
   attackerHull?: string;
-  attackerPropulsion?: PropulsionId;
+  attackerPropulsion?: PropulsionSelection;
   targetHull?: string;
-  targetPropulsion?: PropulsionId;
+  targetPropulsion?: PropulsionSelection;
   attackerFitting?: string;
   attackerOverrides?: Partial<ProfileParamOverrides>;
   targetFitting?: string;
@@ -324,9 +326,9 @@ export class LocalSettingsStore implements SettingsStore {
       isOptionalBoolean(s.targetOverload) &&
       isPositive(s.targetSig) &&
       isOptionalNonEmptyString(s.attackerHull) &&
-      this.isOptionalPropulsionId(s.attackerPropulsion) &&
+      this.isOptionalPropulsionSelection(s.attackerPropulsion) &&
       isOptionalNonEmptyString(s.targetHull) &&
-      this.isOptionalPropulsionId(s.targetPropulsion) &&
+      this.isOptionalPropulsionSelection(s.targetPropulsion) &&
       isOptionalFittedHullSummary(s.attackerFittedHull) &&
       isOptionalFittedHullSummary(s.targetFittedHull) &&
       isOptionalFittingText(s.attackerFitting) &&
@@ -338,8 +340,8 @@ export class LocalSettingsStore implements SettingsStore {
     );
   }
 
-  private isOptionalPropulsionId(value: unknown): value is PropulsionId | undefined {
-    return value === undefined || this.ships.parsePropulsionId(value) !== undefined;
+  private isOptionalPropulsionSelection(value: unknown): value is PropulsionSelection | undefined {
+    return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;
   }
 
   private toProfileSettings(value: unknown): ProfileSettings | null {
@@ -378,37 +380,44 @@ export class LocalSettingsStore implements SettingsStore {
     const storedPropulsionId = settings[propulsionKey];
     const importedPropulsion = imported.propulsion;
     const importedPropulsionId = importedPropulsion?.propulsionId;
-    let propulsionId = storedPropulsionId ?? importedPropulsionId;
-    let propulsion: PropulsionStats | undefined = propulsionId ? this.ships.fittingOption(profile, propulsionId) : undefined;
-    if (!propulsion && importedPropulsion) {
-      propulsion = importedPropulsion;
-      propulsionId = importedPropulsionId;
+    const explicitNone = storedPropulsionId === PROPULSION_NONE;
+    let activePropulsionId: PropulsionId | undefined;
+    let activePropulsion: PropulsionStats | undefined;
+    if (!explicitNone) {
+      activePropulsionId = storedPropulsionId ?? importedPropulsionId;
+      activePropulsion = activePropulsionId ? this.ships.fittingOption(profile, activePropulsionId) : undefined;
+      if (!activePropulsion && importedPropulsion) {
+        activePropulsion = importedPropulsion;
+        activePropulsionId = importedPropulsionId;
+      }
     }
+    const fittedPropulsion = explicitNone ? importedPropulsion : activePropulsion;
+    const fittedPropulsionId = explicitNone ? importedPropulsionId : activePropulsionId;
     const fittedHull: FittedHullSummary = {
       fittingName: imported.fittingName,
-      propulsionId,
+      propulsionId: fittedPropulsionId,
       fitted: imported.fitted,
-      propulsion,
+      propulsion: fittedPropulsion,
     };
-    const stats = this.ships.fittedStats(profile, fittedHull.fitted, propulsion, conditions);
+    const stats = this.ships.fittedStats(profile, fittedHull.fitted, activePropulsion, conditions);
     const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
     const override = overrides ?? {};
     const massOverride = side === "attacker" ? override.attackerMass : override.targetMass;
     const mass = massOverride ?? stats.mass;
     const speedOverride = side === "attacker" ? override.attackerSpeed : override.targetSpeed;
-    const speed = speedOverride ?? this.ships.maxSpeedForFittedMass(profile, fittedHull.fitted, mass, propulsion, conditions);
+    const speed = speedOverride ?? this.ships.maxSpeedForFittedMass(profile, fittedHull.fitted, mass, activePropulsion, conditions);
 
     const result: Partial<UserSettings> = {};
     if (side === "attacker") {
       result.attackerHull = imported.profile.name;
-      result.attackerPropulsion = propulsionId;
+      result.attackerPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
       result.attackerFittedHull = fittedHull;
       result.attackerMass = mass;
       result.attackerInertia = override.attackerInertia ?? stats.inertiaModifier;
       result.attackerSpeed = speed;
     } else {
       result.targetHull = imported.profile.name;
-      result.targetPropulsion = propulsionId;
+      result.targetPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
       result.targetFittedHull = fittedHull;
       result.targetMass = mass;
       result.targetInertia = override.targetInertia ?? stats.inertiaModifier;

@@ -312,6 +312,41 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toBeNull();
   });
 
+  test("save and load round-trip a deselected propulsion", () => {
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const withNone: UserSettings = { ...DEFAULT_SETTINGS, attackerHull: "Rifter", attackerPropulsion: "none" };
+    store.save(withNone);
+    location.replace(store.encodeUrl(withNone));
+    expect(store.load()).toEqual(withNone);
+  });
+
+  test("rebuild with explicit none keeps the fitted hull but uses base stats", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    ships.fittingOption = vi.fn(() => RIFTER_MODULE);
+    ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 }));
+    ships.maxSpeedForFittedMass = vi.fn(() => 456.25);
+
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      attackerPropulsion: "none",
+    };
+    store.save(settings);
+    location.replace(store.encodeUrl(settings));
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerPropulsion).toBe("none");
+    expect(loaded!.attackerSpeed).toBe(456.25);
+    expect(loaded!.attackerMass).toBe(1_000_000);
+    expect(loaded!.attackerFittedHull!.propulsionId).toBe("mwd-5mn");
+    expect(loaded!.attackerFittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
+  });
+
   test("load rejects an empty hull name", () => {
     const store = new LocalSettingsStore({ chargeCatalog,
       ships,

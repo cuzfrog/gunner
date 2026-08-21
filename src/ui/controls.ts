@@ -13,7 +13,7 @@ import {
 import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
 import type { SavedFittings } from "./savedFittings";
-import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { HintRotator, type IHintRotator } from "./hintRotator";
@@ -407,7 +407,7 @@ export class DomControls implements Controls {
       attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
       attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
-      attackerPropulsion: this.propulsionSetting("attacker"),
+      attackerPropulsion: this.currentPropulsionSelection("attacker"),
       attackerFitting: this.attackerFitting,
       attackerOverrides: this.attackerOverrides,
       attackerFittedHull: this.attackerFittedHull,
@@ -421,7 +421,7 @@ export class DomControls implements Controls {
       targetOverload: (this.els.targetOverload as HTMLInputElement).checked,
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
-      targetPropulsion: this.propulsionSetting("target"),
+      targetPropulsion: this.currentPropulsionSelection("target"),
       targetFitting: this.targetFitting,
       targetOverrides: this.targetOverrides,
       targetFittedHull: this.targetFittedHull,
@@ -431,9 +431,15 @@ export class DomControls implements Controls {
     };
   }
 
-  private propulsionSetting(side: "attacker" | "target"): PropulsionId | undefined {
+  private currentPropulsionSelection(side: "attacker" | "target"): PropulsionSelection | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
+    if (value === PROPULSION_NONE) return PROPULSION_NONE;
     return this.ships.parsePropulsionId(value);
+  }
+
+  private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
+    const selection = this.currentPropulsionSelection(side);
+    return selection === PROPULSION_NONE ? undefined : selection;
   }
 
   private loadSettings(settings: UserSettings, selectedName = ""): void {
@@ -934,7 +940,7 @@ export class DomControls implements Controls {
   private applyHull(
     side: "attacker" | "target",
     profile: ShipProfile,
-    propulsionId?: PropulsionId,
+    propulsionId?: PropulsionSelection,
     persist = false,
     updateStats = true,
   ): void {
@@ -1146,7 +1152,7 @@ export class DomControls implements Controls {
   private loadHull(
     side: "attacker" | "target",
     hullName?: string,
-    propulsionId?: PropulsionId,
+    propulsionId?: PropulsionSelection,
   ): void {
     if (!hullName) {
       this.clearHull(side, true, false);
@@ -1199,7 +1205,7 @@ export class DomControls implements Controls {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const isSameAsCurrent = currentProfile?.name === profile.name;
     const isGenuineChange = this.lastCommittedHull[side] !== profile.name;
-    const propulsionId = isSameAsCurrent ? this.currentPropulsionId(side) : undefined;
+    const propulsionId = isSameAsCurrent ? this.currentPropulsionSelection(side) : undefined;
     if (!isSameAsCurrent) this.clearFittedHull(side);
     this.applyHull(side, profile, propulsionId, false, !isSameAsCurrent);
 
@@ -1217,11 +1223,6 @@ export class DomControls implements Controls {
     }
   }
 
-  private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
-    const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
-    return this.ships.parsePropulsionId(value);
-  }
-
   private applyImportedFitting(side: "attacker" | "target", summary: FittedHullSummary): void {
     if (side === "attacker") this.attackerFittedHull = summary;
     else this.targetFittedHull = summary;
@@ -1232,7 +1233,7 @@ export class DomControls implements Controls {
   private restoreFittingSummary(side: "attacker" | "target", summary: FittedHullSummary): void {
     if (side === "attacker") this.attackerFittedHull = summary;
     else this.targetFittedHull = summary;
-    this.renderPropulsionOptions(side, summary.propulsionId ?? "");
+    this.renderPropulsionOptions(side, this.currentPropulsionSelection(side) ?? "");
     this.clearImportHint(side);
     this.updateHullHint(side, this.currentFittedPropulsionModule(side, summary));
   }
@@ -1510,8 +1511,8 @@ export class DomControls implements Controls {
   }
 
   private renderAllPropulsionOptions(): void {
-    this.renderPropulsionOptions("attacker", this.currentPropulsionId("attacker") ?? "");
-    this.renderPropulsionOptions("target", this.currentPropulsionId("target") ?? "");
+    this.renderPropulsionOptions("attacker", this.currentPropulsionSelection("attacker") ?? "");
+    this.renderPropulsionOptions("target", this.currentPropulsionSelection("target") ?? "");
   }
 
   private renderPropulsionOptions(side: "attacker" | "target", selectedId = ""): void {
@@ -1530,6 +1531,7 @@ export class DomControls implements Controls {
     if (profile) {
       const modules = this.ships.fittingOptions(profile);
       const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
+      const noneRequested = selectedId === PROPULSION_NONE;
       select.disabled = modules.length === 0;
       group.classList.toggle("disabled", modules.length === 0);
       const moduleDisabled = modules.length === 0;
@@ -1545,8 +1547,16 @@ export class DomControls implements Controls {
           button.disabled = moduleDisabled;
           button.setAttribute("aria-disabled", "false");
         }
+        const noneOption = document.createElement("option");
+        noneOption.value = PROPULSION_NONE;
+        noneOption.hidden = true;
+        select.appendChild(noneOption);
       }
-      selected = selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId) ? selectedPropulsionId : (modules[0]?.id ?? "");
+      selected = noneRequested
+        ? PROPULSION_NONE
+        : selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId)
+          ? selectedPropulsionId
+          : (modules[0]?.id ?? "");
     } else {
       this.createPlaceholderButton(group);
     }
@@ -1604,14 +1614,17 @@ export class DomControls implements Controls {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return undefined;
     const currentId = this.currentPropulsionId(side);
+    if (currentId === undefined) return undefined;
     if (currentId === fitted.propulsionId) return fitted.propulsion;
-    return this.ships.fittingOption(profile, currentId ?? fitted.propulsionId);
+    return this.ships.fittingOption(profile, currentId);
   }
 
   private currentFittedPropulsionModule(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionModule | undefined {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile || !fitted.propulsionId) return undefined;
-    return this.ships.fittingOption(profile, this.currentPropulsionId(side) ?? fitted.propulsionId);
+    const currentId = this.currentPropulsionId(side);
+    if (currentId === undefined) return undefined;
+    return this.ships.fittingOption(profile, currentId);
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
@@ -1657,7 +1670,7 @@ export class DomControls implements Controls {
     const propulsion = this.els[`${side}Propulsion`] as HTMLSelectElement;
     const overload = this.els[`${side}Overload`] as HTMLInputElement;
     const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
-    const disabled = propulsion.value === "" || propulsion.disabled;
+    const disabled = this.currentPropulsionId(side) === undefined || propulsion.disabled;
     const active = !disabled && overload.checked;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
@@ -1865,7 +1878,9 @@ export class DomControls implements Controls {
   private onPropulsionButtonClick(side: "attacker" | "target", propulsionId: string): void {
     if (side === "attacker" && !this.attackerProfile) return;
     if (side === "target" && !this.targetProfile) return;
-    this.setPropulsionActive(side, propulsionId);
+    const currentId = this.currentPropulsionId(side);
+    const next = currentId === propulsionId ? PROPULSION_NONE : propulsionId;
+    this.setPropulsionActive(side, next);
     this.els[`${side}Propulsion`].dispatchEvent(new Event("change"));
   }
 

@@ -123,6 +123,13 @@ describe("profileText", () => {
     expect(parsed).toEqual(MINIMAL_PROFILE);
   });
 
+  test("round-trips a profile with deselected propulsion modules", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, attackerPropulsion: "none", targetPropulsion: "none" };
+    const text = serializeProfile(profile);
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(profile);
+  });
+
   test("parseProfile returns undefined when the header is missing", () => {
     expect(parseProfile("not a profile")).toBeUndefined();
     expect(parseProfile("\n\n[Rifter, Brawler]")).toBeUndefined();

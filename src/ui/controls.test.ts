@@ -710,7 +710,7 @@ describe("DomControls", () => {
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
     expect(propulsion.disabled).toBe(false);
     const ids = propulsion.children.map((c) => c.value);
-    expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn"]);
+    expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn", "none"]);
   });
 
   test("selecting a different hull after the first refreshes mass, inertia and speed", () => {
@@ -1126,6 +1126,95 @@ describe("DomControls", () => {
     expect(button.getAttribute("title")).toBe("5MN");
     const expected = mockStatsFor(rifter, MWD5MN, { skillLevel: 5, overloaded: true });
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+  });
+
+  test("clicking the active propulsion button deselects it and recomputes base stats", () => {
+    buildControls(globalThis.document);
+    const rifter = RIFTER;
+
+    const hullInput = getFake(globalThis.document, "target-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const mwdButton = findVisibleButton(globalThis.document, "target-propulsion-options", "mwd-5mn");
+    mwdButton.trigger("click");
+
+    expect(getFake(globalThis.document, "target-propulsion").value).toBe("mwd-5mn");
+    expect(mwdButton.getAttribute("aria-pressed")).toBe("true");
+    expect(mwdButton.classList.toggle).toHaveBeenLastCalledWith("active", true);
+
+    mwdButton.trigger("click");
+
+    expect(getFake(globalThis.document, "target-propulsion").value).toBe("none");
+    expect(mwdButton.getAttribute("aria-pressed")).toBe("false");
+    expect(mwdButton.classList.toggle).toHaveBeenLastCalledWith("active", false);
+
+    const expected = mockStatsFor(rifter, undefined, { skillLevel: 5, overloaded: true });
+    expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(expected.maxSpeed));
+    expect(getFake(globalThis.document, "target-mass").value).toBe(String(expected.mass));
+    expect(getFake(globalThis.document, "target-sig").value).toBe(String(expected.sigRadius));
+    expect(getFake(globalThis.document, "target-overload").disabled).toBe(true);
+  });
+
+  test("deselecting propulsion persists the none state in saved settings", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+
+    const mwdButton = findVisibleButton(globalThis.document, "attacker-propulsion-options", "mwd-5mn");
+    mwdButton.trigger("click");
+    mwdButton.trigger("click");
+
+    const calls = settingsStore.save.mock.calls;
+    const [saved] = calls[calls.length - 1];
+    expect(saved.attackerPropulsion).toBe("none");
+  });
+
+  test("load with a deselected propulsion restores the none state and base stats", () => {
+    const settings: UserSettings = {
+      version: USER_SETTINGS_VERSION,
+      tracking: 0.32,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 5000,
+      falloff: 5000,
+      attackerSpeed: 456.25,
+      attackerMode: "keepAtRange",
+      attackerRange: 5000,
+      attackerMass: 1_000_000,
+      attackerInertia: 2,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      attackerHull: "Rifter",
+      attackerPropulsion: "none",
+      attackerFittedHull: {
+        fittingName: "Brawler",
+        propulsionId: "mwd-5mn",
+        fitted: IMPORTED_RIFTER.fitted,
+        propulsion: IMPORTED_RIFTER.propulsion,
+      },
+      initialDistance: 5000,
+      targetSpeed: 1000,
+      targetMode: "orbit",
+      targetRange: 5000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      targetSig: 40,
+      attackerAmmo: "Hail S",
+      simSpeed: 4,
+      language: "en",
+    };
+
+    buildControls(globalThis.document, settings);
+
+    expect(getFake(globalThis.document, "attacker-propulsion").value).toBe("none");
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe("456.25");
+    expect(getFake(globalThis.document, "attacker-mass").value).toBe("1000000");
+    expect(getFake(globalThis.document, "attacker-overload").disabled).toBe(true);
   });
 
   test("clicking a visible skill tuner button updates the hidden select and recomputes speed", () => {
