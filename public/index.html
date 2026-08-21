@@ -221,7 +221,13 @@
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
-          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <div class="propulsion-selector-wrapper">
+            <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+            <button type="button" id="attacker-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-propulsion-variants" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup propulsion-variants-popup" id="attacker-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+          </div>
           <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
@@ -389,7 +395,13 @@
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="target-propulsion" hidden disabled></select>
-          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <div class="propulsion-selector-wrapper">
+            <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+            <button type="button" id="target-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="target-propulsion-variants" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup propulsion-variants-popup" id="target-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+          </div>
           <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>

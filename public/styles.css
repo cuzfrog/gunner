@@ -1365,11 +1365,65 @@ canvas {
   margin-bottom: 0;
 }
 
-.propulsion-group .propulsion-selector {
+.propulsion-group .propulsion-selector-wrapper {
   grid-column: 1;
+  display: flex;
+  gap: 2px;
+  position: relative;
+}
+
+.propulsion-group .propulsion-selector {
+  flex: 1 1 auto;
+  min-width: 0;
   flex-wrap: nowrap;
   overflow: hidden;
   min-height: 22px;
+}
+
+.propulsion-gear {
+  flex: 0 0 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.propulsion-gear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.propulsion-gear:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.propulsion-gear[aria-expanded="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.propulsion-gear:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: -1px;
+}
+
+.propulsion-variants-popup.fitting-popup {
+  left: auto;
+  right: 0;
+  min-width: 220px;
+}
+
+.propulsion-variants-popup .fitting-item:hover,
+.propulsion-variants-popup .fitting-item:focus-visible {
+  background: var(--bg-inset);
 }
 
 .propulsion-group .overload-button {
