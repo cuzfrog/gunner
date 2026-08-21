@@ -1,9 +1,10 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionStats, Ships, SkillLevel } from "../ships";
+import type { FittingImport } from "../fitting";
 import type { Language } from "./i18n";
 import type { TrackingUnit } from "./trackingInput";
 
-export const USER_SETTINGS_VERSION = 5 as const;
+export const USER_SETTINGS_VERSION = 6 as const;
 
 export interface FittedHullSummary {
   readonly fittingName: string;
@@ -11,6 +12,21 @@ export interface FittedHullSummary {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
 }
+
+export type ProfileParamOverrides = Pick<
+  UserSettings,
+  | "attackerMass"
+  | "attackerInertia"
+  | "attackerSpeed"
+  | "targetMass"
+  | "targetInertia"
+  | "targetSig"
+  | "targetSpeed"
+  | "tracking"
+  | "sigRes"
+  | "optimal"
+  | "falloff"
+>;
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
@@ -41,6 +57,10 @@ export interface UserSettings {
   attackerPropulsion?: PropulsionId;
   targetHull?: string;
   targetPropulsion?: PropulsionId;
+  attackerFitting?: string;
+  attackerOverrides?: Partial<ProfileParamOverrides>;
+  targetFitting?: string;
+  targetOverrides?: Partial<ProfileParamOverrides>;
   attackerFittedHull?: FittedHullSummary;
   targetFittedHull?: FittedHullSummary;
   simSpeed: number;
@@ -87,26 +107,43 @@ export interface SettingsStore {
   clearSelectedProfile(): void;
 }
 
-const SETTINGS_KEY = "gunner-settings-v5";
-const PROFILES_KEY = "gunner-profiles-v5";
-const SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
+const SETTINGS_KEY = "gunner-settings-v6";
+const PROFILES_KEY = "gunner-profiles-v6";
+const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
+const MIGRATED_SETTINGS_KEY = "gunner-settings-v5";
+const MIGRATED_PROFILES_KEY = "gunner-profiles-v5";
+const MIGRATED_SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
 const URL_PARAM = "c";
 
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
   private readonly ships: Ships;
+  private readonly fittingImport: FittingImport;
 
-  constructor({ storage, location, ships }: { storage: StorageProvider; location: LocationProvider; ships: Ships }) {
+  constructor({
+    storage,
+    location,
+    ships,
+    fittingImport,
+  }: {
+    storage: StorageProvider;
+    location: LocationProvider;
+    ships: Ships;
+    fittingImport: FittingImport;
+  }) {
     this.storage = storage;
     this.location = location;
     this.ships = ships;
+    this.fittingImport = fittingImport;
   }
 
   load(): UserSettings | null {
     const urlSettings = this.decodeUrl();
-    if (urlSettings) return urlSettings;
-    return this.loadLocalSettings();
+    if (urlSettings) return this.applyFittingBasis(urlSettings);
+    const local = this.loadLocalSettings();
+    if (local) return this.applyFittingBasis(local);
+    return null;
   }
 
   save(settings: UserSettings): void {
@@ -178,7 +215,7 @@ export class LocalSettingsStore implements SettingsStore {
   }
 
   loadSelectedProfile(): { name: string; baseline: ProfileSettings } | null {
-    const raw = this.storage.getItem(SELECTED_PROFILE_KEY);
+    const raw = this.storage.getItem(SELECTED_PROFILE_KEY) ?? this.storage.getItem(MIGRATED_SELECTED_PROFILE_KEY);
     if (!raw) return null;
     try {
       const parsed: unknown = JSON.parse(raw);
@@ -202,13 +239,13 @@ export class LocalSettingsStore implements SettingsStore {
   }
 
   private loadProfiles(): Record<string, ProfileSettings> {
-    const raw = this.storage.getItem(PROFILES_KEY);
+    const raw = this.storage.getItem(PROFILES_KEY) ?? this.storage.getItem(MIGRATED_PROFILES_KEY);
     if (!raw) return {};
     return this.parseProfiles(raw);
   }
 
   private loadLocalSettings(): UserSettings | null {
-    const raw = this.storage.getItem(SETTINGS_KEY);
+    const raw = this.storage.getItem(SETTINGS_KEY) ?? this.storage.getItem(MIGRATED_SETTINGS_KEY);
     if (!raw) return null;
     return this.parseUserSettings(raw);
   }
@@ -216,7 +253,9 @@ export class LocalSettingsStore implements SettingsStore {
   private parseUserSettings(raw: string): UserSettings | null {
     try {
       const parsed: unknown = JSON.parse(raw);
-      return this.isUserSettings(parsed) ? parsed : null;
+      if (!this.isUserSettings(parsed)) return null;
+      parsed.version = USER_SETTINGS_VERSION;
+      return parsed;
     } catch {
       return null;
     }
@@ -254,7 +293,7 @@ export class LocalSettingsStore implements SettingsStore {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     const s = value as Record<string, unknown>;
     return (
-      s.version === USER_SETTINGS_VERSION &&
+      isSettingsVersion(s.version) &&
       isNonNegative(s.tracking) &&
       isSigResolutionClass(s.sigRes) &&
       isNonNegative(s.optimal) &&
@@ -283,6 +322,10 @@ export class LocalSettingsStore implements SettingsStore {
       this.isOptionalPropulsionId(s.targetPropulsion) &&
       isOptionalFittedHullSummary(s.attackerFittedHull) &&
       isOptionalFittedHullSummary(s.targetFittedHull) &&
+      isOptionalFittingText(s.attackerFitting) &&
+      isOptionalFittingText(s.targetFitting) &&
+      isOptionalProfileParamOverrides(s.attackerOverrides) &&
+      isOptionalProfileParamOverrides(s.targetOverrides) &&
       isPositive(s.simSpeed)
     );
   }
@@ -293,7 +336,81 @@ export class LocalSettingsStore implements SettingsStore {
 
   private toProfileSettings(value: unknown): ProfileSettings | null {
     if (!this.isProfileSettings(value)) return null;
-    return stripDisplayPreferences(value);
+    const withVersion = { ...value, version: USER_SETTINGS_VERSION };
+    return stripDisplayPreferences(withVersion);
+  }
+
+  private applyFittingBasis(settings: UserSettings): UserSettings {
+    return {
+      ...settings,
+      ...this.rebuildSide(settings, "attacker"),
+      ...this.rebuildSide(settings, "target"),
+    };
+  }
+
+  private rebuildSide(
+    settings: UserSettings,
+    side: "attacker" | "target",
+  ): Partial<UserSettings> {
+    const fittingKey = side === "attacker" ? "attackerFitting" : "targetFitting";
+    const text = settings[fittingKey];
+    if (!text) return {};
+
+    const skillLevel = side === "attacker" ? settings.attackerSkillLevel ?? 5 : settings.targetSkillLevel ?? 5;
+    const overloaded = side === "attacker" ? settings.attackerOverload ?? true : settings.targetOverload ?? true;
+    const imported = this.fittingImport.importFitting(text, { skillLevel, overloaded });
+    if (!imported) return {};
+
+    const conditions = { skillLevel, overloaded };
+    const profile = imported.profile;
+    const propulsionKey = side === "attacker" ? "attackerPropulsion" : "targetPropulsion";
+    const storedPropulsionId = settings[propulsionKey];
+    const importedPropulsion = imported.propulsion;
+    const importedPropulsionId = importedPropulsion?.propulsionId;
+    let propulsionId = storedPropulsionId ?? importedPropulsionId;
+    let propulsion: PropulsionStats | undefined = propulsionId ? this.ships.fittingOption(profile, propulsionId) : undefined;
+    if (!propulsion && importedPropulsion) {
+      propulsion = importedPropulsion;
+      propulsionId = importedPropulsionId;
+    }
+    const fittedHull: FittedHullSummary = {
+      fittingName: imported.fittingName,
+      propulsionId,
+      fitted: imported.fitted,
+      propulsion,
+    };
+    const stats = this.ships.fittedStats(profile, fittedHull.fitted, propulsion, conditions);
+    const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
+    const override = overrides ?? {};
+    const massOverride = side === "attacker" ? override.attackerMass : override.targetMass;
+    const mass = massOverride ?? stats.mass;
+    const speedOverride = side === "attacker" ? override.attackerSpeed : override.targetSpeed;
+    const speed = speedOverride ?? this.ships.maxSpeedForFittedMass(profile, fittedHull.fitted, mass, propulsion, conditions);
+
+    const result: Partial<UserSettings> = {};
+    if (side === "attacker") {
+      result.attackerHull = imported.profile.name;
+      result.attackerPropulsion = propulsionId;
+      result.attackerFittedHull = fittedHull;
+      result.attackerMass = mass;
+      result.attackerInertia = override.attackerInertia ?? stats.inertiaModifier;
+      result.attackerSpeed = speed;
+    } else {
+      result.targetHull = imported.profile.name;
+      result.targetPropulsion = propulsionId;
+      result.targetFittedHull = fittedHull;
+      result.targetMass = mass;
+      result.targetInertia = override.targetInertia ?? stats.inertiaModifier;
+      result.targetSpeed = speed;
+      result.targetSig = override.targetSig ?? stats.sigRadius;
+    }
+    if (side === "attacker" && imported.turret) {
+      result.tracking = override.tracking ?? imported.turret.tracking;
+      result.sigRes = override.sigRes ?? imported.turret.sigResolutionClass;
+      result.optimal = override.optimal ?? imported.turret.optimal;
+      result.falloff = override.falloff ?? imported.turret.falloff;
+    }
+    return result;
   }
 }
 
@@ -358,6 +475,45 @@ function isNonNegative(value: unknown): value is number {
 
 function isPositive(value: unknown): value is number {
   return isFiniteNumber(value) && value > 0;
+}
+
+function isSettingsVersion(value: unknown): value is 5 | 6 {
+  return value === 5 || value === 6;
+}
+
+function isOptionalFittingText(value: unknown): value is string | undefined {
+  return value === undefined || (typeof value === "string" && value.length > 0);
+}
+
+const PROFILE_PARAM_OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
+  "attackerMass",
+  "attackerInertia",
+  "attackerSpeed",
+  "targetMass",
+  "targetInertia",
+  "targetSig",
+  "targetSpeed",
+  "tracking",
+  "sigRes",
+  "optimal",
+  "falloff",
+];
+
+function isOptionalProfileParamOverrides(value: unknown): value is Partial<ProfileParamOverrides> | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  for (const key of Object.keys(s)) {
+    if (!PROFILE_PARAM_OVERRIDE_KEYS.includes(key as keyof ProfileParamOverrides)) return false;
+    if (key === "sigRes") {
+      if (!(s[key] === undefined || isSigResolutionClass(s[key]))) return false;
+    } else if (key === "targetSig") {
+      if (!(s[key] === undefined || isPositive(s[key]))) return false;
+    } else {
+      if (!(s[key] === undefined || isNonNegative(s[key]))) return false;
+    }
+  }
+  return true;
 }
 
 function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary | undefined {

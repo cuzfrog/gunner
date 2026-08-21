@@ -12,7 +12,7 @@ import {
 } from "../sim";
 import type { FittingImport, ImportedFitting, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 
 export interface ControlsCallbacks {
@@ -55,6 +55,10 @@ export class DomControls implements Controls {
   private targetProfile?: ShipProfile;
   private attackerFittedHull?: FittedHullSummary;
   private targetFittedHull?: FittedHullSummary;
+  private attackerFitting?: string;
+  private targetFitting?: string;
+  private attackerOverrides: Partial<ProfileParamOverrides> = {};
+  private targetOverrides: Partial<ProfileParamOverrides> = {};
   private selectedProfile: ProfileSettings | null = null;
 
   constructor({
@@ -342,6 +346,8 @@ export class DomControls implements Controls {
       attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
       attackerPropulsion: this.propulsionSetting("attacker"),
+      attackerFitting: this.attackerFitting,
+      attackerOverrides: this.attackerOverrides,
       attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
@@ -354,6 +360,8 @@ export class DomControls implements Controls {
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
       targetPropulsion: this.propulsionSetting("target"),
+      targetFitting: this.targetFitting,
+      targetOverrides: this.targetOverrides,
       targetFittedHull: this.targetFittedHull,
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
@@ -366,6 +374,10 @@ export class DomControls implements Controls {
   }
 
   private loadSettings(settings: UserSettings, selectedName = ""): void {
+    this.attackerFitting = settings.attackerFitting;
+    this.attackerOverrides = settings.attackerOverrides ?? {};
+    this.targetFitting = settings.targetFitting;
+    this.targetOverrides = settings.targetOverrides ?? {};
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -404,10 +416,10 @@ export class DomControls implements Controls {
     this.setOverloadDisabled("target");
 
     if (settings.attackerFittedHull) {
-      this.applyImportedFitting("attacker", settings.attackerFittedHull);
+      this.restoreFittingSummary("attacker", settings.attackerFittedHull);
     }
     if (settings.targetFittedHull) {
-      this.applyImportedFitting("target", settings.targetFittedHull);
+      this.restoreFittingSummary("target", settings.targetFittedHull);
     }
     this.displayTrackingInput();
     this.updateUnitToggle();
@@ -615,6 +627,13 @@ export class DomControls implements Controls {
       return;
     }
     this.clearFittedHull(side);
+    if (side === "attacker") {
+      this.attackerFitting = text;
+      this.attackerOverrides = {};
+    } else {
+      this.targetFitting = text;
+      this.targetOverrides = {};
+    }
     this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
     this.applyImportedFitting(side, this.fittedHullSummary(imported));
     if (side === "attacker") this.applyImportedTurret(imported.turret);
@@ -707,6 +726,7 @@ export class DomControls implements Controls {
       this.els[id].addEventListener("input", () => {
         if (id === "tracking") this.updateTrackingFromInput();
         if (id === "sigRes") this.updateTrackingForSigResolution();
+        this.recordOverrideForDisplayInput(id);
         this.updateSaveButtonState();
         this.persist();
         this.callbacks?.onDisplayChange();
@@ -732,6 +752,7 @@ export class DomControls implements Controls {
         if (id === "targetMass") this.updateSpeedFromMass("target");
         if (id === "attackerMass" || id === "attackerInertia") this.updateAlignTime("attacker");
         if (id === "targetMass" || id === "targetInertia") this.updateAlignTime("target");
+        this.recordOverrideForShipInput(id);
         this.updateSaveButtonState();
         this.persist();
         this.callbacks?.onConfigChange();
@@ -837,8 +858,15 @@ export class DomControls implements Controls {
   }
 
   private clearFittedHull(side: "attacker" | "target"): void {
-    if (side === "attacker") this.attackerFittedHull = undefined;
-    else this.targetFittedHull = undefined;
+    if (side === "attacker") {
+      this.attackerFittedHull = undefined;
+      this.attackerFitting = undefined;
+      this.attackerOverrides = {};
+    } else {
+      this.targetFittedHull = undefined;
+      this.targetFitting = undefined;
+      this.targetOverrides = {};
+    }
     this.updateFittingName(side);
   }
 
@@ -910,6 +938,14 @@ export class DomControls implements Controls {
     else this.targetFittedHull = summary;
     this.renderPropulsionOptions(side, summary.propulsionId ?? "");
     this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
+  }
+
+  private restoreFittingSummary(side: "attacker" | "target", summary: FittedHullSummary): void {
+    if (side === "attacker") this.attackerFittedHull = summary;
+    else this.targetFittedHull = summary;
+    this.renderPropulsionOptions(side, summary.propulsionId ?? "");
+    this.updateFittingName(side);
+    this.updateHullHint(side, this.currentFittedPropulsionModule(side, summary));
   }
 
   private applyImportedTurret(turret: ImportedFitting["turret"]): void {
@@ -1051,27 +1087,37 @@ export class DomControls implements Controls {
     const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
     const hintModule = fitted ? this.currentFittedPropulsionModule(side, fitted) : this.currentPropulsionModule(side);
     const conditions = this.skillConditions(side);
+    const massKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerMass" : "targetMass";
+    const inertiaKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerInertia" : "targetInertia";
+    const speedKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerSpeed" : "targetSpeed";
     let mass = num(this.els[`${side}Mass`]);
 
     if (updateMass || updateInertia || (side === "target" && updateSig)) {
       const stats = this.ships.fittedStats(profile, fitted?.fitted, propulsion, conditions);
-      if (updateMass) {
+      if (updateMass && !this.isOverridden(side, massKey)) {
         mass = stats.mass;
         (this.els[`${side}Mass`] as HTMLInputElement).value = String(mass);
       }
-      if (updateInertia) {
+      if (updateInertia && !this.isOverridden(side, inertiaKey)) {
         (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
       }
-      if (side === "target" && updateSig) {
+      if (side === "target" && updateSig && !this.isOverridden(side, "targetSig")) {
         (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
       }
     }
 
-    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
-    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    if (!this.isOverridden(side, speedKey)) {
+      const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
+      (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    }
     this.updateHullHint(side, hintModule);
     if (fitted) this.updateFittingName(side);
     this.updateAlignTime(side);
+  }
+
+  private isOverridden(side: "attacker" | "target", key: keyof ProfileParamOverrides): boolean {
+    const overrides = side === "attacker" ? this.attackerOverrides : this.targetOverrides;
+    return overrides[key] !== undefined;
   }
 
   private currentFittedPropulsion(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionStats | undefined {
@@ -1090,6 +1136,8 @@ export class DomControls implements Controls {
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
+    const speedKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerSpeed" : "targetSpeed";
+    if (this.isOverridden(side, speedKey)) return;
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
@@ -1137,6 +1185,28 @@ export class DomControls implements Controls {
     overload.disabled = disabled;
     button.disabled = disabled;
     button.setAttribute("aria-disabled", String(disabled));
+  }
+
+  private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
+    if (id === "tracking") this.recordOverride("attacker", "tracking", this.trackingInput.rad);
+    if (id === "sigRes") this.recordOverride("attacker", "sigRes", (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass);
+    if (id === "optimal") this.recordOverride("attacker", "optimal", num(this.els.optimal));
+    if (id === "falloff") this.recordOverride("attacker", "falloff", num(this.els.falloff));
+    if (id === "targetSig") this.recordOverride("target", "targetSig", Math.max(num(this.els.targetSig), 1));
+  }
+
+  private recordOverrideForShipInput(id: keyof typeof this.els): void {
+    if (id === "attackerSpeed") this.recordOverride("attacker", "attackerSpeed", num(this.els.attackerSpeed));
+    if (id === "attackerMass") this.recordOverride("attacker", "attackerMass", num(this.els.attackerMass));
+    if (id === "attackerInertia") this.recordOverride("attacker", "attackerInertia", num(this.els.attackerInertia));
+    if (id === "targetSpeed") this.recordOverride("target", "targetSpeed", num(this.els.targetSpeed));
+    if (id === "targetMass") this.recordOverride("target", "targetMass", num(this.els.targetMass));
+    if (id === "targetInertia") this.recordOverride("target", "targetInertia", num(this.els.targetInertia));
+  }
+
+  private recordOverride<K extends keyof ProfileParamOverrides>(side: "attacker" | "target", key: K, value: ProfileParamOverrides[K]): void {
+    const overrides = side === "attacker" ? this.attackerOverrides : this.targetOverrides;
+    overrides[key] = value;
   }
 
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {

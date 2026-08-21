@@ -134,13 +134,13 @@ const SAVED_FITTED_SETTINGS: UserSettings = {
   sigRes: "S",
   optimal: 5000,
   falloff: 5000,
-  attackerSpeed: 0,
+  attackerSpeed: 4_649.72,
   attackerMode: "keepAtRange",
   attackerRange: 5000,
   maneuverAggressivity: 1,
   gridBrightness: 0.2,
-  attackerMass: 1_200_000,
-  attackerInertia: 3,
+  attackerMass: 1_500_000,
+  attackerInertia: 2,
   attackerSkillLevel: 5,
   attackerOverload: true,
   attackerHull: "Rifter",
@@ -2647,7 +2647,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
     });
 
-    test("loadSettings restores a fitted hull and recomputes stats", () => {
+    test("loadSettings restores a fitted hull and its precomputed stats", () => {
       buildControls(globalThis.document, SAVED_FITTED_SETTINGS);
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
@@ -2732,6 +2732,102 @@ describe("DomControls", () => {
       const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
       expect(presetSelect.children.length).toBe(1);
       expect(presetSelect.disabled).toBe(true);
+    });
+
+    test("importing a fitting records the fitting basis and clears attacker overrides", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      clipboard.readText = vi.fn(async () => eft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe(eft);
+      expect(saved.attackerOverrides).toEqual({});
+      expect(saved.attackerFittedHull).not.toBeUndefined();
+      expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
+    });
+
+    test("editing a fitted field records a side-specific override", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      clipboard.readText = vi.fn(async () => eft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const massInput = getFake(globalThis.document, "attacker-mass");
+      massInput.value = "2000000";
+      massInput.trigger("input");
+
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerOverrides).toEqual({ attackerMass: 2_000_000 });
+      expect(saved.attackerFitting).toBe(eft);
+    });
+
+    test("editing mass does not overwrite a speed override", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      clipboard.readText = vi.fn(async () => eft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const speedInput = getFake(globalThis.document, "attacker-speed");
+      speedInput.value = "3500";
+      speedInput.trigger("input");
+
+      const massInput = getFake(globalThis.document, "attacker-mass");
+      massInput.value = "2000000";
+      massInput.trigger("input");
+
+      expect(speedInput.value).toBe("3500");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerOverrides).toEqual({ attackerSpeed: 3500, attackerMass: 2_000_000 });
+    });
+
+    test("importing a different fitting clears the side overrides", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const rifterEft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      const thrasherEft = "[Thrasher, Sniper]\n280mm Howitzer Artillery I, Republic Fleet EMP S\n5MN Y-T8 Compact Microwarpdrive";
+      clipboard.readText = vi.fn(async () => rifterEft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const massInput = getFake(globalThis.document, "attacker-mass");
+      massInput.value = "2000000";
+      massInput.trigger("input");
+
+      clipboard.readText = vi.fn(async () => thrasherEft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerOverrides).toEqual({});
+      expect(saved.attackerFitting).toBe(thrasherEft);
+      expect(saved.attackerFittedHull?.fittingName).toBe("Sniper");
+    });
+
+    test("saveProfile includes fitting basis and overrides but not display preferences", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const eft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      clipboard.readText = vi.fn(async () => eft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const profileInput = getFake(globalThis.document, "profile-name");
+      profileInput.value = "brawler";
+      getFake(globalThis.document, "profile-save").trigger("click");
+
+      const [name, profile] = settingsStore.saveProfile.mock.calls[settingsStore.saveProfile.mock.calls.length - 1];
+      expect(name).toBe("brawler");
+      expect(profile.attackerFitting).toBe(eft);
+      expect(profile).not.toHaveProperty("language");
+      expect(profile).not.toHaveProperty("trackingUnit");
     });
   });
 });
