@@ -107,6 +107,23 @@ function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): strin
   return (canvas.getContext("2d") as unknown as { strokeStyles: string[] }).strokeStyles[0];
 }
 
+function shipAt(position: Vec2, id: ShipState["id"] = "target", desiredRange = 5000): ShipState {
+  return { ...ship, id, position, desiredRange };
+}
+
+function cameraScaleFor(attacker: ShipState, target: ShipState, clientWidth = 1000, clientHeight = 1000): number {
+  const canvas = fakeCanvas(clientWidth, clientHeight);
+  const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+  const testSnapshot: SimSnapshot = {
+    time: 0,
+    attacker,
+    target,
+    commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) },
+  };
+  renderer.draw(testSnapshot, frame, hit, turret);
+  return (renderer as unknown as { camera: { scale: number } }).camera.scale;
+}
+
 describe("CanvasRenderer", () => {
   test("drawGrid uses the default brightness when not overridden", () => {
     const canvas = fakeCanvas();
@@ -141,5 +158,35 @@ describe("CanvasRenderer", () => {
     renderer.draw(snapshot, frame, hit, turret);
     expect(canvas.width).toBe(1000);
     expect(canvas.height).toBe(400);
+  });
+
+  describe("updateCamera", () => {
+    test("caps zoom in at 3x farScale when ships are very close", () => {
+      const attacker = shipAt(new Vec2(0, 0), "attacker");
+      const target = shipAt(new Vec2(0, 10), "target");
+      const scale = cameraScaleFor(attacker, target);
+      expect(scale).toBe(0.12);
+    });
+
+    test("uses farScale as baseline at the normal separation", () => {
+      const attacker = shipAt(new Vec2(0, 0), "attacker");
+      const target = shipAt(new Vec2(0, 3500), "target");
+      const scale = cameraScaleFor(attacker, target);
+      expect(scale).toBe(0.04);
+    });
+
+    test("zooms out below farScale when ships are far apart", () => {
+      const attacker = shipAt(new Vec2(0, 0), "attacker");
+      const target = shipAt(new Vec2(0, 10000), "target");
+      const scale = cameraScaleFor(attacker, target);
+      expect(scale).toBeCloseTo(0.014, 10);
+    });
+
+    test("caps zoom out at farScale / 3 when ships are very far apart", () => {
+      const attacker = shipAt(new Vec2(0, 0), "attacker");
+      const target = shipAt(new Vec2(0, 100000), "target");
+      const scale = cameraScaleFor(attacker, target);
+      expect(scale).toBeCloseTo(0.04 / 3, 10);
+    });
   });
 });

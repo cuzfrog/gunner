@@ -87,7 +87,7 @@ export class CanvasRenderer implements Renderer {
     const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
     const closeScale = minDim / (2 * closeRadius);
 
-    const cameraScale = Math.min(Math.max(farScale, closeScale), farScale * MAX_ZOOM_FACTOR);
+    const cameraScale = Math.min(Math.max(farScale / MAX_ZOOM_FACTOR, closeScale), farScale * MAX_ZOOM_FACTOR);
     this.camera = { center, scale: cameraScale };
   }
 
