@@ -434,7 +434,7 @@ function isSigResolutionClass(value: unknown): value is SigResolutionClass {
 }
 
 function isAutopilotMode(value: unknown): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange";
+  return value === "orbit" || value === "keepAtRange" || value === "midships";
 }
 
 function isLanguage(value: unknown): value is Language {

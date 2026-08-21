@@ -69,6 +69,15 @@ describe("I18nImpl", () => {
     expect(i18n.t("button.play")).toBe("Start");
   });
 
+  test("translates the midships mode label in every language", () => {
+    const i18n = new I18nImpl();
+    expect(i18n.t("mode.midships")).toBe("Midships");
+    i18n.setLanguage("zh");
+    expect(i18n.t("mode.midships")).toBe("正舵");
+    i18n.setLanguage("ja");
+    expect(i18n.t("mode.midships")).toBe("正舵");
+  });
+
   test("returns the key when it is not in the dictionary", () => {
     const i18n = new I18nImpl();
     expect(i18n.t("unknown.key")).toBe("unknown.key");

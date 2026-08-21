@@ -416,7 +416,7 @@ function isPositiveNumber(value: unknown): value is number {
 }
 
 function isAutopilotMode(value: string): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange";
+  return value === "orbit" || value === "keepAtRange" || value === "midships";
 }
 
 function isSigResolutionClass(value: string): value is SigResolutionClass {

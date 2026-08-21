@@ -134,6 +134,11 @@ export const I18N_DICTIONARY = {
     zh: "保持距离",
     ja: "距離を保つ",
   },
+  "mode.midships": {
+    en: "Midships",
+    zh: "正舵",
+    ja: "正舵",
+  },
   "label.desiredRange": {
     en: "Desired range",
     zh: "期望距离",

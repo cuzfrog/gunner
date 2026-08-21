@@ -559,6 +559,14 @@ describe("LocalSettingsStore", () => {
     expect(store.load()).toEqual(settings);
   });
 
+  test("save and load round-trip midships mode", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const settings: UserSettings = { ...DEFAULT_SETTINGS, attackerMode: "midships", targetMode: "midships" };
+    store.save(settings);
+    expect(store.load()).toEqual(settings);
+  });
+
   test("load accepts gridBrightness at the interval endpoints", () => {
     const storage = fakeStorage();
     const zero: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0 };

@@ -196,6 +196,13 @@ describe("profileText", () => {
     expect(parseProfile(text)).toBeUndefined();
   });
 
+  test("round-trips a profile with midships mode for both sides", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, attackerMode: "midships", targetMode: "midships" };
+    const text = serializeProfile(profile);
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(profile);
+  });
+
   test("parseProfile rejects an empty fitting block", () => {
     const text = `${PROFILE_TEXT_HEADER}\nversion=6\nattacker.fitting:\n---`;
     expect(parseProfile(text)).toBeUndefined();
