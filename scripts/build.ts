@@ -1,9 +1,12 @@
 import { createHash } from "node:crypto";
-import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { ITEM_ICON_IDS } from "../src/fitting/iconIds";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";
+const SHIP_IMAGES_SOURCE = "data/ship-images";
+const ICONS_SOURCE_DIRECTORY = "data/ship-modules/icons";
 const STYLES_FILE_NAME = "styles.css";
 const INDEX_FILE_NAME = "index.html";
 const HASH_LENGTH = 8;
@@ -40,6 +43,16 @@ for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
   const src = join(PUBLIC_DIRECTORY, entry.name);
   const dst = join(DISTRIBUTION_DIRECTORY, entry.name);
   cpSync(src, dst, { force: true, recursive: true });
+}
+
+cpSync(SHIP_IMAGES_SOURCE, join(DISTRIBUTION_DIRECTORY, "images", "ships"), { recursive: true });
+
+const iconsDist = join(DISTRIBUTION_DIRECTORY, "images", "icons");
+mkdirSync(iconsDist, { recursive: true });
+for (const iconId of new Set(Object.values(ITEM_ICON_IDS))) {
+  const src = join(ICONS_SOURCE_DIRECTORY, `${iconId}@1x.png`);
+  if (!existsSync(src)) throw new Error(`Missing icon source: ${src}`);
+  cpSync(src, join(iconsDist, `${iconId}@1x.png`));
 }
 
 const stylesHash = hashFile(join(PUBLIC_DIRECTORY, STYLES_FILE_NAME));

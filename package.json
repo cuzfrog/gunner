@@ -9,6 +9,7 @@
     "test": "bun test",
     "trace": "bun run scripts/sim-trace.ts",
     "preview": "bun run scripts/preview.ts",
+    "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {
