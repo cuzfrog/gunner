@@ -4,7 +4,7 @@ import {
   resolveWeapon,
   summarizeFitting,
 } from "./fittingSummary";
-import type { ParsedFitting } from "./eft";
+import type { ParsedFitting } from "../src/fitting/eft";
 
 function makeParsed(modules: ParsedFitting["modules"], drones: ParsedFitting["drones"] = []): ParsedFitting {
   return {

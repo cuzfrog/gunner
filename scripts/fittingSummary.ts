@@ -1,7 +1,7 @@
 // Generated from EVE fitting analysis heuristics (2026-08-20). Do not edit by hand.
 
-import { parseEft } from "./eft";
-import type { ParsedFitting } from "./eft";
+import { parseEft } from "../src/fitting/eft";
+import type { ParsedFitting } from "../src/fitting/eft";
 
 export interface FittingSummary {
   readonly role: string;
