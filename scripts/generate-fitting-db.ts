@@ -21,10 +21,185 @@ interface SdeDogmaEffect {
   effectID: number;
 }
 
+interface SdeGroup {
+  groupID: number;
+  categoryID: number;
+}
+
 interface SdeTypeDogma {
   dogmaAttributes: readonly { attributeID: number; value: number }[];
   dogmaEffects: readonly SdeDogmaEffect[];
 }
+
+type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
+
+interface HullBonusRule {
+  readonly attribute: BonusAttribute;
+  readonly bonusAttr?: string;
+  readonly bonusAttrFallback?: string;
+  readonly constant?: number;
+  readonly skill?: string;
+  readonly turretSkill?: string;
+}
+
+interface HullBonus {
+  readonly attribute: BonusAttribute;
+  readonly magnitude: number;
+  readonly skill?: string;
+  readonly turretSkill?: string;
+}
+
+// Copied from pyfa (eos/effects.py) effect handlers: maps ship dogma effectIDs to the attributes they boost.
+// Only effects carried by published ships are listed. magnitude is a percent, scaled by the skill level at runtime
+// when `skill` is set; `turretSkill` restricts turret bonuses to turrets requiring that skill.
+const BONUS_EFFECTS: Readonly<Record<number, readonly HullBonusRule[]>> = {
+  521: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCC", skill: "Caldari Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  527: [{ attribute: "maxVelocity", bonusAttr: "shipBonusMI", skill: "Minmatar Hauler" }],
+  553: [{ attribute: "turretTracking", bonusAttr: "shipBonusGB", skill: "Gallente Battleship", turretSkill: "Large Hybrid Turret" }],
+  729: [{ attribute: "maxVelocity", bonusAttr: "shipBonusGI", bonusAttrFallback: "shipBonusGI2", skill: "Gallente Hauler" }],
+  730: [{ attribute: "maxVelocity", bonusAttr: "shipBonusCI", skill: "Caldari Hauler" }],
+  732: [{ attribute: "maxVelocity", bonusAttr: "shipBonusAI", skill: "Amarr Hauler" }],
+  882: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", turretSkill: "Small Hybrid Turret" }],
+  919: [{ attribute: "turretTracking", bonusAttr: "shipBonusGC2", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  989: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", turretSkill: "Small Hybrid Turret" }],
+  991: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", turretSkill: "Small Energy Turret" }],
+  996: [{ attribute: "turretTracking", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Hybrid Turret" }],
+  998: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Projectile Turret" }],
+  1058: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusHeavyGunship1", skill: "Heavy Assault Cruisers", turretSkill: "Medium Energy Turret" }],
+  1060: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusHeavyGunship1", skill: "Heavy Assault Cruisers", turretSkill: "Medium Projectile Turret" }],
+  1080: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusHeavyGunship1", skill: "Heavy Assault Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  1099: [{ attribute: "turretTracking", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  1228: [{ attribute: "turretTracking", bonusAttr: "shipBonusGF", skill: "Gallente Frigate", turretSkill: "Small Projectile Turret" }],
+  1264: [{ attribute: "turretTracking", bonusAttr: "eliteBonusInterceptor2", skill: "Interceptors", turretSkill: "Small Hybrid Turret" }],
+  1268: [{ attribute: "turretTracking", bonusAttr: "eliteBonusInterceptor2", skill: "Interceptors", turretSkill: "Small Energy Turret" }],
+  1412: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", turretSkill: "Large Hybrid Turret" }],
+  1615: [{ attribute: "agility", constant: -5, skill: "Advanced Spaceship Command" }],
+  1672: [{ attribute: "maxVelocity", bonusAttr: "freighterBonusA1", skill: "Amarr Freighter" }],
+  1673: [{ attribute: "maxVelocity", bonusAttr: "freighterBonusC1", skill: "Caldari Freighter" }],
+  1674: [{ attribute: "maxVelocity", bonusAttr: "freighterBonusG1", skill: "Gallente Freighter" }],
+  1675: [{ attribute: "maxVelocity", bonusAttr: "freighterBonusM1", skill: "Minmatar Freighter" }],
+  1773: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGF2", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  2130: [{ attribute: "turretOptimal", bonusAttr: "maxRangeBonus", turretSkill: "Small Hybrid Turret" }],
+  2131: [{ attribute: "turretOptimal", bonusAttr: "maxRangeBonus", turretSkill: "Small Energy Turret" }],
+  2132: [{ attribute: "turretOptimal", bonusAttr: "maxRangeBonus", turretSkill: "Small Projectile Turret" }],
+  2156: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusCommandShips2", skill: "Command Ships", turretSkill: "Medium Projectile Turret" }],
+  2160: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusCommandShips2", skill: "Command Ships", turretSkill: "Medium Hybrid Turret" }],
+  2201: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusInterdictors1", skill: "Interdictors", turretSkill: "Small Projectile Turret" }],
+  2503: [{ attribute: "turretTracking", bonusAttr: "shipBonusGB2", skill: "Gallente Battleship", turretSkill: "Large Hybrid Turret" }],
+  2504: [{ attribute: "turretTracking", bonusAttr: "shipBonusGF2", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  3343: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusHeavyInterdictors1", skill: "Heavy Interdiction Cruisers", turretSkill: "Medium Projectile Turret" }],
+  3392: [{ attribute: "turretTracking", bonusAttr: "eliteBonusBlackOps1", skill: "Black Ops", turretSkill: "Large Energy Turret" }],
+  3424: [{ attribute: "turretTracking", bonusAttr: "eliteBonusViolators1", skill: "Marauders", turretSkill: "Large Hybrid Turret" }],
+  3425: [{ attribute: "turretTracking", bonusAttr: "eliteBonusViolators1", skill: "Marauders", turretSkill: "Large Projectile Turret" }],
+  3447: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", turretSkill: "Large Projectile Turret" }],
+  3480: [{ attribute: "turretTracking", bonusAttr: "shipBonusAB2", skill: "Amarr Battleship", turretSkill: "Large Energy Turret" }],
+  3484: [{ attribute: "turretTracking", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser", turretSkill: "Medium Energy Turret" }],
+  3489: [{ attribute: "turretTracking", bonusAttr: "shipBonus2AF", skill: "Amarr Frigate", turretSkill: "Small Energy Turret" }],
+  3677: [{ attribute: "turretOptimal", bonusAttr: "shipBonusAB2", skill: "Amarr Battleship", turretSkill: "Large Energy Turret" }],
+  3680: [{ attribute: "agility", bonusAttr: "freighterBonusC1", skill: "Caldari Freighter" }],
+  3681: [{ attribute: "agility", bonusAttr: "freighterBonusM1", skill: "Minmatar Freighter" }],
+  3682: [{ attribute: "agility", bonusAttr: "freighterBonusG1", skill: "Gallente Freighter" }],
+  3683: [{ attribute: "agility", bonusAttr: "freighterBonusA1", skill: "Amarr Freighter" }],
+  3706: [{ attribute: "turretTracking", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  4473: [{ attribute: "maxVelocity", bonusAttr: "shipBonusATC1" }],
+  4474: [{ attribute: "turretOptimal", bonusAttr: "shipBonusATC2", turretSkill: "Medium Projectile Turret" }],
+  4475: [{ attribute: "turretFalloff", bonusAttr: "shipBonusATC2", turretSkill: "Medium Projectile Turret" }],
+  4476: [{ attribute: "turretFalloff", bonusAttr: "shipBonusATF2", turretSkill: "Small Projectile Turret" }],
+  4477: [{ attribute: "turretOptimal", bonusAttr: "shipBonusATF2", turretSkill: "Small Projectile Turret" }],
+  4482: [{ attribute: "turretOptimal", bonusAttr: "shipBonus2AF", skill: "Amarr Frigate", turretSkill: "Small Energy Turret" }],
+  4484: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGB", skill: "Gallente Battleship", turretSkill: "Large Projectile Turret" }],
+  4512: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGC", skill: "Gallente Cruiser", turretSkill: "Medium Projectile Turret" }],
+  4515: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  4516: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGC", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  4622: [{ attribute: "turretOptimal", bonusAttr: "shipBonusATF2", turretSkill: "Small Hybrid Turret" }],
+  4623: [{ attribute: "turretTracking", bonusAttr: "shipBonusATF2", turretSkill: "Small Hybrid Turret" }],
+  4624: [{ attribute: "turretTracking", bonusAttr: "shipBonusATC2", turretSkill: "Medium Hybrid Turret" }],
+  4625: [{ attribute: "turretFalloff", bonusAttr: "shipBonusATC2", turretSkill: "Medium Hybrid Turret" }],
+  4782: [{ attribute: "turretOptimal", bonusAttr: "shipBonusATF2", turretSkill: "Small Energy Turret" }],
+  4999: [{ attribute: "turretOptimal", bonusAttr: "rookieSHTOptimalBonus", turretSkill: "Small Hybrid Turret" }],
+  5018: [{ attribute: "maxVelocity", bonusAttr: "rookieShipVelocityBonus" }],
+  5132: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  5205: [{ attribute: "turretTracking", bonusAttr: "rookieSETTracking", turretSkill: "Small Energy Turret" }],
+  5206: [{ attribute: "turretOptimal", bonusAttr: "rookieSETOptimal", turretSkill: "Small Energy Turret" }],
+  5215: [{ attribute: "turretTracking", bonusAttr: "rookieSHTTracking", turretSkill: "Small Hybrid Turret" }],
+  5216: [{ attribute: "turretFalloff", bonusAttr: "rookieSHTFalloff", turretSkill: "Small Hybrid Turret" }],
+  5217: [{ attribute: "turretTracking", bonusAttr: "rookieSPTTracking", turretSkill: "Small Projectile Turret" }],
+  5218: [{ attribute: "turretFalloff", bonusAttr: "rookieSPTFalloff", turretSkill: "Small Projectile Turret" }],
+  5219: [{ attribute: "turretOptimal", bonusAttr: "rookieSPTOptimal", turretSkill: "Small Projectile Turret" }],
+  5294: [{ attribute: "turretTracking", bonusAttr: "shipBonusAD2", skill: "Amarr Destroyer", turretSkill: "Small Energy Turret" }],
+  5303: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCD1", skill: "Caldari Destroyer", turretSkill: "Small Hybrid Turret" }],
+  5304: [{ attribute: "turretTracking", bonusAttr: "shipBonusCD2", skill: "Caldari Destroyer", turretSkill: "Small Hybrid Turret" }],
+  5309: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGD1", skill: "Gallente Destroyer", turretSkill: "Small Hybrid Turret" }],
+  5310: [{ attribute: "turretTracking", bonusAttr: "shipBonusGD2", skill: "Gallente Destroyer", turretSkill: "Small Hybrid Turret" }],
+  5318: [{ attribute: "turretTracking", bonusAttr: "shipBonusMD2", skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" }],
+  5334: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCBC1", skill: "Caldari Battlecruiser", turretSkill: "Medium Hybrid Turret" }],
+  5356: [{ attribute: "turretOptimal", bonusAttr: "shipBonusCBC1", skill: "Caldari Battlecruiser", turretSkill: "Large Hybrid Turret" }],
+  5358: [{ attribute: "turretTracking", bonusAttr: "shipBonusGBC1", skill: "Gallente Battlecruiser", turretSkill: "Large Hybrid Turret" }],
+  5361: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", turretSkill: "Large Projectile Turret" }],
+  5380: [{ attribute: "turretTracking", bonusAttr: "shipBonusGBC2", skill: "Gallente Battlecruiser", turretSkill: "Medium Hybrid Turret" }],
+  5381: [{ attribute: "turretTracking", bonusAttr: "shipBonusABC1", skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" }],
+  5382: [{ attribute: "turretOptimal", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser", turretSkill: "Medium Energy Turret" }],
+  5468: [{ attribute: "agility", bonusAttr: "shipBonusCI2" }],
+  5469: [{ attribute: "agility", bonusAttr: "shipBonusMI2", skill: "Minmatar Hauler" }],
+  5470: [{ attribute: "agility", bonusAttr: "shipBonusGI2", skill: "Gallente Hauler" }],
+  5471: [{ attribute: "agility", bonusAttr: "shipBonusAI2", skill: "Amarr Hauler" }],
+  5485: [{ attribute: "turretOptimal", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  5610: [{ attribute: "turretOptimal", bonusAttr: "shipBonusAB", skill: "Amarr Battleship", turretSkill: "Large Energy Turret" }],
+  5611: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGB2", skill: "Gallente Battleship", turretSkill: "Large Hybrid Turret" }],
+  5721: [{ attribute: "turretOptimal", bonusAttr: "shipBonusRole7", turretSkill: "Medium Energy Turret" }],
+  5724: [{ attribute: "turretOptimal", bonusAttr: "shipBonusGF", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  5726: [{ attribute: "turretOptimal", bonusAttr: "shipBonusRole7", turretSkill: "Large Energy Turret" }],
+  5779: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  5957: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusHeavyInterdictors1", skill: "Heavy Interdiction Cruisers", turretSkill: "Medium Energy Turret" }],
+  5958: [{ attribute: "turretTracking", bonusAttr: "shipBonusGC", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  5959: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusHeavyInterdictors1", skill: "Heavy Interdiction Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  5998: [{ attribute: "agility", bonusAttr: "freighterBonusO2", skill: "ORE Freighter" }],
+  6025: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusReconShip1", skill: "Recon Ships", turretSkill: "Medium Hybrid Turret" }],
+  6038: [{ attribute: "turretOptimal", bonusAttr: "shipBonusTacticalDestroyerMinmatar2", skill: "Minmatar Tactical Destroyer", turretSkill: "Small Projectile Turret" }],
+  6150: [{ attribute: "turretTracking", bonusAttr: "shipBonusTacticalDestroyerGallente2", skill: "Gallente Tactical Destroyer", turretSkill: "Small Hybrid Turret" }],
+  6172: [{ attribute: "turretFalloff", bonusAttr: "roleBonusCBC", turretSkill: "Medium Energy Turret" }, { attribute: "turretOptimal", bonusAttr: "roleBonusCBC", turretSkill: "Medium Energy Turret" }],
+  6173: [{ attribute: "turretFalloff", bonusAttr: "roleBonusCBC", turretSkill: "Medium Hybrid Turret" }, { attribute: "turretOptimal", bonusAttr: "roleBonusCBC", turretSkill: "Medium Hybrid Turret" }],
+  6174: [{ attribute: "turretFalloff", bonusAttr: "roleBonusCBC", turretSkill: "Medium Projectile Turret" }, { attribute: "turretOptimal", bonusAttr: "roleBonusCBC", turretSkill: "Medium Projectile Turret" }],
+  6178: [{ attribute: "turretTracking", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", turretSkill: "Medium Projectile Turret" }],
+  6725: [{ attribute: "turretFalloff", bonusAttr: "shipBonus2AF", skill: "Amarr Frigate", turretSkill: "Small Energy Turret" }],
+  7000: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGF", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  7044: [{ attribute: "agility", bonusAttr: "shipBonusGC", skill: "Gallente Cruiser" }],
+  8129: [{ attribute: "maxVelocity", bonusAttr: "shipBonusGF", skill: "Gallente Frigate" }],
+  8133: [{ attribute: "maxVelocity", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate" }],
+  8155: [{ attribute: "turretTracking", bonusAttr: "eliteBonusBlackOps1", skill: "Black Ops", turretSkill: "Large Projectile Turret" }],
+  8156: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusBlackOps2", skill: "Black Ops", turretSkill: "Large Projectile Turret" }],
+  11059: [{ attribute: "turretTracking", bonusAttr: "shipBonusCBC1", skill: "Caldari Battlecruiser", turretSkill: "Medium Hybrid Turret" }],
+  11064: [{ attribute: "turretOptimal", bonusAttr: "shipBonusABC1", skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" }],
+  11376: [{ attribute: "turretOptimal", bonusAttr: "shipBonusDreadnoughtG1", skill: "Gallente Dreadnought", turretSkill: "Capital Hybrid Turret" }],
+  11392: [{ attribute: "turretOptimal", bonusAttr: "shipBonusNavyDestroyerCaldari2", skill: "Caldari Destroyer", turretSkill: "Small Hybrid Turret" }],
+  11393: [{ attribute: "turretOptimal", bonusAttr: "shipBonusNavyDestroyerGallente4", turretSkill: "Small Hybrid Turret" }],
+  11394: [{ attribute: "turretFalloff", bonusAttr: "shipBonusNavyDestroyerGallente5", turretSkill: "Small Hybrid Turret" }],
+  11396: [{ attribute: "turretOptimal", bonusAttr: "shipBonusNavyDestroyerCaldari4", turretSkill: "Small Hybrid Turret" }],
+  11397: [{ attribute: "turretFalloff", bonusAttr: "shipBonusNavyDestroyerCaldari5", turretSkill: "Small Hybrid Turret" }],
+  11401: [{ attribute: "turretOptimal", bonusAttr: "shipBonusNavyDestroyerMinmatar4", turretSkill: "Small Projectile Turret" }],
+  11402: [{ attribute: "turretFalloff", bonusAttr: "shipBonusNavyDestroyerMinmatar5", turretSkill: "Small Projectile Turret" }],
+  11410: [{ attribute: "turretFalloff", bonusAttr: "shipBonusNavyDestroyerAmarr7", turretSkill: "Small Energy Turret" }],
+  11415: [{ attribute: "turretTracking", bonusAttr: "eliteBonusHeavyGunship1", skill: "Heavy Assault Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  11416: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGC2", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  11430: [{ attribute: "turretTracking", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", turretSkill: "Large Projectile Turret" }],
+  11450: [{ attribute: "turretOptimal", bonusAttr: "shipBonusNavyDestroyerAmarr6", turretSkill: "Small Energy Turret" }],
+  11696: [{ attribute: "turretTracking", bonusAttr: "shipBonusDreadnoughtC1", skill: "Caldari Dreadnought", turretSkill: "Capital Hybrid Turret" }],
+  11697: [{ attribute: "turretOptimal", bonusAttr: "shipBonusDreadnoughtC2", skill: "Caldari Dreadnought", turretSkill: "Capital Hybrid Turret" }],
+  11704: [{ attribute: "turretFalloff", bonusAttr: "shipBonusDreadnoughtM2", skill: "Minmatar Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  11743: [{ attribute: "turretTracking", bonusAttr: "shipBonusGD1", skill: "Gallente Destroyer", turretSkill: "Small Projectile Turret" }],
+  11763: [{ attribute: "turretFalloff", bonusAttr: "shipBonusGBC1", skill: "Gallente Battlecruiser", turretSkill: "Medium Projectile Turret" }],
+  11767: [{ attribute: "turretTracking", bonusAttr: "eliteBonusHeavyGunship1", skill: "Heavy Assault Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  11919: [{ attribute: "turretFalloff", bonusAttr: "shipBonusMD1", skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" }],
+  11944: [{ attribute: "turretFalloff", bonusAttr: "shipBonusTitanG2", skill: "Gallente Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  11945: [{ attribute: "turretTracking", bonusAttr: "shipBonusTitanG1", skill: "Gallente Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  11994: [{ attribute: "turretFalloff", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  11998: [{ attribute: "turretOptimal", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Hybrid Turret" }],
+  11999: [{ attribute: "turretTracking", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Hybrid Turret" }],
+  12038: [{ attribute: "turretFalloff", bonusAttr: "shipBonus3MF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  12213: [{ attribute: "turretFalloff", bonusAttr: "ShipBonusMC3", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  12245: [{ attribute: "turretFalloff", bonusAttr: "shipBonusDreadnoughtG1", skill: "Gallente Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  12567: [{ attribute: "turretFalloff", bonusAttr: "shipBonusRole6", turretSkill: "Small Projectile Turret" }],
+};
 
 const MODULE_GROUPS = new Set([
   38, // Shield Extender
@@ -63,6 +238,7 @@ const CHARGE_GROUPS = new Set([
 
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
+const SHIP_CATEGORY_ID = 6;
 
 async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
   const files = (await readdir(SDE_DIR))
@@ -144,6 +320,7 @@ interface TurretStats {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly turretSkill?: string;
 }
 
 interface ChargeStats {
@@ -226,21 +403,71 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   return stats as FittingModuleStats;
 }
 
+function buildHullBonuses(attributeNames: Map<number, string>, typeDogma: SdeTypeDogma | undefined): readonly HullBonus[] {
+  if (!typeDogma) return [];
+  const values = buildAttributeValues(attributeNames, typeDogma);
+  const effects = buildEffectSet(typeDogma);
+
+  const bonuses: HullBonus[] = [];
+  for (const effectID of effects) {
+    const rules = BONUS_EFFECTS[effectID];
+    if (!rules) continue;
+    for (const rule of rules) {
+      const magnitude = resolveBonusMagnitude(rule, values);
+      if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
+      bonuses.push({ attribute: rule.attribute, magnitude, skill: rule.skill, turretSkill: rule.turretSkill });
+    }
+  }
+  return bonuses;
+}
+
+function resolveBonusMagnitude(rule: HullBonusRule, values: Map<string, number>): number | undefined {
+  if (rule.constant !== undefined) return rule.constant;
+  if (!rule.bonusAttr) return undefined;
+  if (values.has(rule.bonusAttr)) return values.get(rule.bonusAttr);
+  if (rule.bonusAttrFallback && values.has(rule.bonusAttrFallback)) return values.get(rule.bonusAttrFallback);
+  return undefined;
+}
+
+function turretSkillFromRequired(
+  types: Record<string, SdeType>,
+  requiredSkills: Record<string, Record<string, number>>,
+  typeID: number,
+): string | undefined {
+  const skills = requiredSkills[String(typeID)];
+  if (!skills) return undefined;
+  for (const skillTypeID of Object.keys(skills)) {
+    const name = types[skillTypeID]?.["typeName_en-us"];
+    if (name?.includes("Turret")) return name;
+  }
+  return undefined;
+}
+
 async function main() {
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
   const attributes = await loadMerged<SdeDogmaAttribute>("dogmaattributes.");
+  const groups = await loadMerged<SdeGroup>("groups.");
+  const requiredSkills = await loadMerged<Record<string, number>>("requiredskillsfortypes.");
   const attributeNames = buildAttributeNameMap(attributes);
+  const shipGroupIds = new Set(Object.values(groups).filter((group) => group.categoryID === SHIP_CATEGORY_ID).map((group) => group.groupID));
 
   const fittingModules: Record<string, FittingModuleStats> = {};
   const turrets: Record<string, TurretStats> = {};
   const charges: Record<string, ChargeStats> = {};
   const scripts: Record<string, TurretScriptStats> = {};
+  const hullBonuses: Record<string, readonly HullBonus[]> = {};
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
     const typeDogma = typedogmas[String(type.typeID)];
     const values = buildAttributeValues(attributeNames, typeDogma);
+
+    if (shipGroupIds.has(type.groupID)) {
+      const bonuses = buildHullBonuses(attributeNames, typeDogma);
+      if (bonuses.length > 0) hullBonuses[type["typeName_en-us"]] = bonuses;
+      continue;
+    }
 
     if (TURRET_GROUPS.has(type.groupID)) {
       const tracking = values.get("trackingSpeed");
@@ -251,6 +478,7 @@ async function main() {
           optimal,
           falloff: values.get("falloff") ?? 0,
           chargeSize: values.get("chargeSize") ?? 1,
+          turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
         };
       }
       continue;
@@ -325,6 +553,16 @@ export interface TurretStats {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly turretSkill?: string;
+}
+
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
+
+export interface HullBonus {
+  readonly attribute: HullBonusAttribute;
+  readonly magnitude: number;
+  readonly skill?: string;
+  readonly turretSkill?: string;
 }
 
 export interface ChargeStats {
@@ -355,12 +593,14 @@ export interface TurretScriptStats {
     ``,
     `export const CHARGES = ${JSON.stringify(charges, null, 2)} as unknown as Readonly<Record<string, ChargeStats>>;`,
     ``,
+    `export const HULL_BONUSES = ${JSON.stringify(hullBonuses, null, 2)} as unknown as Readonly<Record<string, readonly HullBonus[]>>;`,
+    ``,
   ];
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   console.log(
-    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} scripts to ${OUT_FILE}`,
+    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} scripts, ${Object.keys(hullBonuses).length} hull bonus sets to ${OUT_FILE}`,
   );
 }
 

@@ -11,7 +11,7 @@ import type {
 } from "../ships";
 import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
-import type { ChargeStats, FittingModuleStats, TurretScriptStats, TurretStats } from "./fittingDb";
+import type { ChargeStats, FittingModuleStats, HullBonus, TurretScriptStats, TurretStats } from "./fittingDb";
 
 export interface ImportedTurret {
   readonly tracking: number;
@@ -33,6 +33,7 @@ export interface FittingDb {
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
+  readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
 }
 
 export interface FittingImport {
@@ -55,9 +56,10 @@ export class FittingImportImpl implements FittingImport {
     const profile = this.ships.findHull(parsed.hullName);
     if (!profile) return undefined;
 
-    const hullSide = aggregateHullSide(profile, this.db, parsed);
+    const hullBonuses = this.db.hullBonuses[profile.name] ?? [];
+    const hullSide = aggregateHullSide(profile, this.db, parsed, hullBonuses, conditions.skillLevel);
     const propulsion = resolvePropulsion(profile, this.ships, this.db, parsed, hullSide.propulsionName);
-    const turret = resolveTurret(this.db, parsed, conditions.skillLevel);
+    const turret = resolveTurret(this.db, parsed, conditions.skillLevel, hullBonuses);
 
     return {
       profile,
@@ -74,7 +76,13 @@ interface HullSideAggregation {
   readonly propulsionName?: string;
 }
 
-function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFitting): HullSideAggregation {
+function aggregateHullSide(
+  profile: ShipProfile,
+  db: FittingDb,
+  parsed: ParsedFitting,
+  hullBonuses: readonly HullBonus[],
+  skillLevel: number,
+): HullSideAggregation {
   let flatMass = 0;
   const massPercentages: number[] = [];
   const speedPercents: number[] = [];
@@ -101,6 +109,12 @@ function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFi
     if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
     if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
     if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
+  }
+
+  for (const bonus of hullBonuses) {
+    const percent = hullBonusPercent(bonus, skillLevel);
+    if (bonus.attribute === "maxVelocity") speedPercents.push(percent / 100);
+    if (bonus.attribute === "agility") agilityMultipliers.push(1 + percent / 100);
   }
 
   const massMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
@@ -159,7 +173,12 @@ function findGenericPropulsionId(
   return option?.id;
 }
 
-function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number): ImportedTurret | undefined {
+function resolveTurret(
+  db: FittingDb,
+  parsed: ParsedFitting,
+  skillLevel: number,
+  hullBonuses: readonly HullBonus[],
+): ImportedTurret | undefined {
   const trackingPercents: number[] = [];
   const optimalPercents: number[] = [];
   const falloffPercents: number[] = [];
@@ -183,6 +202,14 @@ function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number)
   }
 
   if (!turret) return undefined;
+
+  for (const bonus of hullBonuses) {
+    if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
+    const percent = hullBonusPercent(bonus, skillLevel);
+    if (bonus.attribute === "turretTracking") trackingPercents.push(percent);
+    if (bonus.attribute === "turretOptimal") optimalPercents.push(percent);
+    if (bonus.attribute === "turretFalloff") falloffPercents.push(percent);
+  }
 
   const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
   const sigRes = SIG_RESOLUTIONS[sigResClass];
@@ -231,6 +258,10 @@ const TRACKING_SKILL_BONUS = 0.05;
 const OPTIMAL_SKILL_BONUS = 0.05;
 const FALLOFF_SKILL_BONUS = 0.05;
 const STANDARD_SIGNATURE_RESOLUTION = 40_000;
+
+function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
+  return bonus.magnitude * (bonus.skill ? skillLevel : 1);
+}
 
 function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClass {
   if (chargeSize >= 4) return "XL";

@@ -21,6 +21,26 @@ const frigateProfile: ShipProfile = {
   sigRadius: 35,
 };
 
+const bonusProfile: ShipProfile = {
+  name: "Vagabond",
+  faction: "Minmatar Republic",
+  hullType: "Heavy Assault Cruisers",
+  mass: 10_500_000,
+  inertiaModifier: 0.5,
+  baseSpeed: 205,
+  sigRadius: 130,
+};
+
+const roleBonusProfile: ShipProfile = {
+  name: "Muninn",
+  faction: "Minmatar Republic",
+  hullType: "Heavy Assault Cruisers",
+  mass: 10_800_000,
+  inertiaModifier: 0.51,
+  baseSpeed: 195,
+  sigRadius: 135,
+};
+
 const propulsionModules: readonly PropulsionModule[] = [
   { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
   { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
@@ -69,8 +89,8 @@ const db: FittingDb = {
     "Medium Energy Metastasis Adjuster II": { turretTrackingPercent: 20 },
   },
   turrets: {
-    "Heavy Pulse Laser II": { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2 },
-    "200mm AutoCannon II": { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1 },
+    "Heavy Pulse Laser II": { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, turretSkill: "Medium Energy Turret" },
+    "200mm AutoCannon II": { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, turretSkill: "Small Projectile Turret" },
   },
   charges: {
     "Conflagration M": { trackingMultiplier: 0.7, rangeMultiplier: 0.5 },
@@ -79,6 +99,24 @@ const db: FittingDb = {
   scripts: {
     "Tracking Speed Script": { trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
     "Optimal Range Script": { trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
+  },
+  hullBonuses: {},
+};
+
+const hullBonusDb: FittingDb = {
+  ...db,
+  hullBonuses: {
+    Vagabond: [
+      { attribute: "maxVelocity", magnitude: 5, skill: "Minmatar Cruiser" },
+      { attribute: "agility", magnitude: -4, skill: "Minmatar Cruiser" },
+      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Cruiser", turretSkill: "Small Projectile Turret" },
+      { attribute: "turretFalloff", magnitude: 10 },
+      { attribute: "turretOptimal", magnitude: 25, turretSkill: "Medium Projectile Turret" },
+    ],
+    Muninn: [
+      { attribute: "maxVelocity", magnitude: 50 },
+      { attribute: "agility", magnitude: -5 },
+    ],
   },
 };
 
@@ -345,5 +383,37 @@ Tracking Computer II, Tracking Speed Script`,
     );
     expect(result!.turret!.sigResolutionClass).toBe("S");
     expect(result!.turret!.tracking).toBe((315 * 40) / 40_000);
+  });
+
+  test("skill-scaled hull velocity and agility bonuses apply", () => {
+    ships.findHull.mockReturnValueOnce(bonusProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const result = importer.importFitting("[Vagabond, Bonuses]\n200mm AutoCannon II, EMP S", skillConditions);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(1.2, 6);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.84, 6);
+  });
+
+  test("hull velocity and agility bonuses are flat without a skill", () => {
+    ships.findHull.mockReturnValueOnce(roleBonusProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
+    expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
+    expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
+  });
+
+  test("hull turret bonuses match turret skill and share the module stacking chain", () => {
+    ships.findHull.mockReturnValueOnce(bonusProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb });
+    const result = importer.importFitting(
+      `[Vagabond, Turrets]
+200mm AutoCannon II, EMP S
+Tracking Enhancer II`,
+      skillConditions,
+    );
+    const trackingBonus = _applyStackingPenalty([1.095, 1.4]);
+    expect(result!.turret!.tracking).toBeCloseTo((315 * 1.2 * trackingBonus * 40) / 40_000, 6);
+    const falloffBonus = _applyStackingPenalty([1.2, 1.1]);
+    expect(result!.turret!.falloff).toBeCloseTo(5_160 * 1.2 * falloffBonus, 3);
+    expect(result!.turret!.optimal).toBeCloseTo(1_200 * 0.5 * 1.2 * 1.1, 3);
   });
 });

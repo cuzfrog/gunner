@@ -1,4 +1,4 @@
-import { CHARGES, FITTING_MODULES, SCRIPTS, TURRETS } from "./fittingDb";
+import { CHARGES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, TURRETS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -66,13 +66,22 @@ describe("fittingDb", () => {
     expect(FITTING_MODULES["Medium Core Defense Field Extender I"]).toEqual({ sigDrawbackPercent: 10 });
   });
 
-  test("includes turret base stats with charge size and no sig resolution", () => {
+  test("includes turret base stats with charge size, turret skill and no sig resolution", () => {
     expect(TURRETS["Heavy Pulse Laser II"]).toEqual({
       tracking: 26,
       optimal: 12_600,
       falloff: 5_000,
       chargeSize: 2,
+      turretSkill: "Medium Energy Turret",
     });
+  });
+
+  test("includes hull bonuses for turret, velocity and agility attributes", () => {
+    expect(HULL_BONUSES["Thrasher"]).toEqual([
+      { attribute: "turretOptimal", magnitude: 50, turretSkill: "Small Projectile Turret" },
+      { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
+    ]);
+    expect(HULL_BONUSES["Wyvern"]).toEqual([{ attribute: "agility", magnitude: -5, skill: "Advanced Spaceship Command" }]);
   });
 
   test("includes charge multipliers", () => {
