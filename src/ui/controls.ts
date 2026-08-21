@@ -10,9 +10,20 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
-import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
+import {
+  describeFitting,
+  type CargoCharge,
+  type ChargeCatalog,
+  type ChargeOption,
+  type FittingImport,
+  type FittingSummary,
+  type ImportedFitting,
+  type ImportedTurret,
+  type PresetFittings,
+} from "../fitting";
 import type { I18n, Language } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
+import { DomFittingPreview, type FittingPreview } from "./fittingPreview";
 import type { SavedFittings } from "./savedFittings";
 import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
@@ -55,6 +66,8 @@ export class DomControls implements Controls {
   private readonly imageCatalog: ImageCatalog;
   private readonly trackingInput: TrackingInput;
   private readonly hintRotator: IHintRotator;
+  private readonly attackerPreview: FittingPreview;
+  private readonly targetPreview: FittingPreview;
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: TimeoutId;
@@ -65,6 +78,11 @@ export class DomControls implements Controls {
   private openPropulsionVariantSide: "attacker" | "target" | null = null;
   private importSidePopupOpen = false;
   private pendingImportText?: string;
+  private openPreviewSide: "attacker" | "target" | null = null;
+  private currentPreviewAnchor?: HTMLElement;
+  private currentPreviewText?: string;
+  private readonly previewShowTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
+  private readonly previewHideTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
   private openAmmo = false;
   private attackerAmmo = "";
   private attackerTurret?: ImportedTurret;
@@ -146,8 +164,10 @@ export class DomControls implements Controls {
       attackerAmmoAllList: el("attacker-ammo-all-list"),
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
+      attackerShipImage: el("attacker-ship-image"),
       attackerFittingTrigger: el("attacker-fitting-trigger"),
       attackerFittingPopup: el("attacker-fitting-popup"),
+      attackerFittingPreview: el("attacker-fitting-preview"),
       attackerFittingSavedLabel: el("attacker-fitting-saved-label"),
       attackerFittingSavedList: el("attacker-fitting-saved-list"),
       attackerFittingPresetLabel: el("attacker-fitting-preset-label"),
@@ -181,8 +201,10 @@ export class DomControls implements Controls {
       maneuverAggressivityValue: el("maneuver-aggressivity-value"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
+      targetShipImage: el("target-ship-image"),
       targetFittingTrigger: el("target-fitting-trigger"),
       targetFittingPopup: el("target-fitting-popup"),
+      targetFittingPreview: el("target-fitting-preview"),
       targetFittingSavedLabel: el("target-fitting-saved-label"),
       targetFittingSavedList: el("target-fitting-saved-list"),
       targetFittingPresetLabel: el("target-fitting-preset-label"),
@@ -238,6 +260,17 @@ export class DomControls implements Controls {
       gridBrightnessSlider: el("grid-brightness-slider"),
       gridBrightnessValue: el("grid-brightness-value"),
     };
+
+    this.attackerPreview = new DomFittingPreview({
+      container: this.els.attackerFittingPreview,
+      i18n: this.i18n,
+      imageCatalog: this.imageCatalog,
+    });
+    this.targetPreview = new DomFittingPreview({
+      container: this.els.targetFittingPreview,
+      i18n: this.i18n,
+      imageCatalog: this.imageCatalog,
+    });
 
     this.renderAttackerAmmo();
     this.populateHullDatalist();
@@ -608,6 +641,7 @@ export class DomControls implements Controls {
     this.populateHullDatalist();
     this.refreshHullInputs();
     if (this.openFittingSide) this.renderFittingPopup(this.openFittingSide);
+    this.refreshPreview();
     this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
     this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
@@ -943,6 +977,12 @@ export class DomControls implements Controls {
     (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
     (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
+    this.attachShipImagePreviewListeners("attacker");
+    this.attachShipImagePreviewListeners("target");
+    (this.els.attackerFittingSavedList as HTMLElement).addEventListener("scroll", () => this.hidePreview("attacker"));
+    (this.els.attackerFittingPresetList as HTMLElement).addEventListener("scroll", () => this.hidePreview("attacker"));
+    (this.els.targetFittingSavedList as HTMLElement).addEventListener("scroll", () => this.hidePreview("target"));
+    (this.els.targetFittingPresetList as HTMLElement).addEventListener("scroll", () => this.hidePreview("target"));
     (this.els.targetFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
     (this.els.targetPropulsionGear as HTMLButtonElement).addEventListener("click", () => this.onPropulsionGearClick("target"));
@@ -1027,6 +1067,7 @@ export class DomControls implements Controls {
     else this.targetProfile = profile;
 
     (this.els[`${side}Hull`] as HTMLInputElement).value = this.ships.hullView(profile, this.i18n.current()).name;
+    this.updateShipImage(side);
     this.setHullValidation(side, false);
     this.updateFittingTrigger(side, true);
     if (this.openFittingSide === side) this.renderFittingPopup(side);
@@ -1090,6 +1131,7 @@ export class DomControls implements Controls {
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     if (this.openFittingSide === side) this.openFittingSide = null;
+    this.hidePreview(side);
     trigger.focus();
   }
 
@@ -1120,6 +1162,7 @@ export class DomControls implements Controls {
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
       const item = this.createFittingItem(side, fitting.name, fitting.text, currentText, () => this.onFittingItemClick(side, fitting.text));
+      this.attachFittingItemPreviewListeners(side, item, fitting.text);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
         item.classList.toggle("invalid", true);
@@ -1144,6 +1187,7 @@ export class DomControls implements Controls {
       const fit = presets[index];
       const text = this.presetFittings.eftText(profile.name, fit);
       const item = this.createFittingItem(side, fit.name, text, currentText, () => this.onFittingItemClick(side, text));
+      this.attachFittingItemPreviewListeners(side, item, text);
       presetList.appendChild(this.createFittingEntry(item, undefined));
     }
 
@@ -1183,6 +1227,102 @@ export class DomControls implements Controls {
     return li;
   }
 
+  private updateShipImage(side: "attacker" | "target"): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    if (profile) {
+      image.src = this.imageCatalog.shipImageUrl(profile.name);
+      image.hidden = false;
+    } else {
+      image.hidden = true;
+      image.src = "";
+    }
+  }
+
+  private clearShipImage(side: "attacker" | "target"): void {
+    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    image.hidden = true;
+    image.src = "";
+  }
+
+  private previewOf(side: "attacker" | "target"): FittingPreview {
+    return side === "attacker" ? this.attackerPreview : this.targetPreview;
+  }
+
+  private renderFittingPreview(side: "attacker" | "target", text: string, anchor: HTMLElement): void {
+    const summary = describeFitting(text);
+    if (!summary || summary.sections.length === 0) {
+      this.hidePreview(side);
+      return;
+    }
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.name) : undefined;
+    this.currentPreviewAnchor = anchor;
+    this.currentPreviewText = text;
+    this.openPreviewSide = side;
+    this.previewOf(side).show(anchor, summary, shipImageUrl);
+  }
+
+  private hidePreview(side: "attacker" | "target"): void {
+    this.previewOf(side).hide();
+    if (this.openPreviewSide === side) {
+      this.openPreviewSide = null;
+      this.currentPreviewAnchor = undefined;
+      this.currentPreviewText = undefined;
+    }
+    this.cancelPreviewTimers(side);
+  }
+
+  private refreshPreview(): void {
+    if (!this.openPreviewSide || !this.currentPreviewAnchor || !this.currentPreviewText) return;
+    this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor);
+  }
+
+  private cancelPreviewTimers(side: "attacker" | "target"): void {
+    if (this.previewShowTimeouts[side]) {
+      this.timer.clearTimeout(this.previewShowTimeouts[side]);
+      this.previewShowTimeouts[side] = undefined;
+    }
+    if (this.previewHideTimeouts[side]) {
+      this.timer.clearTimeout(this.previewHideTimeouts[side]);
+      this.previewHideTimeouts[side] = undefined;
+    }
+  }
+
+  private startPreviewShow(side: "attacker" | "target", anchor: HTMLElement, text: string): void {
+    this.cancelPreviewTimers(side);
+    this.previewShowTimeouts[side] = this.timer.setTimeout(() => {
+      this.previewShowTimeouts[side] = undefined;
+      this.renderFittingPreview(side, text, anchor);
+    }, 150);
+  }
+
+  private startPreviewHide(side: "attacker" | "target"): void {
+    this.cancelPreviewTimers(side);
+    this.previewHideTimeouts[side] = this.timer.setTimeout(() => {
+      this.previewHideTimeouts[side] = undefined;
+      this.hidePreview(side);
+    }, 100);
+  }
+
+  private attachFittingItemPreviewListeners(side: "attacker" | "target", item: HTMLButtonElement, text: string): void {
+    const show = () => this.startPreviewShow(side, item, text);
+    const hide = () => this.startPreviewHide(side);
+    item.addEventListener("mouseenter", show);
+    item.addEventListener("focus", show);
+    item.addEventListener("mouseleave", hide);
+    item.addEventListener("blur", hide);
+  }
+
+  private attachShipImagePreviewListeners(side: "attacker" | "target"): void {
+    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    image.addEventListener("mouseenter", () => {
+      const text = side === "attacker" ? this.attackerFitting : this.targetFitting;
+      if (text) this.startPreviewShow(side, image, text);
+    });
+    image.addEventListener("mouseleave", () => this.startPreviewHide(side));
+  }
+
   private onFittingItemClick(side: "attacker" | "target", text: string): void {
     void this.importEftFitting(side, text);
     this.closeFittingPopup(side);
@@ -1192,6 +1332,8 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
     this.clearFittedHull(side);
+    this.hidePreview(side);
+    this.clearShipImage(side);
     delete this.lastCommittedHull[side];
 
     if (resetInput) {
@@ -1210,6 +1352,7 @@ export class DomControls implements Controls {
   }
 
   private clearFittedHull(side: "attacker" | "target"): void {
+    this.hidePreview(side);
     if (side === "attacker") {
       this.attackerFittedHull = undefined;
       this.attackerFitting = undefined;
@@ -1984,7 +2127,15 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && this.openPropulsionVariantSide === null && !this.importSidePopupOpen && !this.openAmmo) return;
+    const hasOpenPopup =
+      this.openSkillSide !== null ||
+      this.openPasteSide !== null ||
+      this.openFittingSide !== null ||
+      this.openPropulsionVariantSide !== null ||
+      this.importSidePopupOpen ||
+      this.openAmmo ||
+      this.openPreviewSide !== null;
+    if (!hasOpenPopup) return;
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function") return;
     if (this.openSkillSide !== null) {
@@ -1997,8 +2148,13 @@ export class DomControls implements Controls {
     }
     if (this.openFittingSide !== null) {
       const side = this.openFittingSide;
-      const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull`);
+      const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull, #${side}-ship-image`);
       if (!insideFitting) this.closeAllFittingPopups();
+    }
+    if (this.openPreviewSide) {
+      const side = this.openPreviewSide;
+      const insidePreview = target.closest(`#${side}-ship-image, .fitting-popup`);
+      if (!insidePreview) this.hidePreview(side);
     }
     if (this.importSidePopupOpen) {
       const insideImport = target.closest("#import-side-popup, #import-profile");
@@ -2017,6 +2173,7 @@ export class DomControls implements Controls {
 
   private onDocumentKeyDown(event: KeyboardEvent): void {
     if (event.key !== "Escape") return;
+    if (this.openPreviewSide) this.hidePreview(this.openPreviewSide);
     if (this.openSkillSide !== null) {
       const side = this.openSkillSide;
       this.closeSkillPopup(side);

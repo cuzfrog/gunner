@@ -301,10 +301,15 @@ class FakeElement {
   hidden = false;
   textContent = "";
   title = "";
+  src = "";
   private _innerHTML = "";
   placeholder = "";
   disabled = false;
   label = "";
+  offsetParent: FakeElement | null = null;
+  offsetWidth = 0;
+  offsetHeight = 0;
+  private rect = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) };
 
   get innerHTML(): string {
     return this._innerHTML;
@@ -356,6 +361,14 @@ class FakeElement {
 
   get firstElementChild(): FakeElement | null {
     return this.children[0] ?? null;
+  }
+
+  setBoundingClientRect(rect: typeof this.rect): void {
+    this.rect = rect;
+  }
+
+  getBoundingClientRect(): typeof this.rect {
+    return this.rect;
   }
 
   closest(): FakeElement | null {
@@ -509,12 +522,43 @@ function createMockSavedFittings() {
   });
 }
 
-function createNoOpTimer(): Timer {
+interface MockTimer extends Timer {
+  fire: (id: number) => void;
+  fireLast: () => void;
+}
+
+function createNoOpTimer(): MockTimer {
+  let nextId = 0;
+  const timeouts = new Map<number, () => void>();
+  const intervals = new Set<number>();
   return {
-    setTimeout: (_callback, _ms) => 1,
-    clearTimeout: () => {},
-    setInterval: (_callback, _ms) => 0,
-    clearInterval: () => {},
+    setTimeout(callback) {
+      nextId += 1;
+      timeouts.set(nextId, callback);
+      return nextId;
+    },
+    clearTimeout(id) {
+      timeouts.delete(id);
+    },
+    setInterval() {
+      nextId += 1;
+      intervals.add(nextId);
+      return nextId;
+    },
+    clearInterval(id) {
+      intervals.delete(id);
+    },
+    fire(id: number) {
+      const callback = timeouts.get(id);
+      if (callback) {
+        timeouts.delete(id);
+        callback();
+      }
+    },
+    fireLast() {
+      const last = Array.from(timeouts.entries()).pop();
+      if (last) this.fire(last[0]);
+    },
   };
 }
 
@@ -576,10 +620,12 @@ function buildControls(
 describe("DomControls", () => {
   beforeEach(() => {
     globalThis.document = fakeDocument() as unknown as Document;
+    (globalThis as unknown as Record<string, unknown>).window = { innerWidth: 1024, innerHeight: 768 };
   });
 
   afterEach(() => {
     globalThis.document = undefined as unknown as Document;
+    (globalThis as unknown as Record<string, unknown>).window = undefined;
   });
 
   test("getConfig maps all ship inputs including mass and inertia", () => {
@@ -4070,6 +4116,62 @@ const ctx = buildControls(globalThis.document);
       hullInput.trigger("change");
       expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(false);
       expect(getFake(globalThis.document, "attacker-ammo-trigger").disabled).toBe(true);
+    });
+  });
+
+  describe("ship image and fitting preview", () => {
+    function setupPreviewContainer(document: Document, side: "attacker" | "target"): void {
+      const preview = getFake(document, `${side}-fitting-preview`);
+      preview.offsetWidth = 300;
+      preview.offsetHeight = 200;
+      const shipImage = getFake(document, `${side}-ship-image`);
+      shipImage.setBoundingClientRect({ left: 20, top: 20, right: 56, bottom: 56, width: 36, height: 36, x: 20, y: 20, toJSON: () => ({}) });
+    }
+
+    test("selecting a hull shows the ship image", () => {
+      const { imageCatalog, controls } = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      expect(imageCatalog.shipImageUrl).toHaveBeenCalledWith("Rifter");
+      expect(getFake(globalThis.document, "attacker-ship-image").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-ship-image").src).toBe("images/ships/Rifter.webp");
+    });
+
+    test("hovering a fitting item shows a preview after the timer fires", () => {
+      const ctx = buildControls(globalThis.document);
+      const { controls, timer, imageCatalog } = ctx;
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      setupPreviewContainer(globalThis.document, "attacker");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
+      item.setBoundingClientRect({ left: 100, top: 100, right: 400, bottom: 120, width: 300, height: 20, x: 100, y: 100, toJSON: () => ({}) });
+      item.trigger("mouseenter");
+      timer.fireLast();
+      const preview = getFake(globalThis.document, "attacker-fitting-preview");
+      expect(preview.hidden).toBe(false);
+      expect(preview.children.length).toBeGreaterThan(0);
+      expect(imageCatalog.itemIconUrl).toHaveBeenCalled();
+    });
+
+    test("clearing the hull hides the ship image and preview", () => {
+      const ctx = buildControls(globalThis.document);
+      const { controls, timer } = ctx;
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      setupPreviewContainer(globalThis.document, "attacker");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
+      item.setBoundingClientRect({ left: 100, top: 100, right: 400, bottom: 120, width: 300, height: 20, x: 100, y: 100, toJSON: () => ({}) });
+      item.trigger("mouseenter");
+      timer.fireLast();
+      hullInput.value = "";
+      hullInput.trigger("change");
+      expect(getFake(globalThis.document, "attacker-ship-image").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
     });
   });
 });

@@ -198,6 +198,7 @@
             </div>
           </div>
           <div class="hull-input-row">
+            <img id="attacker-ship-image" class="ship-image" alt="" hidden>
             <input type="text" id="attacker-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
@@ -215,6 +216,7 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="attacker-fitting-preset-list"></ul>
               <p class="fitting-empty" id="attacker-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
+            <div class="fitting-preview" id="attacker-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </div>
@@ -347,6 +349,7 @@
             </div>
           </div>
           <div class="hull-input-row">
+            <img id="target-ship-image" class="ship-image" alt="" hidden>
             <input type="text" id="target-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
@@ -364,6 +367,7 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="target-fitting-preset-list"></ul>
               <p class="fitting-empty" id="target-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
+            <div class="fitting-preview" id="target-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="target-hull-hint"></span>
         </div>

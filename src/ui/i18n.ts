@@ -364,6 +364,36 @@ export const I18N_DICTIONARY = {
     zh: "将装配导入为",
     ja: "フィッティングのインポート先",
   },
+  "fitting.section.high": {
+    en: "High",
+    zh: "高槽",
+    ja: "ハイスロット",
+  },
+  "fitting.section.mid": {
+    en: "Mid",
+    zh: "中槽",
+    ja: "ミッドスロット",
+  },
+  "fitting.section.low": {
+    en: "Low",
+    zh: "低槽",
+    ja: "ロースロット",
+  },
+  "fitting.section.rig": {
+    en: "Rig",
+    zh: "船插",
+    ja: "リグ",
+  },
+  "fitting.section.cargo": {
+    en: "Cargo",
+    zh: "货舱",
+    ja: "カーゴ",
+  },
+  "fitting.section.drones": {
+    en: "Drones",
+    zh: "无人机",
+    ja: "ドローン",
+  },
   "status.importInvalid": {
     en: "No profile or fitting in clipboard",
     zh: "剪贴板中没有可导入的配置或装配",
