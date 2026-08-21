@@ -384,6 +384,32 @@ interface SelectedProfile {
   baseline: ProfileSettings;
 }
 
+function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
+  return serializeProfile({
+    version: USER_SETTINGS_VERSION,
+    tracking: 0.32,
+    sigRes: "S",
+    optimal: 5000,
+    falloff: 5000,
+    attackerSpeed: 0,
+    attackerMode: "keepAtRange",
+    attackerRange: 5000,
+    attackerMass: 1_200_000,
+    attackerInertia: 3,
+    attackerHull: "Rifter",
+    targetHull: "Thrasher",
+    initialDistance: 5000,
+    targetSpeed: 1000,
+    targetMode: "orbit",
+    targetRange: 5000,
+    targetMass: 10_000_000,
+    targetInertia: 0.45,
+    targetSig: 40,
+    simSpeed: 4,
+    ...overrides,
+  });
+}
+
 function asProfile(settings: UserSettings): ProfileSettings {
   const { language: _, trackingUnit: __, ...rest } = settings;
   return rest;
@@ -395,7 +421,10 @@ function createMockPresetFittings() {
       { name: "Brawler", body: "1MN Afterburner II\nStasis Webifier II\n150mm Light AutoCannon II, Hail S" },
       { name: "Tackle", body: "1MN Afterburner II\nWarp Scrambler II\n150mm Light AutoCannon II, EMP S" },
     ],
-    Thrasher: [{ name: "Sniper", body: "280mm Howitzer Artillery I, Republic Fleet EMP S\n5MN Y-T8 Compact Microwarpdrive" }],
+    Thrasher: [
+      { name: "Sniper", body: "280mm Howitzer Artillery I, Republic Fleet EMP S\n5MN Y-T8 Compact Microwarpdrive" },
+      { name: "Sniper", body: "650mm Artillery Cannon I, Republic Fleet EMP M\n5MN Y-T8 Compact Microwarpdrive" },
+    ],
   };
   return vi.mocked<PresetFittings>({
     listHulls: vi.fn(() => ["Merlin", "Rifter", "Thrasher"]),
@@ -2408,7 +2437,7 @@ describe("DomControls", () => {
       const options = getFake(globalThis.document, "hull-options").children;
       expect(options.some((o) => o.value === "Rifter")).toBe(true);
       const presetOptions = getFake(globalThis.document, "attacker-preset-fitting").children;
-      expect(presetOptions.some((o) => o.value === "Brawler")).toBe(true);
+      expect(presetOptions.some((o) => o.textContent === "Brawler")).toBe(true);
       expect(saveButton.classList.toggle).not.toHaveBeenCalledWith("unsaved", true);
     });
 
@@ -2540,45 +2569,140 @@ describe("DomControls", () => {
       expect(fittingName.classList.toggle).toHaveBeenCalledWith("error", true);
     });
 
-    test("pasting a gunner profile in the popup restores both sides", async () => {
-      const { settingsStore } = buildControls(globalThis.document);
+    test("pasting a gunner profile in the popup imports only that side's fitting", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-import-fitting").trigger("click");
       await flush();
       const popup = getFake(globalThis.document, "attacker-paste-popup");
-      const text = serializeProfile({
-        version: USER_SETTINGS_VERSION,
-        tracking: 0.32,
-        sigRes: "S",
-        optimal: 5000,
-        falloff: 5000,
-        attackerSpeed: 0,
-        attackerMode: "keepAtRange",
-        attackerRange: 5000,
-        attackerMass: 1_200_000,
-        attackerInertia: 3,
-        attackerHull: "Rifter",
-        targetHull: "Thrasher",
-        initialDistance: 5000,
-        targetSpeed: 1000,
-        targetMode: "orbit",
-        targetRange: 5000,
-        targetMass: 10_000_000,
-        targetInertia: 0.45,
-        targetSig: 40,
-        simSpeed: 4,
-      });
       popup.dispatchEvent({
         type: "paste",
-        clipboardData: { getData: () => text },
+        clipboardData: { getData: () => gunnerProfileText({ attackerFitting: "[Rifter, Brawler]\n1MN Afterburner II" }) },
         preventDefault: vi.fn(),
       } as unknown as Event);
       await flush();
       expect(popup.hidden).toBe(true);
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "target-hull").value).toBe("");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe("[Rifter, Brawler]\n1MN Afterburner II");
+      expect(saved.targetFitting).toBeUndefined();
+    });
+
+    test("pasting a gunner profile without that side's fitting shows invalid status", async () => {
+      const { clipboard, fittingImport } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      clipboard.readText = vi.fn(async () => {
+        throw new ClipboardUnavailableError();
+      });
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      const popup = getFake(globalThis.document, "attacker-paste-popup");
+      popup.dispatchEvent({
+        type: "paste",
+        clipboardData: { getData: () => gunnerProfileText({ targetFitting: "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive" }) },
+        preventDefault: vi.fn(),
+      } as unknown as Event);
+      await flush();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("status.fittingInvalid");
+    });
+
+    test("side import button imports only the corresponding side from gunner text", async () => {
+      const { fittingImport, settingsStore, clipboard } = buildControls(globalThis.document);
+      const attackerEft = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+      fittingImport.importFitting.mockImplementation((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : IMPORTED_THRASHER));
+      clipboard.readText = vi.fn(async () => attackerEft);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      clipboard.readText = vi.fn(async () => gunnerProfileText({ attackerFitting: attackerEft, targetFitting: "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive" }));
+      getFake(globalThis.document, "target-import-fitting").trigger("click");
+      await flush();
+
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe(attackerEft);
+      expect(saved.targetFitting).toBe("[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive");
+    });
+
+    test("top import button restores the full profile from gunner text", async () => {
+      const { settingsStore, clipboard } = buildControls(globalThis.document);
+      clipboard.readText = vi.fn(async () => gunnerProfileText({}));
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "target-hull").value).toBe("Thrasher");
+      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.profileImported");
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerHull).toBe("Rifter");
       expect(saved.targetHull).toBe("Thrasher");
+    });
+
+    test("top import button shows invalid status for non-gunner text", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText = vi.fn(async () => "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive");
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("");
+      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.fittingInvalid");
+    });
+
+    test("top import button shows clipboard denied status when reading fails", async () => {
+      const { clipboard } = buildControls(globalThis.document);
+      clipboard.readText = vi.fn(async () => {
+        throw new ClipboardUnavailableError();
+      });
+      getFake(globalThis.document, "import-profile").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "share-status").textContent).toBe("status.clipboardDenied");
+    });
+
+    test("copying the profile includes both sides' fitting bases", async () => {
+      const { fittingImport, clipboard } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockImplementation((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : IMPORTED_THRASHER));
+
+      const attackerHull = getFake(globalThis.document, "attacker-hull");
+      attackerHull.value = "Rifter";
+      attackerHull.trigger("input");
+      const attackerPreset = getFake(globalThis.document, "attacker-preset-fitting");
+      attackerPreset.value = "0";
+      attackerPreset.trigger("change");
+      await flush();
+
+      const targetHull = getFake(globalThis.document, "target-hull");
+      targetHull.value = "Thrasher";
+      targetHull.trigger("input");
+      const targetPreset = getFake(globalThis.document, "target-preset-fitting");
+      targetPreset.value = "1";
+      targetPreset.trigger("change");
+      await flush();
+
+      getFake(globalThis.document, "share-link").trigger("click");
+      await flush();
+      const [text] = clipboard.writeText.mock.calls[0];
+      expect(text).toContain("attacker.fitting:\n[Rifter, Brawler]");
+      expect(text).toContain("target.fitting:\n[Thrasher, Sniper]");
+    });
+
+    test("preset picker distinguishes duplicate fit names by index", async () => {
+      const { fittingImport, presetFittings } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
+      const hullInput = getFake(globalThis.document, "target-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("input");
+
+      const presetSelect = getFake(globalThis.document, "target-preset-fitting");
+      const labels = presetSelect.children.map((child) => child.textContent);
+      expect(labels).toEqual(["select.presetFitting", "Sniper", "Sniper"]);
+      expect(presetSelect.children.map((child) => child.value)).toEqual(["", "0", "1"]);
+
+      presetSelect.value = "1";
+      presetSelect.trigger("change");
+      await flush();
+
+      expect(presetFittings.eftText).toHaveBeenCalledWith("Thrasher", expect.objectContaining({ body: "650mm Artillery Cannon I, Republic Fleet EMP M\n5MN Y-T8 Compact Microwarpdrive" }));
     });
 
     test("clicking the import button again when the paste popup is open closes it", async () => {
@@ -2719,7 +2843,7 @@ describe("DomControls", () => {
       hullInput.trigger("input");
 
       const presetSelect = getFake(globalThis.document, "target-preset-fitting");
-      presetSelect.value = "Sniper";
+      presetSelect.value = "0";
       presetSelect.trigger("change");
       await flush();
 
@@ -2736,7 +2860,7 @@ describe("DomControls", () => {
       hullInput.trigger("input");
 
       const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
-      presetSelect.value = "Brawler";
+      presetSelect.value = "0";
       presetSelect.trigger("change");
       await flush();
 
@@ -2756,10 +2880,10 @@ describe("DomControls", () => {
       hullInput.trigger("input");
 
       const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
-      const options = presetSelect.children.map((child) => child.value);
-      expect(options).toContain("");
-      expect(options).toContain("Brawler");
-      expect(options).toContain("Tackle");
+      const labels = presetSelect.children.map((child) => child.textContent);
+      expect(labels).toContain("Brawler");
+      expect(labels).toContain("Tackle");
+      expect(presetSelect.children.map((child) => child.value)).toEqual(["", "0", "1"]);
       expect(presetFittings.fittingsFor).toHaveBeenCalledWith("Rifter");
     });
 

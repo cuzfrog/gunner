@@ -14,7 +14,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../fitting"
 import type { I18n, Language } from "./i18n";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
-import { parseProfile, serializeProfile } from "./profileText";
+import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -156,6 +156,7 @@ export class DomControls implements Controls {
       profileSelect: el("profile-select"),
       profileDelete: el("profile-delete"),
       shareLink: el("share-link"),
+      importProfile: el("import-profile"),
       shareStatus: el("share-status"),
       langEn: el("lang-en"),
       langZh: el("lang-zh"),
@@ -621,10 +622,21 @@ export class DomControls implements Controls {
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
     this.clearImportHintTimeout(side);
-    if (text.trimStart().startsWith("# gunner")) {
-      await this.importProfileFromText(text.trimStart());
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
+      const parsed = parseProfile(trimmed);
+      const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
+      if (fitting === undefined) {
+        this.showImportHint(side, "status.fittingInvalid", true);
+        return;
+      }
+      await this.importEftFitting(side, fitting);
       return;
     }
+    await this.importEftFitting(side, text);
+  }
+
+  private async importEftFitting(side: "attacker" | "target", text: string): Promise<void> {
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
@@ -648,14 +660,27 @@ export class DomControls implements Controls {
     this.showImportHint(side, "status.fittingImported");
   }
 
-  private async importProfileFromText(text: string): Promise<void> {
-    const parsed = parseProfile(text);
-    if (!parsed) {
-      this.showImportHint("attacker", "status.fittingInvalid", true);
+  private async importProfileFromClipboard(): Promise<void> {
+    let text: string;
+    try {
+      text = await this.clipboard.readText();
+    } catch {
+      this.showProfileStatus("status.clipboardDenied");
       return;
     }
-    const settings: UserSettings = { ...parsed, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+    const settings = this.profileFromText(text);
+    if (!settings) {
+      this.showProfileStatus("status.fittingInvalid");
+      return;
+    }
     this.loadSettings(settings);
+    this.showProfileStatus("status.profileImported");
+  }
+
+  private profileFromText(text: string): UserSettings | undefined {
+    const parsed = parseProfile(text.trimStart());
+    if (!parsed) return undefined;
+    return { ...parsed, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
   }
 
   private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
@@ -698,10 +723,14 @@ export class DomControls implements Controls {
   private async copyProfile(): Promise<void> {
     try {
       await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
-      setText(this.els.shareStatus, this.i18n.t("status.copied"));
+      this.showProfileStatus("status.copied");
     } catch {
-      setText(this.els.shareStatus, this.i18n.t("status.failed"));
+      this.showProfileStatus("status.failed");
     }
+  }
+
+  private showProfileStatus(key: string): void {
+    setText(this.els.shareStatus, this.i18n.t(key));
     if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
     this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
@@ -721,6 +750,7 @@ export class DomControls implements Controls {
     (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
     (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.copyProfile());
+    (this.els.importProfile as HTMLButtonElement).addEventListener("click", () => void this.importProfileFromClipboard());
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
 
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
@@ -846,12 +876,12 @@ export class DomControls implements Controls {
     select.appendChild(placeholder);
 
     const fits = hullName.length > 0 ? this.presetFittings.fittingsFor(hullName) : [];
-    for (const fit of fits) {
+    fits.forEach((fit, index) => {
       const option = document.createElement("option");
-      option.value = fit.name;
+      option.value = String(index);
       option.textContent = fit.name;
       select.appendChild(option);
-    }
+    });
     select.value = "";
     select.disabled = fits.length === 0;
   }
@@ -860,9 +890,9 @@ export class DomControls implements Controls {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
     const select = this.els[`${side}PresetFitting`] as HTMLSelectElement;
-    const fitName = select.value;
-    if (!fitName) return;
-    const fit = this.presetFittings.fittingsFor(profile.name).find((f) => f.name === fitName);
+    const index = Number(select.value);
+    const fits = this.presetFittings.fittingsFor(profile.name);
+    const fit = Number.isInteger(index) && index >= 0 && index < fits.length ? fits[index] : undefined;
     if (!fit) return;
     await this.importFittingFromText(side, this.presetFittings.eftText(profile.name, fit));
   }

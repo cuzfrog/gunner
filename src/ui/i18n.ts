@@ -294,6 +294,21 @@ export const I18N_DICTIONARY = {
     zh: "剪贴板访问被拒绝",
     ja: "クリップボードへのアクセスが拒否されました",
   },
+  "button.importProfile": {
+    en: "Import",
+    zh: "导入",
+    ja: "インポート",
+  },
+  "title.importProfile": {
+    en: "Import profile from clipboard",
+    zh: "从剪贴板导入配置",
+    ja: "クリップボードからプロファイルをインポート",
+  },
+  "status.profileImported": {
+    en: "Imported",
+    zh: "已导入",
+    ja: "インポート済み",
+  },
   "result.distance": {
     en: "Distance",
     zh: "距离",
