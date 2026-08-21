@@ -60,6 +60,7 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private openFittingSide: "attacker" | "target" | null = null;
+  private lastCommittedHull: { attacker?: string; target?: string } = {};
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
   private attackerFittedHull?: FittedHullSummary;
@@ -671,11 +672,11 @@ export class DomControls implements Controls {
         this.showImportHint(side, "status.fittingInvalid", true);
         return;
       }
-      const imported = await this.importEftFitting(side, fitting);
+      const imported = this.importEftFitting(side, fitting);
       if (imported) this.recordSavedFitting(imported, fitting);
       return;
     }
-    const imported = await this.importEftFitting(side, text);
+    const imported = this.importEftFitting(side, text);
     if (imported) this.recordSavedFitting(imported, text);
   }
 
@@ -683,7 +684,7 @@ export class DomControls implements Controls {
     this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
   }
 
-  private async importEftFitting(side: "attacker" | "target", text: string): Promise<ImportedFitting | undefined> {
+  private importEftFitting(side: "attacker" | "target", text: string, persist = true): ImportedFitting | undefined {
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
@@ -701,9 +702,12 @@ export class DomControls implements Controls {
     this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
     this.applyImportedFitting(side, this.fittedHullSummary(imported));
     if (side === "attacker") this.applyImportedTurret(imported.turret);
-    this.persist();
-    this.updateSaveButtonState();
-    this.callbacks?.onConfigChange();
+    if (persist) {
+      this.lastCommittedHull[side] = imported.profile.name;
+      this.persist();
+      this.updateSaveButtonState();
+      this.callbacks?.onConfigChange();
+    }
     this.showImportHint(side, "status.fittingImported");
     return imported;
   }
@@ -938,6 +942,21 @@ export class DomControls implements Controls {
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     this.openFittingSide = side;
+    const current = this.findFittingItem(side, (item) => item.getAttribute("aria-current") === "true");
+    const first = current ?? this.findFittingItem(side, (item) => !item.disabled);
+    first?.focus();
+  }
+
+  private findFittingItem(side: "attacker" | "target", predicate: (item: HTMLButtonElement) => boolean): HTMLButtonElement | undefined {
+    const savedList = this.els[`${side}FittingSavedList`] as HTMLElement;
+    const presetList = this.els[`${side}FittingPresetList`] as HTMLElement;
+    for (const list of [savedList, presetList]) {
+      for (const entry of list.children) {
+        const item = entry.children[0] as HTMLButtonElement;
+        if (predicate(item)) return item;
+      }
+    }
+    return undefined;
   }
 
   private closeFittingPopup(side: "attacker" | "target"): void {
@@ -946,6 +965,7 @@ export class DomControls implements Controls {
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     if (this.openFittingSide === side) this.openFittingSide = null;
+    trigger.focus();
   }
 
   private closeAllFittingPopups(): void {
@@ -978,10 +998,18 @@ export class DomControls implements Controls {
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
         item.classList.toggle("invalid", true);
-        item.title = this.i18n.t("fitting.invalid");
+        const invalidText = this.i18n.t("fitting.invalid");
+        item.title = invalidText;
+        (item.children[0] as HTMLElement).title = invalidText;
         item.disabled = true;
+        item.setAttribute("aria-disabled", "true");
       }
-      const entry = this.createFittingEntry(item, () => this.savedFittings.remove(fitting.id));
+      const entry = this.createFittingEntry(item, () => {
+        this.savedFittings.remove(fitting.id);
+        this.renderFittingPopup(side);
+        const next = this.findFittingItem(side, (it) => !it.disabled) ?? (this.els[`${side}FittingTrigger`] as HTMLButtonElement);
+        next.focus();
+      });
       savedList.appendChild(entry);
     }
 
@@ -1015,6 +1043,7 @@ export class DomControls implements Controls {
   private createFittingEntry(item: HTMLButtonElement, onDelete: (() => void) | undefined): HTMLElement {
     const li = document.createElement("li");
     li.className = "fitting-entry";
+    li.setAttribute("role", "presentation");
     li.appendChild(item);
     if (onDelete) {
       const del = document.createElement("button");
@@ -1038,6 +1067,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
     this.clearFittedHull(side);
+    delete this.lastCommittedHull[side];
 
     if (resetInput) {
       (this.els[`${side}Hull`] as HTMLInputElement).value = "";
@@ -1081,6 +1111,7 @@ export class DomControls implements Controls {
       return;
     }
     this.applyHull(side, profile, propulsionId, false, false);
+    this.lastCommittedHull[side] = profile.name;
   }
 
   private onHullInput(side: "attacker" | "target"): void {
@@ -1119,22 +1150,20 @@ export class DomControls implements Controls {
     autoSelect = false,
   ): void {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const isSameHull = currentProfile?.name === profile.name;
-    const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
-    if (!isSameHull) this.clearFittedHull(side);
+    const isSameAsCurrent = currentProfile?.name === profile.name;
+    const isGenuineChange = this.lastCommittedHull[side] !== profile.name;
+    const propulsionId = isSameAsCurrent ? this.currentPropulsionId(side) : undefined;
+    if (!isSameAsCurrent) this.clearFittedHull(side);
+    this.applyHull(side, profile, propulsionId, false, !isSameAsCurrent);
 
-    if (!isSameHull && autoSelect) {
-      this.applyHull(side, profile, propulsionId, false, !isSameHull);
+    let imported: ImportedFitting | undefined;
+    if (isGenuineChange && autoSelect) {
       const recent = this.savedFittings.mostRecentFor(profile.name);
-      if (recent) {
-        void this.importEftFitting(side, recent.text);
-        return;
-      }
-    } else {
-      this.applyHull(side, profile, propulsionId, false, !isSameHull);
+      if (recent) imported = this.importEftFitting(side, recent.text, false);
     }
 
     if (persist) {
+      if (autoSelect) this.lastCommittedHull[side] = imported?.profile.name ?? profile.name;
       this.persist();
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();

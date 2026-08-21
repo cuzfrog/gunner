@@ -3154,6 +3154,66 @@ describe("DomControls", () => {
       expect(fittingImport.importFitting).not.toHaveBeenCalled();
     });
 
+    test("typing an intermediate hull then retyping the original updates stats and does not auto-select", async () => {
+      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(undefined);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      await flush();
+      fittingImport.importFitting.mockClear();
+      settingsStore.save.mockClear();
+
+      hullInput.value = "Thrasher";
+      hullInput.trigger("input");
+      hullInput.value = "Rifter";
+      hullInput.trigger("input");
+      await flush();
+
+      expect(fittingImport.importFitting).not.toHaveBeenCalled();
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerHull).toBe("Rifter");
+    });
+
+    test("input then change on a new hull auto-imports the recent fitting", async () => {
+      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockImplementation((hull: string) => (hull === "Rifter" ? SAVED_RIFTER : undefined));
+      savedFittings.listForHull.mockImplementation((hull: string) => (hull === "Rifter" ? [SAVED_RIFTER] : []));
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+      await flush();
+
+      fittingImport.importFitting.mockClear();
+      settingsStore.save.mockClear();
+
+      hullInput.value = "Rifter";
+      hullInput.trigger("input");
+      hullInput.trigger("change");
+      await flush();
+
+      expect(fittingImport.importFitting).toHaveBeenCalledWith(SAVED_RIFTER.text, expect.any(Object));
+      expect(savedFittings.record).not.toHaveBeenCalled();
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe(SAVED_RIFTER.text);
+    });
+
+    test("auto-select failure still persists the chosen hull", async () => {
+      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      setRifterHull();
+      await flush();
+
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerHull).toBe("Rifter");
+      expect(saved.attackerFittedHull).toBeUndefined();
+    });
+
     test("selecting the same hull does not auto-select", async () => {
       const { savedFittings, fittingImport } = buildControls(globalThis.document);
       savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
@@ -3274,6 +3334,33 @@ describe("DomControls", () => {
 
       getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[1].trigger("click");
       expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
+    });
+
+    test("deleting a saved fitting re-renders the popup", () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValueOnce([SAVED_RIFTER]).mockReturnValueOnce([]);
+      savedFittings.mostRecentFor.mockReturnValue(undefined);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+
+      const savedList = getFake(globalThis.document, "attacker-fitting-saved-list");
+      expect(savedList.children.length).toBe(1);
+      savedList.children[0].children[1].trigger("click");
+
+      expect(savedList.children.length).toBe(0);
+    });
+
+    test("opening the fitting popup focuses the first item", () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      savedFittings.mostRecentFor.mockReturnValue(undefined);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+
+      const item = getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[0];
+      expect(item.focus).toHaveBeenCalled();
     });
   });
 });

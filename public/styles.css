@@ -235,13 +235,15 @@ body {
 .tracking-unit-toggle button:focus-visible,
 .overload-button:focus-visible,
 .skill-trigger:focus-visible,
-.skill-popup button:focus-visible {
+.skill-popup button:focus-visible,
+.fitting-popup button:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: -1px;
 }
 
 .github-link:focus-visible,
-.import-fitting-button:focus-visible {
+.import-fitting-button:focus-visible,
+.fitting-trigger:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: 2px;
 }
@@ -281,19 +283,11 @@ body {
   grid-template-columns: 1fr auto;
   gap: 8px;
   align-items: stretch;
+  position: relative;
 }
 
 .panel .hull-input-row input {
   min-width: 0;
-}
-
-.panel .hull-input-row .preset-fitting-select {
-  width: auto;
-  min-width: 160px;
-  max-width: 220px;
-  text-align: left;
-  text-align-last: left;
-  padding: 5px 24px 5px 8px;
 }
 
 .panel .hull-label-row > span:not(.fitting-name) {
@@ -361,6 +355,142 @@ body {
 
 .import-fitting-button:hover {
   color: var(--accent-teal);
+}
+
+.fitting-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  margin: 0;
+  border-radius: 2px;
+  line-height: 0;
+}
+
+.fitting-trigger:hover {
+  color: var(--accent-teal);
+}
+
+.fitting-trigger:disabled {
+  opacity: 0.4;
+  cursor: default;
+  color: var(--text-dim);
+}
+
+.fitting-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.fitting-group-label {
+  display: block;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 6px 0 4px;
+}
+
+.fitting-group-label:first-child {
+  margin-top: 0;
+}
+
+.fitting-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fitting-entry {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  border-radius: 2px;
+}
+
+.fitting-entry:hover {
+  background: var(--bg-inset);
+}
+
+.fitting-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: "Saira", sans-serif;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.fitting-item:disabled,
+.fitting-item.invalid {
+  color: var(--text-dim);
+  cursor: default;
+}
+
+.fitting-item[aria-current="true"] {
+  border-left: 2px solid var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.fitting-item-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fitting-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+  line-height: 0;
+}
+
+.fitting-delete:hover {
+  color: var(--danger-red);
+}
+
+.fitting-empty {
+  margin: 0;
+  padding: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .hull-label-row .import-status {

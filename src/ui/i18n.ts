@@ -254,10 +254,35 @@ export const I18N_DICTIONARY = {
     zh: "选择配置...",
     ja: "プロファイルを選択...",
   },
-  "select.presetFitting": {
-    en: "Select a preset fitting...",
-    zh: "选择预设装配...",
-    ja: "プリセットフィッティングを選択...",
+  "button.selectFitting": {
+    en: "Select fitting",
+    zh: "选择装配",
+    ja: "フィッティングを選択",
+  },
+  "fitting.savedGroup": {
+    en: "Saved",
+    zh: "已保存",
+    ja: "保存済み",
+  },
+  "fitting.presetGroup": {
+    en: "Presets",
+    zh: "预设",
+    ja: "プリセット",
+  },
+  "fitting.empty": {
+    en: "No fittings for this ship.",
+    zh: "该舰船没有装配。",
+    ja: "この艦船のフィッティングはありません。",
+  },
+  "button.deleteFitting": {
+    en: "Delete fitting",
+    zh: "删除装配",
+    ja: "フィッティングを削除",
+  },
+  "fitting.invalid": {
+    en: "Outdated fitting",
+    zh: "过期的装配",
+    ja: "古いフィッティング",
   },
   "hint.prefix": {
     en: "Do you know?",
