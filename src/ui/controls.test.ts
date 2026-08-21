@@ -2479,7 +2479,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "sigRes").value).toBe("S");
       expect(getFake(globalThis.document, "optimal").value).toBe("600");
       expect(getFake(globalThis.document, "falloff").value).toBe("3000");
-      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
+      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("status.fittingImported");
       expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull?.fittingName).toBe("Brawler");
@@ -2694,8 +2694,7 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
       expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
-      expect(getFake(globalThis.document, "attacker-fitting-name").innerHTML).toContain("Brawler");
-      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-fitting-name").hidden).toBe(true);
     });
 
     test("changing propulsion updates the fitted summary and recomputes stats", async () => {
@@ -2884,3 +2883,4 @@ function findVisibleButton(document: Document, groupId: string, value: string): 
 function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
 }
+

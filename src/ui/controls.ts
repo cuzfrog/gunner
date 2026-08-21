@@ -49,7 +49,7 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: ReturnType<typeof setTimeout>;
-  private fittingNameTimeout?: ReturnType<typeof setTimeout>;
+  private readonly importHintTimeouts: { attacker?: ReturnType<typeof setTimeout>; target?: ReturnType<typeof setTimeout> } = { attacker: undefined, target: undefined };
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private attackerProfile?: ShipProfile;
@@ -496,8 +496,8 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
-    this.updateFittingName("attacker");
-    this.updateFittingName("target");
+    this.clearImportHint("attacker");
+    this.clearImportHint("target");
     this.populateHullDatalist();
     this.refreshHullInputs();
     this.populatePresetFittings("attacker", this.attackerProfile?.name);
@@ -612,15 +612,15 @@ export class DomControls implements Controls {
         this.openPastePopup(side);
         return;
       }
-      this.clearFittingNameTimeout();
-      this.showImportError(side, "status.clipboardDenied");
+      this.clearImportHintTimeout(side);
+      this.showImportHint(side, "status.clipboardDenied", true);
       return;
     }
     await this.importFittingFromText(side, text);
   }
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
-    this.clearFittingNameTimeout();
+    this.clearImportHintTimeout(side);
     if (text.trimStart().startsWith("# gunner")) {
       await this.importProfileFromText(text.trimStart());
       return;
@@ -628,7 +628,7 @@ export class DomControls implements Controls {
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
-      this.showImportError(side, "status.fittingInvalid");
+      this.showImportHint(side, "status.fittingInvalid", true);
       return;
     }
     this.clearFittedHull(side);
@@ -645,12 +645,13 @@ export class DomControls implements Controls {
     this.persist();
     this.updateSaveButtonState();
     this.callbacks?.onConfigChange();
+    this.showImportHint(side, "status.fittingImported");
   }
 
   private async importProfileFromText(text: string): Promise<void> {
     const parsed = parseProfile(text);
     if (!parsed) {
-      this.showImportError("attacker", "status.fittingInvalid");
+      this.showImportHint("attacker", "status.fittingInvalid", true);
       return;
     }
     const settings: UserSettings = { ...parsed, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
@@ -666,23 +667,31 @@ export class DomControls implements Controls {
     };
   }
 
-  private showImportError(side: "attacker" | "target", key: string): void {
+  private showImportHint(side: "attacker" | "target", key: string, isError = false): void {
+    this.clearImportHintTimeout(side);
     const element = this.els[`${side}FittingName`] as HTMLElement;
-    element.classList.toggle("error", true);
-    const value = escapeHtml(this.i18n.t(key));
-    element.innerHTML = `<span class="fitting-name-value">${value}</span>`;
+    element.classList.toggle("error", isError);
+    element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
-    if (this.fittingNameTimeout) clearTimeout(this.fittingNameTimeout);
-    this.fittingNameTimeout = setTimeout(() => {
-      element.classList.toggle("error", false);
-      this.updateFittingName(side);
+    this.importHintTimeouts[side] = setTimeout(() => {
+      this.importHintTimeouts[side] = undefined;
+      this.clearImportHint(side);
     }, 5000);
   }
 
-  private clearFittingNameTimeout(): void {
-    if (this.fittingNameTimeout) {
-      clearTimeout(this.fittingNameTimeout);
-      this.fittingNameTimeout = undefined;
+  private clearImportHint(side: "attacker" | "target"): void {
+    this.clearImportHintTimeout(side);
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", false);
+    element.innerHTML = "";
+    element.hidden = true;
+  }
+
+  private clearImportHintTimeout(side: "attacker" | "target"): void {
+    const timeout = this.importHintTimeouts[side];
+    if (timeout) {
+      clearTimeout(timeout);
+      this.importHintTimeouts[side] = undefined;
     }
   }
 
@@ -886,7 +895,7 @@ export class DomControls implements Controls {
       this.targetFitting = undefined;
       this.targetOverrides = {};
     }
-    this.updateFittingName(side);
+    this.clearImportHint(side);
   }
 
   private loadHull(
@@ -963,7 +972,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerFittedHull = summary;
     else this.targetFittedHull = summary;
     this.renderPropulsionOptions(side, summary.propulsionId ?? "");
-    this.updateFittingName(side);
+    this.clearImportHint(side);
     this.updateHullHint(side, this.currentFittedPropulsionModule(side, summary));
   }
 
@@ -1021,21 +1030,6 @@ export class DomControls implements Controls {
       text += ` (sig ×${1 + module.sigBloom})`;
     }
     setText(this.els[`${side}HullHint`], text);
-  }
-
-  private updateFittingName(side: "attacker" | "target"): void {
-    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    const element = this.els[`${side}FittingName`] as HTMLElement;
-    element.classList.toggle("error", false);
-    if (fitted?.fittingName) {
-      const label = escapeHtml(`${this.i18n.t("status.fittingImported")}: `);
-      const value = escapeHtml(fitted.fittingName);
-      element.innerHTML = `<span class="fitting-name-label">${label}</span><span class="fitting-name-value">${value}</span>`;
-      element.hidden = false;
-    } else {
-      element.innerHTML = "";
-      element.hidden = true;
-    }
   }
 
   private refreshHullInputs(): void {
@@ -1130,7 +1124,6 @@ export class DomControls implements Controls {
       (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
     }
     this.updateHullHint(side, hintModule);
-    if (fitted) this.updateFittingName(side);
     this.updateAlignTime(side);
   }
 

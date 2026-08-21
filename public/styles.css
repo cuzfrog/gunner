@@ -175,7 +175,8 @@ body {
   border-left: 2px solid var(--accent-orange);
 }
 
-.panel label {
+.panel label,
+.hull-field {
   display: block;
   margin-bottom: 6px;
 }
