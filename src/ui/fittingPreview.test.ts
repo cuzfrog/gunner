@@ -12,6 +12,10 @@ interface Rect {
   readonly height: number;
 }
 
+function rect(left: number, top: number, right: number, bottom: number, width: number, height: number): Rect {
+  return { left, top, right, bottom, width, height };
+}
+
 class FakeElement {
   tagName = "div";
   className = "";
@@ -104,7 +108,6 @@ const SUMMARY: FittingSummary = {
 describe("DomFittingPreview", () => {
   beforeEach(() => {
     globalThis.document = createDocument() as unknown as Document;
-    (globalThis as unknown as Record<string, unknown>).window = { innerWidth: 1024, innerHeight: 768 };
   });
 
   afterEach(() => {
@@ -116,7 +119,7 @@ describe("DomFittingPreview", () => {
     container.offsetWidth = 300;
     container.offsetHeight = 200;
     const anchor = new FakeElement();
-    anchor.setBoundingClientRect({ left: 100, top: 100, right: 150, bottom: 130, width: 50, height: 30 });
+    anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
       i18n: createI18n(),
@@ -152,8 +155,20 @@ describe("DomFittingPreview", () => {
   test("show positions the container next to the anchor", () => {
     const { container, anchor, preview } = buildPreview();
     preview.show(anchor as unknown as HTMLElement, SUMMARY);
-    expect(container.style.left).not.toBe("");
-    expect(container.style.top).not.toBe("");
+    expect(container.style.left).toBe("158px");
+    expect(container.style.top).toBe("100px");
+  });
+
+  test("show clamps the preview inside the viewport", () => {
+    const { container, anchor, preview } = buildPreview();
+    anchor.setBoundingClientRect(rect(900, 600, 950, 630, 50, 30));
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    const left = Number.parseFloat(container.style.left);
+    const top = Number.parseFloat(container.style.top);
+    expect(left).toBeGreaterThanOrEqual(8);
+    expect(left + 300).toBeLessThanOrEqual(1024 - 8);
+    expect(top).toBeGreaterThanOrEqual(8);
+    expect(top + 200).toBeLessThanOrEqual(768 - 8);
   });
 
   test("show renders charges and quantities", () => {

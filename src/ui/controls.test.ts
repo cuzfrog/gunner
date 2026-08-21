@@ -295,6 +295,22 @@ function createMockShips_fittingOption(profile: ShipProfile, id: PropulsionId): 
   return RIFTER_FITTING_OPTIONS.find((m) => m.id === id) ?? [AB1MN, MWD5MN].find((m) => m.id === id);
 }
 
+interface Rect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+  toJSON: () => Record<string, number>;
+}
+
+function rect(left: number, top: number, right: number, bottom: number, width: number, height: number): Rect {
+  return { left, top, right, bottom, width, height, x: left, y: top, toJSON: () => ({}) };
+}
+
 class FakeElement {
   value = "";
   checked = false;
@@ -309,7 +325,8 @@ class FakeElement {
   offsetParent: FakeElement | null = null;
   offsetWidth = 0;
   offsetHeight = 0;
-  private rect = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) };
+  isConnected = true;
+  private rect: Rect = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) };
 
   get innerHTML(): string {
     return this._innerHTML;
@@ -363,11 +380,11 @@ class FakeElement {
     return this.children[0] ?? null;
   }
 
-  setBoundingClientRect(rect: typeof this.rect): void {
-    this.rect = rect;
+  setBoundingClientRect(r: Rect): void {
+    this.rect = r;
   }
 
-  getBoundingClientRect(): typeof this.rect {
+  getBoundingClientRect(): Rect {
     return this.rect;
   }
 
@@ -620,12 +637,10 @@ function buildControls(
 describe("DomControls", () => {
   beforeEach(() => {
     globalThis.document = fakeDocument() as unknown as Document;
-    (globalThis as unknown as Record<string, unknown>).window = { innerWidth: 1024, innerHeight: 768 };
   });
 
   afterEach(() => {
     globalThis.document = undefined as unknown as Document;
-    (globalThis as unknown as Record<string, unknown>).window = undefined;
   });
 
   test("getConfig maps all ship inputs including mass and inertia", () => {
@@ -4125,11 +4140,11 @@ const ctx = buildControls(globalThis.document);
       preview.offsetWidth = 300;
       preview.offsetHeight = 200;
       const shipImage = getFake(document, `${side}-ship-image`);
-      shipImage.setBoundingClientRect({ left: 20, top: 20, right: 56, bottom: 56, width: 36, height: 36, x: 20, y: 20, toJSON: () => ({}) });
+      shipImage.setBoundingClientRect(rect(20, 20, 56, 56, 36, 36));
     }
 
     test("selecting a hull shows the ship image", () => {
-      const { imageCatalog, controls } = buildControls(globalThis.document);
+      const { imageCatalog } = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
@@ -4139,15 +4154,14 @@ const ctx = buildControls(globalThis.document);
     });
 
     test("hovering a fitting item shows a preview after the timer fires", () => {
-      const ctx = buildControls(globalThis.document);
-      const { controls, timer, imageCatalog } = ctx;
+      const { timer, imageCatalog } = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
       setupPreviewContainer(globalThis.document, "attacker");
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
       const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
-      item.setBoundingClientRect({ left: 100, top: 100, right: 400, bottom: 120, width: 300, height: 20, x: 100, y: 100, toJSON: () => ({}) });
+      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
       item.trigger("mouseenter");
       timer.fireLast();
       const preview = getFake(globalThis.document, "attacker-fitting-preview");
@@ -4157,15 +4171,14 @@ const ctx = buildControls(globalThis.document);
     });
 
     test("clearing the hull hides the ship image and preview", () => {
-      const ctx = buildControls(globalThis.document);
-      const { controls, timer } = ctx;
+      const { timer } = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
       setupPreviewContainer(globalThis.document, "attacker");
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
       const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
-      item.setBoundingClientRect({ left: 100, top: 100, right: 400, bottom: 120, width: 300, height: 20, x: 100, y: 100, toJSON: () => ({}) });
+      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
       item.trigger("mouseenter");
       timer.fireLast();
       hullInput.value = "";

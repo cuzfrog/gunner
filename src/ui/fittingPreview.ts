@@ -126,13 +126,14 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow): HTMLElement {
 function positionPreview(container: HTMLElement, anchor: HTMLElement): void {
   const anchorRect = anchor.getBoundingClientRect();
   const parent = container.offsetParent as HTMLElement | null;
-  const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+  const viewport = globalThis.window ?? { innerWidth: 1024, innerHeight: 768 };
+  const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0, width: viewport.innerWidth, height: viewport.innerHeight };
   const margin = 8;
   const gap = 8;
 
   const width = container.offsetWidth;
   const height = container.offsetHeight;
-  const viewportCenter = window.innerWidth / 2;
+  const viewportCenter = viewport.innerWidth / 2;
   const anchorCenter = anchorRect.left + anchorRect.width / 2;
 
   let left: number;
@@ -145,11 +146,11 @@ function positionPreview(container: HTMLElement, anchor: HTMLElement): void {
   let top = anchorRect.top - parentRect.top;
 
   const minLeft = margin - parentRect.left;
-  const maxLeft = window.innerWidth - parentRect.left - width - margin;
+  const maxLeft = viewport.innerWidth - parentRect.left - width - margin;
   left = Math.max(minLeft, Math.min(left, maxLeft));
 
   const minTop = margin - parentRect.top;
-  const maxTop = window.innerHeight - parentRect.top - height - margin;
+  const maxTop = viewport.innerHeight - parentRect.top - height - margin;
   top = Math.max(minTop, Math.min(top, maxTop));
 
   container.style.left = `${left}px`;

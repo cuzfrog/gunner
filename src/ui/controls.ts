@@ -1275,6 +1275,10 @@ export class DomControls implements Controls {
 
   private refreshPreview(): void {
     if (!this.openPreviewSide || !this.currentPreviewAnchor || !this.currentPreviewText) return;
+    if (!this.currentPreviewAnchor.isConnected) {
+      this.hidePreview(this.openPreviewSide);
+      return;
+    }
     this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor);
   }
 
