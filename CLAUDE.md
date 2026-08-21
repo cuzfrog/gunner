@@ -49,6 +49,9 @@
 - Do not add agent info into the commit message.
 - If there are dev branch/PRs, do not create new branch/PRs.
 
+### Web UI
+Follow @doc/UI_STYLE_GUIDE.md
+
 ### Coding Principles
 - Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes. Given a change, do not first attempt to insert into current code base. First look at it from a higher perspective, discover refactor opportunities.
 - Check node_modules for external API type definitions instead of guessing
