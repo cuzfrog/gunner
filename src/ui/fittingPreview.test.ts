@@ -171,6 +171,14 @@ describe("DomFittingPreview", () => {
     expect(top + 200).toBeLessThanOrEqual(768 - 8);
   });
 
+  test("show clamps the preview horizontally when it would overflow the anchor side", () => {
+    const { container, anchor, preview } = buildPreview();
+    container.offsetWidth = 800;
+    anchor.setBoundingClientRect(rect(500, 100, 550, 130, 50, 30));
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    expect(container.style.left).toBe("8px");
+  });
+
   test("show renders charges and quantities", () => {
     const { container, anchor, preview } = buildPreview();
     preview.show(anchor as unknown as HTMLElement, SUMMARY);

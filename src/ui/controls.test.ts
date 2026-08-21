@@ -334,7 +334,17 @@ class FakeElement {
 
   set innerHTML(value: string) {
     this._innerHTML = value;
+    for (const child of this.children) {
+      child.disconnect();
+    }
     this.children = [];
+  }
+
+  disconnect(): void {
+    this.isConnected = false;
+    for (const child of this.children) {
+      child.disconnect();
+    }
   }
 
   style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
@@ -4184,6 +4194,24 @@ const ctx = buildControls(globalThis.document);
       hullInput.value = "";
       hullInput.trigger("change");
       expect(getFake(globalThis.document, "attacker-ship-image").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+    });
+
+    test("re-rendering the fitting popup hides a preview whose anchor was removed", () => {
+      const { timer } = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      setupPreviewContainer(globalThis.document, "attacker");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
+      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
+      item.trigger("mouseenter");
+      timer.fireLast();
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(false);
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(item.isConnected).toBe(false);
       expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
     });
   });
