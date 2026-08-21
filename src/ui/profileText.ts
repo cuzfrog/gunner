@@ -1,13 +1,18 @@
-import { SIG_RESOLUTIONS, type AutopilotMode, type SigResolutionClass } from "../sim";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import { USER_SETTINGS_VERSION, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings } from "./settings";
 
 export const PROFILE_TEXT_HEADER = "# gunner v1" as const;
+
+type Side = "attacker" | "target";
+type ScalarField = keyof Omit<ProfileSettings, "attackerFitting" | "targetFitting" | "attackerOverrides" | "targetOverrides">;
+type ScalarValue = string | number | boolean | FittedHullSummary;
 
 export function serializeProfile(settings: ProfileSettings): string {
   const lines: string[] = [PROFILE_TEXT_HEADER];
 
   for (const field of GLOBAL_FIELDS) {
-    serializeScalar(lines, dotKeyFromField(field), settings[field]);
+    serializeScalar(lines, dotKeyForField(field), settings[field]);
   }
 
   serializeSide(lines, "attacker", settings);
@@ -22,9 +27,9 @@ export function parseProfile(text: string): ProfileSettings | undefined {
   while (firstLine < rawLines.length && rawLines[firstLine].trim() === "") firstLine++;
   if (stripCarriageReturn(rawLines[firstLine]) !== PROFILE_TEXT_HEADER) return undefined;
 
-  const raw: Record<string, unknown> = {};
-  let overrideAttacker: Partial<ProfileParamOverrides> = {};
-  let overrideTarget: Partial<ProfileParamOverrides> = {};
+  let raw: Partial<ProfileSettings> = {};
+  let attackerOverrides: Partial<ProfileParamOverrides> = {};
+  let targetOverrides: Partial<ProfileParamOverrides> = {};
 
   let i = firstLine + 1;
   while (i < rawLines.length) {
@@ -34,12 +39,16 @@ export function parseProfile(text: string): ProfileSettings | undefined {
     if (line === "---") return undefined;
 
     if (line.endsWith(".fitting:")) {
-      const side = parseSideFromDotKey(line.slice(0, line.length - ".fitting:".length));
-      if (!side) return undefined;
+      const side = sideFromFittingDotKey(line.slice(0, line.length - ".fitting:".length));
+      if (side === undefined) return undefined;
       const { body, nextIndex } = readFittingBlock(rawLines, i);
       if (body === undefined) return undefined;
-      if (body.split("\n").some((line) => stripCarriageReturn(line) === "---")) return undefined;
-      raw[`${side}Fitting`] = body;
+      if (body.split("\n").some((l) => stripCarriageReturn(l) === "---")) return undefined;
+      if (side === "attacker") {
+        raw = { ...raw, attackerFitting: body };
+      } else {
+        raw = { ...raw, targetFitting: body };
+      }
       i = nextIndex;
       continue;
     }
@@ -49,40 +58,32 @@ export function parseProfile(text: string): ProfileSettings | undefined {
     const dotKey = line.slice(0, eq);
     const value = line.slice(eq + 1);
 
-    if (dotKey.startsWith("override.attacker.")) {
-      const short = dotKey.slice("override.attacker.".length);
-      const full = overrideKeyFor("attacker", short);
-      if (!full) return undefined;
-      const parsed = parseOverrideValue(full, value);
+    const override = OVERRIDE_DOT_KEY_TO_FULL.get(dotKey);
+    if (override !== undefined) {
+      const parsed = parseOverrideValue(override, value);
       if (parsed === undefined) return undefined;
-      overrideAttacker = { ...overrideAttacker, [full]: parsed };
+      if (dotKey.startsWith("override.attacker.")) {
+        attackerOverrides = { ...attackerOverrides, [override]: parsed };
+      } else {
+        targetOverrides = { ...targetOverrides, [override]: parsed };
+      }
       continue;
     }
 
-    if (dotKey.startsWith("override.target.")) {
-      const short = dotKey.slice("override.target.".length);
-      const full = overrideKeyFor("target", short);
-      if (!full) return undefined;
-      const parsed = parseOverrideValue(full, value);
-      if (parsed === undefined) return undefined;
-      overrideTarget = { ...overrideTarget, [full]: parsed };
-      continue;
-    }
-
-    const field = fieldFromDotKey(dotKey);
-    if (!field) return undefined;
+    const field = DOT_KEY_TO_FIELD.get(dotKey);
+    if (field === undefined) return undefined;
     const parsed = parseScalarValue(field, value);
     if (parsed === undefined) return undefined;
-    raw[field] = parsed;
+    raw = { ...raw, [field]: parsed };
   }
 
-  if (Object.keys(overrideAttacker).length > 0) raw.attackerOverrides = overrideAttacker;
-  if (Object.keys(overrideTarget).length > 0) raw.targetOverrides = overrideTarget;
+  if (Object.keys(attackerOverrides).length > 0) raw = { ...raw, attackerOverrides };
+  if (Object.keys(targetOverrides).length > 0) raw = { ...raw, targetOverrides };
 
-  return asProfileSettings(raw);
+  return profileSettingsFromRaw(raw);
 }
 
-const GLOBAL_FIELDS: (keyof ProfileSettings)[] = [
+const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
   "tracking",
   "sigRes",
@@ -92,9 +93,9 @@ const GLOBAL_FIELDS: (keyof ProfileSettings)[] = [
   "simSpeed",
   "maneuverAggressivity",
   "gridBrightness",
-];
+] as const;
 
-const ATTACKER_FIELDS: (keyof ProfileSettings)[] = [
+const ATTACKER_FIELDS: readonly ScalarField[] = [
   "attackerSpeed",
   "attackerMode",
   "attackerRange",
@@ -105,9 +106,9 @@ const ATTACKER_FIELDS: (keyof ProfileSettings)[] = [
   "attackerHull",
   "attackerPropulsion",
   "attackerFittedHull",
-];
+] as const;
 
-const TARGET_FIELDS: (keyof ProfileSettings)[] = [
+const TARGET_FIELDS: readonly ScalarField[] = [
   "targetSpeed",
   "targetMode",
   "targetRange",
@@ -119,40 +120,11 @@ const TARGET_FIELDS: (keyof ProfileSettings)[] = [
   "targetHull",
   "targetPropulsion",
   "targetFittedHull",
-];
+] as const;
 
-const REQUIRED_FIELDS: (keyof ProfileSettings)[] = [
-  "version",
-  "tracking",
-  "sigRes",
-  "optimal",
-  "falloff",
-  "attackerSpeed",
-  "attackerMode",
-  "attackerRange",
-  "attackerMass",
-  "attackerInertia",
-  "initialDistance",
-  "targetSpeed",
-  "targetMode",
-  "targetRange",
-  "targetMass",
-  "targetInertia",
-  "targetSig",
-  "simSpeed",
-];
+const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...ATTACKER_FIELDS, ...TARGET_FIELDS];
 
-const ALL_FIELDS: Set<keyof ProfileSettings> = new Set([
-  ...GLOBAL_FIELDS,
-  ...ATTACKER_FIELDS,
-  ...TARGET_FIELDS,
-  "attackerFitting",
-  "targetFitting",
-  "attackerOverrides",
-  "targetOverrides",
-]);
-
-const OVERRIDE_KEYS: (keyof ProfileParamOverrides)[] = [
+const OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
   "attackerMass",
   "attackerInertia",
   "attackerSpeed",
@@ -164,9 +136,90 @@ const OVERRIDE_KEYS: (keyof ProfileParamOverrides)[] = [
   "sigRes",
   "optimal",
   "falloff",
-];
+] as const;
 
-function serializeScalar(lines: string[], dotKey: string, value: unknown): void {
+const DOT_KEY_TO_FIELD: ReadonlyMap<string, ScalarField> = buildDotKeyToFieldMap();
+const OVERRIDE_DOT_KEY_TO_FULL: ReadonlyMap<string, keyof ProfileParamOverrides> = buildOverrideDotKeyToFullMap();
+
+function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
+  const map = new Map<string, ScalarField>();
+  for (const field of ALL_FIELDS) {
+    map.set(dotKeyForField(field), field);
+  }
+  return map;
+}
+
+function buildOverrideDotKeyToFullMap(): ReadonlyMap<string, keyof ProfileParamOverrides> {
+  const map = new Map<string, keyof ProfileParamOverrides>();
+  for (const key of OVERRIDE_KEYS) {
+    const attackerDot = overrideDotKeyForFull("attacker", key);
+    if (attackerDot !== undefined) map.set(attackerDot, key);
+    const targetDot = overrideDotKeyForFull("target", key);
+    if (targetDot !== undefined) map.set(targetDot, key);
+  }
+  return map;
+}
+
+function dotKeyForField(field: ScalarField): string {
+  if (field.startsWith("attacker")) return `attacker.${lowerFirst(field.slice("attacker".length))}`;
+  if (field.startsWith("target")) return `target.${lowerFirst(field.slice("target".length))}`;
+  return field;
+}
+
+function sideFromFittingDotKey(dotKey: string): Side | undefined {
+  if (dotKey === "attacker") return "attacker";
+  if (dotKey === "target") return "target";
+  return undefined;
+}
+
+function overrideDotKeyForFull(side: Side, full: keyof ProfileParamOverrides): string | undefined {
+  if (full === "tracking" || full === "sigRes" || full === "optimal" || full === "falloff") {
+    return `override.${side}.${full}`;
+  }
+  if (side === "attacker" && full.startsWith("attacker")) {
+    return `override.attacker.${lowerFirst(full.slice("attacker".length))}`;
+  }
+  if (side === "target" && full.startsWith("target")) {
+    return `override.target.${lowerFirst(full.slice("target".length))}`;
+  }
+  return undefined;
+}
+
+function serializeSide(lines: string[], side: Side, settings: ProfileSettings): void {
+  const fitting = side === "attacker" ? settings.attackerFitting : settings.targetFitting;
+  if (fitting !== undefined) {
+    if (fitting.split("\n").some((line) => stripCarriageReturn(line) === "---")) {
+      throw new Error(`fitting text for ${side} contains block terminator`);
+    }
+    lines.push(`${side}.fitting:`);
+    lines.push(fitting);
+    lines.push("---");
+  }
+
+  const fields = side === "attacker" ? ATTACKER_FIELDS : TARGET_FIELDS;
+  for (const field of fields) {
+    serializeScalar(lines, dotKeyForField(field), settings[field]);
+  }
+
+  const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
+  if (overrides !== undefined) {
+    for (const key of OVERRIDE_KEYS) {
+      const dotKey = overrideDotKeyForFull(side, key);
+      if (dotKey === undefined) continue;
+      if (key === "sigRes") {
+        const sigResValue = overrides[key];
+        if (sigResValue === undefined) continue;
+        lines.push(`${dotKey}=${sigResValue}`);
+      } else {
+        const numValue = overrides[key];
+        if (numValue === undefined) continue;
+        lines.push(`${dotKey}=${formatNumber(numValue)}`);
+      }
+    }
+  }
+}
+
+function serializeScalar(lines: string[], dotKey: string, value: ScalarValue | undefined): void {
   if (value === undefined) return;
   if (typeof value === "boolean") {
     lines.push(`${dotKey}=${value ? "true" : "false"}`);
@@ -180,65 +233,7 @@ function serializeScalar(lines: string[], dotKey: string, value: unknown): void 
     lines.push(`${dotKey}=${value}`);
     return;
   }
-  if (isFittedHullSummary(value)) {
-    lines.push(`${dotKey}=${JSON.stringify(value)}`);
-  }
-}
-
-function serializeSide(lines: string[], side: "attacker" | "target", settings: ProfileSettings): void {
-  const fittingKey = `${side}Fitting` as keyof ProfileSettings;
-  const fitting = settings[fittingKey] as string | undefined;
-  if (fitting !== undefined) {
-    if (fitting.split("\n").some((line) => stripCarriageReturn(line) === "---")) {
-      throw new Error(`fitting text for ${side} contains block terminator`);
-    }
-    lines.push(`${side}.fitting:`);
-    lines.push(fitting);
-    lines.push("---");
-  }
-
-  const fields = side === "attacker" ? ATTACKER_FIELDS : TARGET_FIELDS;
-  for (const field of fields) {
-    const dotKey = dotKeyFromField(field);
-    serializeScalar(lines, dotKey, settings[field]);
-  }
-
-  const overrides = settings[`${side}Overrides` as keyof ProfileSettings] as Partial<ProfileParamOverrides> | undefined;
-  if (overrides) {
-    for (const [key, value] of Object.entries(overrides)) {
-      const short = overrideShortKey(side, key as keyof ProfileParamOverrides);
-      if (short === undefined) continue;
-      const serialized = key === "sigRes" ? String(value) : formatNumber(value as number);
-      lines.push(`override.${side}.${short}=${serialized}`);
-    }
-  }
-}
-
-function dotKeyFromField(field: keyof ProfileSettings): string {
-  if (field.startsWith("attacker")) return `attacker.${lowerFirst(field.slice("attacker".length))}`;
-  if (field.startsWith("target")) return `target.${lowerFirst(field.slice("target".length))}`;
-  return field;
-}
-
-function fieldFromDotKey(dotKey: string): keyof ProfileSettings | undefined {
-  if (dotKey.startsWith("attacker.")) {
-    const short = dotKey.slice("attacker.".length);
-    const field = `attacker${upperFirst(short)}` as keyof ProfileSettings;
-    return ALL_FIELDS.has(field) ? field : undefined;
-  }
-  if (dotKey.startsWith("target.")) {
-    const short = dotKey.slice("target.".length);
-    const field = `target${upperFirst(short)}` as keyof ProfileSettings;
-    return ALL_FIELDS.has(field) ? field : undefined;
-  }
-  const field = dotKey as keyof ProfileSettings;
-  return ALL_FIELDS.has(field) ? field : undefined;
-}
-
-function parseSideFromDotKey(dotKey: string): "attacker" | "target" | undefined {
-  if (dotKey === "attacker" || dotKey.startsWith("attacker.")) return "attacker";
-  if (dotKey === "target" || dotKey.startsWith("target.")) return "target";
-  return undefined;
+  lines.push(`${dotKey}=${JSON.stringify(value)}`);
 }
 
 function readFittingBlock(lines: string[], start: number): { body: string | undefined; nextIndex: number } {
@@ -257,13 +252,16 @@ function readFittingBlock(lines: string[], start: number): { body: string | unde
   return { body: bodyLines.join("\n"), nextIndex: i };
 }
 
-function parseScalarValue(field: keyof ProfileSettings, value: string): unknown | undefined {
+function parseScalarValue(field: ScalarField, value: string): ScalarValue | undefined {
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
   if (field === "attackerOverload" || field === "targetOverload") return value === "true" ? true : value === "false" ? false : undefined;
   if (field === "attackerMode" || field === "targetMode") return isAutopilotMode(value) ? value : undefined;
-  if (field === "attackerSkillLevel" || field === "targetSkillLevel") return isSkillLevel(value) ? Number(value) : undefined;
+  if (field === "attackerSkillLevel" || field === "targetSkillLevel") {
+    const num = Number(value);
+    return isSkillLevelValue(num) ? num : undefined;
+  }
   if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
   if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
@@ -276,19 +274,6 @@ function parseScalarValue(field: keyof ProfileSettings, value: string): unknown 
   return num >= 0 ? num : undefined;
 }
 
-function overrideShortKey(side: "attacker" | "target", key: keyof ProfileParamOverrides): string | undefined {
-  if (side === "attacker" && key.startsWith("attacker")) return lowerFirst(key.slice("attacker".length));
-  if (side === "target" && key.startsWith("target")) return lowerFirst(key.slice("target".length));
-  if (key === "tracking" || key === "sigRes" || key === "optimal" || key === "falloff") return key;
-  return undefined;
-}
-
-function overrideKeyFor(side: "attacker" | "target", short: string): keyof ProfileParamOverrides | undefined {
-  if (OVERRIDE_KEYS.includes(short as keyof ProfileParamOverrides)) return short as keyof ProfileParamOverrides;
-  const full = `${side}${upperFirst(short)}` as keyof ProfileParamOverrides;
-  return OVERRIDE_KEYS.includes(full) ? full : undefined;
-}
-
 function parseOverrideValue(key: keyof ProfileParamOverrides, value: string): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
   if (value === "") return undefined;
   if (key === "sigRes") return isSigResolutionClass(value) ? value : undefined;
@@ -298,16 +283,90 @@ function parseOverrideValue(key: keyof ProfileParamOverrides, value: string): Pr
   return num >= 0 ? num : undefined;
 }
 
-function asProfileSettings(raw: Record<string, unknown>): ProfileSettings | undefined {
-  for (const field of REQUIRED_FIELDS) {
-    if (raw[field] === undefined) return undefined;
+function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings | undefined {
+  const version = raw.version;
+  const tracking = raw.tracking;
+  const sigRes = raw.sigRes;
+  const optimal = raw.optimal;
+  const falloff = raw.falloff;
+  const attackerSpeed = raw.attackerSpeed;
+  const attackerMode = raw.attackerMode;
+  const attackerRange = raw.attackerRange;
+  const attackerMass = raw.attackerMass;
+  const attackerInertia = raw.attackerInertia;
+  const initialDistance = raw.initialDistance;
+  const targetSpeed = raw.targetSpeed;
+  const targetMode = raw.targetMode;
+  const targetRange = raw.targetRange;
+  const targetMass = raw.targetMass;
+  const targetInertia = raw.targetInertia;
+  const targetSig = raw.targetSig;
+  const simSpeed = raw.simSpeed;
+
+  if (
+    version === undefined ||
+    tracking === undefined ||
+    sigRes === undefined ||
+    optimal === undefined ||
+    falloff === undefined ||
+    attackerSpeed === undefined ||
+    attackerMode === undefined ||
+    attackerRange === undefined ||
+    attackerMass === undefined ||
+    attackerInertia === undefined ||
+    initialDistance === undefined ||
+    targetSpeed === undefined ||
+    targetMode === undefined ||
+    targetRange === undefined ||
+    targetMass === undefined ||
+    targetInertia === undefined ||
+    targetSig === undefined ||
+    simSpeed === undefined
+  ) {
+    return undefined;
   }
-  return raw as ProfileSettings;
+
+  return {
+    version,
+    tracking,
+    sigRes,
+    optimal,
+    falloff,
+    attackerSpeed,
+    attackerMode,
+    attackerRange,
+    attackerMass,
+    attackerInertia,
+    initialDistance,
+    targetSpeed,
+    targetMode,
+    targetRange,
+    targetMass,
+    targetInertia,
+    targetSig,
+    simSpeed,
+    attackerSkillLevel: raw.attackerSkillLevel,
+    attackerOverload: raw.attackerOverload,
+    attackerHull: raw.attackerHull,
+    attackerPropulsion: raw.attackerPropulsion,
+    attackerFitting: raw.attackerFitting,
+    attackerOverrides: raw.attackerOverrides,
+    attackerFittedHull: raw.attackerFittedHull,
+    targetSkillLevel: raw.targetSkillLevel,
+    targetOverload: raw.targetOverload,
+    targetHull: raw.targetHull,
+    targetPropulsion: raw.targetPropulsion,
+    targetFitting: raw.targetFitting,
+    targetOverrides: raw.targetOverrides,
+    targetFittedHull: raw.targetFittedHull,
+    maneuverAggressivity: raw.maneuverAggressivity,
+    gridBrightness: raw.gridBrightness,
+  };
 }
 
 function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
   try {
-    const parsed = JSON.parse(value) as unknown;
+    const parsed = JSON.parse(value);
     return isFittedHullSummary(parsed) ? parsed : undefined;
   } catch {
     return undefined;
@@ -324,32 +383,36 @@ function isFittedHullSummary(value: unknown): value is FittedHullSummary {
   return true;
 }
 
-function isFittedHull(value: unknown): value is Record<string, unknown> {
+function isFittedHull(value: unknown): value is FittedHull {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
   return (
-    typeof s.mass === "number" && Number.isFinite(s.mass) && s.mass >= 0 &&
-    isPositiveMultiplier(s.massMultiplier) &&
-    isPositiveMultiplier(s.speedMultiplier) &&
-    isPositiveMultiplier(s.inertiaMultiplier) &&
-    isPositiveMultiplier(s.sigMultiplier) &&
-    typeof s.sigRadiusAdd === "number" && Number.isFinite(s.sigRadiusAdd) && s.sigRadiusAdd >= 0
+    isNonNegativeNumber(s.mass) &&
+    isPositiveNumber(s.massMultiplier) &&
+    isPositiveNumber(s.speedMultiplier) &&
+    isPositiveNumber(s.inertiaMultiplier) &&
+    isPositiveNumber(s.sigMultiplier) &&
+    isNonNegativeNumber(s.sigRadiusAdd)
   );
 }
 
-function isPositiveMultiplier(value: unknown): boolean {
+function isPropulsionStats(value: unknown): value is PropulsionStats {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  return (
+    isNonNegativeNumber(s.thrust) &&
+    isNonNegativeNumber(s.speedBonus) &&
+    isNonNegativeNumber(s.massAddition) &&
+    isNonNegativeNumber(s.sigBloom)
+  );
+}
+
+function isNonNegativeNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function isPositiveNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
-}
-
-function isPropulsionStats(value: unknown): value is Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  return (
-    typeof s.thrust === "number" && Number.isFinite(s.thrust) && s.thrust >= 0 &&
-    typeof s.speedBonus === "number" && Number.isFinite(s.speedBonus) && s.speedBonus >= 0 &&
-    typeof s.massAddition === "number" && Number.isFinite(s.massAddition) && s.massAddition >= 0 &&
-    typeof s.sigBloom === "number" && Number.isFinite(s.sigBloom) && s.sigBloom >= 0
-  );
 }
 
 function isAutopilotMode(value: string): value is AutopilotMode {
@@ -360,8 +423,8 @@ function isSigResolutionClass(value: string): value is SigResolutionClass {
   return value === "S" || value === "M" || value === "L" || value === "XL";
 }
 
-function isSkillLevel(value: string): value is `${0 | 1 | 2 | 3 | 4 | 5}` {
-  return /^[0-5]$/.test(value);
+function isSkillLevelValue(value: number): value is SkillLevel {
+  return value === 0 || value === 1 || value === 2 || value === 3 || value === 4 || value === 5;
 }
 
 function formatNumber(value: number): string {
