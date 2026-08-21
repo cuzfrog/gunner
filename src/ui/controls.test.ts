@@ -1,4 +1,4 @@
-import type { FittingImport, ImportedFitting } from "../fitting";
+import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../fitting";
 import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
@@ -12,6 +12,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   optimal: "5000",
   falloff: "5000",
   "attacker-hull": "",
+  "attacker-preset-fitting": "",
   "attacker-speed": "0",
   "attacker-propulsion": "",
   "attacker-skills": "5",
@@ -23,6 +24,7 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "grid-brightness-slider": "0.2",
   "initial-distance": "5000",
   "target-hull": "",
+  "target-preset-fitting": "",
   "target-speed": "1000",
   "target-propulsion": "",
   "target-skills": "5",
@@ -115,6 +117,14 @@ const IMPORTED_RIFTER: ImportedFitting = {
   fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
   propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
   turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000 },
+};
+
+const IMPORTED_THRASHER: ImportedFitting = {
+  profile: THRASHER,
+  fittingName: "Sniper",
+  fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+  propulsion: undefined,
+  turret: { tracking: 0.12, sigResolutionClass: "S", optimal: 9843.75, falloff: 10937.5 },
 };
 
 const SAVED_FITTED_SETTINGS: UserSettings = {
@@ -378,6 +388,21 @@ function asProfile(settings: UserSettings): ProfileSettings {
   return rest;
 }
 
+function createMockPresetFittings() {
+  const fits: Record<string, PresetFitting[]> = {
+    Rifter: [
+      { name: "Brawler", body: "1MN Afterburner II\nStasis Webifier II\n150mm Light AutoCannon II, Hail S" },
+      { name: "Tackle", body: "1MN Afterburner II\nWarp Scrambler II\n150mm Light AutoCannon II, EMP S" },
+    ],
+    Thrasher: [{ name: "Sniper", body: "280mm Howitzer Artillery I, Republic Fleet EMP S\n5MN Y-T8 Compact Microwarpdrive" }],
+  };
+  return vi.mocked<PresetFittings>({
+    listHulls: vi.fn(() => ["Merlin", "Rifter", "Thrasher"]),
+    fittingsFor: vi.fn((hull) => fits[hull] ?? []),
+    eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]\n${fit.body}`),
+  });
+}
+
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
@@ -414,10 +439,11 @@ function buildControls(
   });
   const ships = createMockShips();
   const fittingImport = vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+  const presetFittings = createMockPresetFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, clipboard, location, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, controls };
 }
 
 describe("DomControls", () => {
@@ -2274,16 +2300,14 @@ describe("DomControls", () => {
   });
 
   describe("ship name i18n", () => {
-    test("datalist option values and labels localize per language and revert in English", () => {
+    test("datalist option values are canonical preset hulls in every language", () => {
       buildControls(globalThis.document, null, { language: "zh" });
 
       const options = getFake(globalThis.document, "hull-options").children;
-      const rifter = options.find((o) => o.value === "裂谷级");
-      const merlin = options.find((o) => o.value === "小鹰级");
-      expect(rifter).toBeTruthy();
-      expect(rifter!.label).toBe(`${HULL_VIEW_RIFTER.zh.hullType} · ${HULL_VIEW_RIFTER.zh.faction}`);
-      expect(merlin).toBeTruthy();
-      expect(merlin!.label).toBe(`${HULL_VIEW_MERLIN.zh.hullType} · ${HULL_VIEW_MERLIN.zh.faction}`);
+      expect(options.some((o) => o.value === "Rifter")).toBe(true);
+      expect(options.some((o) => o.value === "Merlin")).toBe(true);
+      expect(options.some((o) => o.value === "裂谷级")).toBe(false);
+      expect(options.some((o) => o.value === "小鹰级")).toBe(false);
 
       getFake(globalThis.document, "lang-en").trigger("click");
 
@@ -2291,8 +2315,6 @@ describe("DomControls", () => {
       expect(enOptions.some((o) => o.value === "Rifter")).toBe(true);
       expect(enOptions.some((o) => o.value === "Merlin")).toBe(true);
       expect(enOptions.some((o) => o.value === "裂谷级")).toBe(false);
-      const enRifter = enOptions.find((o) => o.value === "Rifter");
-      expect(enRifter!.label).toBe(`${HULL_VIEW_RIFTER.en.hullType} · ${HULL_VIEW_RIFTER.en.faction}`);
     });
 
     test("hull input displays the localized name after loading a profile with a canonical hull", () => {
@@ -2383,7 +2405,9 @@ describe("DomControls", () => {
 
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("裂谷级");
       const options = getFake(globalThis.document, "hull-options").children;
-      expect(options.some((o) => o.value === "裂谷级")).toBe(true);
+      expect(options.some((o) => o.value === "Rifter")).toBe(true);
+      const presetOptions = getFake(globalThis.document, "attacker-preset-fitting").children;
+      expect(presetOptions.some((o) => o.value === "Brawler")).toBe(true);
       expect(saveButton.classList.toggle).not.toHaveBeenCalledWith("unsaved", true);
     });
 
@@ -2644,6 +2668,70 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-speed").value).toBe("1420.75");
       const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
       expect(saved.attackerFittedHull?.propulsionId).toBe("ab-1mn");
+    });
+
+    test("selecting a target preset fitting imports the EFT text for that hull and fit", async () => {
+      const { fittingImport, presetFittings } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
+      const hullInput = getFake(globalThis.document, "target-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("input");
+
+      const presetSelect = getFake(globalThis.document, "target-preset-fitting");
+      presetSelect.value = "Sniper";
+      presetSelect.trigger("change");
+      await flush();
+
+      expect(presetFittings.eftText).toHaveBeenCalledWith("Thrasher", expect.objectContaining({ name: "Sniper" }));
+      const [importedText] = fittingImport.importFitting.mock.calls[fittingImport.importFitting.mock.calls.length - 1];
+      expect(importedText).toContain("[Thrasher, Sniper]");
+    });
+
+    test("selecting a preset fitting imports the EFT text for that hull and fit", async () => {
+      const { fittingImport, presetFittings } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("input");
+
+      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
+      presetSelect.value = "Brawler";
+      presetSelect.trigger("change");
+      await flush();
+
+      expect(presetFittings.eftText).toHaveBeenCalledWith("Rifter", expect.objectContaining({ name: "Brawler" }));
+      const [importedText] = fittingImport.importFitting.mock.calls[fittingImport.importFitting.mock.calls.length - 1];
+      expect(importedText).toContain("[Rifter, Brawler]");
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Rifter");
+      expect(getFake(globalThis.document, "attacker-mass").value).toBe("1500000");
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe("4649.72");
+      expect(getFake(globalThis.document, "tracking").value).toBe("0.315");
+    });
+
+    test("changing the hull repopulates the preset fitting options", () => {
+      const { presetFittings } = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("input");
+
+      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
+      const options = presetSelect.children.map((child) => child.value);
+      expect(options).toContain("");
+      expect(options).toContain("Brawler");
+      expect(options).toContain("Tackle");
+      expect(presetFittings.fittingsFor).toHaveBeenCalledWith("Rifter");
+    });
+
+    test("selecting a hull with no preset fits still accepts typed input", () => {
+      buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "merlin";
+      hullInput.trigger("input");
+
+      expect(getFake(globalThis.document, "attacker-hull").value).toBe("Merlin");
+      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
+      expect(presetSelect.children.length).toBe(1);
+      expect(presetSelect.disabled).toBe(true);
     });
   });
 });

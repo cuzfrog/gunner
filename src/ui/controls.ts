@@ -10,7 +10,7 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
-import type { FittingImport, ImportedFitting } from "../fitting";
+import type { FittingImport, ImportedFitting, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
@@ -41,6 +41,7 @@ export class DomControls implements Controls {
   private readonly settingsStore: SettingsStore;
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
+  private readonly presetFittings: PresetFittings;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
   private readonly trackingInput: TrackingInput;
@@ -62,6 +63,7 @@ export class DomControls implements Controls {
     settingsStore,
     ships,
     fittingImport,
+    presetFittings,
     clipboard,
     location,
   }: {
@@ -70,6 +72,7 @@ export class DomControls implements Controls {
     settingsStore: SettingsStore;
     ships: Ships;
     fittingImport: FittingImport;
+    presetFittings: PresetFittings;
     clipboard: ClipboardProvider;
     location: LocationProvider;
   }) {
@@ -78,6 +81,7 @@ export class DomControls implements Controls {
     this.settingsStore = settingsStore;
     this.ships = ships;
     this.fittingImport = fittingImport;
+    this.presetFittings = presetFittings;
     this.clipboard = clipboard;
     this.location = location;
     this.trackingInput = new TrackingInput();
@@ -91,6 +95,7 @@ export class DomControls implements Controls {
       falloff: el("falloff"),
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
+      attackerPresetFitting: el("attacker-preset-fitting"),
       attackerHullHint: el("attacker-hull-hint"),
       attackerFittingName: el("attacker-fitting-name"),
       attackerImportFitting: el("attacker-import-fitting"),
@@ -117,6 +122,7 @@ export class DomControls implements Controls {
       maneuverAggressivityValue: el("maneuver-aggressivity-value"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
+      targetPresetFitting: el("target-preset-fitting"),
       targetHullHint: el("target-hull-hint"),
       targetFittingName: el("target-fitting-name"),
       targetImportFitting: el("target-import-fitting"),
@@ -481,6 +487,8 @@ export class DomControls implements Controls {
     this.updateFittingName("target");
     this.populateHullDatalist();
     this.refreshHullInputs();
+    this.populatePresetFittings("attacker", this.attackerProfile?.name);
+    this.populatePresetFittings("target", this.targetProfile?.name);
     this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
     this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
@@ -676,12 +684,14 @@ export class DomControls implements Controls {
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
+    (this.els.attackerPresetFitting as HTMLSelectElement).addEventListener("change", () => void this.onPresetFittingChange("attacker"));
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
     (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
     (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
     (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
     (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
+    (this.els.targetPresetFitting as HTMLSelectElement).addEventListener("change", () => void this.onPresetFittingChange("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
     (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
@@ -742,12 +752,10 @@ export class DomControls implements Controls {
 
   private populateHullDatalist(): void {
     const datalist = this.els.hullOptions as HTMLDataListElement;
-    const language = this.i18n.current();
     datalist.innerHTML = "";
-    for (const view of this.ships.hulls(language)) {
+    for (const hull of this.presetFittings.listHulls()) {
       const option = document.createElement("option");
-      option.value = view.name;
-      option.label = `${view.hullType} · ${view.faction}`;
+      option.value = hull;
       datalist.appendChild(option);
     }
   }
@@ -764,6 +772,7 @@ export class DomControls implements Controls {
 
     (this.els[`${side}Hull`] as HTMLInputElement).value = this.ships.hullView(profile, this.i18n.current()).name;
     this.setHullValidation(side, false);
+    this.populatePresetFittings(side, profile.name);
     this.renderPropulsionOptions(side, propulsionId);
 
     if (updateStats) {
@@ -778,6 +787,37 @@ export class DomControls implements Controls {
     }
   }
 
+  private populatePresetFittings(side: "attacker" | "target", hullName = ""): void {
+    const select = this.els[`${side}PresetFitting`] as HTMLSelectElement;
+    select.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.setAttribute("data-i18n", "select.presetFitting");
+    placeholder.textContent = this.i18n.t("select.presetFitting");
+    select.appendChild(placeholder);
+
+    const fits = hullName.length > 0 ? this.presetFittings.fittingsFor(hullName) : [];
+    for (const fit of fits) {
+      const option = document.createElement("option");
+      option.value = fit.name;
+      option.textContent = fit.name;
+      select.appendChild(option);
+    }
+    select.value = "";
+    select.disabled = fits.length === 0;
+  }
+
+  private async onPresetFittingChange(side: "attacker" | "target"): Promise<void> {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return;
+    const select = this.els[`${side}PresetFitting`] as HTMLSelectElement;
+    const fitName = select.value;
+    if (!fitName) return;
+    const fit = this.presetFittings.fittingsFor(profile.name).find((f) => f.name === fitName);
+    if (!fit) return;
+    await this.importFittingFromText(side, this.presetFittings.eftText(profile.name, fit));
+  }
+
   private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
@@ -786,6 +826,7 @@ export class DomControls implements Controls {
     if (resetInput) {
       (this.els[`${side}Hull`] as HTMLInputElement).value = "";
     }
+    this.populatePresetFittings(side);
     this.updateHullHint(side);
     this.renderPropulsionOptions(side);
     if (persist) {

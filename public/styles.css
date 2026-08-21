@@ -275,6 +275,26 @@ body {
   position: relative;
 }
 
+.panel .hull-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.panel .hull-input-row input {
+  min-width: 0;
+}
+
+.panel .hull-input-row .preset-fitting-select {
+  width: auto;
+  min-width: 160px;
+  max-width: 220px;
+  text-align: left;
+  text-align-last: left;
+  padding: 5px 24px 5px 8px;
+}
+
 .panel .hull-label-row > span:not(.fitting-name) {
   margin-bottom: 0;
 }

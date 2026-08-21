@@ -35,17 +35,17 @@ describe("PresetFittings", () => {
     const fit = presets.fittingsFor("Rifter")[0];
     const text = presets.eftText("Rifter", fit);
     const parsed = parseEft(text);
-    expect(parsed).not.toBeUndefined();
-    expect(parsed!.hullName).toBe("Rifter");
-    expect(parsed!.fittingName).toBe(fit.name);
+    if (!parsed) throw new Error("expected parsed fitting");
+    expect(parsed.hullName).toBe("Rifter");
+    expect(parsed.fittingName).toBe(fit.name);
   });
 
   test("eftText round-trips for a fit whose name contains commas", () => {
     const fit: PresetFitting = { name: "Name, With, Commas", body: "1MN Afterburner II\nStasis Webifier II" };
     const text = presets.eftText("Thrasher", fit);
     const parsed = parseEft(text);
-    expect(parsed).not.toBeUndefined();
-    expect(parsed!.hullName).toBe("Thrasher");
-    expect(parsed!.fittingName).toBe("Name, With, Commas");
+    if (!parsed) throw new Error("expected parsed fitting");
+    expect(parsed.hullName).toBe("Thrasher");
+    expect(parsed.fittingName).toBe("Name, With, Commas");
   });
 });

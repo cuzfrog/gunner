@@ -160,9 +160,14 @@
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
-          <input type="text" id="attacker-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <div class="hull-input-row">
+            <input type="text" id="attacker-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <select id="attacker-preset-fitting" class="preset-fitting-select" data-i18n-aria-label="select.presetFitting" aria-label="Select a preset fitting">
+              <option value="" data-i18n="select.presetFitting">Select a preset fitting...</option>
+            </select>
+          </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </label>
         <div class="field-group propulsion-group">
@@ -288,9 +293,14 @@
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
-          <input type="text" id="target-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <div class="hull-input-row">
+            <input type="text" id="target-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <select id="target-preset-fitting" class="preset-fitting-select" data-i18n-aria-label="select.presetFitting" aria-label="Select a preset fitting">
+              <option value="" data-i18n="select.presetFitting">Select a preset fitting...</option>
+            </select>
+          </div>
           <span class="hull-hint" id="target-hull-hint"></span>
         </label>
         <div class="field-row">
