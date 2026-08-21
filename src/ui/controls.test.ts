@@ -370,7 +370,7 @@ function setInputValues(document: Document): void {
   getFake(document, "import-profile").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-fitting-name").hidden = true;
   getFake(document, "target-fitting-name").hidden = true;
-  getFake(document, "attacker-ammo-field").hidden = true;
+  getFake(document, "attacker-ammo-field").hidden = false;
   getFake(document, "attacker-ammo-popup").hidden = true;
   getFake(document, "attacker-ammo-all-section").hidden = true;
   getFake(document, "attacker-ammo-trigger").setAttribute("aria-expanded", "false");
@@ -3663,9 +3663,9 @@ describe("DomControls", () => {
       await flush();
     }
 
-    test("ammo field is hidden and trigger is disabled before a turret is loaded", () => {
+    test("ammo field is visible and trigger is disabled before a turret is loaded", () => {
       buildControls(globalThis.document);
-      expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(false);
       expect(getFake(globalThis.document, "attacker-ammo-trigger").disabled).toBe(true);
       expect(getFake(globalThis.document, "attacker-ammo-summary").textContent).toBe("—");
     });
@@ -3851,13 +3851,13 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-ammo-summary").textContent).toBe("Republic Fleet EMP S");
     });
 
-    test("clearing the attacker hull hides the ammo field", async () => {
+    test("clearing the attacker hull keeps the ammo field visible and disables the trigger", async () => {
       const ctx = buildControls(globalThis.document);
       await importRifter(ctx);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "";
       hullInput.trigger("change");
-      expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(false);
       expect(getFake(globalThis.document, "attacker-ammo-trigger").disabled).toBe(true);
     });
   });

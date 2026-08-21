@@ -1295,11 +1295,9 @@ export class DomControls implements Controls {
   }
 
   private renderAttackerAmmo(): void {
-    const field = this.els.attackerAmmoField as HTMLElement;
     const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
     const summary = this.els.attackerAmmoSummary as HTMLElement;
     const hasTurret = this.attackerTurret !== undefined;
-    field.hidden = !hasTurret;
     trigger.disabled = !hasTurret;
     setText(summary, hasTurret ? this.attackerAmmo : "—");
     if (!hasTurret) return;
@@ -1491,7 +1489,12 @@ export class DomControls implements Controls {
   private applyImportedTurret(imported: ImportedFitting): void {
     const turret = imported.turret;
     if (!turret) {
-      (this.els.attackerAmmoField as HTMLElement).hidden = true;
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = imported.cargoCharges;
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.attackerAmmoAllExpanded = false;
+      (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+      this.renderAttackerAmmo();
       return;
     }
     this.attackerTurret = turret;
