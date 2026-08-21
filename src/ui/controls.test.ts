@@ -6,6 +6,7 @@ import type { I18n, Language } from "./i18n";
 import { serializeProfile } from "./profileText";
 import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
+import type { SavedFittings } from "./savedFittings";
 import type { Timer } from "./timer";
 
 const DEFAULT_INPUTS: Record<string, string> = {
@@ -14,7 +15,6 @@ const DEFAULT_INPUTS: Record<string, string> = {
   optimal: "5000",
   falloff: "5000",
   "attacker-hull": "",
-  "attacker-preset-fitting": "",
   "attacker-speed": "0",
   "attacker-propulsion": "",
   "attacker-skills": "5",
@@ -26,7 +26,6 @@ const DEFAULT_INPUTS: Record<string, string> = {
   "grid-brightness-slider": "0.2",
   "initial-distance": "5000",
   "target-hull": "",
-  "target-preset-fitting": "",
   "target-speed": "1000",
   "target-propulsion": "",
   "target-skills": "5",
@@ -351,10 +350,14 @@ function setInputValues(document: Document): void {
   getFake(document, "target-skill-popup").hidden = true;
   getFake(document, "attacker-paste-popup").hidden = true;
   getFake(document, "target-paste-popup").hidden = true;
+  getFake(document, "attacker-fitting-popup").hidden = true;
+  getFake(document, "target-fitting-popup").hidden = true;
   getFake(document, "attacker-fitting-name").hidden = true;
   getFake(document, "target-fitting-name").hidden = true;
   getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
+  getFake(document, "attacker-fitting-trigger").disabled = true;
+  getFake(document, "target-fitting-trigger").disabled = true;
 }
 
 function addChoiceButtons(document: Document, groupId: string, values: string[], selected: string): void {
@@ -434,6 +437,15 @@ function createMockPresetFittings() {
   });
 }
 
+function createMockSavedFittings() {
+  return vi.mocked<SavedFittings>({
+    listForHull: vi.fn(() => []),
+    mostRecentFor: vi.fn(() => undefined),
+    record: vi.fn((fitting) => ({ id: `${fitting.hull}::${fitting.name}`, ...fitting, savedAt: 0 })),
+    remove: vi.fn(),
+  });
+}
+
 function createNoOpTimer(): Timer {
   return {
     setTimeout: (_callback, _ms) => 1,
@@ -480,11 +492,12 @@ function buildControls(
   const ships = createMockShips();
   const fittingImport = vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
   const presetFittings = createMockPresetFittings();
+  const savedFittings = createMockSavedFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const location = fakeLocation();
   const timer = createNoOpTimer();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, timer });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, clipboard, location, timer, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, location, timer });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, location, timer, controls };
 }
 
 describe("DomControls", () => {
@@ -2127,6 +2140,40 @@ describe("DomControls", () => {
     expect(controls.getConfig().target.mode).toBe("keepAtRange");
   });
 
+  test("selecting attacker mode to midships disables the maneuver aggressivity slider", () => {
+    buildControls(globalThis.document);
+    const select = getFake(globalThis.document, "attacker-mode");
+    const slider = getFake(globalThis.document, "maneuver-aggressivity-slider");
+    expect(slider.disabled).toBe(false);
+
+    select.value = "midships";
+    select.trigger("input");
+    expect(slider.disabled).toBe(true);
+
+    select.value = "orbit";
+    select.trigger("input");
+    expect(slider.disabled).toBe(false);
+  });
+
+  test("selecting target mode to midships does not disable the shared maneuver aggressivity slider", () => {
+    buildControls(globalThis.document);
+    const select = getFake(globalThis.document, "target-mode");
+    const slider = getFake(globalThis.document, "maneuver-aggressivity-slider");
+
+    select.value = "midships";
+    select.trigger("input");
+    expect(slider.disabled).toBe(false);
+  });
+
+  test("loadSettings disables the maneuver aggressivity slider when attacker mode is midships", () => {
+    const { controls } = buildControls(globalThis.document, {
+      ...SAVED_FITTED_SETTINGS,
+      attackerMode: "midships",
+    });
+    expect(getFake(globalThis.document, "maneuver-aggressivity-slider").disabled).toBe(true);
+    expect(controls.getConfig().attacker.mode).toBe("midships");
+  });
+
   test("loadSettings restores the sigRes active button and aria-pressed state", () => {
     const settings: UserSettings = {
       version: USER_SETTINGS_VERSION,
@@ -2459,8 +2506,6 @@ describe("DomControls", () => {
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("裂谷级");
       const options = getFake(globalThis.document, "hull-options").children;
       expect(options.some((o) => o.value === "Rifter")).toBe(true);
-      const presetOptions = getFake(globalThis.document, "attacker-preset-fitting").children;
-      expect(presetOptions.some((o) => o.textContent === "Brawler")).toBe(true);
       expect(saveButton.classList.toggle).not.toHaveBeenCalledWith("unsaved", true);
     });
 
@@ -2688,18 +2733,16 @@ describe("DomControls", () => {
 
       const attackerHull = getFake(globalThis.document, "attacker-hull");
       attackerHull.value = "Rifter";
-      attackerHull.trigger("input");
-      const attackerPreset = getFake(globalThis.document, "attacker-preset-fitting");
-      attackerPreset.value = "0";
-      attackerPreset.trigger("change");
+      attackerHull.trigger("change");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0].trigger("click");
       await flush();
 
       const targetHull = getFake(globalThis.document, "target-hull");
       targetHull.value = "Thrasher";
-      targetHull.trigger("input");
-      const targetPreset = getFake(globalThis.document, "target-preset-fitting");
-      targetPreset.value = "1";
-      targetPreset.trigger("change");
+      targetHull.trigger("change");
+      getFake(globalThis.document, "target-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "target-fitting-preset-list").children[1].children[0].trigger("click");
       await flush();
 
       getFake(globalThis.document, "share-link").trigger("click");
@@ -2714,15 +2757,14 @@ describe("DomControls", () => {
       fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
       const hullInput = getFake(globalThis.document, "target-hull");
       hullInput.value = "Thrasher";
-      hullInput.trigger("input");
+      hullInput.trigger("change");
+      getFake(globalThis.document, "target-fitting-trigger").trigger("click");
 
-      const presetSelect = getFake(globalThis.document, "target-preset-fitting");
-      const labels = presetSelect.children.map((child) => child.textContent);
-      expect(labels).toEqual(["select.presetFitting", "Sniper", "Sniper"]);
-      expect(presetSelect.children.map((child) => child.value)).toEqual(["", "0", "1"]);
+      const presetList = getFake(globalThis.document, "target-fitting-preset-list").children;
+      const labels = presetList.map((child) => child.children[0].children[0].textContent);
+      expect(labels).toEqual(["Sniper", "Sniper"]);
 
-      presetSelect.value = "1";
-      presetSelect.trigger("change");
+      presetList[1].children[0].trigger("click");
       await flush();
 
       expect(presetFittings.eftText).toHaveBeenCalledWith("Thrasher", expect.objectContaining({ body: "650mm Artillery Cannon I, Republic Fleet EMP M\n5MN Y-T8 Compact Microwarpdrive" }));
@@ -2863,11 +2905,10 @@ describe("DomControls", () => {
       fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
       const hullInput = getFake(globalThis.document, "target-hull");
       hullInput.value = "Thrasher";
-      hullInput.trigger("input");
+      hullInput.trigger("change");
+      getFake(globalThis.document, "target-fitting-trigger").trigger("click");
 
-      const presetSelect = getFake(globalThis.document, "target-preset-fitting");
-      presetSelect.value = "0";
-      presetSelect.trigger("change");
+      getFake(globalThis.document, "target-fitting-preset-list").children[0].children[0].trigger("click");
       await flush();
 
       expect(presetFittings.eftText).toHaveBeenCalledWith("Thrasher", expect.objectContaining({ name: "Sniper" }));
@@ -2880,11 +2921,10 @@ describe("DomControls", () => {
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
-      hullInput.trigger("input");
+      hullInput.trigger("change");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
 
-      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
-      presetSelect.value = "0";
-      presetSelect.trigger("change");
+      getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0].trigger("click");
       await flush();
 
       expect(presetFittings.eftText).toHaveBeenCalledWith("Rifter", expect.objectContaining({ name: "Brawler" }));
@@ -2900,13 +2940,14 @@ describe("DomControls", () => {
       const { presetFittings } = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
-      hullInput.trigger("input");
+      hullInput.trigger("change");
 
-      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
-      const labels = presetSelect.children.map((child) => child.textContent);
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const presetList = getFake(globalThis.document, "attacker-fitting-preset-list").children;
+      const labels = presetList.map((child) => child.children[0].children[0].textContent);
       expect(labels).toContain("Brawler");
       expect(labels).toContain("Tackle");
-      expect(presetSelect.children.map((child) => child.value)).toEqual(["", "0", "1"]);
+      expect(getFake(globalThis.document, "attacker-fitting-trigger").disabled).toBe(false);
       expect(presetFittings.fittingsFor).toHaveBeenCalledWith("Rifter");
     });
 
@@ -2914,12 +2955,12 @@ describe("DomControls", () => {
       buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "merlin";
-      hullInput.trigger("input");
+      hullInput.trigger("change");
 
       expect(getFake(globalThis.document, "attacker-hull").value).toBe("Merlin");
-      const presetSelect = getFake(globalThis.document, "attacker-preset-fitting");
-      expect(presetSelect.children.length).toBe(1);
-      expect(presetSelect.disabled).toBe(true);
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-empty").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-fitting-trigger").disabled).toBe(false);
     });
 
     test("importing a fitting records the fitting basis and clears attacker overrides", async () => {
@@ -3016,6 +3057,223 @@ describe("DomControls", () => {
       expect(profile.attackerFitting).toBe(eft);
       expect(profile).not.toHaveProperty("language");
       expect(profile).not.toHaveProperty("trackingUnit");
+    });
+  });
+
+  describe("fitting popup", () => {
+    async function flush(): Promise<void> {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    const SAVED_RIFTER: { id: string; hull: string; name: string; text: string; savedAt: number } = {
+      id: "Rifter::Brawler",
+      hull: "Rifter",
+      name: "Brawler",
+      text: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      savedAt: 0,
+    };
+
+    function setRifterHull(): void {
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+    }
+
+    test("clicking the fitting trigger opens and closes the popup", () => {
+      buildControls(globalThis.document);
+      setRifterHull();
+      const trigger = getFake(globalThis.document, "attacker-fitting-trigger");
+      const popup = getFake(globalThis.document, "attacker-fitting-popup");
+      trigger.trigger("click");
+      expect(popup.hidden).toBe(false);
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+
+      trigger.trigger("click");
+      expect(popup.hidden).toBe(true);
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    test("opening a fitting popup closes other popups", () => {
+      buildControls(globalThis.document);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-skill-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(getFake(globalThis.document, "attacker-skill-popup").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
+    });
+
+    test("pointerdown outside the fitting popup closes it", () => {
+      buildControls(globalThis.document);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const outside = new FakeElement();
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(true);
+    });
+
+    test("pointerdown inside the fitting popup does not close it", () => {
+      buildControls(globalThis.document);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const popup = getFake(globalThis.document, "attacker-fitting-popup");
+      const inside = new FakeElement();
+      inside.closest = () => popup;
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+      expect(popup.hidden).toBe(false);
+    });
+
+    test("Escape closes the fitting popup and focuses the trigger", () => {
+      buildControls(globalThis.document);
+      setRifterHull();
+      const trigger = getFake(globalThis.document, "attacker-fitting-trigger");
+      trigger.trigger("click");
+      globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(true);
+      expect(trigger.focus).toHaveBeenCalled();
+    });
+
+    test("selecting a new hull with a recent saved fitting auto-imports it", async () => {
+      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      await flush();
+
+      expect(fittingImport.importFitting).toHaveBeenCalledWith(SAVED_RIFTER.text, expect.any(Object));
+      expect(savedFittings.record).not.toHaveBeenCalled();
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFitting).toBe(SAVED_RIFTER.text);
+    });
+
+    test("no recent saved fitting results in no auto-import", async () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(undefined);
+      setRifterHull();
+      await flush();
+
+      expect(fittingImport.importFitting).not.toHaveBeenCalled();
+    });
+
+    test("selecting the same hull does not auto-select", async () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      await flush();
+      fittingImport.importFitting.mockClear();
+
+      hullInput.trigger("change");
+      await flush();
+
+      expect(fittingImport.importFitting).not.toHaveBeenCalled();
+    });
+
+    test("successful clipboard fitting import calls record", async () => {
+      const { savedFittings, fittingImport, clipboard } = buildControls(globalThis.document);
+      const eft = SAVED_RIFTER.text;
+      clipboard.readText = vi.fn(async () => eft);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      expect(savedFittings.record).toHaveBeenCalledWith({ hull: "Rifter", name: "Brawler", text: eft });
+    });
+
+    test("failed fitting import does not call record", async () => {
+      const { savedFittings, fittingImport, clipboard } = buildControls(globalThis.document);
+      clipboard.readText = vi.fn(async () => SAVED_RIFTER.text);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      expect(savedFittings.record).not.toHaveBeenCalled();
+    });
+
+    test("selecting a saved fitting imports its stored EFT text without recording", async () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const savedList = getFake(globalThis.document, "attacker-fitting-saved-list").children;
+      savedList[0].children[0].trigger("click");
+      await flush();
+
+      expect(fittingImport.importFitting).toHaveBeenCalledWith(SAVED_RIFTER.text, expect.any(Object));
+      expect(savedFittings.record).not.toHaveBeenCalled();
+    });
+
+    test("selecting a preset fitting does not record", async () => {
+      const { savedFittings, fittingImport, presetFittings } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0].trigger("click");
+      await flush();
+
+      expect(presetFittings.eftText).toHaveBeenCalledWith("Rifter", expect.objectContaining({ name: "Brawler" }));
+      expect(savedFittings.record).not.toHaveBeenCalled();
+    });
+
+    test("popup separates saved and preset entries", () => {
+      const { savedFittings } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-saved-list").children.length).toBe(1);
+      expect(getFake(globalThis.document, "attacker-fitting-preset-list").children.length).toBe(2);
+    });
+
+    test("current fitting is marked with aria-current", async () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[0].trigger("click");
+      await flush();
+
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const button = getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[0];
+      expect(button.getAttribute("aria-current")).toBe("true");
+    });
+
+    test("deleting a saved fitting calls remove and does not unapply the current fitting", async () => {
+      const { savedFittings, fittingImport, settingsStore } = buildControls(globalThis.document);
+      savedFittings.mostRecentFor.mockReturnValue(SAVED_RIFTER);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      setRifterHull();
+      await flush();
+
+      const [savedAfterImport] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterImport.attackerFitting).toBe(SAVED_RIFTER.text);
+
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const savedList = getFake(globalThis.document, "attacker-fitting-saved-list").children;
+      savedList[0].children[1].trigger("click");
+
+      expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
+      const [savedAfterDelete] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(savedAfterDelete.attackerFitting).toBe(SAVED_RIFTER.text);
+    });
+
+    test("invalid saved fittings are disabled and deletable", () => {
+      const { savedFittings, fittingImport } = buildControls(globalThis.document);
+      savedFittings.listForHull.mockReturnValue([SAVED_RIFTER]);
+      fittingImport.importFitting.mockReturnValue(undefined);
+      setRifterHull();
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+
+      const item = getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[0];
+      expect(item.disabled).toBe(true);
+      expect(item.title).toBe("fitting.invalid");
+
+      getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[1].trigger("click");
+      expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
     });
   });
 });
