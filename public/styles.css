@@ -974,7 +974,7 @@ canvas {
   margin-left: 4px;
 }
 
-.profile-tip {
+.slide-hints {
   display: inline-block;
   margin-left: auto;
   color: var(--accent-blue);
@@ -987,7 +987,7 @@ canvas {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.profile-tip.hint-exit {
+.slide-hints.hint-exit {
   transform: translateY(-100%);
   opacity: 0;
 }

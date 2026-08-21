@@ -1,6 +1,6 @@
 import type { I18n, Language } from "./i18n";
 import { HintRotator } from "./hintRotator";
-import { HINT_CANDIDATES } from "./hints";
+import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
 import type { IntervalId, TimeoutId, Timer } from "./timer";
 
 class FakeElement {
@@ -58,11 +58,11 @@ function fakeI18n(language: Language = "en"): I18n {
 }
 
 function createRotator(element: HTMLElement, timer: Timer, language: Language = "en"): HintRotator {
-  return new HintRotator({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, timer });
+  return new HintRotator({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer });
 }
 
 describe("HintRotator", () => {
-  test("initially renders first active hint with prefix in current language", () => {
+  test("initially renders first hint with prefix in current language", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     createRotator(element, timer);
@@ -72,39 +72,48 @@ describe("HintRotator", () => {
   test("refresh updates text when language changes", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
-    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, timer: new ManualTimer() });
+    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer: new ManualTimer() });
     i18n.setLanguage("zh");
     rotator.refresh();
     expect(element.textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
   });
 
-  test("showNext changes to a different active hint", () => {
+  test("showNext advances from first hint to tip", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     const rotator = createRotator(element, timer);
     rotator.showNext();
     timer.runTimeout();
-    expect(element.textContent).toBe("hint.prefix 'Midships' means putting the rudder to the center position.");
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
   });
 
-  test("showNext does not repeat the current hint", () => {
+  test("showNext cycles through hints and tip in order", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     const rotator = createRotator(element, timer);
-    rotator.showNext();
-    timer.runTimeout();
-    const first = element.textContent;
-    rotator.showNext();
-    timer.runTimeout();
-    expect(element.textContent).not.toBe(first);
+    const expected = [
+      "If you like this tool, may consider tip me in the game, thank you!",
+      "hint.prefix 'Midships' means putting the rudder to the center position.",
+      "If you like this tool, may consider tip me in the game, thank you!",
+      "hint.prefix You can import a ship fitting from clipboard.",
+    ];
+    for (const text of expected) {
+      rotator.showNext();
+      timer.runTimeout();
+      expect(element.textContent).toBe(text);
+    }
   });
 
-  test("showNext with one active hint does not change text", () => {
+  test("showNext alternates between one hint and tip", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     const candidates = [HINT_CANDIDATES[0]];
-    const rotator = new HintRotator({ element, i18n: fakeI18n(), candidates, timer });
+    const rotator = new HintRotator({ element, i18n: fakeI18n(), candidates, tipText: TIP_TEXT, timer });
     rotator.showNext();
+    timer.runTimeout();
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
+    rotator.showNext();
+    timer.runTimeout();
     expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
   });
 
@@ -115,7 +124,7 @@ describe("HintRotator", () => {
     expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
     timer.runInterval();
     timer.runTimeout();
-    expect(element.textContent).toBe("hint.prefix 'Midships' means putting the rudder to the center position.");
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
   });
 
   test("stop cancels the interval", () => {
@@ -138,5 +147,17 @@ describe("HintRotator", () => {
     expect(element.style.transition).toBe("");
     expect(element.style.transform).toBe("");
     expect(element.style.opacity).toBe("");
+  });
+
+  test("refresh updates tip text when current slide is a tip", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const i18n = fakeI18n("en");
+    const timer = new ManualTimer();
+    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer });
+    rotator.showNext();
+    timer.runTimeout();
+    i18n.setLanguage("zh");
+    rotator.refresh();
+    expect(element.textContent).toBe("如果喜欢这个工具，可以在游戏中打赏我，谢谢！");
   });
 });

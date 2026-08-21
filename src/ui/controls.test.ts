@@ -1322,16 +1322,16 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-skill-summary").textContent).toBe("Skill 5");
   });
 
-  test("profile tip displays the first active hint on load", () => {
+  test("slide hints display the first hint on load", () => {
     buildControls(globalThis.document);
-    expect(getFake(globalThis.document, "profile-tip").textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+    expect(getFake(globalThis.document, "slide-hints").textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
   });
 
-  test("language change refreshes the profile hint", () => {
+  test("language change refreshes the slide hints", () => {
     buildControls(globalThis.document);
     const langZh = getFake(globalThis.document, "lang-zh");
     langZh.trigger("click");
-    expect(getFake(globalThis.document, "profile-tip").textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
+    expect(getFake(globalThis.document, "slide-hints").textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
   });
 
   test("update colors the hit chance value based on chance", () => {

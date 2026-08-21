@@ -1,5 +1,5 @@
-import type { I18n } from "./i18n";
-import type { HintCandidate } from "./hints";
+import type { I18n, Language } from "./i18n";
+import type { Hint } from "./hints";
 import type { IntervalId, Timer } from "./timer";
 
 export interface IHintRotator {
@@ -11,7 +11,8 @@ export interface IHintRotator {
 export interface HintRotatorConfig {
   readonly element: HTMLElement;
   readonly i18n: I18n;
-  readonly candidates: readonly HintCandidate[];
+  readonly candidates: readonly Hint[];
+  readonly tipText: Readonly<Record<Language, string>>;
   readonly timer: Timer;
   readonly intervalMs?: number;
 }
@@ -19,33 +20,35 @@ export interface HintRotatorConfig {
 export class HintRotator implements IHintRotator {
   private readonly element: HTMLElement;
   private readonly i18n: I18n;
-  private readonly candidates: readonly HintCandidate[];
+  private readonly candidates: readonly Hint[];
+  private readonly tipText: Readonly<Record<Language, string>>;
   private readonly timer: Timer;
   private readonly intervalMs: number;
   private currentIndex = 0;
   private intervalId?: IntervalId;
   private isAnimating = false;
 
-  constructor({ element, i18n, candidates, timer, intervalMs = 60_000 }: HintRotatorConfig) {
+  constructor({ element, i18n, candidates, tipText, timer, intervalMs = 20_000 }: HintRotatorConfig) {
     this.element = element;
     this.i18n = i18n;
     this.candidates = candidates;
+    this.tipText = tipText;
     this.timer = timer;
     this.intervalMs = intervalMs;
-    this.renderFirstActive();
+    this.renderFirst();
     this.start();
   }
 
   showNext(): void {
     if (this.isAnimating) return;
-    const active = activeCandidates(this.candidates);
-    if (active.length <= 1) return;
-    const nextIndex = this.pickNextIndex(active);
+    const total = this.totalSlides();
+    if (total < 2) return;
+    const nextIndex = (this.currentIndex + 1) % total;
     this.currentIndex = nextIndex;
     this.isAnimating = true;
     this.element.classList.toggle("hint-exit", true);
     this.timer.setTimeout(() => {
-      this.render(active[nextIndex]);
+      this.renderSlide(nextIndex);
       this.snapBelow();
       this.element.style.transform = "";
       this.element.style.opacity = "";
@@ -54,8 +57,7 @@ export class HintRotator implements IHintRotator {
   }
 
   refresh(): void {
-    const active = activeCandidates(this.candidates);
-    this.render(active[this.currentIndex]);
+    this.renderSlide(this.currentIndex);
   }
 
   stop(): void {
@@ -69,32 +71,37 @@ export class HintRotator implements IHintRotator {
     this.intervalId = this.timer.setInterval(() => this.showNext(), this.intervalMs);
   }
 
-  private renderFirstActive(): void {
-    const active = activeCandidates(this.candidates);
-    if (active.length === 0) {
+  private renderFirst(): void {
+    const total = this.totalSlides();
+    if (total === 0) {
       this.element.textContent = "";
       return;
     }
     this.currentIndex = 0;
-    this.render(active[0]);
+    this.renderSlide(0);
   }
 
-  private render(candidate: HintCandidate | undefined): void {
-    if (candidate === undefined) {
+  private renderSlide(index: number): void {
+    if (this.isTip(index)) {
+      this.element.textContent = this.tipText[this.i18n.current()];
+      return;
+    }
+    const hintIndex = Math.floor(index / 2);
+    const hint = this.candidates[hintIndex];
+    if (hint === undefined) {
       this.element.textContent = "";
       return;
     }
-    const text = candidate.text[this.i18n.current()];
-    this.element.textContent = candidate.isHint ? `${this.i18n.t("hint.prefix")} ${text}` : text;
+    const text = hint.text[this.i18n.current()];
+    this.element.textContent = `${this.i18n.t("hint.prefix")} ${text}`;
   }
 
-  private pickNextIndex(active: readonly HintCandidate[]): number {
-    if (active.length <= 1) return 0;
-    let next: number;
-    do {
-      next = Math.floor(Math.random() * active.length);
-    } while (next === this.currentIndex);
-    return next;
+  private isTip(index: number): boolean {
+    return index % 2 === 1;
+  }
+
+  private totalSlides(): number {
+    return this.candidates.length * 2;
   }
 
   private snapBelow(): void {
@@ -105,8 +112,4 @@ export class HintRotator implements IHintRotator {
     void this.element.offsetHeight;
     this.element.style.transition = "";
   }
-}
-
-function activeCandidates(candidates: readonly HintCandidate[]): readonly HintCandidate[] {
-  return candidates.filter((c) => c.isHint);
 }

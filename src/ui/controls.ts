@@ -17,7 +17,7 @@ import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { HintRotator, type IHintRotator } from "./hintRotator";
-import { HINT_CANDIDATES } from "./hints";
+import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
 import type { TimeoutId, Timer } from "./timer";
 
 export interface ControlsCallbacks {
@@ -116,11 +116,12 @@ export class DomControls implements Controls {
     this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.trackingInput = new TrackingInput();
     this.hintRotator = new HintRotator({
-      element: el("profile-tip"),
+      element: el("slide-hints"),
       i18n,
       candidates: HINT_CANDIDATES,
+      tipText: TIP_TEXT,
       timer,
-      intervalMs: 60_000,
+      intervalMs: 20_000,
     });
     this.els = {
       tracking: el("tracking"),
