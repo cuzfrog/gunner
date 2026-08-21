@@ -341,6 +341,50 @@ describe("ReactiveAutopilot", () => {
       expect(command(shipLow, other)).toEqual(command(shipMin, other));
       expect(command(shipHigh, other).dot(fromCenterHat)).toBeCloseTo(-1000, 1);
     });
+  });
 
+  describe("midships", () => {
+    test("moving ship burns straight ahead at max speed", () => {
+      const ship = makeShip("attacker", [0, 0], "midships", 1000);
+      ship.velocity = new Vec2(300, 400);
+      const other = makeShip("target", [0, 5000], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(cmd).toEqual(ship.velocity.norm().scale(ship.maxSpeed));
+    });
+
+    test("at rest it burns perpendicular to the line of sight, clockwise by default", () => {
+      const ship = makeShip("attacker", [0, 0], "midships", 1000);
+      const other = makeShip("target", [0, 5000], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(cmd.x).toBeCloseTo(1000, 5);
+      expect(cmd.y).toBeCloseTo(0, 5);
+      expect(cmd.len()).toBeCloseTo(ship.maxSpeed, 5);
+    });
+
+    test("at rest it honors the orbit direction handedness", () => {
+      const ship = makeShip("attacker", [0, 0], "midships", 1000, 5000, 1, 1e-6, 1, "ccw");
+      const other = makeShip("target", [0, 5000], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(cmd.x).toBeCloseTo(-1000, 5);
+      expect(cmd.y).toBeCloseTo(0, 5);
+    });
+
+    test("stationary and co-located with the other ship returns zero", () => {
+      const ship = makeShip("attacker", [0, 0], "midships", 1000);
+      const other = makeShip("target", [0, 0], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(cmd.x).toBe(0);
+      expect(cmd.y).toBe(0);
+    });
+
+    test("moving ship that is co-located still burns straight", () => {
+      const ship = makeShip("attacker", [0, 0], "midships", 1000);
+      ship.velocity = new Vec2(0, 700);
+      const other = makeShip("target", [0, 0], "orbit", 0, 5000);
+      const cmd = command(ship, other);
+      expect(cmd.x).toBeCloseTo(0, 5);
+      expect(cmd.y).toBeCloseTo(1000, 5);
+      expect(cmd.len()).toBeCloseTo(ship.maxSpeed, 5);
+    });
   });
 });

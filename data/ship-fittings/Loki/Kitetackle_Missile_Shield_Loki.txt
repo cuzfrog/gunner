@@ -1,0 +1,35 @@
+[Loki, Kitetackle Missile Shield Loki]
+Covert Ops Cloaking Device II
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+Rapid Light Missile Launcher II, Scourge Fury Light Missile
+
+Large Ancillary Shield Booster, Navy Cap Booster 200
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+Gist X-Type Shield Boost Amplifier
+50MN Y-T8 Compact Microwarpdrive
+Dread Guristas Warp Disruptor
+Multispectrum Shield Hardener II
+Dread Guristas Stasis Webifier
+
+Damage Control II
+Co-Processor II
+
+Medium Thermal Shield Reinforcer II
+Medium Kinetic Shield Reinforcer II
+Medium Ancillary Current Router II
+
+
+Hornet EC-300 x3
+
+
+Standard Blue Pill Booster x1
+Mjolnir Fury Light Missile x1351
+Scourge Fury Light Missile x1023
+Navy Cap Booster 400 x18
+Navy Cap Booster 200 x6
+Loki Offensive - Launcher Efficiency Configuration x1
+Loki Core - Immobility Drivers x1
+Loki Propulsion - Wake Limiter x1
+Loki Defensive - Covert Reconfiguration x1

@@ -26,7 +26,7 @@
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.6.0</span>
+        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.7.0</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -49,9 +49,26 @@
         <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
       <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
-      <button type="button" id="share-link" data-i18n="button.copyLink">Copy link</button>
-      <span id="share-status" class="share-status"></span>
-      <span class="profile-tip" data-i18n="profile.tip">If you like this tool, may consider tip me in the game, thank you!</span>
+      <button type="button" id="share-link" class="icon-button"
+              data-i18n-title="title.copyProfile" data-i18n-aria-label="button.copyProfile"
+              title="Copy current profile to clipboard" aria-label="Copy">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#copy"></use></svg>
+      </button>
+      <div class="profile-import-field">
+        <button type="button" id="import-profile" class="icon-button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"
+                data-i18n-title="title.importProfile" data-i18n-aria-label="button.importProfile"
+                title="Import profile or fitting from clipboard" aria-label="Import">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
+        </button>
+        <div class="import-side-popup" id="import-side-popup" hidden role="menu"
+             data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
+          <button type="button" id="import-side-attacker" role="menuitem" data-i18n="section.attackerTurret">Attacker</button>
+          <button type="button" id="import-side-target" role="menuitem" data-i18n="section.targetShip">Target</button>
+        </div>
+      </div>
+      <span id="share-status" class="share-status" aria-live="polite"></span>
+      <span id="slide-hints" class="slide-hints" aria-live="polite">You can import a ship fitting from clipboard.</span>
     </section>
 
     <section class="results">
@@ -142,29 +159,65 @@
           </label>
         </div>
 
+        <div class="field-group ammo-group" id="attacker-ammo-field" hidden>
+          <button type="button" id="attacker-ammo-trigger" class="ammo-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
+                  data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+                  title="Select ammunition" aria-label="Select ammunition">
+            <span class="ammo-label" data-i18n="label.ammo">Ammo</span>
+            <span class="ammo-summary-row">
+              <span class="ammo-summary-value" id="attacker-ammo-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </span>
+          </button>
+          <div class="ammo-popup" id="attacker-ammo-popup" hidden>
+            <span class="fitting-group-label" id="attacker-ammo-cargo-label" data-i18n="ammo.cargoGroup">In cargo</span>
+            <ul class="ammo-list" id="attacker-ammo-cargo-list" role="listbox"></ul>
+            <button type="button" class="ammo-expand" id="attacker-ammo-expand" data-i18n="ammo.showAll">Show all</button>
+            <div id="attacker-ammo-all-section" hidden>
+              <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
+              <ul class="ammo-list" id="attacker-ammo-all-list" role="listbox"></ul>
+            </div>
+          </div>
+        </div>
+
         <hr class="panel-divider">
 
-        <label>
+        <div class="hull-field">
           <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
             <button type="button" id="attacker-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-            <span class="fitting-name" id="attacker-fitting-name" hidden>
-              <span class="fitting-name-label"></span><span class="fitting-name-value"></span>
-            </span>
+            <span class="fitting-name" id="attacker-fitting-name" hidden></span>
             <span id="attacker-import-status" class="import-status"></span>
             <div class="paste-popup" id="attacker-paste-popup" hidden>
               <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
-          <input type="text" id="attacker-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <div class="hull-input-row">
+            <input type="text" id="attacker-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <button type="button" id="attacker-fitting-trigger" class="fitting-trigger"
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-fitting-popup"
+                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
+                    title="Select fitting" aria-label="Select fitting" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup" id="attacker-fitting-popup" hidden role="menu"
+                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
+              <span class="fitting-group-label" id="attacker-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="attacker-fitting-saved-list"></ul>
+              <span class="fitting-group-label" id="attacker-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="attacker-fitting-preset-list"></ul>
+              <p class="fitting-empty" id="attacker-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+            </div>
+          </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
-        </label>
+        </div>
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
@@ -201,6 +254,7 @@
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
               <option value="orbit" data-i18n="mode.orbit">Orbit</option>
+              <option value="midships" data-i18n="mode.midships">Midships</option>
             </select>
           </div>
           <label>
@@ -272,27 +326,41 @@
 
       <section class="panel target-panel">
         <h2 data-i18n="section.targetShip">Target</h2>
-        <label>
+        <div class="hull-field">
           <div class="hull-label-row">
             <span data-i18n="label.hull">Ship</span>
             <button type="button" id="target-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-            <span class="fitting-name" id="target-fitting-name" hidden>
-              <span class="fitting-name-label"></span><span class="fitting-name-value"></span>
-            </span>
+            <span class="fitting-name" id="target-fitting-name" hidden></span>
             <span id="target-import-status" class="import-status"></span>
             <div class="paste-popup" id="target-paste-popup" hidden>
               <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
-          <input type="text" id="target-hull" list="hull-options"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"
-                 data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+          <div class="hull-input-row">
+            <input type="text" id="target-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <button type="button" id="target-fitting-trigger" class="fitting-trigger"
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="target-fitting-popup"
+                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
+                    title="Select fitting" aria-label="Select fitting" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup" id="target-fitting-popup" hidden role="menu"
+                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
+              <span class="fitting-group-label" id="target-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="target-fitting-saved-list"></ul>
+              <span class="fitting-group-label" id="target-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="target-fitting-preset-list"></ul>
+              <p class="fitting-empty" id="target-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+            </div>
+          </div>
           <span class="hull-hint" id="target-hull-hint"></span>
-        </label>
+        </div>
         <div class="field-row">
           <div class="field-group">
             <span class="field-label-row">
@@ -354,6 +422,7 @@
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
               <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
+              <option value="midships" data-i18n="mode.midships">Midships</option>
             </select>
           </div>
           <label>

@@ -1,0 +1,38 @@
+[Hyperion, Kitetackle Blaster Armor Hyperion]
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+'Vehemence' Compact Large EMP Smartbomb
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Ion Blaster Cannon II, Caldari Navy Antimatter Charge L
+Neutron Blaster Cannon II, Caldari Navy Antimatter Charge L
+
+Heavy F-RX Compact Capacitor Booster
+Warp Scrambler II
+Heavy Stasis Grappler II
+Stasis Webifier II
+500MN Y-T8 Compact Microwarpdrive
+
+Damage Control II
+Magnetic Field Stabilizer II
+Reactive Armor Hardener
+Dark Blood Large Armor Repairer
+Dark Blood Large Armor Repairer
+Magnetic Field Stabilizer II
+Multispectrum Energized Membrane II
+
+Large Nanobot Accelerator I
+Large Auxiliary Nano Pump I
+Large Auxiliary Nano Pump I
+
+
+Hornet EC-300 x5
+
+
+Caldari Navy Antimatter Charge L x213
+Null L x1378
+Dread Guristas Shield Boost Amplifier, Caldari Navy Antimatter Charge L
+Sisters Expanded Probe Launcher, Caldari Navy Antimatter Charge L
+Void L x2894
+Nanite Repair Paste x193
+Pithum C-Type Medium Shield Booster, Caldari Navy Antimatter Charge L

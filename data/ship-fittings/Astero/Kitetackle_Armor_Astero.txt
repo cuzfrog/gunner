@@ -1,0 +1,29 @@
+[Astero, Kitetackle Armor Astero]
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Covert Ops Cloaking Device II
+
+Stasis Webifier II
+Warp Scrambler II
+1MN Afterburner II
+Coreli B-Type 5MN Microwarpdrive
+
+Imperial Navy Small Armor Repairer
+Nanofiber Internal Structure II
+Multispectrum Energized Membrane II
+Damage Control II
+
+Small Low Friction Nozzle Joints I
+Small Gravity Capacitor Upgrade I
+Small Capacitor Control Circuit I
+
+
+Caldari Navy Hornet x5
+'Augmented' Hornet x5
+
+
+Mobile Depot x1
+Sisters Core Scanner Probe x24
+Data Analyzer II, Sisters Core Scanner Probe
+Relic Analyzer II, Sisters Core Scanner Probe
+Noise-5 'Needlejack' Filament x4
+Small Secure Container x1

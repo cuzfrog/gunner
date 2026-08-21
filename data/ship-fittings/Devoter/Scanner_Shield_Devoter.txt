@@ -1,0 +1,30 @@
+[Devoter, Scanner Shield Devoter]
+Core Probe Launcher I, Sisters Core Scanner Probe
+Zero-Point Mass Entangler
+Zero-Point Mass Entangler
+Improved Cloaking Device II
+Zero-Point Mass Entangler
+Zero-Point Mass Entangler
+
+500MN Microwarpdrive I
+
+Overdrive Injector System II
+Damage Control II
+Co-Processor II
+Overdrive Injector System II
+Nanofiber Internal Structure II
+Inertial Stabilizers II
+Inertial Stabilizers II
+
+Medium Polycarbon Engine Housing II
+Medium Higgs Anchor I
+
+
+Hornet EC-300 x5
+Warrior II x5
+
+
+Mobile Depot x1
+Sisters Core Scanner Probe x8
+Proximity-5 'Extraction' Filament x1
+Cladistic-5 'Krai Veles' Filament x1

@@ -1,0 +1,37 @@
+[Rupture, Art Shield Rupture]
+720mm Howitzer Artillery II, Tremor M
+720mm Howitzer Artillery II, Tremor M
+720mm Howitzer Artillery II, Tremor M
+720mm Howitzer Artillery II, Tremor M
+Drone Link Augmentor I
+
+Multispectrum Shield Hardener II
+Large Shield Extender II
+EM Shield Amplifier II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Damage Control II
+Gyrostabilizer II
+Reactor Control Unit II
+Tracking Enhancer II
+Gyrostabilizer II
+
+Medium Thermal Shield Reinforcer I
+Medium Capacitor Control Circuit I
+Medium Core Defense Field Extender I
+
+
+Acolyte II x4
+
+
+Tremor M x546
+Tremor M x162
+Republic Fleet Depleted Uranium M x800
+Republic Fleet Titanium Sabot M x800
+Synth Mindflood Booster x1
+Republic Fleet Phased Plasma M x800
+Agency 'Overclocker' SB3 Dose I x1
+Republic Fleet Fusion M x800
+Quake M x764
+Nanite Repair Paste x50
+Republic Fleet EMP M x800

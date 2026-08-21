@@ -1,0 +1,41 @@
+[Skua, Support Rocket Shield Skua]
+Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+Shield Command Burst II, Shield Extension Charge
+Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+
+Missile Guidance Computer II, Missile Range Script
+Missile Guidance Computer II, Missile Range Script
+Micro Jump Field Generator
+5MN Abyssal Microwarpdrive
+Pithum A-Type Multispectrum Shield Hardener
+Medium Abyssal Shield Extender
+
+Abyssal Ballistic Control System
+Abyssal Ballistic Control System
+Abyssal Ballistic Control System
+
+Small Rocket Fuel Cache Partition II
+Small Hydraulic Bay Thrusters II
+Small EM Shield Reinforcer II
+
+
+Nova Rage Rocket x1360
+Inferno Javelin Rocket x1500
+Dread Guristas Scourge Rocket x1095
+Active Shielding Charge x450
+Scourge Javelin Rocket x1410
+Dread Guristas Inferno Rocket x1160
+Shield Extension Charge x150
+Scourge Rage Rocket x995
+Dread Guristas Nova Rocket x1285
+Shield Harmonizing Charge x450
+Dread Guristas Mjolnir Rocket x1190
+Missile Precision Script x2
+Nanite Repair Paste x296
+Nova Javelin Rocket x1370
+Mjolnir Javelin Rocket x1300
+Inferno Rage Rocket x985
+Mjolnir Rage Rocket x950

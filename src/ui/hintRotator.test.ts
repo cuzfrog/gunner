@@ -1,0 +1,163 @@
+import type { I18n, Language } from "./i18n";
+import { HintRotator } from "./hintRotator";
+import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
+import type { IntervalId, TimeoutId, Timer } from "./timer";
+
+class FakeElement {
+  textContent = "";
+  hidden = false;
+  offsetHeight = 10;
+  style: Record<string, string> = {};
+  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
+}
+
+class ManualTimer implements Timer {
+  private timeout?: { callback: () => void; id: number };
+  private interval?: { callback: () => void; id: number };
+  private nextId = 1;
+
+  setTimeout(callback: () => void, _ms: number): TimeoutId {
+    const id = this.nextId++;
+    this.timeout = { callback, id };
+    return id;
+  }
+
+  clearTimeout(): void {
+    this.timeout = undefined;
+  }
+
+  setInterval(callback: () => void, _ms: number): IntervalId {
+    const id = this.nextId++;
+    this.interval = { callback, id };
+    return id;
+  }
+
+  clearInterval(): void {
+    this.interval = undefined;
+  }
+
+  runTimeout(): void {
+    this.timeout?.callback();
+  }
+
+  runInterval(): void {
+    this.interval?.callback();
+  }
+}
+
+function fakeI18n(language: Language = "en"): I18n {
+  let current = language;
+  return {
+    current: () => current,
+    setLanguage: (l: Language) => {
+      current = l;
+    },
+    t: (key: string) => key,
+    translateDocument: () => {},
+  } as unknown as I18n;
+}
+
+function createRotator(element: HTMLElement, timer: Timer, language: Language = "en"): HintRotator {
+  return new HintRotator({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer });
+}
+
+describe("HintRotator", () => {
+  test("initially renders first hint with prefix in current language", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    createRotator(element, timer);
+    expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+  });
+
+  test("refresh updates text when language changes", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const i18n = fakeI18n("en");
+    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer: new ManualTimer() });
+    i18n.setLanguage("zh");
+    rotator.refresh();
+    expect(element.textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
+  });
+
+  test("showNext advances from first hint to tip", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    const rotator = createRotator(element, timer);
+    rotator.showNext();
+    timer.runTimeout();
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
+  });
+
+  test("showNext cycles through hints and tip in order", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    const rotator = createRotator(element, timer);
+    const expected = [
+      "If you like this tool, may consider tip me in the game, thank you!",
+      "hint.prefix 'Midships' means putting the rudder to the center position.",
+      "If you like this tool, may consider tip me in the game, thank you!",
+      "hint.prefix You can import a ship fitting from clipboard.",
+    ];
+    for (const text of expected) {
+      rotator.showNext();
+      timer.runTimeout();
+      expect(element.textContent).toBe(text);
+    }
+  });
+
+  test("showNext alternates between one hint and tip", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    const candidates = [HINT_CANDIDATES[0]];
+    const rotator = new HintRotator({ element, i18n: fakeI18n(), candidates, tipText: TIP_TEXT, timer });
+    rotator.showNext();
+    timer.runTimeout();
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
+    rotator.showNext();
+    timer.runTimeout();
+    expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+  });
+
+  test("interval schedules showNext", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    createRotator(element, timer);
+    expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+    timer.runInterval();
+    timer.runTimeout();
+    expect(element.textContent).toBe("If you like this tool, may consider tip me in the game, thank you!");
+  });
+
+  test("stop cancels the interval", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    const rotator = createRotator(element, timer);
+    rotator.stop();
+    timer.runInterval();
+    expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
+  });
+
+  test("showNext applies and removes exit class and snaps below before sliding in", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const timer = new ManualTimer();
+    const rotator = createRotator(element, timer);
+    rotator.showNext();
+    expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", true);
+    timer.runTimeout();
+    expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", false);
+    expect(element.style.transition).toBe("");
+    expect(element.style.transform).toBe("");
+    expect(element.style.opacity).toBe("");
+  });
+
+  test("refresh updates tip text when current slide is a tip", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const i18n = fakeI18n("en");
+    const timer = new ManualTimer();
+    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, timer });
+    rotator.showNext();
+    timer.runTimeout();
+    i18n.setLanguage("zh");
+    rotator.refresh();
+    expect(element.textContent).toBe("如果喜欢这个工具，可以在游戏中打赏我，谢谢！");
+  });
+});

@@ -1,0 +1,39 @@
+[Manticore, Kitetackle Torp Shield Manticore]
+Prototype 'Arbalest' Torpedo Launcher, Caldari Navy Inferno Torpedo
+Core Probe Launcher I, Sisters Core Scanner Probe
+Prototype 'Arbalest' Torpedo Launcher, Caldari Navy Inferno Torpedo
+Prototype 'Arbalest' Torpedo Launcher, Caldari Navy Inferno Torpedo
+Covert Ops Cloaking Device II
+
+Target Painter I
+Faint Scoped Warp Disruptor
+1MN Civilian Afterburner
+Fleeting Compact Stasis Webifier
+
+Ballistic Control System II
+Ballistic Control System II
+
+Small Warhead Rigor Catalyst II
+Small Warhead Rigor Catalyst II
+
+
+Data Analyzer I, Sisters Core Scanner Probe
+Burned Logic Circuit x20
+Armor Plates x4
+Positron Cord x43
+Charred Micro Circuit x11
+Sisters Core Scanner Probe x8
+Defective Current Pump x45
+Damaged Artificial Neural Network x29
+Noise-5 'Needlejack' Filament x2
+5MN Cold-Gas Enduring Microwarpdrive, Sisters Core Scanner Probe
+Contaminated Nanite Compound x18
+Nanite Repair Paste x50
+Symmetry Decryptor x1
+Carbon x2
+Augmentation Decryptor x1
+Caldari Navy Inferno Torpedo x2078
+Micro Circuit x2
+Target Painter I, Sisters Core Scanner Probe
+Tripped Power Circuit x13
+Fried Interface Circuit x24

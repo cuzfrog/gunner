@@ -1,0 +1,31 @@
+[Tengu, Tackle Missile Shield Tengu]
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Sisters Expanded Probe Launcher, Sisters Combat Scanner Probe
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Covert Ops Cloaking Device II
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+
+Shield Boost Amplifier I
+Sensor Booster II, Scan Resolution Script
+Multispectrum Shield Hardener II
+Stasis Webifier I
+10MN Y-S8 Compact Afterburner
+Large Ancillary Shield Booster, Navy Cap Booster 150
+Dread Guristas Warp Scrambler
+
+Ballistic Control System II
+Ballistic Control System II
+
+Medium Capacitor Control Circuit II
+Medium EM Shield Reinforcer II
+Medium Ancillary Current Router II
+
+
+Mjolnir Rage Heavy Assault Missile x430
+Tengu Offensive - Accelerated Ejection Bay x1
+Tengu Defensive - Covert Reconfiguration x1
+Tengu Core - Augmented Graviton Reactor x1
+Tengu Propulsion - Fuel Catalyst x1

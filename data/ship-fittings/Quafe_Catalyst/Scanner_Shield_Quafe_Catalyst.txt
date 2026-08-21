@@ -1,0 +1,39 @@
+[Quafe Catalyst, Scanner Shield Quafe Catalyst]
+Salvager I
+Small Tractor Beam I
+Improved Cloaking Device II
+Salvager I
+Salvager I
+Salvager I
+Salvager I
+Salvager I
+
+5MN Y-T8 Compact Microwarpdrive
+Eutectic Compact Cap Recharger
+
+Co-Processor II
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+
+Small Salvage Tackle I
+Small Salvage Tackle I
+Small Salvage Tackle I
+
+
+Core Scanner Probe I x8
+Emergent Combat Intelligence x1
+Sleeper Data Library x8
+Defensive Control Node x1
+Mobile Depot x1
+Electromechanical Hull Sheeting x42
+Heuristic Selfassemblers x4
+Neurovisual Input Matrix x8
+Mobile Tractor Unit x1
+Cartesian Temporal Coordinator x1
+Fused Nanomechanical Engines x1
+Melted Nanoribbons x2
+Resonance Calibration Matrix x1
+Modified Fluid Router x7
+Reinforced Metal Scraps x16
+Powdered C-540 Graphite x15
+Core Probe Launcher I, Core Scanner Probe I

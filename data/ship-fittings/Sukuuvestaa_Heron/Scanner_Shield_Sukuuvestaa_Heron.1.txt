@@ -1,0 +1,38 @@
+[Sukuuvestaa Heron, Scanner Shield Sukuuvestaa Heron]
+Core Probe Launcher I, Core Scanner Probe I
+Prototype Cloaking Device I
+Salvager I
+
+Cargo Scanner II
+5MN Microwarpdrive I
+Data Analyzer I
+Relic Analyzer I
+Small Supplemental Barrier Emitter I
+
+'Repose' Core Compensation
+Nanofiber Internal Structure II
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I
+
+
+Hobgoblin I x7
+
+
+Core Scanner Probe I x7
+Core Scanner Probe I x9
+Scorched Telemetry Processor x25
+Jury Rigging x1
+Burned Logic Circuit x17
+Artificial Neural Network x3
+Charred Micro Circuit x6
+Damaged Artificial Neural Network x16
+Electronic Superiority Rigging x1
+Ward Console x7
+Interface Circuit x3
+Carbon x2
+Carbon x2
+Malfunctioning Shield Emitter x18
+Intact Shield Emitter x3
+Micro Circuit x3
+Micro Circuit x4

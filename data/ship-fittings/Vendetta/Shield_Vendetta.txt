@@ -1,0 +1,44 @@
+[Vendetta, Shield Vendetta]
+Stasis Webification Burst Projector
+Unit F-435454's Modified Fighter Support Unit
+Unit W-634's Modified Fighter Support Unit
+Unit P-343554's Modified Fighter Support Unit
+Unit W-634's Modified Fighter Support Unit
+Networked Sensor Array
+Unit W-634's Modified Fighter Support Unit
+
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Dread Guristas Capital Shield Booster
+Selynne's Modified Cap Recharger
+Unit W-634's Modified Omnidirectional Tracking Link, Tracking Speed Script
+Selynne's Modified Cap Recharger
+
+Unit F-435454's Modified Damage Control
+Corpum A-Type Multispectrum Energized Membrane
+Unit W-634's Modified Drone Damage Amplifier
+Corpum A-Type Multispectrum Energized Membrane
+Unit W-634's Modified Drone Damage Amplifier
+Unit W-634's Modified Drone Damage Amplifier
+Unit W-634's Modified Drone Damage Amplifier
+
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+Capital Trimark Armor Pump II
+
+
+Warp Disruption Burst Projector
+CONCORD Capital Armor Repairer
+ECM Jammer Burst Projector
+CONCORD Capital Shield Extender
+Caldari Navy Cloaking Device
+Dark Blood Capital Cap Battery
+Sentient Sensor Booster
+Sentient Sensor Booster
+Target Illumination Burst Projector
+CONCORD 25000mm Steel Plates
+Pithum A-Type Multispectrum Shield Hardener
+Pith X-Type Shield Boost Amplifier
+Heavy Water x4000
+Scan Resolution Script x2
+Oxygen Isotopes x145849
+Nestor x1

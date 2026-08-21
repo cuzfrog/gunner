@@ -1,0 +1,37 @@
+[Manticore, Kitetackle Rocket Armor Manticore]
+Rocket Launcher II, Mjolnir Rage Rocket
+Covert Ops Cloaking Device II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Rocket Launcher II, Mjolnir Rage Rocket
+
+Stasis Webifier II
+Warp Scrambler II
+1MN Afterburner II
+Warp Scrambler II
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+
+Small Hybrid Burst Aerator I
+Small Hybrid Collision Accelerator I
+
+
+Vespa I x1
+Hornet I x1
+
+
+Rocket Launcher II, Nova Rage Rocket
+Nova Rage Rocket x4367
+125mm Carbide Railgun I, Nova Rage Rocket
+Small Armor Repairer II, Nova Rage Rocket
+Antimatter Charge S x192
+Inertial Stabilizers II, Nova Rage Rocket
+Inertial Stabilizers II, Nova Rage Rocket
+Light Neutron Blaster I, Nova Rage Rocket
+Eutectic Compact Cap Recharger, Nova Rage Rocket
+Initiated Compact Warp Scrambler, Nova Rage Rocket
+5MN Quad LiF Restrained Microwarpdrive, Nova Rage Rocket
+Mjolnir Rage Rocket x8156
+Void S x7836
+Damage Control I, Nova Rage Rocket

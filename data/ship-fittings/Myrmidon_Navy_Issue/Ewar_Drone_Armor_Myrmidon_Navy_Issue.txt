@@ -1,0 +1,40 @@
+[Myrmidon Navy Issue, Ewar Drone Armor Myrmidon Navy Issue]
+Medium Ancillary Remote Armor Repairer, Nanite Repair Paste
+Armor Command Burst II, Rapid Repair Charge
+Medium I-ax Enduring Remote Armor Repairer
+Medium I-ax Enduring Remote Armor Repairer
+Drone Link Augmentor II
+Medium Gremlin Compact Energy Neutralizer
+
+Omnidirectional Tracking Link II
+Sensor Booster II
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Drone Navigation Computer II
+Drone Navigation Computer II
+
+Damage Control II
+Drone Damage Amplifier II
+1600mm Steel Plates II
+Multispectrum Coating II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+Medium Trimark Armor Pump I
+
+
+Valkyrie II x5
+Valkyrie SW-600 x13
+Valkyrie SW-600 x2
+
+
+Improved Mindflood Booster x3
+Tracking Speed Script x1
+ECCM Script x1
+Navy Cap Booster 800 x19
+Optimal Range Script x1
+Scan Resolution Script x1
+Nanite Repair Paste x288
+Rapid Repair Charge x1700
+Targeting Range Script x1

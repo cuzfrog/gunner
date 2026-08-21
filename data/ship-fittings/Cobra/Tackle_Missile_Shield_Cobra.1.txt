@@ -1,0 +1,54 @@
+[Cobra, Tackle Missile Shield Cobra]
+Caldari Navy Heavy Assault Missile Launcher, Inferno Rage Heavy Assault Missile
+Caldari Navy Heavy Assault Missile Launcher, Inferno Rage Heavy Assault Missile
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Caldari Navy Heavy Assault Missile Launcher, Inferno Rage Heavy Assault Missile
+Caldari Navy Heavy Assault Missile Launcher, Inferno Rage Heavy Assault Missile
+Caldari Navy Heavy Assault Missile Launcher, Inferno Rage Heavy Assault Missile
+'Smokescreen' Covert Ops Cloaking Device II
+
+X-Large Abyssal Shield Booster
+Large Abyssal Cap Battery
+Abyssal Stasis Webifier
+Abyssal Warp Scrambler
+100MN Abyssal Afterburner
+Pithum A-Type Multispectrum Shield Hardener
+
+Domination Nanofiber Structure
+Abyssal Ballistic Control System
+Setele's Modified Power Diagnostic System
+Abyssal Ballistic Control System
+Domination Nanofiber Structure
+
+Medium Capacitor Control Circuit II
+Medium Ancillary Current Router II
+
+
+Hornet EC-300 x4
+Medium Mutated Drone x2
+'Augmented' Vespa x1
+Hornet EC-300 x2
+Hornet EC-300 x2
+
+
+Mjolnir Rage Heavy Assault Missile x1370
+'Yurt' Mobile Depot x1
+Caldari Navy Mjolnir Heavy Assault Missile x1500
+Sisters Core Scanner Probe x8
+Improved Blue Pill Booster x2
+Agency 'Pyrolancea' DB7 Dose III x1
+Agency 'Overclocker' SB5 Dose II x1
+Inferno Rage Heavy Assault Missile x1183
+Signal-5 'Needlejack' Filament x6
+Agency 'Pyrolancea' DB5 Dose II x1
+Warp Core Stabilizer II, Mjolnir Rage Heavy Assault Missile
+Caldari Navy Scourge Heavy Assault Missile x1500
+Nova Rage Heavy Assault Missile x1500
+Scourge Rage Heavy Assault Missile x1495
+Caldari Navy Nova Heavy Assault Missile x1500
+Agency 'Hardshell' TB5 Dose II x1
+Strong Blue Pill Booster x1
+Caldari Navy Inferno Heavy Assault Missile x1500
+Agency 'Hardshell' TB7 Dose III x2
+Interdiction Nullifier II, Mjolnir Rage Heavy Assault Missile
+Antipharmakon Thureo x3

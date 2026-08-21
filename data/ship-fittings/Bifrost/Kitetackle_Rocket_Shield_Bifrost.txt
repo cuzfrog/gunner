@@ -1,0 +1,27 @@
+[Bifrost, Kitetackle Rocket Shield Bifrost]
+'Arbalest' Rocket Launcher I, Caldari Navy Mjolnir Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Mjolnir Rocket
+Skirmish Command Burst II, Rapid Deployment Charge
+Skirmish Command Burst II, Evasive Maneuvers Charge
+'Arbalest' Rocket Launcher I, Caldari Navy Mjolnir Rocket
+
+Republic Fleet Medium Shield Extender
+Republic Fleet Medium Shield Extender
+Micro Jump Field Generator
+5MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+
+Nanofiber Internal Structure II
+IFFA Compact Damage Control
+Nanofiber Internal Structure II
+
+Small Ancillary Current Router II
+Small Command Processor I
+
+
+Nanite Repair Paste x32
+Evasive Maneuvers Charge x698
+Rapid Deployment Charge x698
+Caldari Navy Mjolnir Rocket x365
+Caldari Navy Nova Rocket x500
+Interdiction Maneuvers Charge x994

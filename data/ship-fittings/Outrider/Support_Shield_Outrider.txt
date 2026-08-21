@@ -1,0 +1,41 @@
+[Outrider, Support Shield Outrider]
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Miner II
+Mining Foreman Burst I, Mining Laser Optimization Charge
+Miner II
+Miner II
+
+Mining Survey Chipset II
+Compact Multispectrum Shield Hardener
+Scan Rangefinding Array I
+Micro Jump Field Generator
+1MN Afterburner I
+
+Nanofiber Internal Structure II
+Warp Core Stabilizer II
+Nanofiber Internal Structure II
+
+Small Polycarbon Engine Housing II
+Small Polycarbon Engine Housing II
+
+
+Acolyte II x6
+Acolyte II x2
+Salvage Drone I x2
+Infiltrator I x2
+Mining Drone I x1
+Mining Drone I x3
+
+
+Expedition Strength Charge x1000
+Data Analyzer II, Expedition Strength Charge
+Amarr Shuttle Blueprint x1
+Sisters Core Scanner Probe x8
+Amarr Shuttle Blueprint x3
+Venture Blueprint x2
+Gas Cloud Scoop I, Expedition Strength Charge
+Expedition Command Burst II, Expedition Strength Charge
+Improved Cloaking Device II, Expedition Strength Charge
+Relic Analyzer II, Expedition Strength Charge
+Mining Laser Optimization Charge x378
+Expedition Reach Charge x800

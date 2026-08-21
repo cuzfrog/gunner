@@ -1,0 +1,41 @@
+[Pioneer Consortium Issue, Miner Shield Pioneer Consortium Issue]
+Core Probe Launcher I, Core Scanner Probe I
+Miner II
+Miner II
+Miner II
+
+Multispectrum Shield Hardener II
+Medium F-S9 Regolith Compact Shield Extender
+1MN Y-S8 Compact Afterburner
+Relic Analyzer I
+
+Mining Laser Upgrade II
+Type-D Restrained Nanofiber Structure
+
+Small Low Friction Nozzle Joints II
+Small Low Friction Nozzle Joints II
+Small Processor Overclocking Unit I
+
+
+Salvage Drone I x2
+Vespa II x1
+Vespa II x4
+
+
+Core Scanner Probe I x8
+Scorched Telemetry Processor x1
+Metal Scraps x2
+Data Analyzer I, Core Scanner Probe I
+Burned Logic Circuit x38
+Spatial Attunement Unit x1
+Iron Charge S x100
+ML-3 Compact Mining Survey Chipset, Core Scanner Probe I
+Type-E Enduring Cargo Scanner, Core Scanner Probe I
+Damaged Artificial Neural Network x29
+Artificial Neural Network x4
+Enhanced Ward Console x4
+Ward Console x33
+Small Azeotropic Restrained Shield Extender, Core Scanner Probe I
+Uranium Charge S x100
+Tripped Power Circuit x17
+Fried Interface Circuit x32

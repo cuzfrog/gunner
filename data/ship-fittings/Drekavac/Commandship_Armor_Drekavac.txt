@@ -1,0 +1,33 @@
+[Drekavac, Commandship Armor Drekavac]
+Veles Heavy Entropic Disintegrator, Mystic M
+Armor Command Burst II, Rapid Repair Charge
+
+Republic Fleet Large Cap Battery
+10MN Y-S8 Compact Afterburner
+Republic Fleet Large Cap Battery
+Cap Recharger II
+
+Damage Control II
+True Sansha Multispectrum Energized Membrane
+Corelum B-Type Medium Armor Repairer
+Corelum B-Type Medium Armor Repairer
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+Entropic Radiation Sink II
+
+Medium Auxiliary Nano Pump II
+Medium Auxiliary Nano Pump II
+Medium Ancillary Current Router I
+
+
+Valkyrie II x1
+Valkyrie II x4
+
+
+Armor Energizing Charge x1500
+Data Analyzer II, Armor Energizing Charge
+Occult M x5269
+Armor Reinforcement Charge x1800
+Mystic M x4483
+Meson Exotic Plasma M x5000
+Rapid Repair Charge x1384

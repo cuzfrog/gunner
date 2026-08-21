@@ -1,0 +1,83 @@
+[Noctis, Kitetackle Rocket Shield Noctis]
+Salvager I
+Salvager I
+Small Tractor Beam I
+Salvager I
+Small Tractor Beam I
+Small Tractor Beam I
+Salvager I
+Small Tractor Beam I
+
+Small Azeotropic Restrained Shield Extender
+50MN Quad LiF Restrained Microwarpdrive
+
+Type-D Restrained Nanofiber Structure
+Type-D Restrained Inertial Stabilizers
+Type-D Restrained Expanded Cargo
+
+Medium Salvage Tackle I
+Medium Salvage Tackle I
+Medium Salvage Tackle I
+
+
+Hornet EC-300 x5
+
+
+Medium Clarity Ward Enduring Shield Booster, Nova Auto-Targeting Light Missile I
+Medium Asymmetric Enduring Remote Shield Booster, Nova Auto-Targeting Light Missile I
+Nova Auto-Targeting Light Missile I x100
+Mjolnir Rocket x100
+Metal Scraps x1
+Metal Scraps x21
+F-23 Compact Remote Sensor Booster, Nova Auto-Targeting Light Missile I
+Plutonium Charge M x100
+Plutonium Charge M x100
+'Concussion' Compact Small Graviton Smartbomb, Nova Auto-Targeting Light Missile I
+250mm 'Scout' Accelerator Cannon, Nova Auto-Targeting Light Missile I
+Burned Logic Circuit x42
+Salvager I, Nova Auto-Targeting Light Missile I
+Salvager I, Nova Auto-Targeting Light Missile I
+Scorched Telemetry Processor x4
+Scorched Telemetry Processor x34
+Thorium Charge S x100
+Small Inductive Compact Remote Capacitor Transmitter, Nova Auto-Targeting Light Missile I
+Induced Compact Multispectral ECM, Nova Auto-Targeting Light Missile I
+Initiated Compact Warp Disruptor, Nova Auto-Targeting Light Missile I
+Mjolnir Light Missile x100
+'Arbalest' Rocket Launcher I, Nova Auto-Targeting Light Missile I
+Kapteyn Compact Sensor Dampener, Nova Auto-Targeting Light Missile I
+Charred Micro Circuit x4
+Denny Enduring Omnidirectional Tracking Link, Nova Auto-Targeting Light Missile I
+Conductive Polymer x15
+J5 Enduring Warp Disruptor, Nova Auto-Targeting Light Missile I
+A-211 Enduring Guidance Disruptor, Nova Auto-Targeting Light Missile I
+Mjolnir Heavy Assault Missile x200
+Small Radiative Scoped Remote Capacitor Transmitter, Nova Auto-Targeting Light Missile I
+Mjolnir Auto-Targeting Heavy Missile I x100
+'YF-12a' Compact Medium Plasma Smartbomb, Nova Auto-Targeting Light Missile I
+Scourge Torpedo x100
+Damaged Artificial Neural Network x18
+AML Compact Omnidirectional Tracking Link, Nova Auto-Targeting Light Missile I
+'Arbalest' Rapid Heavy Missile Launcher I, Nova Auto-Targeting Light Missile I
+Inferno Cruise Missile x100
+Compact Kinetic Shield Amplifier, Nova Auto-Targeting Light Missile I
+Ward Console x24
+Ward Console x3
+Medium S95a Scoped Remote Shield Booster, Nova Auto-Targeting Light Missile I
+Eutectic Compact Cap Recharger, Nova Auto-Targeting Light Missile I
+Alumel-Wired Enduring Sensor Booster, Nova Auto-Targeting Light Missile I
+'Limos' Rapid Heavy Missile Launcher I, Nova Auto-Targeting Light Missile I
+Balmer Series Compact Tracking Disruptor I, Nova Auto-Targeting Light Missile I
+Lead Charge M x100
+Malfunctioning Shield Emitter x19
+Photonic Upgraded Co-Processor, Nova Auto-Targeting Light Missile I
+Scourge Heavy Missile x200
+Fried Interface Circuit x20
+OE-5200 Rocket Launcher, Nova Auto-Targeting Light Missile I
+Hypnos Scoped Magnetometric ECM, Nova Auto-Targeting Light Missile I
+Antimatter Charge M x100
+Inferno Auto-Targeting Heavy Missile I x100
+Limited 'Limos' Heavy Assault Missile Launcher I, Nova Auto-Targeting Light Missile I
+Tripped Power Circuit x14
+'Malkuth' Cruise Launcher I, Nova Auto-Targeting Light Missile I
+Guristas Palladium Tag x1

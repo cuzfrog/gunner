@@ -1,0 +1,35 @@
+[Vargur, Art Shield Vargur]
+1200mm Artillery Cannon II, Quake L
+1200mm Artillery Cannon II, Quake L
+1200mm Artillery Cannon II, Quake L
+Bastion Module I
+1200mm Artillery Cannon II, Quake L
+
+X-Large Ancillary Shield Booster, Cap Booster 400
+Large Micro Jump Drive
+Shield Boost Amplifier II
+Multispectrum Shield Hardener II
+Tracking Computer II
+Multispectrum Shield Hardener II
+
+Damage Control II
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
+Tracking Enhancer II
+Gyrostabilizer II
+
+Large Core Defense Field Extender II
+Large Core Defense Field Extender II
+
+
+Hornet EC-300 x5
+Warrior II x5
+
+
+Tracking Speed Script x1
+Cap Booster 400 x47
+Republic Fleet Titanium Sabot L x2000
+Optimal Range Script x1
+Quake L x4680
+Tremor L x5980

@@ -1,0 +1,29 @@
+[Stork, Kitetackle Missile Shield Stork]
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Skirmish Command Burst II, Interdiction Maneuvers Charge
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Skirmish Command Burst II, Rapid Deployment Charge
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+
+EM Shield Amplifier II
+Micro Jump Field Generator
+Warp Disruptor II
+Medium F-S9 Regolith Compact Shield Extender
+5MN Microwarpdrive II
+Stasis Webifier II
+
+Nanofiber Internal Structure II
+Overdrive Injector System II
+
+Small Command Processor I
+Small Polycarbon Engine Housing II
+
+
+Caldari Navy Mjolnir Light Missile x512
+Caldari Navy Scourge Light Missile x4688
+Nanite Repair Paste x23
+Rapid Deployment Charge x573
+Caldari Navy Inferno Light Missile x500
+Caldari Navy Nova Light Missile x500
+Interdiction Maneuvers Charge x573

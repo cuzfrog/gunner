@@ -1,0 +1,25 @@
+[Heron, Scanner Shield Heron]
+Prototype Cloaking Device I
+Core Probe Launcher I, Sisters Core Scanner Probe
+Small Tractor Beam I
+
+Data Analyzer I
+5MN Quad LiF Restrained Microwarpdrive
+Relic Analyzer I
+Scan Rangefinding Array I
+Scan Acquisition Array I
+
+Type-D Restrained Inertial Stabilizers
+Type-D Restrained Inertial Stabilizers
+
+Small Memetic Algorithm Bank I
+Small Memetic Algorithm Bank I
+
+
+Hornet I x3
+Salvage Drone I x3
+
+
+Mobile Depot x1
+Small Tractor Beam I, Sisters Core Scanner Probe
+Sisters Core Scanner Probe x8

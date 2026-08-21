@@ -1,0 +1,33 @@
+[Drekavac, Ewar Armor Drekavac]
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Heavy Entropic Disintegrator II, Occult M
+Small Energy Neutralizer II
+
+Tracking Computer II, Optimal Range Script
+50MN Quad LiF Restrained Microwarpdrive
+Medium Cap Battery II
+10MN Y-S8 Compact Afterburner
+
+Damage Control II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+1600mm Steel Plates II
+Explosive Energized Membrane II
+Reactive Armor Hardener
+Entropic Radiation Sink II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Armor Energizing Charge x600
+Rapid Repair Charge x1371
+Tracking Speed Script x1
+Tetryon Exotic Plasma M x2500
+Occult M x4478
+Armor Reinforcement Charge x1971
+Mystic M x3912
+Meson Exotic Plasma M x2500
+Baryon Exotic Plasma M x2500

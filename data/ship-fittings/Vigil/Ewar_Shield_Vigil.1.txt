@@ -1,0 +1,17 @@
+[Vigil, Ewar Shield Vigil]
+Alumel-Wired Enduring Sensor Booster
+Target Painter II
+Medium Shield Extender I
+5MN Y-T8 Compact Microwarpdrive
+Target Painter II
+
+Micro Auxiliary Power Core I
+Type-D Restrained Capacitor Power Relay
+
+Small Particle Dispersion Projector I
+Small Ancillary Current Router I
+Small Particle Dispersion Projector I
+
+
+Targeting Range Script x1
+Scan Resolution Script x1

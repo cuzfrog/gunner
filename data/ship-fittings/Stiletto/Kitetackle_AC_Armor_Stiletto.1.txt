@@ -1,0 +1,22 @@
+[Stiletto, Kitetackle AC Armor Stiletto]
+150mm Light AutoCannon II, Republic Fleet EMP S
+150mm Light AutoCannon II, Republic Fleet EMP S
+Small Energy Nosferatu II
+
+Faint Epsilon Scoped Warp Scrambler
+Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script
+5MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Damage Control II
+Nanofiber Internal Structure II
+
+Small Polycarbon Engine Housing I
+Small Ionic Field Projector I
+
+
+Synth X-Instinct Booster x1
+Republic Fleet EMP S x1133
+Agency 'Overclocker' SB3 Dose I x1
+Nanite Repair Paste x100

@@ -1,0 +1,26 @@
+[Eagle, Rail Shield Eagle]
+250mm Railgun II, Federation Navy Antimatter Charge M
+250mm Railgun II, Federation Navy Antimatter Charge M
+250mm Railgun II, Federation Navy Antimatter Charge M
+250mm Railgun II, Federation Navy Antimatter Charge M
+250mm Railgun II, Federation Navy Antimatter Charge M
+
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II
+Tracking Computer II, Optimal Range Script
+Sensor Booster II, Scan Resolution Script
+Tracking Computer II, Optimal Range Script
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Tracking Enhancer II
+Magnetic Field Stabilizer II
+
+Medium Hybrid Collision Accelerator II
+Medium Ionic Field Projector I
+
+
+Spike M x1869
+Nanite Repair Paste x28
+Federation Navy Antimatter Charge M x1585

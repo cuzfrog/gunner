@@ -134,6 +134,11 @@ export const I18N_DICTIONARY = {
     zh: "保持距离",
     ja: "距離を保つ",
   },
+  "mode.midships": {
+    en: "Midships",
+    zh: "正舵",
+    ja: "正舵",
+  },
   "label.desiredRange": {
     en: "Desired range",
     zh: "期望距离",
@@ -219,10 +224,15 @@ export const I18N_DICTIONARY = {
     zh: "删除",
     ja: "削除",
   },
-  "button.copyLink": {
-    en: "Copy link",
-    zh: "复制链接",
-    ja: "リンクをコピー",
+  "button.copyProfile": {
+    en: "Copy",
+    zh: "复制",
+    ja: "コピー",
+  },
+  "title.copyProfile": {
+    en: "Copy current profile to clipboard",
+    zh: "复制当前配置到剪贴板",
+    ja: "現在のプロファイルをクリップボードにコピー",
   },
   "label.profileName": {
     en: "Profile name",
@@ -244,10 +254,75 @@ export const I18N_DICTIONARY = {
     zh: "选择配置...",
     ja: "プロファイルを選択...",
   },
-  "profile.tip": {
-    en: "If you like this tool, may consider tip me in the game, thank you!",
-    zh: "如果喜欢这个工具，可以在游戏中打赏我，谢谢！",
-    ja: "このツールが気に入ったら、ゲーム内でチップをくれると嬉しいです、ありがとう！",
+  "button.selectFitting": {
+    en: "Select fitting",
+    zh: "选择装配",
+    ja: "フィッティングを選択",
+  },
+  "button.selectAmmo": {
+    en: "Select ammunition",
+    zh: "选择弹药",
+    ja: "弾薬を選択",
+  },
+  "label.ammo": {
+    en: "Ammo",
+    zh: "弹药",
+    ja: "弾薬",
+  },
+  "ammo.cargoGroup": {
+    en: "In cargo",
+    zh: "货舱内",
+    ja: "カーゴ内",
+  },
+  "ammo.allGroup": {
+    en: "All charges",
+    zh: "全部弹药",
+    ja: "全弾薬",
+  },
+  "ammo.showAll": {
+    en: "Show all",
+    zh: "显示全部",
+    ja: "すべて表示",
+  },
+  "ammo.hideAll": {
+    en: "Show less",
+    zh: "收起",
+    ja: "折りたたむ",
+  },
+  "fitting.savedGroup": {
+    en: "Saved",
+    zh: "已保存",
+    ja: "保存済み",
+  },
+  "fitting.presetGroup": {
+    en: "Presets",
+    zh: "预设",
+    ja: "プリセット",
+  },
+  "fitting.empty": {
+    en: "No fittings for this ship.",
+    zh: "该舰船没有装配。",
+    ja: "この艦船のフィッティングはありません。",
+  },
+  "ammo.empty": {
+    en: "No ammunition available.",
+    zh: "没有可用的弹药。",
+    ja: "利用可能な弾薬がありません。",
+  },
+  "button.deleteFitting": {
+    en: "Delete fitting",
+    zh: "删除装配",
+    ja: "フィッティングを削除",
+  },
+  "fitting.invalid": {
+    en: "Outdated fitting",
+    zh: "过期的装配",
+    ja: "古いフィッティング",
+  },
+  "hint.prefix": {
+    en: "Do you know?",
+    zh: "你知道吗？",
+    ja: "知っていますか？",
   },
   "status.copied": {
     en: "Copied",
@@ -279,10 +354,35 @@ export const I18N_DICTIONARY = {
     zh: "装配无效",
     ja: "無効なフィッティング",
   },
+  "menu.importSide": {
+    en: "Import fitting as",
+    zh: "将装配导入为",
+    ja: "フィッティングのインポート先",
+  },
+  "status.importInvalid": {
+    en: "No profile or fitting in clipboard",
+    zh: "剪贴板中没有可导入的配置或装配",
+    ja: "クリップボードにプロファイルまたはフィッティングがありません",
+  },
   "status.clipboardDenied": {
     en: "Clipboard denied",
     zh: "剪贴板访问被拒绝",
     ja: "クリップボードへのアクセスが拒否されました",
+  },
+  "button.importProfile": {
+    en: "Import",
+    zh: "导入",
+    ja: "インポート",
+  },
+  "title.importProfile": {
+    en: "Import profile or fitting from clipboard",
+    zh: "从剪贴板导入配置或装配",
+    ja: "クリップボードからプロファイルまたはフィッティングをインポート",
+  },
+  "status.profileImported": {
+    en: "Imported",
+    zh: "已导入",
+    ja: "インポート済み",
   },
   "result.distance": {
     en: "Distance",

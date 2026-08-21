@@ -8,7 +8,9 @@ no-new-exports:
   - controls.test.ts
   - i18n.test.ts
   - i18n.ts
+  - savedFittings.test.ts
   - settings.test.ts
+  - savedFittings.ts
   # - settings.ts  # ProfileSettings is a cross-boundary DTO, exempt from no-new-exports
   - trackingInput.test.ts
   # - trackingInput.ts  # TrackingUnit is a cross-boundary DTO type; public re-export is required

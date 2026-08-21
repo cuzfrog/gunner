@@ -1,0 +1,31 @@
+[Arbitrator, Missile Shield Arbitrator]
+Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Mjolnir Light Missile
+Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Mjolnir Light Missile
+Experimental SV-2000 Rapid Light Missile Launcher, Caldari Navy Mjolnir Light Missile
+Drone Link Augmentor I
+
+Large Shield Extender II
+Enduring Multispectrum Shield Hardener
+Large Shield Extender II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Nanofiber Internal Structure II
+Drone Damage Amplifier II
+Nanofiber Internal Structure II
+
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+
+
+Valkyrie II x5
+Hammerhead II x2
+Hammerhead II x3
+
+
+Nova Light Missile x838
+Caldari Navy Mjolnir Light Missile x543
+Caldari Navy Nova Light Missile x600
+Drone Navigation Computer I, Nova Light Missile

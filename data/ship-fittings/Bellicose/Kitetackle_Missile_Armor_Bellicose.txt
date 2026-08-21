@@ -1,0 +1,34 @@
+[Bellicose, Kitetackle Missile Armor Bellicose]
+Prototype 'Arbalest' Heavy Assault Missile Launcher I, Inferno Heavy Assault Missile
+Prototype 'Arbalest' Heavy Assault Missile Launcher I, Inferno Heavy Assault Missile
+Prototype 'Arbalest' Heavy Assault Missile Launcher I, Inferno Heavy Assault Missile
+Prototype 'Arbalest' Heavy Assault Missile Launcher I, Inferno Heavy Assault Missile
+
+Balmer Series Compact Tracking Disruptor I
+Initiated Compact Warp Scrambler
+50MN Y-T8 Compact Microwarpdrive
+X5 Enduring Stasis Webifier
+Peripheral Compact Target Painter
+
+Multispectrum Coating II
+Medium Armor Repairer II
+Damage Control II
+1600mm Rolled Tungsten Compact Plates
+
+Medium Ancillary Current Router I
+Medium Explosive Armor Reinforcer I
+Medium Ancillary Current Router I
+
+
+Hobgoblin II x5
+
+
+Caldari Navy Scourge Light Missile x53
+Inferno Heavy Assault Missile x1664
+Optimal Range Disruption Script x1
+Agency 'Overclocker' SB3 Dose I x1
+Baker Nunn Enduring Tracking Disruptor I, Caldari Navy Scourge Light Missile
+Nanofiber Internal Structure II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+5MN Cold-Gas Enduring Microwarpdrive, Caldari Navy Scourge Light Missile
+Small Compact Pb-Acid Cap Battery, Caldari Navy Scourge Light Missile

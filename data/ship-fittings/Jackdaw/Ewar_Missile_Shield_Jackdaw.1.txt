@@ -1,0 +1,28 @@
+[Jackdaw, Ewar Missile Shield Jackdaw]
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Expanded Probe Launcher I, Combat Scanner Probe I
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+
+Missile Guidance Computer II, Missile Range Script
+5MN Microwarpdrive II
+Sensor Booster II, Scan Resolution Script
+Missile Guidance Computer II, Missile Range Script
+Phased Scoped Target Painter
+
+Ballistic Control System II
+Nanofiber Internal Structure II
+Ballistic Control System II
+
+Small EM Shield Reinforcer II
+Small Rocket Fuel Cache Partition II
+Small Hydraulic Bay Thrusters II
+
+
+Caldari Navy Mjolnir Light Missile x500
+Caldari Navy Scourge Light Missile x679
+Nanite Repair Paste x111
+Caldari Navy Inferno Light Missile x500
+Caldari Navy Nova Light Missile x862

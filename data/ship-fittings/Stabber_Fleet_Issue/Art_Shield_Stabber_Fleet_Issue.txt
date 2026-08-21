@@ -1,0 +1,53 @@
+[Stabber Fleet Issue, Art Shield Stabber Fleet Issue]
+Core Probe Launcher I, Sisters Core Scanner Probe
+650mm Artillery Cannon II, Republic Fleet Nuclear M
+650mm Artillery Cannon II, Republic Fleet Nuclear M
+Dual 180mm AutoCannon II, Hail M
+Dual 180mm AutoCannon II, Hail M
+
+Data Analyzer II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+
+Tracking Enhancer II
+Shield Flux Coil II
+Gyrostabilizer II
+Shield Flux Coil II
+Shield Flux Coil II
+Warp Core Stabilizer II
+
+Medium Core Defense Field Purger II
+Medium Core Defense Field Purger II
+Medium Core Defense Field Purger II
+
+
+Salvage Drone I x1
+Warrior SW-300 x1
+Warrior SW-300 x1
+Warrior II x4
+Warrior II x1
+
+
+Accelerant Decryptor x1
+Metal Scraps x1
+Power Couplings x146
+Republic Fleet Nuclear M x390
+Nova Rocket x100
+High-Tech Manufacturing Tools x1
+1MN Monopropellant Enduring Afterburner, Republic Fleet Nuclear M
+Barrage M x4000
+Datacore - Quantum Physics x19
+AML Compact Omnidirectional Tracking Link, Republic Fleet Nuclear M
+Noise-5 'Needlejack' Filament x1
+Noise-5 'Needlejack' Filament x2
+Process Decryptor x1
+Calm Electrical Filament x1
+Symmetry Decryptor x1
+Guristas Medium Weapon Console x1
+Carbon x2
+Republic Fleet EMP M x2394
+Augmentation Decryptor x1
+Augmentation Decryptor x1
+Datacore - Rocket Science x16
+Hail M x2396

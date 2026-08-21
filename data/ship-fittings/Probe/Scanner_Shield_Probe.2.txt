@@ -1,0 +1,22 @@
+[Probe, Scanner Shield Probe]
+Salvager I
+Core Probe Launcher I
+
+Data Analyzer I
+Relic Analyzer I
+Scan Rangefinding Array I
+5MN Quad LiF Restrained Microwarpdrive
+
+Type-D Restrained Inertial Stabilizers
+Type-D Restrained Nanofiber Structure
+Type-D Restrained Inertial Stabilizers
+
+Small Hyperspatial Velocity Optimizer I
+Small Gravity Capacitor Upgrade II
+Small Low Friction Nozzle Joints I
+
+
+Core Scanner Probe I x16
+Mobile Depot x1
+Data Analyzer I, Core Scanner Probe I
+Scan Rangefinding Array I, Core Scanner Probe I

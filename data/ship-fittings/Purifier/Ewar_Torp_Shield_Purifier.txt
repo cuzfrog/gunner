@@ -1,0 +1,24 @@
+[Purifier, Ewar Torp Shield Purifier]
+Torpedo Launcher II, Mjolnir Rage Torpedo
+Torpedo Launcher II, Mjolnir Rage Torpedo
+Torpedo Launcher II, Mjolnir Rage Torpedo
+Covert Ops Cloaking Device II
+
+Missile Guidance Computer II, Missile Range Script
+Peripheral Compact Target Painter
+10MN Y-S8 Compact Afterburner
+
+Crosslink Compact Ballistic Control System
+Nanofiber Internal Structure II
+Crosslink Compact Ballistic Control System
+
+Small Polycarbon Engine Housing II
+Small Ancillary Current Router II
+
+
+Missile Precision Script x2
+Astro-Inertial Compact Missile Guidance Computer, Missile Precision Script
+Missile Range Script x1
+Nanite Repair Paste x75
+Navy Cap Booster 3200 x1
+Mjolnir Rage Torpedo x903

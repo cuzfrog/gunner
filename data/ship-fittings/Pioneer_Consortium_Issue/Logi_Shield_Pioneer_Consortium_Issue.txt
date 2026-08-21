@@ -1,0 +1,33 @@
+[Pioneer Consortium Issue, Logi Shield Pioneer Consortium Issue]
+Miner II
+Core Probe Launcher I, Core Scanner Probe I
+Miner II
+Miner II
+
+Medium Shield Extender I
+Compact EM Shield Amplifier
+Compact Thermal Shield Amplifier
+Mining Survey Chipset II
+
+Damage Control I
+Mining Laser Upgrade II
+
+Small Capacitor Control Circuit I
+Small Ancillary Current Router I
+Small Processor Overclocking Unit I
+
+
+Warrior I x1
+Hobgoblin I x1
+Acolyte I x1
+Hornet I x1
+
+
+Metal Scraps x5
+AIR Mining Range Booster I x1
+AIR Mining Range Booster II x1
+Small I-ax Enduring Remote Armor Repairer, Uranium Charge S
+AIR Mining Yield Booster III x1
+Uranium Charge S x100
+Veldspar II-Grade x67106
+Veldspar III-Grade x14538

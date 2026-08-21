@@ -1,0 +1,16 @@
+[Immolator, Pulse Shield Immolator]
+True Sansha Small Focused Pulse Laser, Conflagration S
+
+Coreli A-Type 1MN Afterburner
+Gistii A-Type Small Shield Booster
+Thukker Small Shield Extender
+
+True Sansha Heat Sink
+True Sansha Heat Sink
+
+
+Multifrequency S x1
+Conflagration S x1
+Conflagration S x7
+Scorch S x19
+Scorch S x1

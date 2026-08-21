@@ -1,0 +1,526 @@
+[Anshar, Kitetackle Art Shield Anshar]
+Expanded Cargohold II
+ORE Expanded Cargohold
+ORE Expanded Cargohold
+
+
+Infiltrator I x4
+Acolyte I x50
+Hobgoblin II x5
+'Integrated' Acolyte x20
+Infiltrator II x271
+
+
+Light Entropic Disintegrator II
+Medium Asymmetric Enduring Remote Shield Booster
+720mm Howitzer Artillery II
+Motley Compound x7
+Mark I Compact Capacitor Flux Coil
+Expanded Probe Launcher I
+Medium F-RX Compact Capacitor Booster
+Arbalest Compact Light Missile Launcher
+Catalyst Blueprint x4
+Co-Processor II
+Large Shield Extender I
+Expired Basic 'Radiance' Cerebral Accelerator x1
+Denny Enduring Omnidirectional Tracking Link
+Naglfar Blueprint x1
+Naglfar Blueprint x1
+Mobile Small Warp Disruptor I x4
+Compact Thermal Shield Amplifier
+Aergia Compact Magnetometric ECM
+Impetus Console x1
+Opulent Compound x1
+Festival Launcher
+Experimental XT-2800 Heavy Assault Missile Launcher I
+Mobile Large Warp Disruptor I x2
+Nocxium Prospecting Array 2 Blueprint x1
+Lustering Alloy x8
+Large Moon Ore Compressor I
+Large Asymmetric Enduring Remote Shield Booster
+Atavum x3
+Interdiction Nullifier II
+Heavy Energy Neutralizer II
+Drone Cerebral Fragment x16
+Crucifier Ardishapur SKIN x1
+Metal Scraps x353
+Minmatar Encryption Methods x3
+N-JM Compact Omnidirectional Tracking Enhancer
+Compact Thermal Shield Hardener
+1MN Civilian Afterburner
+Mobile Medium Warp Disruptor II x13
+100MN Monopropellant Enduring Afterburner
+Agency 'Overclocker' SB5 Dose II x1
+Medium EM Shield Reinforcer II
+250mm Compressed Coil Gun I
+Medium Kinetic Shield Reinforcer II
+'Arbalest' Heavy Missile Launcher
+Expired Chemal Tech Repair Booster II x1
+Precious Alloy x6
+Modulated Deep Core Strip Miner II
+Mercenary Den Management x5
+Heavy Afocal Pulse Laser I
+Initiated Compact Warp Scrambler
+Kinetic Armor Hardener II
+Large Murky Compact Remote Shield Booster
+Anathema Deathglow Remnant SKIN x1
+Compact Kinetic Shield Hardener
+200mm Compressed Coil Gun I
+500MN Microwarpdrive I
+Bleached Bone Matte - Limited x1
+Large Asteroid Ore Compressor I
+Ice Harvester II
+Caldari Freighter x1
+200mm Steel Plates II
+Armor Plates x83
+Compulsive Scoped Multispectral ECM
+Cap Recharger I
+Mining Survey Chipset II
+Drone Transceiver x13
+Ice Harvester Upgrade I
+Linked Enduring Remote Sensor Booster
+Agency 'Overclocker' SB3 Dose I x1
+Datacore - Electronic Engineering x13
+Enduring Thermal Shield Hardener
+150mm Light AutoCannon II
+Inertial Stabilizers II
+Inertial Stabilizers II
+Heavy Water x35994
+Capital EM Shield Reinforcer II
+Multispectrum Coating II
+Capital Kinetic Shield Reinforcer II
+Datacore - Amarrian Starship Engineering x9
+Domination Kinetic Shield Amplifier
+5MN Quad LiF Restrained Microwarpdrive
+'Limos' Cruise Launcher I
+Light Ion Blaster II
+Kaatara's Custom Ballistic Control System
+Melted Capacitor Console x87
+Intact Shield Emitter x1
+Explosive Armor Hardener II
+1600mm Rolled Tungsten Compact Plates
+M51 Benefactor Compact Shield Recharger
+Medium Deep Core Mining Optimization I
+Fenrir Blueprint x2
+Fenrir Blueprint x1
+Capital F-S9 Regolith Compact Shield Extender
+Mobile Micro Jump Unit x1
+200mm Prototype Gauss Gun
+Capital Capacitor Booster I
+Industrial Cynosural Field Generator
+100mm Crystalline Carbonide Restrained Plates
+Nidhoggur Blueprint x1
+Nidhoggur Blueprint x1
+Kapteyn Compact Sensor Dampener
+Medium Remote Shield Booster II
+Liquid Ozone x300000
+350mm Carbide Railgun I
+Celestine Veil Satin - Limited x3
+Modulated Strip Miner II
+250mm Prototype Gauss Gun
+Extruded Compact Heat Sink
+Fleeting Compact Stasis Webifier
+Capital Ancillary Current Router I
+Nanite Compound x4
+Expedition Frigates x2
+Morpheus Enduring Magnetometric ECM
+Medium Armor Repairer II
+Calm Gamma Filament x9
+Caldari Navy Medium Shield Extender
+Heavy Ion Blaster I
+J5b Enduring Warp Scrambler
+Medium Radiative Scoped Remote Capacitor Transmitter
+Caracal Deathglow Remnant SKIN x2
+Micro Circuit x2
+Capital Shield Extender II
+Gleaming Alloy x10
+Damage Control I
+'Malkuth' Rocket Launcher I
+Multispectrum Shield Hardener I
+Data Analyzer II
+IFFA Compact Damage Control
+Drone Link Augmentor I
+Mobile Tractor Unit x30
+'YF-12a' Compact Medium Plasma Smartbomb
+Light Missile Launcher I
+Brutix Deathglow Remnant SKIN x3
+Experimental SV-2000 Rapid Light Missile Launcher
+Caldari Frigate x3
+Calm Electrical Filament x6
+Heavy Karelin Scoped Stasis Grappler
+Medium Cap Battery II
+'Stoic' Core Equalizer I
+Minmatar Drone Specialization x2
+280mm Howitzer Artillery II
+Heavy Neutron Blaster II
+Crystal Compound x7
+'Notos' Compact Large Proton Smartbomb
+Mobile Large Warp Disruptor II x60
+Algos Deathglow Remnant SKIN x2
+Logic Circuit x2
+Cetus Scoped Burst Jammer
+Energy Weapon Rigging x1
+Large Shield Extender II
+250mm Carbide Railgun I
+Medium Hyperspatial Velocity Optimizer II
+Corrupted Coral Matte - Unlimited x2
+Miner I
+Initiated Enduring Multispectral ECM
+Baker Nunn Enduring Tracking Disruptor I
+Ballistic Control System II
+425mm AutoCannon II
+150mm 'Scout' Accelerator Cannon
+Tritanium x2
+Mark I Compact Shield Power Relay
+Covert Ops Cloaking Device II
+Dread Guristas Omnidirectional Tracking Enhancer
+Corelum C-Type 50MN Microwarpdrive
+Atron Blueprint x2
+Atron Blueprint x1
+Minmatar Dreadnought x1
+Dual 250mm 'Scout' Accelerator Cannon
+Mark I Compact Capacitor Power Relay
+Dread Guristas Torpedo Launcher
+Alumel-Wired Enduring Sensor Booster
+Expanded Cargohold II
+1MN Afterburner II
+500MN Cold-Gas Enduring Microwarpdrive
+Abyssal Damage Control
+Minokawa Blueprint x2
+Minokawa Blueprint x2
+'Concussion' Compact Large Graviton Smartbomb
+Covert Cynosural Field Generator I
+'Integrated' Valkyrie Blueprint x2
+Limited 'Limos' Heavy Assault Missile Launcher I
+Interdiction Sphere Launcher I
+5MN Microwarpdrive II
+Drone Navigation Computer I
+'Arbalest' Cruise Launcher I
+Blue Racer Cobalt Metallic - Limited x18
+Medium Capacitor Booster II
+Damage Control II
+Mining Frigate x1
+F-293 Scoped Remote Tracking Computer
+Datacore - Graviton Physics x4
+'Malkuth' Rapid Heavy Missile Launcher I
+Ladar ECM II
+10MN Y-S8 Compact Afterburner
+Mobile Depot x10
+Buzzard Deathglow Remnant SKIN x2
+BZ-5 Scoped Gravimetric ECM
+Mark I Compact Reactor Control Unit
+350mm Compressed Coil Gun I
+Mark I Compact Shield Flux Coil
+1MN Y-S8 Compact Afterburner
+Medium Higgs Anchor I
+Medium Trimark Armor Pump II
+Federation Navy Drone Damage Amplifier
+Coadjunct Scoped Remote Sensor Booster
+Mobile Medium Warp Disruptor I x2
+Medium Hyperspatial Velocity Optimizer I
+Medium Shield Booster II
+Malfunctioning Shield Emitter x40
+Prototype Jump Drive Economizer
+Medium Core Defense Field Purger II
+Hypnos Scoped Magnetometric ECM
+LFT Enduring Sensor Dampener
+Medium Clarity Ward Enduring Shield Booster
+Heavy Modal Pulse Laser I
+Ice Harvester I
+425mm 'Scout' Accelerator Cannon
+125mm Carbide Railgun I
+5MN Y-T8 Compact Microwarpdrive
+Jury Rigging x3
+200mm Steel Plates I
+Capital Shield Emission Systems x1
+'Packrat' Mobile Tractor Unit x1
+AML Compact Omnidirectional Tracking Link
+'Concussion' Compact Small Graviton Smartbomb
+100MN Y-S8 Compact Afterburner
+Large C5-L Compact Shield Booster
+Micro Auxiliary Power Core I
+Contaminated Nanite Compound x87
+Federation Navy Stasis Webifier
+Heavy Assault Missile Launcher II
+Dread Guristas Shield Flux Coil
+Defective Current Pump x125
+'Limos' Rocket Launcher I
+Light Neutron Blaster II
+Light Neutron Blaster II
+425mm Railgun II
+Entosis Link I
+Interdiction Nullifier I
+350mm Prototype Gauss Gun
+Dread Guristas EM Shield Hardener
+Ninazu Blueprint x1
+Limited Hyperspatial Accelerator
+Large EMP Smartbomb I
+Mobile Small Warp Disruptor II x5
+Data Analyzer I
+Gallente Frigate x1
+Medium Core Defense Capacitor Safeguard I
+'Repose' Core Compensation
+Ice Harvester Upgrade II
+Compact EM Shield Amplifier
+Astronautics Rigging x1
+Conductive Polymer x76
+Condensed Alloy x7
+Antique Copper Foil Metallic - Limited x6
+Drone Damage Amplifier I
+Gallente Tactical Destroyer x1
+Caldari Starship Engineering x3
+Copasetic Compact Shield Boost Amplifier
+Medium C5-L Compact Shield Booster
+'Accord' Core Compensation
+150mm Compressed Coil Gun I
+Limited 'Limos' Rapid Light Missile Launcher
+Electronic Superiority Rigging x8
+Advanced 'Limos' Heavy Missile Bay I
+Capital Precursor Weapon x1
+Lif Blueprint x1
+Drone Link Augmentor II
+Hypnos Compact Signal Distortion Amplifier I
+'Wetu' Mobile Depot x2
+Dual 250mm Compressed Coil Gun I
+Caldari Destroyer x2
+1MN Afterburner I
+Multispectrum Shield Hardener II
+F-12 Enduring Tracking Computer
+Minmatar Frigate x2
+250mm Light Gallium Cannon
+Lined Clash - Limited x4
+Assault Damage Control I
+'YF-12a' Compact Large Plasma Smartbomb
+Medium Energy Nosferatu II
+Capital Thermal Shield Reinforcer II
+Large Micro Jump Drive
+Compact Explosive Shield Hardener
+Kinetic Shield Hardener II
+F-89 Compact Signal Amplifier
+Induced Compact Multispectral ECM
+Bomb Launcher I
+Covert Jump Portal Generator I
+Dark Compound x4
+Armageddon Deathglow Remnant SKIN x2
+Heavy Missile Launcher II
+Electronic Attack Ships x1
+Fierce Dark Filament x3
+50MN Quad LiF Restrained Microwarpdrive
+Hydromagnetic Physics x1
+Compact Kinetic Shield Amplifier
+Missile Guidance Enhancer II
+Heavy Energy Nosferatu II
+Gallente Destroyer x1
+Heavy F-RX Compact Capacitor Booster
+Mark I Compact Power Diagnostic System
+DDO Scoped Tracking Disruptor I
+Deluge Enduring Burst Jammer
+Entropic Radiation Sink II
+Improved Cloaking Device II
+Improved Cloaking Device II
+Magnetometric ECM II
+Miner II
+10MN Monopropellant Enduring Afterburner
+1600mm Crystalline Carbonide Restrained Plates
+'Arbalest' Rapid Heavy Missile Launcher I
+Medium Ice Harvester Accelerator I
+1600mm Steel Plates II
+Erratic Ore Processing x9
+Lines of Convergence - Limited x4
+Assault Damage Control II
+Obelisk Blueprint x2
+Medium Core Defense Field Extender I
+Heavy Energy Neutralizer I
+100MN Afterburner II
+Drone Synaptic Relay Wiring x109
+'Concussion' Compact Medium Graviton Smartbomb
+Strontium Clathrates x641
+Acceleration Control x3
+Capital Industrial Core II
+Initiated Compact Warp Disruptor
+Compact Explosive Shield Amplifier
+Core Probe Launcher II
+Dread Guristas EM Shield Amplifier
+500MN Y-T8 Compact Microwarpdrive
+Groundbreaker Black Matte - Unlimited x2
+J5 Enduring Warp Disruptor
+Experimental ZW-4100 Torpedo Launcher
+Current Pump x3
+150mm Railgun II
+Glossy Compound x1
+'Integrated' Warrior Blueprint x2
+'Integrated' Berserker Blueprint x1
+150mm Prototype Gauss Gun
+Medium Auxiliary Thrusters II
+125mm 'Scout' Accelerator Cannon
+5MN Cold-Gas Enduring Microwarpdrive
+Broken Drone Transceiver x339
+'Arbalest' Rocket Launcher I
+Caldari Encryption Methods x47
+Enduring EM Shield Hardener
+Capacitor Power Relay II
+Civilian Gatling Railgun
+Medium Compact Pb-Acid Cap Battery
+Cap Recharger II
+Deep Core Mining x6
+500MN Quad LiF Restrained Microwarpdrive
+Hemolytic Steel Metallic - Limited x3
+Dual 250mm Prototype Gauss Gun
+'YF-12a' Compact Small Plasma Smartbomb
+Guidance Disruptor II
+Charon Blueprint x1
+Charon Blueprint x2
+Compact EM Shield Hardener
+Medium Ancillary Current Router I
+Large Azeotropic Restrained Shield Extender
+200mm 'Scout' Accelerator Cannon
+Mining Foreman Burst II
+Alfven Enduring Remote Tracking Computer
+Cerberus Deathglow Remnant SKIN x2
+100mm Steel Plates II
+1400mm Howitzer Artillery II
+Medium Core Defense Field Purger I
+'Halcyon' Core Equalizer I
+Large S95a Scoped Remote Shield Booster
+Damaged Artificial Neural Network x70
+Enduring Explosive Shield Hardener
+Large Armor Repairer II
+Nuclear Physics x1
+Light Missile Launcher II
+Medium Shield Extender II
+Medium Ancillary Current Router II
+Caldari Navy Small Shield Extender
+Large Clarity Ward Enduring Shield Booster
+Launcher Rigging x10
+Elara Restrained Mining Laser Upgrade
+Capacitor Console x6
+Mining Laser Upgrade II
+'Malkuth' Cruise Launcher I
+Enduring Kinetic Shield Hardener
+'Vehemence' Compact Small EMP Smartbomb
+F-23 Compact Remote Sensor Booster
+Domination Inertial Stabilizers
+Conflux Mist Gloss - Limited x3
+150mm Carbide Railgun I
+Euxenite x33
+Dark Abyss Matte - Limited x1
+Intact Armor Plates x2
+Anode Neutron Particle Cannon I
+Mobile Cynosural Beacon x13
+EM Shield Amplifier II
+425mm Prototype Gauss Gun
+Dual 250mm Carbide Railgun I
+Chimera Blueprint x2
+Capital Tractor Beam II
+Capital Shield Booster II
+Datacore - High Energy Physics x36
+Eutectic Compact Cap Recharger
+Medium Gremlin Compact Energy Neutralizer
+Cybernetic Neural Lattice x571
+AE-K Compact Drone Damage Amplifier
+Expired Chemal Tech Mining Booster III x1
+Medium Auxiliary Thrusters I
+Medium Ionic Field Projector I
+Medium Murky Compact Remote Shield Booster
+Bantam Deathglow Remnant SKIN x1
+Capital Remote Shield Booster I
+Limited 'Limos' Torpedo Launcher
+Medium Capacitor Control Circuit II
+Gyrostabilizer II
+Enhanced Ward Console x3
+Enfeebling Scoped Ladar ECM
+Lucent Compound x1
+Bowhead Blueprint x2
+Multispectrum Energized Membrane II
+Infomorph Decryption Key x8534
+Doctrine of Dread - Limited x3
+Medium Ghoul Compact Energy Nosferatu
+Balmer Series Compact Tracking Disruptor I
+Domination Explosive Shield Amplifier
+Nyx Blueprint x1
+Nyx Blueprint x1
+ML-3 Compact Mining Survey Chipset
+1MN Monopropellant Enduring Afterburner
+Megacyte Prospecting Array 2 Blueprint x1
+Medium Core Defense Field Extender II
+Mining Foreman Burst I
+425mm Compressed Coil Gun I
+Medium Azeotropic Restrained Shield Extender
+Capital Hyperspatial Velocity Optimizer I
+Nanofiber Internal Structure II
+Contaminated Lorentz Fluid x27
+Anchoring x1
+5MN Microwarpdrive I
+Dread Guristas Large Graviton Smartbomb
+1600mm Steel Plates I
+Micro Auxiliary Power Core II
+Archon Blueprint x3
+Drone Navigation Computer II
+Heavy Infectious Scoped Energy Neutralizer
+125mm Gatling AutoCannon II
+Medium Hydraulic Bay Thrusters I
+Medium Cap Battery I
+425mm Carbide Railgun I
+125mm Compressed Coil Gun I
+50MN Cold-Gas Enduring Microwarpdrive
+Medium EM Shield Reinforcer I
+Medium Inductive Compact Remote Capacitor Transmitter
+50MN Y-T8 Compact Microwarpdrive
+Charred Micro Circuit x274
+Cynosural Field Theory x1
+Agency 'Hardshell' TB3 Dose I x1
+Multispectral ECM II
+Large Remote Capacitor Transmitter II
+250mm 'Scout' Accelerator Cannon
+Burned Logic Circuit x223
+Heavy Gunnar Compact Stasis Grappler
+Broker Relations x2
+800mm Rolled Tungsten Compact Plates
+Reinforced Metal Scraps x33
+Modal Neutron Particle Accelerator I
+Heavy Jigoro Enduring Stasis Grappler
+Kinetic Shield Amplifier II
+Gravimetric ECM II
+800mm Repeating Cannon II
+Highstroke Scoped Guidance Disruptor
+10MN Afterburner II
+200mm Carbide Railgun I
+Dread Guristas Explosive Shield Hardener
+Carbon x9
+50MN Microwarpdrive II
+Medium Rocket Fuel Cache Partition I
+C-IR Compact Guidance Disruptor
+EM Shield Hardener II
+Fried Interface Circuit x231
+Magnetic Field Stabilizer II
+Medium Capacitor Control Circuit I
+EM Coating II
+Cynosural Field Generator I
+Alloyed Tritanium Bar x68
+Elite Drone AI x1
+125mm Prototype Gauss Gun
+Enduring Multispectrum Shield Hardener
+Heavy Stasis Grappler II
+Sheen Compound x9
+Large Remote Armor Repairer II
+Mining Laser Upgrade I
+Claret Plating Metallic - Limited x4
+EFFA Compact Assault Damage Control
+Large Trimark Armor Pump I
+A-211 Enduring Guidance Disruptor
+Datacore - Electromagnetic Physics x11
+Apostle Blueprint x1
+F-90 Compact Sensor Booster
+Nitrogen Fuel Block x11653
+Medium F-S9 Regolith Compact Shield Extender
+Fierce Electrical Filament x3
+Amarr Frigate x1
+Missile Guidance Computer II
+Large F-S9 Regolith Compact Shield Extender
+Heavy Capacitor Booster II
+Compact Multispectrum Shield Hardener
+Core Probe Launcher I
+'Malkuth' Heavy Missile Launcher I
+Medium S95a Scoped Remote Shield Booster
+Oxygen Isotopes x98074
+Oxygen Isotopes x235536

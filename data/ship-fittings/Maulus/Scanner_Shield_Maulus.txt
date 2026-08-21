@@ -1,0 +1,30 @@
+[Maulus, Scanner Shield Maulus]
+Core Probe Launcher I
+
+Data Analyzer I
+Relic Analyzer I
+Scan Rangefinding Array I
+5MN Microwarpdrive I
+
+Nanofiber Internal Structure I
+Nanofiber Internal Structure I
+Inertial Stabilizers I
+
+Small Gravity Capacitor Upgrade I
+Small Emission Scope Sharpener I
+
+
+Damaged Artificial Neural Network x33
+Contaminated Nanite Compound x40
+Burned Logic Circuit x15
+Burned Logic Circuit x22
+Carbon x2
+Charred Micro Circuit x31
+Charred Micro Circuit x22
+Tripped Power Circuit x15
+Core Scanner Probe I x16
+Armor Plates x31
+Fried Interface Circuit x37
+Fried Interface Circuit x22
+Intact Armor Plates x5
+Current Pump x3

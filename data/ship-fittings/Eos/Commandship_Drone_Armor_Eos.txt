@@ -1,0 +1,34 @@
+[Eos, Commandship Drone Armor Eos]
+Skirmish Command Burst II
+Drone Link Augmentor II
+Armor Command Burst II, Armor Energizing Charge
+Skirmish Command Burst II, Evasive Maneuvers Charge
+Armor Command Burst II, Rapid Repair Charge
+
+Omnidirectional Tracking Link II, Tracking Speed Script
+Omnidirectional Tracking Link II, Tracking Speed Script
+Cap Recharger II
+Cap Recharger II
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+True Sansha Medium Armor Repairer
+Inertial Stabilizers II
+Reactive Armor Hardener
+Inertial Stabilizers II
+EM Armor Hardener II
+
+Medium Hyperspatial Velocity Optimizer II
+Medium Command Processor I
+
+
+Imperial Navy Curator x10
+
+
+Armor Energizing Charge x15661
+Armor Reinforcement Charge x1000
+Optimal Range Script x2
+Evasive Maneuvers Charge x15661
+Rapid Deployment Charge x1600
+Rapid Repair Charge x15661
+Interdiction Maneuvers Charge x1000

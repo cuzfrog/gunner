@@ -1,0 +1,48 @@
+[Redeemer, Hauler Shield Redeemer]
+Improved Cloaking Device II
+Covert Jump Portal Generator I
+
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+Expanded Cargohold II
+
+
+Pulse Shield Emitter Blueprint x1
+Platinum Technite x195
+Oxygen x578
+Datacore - Electronic Engineering x44
+Ion Thruster Blueprint x1
+Coolant x253
+Mexallon x188
+Cobalt x3802
+Carbon Polymers x98
+Crystalline Carbonide Armor Plate Blueprint x1
+Hydrocarbons x2438
+Tritanium x471
+Datacore - Gallentean Starship Engineering x44
+Photon Microprocessor Blueprint x1
+Nocxium x31
+Nanotransistors x8168
+Sylramic Fibers x9181
+Magnetometric Sensor Cluster Blueprint x1
+Robotics x29
+Crystalline Carbonide Reaction Formula x1
+Crystallite Alloy Reaction Formula x1
+Pyerite x376
+Vanadium x196
+Oxygen Isotopes x1203
+Photonic Metamaterials Reaction Formula x1
+Nitrogen Fuel Block x15
+Silicates x2438
+Symmetry Decryptor x22
+Oxygen Fuel Block x54
+Oscillator Capacitor Unit Blueprint x1
+Cadmium x3802
+Mechanical Parts x114
+Fusion Reactor Unit Blueprint x1
+Helium Isotopes x10426
+Isogen x70

@@ -1,0 +1,40 @@
+[Astero, Kitetackle Shield Astero]
+Sisters Core Probe Launcher, Sisters Core Scanner Probe
+Covert Ops Cloaking Device II
+
+Relic Analyzer II
+5MN Y-T8 Compact Microwarpdrive
+Cargo Scanner II
+Data Analyzer II
+
+Drone Damage Amplifier II
+Reinforced Bulkheads II
+Inertial Stabilizers II
+Damage Control II
+
+Small Hyperspatial Velocity Optimizer II
+Small Hyperspatial Velocity Optimizer II
+Small Hyperspatial Velocity Optimizer II
+
+
+Hobgoblin II x10
+
+
+Scorched Telemetry Processor x16
+Telemetry Processor x9
+Enhanced Ward Console x1
+Burned Logic Circuit x26
+Logic Circuit x6
+Sisters Core Scanner Probe x8
+Power Circuit x3
+Scan Rangefinding Array I, Sisters Core Scanner Probe
+Warp Core Stabilizer II, Sisters Core Scanner Probe
+Artificial Neural Network x1
+Fleeting Compact Stasis Webifier, Sisters Core Scanner Probe
+Ward Console x27
+Warp Scrambler II, Sisters Core Scanner Probe
+Co-Processor II, Sisters Core Scanner Probe
+Malfunctioning Shield Emitter x28
+Warp Disruptor II, Sisters Core Scanner Probe
+Alignment Sequencer x80
+Fried Interface Circuit x24

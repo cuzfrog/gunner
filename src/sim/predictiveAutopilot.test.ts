@@ -2,7 +2,7 @@ import { Vec2 } from "./vec2";
 import { ReactiveAutopilot, type Autopilot } from "./autopilot";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
-import type { OrbitDirection, ShipState } from "./types";
+import type { AutopilotMode, OrbitDirection, ShipState } from "./types";
 
 const kinematics = new KinematicsImpl();
 
@@ -10,7 +10,7 @@ function makeShip(
   id: "attacker" | "target",
   pos: [number, number],
   maxSpeed: number,
-  mode: "orbit" | "keepAtRange",
+  mode: AutopilotMode,
   desiredRange: number,
   mass = 1,
   inertiaModifier = 1e-6,
@@ -167,6 +167,25 @@ describe("PredictiveAutopilot", () => {
     expect(cmd.y).toBeGreaterThan(1300);
     expect(Math.abs(cmd.x)).toBeLessThan(100);
     expect(cmd.len()).toBeLessThanOrEqual(1400 + 1e-9);
+  });
+
+  test("midships delegates to reactive steering and skips planning", () => {
+    const reactiveSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+    reactiveSteering.computeVelocity.mockReturnValue(new Vec2(100, 0));
+    const spy = vi.spyOn(kinematics, "computeEngagement");
+
+    const autopilot = makePredictive(reactiveSteering);
+    const attacker = makeShip("attacker", [0, 0], 1000, "midships", 5000);
+    const target = makeShip("target", [0, 5000], 1000, "orbit", 5000);
+    const cmd = autopilot.computeVelocity(attacker, target, 0);
+
+    expect(cmd).toEqual(new Vec2(100, 0));
+    expect(reactiveSteering.computeVelocity).toHaveBeenCalledWith(attacker, target, 0);
+    expect(spy).not.toHaveBeenCalled();
+
+    autopilot.computeVelocity(attacker, target, 0.5);
+    expect(reactiveSteering.computeVelocity).toHaveBeenCalledTimes(2);
+    expect(spy).not.toHaveBeenCalled();
   });
 
 });

@@ -1,0 +1,33 @@
+[Eos, Kitetackle Armor Eos]
+Skirmish Command Burst II, Evasive Maneuvers Charge
+Small Energy Neutralizer II
+Small Energy Neutralizer II
+Skirmish Command Burst II, Rapid Deployment Charge
+Small Energy Neutralizer II
+
+Warp Scrambler II
+50MN Y-T8 Compact Microwarpdrive
+Remote Sensor Dampener II, Targeting Range Dampening Script
+Small Capacitor Booster II, Navy Cap Booster 400
+
+Damage Control II
+Federation Navy 1600mm Steel Plates
+Centum B-Type Kinetic Energized Membrane
+Thermal Armor Hardener II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Federation Navy 1600mm Steel Plates
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Hammerhead II x5
+Praetor II x5
+
+
+Tracking Disruptor II, Tracking Speed Disruption Script
+Tracking Speed Disruption Script x1
+Optimal Range Disruption Script x1
+Scan Resolution Dampening Script x1
+Navy Cap Booster 400 x50

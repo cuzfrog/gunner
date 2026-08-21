@@ -1,4 +1,4 @@
-// Generated from EVE Online SDE via Pyfa staticdata (2026-08-20). Do not edit by hand.
+// Generated from EVE Online SDE via Pyfa staticdata (2026-08-21). Do not edit by hand.
 /* eslint-disable */
 
 import type { HullTier } from "../ships";
@@ -33,6 +33,16 @@ export interface TurretStats {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly turretSkill?: string;
+}
+
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
+
+export interface HullBonus {
+  readonly attribute: HullBonusAttribute;
+  readonly magnitude: number;
+  readonly skill?: string;
+  readonly turretSkill?: string;
 }
 
 export interface ChargeStats {
@@ -2715,3613 +2725,4215 @@ export const TURRETS = {
     "tracking": 308.125,
     "optimal": 4200,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Light Pulse Laser I": {
     "tracking": 273.75,
     "optimal": 4725,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Light Beam Laser I": {
     "tracking": 117,
     "optimal": 9625,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Pulse Laser I": {
     "tracking": 246.25,
     "optimal": 5250,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Beam Laser I": {
     "tracking": 90,
     "optimal": 11000,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Quad Light Beam Laser I": {
     "tracking": 23.328,
     "optimal": 8800,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Medium Pulse Laser I": {
     "tracking": 28.8,
     "optimal": 9450,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Medium Beam Laser I": {
     "tracking": 12.096,
     "optimal": 19250,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Pulse Laser I": {
     "tracking": 26,
     "optimal": 10500,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Beam Laser I": {
     "tracking": 9.504,
     "optimal": 22000,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dual Heavy Pulse Laser I": {
     "tracking": 3.75,
     "optimal": 18900,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Heavy Beam Laser I": {
     "tracking": 1.75,
     "optimal": 35000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Pulse Laser I": {
     "tracking": 3.375,
     "optimal": 21000,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Beam Laser I": {
     "tracking": 1.53125,
     "optimal": 40000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Beam Laser I": {
     "tracking": 1.39205,
     "optimal": 44000,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "125mm Gatling AutoCannon I": {
     "tracking": 417,
     "optimal": 800,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light AutoCannon I": {
     "tracking": 362,
     "optimal": 900,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm AutoCannon I": {
     "tracking": 315,
     "optimal": 1000,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light Artillery Cannon I": {
     "tracking": 80,
     "optimal": 8050,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "280mm Howitzer Artillery I": {
     "tracking": 64,
     "optimal": 10000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Dual 180mm AutoCannon I": {
     "tracking": 44.68992,
     "optimal": 1600,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "220mm Vulcan AutoCannon I": {
     "tracking": 38.8608,
     "optimal": 1800,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "425mm AutoCannon I": {
     "tracking": 33.792,
     "optimal": 2000,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Artillery Cannon I": {
     "tracking": 8.352,
     "optimal": 16100,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "720mm Howitzer Artillery I": {
     "tracking": 6.688,
     "optimal": 20000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 425mm AutoCannon I": {
     "tracking": 5.7132,
     "optimal": 3200,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm Repeating Cannon I": {
     "tracking": 4.968,
     "optimal": 3600,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "800mm Repeating Cannon I": {
     "tracking": 4.32,
     "optimal": 4000,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Artillery Cannon I": {
     "tracking": 1.125,
     "optimal": 32200,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm Howitzer Artillery I": {
     "tracking": 0.9,
     "optimal": 40000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "75mm Gatling Rail I": {
     "tracking": 136.5,
     "optimal": 6000,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Light Electron Blaster I": {
     "tracking": 438,
     "optimal": 1000,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Light Ion Blaster I": {
     "tracking": 403.2,
     "optimal": 1250,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Light Neutron Blaster I": {
     "tracking": 379.8,
     "optimal": 1500,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "150mm Railgun I": {
     "tracking": 73.5,
     "optimal": 12000,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Heavy Electron Blaster I": {
     "tracking": 46.08,
     "optimal": 2000,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 150mm Railgun I": {
     "tracking": 10.8,
     "optimal": 10800,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Heavy Neutron Blaster I": {
     "tracking": 38.4,
     "optimal": 3000,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Heavy Ion Blaster I": {
     "tracking": 42.24,
     "optimal": 2500,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "250mm Railgun I": {
     "tracking": 5.904,
     "optimal": 21600,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Electron Blaster Cannon I": {
     "tracking": 6,
     "optimal": 4000,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dual 250mm Railgun I": {
     "tracking": 1.90179,
     "optimal": 21600,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Neutron Blaster Cannon I": {
     "tracking": 5.196,
     "optimal": 6000,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "425mm Railgun I": {
     "tracking": 1.04598,
     "optimal": 43200,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Ion Blaster Cannon I": {
     "tracking": 5.52,
     "optimal": 5000,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "1200mm Artillery Cannon II": {
     "tracking": 1.125,
     "optimal": 38640,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "125mm Gatling AutoCannon II": {
     "tracking": 417,
     "optimal": 960,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light AutoCannon II": {
     "tracking": 362,
     "optimal": 1080,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm AutoCannon II": {
     "tracking": 315,
     "optimal": 1200,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "220mm Vulcan AutoCannon II": {
     "tracking": 38.8608,
     "optimal": 2160,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "250mm Light Artillery Cannon II": {
     "tracking": 80,
     "optimal": 9660,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "425mm AutoCannon II": {
     "tracking": 33.792,
     "optimal": 2400,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Artillery Cannon II": {
     "tracking": 8.352,
     "optimal": 19320,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "800mm Repeating Cannon II": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 180mm AutoCannon II": {
     "tracking": 44.68992,
     "optimal": 1920,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 425mm AutoCannon II": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm Repeating Cannon II": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm Howitzer Artillery II": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "720mm Howitzer Artillery II": {
     "tracking": 6.688,
     "optimal": 24000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "280mm Howitzer Artillery II": {
     "tracking": 64,
     "optimal": 12000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Dual Heavy Beam Laser II": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Light Beam Laser II": {
     "tracking": 117,
     "optimal": 11550,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Light Pulse Laser II": {
     "tracking": 273.75,
     "optimal": 5670,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Focused Medium Beam Laser II": {
     "tracking": 12.096,
     "optimal": 23100,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Gatling Pulse Laser II": {
     "tracking": 308.125,
     "optimal": 5040,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Heavy Beam Laser II": {
     "tracking": 9.504,
     "optimal": 26400,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Small Focused Beam Laser II": {
     "tracking": 90,
     "optimal": 13200,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Pulse Laser II": {
     "tracking": 246.25,
     "optimal": 6300,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Mega Beam Laser II": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Pulse Laser II": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Beam Laser II": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "150mm Railgun II": {
     "tracking": 73.5,
     "optimal": 14400,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "250mm Railgun II": {
     "tracking": 5.904,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "425mm Railgun II": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "75mm Gatling Rail II": {
     "tracking": 136.5,
     "optimal": 7200,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Dual 150mm Railgun II": {
     "tracking": 10.8,
     "optimal": 12960,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 250mm Railgun II": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Electron Blaster Cannon II": {
     "tracking": 6,
     "optimal": 4800,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Heavy Electron Blaster II": {
     "tracking": 46.08,
     "optimal": 2400,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Heavy Ion Blaster II": {
     "tracking": 42.24,
     "optimal": 3000,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Heavy Neutron Blaster II": {
     "tracking": 38.4,
     "optimal": 3600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Ion Blaster Cannon II": {
     "tracking": 5.52,
     "optimal": 6000,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Light Electron Blaster II": {
     "tracking": 438,
     "optimal": 1200,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Light Ion Blaster II": {
     "tracking": 403.2,
     "optimal": 1500,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Light Neutron Blaster II": {
     "tracking": 379.8,
     "optimal": 1800,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Neutron Blaster Cannon II": {
     "tracking": 5.196,
     "optimal": 7200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Quad Light Beam Laser II": {
     "tracking": 23.328,
     "optimal": 10560,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Medium Pulse Laser II": {
     "tracking": 28.8,
     "optimal": 11340,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Pulse Laser II": {
     "tracking": 26,
     "optimal": 12600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "CONCORD Ion Siege Blaster": {
     "tracking": 0.045885,
     "optimal": 22000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "CONCORD Dual 1000mm Railgun": {
     "tracking": 0.019201875,
     "optimal": 132000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "CONCORD Dual Giga Pulse Laser": {
     "tracking": 0.04041072,
     "optimal": 46200,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "CONCORD Dual Giga Beam Laser": {
     "tracking": 0.022911326,
     "optimal": 110000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "CONCORD Quad 3500mm Siege Artillery": {
     "tracking": 0.017955,
     "optimal": 103400,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "CONCORD Hexa 2500mm Repeating Cannon": {
     "tracking": 0.04359075,
     "optimal": 27500,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Dual Heavy Pulse Laser II": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Gatling Modal Laser I": {
     "tracking": 308.125,
     "optimal": 4620,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Gatling Afocal Laser I": {
     "tracking": 308.125,
     "optimal": 4410,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Gatling Modulated Energy Beam I": {
     "tracking": 308.125,
     "optimal": 5040,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Gatling Anode Particle Stream I": {
     "tracking": 308.125,
     "optimal": 4830,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Modal Pulse Laser I": {
     "tracking": 273.75,
     "optimal": 5198,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Afocal Pulse Laser I": {
     "tracking": 273.75,
     "optimal": 4961,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Modulated Pulse Energy Beam I": {
     "tracking": 273.75,
     "optimal": 5670,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Anode Pulse Particle Stream I": {
     "tracking": 273.75,
     "optimal": 5434,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Modal Light Laser I": {
     "tracking": 117,
     "optimal": 10588,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Afocal Light Laser I": {
     "tracking": 117,
     "optimal": 10107,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Modulated Light Energy Beam I": {
     "tracking": 117,
     "optimal": 11550,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dual Anode Light Particle Stream I": {
     "tracking": 117,
     "optimal": 11069,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Modal Pulse Laser I": {
     "tracking": 246.25,
     "optimal": 5775,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Afocal Pulse Laser I": {
     "tracking": 246.25,
     "optimal": 5513,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Modulated Pulse Energy Beam I": {
     "tracking": 246.25,
     "optimal": 6300,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Anode Pulse Particle Stream I": {
     "tracking": 246.25,
     "optimal": 6038,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Modal Laser I": {
     "tracking": 90,
     "optimal": 12100,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Afocal Laser I": {
     "tracking": 90,
     "optimal": 11550,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Modulated Energy Beam I": {
     "tracking": 90,
     "optimal": 13200,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Small Focused Anode Particle Stream I": {
     "tracking": 90,
     "optimal": 12650,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Quad Modal Light Laser I": {
     "tracking": 23.328,
     "optimal": 9680,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Quad Afocal Light Laser I": {
     "tracking": 23.328,
     "optimal": 9240,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Quad Modulated Light Energy Beam I": {
     "tracking": 23.328,
     "optimal": 10560,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Quad Anode Light Particle Stream I": {
     "tracking": 23.328,
     "optimal": 10120,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Modal Pulse Laser I": {
     "tracking": 28.8,
     "optimal": 10395,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Afocal Pulse Laser I": {
     "tracking": 28.8,
     "optimal": 9923,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Modulated Pulse Energy Beam I": {
     "tracking": 28.8,
     "optimal": 11340,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Anode Pulse Particle Stream I": {
     "tracking": 28.8,
     "optimal": 10868,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Modal Medium Laser I": {
     "tracking": 12.096,
     "optimal": 21175,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Afocal Medium Laser I": {
     "tracking": 12.096,
     "optimal": 20213,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Modulated Medium Energy Beam I": {
     "tracking": 12.096,
     "optimal": 23100,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Focused Anode Medium Particle Stream I": {
     "tracking": 12.096,
     "optimal": 22138,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Modal Pulse Laser I": {
     "tracking": 26,
     "optimal": 11550,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Afocal Pulse Laser I": {
     "tracking": 26,
     "optimal": 11025,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Modulated Pulse Energy Beam I": {
     "tracking": 26,
     "optimal": 12600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Anode Pulse Particle Stream I": {
     "tracking": 26,
     "optimal": 12075,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Modal Laser I": {
     "tracking": 9.504,
     "optimal": 24200,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Afocal Laser I": {
     "tracking": 9.504,
     "optimal": 23100,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Modulated Energy Beam I": {
     "tracking": 9.504,
     "optimal": 26400,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Heavy Anode Particle Stream I": {
     "tracking": 9.504,
     "optimal": 25300,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dual Heavy Modal Pulse Laser I": {
     "tracking": 3.75,
     "optimal": 20790,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Heavy Afocal Pulse Laser I": {
     "tracking": 3.75,
     "optimal": 19845,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Heavy Modulated Pulse Energy Beam I": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Heavy Anode Pulse Particle Stream I": {
     "tracking": 3.75,
     "optimal": 21735,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Modal Heavy Laser I": {
     "tracking": 1.75,
     "optimal": 38500,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Afocal Heavy Laser I": {
     "tracking": 1.75,
     "optimal": 36750,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Modulated Heavy Energy Beam I": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dual Anode Heavy Particle Stream I": {
     "tracking": 1.75,
     "optimal": 40250,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Modal Pulse Laser I": {
     "tracking": 3.375,
     "optimal": 23100,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Afocal Pulse Laser I": {
     "tracking": 3.375,
     "optimal": 22050,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Modulated Pulse Energy Beam I": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Anode Pulse Particle Stream I": {
     "tracking": 3.375,
     "optimal": 24150,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Modal Laser I": {
     "tracking": 1.53125,
     "optimal": 44000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Afocal Laser I": {
     "tracking": 1.53125,
     "optimal": 42000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Modulated Energy Beam I": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mega Anode Particle Stream I": {
     "tracking": 1.53125,
     "optimal": 46000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Modal Laser I": {
     "tracking": 1.39205,
     "optimal": 48400,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Afocal Laser I": {
     "tracking": 1.39205,
     "optimal": 46200,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Modulated Energy Beam I": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tachyon Anode Particle Stream I": {
     "tracking": 1.39205,
     "optimal": 50600,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "75mm Prototype Gauss Gun": {
     "tracking": 136.5,
     "optimal": 7200,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "75mm 'Scout' Accelerator Cannon": {
     "tracking": 136.5,
     "optimal": 6600,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "75mm Carbide Railgun I": {
     "tracking": 136.5,
     "optimal": 6300,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "75mm Compressed Coil Gun I": {
     "tracking": 136.5,
     "optimal": 6900,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "150mm Prototype Gauss Gun": {
     "tracking": 73.5,
     "optimal": 14400,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "150mm 'Scout' Accelerator Cannon": {
     "tracking": 73.5,
     "optimal": 13200,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "150mm Carbide Railgun I": {
     "tracking": 73.5,
     "optimal": 12600,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "150mm Compressed Coil Gun I": {
     "tracking": 73.5,
     "optimal": 13800,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Dual 150mm Prototype Gauss Gun": {
     "tracking": 10.8,
     "optimal": 12960,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 150mm 'Scout' Accelerator Cannon": {
     "tracking": 10.8,
     "optimal": 11880,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 150mm Carbide Railgun I": {
     "tracking": 10.8,
     "optimal": 11340,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 150mm Compressed Coil Gun I": {
     "tracking": 10.8,
     "optimal": 12420,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "250mm Prototype Gauss Gun": {
     "tracking": 5.904,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "250mm 'Scout' Accelerator Cannon": {
     "tracking": 5.904,
     "optimal": 23760,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "250mm Carbide Railgun I": {
     "tracking": 5.904,
     "optimal": 22680,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "250mm Compressed Coil Gun I": {
     "tracking": 5.904,
     "optimal": 24840,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dual 250mm Prototype Gauss Gun": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dual 250mm 'Scout' Accelerator Cannon": {
     "tracking": 1.90179,
     "optimal": 23760,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dual 250mm Carbide Railgun I": {
     "tracking": 1.90179,
     "optimal": 22680,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dual 250mm Compressed Coil Gun I": {
     "tracking": 1.90179,
     "optimal": 24840,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "425mm Prototype Gauss Gun": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "425mm 'Scout' Accelerator Cannon": {
     "tracking": 1.04598,
     "optimal": 47520,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "425mm Carbide Railgun I": {
     "tracking": 1.04598,
     "optimal": 45360,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "425mm Compressed Coil Gun I": {
     "tracking": 1.04598,
     "optimal": 49680,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Modal Light Electron Particle Accelerator I": {
     "tracking": 438,
     "optimal": 1200,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Limited Light Electron Blaster I": {
     "tracking": 438,
     "optimal": 1100,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Regulated Light Electron Phase Cannon I": {
     "tracking": 438,
     "optimal": 1050,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Anode Light Electron Particle Cannon I": {
     "tracking": 438,
     "optimal": 1150,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Modal Light Ion Particle Accelerator I": {
     "tracking": 403.2,
     "optimal": 1500,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Limited Light Ion Blaster I": {
     "tracking": 403.2,
     "optimal": 1375,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Regulated Light Ion Phase Cannon I": {
     "tracking": 403.2,
     "optimal": 1312,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Anode Light Ion Particle Cannon I": {
     "tracking": 403.2,
     "optimal": 1437,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Modal Light Neutron Particle Accelerator I": {
     "tracking": 379.8,
     "optimal": 1800,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Limited Light Neutron Blaster I": {
     "tracking": 379.8,
     "optimal": 1650,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Regulated Light Neutron Phase Cannon I": {
     "tracking": 379.8,
     "optimal": 1575,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Anode Light Neutron Particle Cannon I": {
     "tracking": 379.8,
     "optimal": 1725,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Modal Electron Particle Accelerator I": {
     "tracking": 46.08,
     "optimal": 2400,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Limited Electron Blaster I": {
     "tracking": 46.08,
     "optimal": 2200,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Regulated Electron Phase Cannon I": {
     "tracking": 46.08,
     "optimal": 2100,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Anode Electron Particle Cannon I": {
     "tracking": 46.08,
     "optimal": 2300,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Modal Ion Particle Accelerator I": {
     "tracking": 42.24,
     "optimal": 3000,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Limited Ion Blaster I": {
     "tracking": 42.24,
     "optimal": 2750,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Regulated Ion Phase Cannon I": {
     "tracking": 42.24,
     "optimal": 2625,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Anode Ion Particle Cannon I": {
     "tracking": 42.24,
     "optimal": 2875,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Modal Neutron Particle Accelerator I": {
     "tracking": 38.4,
     "optimal": 3600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Limited Neutron Blaster I": {
     "tracking": 38.4,
     "optimal": 3300,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Regulated Neutron Phase Cannon I": {
     "tracking": 38.4,
     "optimal": 3150,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Anode Neutron Particle Cannon I": {
     "tracking": 38.4,
     "optimal": 3450,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Modal Mega Electron Particle Accelerator I": {
     "tracking": 6,
     "optimal": 4800,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Limited Electron Blaster Cannon I": {
     "tracking": 6,
     "optimal": 4400,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Regulated Mega Electron Phase Cannon I": {
     "tracking": 6,
     "optimal": 4200,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Anode Mega Electron Particle Cannon I": {
     "tracking": 6,
     "optimal": 4600,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Modal Mega Neutron Particle Accelerator I": {
     "tracking": 5.196,
     "optimal": 7200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Limited Mega Neutron Blaster I": {
     "tracking": 5.196,
     "optimal": 6600,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Regulated Mega Neutron Phase Cannon I": {
     "tracking": 5.196,
     "optimal": 6300,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Anode Mega Neutron Particle Cannon I": {
     "tracking": 5.196,
     "optimal": 6900,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Modal Mega Ion Particle Accelerator I": {
     "tracking": 5.52,
     "optimal": 6000,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Limited Mega Ion Blaster I": {
     "tracking": 5.52,
     "optimal": 5500,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Regulated Mega Ion Phase Cannon I": {
     "tracking": 5.52,
     "optimal": 5250,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Anode Mega Ion Particle Cannon I": {
     "tracking": 5.52,
     "optimal": 5750,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "125mm Light 'Scout' Autocannon I": {
     "tracking": 417,
     "optimal": 960,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "125mm Light Carbine Repeating Cannon I": {
     "tracking": 417,
     "optimal": 840,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "125mm Light Gallium Machine Gun": {
     "tracking": 417,
     "optimal": 880,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "125mm Light Prototype Automatic Cannon": {
     "tracking": 417,
     "optimal": 920,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light 'Scout' Autocannon I": {
     "tracking": 362,
     "optimal": 1080,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light Carbine Repeating Cannon I": {
     "tracking": 362,
     "optimal": 945,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light Gallium Machine Gun": {
     "tracking": 362,
     "optimal": 990,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "150mm Light Prototype Automatic Cannon": {
     "tracking": 362,
     "optimal": 1035,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm Light 'Scout' Autocannon I": {
     "tracking": 315,
     "optimal": 1200,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm Light Carbine Repeating Cannon I": {
     "tracking": 315,
     "optimal": 1050,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm Light Gallium Machine Gun": {
     "tracking": 315,
     "optimal": 1100,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "200mm Light Prototype Automatic Cannon": {
     "tracking": 315,
     "optimal": 1150,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light 'Scout' Artillery I": {
     "tracking": 80,
     "optimal": 9660,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light Carbine Howitzer I": {
     "tracking": 80,
     "optimal": 8453,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light Gallium Cannon": {
     "tracking": 80,
     "optimal": 8855,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light Prototype Siege Cannon": {
     "tracking": 80,
     "optimal": 9258,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Dual 180mm 'Scout' Autocannon I": {
     "tracking": 44.68992,
     "optimal": 1920,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 180mm Carbine Repeating Cannon I": {
     "tracking": 44.68992,
     "optimal": 1680,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 180mm Gallium Machine Gun": {
     "tracking": 44.68992,
     "optimal": 1760,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 180mm Prototype Automatic Cannon": {
     "tracking": 44.68992,
     "optimal": 1840,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "220mm Medium 'Scout' Autocannon I": {
     "tracking": 38.8608,
     "optimal": 2160,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "220mm Medium Carbine Repeating Cannon I": {
     "tracking": 38.8608,
     "optimal": 1890,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "220mm Medium Gallium Machine Gun": {
     "tracking": 38.8608,
     "optimal": 1980,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "220mm Medium Prototype Automatic Cannon": {
     "tracking": 38.8608,
     "optimal": 2070,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "425mm Medium 'Scout' Autocannon I": {
     "tracking": 33.792,
     "optimal": 2400,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "425mm Medium Carbine Repeating Cannon I": {
     "tracking": 33.792,
     "optimal": 2100,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "425mm Medium Gallium Machine Gun": {
     "tracking": 33.792,
     "optimal": 2200,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "425mm Medium Prototype Automatic Cannon": {
     "tracking": 33.792,
     "optimal": 2300,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Medium 'Scout' Artillery I": {
     "tracking": 8.352,
     "optimal": 19320,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Medium Carbine Howitzer I": {
     "tracking": 8.352,
     "optimal": 16905,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Medium Gallium Cannon": {
     "tracking": 8.352,
     "optimal": 17710,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Medium Prototype Siege Cannon": {
     "tracking": 8.352,
     "optimal": 18515,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Dual 425mm 'Scout' Autocannon I": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 425mm Carbine Repeating Cannon I": {
     "tracking": 5.7132,
     "optimal": 3360,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 425mm Gallium Machine Gun": {
     "tracking": 5.7132,
     "optimal": 3520,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 425mm Prototype Automatic Cannon": {
     "tracking": 5.7132,
     "optimal": 3680,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm 'Scout' Repeating Cannon I": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm Carbine Repeating Cannon I": {
     "tracking": 4.968,
     "optimal": 3780,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm Gallium Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 3960,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual 650mm Prototype Automatic Cannon": {
     "tracking": 4.968,
     "optimal": 4140,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "800mm Heavy 'Scout' Repeating Cannon I": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "800mm Heavy Carbine Repeating Cannon I": {
     "tracking": 4.32,
     "optimal": 4200,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "800mm Heavy Gallium Repeating Cannon": {
     "tracking": 4.32,
     "optimal": 4400,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "800mm Heavy Prototype Automatic Cannon": {
     "tracking": 4.32,
     "optimal": 4600,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Heavy 'Scout' Artillery I": {
     "tracking": 1.125,
     "optimal": 38640,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Heavy Carbine Howitzer I": {
     "tracking": 1.125,
     "optimal": 33810,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Heavy Gallium Cannon": {
     "tracking": 1.125,
     "optimal": 35420,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Heavy Prototype Siege Cannon": {
     "tracking": 1.125,
     "optimal": 37030,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "280mm 'Scout' Artillery I": {
     "tracking": 64,
     "optimal": 12000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "280mm Carbine Howitzer I": {
     "tracking": 64,
     "optimal": 10500,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "280mm Gallium Cannon": {
     "tracking": 64,
     "optimal": 11000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "280mm Prototype Siege Cannon": {
     "tracking": 64,
     "optimal": 11500,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "720mm 'Scout' Artillery I": {
     "tracking": 6.688,
     "optimal": 24000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "720mm Carbine Howitzer I": {
     "tracking": 6.688,
     "optimal": 21000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "720mm Gallium Cannon": {
     "tracking": 6.688,
     "optimal": 22000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "720mm Prototype Siege Cannon": {
     "tracking": 6.688,
     "optimal": 23000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "1400mm 'Scout' Artillery I": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm Carbine Howitzer I": {
     "tracking": 0.9,
     "optimal": 42000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm Gallium Cannon": {
     "tracking": 0.9,
     "optimal": 44000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm Prototype Siege Cannon": {
     "tracking": 0.9,
     "optimal": 46000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "125mm Railgun I": {
     "tracking": 89.25,
     "optimal": 9000,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "125mm Railgun II": {
     "tracking": 89.25,
     "optimal": 10800,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "125mm 'Scout' Accelerator Cannon": {
     "tracking": 89.25,
     "optimal": 9900,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "125mm Carbide Railgun I": {
     "tracking": 89.25,
     "optimal": 9450,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "125mm Compressed Coil Gun I": {
     "tracking": 89.25,
     "optimal": 10350,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "125mm Prototype Gauss Gun": {
     "tracking": 89.25,
     "optimal": 10800,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "200mm Railgun I": {
     "tracking": 7.2,
     "optimal": 16200,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "200mm Railgun II": {
     "tracking": 7.2,
     "optimal": 19440,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "350mm Railgun I": {
     "tracking": 1.26828,
     "optimal": 32400,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "350mm Railgun II": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Domination 125mm Autocannon": {
     "tracking": 417,
     "optimal": 960,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Domination 1200mm Artillery": {
     "tracking": 1.125,
     "optimal": 38640,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Domination 1400mm Howitzer Artillery": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Domination 150mm Autocannon": {
     "tracking": 362,
     "optimal": 1080,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Domination 200mm Autocannon": {
     "tracking": 315,
     "optimal": 1200,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Domination 220mm Autocannon": {
     "tracking": 38.8608,
     "optimal": 2160,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Domination 250mm Artillery": {
     "tracking": 80,
     "optimal": 9660,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Domination 280mm Howitzer Artillery": {
     "tracking": 64,
     "optimal": 12000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Domination 425mm Autocannon": {
     "tracking": 33.792,
     "optimal": 2400,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Domination 650mm Artillery": {
     "tracking": 8.352,
     "optimal": 19320,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Domination 720mm Howitzer Artillery": {
     "tracking": 6.688,
     "optimal": 24000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Domination 800mm Repeating Cannon": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Domination Dual 180mm Autocannon": {
     "tracking": 44.68992,
     "optimal": 1920,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Domination Dual 425mm Autocannon": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Domination Dual 650mm Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dark Blood Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dark Blood Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dark Blood Dual Light Beam Laser": {
     "tracking": 117,
     "optimal": 12032,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dark Blood Dual Light Pulse Laser": {
     "tracking": 273.75,
     "optimal": 5906,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dark Blood Focused Medium Beam Laser": {
     "tracking": 12.096,
     "optimal": 24063,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dark Blood Focused Medium Pulse Laser": {
     "tracking": 28.8,
     "optimal": 11813,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dark Blood Gatling Pulse Laser": {
     "tracking": 308.125,
     "optimal": 5250,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dark Blood Heavy Beam Laser": {
     "tracking": 9.504,
     "optimal": 27500,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dark Blood Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Dark Blood Small Focused Beam Laser": {
     "tracking": 90,
     "optimal": 13750,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dark Blood Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Dark Blood Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dark Blood Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dark Blood Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Dark Blood Quad Beam Laser": {
     "tracking": 23.328,
     "optimal": 11000,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "True Sansha Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "True Sansha Dual Light Beam Laser": {
     "tracking": 117,
     "optimal": 12032,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "True Sansha Dual Light Pulse Laser": {
     "tracking": 273.75,
     "optimal": 5906,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "True Sansha Focused Medium Beam Laser": {
     "tracking": 12.096,
     "optimal": 24063,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Focused Medium Pulse Laser": {
     "tracking": 28.8,
     "optimal": 11813,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Gatling Pulse Laser": {
     "tracking": 308.125,
     "optimal": 5250,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "True Sansha Heavy Beam Laser": {
     "tracking": 9.504,
     "optimal": 27500,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Small Focused Beam Laser": {
     "tracking": 90,
     "optimal": 13750,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "True Sansha Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "True Sansha Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "True Sansha Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "True Sansha Quad Beam Laser": {
     "tracking": 23.328,
     "optimal": 11000,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "True Sansha Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Shadow Serpentis 125mm Railgun": {
     "tracking": 89.25,
     "optimal": 10800,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Dread Guristas 125mm Railgun": {
     "tracking": 89.25,
     "optimal": 11700,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis 150mm Railgun": {
     "tracking": 73.5,
     "optimal": 14400,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Dread Guristas 150mm Railgun": {
     "tracking": 73.5,
     "optimal": 15600,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis 200mm Railgun": {
     "tracking": 7.2,
     "optimal": 16200,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dread Guristas 200mm Railgun": {
     "tracking": 7.2,
     "optimal": 21060,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Shadow Serpentis 250mm Railgun": {
     "tracking": 5.904,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dread Guristas 250mm Railgun": {
     "tracking": 5.904,
     "optimal": 28080,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Shadow Serpentis 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dread Guristas 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 42120,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dread Guristas 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 56160,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis Dual 150mm Railgun": {
     "tracking": 10.8,
     "optimal": 12960,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dread Guristas Dual 150mm Railgun": {
     "tracking": 10.8,
     "optimal": 14040,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Shadow Serpentis Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Dread Guristas Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 28080,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis Heavy Electron Blaster": {
     "tracking": 46.08,
     "optimal": 2100,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Shadow Serpentis Heavy Ion Blaster": {
     "tracking": 42.24,
     "optimal": 2625,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Shadow Serpentis Light Electron Blaster": {
     "tracking": 438,
     "optimal": 1050,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis Light Ion Blaster": {
     "tracking": 403.2,
     "optimal": 1312,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis Light Neutron Blaster": {
     "tracking": 379.8,
     "optimal": 1575,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis Electron Blaster Cannon": {
     "tracking": 6,
     "optimal": 4200,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis Ion Blaster Cannon": {
     "tracking": 5.52,
     "optimal": 5250,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis Neutron Blaster Cannon": {
     "tracking": 5.196,
     "optimal": 6300,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Shadow Serpentis Heavy Neutron Blaster": {
     "tracking": 38.4,
     "optimal": 3150,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Dread Guristas 75mm Railgun": {
     "tracking": 136.5,
     "optimal": 7800,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Shadow Serpentis 75mm Railgun": {
     "tracking": 136.5,
     "optimal": 7200,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "200mm Carbide Railgun I": {
     "tracking": 7.2,
     "optimal": 17010,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "200mm 'Scout' Accelerator Cannon": {
     "tracking": 7.2,
     "optimal": 17820,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "200mm Compressed Coil Gun I": {
     "tracking": 7.2,
     "optimal": 18630,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "200mm Prototype Gauss Gun": {
     "tracking": 7.2,
     "optimal": 19440,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "350mm Carbide Railgun I": {
     "tracking": 1.26828,
     "optimal": 34020,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "350mm 'Scout' Accelerator Cannon": {
     "tracking": 1.26828,
     "optimal": 35640,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "350mm Compressed Coil Gun I": {
     "tracking": 1.26828,
     "optimal": 37260,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "350mm Prototype Gauss Gun": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Tuvan's Modified Electron Blaster Cannon": {
     "tracking": 6,
     "optimal": 4200,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Cormack's Modified Electron Blaster Cannon": {
     "tracking": 6,
     "optimal": 4200,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Cormack's Modified Ion Blaster Cannon": {
     "tracking": 5.52,
     "optimal": 5250,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Tuvan's Modified Ion Blaster Cannon": {
     "tracking": 5.52,
     "optimal": 5250,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Tuvan's Modified Neutron Blaster Cannon": {
     "tracking": 5.196,
     "optimal": 6300,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Cormack's Modified Neutron Blaster Cannon": {
     "tracking": 5.196,
     "optimal": 6300,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Brynn's Modified 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Setele's Modified 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Kaikka's Modified 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 42120,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Vepas' Modified 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 44226,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Estamel's Modified 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 46332,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Brynn's Modified 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Setele's Modified 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Kaikka's Modified 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 56160,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Vepas' Modified 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 58968,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Estamel's Modified 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 61776,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Brynn's Modified Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Setele's Modified Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Kaikka's Modified Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 28080,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Vepas' Modified Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 29484,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Estamel's Modified Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 30888,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Selynne's Modified Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Chelm's Modified Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Raysere's Modified Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Draclira's Modified Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tairei's Modified Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ahremen's Modified Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Brokara's Modified Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Vizan's Modified Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Selynne's Modified Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Chelm's Modified Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Raysere's Modified Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Draclira's Modified Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Tairei's Modified Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ahremen's Modified Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Brokara's Modified Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Vizan's Modified Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Selynne's Modified Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Chelm's Modified Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Raysere's Modified Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Draclira's Modified Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Mizuro's Modified 800mm Repeating Cannon": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Gotan's Modified 800mm Repeating Cannon": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Hakim's Modified 1200mm Artillery Cannon": {
     "tracking": 1.125,
     "optimal": 38640,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Tobias' Modified 1200mm Artillery Cannon": {
     "tracking": 1.125,
     "optimal": 33600,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Hakim's Modified 1400mm Howitzer Artillery": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Tobias' Modified 1400mm Howitzer Artillery": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Mizuro's Modified Dual 425mm AutoCannon": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Gotan's Modified Dual 425mm AutoCannon": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Mizuro's Modified Dual 650mm Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Gotan's Modified Dual 650mm Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Caldari Navy Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 28080,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Caldari Navy Dual 150mm Railgun": {
     "tracking": 10.8,
     "optimal": 14040,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Caldari Navy 75mm Railgun": {
     "tracking": 136.5,
     "optimal": 7800,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Caldari Navy 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 56160,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Caldari Navy 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 42120,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Caldari Navy 250mm Railgun": {
     "tracking": 5.904,
     "optimal": 28080,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Caldari Navy 200mm Railgun": {
     "tracking": 7.2,
     "optimal": 21060,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Caldari Navy 150mm Railgun": {
     "tracking": 73.5,
     "optimal": 15600,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Caldari Navy 125mm Railgun": {
     "tracking": 89.25,
     "optimal": 11700,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy Neutron Blaster Cannon": {
     "tracking": 5.196,
     "optimal": 6300,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy Light Neutron Blaster": {
     "tracking": 379.8,
     "optimal": 1575,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy Light Ion Blaster": {
     "tracking": 403.2,
     "optimal": 1312,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy Light Electron Blaster": {
     "tracking": 438,
     "optimal": 1050,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy Ion Blaster Cannon": {
     "tracking": 5.52,
     "optimal": 5250,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy Heavy Neutron Blaster": {
     "tracking": 38.4,
     "optimal": 3150,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy Heavy Ion Blaster": {
     "tracking": 42.24,
     "optimal": 2625,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy Heavy Electron Blaster": {
     "tracking": 46.08,
     "optimal": 2100,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy Electron Blaster Cannon": {
     "tracking": 6,
     "optimal": 4200,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy Dual 250mm Railgun": {
     "tracking": 1.90179,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy Dual 150mm Railgun": {
     "tracking": 10.8,
     "optimal": 12960,
     "falloff": 5400,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy 75mm Railgun": {
     "tracking": 136.5,
     "optimal": 7200,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy 425mm Railgun": {
     "tracking": 1.04598,
     "optimal": 51840,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy 350mm Railgun": {
     "tracking": 1.26828,
     "optimal": 38880,
     "falloff": 18000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Federation Navy 250mm Railgun": {
     "tracking": 5.904,
     "optimal": 25920,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy 200mm Railgun": {
     "tracking": 7.2,
     "optimal": 16200,
     "falloff": 9000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Federation Navy 150mm Railgun": {
     "tracking": 73.5,
     "optimal": 14400,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Federation Navy 125mm Railgun": {
     "tracking": 89.25,
     "optimal": 10800,
     "falloff": 5000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Ammatar Navy Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ammatar Navy Quad Beam Laser": {
     "tracking": 23.328,
     "optimal": 11000,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Ammatar Navy Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ammatar Navy Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ammatar Navy Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ammatar Navy Small Focused Beam Laser": {
     "tracking": 90,
     "optimal": 13750,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ammatar Navy Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Ammatar Navy Heavy Beam Laser": {
     "tracking": 9.504,
     "optimal": 27500,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Ammatar Navy Gatling Pulse Laser": {
     "tracking": 308.125,
     "optimal": 5250,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ammatar Navy Focused Medium Pulse Laser": {
     "tracking": 28.8,
     "optimal": 11813,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Ammatar Navy Focused Medium Beam Laser": {
     "tracking": 12.096,
     "optimal": 24063,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Ammatar Navy Dual Light Pulse Laser": {
     "tracking": 273.75,
     "optimal": 5906,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ammatar Navy Dual Light Beam Laser": {
     "tracking": 117,
     "optimal": 12032,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ammatar Navy Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Ammatar Navy Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Imperial Navy Tachyon Beam Laser": {
     "tracking": 1.39205,
     "optimal": 52800,
     "falloff": 20000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Imperial Navy Quad Beam Laser": {
     "tracking": 23.328,
     "optimal": 11000,
     "falloff": 1000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Imperial Navy Mega Pulse Laser": {
     "tracking": 3.375,
     "optimal": 25200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Imperial Navy Mega Beam Laser": {
     "tracking": 1.53125,
     "optimal": 48000,
     "falloff": 16000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Imperial Navy Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Imperial Navy Small Focused Beam Laser": {
     "tracking": 90,
     "optimal": 13750,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Imperial Navy Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Imperial Navy Heavy Beam Laser": {
     "tracking": 9.504,
     "optimal": 27500,
     "falloff": 8000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Imperial Navy Gatling Pulse Laser": {
     "tracking": 308.125,
     "optimal": 5250,
     "falloff": 1000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Imperial Navy Focused Medium Pulse Laser": {
     "tracking": 28.8,
     "optimal": 11813,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Imperial Navy Focused Medium Beam Laser": {
     "tracking": 12.096,
     "optimal": 24063,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Imperial Navy Dual Light Pulse Laser": {
     "tracking": 273.75,
     "optimal": 5906,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Imperial Navy Dual Light Beam Laser": {
     "tracking": 117,
     "optimal": 12032,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Imperial Navy Dual Heavy Pulse Laser": {
     "tracking": 3.75,
     "optimal": 22680,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Imperial Navy Dual Heavy Beam Laser": {
     "tracking": 1.75,
     "optimal": 42000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Republic Fleet 125mm Autocannon": {
     "tracking": 417,
     "optimal": 960,
     "falloff": 4300,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Republic Fleet 1200mm Artillery": {
     "tracking": 1.125,
     "optimal": 38640,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Republic Fleet 1400mm Howitzer Artillery": {
     "tracking": 0.9,
     "optimal": 48000,
     "falloff": 35000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Republic Fleet 150mm Autocannon": {
     "tracking": 362,
     "optimal": 1080,
     "falloff": 4730,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Republic Fleet 200mm Autocannon": {
     "tracking": 315,
     "optimal": 1200,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Republic Fleet 220mm Autocannon": {
     "tracking": 38.8608,
     "optimal": 2160,
     "falloff": 9933,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Republic Fleet 250mm Artillery": {
     "tracking": 80,
     "optimal": 9660,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Republic Fleet 280mm Howitzer Artillery": {
     "tracking": 64,
     "optimal": 12000,
     "falloff": 8750,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Republic Fleet 425mm Autocannon": {
     "tracking": 33.792,
     "optimal": 2400,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Republic Fleet 650mm Artillery": {
     "tracking": 8.352,
     "optimal": 19320,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Republic Fleet 720mm Howitzer Artillery": {
     "tracking": 6.688,
     "optimal": 24000,
     "falloff": 17500,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Republic Fleet 800mm Repeating Cannon": {
     "tracking": 4.32,
     "optimal": 4800,
     "falloff": 20640,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Republic Fleet Dual 180mm Autocannon": {
     "tracking": 44.68992,
     "optimal": 1920,
     "falloff": 9030,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Republic Fleet Dual 425mm Autocannon": {
     "tracking": 5.7132,
     "optimal": 3840,
     "falloff": 17200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Republic Fleet Dual 650mm Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 4320,
     "falloff": 18920,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Dual Giga Pulse Laser I": {
     "tracking": 0.0384864,
     "optimal": 42000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dual Giga Beam Laser I": {
     "tracking": 0.02182031,
     "optimal": 100000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dual 1000mm Railgun I": {
     "tracking": 0.0182875,
     "optimal": 120000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Ion Siege Blaster I": {
     "tracking": 0.0437,
     "optimal": 20000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Hexa 2500mm Repeating Cannon I": {
     "tracking": 0.041515,
     "optimal": 25000,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Quad 3500mm Siege Artillery I": {
     "tracking": 0.0171,
     "optimal": 94000,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "150mm 'Musket' Railgun": {
     "tracking": 73.5,
     "optimal": 12000,
     "falloff": 6000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "250mm 'Flintlock' Railgun": {
     "tracking": 5.904,
     "optimal": 21600,
     "falloff": 10800,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "425mm 'Popper' Railgun": {
     "tracking": 1.04598,
     "optimal": 43200,
     "falloff": 21600,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "200mm Light 'Jolt' Autocannon I": {
     "tracking": 315,
     "optimal": 1000,
     "falloff": 5676,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "250mm Light 'Jolt' Artillery I": {
     "tracking": 80,
     "optimal": 8050,
     "falloff": 9625,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "280mm 'Jolt' Artillery I": {
     "tracking": 64,
     "optimal": 10000,
     "falloff": 9625,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "425mm Medium 'Jolt' Autocannon I": {
     "tracking": 33.792,
     "optimal": 2000,
     "falloff": 11920,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "650mm Medium 'Jolt' Artillery I": {
     "tracking": 8.352,
     "optimal": 16100,
     "falloff": 19250,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "720mm 'Jolt' Artillery I": {
     "tracking": 6.688,
     "optimal": 20000,
     "falloff": 19250,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "800mm Heavy 'Jolt' Repeating Cannon I": {
     "tracking": 4.32,
     "optimal": 4000,
     "falloff": 22704,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1200mm Heavy 'Jolt' Artillery I": {
     "tracking": 1.125,
     "optimal": 32200,
     "falloff": 38500,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "1400mm 'Jolt' Artillery I": {
     "tracking": 0.9,
     "optimal": 40000,
     "falloff": 38500,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "'Corporate' Light Electron Blaster I": {
     "tracking": 438,
     "optimal": 1200,
     "falloff": 1500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "'Dealer' Light Ion Blaster I": {
     "tracking": 403.2,
     "optimal": 1500,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "'Racket' Light Neutron Blaster I": {
     "tracking": 379.8,
     "optimal": 1800,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "'Slither' Heavy Electron Blaster I": {
     "tracking": 46.08,
     "optimal": 2400,
     "falloff": 3000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "'Hooligan' Heavy Ion Blaster I": {
     "tracking": 42.24,
     "optimal": 3000,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "'Hustler' Heavy Neutron Blaster I": {
     "tracking": 38.4,
     "optimal": 3600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "'Swindler' Electron Blaster Cannon I": {
     "tracking": 6,
     "optimal": 4800,
     "falloff": 6000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "'Felon' Ion Blaster Cannon I": {
     "tracking": 5.52,
     "optimal": 6000,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "'Underhand' Neutron Blaster Cannon I": {
     "tracking": 5.196,
     "optimal": 7200,
     "falloff": 10000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "'Mace' Dual Light Beam Laser I": {
     "tracking": 117,
     "optimal": 9625,
     "falloff": 2400,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "'Longbow' Small Focused Pulse Laser I": {
     "tracking": 246.25,
     "optimal": 5250,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "'Gauntlet' Small Focused Beam Laser I": {
     "tracking": 90,
     "optimal": 11000,
     "falloff": 3000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "'Crossbow' Focused Medium Beam Laser I": {
     "tracking": 12.096,
     "optimal": 19250,
     "falloff": 7200,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "'Joust' Heavy Pulse Laser I": {
     "tracking": 26,
     "optimal": 10500,
     "falloff": 6000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "'Arquebus' Heavy Beam Laser I": {
     "tracking": 9.504,
     "optimal": 22000,
     "falloff": 9600,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "'Halberd' Mega Pulse Laser I": {
     "tracking": 3.375,
     "optimal": 21000,
     "falloff": 12000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "'Catapult' Mega Beam Laser I": {
     "tracking": 1.53125,
     "optimal": 40000,
     "falloff": 19200,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "'Ballista' Tachyon Beam Laser I": {
     "tracking": 1.39205,
     "optimal": 44000,
     "falloff": 24000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Polarized Small Focused Pulse Laser": {
     "tracking": 283.188,
     "optimal": 5040,
     "falloff": 2000,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Polarized Heavy Pulse Laser": {
     "tracking": 29.90016,
     "optimal": 10080,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Polarized Mega Pulse Laser": {
     "tracking": 3.8813,
     "optimal": 20160,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Energy Turret"
   },
   "Polarized Light Neutron Blaster": {
     "tracking": 436.77,
     "optimal": 1440,
     "falloff": 1600,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Polarized Heavy Neutron Blaster": {
     "tracking": 44.16,
     "optimal": 2880,
     "falloff": 4000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Polarized Neutron Blaster Cannon": {
     "tracking": 5.9754,
     "optimal": 5760,
     "falloff": 8000,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Hybrid Turret"
   },
   "Polarized 200mm AutoCannon": {
     "tracking": 362.25,
     "optimal": 960,
     "falloff": 4128,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Polarized 425mm AutoCannon": {
     "tracking": 38.8608,
     "optimal": 1920,
     "falloff": 8669,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Polarized 800mm Repeating Cannon": {
     "tracking": 4.968,
     "optimal": 3840,
     "falloff": 16512,
-    "chargeSize": 3
+    "chargeSize": 3,
+    "turretSkill": "Large Projectile Turret"
   },
   "Quad 800mm Repeating Cannon I": {
     "tracking": 1.92,
     "optimal": 20000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Quad Mega Pulse Laser I": {
     "tracking": 1.5,
     "optimal": 33000,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Triple Neutron Blaster Cannon I": {
     "tracking": 2.3,
     "optimal": 16000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Quad Mega Pulse Laser II": {
     "tracking": 1.5,
     "optimal": 36300,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Modulated Compact Quad Mega Pulse Laser": {
     "tracking": 1.5,
     "optimal": 33000,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dual Giga Pulse Laser II": {
     "tracking": 0.0384864,
     "optimal": 46200,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dual Giga Beam Laser II": {
     "tracking": 0.02182031,
     "optimal": 110000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Triple Neutron Blaster Cannon II": {
     "tracking": 2.3,
     "optimal": 17600,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Regulated Compact Triple Neutron Blaster Cannon": {
     "tracking": 2.3,
     "optimal": 16000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Ion Siege Blaster II": {
     "tracking": 0.0437,
     "optimal": 22000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Dual 1000mm Railgun II": {
     "tracking": 0.0182875,
     "optimal": 132000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Quad 800mm Repeating Cannon II": {
     "tracking": 1.92,
     "optimal": 22000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Compact Carbine Quad 800mm Repeating Cannon": {
     "tracking": 1.92,
     "optimal": 20000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Hexa 2500mm Repeating Cannon II": {
     "tracking": 0.041515,
     "optimal": 27500,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Quad 3500mm Siege Artillery II": {
     "tracking": 0.0171,
     "optimal": 103400,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Modal Enduring Quad Mega Pulse Laser": {
     "tracking": 1.5,
     "optimal": 33000,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Anode Scoped Quad Mega Pulse Laser": {
     "tracking": 1.5,
     "optimal": 34650,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Afocal Precise Quad Mega Pulse Laser": {
     "tracking": 1.575,
     "optimal": 33000,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dark Blood Quad Mega Pulse Laser": {
     "tracking": 1.575,
     "optimal": 36300,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "True Sansha Quad Mega Pulse Laser": {
     "tracking": 1.575,
     "optimal": 36300,
     "falloff": 16000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Modal Enduring Triple Neutron Blaster Cannon": {
     "tracking": 2.3,
     "optimal": 16000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Anode Scoped Triple Neutron Blaster Cannon": {
     "tracking": 2.3,
     "optimal": 16800,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Limited Precise Triple Neutron Blaster Cannon": {
     "tracking": 2.415,
     "optimal": 16000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Shadow Serpentis Triple Neutron Blaster Cannon": {
     "tracking": 2.415,
     "optimal": 17600,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Ample Gallium Quad 800mm Repeating Cannon": {
     "tracking": 1.92,
     "optimal": 20000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Scout Scoped Quad 800mm Repeating Cannon": {
     "tracking": 1.92,
     "optimal": 21000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Prototype Precise Quad 800mm Repeating Cannon": {
     "tracking": 2.016,
     "optimal": 20000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Domination Quad 800mm Repeating Cannon": {
     "tracking": 2.016,
     "optimal": 22000,
     "falloff": 23000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Modulated Compact Dual Giga Pulse Laser": {
     "tracking": 0.0384864,
     "optimal": 42000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Modal Enduring Dual Giga Pulse Laser": {
     "tracking": 0.0384864,
     "optimal": 42000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Anode Scoped Dual Giga Pulse Laser": {
     "tracking": 0.0384864,
     "optimal": 44100,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Afocal Precise Dual Giga Pulse Laser": {
     "tracking": 0.04041072,
     "optimal": 42000,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dark Blood Dual Giga Pulse Laser": {
     "tracking": 0.04041072,
     "optimal": 46200,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "True Sansha Dual Giga Pulse Laser": {
     "tracking": 0.04041072,
     "optimal": 46200,
     "falloff": 20000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Modulated Compact Dual Giga Beam Laser": {
     "tracking": 0.02182031,
     "optimal": 100000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Modal Enduring Dual Giga Beam Laser": {
     "tracking": 0.02182031,
     "optimal": 100000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Anode Scoped Dual Giga Beam Laser": {
     "tracking": 0.02182031,
     "optimal": 105000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Afocal Precise Dual Giga Beam Laser": {
     "tracking": 0.022911326,
     "optimal": 100000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Dark Blood Dual Giga Beam Laser": {
     "tracking": 0.022911326,
     "optimal": 110000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "True Sansha Dual Giga Beam Laser": {
     "tracking": 0.022911326,
     "optimal": 110000,
     "falloff": 42000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Energy Turret"
   },
   "Regulated Compact Ion Siege Blaster": {
     "tracking": 0.0437,
     "optimal": 20000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Modal Enduring Ion Siege Blaster": {
     "tracking": 0.0437,
     "optimal": 20000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Anode Scoped Ion Siege Blaster": {
     "tracking": 0.0437,
     "optimal": 21000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Limited Precise Ion Siege Blaster": {
     "tracking": 0.045885,
     "optimal": 20000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Shadow Serpentis Ion Siege Blaster": {
     "tracking": 0.045885,
     "optimal": 22000,
     "falloff": 25000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Carbide Compact Dual 1000mm Railgun": {
     "tracking": 0.0182875,
     "optimal": 120000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Compressed Enduring Dual 1000mm Railgun": {
     "tracking": 0.0182875,
     "optimal": 120000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Scout Scoped Dual 1000mm Railgun": {
     "tracking": 0.0182875,
     "optimal": 126000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Prototype Precise Dual 1000mm Railgun": {
     "tracking": 0.019201875,
     "optimal": 120000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Shadow Serpentis Dual 1000mm Railgun": {
     "tracking": 0.019201875,
     "optimal": 132000,
     "falloff": 32000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Hybrid Turret"
   },
   "Carbine Compact Hexa 2500mm Repeating Cannon": {
     "tracking": 0.041515,
     "optimal": 25000,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Gallium Ample Hexa 2500mm Repeating Cannon": {
     "tracking": 0.041515,
     "optimal": 25000,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Scout Scoped Hexa 2500mm Repeating Cannon": {
     "tracking": 0.041515,
     "optimal": 26250,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Prototype Precise Hexa 2500mm Repeating Cannon": {
     "tracking": 0.04359075,
     "optimal": 25000,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Domination Hexa 2500mm Repeating Cannon": {
     "tracking": 0.04359075,
     "optimal": 27500,
     "falloff": 28800,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Carbide Compact Quad 3500mm Siege Artillery": {
     "tracking": 0.0171,
     "optimal": 94000,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Gallium Ample Quad 3500mm Siege Artillery": {
     "tracking": 0.0171,
     "optimal": 94000,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Scout Scoped Quad 3500mm Siege Artillery": {
     "tracking": 0.0171,
     "optimal": 98700,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Prototype Precise Quad 3500mm Siege Artillery": {
     "tracking": 0.017955,
     "optimal": 94000,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Domination Quad 3500mm Siege Artillery": {
     "tracking": 0.017955,
     "optimal": 103400,
     "falloff": 90000,
-    "chargeSize": 4
+    "chargeSize": 4,
+    "turretSkill": "Capital Projectile Turret"
   },
   "Asine's Modified Light Neutron Blaster": {
     "tracking": 379.8,
     "optimal": 1800,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Hybrid Turret"
   },
   "Gara's Modified Heavy Neutron Blaster": {
     "tracking": 38.4,
     "optimal": 3600,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Hybrid Turret"
   },
   "Ramaku's Modified 200mm AutoCannon": {
     "tracking": 315,
     "optimal": 1200,
     "falloff": 5160,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Projectile Turret"
   },
   "Sila's Modified 425mm Autocannon": {
     "tracking": 33.792,
     "optimal": 2400,
     "falloff": 10836,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Projectile Turret"
   },
   "Makra's Modified Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Usaras' Modified Small Focused Pulse Laser": {
     "tracking": 246.25,
     "optimal": 6563,
     "falloff": 2500,
-    "chargeSize": 1
+    "chargeSize": 1,
+    "turretSkill": "Small Energy Turret"
   },
   "Ryhad's Modified Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   },
   "Nija's Modified Heavy Pulse Laser": {
     "tracking": 26,
     "optimal": 13125,
     "falloff": 5000,
-    "chargeSize": 2
+    "chargeSize": 2,
+    "turretSkill": "Medium Energy Turret"
   }
 } as unknown as Readonly<Record<string, TurretStats>>;
 
@@ -8303,3 +8915,1958 @@ export const CHARGES = {
     "rangeMultiplier": 0.6
   }
 } as unknown as Readonly<Record<string, ChargeStats>>;
+
+export const HULL_BONUSES = {
+  "Slasher": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Rifter": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Reaper": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 10
+    }
+  ],
+  "Tristan": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Ibis": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 20,
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Atron": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Immolator": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 22.5,
+      "turretSkill": "Small Energy Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 30,
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Echo": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 22.5,
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 22.5,
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 22.5,
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Stabber": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Thorax": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Rupture": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Megathron": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Apocalypse": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Badger": [
+    {
+      "attribute": "agility",
+      "magnitude": -5
+    }
+  ],
+  "Tayra": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Caldari Hauler"
+    }
+  ],
+  "Nereus": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Hoarder": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Hauler"
+    }
+  ],
+  "Mammoth": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Hauler"
+    }
+  ],
+  "Wreathe": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Minmatar Hauler"
+    }
+  ],
+  "Kryos": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Epithal": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Miasmos": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Iteron Mark V": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Erebus": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Bestower": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Amarr Hauler"
+    }
+  ],
+  "Utu": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Adrestia": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 25
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 50,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Revenant": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Malice": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Leviathan": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Naga": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Battlecruiser",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Talos": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battlecruiser",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Tornado": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 7.5,
+      "skill": "Minmatar Battlecruiser",
+      "turretSkill": "Large Projectile Turret"
+    }
+  ],
+  "Miasmos Quafe Ultra Edition": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Miasmos Quafe Ultramarine Edition": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Helios": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Frigate"
+    }
+  ],
+  "Raptor": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Cheetah": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Frigate"
+    }
+  ],
+  "Crusader": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Interceptors",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Claw": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Stiletto": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Taranis": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Interceptors",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Ares": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Wolf": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Harpy": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Retribution": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Avatar": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Gold Magnate": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Silver Magnate": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Lachesis": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Recon Ships",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Vagabond": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 12.5,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Zealot": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Eagle": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 7.5,
+      "skill": "Caldari Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 5,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Broadsword": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Heavy Interdiction Cruisers",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Devoter": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Heavy Interdiction Cruisers",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Phobos": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Heavy Interdiction Cruisers",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Deimos": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Ishkur": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Enyo": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Crane": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Caldari Hauler"
+    }
+  ],
+  "Bustard": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Caldari Hauler"
+    }
+  ],
+  "Prorator": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Amarr Hauler"
+    }
+  ],
+  "Prowler": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Hauler"
+    }
+  ],
+  "Viator": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Occator": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Mastodon": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Hauler"
+    }
+  ],
+  "Impel": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Amarr Hauler"
+    }
+  ],
+  "Megathron Federate Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Ferox": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Battlecruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Brutix": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Coercer": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Amarr Destroyer",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Cormorant": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Caldari Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Catalyst": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Thrasher": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Minmatar Destroyer",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Imperial Navy Slicer": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Omen Navy Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Cruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Stabber Fleet Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 5,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Phantasm": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Cruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Cynabal": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Vigilant": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Apocalypse Navy Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Megathron Navy Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Nightmare": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Machariel": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Projectile Turret"
+    }
+  ],
+  "Vindicator": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Republic Fleet Firetail": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 5,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Federation Navy Comet": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Vexor Navy Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Succubus": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Daredevil": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Dramiel": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Revelation": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Naglfar": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Moros": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Phoenix": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Sigil": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Amarr Hauler"
+    }
+  ],
+  "Providence": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Amarr Freighter"
+    }
+  ],
+  "Charon": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Caldari Freighter"
+    }
+  ],
+  "Obelisk": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Freighter"
+    }
+  ],
+  "Fenrir": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Minmatar Freighter"
+    }
+  ],
+  "Redeemer": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Black Ops",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Panther": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Black Ops",
+      "turretSkill": "Large Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 7.5,
+      "skill": "Black Ops",
+      "turretSkill": "Large Projectile Turret"
+    }
+  ],
+  "Sleipnir": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Command Ships",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Vulture": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Battlecruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Sabre": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Interdictors",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Minmatar Destroyer",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Eris": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Astarte": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Command Ships",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Hel": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Archon": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Ragnarok": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Thanatos": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Nyx": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Chimera": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Wyvern": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Aeon": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Nidhoggur": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Rokh": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Harbinger": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Energy Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Hurricane": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Rorqual": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Paladin": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 5,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Kronos": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Marauders",
+      "turretSkill": "Large Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    }
+  ],
+  "Vargur": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Marauders",
+      "turretSkill": "Large Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 5,
+      "skill": "Minmatar Battleship",
+      "turretSkill": "Large Projectile Turret"
+    }
+  ],
+  "Rhea": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Caldari Freighter"
+    }
+  ],
+  "Nomad": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Minmatar Freighter"
+    }
+  ],
+  "Anshar": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Gallente Freighter"
+    }
+  ],
+  "Ark": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Amarr Freighter"
+    }
+  ],
+  "Exequror Navy Issue": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 7.5,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Freki": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Mimir": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 25
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Typhoon Fleet Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Minmatar Battleship",
+      "turretSkill": "Large Projectile Turret"
+    }
+  ],
+  "Miasmos Amastris Edition": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 5,
+      "skill": "Gallente Hauler"
+    }
+  ],
+  "Algos": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Violator": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 22.5,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 30,
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Brutix Navy Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battlecruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Harbinger Navy Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Battlecruiser",
+      "turretSkill": "Medium Energy Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Energy Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Hurricane Fleet Issue": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Minmatar Battlecruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Moracha": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 15,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Chremoas": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 15,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Stratios": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Nestor": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Stratios Emergency Responder": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Bowhead": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "ORE Freighter"
+    }
+  ],
+  "Svipul": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Minmatar Tactical Destroyer",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Hecate": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Tactical Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Imp": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Fiend": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Amarr Cruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Apostle": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Minokawa": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Lif": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Ninazu": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Vehement": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Vendetta": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Vanquisher": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Molok": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Dagon": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Chemosh": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Caedes": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Pacifier": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Enforcer": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Cruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Marshal": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Battleship",
+      "turretSkill": "Large Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Virtuoso": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Victor": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Monitor": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Gallente Cruiser"
+    }
+  ],
+  "Loggerhead": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Caiman": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Komodo": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Zirnitra": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Ferox Navy Issue": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 5,
+      "skill": "Caldari Battlecruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Prophecy Navy Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Battlecruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Naglfar Fleet Issue": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Coercer Navy Issue": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Energy Turret"
+    }
+  ],
+  "Revelation Navy Issue": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Moros Navy Issue": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 5,
+      "skill": "Gallente Dreadnought",
+      "turretSkill": "Capital Hybrid Turret"
+    }
+  ],
+  "Phoenix Navy Issue": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Thrasher Fleet Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Cormorant Navy Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Catalyst Navy Issue": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Hubris": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Bane": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Karura": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 5,
+      "skill": "Caldari Dreadnought",
+      "turretSkill": "Capital Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Caldari Dreadnought",
+      "turretSkill": "Capital Hybrid Turret"
+    }
+  ],
+  "Valravn": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Dreadnought",
+      "turretSkill": "Capital Projectile Turret"
+    }
+  ],
+  "Cybele": [
+    {
+      "attribute": "maxVelocity",
+      "magnitude": 30
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Heavy Assault Cruisers",
+      "turretSkill": "Medium Hybrid Turret"
+    }
+  ],
+  "Mekubal": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Destroyer",
+      "turretSkill": "Small Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 50,
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Khizriel": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Battlecruiser",
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Shapash": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Assault Frigates",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Azariel": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Dreadnought",
+      "turretSkill": "Capital Projectile Turret"
+    },
+    {
+      "attribute": "turretTracking",
+      "magnitude": 5,
+      "skill": "Gallente Dreadnought",
+      "turretSkill": "Capital Projectile Turret"
+    }
+  ],
+  "Avalanche": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Sidewinder": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Frigate",
+      "turretSkill": "Small Hybrid Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Frigate",
+      "turretSkill": "Small Energy Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Frigate",
+      "turretSkill": "Small Projectile Turret"
+    }
+  ],
+  "Cenotaph": [
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 25,
+      "turretSkill": "Medium Projectile Turret"
+    }
+  ],
+  "Cobra": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Cruiser",
+      "turretSkill": "Medium Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Cruiser",
+      "turretSkill": "Medium Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Cruiser",
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Python": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 7.5,
+      "skill": "Gallente Battleship",
+      "turretSkill": "Large Hybrid Turret"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Minmatar Battleship",
+      "turretSkill": "Large Projectile Turret"
+    },
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 10,
+      "skill": "Amarr Battleship",
+      "turretSkill": "Large Energy Turret"
+    }
+  ],
+  "Sarathiel": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    },
+    {
+      "attribute": "turretFalloff",
+      "magnitude": 10,
+      "skill": "Gallente Dreadnought",
+      "turretSkill": "Capital Projectile Turret"
+    }
+  ],
+  "Odysseus": [
+    {
+      "attribute": "turretOptimal",
+      "magnitude": 50,
+      "turretSkill": "Medium Energy Turret"
+    }
+  ],
+  "Algos Navy Issue": [
+    {
+      "attribute": "turretTracking",
+      "magnitude": 10,
+      "skill": "Gallente Destroyer",
+      "turretSkill": "Small Hybrid Turret"
+    }
+  ],
+  "Salvation": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Simurgh": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Gaia": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ],
+  "Ymir": [
+    {
+      "attribute": "agility",
+      "magnitude": -5,
+      "skill": "Advanced Spaceship Command"
+    }
+  ]
+} as unknown as Readonly<Record<string, readonly HullBonus[]>>;

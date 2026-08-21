@@ -1,0 +1,17 @@
+[Ibis, Rail Shield Ibis]
+Civilian Gatling Railgun
+Civilian Miner
+
+1MN Civilian Afterburner
+
+
+Optimal Range Script x4
+1MN Y-S8 Compact Afterburner, Optimal Range Script
+150mm Prototype Gauss Gun, Optimal Range Script
+150mm Prototype Gauss Gun, Optimal Range Script
+Tracking Speed Script x1
+Co-Processor I, Optimal Range Script
+Antimatter Charge S x240
+Antimatter Charge S x2780
+Vortex Compact Magnetic Field Stabilizer, Optimal Range Script
+10MN Afterburner I, Optimal Range Script

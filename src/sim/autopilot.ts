@@ -10,6 +10,9 @@ export class ReactiveAutopilot implements Autopilot {
   computeVelocity(ship: ShipState, other: ShipState, _time: number): Vec2 {
     const toOther = other.position.sub(ship.position);
     const d = toOther.len();
+    if (ship.mode === "midships") {
+      return midships(ship, other, d);
+    }
     if (d === 0) {
       // Directly on top of the other ship: no meaningful direction.
       return new Vec2(0, 0);
@@ -87,4 +90,18 @@ function zetaFromAggressivity(aggressivity: number): number {
   const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, aggressivity));
   const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
   return Math.max(0, Math.min(1, (Math.log10(AGGRESSIVITY_MAX) - Math.log10(clamped)) / span));
+}
+
+function midships(ship: ShipState, other: ShipState, distance: number): Vec2 {
+  const velocity = ship.velocity;
+  const speed = ship.maxSpeed;
+  if (velocity.len() > 0) {
+    return velocity.norm().scale(speed);
+  }
+  if (distance === 0) {
+    return new Vec2(0, 0);
+  }
+  const toOtherHat = other.position.sub(ship.position).scale(1 / distance);
+  const tHat = (ship.orbitDirection ?? "cw") === "cw" ? toOtherHat.perpCW() : toOtherHat.perpCCW();
+  return tHat.scale(speed);
 }

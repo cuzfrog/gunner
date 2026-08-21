@@ -1,0 +1,40 @@
+[Inner Zone Shipping Imicus, Shield Inner Zone Shipping Imicus]
+Salvager I
+Salvager I
+Prototype Cloaking Device I
+
+Eutectic Compact Cap Recharger
+5MN Y-T8 Compact Microwarpdrive
+Eutectic Compact Cap Recharger
+Eutectic Compact Cap Recharger
+
+F85 Peripheral Damage System I
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+
+Small Low Friction Nozzle Joints I
+Small Polycarbon Engine Housing I
+Small Low Friction Nozzle Joints I
+
+
+Nova Light Missile Blueprint x1
+Alloyed Tritanium Bar x1040
+Small Core Defense Operational Solidifier I Blueprint x1
+Armor Plates x400
+Armor Plates x400
+Scourge Light Missile Blueprint x1
+Contaminated Nanite Compound x725
+Charred Micro Circuit x2714
+Small EM Shield Reinforcer I Blueprint x1
+Small Kinetic Shield Reinforcer I Blueprint x1
+Small Core Defense Capacitor Safeguard I Blueprint x1
+Small Explosive Shield Reinforcer I Blueprint x1
+Small Core Defense Field Extender I Blueprint x1
+Small Thermal Shield Reinforcer I Blueprint x1
+Small Core Defense Charge Economizer I Blueprint x1
+Small Core Defense Field Purger I Blueprint x1
+Mjolnir Light Missile Blueprint x1
+Malfunctioning Shield Emitter x877
+Inferno Light Missile Blueprint x1
+R.Db - Kaalakiota Blueprint x1
+Fried Interface Circuit x1000

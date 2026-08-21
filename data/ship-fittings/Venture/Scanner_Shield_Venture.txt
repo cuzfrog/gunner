@@ -1,0 +1,19 @@
+[Venture, Scanner Shield Venture]
+Miner II
+Core Probe Launcher I, Core Scanner Probe I
+Miner II
+
+Medium Shield Extender I
+5MN Cold-Gas Enduring Microwarpdrive
+Mining Survey Chipset I
+
+Inertial Stabilizers I
+
+Small Low Friction Nozzle Joints I
+Small EM Shield Reinforcer I
+Small Processor Overclocking Unit I
+
+
+Core Scanner Probe I x16
+AIR Agility Booster II x1
+Arkonor IV-Grade x312

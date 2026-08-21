@@ -1,0 +1,115 @@
+[Providence, Kitetackle Missile Shield Providence]
+Experimental Hyperspatial Accelerator
+Experimental Hyperspatial Accelerator
+Experimental Hyperspatial Accelerator
+
+
+Hobgoblin II x15
+
+
+Arbalest Compact Light Missile Launcher, Mjolnir Rocket
+Arbalest Compact Light Missile Launcher, Mjolnir Rocket
+Mjolnir Rocket x1035
+Mjolnir Rocket x165
+Data Analyzer I, Mjolnir Rocket
+Heavy Entropic Disintegrator II, Mjolnir Rocket
+Caldari Navy Scourge Light Missile x2000
+Caldari Navy Scourge Light Missile x486
+Neural Network Analyzer x2
+Covert Ops Cloaking Device II, Mjolnir Rocket
+Drone Link Augmentor I, Mjolnir Rocket
+Triglavian Survey Database x12
+Co-Processor II, Mjolnir Rocket
+Griffin x1
+Anathema x1
+Scan Rangefinding Array II, Mjolnir Rocket
+Ancient Coordinates Database x6
+Zainou 'Snapshot' Light Missiles LM-903 x1
+Tayra x1
+Caldari Navy Nova Light Missile x2000
+Multispectrum Shield Hardener II, Mjolnir Rocket
+Multispectrum Shield Hardener II, Mjolnir Rocket
+Inferno Fury Light Missile x2500
+Interdiction Nullifier II, Mjolnir Rocket
+Interdiction Nullifier II, Mjolnir Rocket
+Large Shield Extender II, Mjolnir Rocket
+Multispectral ECM II, Mjolnir Rocket
+Sleeper Data Library x10
+Caldari Navy Mjolnir Light Missile x2265
+Corpum C-Type Medium Armor Repairer, Mjolnir Rocket
+Ballistic Control System II, Mjolnir Rocket
+Ballistic Control System II, Mjolnir Rocket
+425mm AutoCannon II, Mjolnir Rocket
+425mm AutoCannon II, Mjolnir Rocket
+Overdrive Injector System II, Mjolnir Rocket
+Tranquil Electrical Filament x2
+Occult M x4378
+Zainou 'Gypsy' Signature Analysis SA-703 x1
+EMP M x4432
+Sisters Core Probe Launcher, Mjolnir Rocket
+Signal-25 'Needlejack' Filament x5
+Fleeting Compact Stasis Webifier, Mjolnir Rocket
+Fleeting Compact Stasis Webifier, Mjolnir Rocket
+Nanofiber Internal Structure II, Mjolnir Rocket
+Medium F-S9 Regolith Compact Shield Extender, Mjolnir Rocket
+Medium F-S9 Regolith Compact Shield Extender, Mjolnir Rocket
+Minmatar Shuttle x1
+Stasis Webifier II, Mjolnir Rocket
+EM Shield Amplifier II, Mjolnir Rocket
+Expanded Cargohold II, Mjolnir Rocket
+Warp Disruptor II, Mjolnir Rocket
+Corpum C-Type Multispectrum Energized Membrane, Mjolnir Rocket
+Targeting Range Dampening Script x2
+'YF-12a' Compact Small Plasma Smartbomb, Mjolnir Rocket
+5MN Microwarpdrive II, Mjolnir Rocket
+Nova Fury Light Missile x2500
+Gyrostabilizer II, Mjolnir Rocket
+Gyrostabilizer II, Mjolnir Rocket
+Damage Control II, Mjolnir Rocket
+Sisters Core Scanner Probe x16
+Mjolnir Fury Light Missile x4406
+Isotropic Deposition Guide x1
+Tracking Computer II, Mjolnir Rocket
+Vedmak x1
+Warp Core Stabilizer II, Mjolnir Rocket
+Inertial Stabilizers II, Mjolnir Rocket
+Inertial Stabilizers II, Mjolnir Rocket
+Condor x2
+R.A.M.- Starship Tech x100
+1MN Y-S8 Compact Afterburner, Mjolnir Rocket
+1MN Y-S8 Compact Afterburner, Mjolnir Rocket
+10MN Afterburner II, Mjolnir Rocket
+Entropic Radiation Sink II, Mjolnir Rocket
+Entropic Radiation Sink II, Mjolnir Rocket
+Warp Scrambler II, Mjolnir Rocket
+Nanite Repair Paste x150
+Nanite Repair Paste x150
+'Arbalest' Rocket Launcher I, Mjolnir Rocket
+'Arbalest' Rocket Launcher I, Mjolnir Rocket
+Relic Analyzer I, Mjolnir Rocket
+Cap Recharger II, Mjolnir Rocket
+Zainou 'Deadeye' Guided Missile Precision GP-803 x1
+Federation Navy 10MN Afterburner, Mjolnir Rocket
+Noise-25 'Needlejack' Filament x5
+5MN Y-T8 Compact Microwarpdrive, Mjolnir Rocket
+R.A.M.- Energy Tech x100
+Tracking Speed Script x1
+Crystalline Isogen-10 x2
+Thukker Large Cap Battery, Mjolnir Rocket
+Federation Navy Stasis Webifier, Mjolnir Rocket
+Scourge Fury Light Missile x2765
+Zainou 'Deadeye' Rapid Launch RL-1003 x1
+Prototype Cloaking Device I, Mjolnir Rocket
+Stabber x1
+Light Missile Launcher II, Mjolnir Rocket
+Light Missile Launcher II, Mjolnir Rocket
+Medium Shield Extender II, Mjolnir Rocket
+Medium Shield Extender II, Mjolnir Rocket
+Mystic M x1591
+C3-X 'Hivaa Saitsuo' Ballistic Control System, Mjolnir Rocket
+Caldari Navy Inferno Light Missile x2000
+Gatling Afocal Laser I, Mjolnir Rocket
+Coreli A-Type 5MN Microwarpdrive, Mjolnir Rocket
+Eifyr and Co. 'Rogue' Acceleration Control AC-603 x1
+Reactive Armor Hardener, Mjolnir Rocket
+Republic Fleet Medium Shield Extender, Mjolnir Rocket

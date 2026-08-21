@@ -1,0 +1,43 @@
+[Dagon, Ewar Armor Dagon]
+Capital Abyssal Energy Nosferatu
+CONCORD Capital Remote Armor Repairer
+Dark Blood Capital Energy Nosferatu
+Capital Abyssal Energy Nosferatu
+CONCORD Capital Remote Armor Repairer
+Triage Module II
+
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Small Abyssal Cap Battery
+Small Abyssal Cap Battery
+Small Abyssal Cap Battery
+
+Dark Blood Capital Armor Repairer
+Cormack's Modified Explosive Armor Hardener
+Draclira's Modified Kinetic Armor Hardener
+Chelm's Modified Thermal Armor Hardener
+Reactive Armor Hardener
+Dark Blood Capital Armor Repairer
+Dark Blood Capital Flex Armor Hardener, Armor Thermal Resistance Script
+Cormack's Modified EM Armor Hardener
+
+Capital Nanobot Accelerator II
+Capital Nanobot Accelerator I
+Capital Auxiliary Nano Pump I
+
+
+Heavy Armor Maintenance Bot II x24
+
+
+Strontium Clathrates x275
+Helium Isotopes x38327
+Strong Exile Booster x2
+Armor Explosive Resistance Script x1
+Armor Kinetic Resistance Script x1
+Agency 'Hardshell' TB9 Dose IV x1
+Navy Cap Booster 3200 x4
+Navy Cap Booster 3200 x14
+Expired Imperial Defense Booster IV x1
+Armor EM Resistance Script x1
+Navy Cap Booster 3200 x72
+Hoarder x1
+Hoarder x1

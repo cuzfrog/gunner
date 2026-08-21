@@ -11,14 +11,10 @@ import type {
 } from "../ships";
 import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
-import type { ChargeStats, FittingModuleStats, TurretScriptStats, TurretStats } from "./fittingDb";
+import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
+import type { ChargeStats, FittingModuleStats, HullBonus, TurretScriptStats, TurretStats } from "./fittingDb";
 
-export interface ImportedTurret {
-  readonly tracking: number;
-  readonly sigResolutionClass: SigResolutionClass;
-  readonly optimal: number;
-  readonly falloff: number;
-}
+export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
 
 export interface ImportedFitting {
   readonly profile: ShipProfile;
@@ -26,6 +22,7 @@ export interface ImportedFitting {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId };
   readonly turret?: ImportedTurret;
+  readonly cargoCharges: readonly CargoCharge[];
 }
 
 export interface FittingDb {
@@ -33,6 +30,7 @@ export interface FittingDb {
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
+  readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
 }
 
 export interface FittingImport {
@@ -42,10 +40,12 @@ export interface FittingImport {
 export class FittingImportImpl implements FittingImport {
   private readonly ships: Ships;
   private readonly db: FittingDb;
+  private readonly chargeCatalog: ChargeCatalog;
 
-  constructor({ ships, fittingDb }: { ships: Ships; fittingDb: FittingDb }) {
+  constructor({ ships, fittingDb, chargeCatalog }: { ships: Ships; fittingDb: FittingDb; chargeCatalog: ChargeCatalog }) {
     this.ships = ships;
     this.db = fittingDb;
+    this.chargeCatalog = chargeCatalog;
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
@@ -55,9 +55,11 @@ export class FittingImportImpl implements FittingImport {
     const profile = this.ships.findHull(parsed.hullName);
     if (!profile) return undefined;
 
-    const hullSide = aggregateHullSide(profile, this.db, parsed);
+    const hullBonuses = this.db.hullBonuses[profile.name] ?? [];
+    const hullSide = aggregateHullSide(profile, this.db, parsed, hullBonuses, conditions.skillLevel);
     const propulsion = resolvePropulsion(profile, this.ships, this.db, parsed, hullSide.propulsionName);
-    const turret = resolveTurret(this.db, parsed, conditions.skillLevel);
+    const turret = resolveTurret(this.db, this.chargeCatalog, parsed, conditions.skillLevel, hullBonuses);
+    const cargoCharges = resolveCargoCharges(this.db, parsed);
 
     return {
       profile,
@@ -65,6 +67,7 @@ export class FittingImportImpl implements FittingImport {
       fitted: hullSide.fitted,
       propulsion,
       turret,
+      cargoCharges,
     };
   }
 }
@@ -74,7 +77,13 @@ interface HullSideAggregation {
   readonly propulsionName?: string;
 }
 
-function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFitting): HullSideAggregation {
+function aggregateHullSide(
+  profile: ShipProfile,
+  db: FittingDb,
+  parsed: ParsedFitting,
+  hullBonuses: readonly HullBonus[],
+  skillLevel: number,
+): HullSideAggregation {
   let flatMass = 0;
   const massPercentages: number[] = [];
   const speedPercents: number[] = [];
@@ -101,6 +110,12 @@ function aggregateHullSide(profile: ShipProfile, db: FittingDb, parsed: ParsedFi
     if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
     if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
     if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
+  }
+
+  for (const bonus of hullBonuses) {
+    const percent = hullBonusPercent(bonus, skillLevel);
+    if (bonus.attribute === "maxVelocity") speedPercents.push(percent / 100);
+    if (bonus.attribute === "agility") agilityMultipliers.push(1 + percent / 100);
   }
 
   const massMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
@@ -159,12 +174,18 @@ function findGenericPropulsionId(
   return option?.id;
 }
 
-function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number): ImportedTurret | undefined {
+function resolveTurret(
+  db: FittingDb,
+  chargeCatalog: ChargeCatalog,
+  parsed: ParsedFitting,
+  skillLevel: number,
+  hullBonuses: readonly HullBonus[],
+): ImportedTurret | undefined {
   const trackingPercents: number[] = [];
   const optimalPercents: number[] = [];
   const falloffPercents: number[] = [];
   let turret: TurretStats | undefined;
-  let charge: ChargeStats | undefined;
+  let chargeName: string | undefined;
 
   for (const line of parsed.modules) {
     if (line.offline) continue;
@@ -172,7 +193,7 @@ function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number)
     const lineTurret = db.turrets[line.name];
     if (lineTurret && !turret) {
       turret = lineTurret;
-      charge = line.charge ? db.charges[line.charge] : undefined;
+      chargeName = line.charge;
       continue;
     }
 
@@ -184,6 +205,14 @@ function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number)
 
   if (!turret) return undefined;
 
+  for (const bonus of hullBonuses) {
+    if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
+    const percent = hullBonusPercent(bonus, skillLevel);
+    if (bonus.attribute === "turretTracking") trackingPercents.push(percent);
+    if (bonus.attribute === "turretOptimal") optimalPercents.push(percent);
+    if (bonus.attribute === "turretFalloff") falloffPercents.push(percent);
+  }
+
   const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
   const sigRes = SIG_RESOLUTIONS[sigResClass];
   const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
@@ -194,16 +223,37 @@ function resolveTurret(db: FittingDb, parsed: ParsedFitting, skillLevel: number)
   const optimalBonus = applyStackingPenalty(optimalPercents.map((p) => 1 + p / 100));
   const falloffBonus = applyStackingPenalty(falloffPercents.map((p) => 1 + p / 100));
 
-  const trackingScore = turret.tracking * (charge?.trackingMultiplier ?? 1) * skillTrackingMultiplier * trackingBonus;
-  const optimal = turret.optimal * (charge?.rangeMultiplier ?? 1) * skillOptimalMultiplier * optimalBonus;
-  const falloff = turret.falloff * (charge?.falloffMultiplier ?? 1) * skillFalloffMultiplier * falloffBonus;
+  const trackingScore = turret.tracking * skillTrackingMultiplier * trackingBonus;
+  const optimalScore = turret.optimal * skillOptimalMultiplier * optimalBonus;
+  const falloffScore = turret.falloff * skillFalloffMultiplier * falloffBonus;
+
+  const base: ImportedTurretBase = {
+    tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+    optimal: optimalScore,
+    falloff: falloffScore,
+  };
+
+  const selectedCharge = chargeName && db.charges[chargeName] ? chargeName : chargeCatalog.usualForChargeSize(turret.chargeSize);
+  const charge = db.charges[selectedCharge] ?? {};
 
   return {
-    tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+    tracking: base.tracking * (charge.trackingMultiplier ?? 1),
     sigResolutionClass: sigResClass,
-    optimal,
-    falloff,
+    optimal: base.optimal * (charge.rangeMultiplier ?? 1),
+    falloff: base.falloff * (charge.falloffMultiplier ?? 1),
+    chargeSize: turret.chargeSize,
+    charge: selectedCharge,
+    base,
   };
+}
+
+function resolveCargoCharges(db: FittingDb, parsed: ParsedFitting): readonly CargoCharge[] {
+  const charges: CargoCharge[] = [];
+  for (const item of parsed.cargo) {
+    if (!db.charges[item.name]) continue;
+    charges.push({ name: item.name, quantity: item.quantity });
+  }
+  return charges;
 }
 
 function collectTurretPercents(
@@ -231,6 +281,10 @@ const TRACKING_SKILL_BONUS = 0.05;
 const OPTIMAL_SKILL_BONUS = 0.05;
 const FALLOFF_SKILL_BONUS = 0.05;
 const STANDARD_SIGNATURE_RESOLUTION = 40_000;
+
+function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
+  return bonus.magnitude * (bonus.skill ? skillLevel : 1);
+}
 
 function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClass {
   if (chargeSize >= 4) return "XL";

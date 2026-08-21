@@ -1,4 +1,4 @@
-import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
+import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -10,10 +10,15 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../sim";
-import type { FittingImport, ImportedFitting } from "../fitting";
+import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFittings } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import type { SavedFittings } from "./savedFittings";
+import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type FittedHullSummary, type LocationProvider, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
+import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
+import { HintRotator, type IHintRotator } from "./hintRotator";
+import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
+import type { TimeoutId, Timer } from "./timer";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -41,19 +46,37 @@ export class DomControls implements Controls {
   private readonly settingsStore: SettingsStore;
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
+  private readonly presetFittings: PresetFittings;
+  private readonly savedFittings: SavedFittings;
   private readonly clipboard: ClipboardProvider;
   private readonly location: LocationProvider;
+  private readonly timer: Timer;
+  private readonly chargeCatalog: ChargeCatalog;
   private readonly trackingInput: TrackingInput;
+  private readonly hintRotator: IHintRotator;
   private callbacks?: ControlsCallbacks;
   private playing = false;
-  private shareStatusTimeout?: ReturnType<typeof setTimeout>;
-  private fittingNameTimeout?: ReturnType<typeof setTimeout>;
+  private shareStatusTimeout?: TimeoutId;
+  private readonly importHintTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
+  private openFittingSide: "attacker" | "target" | null = null;
+  private importSidePopupOpen = false;
+  private pendingImportText?: string;
+  private openAmmo = false;
+  private attackerAmmo = "";
+  private attackerTurret?: ImportedTurret;
+  private attackerCargoCharges: readonly CargoCharge[] = [];
+  private attackerAmmoAllExpanded = false;
+  private lastCommittedHull: { attacker?: string; target?: string } = {};
   private attackerProfile?: ShipProfile;
   private targetProfile?: ShipProfile;
   private attackerFittedHull?: FittedHullSummary;
   private targetFittedHull?: FittedHullSummary;
+  private attackerFitting?: string;
+  private targetFitting?: string;
+  private attackerOverrides: Partial<ProfileParamOverrides> = {};
+  private targetOverrides: Partial<ProfileParamOverrides> = {};
   private selectedProfile: ProfileSettings | null = null;
 
   constructor({
@@ -62,25 +85,46 @@ export class DomControls implements Controls {
     settingsStore,
     ships,
     fittingImport,
+    presetFittings,
+    savedFittings,
     clipboard,
     location,
+    timer,
+    chargeCatalog,
   }: {
     hitChance: HitChance;
     i18n: I18n;
     settingsStore: SettingsStore;
     ships: Ships;
     fittingImport: FittingImport;
+    presetFittings: PresetFittings;
+    savedFittings: SavedFittings;
     clipboard: ClipboardProvider;
     location: LocationProvider;
+    timer: Timer;
+    chargeCatalog: ChargeCatalog;
   }) {
     this.hitChance = hitChance;
     this.i18n = i18n;
     this.settingsStore = settingsStore;
     this.ships = ships;
     this.fittingImport = fittingImport;
+    this.presetFittings = presetFittings;
+    this.savedFittings = savedFittings;
     this.clipboard = clipboard;
     this.location = location;
+    this.timer = timer;
+    this.chargeCatalog = chargeCatalog;
+    this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.trackingInput = new TrackingInput();
+    this.hintRotator = new HintRotator({
+      element: el("slide-hints"),
+      i18n,
+      candidates: HINT_CANDIDATES,
+      tipText: TIP_TEXT,
+      timer,
+      intervalMs: 20_000,
+    });
     this.els = {
       tracking: el("tracking"),
       trackingUnitRad: el("tracking-unit-rad"),
@@ -89,8 +133,24 @@ export class DomControls implements Controls {
       sigResOptions: el("sig-res-options"),
       optimal: el("optimal"),
       falloff: el("falloff"),
+      attackerAmmoField: el("attacker-ammo-field"),
+      attackerAmmoTrigger: el("attacker-ammo-trigger"),
+      attackerAmmoSummary: el("attacker-ammo-summary"),
+      attackerAmmoPopup: el("attacker-ammo-popup"),
+      attackerAmmoCargoLabel: el("attacker-ammo-cargo-label"),
+      attackerAmmoCargoList: el("attacker-ammo-cargo-list"),
+      attackerAmmoExpand: el("attacker-ammo-expand"),
+      attackerAmmoAllSection: el("attacker-ammo-all-section"),
+      attackerAmmoAllList: el("attacker-ammo-all-list"),
       hullOptions: el("hull-options"),
       attackerHull: el("attacker-hull"),
+      attackerFittingTrigger: el("attacker-fitting-trigger"),
+      attackerFittingPopup: el("attacker-fitting-popup"),
+      attackerFittingSavedLabel: el("attacker-fitting-saved-label"),
+      attackerFittingSavedList: el("attacker-fitting-saved-list"),
+      attackerFittingPresetLabel: el("attacker-fitting-preset-label"),
+      attackerFittingPresetList: el("attacker-fitting-preset-list"),
+      attackerFittingEmpty: el("attacker-fitting-empty"),
       attackerHullHint: el("attacker-hull-hint"),
       attackerFittingName: el("attacker-fitting-name"),
       attackerImportFitting: el("attacker-import-fitting"),
@@ -117,6 +177,13 @@ export class DomControls implements Controls {
       maneuverAggressivityValue: el("maneuver-aggressivity-value"),
       initialDistance: el("initial-distance"),
       targetHull: el("target-hull"),
+      targetFittingTrigger: el("target-fitting-trigger"),
+      targetFittingPopup: el("target-fitting-popup"),
+      targetFittingSavedLabel: el("target-fitting-saved-label"),
+      targetFittingSavedList: el("target-fitting-saved-list"),
+      targetFittingPresetLabel: el("target-fitting-preset-label"),
+      targetFittingPresetList: el("target-fitting-preset-list"),
+      targetFittingEmpty: el("target-fitting-empty"),
       targetHullHint: el("target-hull-hint"),
       targetFittingName: el("target-fitting-name"),
       targetImportFitting: el("target-import-fitting"),
@@ -145,6 +212,10 @@ export class DomControls implements Controls {
       profileSelect: el("profile-select"),
       profileDelete: el("profile-delete"),
       shareLink: el("share-link"),
+      importProfile: el("import-profile"),
+      importSidePopup: el("import-side-popup"),
+      importSideAttacker: el("import-side-attacker"),
+      importSideTarget: el("import-side-target"),
       shareStatus: el("share-status"),
       langEn: el("lang-en"),
       langZh: el("lang-zh"),
@@ -162,6 +233,7 @@ export class DomControls implements Controls {
       gridBrightnessValue: el("grid-brightness-value"),
     };
 
+    this.renderAttackerAmmo();
     this.populateHullDatalist();
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
@@ -195,6 +267,7 @@ export class DomControls implements Controls {
       this.updateLanguageToggle();
       this.setBestInitialDistance();
       this.updateManeuverAggressivityDisplay();
+      this.updateManeuverAggressivityEnabled();
       this.updateGridBrightnessDisplay(DEFAULT_GRID_BRIGHTNESS);
       this.setPlaying(false);
     }
@@ -295,6 +368,11 @@ export class DomControls implements Controls {
     }
   }
 
+  private updateManeuverAggressivityEnabled(): void {
+    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    slider.disabled = (this.els.attackerMode as HTMLSelectElement).value === "midships";
+  }
+
   private onGridBrightnessChange(): void {
     this.updateGridBrightnessDisplay();
     this.updateSaveButtonState();
@@ -335,7 +413,9 @@ export class DomControls implements Controls {
       attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
       attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
       attackerHull: this.attackerProfile?.name,
-      attackerPropulsion: this.propulsionSetting("attacker"),
+      attackerPropulsion: this.currentPropulsionSelection("attacker"),
+      attackerFitting: this.attackerFitting,
+      attackerOverrides: this.attackerOverrides,
       attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
@@ -347,19 +427,33 @@ export class DomControls implements Controls {
       targetOverload: (this.els.targetOverload as HTMLInputElement).checked,
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
-      targetPropulsion: this.propulsionSetting("target"),
+      targetPropulsion: this.currentPropulsionSelection("target"),
+      targetFitting: this.targetFitting,
+      targetOverrides: this.targetOverrides,
       targetFittedHull: this.targetFittedHull,
+      attackerAmmo: this.attackerAmmo,
       simSpeed: num(this.els.simSpeed),
       language: this.i18n.current(),
     };
   }
 
-  private propulsionSetting(side: "attacker" | "target"): PropulsionId | undefined {
+  private currentPropulsionSelection(side: "attacker" | "target"): PropulsionSelection | undefined {
     const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
+    if (value === PROPULSION_NONE) return PROPULSION_NONE;
     return this.ships.parsePropulsionId(value);
   }
 
+  private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
+    const selection = this.currentPropulsionSelection(side);
+    return selection === PROPULSION_NONE ? undefined : selection;
+  }
+
   private loadSettings(settings: UserSettings, selectedName = ""): void {
+    this.attackerFitting = settings.attackerFitting;
+    this.attackerOverrides = settings.attackerOverrides ?? {};
+    this.targetFitting = settings.targetFitting;
+    this.targetOverrides = settings.targetOverrides ?? {};
+    this.attackerAmmo = settings.attackerAmmo;
     this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
@@ -397,11 +491,13 @@ export class DomControls implements Controls {
     this.setOverloadDisabled("attacker");
     this.setOverloadDisabled("target");
 
+    this.restoreAttackerTurret();
+
     if (settings.attackerFittedHull) {
-      this.applyImportedFitting("attacker", settings.attackerFittedHull);
+      this.restoreFittingSummary("attacker", settings.attackerFittedHull);
     }
     if (settings.targetFittedHull) {
-      this.applyImportedFitting("target", settings.targetFittedHull);
+      this.restoreFittingSummary("target", settings.targetFittedHull);
     }
     this.displayTrackingInput();
     this.updateUnitToggle();
@@ -409,9 +505,11 @@ export class DomControls implements Controls {
     this.renderProfiles(selectedName);
     this.setPlaying(this.playing);
     this.updateManeuverAggressivityDisplay();
+    this.updateManeuverAggressivityEnabled();
     this.updateGridBrightnessDisplay();
     this.updateAlignTime("attacker");
     this.updateAlignTime("target");
+    this.hintRotator.refresh();
     this.persist();
   }
 
@@ -477,14 +575,16 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
-    this.updateFittingName("attacker");
-    this.updateFittingName("target");
+    this.clearImportHint("attacker");
+    this.clearImportHint("target");
     this.populateHullDatalist();
     this.refreshHullInputs();
+    if (this.openFittingSide) this.renderFittingPopup(this.openFittingSide);
     this.updateHullHint("attacker", this.currentPropulsionModule("attacker"));
     this.updateHullHint("target", this.currentPropulsionModule("target"));
     this.renderSkillOptions("attacker");
     this.renderSkillOptions("target");
+    this.hintRotator.refresh();
     this.setPlaying(this.playing);
     this.persist();
     this.updateSaveButtonState();
@@ -547,7 +647,7 @@ export class DomControls implements Controls {
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
-    this.loadSettings({ ...profile, language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
+    this.loadSettings({ ...profile, attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1), language: this.i18n.current(), trackingUnit: this.trackingInput.unit }, name);
     this.selectedProfile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveSelectedProfile(name, this.selectedProfile);
     this.updateSaveButtonState();
@@ -591,28 +691,138 @@ export class DomControls implements Controls {
         this.openPastePopup(side);
         return;
       }
-      this.clearFittingNameTimeout();
-      this.showImportError(side, "status.clipboardDenied");
+      this.clearImportHintTimeout(side);
+      this.showImportHint(side, "status.clipboardDenied", true);
       return;
     }
     await this.importFittingFromText(side, text);
   }
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
-    this.clearFittingNameTimeout();
+    this.clearImportHintTimeout(side);
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
+      const parsed = parseProfile(trimmed);
+      const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
+      if (fitting === undefined) {
+        this.showImportHint(side, "status.fittingInvalid", true);
+        return;
+      }
+      const imported = this.importEftFitting(side, fitting);
+      if (imported) this.recordSavedFitting(imported, fitting);
+      return;
+    }
+    const imported = this.importEftFitting(side, text);
+    if (imported) this.recordSavedFitting(imported, text);
+  }
+
+  private recordSavedFitting(imported: ImportedFitting, text: string): void {
+    this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
+  }
+
+  private importEftFitting(side: "attacker" | "target", text: string, persist = true): ImportedFitting | undefined {
     const conditions = this.skillConditions(side);
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
-      this.showImportError(side, "status.fittingInvalid");
-      return;
+      this.showImportHint(side, "status.fittingInvalid", true);
+      return undefined;
     }
     this.clearFittedHull(side);
+    if (side === "attacker") {
+      this.attackerFitting = text;
+      this.attackerOverrides = {};
+    } else {
+      this.targetFitting = text;
+      this.targetOverrides = {};
+    }
     this.applyHull(side, imported.profile, imported.propulsion?.propulsionId, false, false);
     this.applyImportedFitting(side, this.fittedHullSummary(imported));
-    if (side === "attacker") this.applyImportedTurret(imported.turret);
-    this.persist();
-    this.updateSaveButtonState();
-    this.callbacks?.onConfigChange();
+    if (side === "attacker") this.applyImportedTurret(imported);
+    if (persist) {
+      this.lastCommittedHull[side] = imported.profile.name;
+      this.persist();
+      this.updateSaveButtonState();
+      this.callbacks?.onConfigChange();
+    }
+    this.showImportHint(side, "status.fittingImported");
+    return imported;
+  }
+
+  private async importProfileFromClipboard(): Promise<void> {
+    if (this.importSidePopupOpen) {
+      this.closeImportSidePopup(true);
+      return;
+    }
+    let text: string;
+    try {
+      text = await this.clipboard.readText();
+    } catch {
+      this.showProfileStatus("status.clipboardDenied");
+      return;
+    }
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
+      const settings = this.profileFromText(text);
+      if (!settings) {
+        this.showProfileStatus("status.importInvalid");
+        return;
+      }
+      this.loadSettings(settings);
+      this.showProfileStatus("status.profileImported");
+      return;
+    }
+    if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
+      this.showProfileStatus("status.importInvalid");
+      return;
+    }
+    this.openImportSidePopup(text);
+  }
+
+  private openImportSidePopup(text: string): void {
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
+    const popup = this.els.importSidePopup as HTMLElement;
+    const trigger = this.els.importProfile as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.pendingImportText = text;
+    this.importSidePopupOpen = true;
+    (this.els.importSideAttacker as HTMLButtonElement).focus();
+  }
+
+  private closeImportSidePopup(restoreFocus: boolean): void {
+    const popup = this.els.importSidePopup as HTMLElement;
+    const trigger = this.els.importProfile as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    this.pendingImportText = undefined;
+    this.importSidePopupOpen = false;
+    if (restoreFocus) trigger.focus();
+  }
+
+  private async onImportSideClick(side: "attacker" | "target"): Promise<void> {
+    const text = this.pendingImportText;
+    this.closeImportSidePopup(false);
+    if (text === undefined) return;
+    await this.importFittingFromText(side, text);
+  }
+
+  private profileFromText(text: string): UserSettings | undefined {
+    const parsed = parseProfile(text.trimStart());
+    if (!parsed) return undefined;
+    const ammo = this.resolveProfileAmmo(parsed);
+    return { ...parsed, attackerAmmo: ammo, language: this.i18n.current(), trackingUnit: this.trackingInput.unit };
+  }
+
+  private resolveProfileAmmo(parsed: ProfileSettings): string {
+    if (parsed.attackerAmmo) return parsed.attackerAmmo;
+    if (parsed.attackerFitting) {
+      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
+        skillLevel: parsed.attackerSkillLevel ?? 5,
+        overloaded: parsed.attackerOverload ?? true,
+      });
+      if (imported?.turret) return imported.turret.charge;
+    }
+    return this.chargeCatalog.usualForChargeSize(1);
   }
 
   private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
@@ -624,31 +834,47 @@ export class DomControls implements Controls {
     };
   }
 
-  private showImportError(side: "attacker" | "target", key: string): void {
+  private showImportHint(side: "attacker" | "target", key: string, isError = false): void {
+    this.clearImportHintTimeout(side);
     const element = this.els[`${side}FittingName`] as HTMLElement;
-    element.classList.toggle("error", true);
-    const value = escapeHtml(this.i18n.t(key));
-    element.innerHTML = `<span class="fitting-name-value">${value}</span>`;
+    element.classList.toggle("error", isError);
+    element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
-    if (this.fittingNameTimeout) clearTimeout(this.fittingNameTimeout);
-    this.fittingNameTimeout = setTimeout(() => {
-      element.classList.toggle("error", false);
-      this.updateFittingName(side);
+    this.importHintTimeouts[side] = this.timer.setTimeout(() => {
+      this.importHintTimeouts[side] = undefined;
+      this.clearImportHint(side);
     }, 5000);
   }
 
-  private clearFittingNameTimeout(): void {
-    if (this.fittingNameTimeout) {
-      clearTimeout(this.fittingNameTimeout);
-      this.fittingNameTimeout = undefined;
+  private clearImportHint(side: "attacker" | "target"): void {
+    this.clearImportHintTimeout(side);
+    const element = this.els[`${side}FittingName`] as HTMLElement;
+    element.classList.toggle("error", false);
+    element.innerHTML = "";
+    element.hidden = true;
+  }
+
+  private clearImportHintTimeout(side: "attacker" | "target"): void {
+    const timeout = this.importHintTimeouts[side];
+    if (timeout) {
+      this.timer.clearTimeout(timeout);
+      this.importHintTimeouts[side] = undefined;
     }
   }
 
-  private async shareLink(): Promise<void> {
-    const ok = await this.settingsStore.writeUrlToClipboard(this.getSettings(), this.clipboard);
-    setText(this.els.shareStatus, this.i18n.t(ok ? "status.copied" : "status.failed"));
-    if (this.shareStatusTimeout) clearTimeout(this.shareStatusTimeout);
-    this.shareStatusTimeout = setTimeout(() => setText(this.els.shareStatus, ""), 2000);
+  private async copyProfile(): Promise<void> {
+    try {
+      await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
+      this.showProfileStatus("status.copied");
+    } catch {
+      this.showProfileStatus("status.failed");
+    }
+  }
+
+  private showProfileStatus(key: string): void {
+    setText(this.els.shareStatus, this.i18n.t(key));
+    if (this.shareStatusTimeout) this.timer.clearTimeout(this.shareStatusTimeout);
+    this.shareStatusTimeout = this.timer.setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
   private bind(): void {
@@ -665,7 +891,10 @@ export class DomControls implements Controls {
     (this.els.profileSave as HTMLButtonElement).addEventListener("click", () => this.saveProfile());
     (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
     (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
-    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.shareLink());
+    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.copyProfile());
+    (this.els.importProfile as HTMLButtonElement).addEventListener("click", () => void this.importProfileFromClipboard());
+    (this.els.importSideAttacker as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("attacker"));
+    (this.els.importSideTarget as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("target"));
     (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
 
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
@@ -676,12 +905,16 @@ export class DomControls implements Controls {
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
+    (this.els.attackerFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("attacker"));
+    (this.els.attackerAmmoTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleAttackerAmmoPopup());
+    (this.els.attackerAmmoExpand as HTMLButtonElement).addEventListener("click", () => this.onAttackerAmmoExpandClick());
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
     (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
     (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
     (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
     (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
+    (this.els.targetFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
     (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
@@ -697,6 +930,7 @@ export class DomControls implements Controls {
       this.els[id].addEventListener("input", () => {
         if (id === "tracking") this.updateTrackingFromInput();
         if (id === "sigRes") this.updateTrackingForSigResolution();
+        this.recordOverrideForDisplayInput(id);
         this.updateSaveButtonState();
         this.persist();
         this.callbacks?.onDisplayChange();
@@ -722,6 +956,8 @@ export class DomControls implements Controls {
         if (id === "targetMass") this.updateSpeedFromMass("target");
         if (id === "attackerMass" || id === "attackerInertia") this.updateAlignTime("attacker");
         if (id === "targetMass" || id === "targetInertia") this.updateAlignTime("target");
+        if (id === "attackerMode") this.updateManeuverAggressivityEnabled();
+        this.recordOverrideForShipInput(id);
         this.updateSaveButtonState();
         this.persist();
         this.callbacks?.onConfigChange();
@@ -742,12 +978,10 @@ export class DomControls implements Controls {
 
   private populateHullDatalist(): void {
     const datalist = this.els.hullOptions as HTMLDataListElement;
-    const language = this.i18n.current();
     datalist.innerHTML = "";
-    for (const view of this.ships.hulls(language)) {
+    for (const hull of this.presetFittings.listHulls()) {
       const option = document.createElement("option");
-      option.value = view.name;
-      option.label = `${view.hullType} · ${view.faction}`;
+      option.value = hull;
       datalist.appendChild(option);
     }
   }
@@ -755,7 +989,7 @@ export class DomControls implements Controls {
   private applyHull(
     side: "attacker" | "target",
     profile: ShipProfile,
-    propulsionId?: PropulsionId,
+    propulsionId?: PropulsionSelection,
     persist = false,
     updateStats = true,
   ): void {
@@ -764,6 +998,8 @@ export class DomControls implements Controls {
 
     (this.els[`${side}Hull`] as HTMLInputElement).value = this.ships.hullView(profile, this.i18n.current()).name;
     this.setHullValidation(side, false);
+    this.updateFittingTrigger(side, true);
+    if (this.openFittingSide === side) this.renderFittingPopup(side);
     this.renderPropulsionOptions(side, propulsionId);
 
     if (updateStats) {
@@ -778,14 +1014,162 @@ export class DomControls implements Controls {
     }
   }
 
+  private updateFittingTrigger(side: "attacker" | "target", enabled: boolean): void {
+    (this.els[`${side}FittingTrigger`] as HTMLButtonElement).disabled = !enabled;
+  }
+
+  private toggleFittingPopup(side: "attacker" | "target"): void {
+    if (this.openFittingSide === side) {
+      this.closeFittingPopup(side);
+      return;
+    }
+    if (this.openFittingSide !== null) this.closeAllFittingPopups();
+    this.closeAllSkillPopups();
+    this.closeAllPastePopups();
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
+    this.openFittingPopup(side);
+  }
+
+  private openFittingPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}FittingPopup`] as HTMLElement;
+    const trigger = this.els[`${side}FittingTrigger`] as HTMLButtonElement;
+    this.renderFittingPopup(side);
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.openFittingSide = side;
+    const current = this.findFittingItem(side, (item) => item.getAttribute("aria-current") === "true");
+    const first = current ?? this.findFittingItem(side, (item) => !item.disabled);
+    first?.focus();
+  }
+
+  private findFittingItem(side: "attacker" | "target", predicate: (item: HTMLButtonElement) => boolean): HTMLButtonElement | undefined {
+    const savedList = this.els[`${side}FittingSavedList`] as HTMLElement;
+    const presetList = this.els[`${side}FittingPresetList`] as HTMLElement;
+    for (const list of [savedList, presetList]) {
+      for (const entry of list.children) {
+        const item = entry.children[0] as HTMLButtonElement;
+        if (predicate(item)) return item;
+      }
+    }
+    return undefined;
+  }
+
+  private closeFittingPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}FittingPopup`] as HTMLElement;
+    const trigger = this.els[`${side}FittingTrigger`] as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (this.openFittingSide === side) this.openFittingSide = null;
+    trigger.focus();
+  }
+
+  private closeAllFittingPopups(): void {
+    if (this.openFittingSide) this.closeFittingPopup(this.openFittingSide);
+  }
+
+  private renderFittingPopup(side: "attacker" | "target"): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const savedList = this.els[`${side}FittingSavedList`] as HTMLElement;
+    const presetList = this.els[`${side}FittingPresetList`] as HTMLElement;
+    const savedLabel = this.els[`${side}FittingSavedLabel`] as HTMLElement;
+    const presetLabel = this.els[`${side}FittingPresetLabel`] as HTMLElement;
+    const empty = this.els[`${side}FittingEmpty`] as HTMLElement;
+    savedList.innerHTML = "";
+    presetList.innerHTML = "";
+    const currentText = side === "attacker" ? this.attackerFitting : this.targetFitting;
+
+    if (!profile) {
+      savedLabel.hidden = true;
+      presetLabel.hidden = true;
+      empty.hidden = true;
+      return;
+    }
+
+    const conditions = this.skillConditions(side);
+    const saved = this.savedFittings.listForHull(profile.name);
+    savedLabel.hidden = saved.length === 0;
+    for (const fitting of saved) {
+      const item = this.createFittingItem(side, fitting.name, fitting.text, currentText, () => this.onFittingItemClick(side, fitting.text));
+      const imported = this.fittingImport.importFitting(fitting.text, conditions);
+      if (!imported) {
+        item.classList.toggle("invalid", true);
+        const invalidText = this.i18n.t("fitting.invalid");
+        item.title = invalidText;
+        (item.children[0] as HTMLElement).title = invalidText;
+        item.disabled = true;
+        item.setAttribute("aria-disabled", "true");
+      }
+      const entry = this.createFittingEntry(item, () => {
+        this.savedFittings.remove(fitting.id);
+        this.renderFittingPopup(side);
+        const next = this.findFittingItem(side, (it) => !it.disabled) ?? (this.els[`${side}FittingTrigger`] as HTMLButtonElement);
+        next.focus();
+      });
+      savedList.appendChild(entry);
+    }
+
+    const presets = this.presetFittings.fittingsFor(profile.name);
+    presetLabel.hidden = presets.length === 0;
+    for (let index = 0; index < presets.length; index++) {
+      const fit = presets[index];
+      const text = this.presetFittings.eftText(profile.name, fit);
+      const item = this.createFittingItem(side, fit.name, text, currentText, () => this.onFittingItemClick(side, text));
+      presetList.appendChild(this.createFittingEntry(item, undefined));
+    }
+
+    empty.hidden = saved.length > 0 || presets.length > 0;
+  }
+
+  private createFittingItem(side: "attacker" | "target", name: string, text: string, currentText: string | undefined, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "fitting-item";
+    button.setAttribute("role", "menuitem");
+    if (currentText === text) button.setAttribute("aria-current", "true");
+    const span = document.createElement("span");
+    span.className = "fitting-item-name";
+    span.textContent = name;
+    span.title = name;
+    button.appendChild(span);
+    button.addEventListener("click", onClick);
+    return button;
+  }
+
+  private createFittingEntry(item: HTMLButtonElement, onDelete: (() => void) | undefined): HTMLElement {
+    const li = document.createElement("li");
+    li.className = "fitting-entry";
+    li.setAttribute("role", "presentation");
+    li.appendChild(item);
+    if (onDelete) {
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "fitting-delete";
+      del.setAttribute("title", this.i18n.t("button.deleteFitting"));
+      del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
+      del.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
+      del.addEventListener("click", () => onDelete());
+      li.appendChild(del);
+    }
+    return li;
+  }
+
+  private onFittingItemClick(side: "attacker" | "target", text: string): void {
+    void this.importEftFitting(side, text);
+    this.closeFittingPopup(side);
+  }
+
   private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
     if (side === "attacker") this.attackerProfile = undefined;
     else this.targetProfile = undefined;
     this.clearFittedHull(side);
+    delete this.lastCommittedHull[side];
 
     if (resetInput) {
       (this.els[`${side}Hull`] as HTMLInputElement).value = "";
     }
+    this.updateFittingTrigger(side, false);
+    if (this.openFittingSide === side) this.closeFittingPopup(side);
+    if (side === "attacker" && this.openAmmo) this.closeAttackerAmmoPopup();
     this.updateHullHint(side);
     this.renderPropulsionOptions(side);
     if (persist) {
@@ -796,15 +1180,28 @@ export class DomControls implements Controls {
   }
 
   private clearFittedHull(side: "attacker" | "target"): void {
-    if (side === "attacker") this.attackerFittedHull = undefined;
-    else this.targetFittedHull = undefined;
-    this.updateFittingName(side);
+    if (side === "attacker") {
+      this.attackerFittedHull = undefined;
+      this.attackerFitting = undefined;
+      this.attackerOverrides = {};
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.attackerAmmoAllExpanded = false;
+      (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+      this.renderAttackerAmmo();
+    } else {
+      this.targetFittedHull = undefined;
+      this.targetFitting = undefined;
+      this.targetOverrides = {};
+    }
+    this.clearImportHint(side);
   }
 
   private loadHull(
     side: "attacker" | "target",
     hullName?: string,
-    propulsionId?: PropulsionId,
+    propulsionId?: PropulsionSelection,
   ): void {
     if (!hullName) {
       this.clearHull(side, true, false);
@@ -816,13 +1213,14 @@ export class DomControls implements Controls {
       return;
     }
     this.applyHull(side, profile, propulsionId, false, false);
+    this.lastCommittedHull[side] = profile.name;
   }
 
   private onHullInput(side: "attacker" | "target"): void {
     const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
     const profile = this.ships.findHull(value);
     if (profile) {
-      this.applyProfile(side, profile, true);
+      this.applyProfile(side, profile, true, false);
     } else {
       this.setHullValidation(side, false);
     }
@@ -837,7 +1235,7 @@ export class DomControls implements Controls {
     }
     const profile = this.ships.findHull(value);
     if (profile) {
-      this.applyProfile(side, profile, true);
+      this.applyProfile(side, profile, true, true);
       return;
     }
     this.setHullValidation(side, true);
@@ -851,17 +1249,27 @@ export class DomControls implements Controls {
     side: "attacker" | "target",
     profile: ShipProfile,
     persist: boolean,
+    autoSelect = false,
   ): void {
     const currentProfile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const isSameHull = currentProfile?.name === profile.name;
-    const propulsionId = isSameHull ? this.currentPropulsionId(side) : undefined;
-    if (!isSameHull) this.clearFittedHull(side);
-    this.applyHull(side, profile, propulsionId, persist, !isSameHull);
-  }
+    const isSameAsCurrent = currentProfile?.name === profile.name;
+    const isGenuineChange = this.lastCommittedHull[side] !== profile.name;
+    const propulsionId = isSameAsCurrent ? this.currentPropulsionSelection(side) : undefined;
+    if (!isSameAsCurrent) this.clearFittedHull(side);
+    this.applyHull(side, profile, propulsionId, false, !isSameAsCurrent);
 
-  private currentPropulsionId(side: "attacker" | "target"): PropulsionId | undefined {
-    const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
-    return this.ships.parsePropulsionId(value);
+    let imported: ImportedFitting | undefined;
+    if (isGenuineChange && autoSelect) {
+      const recent = this.savedFittings.mostRecentFor(profile.name);
+      if (recent) imported = this.importEftFitting(side, recent.text, false);
+    }
+
+    if (persist) {
+      if (autoSelect) this.lastCommittedHull[side] = imported?.profile.name ?? profile.name;
+      this.persist();
+      this.updateSaveButtonState();
+      this.callbacks?.onConfigChange();
+    }
   }
 
   private applyImportedFitting(side: "attacker" | "target", summary: FittedHullSummary): void {
@@ -871,15 +1279,229 @@ export class DomControls implements Controls {
     this.updateShipStats(side, { updateInertia: true, updateMass: true, updateSig: true });
   }
 
-  private applyImportedTurret(turret: ImportedFitting["turret"]): void {
-    if (!turret) return;
+  private restoreFittingSummary(side: "attacker" | "target", summary: FittedHullSummary): void {
+    if (side === "attacker") this.attackerFittedHull = summary;
+    else this.targetFittedHull = summary;
+    this.renderPropulsionOptions(side, this.currentPropulsionSelection(side) ?? "");
+    this.clearImportHint(side);
+    this.updateHullHint(side, this.currentFittedPropulsionModule(side, summary));
+  }
+
+  private clearAttackerTurretOverrides(): void {
+    delete this.attackerOverrides.tracking;
+    delete this.attackerOverrides.sigRes;
+    delete this.attackerOverrides.optimal;
+    delete this.attackerOverrides.falloff;
+  }
+
+  private renderAttackerAmmo(): void {
+    const field = this.els.attackerAmmoField as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    const summary = this.els.attackerAmmoSummary as HTMLElement;
+    const hasTurret = this.attackerTurret !== undefined;
+    field.hidden = !hasTurret;
+    trigger.disabled = !hasTurret;
+    setText(summary, hasTurret ? this.attackerAmmo : "—");
+    if (!hasTurret) return;
+    this.renderAttackerAmmoCargoList();
+    this.renderAttackerAmmoAllList();
+    this.renderAttackerAmmoExpand();
+  }
+
+  private renderAttackerAmmoCargoList(): void {
+    const list = this.els.attackerAmmoCargoList as HTMLElement;
+    const label = this.els.attackerAmmoCargoLabel as HTMLElement;
+    list.innerHTML = "";
+    if (!this.attackerTurret) {
+      list.hidden = true;
+      label.hidden = true;
+      return;
+    }
+    const entries = this.ammoCargoEntries();
+    if (entries.length === 0) {
+      list.hidden = true;
+      label.hidden = true;
+      return;
+    }
+    list.hidden = false;
+    label.hidden = false;
+    for (const entry of entries) {
+      const item = this.createAmmoItem(entry.name, entry.name === this.attackerAmmo, this.i18n.t("button.selectAmmo"));
+      if (entry.quantity !== undefined) {
+        const quantity = document.createElement("span");
+        quantity.className = "ammo-item-quantity";
+        quantity.textContent = `x${entry.quantity}`;
+        item.appendChild(quantity);
+      }
+      item.addEventListener("click", () => this.onAttackerAmmoItemClick(entry.name));
+      list.appendChild(item);
+    }
+  }
+
+  private ammoCargoEntries(): { name: string; quantity?: number }[] {
+    const loaded = this.attackerAmmo;
+    const inCargo = this.attackerCargoCharges.some((c) => c.name === loaded);
+    const entries: { name: string; quantity?: number }[] = [];
+    if (!inCargo) entries.push({ name: loaded });
+    for (const charge of this.attackerCargoCharges) {
+      entries.push({ name: charge.name, quantity: charge.quantity });
+    }
+    return entries;
+  }
+
+  private renderAttackerAmmoAllList(): void {
+    const list = this.els.attackerAmmoAllList as HTMLElement;
+    const section = this.els.attackerAmmoAllSection as HTMLElement;
+    list.innerHTML = "";
+    if (!this.attackerTurret) {
+      list.hidden = true;
+      return;
+    }
+    const options = this.chargeCatalog.chargesForSize(this.attackerTurret.chargeSize);
+    if (options.length === 0) {
+      list.hidden = true;
+      return;
+    }
+    list.hidden = false;
+    for (const option of options) {
+      const item = this.createAmmoItem(option.name, option.name === this.attackerAmmo, chargeStatSuffix(option));
+      item.addEventListener("click", () => this.onAttackerAmmoItemClick(option.name));
+      list.appendChild(item);
+    }
+    section.hidden = !this.attackerAmmoAllExpanded;
+  }
+
+  private createAmmoItem(name: string, selected: boolean, title: string): HTMLButtonElement {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "ammo-item";
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(selected));
+    item.title = title;
+    const label = document.createElement("span");
+    label.className = "ammo-item-name";
+    label.textContent = name;
+    label.title = name;
+    item.appendChild(label);
+    return item;
+  }
+
+  private renderAttackerAmmoExpand(): void {
+    const expand = this.els.attackerAmmoExpand as HTMLButtonElement;
+    const key = this.attackerAmmoAllExpanded ? "ammo.hideAll" : "ammo.showAll";
+    expand.setAttribute("data-i18n", key);
+    setText(expand, this.i18n.t(key));
+  }
+
+  private onAttackerAmmoItemClick(name: string): void {
+    if (this.applyAttackerAmmo(name)) this.closeAttackerAmmoPopup();
+  }
+
+  private toggleAttackerAmmoPopup(): void {
+    if (this.openAmmo) {
+      this.closeAttackerAmmoPopup();
+      return;
+    }
+    this.closeAllSkillPopups();
+    this.closeAllPastePopups();
+    this.closeAllFittingPopups();
+    this.openAttackerAmmoPopup();
+  }
+
+  private openAttackerAmmoPopup(): void {
+    if (!this.attackerTurret) return;
+    const popup = this.els.attackerAmmoPopup as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.openAmmo = true;
+    this.renderAttackerAmmo();
+    const selected =
+      ((this.els.attackerAmmoCargoList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null) ??
+      ((this.els.attackerAmmoAllList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null);
+    (selected ?? (this.els.attackerAmmoCargoList as HTMLElement).firstElementChild as HTMLButtonElement | null)?.focus();
+  }
+
+  private closeAttackerAmmoPopup(): void {
+    const popup = this.els.attackerAmmoPopup as HTMLElement;
+    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    popup.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    this.openAmmo = false;
+    trigger.focus();
+  }
+
+  private onAttackerAmmoExpandClick(): void {
+    this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
+    this.renderAttackerAmmo();
+  }
+
+  private applyAttackerAmmo(name: string): boolean {
+    if (!this.attackerTurret) return false;
+    const updated = this.chargeCatalog.withCharge(this.attackerTurret, name);
+    if (updated === this.attackerTurret) return false;
+    this.attackerTurret = updated;
+    this.attackerAmmo = updated.charge;
+    this.clearAttackerTurretOverrides();
+    this.setTurretInputs(updated);
+    this.renderAttackerAmmo();
+    this.persist();
+    this.callbacks?.onConfigChange();
+    return true;
+  }
+
+  private setTurretInputs(turret: ImportedTurret): void {
     const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
-    this.trackingInput.setRadValue(turret.tracking, sigResolution);
-    (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
-    this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
-    (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
-    (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
+    if (this.attackerOverrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    if (this.attackerOverrides.sigRes === undefined) {
+      (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
+      this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
+    }
+    if (this.attackerOverrides.optimal === undefined) (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
+    if (this.attackerOverrides.falloff === undefined) (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
     this.displayTrackingInput();
+  }
+
+  private restoreAttackerTurret(): void {
+    this.attackerAmmoAllExpanded = false;
+    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    if (!this.attackerFitting || !this.attackerProfile) {
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.renderAttackerAmmo();
+      return;
+    }
+    const imported = this.fittingImport.importFitting(this.attackerFitting, this.skillConditions("attacker"));
+    if (!imported?.turret) {
+      this.attackerTurret = undefined;
+      this.attackerCargoCharges = [];
+      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.renderAttackerAmmo();
+      return;
+    }
+    const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
+    this.attackerTurret = restored;
+    this.attackerCargoCharges = imported.cargoCharges;
+    this.attackerAmmo = restored.charge;
+    this.setTurretInputs(restored);
+    this.renderAttackerAmmo();
+  }
+
+  private applyImportedTurret(imported: ImportedFitting): void {
+    const turret = imported.turret;
+    if (!turret) {
+      (this.els.attackerAmmoField as HTMLElement).hidden = true;
+      return;
+    }
+    this.attackerTurret = turret;
+    this.attackerCargoCharges = imported.cargoCharges;
+    this.attackerAmmo = turret.charge;
+    this.attackerAmmoAllExpanded = false;
+    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    this.clearAttackerTurretOverrides();
+    this.setTurretInputs(turret);
+    this.renderAttackerAmmo();
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
@@ -927,21 +1549,6 @@ export class DomControls implements Controls {
     setText(this.els[`${side}HullHint`], text);
   }
 
-  private updateFittingName(side: "attacker" | "target"): void {
-    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    const element = this.els[`${side}FittingName`] as HTMLElement;
-    element.classList.toggle("error", false);
-    if (fitted?.fittingName) {
-      const label = escapeHtml(`${this.i18n.t("status.fittingImported")}: `);
-      const value = escapeHtml(fitted.fittingName);
-      element.innerHTML = `<span class="fitting-name-label">${label}</span><span class="fitting-name-value">${value}</span>`;
-      element.hidden = false;
-    } else {
-      element.innerHTML = "";
-      element.hidden = true;
-    }
-  }
-
   private refreshHullInputs(): void {
     const language = this.i18n.current();
     if (this.attackerProfile) {
@@ -953,8 +1560,8 @@ export class DomControls implements Controls {
   }
 
   private renderAllPropulsionOptions(): void {
-    this.renderPropulsionOptions("attacker", this.currentPropulsionId("attacker") ?? "");
-    this.renderPropulsionOptions("target", this.currentPropulsionId("target") ?? "");
+    this.renderPropulsionOptions("attacker", this.currentPropulsionSelection("attacker") ?? "");
+    this.renderPropulsionOptions("target", this.currentPropulsionSelection("target") ?? "");
   }
 
   private renderPropulsionOptions(side: "attacker" | "target", selectedId = ""): void {
@@ -973,6 +1580,7 @@ export class DomControls implements Controls {
     if (profile) {
       const modules = this.ships.fittingOptions(profile);
       const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
+      const noneRequested = selectedId === PROPULSION_NONE;
       select.disabled = modules.length === 0;
       group.classList.toggle("disabled", modules.length === 0);
       const moduleDisabled = modules.length === 0;
@@ -988,8 +1596,16 @@ export class DomControls implements Controls {
           button.disabled = moduleDisabled;
           button.setAttribute("aria-disabled", "false");
         }
+        const noneOption = document.createElement("option");
+        noneOption.value = PROPULSION_NONE;
+        noneOption.hidden = true;
+        select.appendChild(noneOption);
       }
-      selected = selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId) ? selectedPropulsionId : (modules[0]?.id ?? "");
+      selected = noneRequested
+        ? PROPULSION_NONE
+        : selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId)
+          ? selectedPropulsionId
+          : (modules[0]?.id ?? "");
     } else {
       this.createPlaceholderButton(group);
     }
@@ -1010,27 +1626,36 @@ export class DomControls implements Controls {
     const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
     const hintModule = fitted ? this.currentFittedPropulsionModule(side, fitted) : this.currentPropulsionModule(side);
     const conditions = this.skillConditions(side);
+    const massKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerMass" : "targetMass";
+    const inertiaKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerInertia" : "targetInertia";
+    const speedKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerSpeed" : "targetSpeed";
     let mass = num(this.els[`${side}Mass`]);
 
     if (updateMass || updateInertia || (side === "target" && updateSig)) {
       const stats = this.ships.fittedStats(profile, fitted?.fitted, propulsion, conditions);
-      if (updateMass) {
+      if (updateMass && !this.isOverridden(side, massKey)) {
         mass = stats.mass;
         (this.els[`${side}Mass`] as HTMLInputElement).value = String(mass);
       }
-      if (updateInertia) {
+      if (updateInertia && !this.isOverridden(side, inertiaKey)) {
         (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
       }
-      if (side === "target" && updateSig) {
+      if (side === "target" && updateSig && !this.isOverridden(side, "targetSig")) {
         (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
       }
     }
 
-    const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
-    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    if (!this.isOverridden(side, speedKey)) {
+      const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
+      (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    }
     this.updateHullHint(side, hintModule);
-    if (fitted) this.updateFittingName(side);
     this.updateAlignTime(side);
+  }
+
+  private isOverridden(side: "attacker" | "target", key: keyof ProfileParamOverrides): boolean {
+    const overrides = side === "attacker" ? this.attackerOverrides : this.targetOverrides;
+    return overrides[key] !== undefined;
   }
 
   private currentFittedPropulsion(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionStats | undefined {
@@ -1038,17 +1663,22 @@ export class DomControls implements Controls {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return undefined;
     const currentId = this.currentPropulsionId(side);
+    if (currentId === undefined) return undefined;
     if (currentId === fitted.propulsionId) return fitted.propulsion;
-    return this.ships.fittingOption(profile, currentId ?? fitted.propulsionId);
+    return this.ships.fittingOption(profile, currentId);
   }
 
   private currentFittedPropulsionModule(side: "attacker" | "target", fitted: FittedHullSummary): PropulsionModule | undefined {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile || !fitted.propulsionId) return undefined;
-    return this.ships.fittingOption(profile, this.currentPropulsionId(side) ?? fitted.propulsionId);
+    const currentId = this.currentPropulsionId(side);
+    if (currentId === undefined) return undefined;
+    return this.ships.fittingOption(profile, currentId);
   }
 
   private updateSpeedFromMass(side: "attacker" | "target"): void {
+    const speedKey: keyof ProfileParamOverrides = side === "attacker" ? "attackerSpeed" : "targetSpeed";
+    if (this.isOverridden(side, speedKey)) return;
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
@@ -1089,7 +1719,7 @@ export class DomControls implements Controls {
     const propulsion = this.els[`${side}Propulsion`] as HTMLSelectElement;
     const overload = this.els[`${side}Overload`] as HTMLInputElement;
     const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
-    const disabled = propulsion.value === "" || propulsion.disabled;
+    const disabled = this.currentPropulsionId(side) === undefined || propulsion.disabled;
     const active = !disabled && overload.checked;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
@@ -1098,8 +1728,33 @@ export class DomControls implements Controls {
     button.setAttribute("aria-disabled", String(disabled));
   }
 
+  private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
+    if (id === "tracking") this.recordOverride("attacker", "tracking", this.trackingInput.rad);
+    if (id === "sigRes") this.recordOverride("attacker", "sigRes", (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass);
+    if (id === "optimal") this.recordOverride("attacker", "optimal", num(this.els.optimal));
+    if (id === "falloff") this.recordOverride("attacker", "falloff", num(this.els.falloff));
+    if (id === "targetSig") this.recordOverride("target", "targetSig", Math.max(num(this.els.targetSig), 1));
+  }
+
+  private recordOverrideForShipInput(id: keyof typeof this.els): void {
+    if (id === "attackerSpeed") this.recordOverride("attacker", "attackerSpeed", num(this.els.attackerSpeed));
+    if (id === "attackerMass") this.recordOverride("attacker", "attackerMass", num(this.els.attackerMass));
+    if (id === "attackerInertia") this.recordOverride("attacker", "attackerInertia", num(this.els.attackerInertia));
+    if (id === "targetSpeed") this.recordOverride("target", "targetSpeed", num(this.els.targetSpeed));
+    if (id === "targetMass") this.recordOverride("target", "targetMass", num(this.els.targetMass));
+    if (id === "targetInertia") this.recordOverride("target", "targetInertia", num(this.els.targetInertia));
+  }
+
+  private recordOverride<K extends keyof ProfileParamOverrides>(side: "attacker" | "target", key: K, value: ProfileParamOverrides[K]): void {
+    const overrides = side === "attacker" ? this.attackerOverrides : this.targetOverrides;
+    overrides[key] = value;
+  }
+
   private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
     this.updateShipStats(side, { updateInertia, updateMass: false, updateSig: false });
+    if (side === "attacker" && this.attackerProfile && this.attackerFitting) {
+      this.restoreAttackerTurret();
+    }
     this.updateSaveButtonState();
     this.persist();
     if (side === "attacker" && !this.attackerProfile) return;
@@ -1139,6 +1794,7 @@ export class DomControls implements Controls {
     if (this.openSkillSide !== null && this.openSkillSide !== side) {
       this.closeSkillPopup(this.openSkillSide);
     }
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
     this.openSkillPopup(side);
   }
 
@@ -1168,6 +1824,7 @@ export class DomControls implements Controls {
 
   private openPastePopup(side: "attacker" | "target"): void {
     if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
     const popup = this.els[`${side}PastePopup`] as HTMLElement;
     const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
     popup.hidden = false;
@@ -1196,7 +1853,7 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null && this.openPasteSide === null) return;
+    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && !this.importSidePopupOpen && !this.openAmmo) return;
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function") return;
     if (this.openSkillSide !== null) {
@@ -1206,6 +1863,19 @@ export class DomControls implements Controls {
     if (this.openPasteSide !== null) {
       const insidePaste = target.closest("#attacker-paste-popup, #target-paste-popup, #attacker-import-fitting, #target-import-fitting");
       if (!insidePaste) this.closeAllPastePopups();
+    }
+    if (this.openFittingSide !== null) {
+      const side = this.openFittingSide;
+      const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull`);
+      if (!insideFitting) this.closeAllFittingPopups();
+    }
+    if (this.importSidePopupOpen) {
+      const insideImport = target.closest("#import-side-popup, #import-profile");
+      if (!insideImport) this.closeImportSidePopup(false);
+    }
+    if (this.openAmmo) {
+      const insideAmmo = target.closest("#attacker-ammo-field");
+      if (!insideAmmo) this.closeAttackerAmmoPopup();
     }
   }
 
@@ -1220,6 +1890,17 @@ export class DomControls implements Controls {
       const side = this.openPasteSide;
       this.closePastePopup(side);
       (this.els[`${side}ImportFitting`] as HTMLButtonElement).focus();
+    }
+    if (this.openFittingSide !== null) {
+      const side = this.openFittingSide;
+      this.closeFittingPopup(side);
+      (this.els[`${side}FittingTrigger`] as HTMLButtonElement).focus();
+    }
+    if (this.importSidePopupOpen) {
+      this.closeImportSidePopup(true);
+    }
+    if (this.openAmmo) {
+      this.closeAttackerAmmoPopup();
     }
   }
 
@@ -1253,7 +1934,9 @@ export class DomControls implements Controls {
   private onPropulsionButtonClick(side: "attacker" | "target", propulsionId: string): void {
     if (side === "attacker" && !this.attackerProfile) return;
     if (side === "target" && !this.targetProfile) return;
-    this.setPropulsionActive(side, propulsionId);
+    const currentId = this.currentPropulsionId(side);
+    const next = currentId === propulsionId ? PROPULSION_NONE : propulsionId;
+    this.setPropulsionActive(side, next);
     this.els[`${side}Propulsion`].dispatchEvent(new Event("change"));
   }
 
@@ -1421,3 +2104,17 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+function chargeStatSuffix(option: ChargeOption): string {
+  const parts = [`range x${formatMultiplier(option.rangeMultiplier)}`, `track x${formatMultiplier(option.trackingMultiplier)}`];
+  if (option.falloffMultiplier !== 1) {
+    parts.splice(1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
+  }
+  return parts.join(" · ");
+}
+
+function formatMultiplier(value: number): string {
+  return String(Number(value.toFixed(2)));
+}
+
+const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };

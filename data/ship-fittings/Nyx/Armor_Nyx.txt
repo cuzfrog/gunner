@@ -1,0 +1,33 @@
+[Nyx, Armor Nyx]
+Networked Sensor Array
+Improved Cloaking Device II
+Fighter Support Unit I
+Fighter Support Unit I
+Fighter Support Unit I
+Fighter Support Unit I
+
+Capital Capacitor Booster II, Cap Booster 3200
+Federation Navy Omnidirectional Tracking Link
+10000MN Afterburner II
+Sentient Drone Navigation Computer
+Federation Navy Omnidirectional Tracking Link
+
+Corelum C-Type Multispectrum Energized Membrane
+25000mm Steel Plates I
+Imperial Navy Drone Damage Amplifier
+Corelum C-Type Multispectrum Energized Membrane
+Inertial Stabilizers II
+25000mm Steel Plates I
+Shadow Serpentis Damage Control
+
+
+Liquid Ozone x10000
+Cap Booster 3200 x34
+Power Diagnostic System II, Cap Booster 3200
+Navy Micro Auxiliary Power Core, Cap Booster 3200
+Imperial Navy Drone Damage Amplifier, Cap Booster 3200
+Oxygen Isotopes x105548
+Cynosural Field Generator I, Cap Booster 3200
+Cap Booster 3200 x8
+Oxygen Isotopes x146703
+Orthrus x1

@@ -1,0 +1,24 @@
+[Occator, Armor Occator]
+Prototype Cloaking Device I
+Festival Launcher, Paradoxical Nebula Firework
+
+50MN Y-T8 Compact Microwarpdrive
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 200
+Medium Micro Jump Drive
+
+Inertial Stabilizers II
+Explosive Armor Hardener II
+Reactive Armor Hardener
+EM Armor Hardener II
+Damage Control II
+EM Armor Hardener II
+
+Medium Trimark Armor Pump II
+Medium Trimark Armor Pump II
+
+
+Liquid Ozone x62932
+Strontium Clathrates x6945
+Navy Cap Booster 800 x583
+Liquid Ozone x9480
+Navy Cap Booster 200 x18

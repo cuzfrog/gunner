@@ -1,0 +1,28 @@
+[Jaguar, Kitetackle Missile Shield Jaguar]
+Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+
+Warp Scrambler II
+Small Azeotropic Restrained Shield Extender
+Kinetic Shield Amplifier II
+Small Azeotropic Restrained Shield Extender
+5MN Quad LiF Restrained Microwarpdrive
+
+Nanofiber Internal Structure II
+Assault Damage Control II
+Nanofiber Internal Structure II
+
+Small Explosive Shield Reinforcer II
+Small Core Defense Field Extender II
+
+
+Warrior II x1
+Warrior II x1
+Hornet EC-300 x2
+Warrior II x2
+
+
+Caldari Navy Mjolnir Light Missile x3811
+Nanite Repair Paste x20
+Caldari Navy Nova Light Missile x4159

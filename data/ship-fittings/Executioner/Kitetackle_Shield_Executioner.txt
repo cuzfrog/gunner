@@ -1,0 +1,20 @@
+[Executioner, Kitetackle Shield Executioner]
+Dual Anode Light Particle Stream I, Multifrequency S
+Dual Anode Light Particle Stream I, Multifrequency S
+Dual Anode Light Particle Stream I, Multifrequency S
+
+Faint Scoped Warp Disruptor
+Medium Shield Extender I
+5MN Quad LiF Restrained Microwarpdrive
+
+Micro Auxiliary Power Core I
+Type-D Restrained Overdrive Injector
+Damage Control I
+
+Small Core Defense Field Extender I
+Small EM Shield Reinforcer I
+Small Thermal Shield Reinforcer I
+
+
+Standard S x3
+Radio S x3

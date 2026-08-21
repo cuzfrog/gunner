@@ -1,0 +1,20 @@
+[Probe, Scanner Shield Probe]
+Core Probe Launcher I, Core Scanner Probe I
+
+Data Analyzer I
+Relic Analyzer I
+Scan Acquisition Array I
+5MN Quad LiF Restrained Microwarpdrive
+
+Inertial Stabilizers I
+Nanofiber Internal Structure I
+Inertial Stabilizers I
+
+Small Gravity Capacitor Upgrade I
+Small Gravity Capacitor Upgrade I
+
+
+Hornet I x7
+
+
+Core Scanner Probe I x8
