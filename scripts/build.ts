@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { ITEM_ICON_IDS } from "../src/fitting/iconIds";
+import { ITEM_ICON_IDS } from "../src/fitting";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";

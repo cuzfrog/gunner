@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ITEM_ICON_IDS } from "../src/fitting/iconIds";
+import { ITEM_ICON_IDS } from "../src/fitting";
 
 const DISTRIBUTION_DIRECTORY = "dist";
 const STYLES_LINK_PATTERN = /href="styles-[a-f0-9]{8}\.css"/;
