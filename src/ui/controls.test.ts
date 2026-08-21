@@ -4,7 +4,7 @@ import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipP
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import { serializeProfile } from "./profileText";
-import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "./settings";
+import { ClipboardUnavailableError, type ClipboardProvider, type LocationProvider, type ProfileSettings, type SettingsStore, type UserSettings, PROPULSION_NONE } from "./settings";
 import { USER_SETTINGS_VERSION } from "./settings";
 import type { SavedFittings } from "./savedFittings";
 import type { Timer } from "./timer";
@@ -100,13 +100,38 @@ const AB10MN: PropulsionModule = {
   sigBloom: 0,
 };
 
+const AB100MN: PropulsionModule = { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN Afterburner I", thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 };
+const MWD50MN: PropulsionModule = { id: "mwd-50mn", kind: "microwarpdrive", sizeTier: "medium", label: "50MN Microwarpdrive I", thrust: 15e6, massAddition: 5_000_000, speedBonus: 5, sigBloom: 5 };
+const AB10000MN: PropulsionModule = { id: "ab-10000mn", kind: "afterburner", sizeTier: "capital", label: "10000MN Afterburner I", thrust: 1.5e10, massAddition: 5e9, speedBonus: 1.15, sigBloom: 0 };
+const MWD500MN: PropulsionModule = { id: "mwd-500mn", kind: "microwarpdrive", sizeTier: "large", label: "500MN Microwarpdrive I", thrust: 150e6, massAddition: 50_000_000, speedBonus: 5, sigBloom: 5 };
+const MWD50000MN: PropulsionModule = { id: "mwd-50000mn", kind: "microwarpdrive", sizeTier: "capital", label: "50000MN Microwarpdrive I", thrust: 1.5e10, massAddition: 5e9, speedBonus: 5, sigBloom: 5 };
+
 const RIFTER_FITTING_OPTIONS: readonly PropulsionModule[] = [AB1MN, MWD5MN, AB10MN];
 const VALID_PROPULSION_IDS: readonly PropulsionId[] = ["ab-1mn", "mwd-5mn", "ab-10mn"];
+const ALL_FITTING_OPTIONS: readonly PropulsionModule[] = [AB1MN, MWD5MN, AB10MN, AB100MN, MWD50MN, AB10000MN, MWD500MN, MWD50000MN];
+
+const AB10MN_COMPACT: PropulsionStats = { ...AB10MN, speedBonus: 1.25 };
+const MWD5MN_COMPACT: PropulsionStats = { ...MWD5MN, speedBonus: 5.05 };
+
+const VARIANT_DB: Record<string, PropulsionStats> = {
+  "1MN Afterburner I": AB1MN,
+  "5MN Microwarpdrive I": MWD5MN,
+  "5MN Y-T8 Compact Microwarpdrive": MWD5MN_COMPACT,
+  "10MN Afterburner I": AB10MN,
+  "10MN Y-S8 Compact Afterburner": AB10MN_COMPACT,
+};
+
+const VARIANT_NAMES: Record<string, string[]> = {
+  "ab-1mn": ["1MN Afterburner I"],
+  "mwd-5mn": ["5MN Microwarpdrive I", "5MN Y-T8 Compact Microwarpdrive"],
+  "ab-10mn": ["10MN Afterburner I", "10MN Y-S8 Compact Afterburner"],
+};
 
 const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36 };
 const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 };
 const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36 };
 const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36 };
+const RIFTER_AB10_COMPACT_SKILL5: ShipStats = { mass: 6_000_000, inertiaModifier: 2, maxSpeed: 2238.48, sigRadius: 36 };
 const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210 };
 const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210 };
 const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210 };
@@ -116,7 +141,7 @@ const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
   fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
-  propulsion: { ...MWD5MN, propulsionId: "mwd-5mn" },
+  propulsion: { ...MWD5MN, propulsionId: "mwd-5mn", propulsionName: "5MN Microwarpdrive I" },
   turret: { tracking: 0.315, sigResolutionClass: "S", optimal: 600, falloff: 3000, chargeSize: 1, charge: "Hail S", base: { tracking: 0.42, optimal: 1200, falloff: 3000 } },
   cargoCharges: [],
 };
@@ -180,7 +205,7 @@ function mockStatsFor(profile: ShipProfile, module?: MockedPropulsion, condition
       if (conditions?.skillLevel === 0) return RIFTER_MWD_SKILL0;
       return conditions?.overloaded ? RIFTER_MWD_SKILL5_OVERLOADED : RIFTER_MWD_SKILL5;
     }
-    if (module.id === "ab-10mn") return RIFTER_AB1_SKILL5;
+    if (module.id === "ab-10mn") return module.speedBonus === 1.25 ? RIFTER_AB10_COMPACT_SKILL5 : RIFTER_AB1_SKILL5;
   }
   return THRASHER_BASE;
 }
@@ -233,6 +258,7 @@ function createMockShips() {
       return VALID_PROPULSION_IDS.includes(value as PropulsionId) ? (value as PropulsionId) : undefined;
     }),
     fittingOptions: vi.fn((profile: ShipProfile) => (profile.name === "Rifter" ? RIFTER_FITTING_OPTIONS : [AB1MN, MWD5MN])),
+    allFittingOptions: vi.fn(() => ALL_FITTING_OPTIONS),
     fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
     fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
     maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
@@ -477,6 +503,14 @@ function createNoOpTimer(): Timer {
   };
 }
 
+function createMockFittingImport() {
+  return vi.mocked<FittingImport>({
+    importFitting: vi.fn(() => undefined),
+    propulsionVariantNames: vi.fn((module: PropulsionModule) => VARIANT_NAMES[module.id] ?? [module.label]),
+    propulsionStats: vi.fn((name: string) => VARIANT_DB[name]),
+  });
+}
+
 function buildControls(
   document: Document,
   savedSettings: UserSettings | null = null,
@@ -512,7 +546,7 @@ function buildControls(
     clearSelectedProfile: vi.fn(),
   });
   const ships = createMockShips();
-  const fittingImport = vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+  const fittingImport = createMockFittingImport();
   const chargeCatalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
@@ -712,7 +746,7 @@ describe("DomControls", () => {
     const propulsion = getFake(globalThis.document, "attacker-propulsion");
     expect(propulsion.disabled).toBe(false);
     const ids = propulsion.children.map((c) => c.value);
-    expect(ids).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn", "none"]);
+    expect(ids).toEqual([...RIFTER_FITTING_OPTIONS.map((m) => m.id), PROPULSION_NONE]);
   });
 
   test("selecting a different hull after the first refreshes mass, inertia and speed", () => {
@@ -1219,6 +1253,133 @@ describe("DomControls", () => {
     expect(getFake(globalThis.document, "attacker-overload").disabled).toBe(true);
   });
 
+  test("propulsion buttons show the smallest three and are disabled before a hull is selected", () => {
+    buildControls(globalThis.document);
+    const group = getFake(globalThis.document, "attacker-propulsion-options");
+    expect(group.hidden).toBe(false);
+    expect(group.children.length).toBe(3);
+    const ids = group.children.map((c) => c.getAttribute("data-value"));
+    expect(ids).toEqual(ALL_FITTING_OPTIONS.slice(0, 3).map((m) => m.id));
+    for (const button of group.children) {
+      expect(button.disabled).toBe(true);
+    }
+    expect(getFake(globalThis.document, "attacker-propulsion-gear").disabled).toBe(true);
+  });
+
+  test("selecting a hull enables compatible propulsion buttons and the gear", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const group = getFake(globalThis.document, "attacker-propulsion-options");
+    expect(group.children.length).toBe(3);
+    for (const id of ["ab-1mn", "mwd-5mn", "ab-10mn"]) {
+      expect(findVisibleButton(globalThis.document, "attacker-propulsion-options", id).disabled).toBe(false);
+    }
+    expect(getFake(globalThis.document, "attacker-propulsion-gear").disabled).toBe(false);
+  });
+
+  test("clicking the propulsion gear opens and closes the variant popup", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
+    const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+    const popup = getFake(globalThis.document, "attacker-propulsion-variants");
+    expect(popup.hidden).toBe(true);
+    gear.trigger("click");
+    expect(popup.hidden).toBe(false);
+    expect(gear.getAttribute("aria-expanded")).toBe("true");
+    expect(popup.children.length).toBe(2);
+    expect(popup.children[0].getAttribute("data-value")).toBe("10MN Afterburner I");
+    gear.trigger("click");
+    expect(popup.hidden).toBe(true);
+    expect(gear.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("selecting a propulsion variant updates the fitted summary and speed", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
+    const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+    gear.trigger("click");
+    const popup = getFake(globalThis.document, "attacker-propulsion-variants");
+    const compact = popup.children.find((c) => c.getAttribute("data-value") === "10MN Y-S8 Compact Afterburner");
+    expect(compact).toBeDefined();
+    compact!.trigger("click");
+    expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_AB10_COMPACT_SKILL5.maxSpeed));
+    const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+    expect(saved.attackerFittedHull?.propulsionName).toBe("10MN Y-S8 Compact Afterburner");
+    expect(saved.attackerFittedHull?.propulsion?.speedBonus).toBe(1.25);
+  });
+
+  test("deselecting propulsion clears the fitted variant", () => {
+    const { settingsStore } = buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
+    findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
+    const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+    expect(saved.attackerPropulsion).toBe("none");
+    expect(saved.attackerFittedHull).toBeUndefined();
+  });
+
+  test("Escape closes the propulsion variant popup and focuses the gear", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+    gear.trigger("click");
+    globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+    expect(getFake(globalThis.document, "attacker-propulsion-variants").hidden).toBe(true);
+    expect(gear.getAttribute("aria-expanded")).toBe("false");
+    expect(gear.focus).toHaveBeenCalled();
+  });
+
+  test("pointerdown outside the propulsion variant popup closes it", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+    gear.trigger("click");
+    const outside = new FakeElement();
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: outside } as unknown as Event);
+    expect(getFake(globalThis.document, "attacker-propulsion-variants").hidden).toBe(true);
+  });
+
+  test("pointerdown inside the propulsion variant popup does not close it", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+    gear.trigger("click");
+    const inside = new FakeElement();
+    const popup = getFake(globalThis.document, "attacker-propulsion-variants");
+    inside.closest = () => popup;
+    globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+    expect(popup.hidden).toBe(false);
+  });
+
+  test("attacker and target propulsion variant popups do not interfere", () => {
+    buildControls(globalThis.document);
+    getFake(globalThis.document, "attacker-hull").value = "Rifter";
+    getFake(globalThis.document, "attacker-hull").trigger("change");
+    getFake(globalThis.document, "target-hull").value = "Rifter";
+    getFake(globalThis.document, "target-hull").trigger("change");
+    getFake(globalThis.document, "attacker-propulsion-gear").trigger("click");
+    expect(getFake(globalThis.document, "attacker-propulsion-variants").hidden).toBe(false);
+    getFake(globalThis.document, "target-propulsion-gear").trigger("click");
+    expect(getFake(globalThis.document, "attacker-propulsion-variants").hidden).toBe(true);
+    expect(getFake(globalThis.document, "target-propulsion-variants").hidden).toBe(false);
+  });
+
   test("clicking a visible skill tuner button updates the hidden select and recomputes speed", () => {
     buildControls(globalThis.document);
     const rifter = RIFTER;
@@ -1371,7 +1532,13 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1234.56));
-    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, activeMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(
+      RIFTER,
+      expect.objectContaining({ mass: RIFTER.mass, massMultiplier: 1, speedMultiplier: 1 }),
+      activeMass,
+      MWD5MN,
+      { skillLevel: 5, overloaded: true },
+    );
   });
 
   test("manually editing mass after hull selection round-trips speed without squaring the factor", () => {
@@ -1389,7 +1556,13 @@ describe("DomControls", () => {
     getFake(globalThis.document, "target-mass").trigger("input");
 
     expect(getFake(globalThis.document, "target-speed").value).toBe(formatNumber(1500.5));
-    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(RIFTER, undefined, displayedMass, MWD5MN, { skillLevel: 5, overloaded: true });
+    expect(ships.maxSpeedForFittedMass).toHaveBeenCalledWith(
+      RIFTER,
+      expect.objectContaining({ mass: RIFTER.mass, massMultiplier: 1, speedMultiplier: 1 }),
+      displayedMass,
+      MWD5MN,
+      { skillLevel: 5, overloaded: true },
+    );
   });
 
   test("save button highlights when the current settings differ from the selected profile", () => {
@@ -3328,6 +3501,20 @@ describe("DomControls", () => {
       expect(profile.attackerFitting).toBe(eft);
       expect(profile).not.toHaveProperty("language");
       expect(profile).not.toHaveProperty("trackingUnit");
+    });
+
+    test("imported fitting with a compact propulsion keeps the variant stats", async () => {
+      const { fittingImport, settingsStore } = buildControls(globalThis.document);
+      fittingImport.importFitting.mockReturnValue({
+        ...IMPORTED_RIFTER,
+        propulsion: { ...AB10MN_COMPACT, propulsionId: "ab-10mn", propulsionName: "10MN Y-S8 Compact Afterburner" },
+      });
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+      expect(getFake(globalThis.document, "attacker-speed").value).toBe(formatNumber(RIFTER_AB10_COMPACT_SKILL5.maxSpeed));
+      const [saved] = settingsStore.save.mock.calls[settingsStore.save.mock.calls.length - 1];
+      expect(saved.attackerFittedHull?.propulsionName).toBe("10MN Y-S8 Compact Afterburner");
+      expect(saved.attackerFittedHull?.propulsion?.speedBonus).toBe(1.25);
     });
   });
 

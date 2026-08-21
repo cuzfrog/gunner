@@ -1,4 +1,4 @@
-import type { PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -61,6 +61,7 @@ export class DomControls implements Controls {
   private openSkillSide: "attacker" | "target" | null = null;
   private openPasteSide: "attacker" | "target" | null = null;
   private openFittingSide: "attacker" | "target" | null = null;
+  private openPropulsionVariantSide: "attacker" | "target" | null = null;
   private importSidePopupOpen = false;
   private pendingImportText?: string;
   private openAmmo = false;
@@ -159,6 +160,8 @@ export class DomControls implements Controls {
       attackerPasteInput: el("attacker-paste-input"),
       attackerPropulsion: el("attacker-propulsion"),
       attackerPropulsionOptions: el("attacker-propulsion-options"),
+      attackerPropulsionGear: el("attacker-propulsion-gear"),
+      attackerPropulsionVariants: el("attacker-propulsion-variants"),
       attackerSkills: el("attacker-skills"),
       attackerSkillOptions: el("attacker-skill-options"),
       attackerSkillSummary: el("attacker-skill-summary"),
@@ -192,6 +195,8 @@ export class DomControls implements Controls {
       targetPasteInput: el("target-paste-input"),
       targetPropulsion: el("target-propulsion"),
       targetPropulsionOptions: el("target-propulsion-options"),
+      targetPropulsionGear: el("target-propulsion-gear"),
+      targetPropulsionVariants: el("target-propulsion-variants"),
       targetSkills: el("target-skills"),
       targetSkillOptions: el("target-skill-options"),
       targetSkillSummary: el("target-skill-summary"),
@@ -270,6 +275,7 @@ export class DomControls implements Controls {
       this.updateManeuverAggressivityEnabled();
       this.updateGridBrightnessDisplay(DEFAULT_GRID_BRIGHTNESS);
       this.setPlaying(false);
+      this.renderAllPropulsionOptions();
     }
   }
 
@@ -829,6 +835,7 @@ export class DomControls implements Controls {
     return {
       fittingName: imported.fittingName,
       propulsionId: imported.propulsion?.propulsionId,
+      propulsionName: imported.propulsion?.propulsionName,
       fitted: imported.fitted,
       propulsion: imported.propulsion,
     };
@@ -909,6 +916,7 @@ export class DomControls implements Controls {
     (this.els.attackerAmmoTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleAttackerAmmoPopup());
     (this.els.attackerAmmoExpand as HTMLButtonElement).addEventListener("click", () => this.onAttackerAmmoExpandClick());
     (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
+    (this.els.attackerPropulsionGear as HTMLButtonElement).addEventListener("click", () => this.onPropulsionGearClick("attacker"));
     (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
     (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
     (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
@@ -916,6 +924,7 @@ export class DomControls implements Controls {
     (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
     (this.els.targetFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("target"));
     (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
+    (this.els.targetPropulsionGear as HTMLButtonElement).addEventListener("click", () => this.onPropulsionGearClick("target"));
     (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
     (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
     (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
@@ -1517,21 +1526,119 @@ export class DomControls implements Controls {
   private onPropulsionChange(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     if (!profile) return;
+    const propulsionId = this.currentPropulsionId(side);
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
-    if (fitted) {
-      const propulsionId = this.currentPropulsionId(side);
-      const propulsion = propulsionId ? this.ships.fittingOption(profile, propulsionId) : undefined;
-      if (propulsion) {
-        const updated = { ...fitted, propulsionId, propulsion };
-        if (side === "attacker") this.attackerFittedHull = updated;
-        else this.targetFittedHull = updated;
+    let updated: FittedHullSummary | undefined;
+    if (propulsionId) {
+      const module = this.ships.fittingOption(profile, propulsionId);
+      if (module) {
+        const propulsionName = this.defaultPropulsionName(module);
+        const propulsion = this.fittingImport.propulsionStats(propulsionName) ?? module;
+        updated = { fittingName: fitted?.fittingName ?? "", fitted: fitted?.fitted ?? this.nakedFitted(profile), propulsionId, propulsionName, propulsion };
       }
+    } else if (fitted) {
+      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsion: undefined } : undefined;
+    }
+    if (updated) {
+      if (side === "attacker") this.attackerFittedHull = updated;
+      else this.targetFittedHull = updated;
+    } else if (!propulsionId && fitted && !fitted.fittingName) {
+      if (side === "attacker") this.attackerFittedHull = undefined;
+      else this.targetFittedHull = undefined;
     }
     this.updateShipStats(side, { updateInertia: false, updateMass: true, updateSig: true });
     this.setOverloadDisabled(side);
+    this.updatePropulsionVariantUI(side);
     this.updateSaveButtonState();
     this.persist();
     this.callbacks?.onConfigChange();
+  }
+
+  private updatePropulsionVariantUI(side: "attacker" | "target"): void {
+    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    const id = this.currentPropulsionId(side);
+    gear.disabled = !id;
+    this.renderPropulsionVariants(side);
+  }
+
+  private nakedFitted(profile: ShipProfile): FittedHull {
+    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+  }
+
+  private defaultPropulsionName(module: PropulsionModule): string {
+    const names = this.fittingImport.propulsionVariantNames(module);
+    return names.find((name) => name === module.label) ?? names[0] ?? module.label;
+  }
+
+  private renderPropulsionVariants(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    const module = this.currentPropulsionModule(side);
+    popup.innerHTML = "";
+    if (!module) return;
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const currentName = fitted?.propulsionName;
+    for (const name of this.fittingImport.propulsionVariantNames(module)) {
+      const item = this.createFittingItem(side, name, name, currentName, () => this.onPropulsionVariantClick(side, name));
+      item.setAttribute("data-value", name);
+      item.setAttribute("title", name);
+      popup.appendChild(item);
+    }
+  }
+
+  private onPropulsionVariantClick(side: "attacker" | "target", name: string): void {
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    const propulsion = this.fittingImport.propulsionStats(name);
+    const propulsionId = this.currentPropulsionId(side);
+    if (!profile || !propulsion || !propulsionId) return;
+    const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
+    const updated: FittedHullSummary = {
+      fittingName: fitted?.fittingName ?? "",
+      fitted: fitted?.fitted ?? this.nakedFitted(profile),
+      propulsionId,
+      propulsionName: name,
+      propulsion,
+    };
+    if (side === "attacker") this.attackerFittedHull = updated;
+    else this.targetFittedHull = updated;
+    this.updateShipStats(side, { updateInertia: false, updateMass: true, updateSig: true });
+    this.renderPropulsionVariants(side);
+    this.persist();
+    this.updateSaveButtonState();
+    this.callbacks?.onConfigChange();
+  }
+
+  private onPropulsionGearClick(side: "attacker" | "target"): void {
+    if (this.openPropulsionVariantSide === side) {
+      this.closePropulsionVariantPopup(side);
+      return;
+    }
+    if (this.openPropulsionVariantSide !== null) this.closePropulsionVariantPopup(this.openPropulsionVariantSide);
+    this.closeAllSkillPopups();
+    this.closeAllPastePopups();
+    this.closeAllFittingPopups();
+    if (this.importSidePopupOpen) this.closeImportSidePopup(false);
+    if (this.openAmmo) this.closeAttackerAmmoPopup();
+    this.openPropulsionVariantPopup(side);
+  }
+
+  private openPropulsionVariantPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    this.renderPropulsionVariants(side);
+    popup.hidden = false;
+    gear.setAttribute("aria-expanded", "true");
+    this.openPropulsionVariantSide = side;
+    const active = Array.from(popup.children).find((child) => child.getAttribute("aria-current") === "true") as HTMLElement | null ?? null;
+    const first = popup.firstElementChild as HTMLElement | null;
+    (active ?? first)?.focus();
+  }
+
+  private closePropulsionVariantPopup(side: "attacker" | "target"): void {
+    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    popup.hidden = true;
+    gear.setAttribute("aria-expanded", "false");
+    if (this.openPropulsionVariantSide === side) this.openPropulsionVariantSide = null;
   }
 
   private setHullValidation(side: "attacker" | "target", isInvalid: boolean): void {
@@ -1571,51 +1678,51 @@ export class DomControls implements Controls {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
     const group = this.els[`${side}PropulsionOptions`] as HTMLElement;
+    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
     select.innerHTML = "";
     group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
+    select.disabled = !profile;
 
-    const disabled = !profile;
-    select.disabled = disabled;
-    group.classList.toggle("disabled", disabled);
-
+    const all = this.ships.allFittingOptions();
+    const modules = profile ? this.ships.fittingOptions(profile) : all.slice(0, 3);
+    const moduleSet = new Set(modules.map((module) => module.id));
+    const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
+    const noneRequested = selectedId === PROPULSION_NONE;
     let selected = "";
+
+    for (const module of modules) {
+      const option = document.createElement("option");
+      option.value = module.id;
+      option.textContent = propulsionOptionLabel(module);
+      select.appendChild(option);
+      const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
+      button.disabled = !profile;
+      button.setAttribute("aria-disabled", String(!profile));
+    }
+
+    const noneOption = document.createElement("option");
+    noneOption.value = PROPULSION_NONE;
+    noneOption.hidden = true;
+    select.appendChild(noneOption);
+
     if (profile) {
-      const modules = this.ships.fittingOptions(profile);
-      const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
-      const noneRequested = selectedId === PROPULSION_NONE;
-      select.disabled = modules.length === 0;
-      group.classList.toggle("disabled", modules.length === 0);
-      const moduleDisabled = modules.length === 0;
-      if (modules.length === 0) {
-        this.createPlaceholderButton(group);
-      } else {
-        for (const module of modules) {
-          const option = document.createElement("option");
-          option.value = module.id;
-          option.textContent = propulsionOptionLabel(module);
-          select.appendChild(option);
-          const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
-          button.disabled = moduleDisabled;
-          button.setAttribute("aria-disabled", "false");
-        }
-        const noneOption = document.createElement("option");
-        noneOption.value = PROPULSION_NONE;
-        noneOption.hidden = true;
-        select.appendChild(noneOption);
-      }
       selected = noneRequested
         ? PROPULSION_NONE
-        : selectedPropulsionId && modules.some((m) => m.id === selectedPropulsionId)
+        : selectedPropulsionId && moduleSet.has(selectedPropulsionId)
           ? selectedPropulsionId
           : (modules[0]?.id ?? "");
-    } else {
-      this.createPlaceholderButton(group);
     }
 
     select.value = selected;
     this.setPropulsionActive(side, selected);
+    gear.disabled = !profile || selected === PROPULSION_NONE || selected === "";
+    this.renderPropulsionVariants(side);
     this.setOverloadDisabled(side);
+    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    popup.hidden = true;
+    gear.setAttribute("aria-expanded", "false");
+    if (this.openPropulsionVariantSide === side) this.openPropulsionVariantSide = null;
   }
 
   private updateShipStats(
@@ -1856,7 +1963,7 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && !this.importSidePopupOpen && !this.openAmmo) return;
+    if (this.openSkillSide === null && this.openPasteSide === null && this.openFittingSide === null && this.openPropulsionVariantSide === null && !this.importSidePopupOpen && !this.openAmmo) return;
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function") return;
     if (this.openSkillSide !== null) {
@@ -1879,6 +1986,11 @@ export class DomControls implements Controls {
     if (this.openAmmo) {
       const insideAmmo = target.closest("#attacker-ammo-field");
       if (!insideAmmo) this.closeAttackerAmmoPopup();
+    }
+    if (this.openPropulsionVariantSide !== null) {
+      const side = this.openPropulsionVariantSide;
+      const inside = target.closest(`#${side}-propulsion-variants, #${side}-propulsion-gear`);
+      if (!inside) this.closePropulsionVariantPopup(side);
     }
   }
 
@@ -1904,6 +2016,11 @@ export class DomControls implements Controls {
     }
     if (this.openAmmo) {
       this.closeAttackerAmmoPopup();
+    }
+    if (this.openPropulsionVariantSide !== null) {
+      const side = this.openPropulsionVariantSide;
+      this.closePropulsionVariantPopup(side);
+      (this.els[`${side}PropulsionGear`] as HTMLButtonElement).focus();
     }
   }
 
@@ -1935,10 +2052,12 @@ export class DomControls implements Controls {
   }
 
   private onPropulsionButtonClick(side: "attacker" | "target", propulsionId: string): void {
-    if (side === "attacker" && !this.attackerProfile) return;
-    if (side === "target" && !this.targetProfile) return;
+    const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
+    if (!profile) return;
+    const id = this.ships.parsePropulsionId(propulsionId);
+    if (!id || !this.ships.fittingOption(profile, id)) return;
     const currentId = this.currentPropulsionId(side);
-    const next = currentId === propulsionId ? PROPULSION_NONE : propulsionId;
+    const next = currentId === id ? PROPULSION_NONE : id;
     this.setPropulsionActive(side, next);
     this.els[`${side}Propulsion`].dispatchEvent(new Event("change"));
   }

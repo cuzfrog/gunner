@@ -381,9 +381,10 @@ function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
 function isFittedHullSummary(value: unknown): value is FittedHullSummary {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  if (typeof s.fittingName !== "string" || s.fittingName.length === 0) return false;
+  if (typeof s.fittingName !== "string") return false;
   if (!isFittedHull(s.fitted)) return false;
   if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
+  if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
   if (s.propulsion !== undefined && !isPropulsionStats(s.propulsion)) return false;
   return true;
 }

@@ -79,6 +79,7 @@ const FITTED_PROPULSION = {
 const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
   propulsionId: "ab-1mn",
+  propulsionName: "1MN Afterburner I",
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
 };
@@ -114,6 +115,8 @@ const RIFTER_MODULE: PropulsionModule = {
 };
 
 const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn" };
+
+const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5 };
 
 const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER_PROFILE,
@@ -161,8 +164,12 @@ let ships: Ships;
 let fittingImport: FittingImport;
 let chargeCatalog: ChargeCatalog;
 
-function makeFittingImport(): FittingImport {
-  return vi.mocked<FittingImport>({ importFitting: vi.fn(() => undefined) });
+function makeFittingImport() {
+  return vi.mocked<FittingImport>({
+    importFitting: vi.fn(() => undefined),
+    propulsionVariantNames: vi.fn(() => []),
+    propulsionStats: vi.fn(() => undefined),
+  });
 }
 
 function makeChargeCatalog(): ChargeCatalog {
@@ -173,7 +180,7 @@ function makeChargeCatalog(): ChargeCatalog {
   });
 }
 
-function makeShips(): Ships {
+function makeShips() {
   return vi.mocked<Ships>({
     hulls: vi.fn(),
     hullView: vi.fn(),
@@ -183,6 +190,7 @@ function makeShips(): Ships {
       return VALID_PROPULSION_IDS.includes(value) ? (value as PropulsionId) : undefined;
     }),
     fittingOptions: vi.fn(),
+    allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(),
     fittedStats: vi.fn(),
     maxSpeedForFittedMass: vi.fn(),
@@ -770,6 +778,7 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.attackerFittedHull).toEqual({
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
+      propulsionName: RIFTER_MODULE.label,
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
     });
@@ -780,6 +789,35 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.sigRes).toBe("S");
     expect(loaded!.optimal).toBe(600);
     expect(loaded!.falloff).toBe(3000);
+  });
+
+  test("save and load round-trip preserves an exact propulsion variant from the fitted hull summary", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    fittingImport.propulsionStats = vi.fn((name: string) => (name === "5MN Y-T8 Compact Microwarpdrive" ? COMPACT_MWD : undefined));
+    ships.fittingOption = vi.fn(() => RIFTER_MODULE);
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.maxSpeedForFittedMass = vi.fn(() => 4_650);
+
+    const storage = fakeStorage();
+    const location = fakeLocation("http://localhost/");
+    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      attackerFittedHull: {
+        ...FITTED_HULL_SUMMARY,
+        propulsionId: "mwd-5mn",
+        propulsionName: "5MN Y-T8 Compact Microwarpdrive",
+        propulsion: COMPACT_MWD,
+      },
+    };
+    store.save(settings);
+    location.replace(store.encodeUrl(settings));
+    const loaded = store.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.attackerFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
+    expect(loaded!.attackerFittedHull?.propulsion).toEqual(COMPACT_MWD);
+    expect(loaded!.attackerSpeed).toBe(4_650);
   });
 
   test("basis re-import on load overwrites stale parameter cache", () => {

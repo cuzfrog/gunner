@@ -263,8 +263,43 @@ describe("FittingImportImpl", () => {
     );
     expect(result!.propulsion).toBeDefined();
     expect(result!.propulsion!.propulsionId).toBe("ab-100mn");
+    expect(result!.propulsion!.propulsionName).toBe("100MN Y-S8 Compact Afterburner");
     expect(result!.propulsion!.speedBonus).toBe(1.25);
     expect(result!.propulsion!.massAddition).toBe(50_000_000);
+  });
+
+  test("propulsionVariantNames returns matching module names", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const mwd = propulsionModules.find((m) => m.id === "mwd-5mn")!;
+    expect(importer.propulsionVariantNames(mwd)).toEqual(["5MN Microwarpdrive I"]);
+  });
+
+  test("propulsionVariantNames returns an empty list when no variants match", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const ab10 = propulsionModules.find((m) => m.id === "ab-10mn")!;
+    expect(importer.propulsionVariantNames(ab10)).toEqual([]);
+  });
+
+  test("propulsionStats returns stats for a named propulsion module", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    expect(importer.propulsionStats("5MN Microwarpdrive I")).toEqual({
+      thrust: 1_500_000,
+      speedBonus: 5,
+      massAddition: 500_000,
+      sigBloom: 5,
+    });
+    expect(importer.propulsionStats("100MN Y-S8 Compact Afterburner")).toEqual({
+      thrust: 150_000_000,
+      speedBonus: 1.25,
+      massAddition: 50_000_000,
+      sigBloom: 0,
+    });
+  });
+
+  test("propulsionStats returns undefined for an unknown or non-propulsion module", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    expect(importer.propulsionStats("1600mm Steel Plates II")).toBeUndefined();
+    expect(importer.propulsionStats("Unknown")).toBeUndefined();
   });
 
   test("skips unknown module names", () => {

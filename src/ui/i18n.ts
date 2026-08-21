@@ -73,6 +73,11 @@ export const I18N_DICTIONARY = {
     zh: "推进模块",
     ja: "推進モジュール",
   },
+  "label.propulsionVariant": {
+    en: "Propulsion variant",
+    zh: "推进模块型号",
+    ja: "推進モジュール型",
+  },
   "label.skillLevel": {
     en: "Pilot skills",
     zh: "飞行员技能",

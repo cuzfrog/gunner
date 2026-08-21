@@ -1,6 +1,7 @@
 import { ShipsImpl } from "./ships";
 import { fittingOptions } from "./fitting";
 import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
+import { PROPULSION_MODULES } from "./propulsion";
 import { SHIP_PROFILES } from "./profiles";
 import type { FittedHull, PropulsionId, ShipProfile } from "./types";
 
@@ -38,6 +39,10 @@ describe("ShipsImpl", () => {
     expect(ships.parsePropulsionId("")).toBeUndefined();
     expect(ships.parsePropulsionId(null)).toBeUndefined();
     expect(ships.parsePropulsionId(42)).toBeUndefined();
+  });
+
+  test("allFittingOptions returns every generic propulsion module", () => {
+    expect(ships.allFittingOptions().map((m) => m.id)).toEqual(PROPULSION_MODULES.map((m) => m.id));
   });
 
   test("fittingOptions returns the modules eligible for the hull", () => {

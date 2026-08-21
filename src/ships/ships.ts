@@ -5,7 +5,7 @@ import {
 } from "./effectiveStats";
 import { fittingOptions as computeFittingOptions } from "./fitting";
 import { SHIP_PROFILES } from "./profiles";
-import { isPropulsionId } from "./propulsion";
+import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
 import { factionDisplayName, findShipProfileByName, hullTypeDisplayName, shipDisplayName, type ShipNameLanguage } from "./shipNames";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
@@ -25,6 +25,7 @@ export interface Ships {
   findHull(name: string): ShipProfile | undefined;
   parsePropulsionId(value: unknown): PropulsionId | undefined;
   fittingOptions(profile: ShipProfile): readonly PropulsionModule[];
+  allFittingOptions(): readonly PropulsionModule[];
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined;
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions): ShipStats;
   maxSpeedForFittedMass(profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions): number;
@@ -54,6 +55,10 @@ export class ShipsImpl implements Ships {
 
   fittingOptions(profile: ShipProfile): readonly PropulsionModule[] {
     return computeFittingOptions(profile);
+  }
+
+  allFittingOptions(): readonly PropulsionModule[] {
+    return PROPULSION_MODULES;
   }
 
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined {

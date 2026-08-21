@@ -20,7 +20,7 @@ export interface ImportedFitting {
   readonly profile: ShipProfile;
   readonly fittingName: string;
   readonly fitted: FittedHull;
-  readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId };
+  readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
   readonly cargoCharges: readonly CargoCharge[];
 }
@@ -35,6 +35,8 @@ export interface FittingDb {
 
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
+  propulsionVariantNames(module: PropulsionModule): readonly string[];
+  propulsionStats(name: string): PropulsionStats | undefined;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -46,6 +48,25 @@ export class FittingImportImpl implements FittingImport {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
+  }
+
+  propulsionVariantNames(module: PropulsionModule): readonly string[] {
+    return Object.entries(this.db.modules)
+      .filter(([, stats]) => stats.propulsion?.kind === module.kind && stats.propulsion?.sizeTier === module.sizeTier && stats.propulsion.thrust > 0 && stats.propulsion.speedBonus > 0)
+      .map(([name]) => name)
+      .sort((a, b) => {
+        const aStats = this.db.modules[a]?.propulsion;
+        const bStats = this.db.modules[b]?.propulsion;
+        if (!aStats || !bStats) return a.localeCompare(b);
+        if (bStats.speedBonus !== aStats.speedBonus) return bStats.speedBonus - aStats.speedBonus;
+        return a.localeCompare(b);
+      });
+  }
+
+  propulsionStats(name: string): PropulsionStats | undefined {
+    const stats = this.db.modules[name]?.propulsion;
+    if (!stats) return undefined;
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
@@ -142,7 +163,7 @@ function resolvePropulsion(
   db: FittingDb,
   parsed: ParsedFitting,
   propulsionName: string | undefined,
-): (PropulsionStats & { readonly propulsionId: PropulsionId }) | undefined {
+): (PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName: string }) | undefined {
   const name = propulsionName ?? findFirstPropulsion(parsed, db);
   if (!name) return undefined;
 
@@ -152,7 +173,7 @@ function resolvePropulsion(
   const propulsionId = findGenericPropulsionId(ships, profile, stats.kind, stats.sizeTier);
   if (!propulsionId) return undefined;
 
-  return { ...stats, propulsionId };
+  return { ...stats, propulsionId, propulsionName: name };
 }
 
 function findFirstPropulsion(parsed: ParsedFitting, db: FittingDb): string | undefined {

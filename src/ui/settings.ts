@@ -11,6 +11,7 @@ export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
+  readonly propulsionName?: string;
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
 }
@@ -378,24 +379,44 @@ export class LocalSettingsStore implements SettingsStore {
     const profile = imported.profile;
     const propulsionKey = side === "attacker" ? "attackerPropulsion" : "targetPropulsion";
     const storedPropulsionId = settings[propulsionKey];
+    const storedFittedHull = side === "attacker" ? settings.attackerFittedHull : settings.targetFittedHull;
     const importedPropulsion = imported.propulsion;
     const importedPropulsionId = importedPropulsion?.propulsionId;
     const explicitNone = storedPropulsionId === PROPULSION_NONE;
     let activePropulsionId: PropulsionId | undefined;
     let activePropulsion: PropulsionStats | undefined;
+    let activePropulsionName: string | undefined;
+
     if (!explicitNone) {
       activePropulsionId = storedPropulsionId ?? importedPropulsionId;
-      activePropulsion = activePropulsionId ? this.ships.fittingOption(profile, activePropulsionId) : undefined;
+      if (activePropulsionId && storedFittedHull?.propulsionId === activePropulsionId && storedFittedHull.propulsionName) {
+        const exact = this.fittingImport.propulsionStats(storedFittedHull.propulsionName);
+        if (exact) {
+          activePropulsion = exact;
+          activePropulsionName = storedFittedHull.propulsionName;
+        }
+      }
+      if (!activePropulsion) {
+        const generic = activePropulsionId ? this.ships.fittingOption(profile, activePropulsionId) : undefined;
+        if (generic) {
+          const variants = this.fittingImport.propulsionVariantNames(generic);
+          activePropulsionName = variants.find((name) => name === generic.label) ?? variants[0] ?? generic.label;
+          activePropulsion = this.fittingImport.propulsionStats(activePropulsionName) ?? generic;
+        }
+      }
       if (!activePropulsion && importedPropulsion) {
         activePropulsion = importedPropulsion;
         activePropulsionId = importedPropulsionId;
+        activePropulsionName = importedPropulsion.propulsionName ?? activePropulsionName;
       }
     }
     const fittedPropulsion = explicitNone ? importedPropulsion : activePropulsion;
     const fittedPropulsionId = explicitNone ? importedPropulsionId : activePropulsionId;
+    const fittedPropulsionName = explicitNone ? importedPropulsion?.propulsionName : activePropulsionName;
     const fittedHull: FittedHullSummary = {
       fittingName: imported.fittingName,
       propulsionId: fittedPropulsionId,
+      propulsionName: fittedPropulsionName,
       fitted: imported.fitted,
       propulsion: fittedPropulsion,
     };
@@ -545,7 +566,12 @@ function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  return typeof s.fittingName === "string" && s.fittingName.length > 0 && isFittedHull(s.fitted) && isOptionalPropulsionStats(s.propulsion) && (s.propulsionId === undefined || typeof s.propulsionId === "string");
+  if (typeof s.fittingName !== "string") return false;
+  if (!isFittedHull(s.fitted)) return false;
+  if (!isOptionalPropulsionStats(s.propulsion)) return false;
+  if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
+  if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
+  return true;
 }
 
 function isFittedHull(value: unknown): value is FittedHull {
