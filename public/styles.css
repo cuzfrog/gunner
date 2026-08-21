@@ -395,7 +395,31 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   padding: 6px;
   max-height: 260px;
+  overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(92, 203, 203, 0.35) transparent;
+}
+
+.fitting-popup::-webkit-scrollbar,
+.ammo-popup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fitting-popup::-webkit-scrollbar-track,
+.ammo-popup::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fitting-popup::-webkit-scrollbar-thumb,
+.ammo-popup::-webkit-scrollbar-thumb {
+  background: rgba(92, 203, 203, 0.35);
+  border-radius: 3px;
+}
+
+.fitting-popup::-webkit-scrollbar-thumb:hover,
+.ammo-popup::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-teal);
 }
 
 .fitting-group-label {
@@ -606,7 +630,10 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   padding: 6px;
   max-height: 260px;
+  overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(92, 203, 203, 0.35) transparent;
 }
 
 .ammo-list {
