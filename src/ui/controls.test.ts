@@ -1227,8 +1227,10 @@ describe("DomControls", () => {
     gear.trigger("click");
     expect(popup.hidden).toBe(false);
     expect(gear.getAttribute("aria-expanded")).toBe("true");
-    expect(popup.children.length).toBe(2);
-    expect(popup.children[0].getAttribute("data-value")).toBe("10MN Afterburner I");
+    expect(popup.children.length).toBe(3);
+    expect(popup.children[0].textContent).toBe("10MN Afterburner I");
+    expect(popup.children[0].getAttribute("class")).toBe("fitting-group-label");
+    expect(popup.children[1].getAttribute("data-value")).toBe("10MN Afterburner I");
     gear.trigger("click");
     expect(popup.hidden).toBe(true);
     expect(gear.getAttribute("aria-expanded")).toBe("false");
@@ -1251,6 +1253,24 @@ describe("DomControls", () => {
     const saved = saveAsProfile(ctx);
     expect(saved.attackerFittedHull?.propulsionName).toBe("10MN Y-S8 Compact Afterburner");
     expect(saved.attackerFittedHull?.propulsion?.speedBonus).toBe(1.25);
+  });
+
+  test("current propulsion variant is marked with aria-current", () => {
+    buildControls(globalThis.document);
+    const hullInput = getFake(globalThis.document, "attacker-hull");
+    hullInput.value = "Rifter";
+    hullInput.trigger("change");
+    findVisibleButton(globalThis.document, "attacker-propulsion-options", "ab-10mn").trigger("click");
+    getFake(globalThis.document, "attacker-propulsion-gear").trigger("click");
+    const popup = getFake(globalThis.document, "attacker-propulsion-variants");
+    const base = popup.children.find((c) => c.getAttribute("data-value") === "10MN Afterburner I");
+    expect(base?.getAttribute("aria-current")).toBe("true");
+    const compact = popup.children.find((c) => c.getAttribute("data-value") === "10MN Y-S8 Compact Afterburner");
+    compact!.trigger("click");
+    const nextBase = popup.children.find((c) => c.getAttribute("data-value") === "10MN Afterburner I");
+    const nextCompact = popup.children.find((c) => c.getAttribute("data-value") === "10MN Y-S8 Compact Afterburner");
+    expect(nextBase?.getAttribute("aria-current")).toBeNull();
+    expect(nextCompact?.getAttribute("aria-current")).toBe("true");
   });
 
   test("deselecting propulsion clears the fitted variant", () => {

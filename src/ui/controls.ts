@@ -1591,6 +1591,10 @@ export class DomControls implements Controls {
     const module = this.currentPropulsionModule(side);
     popup.innerHTML = "";
     if (!module) return;
+    const label = document.createElement("span");
+    label.setAttribute("class", "fitting-group-label");
+    label.textContent = module.label;
+    popup.appendChild(label);
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
     const currentName = fitted?.propulsionName;
     for (const name of this.fittingImport.propulsionVariantNames(module)) {
