@@ -4274,6 +4274,63 @@ const ctx = buildControls(globalThis.document);
       expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
     });
   });
+
+  describe("sig-res icons", () => {
+    async function flush(): Promise<void> {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    const EXPECTED_AUTO_ICON_NAMES = ["200mm AutoCannon I", "425mm AutoCannon I", "800mm Repeating Cannon I", "Quad 800mm Repeating Cannon I"] as const;
+
+    test("importing a fitted turret shows gun-family icons on the sig-res buttons", async () => {
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, imageCatalog } = ctx;
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      imageCatalog.itemIconUrl.mockImplementation((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      for (const value of ["S", "M", "L", "XL"]) {
+        const icon = sigResIcon(sigResButton(globalThis.document, value));
+        expect(icon.hidden).toBe(false);
+        expect(icon.src).toContain("images/icons/");
+      }
+    });
+
+    test("imageCatalog.itemIconUrl is called with the representative names for the fitted gun family", async () => {
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, imageCatalog } = ctx;
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      imageCatalog.itemIconUrl.mockImplementation((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      for (const name of EXPECTED_AUTO_ICON_NAMES) {
+        expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(name);
+      }
+    });
+
+    test("clearing the attacker hull hides the sig-res icons", async () => {
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, imageCatalog } = ctx;
+      fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      imageCatalog.itemIconUrl.mockImplementation((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Thrasher";
+      hullInput.trigger("change");
+
+      for (const value of ["S", "M", "L", "XL"]) {
+        const icon = sigResIcon(sigResButton(globalThis.document, value));
+        expect(icon.hidden).toBe(true);
+      }
+    });
+  });
 });
 
 function findVisibleButton(document: Document, groupId: string, value: string): FakeElement {
@@ -4285,5 +4342,18 @@ function findVisibleButton(document: Document, groupId: string, value: string): 
 
 function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
+}
+
+function sigResButton(document: Document, value: string): FakeElement {
+  const group = getFake(document, "sig-res-options");
+  const button = group.children.find((child) => child.getAttribute("data-value") === value);
+  if (!button) throw new Error(`Missing sig-res button ${value}`);
+  return button;
+}
+
+function sigResIcon(button: FakeElement): FakeElement {
+  const icon = button.children.find((child) => child.className === "sigres-icon");
+  if (!icon) throw new Error("Missing sigres-icon element");
+  return icon;
 }
 

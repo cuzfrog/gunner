@@ -1472,11 +1472,16 @@ canvas {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 4px;
   padding: 3px 2px 4px;
   line-height: 1.2;
+}
+
+.sigres-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .panel .sigres-selector button span {

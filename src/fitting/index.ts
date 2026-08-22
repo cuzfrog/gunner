@@ -5,4 +5,6 @@ export { describeFitting } from "./fittingSummary";
 export type { FittingRow, FittingSection, FittingSummary } from "./fittingSummary";
 export type { ModuleSlot } from "./moduleSlots";
 export { ITEM_ICON_IDS } from "./iconIds";
+export { gunFamilyOf, gunIconNames } from "./gunFamilies";
+export type { GunFamily } from "./gunFamilies";
 export { registerFittingModule } from "./module";

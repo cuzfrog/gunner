@@ -12,6 +12,8 @@ import {
 } from "../sim";
 import {
   describeFitting,
+  gunFamilyOf,
+  gunIconNames,
   type CargoCharge,
   type ChargeCatalog,
   type ChargeOption,
@@ -98,6 +100,7 @@ export class DomControls implements Controls {
   private attackerOverrides: Partial<ProfileParamOverrides> = {};
   private targetOverrides: Partial<ProfileParamOverrides> = {};
   private selectedProfile: ProfileSettings | null = null;
+  private readonly sigResOriginalTitles: Partial<Record<SigResolutionClass, string>> = {};
 
   constructor({
     hitChance,
@@ -637,6 +640,7 @@ export class DomControls implements Controls {
     this.updateLanguageToggle();
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
+    this.renderSigResIcons();
     this.clearImportHint("attacker");
     this.clearImportHint("target");
     this.populateHullDatalist();
@@ -1368,6 +1372,7 @@ export class DomControls implements Controls {
       this.attackerAmmoAllExpanded = false;
       (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
       this.renderAttackerAmmo();
+      this.renderSigResIcons();
     } else {
       this.targetFittedHull = undefined;
       this.targetFitting = undefined;
@@ -1489,6 +1494,51 @@ export class DomControls implements Controls {
     this.renderAttackerAmmoCargoList();
     this.renderAttackerAmmoAllList();
     this.renderAttackerAmmoExpand();
+  }
+
+  private renderSigResIcons(): void {
+    const group = this.els.sigResOptions as HTMLElement;
+    const turret = this.attackerTurret;
+    for (const button of Array.from(group.children)) {
+      const value = button.getAttribute("data-value") ?? "";
+      if (!isSigResClass(value)) continue;
+      const img = this.sigResIcon(button);
+      const title = this.sigResOriginalTitle(value, button as HTMLButtonElement);
+      if (turret) {
+        const family = gunFamilyOf(turret.moduleName);
+        const representative = gunIconNames(family)[value];
+        const url = this.imageCatalog.itemIconUrl(representative);
+        if (url) {
+          (img as HTMLImageElement).src = url;
+          img.hidden = false;
+          (button as HTMLButtonElement).title = `${representative} · ${title}`;
+          continue;
+        }
+      }
+      img.hidden = true;
+      (button as HTMLButtonElement).title = title;
+    }
+  }
+
+  private sigResIcon(button: Element): HTMLImageElement {
+    for (const child of Array.from(button.children)) {
+      if (child.className === "sigres-icon") return child as HTMLImageElement;
+    }
+    const img = document.createElement("img");
+    img.className = "sigres-icon";
+    img.alt = "";
+    img.hidden = true;
+    button.appendChild(img);
+    return img;
+  }
+
+  private sigResOriginalTitle(value: SigResolutionClass, button: HTMLButtonElement): string {
+    let title = this.sigResOriginalTitles[value];
+    if (title === undefined) {
+      title = button.title;
+      this.sigResOriginalTitles[value] = title;
+    }
+    return title;
   }
 
   private renderAttackerAmmoCargoList(): void {
@@ -1661,6 +1711,7 @@ export class DomControls implements Controls {
       this.attackerCargoCharges = [];
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
       this.renderAttackerAmmo();
+      this.renderSigResIcons();
       return;
     }
     const imported = this.fittingImport.importFitting(this.attackerFitting, this.skillConditions("attacker"));
@@ -1669,6 +1720,7 @@ export class DomControls implements Controls {
       this.attackerCargoCharges = [];
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
       this.renderAttackerAmmo();
+      this.renderSigResIcons();
       return;
     }
     const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
@@ -1677,6 +1729,7 @@ export class DomControls implements Controls {
     this.attackerAmmo = restored.charge;
     this.setTurretInputs(restored);
     this.renderAttackerAmmo();
+    this.renderSigResIcons();
   }
 
   private applyImportedTurret(imported: ImportedFitting): void {
@@ -1688,6 +1741,7 @@ export class DomControls implements Controls {
       this.attackerAmmoAllExpanded = false;
       (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
       this.renderAttackerAmmo();
+      this.renderSigResIcons();
       return;
     }
     this.attackerTurret = turret;
@@ -1698,6 +1752,7 @@ export class DomControls implements Controls {
     this.clearAttackerTurretOverrides();
     this.setTurretInputs(turret);
     this.renderAttackerAmmo();
+    this.renderSigResIcons();
   }
 
   private currentPropulsionModule(side: "attacker" | "target"): PropulsionModule | undefined {
@@ -2458,6 +2513,10 @@ function chargeStatSuffix(option: ChargeOption): string {
 
 function formatMultiplier(value: number): string {
   return String(Number(value.toFixed(2)));
+}
+
+function isSigResClass(value: string): value is SigResolutionClass {
+  return value === "S" || value === "M" || value === "L" || value === "XL";
 }
 
 const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
