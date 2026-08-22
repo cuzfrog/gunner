@@ -859,10 +859,6 @@ body {
   padding-left: 4px;
 }
 
-.ammo-item {
-  align-items: center;
-}
-
 .ammo-item-icon {
   width: 20px;
   height: 20px;
@@ -1643,7 +1639,7 @@ canvas {
   margin-top: 2px;
 }
 
-.propulsion-selector button {
+.segmented-control.propulsion-selector button {
   display: flex;
   align-items: center;
   justify-content: center;
