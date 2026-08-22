@@ -1282,7 +1282,8 @@ export class DomControls implements Controls {
     const saved = this.savedFittings.listForHull(profile.name);
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
-      const item = this.createFittingItem(side, fitting.name, fitting.text, currentText, () => this.onFittingItemClick(side, fitting.text));
+      const onFittingClick = () => this.onFittingItemClick(side, fitting.text);
+      const item = this.createFittingItem(fitting.name, fitting.text, currentText, onFittingClick);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
         item.classList.toggle("invalid", true);
@@ -1305,7 +1306,8 @@ export class DomControls implements Controls {
     for (let index = 0; index < presets.length; index++) {
       const fit = presets[index];
       const text = this.presetFittings.eftText(profile.name, fit);
-      const item = this.createFittingItem(side, fit.name, text, currentText, () => this.onFittingItemClick(side, text));
+      const onFittingClick = () => this.onFittingItemClick(side, text);
+      const item = this.createFittingItem(fit.name, text, currentText, onFittingClick);
       presetList.appendChild(this.createFittingEntry(side, item, text, undefined));
     }
 
@@ -1313,7 +1315,6 @@ export class DomControls implements Controls {
   }
 
   private createFittingItem(
-    side: "attacker" | "target",
     name: string,
     text: string,
     currentText: string | undefined,
@@ -1341,7 +1342,12 @@ export class DomControls implements Controls {
     return button;
   }
 
-  private createFittingEntry(side: "attacker" | "target", item: HTMLButtonElement, text: string, onDelete: (() => void) | undefined): HTMLElement {
+  private createFittingEntry(
+    side: "attacker" | "target",
+    item: HTMLButtonElement,
+    text: string,
+    onDelete: (() => void) | undefined,
+  ): HTMLElement {
     const li = document.createElement("li");
     li.className = "fitting-entry";
     li.setAttribute("role", "presentation");
@@ -1426,7 +1432,8 @@ export class DomControls implements Controls {
       this.hidePreview(this.openPreviewSide);
       return;
     }
-    this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor, this.currentPreviewEye ?? this.els[`${this.openPreviewSide}FittingEye`]);
+    const eye = this.currentPreviewEye ?? this.els[`${this.openPreviewSide}FittingEye`];
+    this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor, eye);
   }
 
   private onFittingItemClick(side: "attacker" | "target", text: string): void {

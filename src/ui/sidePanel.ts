@@ -9,6 +9,27 @@ import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, ty
 import type { SavedFitting } from "./savedFittings";
 import type { TimeoutId, Timer } from "./timer";
 
+export interface SidePanelHost {
+  updateFittingTrigger(enabled: boolean): void;
+  isFittingPopupOpen(): boolean;
+  renderFittingPopup(): void;
+  closeFittingPopup(): void;
+  hidePreview(): void;
+  closeAttackerAmmoPopup(): void;
+  onAttackerFittedHullCleared(): void;
+  importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
+  mostRecentFittingFor(hullName: string): SavedFitting | undefined;
+  persistConfigChange(notify?: boolean): void;
+  closeAllSkillPopups(): void;
+  closeAllPastePopups(): void;
+  closeAllPropulsionVariantPopups(): void;
+  closeAllFittingPopups(): void;
+  closeImportSidePopup(keepSelection: boolean): void;
+  restoreAttackerTurret(): void;
+  importFittingFromText(text: string): Promise<void>;
+  importFitting(): Promise<void>;
+}
+
 interface SidePanelElements {
   readonly hull: HTMLInputElement;
   readonly shipImage: HTMLImageElement;
@@ -35,27 +56,6 @@ interface SidePanelElements {
   readonly propulsionOptions: HTMLElement;
   readonly propulsionGear: HTMLButtonElement;
   readonly propulsionVariants: HTMLElement;
-}
-
-export interface SidePanelHost {
-  updateFittingTrigger(enabled: boolean): void;
-  isFittingPopupOpen(): boolean;
-  renderFittingPopup(): void;
-  closeFittingPopup(): void;
-  hidePreview(): void;
-  closeAttackerAmmoPopup(): void;
-  onAttackerFittedHullCleared(): void;
-  importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
-  mostRecentFittingFor(hullName: string): SavedFitting | undefined;
-  persistConfigChange(notify?: boolean): void;
-  closeAllSkillPopups(): void;
-  closeAllPastePopups(): void;
-  closeAllPropulsionVariantPopups(): void;
-  closeAllFittingPopups(): void;
-  closeImportSidePopup(keepSelection: boolean): void;
-  restoreAttackerTurret(): void;
-  importFittingFromText(text: string): Promise<void>;
-  importFitting(): Promise<void>;
 }
 
 export class SidePanel {
