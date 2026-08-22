@@ -65,8 +65,128 @@ export interface Controls {
   setCallbacks(callbacks: ControlsCallbacks): void;
 }
 
+interface Els {
+  tracking: HTMLInputElement;
+  trackingUnitRad: HTMLButtonElement;
+  trackingUnitScore: HTMLButtonElement;
+  sigRes: HTMLSelectElement;
+  sigResOptions: HTMLElement;
+  optimal: HTMLInputElement;
+  falloff: HTMLInputElement;
+  attackerAmmoField: HTMLElement;
+  attackerAmmoTrigger: HTMLButtonElement;
+  attackerAmmoSummary: HTMLElement;
+  attackerAmmoSummaryIcon: HTMLImageElement;
+  attackerAmmoPopup: HTMLElement;
+  attackerAmmoCargoLabel: HTMLElement;
+  attackerAmmoCargoList: HTMLElement;
+  attackerAmmoExpand: HTMLButtonElement;
+  attackerAmmoAllSection: HTMLElement;
+  attackerAmmoAllList: HTMLElement;
+  hullOptions: HTMLElement;
+  attackerHull: HTMLInputElement;
+  attackerShipImage: HTMLImageElement;
+  attackerFittingTrigger: HTMLButtonElement;
+  attackerFittingPopup: HTMLElement;
+  attackerFittingPreview: HTMLElement;
+  attackerFittingSavedLabel: HTMLElement;
+  attackerFittingSavedList: HTMLElement;
+  attackerFittingPresetLabel: HTMLElement;
+  attackerFittingPresetList: HTMLElement;
+  attackerFittingEmpty: HTMLElement;
+  attackerHullHint: HTMLElement;
+  attackerFittingName: HTMLElement;
+  attackerImportFitting: HTMLButtonElement;
+  attackerImportStatus: HTMLElement;
+  attackerPastePopup: HTMLElement;
+  attackerPasteInput: HTMLTextAreaElement;
+  attackerPropulsion: HTMLSelectElement;
+  attackerPropulsionOptions: HTMLElement;
+  attackerPropulsionGear: HTMLButtonElement;
+  attackerPropulsionVariants: HTMLElement;
+  attackerSkills: HTMLSelectElement;
+  attackerSkillOptions: HTMLElement;
+  attackerSkillSummary: HTMLElement;
+  attackerSkillTrigger: HTMLButtonElement;
+  attackerSkillPopup: HTMLElement;
+  attackerOverload: HTMLInputElement;
+  attackerOverloadButton: HTMLButtonElement;
+  attackerSpeed: HTMLInputElement;
+  attackerMass: HTMLInputElement;
+  attackerInertia: HTMLInputElement;
+  attackerAlignTime: HTMLElement;
+  attackerMode: HTMLSelectElement;
+  attackerRange: HTMLInputElement;
+  maneuverAggressivity: HTMLInputElement;
+  maneuverAggressivitySlider: HTMLInputElement;
+  maneuverAggressivityValue: HTMLElement;
+  initialDistance: HTMLInputElement;
+  targetHull: HTMLInputElement;
+  targetShipImage: HTMLImageElement;
+  targetFittingTrigger: HTMLButtonElement;
+  targetFittingPopup: HTMLElement;
+  targetFittingPreview: HTMLElement;
+  targetFittingSavedLabel: HTMLElement;
+  targetFittingSavedList: HTMLElement;
+  targetFittingPresetLabel: HTMLElement;
+  targetFittingPresetList: HTMLElement;
+  targetFittingEmpty: HTMLElement;
+  targetHullHint: HTMLElement;
+  targetFittingName: HTMLElement;
+  targetImportFitting: HTMLButtonElement;
+  targetImportStatus: HTMLElement;
+  targetPastePopup: HTMLElement;
+  targetPasteInput: HTMLTextAreaElement;
+  targetPropulsion: HTMLSelectElement;
+  targetPropulsionOptions: HTMLElement;
+  targetPropulsionGear: HTMLButtonElement;
+  targetPropulsionVariants: HTMLElement;
+  targetSkills: HTMLSelectElement;
+  targetSkillOptions: HTMLElement;
+  targetSkillSummary: HTMLElement;
+  targetSkillTrigger: HTMLButtonElement;
+  targetSkillPopup: HTMLElement;
+  targetOverload: HTMLInputElement;
+  targetOverloadButton: HTMLButtonElement;
+  targetSpeed: HTMLInputElement;
+  targetMass: HTMLInputElement;
+  targetInertia: HTMLInputElement;
+  targetAlignTime: HTMLElement;
+  targetMode: HTMLSelectElement;
+  targetRange: HTMLInputElement;
+  targetSig: HTMLInputElement;
+  simSpeed: HTMLSelectElement;
+  profileName: HTMLInputElement;
+  profileSave: HTMLButtonElement;
+  profileSelect: HTMLSelectElement;
+  profileDelete: HTMLButtonElement;
+  shareLink: HTMLButtonElement;
+  importProfile: HTMLButtonElement;
+  importSidePopup: HTMLElement;
+  importSideAttacker: HTMLButtonElement;
+  importSideTarget: HTMLButtonElement;
+  shareStatus: HTMLElement;
+  langEn: HTMLButtonElement;
+  langZh: HTMLButtonElement;
+  langJa: HTMLButtonElement;
+  play: HTMLButtonElement;
+  reset: HTMLButtonElement;
+  resDistance: HTMLElement;
+  resTransversal: HTMLElement;
+  resAngular: HTMLElement;
+  resRadial: HTMLElement;
+  resTrackPen: HTMLElement;
+  resRangePen: HTMLElement;
+  resHit: HTMLElement;
+  gridBrightnessSlider: HTMLInputElement;
+  gridBrightnessValue: HTMLElement;
+  [key: string]: HTMLElement;
+}
+
+
+
 export class DomControls implements Controls {
-  private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLImageElement | HTMLElement>;
+  private readonly els: Els;
   private readonly hitChance: HitChance;
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
@@ -161,27 +281,27 @@ export class DomControls implements Controls {
       intervalMs: 20_000,
     });
     this.els = {
-      tracking: el("tracking"),
-      trackingUnitRad: el("tracking-unit-rad"),
-      trackingUnitScore: el("tracking-unit-score"),
-      sigRes: el("sigRes"),
+      tracking: elOf("tracking", isHtmlInputElement),
+      trackingUnitRad: elOf("tracking-unit-rad", isHtmlButtonElement),
+      trackingUnitScore: elOf("tracking-unit-score", isHtmlButtonElement),
+      sigRes: elOf("sigRes", isHtmlSelectElement),
       sigResOptions: el("sig-res-options"),
-      optimal: el("optimal"),
-      falloff: el("falloff"),
+      optimal: elOf("optimal", isHtmlInputElement),
+      falloff: elOf("falloff", isHtmlInputElement),
       attackerAmmoField: el("attacker-ammo-field"),
-      attackerAmmoTrigger: el("attacker-ammo-trigger"),
+      attackerAmmoTrigger: elOf("attacker-ammo-trigger", isHtmlButtonElement),
       attackerAmmoSummary: el("attacker-ammo-summary"),
-      attackerAmmoSummaryIcon: el("attacker-ammo-summary-icon"),
+      attackerAmmoSummaryIcon: elOf("attacker-ammo-summary-icon", isHtmlImageElement),
       attackerAmmoPopup: el("attacker-ammo-popup"),
       attackerAmmoCargoLabel: el("attacker-ammo-cargo-label"),
       attackerAmmoCargoList: el("attacker-ammo-cargo-list"),
-      attackerAmmoExpand: el("attacker-ammo-expand"),
+      attackerAmmoExpand: elOf("attacker-ammo-expand", isHtmlButtonElement),
       attackerAmmoAllSection: el("attacker-ammo-all-section"),
       attackerAmmoAllList: el("attacker-ammo-all-list"),
       hullOptions: el("hull-options"),
-      attackerHull: el("attacker-hull"),
-      attackerShipImage: el("attacker-ship-image"),
-      attackerFittingTrigger: el("attacker-fitting-trigger"),
+      attackerHull: elOf("attacker-hull", isHtmlInputElement),
+      attackerShipImage: elOf("attacker-ship-image", isHtmlImageElement),
+      attackerFittingTrigger: elOf("attacker-fitting-trigger", isHtmlButtonElement),
       attackerFittingPopup: el("attacker-fitting-popup"),
       attackerFittingPreview: el("attacker-fitting-preview"),
       attackerFittingSavedLabel: el("attacker-fitting-saved-label"),
@@ -191,34 +311,34 @@ export class DomControls implements Controls {
       attackerFittingEmpty: el("attacker-fitting-empty"),
       attackerHullHint: el("attacker-hull-hint"),
       attackerFittingName: el("attacker-fitting-name"),
-      attackerImportFitting: el("attacker-import-fitting"),
+      attackerImportFitting: elOf("attacker-import-fitting", isHtmlButtonElement),
       attackerImportStatus: el("attacker-import-status"),
       attackerPastePopup: el("attacker-paste-popup"),
-      attackerPasteInput: el("attacker-paste-input"),
-      attackerPropulsion: el("attacker-propulsion"),
+      attackerPasteInput: elOf("attacker-paste-input", isHtmlTextAreaElement),
+      attackerPropulsion: elOf("attacker-propulsion", isHtmlSelectElement),
       attackerPropulsionOptions: el("attacker-propulsion-options"),
-      attackerPropulsionGear: el("attacker-propulsion-gear"),
+      attackerPropulsionGear: elOf("attacker-propulsion-gear", isHtmlButtonElement),
       attackerPropulsionVariants: el("attacker-propulsion-variants"),
-      attackerSkills: el("attacker-skills"),
+      attackerSkills: elOf("attacker-skills", isHtmlSelectElement),
       attackerSkillOptions: el("attacker-skill-options"),
       attackerSkillSummary: el("attacker-skill-summary"),
-      attackerSkillTrigger: el("attacker-skill-trigger"),
+      attackerSkillTrigger: elOf("attacker-skill-trigger", isHtmlButtonElement),
       attackerSkillPopup: el("attacker-skill-popup"),
-      attackerOverload: el("attacker-overload"),
-      attackerOverloadButton: el("attacker-overload-button"),
-      attackerSpeed: el("attacker-speed"),
-      attackerMass: el("attacker-mass"),
-      attackerInertia: el("attacker-inertia"),
+      attackerOverload: elOf("attacker-overload", isHtmlInputElement),
+      attackerOverloadButton: elOf("attacker-overload-button", isHtmlButtonElement),
+      attackerSpeed: elOf("attacker-speed", isHtmlInputElement),
+      attackerMass: elOf("attacker-mass", isHtmlInputElement),
+      attackerInertia: elOf("attacker-inertia", isHtmlInputElement),
       attackerAlignTime: el("attacker-align-time"),
-      attackerMode: el("attacker-mode"),
-      attackerRange: el("attacker-range"),
-      maneuverAggressivity: el("maneuver-aggressivity"),
-      maneuverAggressivitySlider: el("maneuver-aggressivity-slider"),
+      attackerMode: elOf("attacker-mode", isHtmlSelectElement),
+      attackerRange: elOf("attacker-range", isHtmlInputElement),
+      maneuverAggressivity: elOf("maneuver-aggressivity", isHtmlInputElement),
+      maneuverAggressivitySlider: elOf("maneuver-aggressivity-slider", isHtmlInputElement),
       maneuverAggressivityValue: el("maneuver-aggressivity-value"),
-      initialDistance: el("initial-distance"),
-      targetHull: el("target-hull"),
-      targetShipImage: el("target-ship-image"),
-      targetFittingTrigger: el("target-fitting-trigger"),
+      initialDistance: elOf("initial-distance", isHtmlInputElement),
+      targetHull: elOf("target-hull", isHtmlInputElement),
+      targetShipImage: elOf("target-ship-image", isHtmlImageElement),
+      targetFittingTrigger: elOf("target-fitting-trigger", isHtmlButtonElement),
       targetFittingPopup: el("target-fitting-popup"),
       targetFittingPreview: el("target-fitting-preview"),
       targetFittingSavedLabel: el("target-fitting-saved-label"),
@@ -228,44 +348,44 @@ export class DomControls implements Controls {
       targetFittingEmpty: el("target-fitting-empty"),
       targetHullHint: el("target-hull-hint"),
       targetFittingName: el("target-fitting-name"),
-      targetImportFitting: el("target-import-fitting"),
+      targetImportFitting: elOf("target-import-fitting", isHtmlButtonElement),
       targetImportStatus: el("target-import-status"),
       targetPastePopup: el("target-paste-popup"),
-      targetPasteInput: el("target-paste-input"),
-      targetPropulsion: el("target-propulsion"),
+      targetPasteInput: elOf("target-paste-input", isHtmlTextAreaElement),
+      targetPropulsion: elOf("target-propulsion", isHtmlSelectElement),
       targetPropulsionOptions: el("target-propulsion-options"),
-      targetPropulsionGear: el("target-propulsion-gear"),
+      targetPropulsionGear: elOf("target-propulsion-gear", isHtmlButtonElement),
       targetPropulsionVariants: el("target-propulsion-variants"),
-      targetSkills: el("target-skills"),
+      targetSkills: elOf("target-skills", isHtmlSelectElement),
       targetSkillOptions: el("target-skill-options"),
       targetSkillSummary: el("target-skill-summary"),
-      targetSkillTrigger: el("target-skill-trigger"),
+      targetSkillTrigger: elOf("target-skill-trigger", isHtmlButtonElement),
       targetSkillPopup: el("target-skill-popup"),
-      targetOverload: el("target-overload"),
-      targetOverloadButton: el("target-overload-button"),
-      targetSpeed: el("target-speed"),
-      targetMass: el("target-mass"),
-      targetInertia: el("target-inertia"),
+      targetOverload: elOf("target-overload", isHtmlInputElement),
+      targetOverloadButton: elOf("target-overload-button", isHtmlButtonElement),
+      targetSpeed: elOf("target-speed", isHtmlInputElement),
+      targetMass: elOf("target-mass", isHtmlInputElement),
+      targetInertia: elOf("target-inertia", isHtmlInputElement),
       targetAlignTime: el("target-align-time"),
-      targetMode: el("target-mode"),
-      targetRange: el("target-range"),
-      targetSig: el("target-sig"),
-      simSpeed: el("sim-speed"),
-      profileName: el("profile-name"),
-      profileSave: el("profile-save"),
-      profileSelect: el("profile-select"),
-      profileDelete: el("profile-delete"),
-      shareLink: el("share-link"),
-      importProfile: el("import-profile"),
+      targetMode: elOf("target-mode", isHtmlSelectElement),
+      targetRange: elOf("target-range", isHtmlInputElement),
+      targetSig: elOf("target-sig", isHtmlInputElement),
+      simSpeed: elOf("sim-speed", isHtmlSelectElement),
+      profileName: elOf("profile-name", isHtmlInputElement),
+      profileSave: elOf("profile-save", isHtmlButtonElement),
+      profileSelect: elOf("profile-select", isHtmlSelectElement),
+      profileDelete: elOf("profile-delete", isHtmlButtonElement),
+      shareLink: elOf("share-link", isHtmlButtonElement),
+      importProfile: elOf("import-profile", isHtmlButtonElement),
       importSidePopup: el("import-side-popup"),
-      importSideAttacker: el("import-side-attacker"),
-      importSideTarget: el("import-side-target"),
+      importSideAttacker: elOf("import-side-attacker", isHtmlButtonElement),
+      importSideTarget: elOf("import-side-target", isHtmlButtonElement),
       shareStatus: el("share-status"),
-      langEn: el("lang-en"),
-      langZh: el("lang-zh"),
-      langJa: el("lang-ja"),
-      play: el("play"),
-      reset: el("reset"),
+      langEn: elOf("lang-en", isHtmlButtonElement),
+      langZh: elOf("lang-zh", isHtmlButtonElement),
+      langJa: elOf("lang-ja", isHtmlButtonElement),
+      play: elOf("play", isHtmlButtonElement),
+      reset: elOf("reset", isHtmlButtonElement),
       resDistance: el("res-distance"),
       resTransversal: el("res-transversal"),
       resAngular: el("res-angular"),
@@ -273,7 +393,7 @@ export class DomControls implements Controls {
       resTrackPen: el("res-track-pen"),
       resRangePen: el("res-range-pen"),
       resHit: el("res-hit"),
-      gridBrightnessSlider: el("grid-brightness-slider"),
+      gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
       gridBrightnessValue: el("grid-brightness-value"),
     };
 
@@ -334,8 +454,8 @@ export class DomControls implements Controls {
   private applyPreferences(preferences: DisplayPreferences): void {
     this.i18n.setLanguage(preferences.language);
     const display = this.trackingInput.setUnit(preferences.trackingUnit, this.currentSigResolution());
-    (this.els.tracking as HTMLInputElement).value = String(display);
-    (this.els.simSpeed as HTMLSelectElement).value = String(preferences.simSpeed);
+    this.els.tracking.value = String(display);
+    this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
   }
 
@@ -353,7 +473,7 @@ export class DomControls implements Controls {
   getTurret(): TurretSpec {
     return {
       tracking: this.trackingInput.rad,
-      sigResolution: SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass],
+      sigResolution: SIG_RESOLUTIONS[this.els.sigRes.value as SigResolutionClass],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
     };
@@ -365,13 +485,13 @@ export class DomControls implements Controls {
 
   getConfig(): SimConfig {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
-    const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement);
+    const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity);
     const attacker: ShipConfig = {
       id: "attacker",
       maxSpeed: num(this.els.attackerSpeed),
       mass: num(this.els.attackerMass),
       inertiaModifier: num(this.els.attackerInertia),
-      mode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
+      mode: this.els.attackerMode.value as ShipConfig["mode"],
       desiredRange: num(this.els.attackerRange),
       aggressivity,
       orbitDirection: "cw",
@@ -381,7 +501,7 @@ export class DomControls implements Controls {
       maxSpeed: num(this.els.targetSpeed),
       mass: num(this.els.targetMass),
       inertiaModifier: num(this.els.targetInertia),
-      mode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
+      mode: this.els.targetMode.value as ShipConfig["mode"],
       desiredRange: num(this.els.targetRange),
       aggressivity: AGGRESSIVITY_MIN,
       orbitDirection: "cw",
@@ -394,7 +514,7 @@ export class DomControls implements Controls {
   }
 
   getGridBrightness(): number {
-    const value = Number.parseFloat((this.els.gridBrightnessSlider as HTMLInputElement).value);
+    const value = Number.parseFloat(this.els.gridBrightnessSlider.value);
     if (!Number.isFinite(value)) return DEFAULT_GRID_BRIGHTNESS;
     return Math.max(0, Math.min(1, value));
   }
@@ -411,18 +531,18 @@ export class DomControls implements Controls {
     setText(this.els.resRangePen, `${formatWithCommas(rangePenalty, 1)}%`);
     setText(this.els.resHit, `${formatWithCommas(hit.chance * 100, 1)}%`);
 
-    (this.els.resHit as HTMLElement).style.color = hitChanceColor(hit.chance);
+    this.els.resHit.style.color = hitChanceColor(hit.chance);
   }
 
   setPlaying(playing: boolean): void {
     this.playing = playing;
-    (this.els.play as HTMLButtonElement).textContent = this.i18n.t(
+    this.els.play.textContent = this.i18n.t(
       playing ? "button.pause" : "button.play",
     );
   }
 
   private onManeuverAggressivityChange(): void {
-    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const slider = this.els.maneuverAggressivitySlider;
     const pos = Number.parseFloat(slider.value);
     const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
     this.updateManeuverAggressivityDisplay(value);
@@ -432,8 +552,8 @@ export class DomControls implements Controls {
   }
 
   private updateManeuverAggressivityDisplay(value?: number): void {
-    const input = this.els.maneuverAggressivity as HTMLInputElement;
-    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
+    const input = this.els.maneuverAggressivity;
+    const slider = this.els.maneuverAggressivitySlider;
     const output = this.els.maneuverAggressivityValue;
     const current = value ?? parseManeuverAggressivity(input);
     input.value = String(current);
@@ -446,8 +566,8 @@ export class DomControls implements Controls {
   }
 
   private updateManeuverAggressivityEnabled(): void {
-    const slider = this.els.maneuverAggressivitySlider as HTMLInputElement;
-    slider.disabled = (this.els.attackerMode as HTMLSelectElement).value === "midships";
+    const slider = this.els.maneuverAggressivitySlider;
+    slider.disabled = this.els.attackerMode.value === "midships";
   }
 
   private onGridBrightnessChange(): void {
@@ -458,7 +578,7 @@ export class DomControls implements Controls {
   }
 
   private updateGridBrightnessDisplay(value?: number): void {
-    const slider = this.els.gridBrightnessSlider as HTMLInputElement;
+    const slider = this.els.gridBrightnessSlider;
     const output = this.els.gridBrightnessValue;
     const current = value ?? this.getGridBrightness();
     slider.value = String(current);
@@ -477,18 +597,18 @@ export class DomControls implements Controls {
       version: USER_SETTINGS_VERSION,
       tracking: this.trackingInput.rad,
       trackingUnit: this.trackingInput.unit,
-      sigRes: (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass,
+      sigRes: this.els.sigRes.value as SigResolutionClass,
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
       attackerSpeed: num(this.els.attackerSpeed),
-      attackerMode: (this.els.attackerMode as HTMLSelectElement).value as ShipConfig["mode"],
+      attackerMode: this.els.attackerMode.value as ShipConfig["mode"],
       attackerRange: num(this.els.attackerRange),
-      maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity as HTMLInputElement),
+      maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity),
       gridBrightness: this.getGridBrightness(),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
-      attackerSkillLevel: skillLevelFromString((this.els.attackerSkills as HTMLSelectElement).value),
-      attackerOverload: (this.els.attackerOverload as HTMLInputElement).checked,
+      attackerSkillLevel: skillLevelFromString(this.els.attackerSkills.value),
+      attackerOverload: this.els.attackerOverload.checked,
       attackerHull: this.attackerProfile?.name,
       attackerPropulsion: this.currentPropulsionSelection("attacker"),
       attackerFitting: this.attackerFitting,
@@ -496,12 +616,12 @@ export class DomControls implements Controls {
       attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
-      targetMode: (this.els.targetMode as HTMLSelectElement).value as ShipConfig["mode"],
+      targetMode: this.els.targetMode.value as ShipConfig["mode"],
       targetRange: num(this.els.targetRange),
       targetMass: num(this.els.targetMass),
       targetInertia: num(this.els.targetInertia),
-      targetSkillLevel: skillLevelFromString((this.els.targetSkills as HTMLSelectElement).value),
-      targetOverload: (this.els.targetOverload as HTMLInputElement).checked,
+      targetSkillLevel: skillLevelFromString(this.els.targetSkills.value),
+      targetOverload: this.els.targetOverload.checked,
       targetSig: Math.max(num(this.els.targetSig), 1),
       targetHull: this.targetProfile?.name,
       targetPropulsion: this.currentPropulsionSelection("target"),
@@ -515,7 +635,7 @@ export class DomControls implements Controls {
   }
 
   private currentPropulsionSelection(side: "attacker" | "target"): PropulsionSelection | undefined {
-    const value = (this.els[`${side}Propulsion`] as HTMLSelectElement).value;
+    const value = this.els[`${side}Propulsion`].value;
     if (value === PROPULSION_NONE) return PROPULSION_NONE;
     return this.ships.parsePropulsionId(value);
   }
@@ -537,25 +657,25 @@ export class DomControls implements Controls {
     this.trackingInput.setRadValue(settings.tracking, sigResolution);
     this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
 
-    (this.els.sigRes as HTMLSelectElement).value = settings.sigRes;
+    this.els.sigRes.value = settings.sigRes;
     this.setChoiceGroup(this.els.sigResOptions, settings.sigRes);
-    (this.els.optimal as HTMLInputElement).value = String(settings.optimal);
-    (this.els.falloff as HTMLInputElement).value = String(settings.falloff);
-    (this.els.attackerSpeed as HTMLInputElement).value = formatNumber(settings.attackerSpeed);
-    (this.els.attackerMass as HTMLInputElement).value = String(settings.attackerMass);
-    (this.els.attackerInertia as HTMLInputElement).value = formatNumber(settings.attackerInertia, 6);
-    (this.els.attackerMode as HTMLSelectElement).value = settings.attackerMode;
-    (this.els.attackerRange as HTMLInputElement).value = String(settings.attackerRange);
-    (this.els.maneuverAggressivity as HTMLInputElement).value = String(settings.maneuverAggressivity ?? 1);
-    (this.els.gridBrightnessSlider as HTMLInputElement).value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
-    (this.els.initialDistance as HTMLInputElement).value = String(settings.initialDistance);
-    (this.els.targetSpeed as HTMLInputElement).value = formatNumber(settings.targetSpeed);
-    (this.els.targetMass as HTMLInputElement).value = String(settings.targetMass);
-    (this.els.targetInertia as HTMLInputElement).value = formatNumber(settings.targetInertia, 6);
-    (this.els.targetMode as HTMLSelectElement).value = settings.targetMode;
-    (this.els.targetRange as HTMLInputElement).value = String(settings.targetRange);
-    (this.els.targetSig as HTMLInputElement).value = String(settings.targetSig);
-    (this.els.simSpeed as HTMLSelectElement).value = String(settings.simSpeed);
+    this.els.optimal.value = String(settings.optimal);
+    this.els.falloff.value = String(settings.falloff);
+    this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
+    this.els.attackerMass.value = String(settings.attackerMass);
+    this.els.attackerInertia.value = formatNumber(settings.attackerInertia, 6);
+    this.els.attackerMode.value = settings.attackerMode;
+    this.els.attackerRange.value = String(settings.attackerRange);
+    this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
+    this.els.gridBrightnessSlider.value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
+    this.els.initialDistance.value = String(settings.initialDistance);
+    this.els.targetSpeed.value = formatNumber(settings.targetSpeed);
+    this.els.targetMass.value = String(settings.targetMass);
+    this.els.targetInertia.value = formatNumber(settings.targetInertia, 6);
+    this.els.targetMode.value = settings.targetMode;
+    this.els.targetRange.value = String(settings.targetRange);
+    this.els.targetSig.value = String(settings.targetSig);
+    this.els.simSpeed.value = String(settings.simSpeed);
 
     this.loadHull("attacker", settings.attackerHull, settings.attackerPropulsion);
     this.loadHull("target", settings.targetHull, settings.targetPropulsion);
@@ -597,20 +717,20 @@ export class DomControls implements Controls {
     const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
     if (!Number.isFinite(best) || best <= 0) return;
 
-    (this.els.initialDistance as HTMLInputElement).value = String(Math.round(best));
+    this.els.initialDistance.value = String(Math.round(best));
 
     // Make the target's desired orbit range match the starting distance by default.
-    (this.els.targetRange as HTMLInputElement).value = String(Math.round(best));
+    this.els.targetRange.value = String(Math.round(best));
   }
 
   private currentSigResolution(): number {
-    return SIG_RESOLUTIONS[(this.els.sigRes as HTMLSelectElement).value as SigResolutionClass];
+    return SIG_RESOLUTIONS[this.els.sigRes.value as SigResolutionClass];
   }
 
   private setTrackingUnit(unit: TrackingUnit): void {
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.setUnit(unit, sigResolution);
-    (this.els.tracking as HTMLInputElement).value = String(display);
+    this.els.tracking.value = String(display);
     this.updateUnitToggle();
     this.savePreferences();
     this.updateSaveButtonState();
@@ -620,32 +740,32 @@ export class DomControls implements Controls {
     const value = num(this.els.tracking);
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.setDisplayValue(value, sigResolution);
-    (this.els.tracking as HTMLInputElement).value = String(display);
+    this.els.tracking.value = String(display);
   }
 
   private updateTrackingForSigResolution(): void {
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.displayValue(sigResolution);
-    (this.els.tracking as HTMLInputElement).value = String(display);
+    this.els.tracking.value = String(display);
   }
 
   private displayTrackingInput(): void {
     const sigResolution = this.currentSigResolution();
     const display = this.trackingInput.displayValue(sigResolution);
-    (this.els.tracking as HTMLInputElement).value = String(display);
+    this.els.tracking.value = String(display);
   }
 
   private updateUnitToggle(): void {
     const radActive = this.trackingInput.unit === "rad";
     const scoreActive = this.trackingInput.unit === "score";
-    (this.els.trackingUnitRad as HTMLButtonElement).classList.toggle("active", radActive);
-    (this.els.trackingUnitRad as HTMLButtonElement).setAttribute("aria-pressed", String(radActive));
-    (this.els.trackingUnitScore as HTMLButtonElement).classList.toggle("active", scoreActive);
-    (this.els.trackingUnitScore as HTMLButtonElement).setAttribute("aria-pressed", String(scoreActive));
+    this.els.trackingUnitRad.classList.toggle("active", radActive);
+    this.els.trackingUnitRad.setAttribute("aria-pressed", String(radActive));
+    this.els.trackingUnitScore.classList.toggle("active", scoreActive);
+    this.els.trackingUnitScore.setAttribute("aria-pressed", String(scoreActive));
   }
 
   private setLanguage(language: Language): void {
-    const selected = (this.els.profileSelect as HTMLSelectElement).value;
+    const selected = this.els.profileSelect.value;
     this.closeAllSkillPopups();
     this.i18n.setLanguage(language);
     this.i18n.translateDocument();
@@ -672,12 +792,12 @@ export class DomControls implements Controls {
 
   private updateLanguageToggle(): void {
     const current = this.i18n.current();
-    (this.els.langEn as HTMLButtonElement).classList.toggle("active", current === "en");
-    (this.els.langEn as HTMLButtonElement).setAttribute("aria-pressed", String(current === "en"));
-    (this.els.langZh as HTMLButtonElement).classList.toggle("active", current === "zh");
-    (this.els.langZh as HTMLButtonElement).setAttribute("aria-pressed", String(current === "zh"));
-    (this.els.langJa as HTMLButtonElement).classList.toggle("active", current === "ja");
-    (this.els.langJa as HTMLButtonElement).setAttribute("aria-pressed", String(current === "ja"));
+    this.els.langEn.classList.toggle("active", current === "en");
+    this.els.langEn.setAttribute("aria-pressed", String(current === "en"));
+    this.els.langZh.classList.toggle("active", current === "zh");
+    this.els.langZh.setAttribute("aria-pressed", String(current === "zh"));
+    this.els.langJa.classList.toggle("active", current === "ja");
+    this.els.langJa.setAttribute("aria-pressed", String(current === "ja"));
   }
 
   private savePreferences(): void {
@@ -691,7 +811,7 @@ export class DomControls implements Controls {
 
   private renderProfiles(selected = ""): void {
     const names = this.settingsStore.listProfiles();
-    const select = this.els.profileSelect as HTMLSelectElement;
+    const select = this.els.profileSelect;
     select.innerHTML = "";
     const placeholder = document.createElement("option");
     placeholder.value = "";
@@ -707,21 +827,21 @@ export class DomControls implements Controls {
   }
 
   private saveProfile(): void {
-    const selected = (this.els.profileSelect as HTMLSelectElement).value;
-    const name = (this.els.profileName as HTMLInputElement).value.trim();
+    const selected = this.els.profileSelect.value;
+    const name = this.els.profileName.value.trim();
     const profileName = name || selected;
     if (!profileName) return;
     const profile = profileSettingsOf(this.getSettings());
     this.settingsStore.saveProfile(profileName, profile);
     this.settingsStore.selectProfile(profileName);
-    (this.els.profileName as HTMLInputElement).value = "";
+    this.els.profileName.value = "";
     this.renderProfiles(profileName);
     this.selectedProfile = profile;
     this.updateSaveButtonState();
   }
 
   private loadProfile(): void {
-    const name = (this.els.profileSelect as HTMLSelectElement).value;
+    const name = this.els.profileSelect.value;
     if (!name) return;
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
@@ -733,7 +853,7 @@ export class DomControls implements Controls {
   }
 
   private deleteProfile(): void {
-    const name = (this.els.profileSelect as HTMLSelectElement).value;
+    const name = this.els.profileSelect.value;
     if (!name) return;
     this.settingsStore.deleteProfile(name);
     this.renderProfiles();
@@ -742,8 +862,8 @@ export class DomControls implements Controls {
   }
 
   private updateSaveButtonState(): void {
-    const selected = (this.els.profileSelect as HTMLSelectElement).value;
-    const name = (this.els.profileName as HTMLInputElement).value.trim();
+    const selected = this.els.profileSelect.value;
+    const name = this.els.profileName.value.trim();
     let saved: ProfileSettings | null = null;
     if (name && name !== selected) {
       saved = this.settingsStore.loadProfile(name);
@@ -752,7 +872,7 @@ export class DomControls implements Controls {
     }
     const current = profileSettingsOf(this.getSettings());
     const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
-    (this.els.profileSave as HTMLButtonElement).classList.toggle("unsaved", pending);
+    this.els.profileSave.classList.toggle("unsaved", pending);
   }
 
   private async importFitting(side: "attacker" | "target"): Promise<void> {
@@ -858,18 +978,18 @@ export class DomControls implements Controls {
 
   private openImportSidePopup(text: string): void {
     if (this.openAmmo) this.closeAttackerAmmoPopup();
-    const popup = this.els.importSidePopup as HTMLElement;
-    const trigger = this.els.importProfile as HTMLButtonElement;
+    const popup = this.els.importSidePopup;
+    const trigger = this.els.importProfile;
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     this.pendingImportText = text;
     this.importSidePopupOpen = true;
-    (this.els.importSideAttacker as HTMLButtonElement).focus();
+    this.els.importSideAttacker.focus();
   }
 
   private closeImportSidePopup(restoreFocus: boolean): void {
-    const popup = this.els.importSidePopup as HTMLElement;
-    const trigger = this.els.importProfile as HTMLButtonElement;
+    const popup = this.els.importSidePopup;
+    const trigger = this.els.importProfile;
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     this.pendingImportText = undefined;
@@ -922,7 +1042,7 @@ export class DomControls implements Controls {
 
   private showImportHint(side: "attacker" | "target", key: string, isError = false): void {
     this.clearImportHintTimeout(side);
-    const element = this.els[`${side}FittingName`] as HTMLElement;
+    const element = this.els[`${side}FittingName`];
     element.classList.toggle("error", isError);
     element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
@@ -934,7 +1054,7 @@ export class DomControls implements Controls {
 
   private clearImportHint(side: "attacker" | "target"): void {
     this.clearImportHintTimeout(side);
-    const element = this.els[`${side}FittingName`] as HTMLElement;
+    const element = this.els[`${side}FittingName`];
     element.classList.toggle("error", false);
     element.innerHTML = "";
     element.hidden = true;
@@ -964,62 +1084,62 @@ export class DomControls implements Controls {
   }
 
   private bind(): void {
-    (this.els.play as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onPlayPause());
-    (this.els.reset as HTMLButtonElement).addEventListener("click", () => this.callbacks?.onReset());
-    (this.els.simSpeed as HTMLSelectElement).addEventListener("change", () => {
+    this.els.play.addEventListener("click", () => this.callbacks?.onPlayPause());
+    this.els.reset.addEventListener("click", () => this.callbacks?.onReset());
+    this.els.simSpeed.addEventListener("change", () => {
       this.callbacks?.onSpeedChange(this.getSpeed());
     });
-    (this.els.trackingUnitRad as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("rad"));
-    (this.els.trackingUnitScore as HTMLButtonElement).addEventListener("click", () => this.setTrackingUnit("score"));
-    (this.els.langEn as HTMLButtonElement).addEventListener("click", () => this.setLanguage("en"));
-    (this.els.langZh as HTMLButtonElement).addEventListener("click", () => this.setLanguage("zh"));
-    (this.els.langJa as HTMLButtonElement).addEventListener("click", () => this.setLanguage("ja"));
-    (this.els.profileSave as HTMLButtonElement).addEventListener("click", () => this.saveProfile());
-    (this.els.profileSelect as HTMLSelectElement).addEventListener("change", () => this.loadProfile());
-    (this.els.profileDelete as HTMLButtonElement).addEventListener("click", () => this.deleteProfile());
-    (this.els.shareLink as HTMLButtonElement).addEventListener("click", () => this.copyProfile());
-    (this.els.importProfile as HTMLButtonElement).addEventListener("click", () => void this.importProfileFromClipboard());
-    (this.els.importSideAttacker as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("attacker"));
-    (this.els.importSideTarget as HTMLButtonElement).addEventListener("click", () => void this.onImportSideClick("target"));
-    (this.els.profileName as HTMLInputElement).addEventListener("input", () => this.updateSaveButtonState());
+    this.els.trackingUnitRad.addEventListener("click", () => this.setTrackingUnit("rad"));
+    this.els.trackingUnitScore.addEventListener("click", () => this.setTrackingUnit("score"));
+    this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
+    this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
+    this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
+    this.els.profileSave.addEventListener("click", () => this.saveProfile());
+    this.els.profileSelect.addEventListener("change", () => this.loadProfile());
+    this.els.profileDelete.addEventListener("click", () => this.deleteProfile());
+    this.els.shareLink.addEventListener("click", () => this.copyProfile());
+    this.els.importProfile.addEventListener("click", () => void this.importProfileFromClipboard());
+    this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
+    this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
+    this.els.profileName.addEventListener("input", () => this.updateSaveButtonState());
 
-    (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
-    (this.els.targetImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("target"));
+    this.els.attackerImportFitting.addEventListener("click", () => this.importFitting("attacker"));
+    this.els.targetImportFitting.addEventListener("click", () => this.importFitting("target"));
 
-    const attackerPastePopup = this.els.attackerPastePopup as HTMLElement;
-    const targetPastePopup = this.els.targetPastePopup as HTMLElement;
+    const attackerPastePopup = this.els.attackerPastePopup;
+    const targetPastePopup = this.els.targetPastePopup;
     attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
     targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
 
-    (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
-    (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
-    (this.els.attackerFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("attacker"));
-    (this.els.attackerAmmoTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleAttackerAmmoPopup());
-    (this.els.attackerAmmoExpand as HTMLButtonElement).addEventListener("click", () => this.onAttackerAmmoExpandClick());
-    (this.els.attackerPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("attacker"));
-    (this.els.attackerPropulsionGear as HTMLButtonElement).addEventListener("click", () => this.onPropulsionGearClick("attacker"));
-    (this.els.attackerSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
-    (this.els.attackerOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
-    (this.els.attackerOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("attacker"));
-    (this.els.targetHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("target"));
-    (this.els.targetHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("target"));
+    this.els.attackerHull.addEventListener("input", () => this.onHullInput("attacker"));
+    this.els.attackerHull.addEventListener("change", () => this.onHullChange("attacker"));
+    this.els.attackerFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("attacker"));
+    this.els.attackerAmmoTrigger.addEventListener("click", () => this.toggleAttackerAmmoPopup());
+    this.els.attackerAmmoExpand.addEventListener("click", () => this.onAttackerAmmoExpandClick());
+    this.els.attackerPropulsion.addEventListener("change", () => this.onPropulsionChange("attacker"));
+    this.els.attackerPropulsionGear.addEventListener("click", () => this.onPropulsionGearClick("attacker"));
+    this.els.attackerSkills.addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
+    this.els.attackerOverload.addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
+    this.els.attackerOverloadButton.addEventListener("click", () => this.onOverloadButtonClick("attacker"));
+    this.els.targetHull.addEventListener("input", () => this.onHullInput("target"));
+    this.els.targetHull.addEventListener("change", () => this.onHullChange("target"));
     this.attachShipImagePreviewListeners("attacker");
     this.attachShipImagePreviewListeners("target");
-    (this.els.attackerFittingSavedList as HTMLElement).addEventListener("scroll", () => this.hidePreview("attacker"));
-    (this.els.attackerFittingPresetList as HTMLElement).addEventListener("scroll", () => this.hidePreview("attacker"));
-    (this.els.targetFittingSavedList as HTMLElement).addEventListener("scroll", () => this.hidePreview("target"));
-    (this.els.targetFittingPresetList as HTMLElement).addEventListener("scroll", () => this.hidePreview("target"));
-    (this.els.targetFittingTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleFittingPopup("target"));
-    (this.els.targetPropulsion as HTMLSelectElement).addEventListener("change", () => this.onPropulsionChange("target"));
-    (this.els.targetPropulsionGear as HTMLButtonElement).addEventListener("click", () => this.onPropulsionGearClick("target"));
-    (this.els.targetSkills as HTMLSelectElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
-    (this.els.targetOverload as HTMLInputElement).addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
-    (this.els.targetOverloadButton as HTMLButtonElement).addEventListener("click", () => this.onOverloadButtonClick("target"));
+    this.els.attackerFittingSavedList.addEventListener("scroll", () => this.hidePreview("attacker"));
+    this.els.attackerFittingPresetList.addEventListener("scroll", () => this.hidePreview("attacker"));
+    this.els.targetFittingSavedList.addEventListener("scroll", () => this.hidePreview("target"));
+    this.els.targetFittingPresetList.addEventListener("scroll", () => this.hidePreview("target"));
+    this.els.targetFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("target"));
+    this.els.targetPropulsion.addEventListener("change", () => this.onPropulsionChange("target"));
+    this.els.targetPropulsionGear.addEventListener("click", () => this.onPropulsionGearClick("target"));
+    this.els.targetSkills.addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
+    this.els.targetOverload.addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
+    this.els.targetOverloadButton.addEventListener("click", () => this.onOverloadButtonClick("target"));
 
-    (this.els.attackerSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("attacker"));
-    (this.els.targetSkillTrigger as HTMLButtonElement).addEventListener("click", () => this.toggleSkillPopup("target"));
+    this.els.attackerSkillTrigger.addEventListener("click", () => this.toggleSkillPopup("attacker"));
+    this.els.targetSkillTrigger.addEventListener("click", () => this.toggleSkillPopup("target"));
 
-    this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes as HTMLSelectElement, ["S", "M", "L", "XL"]);
+    this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes, ["S", "M", "L", "XL"]);
 
     const displayInputs: (keyof typeof this.els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
@@ -1060,8 +1180,8 @@ export class DomControls implements Controls {
       });
     }
 
-    (this.els.maneuverAggressivitySlider as HTMLInputElement).addEventListener("input", () => this.onManeuverAggressivityChange());
-    (this.els.gridBrightnessSlider as HTMLInputElement).addEventListener("input", () => this.onGridBrightnessChange());
+    this.els.maneuverAggressivitySlider.addEventListener("input", () => this.onManeuverAggressivityChange());
+    this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
 
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
@@ -1073,7 +1193,7 @@ export class DomControls implements Controls {
   }
 
   private populateHullDatalist(): void {
-    const datalist = this.els.hullOptions as HTMLDataListElement;
+    const datalist = this.els.hullOptions;
     datalist.innerHTML = "";
     for (const hull of this.presetFittings.listHulls()) {
       const option = document.createElement("option");
@@ -1092,7 +1212,7 @@ export class DomControls implements Controls {
     if (side === "attacker") this.attackerProfile = profile;
     else this.targetProfile = profile;
 
-    (this.els[`${side}Hull`] as HTMLInputElement).value = this.ships.hullView(profile, this.i18n.current()).name;
+    this.els[`${side}Hull`].value = this.ships.hullView(profile, this.i18n.current()).name;
     this.updateShipImage(side);
     this.setHullValidation(side, false);
     this.updateFittingTrigger(side, true);
@@ -1112,7 +1232,7 @@ export class DomControls implements Controls {
   }
 
   private updateFittingTrigger(side: "attacker" | "target", enabled: boolean): void {
-    (this.els[`${side}FittingTrigger`] as HTMLButtonElement).disabled = !enabled;
+    this.els[`${side}FittingTrigger`].disabled = !enabled;
   }
 
   private toggleFittingPopup(side: "attacker" | "target"): void {
@@ -1128,8 +1248,8 @@ export class DomControls implements Controls {
   }
 
   private openFittingPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}FittingPopup`] as HTMLElement;
-    const trigger = this.els[`${side}FittingTrigger`] as HTMLButtonElement;
+    const popup = this.els[`${side}FittingPopup`];
+    const trigger = this.els[`${side}FittingTrigger`];
     this.renderFittingPopup(side);
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
@@ -1140,11 +1260,12 @@ export class DomControls implements Controls {
   }
 
   private findFittingItem(side: "attacker" | "target", predicate: (item: HTMLButtonElement) => boolean): HTMLButtonElement | undefined {
-    const savedList = this.els[`${side}FittingSavedList`] as HTMLElement;
-    const presetList = this.els[`${side}FittingPresetList`] as HTMLElement;
+    const savedList = this.els[`${side}FittingSavedList`];
+    const presetList = this.els[`${side}FittingPresetList`];
     for (const list of [savedList, presetList]) {
       for (const entry of list.children) {
-        const item = entry.children[0] as HTMLButtonElement;
+        const item = entry.children[0];
+        if (!isHtmlButtonElement(item)) continue;
         if (predicate(item)) return item;
       }
     }
@@ -1152,8 +1273,8 @@ export class DomControls implements Controls {
   }
 
   private closeFittingPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}FittingPopup`] as HTMLElement;
-    const trigger = this.els[`${side}FittingTrigger`] as HTMLButtonElement;
+    const popup = this.els[`${side}FittingPopup`];
+    const trigger = this.els[`${side}FittingTrigger`];
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     if (this.openFittingSide === side) this.openFittingSide = null;
@@ -1167,11 +1288,11 @@ export class DomControls implements Controls {
 
   private renderFittingPopup(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const savedList = this.els[`${side}FittingSavedList`] as HTMLElement;
-    const presetList = this.els[`${side}FittingPresetList`] as HTMLElement;
-    const savedLabel = this.els[`${side}FittingSavedLabel`] as HTMLElement;
-    const presetLabel = this.els[`${side}FittingPresetLabel`] as HTMLElement;
-    const empty = this.els[`${side}FittingEmpty`] as HTMLElement;
+    const savedList = this.els[`${side}FittingSavedList`];
+    const presetList = this.els[`${side}FittingPresetList`];
+    const savedLabel = this.els[`${side}FittingSavedLabel`];
+    const presetLabel = this.els[`${side}FittingPresetLabel`];
+    const empty = this.els[`${side}FittingEmpty`];
     savedList.innerHTML = "";
     presetList.innerHTML = "";
     const currentText = side === "attacker" ? this.attackerFitting : this.targetFitting;
@@ -1194,14 +1315,13 @@ export class DomControls implements Controls {
         item.classList.toggle("invalid", true);
         const invalidText = this.i18n.t("fitting.invalid");
         item.title = invalidText;
-        (item.children[0] as HTMLElement).title = invalidText;
         item.disabled = true;
         item.setAttribute("aria-disabled", "true");
       }
       const entry = this.createFittingEntry(item, () => {
         this.savedFittings.remove(fitting.id);
         this.renderFittingPopup(side);
-        const next = this.findFittingItem(side, (it) => !it.disabled) ?? (this.els[`${side}FittingTrigger`] as HTMLButtonElement);
+        const next = this.findFittingItem(side, (it) => !it.disabled) ?? this.els[`${side}FittingTrigger`];
         next.focus();
       });
       savedList.appendChild(entry);
@@ -1376,7 +1496,7 @@ export class DomControls implements Controls {
     delete this.lastCommittedHull[side];
 
     if (resetInput) {
-      (this.els[`${side}Hull`] as HTMLInputElement).value = "";
+      this.els[`${side}Hull`].value = "";
     }
     this.updateFittingTrigger(side, false);
     if (this.openFittingSide === side) this.closeFittingPopup(side);
@@ -1400,7 +1520,7 @@ export class DomControls implements Controls {
       this.attackerCargoCharges = [];
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
       this.attackerAmmoAllExpanded = false;
-      (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+      this.els.attackerAmmoAllSection.hidden = true;
       this.renderAttackerAmmo();
       this.renderSigResIcons();
     } else {
@@ -1430,7 +1550,7 @@ export class DomControls implements Controls {
   }
 
   private onHullInput(side: "attacker" | "target"): void {
-    const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
+    const value = this.els[`${side}Hull`].value.trim();
     const profile = this.ships.findHull(value);
     if (profile) {
       this.applyProfile(side, profile, true, false);
@@ -1440,7 +1560,7 @@ export class DomControls implements Controls {
   }
 
   private onHullChange(side: "attacker" | "target"): void {
-    const value = (this.els[`${side}Hull`] as HTMLInputElement).value.trim();
+    const value = this.els[`${side}Hull`].value.trim();
     if (value === "") {
       this.setHullValidation(side, false);
       this.clearHull(side, false, true);
@@ -1509,7 +1629,7 @@ export class DomControls implements Controls {
 
   private renderAttackerAmmo(): void {
     const trigger = this.els.attackerAmmoTrigger;
-    const summary = this.els.attackerAmmoSummary as HTMLElement;
+    const summary = this.els.attackerAmmoSummary;
     const summaryIcon = this.els.attackerAmmoSummaryIcon;
     if (!isHtmlButtonElement(trigger) || !isHtmlImageElement(summaryIcon)) return;
     const hasTurret = this.attackerTurret !== undefined;
@@ -1528,7 +1648,7 @@ export class DomControls implements Controls {
   }
 
   private renderSigResIcons(): void {
-    const group = this.els.sigResOptions as HTMLElement;
+    const group = this.els.sigResOptions;
     const turret = this.attackerTurret;
     for (const button of Array.from(group.children)) {
       if (!isHtmlButtonElement(button)) continue;
@@ -1574,8 +1694,8 @@ export class DomControls implements Controls {
   }
 
   private renderAttackerAmmoCargoList(): void {
-    const list = this.els.attackerAmmoCargoList as HTMLElement;
-    const label = this.els.attackerAmmoCargoLabel as HTMLElement;
+    const list = this.els.attackerAmmoCargoList;
+    const label = this.els.attackerAmmoCargoLabel;
     list.innerHTML = "";
     if (!this.attackerTurret) {
       list.hidden = true;
@@ -1615,8 +1735,8 @@ export class DomControls implements Controls {
   }
 
   private renderAttackerAmmoAllList(): void {
-    const list = this.els.attackerAmmoAllList as HTMLElement;
-    const section = this.els.attackerAmmoAllSection as HTMLElement;
+    const list = this.els.attackerAmmoAllList;
+    const section = this.els.attackerAmmoAllSection;
     list.innerHTML = "";
     if (!this.attackerTurret) {
       list.hidden = true;
@@ -1660,7 +1780,8 @@ export class DomControls implements Controls {
   }
 
   private renderAttackerAmmoExpand(): void {
-    const expand = this.els.attackerAmmoExpand as HTMLButtonElement;
+    const expand = this.els.attackerAmmoExpand;
+    if (!isHtmlButtonElement(expand)) return;
     const key = this.attackerAmmoAllExpanded ? "ammo.hideAll" : "ammo.showAll";
     expand.setAttribute("data-i18n", key);
     setText(expand, this.i18n.t(key));
@@ -1683,21 +1804,27 @@ export class DomControls implements Controls {
 
   private openAttackerAmmoPopup(): void {
     if (!this.attackerTurret) return;
-    const popup = this.els.attackerAmmoPopup as HTMLElement;
-    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    const popup = this.els.attackerAmmoPopup;
+    const trigger = this.els.attackerAmmoTrigger;
+    if (!isHtmlButtonElement(trigger)) return;
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     this.openAmmo = true;
     this.renderAttackerAmmo();
+    const cargoSelected = this.els.attackerAmmoCargoList.querySelector('[aria-selected="true"]');
+    const allSelected = this.els.attackerAmmoAllList.querySelector('[aria-selected="true"]');
     const selected =
-      ((this.els.attackerAmmoCargoList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null) ??
-      ((this.els.attackerAmmoAllList as HTMLElement).querySelector('[aria-selected="true"]') as HTMLButtonElement | null);
-    (selected ?? (this.els.attackerAmmoCargoList as HTMLElement).firstElementChild as HTMLButtonElement | null)?.focus();
+      (cargoSelected && isHtmlButtonElement(cargoSelected) ? cargoSelected : null) ??
+      (allSelected && isHtmlButtonElement(allSelected) ? allSelected : null);
+    const firstChild = this.els.attackerAmmoCargoList.firstElementChild;
+    const first = firstChild && isHtmlButtonElement(firstChild) ? firstChild : null;
+    (selected ?? first)?.focus();
   }
 
   private closeAttackerAmmoPopup(): void {
-    const popup = this.els.attackerAmmoPopup as HTMLElement;
-    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    const popup = this.els.attackerAmmoPopup;
+    const trigger = this.els.attackerAmmoTrigger;
+    if (!isHtmlButtonElement(trigger)) return;
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     this.openAmmo = false;
@@ -1727,17 +1854,17 @@ export class DomControls implements Controls {
     const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
     if (this.attackerOverrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
     if (this.attackerOverrides.sigRes === undefined) {
-      (this.els.sigRes as HTMLSelectElement).value = turret.sigResolutionClass;
+      this.els.sigRes.value = turret.sigResolutionClass;
       this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
     }
-    if (this.attackerOverrides.optimal === undefined) (this.els.optimal as HTMLInputElement).value = String(Math.round(turret.optimal));
-    if (this.attackerOverrides.falloff === undefined) (this.els.falloff as HTMLInputElement).value = String(Math.round(turret.falloff));
+    if (this.attackerOverrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
+    if (this.attackerOverrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
     this.displayTrackingInput();
   }
 
   private restoreAttackerTurret(): void {
     this.attackerAmmoAllExpanded = false;
-    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    this.els.attackerAmmoAllSection.hidden = true;
     if (!this.attackerFitting || !this.attackerProfile) {
       this.attackerTurret = undefined;
       this.attackerCargoCharges = [];
@@ -1771,7 +1898,7 @@ export class DomControls implements Controls {
       this.attackerCargoCharges = imported.cargoCharges;
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
       this.attackerAmmoAllExpanded = false;
-      (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+      this.els.attackerAmmoAllSection.hidden = true;
       this.renderAttackerAmmo();
       this.renderSigResIcons();
       return;
@@ -1780,7 +1907,7 @@ export class DomControls implements Controls {
     this.attackerCargoCharges = imported.cargoCharges;
     this.attackerAmmo = turret.charge;
     this.attackerAmmoAllExpanded = false;
-    (this.els.attackerAmmoAllSection as HTMLElement).hidden = true;
+    this.els.attackerAmmoAllSection.hidden = true;
     this.clearAttackerTurretOverrides();
     this.setTurretInputs(turret);
     this.renderAttackerAmmo();
@@ -1832,7 +1959,7 @@ export class DomControls implements Controls {
   }
 
   private updatePropulsionVariantUI(side: "attacker" | "target"): void {
-    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    const gear = this.els[`${side}PropulsionGear`];
     const id = this.currentPropulsionId(side);
     gear.disabled = !id;
     this.renderPropulsionVariants(side);
@@ -1848,7 +1975,7 @@ export class DomControls implements Controls {
   }
 
   private renderPropulsionVariants(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    const popup = this.els[`${side}PropulsionVariants`];
     const module = this.currentPropulsionModule(side);
     popup.innerHTML = "";
     if (!module) return;
@@ -1899,27 +2026,29 @@ export class DomControls implements Controls {
   }
 
   private openPropulsionVariantPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
-    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    const popup = this.els[`${side}PropulsionVariants`];
+    const gear = this.els[`${side}PropulsionGear`];
     this.renderPropulsionVariants(side);
     popup.hidden = false;
     gear.setAttribute("aria-expanded", "true");
     this.openPropulsionVariantSide = side;
-    const active = Array.from(popup.children).find((child) => child.getAttribute("aria-current") === "true") as HTMLElement | null ?? null;
-    const first = popup.firstElementChild as HTMLElement | null;
-    (active ?? first)?.focus();
+    const active = Array.from(popup.children).find((child) => child.getAttribute("aria-current") === "true");
+    const activeButton = active && isHtmlButtonElement(active) ? active : null;
+    const firstChild = popup.firstElementChild;
+    const firstButton = firstChild && isHtmlButtonElement(firstChild) ? firstChild : null;
+    (activeButton ?? firstButton)?.focus();
   }
 
   private closePropulsionVariantPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
-    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    const popup = this.els[`${side}PropulsionVariants`];
+    const gear = this.els[`${side}PropulsionGear`];
     popup.hidden = true;
     gear.setAttribute("aria-expanded", "false");
     if (this.openPropulsionVariantSide === side) this.openPropulsionVariantSide = null;
   }
 
   private setHullValidation(side: "attacker" | "target", isInvalid: boolean): void {
-    (this.els[`${side}Hull`] as HTMLInputElement).classList.toggle("hull-invalid", isInvalid);
+    this.els[`${side}Hull`].classList.toggle("hull-invalid", isInvalid);
   }
 
   private updateHullHint(side: "attacker" | "target", module?: PropulsionModule): void {
@@ -1939,10 +2068,10 @@ export class DomControls implements Controls {
   private refreshHullInputs(): void {
     const language = this.i18n.current();
     if (this.attackerProfile) {
-      (this.els.attackerHull as HTMLInputElement).value = this.ships.hullView(this.attackerProfile, language).name;
+      this.els.attackerHull.value = this.ships.hullView(this.attackerProfile, language).name;
     }
     if (this.targetProfile) {
-      (this.els.targetHull as HTMLInputElement).value = this.ships.hullView(this.targetProfile, language).name;
+      this.els.targetHull.value = this.ships.hullView(this.targetProfile, language).name;
     }
   }
 
@@ -1953,9 +2082,9 @@ export class DomControls implements Controls {
 
   private renderPropulsionOptions(side: "attacker" | "target", selectedId = ""): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
-    const group = this.els[`${side}PropulsionOptions`] as HTMLElement;
-    const gear = this.els[`${side}PropulsionGear`] as HTMLButtonElement;
+    const select = this.els[`${side}Propulsion`];
+    const group = this.els[`${side}PropulsionOptions`];
+    const gear = this.els[`${side}PropulsionGear`];
     select.innerHTML = "";
     group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
@@ -1996,7 +2125,7 @@ export class DomControls implements Controls {
     gear.disabled = !profile || selected === PROPULSION_NONE || selected === "";
     this.renderPropulsionVariants(side);
     this.setOverloadDisabled(side);
-    const popup = this.els[`${side}PropulsionVariants`] as HTMLElement;
+    const popup = this.els[`${side}PropulsionVariants`];
     popup.hidden = true;
     gear.setAttribute("aria-expanded", "false");
     if (this.openPropulsionVariantSide === side) this.openPropulsionVariantSide = null;
@@ -2022,19 +2151,19 @@ export class DomControls implements Controls {
       const stats = this.ships.fittedStats(profile, fitted?.fitted, propulsion, conditions);
       if (updateMass && !this.isOverridden(side, massKey)) {
         mass = stats.mass;
-        (this.els[`${side}Mass`] as HTMLInputElement).value = String(mass);
+        this.els[`${side}Mass`].value = String(mass);
       }
       if (updateInertia && !this.isOverridden(side, inertiaKey)) {
-        (this.els[`${side}Inertia`] as HTMLInputElement).value = formatNumber(stats.inertiaModifier, 6);
+        this.els[`${side}Inertia`].value = formatNumber(stats.inertiaModifier, 6);
       }
       if (side === "target" && updateSig && !this.isOverridden(side, "targetSig")) {
-        (this.els.targetSig as HTMLInputElement).value = String(Math.max(1, stats.sigRadius));
+        this.els.targetSig.value = String(Math.max(1, stats.sigRadius));
       }
     }
 
     if (!this.isOverridden(side, speedKey)) {
       const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
-      (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+      this.els[`${side}Speed`].value = formatNumber(speed);
     }
     this.updateHullHint(side, hintModule);
     this.updateAlignTime(side);
@@ -2073,7 +2202,7 @@ export class DomControls implements Controls {
     const mass = num(this.els[`${side}Mass`]);
     const propulsion = fitted ? this.currentFittedPropulsion(side, fitted) : this.currentPropulsionModule(side);
     const speed = this.ships.maxSpeedForFittedMass(profile, fitted?.fitted, mass, propulsion, conditions);
-    (this.els[`${side}Speed`] as HTMLInputElement).value = formatNumber(speed);
+    this.els[`${side}Speed`].value = formatNumber(speed);
     this.updateAlignTime(side);
   }
 
@@ -2081,7 +2210,7 @@ export class DomControls implements Controls {
     const mass = num(this.els[`${side}Mass`]);
     const inertia = num(this.els[`${side}Inertia`]);
     const t = alignTime(mass, inertia);
-    const input = this.els[`${side}Inertia`] as HTMLInputElement;
+    const input = this.els[`${side}Inertia`];
     const suffix = this.els[`${side}AlignTime`];
     if (Number.isFinite(t) && t > 0) {
       const value = `${t.toFixed(1)}${this.i18n.t("unit.second")}`;
@@ -2097,15 +2226,15 @@ export class DomControls implements Controls {
     const skill = side === "attacker" ? this.els.attackerSkills : this.els.targetSkills;
     const overload = side === "attacker" ? this.els.attackerOverload : this.els.targetOverload;
     return {
-      skillLevel: skillLevelFromString((skill as HTMLSelectElement).value),
-      overloaded: (overload as HTMLInputElement).checked,
+      skillLevel: skillLevelFromString(skill.value),
+      overloaded: overload.checked,
     };
   }
 
   private setOverloadDisabled(side: "attacker" | "target"): void {
-    const propulsion = this.els[`${side}Propulsion`] as HTMLSelectElement;
-    const overload = this.els[`${side}Overload`] as HTMLInputElement;
-    const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
+    const propulsion = this.els[`${side}Propulsion`];
+    const overload = this.els[`${side}Overload`];
+    const button = this.els[`${side}OverloadButton`];
     const disabled = this.currentPropulsionId(side) === undefined || propulsion.disabled;
     const active = !disabled && overload.checked;
     button.classList.toggle("active", active);
@@ -2117,7 +2246,7 @@ export class DomControls implements Controls {
 
   private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
     if (id === "tracking") this.recordOverride("attacker", "tracking", this.trackingInput.rad);
-    if (id === "sigRes") this.recordOverride("attacker", "sigRes", (this.els.sigRes as HTMLSelectElement).value as SigResolutionClass);
+    if (id === "sigRes") this.recordOverride("attacker", "sigRes", this.els.sigRes.value as SigResolutionClass);
     if (id === "optimal") this.recordOverride("attacker", "optimal", num(this.els.optimal));
     if (id === "falloff") this.recordOverride("attacker", "falloff", num(this.els.falloff));
     if (id === "targetSig") this.recordOverride("target", "targetSig", Math.max(num(this.els.targetSig), 1));
@@ -2161,12 +2290,12 @@ export class DomControls implements Controls {
   }
 
   private setSkillLevel(side: "attacker" | "target", level: SkillLevel): void {
-    (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
+    this.els[`${side}Skills`].value = String(level);
     this.setSkillActive(side, level);
   }
 
   private setSkillActive(side: "attacker" | "target", level: SkillLevel): void {
-    const group = this.els[`${side}SkillOptions`] as HTMLElement;
+    const group = this.els[`${side}SkillOptions`];
     const value = String(level);
     for (const button of group.children) {
       const active = button.getAttribute("data-value") === value;
@@ -2190,20 +2319,21 @@ export class DomControls implements Controls {
   }
 
   private openSkillPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
-    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    const popup = this.els[`${side}SkillPopup`];
+    const trigger = this.els[`${side}SkillTrigger`];
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     this.openSkillSide = side;
-    const active = Array.from((this.els[`${side}SkillOptions`] as HTMLElement).children).find(
+    const active = Array.from(this.els[`${side}SkillOptions`].children).find(
       (button) => button.getAttribute("aria-pressed") === "true",
-    ) as HTMLButtonElement | undefined;
-    active?.focus();
+    );
+    const activeButton = active && isHtmlButtonElement(active) ? active : undefined;
+    activeButton?.focus();
   }
 
   private closeSkillPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}SkillPopup`] as HTMLElement;
-    const trigger = this.els[`${side}SkillTrigger`] as HTMLButtonElement;
+    const popup = this.els[`${side}SkillPopup`];
+    const trigger = this.els[`${side}SkillTrigger`];
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     if (this.openSkillSide === side) this.openSkillSide = null;
@@ -2216,16 +2346,16 @@ export class DomControls implements Controls {
   private openPastePopup(side: "attacker" | "target"): void {
     if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
     if (this.openAmmo) this.closeAttackerAmmoPopup();
-    const popup = this.els[`${side}PastePopup`] as HTMLElement;
-    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    const popup = this.els[`${side}PastePopup`];
+    const input = this.els[`${side}PasteInput`];
     popup.hidden = false;
     this.openPasteSide = side;
     input.focus();
   }
 
   private closePastePopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}PastePopup`] as HTMLElement;
-    const input = this.els[`${side}PasteInput`] as HTMLTextAreaElement;
+    const popup = this.els[`${side}PastePopup`];
+    const input = this.els[`${side}PasteInput`];
     popup.hidden = true;
     input.blur();
     if (this.openPasteSide === side) this.openPasteSide = null;
@@ -2294,17 +2424,17 @@ export class DomControls implements Controls {
     if (this.openSkillSide !== null) {
       const side = this.openSkillSide;
       this.closeSkillPopup(side);
-      (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+      this.els[`${side}SkillTrigger`].focus();
     }
     if (this.openPasteSide !== null) {
       const side = this.openPasteSide;
       this.closePastePopup(side);
-      (this.els[`${side}ImportFitting`] as HTMLButtonElement).focus();
+      this.els[`${side}ImportFitting`].focus();
     }
     if (this.openFittingSide !== null) {
       const side = this.openFittingSide;
       this.closeFittingPopup(side);
-      (this.els[`${side}FittingTrigger`] as HTMLButtonElement).focus();
+      this.els[`${side}FittingTrigger`].focus();
     }
     if (this.importSidePopupOpen) {
       this.closeImportSidePopup(true);
@@ -2315,21 +2445,21 @@ export class DomControls implements Controls {
     if (this.openPropulsionVariantSide !== null) {
       const side = this.openPropulsionVariantSide;
       this.closePropulsionVariantPopup(side);
-      (this.els[`${side}PropulsionGear`] as HTMLButtonElement).focus();
+      this.els[`${side}PropulsionGear`].focus();
     }
   }
 
   private setOverloadActive(side: "attacker" | "target", active: boolean): void {
-    const input = this.els[`${side}Overload`] as HTMLInputElement;
-    const button = this.els[`${side}OverloadButton`] as HTMLButtonElement;
+    const input = this.els[`${side}Overload`];
+    const button = this.els[`${side}OverloadButton`];
     input.checked = active;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
   }
 
   private setPropulsionActive(side: "attacker" | "target", propulsionId: string): void {
-    const select = this.els[`${side}Propulsion`] as HTMLSelectElement;
-    const group = this.els[`${side}PropulsionOptions`] as HTMLElement;
+    const select = this.els[`${side}Propulsion`];
+    const group = this.els[`${side}PropulsionOptions`];
     select.value = propulsionId;
     for (const button of group.children) {
       const active = button.getAttribute("data-value") === propulsionId;
@@ -2339,7 +2469,7 @@ export class DomControls implements Controls {
   }
 
   private currentSkillLevel(side: "attacker" | "target"): SkillLevel | undefined {
-    const value = (this.els[`${side}Skills`] as HTMLSelectElement).value;
+    const value = this.els[`${side}Skills`].value;
     if (value === "") return undefined;
     const level = skillLevelFromString(value);
     if (level === 0 && value !== "0") return undefined;
@@ -2359,14 +2489,14 @@ export class DomControls implements Controls {
 
   private onSkillButtonClick(side: "attacker" | "target", level: SkillLevel): void {
     this.setSkillActive(side, level);
-    (this.els[`${side}Skills`] as HTMLSelectElement).value = String(level);
+    this.els[`${side}Skills`].value = String(level);
     this.els[`${side}Skills`].dispatchEvent(new Event("change"));
     this.closeSkillPopup(side);
-    (this.els[`${side}SkillTrigger`] as HTMLButtonElement).focus();
+    this.els[`${side}SkillTrigger`].focus();
   }
 
   private onOverloadButtonClick(side: "attacker" | "target"): void {
-    const input = this.els[`${side}Overload`] as HTMLInputElement;
+    const input = this.els[`${side}Overload`];
     this.setOverloadActive(side, !input.checked);
     input.dispatchEvent(new Event("change"));
   }
@@ -2414,8 +2544,8 @@ export class DomControls implements Controls {
   }
 
   private renderSkillOptions(side: "attacker" | "target", selectedValue: SkillLevel = this.currentSkillLevel(side) ?? 5): void {
-    const select = this.els[`${side}Skills`] as HTMLSelectElement;
-    const group = this.els[`${side}SkillOptions`] as HTMLElement;
+    const select = this.els[`${side}Skills`];
+    const group = this.els[`${side}SkillOptions`];
     const selected = String(selectedValue);
     select.innerHTML = "";
     group.innerHTML = "";
@@ -2489,6 +2619,12 @@ function el(id: string): HTMLElement {
   if (e === null) throw new Error(`Missing DOM element #${id}`);
   return e;
 }
+function elOf<T extends HTMLElement>(id: string, guard: (el: Element) => el is T): T {
+  const e = el(id);
+  if (!guard(e)) throw new Error(`Expected #${id} to be a ${guard.name}`);
+  return e;
+}
+
 
 function isHtmlButtonElement(el: Element): el is HTMLButtonElement {
   return el.tagName === "BUTTON";
@@ -2498,8 +2634,26 @@ function isHtmlImageElement(el: Element): el is HTMLImageElement {
   return el.tagName === "IMG";
 }
 
-function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number {
-  const value = (input as HTMLInputElement).value;
+function isHtmlInputElement(el: Element): el is HTMLInputElement {
+  return el.tagName === "INPUT";
+}
+
+function isHtmlSelectElement(el: Element): el is HTMLSelectElement {
+  return el.tagName === "SELECT";
+}
+
+function isHtmlTextAreaElement(el: Element): el is HTMLTextAreaElement {
+  return el.tagName === "TEXTAREA";
+}
+
+function checked<T extends HTMLElement>(el: Element, guard: (el: Element) => el is T): T {
+  if (!guard(el)) throw new Error(`Expected element to be a ${guard.name}`);
+  return el;
+}
+
+
+function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): number {
+  const value = input.value;
   const n = parseFloat(value);
   return Number.isNaN(n) ? 0 : Math.max(0, n);
 }
