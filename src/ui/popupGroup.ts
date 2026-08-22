@@ -21,8 +21,12 @@ export class PopupGroup {
   }
 
   toggle(popup: Popup): void {
-    if (popup.isOpen()) popup.close();
+    if (popup.isOpen()) this.close(popup);
     else this.open(popup);
+  }
+
+  close(popup: Popup): void {
+    if (popup.isOpen()) popup.close();
   }
 
   closeAll(): void {

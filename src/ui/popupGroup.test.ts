@@ -83,6 +83,28 @@ describe("PopupGroup", () => {
     expect(a.isOpen()).toBe(false);
   });
 
+  test("close closes an open popup", () => {
+    const [a] = makePopups(1);
+    a.openResult = true;
+
+    const group = new PopupGroup();
+    group.register(a);
+    group.close(a);
+
+    expect(a.closeCalled).toBe(true);
+    expect(a.isOpen()).toBe(false);
+  });
+
+  test("close is no-op on an already closed popup", () => {
+    const [a] = makePopups(1);
+
+    const group = new PopupGroup();
+    group.register(a);
+    group.close(a);
+
+    expect(a.closeCalled).toBe(false);
+  });
+
   test("toggle opens a closed popup and closes other open popups", () => {
     const [a, b] = makePopups(2);
     b.openResult = true;
