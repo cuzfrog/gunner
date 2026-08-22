@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 import { readFileSync, writeFileSync } from "node:fs";
 import * as process from "node:process";
-import { CHARGES, TURRETS } from "../src/fitting/fittingDb";
+import { CHARGES, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
+import { MODULE_SLOTS } from "../src/fitting/moduleSlots";
 import { PROPULSION_MODULES } from "../src/ships/propulsion";
 
 const OUTPUT_PATH = "src/fitting/iconIds.ts";
@@ -18,6 +19,8 @@ export function generateIconIdsContent(
   chargeNames: readonly string[],
   turretNames: readonly string[],
   propulsionLabels: readonly string[],
+  moduleSlotNames: readonly string[],
+  scriptNames: readonly string[],
 ): string {
   const missing: string[] = [];
   const ids: Record<string, number> = {};
@@ -25,6 +28,8 @@ export function generateIconIdsContent(
   for (const name of chargeNames) collectIconId(name);
   for (const name of turretNames) collectIconId(name);
   for (const name of propulsionLabels) collectIconId(name);
+  for (const name of moduleSlotNames) collectIconId(name);
+  for (const name of scriptNames) collectIconId(name);
 
   if (missing.length > 0) {
     missing.sort();
@@ -56,6 +61,8 @@ function main(): void {
     Object.keys(CHARGES),
     Object.keys(TURRETS),
     PROPULSION_MODULES.map((module) => module.label),
+    Object.keys(MODULE_SLOTS),
+    Object.keys(SCRIPTS),
   );
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);
