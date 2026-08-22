@@ -1,4 +1,5 @@
 import type { SigResolutionClass } from "../sim";
+import type { GunFamilies, GunFamily } from "./gunFamilies";
 import type { ChargeStats } from "./fittingDb";
 
 export interface ImportedTurretBase {
@@ -15,6 +16,7 @@ export interface ImportedTurret {
   readonly chargeSize: number;
   readonly charge: string;
   readonly base: ImportedTurretBase;
+  readonly moduleName: string;
 }
 
 export interface CargoCharge {
@@ -29,21 +31,27 @@ export interface ChargeOption {
   readonly falloffMultiplier: number;
 }
 
+export type ChargeFamily = "projectile" | "hybrid" | "laser";
+
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): string;
   chargesForSize(chargeSize: number): readonly ChargeOption[];
+  chargesForTurret(turret: ImportedTurret): readonly ChargeOption[];
   withCharge(turret: ImportedTurret, charge: string): ImportedTurret;
 }
 
 interface ChargeCatalogDeps {
   readonly fittingDb: { readonly charges: Readonly<Record<string, ChargeStats>> };
+  readonly gunFamilies: GunFamilies;
 }
 
 export class ChargeCatalogImpl implements ChargeCatalog {
   private readonly charges: Readonly<Record<string, ChargeStats>>;
+  private readonly gunFamilies: GunFamilies;
 
-  constructor({ fittingDb }: ChargeCatalogDeps) {
+  constructor({ fittingDb, gunFamilies }: ChargeCatalogDeps) {
     this.charges = fittingDb.charges;
+    this.gunFamilies = gunFamilies;
   }
 
   usualForChargeSize(chargeSize: number): string {
@@ -52,6 +60,13 @@ export class ChargeCatalogImpl implements ChargeCatalog {
 
   chargesForSize(chargeSize: number): readonly ChargeOption[] {
     return _chargesForSize(this.charges, chargeSize);
+  }
+
+  chargesForTurret(turret: ImportedTurret): readonly ChargeOption[] {
+    const turretFamily = _turretChargeFamily(turret.moduleName, this.gunFamilies);
+    const all = this.chargesForSize(turret.chargeSize);
+    if (turretFamily === undefined) return all;
+    return all.filter((option) => _chargeFamilyOf(option.name) === turretFamily);
   }
 
   withCharge(turret: ImportedTurret, charge: string): ImportedTurret {
@@ -130,3 +145,82 @@ function _usualForChargeSize(charges: Readonly<Record<string, ChargeStats>>, cha
   const chosen = navy.length > 0 ? navy : all;
   return chosen[0].name;
 }
+
+const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
+  autocannon: "projectile",
+  artillery: "projectile",
+  railgun: "hybrid",
+  blaster: "hybrid",
+  pulseLaser: "laser",
+  beamLaser: "laser",
+} as const;
+
+const CHARGE_FAMILY_BY_BASE: Readonly<Record<string, ChargeFamily>> = {
+  "Carbonized Lead": "projectile",
+  "Depleted Uranium": "projectile",
+  "Phased Plasma": "projectile",
+  "Titanium Sabot": "projectile",
+  "Antimatter Charge": "hybrid",
+  "Iridium Charge": "hybrid",
+  "Iron Charge": "hybrid",
+  "Lead Charge": "hybrid",
+  "Plutonium Charge": "hybrid",
+  "Thorium Charge": "hybrid",
+  "Tungsten Charge": "hybrid",
+  "Uranium Charge": "hybrid",
+  Aurora: "laser",
+  Barrage: "projectile",
+  Conflagration: "laser",
+  EMP: "projectile",
+  Fusion: "projectile",
+  Gamma: "laser",
+  Gleam: "laser",
+  Hail: "projectile",
+  Infrared: "laser",
+  Javelin: "hybrid",
+  Microwave: "laser",
+  Multifrequency: "laser",
+  Nuclear: "projectile",
+  Null: "hybrid",
+  Proton: "projectile",
+  Quake: "projectile",
+  Radio: "laser",
+  Scorch: "laser",
+  Spike: "hybrid",
+  Standard: "laser",
+  Tremor: "projectile",
+  Ultraviolet: "laser",
+  Void: "hybrid",
+  Xray: "laser",
+} as const;
+
+function _chargeFamilyOf(name: string): ChargeFamily | undefined {
+  const stem = _chargeStem(name);
+  const tokens = stem.split(/\s+/);
+  if (tokens.length >= 2) {
+    const two = tokens.slice(-2).join(" ");
+    const family = CHARGE_FAMILY_BY_BASE[two];
+    if (family !== undefined) return family;
+  }
+  const one = tokens[tokens.length - 1];
+  return CHARGE_FAMILY_BY_BASE[one];
+}
+
+function _turretChargeFamily(moduleName: string, gunFamilies: GunFamilies): ChargeFamily | undefined {
+  try {
+    const family = gunFamilies.familyOf(moduleName);
+    return TURRET_CHARGE_FAMILIES[family];
+  } catch {
+    return undefined;
+  }
+}
+
+function _chargeStem(name: string): string {
+  for (let i = SIZE_SUFFIXES.length - 1; i >= 0; i--) {
+    const { suffix } = SIZE_SUFFIXES[i];
+    if (name.endsWith(suffix)) return name.slice(0, -suffix.length);
+  }
+  return name;
+}
+
+export { _chargeFamilyOf, _turretChargeFamily };

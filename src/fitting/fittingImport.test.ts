@@ -1,6 +1,11 @@
+import { join } from "path";
 import type { PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, _applyStackingPenalty, type FittingDb } from "./fittingImport";
+import { GunFamiliesImpl } from "./gunFamilies";
+import { CHARGES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, TURRETS } from "./fittingDb";
+import { MODULE_SLOTS } from "./moduleSlots";
+import { parseEft } from "./eft";
 
 const profile: ShipProfile = {
   name: "Harbinger",
@@ -40,6 +45,16 @@ const roleBonusProfile: ShipProfile = {
   inertiaModifier: 0.51,
   baseSpeed: 195,
   sigRadius: 135,
+};
+
+const abaddonProfile: ShipProfile = {
+  name: "Abaddon",
+  faction: "Amarr Empire",
+  hullType: "Standard Battleships",
+  mass: 103_200_000,
+  inertiaModifier: 0.14,
+  baseSpeed: 89,
+  sigRadius: 470,
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
@@ -121,7 +136,18 @@ const hullBonusDb: FittingDb = {
   },
 };
 
-const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db });
+const gunFamilies = new GunFamiliesImpl();
+
+const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db, gunFamilies });
+
+const fullFittingDb: FittingDb = {
+  modules: FITTING_MODULES,
+  turrets: TURRETS,
+  charges: CHARGES,
+  scripts: SCRIPTS,
+  hullBonuses: HULL_BONUSES,
+};
+const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies });
 
 const conditions: StatConditions = { skillLevel: 0, overloaded: false };
 
@@ -263,8 +289,43 @@ describe("FittingImportImpl", () => {
     );
     expect(result!.propulsion).toBeDefined();
     expect(result!.propulsion!.propulsionId).toBe("ab-100mn");
+    expect(result!.propulsion!.propulsionName).toBe("100MN Y-S8 Compact Afterburner");
     expect(result!.propulsion!.speedBonus).toBe(1.25);
     expect(result!.propulsion!.massAddition).toBe(50_000_000);
+  });
+
+  test("propulsionVariantNames returns matching module names", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const mwd = propulsionModules.find((m) => m.id === "mwd-5mn")!;
+    expect(importer.propulsionVariantNames(mwd)).toEqual(["5MN Microwarpdrive I"]);
+  });
+
+  test("propulsionVariantNames returns an empty list when no variants match", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    const ab10 = propulsionModules.find((m) => m.id === "ab-10mn")!;
+    expect(importer.propulsionVariantNames(ab10)).toEqual([]);
+  });
+
+  test("propulsionStats returns stats for a named propulsion module", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    expect(importer.propulsionStats("5MN Microwarpdrive I")).toEqual({
+      thrust: 1_500_000,
+      speedBonus: 5,
+      massAddition: 500_000,
+      sigBloom: 5,
+    });
+    expect(importer.propulsionStats("100MN Y-S8 Compact Afterburner")).toEqual({
+      thrust: 150_000_000,
+      speedBonus: 1.25,
+      massAddition: 50_000_000,
+      sigBloom: 0,
+    });
+  });
+
+  test("propulsionStats returns undefined for an unknown or non-propulsion module", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog });
+    expect(importer.propulsionStats("1600mm Steel Plates II")).toBeUndefined();
+    expect(importer.propulsionStats("Unknown")).toBeUndefined();
   });
 
   test("skips unknown module names", () => {
@@ -284,6 +345,7 @@ describe("FittingImportImpl", () => {
       conditions,
     );
     expect(result!.turret).toBeDefined();
+    expect(result!.turret!.moduleName).toBe("Heavy Pulse Laser II");
     expect(result!.turret!.charge).toBe("Conflagration M");
     expect(result!.turret!.chargeSize).toBe(2);
     expect(result!.turret!.optimal).toBe(12_600 * 0.5);
@@ -456,5 +518,124 @@ Tracking Enhancer II`,
     const falloffBonus = _applyStackingPenalty([1.2, 1.1]);
     expect(result!.turret!.falloff).toBeCloseTo(5_160 * 1.2 * falloffBonus, 3);
     expect(result!.turret!.optimal).toBeCloseTo(1_200 * 0.5 * 1.2 * 1.1, 3);
+  });
+
+  test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
+    const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Abaddon", "Pulse_Armor_Abaddon.txt");
+    const text = await Bun.file(path).text();
+    ships.findHull.mockReturnValueOnce(abaddonProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog });
+    const result = importer.importFitting(text, conditions);
+    expect(result).toBeDefined();
+    const names = result!.cargoCharges.map((charge) => charge.name);
+    expect(names).toContain("Conflagration L");
+    expect(names).toContain("Scorch L");
+  });
+});
+
+const RIFTER_BRAWLER = `[Rifter, Brawler]
+200mm AutoCannon I, Hail S
+200mm AutoCannon I, Hail S
+5MN Microwarpdrive I
+400mm Steel Plates II
+Inertial Stabilizers II
+Small Trimark Armor Pump I
+Small Projectile Ambit Extension I
+
+Hobgoblin I x3
+
+Hail S x1000
+Republic Fleet EMP S x500
+`;
+
+const RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK = `[Rifter, Brawler]
+200mm AutoCannon I, Hail S
+5MN Microwarpdrive I
+
+Hail S x1000
+
+Republic Fleet EMP S x500
+`;
+
+const INVALID_TEXT = `not a fitting
+some line`;
+
+function summarizeDb(): FittingDb {
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, hullBonuses: {} };
+}
+
+describe("FittingImportImpl.summarize", () => {
+  test("parses hull and fitting names", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    expect(summary).toBeDefined();
+    expect(summary!.hullName).toBe("Rifter");
+    expect(summary!.fittingName).toBe("Brawler");
+  });
+
+  test("groups modules by slot in fixed order", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    expect(summary).toBeDefined();
+    const kinds = summary!.sections.map((section) => section.kind);
+    expect(kinds).toEqual(["high", "mid", "low", "rig", "cargo", "drones"]);
+  });
+
+  test("captures charges on module rows", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    const high = summary!.sections.find((section) => section.kind === "high");
+    expect(high!.rows[0].charge).toBe("Hail S");
+    expect(high!.rows[1].charge).toBe("Hail S");
+  });
+
+  test("captures cargo quantities", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    const cargo = summary!.sections.find((section) => section.kind === "cargo");
+    expect(cargo!.rows).toEqual([
+      { name: "Hail S", quantity: 1000 },
+      { name: "Republic Fleet EMP S", quantity: 500 },
+    ]);
+  });
+
+  test("captures drone quantities", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_BRAWLER);
+    const drones = summary!.sections.find((section) => section.kind === "drones");
+    expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+  });
+
+  test("moves charge quantity items from the drone block to cargo", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
+    const kinds = summary!.sections.map((section) => section.kind);
+    expect(kinds).toEqual(["high", "mid", "cargo"]);
+    const cargo = summary!.sections.find((section) => section.kind === "cargo");
+    expect(cargo!.rows).toEqual([
+      { name: "Republic Fleet EMP S", quantity: 500 },
+      { name: "Hail S", quantity: 1000 },
+    ]);
+  });
+
+  test("returns undefined for unparseable text", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    expect(importer.summarize(INVALID_TEXT)).toBeUndefined();
+  });
+
+  test("skips module names that are not in the slot map", () => {
+    const text = `[Rifter, Unknown]\nUnknown Module Name\n5MN Microwarpdrive I\n`;
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog });
+    const summary = importer.summarize(text);
+    expect(summary!.sections).toHaveLength(1);
+    expect(summary!.sections[0].kind).toBe("mid");
+  });
+
+  test("fixture modules are all present in the generated slot map", () => {
+    const parsed = parseEft(RIFTER_BRAWLER);
+    for (const line of parsed!.modules) {
+      expect(MODULE_SLOTS[line.name]).toBeDefined();
+    }
   });
 });

@@ -26,7 +26,7 @@
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.7.0</span>
+        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.9.0</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -107,7 +107,7 @@
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
           <span class="tracking-label-row">
-            <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
               <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
@@ -129,29 +129,29 @@
                id="sig-res-options" role="group"
                data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
             <button type="button" data-value="S"  class="active" aria-pressed="true"  title="S (40 m)">
-              <span class="sigres-class">S</span><span class="sigres-value">(40 m)</span>
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value">(40 m)</span>
             </button>
             <button type="button" data-value="M"  aria-pressed="false" title="M (125 m)">
-              <span class="sigres-class">M</span><span class="sigres-value">(125 m)</span>
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">M</span><span class="sigres-value">(125 m)</span>
             </button>
             <button type="button" data-value="L"  aria-pressed="false" title="L (400 m)">
-              <span class="sigres-class">L</span><span class="sigres-value">(400 m)</span>
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">L</span><span class="sigres-value">(400 m)</span>
             </button>
             <button type="button" data-value="XL" aria-pressed="false" title="XL (2000 m)">
-              <span class="sigres-class">XL</span><span class="sigres-value">(2000 m)</span>
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">XL</span><span class="sigres-value">(2000 m)</span>
             </button>
           </div>
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.optimalRange">Optimal range</span>
+            <span class="field-label" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit">
               <input type="number" id="optimal" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.falloffRange">Falloff range</span>
+            <span class="field-label" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit">
               <input type="number" id="falloff" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -159,13 +159,14 @@
           </label>
         </div>
 
-        <div class="field-group ammo-group" id="attacker-ammo-field" hidden>
+        <div class="field-group ammo-group" id="attacker-ammo-field">
           <button type="button" id="attacker-ammo-trigger" class="ammo-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
                   data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
                   title="Select ammunition" aria-label="Select ammunition">
             <span class="ammo-label" data-i18n="label.ammo">Ammo</span>
             <span class="ammo-summary-row">
+              <img id="attacker-ammo-summary-icon" class="ammo-summary-icon" alt="" hidden>
               <span class="ammo-summary-value" id="attacker-ammo-summary"></span>
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
@@ -185,19 +186,25 @@
 
         <div class="hull-field">
           <div class="hull-label-row">
-            <span data-i18n="label.hull">Ship</span>
+            <span class="field-label" data-i18n="label.hull">Ship</span>
             <button type="button" id="attacker-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
+            <button type="button" id="attacker-fitting-eye" class="fitting-eye"
+                    aria-pressed="false" disabled
+                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
+                    title="Show fitting details" aria-label="Show fitting details">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
+            </button>
             <span class="fitting-name" id="attacker-fitting-name" hidden></span>
-            <span id="attacker-import-status" class="import-status"></span>
             <div class="paste-popup" id="attacker-paste-popup" hidden>
               <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
           <div class="hull-input-row">
+            <img id="attacker-ship-image" class="ship-image" alt="" hidden>
             <input type="text" id="attacker-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
@@ -215,13 +222,20 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="attacker-fitting-preset-list"></ul>
               <p class="fitting-empty" id="attacker-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
+            <div class="fitting-preview" id="attacker-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </div>
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
-          <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <div class="propulsion-selector-wrapper">
+            <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+            <button type="button" id="attacker-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-propulsion-variants" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup propulsion-variants-popup" id="attacker-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+          </div>
           <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
@@ -233,14 +247,14 @@
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.mass">Mass</span>
+            <span class="field-label" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-inertia" value="3" step="any" min="0">
               <span class="input-suffix" id="attacker-align-time" aria-hidden="true">5.0s</span>
@@ -258,7 +272,7 @@
             </select>
           </div>
           <label>
-            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-range" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -267,7 +281,7 @@
         </div>
         <div class="slider-field maneuver-field">
           <span class="slider-label-row">
-            <span data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
+            <span class="field-label" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
             <button type="button" class="info-hint"
                     data-i18n-title="hint.maneuverAggressivity"
                     data-i18n-aria-label="hint.maneuverAggressivity"
@@ -328,19 +342,25 @@
         <h2 data-i18n="section.targetShip">Target</h2>
         <div class="hull-field">
           <div class="hull-label-row">
-            <span data-i18n="label.hull">Ship</span>
+            <span class="field-label" data-i18n="label.hull">Ship</span>
             <button type="button" id="target-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
+            <button type="button" id="target-fitting-eye" class="fitting-eye"
+                    aria-pressed="false" disabled
+                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
+                    title="Show fitting details" aria-label="Show fitting details">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
+            </button>
             <span class="fitting-name" id="target-fitting-name" hidden></span>
-            <span id="target-import-status" class="import-status"></span>
             <div class="paste-popup" id="target-paste-popup" hidden>
               <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
           <div class="hull-input-row">
+            <img id="target-ship-image" class="ship-image" alt="" hidden>
             <input type="text" id="target-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
@@ -358,6 +378,7 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="target-fitting-preset-list"></ul>
               <p class="fitting-empty" id="target-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
+            <div class="fitting-preview" id="target-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="target-hull-hint"></span>
         </div>
@@ -365,7 +386,7 @@
           <div class="field-group">
             <span class="field-label-row">
               <label for="initial-distance">
-                <span data-i18n="label.initialDistance">Initial distance</span>
+                <span class="field-label" data-i18n="label.initialDistance">Initial distance</span>
               </label>
               <button type="button" class="info-hint"
                       data-i18n-title="hint.initialDistance"
@@ -379,7 +400,7 @@
             </span>
           </div>
           <label>
-            <span data-i18n="label.signatureRadius">Signature radius</span>
+            <span class="field-label" data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
               <input type="number" id="target-sig" value="40" step="any" min="1">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -389,7 +410,13 @@
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="target-propulsion" hidden disabled></select>
-          <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+          <div class="propulsion-selector-wrapper">
+            <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
+            <button type="button" id="target-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="target-propulsion-variants" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup propulsion-variants-popup" id="target-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+          </div>
           <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
@@ -401,14 +428,14 @@
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.mass">Mass</span>
+            <span class="field-label" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="target-mass" value="10000000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="target-inertia" value="0.45" step="any" min="0">
               <span class="input-suffix" id="target-align-time" aria-hidden="true">6.2s</span>
@@ -426,7 +453,7 @@
             </select>
           </div>
           <label>
-            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="target-range" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>

@@ -17,7 +17,6 @@ function main(): void {
       get href() {
         return window.location.href;
       },
-      replace: (url: string) => window.history.replaceState(null, "", url),
     }),
     clipboard: asValue({
       readText: readClipboardText,

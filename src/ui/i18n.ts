@@ -73,6 +73,11 @@ export const I18N_DICTIONARY = {
     zh: "推进模块",
     ja: "推進モジュール",
   },
+  "label.propulsionVariant": {
+    en: "Propulsion variant",
+    zh: "推进模块型号",
+    ja: "推進モジュール型",
+  },
   "label.skillLevel": {
     en: "Pilot skills",
     zh: "飞行员技能",
@@ -224,6 +229,11 @@ export const I18N_DICTIONARY = {
     zh: "删除",
     ja: "削除",
   },
+  "button.close": {
+    en: "Close",
+    zh: "关闭",
+    ja: "閉じる",
+  },
   "button.copyProfile": {
     en: "Copy",
     zh: "复制",
@@ -258,6 +268,11 @@ export const I18N_DICTIONARY = {
     en: "Select fitting",
     zh: "选择装配",
     ja: "フィッティングを選択",
+  },
+  "button.fittingDetails": {
+    en: "Show fitting details",
+    zh: "显示装配详情",
+    ja: "フィッティング詳細を表示",
   },
   "button.selectAmmo": {
     en: "Select ammunition",
@@ -358,6 +373,36 @@ export const I18N_DICTIONARY = {
     en: "Import fitting as",
     zh: "将装配导入为",
     ja: "フィッティングのインポート先",
+  },
+  "fitting.section.high": {
+    en: "High",
+    zh: "高槽",
+    ja: "ハイスロット",
+  },
+  "fitting.section.mid": {
+    en: "Mid",
+    zh: "中槽",
+    ja: "ミッドスロット",
+  },
+  "fitting.section.low": {
+    en: "Low",
+    zh: "低槽",
+    ja: "ロースロット",
+  },
+  "fitting.section.rig": {
+    en: "Rig",
+    zh: "船插",
+    ja: "リグ",
+  },
+  "fitting.section.cargo": {
+    en: "Cargo",
+    zh: "货舱",
+    ja: "カーゴ",
+  },
+  "fitting.section.drones": {
+    en: "Drones",
+    zh: "无人机",
+    ja: "ドローン",
   },
   "status.importInvalid": {
     en: "No profile or fitting in clipboard",

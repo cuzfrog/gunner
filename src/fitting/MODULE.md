@@ -5,9 +5,12 @@ resolving fitted modules and charges against the generated fitting database,
 and aggregating exact ship and turret statistics for the `Ships` engine.
 
 The public boundary is `index.ts`, which exports the `FittingImport`,
-`ChargeCatalog`, and `PresetFittings` abstractions, `FittingDb`,
+`ChargeCatalog`, `PresetFittings`, and `GunFamilies` abstractions, `FittingDb`,
 `ImportedFitting`, `ImportedTurret`, `CargoCharge`, `ChargeOption`,
-`PresetFitting`, and the module registration. Internal files such as
+`PresetFitting`, `FittingRow`, `FittingSection`, `FittingSummary`,
+and the module registration. `FittingImport.summarize` produces a structural
+fitting summary for UI previews. Icon and drone image identifiers have moved to
+the `src/ui` module because they are presentational data. Internal files such as
 `eft.ts`, `fittingImport.ts`, `fittingPresets.ts`, `chargeCatalog.ts`,
-`presetFittings.ts`, and `chargeCatalog.test.ts` are reached only by their
-sibling tests and by `module.ts`.
+`gunFamilies.ts`, `presetFittings.ts`, `moduleSlots.ts`, `fittingDb.ts`, and
+their sibling tests are reached only by their sibling tests and by `module.ts`.

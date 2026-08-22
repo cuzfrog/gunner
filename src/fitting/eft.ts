@@ -23,11 +23,14 @@ const QUANTITY_PATTERN = /^(.+?) x(\d+)$/;
 const MODULE_PATTERN = /^([^,/\[\]]+?)(?:,\s*([^,/\[\]]+?))?(\s*\/(OFFLINE|offline))?$/;
 
 export function parseEft(text: string): ParsedFitting | undefined {
-  const nonEmpty = trimmedNonEmptyLines(text);
-  const header = nonEmpty.find((line) => HEADER_PATTERN.test(line));
-  if (!header) return undefined;
+  const groups = trimmedLineGroups(text);
+  if (groups.length === 0) return undefined;
 
-  const parsedHeader = HEADER_PATTERN.exec(header);
+  const headerGroup = groups[0];
+  const headerIndex = headerGroup.findIndex((line) => HEADER_PATTERN.test(line));
+  if (headerIndex === -1) return undefined;
+
+  const parsedHeader = HEADER_PATTERN.exec(headerGroup[headerIndex]);
   if (!parsedHeader?.groups) return undefined;
 
   const hullName = parsedHeader.groups.hull.trim();
@@ -35,33 +38,65 @@ export function parseEft(text: string): ParsedFitting | undefined {
   if (hullName.length === 0 || fittingName.length === 0) return undefined;
 
   const modules: ParsedModuleLine[] = [];
-  const drones: ParsedQuantityItem[] = [];
   const cargo: ParsedQuantityItem[] = [];
+  const drones: ParsedQuantityItem[] = [];
+  let droneBlockSeen = false;
 
-  for (const line of nonEmpty) {
-    if (line === header) continue;
-    if (EMPTY_SLOT_PATTERN.test(line)) continue;
+  for (let i = 0; i < groups.length; i++) {
+    const group = i === 0 ? headerGroup.slice(headerIndex + 1) : groups[i];
+    const quantities: ParsedQuantityItem[] = [];
+    const moduleLines: ParsedModuleLine[] = [];
 
-    const quantity = parseQuantityLine(line);
-    if (quantity) {
-      cargo.push(quantity);
+    for (const line of group) {
+      if (EMPTY_SLOT_PATTERN.test(line)) continue;
+
+      const quantity = parseQuantityLine(line);
+      if (quantity) {
+        quantities.push(quantity);
+        continue;
+      }
+
+      const module = parseModuleLine(line);
+      if (module) {
+        moduleLines.push(module);
+      }
+    }
+
+    if (moduleLines.length > 0) {
+      modules.push(...moduleLines);
+      cargo.push(...quantities);
       continue;
     }
 
-    const module = parseModuleLine(line);
-    if (module) {
-      modules.push(module);
+    if (quantities.length === 0) continue;
+
+    if (!droneBlockSeen) {
+      drones.push(...quantities);
+      droneBlockSeen = true;
+    } else {
+      cargo.push(...quantities);
     }
   }
 
-  return { hullName, fittingName, modules, drones, cargo };
+  return { hullName, fittingName, modules, cargo, drones };
 }
 
-function trimmedNonEmptyLines(text: string): string[] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+function trimmedLineGroups(text: string): string[][] {
+  const groups: string[][] = [];
+  let current: string[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) {
+      if (current.length > 0) {
+        groups.push(current);
+        current = [];
+      }
+    } else {
+      current.push(trimmed);
+    }
+  }
+  if (current.length > 0) groups.push(current);
+  return groups;
 }
 
 function parseQuantityLine(line: string): ParsedQuantityItem | undefined {

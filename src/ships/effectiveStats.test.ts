@@ -1,6 +1,6 @@
 import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { fittingOptions } from "./fitting";
-import type { FittedHull, PropulsionModule, ShipProfile, SkillLevel, StatConditions } from "./types";
+import type { FittedHull, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
 const frigate: ShipProfile = {
   name: "Test Frigate",
@@ -59,6 +59,22 @@ describe("naked hull", () => {
     expect(stats.mass).toBe(6_000_000);
     expect(stats.inertiaModifier).toBe(3);
     expect(stats.sigRadius).toBe(35);
+  });
+
+  test("Thrasher with 10MN compact afterburner reaches the expected 1536 m/s", () => {
+    const thrasher: ShipProfile = {
+      name: "Thrasher",
+      faction: "Minmatar Republic",
+      hullType: "Standard Destroyers",
+      mass: 1_600_000,
+      inertiaModifier: 2.8,
+      baseSpeed: 270,
+      sigRadius: 56,
+    };
+    const compactAB10: PropulsionStats = { thrust: 15_000_000, speedBonus: 1.25, massAddition: 5_000_000, sigBloom: 0 };
+    const stats = fittedStats(thrasher, undefined, compactAB10, conditions(5));
+    expect(stats.maxSpeed).toBeCloseTo(1536.01, 2);
+    expect(stats.mass).toBe(6_600_000);
   });
 
   test("battleship with 500MN MWD follows the same rules at capital scale", () => {

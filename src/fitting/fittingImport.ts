@@ -13,14 +13,32 @@ import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type { ChargeStats, FittingModuleStats, HullBonus, TurretScriptStats, TurretStats } from "./fittingDb";
+import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
 
 export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
+
+export interface FittingRow {
+  readonly name: string;
+  readonly charge?: string;
+  readonly quantity?: number;
+}
+
+export interface FittingSection {
+  readonly kind: ModuleSlot | "cargo" | "drones";
+  readonly rows: readonly FittingRow[];
+}
+
+export interface FittingSummary {
+  readonly hullName: string;
+  readonly fittingName: string;
+  readonly sections: readonly FittingSection[];
+}
 
 export interface ImportedFitting {
   readonly profile: ShipProfile;
   readonly fittingName: string;
   readonly fitted: FittedHull;
-  readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId };
+  readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
   readonly cargoCharges: readonly CargoCharge[];
 }
@@ -35,6 +53,9 @@ export interface FittingDb {
 
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
+  propulsionVariantNames(module: PropulsionModule): readonly string[];
+  propulsionStats(name: string): PropulsionStats | undefined;
+  summarize(text: string): FittingSummary | undefined;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -46,6 +67,25 @@ export class FittingImportImpl implements FittingImport {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
+  }
+
+  propulsionVariantNames(module: PropulsionModule): readonly string[] {
+    return Object.entries(this.db.modules)
+      .filter(([, stats]) => stats.propulsion?.kind === module.kind && stats.propulsion?.sizeTier === module.sizeTier && stats.propulsion.thrust > 0 && stats.propulsion.speedBonus > 0)
+      .map(([name]) => name)
+      .sort((a, b) => {
+        const aStats = this.db.modules[a]?.propulsion;
+        const bStats = this.db.modules[b]?.propulsion;
+        if (!aStats || !bStats) return a.localeCompare(b);
+        if (bStats.speedBonus !== aStats.speedBonus) return bStats.speedBonus - aStats.speedBonus;
+        return a.localeCompare(b);
+      });
+  }
+
+  propulsionStats(name: string): PropulsionStats | undefined {
+    const stats = this.db.modules[name]?.propulsion;
+    if (!stats) return undefined;
+    return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
@@ -68,6 +108,16 @@ export class FittingImportImpl implements FittingImport {
       propulsion,
       turret,
       cargoCharges,
+    };
+  }
+
+  summarize(text: string): FittingSummary | undefined {
+    const parsed = parseEft(text);
+    if (!parsed) return undefined;
+    return {
+      hullName: parsed.hullName,
+      fittingName: parsed.fittingName,
+      sections: buildSections(parsed, this.db),
     };
   }
 }
@@ -142,7 +192,7 @@ function resolvePropulsion(
   db: FittingDb,
   parsed: ParsedFitting,
   propulsionName: string | undefined,
-): (PropulsionStats & { readonly propulsionId: PropulsionId }) | undefined {
+): (PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName: string }) | undefined {
   const name = propulsionName ?? findFirstPropulsion(parsed, db);
   if (!name) return undefined;
 
@@ -152,7 +202,7 @@ function resolvePropulsion(
   const propulsionId = findGenericPropulsionId(ships, profile, stats.kind, stats.sizeTier);
   if (!propulsionId) return undefined;
 
-  return { ...stats, propulsionId };
+  return { ...stats, propulsionId, propulsionName: name };
 }
 
 function findFirstPropulsion(parsed: ParsedFitting, db: FittingDb): string | undefined {
@@ -186,6 +236,7 @@ function resolveTurret(
   const falloffPercents: number[] = [];
   let turret: TurretStats | undefined;
   let chargeName: string | undefined;
+  let moduleName: string | undefined;
 
   for (const line of parsed.modules) {
     if (line.offline) continue;
@@ -194,6 +245,7 @@ function resolveTurret(
     if (lineTurret && !turret) {
       turret = lineTurret;
       chargeName = line.charge;
+      moduleName = line.name;
       continue;
     }
 
@@ -244,6 +296,7 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     charge: selectedCharge,
     base,
+    moduleName: moduleName ?? "Unknown Turret",
   };
 }
 
@@ -291,6 +344,34 @@ function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClas
   if (chargeSize === 3) return "L";
   if (chargeSize === 2) return "M";
   return "S";
+}
+
+function buildSections(parsed: ParsedFitting, db: FittingDb): readonly FittingSection[] {
+  const buckets: Record<ModuleSlot | "cargo" | "drones", FittingRow[]> = { high: [], mid: [], low: [], rig: [], cargo: [], drones: [] };
+
+  for (const line of parsed.modules) {
+    const slot = MODULE_SLOTS[line.name];
+    if (slot === undefined) continue;
+    buckets[slot].push({ name: line.name, charge: line.charge });
+  }
+
+  for (const item of parsed.cargo) {
+    buckets.cargo.push({ name: item.name, quantity: item.quantity });
+  }
+
+  for (const item of parsed.drones) {
+    if (item.name in db.charges) {
+      buckets.cargo.push({ name: item.name, quantity: item.quantity });
+    } else {
+      buckets.drones.push({ name: item.name, quantity: item.quantity });
+    }
+  }
+
+  const sections: FittingSection[] = [];
+  for (const kind of ["high", "mid", "low", "rig", "cargo", "drones"] as const) {
+    if (buckets[kind].length > 0) sections.push({ kind, rows: buckets[kind] });
+  }
+  return sections;
 }
 
 function applyStackingPenalty(multipliers: number[]): number {
