@@ -13,9 +13,7 @@ import {
 import {
   type ChargeCatalog,
   type FittingImport,
-  type FittingSummary,
   type GunFamilies,
-  type ImportedFitting,
   type PresetFittings,
 } from "../fitting";
 import type { I18n, Language } from "./i18n";
@@ -23,23 +21,20 @@ import type { ImageCatalog } from "./imageCatalog";
 import type { SavedFittings } from "./savedFittings";
 import { DomFittingPreview } from "./fittingPreview";
 import {
-  ClipboardUnavailableError,
   USER_SETTINGS_VERSION,
   type ClipboardProvider,
-  type DisplayPreferences,
-  type FittedHullSummary,
-  type ProfileParamOverrides,
   type ProfileSettings,
   type PropulsionSelection,
   type SettingsStore,
   type UserSettings,
 } from "./settings";
-import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
+
 import { PreferencesController } from "./controls/preferencesController";
 import { ProfileController } from "./controls/profileController";
 import { TurretController } from "./controls/turretController";
 import { FittingPopupController, type FittingPopupEls } from "./controls/fittingPopupController";
 import { FittingPreviewManager } from "./controls/fittingPreviewManager";
+import { ImportController, type ImportEls } from "./controls/importController";
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { Timer } from "./timer";
@@ -51,7 +46,6 @@ import { EngagementReadout } from "./controls/engagementReadout";
 import {
   AGGRESSIVITY_MIN,
   DEFAULT_GRID_BRIGHTNESS,
-  NEUTRAL_STAT_CONDITIONS,
   formatNumber,
   isAutopilotMode,
   isSigResClass,
@@ -101,18 +95,14 @@ export class DomControls implements Controls {
   private readonly targetFittingPopup: FittingPopupController;
   private callbacks?: ControlsCallbacks;
   private playing = false;
-  private importSidePopupOpen = false;
-  private pendingImportText?: string;
   private readonly popupGroup: PopupGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly attackerSkillPopup: Popup;
   private readonly targetSkillPopup: Popup;
-  private readonly attackerPastePopup: Popup;
-  private readonly targetPastePopup: Popup;
   private readonly attackerPropulsionVariantPopup: Popup;
   private readonly targetPropulsionVariantPopup: Popup;
-  private readonly importSidePopup: Popup;
+  private readonly importController: ImportController;
   private readonly attackerAmmoPopup: Popup;
   private readonly engagementReadout: EngagementReadout;
   private readonly sigResChoice: ChoiceGroup;
@@ -345,10 +335,27 @@ export class DomControls implements Controls {
       },
     });
 
+    this.importController = new ImportController({
+      clipboard: this.clipboard,
+      fittingImport: this.fittingImport,
+      savedFittings: this.savedFittings,
+      popupGroup: this.popupGroup,
+      els: {
+        importProfile: this.els.importProfile,
+        importSidePopup: this.els.importSidePopup,
+        importSideAttacker: this.els.importSideAttacker,
+        importSideTarget: this.els.importSideTarget,
+      },
+      sidePanel: (side) => this.side(side),
+      turret: this.turretController,
+      preferences: this.preferencesController,
+      profileController: this.profileController,
+      getSettings: () => this.getSettings(),
+      onConfigPersisted: () => this.onConfigPersisted(),
+      onProfileTextLoaded: (settings) => this.onProfileTextLoaded(settings),
+    });
     this.attackerSkillPopup = this.attackerSide.getSkillPopup();
     this.targetSkillPopup = this.targetSide.getSkillPopup();
-    this.attackerPastePopup = this.attackerSide.getPastePopup();
-    this.targetPastePopup = this.targetSide.getPastePopup();
     this.attackerPropulsionVariantPopup = this.attackerSide.getPropulsionVariantPopup();
     this.targetPropulsionVariantPopup = this.targetSide.getPropulsionVariantPopup();
     this.previewManager = new FittingPreviewManager({
@@ -367,10 +374,9 @@ export class DomControls implements Controls {
     this.targetSide.setFittingPopup(this.targetFittingPopup);
     this.attackerSide.setFittingPreview(this.previewManager);
     this.targetSide.setFittingPreview(this.previewManager);
-    this.importSidePopup = this.createImportSidePopup();
     this.popupGroup.register(this.attackerFittingPopup.popup);
     this.popupGroup.register(this.targetFittingPopup.popup);
-    this.popupGroup.register(this.importSidePopup);
+    this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.attackerAmmoPopup);
 
     this.populateHullDatalist();
@@ -393,14 +399,14 @@ export class DomControls implements Controls {
       onAttackerFittedHullCleared: () => {
         if (side === "attacker") this.onAttackerFittedHullCleared();
       },
-      importEftFitting: (text, persist) => this.importEftFitting(side, text, persist),
+      importEftFitting: (text, persist) => this.importController.importEftFitting(side, text, persist),
       mostRecentFittingFor: (hullName) => this.savedFittings.mostRecentFor(hullName),
       persistConfigChange: (notify) => this.persistConfigChange(notify),
       restoreAttackerTurret: () => {
         if (side === "attacker") this.turretController.restore(this.attackerSide.fittingText, this.attackerSide.skillConditions());
       },
-      importFittingFromText: (text) => this.importFittingFromText(side, text),
-      importFitting: () => this.importFitting(side),
+      importFittingFromText: (text) => this.importController.importFromText(side, text),
+      importFitting: () => this.importController.importFromClipboard(side),
     };
   }
 
@@ -667,175 +673,16 @@ export class DomControls implements Controls {
   }
 
 
-  private async importFitting(side: Side): Promise<void> {
-    const pastePopup = side === "attacker" ? this.attackerPastePopup : this.targetPastePopup;
-    if (pastePopup.isOpen()) {
-      this.popupGroup.close(pastePopup);
-      return;
-    }
-    if (this.attackerPastePopup.isOpen()) this.popupGroup.close(this.attackerPastePopup);
-    if (this.targetPastePopup.isOpen()) this.popupGroup.close(this.targetPastePopup);
-    let text: string;
-    try {
-      text = await this.clipboard.readText();
-    } catch (error) {
-      if (error instanceof ClipboardUnavailableError) {
-        this.popupGroup.open(pastePopup);
-        return;
-      }
-      const panel = this.side(side);
-      panel.clearImportHintTimeout();
-      panel.showImportHint("status.clipboardDenied", true);
-      return;
-    }
-    await this.importFittingFromText(side, text);
+  private onConfigPersisted(): void {
+    this.preferencesController.savePreferences();
+    this.profileController.updateDirtyState();
+    this.callbacks?.onConfigChange();
   }
 
-  private async importFittingFromText(side: Side, text: string): Promise<void> {
-    const panel = this.side(side);
-    panel.clearImportHintTimeout();
-    const trimmed = text.trimStart();
-    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
-      const parsed = parseProfile(trimmed);
-      const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
-      if (fitting === undefined) {
-        panel.showImportHint("status.fittingInvalid", true);
-        return;
-      }
-      const imported = this.importEftFitting(side, fitting);
-      if (imported) this.recordSavedFitting(imported, fitting);
-      return;
-    }
-    const imported = this.importEftFitting(side, text);
-    if (imported) this.recordSavedFitting(imported, text);
-  }
-
-  private recordSavedFitting(imported: ImportedFitting, text: string): void {
-    this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
-  }
-
-  private importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
-    const panel = this.side(side);
-    const conditions = panel.skillConditions();
-    const imported = this.fittingImport.importFitting(text, conditions);
-    if (!imported) {
-      panel.showImportHint("status.fittingInvalid", true);
-      return undefined;
-    }
-    panel.clearFittedHull();
-    panel.fittingText = text;
-    panel.overrides = {};
-    panel.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
-    panel.applyImportedFitting(this.fittedHullSummary(imported));
-    if (side === "attacker") this.turretController.applyImported(imported);
-    if (persist) {
-      panel.lastCommittedHull = imported.profile.name;
-      this.preferencesController.savePreferences();
-      this.profileController.updateDirtyState();
-      this.callbacks?.onConfigChange();
-    }
-    panel.showImportHint("status.fittingImported");
-    return imported;
-  }
-
-  private async onImportProfileClick(): Promise<void> {
-    if (this.importSidePopup.isOpen()) {
-      this.popupGroup.close(this.importSidePopup);
-      this.importSidePopup.focusTrigger();
-      return;
-    }
-    let text: string;
-    try {
-      text = await this.clipboard.readText();
-    } catch {
-      this.profileController.showStatus("status.clipboardDenied");
-      return;
-    }
-    const trimmed = text.trimStart();
-    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
-      const settings = this.profileFromText(text);
-      if (!settings) {
-        this.profileController.showStatus("status.importInvalid");
-        return;
-      }
-      this.loadSettings(settings);
-      this.profileController.showStatus("status.profileImported");
-      return;
-    }
-    if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
-      this.profileController.showStatus("status.importInvalid");
-      return;
-    }
-    this.pendingImportText = text;
-    this.popupGroup.open(this.importSidePopup);
-  }
-
-  private openImportSidePopup(text: string): void {
-    const popup = this.els.importSidePopup;
-    const trigger = this.els.importProfile;
-    popup.hidden = false;
-    trigger.setAttribute("aria-expanded", "true");
-    this.pendingImportText = text;
-    this.importSidePopupOpen = true;
-    this.els.importSideAttacker.focus();
-  }
-
-  private closeImportSidePopup(): void {
-    const popup = this.els.importSidePopup;
-    const trigger = this.els.importProfile;
-    popup.hidden = true;
-    trigger.setAttribute("aria-expanded", "false");
-    this.pendingImportText = undefined;
-    this.importSidePopupOpen = false;
-  }
-
-  private async onImportSideClick(side: Side): Promise<void> {
-    const text = this.pendingImportText;
-    this.popupGroup.close(this.importSidePopup);
-    if (text === undefined) return;
-    await this.importFittingFromText(side, text);
-  }
-
-  private profileFromText(text: string): UserSettings | undefined {
-    const parsed = parseProfile(text.trimStart());
-    if (!parsed) return undefined;
-    const ammo = this.resolveProfileAmmo(parsed);
-    return {
-      ...parsed,
-      attackerAmmo: ammo,
-      ...this.preferencesController.capture(),
-    };
-  }
-
-  private resolveProfileAmmo(parsed: ProfileSettings): string {
-    if (parsed.attackerAmmo) return parsed.attackerAmmo;
-    if (parsed.attackerFitting) {
-      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
-        skillLevel: parsed.attackerSkillLevel ?? 5,
-        overloaded: parsed.attackerOverload ?? true,
-      });
-      if (imported?.turret) return imported.turret.charge;
-    }
-    return this.chargeCatalog.usualForChargeSize(1);
-  }
-
-  private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
-    return {
-      fittingName: imported.fittingName,
-      propulsionId: imported.propulsion?.propulsionId,
-      propulsionName: imported.propulsion?.propulsionName,
-      fitted: imported.fitted,
-      propulsion: imported.propulsion,
-    };
-  }
-
-  private async copyProfile(): Promise<void> {
-    try {
-      await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
-      this.profileController.showStatus("status.copied");
-    } catch {
-      this.profileController.showStatus("status.failed");
-    }
+  private onProfileTextLoaded(settings: UserSettings): void {
+    this.loadSettings(settings);
+    this.profileController.showStatus("status.profileImported");
+    this.callbacks?.onReset();
   }
 
   private bind(): void {
@@ -860,14 +707,14 @@ export class DomControls implements Controls {
     this.els.profileSave.addEventListener("click", () => this.profileController.saveProfile());
     this.els.profileSelect.addEventListener("change", () => this.profileController.loadProfile());
     this.els.profileDelete.addEventListener("click", () => this.profileController.deleteProfile());
-    this.els.shareLink.addEventListener("click", () => this.copyProfile());
-    this.els.importProfile.addEventListener("click", () => void this.onImportProfileClick());
-    this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
-    this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
+    this.els.shareLink.addEventListener("click", () => void this.importController.copyProfile());
+    this.els.importProfile.addEventListener("click", () => void this.importController.importProfileClicked());
+    this.els.importSideAttacker.addEventListener("click", () => void this.importController.onImportSideClick("attacker"));
+    this.els.importSideTarget.addEventListener("click", () => void this.importController.onImportSideClick("target"));
     this.els.profileName.addEventListener("input", () => this.profileController.updateDirtyState());
 
-    this.els.attackerImportFitting.addEventListener("click", () => this.attackerSide.onImportFittingClick());
-    this.els.targetImportFitting.addEventListener("click", () => this.targetSide.onImportFittingClick());
+    this.els.attackerImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("attacker"));
+    this.els.targetImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("target"));
 
     const attackerPastePopup = this.els.attackerPastePopup;
     const targetPastePopup = this.els.targetPastePopup;
@@ -928,7 +775,9 @@ export class DomControls implements Controls {
         if (id === "targetMass") this.targetSide.updateSpeedFromMass();
         if (id === "attackerMass" || id === "attackerInertia") this.attackerSide.updateAlignTime();
         if (id === "targetMass" || id === "targetInertia") this.targetSide.updateAlignTime();
-        if (id === "attackerMode") this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
+        if (id === "attackerMode") {
+          this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
+        }
         this.recordOverrideForShipInput(id);
         this.profileController.updateDirtyState();
         this.preferencesController.savePreferences();
@@ -1015,7 +864,7 @@ export class DomControls implements Controls {
       i18n: this.i18n,
       els: this.fittingPopupEls(side),
       panelFor: (s) => this.side(s),
-      applyFitting: (text) => this.importEftFitting(side, text, true),
+      applyFitting: (text) => this.importController.importEftFitting(side, text, true),
       previews: this.previewManager,
     });
   }
@@ -1031,16 +880,6 @@ export class DomControls implements Controls {
       presetLabel: this.els[`${side}FittingPresetLabel`],
       empty: this.els[`${side}FittingEmpty`],
       shipImage: this.els[`${side}ShipImage`],
-    };
-  }
-
-  private createImportSidePopup(): Popup {
-    return {
-      isOpen: () => this.importSidePopupOpen,
-      open: () => this.openImportSidePopup(this.pendingImportText ?? ""),
-      close: () => this.closeImportSidePopup(),
-      focusTrigger: () => this.els.importProfile.focus(),
-      contains: (target) => target instanceof Element && target.closest("#import-side-popup, #import-profile") !== null,
     };
   }
 
