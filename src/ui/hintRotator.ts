@@ -1,6 +1,5 @@
-import type { I18n, Language } from "./i18n";
-import type { Hint } from "./hints";
-import type { Lore } from "./lores";
+import type { I18n } from "./i18n";
+import type { SlideText } from "./hints";
 import type { IntervalId, Timer } from "./timer";
 
 export interface IHintRotator {
@@ -12,9 +11,9 @@ export interface IHintRotator {
 export interface HintRotatorConfig {
   readonly element: HTMLElement;
   readonly i18n: I18n;
-  readonly candidates: readonly Hint[];
-  readonly tipText: Readonly<Record<Language, string>>;
-  readonly lores: readonly Lore[];
+  readonly candidates: readonly SlideText[];
+  readonly tipText: SlideText;
+  readonly lores: readonly SlideText[];
   readonly timer: Timer;
   readonly intervalMs?: number;
 }
@@ -22,9 +21,9 @@ export interface HintRotatorConfig {
 export class HintRotator implements IHintRotator {
   private readonly element: HTMLElement;
   private readonly i18n: I18n;
-  private readonly candidates: readonly Hint[];
-  private readonly tipText: Readonly<Record<Language, string>>;
-  private readonly lores: readonly Lore[];
+  private readonly candidates: readonly SlideText[];
+  private readonly tipText: SlideText;
+  private readonly lores: readonly SlideText[];
   private readonly timer: Timer;
   private readonly intervalMs: number;
   private currentIndex = 0;
@@ -112,7 +111,7 @@ export class HintRotator implements IHintRotator {
     const lang = this.i18n.current();
     switch (category) {
       case "tip":
-        return this.tipText[lang];
+        return this.tipText.text[lang];
       case "hint": {
         const hint = this.candidates[this.hintIndex(index)];
         return hint ? `${this.i18n.t("hint.prefix")} ${hint.text[lang]}` : "";
