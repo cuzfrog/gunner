@@ -57,6 +57,7 @@ import {
   type Els,
 } from "./controlsDom";
 import { SidePanel, type SidePanelHost } from "./sidePanel";
+import { PopupGroup, type Popup } from "./popupGroup";
 import {
   AGGRESSIVITY_MAX,
   AGGRESSIVITY_MIN,
@@ -129,8 +130,19 @@ export class DomControls implements Controls {
   private attackerTurret?: ImportedTurret;
   private attackerCargoCharges: readonly CargoCharge[] = [];
   private attackerAmmoAllExpanded = false;
+  private readonly popupGroup: PopupGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
+  private readonly attackerSkillPopup: Popup;
+  private readonly targetSkillPopup: Popup;
+  private readonly attackerPastePopup: Popup;
+  private readonly targetPastePopup: Popup;
+  private readonly attackerPropulsionVariantPopup: Popup;
+  private readonly targetPropulsionVariantPopup: Popup;
+  private readonly attackerFittingPopup: Popup;
+  private readonly targetFittingPopup: Popup;
+  private readonly importSidePopup: Popup;
+  private readonly attackerAmmoPopup: Popup;
   private selectedProfile: ProfileSettings | null = null;
   private readonly sigResOriginalTitles: Partial<Record<SigResolutionClass, string>> = {};
 
@@ -174,6 +186,7 @@ export class DomControls implements Controls {
     this.chargeCatalog = chargeCatalog;
     this.imageCatalog = imageCatalog;
     this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
+    this.popupGroup = new PopupGroup();
     this.trackingInput = new TrackingInput();
     this.hintRotator = new HintRotator({
       element: el("slide-hints"),
@@ -316,6 +329,7 @@ export class DomControls implements Controls {
     this.attackerSide = new SidePanel({
       side: "attacker",
       host: this.createSidePanelHost("attacker"),
+      popupGroup: this.popupGroup,
       els: {
         hull: this.els.attackerHull,
         shipImage: this.els.attackerShipImage,
@@ -351,6 +365,7 @@ export class DomControls implements Controls {
     this.targetSide = new SidePanel({
       side: "target",
       host: this.createSidePanelHost("target"),
+      popupGroup: this.popupGroup,
       els: {
         hull: this.els.targetHull,
         shipImage: this.els.targetShipImage,
@@ -385,6 +400,21 @@ export class DomControls implements Controls {
       timer: this.timer,
     });
 
+    this.attackerSkillPopup = this.attackerSide.getSkillPopup();
+    this.targetSkillPopup = this.targetSide.getSkillPopup();
+    this.attackerPastePopup = this.attackerSide.getPastePopup();
+    this.targetPastePopup = this.targetSide.getPastePopup();
+    this.attackerPropulsionVariantPopup = this.attackerSide.getPropulsionVariantPopup();
+    this.targetPropulsionVariantPopup = this.targetSide.getPropulsionVariantPopup();
+    this.attackerFittingPopup = this.createFittingPopup("attacker");
+    this.targetFittingPopup = this.createFittingPopup("target");
+    this.importSidePopup = this.createImportSidePopup();
+    this.attackerAmmoPopup = this.createAttackerAmmoPopup();
+    this.popupGroup.register(this.attackerFittingPopup);
+    this.popupGroup.register(this.targetFittingPopup);
+    this.popupGroup.register(this.importSidePopup);
+    this.popupGroup.register(this.attackerAmmoPopup);
+
     this.renderAttackerAmmo();
     this.populateHullDatalist();
     this.attackerSide.renderSkillOptions();
@@ -401,30 +431,24 @@ export class DomControls implements Controls {
   }
 
   private createSidePanelHost(side: "attacker" | "target"): SidePanelHost {
+    const fittingPopup = () => (side === "attacker" ? this.attackerFittingPopup : this.targetFittingPopup);
     return {
       updateFittingTrigger: (enabled) => this.updateFittingTrigger(side, enabled),
-      isFittingPopupOpen: () => this.openFittingSide === side,
+      isFittingPopupOpen: () => fittingPopup().isOpen(),
       renderFittingPopup: () => {
-        if (this.openFittingSide === side) this.renderFittingPopup(side);
+        if (fittingPopup().isOpen()) this.renderFittingPopup(side);
       },
       closeFittingPopup: () => {
-        if (this.openFittingSide === side) this.closeFittingPopup(side);
+        const popup = fittingPopup();
+        if (popup.isOpen()) this.popupGroup.close(popup);
       },
       hidePreview: () => this.hidePreview(side),
-      closeAttackerAmmoPopup: () => {
-        if (this.openAmmo) this.closeAttackerAmmoPopup();
-      },
       onAttackerFittedHullCleared: () => {
         if (side === "attacker") this.onAttackerFittedHullCleared();
       },
       importEftFitting: (text, persist) => this.importEftFitting(side, text, persist),
       mostRecentFittingFor: (hullName) => this.savedFittings.mostRecentFor(hullName),
       persistConfigChange: (notify) => this.persistConfigChange(notify),
-      closeAllSkillPopups: () => this.closeAllSkillPopups(),
-      closeAllPastePopups: () => this.closeAllPastePopups(),
-      closeAllPropulsionVariantPopups: () => this.closeAllPropulsionVariantPopups(),
-      closeAllFittingPopups: () => this.closeAllFittingPopups(),
-      closeImportSidePopup: (keepSelection) => this.closeImportSidePopup(keepSelection),
       restoreAttackerTurret: () => {
         if (side === "attacker") this.restoreAttackerTurret();
       },
@@ -434,6 +458,7 @@ export class DomControls implements Controls {
   }
 
   private onAttackerFittedHullCleared(): void {
+    this.popupGroup.close(this.attackerAmmoPopup);
     this.attackerTurret = undefined;
     this.attackerCargoCharges = [];
     this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
@@ -800,7 +825,8 @@ export class DomControls implements Controls {
 
   private setLanguage(language: Language): void {
     const selected = this.els.profileSelect.value;
-    this.closeAllSkillPopups();
+    this.popupGroup.close(this.attackerSkillPopup);
+    this.popupGroup.close(this.targetSkillPopup);
     this.i18n.setLanguage(language);
     this.i18n.translateDocument();
     this.updateLanguageToggle();
@@ -912,20 +938,22 @@ export class DomControls implements Controls {
   }
 
   private async importFitting(side: "attacker" | "target"): Promise<void> {
-    const panel = this.side(side);
-    if (panel.isPastePopupOpen()) {
-      panel.closePastePopup();
+    const pastePopup = side === "attacker" ? this.attackerPastePopup : this.targetPastePopup;
+    if (pastePopup.isOpen()) {
+      this.popupGroup.close(pastePopup);
       return;
     }
-    if (this.attackerSide.isPastePopupOpen() || this.targetSide.isPastePopupOpen()) this.closeAllPastePopups();
+    if (this.attackerPastePopup.isOpen()) this.popupGroup.close(this.attackerPastePopup);
+    if (this.targetPastePopup.isOpen()) this.popupGroup.close(this.targetPastePopup);
     let text: string;
     try {
       text = await this.clipboard.readText();
     } catch (error) {
       if (error instanceof ClipboardUnavailableError) {
-        panel.openPastePopup();
+        this.popupGroup.open(pastePopup);
         return;
       }
+      const panel = this.side(side);
       panel.clearImportHintTimeout();
       panel.showImportHint("status.clipboardDenied", true);
       return;
@@ -980,9 +1008,10 @@ export class DomControls implements Controls {
     return imported;
   }
 
-  private async importProfileFromClipboard(): Promise<void> {
-    if (this.importSidePopupOpen) {
-      this.closeImportSidePopup(true);
+  private async onImportProfileClick(): Promise<void> {
+    if (this.importSidePopup.isOpen()) {
+      this.popupGroup.close(this.importSidePopup);
+      this.importSidePopup.focusTrigger();
       return;
     }
     let text: string;
@@ -1007,11 +1036,11 @@ export class DomControls implements Controls {
       this.showProfileStatus("status.importInvalid");
       return;
     }
-    this.openImportSidePopup(text);
+    this.pendingImportText = text;
+    this.popupGroup.open(this.importSidePopup);
   }
 
   private openImportSidePopup(text: string): void {
-    if (this.openAmmo) this.closeAttackerAmmoPopup();
     const popup = this.els.importSidePopup;
     const trigger = this.els.importProfile;
     popup.hidden = false;
@@ -1021,19 +1050,18 @@ export class DomControls implements Controls {
     this.els.importSideAttacker.focus();
   }
 
-  private closeImportSidePopup(restoreFocus: boolean): void {
+  private closeImportSidePopup(): void {
     const popup = this.els.importSidePopup;
     const trigger = this.els.importProfile;
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     this.pendingImportText = undefined;
     this.importSidePopupOpen = false;
-    if (restoreFocus) trigger.focus();
   }
 
   private async onImportSideClick(side: "attacker" | "target"): Promise<void> {
     const text = this.pendingImportText;
-    this.closeImportSidePopup(false);
+    this.popupGroup.close(this.importSidePopup);
     if (text === undefined) return;
     await this.importFittingFromText(side, text);
   }
@@ -1104,7 +1132,7 @@ export class DomControls implements Controls {
     this.els.profileSelect.addEventListener("change", () => this.loadProfile());
     this.els.profileDelete.addEventListener("click", () => this.deleteProfile());
     this.els.shareLink.addEventListener("click", () => this.copyProfile());
-    this.els.importProfile.addEventListener("click", () => void this.importProfileFromClipboard());
+    this.els.importProfile.addEventListener("click", () => void this.onImportProfileClick());
     this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
     this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
     this.els.profileName.addEventListener("input", () => this.updateSaveButtonState());
@@ -1119,27 +1147,27 @@ export class DomControls implements Controls {
 
     this.els.attackerHull.addEventListener("input", () => this.attackerSide.onHullInput());
     this.els.attackerHull.addEventListener("change", () => this.attackerSide.onHullChange());
-    this.els.attackerFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("attacker"));
+    this.els.attackerFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerFittingPopup));
     this.els.attackerFittingEye.addEventListener("click", () => this.toggleFittingPreview("attacker"));
-    this.els.attackerAmmoTrigger.addEventListener("click", () => this.toggleAttackerAmmoPopup());
+    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerAmmoPopup));
     this.els.attackerAmmoExpand.addEventListener("click", () => this.onAttackerAmmoExpandClick());
     this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.onPropulsionChange());
-    this.els.attackerPropulsionGear.addEventListener("click", () => this.attackerSide.onPropulsionGearClick());
+    this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerPropulsionVariantPopup));
     this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
     this.els.attackerOverload.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(false));
     this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.onOverloadButtonClick());
     this.els.targetHull.addEventListener("input", () => this.targetSide.onHullInput());
     this.els.targetHull.addEventListener("change", () => this.targetSide.onHullChange());
-    this.els.targetFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("target"));
+    this.els.targetFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetFittingPopup));
     this.els.targetFittingEye.addEventListener("click", () => this.toggleFittingPreview("target"));
     this.els.targetPropulsion.addEventListener("change", () => this.targetSide.onPropulsionChange());
-    this.els.targetPropulsionGear.addEventListener("click", () => this.targetSide.onPropulsionGearClick());
+    this.els.targetPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.targetPropulsionVariantPopup));
     this.els.targetSkills.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(true));
     this.els.targetOverload.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(false));
     this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.onOverloadButtonClick());
 
-    this.els.attackerSkillTrigger.addEventListener("click", () => this.attackerSide.toggleSkillPopup());
-    this.els.targetSkillTrigger.addEventListener("click", () => this.targetSide.toggleSkillPopup());
+    this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSkillPopup));
+    this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSkillPopup));
 
     this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes, ["S", "M", "L", "XL"]);
 
@@ -1209,18 +1237,6 @@ export class DomControls implements Controls {
     this.els[`${side}FittingEye`].disabled = !enabled;
   }
 
-  private toggleFittingPopup(side: "attacker" | "target"): void {
-    if (this.openFittingSide === side) {
-      this.closeFittingPopup(side);
-      return;
-    }
-    if (this.openFittingSide !== null) this.closeAllFittingPopups();
-    this.closeAllSkillPopups();
-    this.closeAllPastePopups();
-    if (this.openAmmo) this.closeAttackerAmmoPopup();
-    this.openFittingPopup(side);
-  }
-
   private openFittingPopup(side: "attacker" | "target"): void {
     const popup = this.els[`${side}FittingPopup`];
     const trigger = this.els[`${side}FittingTrigger`];
@@ -1253,11 +1269,6 @@ export class DomControls implements Controls {
     trigger.setAttribute("aria-expanded", "false");
     if (this.openFittingSide === side) this.openFittingSide = null;
     if (this.openPreviewSide === side && this.currentPreviewInMenu) this.hidePreview(side);
-    trigger.focus();
-  }
-
-  private closeAllFittingPopups(): void {
-    if (this.openFittingSide) this.closeFittingPopup(this.openFittingSide);
   }
 
   private renderFittingPopup(side: "attacker" | "target"): void {
@@ -1438,7 +1449,9 @@ export class DomControls implements Controls {
 
   private onFittingItemClick(side: "attacker" | "target", text: string): void {
     const imported = this.importEftFitting(side, text);
-    this.closeFittingPopup(side);
+    const fittingPopup = side === "attacker" ? this.attackerFittingPopup : this.targetFittingPopup;
+    this.popupGroup.close(fittingPopup);
+    fittingPopup.focusTrigger();
     if (imported && this.openPreviewSide === side && !this.currentPreviewInMenu) {
       this.renderFittingPreview(side, text, this.els[`${side}ShipImage`], this.els[`${side}FittingEye`]);
     }
@@ -1610,18 +1623,9 @@ export class DomControls implements Controls {
   }
 
   private onAttackerAmmoItemClick(name: string): void {
-    if (this.applyAttackerAmmo(name)) this.closeAttackerAmmoPopup();
-  }
-
-  private toggleAttackerAmmoPopup(): void {
-    if (this.openAmmo) {
-      this.closeAttackerAmmoPopup();
-      return;
-    }
-    this.closeAllSkillPopups();
-    this.closeAllPastePopups();
-    this.closeAllFittingPopups();
-    this.openAttackerAmmoPopup();
+    if (!this.applyAttackerAmmo(name)) return;
+    this.popupGroup.close(this.attackerAmmoPopup);
+    this.attackerAmmoPopup.focusTrigger();
   }
 
   private openAttackerAmmoPopup(): void {
@@ -1648,7 +1652,6 @@ export class DomControls implements Controls {
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     this.openAmmo = false;
-    trigger.focus();
   }
 
   private onAttackerAmmoExpandClick(): void {
@@ -1760,53 +1763,13 @@ export class DomControls implements Controls {
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
-    const hasOpenPopup =
-      this.attackerSide.isSkillPopupOpen() ||
-      this.targetSide.isSkillPopupOpen() ||
-      this.attackerSide.isPastePopupOpen() ||
-      this.targetSide.isPastePopupOpen() ||
-      this.openFittingSide !== null ||
-      this.attackerSide.isPropulsionVariantPopupOpen() ||
-      this.targetSide.isPropulsionVariantPopupOpen() ||
-      this.importSidePopupOpen ||
-      this.openAmmo ||
-      this.openPreviewSide !== null;
-    if (!hasOpenPopup) return;
+    if (!this.popupGroup.hasOpen() && !this.openPreviewSide) return;
     const target = event.target;
     if (!isEventTargetWithClosest(target)) return;
-    if (this.attackerSide.isSkillPopupOpen() || this.targetSide.isSkillPopupOpen()) {
-      const insideSkill = target.closest("#attacker-skill-field, #target-skill-field");
-      if (!insideSkill) this.closeAllSkillPopups();
-    }
-    if (this.attackerSide.isPastePopupOpen() || this.targetSide.isPastePopupOpen()) {
-      const insidePaste = target.closest("#attacker-paste-popup, #target-paste-popup, #attacker-import-fitting, #target-import-fitting");
-      if (!insidePaste) this.closeAllPastePopups();
-    }
-    if (this.openFittingSide !== null) {
-      const side = this.openFittingSide;
-      const insideFitting = target.closest(fittingAreaSelector(side));
-      if (!insideFitting) this.closeAllFittingPopups();
-    }
+    this.popupGroup.onPointerDown(target);
     if (this.openPreviewSide) {
       const side = this.openPreviewSide;
-      const insidePreview = target.closest(fittingAreaSelector(side));
-      if (!insidePreview) this.hidePreview(side);
-    }
-    if (this.importSidePopupOpen) {
-      const insideImport = target.closest("#import-side-popup, #import-profile");
-      if (!insideImport) this.closeImportSidePopup(false);
-    }
-    if (this.openAmmo) {
-      const insideAmmo = target.closest("#attacker-ammo-field");
-      if (!insideAmmo) this.closeAttackerAmmoPopup();
-    }
-    if (this.attackerSide.isPropulsionVariantPopupOpen()) {
-      const inside = target.closest("#attacker-propulsion-variants, #attacker-propulsion-gear");
-      if (!inside) this.attackerSide.closePropulsionVariantPopup();
-    }
-    if (this.targetSide.isPropulsionVariantPopupOpen()) {
-      const inside = target.closest("#target-propulsion-variants, #target-propulsion-gear");
-      if (!inside) this.targetSide.closePropulsionVariantPopup();
+      if (target.closest(fittingAreaSelector(side)) === null) this.hidePreview(side);
     }
   }
 
@@ -1818,53 +1781,7 @@ export class DomControls implements Controls {
       this.hidePreview(side);
       eye.focus();
     }
-    if (this.attackerSide.isSkillPopupOpen()) {
-      this.attackerSide.closeSkillPopup();
-      this.els.attackerSkillTrigger.focus();
-    } else if (this.targetSide.isSkillPopupOpen()) {
-      this.targetSide.closeSkillPopup();
-      this.els.targetSkillTrigger.focus();
-    }
-    if (this.attackerSide.isPastePopupOpen()) {
-      this.attackerSide.closePastePopup();
-      this.els.attackerImportFitting.focus();
-    } else if (this.targetSide.isPastePopupOpen()) {
-      this.targetSide.closePastePopup();
-      this.els.targetImportFitting.focus();
-    }
-    if (this.openFittingSide !== null) {
-      const side = this.openFittingSide;
-      this.closeFittingPopup(side);
-      this.els[`${side}FittingTrigger`].focus();
-    }
-    if (this.importSidePopupOpen) {
-      this.closeImportSidePopup(true);
-    }
-    if (this.openAmmo) {
-      this.closeAttackerAmmoPopup();
-    }
-    if (this.attackerSide.isPropulsionVariantPopupOpen()) {
-      this.attackerSide.closePropulsionVariantPopup();
-      this.els.attackerPropulsionGear.focus();
-    } else if (this.targetSide.isPropulsionVariantPopupOpen()) {
-      this.targetSide.closePropulsionVariantPopup();
-      this.els.targetPropulsionGear.focus();
-    }
-  }
-
-  private closeAllSkillPopups(): void {
-    this.attackerSide.closeSkillPopup();
-    this.targetSide.closeSkillPopup();
-  }
-
-  private closeAllPastePopups(): void {
-    this.attackerSide.closePastePopup();
-    this.targetSide.closePastePopup();
-  }
-
-  private closeAllPropulsionVariantPopups(): void {
-    this.attackerSide.closePropulsionVariantPopup();
-    this.targetSide.closePropulsionVariantPopup();
+    this.popupGroup.onKeyDown(event);
   }
 
   private bindChoiceGroup(group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): void {
@@ -1892,6 +1809,36 @@ export class DomControls implements Controls {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
+  }
+
+  private createFittingPopup(side: "attacker" | "target"): Popup {
+    return {
+      isOpen: () => this.openFittingSide === side,
+      open: () => this.openFittingPopup(side),
+      close: () => this.closeFittingPopup(side),
+      focusTrigger: () => this.els[`${side}FittingTrigger`].focus(),
+      contains: (target) => target instanceof Element && target.closest(fittingAreaSelector(side)) !== null,
+    };
+  }
+
+  private createImportSidePopup(): Popup {
+    return {
+      isOpen: () => this.importSidePopupOpen,
+      open: () => this.openImportSidePopup(this.pendingImportText ?? ""),
+      close: () => this.closeImportSidePopup(),
+      focusTrigger: () => this.els.importProfile.focus(),
+      contains: (target) => target instanceof Element && target.closest("#import-side-popup, #import-profile") !== null,
+    };
+  }
+
+  private createAttackerAmmoPopup(): Popup {
+    return {
+      isOpen: () => this.openAmmo,
+      open: () => this.openAttackerAmmoPopup(),
+      close: () => this.closeAttackerAmmoPopup(),
+      focusTrigger: () => this.els.attackerAmmoTrigger.focus(),
+      contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
+    };
   }
 }
 

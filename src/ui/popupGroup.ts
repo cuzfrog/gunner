@@ -33,6 +33,10 @@ export class PopupGroup {
     for (const p of this.popups) if (p.isOpen()) p.close();
   }
 
+  hasOpen(): boolean {
+    return this.popups.some((p) => p.isOpen());
+  }
+
   onPointerDown(target: EventTarget | null): void {
     if (!target) return;
     for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();

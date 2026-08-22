@@ -8,6 +8,7 @@ import type { ImageCatalog } from "./imageCatalog";
 import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "./settings";
 import type { SavedFitting } from "./savedFittings";
 import type { TimeoutId, Timer } from "./timer";
+import { PopupGroup, type Popup } from "./popupGroup";
 
 export interface SidePanelHost {
   updateFittingTrigger(enabled: boolean): void;
@@ -15,16 +16,10 @@ export interface SidePanelHost {
   renderFittingPopup(): void;
   closeFittingPopup(): void;
   hidePreview(): void;
-  closeAttackerAmmoPopup(): void;
   onAttackerFittedHullCleared(): void;
   importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
   mostRecentFittingFor(hullName: string): SavedFitting | undefined;
   persistConfigChange(notify?: boolean): void;
-  closeAllSkillPopups(): void;
-  closeAllPastePopups(): void;
-  closeAllPropulsionVariantPopups(): void;
-  closeAllFittingPopups(): void;
-  closeImportSidePopup(keepSelection: boolean): void;
   restoreAttackerTurret(): void;
   importFittingFromText(text: string): Promise<void>;
   importFitting(): Promise<void>;
@@ -76,10 +71,15 @@ export class SidePanel {
   private pastePopupOpen = false;
   private propulsionVariantPopupOpen = false;
   private importHintTimeout?: TimeoutId;
+  private readonly popupGroup: PopupGroup;
+  private readonly skillPopup: Popup;
+  private readonly pastePopup: Popup;
+  private readonly propulsionVariantPopup: Popup;
 
   constructor({
     side,
     host,
+    popupGroup,
     els,
     i18n,
     ships,
@@ -89,6 +89,7 @@ export class SidePanel {
   }: {
     side: "attacker" | "target";
     host: SidePanelHost;
+    popupGroup: PopupGroup;
     els: SidePanelElements;
     i18n: I18n;
     ships: Ships;
@@ -98,12 +99,19 @@ export class SidePanel {
   }) {
     this.side = side;
     this.host = host;
+    this.popupGroup = popupGroup;
     this.els = els;
     this.i18n = i18n;
     this.ships = ships;
     this.fittingImport = fittingImport;
     this.imageCatalog = imageCatalog;
     this.timer = timer;
+    this.skillPopup = this.createSkillPopup();
+    this.pastePopup = this.createPastePopup();
+    this.propulsionVariantPopup = this.createPropulsionVariantPopup();
+    this.popupGroup.register(this.skillPopup);
+    this.popupGroup.register(this.pastePopup);
+    this.popupGroup.register(this.propulsionVariantPopup);
   }
 
   get profile(): ShipProfile | undefined {
@@ -140,6 +148,18 @@ export class SidePanel {
 
   set lastCommittedHull(value: string | undefined) {
     this.lastCommittedHullValue = value;
+  }
+
+  getSkillPopup(): Popup {
+    return this.skillPopup;
+  }
+
+  getPastePopup(): Popup {
+    return this.pastePopup;
+  }
+
+  getPropulsionVariantPopup(): Popup {
+    return this.propulsionVariantPopup;
   }
 
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void {
@@ -228,9 +248,6 @@ export class SidePanel {
     }
     this.host.updateFittingTrigger(false);
     this.host.closeFittingPopup();
-    if (this.side === "attacker") {
-      this.host.closeAttackerAmmoPopup();
-    }
     this.updateHullHint();
     this.renderPropulsionOptions();
     if (persist) {
@@ -482,20 +499,6 @@ export class SidePanel {
     this.host.persistConfigChange();
   }
 
-  onPropulsionGearClick(): void {
-    if (this.propulsionVariantPopupOpen) {
-      this.closePropulsionVariantPopup();
-      return;
-    }
-    this.host.closeAllPropulsionVariantPopups();
-    this.host.closeAllSkillPopups();
-    this.host.closeAllPastePopups();
-    this.host.closeAllFittingPopups();
-    this.host.closeImportSidePopup(false);
-    this.host.closeAttackerAmmoPopup();
-    this.openPropulsionVariantPopup();
-  }
-
   closePropulsionVariantPopup(): void {
     this.els.propulsionVariants.hidden = true;
     this.els.propulsionGear.setAttribute("aria-expanded", "false");
@@ -531,16 +534,6 @@ export class SidePanel {
     setText(this.els.skillSummary, summary);
   }
 
-  toggleSkillPopup(): void {
-    if (this.isSkillPopupOpen()) {
-      this.closeSkillPopup();
-      return;
-    }
-    this.host.closeAllSkillPopups();
-    this.host.closeAttackerAmmoPopup();
-    this.openSkillPopup();
-  }
-
   openSkillPopup(): void {
     const popup = this.els.skillPopup;
     const trigger = this.els.skillTrigger;
@@ -563,8 +556,6 @@ export class SidePanel {
   }
 
   openPastePopup(): void {
-    this.host.closeAllPastePopups();
-    this.host.closeAttackerAmmoPopup();
     this.els.pastePopup.hidden = false;
     this.els.pasteInput.focus();
     this.pastePopupOpen = true;
@@ -847,5 +838,36 @@ export class SidePanel {
     button.appendChild(span);
     button.addEventListener("click", onClick);
     return button;
+  }
+
+  private createSkillPopup(): Popup {
+    return {
+      isOpen: () => this.isSkillPopupOpen(),
+      open: () => this.openSkillPopup(),
+      close: () => this.closeSkillPopup(),
+      focusTrigger: () => this.els.skillTrigger.focus(),
+      contains: (target) => target instanceof Element && target.closest(`#${this.side}-skill-field`) !== null,
+    };
+  }
+
+  private createPastePopup(): Popup {
+    return {
+      isOpen: () => this.isPastePopupOpen(),
+      open: () => this.openPastePopup(),
+      close: () => this.closePastePopup(),
+      focusTrigger: () => this.els.importFitting.focus(),
+      contains: (target) => target instanceof Element && target.closest(`#${this.side}-paste-popup, #${this.side}-import-fitting`) !== null,
+    };
+  }
+
+  private createPropulsionVariantPopup(): Popup {
+    return {
+      isOpen: () => this.isPropulsionVariantPopupOpen(),
+      open: () => this.openPropulsionVariantPopup(),
+      close: () => this.closePropulsionVariantPopup(),
+      focusTrigger: () => this.els.propulsionGear.focus(),
+      contains: (target) =>
+        target instanceof Element && target.closest(`#${this.side}-propulsion-variants, #${this.side}-propulsion-gear`) !== null,
+    };
   }
 }

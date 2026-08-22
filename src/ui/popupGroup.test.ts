@@ -201,4 +201,17 @@ describe("PopupGroup", () => {
     expect(b.closeCalled).toBe(true);
     expect(b.focusCalled).toBe(true);
   });
+
+  test("hasOpen is true only when at least one popup is open", () => {
+    const [a, b] = makePopups(2);
+    const group = new PopupGroup();
+    group.register(a);
+    group.register(b);
+
+    expect(group.hasOpen()).toBe(false);
+    a.openResult = true;
+    expect(group.hasOpen()).toBe(true);
+    a.openResult = false;
+    expect(group.hasOpen()).toBe(false);
+  });
 });
