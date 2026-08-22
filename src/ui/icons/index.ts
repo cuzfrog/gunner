@@ -1,2 +1,2 @@
 export type { ImageCatalog } from "./imageCatalog";
-export { StaticImageCatalog } from "./imageCatalog";
+export { registerIconsModule } from "./module";

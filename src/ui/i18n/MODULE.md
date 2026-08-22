@@ -1,10 +1,11 @@
 ---
 no-new-exports:
-  - index.ts
+  - i18nImpl.ts
+  - module.ts
 ---
 
 # i18n
 
 Text translation and language state.
 
-The public surface is `Language`, `I18n`, and `I18N_DICTIONARY`. `I18nImpl` is exposed through the module index only so `src/ui/module.ts` can register it.
+The public surface is `Language`, `I18n`, `I18N_DICTIONARY`, and `registerI18nModule`. `I18nImpl` is registered by `module.ts` under the key `i18n`.

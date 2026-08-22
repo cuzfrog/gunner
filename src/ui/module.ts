@@ -1,22 +1,20 @@
 import { asClass, type AwilixContainer } from "awilix";
-import { DomControls } from "./controls";
-import { I18nImpl } from "./i18n";
-import { StaticImageCatalog } from "./icons";
+import { registerControlsModule } from "./controls";
+import { registerI18nModule } from "./i18n";
+import { registerIconsModule } from "./icons";
+import { registerSettingsModule } from "./settings";
 import { RafLoop } from "./loop";
-import { LocalSavedFittings, LocalSettingsStore, SettingsParser } from "./settings";
 import { CanvasRenderer } from "./renderer";
 import { DefaultTimer } from "./timer";
 
 export function registerUiModule(cradle: AwilixContainer<object>): void {
+  registerControlsModule(cradle);
+  registerI18nModule(cradle);
+  registerSettingsModule(cradle);
+  registerIconsModule(cradle);
   cradle.register({
-    controls: asClass(DomControls).singleton(),
-    i18n: asClass(I18nImpl).singleton(),
-    settingsStore: asClass(LocalSettingsStore).singleton(),
-    parser: asClass(SettingsParser).singleton(),
-    savedFittings: asClass(LocalSavedFittings).singleton(),
     renderer: asClass(CanvasRenderer).singleton(),
     loop: asClass(RafLoop).singleton(),
     timer: asClass(DefaultTimer).singleton(),
-    imageCatalog: asClass(StaticImageCatalog).singleton(),
   });
 }

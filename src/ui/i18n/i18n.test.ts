@@ -1,4 +1,5 @@
-import { I18nImpl, type Language } from "./index";
+import { I18nImpl } from "./i18nImpl";
+import type { Language } from "./dictionaryTypes";
 
 class FakeElement {
   private _text = "";

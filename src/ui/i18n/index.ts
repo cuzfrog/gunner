@@ -1,4 +1,4 @@
 export type { Language } from "./dictionaryTypes";
 export { I18N_DICTIONARY } from "./dictionary";
 export type { I18n } from "./i18nImpl";
-export { I18nImpl } from "./i18nImpl";
+export { registerI18nModule } from "./module";

@@ -15,4 +15,4 @@ Browser presentation, input, and persistence: DOM form controls, canvas renderer
 
 The `settings/` sub-module owns persistence (`LocalSettingsStore`), saved fittings (`LocalSavedFittings`), and profile sharing (`profileText`). The `i18n/` sub-module owns language switching and the dictionary. The `icons/` sub-module owns the static image catalog; `iconIds.ts` and `droneIconIds.ts` are generated data files internal to that module.
 
-DI wiring: `module.ts` registers `controls`, `renderer`, `loop`, `settingsStore`, `savedFittings`, `i18n`, `imageCatalog` and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root.
+DI wiring: `module.ts` composes the `controls`, `i18n`, `settings`, and `icons` sub-modules and registers `renderer`, `loop`, and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root.
