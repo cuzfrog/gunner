@@ -142,6 +142,34 @@ function fakeRenderingContext(): FakeContext {
   };
 }
 
+const DEFAULT_VALUES: Record<string, string> = {
+  tracking: "0.32",
+  sigRes: "S",
+  optimal: "5000",
+  falloff: "5000",
+  "attacker-hull": "",
+  "attacker-speed": "0",
+  "attacker-propulsion": "",
+  "attacker-skills": "5",
+  "attacker-mass": "1200000",
+  "attacker-inertia": "3",
+  "attacker-mode": "keepAtRange",
+  "attacker-range": "5000",
+  "maneuver-aggressivity": "1",
+  "grid-brightness-slider": "0.2",
+  "initial-distance": "5000",
+  "target-hull": "",
+  "target-speed": "1000",
+  "target-propulsion": "",
+  "target-skills": "5",
+  "target-mass": "10000000",
+  "target-inertia": "0.45",
+  "target-mode": "orbit",
+  "target-range": "5000",
+  "target-sig": "40",
+  "sim-speed": "4",
+};
+
 const TAG_BY_ID: Record<string, string> = {
   "app-version": "SPAN",
   "attacker-align-time": "SPAN",
@@ -271,7 +299,9 @@ function fakeDocument(): Document {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
       if (!elements.has(id)) {
-        elements.set(id, id === "scene" ? new FakeCanvas() : new FakeElement());
+        const el = id === "scene" ? new FakeCanvas() : new FakeElement();
+        if (id in DEFAULT_VALUES) el.value = DEFAULT_VALUES[id];
+        elements.set(id, el);
       }
       elements.get(id)!.tagName = TAG_BY_ID[id] ?? "DIV";
       return elements.get(id) as unknown as HTMLElement;

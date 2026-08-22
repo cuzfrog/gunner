@@ -2,6 +2,7 @@ import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipP
 import {
   SIG_RESOLUTIONS,
   alignTime,
+  type AutopilotMode,
   type EngagementFrame,
   type HitChance,
   type HitChanceBreakdown,
@@ -473,7 +474,7 @@ export class DomControls implements Controls {
   getTurret(): TurretSpec {
     return {
       tracking: this.trackingInput.rad,
-      sigResolution: SIG_RESOLUTIONS[this.els.sigRes.value as SigResolutionClass],
+      sigResolution: SIG_RESOLUTIONS[this.currentSigResValue()],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
     };
@@ -491,7 +492,7 @@ export class DomControls implements Controls {
       maxSpeed: num(this.els.attackerSpeed),
       mass: num(this.els.attackerMass),
       inertiaModifier: num(this.els.attackerInertia),
-      mode: this.els.attackerMode.value as ShipConfig["mode"],
+      mode: this.currentMode("attacker"),
       desiredRange: num(this.els.attackerRange),
       aggressivity,
       orbitDirection: "cw",
@@ -501,7 +502,7 @@ export class DomControls implements Controls {
       maxSpeed: num(this.els.targetSpeed),
       mass: num(this.els.targetMass),
       inertiaModifier: num(this.els.targetInertia),
-      mode: this.els.targetMode.value as ShipConfig["mode"],
+      mode: this.currentMode("target"),
       desiredRange: num(this.els.targetRange),
       aggressivity: AGGRESSIVITY_MIN,
       orbitDirection: "cw",
@@ -597,11 +598,11 @@ export class DomControls implements Controls {
       version: USER_SETTINGS_VERSION,
       tracking: this.trackingInput.rad,
       trackingUnit: this.trackingInput.unit,
-      sigRes: this.els.sigRes.value as SigResolutionClass,
+      sigRes: this.currentSigResValue(),
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
       attackerSpeed: num(this.els.attackerSpeed),
-      attackerMode: this.els.attackerMode.value as ShipConfig["mode"],
+      attackerMode: this.currentMode("attacker"),
       attackerRange: num(this.els.attackerRange),
       maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity),
       gridBrightness: this.getGridBrightness(),
@@ -616,7 +617,7 @@ export class DomControls implements Controls {
       attackerFittedHull: this.attackerFittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: num(this.els.targetSpeed),
-      targetMode: this.els.targetMode.value as ShipConfig["mode"],
+      targetMode: this.currentMode("target"),
       targetRange: num(this.els.targetRange),
       targetMass: num(this.els.targetMass),
       targetInertia: num(this.els.targetInertia),
@@ -723,8 +724,22 @@ export class DomControls implements Controls {
     this.els.targetRange.value = String(Math.round(best));
   }
 
+  private currentSigResValue(): SigResolutionClass {
+    const value = this.els.sigRes.value;
+    if (!isSigResClass(value)) throw new Error(`Invalid sigRes value: ${value}`);
+    return value;
+  }
+
+  private currentMode(side: "attacker" | "target"): AutopilotMode {
+    const select = this.els[`${side}Mode`];
+    if (!isHtmlSelectElement(select)) throw new Error(`Expected ${side}Mode to be a select`);
+    const value = select.value;
+    if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
+    return value;
+  }
+
   private currentSigResolution(): number {
-    return SIG_RESOLUTIONS[this.els.sigRes.value as SigResolutionClass];
+    return SIG_RESOLUTIONS[this.currentSigResValue()];
   }
 
   private setTrackingUnit(unit: TrackingUnit): void {
@@ -2246,7 +2261,7 @@ export class DomControls implements Controls {
 
   private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
     if (id === "tracking") this.recordOverride("attacker", "tracking", this.trackingInput.rad);
-    if (id === "sigRes") this.recordOverride("attacker", "sigRes", this.els.sigRes.value as SigResolutionClass);
+    if (id === "sigRes") this.recordOverride("attacker", "sigRes", this.currentSigResValue());
     if (id === "optimal") this.recordOverride("attacker", "optimal", num(this.els.optimal));
     if (id === "falloff") this.recordOverride("attacker", "falloff", num(this.els.falloff));
     if (id === "targetSig") this.recordOverride("target", "targetSig", Math.max(num(this.els.targetSig), 1));
@@ -2383,8 +2398,8 @@ export class DomControls implements Controls {
       this.openAmmo ||
       this.openPreviewSide !== null;
     if (!hasOpenPopup) return;
-    const target = event.target as Element | null;
-    if (typeof target?.closest !== "function") return;
+    const target = event.target;
+    if (!isEventTargetWithClosest(target)) return;
     if (this.openSkillSide !== null) {
       const insideSkill = target.closest("#attacker-skill-field, #target-skill-field");
       if (!insideSkill) this.closeAllSkillPopups();
@@ -2551,7 +2566,7 @@ export class DomControls implements Controls {
     group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.skillLevel"));
     for (let level = 0; level <= 5; level++) {
-      const skill = level as SkillLevel;
+      const skill = skillLevelFromString(String(level));
       const option = document.createElement("option");
       option.value = String(level);
       option.textContent = skillOptionLabel(this.i18n, skill);
@@ -2724,6 +2739,16 @@ function formatMultiplier(value: number): string {
 
 function isSigResClass(value: string): value is SigResolutionClass {
   return value === "S" || value === "M" || value === "L" || value === "XL";
+}
+
+function isAutopilotMode(value: string): value is AutopilotMode {
+  return value === "orbit" || value === "keepAtRange" || value === "midships";
+}
+
+function isEventTargetWithClosest(target: EventTarget | null): target is EventTarget & { closest: (selector: string) => Element | null } {
+  if (target === null) return false;
+  const closest: unknown = Reflect.get(target, "closest");
+  return typeof closest === "function";
 }
 
 const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
