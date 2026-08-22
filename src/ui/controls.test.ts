@@ -127,15 +127,33 @@ const VARIANT_NAMES: Record<string, string[]> = {
   "ab-10mn": ["10MN Afterburner I", "10MN Y-S8 Compact Afterburner"],
 };
 
-const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36, alignTime: 1_000_000 * 3 * Math.log(4) * 1e-6 };
-const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36, alignTime: 1_000_000 * 2 * Math.log(4) * 1e-6 };
-const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36, alignTime: 1_500_000 * 3 * Math.log(4) * 1e-6 };
-const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
-const RIFTER_AB10_COMPACT_SKILL5: ShipStats = { mass: 6_000_000, inertiaModifier: 2, maxSpeed: 2238.48, sigRadius: 36, alignTime: 6_000_000 * 2 * Math.log(4) * 1e-6 };
-const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210, alignTime: 1_500_000 * 3 * Math.log(4) * 1e-6 };
-const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
-const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
-const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70, alignTime: 1_500_000 * 2.5 * Math.log(4) * 1e-6 };
+const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36, alignTime: Math.log(4) * 3 };
+const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36, alignTime: Math.log(4) * 2 };
+const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36, alignTime: Math.log(4) * 4.5 };
+const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36, alignTime: Math.log(4) * 3 };
+const RIFTER_AB10_COMPACT_SKILL5: ShipStats = {
+  mass: 6_000_000,
+  inertiaModifier: 2,
+  maxSpeed: 2238.48,
+  sigRadius: 36,
+  alignTime: Math.log(4) * 12,
+};
+const RIFTER_MWD_SKILL0: ShipStats = {
+  mass: 1_500_000,
+  inertiaModifier: 3,
+  maxSpeed: 3048.82,
+  sigRadius: 210,
+  alignTime: Math.log(4) * 4.5,
+};
+const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210, alignTime: Math.log(4) * 3 };
+const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = {
+  mass: 1_500_000,
+  inertiaModifier: 2,
+  maxSpeed: 4649.72,
+  sigRadius: 210,
+  alignTime: Math.log(4) * 3,
+};
+const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70, alignTime: Math.log(4) * 3.75 };
 
 const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
