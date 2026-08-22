@@ -1,7 +1,6 @@
 import { setText } from "./controlsDom";
-import { settingsEqual } from "./controlsFormat";
+import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../settings";
 import type { I18n } from "../i18n";
-import type { ProfileSettings, SettingsStore, StartupState } from "../settings";
 import type { TimeoutId, Timer } from "../timer";
 
 export interface ProfileEls {
@@ -86,7 +85,7 @@ export class ProfileController {
       saved = this.selectedProfile;
     }
     const current = this.captureCurrent();
-    const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
+    const pending = saved ? !profilesEqual(saved, current) : name.length > 0;
     this.els.profileSave.classList.toggle("unsaved", pending);
   }
 

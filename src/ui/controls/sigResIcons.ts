@@ -1,8 +1,8 @@
 import type { SigResolutionClass } from "../../sim";
 import type { GunFamilies, ImportedTurret } from "../../fitting";
 import type { ImageCatalog } from "../icons";
+import { isSigResolutionClass } from "../settings";
 import { isHtmlButtonElement, isHtmlImageElement } from "./controlsDom";
-import { isSigResClass } from "./controlsFormat";
 
 export interface SigResIconEls {
   readonly sigResOptions: HTMLElement;
@@ -22,7 +22,7 @@ export class SigResIcons {
     for (const button of Array.from(els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
       const value = button.getAttribute("data-value") ?? "";
-      if (!isSigResClass(value)) continue;
+      if (!isSigResolutionClass(value)) continue;
       const img = this.iconFor(button);
       const original = this.originalTitle(value, button);
       if (turret) {
@@ -45,7 +45,7 @@ export class SigResIcons {
     for (const button of Array.from(els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
       const value = button.getAttribute("data-value") ?? "";
-      if (!isSigResClass(value)) continue;
+      if (!isSigResolutionClass(value)) continue;
       const img = this.iconFor(button);
       img.hidden = true;
       const original = this.originalTitles[value];

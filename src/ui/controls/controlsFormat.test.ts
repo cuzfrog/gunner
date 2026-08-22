@@ -16,7 +16,6 @@ import {
   positionFromAggressivity,
   profileSettingsOf,
   propulsionOptionLabel,
-  settingsEqual,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
@@ -99,17 +98,6 @@ describe("profile settings", () => {
     expect(profile.attackerAmmo).toBe("Hail S");
   });
 
-  test("detects equality independent of key order", () => {
-    const a = profileSettingsOf(baseUserSettings());
-    const b = profileSettingsOf(baseUserSettings());
-    expect(settingsEqual(a, b)).toBe(true);
-  });
-
-  test("detects inequality for differing profile values", () => {
-    const a = profileSettingsOf(baseUserSettings());
-    const b = profileSettingsOf(baseUserSettings({ attackerSpeed: 2000 }));
-    expect(settingsEqual(a, b)).toBe(false);
-  });
 });
 
 describe("hit chance color", () => {

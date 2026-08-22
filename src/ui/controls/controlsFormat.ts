@@ -1,7 +1,6 @@
 import type { ChargeOption } from "../../fitting";
 import { PALETTE } from "../palette";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
-import type { AutopilotMode, SigResolutionClass } from "../../sim";
 import type { I18n } from "../i18n";
 import type { ProfileSettings, UserSettings } from "../settings";
 
@@ -68,21 +67,9 @@ export function formatMultiplier(value: number): string {
   return String(Number(value.toFixed(2)));
 }
 
-export function isSigResClass(value: string): value is SigResolutionClass {
-  return value === "S" || value === "M" || value === "L" || value === "XL";
-}
-
-export function isAutopilotMode(value: string): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange" || value === "midships";
-}
-
 export function profileSettingsOf(settings: UserSettings): ProfileSettings {
   const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
   return rest;
-}
-
-export function settingsEqual(a: ProfileSettings, b: ProfileSettings): boolean {
-  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
 }
 
 export function escapeHtml(value: string): string {

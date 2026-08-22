@@ -39,14 +39,6 @@ export function isPositive(value: unknown): value is number {
   return isFiniteNumber(value) && value > 0;
 }
 
-export function isNonNegativeNumber(value: unknown): value is number {
-  return isFiniteNumber(value) && value >= 0;
-}
-
-export function isPositiveNumber(value: unknown): value is number {
-  return isFiniteNumber(value) && value > 0;
-}
-
 export function isOptionalNonNegative(value: unknown): value is number | undefined {
   return value === undefined || (isFiniteNumber(value) && value >= 0);
 }
@@ -103,12 +95,12 @@ export function isFittedHull(value: unknown): value is FittedHull {
   const s = value as Record<string, unknown>;
   if (s.massMultiplier === undefined) s.massMultiplier = 1;
   return (
-    isNonNegativeNumber(s.mass) &&
-    isPositiveNumber(s.massMultiplier) &&
-    isPositiveNumber(s.speedMultiplier) &&
-    isPositiveNumber(s.inertiaMultiplier) &&
-    isPositiveNumber(s.sigMultiplier) &&
-    isNonNegativeNumber(s.sigRadiusAdd)
+    isNonNegative(s.mass) &&
+    isPositive(s.massMultiplier) &&
+    isPositive(s.speedMultiplier) &&
+    isPositive(s.inertiaMultiplier) &&
+    isPositive(s.sigMultiplier) &&
+    isNonNegative(s.sigRadiusAdd)
   );
 }
 
@@ -116,7 +108,7 @@ export function isOptionalPropulsionStats(value: unknown): value is PropulsionSt
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  return isNonNegativeNumber(s.thrust) && isNonNegativeNumber(s.speedBonus) && isNonNegativeNumber(s.massAddition) && isNonNegativeNumber(s.sigBloom);
+  return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom);
 }
 
 export function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary | undefined {

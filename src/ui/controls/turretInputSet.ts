@@ -1,7 +1,6 @@
 import { SIG_RESOLUTIONS } from "../../sim";
 import type { ImportedTurret } from "../../fitting";
-import type { ProfileParamOverrides } from "../settings";
-import { isSigResClass } from "./controlsFormat";
+import { type ProfileParamOverrides, isSigResolutionClass } from "../settings";
 import type { SigResButtons } from "./sigResButtons";
 import { TrackingInput } from "./trackingInput";
 import type { TurretEls } from "./turretEls";
@@ -41,7 +40,7 @@ export class TurretInputSet {
 
   currentSigResValue(): "S" | "M" | "L" | "XL" {
     const value = this.els.sigRes.value;
-    if (!isSigResClass(value)) throw new Error(`Invalid sigRes value: ${value}`);
+    if (!isSigResolutionClass(value)) throw new Error(`Invalid sigRes value: ${value}`);
     return value;
   }
 }

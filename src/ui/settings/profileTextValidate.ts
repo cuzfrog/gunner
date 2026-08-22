@@ -1,7 +1,13 @@
 import type { AutopilotMode, SigResolutionClass } from "../../sim";
-import type { FittedHull, PropulsionStats, SkillLevel } from "../../ships";
 import { USER_SETTINGS_VERSION, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings } from "./userSettings";
-import { isAutopilotMode, isNonNegativeNumber, isPositiveNumber, isSigResolutionClass, isSkillLevel } from "./validators";
+import {
+  isAutopilotMode,
+  isNonNegative,
+  isOptionalFittedHullSummary,
+  isPositive,
+  isSigResolutionClass,
+  isSkillLevel,
+} from "./validators";
 import { type ScalarField, type ScalarValue } from "./profileTextFields";
 
 export function parseScalarValue(field: ScalarField, value: string): ScalarValue | undefined {
@@ -12,7 +18,7 @@ export function parseScalarValue(field: ScalarField, value: string): ScalarValue
   if (field === "attackerMode" || field === "targetMode") return isAutopilotMode(value) ? value : undefined;
   if (field === "attackerSkillLevel" || field === "targetSkillLevel") {
     const num = Number(value);
-    return isSkillLevelValue(num) ? num : undefined;
+    return isSkillLevel(num) ? num : undefined;
   }
   if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
@@ -116,47 +122,8 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
 export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
   try {
     const parsed = JSON.parse(value);
-    return isFittedHullSummary(parsed) ? parsed : undefined;
+    return isOptionalFittedHullSummary(parsed) ? parsed : undefined;
   } catch {
     return undefined;
   }
-}
-
-function isFittedHullSummary(value: unknown): value is FittedHullSummary {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  if (typeof s.fittingName !== "string") return false;
-  if (!isFittedHull(s.fitted)) return false;
-  if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
-  if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
-  if (s.propulsion !== undefined && !isPropulsionStats(s.propulsion)) return false;
-  return true;
-}
-
-function isFittedHull(value: unknown): value is FittedHull {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  return (
-    isNonNegativeNumber(s.mass) &&
-    isPositiveNumber(s.massMultiplier) &&
-    isPositiveNumber(s.speedMultiplier) &&
-    isPositiveNumber(s.inertiaMultiplier) &&
-    isPositiveNumber(s.sigMultiplier) &&
-    isNonNegativeNumber(s.sigRadiusAdd)
-  );
-}
-
-function isPropulsionStats(value: unknown): value is PropulsionStats {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
-  return (
-    isNonNegativeNumber(s.thrust) &&
-    isNonNegativeNumber(s.speedBonus) &&
-    isNonNegativeNumber(s.massAddition) &&
-    isNonNegativeNumber(s.sigBloom)
-  );
-}
-
-function isSkillLevelValue(value: number): value is SkillLevel {
-  return isSkillLevel(value);
 }

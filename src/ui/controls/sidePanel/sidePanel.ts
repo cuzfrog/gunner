@@ -1,11 +1,11 @@
 import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
+import { isAutopilotMode, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection, type UserSettings } from "../../settings";
 import { num } from "../controlsDom";
-import { formatNumber, isAutopilotMode } from "../controlsFormat";
+import { formatNumber } from "../controlsFormat";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection, type UserSettings } from "../../settings";
 import type { Timer } from "../../timer";
 import { PopupGroup, type Popup } from "../popupGroup";
 import type { SidePanelElements } from "./elements";

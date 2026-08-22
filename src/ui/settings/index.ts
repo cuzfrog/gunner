@@ -1,4 +1,5 @@
 export { USER_SETTINGS_VERSION, PROPULSION_NONE } from "./userSettings";
+export { isAutopilotMode, isSigResolutionClass, profilesEqual } from "./validators";
 export type {
   DisplayPreferences,
   FittedHullSummary,

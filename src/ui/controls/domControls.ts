@@ -3,7 +3,7 @@ import { type AutopilotMode, type EngagementFrame, type HitChance, type HitChanc
 import { type ChargeCatalog, type FittingImport, type GunFamilies, type PresetFittings } from "../../fitting";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { SavedFittings } from "../settings";
+import { isAutopilotMode, type SavedFittings, type ClipboardProvider, type SettingsStore, type UserSettings } from "../settings";
 import { DomFittingPreview } from "./fittingPreview";
 import { PreferencesController } from "./preferencesController";
 import { ProfileController } from "./profileController";
@@ -22,13 +22,12 @@ import { PopupGroup } from "./popupGroup";
 import { ChoiceGroup } from "./choiceGroup";
 import { EngagementReadout } from "./engagementReadout";
 import { SessionCodec } from "./sessionCodec";
-import { AGGRESSIVITY_MIN, isAutopilotMode, parseManeuverAggressivity, profileSettingsOf } from "./controlsFormat";
+import { AGGRESSIVITY_MIN, parseManeuverAggressivity, profileSettingsOf } from "./controlsFormat";
 import { collectPreferencesEls, collectProfileEls, collectTurretEls, collectImportEls, collectFittingPopupEls } from "./elementSlices";
 import { FittingPopupController } from "./fittingPopupController";
 import { EventRouter, type EventRouterHost } from "./eventRouter";
 import { LanguageRefresh } from "./languageRefresh";
 import { HullDatalist } from "./hullDatalist";
-import type { ClipboardProvider, SettingsStore, UserSettings } from "../settings";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
