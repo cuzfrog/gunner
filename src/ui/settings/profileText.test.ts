@@ -1,4 +1,4 @@
-import type { FittedHullSummary, ProfileSettings } from "./settings";
+import type { FittedHullSummary, ProfileSettings } from "./userSettings";
 import { PROFILE_TEXT_HEADER, parseProfile, serializeProfile } from "./profileText";
 
 const RIFTER_FITTING = `[Rifter, Brawler]

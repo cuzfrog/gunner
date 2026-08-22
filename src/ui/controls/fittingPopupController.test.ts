@@ -1,7 +1,7 @@
 import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../../fitting";
-import type { SavedFitting, SavedFittings } from "../savedFittings";
+import type { SavedFitting, SavedFittings } from "../settings";
 import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../imageCatalog";
+import type { ImageCatalog } from "../icons";
 import { PopupGroup } from "./popupGroup";
 import { FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";

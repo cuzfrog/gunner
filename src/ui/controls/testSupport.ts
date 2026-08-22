@@ -3,10 +3,9 @@ import type { FittedHull, HullView, ShipProfile, Ships, StatConditions } from ".
 import type { HitChance, SigResolutionClass } from "../../sim";
 import { TrackingInput } from "./trackingInput";
 import type { I18n, Language } from "../i18n";
-import type { ImageCatalog } from "../imageCatalog";
-import type { ProfileParamOverrides, SettingsStore, ClipboardProvider } from "../settings";
+import type { ImageCatalog } from "../icons";
+import type { ClipboardProvider, ProfileParamOverrides, SavedFittings, SettingsStore } from "../settings";
 import type { Timer } from "../timer";
-import type { SavedFittings } from "../savedFittings";
 import { TurretController, type TurretEls } from "./turretController";
 import { DomControls, type Controls, type ControlsCallbacks } from "./domControls";
 import { SidePanel, type Side, collectSideEls } from "./sidePanel";

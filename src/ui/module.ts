@@ -1,10 +1,9 @@
 import { asClass, type AwilixContainer } from "awilix";
 import { DomControls } from "./controls";
 import { I18nImpl } from "./i18n";
-import { StaticImageCatalog } from "./imageCatalog";
+import { StaticImageCatalog } from "./icons";
 import { RafLoop } from "./loop";
-import { LocalSettingsStore } from "./settings";
-import { LocalSavedFittings } from "./savedFittings";
+import { LocalSavedFittings, LocalSettingsStore } from "./settings";
 import { CanvasRenderer } from "./renderer";
 import { DefaultTimer } from "./timer";
 

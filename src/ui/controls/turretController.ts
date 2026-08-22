@@ -4,7 +4,7 @@ import type { StatConditions } from "../../ships";
 import { isSigResClass } from "./controlsFormat";
 import { num } from "./controlsDom";
 import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../imageCatalog";
+import type { ImageCatalog } from "../icons";
 import type { Popup } from "./popupGroup";
 import type { ProfileParamOverrides } from "../settings";
 import { TrackingInput } from "./trackingInput";

@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import type { FittedHull, PropulsionModule, ShipProfile } from "../../../ships";
-import type { ImageCatalog } from "../../imageCatalog";
+import type { ImageCatalog } from "../../icons";
 import { type FittedHullSummary } from "../../settings";
 import { isHtmlButtonElement } from "../controlsDom";
 import { type Popup } from "../popupGroup";

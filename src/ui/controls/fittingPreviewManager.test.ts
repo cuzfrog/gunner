@@ -3,7 +3,7 @@ import { FakeElement, RIFTER } from "./testSupport";
 import { FittingPreviewManager } from "./fittingPreviewManager";
 import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../imageCatalog";
+import type { ImageCatalog } from "../icons";
 import type { FittingImport } from "../../fitting";
 import type { ShipProfile } from "../../ships";
 import type { Side } from "./sidePanel";

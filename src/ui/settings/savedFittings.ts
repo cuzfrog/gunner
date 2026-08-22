@@ -1,4 +1,4 @@
-import type { StorageProvider } from "./settings";
+import type { StorageProvider } from "./providers";
 
 export interface SavedFitting {
   readonly id: string;

@@ -1,4 +1,4 @@
-import { I18nImpl, type Language } from "./i18n";
+import { I18nImpl, type Language } from "./index";
 
 class FakeElement {
   private _text = "";

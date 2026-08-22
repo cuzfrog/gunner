@@ -1,10 +1,10 @@
 export type { Controls, ControlsCallbacks } from "./controls";
-export type { ImageCatalog } from "./imageCatalog";
+export type { ImageCatalog } from "./icons";
 export type { I18n, Language } from "./i18n";
 export { I18N_DICTIONARY } from "./i18n";
 export type { Loop } from "./loop";
 export type { Renderer } from "./renderer";
-export type { SavedFitting, SavedFittings } from "./savedFittings";
+export type { SavedFitting, SavedFittings } from "./settings";
 export type { SettingsStore, UserSettings, StorageProvider, LocationProvider, ClipboardProvider } from "./settings";
 export { ClipboardUnavailableError } from "./settings";
 export { registerUiModule } from "./module";

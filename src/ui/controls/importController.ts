@@ -1,13 +1,15 @@
 import {
   ClipboardUnavailableError,
+  parseProfile,
+  PROFILE_TEXT_HEADER,
+  serializeProfile,
   type ClipboardProvider,
   type FittedHullSummary,
   type ProfileSettings,
+  type SavedFittings,
   type UserSettings,
 } from "../settings";
 import { type FittingImport, type ImportedFitting } from "../../fitting";
-import { type SavedFittings } from "../savedFittings";
-import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "../profileText";
 import { NEUTRAL_STAT_CONDITIONS, profileSettingsOf } from "./controlsFormat";
 import { PopupGroup, type Popup } from "./popupGroup";
 import { type Side, type SidePanel } from "./sidePanel";

@@ -1,6 +1,6 @@
 import type { SigResolutionClass } from "../../sim";
 import type { GunFamilies, ImportedTurret } from "../../fitting";
-import type { ImageCatalog } from "../imageCatalog";
+import type { ImageCatalog } from "../icons";
 import { isHtmlButtonElement, isHtmlImageElement } from "./controlsDom";
 import { isSigResClass } from "./controlsFormat";
 

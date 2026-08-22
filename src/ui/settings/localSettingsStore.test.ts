@@ -6,9 +6,11 @@ import type {
   ShipProfile,
   ShipStats,
   Ships,
-} from "../ships";
-import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
-import { LocalSettingsStore, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type FittedHullSummary, type LocationProvider, type ProfileSettings, type StorageProvider, type UserSettings } from "./settings";
+} from "../../ships";
+import type { ChargeCatalog, FittingImport, ImportedFitting } from "../../fitting";
+import { LocalSettingsStore } from "./localSettingsStore";
+import { USER_SETTINGS_VERSION, type DisplayPreferences, type FittedHullSummary, type ProfileSettings, type UserSettings } from "./userSettings";
+import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 
 function base64Url(value: unknown): string {
   return Buffer.from(JSON.stringify(value)).toString("base64url");

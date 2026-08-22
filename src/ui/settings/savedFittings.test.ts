@@ -1,4 +1,4 @@
-import type { StorageProvider } from "./settings";
+import type { StorageProvider } from "./providers";
 import { LocalSavedFittings, type SavedFittings } from "./savedFittings";
 
 function fakeStorage(): StorageProvider {

@@ -1,6 +1,6 @@
 import type { CargoCharge, ChargeCatalog, ImportedTurret } from "../../fitting";
 import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../imageCatalog";
+import type { ImageCatalog } from "../icons";
 import { chargeStatSuffix } from "./controlsFormat";
 import { isHtmlButtonElement, setText } from "./controlsDom";
 
