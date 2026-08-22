@@ -1,17 +1,11 @@
 import { SIG_RESOLUTIONS, type HitChance } from "../../sim";
 import type { ChargeCatalog } from "../../fitting";
 import type { I18n } from "../i18n";
-import {
-  USER_SETTINGS_VERSION,
-  type ProfileSettings,
-  type SettingsStore,
-  type StartupState,
-  type UserSettings,
-} from "../settings";
+import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../settings";
 import { num } from "./controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber, parseManeuverAggressivity } from "./controlsFormat";
 import { ChoiceGroup } from "./choiceGroup";
-import type { Els } from "./elements";
+import type { Els } from "./elementsContract";
 import type { IHintRotator } from "./hintRotator";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
@@ -35,20 +29,9 @@ export class SessionCodec {
   private readonly setPlaying: (playing: boolean) => void;
 
   constructor(deps: {
-    els: Els;
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
-    turret: TurretController;
-    preferences: PreferencesController;
-    profileController: ProfileController;
-    i18n: I18n;
-    chargeCatalog: ChargeCatalog;
-    sigResChoice: ChoiceGroup;
-    hintRotator: IHintRotator;
-    settingsStore: SettingsStore;
-    hitChance: HitChance;
-    isPlaying: () => boolean;
-    setPlaying: (playing: boolean) => void;
+    els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; preferences: PreferencesController;
+    profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: IHintRotator;
+    settingsStore: SettingsStore; hitChance: HitChance; isPlaying: () => boolean; setPlaying: (playing: boolean) => void;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -120,7 +103,6 @@ export class SessionCodec {
       simSpeed: settings.simSpeed,
       gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
     });
-
     this.els.optimal.value = String(settings.optimal);
     this.els.falloff.value = String(settings.falloff);
     this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
@@ -136,13 +118,12 @@ export class SessionCodec {
     this.els.targetMode.value = settings.targetMode;
     this.els.targetRange.value = String(settings.targetRange);
     this.els.targetSig.value = String(settings.targetSig);
-
     this.attackerSide.restore(this.attackerSide.stateFrom(settings));
     this.targetSide.restore(this.targetSide.stateFrom(settings));
-
     this.i18n.translateDocument();
-    this.turretController.restore({ fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo });
-
+    this.turretController.restore({
+      fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
+    });
     this.setPlaying(this.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");

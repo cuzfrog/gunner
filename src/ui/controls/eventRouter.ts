@@ -1,5 +1,5 @@
 import { isEventTargetWithClosest, num } from "./controlsDom";
-import type { Els } from "./elements";
+import type { Els } from "./elementsContract";
 import type { FittingPopupController } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { ImportController } from "./importController";

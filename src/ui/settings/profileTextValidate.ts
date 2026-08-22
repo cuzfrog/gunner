@@ -27,18 +27,21 @@ export function parseScalarValue(field: ScalarField, value: string): ScalarValue
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (field === "initialDistance" || field === "targetSig") return num > 0 ? num : undefined;
-  if (field === "maneuverAggressivity") return num >= 0 ? num : undefined;
-  return num >= 0 ? num : undefined;
+  if (field === "initialDistance" || field === "targetSig") return isPositive(num) ? num : undefined;
+  if (field === "maneuverAggressivity") return isNonNegative(num) ? num : undefined;
+  return isNonNegative(num) ? num : undefined;
 }
 
-export function parseOverrideValue(key: keyof ProfileParamOverrides, value: string): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
+export function parseOverrideValue(
+  key: keyof ProfileParamOverrides,
+  value: string,
+): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
   if (value === "") return undefined;
   if (key === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (key === "targetSig") return num > 0 ? num : undefined;
-  return num >= 0 ? num : undefined;
+  if (key === "targetSig") return isPositive(num) ? num : undefined;
+  return isNonNegative(num) ? num : undefined;
 }
 
 export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings | undefined {

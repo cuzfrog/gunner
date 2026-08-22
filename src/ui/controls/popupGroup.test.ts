@@ -147,3 +147,61 @@ describe("PopupGroup", () => {
     expect(group.hasOpen()).toBe(false);
   });
 });
+
+describe("PopupGroup input handling", () => {
+  test("onPointerDown does nothing when no popup is open", () => {
+    const [a] = makePopups(1);
+    const group = new PopupGroup();
+    group.register(a);
+    group.onPointerDown(new EventTarget());
+    expect(a.closeCalled).toBe(false);
+  });
+
+  test("onPointerDown closes open popups whose contains returns false", () => {
+    const [a, b] = makePopups(2);
+    a.openResult = true;
+    b.openResult = true;
+    const target = new EventTarget();
+    a.setContains(target, true);
+    b.setContains(target, false);
+    const group = new PopupGroup();
+    group.register(a);
+    group.register(b);
+    group.onPointerDown(target);
+    expect(a.closeCalled).toBe(false);
+    expect(b.closeCalled).toBe(true);
+  });
+
+  test("onPointerDown ignores a null target", () => {
+    const [a] = makePopups(1);
+    a.openResult = true;
+    const group = new PopupGroup();
+    group.register(a);
+    group.onPointerDown(null);
+    expect(a.closeCalled).toBe(false);
+  });
+
+  test("onKeyDown does nothing for non-Escape keys", () => {
+    const [a] = makePopups(1);
+    a.openResult = true;
+    const group = new PopupGroup();
+    group.register(a);
+    group.onKeyDown({ key: "Enter" });
+    expect(a.closeCalled).toBe(false);
+    expect(a.focusCalled).toBe(false);
+  });
+
+  test("onKeyDown closes all open popups and focuses their triggers on Escape", () => {
+    const [a, b] = makePopups(2);
+    a.openResult = true;
+    b.openResult = true;
+    const group = new PopupGroup();
+    group.register(a);
+    group.register(b);
+    group.onKeyDown({ key: "Escape" });
+    expect(a.closeCalled).toBe(true);
+    expect(a.focusCalled).toBe(true);
+    expect(b.closeCalled).toBe(true);
+    expect(b.focusCalled).toBe(true);
+  });
+});

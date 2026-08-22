@@ -45,5 +45,12 @@ export function setText(el: HTMLElement, text: string): void {
 }
 
 export function fittingAreaSelector(side: "attacker" | "target"): string {
-  return [`#${side}-hull`, `#${side}-ship-image`, `#${side}-fitting-trigger`, `#${side}-fitting-eye`, `#${side}-fitting-popup`, `#${side}-fitting-preview`].join(", ");
+  return [
+    `#${side}-hull`,
+    `#${side}-ship-image`,
+    `#${side}-fitting-trigger`,
+    `#${side}-fitting-eye`,
+    `#${side}-fitting-popup`,
+    `#${side}-fitting-preview`,
+  ].join(", ");
 }

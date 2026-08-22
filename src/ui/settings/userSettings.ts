@@ -70,7 +70,9 @@ export interface UserSettings {
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "attackerAmmo"> & { attackerAmmo?: string };
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "attackerAmmo"> & {
+  attackerAmmo?: string;
+};
 
 export interface DisplayPreferences {
   readonly language: Language;

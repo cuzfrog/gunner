@@ -30,7 +30,9 @@ export const JA: LanguageSlice<"ja"> = {
   "mode.midships": { ja: "正舵" },
   "label.desiredRange": { ja: "希望射程" },
   "label.maneuverAggressivity": { ja: "機動の積極さ" },
-  "hint.maneuverAggressivity": { ja: "設定距離への接近時の反応的ブレーキを制御します。高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。低い値ほど距離を厳密に保ちます。" },
+  "hint.maneuverAggressivity": { ja: "設定距離への接近時の反応的ブレーキを制御します。" +
+    "高い値ほど機動を積極的に行い、ブレーキが遅く、オーバーシュートを許容します。" +
+    "低い値ほど距離を厳密に保ちます。" },
   "hint.initialDistance": { ja: "変更はリセット時に適用されます。" },
   "label.gridBrightness": { ja: "グリッドの明るさ" },
   "label.version": { ja: "バージョン" },
@@ -70,7 +72,8 @@ export const JA: LanguageSlice<"ja"> = {
   "status.copied": { ja: "コピー済み" },
   "status.failed": { ja: "失敗" },
   "button.importFitting": { ja: "クリップボードからインポート" },
-  "hint.pasteFitting": { ja: "クリップボードがブロックされました。Ctrl+V でフィッティングを貼り付けてください。" },
+  "hint.pasteFitting": { ja: "クリップボードがブロックされました。" +
+    "Ctrl+V でフィッティングを貼り付けてください。" },
   "status.fittingImported": { ja: "フィッティングをインポートしました" },
   "status.fittingInvalid": { ja: "無効なフィッティング" },
   "menu.importSide": { ja: "フィッティングのインポート先" },
@@ -102,15 +105,25 @@ export const JA: LanguageSlice<"ja"> = {
   "readout.hitChance": { ja: "命中確率：" },
   "readout.none": { ja: "なし" },
   "footer.about.heading": { ja: "Gunner について" },
-  "footer.about.text": { ja: "このツールは、艦船戦闘のダイナミクスを理解し、戦闘での自信を高めるために作りました。あなたと同じく、私もこのゲームが大好きです。" },
+  "footer.about.text": {
+    ja: "このツールは、艦船戦闘のダイナミクスを理解し、戦闘での自信を高めるために作りました。" +
+      "あなたと同じく、私もこのゲームが大好きです。",
+  },
   "footer.mech.kinematics.heading": { ja: "運動学" },
-  "footer.mech.kinematics.text": { ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。加速度は指数関数的に最大速度に近づく。" },
+  "footer.mech.kinematics.text": {
+    ja: "艦船の動きは質量と慣性で決まる：横断、放射、角速度が相対運動を表す。" +
+      "加速度は指数関数的に最大速度に近づく。",
+  },
   "footer.mech.kinematics.link": { ja: "Velocity" },
   "footer.mech.speed.heading": { ja: "速度" },
-  "footer.mech.speed.text": { ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。オーバーヒートでさらに上昇。" },
+  "footer.mech.speed.text": {
+    ja: "最大速度 = 船体ベース速度 × 推進モジュールボーナス（AB / MWD）× スキル補正。" +
+      "オーバーヒートでさらに上昇。",
+  },
   "footer.mech.speed.link": { ja: "Propulsion" },
   "footer.mech.hitChance.heading": { ja: "命中確率" },
-  "footer.mech.hitChance.text": { ja: "命中確率 = 0.5^(追跡項 + 射程項)。追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。" },
+  "footer.mech.hitChance.text": { ja: "命中確率 = 0.5^(追跡項 + 射程項)。" +
+    "追跡項は角速度・追跡速度・信号半径、射程項は最適射程を超えた距離から求まる。" },
   "footer.mech.hitChance.link": { ja: "Turret mechanics" },
   "unit.meter": { ja: "m" },
   "unit.kilometer": { ja: "km" },

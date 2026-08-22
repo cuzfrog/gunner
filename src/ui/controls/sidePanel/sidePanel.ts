@@ -1,7 +1,10 @@
 import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
-import { isAutopilotMode, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection, type UserSettings } from "../../settings";
+import {
+  isAutopilotMode, type FittedHullSummary, type ProfileParamOverrides,
+  type PropulsionSelection, type UserSettings,
+} from "../../settings";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
 import type { I18n } from "../../i18n";

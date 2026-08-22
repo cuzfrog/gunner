@@ -90,24 +90,24 @@ export class LocalSettingsStore implements SettingsStore {
         language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
         trackingUnit: s.trackingUnit === "score" ? "score" : DEFAULT_PREFERENCES.trackingUnit,
         simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
-        gridBrightness: isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined ? s.gridBrightness : DEFAULT_PREFERENCES.gridBrightness,
+        gridBrightness:
+          isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined
+            ? s.gridBrightness
+            : DEFAULT_PREFERENCES.gridBrightness,
       };
     } catch {
       return { ...DEFAULT_PREFERENCES };
     }
   }
-
   savePreferences(preferences: DisplayPreferences): void {
     this.storage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
   }
-
   private decodeUrl(): UserSettings | null {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
     return this.parser.decodeUrlSettings(encoded);
   }
-
   private matchingSelectedProfile(urlSettings: UserSettings): string | null {
     const name = this.readSelectedProfileName();
     if (!name) return null;

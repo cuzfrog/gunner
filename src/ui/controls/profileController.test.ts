@@ -101,7 +101,12 @@ function createNoOpTimer(): Timer & { fireLast: () => void } {
 function build(options: { profiles?: Record<string, ProfileSettings>; list?: string[] } = {}) {
   globalThis.document = new FakeDocument() as unknown as Document;
   const els = fakeProfileEls();
-  const i18n: I18n = { current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key) => key), translateDocument: vi.fn() };
+  const i18n: I18n = {
+    current: vi.fn((): Language => "en"),
+    setLanguage: vi.fn(),
+    t: vi.fn((key) => key),
+    translateDocument: vi.fn(),
+  };
   const settingsStore: SettingsStore = {
     loadStartupState: vi.fn(),
     listProfiles: vi.fn(() => options.list ?? Object.keys(options.profiles ?? {})),
@@ -188,5 +193,40 @@ describe("ProfileController", () => {
     const options = Array.from(els.profileSelect.children as unknown as FakeElement[]).map((c) => c.value);
     expect(options).toEqual(["", "brawler", "kiter"]);
     expect(els.profileSelect.value).toBe("kiter");
+  });
+
+  test("updateDirtyState distinguishes new, equal, changed, and existing-different profiles", () => {
+    const { controller, els, captureCurrent } = build({
+      profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
+      list: ["brawler", "kiter"],
+    });
+    els.profileName.value = "new";
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+    els.profileName.value = "";
+    controller.markLoaded("brawler");
+    vi.mocked(els.profileSave.classList.toggle).mockClear();
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    els.profileName.value = "brawler";
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    els.profileName.value = "kiter";
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+    els.profileName.value = "";
+    captureCurrent.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+  });
+
+  test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {
+    const { controller, els, timer } = build();
+    controller.showStatus("status.copied");
+    expect(els.shareStatus.textContent).toBe("status.copied");
+    controller.showStatus("status.failed");
+    expect(timer.clearTimeout).toHaveBeenCalled();
+    timer.fireLast();
+    expect(els.shareStatus.textContent).toBe("");
   });
 });

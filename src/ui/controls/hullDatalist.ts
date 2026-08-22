@@ -1,5 +1,5 @@
 import type { PresetFittings } from "../../fitting";
-import type { Els } from "./elements";
+import type { Els } from "./elementsContract";
 
 export class HullDatalist {
   private readonly els: Els;

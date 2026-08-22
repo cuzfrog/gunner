@@ -21,7 +21,9 @@ export class HullSection implements IHullSection {
   private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
 
-  constructor({ panel, els, ships, i18n, imageCatalog }: { panel: ISidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
+  constructor({
+    panel, els, ships, i18n, imageCatalog,
+  }: { panel: ISidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
@@ -148,7 +150,9 @@ export class HullSection implements IHullSection {
     this.els.hull.classList.toggle("hull-invalid", isInvalid);
   }
 
-  updateHullHint(module: PropulsionModule | undefined = this.panel.sections.stats.currentFittedPropulsionModule(this.panel.fittedHull)): void {
+  updateHullHint(
+    module: PropulsionModule | undefined = this.panel.sections.stats.currentFittedPropulsionModule(this.panel.fittedHull),
+  ): void {
     if (!this.panel.profile) {
       setText(this.els.hullHint, "");
       return;

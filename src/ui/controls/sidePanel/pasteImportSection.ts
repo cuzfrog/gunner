@@ -88,7 +88,9 @@ export class PasteImportSection implements IPasteImportSection {
       open: () => this.openPastePopup(),
       close: () => this.closePastePopup(),
       focusTrigger: () => this.els.importFitting.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${this.panel.side}-paste-popup, #${this.panel.side}-import-fitting`) !== null,
+      contains: (target) =>
+        target instanceof Element
+        && target.closest(`#${this.panel.side}-paste-popup, #${this.panel.side}-import-fitting`) !== null,
     };
   }
 }

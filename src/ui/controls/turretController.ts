@@ -15,9 +15,12 @@ import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
 
 interface TurretControllerDeps {
-  readonly els: TurretEls; readonly popup: Popup; readonly chargeCatalog: ChargeCatalog; readonly gunFamilies: GunFamilies; readonly imageCatalog: ImageCatalog;
-  readonly trackingInput: TrackingInput; readonly i18n: I18n; readonly fittingImport: FittingImport; readonly resolver: TurretStateResolver;
-  readonly overrides: () => Partial<ProfileParamOverrides>; readonly clearTurretOverrides: () => void; readonly onConfigChange: (persist: boolean) => void;
+  readonly els: TurretEls; readonly popup: Popup;
+  readonly chargeCatalog: ChargeCatalog; readonly gunFamilies: GunFamilies;
+  readonly imageCatalog: ImageCatalog; readonly trackingInput: TrackingInput;
+  readonly i18n: I18n; readonly fittingImport: FittingImport;
+  readonly resolver: TurretStateResolver; readonly overrides: () => Partial<ProfileParamOverrides>;
+  readonly clearTurretOverrides: () => void; readonly onConfigChange: (persist: boolean) => void;
 }
 
 export class TurretController {
@@ -122,23 +125,23 @@ export class TurretController {
     return {
       tracking: trackingOverride ?? this.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[this.currentSigResClass()],
-      optimal: num(this.els.optimal),
-      falloff: num(this.els.falloff),
+      optimal: num(this.els.optimal), falloff: num(this.els.falloff),
     };
   }
 
   currentSigResClass(): SigResolutionClass {
     return this.inputSet.currentSigResValue();
   }
-
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
-    return { sigRes: this.inputSet.currentSigResValue(), optimal: num(this.els.optimal), falloff: num(this.els.falloff), ammo: this.attackerAmmo };
+    return {
+      sigRes: this.inputSet.currentSigResValue(), optimal: num(this.els.optimal),
+      falloff: num(this.els.falloff), ammo: this.attackerAmmo,
+    };
   }
 
   isAmmoPopupOpen(): boolean {
     return this.ammoPopupOpen;
   }
-
   openAmmoPopup(): void {
     if (!this.attackerTurret) return;
     this.ammoPopupOpen = true;
@@ -151,9 +154,11 @@ export class TurretController {
     this.ammoPopupOpen = false;
     this.ammoList.setPopupOpen(false);
   }
-
   render(): void {
-    this.ammoList.render({ turret: this.attackerTurret, ammo: this.attackerAmmo, cargo: this.attackerCargoCharges, allExpanded: this.attackerAmmoAllExpanded });
+    this.ammoList.render({
+      turret: this.attackerTurret, ammo: this.attackerAmmo,
+      cargo: this.attackerCargoCharges, allExpanded: this.attackerAmmoAllExpanded,
+    });
     this.sigResIcons.render({ sigResOptions: this.els.sigResOptions }, this.attackerTurret);
   }
 
@@ -169,18 +174,15 @@ export class TurretController {
     this.onConfigChange(false);
     return true;
   }
-
   private onAmmoItemClick(name: string): void {
     if (!this.applyAmmo(name)) return;
     this.closeAmmoPopup();
     this.popup.focusTrigger();
   }
-
   private onAmmoExpandClick(): void {
     this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
     this.render();
   }
-
   private ammoListEls(): AmmoListEls {
     return {
       attackerAmmoTrigger: this.els.attackerAmmoTrigger,

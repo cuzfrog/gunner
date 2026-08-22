@@ -1,4 +1,4 @@
-import type { Els } from "../elements";
+import type { Els } from "../elementsContract";
 import type { Side } from "./side";
 
 export interface SidePanelElements {

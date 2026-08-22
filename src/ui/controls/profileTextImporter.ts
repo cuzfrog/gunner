@@ -1,4 +1,7 @@
-import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile, type ClipboardProvider, type ProfileSettings, type UserSettings } from "../settings";
+import {
+  parseProfile, PROFILE_TEXT_HEADER, serializeProfile,
+  type ClipboardProvider, type ProfileSettings, type UserSettings,
+} from "../settings";
 import { type FittingImport } from "../../fitting";
 import { profileSettingsOf } from "./controlsFormat";
 import type { PreferencesController } from "./preferencesController";

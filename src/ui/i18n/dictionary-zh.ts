@@ -30,7 +30,10 @@ export const ZH: LanguageSlice<"zh"> = {
   "mode.midships": { zh: "正舵" },
   "label.desiredRange": { zh: "期望距离" },
   "label.maneuverAggressivity": { zh: "机动激进程度" },
-  "hint.maneuverAggressivity": { zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；较低值更严格保持距离。" },
+  "hint.maneuverAggressivity": {
+    zh: "控制接近设定距离时的反应制动。较高值机动更激进、更晚制动并允许更多超调；" +
+      "较低值更严格保持距离。",
+  },
   "hint.initialDistance": { zh: "更改在重置时生效。" },
   "label.gridBrightness": { zh: "网格亮度" },
   "label.version": { zh: "版本" },
@@ -102,15 +105,27 @@ export const ZH: LanguageSlice<"zh"> = {
   "readout.hitChance": { zh: "命中率：" },
   "readout.none": { zh: "无" },
   "footer.about.heading": { zh: "关于 Gunner" },
-  "footer.about.text": { zh: "我写这个工具是为了帮助自己理解舰船战斗的动态，并在战斗中建立信心。和你一样，我热爱这款游戏。" },
+  "footer.about.text": {
+    zh: "我写这个工具是为了帮助自己理解舰船战斗的动态，并在战斗中建立信心。" +
+      "和你一样，我热爱这款游戏。",
+  },
   "footer.mech.kinematics.heading": { zh: "运动学" },
-  "footer.mech.kinematics.text": { zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述目标相对运动，加速度按指数趋近最大速度。" },
+  "footer.mech.kinematics.text": {
+    zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述目标相对运动，" +
+      "加速度按指数趋近最大速度。",
+  },
   "footer.mech.kinematics.link": { zh: "Velocity" },
   "footer.mech.speed.heading": { zh: "速度" },
-  "footer.mech.speed.text": { zh: "最大速度 = 船体基础速度 × 推进模块加成（加力 / 微曲）× 技能修正；超载进一步提升。" },
+  "footer.mech.speed.text": {
+    zh: "最大速度 = 船体基础速度 × 推进模块加成（加力 / 微曲）× 技能修正；" +
+      "超载进一步提升。",
+  },
   "footer.mech.speed.link": { zh: "Propulsion" },
   "footer.mech.hitChance.heading": { zh: "命中率" },
-  "footer.mech.hitChance.text": { zh: "命中率 = 0.5^(追踪项 + 射程项)。追踪项来自角速度、炮塔跟踪、信号半径；射程项来自超出最佳射程的距离。" },
+  "footer.mech.hitChance.text": {
+    zh: "命中率 = 0.5^(追踪项 + 射程项)。追踪项来自角速度、炮塔跟踪、信号半径；" +
+      "射程项来自超出最佳射程的距离。",
+  },
   "footer.mech.hitChance.link": { zh: "Turret mechanics" },
   "unit.meter": { zh: "m" },
   "unit.kilometer": { zh: "km" },

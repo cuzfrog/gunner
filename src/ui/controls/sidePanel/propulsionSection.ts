@@ -23,14 +23,19 @@ export class PropulsionSection implements IPropulsionSection {
   private readonly i18n: I18n;
   private readonly variants: PropulsionVariantSection;
 
-  constructor({ panel, els, ships, fittingImport, imageCatalog, i18n }: { panel: ISidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n }) {
+  constructor({
+    panel, els, ships, fittingImport, imageCatalog, i18n,
+  }: { panel: ISidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
     this.fittingImport = fittingImport;
     this.imageCatalog = imageCatalog;
     this.i18n = i18n;
-    this.variants = new PropulsionVariantSection({ panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants }, fittingImport, imageCatalog });
+    this.variants = new PropulsionVariantSection({
+      panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants },
+      fittingImport, imageCatalog,
+    });
   }
 
   get popup(): Popup {

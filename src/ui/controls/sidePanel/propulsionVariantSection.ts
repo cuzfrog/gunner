@@ -21,7 +21,9 @@ export class PropulsionVariantSection {
   private propulsionVariantPopupOpen = false;
   readonly popup: Popup;
 
-  constructor({ panel, els, fittingImport, imageCatalog }: { panel: ISidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; imageCatalog: ImageCatalog }) {
+  constructor({
+    panel, els, fittingImport, imageCatalog,
+  }: { panel: ISidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.fittingImport = fittingImport;
@@ -123,7 +125,8 @@ export class PropulsionVariantSection {
       close: () => this.closePropulsionVariantPopup(),
       focusTrigger: () => this.els.propulsionGear.focus(),
       contains: (target) =>
-        target instanceof Element && target.closest(`#${this.panel.side}-propulsion-variants, #${this.panel.side}-propulsion-gear`) !== null,
+        target instanceof Element &&
+        target.closest(`#${this.panel.side}-propulsion-variants, #${this.panel.side}-propulsion-gear`) !== null,
     };
   }
 }

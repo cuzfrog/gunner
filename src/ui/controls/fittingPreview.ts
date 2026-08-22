@@ -45,7 +45,12 @@ export class DomFittingPreview implements FittingPreview {
   }
 }
 
-function renderHeader(i18n: I18n, summary: FittingSummary, shipImageUrl: string | undefined, onClose: (() => void) | undefined): HTMLElement {
+function renderHeader(
+  i18n: I18n,
+  summary: FittingSummary,
+  shipImageUrl: string | undefined,
+  onClose: (() => void) | undefined,
+): HTMLElement {
   const header = document.createElement("div");
   header.className = "preview-header";
 
@@ -146,10 +151,16 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: Fit
   return rowEl;
 }
 
-function positionPreview(container: HTMLElement, anchor: HTMLElement, viewport: { readonly innerWidth: number; readonly innerHeight: number }): void {
+function positionPreview(
+  container: HTMLElement,
+  anchor: HTMLElement,
+  viewport: { readonly innerWidth: number; readonly innerHeight: number },
+): void {
   const anchorRect = anchor.getBoundingClientRect();
   const parent = container.offsetParent;
-  const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0, width: viewport.innerWidth, height: viewport.innerHeight };
+  const parentRect = parent?.getBoundingClientRect() ?? {
+    left: 0, top: 0, width: viewport.innerWidth, height: viewport.innerHeight,
+  };
   const margin = 8;
   const gap = 8;
 

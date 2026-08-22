@@ -31,7 +31,8 @@ export const EN: LanguageSlice<"en"> = {
   "label.desiredRange": { en: "Desired range" },
   "label.maneuverAggressivity": { en: "Maneuver aggressivity" },
   "hint.maneuverAggressivity": {
-    en: "Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly.",
+    en: "Controls reactive braking as the ship approaches its set range. " +
+      "Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly.",
   },
   "hint.initialDistance": { en: "Changes apply on reset." },
   "label.gridBrightness": { en: "Grid brightness" },
@@ -105,7 +106,8 @@ export const EN: LanguageSlice<"en"> = {
   "readout.none": { en: "none" },
   "footer.about.heading": { en: "About Gunner" },
   "footer.about.text": {
-    en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.",
+    en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. " +
+      "Just like you, I love this game.",
   },
   "footer.mech.kinematics.heading": { en: "Kinematics" },
   "footer.mech.kinematics.text": {
@@ -119,7 +121,8 @@ export const EN: LanguageSlice<"en"> = {
   "footer.mech.speed.link": { en: "Propulsion" },
   "footer.mech.hitChance.heading": { en: "Hit chance" },
   "footer.mech.hitChance.text": {
-    en: "Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.",
+    en: "Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, " +
+      "and distance past optimal over falloff.",
   },
   "footer.mech.hitChance.link": { en: "Turret mechanics" },
   "unit.meter": { en: "m" },
