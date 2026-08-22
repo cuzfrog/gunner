@@ -179,11 +179,14 @@ function makeFittingImport() {
 }
 
 function makeChargeCatalog(): ChargeCatalog {
-  return vi.mocked<ChargeCatalog>({
+  const catalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
+    chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret) => turret),
   });
+  catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
+  return catalog;
 }
 
 function makeShips() {

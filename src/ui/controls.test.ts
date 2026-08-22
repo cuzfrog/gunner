@@ -762,8 +762,10 @@ function buildControls(
   const chargeCatalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
+    chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret) => turret),
   });
+  chargeCatalog.chargesForTurret = vi.fn((turret) => chargeCatalog.chargesForSize(turret.chargeSize));
   const presetFittings = createMockPresetFittings();
   const savedFittings = createMockSavedFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });

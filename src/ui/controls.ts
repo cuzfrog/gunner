@@ -1765,7 +1765,7 @@ export class DomControls implements Controls {
       list.hidden = true;
       return;
     }
-    const options = this.chargeCatalog.chargesForSize(this.attackerTurret.chargeSize);
+    const options = this.chargeCatalog.chargesForTurret(this.attackerTurret);
     if (options.length === 0) {
       list.hidden = true;
       return;
