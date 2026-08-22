@@ -89,6 +89,7 @@ interface Els {
   attackerHull: HTMLInputElement;
   attackerShipImage: HTMLImageElement;
   attackerFittingTrigger: HTMLButtonElement;
+  attackerFittingEye: HTMLButtonElement;
   attackerFittingPopup: HTMLElement;
   attackerFittingPreview: HTMLElement;
   attackerFittingSavedLabel: HTMLElement;
@@ -126,6 +127,7 @@ interface Els {
   targetHull: HTMLInputElement;
   targetShipImage: HTMLImageElement;
   targetFittingTrigger: HTMLButtonElement;
+  targetFittingEye: HTMLButtonElement;
   targetFittingPopup: HTMLElement;
   targetFittingPreview: HTMLElement;
   targetFittingSavedLabel: HTMLElement;
@@ -216,8 +218,8 @@ export class DomControls implements Controls {
   private openPreviewSide: "attacker" | "target" | null = null;
   private currentPreviewAnchor?: HTMLElement;
   private currentPreviewText?: string;
-  private readonly previewShowTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
-  private readonly previewHideTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
+  private currentPreviewEye?: HTMLButtonElement;
+  private currentPreviewInMenu = false;
   private openAmmo = false;
   private attackerAmmo = "";
   private attackerTurret?: ImportedTurret;
@@ -303,6 +305,7 @@ export class DomControls implements Controls {
       attackerHull: elOf("attacker-hull", isHtmlInputElement),
       attackerShipImage: elOf("attacker-ship-image", isHtmlImageElement),
       attackerFittingTrigger: elOf("attacker-fitting-trigger", isHtmlButtonElement),
+      attackerFittingEye: elOf("attacker-fitting-eye", isHtmlButtonElement),
       attackerFittingPopup: el("attacker-fitting-popup"),
       attackerFittingPreview: el("attacker-fitting-preview"),
       attackerFittingSavedLabel: el("attacker-fitting-saved-label"),
@@ -340,6 +343,7 @@ export class DomControls implements Controls {
       targetHull: elOf("target-hull", isHtmlInputElement),
       targetShipImage: elOf("target-ship-image", isHtmlImageElement),
       targetFittingTrigger: elOf("target-fitting-trigger", isHtmlButtonElement),
+      targetFittingEye: elOf("target-fitting-eye", isHtmlButtonElement),
       targetFittingPopup: el("target-fitting-popup"),
       targetFittingPreview: el("target-fitting-preview"),
       targetFittingSavedLabel: el("target-fitting-saved-label"),
@@ -1131,6 +1135,7 @@ export class DomControls implements Controls {
     this.els.attackerHull.addEventListener("input", () => this.onHullInput("attacker"));
     this.els.attackerHull.addEventListener("change", () => this.onHullChange("attacker"));
     this.els.attackerFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("attacker"));
+    this.els.attackerFittingEye.addEventListener("click", () => this.toggleFittingPreview("attacker"));
     this.els.attackerAmmoTrigger.addEventListener("click", () => this.toggleAttackerAmmoPopup());
     this.els.attackerAmmoExpand.addEventListener("click", () => this.onAttackerAmmoExpandClick());
     this.els.attackerPropulsion.addEventListener("change", () => this.onPropulsionChange("attacker"));
@@ -1140,13 +1145,8 @@ export class DomControls implements Controls {
     this.els.attackerOverloadButton.addEventListener("click", () => this.onOverloadButtonClick("attacker"));
     this.els.targetHull.addEventListener("input", () => this.onHullInput("target"));
     this.els.targetHull.addEventListener("change", () => this.onHullChange("target"));
-    this.attachShipImagePreviewListeners("attacker");
-    this.attachShipImagePreviewListeners("target");
-    this.els.attackerFittingSavedList.addEventListener("scroll", () => this.hidePreview("attacker"));
-    this.els.attackerFittingPresetList.addEventListener("scroll", () => this.hidePreview("attacker"));
-    this.els.targetFittingSavedList.addEventListener("scroll", () => this.hidePreview("target"));
-    this.els.targetFittingPresetList.addEventListener("scroll", () => this.hidePreview("target"));
     this.els.targetFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("target"));
+    this.els.targetFittingEye.addEventListener("click", () => this.toggleFittingPreview("target"));
     this.els.targetPropulsion.addEventListener("change", () => this.onPropulsionChange("target"));
     this.els.targetPropulsionGear.addEventListener("click", () => this.onPropulsionGearClick("target"));
     this.els.targetSkills.addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
@@ -1250,6 +1250,7 @@ export class DomControls implements Controls {
 
   private updateFittingTrigger(side: "attacker" | "target", enabled: boolean): void {
     this.els[`${side}FittingTrigger`].disabled = !enabled;
+    this.els[`${side}FittingEye`].disabled = !enabled;
   }
 
   private toggleFittingPopup(side: "attacker" | "target"): void {
@@ -1295,7 +1296,7 @@ export class DomControls implements Controls {
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     if (this.openFittingSide === side) this.openFittingSide = null;
-    this.hidePreview(side);
+    if (this.openPreviewSide === side && this.currentPreviewInMenu) this.hidePreview(side);
     trigger.focus();
   }
 
@@ -1326,7 +1327,6 @@ export class DomControls implements Controls {
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
       const item = this.createFittingItem(side, fitting.name, fitting.text, currentText, () => this.onFittingItemClick(side, fitting.text));
-      this.attachFittingItemPreviewListeners(side, item, fitting.text);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
         item.classList.toggle("invalid", true);
@@ -1335,7 +1335,7 @@ export class DomControls implements Controls {
         item.disabled = true;
         item.setAttribute("aria-disabled", "true");
       }
-      const entry = this.createFittingEntry(item, () => {
+      const entry = this.createFittingEntry(side, item, fitting.text, () => {
         this.savedFittings.remove(fitting.id);
         this.renderFittingPopup(side);
         const next = this.findFittingItem(side, (it) => !it.disabled) ?? this.els[`${side}FittingTrigger`];
@@ -1350,8 +1350,7 @@ export class DomControls implements Controls {
       const fit = presets[index];
       const text = this.presetFittings.eftText(profile.name, fit);
       const item = this.createFittingItem(side, fit.name, text, currentText, () => this.onFittingItemClick(side, text));
-      this.attachFittingItemPreviewListeners(side, item, text);
-      presetList.appendChild(this.createFittingEntry(item, undefined));
+      presetList.appendChild(this.createFittingEntry(side, item, text, undefined));
     }
 
     empty.hidden = saved.length > 0 || presets.length > 0;
@@ -1386,11 +1385,12 @@ export class DomControls implements Controls {
     return button;
   }
 
-  private createFittingEntry(item: HTMLButtonElement, onDelete: (() => void) | undefined): HTMLElement {
+  private createFittingEntry(side: "attacker" | "target", item: HTMLButtonElement, text: string, onDelete: (() => void) | undefined): HTMLElement {
     const li = document.createElement("li");
     li.className = "fitting-entry";
     li.setAttribute("role", "presentation");
     li.appendChild(item);
+    li.appendChild(this.createFittingItemEye(side, text));
     if (onDelete) {
       const del = document.createElement("button");
       del.type = "button";
@@ -1402,6 +1402,18 @@ export class DomControls implements Controls {
       li.appendChild(del);
     }
     return li;
+  }
+
+  private createFittingItemEye(side: "attacker" | "target", text: string): HTMLButtonElement {
+    const eye = document.createElement("button");
+    eye.type = "button";
+    eye.className = "fitting-item-eye";
+    eye.setAttribute("aria-pressed", "false");
+    eye.setAttribute("title", this.i18n.t("button.fittingDetails"));
+    eye.setAttribute("aria-label", this.i18n.t("button.fittingDetails"));
+    eye.innerHTML = EYE_ICON_SVG;
+    eye.addEventListener("click", () => this.showFittingPreview(side, text, eye, eye, true));
+    return eye;
   }
 
   private updateShipImage(side: "attacker" | "target"): void {
@@ -1426,7 +1438,7 @@ export class DomControls implements Controls {
     return side === "attacker" ? this.attackerPreview : this.targetPreview;
   }
 
-  private renderFittingPreview(side: "attacker" | "target", text: string, anchor: HTMLElement): void {
+  private renderFittingPreview(side: "attacker" | "target", text: string, anchor: HTMLElement, eye: HTMLButtonElement): void {
     const summary = describeFitting(text);
     if (!summary || summary.sections.length === 0) {
       this.hidePreview(side);
@@ -1434,10 +1446,28 @@ export class DomControls implements Controls {
     }
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.name) : undefined;
+    this.currentPreviewEye?.setAttribute("aria-pressed", "false");
     this.currentPreviewAnchor = anchor;
     this.currentPreviewText = text;
+    this.currentPreviewEye = eye;
     this.openPreviewSide = side;
-    this.previewOf(side).show(anchor, summary, shipImageUrl);
+    eye.setAttribute("aria-pressed", "true");
+    this.previewOf(side).show(anchor, summary, shipImageUrl, () => this.hidePreview(side));
+  }
+
+  private showFittingPreview(side: "attacker" | "target", text: string, anchor: HTMLElement, eye: HTMLButtonElement, inMenu = false): void {
+    if (this.openPreviewSide === side && this.currentPreviewText === text && this.currentPreviewAnchor === anchor) {
+      this.hidePreview(side);
+      return;
+    }
+    this.renderFittingPreview(side, text, anchor, eye);
+    this.currentPreviewInMenu = inMenu;
+  }
+
+  private toggleFittingPreview(side: "attacker" | "target"): void {
+    const text = side === "attacker" ? this.attackerFitting : this.targetFitting;
+    if (!text) return;
+    this.showFittingPreview(side, text, this.els[`${side}ShipImage`], this.els[`${side}FittingEye`]);
   }
 
   private hidePreview(side: "attacker" | "target"): void {
@@ -1446,8 +1476,10 @@ export class DomControls implements Controls {
       this.openPreviewSide = null;
       this.currentPreviewAnchor = undefined;
       this.currentPreviewText = undefined;
+      this.currentPreviewInMenu = false;
     }
-    this.cancelPreviewTimers(side);
+    this.currentPreviewEye?.setAttribute("aria-pressed", "false");
+    this.currentPreviewEye = undefined;
   }
 
   private refreshPreview(): void {
@@ -1456,57 +1488,15 @@ export class DomControls implements Controls {
       this.hidePreview(this.openPreviewSide);
       return;
     }
-    this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor);
-  }
-
-  private cancelPreviewTimers(side: "attacker" | "target"): void {
-    if (this.previewShowTimeouts[side]) {
-      this.timer.clearTimeout(this.previewShowTimeouts[side]);
-      this.previewShowTimeouts[side] = undefined;
-    }
-    if (this.previewHideTimeouts[side]) {
-      this.timer.clearTimeout(this.previewHideTimeouts[side]);
-      this.previewHideTimeouts[side] = undefined;
-    }
-  }
-
-  private startPreviewShow(side: "attacker" | "target", anchor: HTMLElement, text: string): void {
-    this.cancelPreviewTimers(side);
-    this.previewShowTimeouts[side] = this.timer.setTimeout(() => {
-      this.previewShowTimeouts[side] = undefined;
-      this.renderFittingPreview(side, text, anchor);
-    }, 150);
-  }
-
-  private startPreviewHide(side: "attacker" | "target"): void {
-    this.cancelPreviewTimers(side);
-    this.previewHideTimeouts[side] = this.timer.setTimeout(() => {
-      this.previewHideTimeouts[side] = undefined;
-      this.hidePreview(side);
-    }, 100);
-  }
-
-  private attachFittingItemPreviewListeners(side: "attacker" | "target", item: HTMLButtonElement, text: string): void {
-    const show = () => this.startPreviewShow(side, item, text);
-    const hide = () => this.startPreviewHide(side);
-    item.addEventListener("mouseenter", show);
-    item.addEventListener("focus", show);
-    item.addEventListener("mouseleave", hide);
-    item.addEventListener("blur", hide);
-  }
-
-  private attachShipImagePreviewListeners(side: "attacker" | "target"): void {
-    const image = this.els[`${side}ShipImage`];
-    image.addEventListener("mouseenter", () => {
-      const text = side === "attacker" ? this.attackerFitting : this.targetFitting;
-      if (text) this.startPreviewShow(side, image, text);
-    });
-    image.addEventListener("mouseleave", () => this.startPreviewHide(side));
+    this.renderFittingPreview(this.openPreviewSide, this.currentPreviewText, this.currentPreviewAnchor, this.currentPreviewEye ?? this.els[`${this.openPreviewSide}FittingEye`]);
   }
 
   private onFittingItemClick(side: "attacker" | "target", text: string): void {
-    void this.importEftFitting(side, text);
+    const imported = this.importEftFitting(side, text);
     this.closeFittingPopup(side);
+    if (imported && this.openPreviewSide === side && !this.currentPreviewInMenu) {
+      this.renderFittingPreview(side, text, this.els[`${side}ShipImage`], this.els[`${side}FittingEye`]);
+    }
   }
 
   private clearHull(side: "attacker" | "target", resetInput: boolean, persist: boolean): void {
@@ -2414,12 +2404,12 @@ export class DomControls implements Controls {
     }
     if (this.openFittingSide !== null) {
       const side = this.openFittingSide;
-      const insideFitting = target.closest(`#${side}-fitting-popup, #${side}-fitting-trigger, #${side}-hull, #${side}-ship-image`);
+      const insideFitting = target.closest(fittingAreaSelector(side));
       if (!insideFitting) this.closeAllFittingPopups();
     }
     if (this.openPreviewSide) {
       const side = this.openPreviewSide;
-      const insidePreview = target.closest(`#${side}-ship-image, .fitting-popup`);
+      const insidePreview = target.closest(fittingAreaSelector(side));
       if (!insidePreview) this.hidePreview(side);
     }
     if (this.importSidePopupOpen) {
@@ -2439,7 +2429,12 @@ export class DomControls implements Controls {
 
   private onDocumentKeyDown(event: KeyboardEvent): void {
     if (event.key !== "Escape") return;
-    if (this.openPreviewSide) this.hidePreview(this.openPreviewSide);
+    if (this.openPreviewSide) {
+      const side = this.openPreviewSide;
+      const eye = this.currentPreviewEye ?? this.els[`${side}FittingEye`];
+      this.hidePreview(side);
+      eye.focus();
+    }
     if (this.openSkillSide !== null) {
       const side = this.openSkillSide;
       this.closeSkillPopup(side);
@@ -2617,6 +2612,10 @@ const DELETE_ICON_SVG =
   '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
   'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
+const EYE_ICON_SVG =
+  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
+  'aria-hidden="true"><use href="icons.svg#eye"></use></svg>';
+
 function aggressivityFromPosition(pos: number): number {
   const clamped = Math.max(0, Math.min(1, pos));
   return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
@@ -2741,6 +2740,17 @@ function isSigResClass(value: string): value is SigResolutionClass {
 
 function isAutopilotMode(value: string): value is AutopilotMode {
   return value === "orbit" || value === "keepAtRange" || value === "midships";
+}
+
+function fittingAreaSelector(side: "attacker" | "target"): string {
+  return [
+    `#${side}-hull`,
+    `#${side}-ship-image`,
+    `#${side}-fitting-trigger`,
+    `#${side}-fitting-eye`,
+    `#${side}-fitting-popup`,
+    `#${side}-fitting-preview`,
+  ].join(", ");
 }
 
 function isEventTargetWithClosest(target: EventTarget | null): target is Element {

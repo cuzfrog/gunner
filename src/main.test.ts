@@ -75,6 +75,11 @@ class FakeElement {
   closest(): FakeElement | null {
     return null;
   }
+
+  contains(target: FakeElement): boolean {
+    if (target === this) return true;
+    return this.children.some((child) => child.contains(target));
+  }
 }
 
 type Mocked = ReturnType<typeof vi.fn>;
@@ -192,6 +197,7 @@ const TAG_BY_ID: Record<string, string> = {
   "attacker-fitting-saved-label": "SPAN",
   "attacker-fitting-saved-list": "UL",
   "attacker-fitting-trigger": "BUTTON",
+  "attacker-fitting-eye": "BUTTON",
   "attacker-hull": "INPUT",
   "attacker-hull-hint": "SPAN",
   "attacker-import-fitting": "BUTTON",
@@ -262,6 +268,7 @@ const TAG_BY_ID: Record<string, string> = {
   "target-fitting-saved-label": "SPAN",
   "target-fitting-saved-list": "UL",
   "target-fitting-trigger": "BUTTON",
+  "target-fitting-eye": "BUTTON",
   "target-hull": "INPUT",
   "target-hull-hint": "SPAN",
   "target-import-fitting": "BUTTON",

@@ -40,7 +40,7 @@ export function generateIconIdsContent(
     .sort()
     .map((name) => `  ${JSON.stringify(name)}: ${ids[name]},`);
 
-  return `export const ITEM_ICON_IDS: Readonly<Record<string, number>> = {\n${lines.join("\n")}\n} as const;\n`;
+  return `export const ITEM_ICON_IDS: Readonly<Record<string, number>> = {\n${lines.join("\n")}\n} as const;\n\nexport const DRONE_ICON_ID = 1084;\n`;
 
   function collectIconId(name: string): void {
     if (name in ids) return;

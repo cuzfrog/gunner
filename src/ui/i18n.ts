@@ -229,6 +229,11 @@ export const I18N_DICTIONARY = {
     zh: "删除",
     ja: "削除",
   },
+  "button.close": {
+    en: "Close",
+    zh: "关闭",
+    ja: "閉じる",
+  },
   "button.copyProfile": {
     en: "Copy",
     zh: "复制",
@@ -263,6 +268,11 @@ export const I18N_DICTIONARY = {
     en: "Select fitting",
     zh: "选择装配",
     ja: "フィッティングを選択",
+  },
+  "button.fittingDetails": {
+    en: "Show fitting details",
+    zh: "显示装配详情",
+    ja: "フィッティング詳細を表示",
   },
   "button.selectAmmo": {
     en: "Select ammunition",

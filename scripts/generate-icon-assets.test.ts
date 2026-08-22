@@ -36,6 +36,7 @@ describe("generateIconIdsContent", () => {
     expect(content).toContain('"Tracking Computer II": 999,');
     expect(content).toContain('"Optimal Range Script": 111,');
     expect(content).toContain('"Multi-Entry Item": 111,');
+    expect(content).toContain("export const DRONE_ICON_ID = 1084;");
   });
 
   test("throws a sorted error when names are missing", () => {

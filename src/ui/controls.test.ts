@@ -403,6 +403,11 @@ class FakeElement {
     return null;
   }
 
+  contains(target: FakeElement): boolean {
+    if (target === this) return true;
+    return this.children.some((child) => child.contains(target));
+  }
+
   querySelector(selector: string): FakeElement | null {
     if (selector.startsWith('[aria-selected="true"]')) {
       return this.children.find((child) => child.getAttribute("aria-selected") === "true") ?? null;
@@ -433,6 +438,7 @@ const TAG_BY_ID: Record<string, string> = {
   "attacker-fitting-saved-label": "SPAN",
   "attacker-fitting-saved-list": "UL",
   "attacker-fitting-trigger": "BUTTON",
+  "attacker-fitting-eye": "BUTTON",
   "attacker-hull": "INPUT",
   "attacker-hull-hint": "SPAN",
   "attacker-import-fitting": "BUTTON",
@@ -503,6 +509,7 @@ const TAG_BY_ID: Record<string, string> = {
   "target-fitting-saved-label": "SPAN",
   "target-fitting-saved-list": "UL",
   "target-fitting-trigger": "BUTTON",
+  "target-fitting-eye": "BUTTON",
   "target-hull": "INPUT",
   "target-hull-hint": "SPAN",
   "target-import-fitting": "BUTTON",
@@ -593,6 +600,8 @@ function setInputValues(document: Document): void {
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-fitting-trigger").disabled = true;
   getFake(document, "target-fitting-trigger").disabled = true;
+  getFake(document, "attacker-fitting-eye").disabled = true;
+  getFake(document, "target-fitting-eye").disabled = true;
 }
 
 function addChoiceButtons(document: Document, groupId: string, values: string[], selected: string): void {
@@ -770,7 +779,7 @@ function buildControls(
   const savedFittings = createMockSavedFittings();
   const clipboard = vi.mocked<ClipboardProvider>({ readText: vi.fn(async () => ""), writeText: vi.fn(async () => {}) });
   const timer = createNoOpTimer();
-  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((shipName) => `images/ships/${shipName}.webp`), itemIconUrl: vi.fn(() => undefined) });
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((shipName) => `images/ships/${shipName}.webp`), itemIconUrl: vi.fn(() => undefined), droneIconUrl: vi.fn(() => "images/icons/1084@1x.png") });
   options.setup?.({ fittingImport, chargeCatalog });
   const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog });
   return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, timer, imageCatalog, controls };
@@ -4001,7 +4010,7 @@ const ctx = buildControls(globalThis.document);
 
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
       const savedList = getFake(globalThis.document, "attacker-fitting-saved-list").children;
-      savedList[0].children[1].trigger("click");
+      savedList[0].children[2].trigger("click");
 
       expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
       expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
@@ -4020,7 +4029,7 @@ const ctx = buildControls(globalThis.document);
       expect(item.disabled).toBe(true);
       expect(item.title).toBe("fitting.invalid");
 
-      getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[1].trigger("click");
+      getFake(globalThis.document, "attacker-fitting-saved-list").children[0].children[2].trigger("click");
       expect(savedFittings.remove).toHaveBeenCalledWith(SAVED_RIFTER.id);
     });
 
@@ -4034,7 +4043,7 @@ const ctx = buildControls(globalThis.document);
 
       const savedList = getFake(globalThis.document, "attacker-fitting-saved-list");
       expect(savedList.children.length).toBe(1);
-      savedList.children[0].children[1].trigger("click");
+      savedList.children[0].children[2].trigger("click");
 
       expect(savedList.children.length).toBe(0);
     });
@@ -4377,55 +4386,175 @@ const ctx = buildControls(globalThis.document);
       expect(getFake(globalThis.document, "attacker-ship-image").src).toBe("images/ships/Rifter.webp");
     });
 
-    test("hovering a fitting item shows a preview after the timer fires", () => {
-      const { timer, imageCatalog } = buildControls(globalThis.document);
+    function applyFirstPreset(ctx: ReturnType<typeof buildControls>, side: "attacker" | "target"): void {
+      ctx.fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, `${side}-fitting-trigger`).trigger("click");
+      const item = getFake(globalThis.document, `${side}-fitting-preset-list`).children[0].children[0];
+      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
+      item.trigger("click");
+    }
+
+    function openPreview(ctx: ReturnType<typeof buildControls>, side: "attacker" | "target"): void {
+      setupPreviewContainer(globalThis.document, side);
+      applyFirstPreset(ctx, side);
+      getFake(globalThis.document, `${side}-fitting-eye`).trigger("click");
+    }
+
+    test("clicking the eye button shows the fitting preview window", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
+      const preview = getFake(globalThis.document, "attacker-fitting-preview");
+      const eye = getFake(globalThis.document, "attacker-fitting-eye");
+      expect(preview.hidden).toBe(false);
+      expect(preview.children.length).toBeGreaterThan(0);
+      expect(eye.getAttribute("aria-pressed")).toBe("true");
+      expect(ctx.imageCatalog.itemIconUrl).toHaveBeenCalled();
+    });
+
+    test("clicking the eye button again hides the preview", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
+      getFake(globalThis.document, "attacker-fitting-eye").trigger("click");
+      const preview = getFake(globalThis.document, "attacker-fitting-preview");
+      expect(preview.hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-eye").getAttribute("aria-pressed")).toBe("false");
+    });
+
+    test("eye click does not close the fitting popup", () => {
+      const ctx = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
       setupPreviewContainer(globalThis.document, "attacker");
+      applyFirstPreset(ctx, "attacker");
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
-      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
-      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
-      item.trigger("mouseenter");
-      timer.fireLast();
+      getFake(globalThis.document, "attacker-fitting-eye").trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(false);
+    });
+
+    test("a fitting entry's eye previews that fit without applying it", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      setupPreviewContainer(globalThis.document, "attacker");
+      ctx.fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const entry = getFake(globalThis.document, "attacker-fitting-preset-list").children[0];
+      const eye = entry.children[1];
+      eye.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
+      eye.trigger("click");
       const preview = getFake(globalThis.document, "attacker-fitting-preview");
       expect(preview.hidden).toBe(false);
       expect(preview.children.length).toBeGreaterThan(0);
-      expect(imageCatalog.itemIconUrl).toHaveBeenCalled();
+      expect(eye.getAttribute("aria-pressed")).toBe("true");
+      expect(getFake(globalThis.document, "attacker-fitting-popup").hidden).toBe(false);
     });
 
-    test("clearing the hull hides the ship image and preview", () => {
-      const { timer } = buildControls(globalThis.document);
+    test("clicking the same fitting entry eye again hides the preview", () => {
+      const ctx = buildControls(globalThis.document);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
       setupPreviewContainer(globalThis.document, "attacker");
+      ctx.fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
       getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
-      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
-      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
-      item.trigger("mouseenter");
-      timer.fireLast();
+      const eye = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[1];
+      eye.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
+      eye.trigger("click");
+      eye.trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+      expect(eye.getAttribute("aria-pressed")).toBe("false");
+    });
+
+    test("closing the fitting popup hides a menu-sourced preview but keeps a ship-sourced one", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      setupPreviewContainer(globalThis.document, "attacker");
+      ctx.fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      const entryEye = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[1];
+      entryEye.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
+      entryEye.trigger("click");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+
+      applyFirstPreset(ctx, "attacker");
+      getFake(globalThis.document, "attacker-fitting-eye").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(false);
+    });
+
+    test("Escape closes the preview and focuses the eye button", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
+      globalThis.document.dispatchEvent({ type: "keydown", key: "Escape" } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-eye").focus).toHaveBeenCalled();
+    });
+
+    test("pointerdown outside closes the preview but inside keeps it", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: getFake(globalThis.document, "target-hull") } as unknown as Event);
+      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+      openPreview(ctx, "attacker");
+      const previewElement = getFake(globalThis.document, "attacker-fitting-preview");
+      const inside = new FakeElement();
+      inside.closest = () => previewElement;
+      globalThis.document.dispatchEvent({ type: "pointerdown", target: inside } as unknown as Event);
+      expect(previewElement.hidden).toBe(false);
+    });
+
+    test("clearing the hull hides the ship image and preview", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
       hullInput.value = "";
       hullInput.trigger("change");
       expect(getFake(globalThis.document, "attacker-ship-image").hidden).toBe(true);
       expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+      expect(getFake(globalThis.document, "attacker-fitting-eye").disabled).toBe(true);
     });
 
-    test("re-rendering the fitting popup hides a preview whose anchor was removed", () => {
-      const { timer } = buildControls(globalThis.document);
+    test("the eye button is disabled until a fitting is applied", () => {
+      const ctx = buildControls(globalThis.document);
+      expect(getFake(globalThis.document, "attacker-fitting-eye").disabled).toBe(true);
       const hullInput = getFake(globalThis.document, "attacker-hull");
       hullInput.value = "Rifter";
       hullInput.trigger("change");
-      setupPreviewContainer(globalThis.document, "attacker");
-      getFake(globalThis.document, "attacker-fitting-trigger").trigger("click");
-      const item = getFake(globalThis.document, "attacker-fitting-preset-list").children[0].children[0];
-      item.setBoundingClientRect(rect(100, 100, 400, 120, 300, 20));
-      item.trigger("mouseenter");
-      timer.fireLast();
-      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(false);
+      applyFirstPreset(ctx, "attacker");
+      expect(getFake(globalThis.document, "attacker-fitting-eye").disabled).toBe(false);
+    });
+
+    test("language switch re-renders an open preview in place", () => {
+      const ctx = buildControls(globalThis.document);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      openPreview(ctx, "attacker");
       getFake(globalThis.document, "lang-zh").trigger("click");
-      expect(item.isConnected).toBe(false);
-      expect(getFake(globalThis.document, "attacker-fitting-preview").hidden).toBe(true);
+      const preview = getFake(globalThis.document, "attacker-fitting-preview");
+      expect(preview.hidden).toBe(false);
+      expect(preview.children.length).toBeGreaterThan(0);
     });
   });
 

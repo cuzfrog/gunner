@@ -23,13 +23,24 @@ class FakeElement {
   hidden = false;
   src = "";
   alt = "";
+  type = "";
   style: Record<string, string> = {};
   children: FakeElement[] = [];
   offsetParent: FakeElement | null = null;
   offsetWidth = 0;
   offsetHeight = 0;
   private readonly attributes: Record<string, string> = {};
+  private readonly handlers: Record<string, Array<() => void>> = {};
   private rect: Rect = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
+
+  addEventListener(event: string, handler: () => void): void {
+    this.handlers[event] ??= [];
+    this.handlers[event].push(handler);
+  }
+
+  trigger(event: string): void {
+    this.handlers[event]?.forEach((handler) => handler());
+  }
 
   setBoundingClientRect(rect: Rect): void {
     this.rect = rect;
@@ -79,6 +90,7 @@ function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
     itemIconUrl: (itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined),
+    droneIconUrl: () => "images/icons/1084@1x.png",
   };
 }
 
@@ -139,11 +151,22 @@ describe("DomFittingPreview", () => {
 
     const header = container.children[0];
     expect(header.className).toBe("preview-header");
-    const [image, titles] = header.children;
+    const [image, titles, close] = header.children;
     expect(image.tagName).toBe("img");
     expect(image.src).toBe("images/ships/Rifter.webp");
     expect(titles.children[0].textContent).toBe("Rifter");
     expect(titles.children[1].textContent).toBe("Brawler");
+    expect(close.tagName).toBe("button");
+    expect(close.getAttribute("aria-label")).toBe("button.close");
+  });
+
+  test("close button invokes the onClose callback", () => {
+    const { container, anchor, preview } = buildPreview();
+    const onClose = vi.fn();
+    preview.show(anchor as unknown as HTMLElement, SUMMARY, undefined, onClose);
+    const close = container.children[0].children[2];
+    close.trigger("click");
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   test("show hides the header image when no ship url is provided", () => {
@@ -188,10 +211,33 @@ describe("DomFittingPreview", () => {
     expect(row.children[0].tagName).toBe("img");
     expect(row.children[0].src).toBe("images/icons/1@1x.png");
     expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I");
-    expect(row.children[1].children[1].textContent).toBe(", Hail S");
+    expect(row.children[1].children[2].textContent).toBe(", Hail S");
     const cargoSection = container.children[4];
     const cargoRow = cargoSection.children[1];
     expect(cargoRow.children[2].textContent).toBe("x1000");
+  });
+
+  test("show renders a charge icon next to the charge name", () => {
+    const { container, anchor, preview } = buildPreview();
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    const highRow = container.children[1].children[1];
+    const main = highRow.children[1];
+    expect(main.children[1].tagName).toBe("img");
+    expect(main.children[1].className).toBe("preview-charge-icon");
+    expect(main.children[2].textContent).toBe(", Hail S");
+  });
+
+  test("drone rows fall back to the generic drone icon", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", quantity: 3 }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const droneRow = container.children[1].children[1];
+    expect(droneRow.children[0].tagName).toBe("img");
+    expect(droneRow.children[0].src).toBe("images/icons/1084@1x.png");
   });
 
   test("show hides the icon for items without an icon url", () => {

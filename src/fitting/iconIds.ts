@@ -1706,3 +1706,5 @@ export const ITEM_ICON_IDS: Readonly<Record<string, number>> = {
   "Xray S": 1140,
   "Xray XL": 1140,
 } as const;
+
+export const DRONE_ICON_ID = 1084;

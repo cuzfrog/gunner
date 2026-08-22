@@ -3,7 +3,7 @@ import type { I18n } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
 
 export interface FittingPreview {
-  show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string): void;
+  show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string, onClose?: () => void): void;
   hide(): void;
 }
 
@@ -27,9 +27,9 @@ export class DomFittingPreview implements FittingPreview {
     this.viewport = viewport;
   }
 
-  show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string): void {
+  show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string, onClose?: () => void): void {
     this.container.innerHTML = "";
-    this.container.appendChild(renderHeader(summary, shipImageUrl));
+    this.container.appendChild(renderHeader(this.i18n, summary, shipImageUrl, onClose));
     for (const section of summary.sections) {
       this.container.appendChild(renderSection(this.i18n, this.imageCatalog, section));
     }
@@ -45,7 +45,7 @@ export class DomFittingPreview implements FittingPreview {
   }
 }
 
-function renderHeader(summary: FittingSummary, shipImageUrl?: string): HTMLElement {
+function renderHeader(i18n: I18n, summary: FittingSummary, shipImageUrl: string | undefined, onClose: (() => void) | undefined): HTMLElement {
   const header = document.createElement("div");
   header.className = "preview-header";
 
@@ -70,8 +70,21 @@ function renderHeader(summary: FittingSummary, shipImageUrl?: string): HTMLEleme
   titles.appendChild(fitting);
 
   header.appendChild(titles);
+
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "preview-close";
+  close.setAttribute("title", i18n.t("button.close"));
+  close.setAttribute("aria-label", i18n.t("button.close"));
+  close.innerHTML = CLOSE_ICON_SVG;
+  close.addEventListener("click", () => onClose?.());
+  header.appendChild(close);
   return header;
 }
+
+const CLOSE_ICON_SVG =
+  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
+  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
 function renderSection(i18n: I18n, imageCatalog: ImageCatalog, section: FittingSection): HTMLElement {
   const container = document.createElement("div");
@@ -83,16 +96,16 @@ function renderSection(i18n: I18n, imageCatalog: ImageCatalog, section: FittingS
   container.appendChild(label);
 
   for (const row of section.rows) {
-    container.appendChild(renderRow(imageCatalog, row));
+    container.appendChild(renderRow(imageCatalog, row, section.kind));
   }
   return container;
 }
 
-function renderRow(imageCatalog: ImageCatalog, row: FittingRow): HTMLElement {
+function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: FittingSection["kind"]): HTMLElement {
   const rowEl = document.createElement("div");
   rowEl.className = "preview-row";
 
-  const iconUrl = imageCatalog.itemIconUrl(row.name);
+  const iconUrl = imageCatalog.itemIconUrl(row.name) ?? (sectionKind === "drones" ? imageCatalog.droneIconUrl() : undefined);
   const icon = document.createElement("img");
   icon.className = "preview-icon";
   icon.alt = "";
@@ -108,6 +121,13 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow): HTMLElement {
   main.appendChild(name);
 
   if (row.charge) {
+    const chargeIcon = document.createElement("img");
+    chargeIcon.className = "preview-charge-icon";
+    chargeIcon.alt = "";
+    const chargeIconUrl = imageCatalog.itemIconUrl(row.charge);
+    if (chargeIconUrl) chargeIcon.src = chargeIconUrl;
+    main.appendChild(chargeIcon);
+
     const charge = document.createElement("span");
     charge.className = "preview-charge";
     charge.textContent = `, ${row.charge}`;

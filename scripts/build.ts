@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
-import { ITEM_ICON_IDS } from "../src/fitting";
+import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../src/fitting";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";
@@ -55,7 +55,7 @@ for (const entry of readdirSync(SHIP_IMAGES_SOURCE, { withFileTypes: true })) {
 
 const iconsDist = join(DISTRIBUTION_DIRECTORY, "images", "icons");
 mkdirSync(iconsDist, { recursive: true });
-for (const iconId of new Set(Object.values(ITEM_ICON_IDS))) {
+for (const iconId of new Set([...Object.values(ITEM_ICON_IDS), DRONE_ICON_ID])) {
   const src = join(ICONS_SOURCE_DIRECTORY, `${iconId}@1x.png`);
   if (!existsSync(src)) throw new Error(`Missing icon source: ${src}`);
   cpSync(src, join(iconsDist, `${iconId}@1x.png`));

@@ -254,6 +254,7 @@ body {
 .github-link:focus-visible,
 .import-fitting-button:focus-visible,
 .fitting-trigger:focus-visible,
+.fitting-eye:focus-visible,
 .ammo-trigger:focus-visible,
 .ammo-popup button:focus-visible {
   outline: 1px solid var(--accent-teal);
@@ -302,8 +303,8 @@ body {
 
 .ship-image {
   display: block;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
@@ -325,7 +326,6 @@ body {
   border-radius: 2px;
   box-shadow: 0 4px 16px var(--shadow-color);
   padding: 8px;
-  pointer-events: none;
   scrollbar-width: thin;
   scrollbar-color: var(--accent-teal-35) transparent;
 }
@@ -363,6 +363,28 @@ body {
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   flex-shrink: 0;
+}
+
+.preview-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.preview-close:hover {
+  color: var(--accent-teal);
 }
 
 .preview-titles {
@@ -455,6 +477,15 @@ body {
   margin-left: 4px;
 }
 
+.preview-charge-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
 .preview-quantity {
   flex: none;
   color: var(--text-dim);
@@ -525,7 +556,8 @@ body {
   color: var(--accent-teal);
 }
 
-.fitting-trigger {
+.fitting-trigger,
+.fitting-eye {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -539,14 +571,20 @@ body {
   line-height: 0;
 }
 
-.fitting-trigger:hover {
+.fitting-trigger:hover,
+.fitting-eye:hover {
   color: var(--accent-teal);
 }
 
-.fitting-trigger:disabled {
+.fitting-trigger:disabled,
+.fitting-eye:disabled {
   opacity: 0.5;
   cursor: default;
   color: var(--text-dim);
+}
+
+.fitting-eye[aria-pressed="true"] {
+  color: var(--accent-teal);
 }
 
 .fitting-popup {
@@ -672,6 +710,36 @@ body {
 
 .fitting-delete:hover {
   color: var(--danger-red);
+}
+
+.fitting-item-eye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+  line-height: 0;
+  opacity: 0;
+}
+
+.fitting-entry:hover .fitting-item-eye,
+.fitting-entry:focus-within .fitting-item-eye,
+.fitting-item-eye[aria-pressed="true"] {
+  opacity: 1;
+}
+
+.fitting-item-eye:hover {
+  color: var(--accent-teal);
+}
+
+.fitting-item-eye[aria-pressed="true"] {
+  color: var(--accent-teal);
 }
 
 .fitting-empty {
