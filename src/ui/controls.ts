@@ -2661,12 +2661,6 @@ function isHtmlTextAreaElement(el: Element): el is HTMLTextAreaElement {
   return el.tagName === "TEXTAREA";
 }
 
-function checked<T extends HTMLElement>(el: Element, guard: (el: Element) => el is T): T {
-  if (!guard(el)) throw new Error(`Expected element to be a ${guard.name}`);
-  return el;
-}
-
-
 function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): number {
   const value = input.value;
   const n = parseFloat(value);
