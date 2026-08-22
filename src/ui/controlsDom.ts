@@ -104,13 +104,6 @@ export interface Els {
   readonly langJa: HTMLButtonElement;
   readonly play: HTMLButtonElement;
   readonly reset: HTMLButtonElement;
-  readonly resDistance: HTMLElement;
-  readonly resTransversal: HTMLElement;
-  readonly resAngular: HTMLElement;
-  readonly resRadial: HTMLElement;
-  readonly resTrackPen: HTMLElement;
-  readonly resRangePen: HTMLElement;
-  readonly resHit: HTMLElement;
   readonly gridBrightnessSlider: HTMLInputElement;
   readonly gridBrightnessValue: HTMLElement;
 }

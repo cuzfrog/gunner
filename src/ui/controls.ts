@@ -57,6 +57,8 @@ import {
 } from "./controlsDom";
 import { SidePanel, type SidePanelHost } from "./sidePanel";
 import { PopupGroup, type Popup } from "./popupGroup";
+import { ChoiceGroup } from "./controls/choiceGroup";
+import { EngagementReadout } from "./controls/engagementReadout";
 import {
   AGGRESSIVITY_MAX,
   AGGRESSIVITY_MIN,
@@ -65,8 +67,6 @@ import {
   aggressivityFromPosition,
   chargeStatSuffix,
   formatNumber,
-  formatWithCommas,
-  hitChanceColor,
   isAutopilotMode,
   isSigResClass,
   parseManeuverAggressivity,
@@ -142,6 +142,8 @@ export class DomControls implements Controls {
   private readonly targetFittingPopup: Popup;
   private readonly importSidePopup: Popup;
   private readonly attackerAmmoPopup: Popup;
+  private readonly engagementReadout: EngagementReadout;
+  private readonly sigResChoice: ChoiceGroup;
   private selectedProfile: ProfileSettings | null = null;
   private readonly sigResOriginalTitles: Partial<Record<SigResolutionClass, string>> = {};
 
@@ -302,6 +304,11 @@ export class DomControls implements Controls {
       langJa: elOf("lang-ja", isHtmlButtonElement),
       play: elOf("play", isHtmlButtonElement),
       reset: elOf("reset", isHtmlButtonElement),
+      gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
+      gridBrightnessValue: el("grid-brightness-value"),
+    };
+
+    this.engagementReadout = new EngagementReadout({
       resDistance: el("res-distance"),
       resTransversal: el("res-transversal"),
       resAngular: el("res-angular"),
@@ -309,9 +316,8 @@ export class DomControls implements Controls {
       resTrackPen: el("res-track-pen"),
       resRangePen: el("res-range-pen"),
       resHit: el("res-hit"),
-      gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
-      gridBrightnessValue: el("grid-brightness-value"),
-    };
+    });
+    this.sigResChoice = new ChoiceGroup(this.els.sigResOptions, this.els.sigRes, ["S", "M", "L", "XL"]);
 
     this.attackerPreview = new DomFittingPreview({
       container: this.els.attackerFittingPreview,
@@ -575,18 +581,7 @@ export class DomControls implements Controls {
   }
 
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
-    const trackPenalty = Number.isFinite(hit.trackingTerm) ? (0.5 ** hit.trackingTerm) * 100 : 0;
-    const rangePenalty = Number.isFinite(hit.rangeTerm) ? (0.5 ** hit.rangeTerm) * 100 : 0;
-
-    setText(this.els.resDistance, this.formatDistance(frame.distance));
-    setText(this.els.resTransversal, `${formatWithCommas(frame.transversalSpeed, 1)} m/s`);
-    setText(this.els.resAngular, `${formatWithCommas(frame.angularVelocity, 4)} rad/s`);
-    setText(this.els.resRadial, `${formatWithCommas(frame.radialVelocity, 1)} m/s`);
-    setText(this.els.resTrackPen, `${formatWithCommas(trackPenalty, 1)}%`);
-    setText(this.els.resRangePen, `${formatWithCommas(rangePenalty, 1)}%`);
-    setText(this.els.resHit, `${formatWithCommas(hit.chance * 100, 1)}%`);
-
-    this.els.resHit.style.color = hitChanceColor(hit.chance);
+    this.engagementReadout.update(frame, hit, (key) => this.i18n.t(key));
   }
 
   setPlaying(playing: boolean): void {
@@ -702,7 +697,7 @@ export class DomControls implements Controls {
     this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
 
     this.els.sigRes.value = settings.sigRes;
-    this.setChoiceGroup(this.els.sigResOptions, settings.sigRes);
+    this.sigResChoice.set(settings.sigRes);
     this.els.optimal.value = String(settings.optimal);
     this.els.falloff.value = String(settings.falloff);
     this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
@@ -1168,8 +1163,6 @@ export class DomControls implements Controls {
     this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSkillPopup));
     this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSkillPopup));
 
-    this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes, ["S", "M", "L", "XL"]);
-
     const displayInputs: (keyof typeof this.els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
       this.els[id].addEventListener("input", () => {
@@ -1214,11 +1207,6 @@ export class DomControls implements Controls {
 
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
-  }
-
-  private formatDistance(m: number): string {
-    if (m >= 10000) return `${formatWithCommas(m / 1000, 1)} ${this.i18n.t("unit.kilometer")}`;
-    return `${formatWithCommas(Math.round(m))} ${this.i18n.t("unit.meter")}`;
   }
 
   private populateHullDatalist(): void {
@@ -1677,7 +1665,7 @@ export class DomControls implements Controls {
     if (this.attackerSide.overrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
     if (this.attackerSide.overrides.sigRes === undefined) {
       this.els.sigRes.value = turret.sigResolutionClass;
-      this.setChoiceGroup(this.els.sigResOptions, turret.sigResolutionClass);
+      this.sigResChoice.set(turret.sigResolutionClass);
     }
     if (this.attackerSide.overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
     if (this.attackerSide.overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
@@ -1781,33 +1769,6 @@ export class DomControls implements Controls {
       eye.focus();
     }
     this.popupGroup.onKeyDown(event);
-  }
-
-  private bindChoiceGroup(group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): void {
-    for (const button of Array.from(group.children)) {
-      button.addEventListener("click", () => this.onChoiceButtonClick(group, select, button, values));
-    }
-  }
-
-  private onChoiceButtonClick(
-    group: HTMLElement,
-    select: HTMLSelectElement,
-    button: Element,
-    values: readonly string[],
-  ): void {
-    const value = button.getAttribute("data-value") ?? "";
-    if (!values.includes(value)) return;
-    select.value = value;
-    this.setChoiceGroup(group, value);
-    select.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  private setChoiceGroup(group: HTMLElement, value: string): void {
-    for (const button of Array.from(group.children)) {
-      const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    }
   }
 
   private createFittingPopup(side: "attacker" | "target"): Popup {
