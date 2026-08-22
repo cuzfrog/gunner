@@ -36,8 +36,9 @@ import {
   type SettingsStore,
   type UserSettings,
 } from "./settings";
-import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
+import { PreferencesController } from "./controls/preferencesController";
+import { ProfileController } from "./controls/profileController";
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { TimeoutId, Timer } from "./timer";
@@ -60,19 +61,15 @@ import { PopupGroup, type Popup } from "./popupGroup";
 import { ChoiceGroup } from "./controls/choiceGroup";
 import { EngagementReadout } from "./controls/engagementReadout";
 import {
-  AGGRESSIVITY_MAX,
   AGGRESSIVITY_MIN,
   DEFAULT_GRID_BRIGHTNESS,
   NEUTRAL_STAT_CONDITIONS,
-  aggressivityFromPosition,
   chargeStatSuffix,
   formatNumber,
   isAutopilotMode,
   isSigResClass,
   parseManeuverAggressivity,
-  positionFromAggressivity,
   profileSettingsOf,
-  settingsEqual,
   skillLevelFromString,
 } from "./controlsFormat";
 
@@ -109,13 +106,13 @@ export class DomControls implements Controls {
   private readonly timer: Timer;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly imageCatalog: ImageCatalog;
-  private readonly trackingInput: TrackingInput;
+  private readonly preferencesController: PreferencesController;
+  private readonly profileController: ProfileController;
   private readonly hintRotator: IHintRotator;
   private readonly attackerPreview: FittingPreview;
   private readonly targetPreview: FittingPreview;
   private callbacks?: ControlsCallbacks;
   private playing = false;
-  private shareStatusTimeout?: TimeoutId;
   private openFittingSide: "attacker" | "target" | null = null;
   private importSidePopupOpen = false;
   private pendingImportText?: string;
@@ -144,7 +141,6 @@ export class DomControls implements Controls {
   private readonly attackerAmmoPopup: Popup;
   private readonly engagementReadout: EngagementReadout;
   private readonly sigResChoice: ChoiceGroup;
-  private selectedProfile: ProfileSettings | null = null;
   private readonly sigResOriginalTitles: Partial<Record<SigResolutionClass, string>> = {};
 
   constructor({
@@ -188,7 +184,6 @@ export class DomControls implements Controls {
     this.imageCatalog = imageCatalog;
     this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.popupGroup = new PopupGroup();
-    this.trackingInput = new TrackingInput();
     this.hintRotator = new HintRotator({
       element: el("slide-hints"),
       i18n,
@@ -307,6 +302,41 @@ export class DomControls implements Controls {
       gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
       gridBrightnessValue: el("grid-brightness-value"),
     };
+
+    this.preferencesController = new PreferencesController({
+      els: {
+        tracking: this.els.tracking,
+        trackingUnitRad: this.els.trackingUnitRad,
+        trackingUnitScore: this.els.trackingUnitScore,
+        langEn: this.els.langEn,
+        langZh: this.els.langZh,
+        langJa: this.els.langJa,
+        gridBrightnessSlider: this.els.gridBrightnessSlider,
+        gridBrightnessValue: this.els.gridBrightnessValue,
+        maneuverAggressivity: this.els.maneuverAggressivity,
+        maneuverAggressivitySlider: this.els.maneuverAggressivitySlider,
+        maneuverAggressivityValue: this.els.maneuverAggressivityValue,
+        simSpeed: this.els.simSpeed,
+      },
+      i18n: this.i18n,
+      settingsStore: this.settingsStore,
+      sigResolution: () => this.currentSigResolution(),
+      onLanguageChanged: () => this.onLanguageChanged(),
+    });
+    this.profileController = new ProfileController({
+      els: {
+        profileName: this.els.profileName,
+        profileSave: this.els.profileSave,
+        profileSelect: this.els.profileSelect,
+        profileDelete: this.els.profileDelete,
+        shareStatus: this.els.shareStatus,
+      },
+      settingsStore: this.settingsStore,
+      timer: this.timer,
+      i18n: this.i18n,
+      captureCurrent: () => profileSettingsOf(this.getSettings()),
+      onLoaded: (name) => this.onProfileLoaded(name),
+    });
 
     this.engagementReadout = new EngagementReadout({
       resDistance: el("res-distance"),
@@ -474,66 +504,75 @@ export class DomControls implements Controls {
   }
 
   private persistConfigChange(notify = true): void {
-    this.savePreferences();
-    this.updateSaveButtonState();
+    this.preferencesController.savePreferences();
+    this.profileController.updateDirtyState();
     if (notify) this.callbacks?.onConfigChange();
+  }
+
+  private onProfileLoaded(name: string): void {
+    const profile = this.settingsStore.loadProfile(name);
+    if (!profile) return;
+    this.loadSettings(this.sessionSettings(profile), name);
+    this.callbacks?.onReset();
+  }
+
+  private onLanguageChanged(): void {
+    const selected = this.profileController.selectedName();
+    this.i18n.translateDocument();
+    this.profileController.refresh(selected);
+    this.attackerSide.renderPropulsionOptions();
+    this.targetSide.renderPropulsionOptions();
+    this.renderSigResIcons();
+    this.attackerSide.clearImportHint();
+    this.targetSide.clearImportHint();
+    this.populateHullDatalist();
+    this.attackerSide.refreshHullInputs();
+    this.targetSide.refreshHullInputs();
+    if (this.openFittingSide) this.renderFittingPopup(this.openFittingSide);
+    this.refreshPreview();
+    this.attackerSide.updateHullHint();
+    this.targetSide.updateHullHint();
+    this.attackerSide.renderSkillOptions();
+    this.targetSide.renderSkillOptions();
+    this.hintRotator.refresh();
+    this.setPlaying(this.playing);
+    this.profileController.updateDirtyState();
+    this.callbacks?.onDisplayChange();
   }
 
   private restoreSavedState(): void {
     const startup = this.settingsStore.loadStartupState();
     if (startup.settings) {
       this.loadSettings(startup.settings, startup.selectedProfileName ?? "");
-      this.selectedProfile = startup.selectedProfileName ? profileSettingsOf(this.getSettings()) : null;
-      this.updateSaveButtonState();
       return;
     }
-    this.applyPreferences(this.settingsStore.loadPreferences());
-    const selectedName = startup.selectedProfileName;
-    const profile = selectedName ? this.settingsStore.loadProfile(selectedName) : null;
-    if (selectedName && profile) {
-      this.loadSettings(this.sessionSettings(profile), selectedName);
-      this.selectedProfile = profileSettingsOf(this.getSettings());
-      this.updateSaveButtonState();
-      return;
-    }
+    if (this.profileController.restoreFromStartup(startup)) return;
+    const preferences = this.settingsStore.loadPreferences();
+    this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
     this.setDefaultSkillAndOverload();
     this.attackerSide.setOverloadDisabled();
     this.targetSide.setOverloadDisabled();
-    this.updateUnitToggle();
-    this.updateLanguageToggle();
     this.setBestInitialDistance();
-    this.updateManeuverAggressivityDisplay();
-    this.updateManeuverAggressivityEnabled();
-    this.updateGridBrightnessDisplay();
+    this.preferencesController.updateManeuverAggressivityDisplay();
+    this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
     this.setPlaying(false);
     this.attackerSide.renderPropulsionOptions();
     this.targetSide.renderPropulsionOptions();
-    this.renderProfiles(selectedName ?? "");
-  }
-
-  private applyPreferences(preferences: DisplayPreferences): void {
-    this.i18n.setLanguage(preferences.language);
-    const display = this.trackingInput.setUnit(preferences.trackingUnit, this.currentSigResolution());
-    this.els.tracking.value = String(display);
-    this.els.simSpeed.value = String(preferences.simSpeed);
-    this.updateGridBrightnessDisplay(preferences.gridBrightness);
+    this.profileController.refresh();
   }
 
   private sessionSettings(profile: ProfileSettings): UserSettings {
     return {
       ...profile,
       attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1),
-      language: this.i18n.current(),
-      trackingUnit: this.trackingInput.unit,
-      simSpeed: num(this.els.simSpeed),
-      gridBrightness: this.getGridBrightness(),
+      ...this.preferencesController.capture(),
     };
   }
 
   getTurret(): TurretSpec {
     return {
-      tracking: this.trackingInput.rad,
+      tracking: this.preferencesController.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[this.currentSigResValue()],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
@@ -571,13 +610,11 @@ export class DomControls implements Controls {
   }
 
   getSpeed(): number {
-    return num(this.els.simSpeed);
+    return this.preferencesController.getSpeed();
   }
 
   getGridBrightness(): number {
-    const value = Number.parseFloat(this.els.gridBrightnessSlider.value);
-    if (!Number.isFinite(value)) return DEFAULT_GRID_BRIGHTNESS;
-    return Math.max(0, Math.min(1, value));
+    return this.preferencesController.getGridBrightness();
   }
 
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
@@ -591,53 +628,6 @@ export class DomControls implements Controls {
     );
   }
 
-  private onManeuverAggressivityChange(): void {
-    const slider = this.els.maneuverAggressivitySlider;
-    const pos = Number.parseFloat(slider.value);
-    const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
-    this.updateManeuverAggressivityDisplay(value);
-    this.updateSaveButtonState();
-    this.savePreferences();
-    this.callbacks?.onConfigChange();
-  }
-
-  private updateManeuverAggressivityDisplay(value?: number): void {
-    const input = this.els.maneuverAggressivity;
-    const slider = this.els.maneuverAggressivitySlider;
-    const output = this.els.maneuverAggressivityValue;
-    const current = value ?? parseManeuverAggressivity(input);
-    input.value = String(current);
-    setText(output, current.toFixed(2));
-    const pos = positionFromAggressivity(current);
-    slider.value = String(pos);
-    if ("setProperty" in slider.style) {
-      slider.style.setProperty("--fill", `${pos * 100}%`);
-    }
-  }
-
-  private updateManeuverAggressivityEnabled(): void {
-    const slider = this.els.maneuverAggressivitySlider;
-    slider.disabled = this.els.attackerMode.value === "midships";
-  }
-
-  private onGridBrightnessChange(): void {
-    this.updateGridBrightnessDisplay();
-    this.updateSaveButtonState();
-    this.savePreferences();
-    this.callbacks?.onDisplayChange();
-  }
-
-  private updateGridBrightnessDisplay(value?: number): void {
-    const slider = this.els.gridBrightnessSlider;
-    const output = this.els.gridBrightnessValue;
-    const current = value ?? this.getGridBrightness();
-    slider.value = String(current);
-    setText(output, `${Math.round(current * 100)}%`);
-    if ("setProperty" in slider.style) {
-      slider.style.setProperty("--fill", `${current * 100}%`);
-    }
-  }
-
   setCallbacks(callbacks: ControlsCallbacks): void {
     this.callbacks = callbacks;
   }
@@ -645,8 +635,8 @@ export class DomControls implements Controls {
   private getSettings(): UserSettings {
     return {
       version: USER_SETTINGS_VERSION,
-      tracking: this.trackingInput.rad,
-      trackingUnit: this.trackingInput.unit,
+      tracking: this.preferencesController.trackingInput.rad,
+      ...this.preferencesController.capture(),
       sigRes: this.currentSigResValue(),
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
@@ -654,7 +644,6 @@ export class DomControls implements Controls {
       attackerMode: this.currentMode("attacker"),
       attackerRange: num(this.els.attackerRange),
       maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity),
-      gridBrightness: this.getGridBrightness(),
       attackerMass: num(this.els.attackerMass),
       attackerInertia: num(this.els.attackerInertia),
       attackerSkillLevel: skillLevelFromString(this.els.attackerSkills.value),
@@ -679,8 +668,6 @@ export class DomControls implements Controls {
       targetOverrides: this.targetSide.overrides,
       targetFittedHull: this.targetSide.fittedHull,
       attackerAmmo: this.attackerAmmo,
-      simSpeed: num(this.els.simSpeed),
-      language: this.i18n.current(),
     };
   }
 
@@ -690,14 +677,18 @@ export class DomControls implements Controls {
     this.targetSide.fittingText = settings.targetFitting;
     this.targetSide.overrides = settings.targetOverrides ?? {};
     this.attackerAmmo = settings.attackerAmmo;
-    this.i18n.setLanguage(settings.language);
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
-    this.trackingInput.setRadValue(settings.tracking, sigResolution);
-    this.trackingInput.setUnit(settings.trackingUnit, sigResolution);
-
     this.els.sigRes.value = settings.sigRes;
     this.sigResChoice.set(settings.sigRes);
+    this.preferencesController.trackingInput.setRadValue(settings.tracking, sigResolution);
+    this.preferencesController.restore({
+      language: settings.language,
+      trackingUnit: settings.trackingUnit,
+      simSpeed: settings.simSpeed,
+      gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
+    });
+
     this.els.optimal.value = String(settings.optimal);
     this.els.falloff.value = String(settings.falloff);
     this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
@@ -706,7 +697,6 @@ export class DomControls implements Controls {
     this.els.attackerMode.value = settings.attackerMode;
     this.els.attackerRange.value = String(settings.attackerRange);
     this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
-    this.els.gridBrightnessSlider.value = String(settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS);
     this.els.initialDistance.value = String(settings.initialDistance);
     this.els.targetSpeed.value = formatNumber(settings.targetSpeed);
     this.els.targetMass.value = String(settings.targetMass);
@@ -714,7 +704,6 @@ export class DomControls implements Controls {
     this.els.targetMode.value = settings.targetMode;
     this.els.targetRange.value = String(settings.targetRange);
     this.els.targetSig.value = String(settings.targetSig);
-    this.els.simSpeed.value = String(settings.simSpeed);
 
     this.attackerSide.loadHull(settings.attackerHull, settings.attackerPropulsion);
     this.targetSide.loadHull(settings.targetHull, settings.targetPropulsion);
@@ -735,18 +724,14 @@ export class DomControls implements Controls {
     if (settings.targetFittedHull) {
       this.targetSide.restoreFittingSummary(settings.targetFittedHull);
     }
-    this.displayTrackingInput();
-    this.updateUnitToggle();
-    this.updateLanguageToggle();
-    this.renderProfiles(selectedName);
     this.setPlaying(this.playing);
-    this.updateManeuverAggressivityDisplay();
-    this.updateManeuverAggressivityEnabled();
-    this.updateGridBrightnessDisplay();
+    this.preferencesController.updateManeuverAggressivityDisplay();
+    this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
     this.attackerSide.updateAlignTime();
     this.targetSide.updateAlignTime();
     this.hintRotator.refresh();
-    this.savePreferences();
+    this.profileController.markLoaded(selectedName);
+    this.preferencesController.savePreferences();
   }
 
   private setBestInitialDistance(): void {
@@ -780,156 +765,6 @@ export class DomControls implements Controls {
     return SIG_RESOLUTIONS[this.currentSigResValue()];
   }
 
-  private setTrackingUnit(unit: TrackingUnit): void {
-    const sigResolution = this.currentSigResolution();
-    const display = this.trackingInput.setUnit(unit, sigResolution);
-    this.els.tracking.value = String(display);
-    this.updateUnitToggle();
-    this.savePreferences();
-    this.updateSaveButtonState();
-  }
-
-  private updateTrackingFromInput(): void {
-    const value = num(this.els.tracking);
-    const sigResolution = this.currentSigResolution();
-    const display = this.trackingInput.setDisplayValue(value, sigResolution);
-    this.els.tracking.value = String(display);
-  }
-
-  private updateTrackingForSigResolution(): void {
-    const sigResolution = this.currentSigResolution();
-    const display = this.trackingInput.displayValue(sigResolution);
-    this.els.tracking.value = String(display);
-  }
-
-  private displayTrackingInput(): void {
-    const sigResolution = this.currentSigResolution();
-    const display = this.trackingInput.displayValue(sigResolution);
-    this.els.tracking.value = String(display);
-  }
-
-  private updateUnitToggle(): void {
-    const radActive = this.trackingInput.unit === "rad";
-    const scoreActive = this.trackingInput.unit === "score";
-    this.els.trackingUnitRad.classList.toggle("active", radActive);
-    this.els.trackingUnitRad.setAttribute("aria-pressed", String(radActive));
-    this.els.trackingUnitScore.classList.toggle("active", scoreActive);
-    this.els.trackingUnitScore.setAttribute("aria-pressed", String(scoreActive));
-  }
-
-  private setLanguage(language: Language): void {
-    const selected = this.els.profileSelect.value;
-    this.popupGroup.close(this.attackerSkillPopup);
-    this.popupGroup.close(this.targetSkillPopup);
-    this.i18n.setLanguage(language);
-    this.i18n.translateDocument();
-    this.updateLanguageToggle();
-    this.renderProfiles(selected);
-    this.attackerSide.renderPropulsionOptions();
-    this.targetSide.renderPropulsionOptions();
-    this.renderSigResIcons();
-    this.attackerSide.clearImportHint();
-    this.targetSide.clearImportHint();
-    this.populateHullDatalist();
-    this.attackerSide.refreshHullInputs();
-    this.targetSide.refreshHullInputs();
-    if (this.openFittingSide) this.renderFittingPopup(this.openFittingSide);
-    this.refreshPreview();
-    this.attackerSide.updateHullHint();
-    this.targetSide.updateHullHint();
-    this.attackerSide.renderSkillOptions();
-    this.targetSide.renderSkillOptions();
-    this.hintRotator.refresh();
-    this.setPlaying(this.playing);
-    this.savePreferences();
-    this.updateSaveButtonState();
-    this.callbacks?.onDisplayChange();
-  }
-
-  private updateLanguageToggle(): void {
-    const current = this.i18n.current();
-    this.els.langEn.classList.toggle("active", current === "en");
-    this.els.langEn.setAttribute("aria-pressed", String(current === "en"));
-    this.els.langZh.classList.toggle("active", current === "zh");
-    this.els.langZh.setAttribute("aria-pressed", String(current === "zh"));
-    this.els.langJa.classList.toggle("active", current === "ja");
-    this.els.langJa.setAttribute("aria-pressed", String(current === "ja"));
-  }
-
-  private savePreferences(): void {
-    this.settingsStore.savePreferences({
-      language: this.i18n.current(),
-      trackingUnit: this.trackingInput.unit,
-      simSpeed: num(this.els.simSpeed),
-      gridBrightness: this.getGridBrightness(),
-    });
-  }
-
-  private renderProfiles(selected = ""): void {
-    const names = this.settingsStore.listProfiles();
-    const select = this.els.profileSelect;
-    select.innerHTML = "";
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = this.i18n.t("select.profile");
-    select.appendChild(placeholder);
-    for (const name of names) {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      select.appendChild(option);
-    }
-    select.value = selected;
-  }
-
-  private saveProfile(): void {
-    const selected = this.els.profileSelect.value;
-    const name = this.els.profileName.value.trim();
-    const profileName = name || selected;
-    if (!profileName) return;
-    const profile = profileSettingsOf(this.getSettings());
-    this.settingsStore.saveProfile(profileName, profile);
-    this.settingsStore.selectProfile(profileName);
-    this.els.profileName.value = "";
-    this.renderProfiles(profileName);
-    this.selectedProfile = profile;
-    this.updateSaveButtonState();
-  }
-
-  private loadProfile(): void {
-    const name = this.els.profileSelect.value;
-    if (!name) return;
-    const profile = this.settingsStore.loadProfile(name);
-    if (!profile) return;
-    this.loadSettings(this.sessionSettings(profile), name);
-    this.selectedProfile = profileSettingsOf(this.getSettings());
-    this.settingsStore.selectProfile(name);
-    this.updateSaveButtonState();
-    this.callbacks?.onReset();
-  }
-
-  private deleteProfile(): void {
-    const name = this.els.profileSelect.value;
-    if (!name) return;
-    this.settingsStore.deleteProfile(name);
-    this.renderProfiles();
-    this.selectedProfile = null;
-    this.updateSaveButtonState();
-  }
-
-  private updateSaveButtonState(): void {
-    const selected = this.els.profileSelect.value;
-    const name = this.els.profileName.value.trim();
-    let saved: ProfileSettings | null = null;
-    if (name && name !== selected) {
-      saved = this.settingsStore.loadProfile(name);
-    } else if (selected) {
-      saved = this.selectedProfile;
-    }
-    const current = profileSettingsOf(this.getSettings());
-    const pending = saved ? !settingsEqual(saved, current) : name.length > 0;
-    this.els.profileSave.classList.toggle("unsaved", pending);
-  }
 
   private async importFitting(side: "attacker" | "target"): Promise<void> {
     const pastePopup = side === "attacker" ? this.attackerPastePopup : this.targetPastePopup;
@@ -994,8 +829,8 @@ export class DomControls implements Controls {
     if (side === "attacker") this.applyImportedTurret(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
-      this.savePreferences();
-      this.updateSaveButtonState();
+      this.preferencesController.savePreferences();
+      this.profileController.updateDirtyState();
       this.callbacks?.onConfigChange();
     }
     panel.showImportHint("status.fittingImported");
@@ -1012,22 +847,22 @@ export class DomControls implements Controls {
     try {
       text = await this.clipboard.readText();
     } catch {
-      this.showProfileStatus("status.clipboardDenied");
+      this.profileController.showStatus("status.clipboardDenied");
       return;
     }
     const trimmed = text.trimStart();
     if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
       const settings = this.profileFromText(text);
       if (!settings) {
-        this.showProfileStatus("status.importInvalid");
+        this.profileController.showStatus("status.importInvalid");
         return;
       }
       this.loadSettings(settings);
-      this.showProfileStatus("status.profileImported");
+      this.profileController.showStatus("status.profileImported");
       return;
     }
     if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
-      this.showProfileStatus("status.importInvalid");
+      this.profileController.showStatus("status.importInvalid");
       return;
     }
     this.pendingImportText = text;
@@ -1067,10 +902,7 @@ export class DomControls implements Controls {
     return {
       ...parsed,
       attackerAmmo: ammo,
-      language: this.i18n.current(),
-      trackingUnit: this.trackingInput.unit,
-      simSpeed: num(this.els.simSpeed),
-      gridBrightness: this.getGridBrightness(),
+      ...this.preferencesController.capture(),
     };
   }
 
@@ -1099,16 +931,10 @@ export class DomControls implements Controls {
   private async copyProfile(): Promise<void> {
     try {
       await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
-      this.showProfileStatus("status.copied");
+      this.profileController.showStatus("status.copied");
     } catch {
-      this.showProfileStatus("status.failed");
+      this.profileController.showStatus("status.failed");
     }
-  }
-
-  private showProfileStatus(key: string): void {
-    setText(this.els.shareStatus, this.i18n.t(key));
-    if (this.shareStatusTimeout) this.timer.clearTimeout(this.shareStatusTimeout);
-    this.shareStatusTimeout = this.timer.setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
   private bind(): void {
@@ -1117,19 +943,27 @@ export class DomControls implements Controls {
     this.els.simSpeed.addEventListener("change", () => {
       this.callbacks?.onSpeedChange(this.getSpeed());
     });
-    this.els.trackingUnitRad.addEventListener("click", () => this.setTrackingUnit("rad"));
-    this.els.trackingUnitScore.addEventListener("click", () => this.setTrackingUnit("score"));
-    this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
-    this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
-    this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
-    this.els.profileSave.addEventListener("click", () => this.saveProfile());
-    this.els.profileSelect.addEventListener("change", () => this.loadProfile());
-    this.els.profileDelete.addEventListener("click", () => this.deleteProfile());
+    this.els.trackingUnitRad.addEventListener("click", () => {
+      this.preferencesController.setTrackingUnit("rad");
+      this.profileController.updateDirtyState();
+      this.callbacks?.onDisplayChange();
+    });
+    this.els.trackingUnitScore.addEventListener("click", () => {
+      this.preferencesController.setTrackingUnit("score");
+      this.profileController.updateDirtyState();
+      this.callbacks?.onDisplayChange();
+    });
+    this.els.langEn.addEventListener("click", () => this.preferencesController.setLanguage("en"));
+    this.els.langZh.addEventListener("click", () => this.preferencesController.setLanguage("zh"));
+    this.els.langJa.addEventListener("click", () => this.preferencesController.setLanguage("ja"));
+    this.els.profileSave.addEventListener("click", () => this.profileController.saveProfile());
+    this.els.profileSelect.addEventListener("change", () => this.profileController.loadProfile());
+    this.els.profileDelete.addEventListener("click", () => this.profileController.deleteProfile());
     this.els.shareLink.addEventListener("click", () => this.copyProfile());
     this.els.importProfile.addEventListener("click", () => void this.onImportProfileClick());
     this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
     this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
-    this.els.profileName.addEventListener("input", () => this.updateSaveButtonState());
+    this.els.profileName.addEventListener("input", () => this.profileController.updateDirtyState());
 
     this.els.attackerImportFitting.addEventListener("click", () => this.attackerSide.onImportFittingClick());
     this.els.targetImportFitting.addEventListener("click", () => this.targetSide.onImportFittingClick());
@@ -1166,11 +1000,11 @@ export class DomControls implements Controls {
     const displayInputs: (keyof typeof this.els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
       this.els[id].addEventListener("input", () => {
-        if (id === "tracking") this.updateTrackingFromInput();
-        if (id === "sigRes") this.updateTrackingForSigResolution();
+        if (id === "tracking") this.preferencesController.updateTrackingFromInput();
+        if (id === "sigRes") this.preferencesController.updateTrackingForSigResolution();
         this.recordOverrideForDisplayInput(id);
-        this.updateSaveButtonState();
-        this.savePreferences();
+        this.profileController.updateDirtyState();
+        this.preferencesController.savePreferences();
         this.callbacks?.onDisplayChange();
       });
     }
@@ -1194,16 +1028,24 @@ export class DomControls implements Controls {
         if (id === "targetMass") this.targetSide.updateSpeedFromMass();
         if (id === "attackerMass" || id === "attackerInertia") this.attackerSide.updateAlignTime();
         if (id === "targetMass" || id === "targetInertia") this.targetSide.updateAlignTime();
-        if (id === "attackerMode") this.updateManeuverAggressivityEnabled();
+        if (id === "attackerMode") this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
         this.recordOverrideForShipInput(id);
-        this.updateSaveButtonState();
-        this.savePreferences();
+        this.profileController.updateDirtyState();
+        this.preferencesController.savePreferences();
         this.callbacks?.onConfigChange();
       });
     }
 
-    this.els.maneuverAggressivitySlider.addEventListener("input", () => this.onManeuverAggressivityChange());
-    this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
+    this.els.maneuverAggressivitySlider.addEventListener("input", () => {
+      this.preferencesController.onManeuverAggressivityChange();
+      this.callbacks?.onConfigChange();
+      this.profileController.updateDirtyState();
+    });
+    this.els.gridBrightnessSlider.addEventListener("input", () => {
+      this.preferencesController.onGridBrightnessChange();
+      this.callbacks?.onDisplayChange();
+      this.profileController.updateDirtyState();
+    });
 
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
@@ -1655,21 +1497,22 @@ export class DomControls implements Controls {
     this.clearAttackerTurretOverrides();
     this.setTurretInputs(updated);
     this.renderAttackerAmmo();
-    this.savePreferences();
+    this.preferencesController.savePreferences();
     this.callbacks?.onConfigChange();
     return true;
   }
 
   private setTurretInputs(turret: ImportedTurret): void {
     const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
-    if (this.attackerSide.overrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    const trackingInput = this.preferencesController.trackingInput;
+    if (this.attackerSide.overrides.tracking === undefined) trackingInput.setRadValue(turret.tracking, sigResolution);
     if (this.attackerSide.overrides.sigRes === undefined) {
       this.els.sigRes.value = turret.sigResolutionClass;
       this.sigResChoice.set(turret.sigResolutionClass);
     }
     if (this.attackerSide.overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
     if (this.attackerSide.overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
-    this.displayTrackingInput();
+    this.preferencesController.displayTrackingInput();
   }
 
   private restoreAttackerTurret(): void {
@@ -1726,7 +1569,7 @@ export class DomControls implements Controls {
 
 
   private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
-    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.trackingInput.rad);
+    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.preferencesController.trackingInput.rad);
     if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.currentSigResValue());
     if (id === "optimal") this.attackerSide.recordOverride("optimal", num(this.els.optimal));
     if (id === "falloff") this.attackerSide.recordOverride("falloff", num(this.els.falloff));
