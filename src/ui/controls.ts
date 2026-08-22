@@ -11,13 +11,11 @@ import {
   type TurretSpec,
 } from "../sim";
 import {
-  type CargoCharge,
   type ChargeCatalog,
   type FittingImport,
   type FittingSummary,
   type GunFamilies,
   type ImportedFitting,
-  type ImportedTurret,
   type PresetFittings,
 } from "../fitting";
 import type { I18n, Language } from "./i18n";
@@ -39,6 +37,7 @@ import {
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { PreferencesController } from "./controls/preferencesController";
 import { ProfileController } from "./controls/profileController";
+import { TurretController } from "./controls/turretController";
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { Timer } from "./timer";
@@ -47,7 +46,6 @@ import {
   el,
   fittingAreaSelector,
   isHtmlButtonElement,
-  isHtmlImageElement,
   isHtmlSelectElement,
   isEventTargetWithClosest,
   num,
@@ -62,7 +60,6 @@ import {
   AGGRESSIVITY_MIN,
   DEFAULT_GRID_BRIGHTNESS,
   NEUTRAL_STAT_CONDITIONS,
-  chargeStatSuffix,
   formatNumber,
   isAutopilotMode,
   isSigResClass,
@@ -119,11 +116,6 @@ export class DomControls implements Controls {
   private currentPreviewText?: string;
   private currentPreviewEye?: HTMLButtonElement;
   private currentPreviewInMenu = false;
-  private openAmmo = false;
-  private attackerAmmo = "";
-  private attackerTurret?: ImportedTurret;
-  private attackerCargoCharges: readonly CargoCharge[] = [];
-  private attackerAmmoAllExpanded = false;
   private readonly popupGroup: PopupGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
@@ -139,7 +131,7 @@ export class DomControls implements Controls {
   private readonly attackerAmmoPopup: Popup;
   private readonly engagementReadout: EngagementReadout;
   private readonly sigResChoice: ChoiceGroup;
-  private readonly sigResOriginalTitles: Partial<Record<SigResolutionClass, string>> = {};
+  private readonly turretController: TurretController;
 
   constructor({
     hitChance,
@@ -180,7 +172,6 @@ export class DomControls implements Controls {
     this.timer = timer;
     this.chargeCatalog = chargeCatalog;
     this.imageCatalog = imageCatalog;
-    this.attackerAmmo = chargeCatalog.usualForChargeSize(1);
     this.popupGroup = new PopupGroup();
     this.hintRotator = new HintRotator({
       element: el("slide-hints"),
@@ -324,6 +315,50 @@ export class DomControls implements Controls {
       imageCatalog: this.imageCatalog,
       timer: this.timer,
     });
+    this.attackerAmmoPopup = {
+      isOpen: () => this.turretController.isAmmoPopupOpen(),
+      open: () => this.turretController.openAmmoPopup(),
+      close: () => this.turretController.closeAmmoPopup(),
+      focusTrigger: () => this.els.attackerAmmoTrigger.focus(),
+      contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
+    };
+    this.turretController = new TurretController({
+      els: {
+        tracking: this.els.tracking,
+        sigRes: this.els.sigRes,
+        sigResOptions: this.els.sigResOptions,
+        optimal: this.els.optimal,
+        falloff: this.els.falloff,
+        attackerAmmoTrigger: this.els.attackerAmmoTrigger,
+        attackerAmmoSummary: this.els.attackerAmmoSummary,
+        attackerAmmoSummaryIcon: this.els.attackerAmmoSummaryIcon,
+        attackerAmmoPopup: this.els.attackerAmmoPopup,
+        attackerAmmoCargoLabel: this.els.attackerAmmoCargoLabel,
+        attackerAmmoCargoList: this.els.attackerAmmoCargoList,
+        attackerAmmoExpand: this.els.attackerAmmoExpand,
+        attackerAmmoAllSection: this.els.attackerAmmoAllSection,
+        attackerAmmoAllList: this.els.attackerAmmoAllList,
+      },
+      popup: this.attackerAmmoPopup,
+      chargeCatalog: this.chargeCatalog,
+      gunFamilies: this.gunFamilies,
+      imageCatalog: this.imageCatalog,
+      trackingInput: this.preferencesController.trackingInput,
+      i18n: this.i18n,
+      fittingImport: this.fittingImport,
+      overrides: () => this.attackerSide.overrides,
+      clearTurretOverrides: () => {
+        delete this.attackerSide.overrides.tracking;
+        delete this.attackerSide.overrides.sigRes;
+        delete this.attackerSide.overrides.optimal;
+        delete this.attackerSide.overrides.falloff;
+      },
+      onConfigChange: (persist) => {
+        this.preferencesController.savePreferences();
+        if (persist) this.profileController.updateDirtyState();
+        this.callbacks?.onConfigChange();
+      },
+    });
 
     this.attackerSkillPopup = this.attackerSide.getSkillPopup();
     this.targetSkillPopup = this.targetSide.getSkillPopup();
@@ -334,13 +369,11 @@ export class DomControls implements Controls {
     this.attackerFittingPopup = this.createFittingPopup("attacker");
     this.targetFittingPopup = this.createFittingPopup("target");
     this.importSidePopup = this.createImportSidePopup();
-    this.attackerAmmoPopup = this.createAttackerAmmoPopup();
     this.popupGroup.register(this.attackerFittingPopup);
     this.popupGroup.register(this.targetFittingPopup);
     this.popupGroup.register(this.importSidePopup);
     this.popupGroup.register(this.attackerAmmoPopup);
 
-    this.renderAttackerAmmo();
     this.populateHullDatalist();
     this.attackerSide.renderSkillOptions();
     this.targetSide.renderSkillOptions();
@@ -375,7 +408,7 @@ export class DomControls implements Controls {
       mostRecentFittingFor: (hullName) => this.savedFittings.mostRecentFor(hullName),
       persistConfigChange: (notify) => this.persistConfigChange(notify),
       restoreAttackerTurret: () => {
-        if (side === "attacker") this.restoreAttackerTurret();
+        if (side === "attacker") this.turretController.restore(this.attackerSide.fittingText, this.attackerSide.skillConditions());
       },
       importFittingFromText: (text) => this.importFittingFromText(side, text),
       importFitting: () => this.importFitting(side),
@@ -384,13 +417,7 @@ export class DomControls implements Controls {
 
   private onAttackerFittedHullCleared(): void {
     this.popupGroup.close(this.attackerAmmoPopup);
-    this.attackerTurret = undefined;
-    this.attackerCargoCharges = [];
-    this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-    this.attackerAmmoAllExpanded = false;
-    this.els.attackerAmmoAllSection.hidden = true;
-    this.renderAttackerAmmo();
-    this.renderSigResIcons();
+    this.turretController.clear();
   }
 
   private persistConfigChange(notify = true): void {
@@ -412,7 +439,7 @@ export class DomControls implements Controls {
     this.profileController.refresh(selected);
     this.attackerSide.renderPropulsionOptions();
     this.targetSide.renderPropulsionOptions();
-    this.renderSigResIcons();
+    this.turretController.render();
     this.attackerSide.clearImportHint();
     this.targetSide.clearImportHint();
     this.populateHullDatalist();
@@ -461,12 +488,7 @@ export class DomControls implements Controls {
   }
 
   getTurret(): TurretSpec {
-    return {
-      tracking: this.preferencesController.trackingInput.rad,
-      sigResolution: SIG_RESOLUTIONS[this.currentSigResValue()],
-      optimal: num(this.els.optimal),
-      falloff: num(this.els.falloff),
-    };
+    return this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad);
   }
 
   getTargetSig(): number {
@@ -557,7 +579,7 @@ export class DomControls implements Controls {
       targetFitting: this.targetSide.fittingText,
       targetOverrides: this.targetSide.overrides,
       targetFittedHull: this.targetSide.fittedHull,
-      attackerAmmo: this.attackerAmmo,
+      attackerAmmo: this.turretController.capture().ammo,
     };
   }
 
@@ -566,7 +588,6 @@ export class DomControls implements Controls {
     this.attackerSide.overrides = settings.attackerOverrides ?? {};
     this.targetSide.fittingText = settings.targetFitting;
     this.targetSide.overrides = settings.targetOverrides ?? {};
-    this.attackerAmmo = settings.attackerAmmo;
 
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
     this.els.sigRes.value = settings.sigRes;
@@ -606,7 +627,7 @@ export class DomControls implements Controls {
     this.attackerSide.setOverloadDisabled();
     this.targetSide.setOverloadDisabled();
 
-    this.restoreAttackerTurret();
+    this.turretController.restore(settings.attackerFitting, this.attackerSide.skillConditions(), settings.attackerAmmo);
 
     if (settings.attackerFittedHull) {
       this.attackerSide.restoreFittingSummary(settings.attackerFittedHull);
@@ -716,7 +737,7 @@ export class DomControls implements Controls {
     panel.overrides = {};
     panel.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
     panel.applyImportedFitting(this.fittedHullSummary(imported));
-    if (side === "attacker") this.applyImportedTurret(imported);
+    if (side === "attacker") this.turretController.applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
       this.preferencesController.savePreferences();
@@ -868,7 +889,6 @@ export class DomControls implements Controls {
     this.els.attackerFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerFittingPopup));
     this.els.attackerFittingEye.addEventListener("click", () => this.toggleFittingPreview("attacker"));
     this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerAmmoPopup));
-    this.els.attackerAmmoExpand.addEventListener("click", () => this.onAttackerAmmoExpandClick());
     this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.onPropulsionChange());
     this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerPropulsionVariantPopup));
     this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
@@ -1176,288 +1196,6 @@ export class DomControls implements Controls {
     }
   }
 
-  private clearAttackerTurretOverrides(): void {
-    delete this.attackerSide.overrides.tracking;
-    delete this.attackerSide.overrides.sigRes;
-    delete this.attackerSide.overrides.optimal;
-    delete this.attackerSide.overrides.falloff;
-  }
-
-  private renderAttackerAmmo(): void {
-    const trigger = this.els.attackerAmmoTrigger;
-    const summary = this.els.attackerAmmoSummary;
-    const summaryIcon = this.els.attackerAmmoSummaryIcon;
-    const hasTurret = this.attackerTurret !== undefined;
-    trigger.disabled = !hasTurret;
-    setText(summary, hasTurret ? this.attackerAmmo : "—");
-    if (!hasTurret) {
-      summaryIcon.hidden = true;
-      return;
-    }
-    const iconUrl = this.imageCatalog.itemIconUrl(this.attackerAmmo);
-    summaryIcon.src = iconUrl ?? "";
-    summaryIcon.hidden = !iconUrl;
-    this.renderAttackerAmmoCargoList();
-    this.renderAttackerAmmoAllList();
-    this.renderAttackerAmmoExpand();
-  }
-
-  private renderSigResIcons(): void {
-    const group = this.els.sigResOptions;
-    const turret = this.attackerTurret;
-    for (const button of Array.from(group.children)) {
-      if (!isHtmlButtonElement(button)) continue;
-      const value = button.getAttribute("data-value") ?? "";
-      if (!isSigResClass(value)) continue;
-      const img = this.sigResIcon(button);
-      const title = this.sigResOriginalTitle(value, button);
-      if (turret) {
-        const family = this.gunFamilies.familyOf(turret.moduleName);
-        const representative = this.gunFamilies.representativeOf(family, value);
-        const url = this.imageCatalog.itemIconUrl(representative);
-        if (url) {
-          img.src = url;
-          img.hidden = false;
-          button.title = `${representative} · ${title}`;
-          continue;
-        }
-      }
-      img.hidden = true;
-      button.title = title;
-    }
-  }
-
-  private sigResIcon(button: HTMLButtonElement): HTMLImageElement {
-    for (const child of Array.from(button.children)) {
-      if (isHtmlImageElement(child) && child.className === "sigres-icon") return child;
-    }
-    const img = document.createElement("img");
-    img.className = "sigres-icon";
-    img.alt = "";
-    img.hidden = true;
-    button.appendChild(img);
-    return img;
-  }
-
-  private sigResOriginalTitle(value: SigResolutionClass, button: HTMLButtonElement): string {
-    let title = this.sigResOriginalTitles[value];
-    if (title === undefined) {
-      title = button.title;
-      this.sigResOriginalTitles[value] = title;
-    }
-    return title;
-  }
-
-  private renderAttackerAmmoCargoList(): void {
-    const list = this.els.attackerAmmoCargoList;
-    const label = this.els.attackerAmmoCargoLabel;
-    list.innerHTML = "";
-    if (!this.attackerTurret) {
-      list.hidden = true;
-      label.hidden = true;
-      return;
-    }
-    const entries = this.ammoCargoEntries();
-    if (entries.length === 0) {
-      list.hidden = true;
-      label.hidden = true;
-      return;
-    }
-    list.hidden = false;
-    label.hidden = false;
-    for (const entry of entries) {
-      const item = this.createAmmoItem(entry.name, entry.name === this.attackerAmmo, this.i18n.t("button.selectAmmo"));
-      if (entry.quantity !== undefined) {
-        const quantity = document.createElement("span");
-        quantity.className = "ammo-item-quantity";
-        quantity.textContent = `x${entry.quantity}`;
-        item.appendChild(quantity);
-      }
-      item.addEventListener("click", () => this.onAttackerAmmoItemClick(entry.name));
-      list.appendChild(item);
-    }
-  }
-
-  private ammoCargoEntries(): { name: string; quantity?: number }[] {
-    const loaded = this.attackerAmmo;
-    const inCargo = this.attackerCargoCharges.some((c) => c.name === loaded);
-    const entries: { name: string; quantity?: number }[] = [];
-    if (!inCargo) entries.push({ name: loaded });
-    for (const charge of this.attackerCargoCharges) {
-      entries.push({ name: charge.name, quantity: charge.quantity });
-    }
-    return entries;
-  }
-
-  private renderAttackerAmmoAllList(): void {
-    const list = this.els.attackerAmmoAllList;
-    const section = this.els.attackerAmmoAllSection;
-    list.innerHTML = "";
-    if (!this.attackerTurret) {
-      list.hidden = true;
-      return;
-    }
-    const options = this.chargeCatalog.chargesForTurret(this.attackerTurret);
-    if (options.length === 0) {
-      list.hidden = true;
-      return;
-    }
-    list.hidden = false;
-    for (const option of options) {
-      const item = this.createAmmoItem(option.name, option.name === this.attackerAmmo, chargeStatSuffix(option));
-      item.addEventListener("click", () => this.onAttackerAmmoItemClick(option.name));
-      list.appendChild(item);
-    }
-    section.hidden = !this.attackerAmmoAllExpanded;
-  }
-
-  private createAmmoItem(name: string, selected: boolean, title: string): HTMLButtonElement {
-    const item = document.createElement("button");
-    item.type = "button";
-    item.className = "ammo-item";
-    item.setAttribute("role", "option");
-    item.setAttribute("aria-selected", String(selected));
-    item.title = title;
-    const iconUrl = this.imageCatalog.itemIconUrl(name);
-    if (iconUrl) {
-      const icon = document.createElement("img");
-      icon.className = "ammo-item-icon";
-      icon.src = iconUrl;
-      icon.alt = "";
-      item.appendChild(icon);
-    }
-    const label = document.createElement("span");
-    label.className = "ammo-item-name";
-    label.textContent = name;
-    label.title = name;
-    item.appendChild(label);
-    return item;
-  }
-
-  private renderAttackerAmmoExpand(): void {
-    const expand = this.els.attackerAmmoExpand;
-    const key = this.attackerAmmoAllExpanded ? "ammo.hideAll" : "ammo.showAll";
-    expand.setAttribute("data-i18n", key);
-    setText(expand, this.i18n.t(key));
-  }
-
-  private onAttackerAmmoItemClick(name: string): void {
-    if (!this.applyAttackerAmmo(name)) return;
-    this.popupGroup.close(this.attackerAmmoPopup);
-    this.attackerAmmoPopup.focusTrigger();
-  }
-
-  private openAttackerAmmoPopup(): void {
-    if (!this.attackerTurret) return;
-    const popup = this.els.attackerAmmoPopup;
-    const trigger = this.els.attackerAmmoTrigger;
-    popup.hidden = false;
-    trigger.setAttribute("aria-expanded", "true");
-    this.openAmmo = true;
-    this.renderAttackerAmmo();
-    const cargoSelected = this.els.attackerAmmoCargoList.querySelector('[aria-selected="true"]');
-    const allSelected = this.els.attackerAmmoAllList.querySelector('[aria-selected="true"]');
-    const selected =
-      (cargoSelected && isHtmlButtonElement(cargoSelected) ? cargoSelected : null) ??
-      (allSelected && isHtmlButtonElement(allSelected) ? allSelected : null);
-    const firstChild = this.els.attackerAmmoCargoList.firstElementChild;
-    const first = firstChild && isHtmlButtonElement(firstChild) ? firstChild : null;
-    (selected ?? first)?.focus();
-  }
-
-  private closeAttackerAmmoPopup(): void {
-    const popup = this.els.attackerAmmoPopup;
-    const trigger = this.els.attackerAmmoTrigger;
-    popup.hidden = true;
-    trigger.setAttribute("aria-expanded", "false");
-    this.openAmmo = false;
-  }
-
-  private onAttackerAmmoExpandClick(): void {
-    this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
-    this.renderAttackerAmmo();
-  }
-
-  private applyAttackerAmmo(name: string): boolean {
-    if (!this.attackerTurret) return false;
-    const updated = this.chargeCatalog.withCharge(this.attackerTurret, name);
-    if (updated === this.attackerTurret) return false;
-    this.attackerTurret = updated;
-    this.attackerAmmo = updated.charge;
-    this.clearAttackerTurretOverrides();
-    this.setTurretInputs(updated);
-    this.renderAttackerAmmo();
-    this.preferencesController.savePreferences();
-    this.callbacks?.onConfigChange();
-    return true;
-  }
-
-  private setTurretInputs(turret: ImportedTurret): void {
-    const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
-    const trackingInput = this.preferencesController.trackingInput;
-    if (this.attackerSide.overrides.tracking === undefined) trackingInput.setRadValue(turret.tracking, sigResolution);
-    if (this.attackerSide.overrides.sigRes === undefined) {
-      this.els.sigRes.value = turret.sigResolutionClass;
-      this.sigResChoice.set(turret.sigResolutionClass);
-    }
-    if (this.attackerSide.overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
-    if (this.attackerSide.overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
-    this.preferencesController.displayTrackingInput();
-  }
-
-  private restoreAttackerTurret(): void {
-    this.attackerAmmoAllExpanded = false;
-    this.els.attackerAmmoAllSection.hidden = true;
-    if (!this.attackerSide.fittingText || !this.attackerSide.profile) {
-      this.attackerTurret = undefined;
-      this.attackerCargoCharges = [];
-      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-      this.renderAttackerAmmo();
-      this.renderSigResIcons();
-      return;
-    }
-    const imported = this.fittingImport.importFitting(this.attackerSide.fittingText, this.attackerSide.skillConditions());
-    if (!imported?.turret) {
-      this.attackerTurret = undefined;
-      this.attackerCargoCharges = [];
-      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-      this.renderAttackerAmmo();
-      this.renderSigResIcons();
-      return;
-    }
-    const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
-    this.attackerTurret = restored;
-    this.attackerCargoCharges = imported.cargoCharges;
-    this.attackerAmmo = restored.charge;
-    this.setTurretInputs(restored);
-    this.renderAttackerAmmo();
-    this.renderSigResIcons();
-  }
-
-  private applyImportedTurret(imported: ImportedFitting): void {
-    const turret = imported.turret;
-    if (!turret) {
-      this.attackerTurret = undefined;
-      this.attackerCargoCharges = imported.cargoCharges;
-      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-      this.attackerAmmoAllExpanded = false;
-      this.els.attackerAmmoAllSection.hidden = true;
-      this.renderAttackerAmmo();
-      this.renderSigResIcons();
-      return;
-    }
-    this.attackerTurret = turret;
-    this.attackerCargoCharges = imported.cargoCharges;
-    this.attackerAmmo = turret.charge;
-    this.attackerAmmoAllExpanded = false;
-    this.els.attackerAmmoAllSection.hidden = true;
-    this.clearAttackerTurretOverrides();
-    this.setTurretInputs(turret);
-    this.renderAttackerAmmo();
-    this.renderSigResIcons();
-  }
-
-
   private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
     if (id === "tracking") this.attackerSide.recordOverride("tracking", this.preferencesController.trackingInput.rad);
     if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.currentSigResValue());
@@ -1524,15 +1262,6 @@ export class DomControls implements Controls {
     };
   }
 
-  private createAttackerAmmoPopup(): Popup {
-    return {
-      isOpen: () => this.openAmmo,
-      open: () => this.openAttackerAmmoPopup(),
-      close: () => this.closeAttackerAmmoPopup(),
-      focusTrigger: () => this.els.attackerAmmoTrigger.focus(),
-      contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
-    };
-  }
 }
 
 const DELETE_ICON_SVG =
