@@ -1,4 +1,4 @@
-import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
+import { alignTime, fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { fittingOptions } from "./fitting";
 import type { FittedHull, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
@@ -208,6 +208,13 @@ describe("fittedStats", () => {
     const stats = fittedStats(frigate, higgsFitted, ab1, conditions(0));
     expect(stats.mass).toBe(3_500_000);
     expect(stats.alignTime).toBeCloseTo(2.7 * 3_500_000 * Math.log(4) * 1e-6, 6);
+  });
+});
+
+describe("alignTime", () => {
+  test("returns ln(4) * mass * inertiaModifier * 1e-6", () => {
+    expect(alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
+    expect(alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);
   });
 });
 
