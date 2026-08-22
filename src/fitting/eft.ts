@@ -40,7 +40,7 @@ export function parseEft(text: string): ParsedFitting | undefined {
   const modules: ParsedModuleLine[] = [];
   const cargo: ParsedQuantityItem[] = [];
   const drones: ParsedQuantityItem[] = [];
-  let cargoBlockSeen = false;
+  let droneBlockSeen = false;
 
   for (let i = 0; i < groups.length; i++) {
     const group = i === 0 ? headerGroup.slice(headerIndex + 1) : groups[i];
@@ -70,11 +70,11 @@ export function parseEft(text: string): ParsedFitting | undefined {
 
     if (quantities.length === 0) continue;
 
-    if (!cargoBlockSeen) {
-      cargo.push(...quantities);
-      cargoBlockSeen = true;
-    } else {
+    if (!droneBlockSeen) {
       drones.push(...quantities);
+      droneBlockSeen = true;
+    } else {
+      cargo.push(...quantities);
     }
   }
 

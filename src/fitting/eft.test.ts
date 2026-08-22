@@ -68,8 +68,9 @@ Damage Control II /OFFLINE
     ]);
   });
 
-  test("parses quantity lines as cargo", () => {
+  test("parses quantity lines inside a module group as cargo", () => {
     const text = `[Rifter, Cargo]
+200mm AutoCannon I
 EMP S x1000
 Nanite Repair Paste x50`;
     const parsed = parseEft(text);
@@ -77,14 +78,13 @@ Nanite Repair Paste x50`;
       { name: "EMP S", quantity: 1000 },
       { name: "Nanite Repair Paste", quantity: 50 },
     ]);
-    expect(parsed!.modules).toEqual([]);
+    expect(parsed!.modules).toEqual([{ name: "200mm AutoCannon I", offline: false }]);
   });
 
   test("tolerates blank lines between sections", () => {
     const text = `[Rifter, Sections]
 
 1MN Afterburner I
-
 EMP S x1000
 
 [empty low slot]`;
@@ -93,17 +93,30 @@ EMP S x1000
     expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
   });
 
-  test("parses a second quantity block as drones", () => {
+  test("parses the first quantity-only block as drones and the second as cargo", () => {
     const text = `[Rifter, Drones]
 1MN Afterburner I
 
-EMP S x1000
+Hobgoblin I x3
 
-Hobgoblin I x3`;
+EMP S x1000`;
     const parsed = parseEft(text);
     expect(parsed!.modules).toEqual([{ name: "1MN Afterburner I", offline: false }]);
-    expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
     expect(parsed!.drones).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+    expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
+  });
+
+  test("parses CCP-style EFT with drones before cargo", () => {
+    const text = `[Rifter, Official]
+1MN Afterburner I
+
+Warrior II x2
+
+Antimatter Charge M x42`;
+    const parsed = parseEft(text);
+    expect(parsed!.modules).toEqual([{ name: "1MN Afterburner I", offline: false }]);
+    expect(parsed!.drones).toEqual([{ name: "Warrior II", quantity: 2 }]);
+    expect(parsed!.cargo).toEqual([{ name: "Antimatter Charge M", quantity: 42 }]);
   });
 
   test("drops lines that match nothing", () => {

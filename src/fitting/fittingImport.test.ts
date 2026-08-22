@@ -1,6 +1,8 @@
+import { join } from "path";
 import type { PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, _applyStackingPenalty, type FittingDb } from "./fittingImport";
+import { CHARGES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, TURRETS } from "./fittingDb";
 
 const profile: ShipProfile = {
   name: "Harbinger",
@@ -40,6 +42,16 @@ const roleBonusProfile: ShipProfile = {
   inertiaModifier: 0.51,
   baseSpeed: 195,
   sigRadius: 135,
+};
+
+const abaddonProfile: ShipProfile = {
+  name: "Abaddon",
+  faction: "Amarr Empire",
+  hullType: "Standard Battleships",
+  mass: 103_200_000,
+  inertiaModifier: 0.14,
+  baseSpeed: 89,
+  sigRadius: 470,
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
@@ -122,6 +134,15 @@ const hullBonusDb: FittingDb = {
 };
 
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db });
+
+const fullFittingDb: FittingDb = {
+  modules: FITTING_MODULES,
+  turrets: TURRETS,
+  charges: CHARGES,
+  scripts: SCRIPTS,
+  hullBonuses: HULL_BONUSES,
+};
+const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb });
 
 const conditions: StatConditions = { skillLevel: 0, overloaded: false };
 
@@ -492,5 +513,18 @@ Tracking Enhancer II`,
     const falloffBonus = _applyStackingPenalty([1.2, 1.1]);
     expect(result!.turret!.falloff).toBeCloseTo(5_160 * 1.2 * falloffBonus, 3);
     expect(result!.turret!.optimal).toBeCloseTo(1_200 * 0.5 * 1.2 * 1.1, 3);
+  });
+
+  test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
+    const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Abaddon", "Pulse_Armor_Abaddon.txt");
+    const text = await Bun.file(path).text();
+    ships.findHull.mockReturnValueOnce(abaddonProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog });
+    const result = importer.importFitting(text, conditions);
+    expect(result).toBeDefined();
+    const names = result!.cargoCharges.map((charge) => charge.name);
+    expect(names).toContain("Conflagration L");
+    expect(names).toContain("Scorch L");
   });
 });

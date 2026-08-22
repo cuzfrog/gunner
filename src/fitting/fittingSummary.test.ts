@@ -11,10 +11,10 @@ Inertial Stabilizers II
 Small Trimark Armor Pump I
 Small Projectile Ambit Extension I
 
+Hobgoblin I x3
+
 Hail S x1000
 Republic Fleet EMP S x500
-
-Hobgoblin I x3
 `;
 
 const RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK = `[Rifter, Brawler]
@@ -72,8 +72,8 @@ describe("describeFitting", () => {
     expect(kinds).toEqual(["high", "mid", "cargo"]);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
-      { name: "Hail S", quantity: 1000 },
       { name: "Republic Fleet EMP S", quantity: 500 },
+      { name: "Hail S", quantity: 1000 },
     ]);
   });
 
