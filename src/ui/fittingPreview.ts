@@ -125,7 +125,7 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow): HTMLElement {
 
 function positionPreview(container: HTMLElement, anchor: HTMLElement): void {
   const anchorRect = anchor.getBoundingClientRect();
-  const parent = container.offsetParent as HTMLElement | null;
+  const parent = container.offsetParent;
   const viewport = globalThis.window ?? { innerWidth: 1024, innerHeight: 768 };
   const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0, width: viewport.innerWidth, height: viewport.innerHeight };
   const margin = 8;

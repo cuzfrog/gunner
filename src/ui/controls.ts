@@ -27,7 +27,19 @@ import type { I18n, Language } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
 import { DomFittingPreview, type FittingPreview } from "./fittingPreview";
 import type { SavedFittings } from "./savedFittings";
-import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type FittedHullSummary, type ProfileParamOverrides, type ProfileSettings, type PropulsionSelection, type SettingsStore, type UserSettings } from "./settings";
+import {
+  ClipboardUnavailableError,
+  PROPULSION_NONE,
+  USER_SETTINGS_VERSION,
+  type ClipboardProvider,
+  type DisplayPreferences,
+  type FittedHullSummary,
+  type ProfileParamOverrides,
+  type ProfileSettings,
+  type PropulsionSelection,
+  type SettingsStore,
+  type UserSettings,
+} from "./settings";
 import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { HintRotator, type IHintRotator } from "./hintRotator";
@@ -54,7 +66,7 @@ export interface Controls {
 }
 
 export class DomControls implements Controls {
-  private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLElement>;
+  private readonly els: Record<string, HTMLInputElement | HTMLSelectElement | HTMLButtonElement | HTMLImageElement | HTMLElement>;
   private readonly hitChance: HitChance;
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
@@ -876,7 +888,14 @@ export class DomControls implements Controls {
     const parsed = parseProfile(text.trimStart());
     if (!parsed) return undefined;
     const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo, language: this.i18n.current(), trackingUnit: this.trackingInput.unit, simSpeed: num(this.els.simSpeed), gridBrightness: this.getGridBrightness() };
+    return {
+      ...parsed,
+      attackerAmmo: ammo,
+      language: this.i18n.current(),
+      trackingUnit: this.trackingInput.unit,
+      simSpeed: num(this.els.simSpeed),
+      gridBrightness: this.getGridBrightness(),
+    };
   }
 
   private resolveProfileAmmo(parsed: ProfileSettings): string {
@@ -967,8 +986,10 @@ export class DomControls implements Controls {
     (this.els.attackerImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("attacker"));
     (this.els.targetImportFitting as HTMLButtonElement).addEventListener("click", () => this.importFitting("target"));
 
-    (this.els.attackerPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
-    (this.els.targetPastePopup as HTMLElement).addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
+    const attackerPastePopup = this.els.attackerPastePopup as HTMLElement;
+    const targetPastePopup = this.els.targetPastePopup as HTMLElement;
+    attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
+    targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
 
     (this.els.attackerHull as HTMLInputElement).addEventListener("input", () => this.onHullInput("attacker"));
     (this.els.attackerHull as HTMLInputElement).addEventListener("change", () => this.onHullChange("attacker"));
@@ -1199,7 +1220,13 @@ export class DomControls implements Controls {
     empty.hidden = saved.length > 0 || presets.length > 0;
   }
 
-  private createFittingItem(side: "attacker" | "target", name: string, text: string, currentText: string | undefined, onClick: () => void): HTMLButtonElement {
+  private createFittingItem(
+    side: "attacker" | "target",
+    name: string,
+    text: string,
+    currentText: string | undefined,
+    onClick: () => void,
+  ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
@@ -1225,7 +1252,7 @@ export class DomControls implements Controls {
       del.className = "fitting-delete";
       del.setAttribute("title", this.i18n.t("button.deleteFitting"));
       del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
-      del.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
+      del.innerHTML = DELETE_ICON_SVG;
       del.addEventListener("click", () => onDelete());
       li.appendChild(del);
     }
@@ -1773,7 +1800,13 @@ export class DomControls implements Controls {
       if (module) {
         const propulsionName = this.defaultPropulsionName(module);
         const propulsion = this.fittingImport.propulsionStats(propulsionName) ?? module;
-        updated = { fittingName: fitted?.fittingName ?? "", fitted: fitted?.fitted ?? this.nakedFitted(profile), propulsionId, propulsionName, propulsion };
+        updated = {
+          fittingName: fitted?.fittingName ?? "",
+          fitted: fitted?.fitted ?? this.nakedFitted(profile),
+          propulsionId,
+          propulsionName,
+          propulsion,
+        };
       }
     } else if (fitted) {
       updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsion: undefined } : undefined;
@@ -2094,7 +2127,11 @@ export class DomControls implements Controls {
     if (id === "targetInertia") this.recordOverride("target", "targetInertia", num(this.els.targetInertia));
   }
 
-  private recordOverride<K extends keyof ProfileParamOverrides>(side: "attacker" | "target", key: K, value: ProfileParamOverrides[K]): void {
+  private recordOverride<K extends keyof ProfileParamOverrides>(
+    side: "attacker" | "target",
+    key: K,
+    value: ProfileParamOverrides[K],
+  ): void {
     const overrides = side === "attacker" ? this.attackerOverrides : this.targetOverrides;
     overrides[key] = value;
   }
@@ -2422,6 +2459,9 @@ export class DomControls implements Controls {
 const AGGRESSIVITY_MIN = 0.01;
 const AGGRESSIVITY_MAX = 100;
 const DEFAULT_GRID_BRIGHTNESS = 0.2;
+const DELETE_ICON_SVG =
+  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
+  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
 function aggressivityFromPosition(pos: number): number {
   const clamped = Math.max(0, Math.min(1, pos));
@@ -2441,8 +2481,8 @@ function parseManeuverAggressivity(input: HTMLInputElement): number {
 
 function el(id: string): HTMLElement {
   const e = document.getElementById(id);
-  if (!e) throw new Error(`Missing DOM element #${id}`);
-  return e as HTMLElement;
+  if (e === null) throw new Error(`Missing DOM element #${id}`);
+  return e;
 }
 
 function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number {

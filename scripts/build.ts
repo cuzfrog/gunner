@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, extname, join } from "node:path";
 import { ITEM_ICON_IDS } from "../src/fitting";
 
 const PUBLIC_DIRECTORY = "public";
@@ -45,7 +45,13 @@ for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
   cpSync(src, dst, { force: true, recursive: true });
 }
 
-cpSync(SHIP_IMAGES_SOURCE, join(DISTRIBUTION_DIRECTORY, "images", "ships"), { recursive: true });
+const shipsDist = join(DISTRIBUTION_DIRECTORY, "images", "ships");
+mkdirSync(shipsDist, { recursive: true });
+for (const entry of readdirSync(SHIP_IMAGES_SOURCE, { withFileTypes: true })) {
+  if (entry.isFile() && extname(entry.name) === ".webp") {
+    cpSync(join(SHIP_IMAGES_SOURCE, entry.name), join(shipsDist, entry.name));
+  }
+}
 
 const iconsDist = join(DISTRIBUTION_DIRECTORY, "images", "icons");
 mkdirSync(iconsDist, { recursive: true });
