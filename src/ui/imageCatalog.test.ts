@@ -19,7 +19,15 @@ describe("StaticImageCatalog", () => {
     expect(catalog.itemIconUrl("Unknown Item")).toBeUndefined();
   });
 
-  test("droneIconUrl returns the generic drone icon path", () => {
+  test("droneIconUrl returns the specific icon path for a known drone", () => {
+    expect(catalog.droneIconUrl("Hobgoblin I")).toBe("images/icons/2454@1x.png");
+  });
+
+  test("droneIconUrl returns the generic drone icon path when no name is given", () => {
     expect(catalog.droneIconUrl()).toBe("images/icons/1084@1x.png");
+  });
+
+  test("droneIconUrl returns the generic drone icon path for an unknown drone", () => {
+    expect(catalog.droneIconUrl("Unknown Drone")).toBe("images/icons/1084@1x.png");
   });
 });

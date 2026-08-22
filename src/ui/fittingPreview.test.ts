@@ -90,7 +90,7 @@ function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
     itemIconUrl: (itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined),
-    droneIconUrl: () => "images/icons/1084@1x.png",
+    droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : "images/icons/1084@1x.png"),
   };
 }
 
@@ -227,12 +227,25 @@ describe("DomFittingPreview", () => {
     expect(main.children[2].textContent).toBe(", Hail S");
   });
 
-  test("drone rows fall back to the generic drone icon", () => {
+  test("drone rows use the actual drone icon when available", () => {
     const { container, anchor, preview } = buildPreview();
     const summary: FittingSummary = {
       hullName: "Rifter",
       fittingName: "Brawler",
       sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", quantity: 3 }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const droneRow = container.children[1].children[1];
+    expect(droneRow.children[0].tagName).toBe("img");
+    expect(droneRow.children[0].src).toBe("images/icons/2456@1x.png");
+  });
+
+  test("drone rows fall back to the generic drone icon for unknown drones", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "drones", rows: [{ name: "Unknown Drone", quantity: 3 }] }],
     };
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];

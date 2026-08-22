@@ -105,7 +105,7 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: Fit
   const rowEl = document.createElement("div");
   rowEl.className = "preview-row";
 
-  const iconUrl = imageCatalog.itemIconUrl(row.name) ?? (sectionKind === "drones" ? imageCatalog.droneIconUrl() : undefined);
+  const iconUrl = sectionKind === "drones" ? imageCatalog.droneIconUrl(row.name) : imageCatalog.itemIconUrl(row.name);
   const icon = document.createElement("img");
   icon.className = "preview-icon";
   icon.alt = "";

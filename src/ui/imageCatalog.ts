@@ -1,9 +1,9 @@
-import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../fitting";
+import { DRONE_ICON_ID, DRONE_TYPE_IDS, ITEM_ICON_IDS } from "../fitting";
 
 export interface ImageCatalog {
   shipImageUrl(shipName: string): string;
   itemIconUrl(itemName: string): string | undefined;
-  droneIconUrl(): string;
+  droneIconUrl(droneName?: string): string;
 }
 
 export class StaticImageCatalog implements ImageCatalog {
@@ -17,7 +17,9 @@ export class StaticImageCatalog implements ImageCatalog {
     return `images/icons/${id}@1x.png`;
   }
 
-  droneIconUrl(): string {
-    return `images/icons/${DRONE_ICON_ID}@1x.png`;
+  droneIconUrl(droneName?: string): string {
+    const id = droneName !== undefined ? DRONE_TYPE_IDS[droneName] : undefined;
+    if (id === undefined) return `images/icons/${DRONE_ICON_ID}@1x.png`;
+    return `images/icons/${id}@1x.png`;
   }
 }
