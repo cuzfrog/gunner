@@ -315,6 +315,7 @@ class FakeElement {
   value = "";
   checked = false;
   hidden = false;
+  className = "";
   textContent = "";
   title = "";
   src = "";
@@ -4141,6 +4142,65 @@ const ctx = buildControls(globalThis.document);
       hullInput.trigger("change");
       expect(getFake(globalThis.document, "attacker-ammo-field").hidden).toBe(false);
       expect(getFake(globalThis.document, "attacker-ammo-trigger").disabled).toBe(true);
+    });
+
+    test("ammo items include an icon when the catalog resolves one", async () => {
+      const ctx = buildControls(globalThis.document);
+      ctx.imageCatalog.itemIconUrl.mockReturnValue("images/icons/charge.png");
+      ctx.chargeCatalog.chargesForSize.mockReturnValue([
+        { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+        { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+      ]);
+      await importRifter(ctx, IMPORTED_RIFTER_WITH_CARGO);
+      getFake(globalThis.document, "attacker-ammo-trigger").trigger("click");
+      const cargoItem = getFake(globalThis.document, "attacker-ammo-cargo-list").children[0];
+      expect(cargoItem.children[0].className).toBe("ammo-item-icon");
+      expect(cargoItem.children[0].src).toBe("images/icons/charge.png");
+      expect(cargoItem.children[1].className).toBe("ammo-item-name");
+    });
+
+    test("ammo trigger summary shows and hides an icon with the selected charge", async () => {
+      const ctx = buildControls(globalThis.document);
+      ctx.imageCatalog.itemIconUrl.mockImplementation((name) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+      await importRifter(ctx);
+      const icon = getFake(globalThis.document, "attacker-ammo-summary-icon");
+      expect(icon.hidden).toBe(false);
+      expect(icon.src).toBe("images/icons/Hail_S.png");
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "";
+      hullInput.trigger("change");
+      expect(icon.hidden).toBe(true);
+    });
+  });
+
+  describe("propulsion icons", () => {
+    test("propulsion buttons show module icons from the image catalog", () => {
+      const ctx = buildControls(globalThis.document);
+      ctx.imageCatalog.itemIconUrl.mockImplementation((name) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      const group = getFake(globalThis.document, "attacker-propulsion-options");
+      expect(group.children.length).toBeGreaterThan(0);
+      for (const button of group.children) {
+        expect(button.children[0].className).toBe("propulsion-icon");
+        expect(button.children[0].src).toMatch(/^images\/icons\//);
+        expect(button.children[1].textContent).toMatch(/^[A-Z0-9]+$/);
+      }
+    });
+
+    test("propulsion buttons render without icons when the catalog returns undefined", () => {
+      const ctx = buildControls(globalThis.document);
+      ctx.imageCatalog.itemIconUrl.mockReturnValue(undefined);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      const group = getFake(globalThis.document, "attacker-propulsion-options");
+      expect(group.children.length).toBeGreaterThan(0);
+      for (const button of group.children) {
+        expect(button.children.length).toBe(1);
+        expect(button.children[0].textContent).toMatch(/^[A-Z0-9]+$/);
+      }
     });
   });
 

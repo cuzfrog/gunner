@@ -754,6 +754,13 @@ body {
   text-overflow: ellipsis;
 }
 
+.ammo-summary-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .skill-trigger .chevron,
 .ammo-trigger .chevron {
   color: var(--accent-teal);
@@ -850,6 +857,17 @@ body {
   border-left: 2px solid var(--accent-teal);
   color: var(--accent-teal);
   padding-left: 4px;
+}
+
+.ammo-item {
+  align-items: center;
+}
+
+.ammo-item-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .ammo-item-name {
@@ -1626,7 +1644,17 @@ canvas {
 }
 
 .propulsion-selector button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   white-space: nowrap;
+}
+
+.propulsion-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .overload-button {

@@ -156,6 +156,7 @@ export class DomControls implements Controls {
       attackerAmmoField: el("attacker-ammo-field"),
       attackerAmmoTrigger: el("attacker-ammo-trigger"),
       attackerAmmoSummary: el("attacker-ammo-summary"),
+      attackerAmmoSummaryIcon: el("attacker-ammo-summary-icon"),
       attackerAmmoPopup: el("attacker-ammo-popup"),
       attackerAmmoCargoLabel: el("attacker-ammo-cargo-label"),
       attackerAmmoCargoList: el("attacker-ammo-cargo-list"),
@@ -1474,10 +1475,17 @@ export class DomControls implements Controls {
   private renderAttackerAmmo(): void {
     const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
     const summary = this.els.attackerAmmoSummary as HTMLElement;
+    const summaryIcon = this.els.attackerAmmoSummaryIcon as HTMLImageElement;
     const hasTurret = this.attackerTurret !== undefined;
     trigger.disabled = !hasTurret;
     setText(summary, hasTurret ? this.attackerAmmo : "—");
-    if (!hasTurret) return;
+    if (!hasTurret) {
+      summaryIcon.hidden = true;
+      return;
+    }
+    const iconUrl = this.imageCatalog.itemIconUrl(this.attackerAmmo);
+    summaryIcon.src = iconUrl ?? "";
+    summaryIcon.hidden = !iconUrl;
     this.renderAttackerAmmoCargoList();
     this.renderAttackerAmmoAllList();
     this.renderAttackerAmmoExpand();
@@ -1553,6 +1561,14 @@ export class DomControls implements Controls {
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(selected));
     item.title = title;
+    const iconUrl = this.imageCatalog.itemIconUrl(name);
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.className = "ammo-item-icon";
+      icon.src = iconUrl;
+      icon.alt = "";
+      item.appendChild(icon);
+    }
     const label = document.createElement("span");
     label.className = "ammo-item-name";
     label.textContent = name;
@@ -1864,7 +1880,7 @@ export class DomControls implements Controls {
       option.value = module.id;
       option.textContent = propulsionOptionLabel(module);
       select.appendChild(option);
-      const button = this.createButton(group, module.id, propulsionOptionLabel(module), () => this.onPropulsionButtonClick(side, module.id));
+      const button = this.createPropulsionButton(group, module, () => this.onPropulsionButtonClick(side, module.id));
       button.disabled = !profile;
       button.setAttribute("aria-disabled", String(!profile));
     }
@@ -2265,6 +2281,29 @@ export class DomControls implements Controls {
     button.setAttribute("aria-pressed", "false");
     button.textContent = text;
     button.setAttribute("title", text);
+    button.addEventListener("click", onClick);
+    container.appendChild(button);
+    return button;
+  }
+
+  private createPropulsionButton(container: HTMLElement, module: PropulsionModule, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("data-value", module.id);
+    button.setAttribute("aria-pressed", "false");
+    const text = propulsionOptionLabel(module);
+    button.setAttribute("title", text);
+    const iconUrl = this.imageCatalog.itemIconUrl(module.label);
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.className = "propulsion-icon";
+      icon.src = iconUrl;
+      icon.alt = "";
+      button.appendChild(icon);
+    }
+    const label = document.createElement("span");
+    label.textContent = text;
+    button.appendChild(label);
     button.addEventListener("click", onClick);
     container.appendChild(button);
     return button;
