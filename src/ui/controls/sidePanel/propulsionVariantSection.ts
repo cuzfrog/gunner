@@ -1,9 +1,9 @@
 import type { FittingImport } from "../../../fitting";
 import type { FittedHull, PropulsionModule, ShipProfile } from "../../../ships";
 import type { ImageCatalog } from "../../icons";
-import { type FittedHullSummary } from "../../settings";
+import type { FittedHullSummary } from "../../settings";
 import { isHtmlButtonElement } from "../controlsDom";
-import { type Popup } from "../popupGroup";
+import type { Popup } from "./popup";
 import type { Side } from "./side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";

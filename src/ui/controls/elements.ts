@@ -1,12 +1,18 @@
 import {
-  el, elOf, isHtmlButtonElement, isHtmlImageElement, isHtmlInputElement, isHtmlSelectElement, isHtmlTextAreaElement,
+  el,
+  elOf,
+  isHtmlButtonElement,
+  isHtmlImageElement,
+  isHtmlInputElement,
+  isHtmlSelectElement,
+  isHtmlTextAreaElement,
 } from "./controlsDom";
 
 import type { PreferencesEls } from "./preferencesController";
 import type { ProfileEls } from "./profileController";
-import type { ImportEls } from "./importController";
-import type { FittingPopupEls } from "./fittingPopupEls";
-import type { TurretEls } from "./turretEls";
+import type { ImportEls } from "./import/importControllerContract";
+import type { FittingPopupEls } from "./popup/fittingPopupEls";
+import type { TurretEls } from "./turret/turretEls";
 import type { Side } from "./sidePanel";
 import type { Els } from "./elementsContract";
 export function createControlsEls(): Els {

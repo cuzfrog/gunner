@@ -10,27 +10,30 @@ import {
 import { el } from "./controlsDom";
 import { profileSettingsOf } from "./controlsFormat";
 import { createSidePanel, collectSideEls, type Side, type SidePanel } from "./sidePanel";
-import { PopupGroupImpl, type Popup, type PopupGroup } from "./popupGroup";
+import { PopupGroupImpl } from "./popup/popupGroup";
+import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
 import { ChoiceGroupImpl, type ChoiceGroup } from "./choiceGroup";
 import { EngagementReadoutImpl, type EngagementReadout } from "./engagementReadout";
-import { SessionCodecImpl, type SessionCodec } from "./sessionCodec";
-import { TurretControllerImpl, type TurretController } from "./turretController";
-import { TurretStateResolver } from "./turretStateResolver";
-import { DomFittingPreview } from "./fittingPreview";
-import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
-import { FittingPopupControllerImpl, type FittingPopupController } from "./fittingPopupController";
-import { ImportControllerImpl, type ImportController } from "./importController";
+import { SessionCodecImpl } from "./session/sessionCodec";
+import type { HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import { TurretControllerImpl } from "./turret/turretController";
+import type { TurretController } from "./turret";
+import { TurretStateResolver } from "./turret/turretStateResolver";
+import { DomFittingPreview } from "./popup/fittingPreview";
+import { FittingPreviewManagerImpl } from "./popup/fittingPreviewManager";
+import { FittingPopupControllerImpl } from "./popup/fittingPopupController";
+import { ImportControllerImpl } from "./import/importController";
+import type { ImportController } from "./import";
 import { PreferencesControllerImpl, type PreferencesController } from "./preferencesController";
 import { ProfileControllerImpl, type ProfileController } from "./profileController";
-import { HintRotatorImpl, type HintRotator } from "./hintRotator";
-import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
-import { LanguageRefreshImpl, type LanguageRefresh } from "./languageRefresh";
-import { HullDatalistImpl, type HullDatalist } from "./hullDatalist";
+import { HintRotatorImpl } from "./hints/hintRotator";
+import { HINT_CANDIDATES, LORES, TIP_TEXT, type HintRotator } from "./hints";
+import { LanguageRefreshImpl } from "./session/languageRefresh";
+import { HullDatalistImpl } from "./session/hullDatalist";
+import { EventRouter } from "./session/eventRouter";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
-import { EventRouter } from "./eventRouter";
 import { SIG_RESOLUTIONS } from "../../sim";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
-
 export class DomControlsFactory {
   buildParts(deps: DomControlsDeps): { parts: DomControlsParts; host: DomControlsHost } {
     const host: DomControlsHost = {

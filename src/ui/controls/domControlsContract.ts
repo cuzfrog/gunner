@@ -8,19 +8,14 @@ import type { Timer } from "../timer";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { Els } from "./elementsContract";
 import type { EngagementReadout } from "./engagementReadout";
-import type { EventRouterHost } from "./eventRouter";
-import type { FittingPopupController } from "./fittingPopupController";
-import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { HintRotator } from "./hintRotator";
-import type { HullDatalist } from "./hullDatalist";
-import type { ImportController } from "./importController";
-import type { LanguageRefresh } from "./languageRefresh";
-import type { Popup, PopupGroup } from "./popupGroup";
+import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
+import type { EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { HintRotator } from "./hints";
+import type { ImportController } from "./import";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
-import type { SessionCodec } from "./sessionCodec";
 import type { SidePanel } from "./sidePanel";
-import type { TurretController } from "./turretController";
+import type { TurretController } from "./turret";
 
 export interface DomControlsDeps {
   hitChance: HitChance; i18n: I18n; settingsStore: SettingsStore; ships: Ships; fittingImport: FittingImport;

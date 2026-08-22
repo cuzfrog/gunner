@@ -1,10 +1,5 @@
 import { num, setText } from "./controlsDom";
-import {
-  DEFAULT_GRID_BRIGHTNESS,
-  aggressivityFromPosition,
-  parseManeuverAggressivity,
-  positionFromAggressivity,
-} from "./controlsFormat";
+import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggressivity, positionFromAggressivity } from "./controlsFormat";
 import type { I18n, Language } from "../i18n";
 import { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../settings";

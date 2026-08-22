@@ -1,6 +1,11 @@
 import {
-  type AutopilotMode, type EngagementFrame, type HitChanceBreakdown, type ShipConfig, type SimConfig,
-  SIG_RESOLUTIONS, type TurretSpec,
+  type AutopilotMode,
+  type EngagementFrame,
+  type HitChanceBreakdown,
+  type ShipConfig,
+  type SimConfig,
+  SIG_RESOLUTIONS,
+  type TurretSpec,
 } from "../../sim";
 import { isAutopilotMode, type UserSettings } from "../settings";
 import type { Els } from "./elementsContract";
@@ -9,20 +14,16 @@ import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
 import { DomControlsFactory } from "./domControlsFactory";
-import type { Popup, PopupGroup } from "./popupGroup";
-import type { HintRotator } from "./hintRotator";
-import type { HullDatalist } from "./hullDatalist";
+import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
+import type { HintRotator } from "./hints";
+import type { HullDatalist, LanguageRefresh, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { Side, SidePanel } from "./sidePanel";
-import type { TurretController } from "./turretController";
-import type { SessionCodec } from "./sessionCodec";
-import type { ImportController } from "./importController";
-import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { FittingPopupController } from "./fittingPopupController";
-import type { LanguageRefresh } from "./languageRefresh";
+import type { TurretController } from "./turret";
+import type { ImportController } from "./import";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 

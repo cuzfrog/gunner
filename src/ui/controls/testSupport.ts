@@ -5,23 +5,17 @@ import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ClipboardProvider, ProfileParamOverrides, SavedFittings, SettingsStore } from "../settings";
 import { TrackingInput } from "./trackingInput";
-import { TurretControllerImpl } from "./turretController";
-import { TurretStateResolver } from "./turretStateResolver";
+import { TurretControllerImpl } from "./turret/turretController";
+import { TurretStateResolver } from "./turret/turretStateResolver";
 import { DomControls } from "./domControls";
 import { DomControlsFactory } from "./domControlsFactory";
-import type { TurretEls } from "./turretEls";
+import type { TurretEls } from "./turret/turretEls";
 import { createSidePanel, type Side, collectSideEls } from "./sidePanel";
-import { PopupGroupImpl } from "./popupGroup";
+import type { Popup, PopupGroup } from "./popup";
 import { createControlsEls } from "./elements";
 import { fakeDocument, getFake } from "./fakeDocument";
 import { FakeElement } from "./fakeElement";
-import {
-  CHARGE_OPTIONS,
-  IMPORTED_RIFTER,
-  IMPORTED_RIFTER_WITH_CARGO,
-  RIFTER,
-  TURRET,
-} from "./testConstants";
+import { CHARGE_OPTIONS, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "./testConstants";
 import {
   mockChargeCatalog,
   mockClipboard,
@@ -272,6 +266,28 @@ export function buildTurret(
   };
 }
 
+
+class FakePopupGroup implements PopupGroup {
+  private readonly popups: Popup[] = [];
+  register(popup: Popup): void { this.popups.push(popup); }
+  open(popup: Popup): void {
+    for (const p of this.popups) { if (p !== popup && p.isOpen()) p.close(); }
+    if (!popup.isOpen()) popup.open();
+  }
+  toggle(popup: Popup): void { if (popup.isOpen()) this.close(popup); else this.open(popup); }
+  close(popup: Popup): void { if (popup.isOpen()) popup.close(); }
+  closeAll(): void { for (const p of this.popups) if (p.isOpen()) p.close(); }
+  hasOpen(): boolean { return this.popups.some((p) => p.isOpen()); }
+  onPointerDown(target: EventTarget | null): void {
+    if (!target) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  }
+  onKeyDown(event: { readonly key: string }): void {
+    if (event.key !== "Escape") return;
+    for (const p of this.popups) if (p.isOpen()) { p.close(); p.focusTrigger(); }
+  }
+}
+
 export function buildSidePanel(
   side: Side = "attacker",
   ships: Ships = mockShips(),
@@ -305,7 +321,7 @@ export function buildSidePanel(
   const panel = createSidePanel({
     side,
     host,
-    popupGroup: new PopupGroupImpl(),
+    popupGroup: new FakePopupGroup(),
     els,
     i18n,
     ships,

@@ -1,7 +1,7 @@
 import type { SavedFittings } from "../settings";
-import type { ImportController } from "./importController";
-import type { PopupGroup } from "./popupGroup";
-import type { TurretController } from "./turretController";
+import type { ImportController } from "./import";
+import type { PopupGroup } from "./popup";
+import type { TurretController } from "./turret";
 import type { Side, SidePanel } from "./sidePanel";
 
 export interface SidePanelHostBuilderDeps {

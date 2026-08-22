@@ -1,7 +1,7 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import { type DisplayPreferences, type ProfileSettings, type StartupState, type UserSettings } from "./userSettings";
+import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
 import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
 

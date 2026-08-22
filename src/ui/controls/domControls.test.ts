@@ -3,7 +3,13 @@ import type { FittingImport } from "../../fitting";
 import type { Ships } from "../../ships";
 import { USER_SETTINGS_VERSION } from "../settings";
 import {
-  buildDomControls, getFake, mockFittingImport, mockSavedFittings, mockShips, RIFTER, IMPORTED_RIFTER,
+  buildDomControls,
+  getFake,
+  mockFittingImport,
+  mockSavedFittings,
+  mockShips,
+  RIFTER,
+  IMPORTED_RIFTER,
   FakeElement,
 } from "./testSupport";
 

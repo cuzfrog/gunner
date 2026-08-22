@@ -1,12 +1,18 @@
 import type { ImportedFitting } from "../../../fitting";
 import type {
-  FittedHull, PropulsionId, PropulsionModule, PropulsionStats,
-  ShipProfile, Ships, SkillLevel, StatConditions,
+  FittedHull,
+  PropulsionId,
+  PropulsionModule,
+  PropulsionStats,
+  ShipProfile,
+  Ships,
+  SkillLevel,
+  StatConditions,
 } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../settings";
-import type { Popup } from "../popupGroup";
+import type { Popup } from "./popup";
 
 export interface IHullSection {
   onHullInput(): void;

@@ -1,6 +1,6 @@
 import type { PropulsionId, PropulsionModule, PropulsionStats, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
-import { type FittedHullSummary, type ProfileParamOverrides } from "../../settings";
+import type { FittedHullSummary, ProfileParamOverrides } from "../../settings";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
 import type { Side } from "./side";

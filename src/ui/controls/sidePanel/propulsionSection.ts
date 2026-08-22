@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../settings";
 import { propulsionOptionLabel } from "../controlsFormat";
-import { type Popup } from "../popupGroup";
+import type { Popup } from "./popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
