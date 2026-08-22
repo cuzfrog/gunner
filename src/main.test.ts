@@ -330,13 +330,15 @@ function fakeLocalStorage(): Storage {
 
 function fakeWindow(): Window {
   return {
+    innerWidth: 1024,
+    innerHeight: 768,
     location: { href: "http://localhost/" },
     history: { replaceState: vi.fn() },
     navigator: { clipboard: { readText: vi.fn(), writeText: vi.fn(async () => {}) } },
   } as unknown as Window;
 }
 
-const GLOBAL_KEYS = ["document", "localStorage", "window", "HTMLCanvasElement", "performance", "requestAnimationFrame"];
+const GLOBAL_KEYS = ["document", "localStorage", "window", "HTMLCanvasElement", "Element", "performance", "requestAnimationFrame"];
 
 let originals: Record<string, unknown> = {};
 
@@ -350,6 +352,7 @@ function installGlobals(): void {
   globalThis.localStorage = fakeLocalStorage() as unknown as Storage;
   (globalThis as Record<string, unknown>).window = fakeWindow();
   globalThis.HTMLCanvasElement = FakeCanvas as unknown as typeof HTMLCanvasElement;
+  globalThis.Element = FakeElement as unknown as typeof Element;
   globalThis.performance = { now: vi.fn(() => 0) } as unknown as Performance;
   globalThis.requestAnimationFrame = vi.fn(() => 0);
 }

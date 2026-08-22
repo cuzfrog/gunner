@@ -11,17 +11,20 @@ interface PreviewDependencies {
   readonly container: HTMLElement;
   readonly i18n: I18n;
   readonly imageCatalog: ImageCatalog;
+  readonly viewport: () => { readonly innerWidth: number; readonly innerHeight: number };
 }
 
 export class DomFittingPreview implements FittingPreview {
   private readonly container: HTMLElement;
   private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
+  private readonly viewport: () => { readonly innerWidth: number; readonly innerHeight: number };
 
-  constructor({ container, i18n, imageCatalog }: PreviewDependencies) {
+  constructor({ container, i18n, imageCatalog, viewport }: PreviewDependencies) {
     this.container = container;
     this.i18n = i18n;
     this.imageCatalog = imageCatalog;
+    this.viewport = viewport;
   }
 
   show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string): void {
@@ -32,7 +35,7 @@ export class DomFittingPreview implements FittingPreview {
     }
     this.container.hidden = false;
     this.container.setAttribute("aria-hidden", "false");
-    positionPreview(this.container, anchor);
+    positionPreview(this.container, anchor, this.viewport());
   }
 
   hide(): void {
@@ -123,10 +126,9 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow): HTMLElement {
   return rowEl;
 }
 
-function positionPreview(container: HTMLElement, anchor: HTMLElement): void {
+function positionPreview(container: HTMLElement, anchor: HTMLElement, viewport: { readonly innerWidth: number; readonly innerHeight: number }): void {
   const anchorRect = anchor.getBoundingClientRect();
   const parent = container.offsetParent;
-  const viewport = globalThis.window ?? { innerWidth: 1024, innerHeight: 768 };
   const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0, width: viewport.innerWidth, height: viewport.innerHeight };
   const margin = 8;
   const gap = 8;

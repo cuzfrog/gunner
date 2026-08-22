@@ -31,6 +31,8 @@ export interface ChargeOption {
   readonly falloffMultiplier: number;
 }
 
+export type ChargeFamily = "projectile" | "hybrid" | "laser";
+
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): string;
   chargesForSize(chargeSize: number): readonly ChargeOption[];
@@ -140,8 +142,6 @@ function _usualForChargeSize(charges: Readonly<Record<string, ChargeStats>>, cha
   const chosen = navy.length > 0 ? navy : all;
   return chosen[0].name;
 }
-
-type ChargeFamily = "projectile" | "hybrid" | "laser";
 
 const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
   autocannon: "projectile",

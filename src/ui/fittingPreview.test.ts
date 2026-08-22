@@ -124,6 +124,7 @@ describe("DomFittingPreview", () => {
       container: container as unknown as HTMLElement,
       i18n: createI18n(),
       imageCatalog: createImageCatalog(),
+      viewport: () => ({ innerWidth: 1024, innerHeight: 768 }),
     });
     return { container, anchor, preview };
   }

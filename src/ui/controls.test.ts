@@ -779,10 +779,14 @@ function buildControls(
 describe("DomControls", () => {
   beforeEach(() => {
     globalThis.document = fakeDocument() as unknown as Document;
+    globalThis.Element = FakeElement as unknown as typeof Element;
+    (globalThis as Record<string, unknown>).window = { innerWidth: 1024, innerHeight: 768 };
   });
 
   afterEach(() => {
     globalThis.document = undefined as unknown as Document;
+    globalThis.Element = undefined as unknown as typeof Element;
+    (globalThis as Record<string, unknown>).window = undefined;
   });
 
   test("getConfig maps all ship inputs including mass and inertia", () => {

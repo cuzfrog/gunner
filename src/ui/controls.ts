@@ -182,7 +182,6 @@ interface Els {
   resHit: HTMLElement;
   gridBrightnessSlider: HTMLInputElement;
   gridBrightnessValue: HTMLElement;
-  [key: string]: HTMLElement;
 }
 
 
@@ -403,11 +402,13 @@ export class DomControls implements Controls {
       container: this.els.attackerFittingPreview,
       i18n: this.i18n,
       imageCatalog: this.imageCatalog,
+      viewport: () => window,
     });
     this.targetPreview = new DomFittingPreview({
       container: this.els.targetFittingPreview,
       i18n: this.i18n,
       imageCatalog: this.imageCatalog,
+      viewport: () => window,
     });
 
     this.renderAttackerAmmo();
@@ -1406,7 +1407,6 @@ export class DomControls implements Controls {
   private updateShipImage(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
     const image = this.els[`${side}ShipImage`];
-    if (!isHtmlImageElement(image)) return;
     if (profile) {
       image.src = this.imageCatalog.shipImageUrl(profile.name);
       image.hidden = false;
@@ -1418,7 +1418,6 @@ export class DomControls implements Controls {
 
   private clearShipImage(side: "attacker" | "target"): void {
     const image = this.els[`${side}ShipImage`];
-    if (!isHtmlImageElement(image)) return;
     image.hidden = true;
     image.src = "";
   }
@@ -1498,7 +1497,6 @@ export class DomControls implements Controls {
 
   private attachShipImagePreviewListeners(side: "attacker" | "target"): void {
     const image = this.els[`${side}ShipImage`];
-    if (!isHtmlImageElement(image)) return;
     image.addEventListener("mouseenter", () => {
       const text = side === "attacker" ? this.attackerFitting : this.targetFitting;
       if (text) this.startPreviewShow(side, image, text);
@@ -1655,7 +1653,6 @@ export class DomControls implements Controls {
     const trigger = this.els.attackerAmmoTrigger;
     const summary = this.els.attackerAmmoSummary;
     const summaryIcon = this.els.attackerAmmoSummaryIcon;
-    if (!isHtmlButtonElement(trigger) || !isHtmlImageElement(summaryIcon)) return;
     const hasTurret = this.attackerTurret !== undefined;
     trigger.disabled = !hasTurret;
     setText(summary, hasTurret ? this.attackerAmmo : "—");
@@ -1805,7 +1802,6 @@ export class DomControls implements Controls {
 
   private renderAttackerAmmoExpand(): void {
     const expand = this.els.attackerAmmoExpand;
-    if (!isHtmlButtonElement(expand)) return;
     const key = this.attackerAmmoAllExpanded ? "ammo.hideAll" : "ammo.showAll";
     expand.setAttribute("data-i18n", key);
     setText(expand, this.i18n.t(key));
@@ -1830,7 +1826,6 @@ export class DomControls implements Controls {
     if (!this.attackerTurret) return;
     const popup = this.els.attackerAmmoPopup;
     const trigger = this.els.attackerAmmoTrigger;
-    if (!isHtmlButtonElement(trigger)) return;
     popup.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     this.openAmmo = true;
@@ -1848,7 +1843,6 @@ export class DomControls implements Controls {
   private closeAttackerAmmoPopup(): void {
     const popup = this.els.attackerAmmoPopup;
     const trigger = this.els.attackerAmmoTrigger;
-    if (!isHtmlButtonElement(trigger)) return;
     popup.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
     this.openAmmo = false;
@@ -2749,10 +2743,8 @@ function isAutopilotMode(value: string): value is AutopilotMode {
   return value === "orbit" || value === "keepAtRange" || value === "midships";
 }
 
-function isEventTargetWithClosest(target: EventTarget | null): target is EventTarget & { closest: (selector: string) => Element | null } {
-  if (target === null) return false;
-  const closest: unknown = Reflect.get(target, "closest");
-  return typeof closest === "function";
+function isEventTargetWithClosest(target: EventTarget | null): target is Element {
+  return target instanceof Element;
 }
 
 const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
