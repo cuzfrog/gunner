@@ -1,4 +1,4 @@
-import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
 import {
   SIG_RESOLUTIONS,
   alignTime,
@@ -14,7 +14,6 @@ import {
 import {
   type CargoCharge,
   type ChargeCatalog,
-  type ChargeOption,
   type FittingImport,
   type FittingSummary,
   type GunFamilies,
@@ -23,7 +22,6 @@ import {
   type PresetFittings,
 } from "../fitting";
 import type { I18n, Language } from "./i18n";
-import { PALETTE } from "./palette";
 import type { ImageCatalog } from "./imageCatalog";
 import { DomFittingPreview, type FittingPreview } from "./fittingPreview";
 import type { SavedFittings } from "./savedFittings";
@@ -45,6 +43,41 @@ import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileTe
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
 import type { TimeoutId, Timer } from "./timer";
+import {
+  el,
+  elOf,
+  fittingAreaSelector,
+  isHtmlButtonElement,
+  isHtmlImageElement,
+  isHtmlInputElement,
+  isHtmlSelectElement,
+  isHtmlTextAreaElement,
+  isEventTargetWithClosest,
+  num,
+  setText,
+  type Els,
+} from "./controlsDom";
+import {
+  AGGRESSIVITY_MAX,
+  AGGRESSIVITY_MIN,
+  DEFAULT_GRID_BRIGHTNESS,
+  NEUTRAL_STAT_CONDITIONS,
+  aggressivityFromPosition,
+  chargeStatSuffix,
+  escapeHtml,
+  formatNumber,
+  formatWithCommas,
+  hitChanceColor,
+  isAutopilotMode,
+  isSigResClass,
+  parseManeuverAggressivity,
+  positionFromAggressivity,
+  profileSettingsOf,
+  propulsionOptionLabel,
+  settingsEqual,
+  skillLevelFromString,
+  skillOptionLabel,
+} from "./controlsFormat";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -64,127 +97,6 @@ export interface Controls {
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }
-
-interface Els {
-  tracking: HTMLInputElement;
-  trackingUnitRad: HTMLButtonElement;
-  trackingUnitScore: HTMLButtonElement;
-  sigRes: HTMLSelectElement;
-  sigResOptions: HTMLElement;
-  optimal: HTMLInputElement;
-  falloff: HTMLInputElement;
-  attackerAmmoField: HTMLElement;
-  attackerAmmoTrigger: HTMLButtonElement;
-  attackerAmmoSummary: HTMLElement;
-  attackerAmmoSummaryIcon: HTMLImageElement;
-  attackerAmmoPopup: HTMLElement;
-  attackerAmmoCargoLabel: HTMLElement;
-  attackerAmmoCargoList: HTMLElement;
-  attackerAmmoExpand: HTMLButtonElement;
-  attackerAmmoAllSection: HTMLElement;
-  attackerAmmoAllList: HTMLElement;
-  hullOptions: HTMLElement;
-  attackerHull: HTMLInputElement;
-  attackerShipImage: HTMLImageElement;
-  attackerFittingTrigger: HTMLButtonElement;
-  attackerFittingEye: HTMLButtonElement;
-  attackerFittingPopup: HTMLElement;
-  attackerFittingPreview: HTMLElement;
-  attackerFittingSavedLabel: HTMLElement;
-  attackerFittingSavedList: HTMLElement;
-  attackerFittingPresetLabel: HTMLElement;
-  attackerFittingPresetList: HTMLElement;
-  attackerFittingEmpty: HTMLElement;
-  attackerHullHint: HTMLElement;
-  attackerFittingName: HTMLElement;
-  attackerImportFitting: HTMLButtonElement;
-  attackerImportStatus: HTMLElement;
-  attackerPastePopup: HTMLElement;
-  attackerPasteInput: HTMLTextAreaElement;
-  attackerPropulsion: HTMLSelectElement;
-  attackerPropulsionOptions: HTMLElement;
-  attackerPropulsionGear: HTMLButtonElement;
-  attackerPropulsionVariants: HTMLElement;
-  attackerSkills: HTMLSelectElement;
-  attackerSkillOptions: HTMLElement;
-  attackerSkillSummary: HTMLElement;
-  attackerSkillTrigger: HTMLButtonElement;
-  attackerSkillPopup: HTMLElement;
-  attackerOverload: HTMLInputElement;
-  attackerOverloadButton: HTMLButtonElement;
-  attackerSpeed: HTMLInputElement;
-  attackerMass: HTMLInputElement;
-  attackerInertia: HTMLInputElement;
-  attackerAlignTime: HTMLElement;
-  attackerMode: HTMLSelectElement;
-  attackerRange: HTMLInputElement;
-  maneuverAggressivity: HTMLInputElement;
-  maneuverAggressivitySlider: HTMLInputElement;
-  maneuverAggressivityValue: HTMLElement;
-  initialDistance: HTMLInputElement;
-  targetHull: HTMLInputElement;
-  targetShipImage: HTMLImageElement;
-  targetFittingTrigger: HTMLButtonElement;
-  targetFittingEye: HTMLButtonElement;
-  targetFittingPopup: HTMLElement;
-  targetFittingPreview: HTMLElement;
-  targetFittingSavedLabel: HTMLElement;
-  targetFittingSavedList: HTMLElement;
-  targetFittingPresetLabel: HTMLElement;
-  targetFittingPresetList: HTMLElement;
-  targetFittingEmpty: HTMLElement;
-  targetHullHint: HTMLElement;
-  targetFittingName: HTMLElement;
-  targetImportFitting: HTMLButtonElement;
-  targetImportStatus: HTMLElement;
-  targetPastePopup: HTMLElement;
-  targetPasteInput: HTMLTextAreaElement;
-  targetPropulsion: HTMLSelectElement;
-  targetPropulsionOptions: HTMLElement;
-  targetPropulsionGear: HTMLButtonElement;
-  targetPropulsionVariants: HTMLElement;
-  targetSkills: HTMLSelectElement;
-  targetSkillOptions: HTMLElement;
-  targetSkillSummary: HTMLElement;
-  targetSkillTrigger: HTMLButtonElement;
-  targetSkillPopup: HTMLElement;
-  targetOverload: HTMLInputElement;
-  targetOverloadButton: HTMLButtonElement;
-  targetSpeed: HTMLInputElement;
-  targetMass: HTMLInputElement;
-  targetInertia: HTMLInputElement;
-  targetAlignTime: HTMLElement;
-  targetMode: HTMLSelectElement;
-  targetRange: HTMLInputElement;
-  targetSig: HTMLInputElement;
-  simSpeed: HTMLSelectElement;
-  profileName: HTMLInputElement;
-  profileSave: HTMLButtonElement;
-  profileSelect: HTMLSelectElement;
-  profileDelete: HTMLButtonElement;
-  shareLink: HTMLButtonElement;
-  importProfile: HTMLButtonElement;
-  importSidePopup: HTMLElement;
-  importSideAttacker: HTMLButtonElement;
-  importSideTarget: HTMLButtonElement;
-  shareStatus: HTMLElement;
-  langEn: HTMLButtonElement;
-  langZh: HTMLButtonElement;
-  langJa: HTMLButtonElement;
-  play: HTMLButtonElement;
-  reset: HTMLButtonElement;
-  resDistance: HTMLElement;
-  resTransversal: HTMLElement;
-  resAngular: HTMLElement;
-  resRadial: HTMLElement;
-  resTrackPen: HTMLElement;
-  resRangePen: HTMLElement;
-  resHit: HTMLElement;
-  gridBrightnessSlider: HTMLInputElement;
-  gridBrightnessValue: HTMLElement;
-}
-
-
 
 export class DomControls implements Controls {
   private readonly els: Els;
@@ -2607,9 +2519,6 @@ export class DomControls implements Controls {
   }
 }
 
-const AGGRESSIVITY_MIN = 0.01;
-const AGGRESSIVITY_MAX = 100;
-const DEFAULT_GRID_BRIGHTNESS = 0.2;
 const DELETE_ICON_SVG =
   '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
   'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
@@ -2617,146 +2526,3 @@ const DELETE_ICON_SVG =
 const EYE_ICON_SVG =
   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
   'aria-hidden="true"><use href="icons.svg#eye"></use></svg>';
-
-function aggressivityFromPosition(pos: number): number {
-  const clamped = Math.max(0, Math.min(1, pos));
-  return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
-}
-
-function positionFromAggressivity(value: number): number {
-  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
-  return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
-}
-
-function parseManeuverAggressivity(input: HTMLInputElement): number {
-  const value = Number.parseFloat(input.value);
-  if (!Number.isFinite(value)) return 1;
-  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
-}
-
-function el(id: string): HTMLElement {
-  const e = document.getElementById(id);
-  if (e === null) throw new Error(`Missing DOM element #${id}`);
-  return e;
-}
-function elOf<T extends HTMLElement>(id: string, guard: (el: Element) => el is T): T {
-  const e = el(id);
-  if (!guard(e)) throw new Error(`Expected #${id} to be a ${guard.name}`);
-  return e;
-}
-
-
-function isHtmlButtonElement(el: Element): el is HTMLButtonElement {
-  return el.tagName === "BUTTON";
-}
-
-function isHtmlImageElement(el: Element): el is HTMLImageElement {
-  return el.tagName === "IMG";
-}
-
-function isHtmlInputElement(el: Element): el is HTMLInputElement {
-  return el.tagName === "INPUT";
-}
-
-function isHtmlSelectElement(el: Element): el is HTMLSelectElement {
-  return el.tagName === "SELECT";
-}
-
-function isHtmlTextAreaElement(el: Element): el is HTMLTextAreaElement {
-  return el.tagName === "TEXTAREA";
-}
-
-function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): number {
-  const value = input.value;
-  const n = parseFloat(value);
-  return Number.isNaN(n) ? 0 : Math.max(0, n);
-}
-
-function setText(el: HTMLElement, text: string): void {
-  el.textContent = text;
-}
-
-function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
-  return rest;
-}
-
-function settingsEqual(a: ProfileSettings, b: ProfileSettings): boolean {
-  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
-}
-
-function formatWithCommas(value: number, decimals = 0): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
-
-function hitChanceColor(chance: number): string {
-  if (chance >= 0.9) return PALETTE.optimalGreen;
-  if (chance >= 0.5) return PALETTE.accentTeal;
-  if (chance >= 0.25) return PALETTE.warnYellow;
-  if (chance >= 0.05) return PALETTE.accentOrange;
-  return PALETTE.dangerRed;
-}
-
-function propulsionOptionLabel(module: PropulsionModule): string {
-  return module.id.replace(/^.*-/, "").toUpperCase();
-}
-
-function skillLevelFromString(value: string): SkillLevel {
-  const level = Number.parseInt(value, 10);
-  if (level === 0 || level === 1 || level === 2 || level === 3 || level === 4 || level === 5) return level;
-  return 0;
-}
-
-function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
-  return `${i18n.t("skill.level")} ${level}`;
-}
-
-function formatNumber(value: number, decimals = 2): string {
-  return String(Number(value.toFixed(decimals)));
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function chargeStatSuffix(option: ChargeOption): string {
-  const parts = [`range x${formatMultiplier(option.rangeMultiplier)}`, `track x${formatMultiplier(option.trackingMultiplier)}`];
-  if (option.falloffMultiplier !== 1) {
-    parts.splice(1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
-  }
-  return parts.join(" · ");
-}
-
-function formatMultiplier(value: number): string {
-  return String(Number(value.toFixed(2)));
-}
-
-function isSigResClass(value: string): value is SigResolutionClass {
-  return value === "S" || value === "M" || value === "L" || value === "XL";
-}
-
-function isAutopilotMode(value: string): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange" || value === "midships";
-}
-
-function fittingAreaSelector(side: "attacker" | "target"): string {
-  return [
-    `#${side}-hull`,
-    `#${side}-ship-image`,
-    `#${side}-fitting-trigger`,
-    `#${side}-fitting-eye`,
-    `#${side}-fitting-popup`,
-    `#${side}-fitting-preview`,
-  ].join(", ");
-}
-
-function isEventTargetWithClosest(target: EventTarget | null): target is Element {
-  return target instanceof Element;
-}
-
-const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
