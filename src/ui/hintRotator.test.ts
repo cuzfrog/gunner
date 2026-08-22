@@ -107,7 +107,6 @@ describe("HintRotator", () => {
     const tip = "If you like this tool, may consider tip me in the game, thank you!";
     const total = 4 * Math.max(HINT_CANDIDATES.length, Math.ceil(LORES.length / 2));
     let hintIndex = 0;
-    let loreOffset = 0;
     for (let i = 1; i < total; i++) {
       const slot = i % 4;
       rotator.showNext();
@@ -120,7 +119,6 @@ describe("HintRotator", () => {
         expect(element.textContent).toBe(tip);
         expect(element.classList.add).toHaveBeenLastCalledWith("tip");
       } else {
-        loreOffset = slot === 2 ? loreOffset + 1 : loreOffset;
         const lore = LORES[(Math.floor(i / 4) * 2 + (slot - 2)) % LORES.length];
         expect(element.textContent).toBe(lore.text.en);
         expect(element.classList.add).toHaveBeenLastCalledWith("lore");
@@ -153,8 +151,8 @@ describe("HintRotator", () => {
     const rotator = createRotator(element, timer);
     rotator.showNext();
     expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", true);
-    expect(element.classList.remove).toHaveBeenCalledWith("hint", "tip", "lore");
     timer.runTimeout();
+    expect(element.classList.remove).toHaveBeenCalledWith("hint", "tip", "lore");
     expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", false);
     expect(element.style.transition).toBe("");
     expect(element.style.transform).toBe("");
