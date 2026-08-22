@@ -1472,8 +1472,11 @@ canvas {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  column-gap: 4px;
+  row-gap: 1px;
   padding: 3px 2px 4px;
   line-height: 1.2;
 }
@@ -1500,10 +1503,8 @@ canvas {
   font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  flex-basis: 100%;
+  text-align: center;
 }
 
 .sigres-selector button.active .sigres-class,
