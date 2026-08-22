@@ -5,7 +5,7 @@ import { CHARGES, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
 import { MODULE_SLOTS } from "../src/fitting/moduleSlots";
 import { PROPULSION_MODULES } from "../src/ships/propulsion";
 
-const OUTPUT_PATH = "src/fitting/iconIds.ts";
+const OUTPUT_PATH = "src/ui/iconIds.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
 
 interface NameToId {

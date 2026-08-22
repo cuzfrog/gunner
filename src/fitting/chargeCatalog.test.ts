@@ -8,6 +8,7 @@ import {
   type ChargeOption,
   type ImportedTurret,
 } from "./chargeCatalog";
+import { GunFamiliesImpl } from "./gunFamilies";
 import { CHARGES as FittingDbCharges } from "./fittingDb";
 import type { ChargeStats } from "./fittingDb";
 
@@ -24,8 +25,10 @@ const TEST_CHARGES: Readonly<Record<string, ChargeStats>> = {
   "Nuclear L": { rangeMultiplier: 1.6 },
 };
 
+const gunFamilies = new GunFamiliesImpl();
+
 function buildCatalog(charges = TEST_CHARGES): ChargeCatalogImpl {
-  return new ChargeCatalogImpl({ fittingDb: { charges } });
+  return new ChargeCatalogImpl({ fittingDb: { charges }, gunFamilies });
 }
 
 function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
@@ -181,11 +184,11 @@ describe("ChargeCatalogImpl", () => {
   });
 
   test("turretChargeFamily maps turret families to charge families", () => {
-    expect(_turretChargeFamily("200mm AutoCannon I")).toBe("projectile");
-    expect(_turretChargeFamily("280mm Howitzer Artillery I")).toBe("projectile");
-    expect(_turretChargeFamily("150mm Railgun I")).toBe("hybrid");
-    expect(_turretChargeFamily("Light Neutron Blaster I")).toBe("hybrid");
-    expect(_turretChargeFamily("Gatling Pulse Laser I")).toBe("laser");
-    expect(_turretChargeFamily("Small Focused Beam Laser I")).toBe("laser");
+    expect(_turretChargeFamily("200mm AutoCannon I", gunFamilies)).toBe("projectile");
+    expect(_turretChargeFamily("280mm Howitzer Artillery I", gunFamilies)).toBe("projectile");
+    expect(_turretChargeFamily("150mm Railgun I", gunFamilies)).toBe("hybrid");
+    expect(_turretChargeFamily("Light Neutron Blaster I", gunFamilies)).toBe("hybrid");
+    expect(_turretChargeFamily("Gatling Pulse Laser I", gunFamilies)).toBe("laser");
+    expect(_turretChargeFamily("Small Focused Beam Laser I", gunFamilies)).toBe("laser");
   });
 });

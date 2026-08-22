@@ -1,6 +1,7 @@
 import { TURRETS } from "./fittingDb";
-import { gunFamilyOf, gunIconNames, type GunFamily } from "./gunFamilies";
-import { ITEM_ICON_IDS } from "./iconIds";
+import { GunFamiliesImpl, type GunFamily } from "./gunFamilies";
+
+const gunFamilies = new GunFamiliesImpl();
 
 const FAMILIES: readonly GunFamily[] = ["pulseLaser", "beamLaser", "railgun", "blaster", "autocannon", "artillery"];
 
@@ -19,54 +20,51 @@ const TRICKY_VARIANTS: { readonly name: string; readonly family: GunFamily }[] =
   { name: "Gatling Modulated Energy Beam I", family: "pulseLaser" },
   { name: "Quad Afocal Light Laser I", family: "beamLaser" },
   { name: "Shadow Serpentis Dual 1000mm Railgun", family: "railgun" },
-  { name: "Tuvan\'s Modified Neutron Blaster Cannon", family: "blaster" },
+  { name: "Tuvan's Modified Neutron Blaster Cannon", family: "blaster" },
   { name: "Domination Quad 800mm Repeating Cannon", family: "autocannon" },
-  { name: "Hakim\'s Modified 1400mm Howitzer Artillery", family: "artillery" },
+  { name: "Hakim's Modified 1400mm Howitzer Artillery", family: "artillery" },
 ] as const;
 
 function assertFamily(name: string, family: GunFamily): void {
-  const result = gunFamilyOf(name);
+  const result = gunFamilies.familyOf(name);
   if (result !== family) {
     throw new Error(`Expected ${name} to be ${family}, got ${result}`);
   }
 }
 
-describe("gunFamilyOf", () => {
-  test("exhaustive: does not throw for every TURRETS key", () => {
-    for (const name of Object.keys(TURRETS)) {
-      const result = gunFamilyOf(name);
-      expect(FAMILIES).toContain(result);
+describe("GunFamiliesImpl", () => {
+  describe("familyOf", () => {
+    test("exhaustive: does not throw for every TURRETS key", () => {
+      for (const name of Object.keys(TURRETS)) {
+        const result = gunFamilies.familyOf(name);
+        expect(FAMILIES).toContain(result);
+      }
+    });
+
+    for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
+      test(`classifies ${family} representatives`, () => {
+        assertFamily(S, family);
+        assertFamily(M, family);
+        assertFamily(L, family);
+        assertFamily(XL, family);
+      });
+    }
+
+    for (const { name, family } of TRICKY_VARIANTS) {
+      test(`classifies tricky variant ${name}`, () => {
+        assertFamily(name, family);
+      });
     }
   });
 
-  for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
-    test(`classifies ${family} representatives`, () => {
-      assertFamily(S, family);
-      assertFamily(M, family);
-      assertFamily(L, family);
-      assertFamily(XL, family);
-    });
-  }
-
-  for (const { name, family } of TRICKY_VARIANTS) {
-    test(`classifies tricky variant ${name}`, () => {
-      assertFamily(name, family);
-    });
-  }
-});
-
-describe("gunIconNames", () => {
-  for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
-    test(`returns the representative table for ${family}`, () => {
-      const names = gunIconNames(family);
-      expect(names.S).toBe(S);
-      expect(names.M).toBe(M);
-      expect(names.L).toBe(L);
-      expect(names.XL).toBe(XL);
-      expect(ITEM_ICON_IDS[S]).toBeDefined();
-      expect(ITEM_ICON_IDS[M]).toBeDefined();
-      expect(ITEM_ICON_IDS[L]).toBeDefined();
-      expect(ITEM_ICON_IDS[XL]).toBeDefined();
-    });
-  }
+  describe("representativeOf", () => {
+    for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
+      test(`returns the representative for ${family}`, () => {
+        expect(gunFamilies.representativeOf(family, "S")).toBe(S);
+        expect(gunFamilies.representativeOf(family, "M")).toBe(M);
+        expect(gunFamilies.representativeOf(family, "L")).toBe(L);
+        expect(gunFamilies.representativeOf(family, "XL")).toBe(XL);
+      });
+    }
+  });
 });

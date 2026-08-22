@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { DRONE_ICON_ID, DRONE_TYPE_IDS, ITEM_ICON_IDS } from "../src/fitting";
+import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../src/ui/iconIds";
+import { DRONE_TYPE_IDS } from "../src/ui/droneIconIds";
 
 const DISTRIBUTION_DIRECTORY = "dist";
 const STYLES_LINK_PATTERN = /href="styles-[a-f0-9]{8}\.css"/;

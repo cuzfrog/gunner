@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
-import { DRONE_ICON_ID, DRONE_TYPE_IDS, ITEM_ICON_IDS } from "../src/fitting";
+import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../src/ui/iconIds";
+import { DRONE_TYPE_IDS } from "../src/ui/droneIconIds";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";

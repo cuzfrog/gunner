@@ -1,12 +1,6 @@
-export type { FittingDb, FittingImport, ImportedFitting, ImportedTurret } from "./fittingImport";
+export type { FittingDb, FittingImport, FittingRow, FittingSection, FittingSummary, ImportedFitting, ImportedTurret } from "./fittingImport";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
 export type { PresetFitting, PresetFittings } from "./presetFittings";
-export { describeFitting } from "./fittingSummary";
-export type { FittingRow, FittingSection, FittingSummary } from "./fittingSummary";
 export type { ModuleSlot } from "./moduleSlots";
-export { DRONE_TYPE_IDS } from "./droneIconIds";
-export { DRONE_ICON_ID, ITEM_ICON_IDS } from "./iconIds";
-
-export { gunFamilyOf, gunIconNames } from "./gunFamilies";
-export type { GunFamily } from "./gunFamilies";
+export type { GunFamilies, GunFamily } from "./gunFamilies";
 export { registerFittingModule } from "./module";

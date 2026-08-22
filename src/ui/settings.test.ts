@@ -175,6 +175,7 @@ function makeFittingImport() {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
+    summarize: vi.fn(() => undefined),
   });
 }
 

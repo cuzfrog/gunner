@@ -2,7 +2,22 @@ import type { SigResolutionClass } from "../sim";
 
 export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery";
 
-export function gunFamilyOf(moduleName: string): GunFamily {
+export interface GunFamilies {
+  familyOf(moduleName: string): GunFamily;
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string;
+}
+
+export class GunFamiliesImpl implements GunFamilies {
+  familyOf(moduleName: string): GunFamily {
+    return gunFamilyOf(moduleName);
+  }
+
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string {
+    return gunIconNames(family)[sigResolutionClass];
+  }
+}
+
+function gunFamilyOf(moduleName: string): GunFamily {
   const override = FAMILY_OVERRIDES[moduleName];
   if (override) return override;
 
@@ -16,7 +31,7 @@ export function gunFamilyOf(moduleName: string): GunFamily {
   return disambiguateEnergy(normalized, moduleName);
 }
 
-export function gunIconNames(family: GunFamily): Readonly<Record<SigResolutionClass, string>> {
+function gunIconNames(family: GunFamily): Readonly<Record<SigResolutionClass, string>> {
   return GUN_FAMILY_REPRESENTATIVES[family];
 }
 

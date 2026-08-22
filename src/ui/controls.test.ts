@@ -1,5 +1,5 @@
-import type { ChargeCatalog, ChargeOption, FittingImport, ImportedFitting, ImportedTurret, PresetFitting, PresetFittings } from "../fitting";
-import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState } from "../sim";
+import type { ChargeCatalog, ChargeOption, FittingImport, FittingSummary, GunFamilies, GunFamily, ImportedFitting, ImportedTurret, PresetFitting, PresetFittings } from "../fitting";
+import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState, type SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -171,6 +171,19 @@ const IMPORTED_THRASHER: ImportedFitting = {
     moduleName: "280mm Howitzer Artillery I",
   },
   cargoCharges: [],
+};
+
+const RIFTER_PREVIEW_SUMMARY: FittingSummary = {
+  hullName: "Rifter",
+  fittingName: "Brawler",
+  sections: [
+    { kind: "high", rows: [{ name: "200mm AutoCannon I", charge: "Hail S" }] },
+    { kind: "mid", rows: [{ name: "5MN Microwarpdrive I" }] },
+    { kind: "low", rows: [{ name: "400mm Steel Plates II" }, { name: "Inertial Stabilizers II" }] },
+    { kind: "rig", rows: [{ name: "Small Trimark Armor Pump I" }, { name: "Small Projectile Ambit Extension I" }] },
+    { kind: "cargo", rows: [{ name: "Hail S", quantity: 1000 }, { name: "Republic Fleet EMP S", quantity: 500 }] },
+    { kind: "drones", rows: [{ name: "Hobgoblin I", quantity: 3 }] },
+  ],
 };
 
 const SAVED_FITTED_SETTINGS: UserSettings = {
@@ -733,6 +746,27 @@ function createMockFittingImport() {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn((module: PropulsionModule) => VARIANT_NAMES[module.id] ?? [module.label]),
     propulsionStats: vi.fn((name: string) => VARIANT_DB[name]),
+    summarize: vi.fn(() => RIFTER_PREVIEW_SUMMARY),
+  });
+}
+
+const MOCK_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<SigResolutionClass, string>>>> = {
+  autocannon: { S: "200mm AutoCannon I", M: "425mm AutoCannon I", L: "800mm Repeating Cannon I", XL: "Quad 800mm Repeating Cannon I" },
+  artillery: { S: "280mm Howitzer Artillery I", M: "720mm Howitzer Artillery I", L: "1400mm Howitzer Artillery I", XL: "Quad 3500mm Siege Artillery I" },
+  beamLaser: { S: "Small Focused Beam Laser I", M: "Heavy Beam Laser I", L: "Tachyon Beam Laser I", XL: "Dual Giga Beam Laser I" },
+  blaster: { S: "Light Neutron Blaster I", M: "Heavy Neutron Blaster I", L: "Neutron Blaster Cannon I", XL: "Ion Siege Blaster I" },
+  pulseLaser: { S: "Gatling Pulse Laser I", M: "Heavy Pulse Laser I", L: "Mega Pulse Laser I", XL: "Dual Giga Pulse Laser I" },
+  railgun: { S: "150mm Railgun I", M: "250mm Railgun I", L: "425mm Railgun I", XL: "Dual 1000mm Railgun I" },
+} as const;
+
+function mockFamilyOf(moduleName: string): GunFamily {
+  return moduleName.includes("Howitzer") || moduleName.includes("Artillery") ? "artillery" : "autocannon";
+}
+
+function createMockGunFamilies() {
+  return vi.mocked<GunFamilies>({
+    familyOf: vi.fn((moduleName: string) => mockFamilyOf(moduleName)),
+    representativeOf: vi.fn((family: GunFamily, sigResClass: SigResolutionClass) => MOCK_REPRESENTATIVES[family][sigResClass]),
   });
 }
 
@@ -768,6 +802,7 @@ function buildControls(
   });
   const ships = createMockShips();
   const fittingImport = createMockFittingImport();
+  const gunFamilies = createMockGunFamilies();
   const chargeCatalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
@@ -781,8 +816,8 @@ function buildControls(
   const timer = createNoOpTimer();
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((shipName) => `images/ships/${shipName}.webp`), itemIconUrl: vi.fn(() => undefined), droneIconUrl: vi.fn(() => "images/icons/1084@1x.png") });
   options.setup?.({ fittingImport, chargeCatalog });
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog });
-  return { hitChance, i18n, settingsStore, ships, fittingImport, chargeCatalog, presetFittings, savedFittings, clipboard, timer, imageCatalog, controls };
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies, presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog });
+  return { hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies, chargeCatalog, presetFittings, savedFittings, clipboard, timer, imageCatalog, controls };
 }
 
 describe("DomControls", () => {

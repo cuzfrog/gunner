@@ -9,7 +9,7 @@ import { parseEft } from "../src/fitting/eft";
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const FITTINGS_DIR = "data/ship-fittings";
 const ICONS_DIR = "data/ship-modules/icons";
-const OUTPUT_PATH = "src/fitting/droneIconIds.ts";
+const OUTPUT_PATH = "src/ui/droneIconIds.ts";
 
 interface SdeGroup {
   readonly categoryID: number;

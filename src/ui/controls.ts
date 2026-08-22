@@ -12,14 +12,12 @@ import {
   type TurretSpec,
 } from "../sim";
 import {
-  describeFitting,
-  gunFamilyOf,
-  gunIconNames,
   type CargoCharge,
   type ChargeCatalog,
   type ChargeOption,
   type FittingImport,
   type FittingSummary,
+  type GunFamilies,
   type ImportedFitting,
   type ImportedTurret,
   type PresetFittings,
@@ -195,6 +193,7 @@ export class DomControls implements Controls {
   private readonly settingsStore: SettingsStore;
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
+  private readonly gunFamilies: GunFamilies;
   private readonly presetFittings: PresetFittings;
   private readonly savedFittings: SavedFittings;
   private readonly clipboard: ClipboardProvider;
@@ -243,6 +242,7 @@ export class DomControls implements Controls {
     settingsStore,
     ships,
     fittingImport,
+    gunFamilies,
     presetFittings,
     savedFittings,
     clipboard,
@@ -255,6 +255,7 @@ export class DomControls implements Controls {
     settingsStore: SettingsStore;
     ships: Ships;
     fittingImport: FittingImport;
+    gunFamilies: GunFamilies;
     presetFittings: PresetFittings;
     savedFittings: SavedFittings;
     clipboard: ClipboardProvider;
@@ -267,6 +268,7 @@ export class DomControls implements Controls {
     this.settingsStore = settingsStore;
     this.ships = ships;
     this.fittingImport = fittingImport;
+    this.gunFamilies = gunFamilies;
     this.presetFittings = presetFittings;
     this.savedFittings = savedFittings;
     this.clipboard = clipboard;
@@ -1439,7 +1441,7 @@ export class DomControls implements Controls {
   }
 
   private renderFittingPreview(side: "attacker" | "target", text: string, anchor: HTMLElement, eye: HTMLButtonElement): void {
-    const summary = describeFitting(text);
+    const summary = this.fittingImport.summarize(text);
     if (!summary || summary.sections.length === 0) {
       this.hidePreview(side);
       return;
@@ -1668,8 +1670,8 @@ export class DomControls implements Controls {
       const img = this.sigResIcon(button);
       const title = this.sigResOriginalTitle(value, button);
       if (turret) {
-        const family = gunFamilyOf(turret.moduleName);
-        const representative = gunIconNames(family)[value];
+        const family = this.gunFamilies.familyOf(turret.moduleName);
+        const representative = this.gunFamilies.representativeOf(family, value);
         const url = this.imageCatalog.itemIconUrl(representative);
         if (url) {
           img.src = url;

@@ -1,5 +1,5 @@
 import type { SigResolutionClass } from "../sim";
-import { gunFamilyOf, type GunFamily } from "./gunFamilies";
+import type { GunFamilies, GunFamily } from "./gunFamilies";
 import type { ChargeStats } from "./fittingDb";
 
 export interface ImportedTurretBase {
@@ -42,13 +42,16 @@ export interface ChargeCatalog {
 
 interface ChargeCatalogDeps {
   readonly fittingDb: { readonly charges: Readonly<Record<string, ChargeStats>> };
+  readonly gunFamilies: GunFamilies;
 }
 
 export class ChargeCatalogImpl implements ChargeCatalog {
   private readonly charges: Readonly<Record<string, ChargeStats>>;
+  private readonly gunFamilies: GunFamilies;
 
-  constructor({ fittingDb }: ChargeCatalogDeps) {
+  constructor({ fittingDb, gunFamilies }: ChargeCatalogDeps) {
     this.charges = fittingDb.charges;
+    this.gunFamilies = gunFamilies;
   }
 
   usualForChargeSize(chargeSize: number): string {
@@ -60,7 +63,7 @@ export class ChargeCatalogImpl implements ChargeCatalog {
   }
 
   chargesForTurret(turret: ImportedTurret): readonly ChargeOption[] {
-    const turretFamily = _turretChargeFamily(turret.moduleName);
+    const turretFamily = _turretChargeFamily(turret.moduleName, this.gunFamilies);
     const all = this.chargesForSize(turret.chargeSize);
     if (turretFamily === undefined) return all;
     return all.filter((option) => _chargeFamilyOf(option.name) === turretFamily);
@@ -203,9 +206,9 @@ function _chargeFamilyOf(name: string): ChargeFamily | undefined {
   return CHARGE_FAMILY_BY_BASE[one];
 }
 
-function _turretChargeFamily(moduleName: string): ChargeFamily | undefined {
+function _turretChargeFamily(moduleName: string, gunFamilies: GunFamilies): ChargeFamily | undefined {
   try {
-    const family = gunFamilyOf(moduleName);
+    const family = gunFamilies.familyOf(moduleName);
     return TURRET_CHARGE_FAMILIES[family];
   } catch {
     return undefined;

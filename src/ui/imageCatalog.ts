@@ -1,4 +1,5 @@
-import { DRONE_ICON_ID, DRONE_TYPE_IDS, ITEM_ICON_IDS } from "../fitting";
+import { DRONE_ICON_ID, ITEM_ICON_IDS } from "./iconIds";
+import { DRONE_TYPE_IDS } from "./droneIconIds";
 
 export interface ImageCatalog {
   shipImageUrl(shipName: string): string;
