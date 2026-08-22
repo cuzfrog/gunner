@@ -5,8 +5,8 @@ import type { ImageCatalog } from "../imageCatalog";
 import { PopupGroup } from "./popupGroup";
 import { FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "./testSupport";
-import type { PanelView, Side } from "./sidePanel";
+import { FakeElement, IMPORTED_RIFTER, RIFTER, buildSidePanel, getFake } from "./testSupport";
+import type { Side, SidePanel } from "./sidePanel";
 
 const SAVED_RIFTER: SavedFitting = {
   id: "Rifter::Brawler",
@@ -30,17 +30,11 @@ function createI18n(): I18n {
   };
 }
 
-function createController(options: { panel?: Partial<PanelView>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
-  const document = fakeDocument();
-  globalThis.document = document as unknown as Document;
-  globalThis.Element = FakeElement as unknown as typeof Element;
-
-  const panel: PanelView = {
-    profile: RIFTER,
-    fittingText: undefined,
-    skillConditions: () => ({ skillLevel: 5, overloaded: true }),
-    ...options.panel,
-  };
+function createController(options: { panel?: Partial<SidePanel>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
+  const { document, panel } = buildSidePanel("attacker");
+  panel.profile = options.panel?.profile ?? RIFTER;
+  panel.fittingText = options.panel?.fittingText;
+  if (options.panel?.skillConditions) panel.skillConditions = options.panel.skillConditions;
 
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => [SAVED_RIFTER]),

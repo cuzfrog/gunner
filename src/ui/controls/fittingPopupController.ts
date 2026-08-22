@@ -5,7 +5,7 @@ import type { ImageCatalog } from "../imageCatalog";
 import { PopupGroup, type Popup } from "./popupGroup";
 import { fittingAreaSelector, isHtmlButtonElement } from "./controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { PanelView, Side } from "./sidePanel";
+import type { Side, SidePanel } from "./sidePanel";
 
 export interface FittingPopupEls {
   readonly trigger: HTMLButtonElement;
@@ -28,7 +28,7 @@ export class FittingPopupController {
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
   private readonly els: FittingPopupEls;
-  private readonly panelFor: (side: Side) => PanelView;
+  private readonly panelFor: (side: Side) => SidePanel;
   private readonly applyFitting: (text: string) => ImportedFitting | undefined;
   private readonly previews: FittingPreviewManager;
   private readonly popupValue: Popup;
@@ -43,7 +43,7 @@ export class FittingPopupController {
     imageCatalog: ImageCatalog;
     i18n: I18n;
     els: FittingPopupEls;
-    panelFor: (side: Side) => PanelView;
+    panelFor: (side: Side) => SidePanel;
     applyFitting: (text: string) => ImportedFitting | undefined;
     previews: FittingPreviewManager;
   }) {

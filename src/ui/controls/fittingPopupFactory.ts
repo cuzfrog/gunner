@@ -7,7 +7,7 @@ import { collectFittingPopupEls } from "./elementSlices";
 import type { Els } from "./elements";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { PopupGroup } from "./popupGroup";
-import type { PanelView, Side } from "./sidePanel";
+import type { Side, SidePanel } from "./sidePanel";
 
 export interface FittingPopupFactoryDeps {
   readonly popupGroup: PopupGroup;
@@ -16,7 +16,7 @@ export interface FittingPopupFactoryDeps {
   readonly fittingImport: FittingImport;
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
-  readonly panelFor: (side: Side) => PanelView;
+  readonly panelFor: (side: Side) => SidePanel;
   readonly applyFitting: (text: string) => ImportedFitting | undefined;
   readonly previews: FittingPreviewManager;
 }

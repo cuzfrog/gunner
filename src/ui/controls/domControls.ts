@@ -15,13 +15,13 @@ import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { Timer } from "../timer";
 import { createControlsEls, type Els } from "./elements";
 import { el, num } from "./controlsDom";
-import { SidePanel, type Side, type SidePanelHost } from "./sidePanel";
+import { SidePanel, type Side, collectSideEls } from "./sidePanel";
 import { PopupGroup } from "./popupGroup";
 import { ChoiceGroup } from "./choiceGroup";
 import { EngagementReadout } from "./engagementReadout";
 import { SessionCodec } from "./sessionCodec";
 import { AGGRESSIVITY_MIN, isAutopilotMode, parseManeuverAggressivity, profileSettingsOf } from "./controlsFormat";
-import { collectPreferencesEls, collectProfileEls, collectSideEls, collectTurretEls, collectImportEls } from "./elementSlices";
+import { collectPreferencesEls, collectProfileEls, collectTurretEls, collectImportEls } from "./elementSlices";
 import { createFittingPopup, type FittingPopupFactoryDeps } from "./fittingPopupFactory";
 import { EventRouter, type EventRouterHost } from "./eventRouter";
 import { LanguageRefresh } from "./languageRefresh";
@@ -140,16 +140,20 @@ export class DomControls implements Controls, EventRouterHost {
 
   private languageRefresh!: LanguageRefresh;
 
-  private createSidePanelHost(side: Side): SidePanelHost {
+  private createSidePanelHost(side: Side) {
     return {
-      updateFittingTrigger: (enabled) => updateFittingTrigger(this.els, side, enabled),
-      onAttackerFittedHullCleared: () => { if (side === "attacker") this.onAttackerFittedHullCleared(); },
-      importEftFitting: (text, persist) => this.importController.importEftFitting(side, text, persist),
-      mostRecentFittingFor: (hullName) => this.savedFittings.mostRecentFor(hullName),
-      persistConfigChange: (notify) => this.persistConfigChange(notify),
-      restoreAttackerTurret: () => { if (side === "attacker") this.turretController.restore(this.attackerSide.fittingText, this.attackerSide.skillConditions()); },
-      importFittingFromText: (text) => this.importController.importFromText(side, text),
-      importFitting: () => this.importController.importFromClipboard(side),
+      updateFittingTrigger: (enabled: boolean) => updateFittingTrigger(this.els, side, enabled),
+      persistConfigChange: (notify = true) => this.persistConfigChange(notify),
+      attackerTurretHooks: side === "attacker" ? {
+        onFittedHullCleared: () => this.onAttackerFittedHullCleared(),
+        restoreTurret: () => this.turretController.restore(this.attackerSide.fittingText, this.attackerSide.skillConditions()),
+      } : { onFittedHullCleared: () => {}, restoreTurret: () => {} },
+      importer: {
+        mostRecentFittingFor: (hullName: string) => this.savedFittings.mostRecentFor(hullName),
+        importEftFitting: (text: string, persist: boolean) => this.importController.importEftFitting(side, text, persist),
+        importFromText: (text: string) => this.importController.importFromText(side, text),
+        importFromClipboard: () => this.importController.importFromClipboard(side),
+      },
     };
   }
 

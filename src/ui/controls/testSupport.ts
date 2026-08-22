@@ -9,10 +9,9 @@ import type { Timer } from "../timer";
 import type { SavedFittings } from "../savedFittings";
 import { TurretController, type TurretEls } from "./turretController";
 import { DomControls, type Controls, type ControlsCallbacks } from "./domControls";
-import { SidePanel, type Side, type SidePanelHost } from "./sidePanel";
+import { SidePanel, type Side, collectSideEls } from "./sidePanel";
 import { PopupGroup } from "./popupGroup";
 import { createControlsEls } from "./elements";
-import { collectSideEls } from "./elementSlices";
 
 export const RIFTER: ShipProfile = {
   name: "Rifter",
@@ -92,6 +91,7 @@ export class FakeElement {
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
   setAttribute(name: string, value: string): void { this.attributes[name] = value; }
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
+  dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
   appendChild(child: unknown): void { this.children.push(child as FakeElement); }
   closest(): FakeElement | null { return null; }
@@ -253,7 +253,7 @@ function mockSettingsStore(): SettingsStore {
   };
 }
 
-function mockShips(): Ships {
+export function mockShips(): Ships {
   return {
     hulls: vi.fn(() => []),
     hullView: vi.fn((profile: ShipProfile, _language: Language): HullView => ({ name: profile.name, hullType: "Frigate", faction: "Unknown" })),
@@ -268,7 +268,7 @@ function mockShips(): Ships {
   };
 }
 
-function mockFittingImport(): FittingImport {
+export function mockFittingImport(): FittingImport {
   return {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(() => []),
@@ -382,23 +382,28 @@ export interface BuildSidePanelResult {
   panel: SidePanel;
 }
 
-export function buildSidePanel(side: Side = "attacker"): BuildSidePanelResult {
+export function buildSidePanel(
+  side: Side = "attacker",
+  ships: Ships = mockShips(),
+  fittingImport: FittingImport = mockFittingImport(),
+): BuildSidePanelResult {
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
   const els = collectSideEls(createControlsEls(), side);
-  const host = vi.mocked<SidePanelHost>({
+  const host = {
     updateFittingTrigger: vi.fn(),
-    onAttackerFittedHullCleared: vi.fn(),
-    importEftFitting: vi.fn(),
-    mostRecentFittingFor: vi.fn(),
     persistConfigChange: vi.fn(),
-    restoreAttackerTurret: vi.fn(),
-    importFittingFromText: vi.fn(() => Promise.resolve()),
-    importFitting: vi.fn(() => Promise.resolve()),
-  });
+    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
+    importer: {
+      mostRecentFittingFor: vi.fn(),
+      importEftFitting: vi.fn(),
+      importFromText: vi.fn(() => Promise.resolve()),
+      importFromClipboard: vi.fn(() => Promise.resolve()),
+    },
+  };
   const i18n = vi.mocked<I18n>({ current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key) => key), translateDocument: vi.fn() });
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(() => undefined), droneIconUrl: vi.fn() });
-  const panel = new SidePanel({ side, host, popupGroup: new PopupGroup(), els, i18n, ships: mockShips(), fittingImport: mockFittingImport(), imageCatalog, timer: mockTimer() });
+  const panel = new SidePanel({ side, host, popupGroup: new PopupGroup(), els, i18n, ships, fittingImport, imageCatalog, timer: mockTimer() });
   return { document, panel };
 }

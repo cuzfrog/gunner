@@ -15,7 +15,7 @@ import type { Els } from "./elements";
 import type { IHintRotator } from "./hintRotator";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
-import type { SidePanel, SidePanelState } from "./sidePanel";
+import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
 export class SessionCodec {
@@ -173,7 +173,7 @@ export class SessionCodec {
     this.onSetInitialDefaults();
   }
 
-  private sidePanelState(settings: UserSettings, side: "attacker" | "target"): SidePanelState {
+  private sidePanelState(settings: UserSettings, side: "attacker" | "target"): Parameters<SidePanel["restore"]>[0] {
     if (side === "attacker") {
       return {
         speed: settings.attackerSpeed,
