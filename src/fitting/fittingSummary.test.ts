@@ -17,6 +17,15 @@ Republic Fleet EMP S x500
 Hobgoblin I x3
 `;
 
+const RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK = `[Rifter, Brawler]
+200mm AutoCannon I, Hail S
+5MN Microwarpdrive I
+
+Hail S x1000
+
+Republic Fleet EMP S x500
+`;
+
 const INVALID_TEXT = `not a fitting
 some line`;
 
@@ -55,6 +64,17 @@ describe("describeFitting", () => {
     const summary = describeFitting(RIFTER_BRAWLER);
     const drones = summary!.sections.find((section) => section.kind === "drones");
     expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+  });
+
+  test("moves charge quantity items from the drone block to cargo", () => {
+    const summary = describeFitting(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
+    const kinds = summary!.sections.map((section) => section.kind);
+    expect(kinds).toEqual(["high", "mid", "cargo"]);
+    const cargo = summary!.sections.find((section) => section.kind === "cargo");
+    expect(cargo!.rows).toEqual([
+      { name: "Hail S", quantity: 1000 },
+      { name: "Republic Fleet EMP S", quantity: 500 },
+    ]);
   });
 
   test("returns undefined for unparseable text", () => {

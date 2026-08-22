@@ -1,4 +1,5 @@
 import { parseEft, type ParsedFitting } from "./eft";
+import { CHARGES } from "./fittingDb";
 import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
 
 export interface FittingRow {
@@ -42,7 +43,11 @@ function buildSections(parsed: ParsedFitting): readonly FittingSection[] {
   }
 
   for (const item of parsed.drones) {
-    buckets.drones.push({ name: item.name, quantity: item.quantity });
+    if (CHARGES[item.name]) {
+      buckets.cargo.push({ name: item.name, quantity: item.quantity });
+    } else {
+      buckets.drones.push({ name: item.name, quantity: item.quantity });
+    }
   }
 
   const sections: FittingSection[] = [];
