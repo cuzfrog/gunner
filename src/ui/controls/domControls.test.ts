@@ -1,6 +1,19 @@
-import type { UserSettings } from "../settings";
+import type { UserSettings, SavedFittings, SavedFitting } from "../settings";
+import type { FittingImport } from "../../fitting";
+import type { Ships } from "../../ships";
 import { USER_SETTINGS_VERSION } from "../settings";
-import { buildDomControls, getFake } from "./testSupport";
+import {
+  buildDomControls, getFake, mockFittingImport, mockSavedFittings, mockShips, RIFTER, IMPORTED_RIFTER,
+  FakeElement,
+} from "./testSupport";
+
+const SAVED_RIFTER: SavedFitting = {
+  id: "Rifter::Brawler",
+  hull: "Rifter",
+  name: "Brawler",
+  text: "[Rifter, Brawler]\n200mm AutoCannon I, Hail S",
+  savedAt: 0,
+};
 
 function mockCallbacks() {
   return {
@@ -131,5 +144,19 @@ describe("DomControls", () => {
     getFake(document, "share-link").trigger("click");
     await Promise.resolve();
     expect(clipboard.writeText).toHaveBeenCalled();
+  });
+
+  test("target fitting popup applies fitting to the target side", () => {
+    const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), listForHull: vi.fn(() => [SAVED_RIFTER]) });
+    const fittingImport = vi.mocked<FittingImport>({ ...mockFittingImport(), importFitting: vi.fn(() => IMPORTED_RIFTER) });
+    const ships = vi.mocked<Ships>({ ...mockShips(), findHull: vi.fn(() => RIFTER) });
+    const { document, controls } = buildDomControls({ savedFittings, fittingImport, ships });
+    controls["attackerSide"].profile = RIFTER;
+    controls["targetSide"].profile = RIFTER;
+    getFake(document, "target-fitting-trigger").trigger("click");
+    const item = getFake(document, "target-fitting-saved-list").children[0].children[0] as unknown as FakeElement;
+    item.trigger("click");
+    expect(controls["targetSide"].fittingText).toBe(SAVED_RIFTER.text);
+    expect(controls["attackerSide"].fittingText).toBeUndefined();
   });
 });

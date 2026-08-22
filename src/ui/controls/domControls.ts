@@ -23,15 +23,14 @@ import { ChoiceGroup } from "./choiceGroup";
 import { EngagementReadout } from "./engagementReadout";
 import { SessionCodec } from "./sessionCodec";
 import { AGGRESSIVITY_MIN, isAutopilotMode, parseManeuverAggressivity, profileSettingsOf } from "./controlsFormat";
-import { collectPreferencesEls, collectProfileEls, collectTurretEls, collectImportEls } from "./elementSlices";
-import { createFittingPopup, type FittingPopupFactoryDeps } from "./fittingPopupFactory";
+import { collectPreferencesEls, collectProfileEls, collectTurretEls, collectImportEls, collectFittingPopupEls } from "./elementSlices";
+import { FittingPopupController } from "./fittingPopupController";
 import { EventRouter, type EventRouterHost } from "./eventRouter";
 import { LanguageRefresh } from "./languageRefresh";
 import { populateHullDatalist, updateFittingTrigger } from "./hullDatalist";
 import { currentSigResValue } from "./inputState";
 import { setInitialDefaults } from "./sessionDefaults";
 import type { ClipboardProvider, SettingsStore, UserSettings } from "../settings";
-import type { FittingPopupController } from "./fittingPopupController";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -120,8 +119,8 @@ export class DomControls implements Controls, EventRouterHost {
     const attackerPreview = new DomFittingPreview({ container: this.els.attackerFittingPreview, i18n: this.i18n, imageCatalog: this.imageCatalog, viewport: () => window });
     const targetPreview = new DomFittingPreview({ container: this.els.targetFittingPreview, i18n: this.i18n, imageCatalog: this.imageCatalog, viewport: () => window });
     this.previewManager = new FittingPreviewManager({ fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, i18n: this.i18n, previewsBySide: { attacker: attackerPreview, target: targetPreview } as const, shipImageBySide: { attacker: this.els.attackerShipImage, target: this.els.targetShipImage } as const, eyeBySide: { attacker: this.els.attackerFittingEye, target: this.els.targetFittingEye } as const, profileOf: (side) => this.side(side).profile, fittingTextOf: (side) => this.side(side).fittingText });
-    this.attackerFittingPopup = createFittingPopup("attacker", this.fittingPopupDeps(), this.els);
-    this.targetFittingPopup = createFittingPopup("target", this.fittingPopupDeps(), this.els);
+    this.attackerFittingPopup = this.createFittingPopup("attacker");
+    this.targetFittingPopup = this.createFittingPopup("target");
     this.languageRefresh = new LanguageRefresh({ i18n: this.i18n, els: this.els, presetFittings: this.presetFittings, profileController: this.profileController, attackerSide: this.attackerSide, targetSide: this.targetSide, turretController: this.turretController, attackerFittingPopup: this.attackerFittingPopup, targetFittingPopup: this.targetFittingPopup, previewManager: this.previewManager, hintRotator: this.hintRotator, setPlaying: (playing: boolean) => this.setPlaying(playing), onDisplayChange: () => this.callbacks?.onDisplayChange() });
     this.attackerSide.setFittingPopup(this.attackerFittingPopup);
     this.targetSide.setFittingPopup(this.targetFittingPopup);
@@ -142,8 +141,20 @@ export class DomControls implements Controls, EventRouterHost {
 
   private side(side: Side): SidePanel { return side === "attacker" ? this.attackerSide : this.targetSide; }
 
-  private fittingPopupDeps(): FittingPopupFactoryDeps {
-    return { popupGroup: this.popupGroup, savedFittings: this.savedFittings, presetFittings: this.presetFittings, fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, i18n: this.i18n, panelFor: (side) => this.side(side), applyFitting: (text) => this.importController.importEftFitting("attacker", text, true), previews: this.previewManager };
+  private fittingPopupDeps(side: Side): FittingPopupSharedDeps {
+    return {
+      popupGroup: this.popupGroup, savedFittings: this.savedFittings, presetFittings: this.presetFittings,
+      fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, i18n: this.i18n,
+      panelFor: (side) => this.side(side), previews: this.previewManager,
+    };
+  }
+  private createFittingPopup(side: Side): FittingPopupController {
+    return new FittingPopupController({
+      side,
+      ...this.fittingPopupDeps(side),
+      els: collectFittingPopupEls(this.els, side),
+      applyFitting: (text) => this.importController.importEftFitting(side, text, true),
+    });
   }
 
   private languageRefresh!: LanguageRefresh;
@@ -191,4 +202,15 @@ export class DomControls implements Controls, EventRouterHost {
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
     return value;
   }
+}
+
+interface FittingPopupSharedDeps {
+  readonly popupGroup: PopupGroup;
+  readonly savedFittings: SavedFittings;
+  readonly presetFittings: PresetFittings;
+  readonly fittingImport: FittingImport;
+  readonly imageCatalog: ImageCatalog;
+  readonly i18n: I18n;
+  readonly panelFor: (side: Side) => SidePanel;
+  readonly previews: FittingPreviewManager;
 }

@@ -1,9 +1,9 @@
-import type { ChargeCatalog, FittingImport, GunFamilies } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { ClipboardProvider, ProfileParamOverrides, SettingsStore } from "../settings";
+import type { ClipboardProvider, ProfileParamOverrides, SavedFittings, SettingsStore } from "../settings";
 import { TrackingInput } from "./trackingInput";
 import { TurretController } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
@@ -92,7 +92,18 @@ function setControlDefaults(document: Document): void {
   addSigResButtons(document);
 }
 
-export function buildDomControls(options: { i18n?: Partial<I18n>; hitChance?: Partial<HitChance>; ships?: Partial<Ships>; settingsStore?: Partial<SettingsStore>; chargeCatalog?: Partial<ChargeCatalog>; fittingImport?: Partial<FittingImport> } = {}) {
+interface BuildDomControlsOptions {
+  i18n?: Partial<I18n>;
+  hitChance?: Partial<HitChance>;
+  ships?: Partial<Ships>;
+  settingsStore?: Partial<SettingsStore>;
+  chargeCatalog?: Partial<ChargeCatalog>;
+  fittingImport?: Partial<FittingImport>;
+  presetFittings?: Partial<PresetFittings>;
+  savedFittings?: Partial<SavedFittings>;
+}
+
+export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
@@ -106,7 +117,9 @@ export function buildDomControls(options: { i18n?: Partial<I18n>; hitChance?: Pa
   const hitChance = vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance });
   const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
   const clipboard = mockClipboard();
-  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies, presetFittings: mockPresetFittings(), savedFittings: mockSavedFittings(), clipboard, timer: mockTimer(), chargeCatalog, imageCatalog });
+  const presetFittings = vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings });
+  const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings });
+  const controls = new DomControls({ hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies, presetFittings, savedFittings, clipboard, timer: mockTimer(), chargeCatalog, imageCatalog });
   return { document, controls, settingsStore, hitChance, i18n, clipboard };
 }
 
