@@ -5,8 +5,7 @@ import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
 import { serializeProfile } from "./profileText";
-import { ClipboardUnavailableError, type ClipboardProvider, type DisplayPreferences, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings, PROPULSION_NONE } from "./settings";
-import { USER_SETTINGS_VERSION } from "./settings";
+import { ClipboardUnavailableError, PROPULSION_NONE, USER_SETTINGS_VERSION, type ClipboardProvider, type DisplayPreferences, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "./settings";
 import type { SavedFittings } from "./savedFittings";
 import type { Timer } from "./timer";
 
