@@ -43,7 +43,7 @@ function buildSections(parsed: ParsedFitting): readonly FittingSection[] {
   }
 
   for (const item of parsed.drones) {
-    if (CHARGES[item.name]) {
+    if (item.name in CHARGES) {
       buckets.cargo.push({ name: item.name, quantity: item.quantity });
     } else {
       buckets.drones.push({ name: item.name, quantity: item.quantity });

@@ -589,7 +589,7 @@ function setInputValues(document: Document): void {
   getFake(document, "attacker-ammo-all-section").hidden = true;
   getFake(document, "attacker-ammo-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-ammo-trigger").disabled = true;
-          getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
+  getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-fitting-trigger").disabled = true;
   getFake(document, "target-fitting-trigger").disabled = true;
@@ -4329,6 +4329,25 @@ const ctx = buildControls(globalThis.document);
       for (const button of group.children) {
         expect(button.children.length).toBe(1);
         expect(button.children[0].textContent).toMatch(/^[A-Z0-9]+$/);
+      }
+    });
+
+    test("propulsion variant list items show module icons", () => {
+      const ctx = buildControls(globalThis.document);
+      ctx.imageCatalog.itemIconUrl.mockImplementation((name) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+      const hullInput = getFake(globalThis.document, "attacker-hull");
+      hullInput.value = "Rifter";
+      hullInput.trigger("change");
+      const gear = getFake(globalThis.document, "attacker-propulsion-gear");
+      expect(gear.disabled).toBe(false);
+      gear.trigger("click");
+      const popup = getFake(globalThis.document, "attacker-propulsion-variants");
+      expect(popup.hidden).toBe(false);
+      expect(popup.children.length).toBeGreaterThan(0);
+      for (const button of popup.children) {
+        expect(button.children[0].className).toBe("propulsion-icon");
+        expect(button.children[0].src).toMatch(/^images\/icons\//);
+        expect(button.children[1].className).toBe("fitting-item-name");
       }
     });
   });

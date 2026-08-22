@@ -1361,12 +1361,20 @@ export class DomControls implements Controls {
     text: string,
     currentText: string | undefined,
     onClick: () => void,
+    iconUrl?: string,
   ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
     button.setAttribute("role", "menuitem");
     if (currentText === text) button.setAttribute("aria-current", "true");
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.className = "propulsion-icon";
+      icon.src = iconUrl;
+      icon.alt = "";
+      button.appendChild(icon);
+    }
     const span = document.createElement("span");
     span.className = "fitting-item-name";
     span.textContent = name;
@@ -1997,7 +2005,8 @@ export class DomControls implements Controls {
     const fitted = side === "attacker" ? this.attackerFittedHull : this.targetFittedHull;
     const currentName = fitted?.propulsionName ?? this.defaultPropulsionName(module);
     for (const name of this.fittingImport.propulsionVariantNames(module)) {
-      const item = this.createFittingItem(side, name, name, currentName, () => this.onPropulsionVariantClick(side, name));
+      const iconUrl = this.imageCatalog.itemIconUrl(name);
+      const item = this.createFittingItem(side, name, name, currentName, () => this.onPropulsionVariantClick(side, name), iconUrl);
       item.setAttribute("data-value", name);
       item.setAttribute("title", name);
       popup.appendChild(item);

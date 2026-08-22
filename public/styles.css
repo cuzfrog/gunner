@@ -1634,6 +1634,10 @@ canvas {
   background: var(--bg-inset);
 }
 
+.propulsion-variants-popup .propulsion-icon {
+  margin-right: 6px;
+}
+
 .propulsion-group .overload-button {
   grid-column: 2;
   align-self: stretch;
