@@ -4281,6 +4281,7 @@ const ctx = buildControls(globalThis.document);
     }
 
     const EXPECTED_AUTO_ICON_NAMES = ["200mm AutoCannon I", "425mm AutoCannon I", "800mm Repeating Cannon I", "Quad 800mm Repeating Cannon I"] as const;
+    const EXPECTED_ART_ICON_NAMES = ["280mm Howitzer Artillery I", "720mm Howitzer Artillery I", "1400mm Howitzer Artillery I", "Quad 3500mm Siege Artillery I"] as const;
 
     test("importing a fitted turret shows gun-family icons on the sig-res buttons", async () => {
       const ctx = buildControls(globalThis.document);
@@ -4298,7 +4299,7 @@ const ctx = buildControls(globalThis.document);
       }
     });
 
-    test("imageCatalog.itemIconUrl is called with the representative names for the fitted gun family", async () => {
+    test("imageCatalog.itemIconUrl is called with the autocannon representative names", async () => {
       const ctx = buildControls(globalThis.document);
       const { fittingImport, imageCatalog } = ctx;
       fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
@@ -4308,6 +4309,20 @@ const ctx = buildControls(globalThis.document);
       await flush();
 
       for (const name of EXPECTED_AUTO_ICON_NAMES) {
+        expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(name);
+      }
+    });
+
+    test("imageCatalog.itemIconUrl is called with the artillery representative names", async () => {
+      const ctx = buildControls(globalThis.document);
+      const { fittingImport, imageCatalog } = ctx;
+      fittingImport.importFitting.mockReturnValue(IMPORTED_THRASHER);
+      imageCatalog.itemIconUrl.mockImplementation((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`);
+
+      getFake(globalThis.document, "attacker-import-fitting").trigger("click");
+      await flush();
+
+      for (const name of EXPECTED_ART_ICON_NAMES) {
         expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(name);
       }
     });

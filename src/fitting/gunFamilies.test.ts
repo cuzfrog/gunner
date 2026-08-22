@@ -16,6 +16,7 @@ const REPRESENTATIVE_CANONICALS: { readonly family: GunFamily; readonly S: strin
 const TRICKY_VARIANTS: { readonly name: string; readonly family: GunFamily }[] = [
   { name: "Dark Blood Mega Pulse Laser", family: "pulseLaser" },
   { name: "Gatling Modal Laser I", family: "pulseLaser" },
+  { name: "Gatling Modulated Energy Beam I", family: "pulseLaser" },
   { name: "Quad Afocal Light Laser I", family: "beamLaser" },
   { name: "Shadow Serpentis Dual 1000mm Railgun", family: "railgun" },
   { name: "Tuvan\'s Modified Neutron Blaster Cannon", family: "blaster" },

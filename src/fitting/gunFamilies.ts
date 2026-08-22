@@ -66,6 +66,7 @@ const FAMILY_OVERRIDES: Readonly<Record<string, GunFamily>> = {
   "280mm Gallium Cannon": "artillery",
   "720mm Gallium Cannon": "artillery",
   "1400mm Gallium Cannon": "artillery",
+  "Gatling Modulated Energy Beam I": "pulseLaser",
 } as const;
 
 const FACTION_PREFIXES = [
