@@ -1261,7 +1261,8 @@ export class DomControls implements Controls {
 
   private updateShipImage(side: "attacker" | "target"): void {
     const profile = side === "attacker" ? this.attackerProfile : this.targetProfile;
-    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    const image = this.els[`${side}ShipImage`];
+    if (!isHtmlImageElement(image)) return;
     if (profile) {
       image.src = this.imageCatalog.shipImageUrl(profile.name);
       image.hidden = false;
@@ -1272,7 +1273,8 @@ export class DomControls implements Controls {
   }
 
   private clearShipImage(side: "attacker" | "target"): void {
-    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    const image = this.els[`${side}ShipImage`];
+    if (!isHtmlImageElement(image)) return;
     image.hidden = true;
     image.src = "";
   }
@@ -1351,7 +1353,8 @@ export class DomControls implements Controls {
   }
 
   private attachShipImagePreviewListeners(side: "attacker" | "target"): void {
-    const image = this.els[`${side}ShipImage`] as HTMLImageElement;
+    const image = this.els[`${side}ShipImage`];
+    if (!isHtmlImageElement(image)) return;
     image.addEventListener("mouseenter", () => {
       const text = side === "attacker" ? this.attackerFitting : this.targetFitting;
       if (text) this.startPreviewShow(side, image, text);
@@ -1505,9 +1508,10 @@ export class DomControls implements Controls {
   }
 
   private renderAttackerAmmo(): void {
-    const trigger = this.els.attackerAmmoTrigger as HTMLButtonElement;
+    const trigger = this.els.attackerAmmoTrigger;
     const summary = this.els.attackerAmmoSummary as HTMLElement;
-    const summaryIcon = this.els.attackerAmmoSummaryIcon as HTMLImageElement;
+    const summaryIcon = this.els.attackerAmmoSummaryIcon;
+    if (!isHtmlButtonElement(trigger) || !isHtmlImageElement(summaryIcon)) return;
     const hasTurret = this.attackerTurret !== undefined;
     trigger.disabled = !hasTurret;
     setText(summary, hasTurret ? this.attackerAmmo : "—");
@@ -1527,29 +1531,30 @@ export class DomControls implements Controls {
     const group = this.els.sigResOptions as HTMLElement;
     const turret = this.attackerTurret;
     for (const button of Array.from(group.children)) {
+      if (!isHtmlButtonElement(button)) continue;
       const value = button.getAttribute("data-value") ?? "";
       if (!isSigResClass(value)) continue;
       const img = this.sigResIcon(button);
-      const title = this.sigResOriginalTitle(value, button as HTMLButtonElement);
+      const title = this.sigResOriginalTitle(value, button);
       if (turret) {
         const family = gunFamilyOf(turret.moduleName);
         const representative = gunIconNames(family)[value];
         const url = this.imageCatalog.itemIconUrl(representative);
         if (url) {
-          (img as HTMLImageElement).src = url;
+          img.src = url;
           img.hidden = false;
-          (button as HTMLButtonElement).title = `${representative} · ${title}`;
+          button.title = `${representative} · ${title}`;
           continue;
         }
       }
       img.hidden = true;
-      (button as HTMLButtonElement).title = title;
+      button.title = title;
     }
   }
 
-  private sigResIcon(button: Element): HTMLImageElement {
+  private sigResIcon(button: HTMLButtonElement): HTMLImageElement {
     for (const child of Array.from(button.children)) {
-      if (child.className === "sigres-icon") return child as HTMLImageElement;
+      if (isHtmlImageElement(child) && child.className === "sigres-icon") return child;
     }
     const img = document.createElement("img");
     img.className = "sigres-icon";
@@ -2483,6 +2488,14 @@ function el(id: string): HTMLElement {
   const e = document.getElementById(id);
   if (e === null) throw new Error(`Missing DOM element #${id}`);
   return e;
+}
+
+function isHtmlButtonElement(el: Element): el is HTMLButtonElement {
+  return el.tagName === "BUTTON";
+}
+
+function isHtmlImageElement(el: Element): el is HTMLImageElement {
+  return el.tagName === "IMG";
 }
 
 function num(input: HTMLInputElement | HTMLSelectElement | HTMLElement): number {

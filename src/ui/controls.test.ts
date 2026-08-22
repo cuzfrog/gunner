@@ -318,6 +318,7 @@ class FakeElement {
   textContent = "";
   title = "";
   src = "";
+  tagName = "";
   private _innerHTML = "";
   placeholder = "";
   disabled = false;
@@ -420,7 +421,11 @@ function fakeDocument(): Document {
       return elements.get(id) as unknown as HTMLElement;
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
-    createElement: () => new FakeElement() as unknown as HTMLElement,
+    createElement: (tagName: string) => {
+      const el = new FakeElement();
+      el.tagName = tagName.toUpperCase();
+      return el as unknown as HTMLElement;
+    },
     addEventListener: (event: string, handler: (event: { type: string; target?: FakeElement }) => void) => {
       documentHandlers[event] ??= [];
       documentHandlers[event].push(handler);
@@ -460,6 +465,10 @@ function setInputValues(document: Document): void {
   getFake(document, "attacker-ammo-all-section").hidden = true;
   getFake(document, "attacker-ammo-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-ammo-trigger").disabled = true;
+  getFake(document, "attacker-ammo-trigger").tagName = "BUTTON";
+  getFake(document, "attacker-ammo-summary-icon").tagName = "IMG";
+  getFake(document, "attacker-ship-image").tagName = "IMG";
+  getFake(document, "target-ship-image").tagName = "IMG";
   getFake(document, "attacker-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "target-skill-trigger").setAttribute("aria-expanded", "false");
   getFake(document, "attacker-fitting-trigger").disabled = true;
@@ -470,6 +479,7 @@ function addChoiceButtons(document: Document, groupId: string, values: string[],
   const group = getFake(document, groupId);
   for (const value of values) {
     const button = new FakeElement();
+    button.tagName = "BUTTON";
     button.setAttribute("data-value", value);
     button.setAttribute("aria-pressed", String(value === selected));
     if (value === selected) button.classList.toggle("active", true);

@@ -37,6 +37,8 @@ class FakeElement {
   textContent = "";
   innerHTML = "";
   placeholder = "";
+  src = "";
+  tagName = "";
   style: Record<string, string> = {};
   classList = { toggle: vi.fn() };
   children: FakeElement[] = [];
@@ -151,7 +153,11 @@ function fakeDocument(): Document {
       return elements.get(id) as unknown as HTMLElement;
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
-    createElement: () => new FakeElement() as unknown as HTMLElement,
+    createElement: (tagName: string) => {
+      const el = new FakeElement();
+      el.tagName = tagName.toUpperCase();
+      return el as unknown as HTMLElement;
+    },
     addEventListener: () => {},
     removeEventListener: () => {},
   } as unknown as Document;
