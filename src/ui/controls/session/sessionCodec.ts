@@ -3,6 +3,7 @@ import type { ChargeCatalog } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../../settings";
 import { num } from "../controlsDom";
+import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber, parseManeuverAggressivity } from "../controlsFormat";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { Els } from "../elementsContract";
@@ -32,13 +33,12 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
   private readonly hitChance: HitChance;
-  private readonly isPlaying: () => boolean;
-  private readonly setPlaying: (playing: boolean) => void;
+  private readonly sessionControl: SessionControl;
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; preferences: PreferencesController;
     profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-    settingsStore: SettingsStore; hitChance: HitChance; isPlaying: () => boolean; setPlaying: (playing: boolean) => void;
+    settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -52,8 +52,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
     this.hitChance = deps.hitChance;
-    this.isPlaying = deps.isPlaying;
-    this.setPlaying = deps.setPlaying;
+    this.sessionControl = deps.sessionControl;
   }
 
   capture(): UserSettings {
@@ -131,7 +130,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.turretController.restore({
       fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
     });
-    this.setPlaying(this.isPlaying());
+    this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
     this.attackerSide.updateAlignTime();
@@ -168,7 +167,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.setBestInitialDistance();
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-    this.setPlaying(false);
+    this.sessionControl.setPlaying(false);
     this.attackerSide.renderPropulsionOptions();
     this.targetSide.renderPropulsionOptions();
     this.profileController.refresh();

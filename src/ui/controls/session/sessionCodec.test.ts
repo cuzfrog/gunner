@@ -80,7 +80,7 @@ describe("SessionCodec", () => {
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: {} as ChoiceGroup, hintRotator: {} as HintRotator,
       settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
-      isPlaying: () => false, setPlaying: vi.fn(),
+      sessionControl: { isPlaying: () => false, setPlaying: vi.fn() },
     });
 
     const settings = codec.capture();
@@ -172,12 +172,13 @@ describe("SessionCodec", () => {
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
+    const sessionControl = { isPlaying: () => true, setPlaying };
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      isPlaying: () => true, setPlaying,
+      sessionControl,
     });
 
     codec.restoreStartup({ settings, selectedProfileName: null });
@@ -214,12 +215,13 @@ describe("SessionCodec", () => {
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
+    const sessionControl = { isPlaying: () => false, setPlaying };
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      isPlaying: () => false, setPlaying,
+      sessionControl,
     });
 
     codec.restoreStartup({ settings: null, selectedProfileName: null });

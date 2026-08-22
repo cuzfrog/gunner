@@ -34,23 +34,9 @@ import { EventRouter } from "./session/eventRouter";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
 import { SIG_RESOLUTIONS } from "../../sim";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
+
 export class DomControlsFactory {
-  buildParts(deps: DomControlsDeps): { parts: DomControlsParts; host: DomControlsHost } {
-    const host: DomControlsHost = {
-      isPlaying: () => false,
-      setPlaying: () => {},
-      onPlayPause: () => {},
-      onReset: () => {},
-      onSpeedChange: () => {},
-      onConfigChange: () => {},
-      onDisplayChange: () => {},
-      fireConfigChange: () => {},
-      fireDisplayChange: () => {},
-      onProfileLoaded: () => {},
-      onProfileTextLoaded: () => {},
-      captureSettings: notWired,
-      persistConfigChange: () => {},
-    };
+  buildParts(deps: DomControlsDeps, host: DomControlsHost): DomControlsParts {
     const els = createControlsEls();
     const popupGroup: PopupGroup = new PopupGroupImpl();
     const hintRotator: HintRotator = new HintRotatorImpl({
@@ -130,7 +116,7 @@ export class DomControlsFactory {
       els, attackerSide, targetSide, turret: turretController, preferences: preferencesController,
       profileController, i18n: deps.i18n, chargeCatalog: deps.chargeCatalog, sigResChoice, hintRotator,
       settingsStore: deps.settingsStore, hitChance: deps.hitChance,
-      isPlaying: () => host.isPlaying(), setPlaying: (playing) => host.setPlaying(playing),
+      sessionControl: host,
     });
     importController = new ImportControllerImpl({
       clipboard: deps.clipboard, fittingImport: deps.fittingImport,
@@ -172,19 +158,17 @@ export class DomControlsFactory {
       previewManager, hintRotator,
       setPlaying: (playing) => host.setPlaying(playing), onDisplayChange: () => host.fireDisplayChange(),
     });
-    new EventRouter({
+    const eventRouter = new EventRouter({
       els, preferences: preferencesController, profile: profileController, import: importController,
       attackerSide, targetSide, turret: turretController, popupGroup,
       previewManager, attackerAmmoPopup,
       attackerFittingPopup, targetFittingPopup, host,
     });
-    const parts: DomControlsParts = {
+    return {
       deps, els, popupGroup, hintRotator, hullDatalist, preferencesController, profileController,
       engagementReadout, sigResChoice, attackerSide, targetSide, attackerAmmoPopup, turretController,
       sessionCodec, importController, previewManager, attackerFittingPopup, targetFittingPopup, languageRefresh,
+      eventRouter,
     };
-    return { parts, host };
   }
 }
-
-function notWired(): never { throw new Error("Host not wired"); }

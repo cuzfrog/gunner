@@ -9,7 +9,7 @@ import type { ChoiceGroup } from "./choiceGroup";
 import type { Els } from "./elementsContract";
 import type { EngagementReadout } from "./engagementReadout";
 import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
-import type { EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { EventRouter, EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec, SessionControl } from "./session";
 import type { HintRotator } from "./hints";
 import type { ImportController } from "./import";
 import type { PreferencesController } from "./preferencesController";
@@ -23,17 +23,19 @@ export interface DomControlsDeps {
   timer: Timer; chargeCatalog: ChargeCatalog; imageCatalog: ImageCatalog;
 }
 
-export interface DomControlsHost extends EventRouterHost {
-  isPlaying(): boolean;
-  setPlaying(playing: boolean): void;
-  fireConfigChange(): void;
-  fireDisplayChange(): void;
+interface ProfileEvents {
   onProfileLoaded(name: string): void;
   onProfileTextLoaded(settings: UserSettings): void;
   captureSettings(): UserSettings;
   persistConfigChange(notify?: boolean): void;
 }
 
+interface ConfigEvents {
+  fireConfigChange(): void;
+  fireDisplayChange(): void;
+}
+
+export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents, ConfigEvents {}
 export interface DomControlsParts {
   deps: DomControlsDeps;
   els: Els;
@@ -54,4 +56,5 @@ export interface DomControlsParts {
   attackerFittingPopup: FittingPopupController;
   targetFittingPopup: FittingPopupController;
   languageRefresh: LanguageRefresh;
+  eventRouter: EventRouter;
 }

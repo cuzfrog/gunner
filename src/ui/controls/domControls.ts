@@ -12,11 +12,11 @@ import type { Els } from "./elementsContract";
 import { num } from "./controlsDom";
 import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
-import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
+import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import { DomControlsFactory } from "./domControlsFactory";
 import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
-import type { HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { EventRouter, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
@@ -27,42 +27,32 @@ import type { ImportController } from "./import";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 
-export class DomControls implements Controls {
-  private readonly deps!: DomControlsDeps;
-  private readonly els!: Els;
-  private readonly popupGroup!: PopupGroup;
-  private readonly hintRotator!: HintRotator;
-  private readonly hullDatalist!: HullDatalist;
-  private readonly preferencesController!: PreferencesController;
-  private readonly profileController!: ProfileController;
-  private readonly engagementReadout!: EngagementReadout;
-  private readonly sigResChoice!: ChoiceGroup;
-  private readonly attackerSide!: SidePanel;
-  private readonly targetSide!: SidePanel;
-  private readonly attackerAmmoPopup!: Popup;
-  private readonly turretController!: TurretController;
-  private readonly sessionCodec!: SessionCodec;
-  private readonly importController!: ImportController;
-  private readonly previewManager!: FittingPreviewManager;
-  private readonly attackerFittingPopup!: FittingPopupController;
-  private readonly targetFittingPopup!: FittingPopupController;
-  private readonly languageRefresh!: LanguageRefresh;
+export class DomControls implements Controls, DomControlsHost {
+  private readonly deps: DomControlsDeps;
+  private readonly els: Els;
+  private readonly popupGroup: PopupGroup;
+  private readonly hintRotator: HintRotator;
+  private readonly hullDatalist: HullDatalist;
+  private readonly preferencesController: PreferencesController;
+  private readonly profileController: ProfileController;
+  private readonly engagementReadout: EngagementReadout;
+  private readonly sigResChoice: ChoiceGroup;
+  private readonly attackerSide: SidePanel;
+  private readonly targetSide: SidePanel;
+  private readonly attackerAmmoPopup: Popup;
+  private readonly turretController: TurretController;
+  private readonly sessionCodec: SessionCodec;
+  private readonly importController: ImportController;
+  private readonly previewManager: FittingPreviewManager;
+  private readonly attackerFittingPopup: FittingPopupController;
+  private readonly targetFittingPopup: FittingPopupController;
+  private readonly languageRefresh: LanguageRefresh;
+  private readonly eventRouter: EventRouter;
   private callbacks?: ControlsCallbacks;
   private playing = false;
 
-  constructor(parts: DomControlsParts, host: DomControlsHost);
-  constructor(deps: DomControlsDeps);
-  constructor(partsOrDeps: DomControlsParts | DomControlsDeps, host?: DomControlsHost) {
-    let resolvedHost: DomControlsHost;
-    let parts: DomControlsParts;
-    if (host) {
-      parts = partsOrDeps as DomControlsParts;
-      resolvedHost = host;
-    } else {
-      const built = new DomControlsFactory().buildParts(partsOrDeps as DomControlsDeps);
-      parts = built.parts;
-      resolvedHost = built.host;
-    }
+  constructor(deps: DomControlsDeps) {
+    const parts = new DomControlsFactory().buildParts(deps, this);
     this.deps = parts.deps;
     this.els = parts.els;
     this.popupGroup = parts.popupGroup;
@@ -82,27 +72,11 @@ export class DomControls implements Controls {
     this.attackerFittingPopup = parts.attackerFittingPopup;
     this.targetFittingPopup = parts.targetFittingPopup;
     this.languageRefresh = parts.languageRefresh;
-    this.wireHost(resolvedHost);
+    this.eventRouter = parts.eventRouter;
     this.wireControls();
     this.sessionCodec.restoreStartup(this.deps.settingsStore.loadStartupState());
     this.attackerSide.updateAlignTime();
     this.targetSide.updateAlignTime();
-  }
-
-  private wireHost(host: DomControlsHost): void {
-    host.isPlaying = () => this.playing;
-    host.setPlaying = (playing) => this.setPlaying(playing);
-    host.onPlayPause = () => this.onPlayPause();
-    host.onReset = () => this.onReset();
-    host.onSpeedChange = (speed) => this.onSpeedChange(speed);
-    host.onConfigChange = () => this.onConfigChange();
-    host.onDisplayChange = () => this.onDisplayChange();
-    host.fireConfigChange = () => this.callbacks?.onConfigChange();
-    host.fireDisplayChange = () => this.callbacks?.onDisplayChange();
-    host.onProfileLoaded = (name) => this.onProfileLoaded(name);
-    host.onProfileTextLoaded = (settings) => this.onProfileTextLoaded(settings);
-    host.captureSettings = () => this.sessionCodec.capture();
-    host.persistConfigChange = (notify = true) => this.persistConfigChange(notify);
   }
 
   private wireControls(): void {
@@ -119,23 +93,44 @@ export class DomControls implements Controls {
     this.targetSide.renderSkillOptions();
   }
 
-  private persistConfigChange(notify = true): void {
+  isPlaying(): boolean { return this.playing; }
+
+  onPlayPause(): void { this.callbacks?.onPlayPause(); }
+  onReset(): void { this.callbacks?.onReset(); }
+  onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
+  onConfigChange(): void {
     this.preferencesController.savePreferences();
     this.profileController.updateDirtyState();
-    if (notify) this.callbacks?.onConfigChange();
+    this.callbacks?.onConfigChange();
+  }
+  onDisplayChange(): void {
+    this.preferencesController.savePreferences();
+    this.profileController.updateDirtyState();
+    this.callbacks?.onDisplayChange();
   }
 
-  private onProfileLoaded(name: string): void {
+  fireConfigChange(): void { this.callbacks?.onConfigChange(); }
+  fireDisplayChange(): void { this.callbacks?.onDisplayChange(); }
+
+  onProfileLoaded(name: string): void {
     const profile = this.deps.settingsStore.loadProfile(name);
     if (!profile) return;
     this.sessionCodec.restore(this.sessionCodec.fromProfile(profile), name);
     this.callbacks?.onReset();
   }
 
-  private onProfileTextLoaded(settings: UserSettings): void {
+  onProfileTextLoaded(settings: UserSettings): void {
     this.sessionCodec.restore(settings);
     this.profileController.showStatus("status.profileImported");
     this.callbacks?.onReset();
+  }
+
+  captureSettings(): UserSettings { return this.sessionCodec.capture(); }
+
+  persistConfigChange(notify = true): void {
+    this.preferencesController.savePreferences();
+    this.profileController.updateDirtyState();
+    if (notify) this.callbacks?.onConfigChange();
   }
 
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad); }
@@ -165,19 +160,6 @@ export class DomControls implements Controls {
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-  onPlayPause(): void { this.callbacks?.onPlayPause(); }
-  onReset(): void { this.callbacks?.onReset(); }
-  onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
-  onConfigChange(): void {
-    this.preferencesController.savePreferences();
-    this.profileController.updateDirtyState();
-    this.callbacks?.onConfigChange();
-  }
-  onDisplayChange(): void {
-    this.preferencesController.savePreferences();
-    this.profileController.updateDirtyState();
-    this.callbacks?.onDisplayChange();
-  }
   private currentSigResolution(): number { return SIG_RESOLUTIONS[this.turretController.currentSigResClass()]; }
   private currentMode(side: Side): AutopilotMode {
     const value = this.els[`${side}Mode`].value;

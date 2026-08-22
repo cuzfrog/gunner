@@ -8,7 +8,6 @@ import { TrackingInput } from "./trackingInput";
 import { TurretControllerImpl } from "./turret/turretController";
 import { TurretStateResolver } from "./turret/turretStateResolver";
 import { DomControls } from "./domControls";
-import { DomControlsFactory } from "./domControlsFactory";
 import type { TurretEls } from "./turret/turretEls";
 import { createSidePanel, type Side, collectSideEls } from "./sidePanel";
 import type { Popup, PopupGroup } from "./popup";
@@ -166,7 +165,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const clipboard = mockClipboard();
   const presetFittings = vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings });
   const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings });
-  const { parts, host } = new DomControlsFactory().buildParts({
+  const controls = new DomControls({
     hitChance,
     i18n,
     settingsStore,
@@ -180,7 +179,6 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
     chargeCatalog,
     imageCatalog,
   });
-  const controls = new DomControls(parts, host);
   return { document, controls, settingsStore, hitChance, i18n, clipboard };
 }
 
