@@ -1,4 +1,4 @@
-import { SIG_RESOLUTIONS } from "../../sim";
+import { SIG_RESOLUTIONS, type HitChance } from "../../sim";
 import type { ChargeCatalog } from "../../fitting";
 import type { I18n } from "../i18n";
 import {
@@ -15,7 +15,6 @@ import type { Els } from "./elements";
 import type { IHintRotator } from "./hintRotator";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
-import { sidePanelState } from "./sessionCodecState";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
@@ -31,9 +30,9 @@ export class SessionCodec {
   private readonly sigResChoice: ChoiceGroup;
   private readonly hintRotator: IHintRotator;
   private readonly settingsStore: SettingsStore;
+  private readonly hitChance: HitChance;
   private readonly isPlaying: () => boolean;
   private readonly setPlaying: (playing: boolean) => void;
-  private readonly onSetInitialDefaults: () => void;
 
   constructor(deps: {
     els: Els;
@@ -47,9 +46,9 @@ export class SessionCodec {
     sigResChoice: ChoiceGroup;
     hintRotator: IHintRotator;
     settingsStore: SettingsStore;
+    hitChance: HitChance;
     isPlaying: () => boolean;
     setPlaying: (playing: boolean) => void;
-    onSetInitialDefaults: () => void;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -62,9 +61,9 @@ export class SessionCodec {
     this.sigResChoice = deps.sigResChoice;
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
+    this.hitChance = deps.hitChance;
     this.isPlaying = deps.isPlaying;
     this.setPlaying = deps.setPlaying;
-    this.onSetInitialDefaults = deps.onSetInitialDefaults;
   }
 
   capture(): UserSettings {
@@ -138,8 +137,8 @@ export class SessionCodec {
     this.els.targetRange.value = String(settings.targetRange);
     this.els.targetSig.value = String(settings.targetSig);
 
-    this.attackerSide.restore(sidePanelState(settings, "attacker"));
-    this.targetSide.restore(sidePanelState(settings, "target"));
+    this.attackerSide.restore(this.attackerSide.stateFrom(settings));
+    this.targetSide.restore(this.targetSide.stateFrom(settings));
 
     this.i18n.translateDocument();
     this.turretController.restore({ fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo });
@@ -171,6 +170,36 @@ export class SessionCodec {
     const preferences = this.settingsStore.loadPreferences();
     this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
-    this.onSetInitialDefaults();
+    this.setInitialDefaults();
+  }
+
+  private setInitialDefaults(): void {
+    this.setDefaultSkillAndOverload();
+    this.attackerSide.setOverloadDisabled();
+    this.targetSide.setOverloadDisabled();
+    this.setBestInitialDistance();
+    this.preferencesController.updateManeuverAggressivityDisplay();
+    this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
+    this.setPlaying(false);
+    this.attackerSide.renderPropulsionOptions();
+    this.targetSide.renderPropulsionOptions();
+    this.profileController.refresh();
+  }
+
+  private setDefaultSkillAndOverload(): void {
+    this.attackerSide.setSkillLevel(5);
+    this.targetSide.setSkillLevel(5);
+    this.attackerSide.setOverloadActive(true);
+    this.targetSide.setOverloadActive(true);
+  }
+
+  private setBestInitialDistance(): void {
+    const turret = this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad);
+    const targetSig = Math.max(num(this.els.targetSig), 1);
+    const targetSpeed = num(this.els.targetSpeed);
+    const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
+    if (!Number.isFinite(best) || best <= 0) return;
+    this.els.initialDistance.value = String(Math.round(best));
+    this.els.targetRange.value = String(Math.round(best));
   }
 }

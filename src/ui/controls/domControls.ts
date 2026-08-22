@@ -27,9 +27,7 @@ import { collectPreferencesEls, collectProfileEls, collectTurretEls, collectImpo
 import { FittingPopupController } from "./fittingPopupController";
 import { EventRouter, type EventRouterHost } from "./eventRouter";
 import { LanguageRefresh } from "./languageRefresh";
-import { populateHullDatalist, updateFittingTrigger } from "./hullDatalist";
-import { currentSigResValue } from "./inputState";
-import { setInitialDefaults } from "./sessionDefaults";
+import { HullDatalist } from "./hullDatalist";
 import type { ClipboardProvider, SettingsStore, UserSettings } from "../settings";
 
 export interface ControlsCallbacks {
@@ -83,6 +81,7 @@ export class DomControls implements Controls, EventRouterHost {
   private readonly turretController: TurretController;
   private readonly sessionCodec: SessionCodec;
   private readonly eventRouter: EventRouter;
+  private readonly hullDatalist: HullDatalist;
 
   constructor({ hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies, presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog }: { hitChance: HitChance; i18n: I18n; settingsStore: SettingsStore; ships: Ships; fittingImport: FittingImport; gunFamilies: GunFamilies; presetFittings: PresetFittings; savedFittings: SavedFittings; clipboard: ClipboardProvider; timer: Timer; chargeCatalog: ChargeCatalog; imageCatalog: ImageCatalog }) {
     this.hitChance = hitChance;
@@ -100,6 +99,7 @@ export class DomControls implements Controls, EventRouterHost {
     this.popupGroup = new PopupGroup();
     this.hintRotator = new HintRotator({ element: el("slide-hints"), i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, intervalMs: 20_000 });
     this.els = createControlsEls();
+    this.hullDatalist = new HullDatalist(this.els, this.presetFittings);
     this.preferencesController = new PreferencesController({ els: collectPreferencesEls(this.els), i18n: this.i18n, settingsStore: this.settingsStore, sigResolution: () => this.currentSigResolution(), onLanguageChanged: () => this.languageRefresh.refresh(this.playing) });
     this.profileController = new ProfileController({ els: collectProfileEls(this.els), settingsStore: this.settingsStore, timer: this.timer, i18n: this.i18n, captureCurrent: () => profileSettingsOf(this.sessionCodec.capture()), onLoaded: (name) => this.onProfileLoaded(name) });
     this.engagementReadout = new EngagementReadout({ resDistance: el("res-distance"), resTransversal: el("res-transversal"), resAngular: el("res-angular"), resRadial: el("res-radial"), resTrackPen: el("res-track-pen"), resRangePen: el("res-range-pen"), resHit: el("res-hit") });
@@ -114,14 +114,27 @@ export class DomControls implements Controls, EventRouterHost {
       overrides: () => this.attackerSide.overrides, clearTurretOverrides: () => { delete this.attackerSide.overrides.tracking; delete this.attackerSide.overrides.sigRes; delete this.attackerSide.overrides.optimal; delete this.attackerSide.overrides.falloff; },
       onConfigChange: (persist) => { this.preferencesController.savePreferences(); if (persist) this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); },
     });
-    this.sessionCodec = new SessionCodec({ els: this.els, attackerSide: this.attackerSide, targetSide: this.targetSide, turret: this.turretController, preferences: this.preferencesController, profileController: this.profileController, i18n: this.i18n, chargeCatalog: this.chargeCatalog, sigResChoice: this.sigResChoice, hintRotator: this.hintRotator, settingsStore: this.settingsStore, isPlaying: () => this.playing, setPlaying: (playing: boolean) => this.setPlaying(playing), onSetInitialDefaults: () => setInitialDefaults({ els: this.els, hitChance: this.hitChance, attackerSide: this.attackerSide, targetSide: this.targetSide, turretController: this.turretController, preferencesController: this.preferencesController, profileController: this.profileController, setPlaying: (playing: boolean) => this.setPlaying(playing) }) });
+    this.sessionCodec = new SessionCodec({
+      els: this.els, attackerSide: this.attackerSide, targetSide: this.targetSide, turret: this.turretController,
+      preferences: this.preferencesController, profileController: this.profileController, i18n: this.i18n,
+      chargeCatalog: this.chargeCatalog, sigResChoice: this.sigResChoice, hintRotator: this.hintRotator,
+      settingsStore: this.settingsStore, hitChance: this.hitChance,
+      isPlaying: () => this.playing, setPlaying: (playing: boolean) => this.setPlaying(playing),
+    });
     this.importController = new ImportController({ clipboard: this.clipboard, fittingImport: this.fittingImport, savedFittings: this.savedFittings, popupGroup: this.popupGroup, els: collectImportEls(this.els), sidePanel: (side) => this.side(side), turret: this.turretController, preferences: this.preferencesController, profileController: this.profileController, getSettings: () => this.sessionCodec.capture(), onConfigPersisted: () => this.onConfigPersisted(), onProfileTextLoaded: (settings) => this.onProfileTextLoaded(settings) });
     const attackerPreview = new DomFittingPreview({ container: this.els.attackerFittingPreview, i18n: this.i18n, imageCatalog: this.imageCatalog, viewport: () => window });
     const targetPreview = new DomFittingPreview({ container: this.els.targetFittingPreview, i18n: this.i18n, imageCatalog: this.imageCatalog, viewport: () => window });
     this.previewManager = new FittingPreviewManager({ fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, i18n: this.i18n, previewsBySide: { attacker: attackerPreview, target: targetPreview } as const, shipImageBySide: { attacker: this.els.attackerShipImage, target: this.els.targetShipImage } as const, eyeBySide: { attacker: this.els.attackerFittingEye, target: this.els.targetFittingEye } as const, profileOf: (side) => this.side(side).profile, fittingTextOf: (side) => this.side(side).fittingText });
     this.attackerFittingPopup = this.createFittingPopup("attacker");
     this.targetFittingPopup = this.createFittingPopup("target");
-    this.languageRefresh = new LanguageRefresh({ i18n: this.i18n, els: this.els, presetFittings: this.presetFittings, profileController: this.profileController, attackerSide: this.attackerSide, targetSide: this.targetSide, turretController: this.turretController, attackerFittingPopup: this.attackerFittingPopup, targetFittingPopup: this.targetFittingPopup, previewManager: this.previewManager, hintRotator: this.hintRotator, setPlaying: (playing: boolean) => this.setPlaying(playing), onDisplayChange: () => this.callbacks?.onDisplayChange() });
+    this.languageRefresh = new LanguageRefresh({
+      i18n: this.i18n, hullDatalist: this.hullDatalist, profileController: this.profileController,
+      attackerSide: this.attackerSide, targetSide: this.targetSide, turretController: this.turretController,
+      attackerFittingPopup: this.attackerFittingPopup, targetFittingPopup: this.targetFittingPopup,
+      previewManager: this.previewManager, hintRotator: this.hintRotator,
+      setPlaying: (playing: boolean) => this.setPlaying(playing),
+      onDisplayChange: () => this.callbacks?.onDisplayChange(),
+    });
     this.attackerSide.setFittingPopup(this.attackerFittingPopup);
     this.targetSide.setFittingPopup(this.targetFittingPopup);
     this.attackerSide.setFittingPreview(this.previewManager);
@@ -130,7 +143,7 @@ export class DomControls implements Controls, EventRouterHost {
     this.popupGroup.register(this.targetFittingPopup.popup);
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.attackerAmmoPopup);
-    populateHullDatalist(this.els, this.presetFittings);
+    this.hullDatalist.populate();
     this.attackerSide.renderSkillOptions();
     this.targetSide.renderSkillOptions();
     this.sessionCodec.restoreStartup(this.settingsStore.loadStartupState());
@@ -161,7 +174,6 @@ export class DomControls implements Controls, EventRouterHost {
 
   private createSidePanelHost(side: Side) {
     return {
-      updateFittingTrigger: (enabled: boolean) => updateFittingTrigger(this.els, side, enabled),
       persistConfigChange: (notify = true) => this.persistConfigChange(notify),
       attackerTurretHooks: side === "attacker" ? {
         onFittedHullCleared: () => this.onAttackerFittedHullCleared(),
@@ -196,7 +208,7 @@ export class DomControls implements Controls, EventRouterHost {
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
   onConfigChange(): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); }
   onDisplayChange(): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); this.callbacks?.onDisplayChange(); }
-  private currentSigResolution(): number { return SIG_RESOLUTIONS[currentSigResValue(this.els)]; }
+  private currentSigResolution(): number { return SIG_RESOLUTIONS[this.turretController.currentSigResClass()]; }
   private currentMode(side: Side): AutopilotMode {
     const value = this.els[`${side}Mode`].value;
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);

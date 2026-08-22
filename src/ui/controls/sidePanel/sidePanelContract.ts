@@ -3,7 +3,7 @@ import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions }
 import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../settings";
+import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting, UserSettings } from "../../settings";
 import type { Popup } from "../popupGroup";
 import type { Side } from "./side";
 import type { ISidePanelSections } from "./sidePanelSections";
@@ -24,8 +24,43 @@ export interface SidePanelState {
   readonly sig?: number;
 }
 
+export function stateSliceOf(settings: UserSettings, side: Side): SidePanelState {
+  if (side === "attacker") {
+    return {
+      speed: settings.attackerSpeed,
+      mass: settings.attackerMass,
+      inertia: settings.attackerInertia,
+      mode: settings.attackerMode,
+      range: settings.attackerRange,
+      skillLevel: settings.attackerSkillLevel,
+      overload: settings.attackerOverload ?? true,
+      hull: settings.attackerHull,
+      propulsion: settings.attackerPropulsion,
+      fitting: settings.attackerFitting,
+      overrides: settings.attackerOverrides ?? {},
+      fittedHull: settings.attackerFittedHull,
+    };
+  }
+  return {
+    speed: settings.targetSpeed,
+    mass: settings.targetMass,
+    inertia: settings.targetInertia,
+    mode: settings.targetMode,
+    range: settings.targetRange,
+    skillLevel: settings.targetSkillLevel,
+    overload: settings.targetOverload ?? true,
+    hull: settings.targetHull,
+    propulsion: settings.targetPropulsion,
+    fitting: settings.targetFitting,
+    overrides: settings.targetOverrides ?? {},
+    fittedHull: settings.targetFittedHull,
+    sig: settings.targetSig,
+  };
+}
+
 export interface FittingPopupControl {
   readonly popup: Popup;
+  setTriggerEnabled(enabled: boolean): void;
   renderIfOpen(): void;
   closeIfOpen(): void;
 }
@@ -47,7 +82,6 @@ export interface FittingImporter {
 }
 
 export interface SidePanelHost {
-  updateFittingTrigger(enabled: boolean): void;
   persistConfigChange(notify?: boolean): void;
   attackerTurretHooks: AttackerTurretHooks;
   importer: FittingImporter;
@@ -64,6 +98,8 @@ export interface ISidePanel {
   lastCommittedHull: string | undefined;
   setFittingPopup(popup: FittingPopupControl): void;
   setFittingPreview(preview: FittingPreviewControl): void;
+  setFittingTriggerEnabled(enabled: boolean): void;
+  stateFrom(settings: UserSettings): SidePanelState;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;

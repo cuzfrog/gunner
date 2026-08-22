@@ -1,10 +1,7 @@
-import type { ChargeCatalog, FittingImport } from "../../fitting";
-import type { Ships } from "../../ships";
+import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
 import { type DisplayPreferences, type ProfileSettings, type StartupState, type UserSettings } from "./userSettings";
-import { decodeUrlSettings, parseProfiles } from "./settingsCodec";
-import { rebuildFittingBasis } from "./rebuildFittingBasis";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
 import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
 
@@ -18,35 +15,18 @@ const DEFAULT_PREFERENCES: DisplayPreferences = { language: "en", trackingUnit: 
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
-  private readonly ships: Ships;
-  private readonly fittingImport: FittingImport;
-  private readonly chargeCatalog: ChargeCatalog;
+  private readonly parser: SettingsParser;
 
-  constructor({
-    storage,
-    location,
-    ships,
-    fittingImport,
-    chargeCatalog,
-  }: {
-    storage: StorageProvider;
-    location: LocationProvider;
-    ships: Ships;
-    fittingImport: FittingImport;
-    chargeCatalog: ChargeCatalog;
-  }) {
+  constructor({ storage, location, parser }: { storage: StorageProvider; location: LocationProvider; parser: SettingsParser }) {
     this.storage = storage;
     this.location = location;
-    this.ships = ships;
-    this.fittingImport = fittingImport;
-    this.chargeCatalog = chargeCatalog;
+    this.parser = parser;
   }
 
   loadStartupState(): StartupState {
     const urlSettings = this.decodeUrl();
     if (urlSettings) {
-      const settings = this.applyFittingBasis(urlSettings);
-      return { settings, selectedProfileName: this.matchingSelectedProfile(settings) };
+      return { settings: urlSettings, selectedProfileName: this.matchingSelectedProfile(urlSettings) };
     }
     const name = this.readSelectedProfileName();
     if (!name || !this.listProfiles().includes(name)) return { settings: null, selectedProfileName: null };
@@ -56,7 +36,7 @@ export class LocalSettingsStore implements SettingsStore {
   listProfiles(): string[] {
     const raw = this.storage.getItem(PROFILES_KEY);
     if (!raw) return [];
-    const parsed = parseProfiles({ ships: this.ships, chargeCatalog: this.chargeCatalog }, raw);
+    const parsed = this.parser.parseProfiles(raw);
     return Object.keys(parsed).sort();
   }
 
@@ -125,7 +105,7 @@ export class LocalSettingsStore implements SettingsStore {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
-    return decodeUrlSettings({ ships: this.ships, chargeCatalog: this.chargeCatalog }, encoded);
+    return this.parser.decodeUrlSettings(encoded);
   }
 
   private matchingSelectedProfile(urlSettings: UserSettings): string | null {
@@ -155,11 +135,6 @@ export class LocalSettingsStore implements SettingsStore {
   private loadProfiles(): Record<string, ProfileSettings> {
     const raw = this.storage.getItem(PROFILES_KEY) ?? this.storage.getItem(MIGRATED_PROFILES_KEY);
     if (!raw) return {};
-    return parseProfiles({ ships: this.ships, chargeCatalog: this.chargeCatalog }, raw);
-  }
-
-  private applyFittingBasis(settings: UserSettings): UserSettings {
-    const deps = { ships: this.ships, fittingImport: this.fittingImport, chargeCatalog: this.chargeCatalog };
-    return { ...settings, ...rebuildFittingBasis(deps, settings, "attacker"), ...rebuildFittingBasis(deps, settings, "target") };
+    return this.parser.parseProfiles(raw);
   }
 }

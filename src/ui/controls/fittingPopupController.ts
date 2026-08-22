@@ -62,6 +62,11 @@ export class FittingPopupController {
 
   get popup(): Popup { return this.popupValue; }
 
+  setTriggerEnabled(enabled: boolean): void {
+    this.renderer.fittingEls.trigger.disabled = !enabled;
+    this.renderer.fittingEls.eye.disabled = !enabled;
+  }
+
   renderIfOpen(): void { if (this.open) this.render(); }
   closeIfOpen(): void { if (this.open) this.closePopup(); }
 

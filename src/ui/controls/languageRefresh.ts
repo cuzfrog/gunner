@@ -1,18 +1,15 @@
 import type { I18n } from "../i18n";
-import type { PresetFittings } from "../../fitting";
-import type { Els } from "./elements";
 import type { FittingPopupController } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { IHintRotator } from "./hintRotator";
-import { populateHullDatalist } from "./hullDatalist";
+import type { HullDatalist } from "./hullDatalist";
 import type { ProfileController } from "./profileController";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
 export class LanguageRefresh {
   private readonly i18n: I18n;
-  private readonly els: Els;
-  private readonly presetFittings: PresetFittings;
+  private readonly hullDatalist: HullDatalist;
   private readonly profileController: ProfileController;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
@@ -26,8 +23,7 @@ export class LanguageRefresh {
 
   constructor(deps: {
     i18n: I18n;
-    els: Els;
-    presetFittings: PresetFittings;
+    hullDatalist: HullDatalist;
     profileController: ProfileController;
     attackerSide: SidePanel;
     targetSide: SidePanel;
@@ -40,8 +36,7 @@ export class LanguageRefresh {
     onDisplayChange: () => void;
   }) {
     this.i18n = deps.i18n;
-    this.els = deps.els;
-    this.presetFittings = deps.presetFittings;
+    this.hullDatalist = deps.hullDatalist;
     this.profileController = deps.profileController;
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
@@ -63,7 +58,7 @@ export class LanguageRefresh {
     this.turretController.render();
     this.attackerSide.clearImportHint();
     this.targetSide.clearImportHint();
-    populateHullDatalist(this.els, this.presetFittings);
+    this.hullDatalist.populate();
     this.attackerSide.refreshHullInputs();
     this.targetSide.refreshHullInputs();
     this.attackerFittingPopup.renderIfOpen();

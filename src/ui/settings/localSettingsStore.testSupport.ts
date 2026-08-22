@@ -1,6 +1,7 @@
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../../ships";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../../fitting";
 import { LocalSettingsStore } from "./localSettingsStore";
+import { SettingsParser } from "./settingsParser";
 import { USER_SETTINGS_VERSION, type DisplayPreferences, type FittedHullSummary, type ProfileSettings, type UserSettings } from "./userSettings";
 export type { UserSettings, DisplayPreferences, ProfileSettings } from "./userSettings";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
@@ -178,4 +179,7 @@ export function resetMocks(): void {
   ships = makeShips();
   fittingImport = makeFittingImport();
   chargeCatalog = makeChargeCatalog();
+}
+export function makeParser(): SettingsParser {
+  return new SettingsParser({ ships, fittingImport, chargeCatalog });
 }

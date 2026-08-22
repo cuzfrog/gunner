@@ -1,5 +1,4 @@
-import { isEventTargetWithClosest } from "./controlsDom";
-import { applyDisplayInput, applyShipInput } from "./inputState";
+import { isEventTargetWithClosest, num } from "./controlsDom";
 import type { Els } from "./elements";
 import type { FittingPopupController } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
@@ -65,26 +64,6 @@ export class EventRouter {
     this.bind();
   }
 
-  private sidePanel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
-  }
-
-  private fittingPopup(side: Side): FittingPopupController {
-    return side === "attacker" ? this.attackerFittingPopup : this.targetFittingPopup;
-  }
-
-  private skillPopup(side: Side): Popup {
-    return this.sidePanel(side).getSkillPopup();
-  }
-
-  private propulsionVariantPopup(side: Side): Popup {
-    return this.sidePanel(side).getPropulsionVariantPopup();
-  }
-
-  private pastePopup(side: Side): Popup {
-    return this.sidePanel(side).getPastePopup();
-  }
-
   private bind(): void {
     this.els.play.addEventListener("click", () => this.host.onPlayPause());
     this.els.reset.addEventListener("click", () => this.host.onReset());
@@ -115,7 +94,7 @@ export class EventRouter {
     this.els.attackerFittingEye.addEventListener("click", () => this.previewManager.toggle("attacker"));
     this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerAmmoPopup));
     this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.onPropulsionChange());
-    this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.propulsionVariantPopup("attacker")));
+    this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getPropulsionVariantPopup()));
     this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
     this.els.attackerOverload.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(false));
     this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.onOverloadButtonClick());
@@ -125,20 +104,17 @@ export class EventRouter {
     this.els.targetFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetFittingPopup.popup));
     this.els.targetFittingEye.addEventListener("click", () => this.previewManager.toggle("target"));
     this.els.targetPropulsion.addEventListener("change", () => this.targetSide.onPropulsionChange());
-    this.els.targetPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.propulsionVariantPopup("target")));
+    this.els.targetPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getPropulsionVariantPopup()));
     this.els.targetSkills.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(true));
     this.els.targetOverload.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(false));
     this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.onOverloadButtonClick());
 
-    this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.skillPopup("attacker")));
-    this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.skillPopup("target")));
+    this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getSkillPopup()));
+    this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getSkillPopup()));
 
     const displayInputs: (keyof Els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
-      this.els[id].addEventListener("input", () => {
-        applyDisplayInput(this.els, this.attackerSide, this.targetSide, this.preferences, id);
-        this.host.onDisplayChange();
-      });
+      this.els[id].addEventListener("input", () => { this.applyDisplayInput(id); this.host.onDisplayChange(); });
     }
 
     const shipInputs: (keyof Els)[] = [
@@ -157,7 +133,7 @@ export class EventRouter {
     for (const id of shipInputs) {
       this.els[id].addEventListener("input", () => {
         if (id === "attackerMode") this.preferences.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-        applyShipInput(this.els, this.attackerSide, this.targetSide, id);
+        this.applyShipInput(id);
         this.host.onConfigChange();
       });
     }
@@ -193,5 +169,27 @@ export class EventRouter {
     if (event.key !== "Escape") return;
     if (this.previewManager.openSide()) this.previewManager.handleEscape();
     this.popupGroup.onKeyDown(event);
+  }
+
+  private applyDisplayInput(id: keyof Els): void {
+    if (id === "tracking") this.preferences.updateTrackingFromInput();
+    if (id === "sigRes") this.preferences.updateTrackingForSigResolution();
+    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.preferences.trackingInput.rad);
+    if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.turret.currentSigResClass());
+    if (id === "optimal") this.attackerSide.recordOverride("optimal", num(this.els.optimal));
+    if (id === "falloff") this.attackerSide.recordOverride("falloff", num(this.els.falloff));
+    if (id === "targetSig") this.targetSide.recordOverride("targetSig", Math.max(num(this.els.targetSig), 1));
+  }
+  private applyShipInput(id: keyof Els): void {
+    if (id === "attackerMass") this.attackerSide.updateSpeedFromMass();
+    if (id === "targetMass") this.targetSide.updateSpeedFromMass();
+    if (id === "attackerMass" || id === "attackerInertia") this.attackerSide.updateAlignTime();
+    if (id === "targetMass" || id === "targetInertia") this.targetSide.updateAlignTime();
+    if (id === "attackerSpeed") this.attackerSide.recordOverride("attackerSpeed", num(this.els.attackerSpeed));
+    if (id === "attackerMass") this.attackerSide.recordOverride("attackerMass", num(this.els.attackerMass));
+    if (id === "attackerInertia") this.attackerSide.recordOverride("attackerInertia", num(this.els.attackerInertia));
+    if (id === "targetSpeed") this.targetSide.recordOverride("targetSpeed", num(this.els.targetSpeed));
+    if (id === "targetMass") this.targetSide.recordOverride("targetMass", num(this.els.targetMass));
+    if (id === "targetInertia") this.targetSide.recordOverride("targetInertia", num(this.els.targetInertia));
   }
 }

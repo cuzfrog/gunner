@@ -5,7 +5,7 @@ import { num } from "../controlsDom";
 import { formatNumber, isAutopilotMode } from "../controlsFormat";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "../../settings";
+import { type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection, type UserSettings } from "../../settings";
 import type { Timer } from "../../timer";
 import { PopupGroup, type Popup } from "../popupGroup";
 import type { SidePanelElements } from "./elements";
@@ -15,14 +15,15 @@ import { PropulsionSection } from "./propulsionSection";
 import { SkillOverloadSection } from "./skillOverloadSection";
 import { StatsSection } from "./statsSection";
 import type { Side } from "./side";
-import type {
-  AttackerTurretHooks,
-  FittingPopupControl,
-  FittingPreviewControl,
-  FittingImporter,
-  ISidePanel,
-  SidePanelHost,
-  SidePanelState,
+import {
+  stateSliceOf,
+  type AttackerTurretHooks,
+  type FittingPopupControl,
+  type FittingPreviewControl,
+  type FittingImporter,
+  type ISidePanel,
+  type SidePanelHost,
+  type SidePanelState,
 } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
@@ -84,6 +85,8 @@ export class SidePanel implements ISidePanel {
   getPropulsionVariantPopup(): Popup { return this.sections.propulsion.popup; }
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
+  setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }
+  stateFrom(settings: UserSettings): SidePanelState { return stateSliceOf(settings, this.side); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }

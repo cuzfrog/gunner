@@ -3,6 +3,7 @@ import {
   chargeCatalog,
   ships,
   fittingImport,
+  makeParser,
   resetMocks,
   fakeStorage,
   fakeLocation,
@@ -30,7 +31,7 @@ import {
 beforeEach(() => resetMocks());
 describe("LocalSettingsStore group 3", () => {
   test("saveProfile and loadProfile round-trip", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     expect(store.listProfiles()).toEqual(["brawler"]);
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
@@ -38,7 +39,7 @@ describe("LocalSettingsStore group 3", () => {
 
   test("saveProfile strips display preference fields from the stored profile", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_SETTINGS);
     const raw = storage.getItem("gunner-profiles-v6")!;
     const stored = JSON.parse(raw).brawler;
@@ -53,12 +54,12 @@ describe("LocalSettingsStore group 3", () => {
   test("loadProfile strips legacy display preference fields from stored profiles", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
   test("deleteProfile removes the profile", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("a", DEFAULT_PROFILE);
     store.saveProfile("b", DEFAULT_PROFILE);
     store.deleteProfile("a");
@@ -68,7 +69,7 @@ describe("LocalSettingsStore group 3", () => {
 
   test("deleteProfile clears the selected profile when it is the deleted one", () => {
     const storage = fakeStorage();
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     store.selectProfile("brawler");
     store.deleteProfile("brawler");
@@ -78,7 +79,7 @@ describe("LocalSettingsStore group 3", () => {
   });
 
   test("deleteProfile leaves the selected profile alone when it is a different one", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     store.saveProfile("brawler", DEFAULT_PROFILE);
     store.saveProfile("sniper", DEFAULT_PROFILE);
     store.selectProfile("sniper");
@@ -89,30 +90,30 @@ describe("LocalSettingsStore group 3", () => {
 
   test("encodeUrl round-trips through loadStartupState", () => {
     const location = fakeLocation("http://localhost/index.html");
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
-    const decoded = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(url) });
+    const decoded = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(url) });
     expect(decoded.loadStartupState().settings).toEqual(DEFAULT_SETTINGS);
     expect(location.href).toBe("http://localhost/index.html");
   });
 
   test("loadStartupState rejects invalid URL settings and keeps the URL untouched", () => {
     const location = fakeLocation("http://localhost/?c=INVALID");
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location });
     expect(store.loadStartupState().settings).toBeNull();
     expect(location.href).toBe("http://localhost/?c=INVALID");
   });
 
   test("loadStartupState rejects a malformed c parameter", () => {
     const location = fakeLocation("http://localhost/?c=%25");
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location });
     expect(store.loadStartupState().settings).toBeNull();
     expect(location.href).toBe("http://localhost/?c=%25");
   });
 
   test("loadStartupState rejects settings with a non-positive initialDistance", () => {
     const bad = { ...DEFAULT_SETTINGS, initialDistance: 0 };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(bad)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(bad)) });
     expect(store.loadStartupState().settings).toBeNull();
   });
 

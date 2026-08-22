@@ -121,10 +121,14 @@ export class TurretController {
   currentTurretSpec(trackingOverride?: number): TurretSpec {
     return {
       tracking: trackingOverride ?? this.trackingInput.rad,
-      sigResolution: SIG_RESOLUTIONS[this.inputSet.currentSigResValue()],
+      sigResolution: SIG_RESOLUTIONS[this.currentSigResClass()],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
     };
+  }
+
+  currentSigResClass(): SigResolutionClass {
+    return this.inputSet.currentSigResValue();
   }
 
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {

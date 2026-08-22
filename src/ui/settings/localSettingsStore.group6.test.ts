@@ -3,6 +3,7 @@ import {
   chargeCatalog,
   ships,
   fittingImport,
+  makeParser,
   resetMocks,
   fakeStorage,
   fakeLocation,
@@ -40,7 +41,7 @@ describe("LocalSettingsStore group 6", () => {
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerOverrides: { attackerMass: 2_000_000 },
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerFitting).toBe(settings.attackerFitting);
@@ -78,7 +79,7 @@ describe("LocalSettingsStore group 6", () => {
         propulsion: COMPACT_MWD,
       },
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
@@ -103,7 +104,7 @@ describe("LocalSettingsStore group 6", () => {
       optimal: 10,
       falloff: 10,
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(stale)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(stale)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerMass).toBe(1_500_000);
@@ -126,7 +127,7 @@ describe("LocalSettingsStore group 6", () => {
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerOverrides: { attackerMass: 2_000_000 },
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerMass).toBe(2_000_000);
@@ -136,14 +137,14 @@ describe("LocalSettingsStore group 6", () => {
   test("loadStartupState normalizes a v6 payload missing attackerAmmo", () => {
     const missingAmmo: Record<string, unknown> = { ...DEFAULT_SETTINGS };
     delete missingAmmo.attackerAmmo;
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerAmmo).toBe("Hail S");
   });
 
   test("loadProfile normalizes a profile missing attackerAmmo", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const { attackerAmmo: _, ...missingAmmo } = DEFAULT_PROFILE;
     store.saveProfile("brawler", missingAmmo as ProfileSettings);
     const loaded = store.loadProfile("brawler");
@@ -167,7 +168,7 @@ describe("LocalSettingsStore group 6", () => {
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerAmmo: "Republic Fleet EMP S",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerAmmo).toBe("Republic Fleet EMP S");
@@ -189,7 +190,7 @@ describe("LocalSettingsStore group 6", () => {
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerAmmo: "Mjolnir Rocket",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerAmmo).toBe("Hail S");

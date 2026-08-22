@@ -3,6 +3,7 @@ import {
   chargeCatalog,
   ships,
   fittingImport,
+  makeParser,
   resetMocks,
   fakeStorage,
   fakeLocation,
@@ -30,9 +31,7 @@ import {
 beforeEach(() => resetMocks());
 describe("LocalSettingsStore group 4", () => {
   test("loadStartupState rejects settings with invalid values", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetSig: -1 })),
     });
@@ -41,9 +40,7 @@ describe("LocalSettingsStore group 4", () => {
 
   test("loadStartupState rejects a fitted hull missing sigMultiplier", () => {
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, sigMultiplier: undefined } };
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
     });
@@ -52,9 +49,7 @@ describe("LocalSettingsStore group 4", () => {
 
   test("loadStartupState defaults a fitted hull missing massMultiplier to one", () => {
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, massMultiplier: undefined } };
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
     });
@@ -69,34 +64,32 @@ describe("LocalSettingsStore group 4", () => {
     delete partial.attackerOverload;
     delete partial.targetSkillLevel;
     delete partial.targetOverload;
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
     expect(store.loadStartupState().settings).toEqual(partial);
   });
 
   test("loadStartupState accepts settings without gridBrightness", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.gridBrightness;
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
     expect(store.loadStartupState().settings).toEqual(partial);
   });
 
   test("loadStartupState round-trips a non-default maneuverAggressivity", () => {
     const settings: UserSettings = { ...DEFAULT_SETTINGS, maneuverAggressivity: 2.5 };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     expect(store.loadStartupState().settings).toEqual(settings);
   });
 
   test("loadStartupState accepts settings without maneuverAggressivity", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.maneuverAggressivity;
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
     expect(store.loadStartupState().settings).toEqual(partial);
   });
 
   test("loadStartupState rejects an out-of-range skill level", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerSkillLevel: 6 })),
     });
@@ -104,9 +97,7 @@ describe("LocalSettingsStore group 4", () => {
   });
 
   test("loadStartupState rejects a non-boolean overload value", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetOverload: "yes" })),
     });
@@ -121,7 +112,7 @@ describe("LocalSettingsStore group 4", () => {
       targetSkillLevel: 0,
       targetOverload: false,
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     expect(store.loadStartupState().settings).toEqual(settings);
   });
 

@@ -13,6 +13,7 @@ export type { ClipboardProvider, LocationProvider, StorageProvider } from "./pro
 export { ClipboardUnavailableError } from "./providers";
 export type { SettingsStore } from "./settingsStore";
 export { LocalSettingsStore } from "./localSettingsStore";
+export { SettingsParser } from "./settingsParser";
 export type { SavedFitting, SavedFittings } from "./savedFittings";
 export { LocalSavedFittings } from "./savedFittings";
 export { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";

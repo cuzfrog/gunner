@@ -1,20 +1,22 @@
-import type { Els } from "./elements";
 import type { PresetFittings } from "../../fitting";
-import type { Side } from "./sidePanel";
+import type { Els } from "./elements";
 
-export function populateHullDatalist(els: Els, presetFittings: PresetFittings): void {
-  const datalist = els.hullOptions;
-  datalist.innerHTML = "";
-  for (const hull of presetFittings.listHulls()) {
-    const option = document.createElement("option");
-    option.value = hull;
-    datalist.appendChild(option);
+export class HullDatalist {
+  private readonly els: Els;
+  private readonly presetFittings: PresetFittings;
+
+  constructor(els: Els, presetFittings: PresetFittings) {
+    this.els = els;
+    this.presetFittings = presetFittings;
   }
-}
 
-export function updateFittingTrigger(els: Els, side: Side, enabled: boolean): void {
-  const trigger = side === "attacker" ? els.attackerFittingTrigger : els.targetFittingTrigger;
-  const eye = side === "attacker" ? els.attackerFittingEye : els.targetFittingEye;
-  trigger.disabled = !enabled;
-  eye.disabled = !enabled;
+  populate(): void {
+    const datalist = this.els.hullOptions;
+    datalist.innerHTML = "";
+    for (const hull of this.presetFittings.listHulls()) {
+      const option = document.createElement("option");
+      option.value = hull;
+      datalist.appendChild(option);
+    }
+  }
 }

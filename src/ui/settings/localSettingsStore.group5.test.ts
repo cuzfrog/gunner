@@ -3,6 +3,7 @@ import {
   chargeCatalog,
   ships,
   fittingImport,
+  makeParser,
   resetMocks,
   fakeStorage,
   fakeLocation,
@@ -31,27 +32,25 @@ beforeEach(() => resetMocks());
 describe("LocalSettingsStore group 5", () => {
   test("loadStartupState round-trips a custom gridBrightness", () => {
     const settings: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0.75 };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     expect(store.loadStartupState().settings).toEqual(settings);
   });
 
   test("loadStartupState round-trips midships mode", () => {
     const settings: UserSettings = { ...DEFAULT_SETTINGS, attackerMode: "midships", targetMode: "midships" };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     expect(store.loadStartupState().settings).toEqual(settings);
   });
 
   test("loadStartupState accepts gridBrightness at the interval endpoints", () => {
     const zero: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 0 };
     const one: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 1 };
-    expect(new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(zero)) }).loadStartupState().settings).toEqual(zero);
-    expect(new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(one)) }).loadStartupState().settings).toEqual(one);
+    expect(new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(zero)) }).loadStartupState().settings).toEqual(zero);
+    expect(new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(one)) }).loadStartupState().settings).toEqual(one);
   });
 
   test("loadStartupState accepts an out-of-range gridBrightness which the controls clamp", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, gridBrightness: 1.5 })),
     });
@@ -59,12 +58,12 @@ describe("LocalSettingsStore group 5", () => {
   });
 
   test("loadPreferences returns defaults when nothing is stored", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
   test("savePreferences and loadPreferences round-trip", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.8 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
@@ -73,20 +72,20 @@ describe("LocalSettingsStore group 5", () => {
   test("loadPreferences falls back per field for invalid values", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-prefs-v1", JSON.stringify({ language: "klingon", trackingUnit: "meters", simSpeed: -1, gridBrightness: 2 }));
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
   test("loadPreferences returns defaults for malformed JSON", () => {
     const storage = fakeStorage();
     storage.setItem("gunner-prefs-v1", "{not json");
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
   test("loadStartupState migrates a v5 payload with fitted hull summaries", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5, attackerFittedHull: FITTED_HULL_SUMMARY };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(6);
@@ -96,7 +95,7 @@ describe("LocalSettingsStore group 5", () => {
 
   test("loadStartupState migrates a v5 payload without fitted hull summaries", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(6);

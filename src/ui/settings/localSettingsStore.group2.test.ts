@@ -3,6 +3,7 @@ import {
   chargeCatalog,
   ships,
   fittingImport,
+  makeParser,
   resetMocks,
   fakeStorage,
   fakeLocation,
@@ -32,9 +33,9 @@ describe("LocalSettingsStore group 2", () => {
   test("save and load round-trips settings through the URL", () => {
     const storage = fakeStorage();
     const location = fakeLocation("http://localhost/");
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
-    const reloaded = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage, location: fakeLocation(url) });
+    const reloaded = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation(url) });
     expect(reloaded.loadStartupState().settings).toEqual(DEFAULT_SETTINGS);
   });
 
@@ -57,7 +58,7 @@ describe("LocalSettingsStore group 2", () => {
       simSpeed: 4,
       language: "en",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v2)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v2)) });
     expect(store.loadStartupState().settings).toBeNull();
   });
 
@@ -84,7 +85,7 @@ describe("LocalSettingsStore group 2", () => {
       simSpeed: 4,
       language: "en",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(v3)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v3)) });
     expect(store.loadStartupState().settings).toBeNull();
   });
 
@@ -94,7 +95,7 @@ describe("LocalSettingsStore group 2", () => {
       attackerFittedHull: FITTED_HULL_SUMMARY,
       targetFittedHull: FITTED_HULL_SUMMARY,
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(withFitted)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withFitted)) });
     expect(store.loadStartupState().settings).toEqual(withFitted);
   });
 
@@ -105,14 +106,12 @@ describe("LocalSettingsStore group 2", () => {
       attackerPropulsion: "mwd-5mn",
       targetHull: "Caldari Shuttle",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(withHull)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withHull)) });
     expect(store.loadStartupState().settings).toEqual(withHull);
   });
 
   test("loadStartupState rejects an invalid propulsion id", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" })),
     });
@@ -121,7 +120,7 @@ describe("LocalSettingsStore group 2", () => {
 
   test("loadStartupState round-trips a deselected propulsion", () => {
     const withNone: UserSettings = { ...DEFAULT_SETTINGS, attackerHull: "Rifter", attackerPropulsion: "none" };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(withNone)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withNone)) });
     expect(store.loadStartupState().settings).toEqual(withNone);
   });
 
@@ -136,7 +135,7 @@ describe("LocalSettingsStore group 2", () => {
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       attackerPropulsion: "none",
     };
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.attackerPropulsion).toBe("none");
@@ -147,9 +146,7 @@ describe("LocalSettingsStore group 2", () => {
   });
 
   test("loadStartupState rejects an empty hull name", () => {
-    const store = new LocalSettingsStore({ chargeCatalog,
-      ships,
-      fittingImport,
+    const store = new LocalSettingsStore({ parser: makeParser(),
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerHull: "" })),
     });
@@ -157,7 +154,7 @@ describe("LocalSettingsStore group 2", () => {
   });
 
   test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
-    const store = new LocalSettingsStore({ chargeCatalog, ships, fittingImport, storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const profile = profileFrom({ ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY });
     store.saveProfile("brawler", profile);
     expect(store.loadProfile("brawler")).toEqual(profile);

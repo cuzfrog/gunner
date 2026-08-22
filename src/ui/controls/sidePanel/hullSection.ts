@@ -81,7 +81,7 @@ export class HullSection implements IHullSection {
     this.els.hull.value = this.ships.hullView(profile, this.i18n.current()).name;
     this.updateShipImage();
     this.setHullValidation(false);
-    this.panel.host.updateFittingTrigger(true);
+    this.panel.setFittingTriggerEnabled(true);
     this.panel.renderFittingPopupIfOpen();
     this.panel.sections.propulsion.renderPropulsionOptions(propulsionId ?? "");
     if (updateStats) {
@@ -113,7 +113,7 @@ export class HullSection implements IHullSection {
     this.clearShipImage();
     this.panel.lastCommittedHull = undefined;
     if (resetInput) this.els.hull.value = "";
-    this.panel.host.updateFittingTrigger(false);
+    this.panel.setFittingTriggerEnabled(false);
     this.panel.closeFittingPopupIfOpen();
     this.updateHullHint();
     this.panel.sections.propulsion.renderPropulsionOptions();

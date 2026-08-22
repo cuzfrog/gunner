@@ -151,7 +151,6 @@ export function buildSidePanel(side: Side = "attacker", ships: Ships = mockShips
   globalThis.Element = FakeElement as unknown as typeof Element;
   const els = collectSideEls(createControlsEls(), side);
   const host = {
-    updateFittingTrigger: vi.fn(),
     persistConfigChange: vi.fn(),
     attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
     importer: { mostRecentFittingFor: vi.fn(), importEftFitting: vi.fn(), importFromText: vi.fn(() => Promise.resolve()), importFromClipboard: vi.fn(() => Promise.resolve()) },
