@@ -91,12 +91,13 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     const rotator = createRotator(element, timer);
-    const expected = [
-      "If you like this tool, may consider tip me in the game, thank you!",
-      "hint.prefix 'Midships' means putting the rudder to the center position.",
-      "If you like this tool, may consider tip me in the game, thank you!",
-      "hint.prefix You can import a ship fitting from clipboard.",
-    ];
+    const tip = "If you like this tool, may consider tip me in the game, thank you!";
+    const expected: string[] = [tip];
+    for (let i = 1; i < HINT_CANDIDATES.length; i++) {
+      expected.push(`hint.prefix ${HINT_CANDIDATES[i].text.en}`);
+      expected.push(tip);
+    }
+    expected.push(`hint.prefix ${HINT_CANDIDATES[0].text.en}`);
     for (const text of expected) {
       rotator.showNext();
       timer.runTimeout();
