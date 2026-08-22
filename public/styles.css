@@ -1238,6 +1238,14 @@ canvas {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
+.slide-hints.tip {
+  color: var(--warn-yellow);
+}
+
+.slide-hints.lore {
+  color: var(--accent-orange);
+}
+
 .slide-hints.hint-exit {
   transform: translateY(-100%);
   opacity: 0;

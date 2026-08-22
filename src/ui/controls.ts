@@ -41,6 +41,7 @@ import { TrackingInput, type TrackingUnit } from "./trackingInput";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, TIP_TEXT } from "./hints";
+import { LORES } from "./lores";
 import type { TimeoutId, Timer } from "./timer";
 import {
   el,
@@ -182,6 +183,7 @@ export class DomControls implements Controls {
       i18n,
       candidates: HINT_CANDIDATES,
       tipText: TIP_TEXT,
+      lores: LORES,
       timer,
       intervalMs: 20_000,
     });

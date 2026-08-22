@@ -1,5 +1,6 @@
 import type { I18n, Language } from "./i18n";
 import type { Hint } from "./hints";
+import type { Lore } from "./lores";
 import type { IntervalId, Timer } from "./timer";
 
 export interface IHintRotator {
@@ -13,6 +14,7 @@ export interface HintRotatorConfig {
   readonly i18n: I18n;
   readonly candidates: readonly Hint[];
   readonly tipText: Readonly<Record<Language, string>>;
+  readonly lores: readonly Lore[];
   readonly timer: Timer;
   readonly intervalMs?: number;
 }
@@ -22,17 +24,19 @@ export class HintRotator implements IHintRotator {
   private readonly i18n: I18n;
   private readonly candidates: readonly Hint[];
   private readonly tipText: Readonly<Record<Language, string>>;
+  private readonly lores: readonly Lore[];
   private readonly timer: Timer;
   private readonly intervalMs: number;
   private currentIndex = 0;
   private intervalId?: IntervalId;
   private isAnimating = false;
 
-  constructor({ element, i18n, candidates, tipText, timer, intervalMs = 20_000 }: HintRotatorConfig) {
+  constructor({ element, i18n, candidates, tipText, lores, timer, intervalMs = 20_000 }: HintRotatorConfig) {
     this.element = element;
     this.i18n = i18n;
     this.candidates = candidates;
     this.tipText = tipText;
+    this.lores = lores;
     this.timer = timer;
     this.intervalMs = intervalMs;
     this.renderFirst();
@@ -82,26 +86,58 @@ export class HintRotator implements IHintRotator {
   }
 
   private renderSlide(index: number): void {
-    if (this.isTip(index)) {
-      this.element.textContent = this.tipText[this.i18n.current()];
-      return;
-    }
-    const hintIndex = Math.floor(index / 2);
-    const hint = this.candidates[hintIndex];
-    if (hint === undefined) {
-      this.element.textContent = "";
-      return;
-    }
-    const text = hint.text[this.i18n.current()];
-    this.element.textContent = `${this.i18n.t("hint.prefix")} ${text}`;
+    const category = this.categoryAt(index);
+    this.setCategory(category);
+    this.element.textContent = this.slideText(index);
   }
 
-  private isTip(index: number): boolean {
-    return index % 2 === 1;
+  private categoryAt(index: number): "hint" | "tip" | "lore" {
+    switch (index % 4) {
+      case 0:
+        return "hint";
+      case 1:
+        return "tip";
+      default:
+        return "lore";
+    }
+  }
+
+  private setCategory(category: "hint" | "tip" | "lore"): void {
+    this.element.classList.remove("hint", "tip", "lore");
+    this.element.classList.add(category);
+  }
+
+  private slideText(index: number): string {
+    const category = this.categoryAt(index);
+    const lang = this.i18n.current();
+    switch (category) {
+      case "tip":
+        return this.tipText[lang];
+      case "hint": {
+        const hint = this.candidates[this.hintIndex(index)];
+        return hint ? `${this.i18n.t("hint.prefix")} ${hint.text[lang]}` : "";
+      }
+      case "lore": {
+        const lore = this.lores[this.loreIndex(index)];
+        return lore ? lore.text[lang] : "";
+      }
+    }
+  }
+
+  private hintIndex(index: number): number {
+    return Math.floor(index / 4) % Math.max(1, this.candidates.length);
+  }
+
+  private loreIndex(index: number): number {
+    const group = Math.floor(index / 4);
+    const offset = index % 4 === 2 ? 0 : 1;
+    return (group * 2 + offset) % Math.max(1, this.lores.length);
   }
 
   private totalSlides(): number {
-    return this.candidates.length * 2;
+    if (this.candidates.length === 0 && this.lores.length === 0) return 0;
+    const groups = Math.max(this.candidates.length, Math.ceil(this.lores.length / 2));
+    return groups * 4;
   }
 
   private snapBelow(): void {

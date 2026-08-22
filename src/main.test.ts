@@ -40,7 +40,7 @@ class FakeElement {
   src = "";
   tagName = "";
   style: Record<string, string> = {};
-  classList = { toggle: vi.fn() };
+  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};

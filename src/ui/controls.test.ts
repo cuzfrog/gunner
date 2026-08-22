@@ -366,7 +366,7 @@ class FakeElement {
       this[name] = value;
     },
   }) as Record<string, string> & { setProperty(name: string, value: string): void };
-  classList = { toggle: vi.fn() };
+  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
   children: FakeElement[] = [];
   private readonly handlers: Record<string, Array<(event?: unknown) => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
