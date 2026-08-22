@@ -18,4 +18,8 @@ describe("StaticImageCatalog", () => {
   test("itemIconUrl returns undefined for an unknown item", () => {
     expect(catalog.itemIconUrl("Unknown Item")).toBeUndefined();
   });
+
+  test("droneIconUrl returns the generic drone icon path", () => {
+    expect(catalog.droneIconUrl()).toBe("images/icons/1084@1x.png");
+  });
 });

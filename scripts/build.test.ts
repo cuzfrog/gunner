@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ITEM_ICON_IDS } from "../src/fitting";
+import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../src/fitting";
 
 const DISTRIBUTION_DIRECTORY = "dist";
 const STYLES_LINK_PATTERN = /href="styles-[a-f0-9]{8}\.css"/;
@@ -34,5 +34,6 @@ describe("build", () => {
     const knownIconId = ITEM_ICON_IDS["Hail S"];
     if (knownIconId === undefined) throw new Error("Hail S has no icon id");
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "icons", `${knownIconId}@1x.png`))).toBe(true);
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "icons", `${DRONE_ICON_ID}@1x.png`))).toBe(true);
   });
 });
