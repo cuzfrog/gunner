@@ -1,11 +1,11 @@
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
-import type { ImportedFitting } from "../fitting";
+import type { FittingImport, ImportedFitting } from "../fitting";
 import { alignTime } from "../sim";
 import { isHtmlButtonElement, num, setText } from "./controlsDom";
-import { escapeHtml, formatNumber, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
+import { escapeHtml, formatNumber, propulsionOptionLabel, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
 import type { I18n } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
-import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "./settings";
+import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "./settings";
 import type { SavedFitting } from "./savedFittings";
 import type { TimeoutId, Timer } from "./timer";
 
@@ -31,13 +31,13 @@ interface SidePanelElements {
   readonly pastePopup: HTMLElement;
   readonly pasteInput: HTMLTextAreaElement;
   readonly importFitting: HTMLButtonElement;
+  readonly propulsion: HTMLSelectElement;
+  readonly propulsionOptions: HTMLElement;
+  readonly propulsionGear: HTMLButtonElement;
+  readonly propulsionVariants: HTMLElement;
 }
 
 export interface SidePanelHost {
-  currentPropulsionSelection(): PropulsionSelection | undefined;
-  currentPropulsionId(): PropulsionId | undefined;
-  currentPropulsionModule(): PropulsionModule | undefined;
-  renderPropulsionOptions(selectedId?: string): void;
   updateFittingTrigger(enabled: boolean): void;
   isFittingPopupOpen(): boolean;
   renderFittingPopup(): void;
@@ -50,6 +50,9 @@ export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
   closeAllSkillPopups(): void;
   closeAllPastePopups(): void;
+  closeAllPropulsionVariantPopups(): void;
+  closeAllFittingPopups(): void;
+  closeImportSidePopup(keepSelection: boolean): void;
   restoreAttackerTurret(): void;
   importFittingFromText(text: string): Promise<void>;
   importFitting(): Promise<void>;
@@ -61,6 +64,7 @@ export class SidePanel {
   private readonly els: SidePanelElements;
   private readonly i18n: I18n;
   private readonly ships: Ships;
+  private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly timer: Timer;
   private profileValue?: ShipProfile;
@@ -70,6 +74,7 @@ export class SidePanel {
   private lastCommittedHullValue?: string;
   private skillPopupOpen = false;
   private pastePopupOpen = false;
+  private propulsionVariantPopupOpen = false;
   private importHintTimeout?: TimeoutId;
 
   constructor({
@@ -78,6 +83,7 @@ export class SidePanel {
     els,
     i18n,
     ships,
+    fittingImport,
     imageCatalog,
     timer,
   }: {
@@ -86,6 +92,7 @@ export class SidePanel {
     els: SidePanelElements;
     i18n: I18n;
     ships: Ships;
+    fittingImport: FittingImport;
     imageCatalog: ImageCatalog;
     timer: Timer;
   }) {
@@ -94,6 +101,7 @@ export class SidePanel {
     this.els = els;
     this.i18n = i18n;
     this.ships = ships;
+    this.fittingImport = fittingImport;
     this.imageCatalog = imageCatalog;
     this.timer = timer;
   }
@@ -179,7 +187,7 @@ export class SidePanel {
     const currentProfile = this.profile;
     const isSameAsCurrent = currentProfile?.name === profile.name;
     const isGenuineChange = this.lastCommittedHull !== profile.name;
-    const propulsionId = isSameAsCurrent ? this.host.currentPropulsionSelection() : undefined;
+    const propulsionId = isSameAsCurrent ? this.currentPropulsionSelection() : undefined;
     if (!isSameAsCurrent) this.clearFittedHull();
     this.applyHull(profile, propulsionId, false, !isSameAsCurrent);
 
@@ -197,13 +205,13 @@ export class SidePanel {
 
   applyImportedFitting(summary: FittedHullSummary): void {
     this.fittedHull = summary;
-    this.host.renderPropulsionOptions(summary.propulsionId ?? "");
+    this.renderPropulsionOptions(summary.propulsionId ?? "");
     this.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
   }
 
   restoreFittingSummary(summary: FittedHullSummary): void {
     this.fittedHull = summary;
-    this.host.renderPropulsionOptions(this.host.currentPropulsionSelection() ?? "");
+    this.renderPropulsionOptions();
     this.clearImportHint();
     this.updateHullHint(this.currentFittedPropulsionModule(summary));
   }
@@ -224,7 +232,7 @@ export class SidePanel {
       this.host.closeAttackerAmmoPopup();
     }
     this.updateHullHint();
-    this.host.renderPropulsionOptions();
+    this.renderPropulsionOptions();
     if (persist) {
       this.host.persistConfigChange();
     }
@@ -260,8 +268,8 @@ export class SidePanel {
     if (!this.profile) return;
 
     const fitted = this.fittedHull;
-    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.host.currentPropulsionModule();
-    const hintModule = fitted ? this.currentFittedPropulsionModule(fitted) : this.host.currentPropulsionModule();
+    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.currentPropulsionModule();
+    const hintModule = fitted ? this.currentFittedPropulsionModule(fitted) : this.currentPropulsionModule();
     const conditions = this.skillConditions();
     const massKey: keyof ProfileParamOverrides = this.side === "attacker" ? "attackerMass" : "targetMass";
     const inertiaKey: keyof ProfileParamOverrides = this.side === "attacker" ? "attackerInertia" : "targetInertia";
@@ -297,7 +305,7 @@ export class SidePanel {
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined {
     if (!fitted.propulsionId || !fitted.propulsion) return undefined;
     if (!this.profile) return undefined;
-    const currentId = this.host.currentPropulsionId();
+    const currentId = this.currentPropulsionId();
     if (currentId === undefined) return undefined;
     if (currentId === fitted.propulsionId) return fitted.propulsion;
     return this.ships.fittingOption(this.profile, currentId);
@@ -305,7 +313,7 @@ export class SidePanel {
 
   currentFittedPropulsionModule(fitted: FittedHullSummary): PropulsionModule | undefined {
     if (!this.profile || !fitted.propulsionId) return undefined;
-    const currentId = this.host.currentPropulsionId();
+    const currentId = this.currentPropulsionId();
     if (currentId === undefined) return undefined;
     return this.ships.fittingOption(this.profile, currentId);
   }
@@ -317,7 +325,7 @@ export class SidePanel {
     const fitted = this.fittedHull;
     const conditions = this.skillConditions();
     const mass = num(this.els.mass);
-    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.host.currentPropulsionModule();
+    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.currentPropulsionModule();
     const speed = this.ships.maxSpeedForFittedMass(this.profile, fitted?.fitted, mass, propulsion, conditions);
     this.els.speed.value = formatNumber(speed);
     this.updateAlignTime();
@@ -343,7 +351,7 @@ export class SidePanel {
     this.els.hull.classList.toggle("hull-invalid", isInvalid);
   }
 
-  updateHullHint(module?: PropulsionModule): void {
+  updateHullHint(module: PropulsionModule | undefined = this.currentPropulsionModule()): void {
     if (!this.profile) {
       setText(this.els.hullHint, "");
       return;
@@ -375,13 +383,127 @@ export class SidePanel {
   }
 
   setOverloadDisabled(): void {
-    const disabled = this.host.currentPropulsionId() === undefined;
+    const disabled = this.currentPropulsionId() === undefined;
     const active = !disabled && this.els.overload.checked;
     this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));
     this.els.overload.disabled = disabled;
     this.els.overloadButton.disabled = disabled;
     this.els.overloadButton.setAttribute("aria-disabled", String(disabled));
+  }
+
+  currentPropulsionSelection(): PropulsionSelection | undefined {
+    const value = this.els.propulsion.value;
+    if (value === PROPULSION_NONE) return PROPULSION_NONE;
+    return this.ships.parsePropulsionId(value);
+  }
+
+  renderPropulsionOptions(selectedId: string = this.currentPropulsionSelection() ?? ""): void {
+    const profile = this.profile;
+    const select = this.els.propulsion;
+    const group = this.els.propulsionOptions;
+    const gear = this.els.propulsionGear;
+    select.innerHTML = "";
+    group.innerHTML = "";
+    group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
+    select.disabled = !profile;
+
+    const all = this.ships.allFittingOptions();
+    const modules = profile ? this.ships.fittingOptions(profile) : all.slice(0, 3);
+    const moduleSet = new Set(modules.map((module) => module.id));
+    const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
+    const noneRequested = selectedId === PROPULSION_NONE;
+    let selected = "";
+
+    for (const module of modules) {
+      const option = document.createElement("option");
+      option.value = module.id;
+      option.textContent = propulsionOptionLabel(module);
+      select.appendChild(option);
+      const button = this.createPropulsionButton(group, module, () => this.onPropulsionButtonClick(module.id));
+      button.disabled = !profile;
+      button.setAttribute("aria-disabled", String(!profile));
+    }
+
+    const noneOption = document.createElement("option");
+    noneOption.value = PROPULSION_NONE;
+    noneOption.hidden = true;
+    select.appendChild(noneOption);
+
+    if (profile) {
+      selected = noneRequested
+        ? PROPULSION_NONE
+        : selectedPropulsionId && moduleSet.has(selectedPropulsionId)
+          ? selectedPropulsionId
+          : (modules[0]?.id ?? "");
+    }
+
+    select.value = selected;
+    this.setPropulsionActive(selected);
+    gear.disabled = !profile || selected === PROPULSION_NONE || selected === "";
+    this.renderPropulsionVariants();
+    this.setOverloadDisabled();
+    const popup = this.els.propulsionVariants;
+    popup.hidden = true;
+    gear.setAttribute("aria-expanded", "false");
+    this.propulsionVariantPopupOpen = false;
+  }
+
+  onPropulsionChange(): void {
+    const profile = this.profile;
+    if (!profile) return;
+    const propulsionId = this.currentPropulsionId();
+    const fitted = this.fittedHull;
+    let updated: FittedHullSummary | undefined;
+    if (propulsionId) {
+      const module = this.ships.fittingOption(profile, propulsionId);
+      if (module) {
+        const propulsionName = this.defaultPropulsionName(module);
+        const propulsion = this.fittingImport.propulsionStats(propulsionName) ?? module;
+        updated = {
+          fittingName: fitted?.fittingName ?? "",
+          fitted: fitted?.fitted ?? this.nakedFitted(profile),
+          propulsionId,
+          propulsionName,
+          propulsion,
+        };
+      }
+    } else if (fitted) {
+      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsion: undefined } : undefined;
+    }
+    if (updated) {
+      this.fittedHull = updated;
+    } else if (!propulsionId && fitted && !fitted.fittingName) {
+      this.fittedHull = undefined;
+    }
+    this.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
+    this.setOverloadDisabled();
+    this.updatePropulsionVariantUI();
+    this.host.persistConfigChange();
+  }
+
+  onPropulsionGearClick(): void {
+    if (this.propulsionVariantPopupOpen) {
+      this.closePropulsionVariantPopup();
+      return;
+    }
+    this.host.closeAllPropulsionVariantPopups();
+    this.host.closeAllSkillPopups();
+    this.host.closeAllPastePopups();
+    this.host.closeAllFittingPopups();
+    this.host.closeImportSidePopup(false);
+    this.host.closeAttackerAmmoPopup();
+    this.openPropulsionVariantPopup();
+  }
+
+  closePropulsionVariantPopup(): void {
+    this.els.propulsionVariants.hidden = true;
+    this.els.propulsionGear.setAttribute("aria-expanded", "false");
+    this.propulsionVariantPopupOpen = false;
+  }
+
+  isPropulsionVariantPopupOpen(): boolean {
+    return this.propulsionVariantPopupOpen;
   }
 
   onSkillOrOverloadChange(updateInertia: boolean): void {
@@ -570,15 +692,160 @@ export class SidePanel {
     this.setHullValidation(false);
     this.host.updateFittingTrigger(true);
     if (this.host.isFittingPopupOpen()) this.host.renderFittingPopup();
-    this.host.renderPropulsionOptions(propulsionId ?? "");
+    this.renderPropulsionOptions(propulsionId ?? "");
 
     if (updateStats) {
       this.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
     } else {
-      this.updateHullHint(this.host.currentPropulsionModule());
+      this.updateHullHint();
     }
     if (persist) {
       this.host.persistConfigChange();
     }
+  }
+
+  private currentPropulsionId(): PropulsionId | undefined {
+    const selection = this.currentPropulsionSelection();
+    return selection === PROPULSION_NONE ? undefined : selection;
+  }
+
+  private currentPropulsionModule(): PropulsionModule | undefined {
+    if (!this.profile) return undefined;
+    const id = this.currentPropulsionId();
+    if (!id) return undefined;
+    return this.ships.fittingOption(this.profile, id);
+  }
+
+  private setPropulsionActive(propulsionId: string): void {
+    const select = this.els.propulsion;
+    const group = this.els.propulsionOptions;
+    select.value = propulsionId;
+    for (const button of group.children) {
+      const active = button.getAttribute("data-value") === propulsionId;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+  }
+
+  private onPropulsionButtonClick(propulsionId: string): void {
+    const profile = this.profile;
+    if (!profile) return;
+    const id = this.ships.parsePropulsionId(propulsionId);
+    if (!id || !this.ships.fittingOption(profile, id)) return;
+    const currentId = this.currentPropulsionId();
+    const next = currentId === id ? PROPULSION_NONE : id;
+    this.setPropulsionActive(next);
+    this.els.propulsion.dispatchEvent(new Event("change"));
+  }
+
+  private createPropulsionButton(container: HTMLElement, module: PropulsionModule, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("data-value", module.id);
+    button.setAttribute("aria-pressed", "false");
+    const text = propulsionOptionLabel(module);
+    button.setAttribute("title", text);
+    const iconUrl = this.imageCatalog.itemIconUrl(module.label);
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.className = "propulsion-icon";
+      icon.src = iconUrl;
+      icon.alt = "";
+      button.appendChild(icon);
+    }
+    const label = document.createElement("span");
+    label.textContent = text;
+    button.appendChild(label);
+    button.addEventListener("click", onClick);
+    container.appendChild(button);
+    return button;
+  }
+
+  private updatePropulsionVariantUI(): void {
+    const gear = this.els.propulsionGear;
+    const id = this.currentPropulsionId();
+    gear.disabled = !id;
+    this.renderPropulsionVariants();
+  }
+
+  private renderPropulsionVariants(): void {
+    const popup = this.els.propulsionVariants;
+    const module = this.currentPropulsionModule();
+    popup.innerHTML = "";
+    if (!module) return;
+    const fitted = this.fittedHull;
+    const currentName = fitted?.propulsionName ?? this.defaultPropulsionName(module);
+    for (const name of this.fittingImport.propulsionVariantNames(module)) {
+      const iconUrl = this.imageCatalog.itemIconUrl(name);
+      const item = this.createVariantButton(name, currentName, iconUrl, () => this.onPropulsionVariantClick(name));
+      item.setAttribute("data-value", name);
+      item.setAttribute("title", name);
+      popup.appendChild(item);
+    }
+  }
+
+  private onPropulsionVariantClick(name: string): void {
+    const profile = this.profile;
+    const propulsion = this.fittingImport.propulsionStats(name);
+    const propulsionId = this.currentPropulsionId();
+    if (!profile || !propulsion || !propulsionId) return;
+    const fitted = this.fittedHull;
+    const updated: FittedHullSummary = {
+      fittingName: fitted?.fittingName ?? "",
+      fitted: fitted?.fitted ?? this.nakedFitted(profile),
+      propulsionId,
+      propulsionName: name,
+      propulsion,
+    };
+    this.fittedHull = updated;
+    this.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
+    this.setOverloadDisabled();
+    this.renderPropulsionVariants();
+    this.host.persistConfigChange();
+  }
+
+  private openPropulsionVariantPopup(): void {
+    const popup = this.els.propulsionVariants;
+    const gear = this.els.propulsionGear;
+    this.renderPropulsionVariants();
+    popup.hidden = false;
+    gear.setAttribute("aria-expanded", "true");
+    this.propulsionVariantPopupOpen = true;
+    const active = Array.from(popup.children).find((child) => child.getAttribute("aria-current") === "true");
+    const activeButton = active && isHtmlButtonElement(active) ? active : null;
+    const firstChild = popup.firstElementChild;
+    const firstButton = firstChild && isHtmlButtonElement(firstChild) ? firstChild : null;
+    (activeButton ?? firstButton)?.focus();
+  }
+
+  private defaultPropulsionName(module: PropulsionModule): string {
+    const names = this.fittingImport.propulsionVariantNames(module);
+    return names.find((name) => name === module.label) ?? names[0] ?? module.label;
+  }
+
+  private nakedFitted(profile: ShipProfile): FittedHull {
+    return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
+  }
+
+  private createVariantButton(name: string, currentName: string, iconUrl: string | undefined, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "fitting-item";
+    button.setAttribute("role", "menuitem");
+    if (currentName === name) button.setAttribute("aria-current", "true");
+    if (iconUrl) {
+      const icon = document.createElement("img");
+      icon.className = "propulsion-icon";
+      icon.src = iconUrl;
+      icon.alt = "";
+      button.appendChild(icon);
+    }
+    const span = document.createElement("span");
+    span.className = "fitting-item-name";
+    span.textContent = name;
+    span.title = name;
+    button.appendChild(span);
+    button.addEventListener("click", onClick);
+    return button;
   }
 }
