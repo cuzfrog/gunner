@@ -31,7 +31,6 @@ export interface Els {
   readonly attackerHullHint: HTMLElement;
   readonly attackerFittingName: HTMLElement;
   readonly attackerImportFitting: HTMLButtonElement;
-  readonly attackerImportStatus: HTMLElement;
   readonly attackerPastePopup: HTMLElement;
   readonly attackerPasteInput: HTMLTextAreaElement;
   readonly attackerPropulsion: HTMLSelectElement;
@@ -69,7 +68,6 @@ export interface Els {
   readonly targetHullHint: HTMLElement;
   readonly targetFittingName: HTMLElement;
   readonly targetImportFitting: HTMLButtonElement;
-  readonly targetImportStatus: HTMLElement;
   readonly targetPastePopup: HTMLElement;
   readonly targetPasteInput: HTMLTextAreaElement;
   readonly targetPropulsion: HTMLSelectElement;

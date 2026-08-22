@@ -64,7 +64,6 @@ import {
   NEUTRAL_STAT_CONDITIONS,
   aggressivityFromPosition,
   chargeStatSuffix,
-  escapeHtml,
   formatNumber,
   formatWithCommas,
   hitChanceColor,
@@ -76,7 +75,6 @@ import {
   propulsionOptionLabel,
   settingsEqual,
   skillLevelFromString,
-  skillOptionLabel,
 } from "./controlsFormat";
 
 export interface ControlsCallbacks {
@@ -119,9 +117,6 @@ export class DomControls implements Controls {
   private callbacks?: ControlsCallbacks;
   private playing = false;
   private shareStatusTimeout?: TimeoutId;
-  private readonly importHintTimeouts: { attacker?: TimeoutId; target?: TimeoutId } = { attacker: undefined, target: undefined };
-  private openSkillSide: "attacker" | "target" | null = null;
-  private openPasteSide: "attacker" | "target" | null = null;
   private openFittingSide: "attacker" | "target" | null = null;
   private openPropulsionVariantSide: "attacker" | "target" | null = null;
   private importSidePopupOpen = false;
@@ -223,7 +218,6 @@ export class DomControls implements Controls {
       attackerHullHint: el("attacker-hull-hint"),
       attackerFittingName: el("attacker-fitting-name"),
       attackerImportFitting: elOf("attacker-import-fitting", isHtmlButtonElement),
-      attackerImportStatus: el("attacker-import-status"),
       attackerPastePopup: el("attacker-paste-popup"),
       attackerPasteInput: elOf("attacker-paste-input", isHtmlTextAreaElement),
       attackerPropulsion: elOf("attacker-propulsion", isHtmlSelectElement),
@@ -261,7 +255,6 @@ export class DomControls implements Controls {
       targetHullHint: el("target-hull-hint"),
       targetFittingName: el("target-fitting-name"),
       targetImportFitting: elOf("target-import-fitting", isHtmlButtonElement),
-      targetImportStatus: el("target-import-status"),
       targetPastePopup: el("target-paste-popup"),
       targetPasteInput: elOf("target-paste-input", isHtmlTextAreaElement),
       targetPropulsion: elOf("target-propulsion", isHtmlSelectElement),
@@ -335,10 +328,21 @@ export class DomControls implements Controls {
         alignTime: this.els.attackerAlignTime,
         mode: this.els.attackerMode,
         range: this.els.attackerRange,
+        skills: this.els.attackerSkills,
+        skillOptions: this.els.attackerSkillOptions,
+        skillSummary: this.els.attackerSkillSummary,
+        skillTrigger: this.els.attackerSkillTrigger,
+        skillPopup: this.els.attackerSkillPopup,
+        overload: this.els.attackerOverload,
+        overloadButton: this.els.attackerOverloadButton,
+        pastePopup: this.els.attackerPastePopup,
+        pasteInput: this.els.attackerPasteInput,
+        importFitting: this.els.attackerImportFitting,
       },
       i18n: this.i18n,
       ships: this.ships,
       imageCatalog: this.imageCatalog,
+      timer: this.timer,
     });
     this.targetSide = new SidePanel({
       side: "target",
@@ -355,16 +359,27 @@ export class DomControls implements Controls {
         mode: this.els.targetMode,
         range: this.els.targetRange,
         targetSig: this.els.targetSig,
+        skills: this.els.targetSkills,
+        skillOptions: this.els.targetSkillOptions,
+        skillSummary: this.els.targetSkillSummary,
+        skillTrigger: this.els.targetSkillTrigger,
+        skillPopup: this.els.targetSkillPopup,
+        overload: this.els.targetOverload,
+        overloadButton: this.els.targetOverloadButton,
+        pastePopup: this.els.targetPastePopup,
+        pasteInput: this.els.targetPasteInput,
+        importFitting: this.els.targetImportFitting,
       },
       i18n: this.i18n,
       ships: this.ships,
       imageCatalog: this.imageCatalog,
+      timer: this.timer,
     });
 
     this.renderAttackerAmmo();
     this.populateHullDatalist();
-    this.renderSkillOptions("attacker");
-    this.renderSkillOptions("target");
+    this.attackerSide.renderSkillOptions();
+    this.targetSide.renderSkillOptions();
 
     this.restoreSavedState();
     this.bind();
@@ -381,7 +396,6 @@ export class DomControls implements Controls {
       currentPropulsionSelection: () => this.currentPropulsionSelection(side),
       currentPropulsionId: () => this.currentPropulsionId(side),
       currentPropulsionModule: () => this.currentPropulsionModule(side),
-      skillConditions: () => this.skillConditions(side),
       renderPropulsionOptions: (selectedId) => this.renderPropulsionOptions(side, selectedId ?? ""),
       updateFittingTrigger: (enabled) => this.updateFittingTrigger(side, enabled),
       isFittingPopupOpen: () => this.openFittingSide === side,
@@ -392,7 +406,6 @@ export class DomControls implements Controls {
         if (this.openFittingSide === side) this.closeFittingPopup(side);
       },
       hidePreview: () => this.hidePreview(side),
-      clearImportHint: () => this.clearImportHint(side),
       closeAttackerAmmoPopup: () => {
         if (this.openAmmo) this.closeAttackerAmmoPopup();
       },
@@ -401,7 +414,14 @@ export class DomControls implements Controls {
       },
       importEftFitting: (text, persist) => this.importEftFitting(side, text, persist),
       mostRecentFittingFor: (hullName) => this.savedFittings.mostRecentFor(hullName),
-      persistConfigChange: () => this.persistConfigChange(),
+      persistConfigChange: (notify) => this.persistConfigChange(notify),
+      closeAllSkillPopups: () => this.closeAllSkillPopups(),
+      closeAllPastePopups: () => this.closeAllPastePopups(),
+      restoreAttackerTurret: () => {
+        if (side === "attacker") this.restoreAttackerTurret();
+      },
+      importFittingFromText: (text) => this.importFittingFromText(side, text),
+      importFitting: () => this.importFitting(side),
     };
   }
 
@@ -415,10 +435,10 @@ export class DomControls implements Controls {
     this.renderSigResIcons();
   }
 
-  private persistConfigChange(): void {
+  private persistConfigChange(notify = true): void {
     this.savePreferences();
     this.updateSaveButtonState();
-    this.callbacks?.onConfigChange();
+    if (notify) this.callbacks?.onConfigChange();
   }
 
   private restoreSavedState(): void {
@@ -440,8 +460,8 @@ export class DomControls implements Controls {
     }
     this.i18n.translateDocument();
     this.setDefaultSkillAndOverload();
-    this.setOverloadDisabled("attacker");
-    this.setOverloadDisabled("target");
+    this.attackerSide.setOverloadDisabled();
+    this.targetSide.setOverloadDisabled();
     this.updateUnitToggle();
     this.updateLanguageToggle();
     this.setBestInitialDistance();
@@ -683,12 +703,12 @@ export class DomControls implements Controls {
     this.targetSide.loadHull(settings.targetHull, settings.targetPropulsion);
 
     this.i18n.translateDocument();
-    this.renderSkillOptions("attacker", settings.attackerSkillLevel ?? 5);
-    this.renderSkillOptions("target", settings.targetSkillLevel ?? 5);
-    this.setOverloadActive("attacker", settings.attackerOverload ?? true);
-    this.setOverloadActive("target", settings.targetOverload ?? true);
-    this.setOverloadDisabled("attacker");
-    this.setOverloadDisabled("target");
+    this.attackerSide.renderSkillOptions(settings.attackerSkillLevel ?? 5);
+    this.targetSide.renderSkillOptions(settings.targetSkillLevel ?? 5);
+    this.attackerSide.setOverloadActive(settings.attackerOverload ?? true);
+    this.targetSide.setOverloadActive(settings.targetOverload ?? true);
+    this.attackerSide.setOverloadDisabled();
+    this.targetSide.setOverloadDisabled();
 
     this.restoreAttackerTurret();
 
@@ -789,8 +809,8 @@ export class DomControls implements Controls {
     this.renderProfiles(selected);
     this.renderAllPropulsionOptions();
     this.renderSigResIcons();
-    this.clearImportHint("attacker");
-    this.clearImportHint("target");
+    this.attackerSide.clearImportHint();
+    this.targetSide.clearImportHint();
     this.populateHullDatalist();
     this.attackerSide.refreshHullInputs();
     this.targetSide.refreshHullInputs();
@@ -798,8 +818,8 @@ export class DomControls implements Controls {
     this.refreshPreview();
     this.attackerSide.updateHullHint(this.currentPropulsionModule("attacker"));
     this.targetSide.updateHullHint(this.currentPropulsionModule("target"));
-    this.renderSkillOptions("attacker");
-    this.renderSkillOptions("target");
+    this.attackerSide.renderSkillOptions();
+    this.targetSide.renderSkillOptions();
     this.hintRotator.refresh();
     this.setPlaying(this.playing);
     this.savePreferences();
@@ -893,34 +913,36 @@ export class DomControls implements Controls {
   }
 
   private async importFitting(side: "attacker" | "target"): Promise<void> {
-    if (this.openPasteSide === side) {
-      this.closePastePopup(side);
+    const panel = this.side(side);
+    if (panel.isPastePopupOpen()) {
+      panel.closePastePopup();
       return;
     }
-    if (this.openPasteSide !== null) this.closeAllPastePopups();
+    if (this.attackerSide.isPastePopupOpen() || this.targetSide.isPastePopupOpen()) this.closeAllPastePopups();
     let text: string;
     try {
       text = await this.clipboard.readText();
     } catch (error) {
       if (error instanceof ClipboardUnavailableError) {
-        this.openPastePopup(side);
+        panel.openPastePopup();
         return;
       }
-      this.clearImportHintTimeout(side);
-      this.showImportHint(side, "status.clipboardDenied", true);
+      panel.clearImportHintTimeout();
+      panel.showImportHint("status.clipboardDenied", true);
       return;
     }
     await this.importFittingFromText(side, text);
   }
 
   private async importFittingFromText(side: "attacker" | "target", text: string): Promise<void> {
-    this.clearImportHintTimeout(side);
+    const panel = this.side(side);
+    panel.clearImportHintTimeout();
     const trimmed = text.trimStart();
     if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
       const parsed = parseProfile(trimmed);
       const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
       if (fitting === undefined) {
-        this.showImportHint(side, "status.fittingInvalid", true);
+        panel.showImportHint("status.fittingInvalid", true);
         return;
       }
       const imported = this.importEftFitting(side, fitting);
@@ -936,13 +958,13 @@ export class DomControls implements Controls {
   }
 
   private importEftFitting(side: "attacker" | "target", text: string, persist = true): ImportedFitting | undefined {
-    const conditions = this.skillConditions(side);
+    const panel = this.side(side);
+    const conditions = panel.skillConditions();
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
-      this.showImportHint(side, "status.fittingInvalid", true);
+      panel.showImportHint("status.fittingInvalid", true);
       return undefined;
     }
-    const panel = this.side(side);
     panel.clearFittedHull();
     panel.fittingText = text;
     panel.overrides = {};
@@ -955,7 +977,7 @@ export class DomControls implements Controls {
       this.updateSaveButtonState();
       this.callbacks?.onConfigChange();
     }
-    this.showImportHint(side, "status.fittingImported");
+    panel.showImportHint("status.fittingImported");
     return imported;
   }
 
@@ -1053,34 +1075,6 @@ export class DomControls implements Controls {
     };
   }
 
-  private showImportHint(side: "attacker" | "target", key: string, isError = false): void {
-    this.clearImportHintTimeout(side);
-    const element = this.els[`${side}FittingName`];
-    element.classList.toggle("error", isError);
-    element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
-    element.hidden = false;
-    this.importHintTimeouts[side] = this.timer.setTimeout(() => {
-      this.importHintTimeouts[side] = undefined;
-      this.clearImportHint(side);
-    }, 5000);
-  }
-
-  private clearImportHint(side: "attacker" | "target"): void {
-    this.clearImportHintTimeout(side);
-    const element = this.els[`${side}FittingName`];
-    element.classList.toggle("error", false);
-    element.innerHTML = "";
-    element.hidden = true;
-  }
-
-  private clearImportHintTimeout(side: "attacker" | "target"): void {
-    const timeout = this.importHintTimeouts[side];
-    if (timeout) {
-      this.timer.clearTimeout(timeout);
-      this.importHintTimeouts[side] = undefined;
-    }
-  }
-
   private async copyProfile(): Promise<void> {
     try {
       await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
@@ -1116,13 +1110,13 @@ export class DomControls implements Controls {
     this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
     this.els.profileName.addEventListener("input", () => this.updateSaveButtonState());
 
-    this.els.attackerImportFitting.addEventListener("click", () => this.importFitting("attacker"));
-    this.els.targetImportFitting.addEventListener("click", () => this.importFitting("target"));
+    this.els.attackerImportFitting.addEventListener("click", () => this.attackerSide.onImportFittingClick());
+    this.els.targetImportFitting.addEventListener("click", () => this.targetSide.onImportFittingClick());
 
     const attackerPastePopup = this.els.attackerPastePopup;
     const targetPastePopup = this.els.targetPastePopup;
-    attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "attacker"));
-    targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event, "target"));
+    attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.attackerSide.onPastePopupPaste(event));
+    targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.targetSide.onPastePopupPaste(event));
 
     this.els.attackerHull.addEventListener("input", () => this.attackerSide.onHullInput());
     this.els.attackerHull.addEventListener("change", () => this.attackerSide.onHullChange());
@@ -1132,21 +1126,21 @@ export class DomControls implements Controls {
     this.els.attackerAmmoExpand.addEventListener("click", () => this.onAttackerAmmoExpandClick());
     this.els.attackerPropulsion.addEventListener("change", () => this.onPropulsionChange("attacker"));
     this.els.attackerPropulsionGear.addEventListener("click", () => this.onPropulsionGearClick("attacker"));
-    this.els.attackerSkills.addEventListener("change", () => this.onSkillOrOverloadChange("attacker", true));
-    this.els.attackerOverload.addEventListener("change", () => this.onSkillOrOverloadChange("attacker", false));
-    this.els.attackerOverloadButton.addEventListener("click", () => this.onOverloadButtonClick("attacker"));
+    this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
+    this.els.attackerOverload.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(false));
+    this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.onOverloadButtonClick());
     this.els.targetHull.addEventListener("input", () => this.targetSide.onHullInput());
     this.els.targetHull.addEventListener("change", () => this.targetSide.onHullChange());
     this.els.targetFittingTrigger.addEventListener("click", () => this.toggleFittingPopup("target"));
     this.els.targetFittingEye.addEventListener("click", () => this.toggleFittingPreview("target"));
     this.els.targetPropulsion.addEventListener("change", () => this.onPropulsionChange("target"));
     this.els.targetPropulsionGear.addEventListener("click", () => this.onPropulsionGearClick("target"));
-    this.els.targetSkills.addEventListener("change", () => this.onSkillOrOverloadChange("target", true));
-    this.els.targetOverload.addEventListener("change", () => this.onSkillOrOverloadChange("target", false));
-    this.els.targetOverloadButton.addEventListener("click", () => this.onOverloadButtonClick("target"));
+    this.els.targetSkills.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(true));
+    this.els.targetOverload.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(false));
+    this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.onOverloadButtonClick());
 
-    this.els.attackerSkillTrigger.addEventListener("click", () => this.toggleSkillPopup("attacker"));
-    this.els.targetSkillTrigger.addEventListener("click", () => this.toggleSkillPopup("target"));
+    this.els.attackerSkillTrigger.addEventListener("click", () => this.attackerSide.toggleSkillPopup());
+    this.els.targetSkillTrigger.addEventListener("click", () => this.targetSide.toggleSkillPopup());
 
     this.bindChoiceGroup(this.els.sigResOptions, this.els.sigRes, ["S", "M", "L", "XL"]);
 
@@ -1285,7 +1279,7 @@ export class DomControls implements Controls {
       return;
     }
 
-    const conditions = this.skillConditions(side);
+    const conditions = this.side(side).skillConditions();
     const saved = this.savedFittings.listForHull(profile.name);
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
@@ -1693,7 +1687,7 @@ export class DomControls implements Controls {
       this.renderSigResIcons();
       return;
     }
-    const imported = this.fittingImport.importFitting(this.attackerSide.fittingText, this.skillConditions("attacker"));
+    const imported = this.fittingImport.importFitting(this.attackerSide.fittingText, this.attackerSide.skillConditions());
     if (!imported?.turret) {
       this.attackerTurret = undefined;
       this.attackerCargoCharges = [];
@@ -1771,7 +1765,7 @@ export class DomControls implements Controls {
       else this.targetSide.fittedHull = undefined;
     }
     this.side(side).updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
-    this.setOverloadDisabled(side);
+    this.side(side).setOverloadDisabled();
     this.updatePropulsionVariantUI(side);
     this.updateSaveButtonState();
     this.savePreferences();
@@ -1917,33 +1911,11 @@ export class DomControls implements Controls {
     this.setPropulsionActive(side, selected);
     gear.disabled = !profile || selected === PROPULSION_NONE || selected === "";
     this.renderPropulsionVariants(side);
-    this.setOverloadDisabled(side);
+    this.side(side).setOverloadDisabled();
     const popup = this.els[`${side}PropulsionVariants`];
     popup.hidden = true;
     gear.setAttribute("aria-expanded", "false");
     if (this.openPropulsionVariantSide === side) this.openPropulsionVariantSide = null;
-  }
-
-  private skillConditions(side: "attacker" | "target"): { skillLevel: SkillLevel; overloaded: boolean } {
-    const skill = side === "attacker" ? this.els.attackerSkills : this.els.targetSkills;
-    const overload = side === "attacker" ? this.els.attackerOverload : this.els.targetOverload;
-    return {
-      skillLevel: skillLevelFromString(skill.value),
-      overloaded: overload.checked,
-    };
-  }
-
-  private setOverloadDisabled(side: "attacker" | "target"): void {
-    const propulsion = this.els[`${side}Propulsion`];
-    const overload = this.els[`${side}Overload`];
-    const button = this.els[`${side}OverloadButton`];
-    const disabled = this.currentPropulsionId(side) === undefined || propulsion.disabled;
-    const active = !disabled && overload.checked;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-    overload.disabled = disabled;
-    button.disabled = disabled;
-    button.setAttribute("aria-disabled", String(disabled));
   }
 
   private recordOverrideForDisplayInput(id: keyof typeof this.els): void {
@@ -1963,113 +1935,19 @@ export class DomControls implements Controls {
     if (id === "targetInertia") this.targetSide.recordOverride("targetInertia", num(this.els.targetInertia));
   }
 
-  private onSkillOrOverloadChange(side: "attacker" | "target", updateInertia: boolean): void {
-    this.side(side).updateShipStats({ updateInertia, updateMass: false, updateSig: false });
-    if (side === "attacker" && this.attackerSide.profile && this.attackerSide.fittingText) {
-      this.restoreAttackerTurret();
-    }
-    this.updateSaveButtonState();
-    this.savePreferences();
-    if (side === "attacker" && !this.attackerSide.profile) return;
-    if (side === "target" && !this.targetSide.profile) return;
-    this.callbacks?.onConfigChange();
-  }
-
   private setDefaultSkillAndOverload(): void {
-    this.setSkillLevel("attacker", 5);
-    this.setSkillLevel("target", 5);
-    this.setOverloadActive("attacker", true);
-    this.setOverloadActive("target", true);
-  }
-
-  private setSkillLevel(side: "attacker" | "target", level: SkillLevel): void {
-    this.els[`${side}Skills`].value = String(level);
-    this.setSkillActive(side, level);
-  }
-
-  private setSkillActive(side: "attacker" | "target", level: SkillLevel): void {
-    const group = this.els[`${side}SkillOptions`];
-    const value = String(level);
-    for (const button of group.children) {
-      const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    }
-    const summary = skillOptionLabel(this.i18n, level);
-    setText(this.els[`${side}SkillSummary`], summary);
-  }
-
-  private toggleSkillPopup(side: "attacker" | "target"): void {
-    if (this.openSkillSide === side) {
-      this.closeSkillPopup(side);
-      return;
-    }
-    if (this.openSkillSide !== null && this.openSkillSide !== side) {
-      this.closeSkillPopup(this.openSkillSide);
-    }
-    if (this.openAmmo) this.closeAttackerAmmoPopup();
-    this.openSkillPopup(side);
-  }
-
-  private openSkillPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}SkillPopup`];
-    const trigger = this.els[`${side}SkillTrigger`];
-    popup.hidden = false;
-    trigger.setAttribute("aria-expanded", "true");
-    this.openSkillSide = side;
-    const active = Array.from(this.els[`${side}SkillOptions`].children).find(
-      (button) => button.getAttribute("aria-pressed") === "true",
-    );
-    const activeButton = active && isHtmlButtonElement(active) ? active : undefined;
-    activeButton?.focus();
-  }
-
-  private closeSkillPopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}SkillPopup`];
-    const trigger = this.els[`${side}SkillTrigger`];
-    popup.hidden = true;
-    trigger.setAttribute("aria-expanded", "false");
-    if (this.openSkillSide === side) this.openSkillSide = null;
-  }
-
-  private closeAllSkillPopups(): void {
-    if (this.openSkillSide) this.closeSkillPopup(this.openSkillSide);
-  }
-
-  private openPastePopup(side: "attacker" | "target"): void {
-    if (this.openPasteSide !== null && this.openPasteSide !== side) this.closeAllPastePopups();
-    if (this.openAmmo) this.closeAttackerAmmoPopup();
-    const popup = this.els[`${side}PastePopup`];
-    const input = this.els[`${side}PasteInput`];
-    popup.hidden = false;
-    this.openPasteSide = side;
-    input.focus();
-  }
-
-  private closePastePopup(side: "attacker" | "target"): void {
-    const popup = this.els[`${side}PastePopup`];
-    const input = this.els[`${side}PasteInput`];
-    popup.hidden = true;
-    input.blur();
-    if (this.openPasteSide === side) this.openPasteSide = null;
-  }
-
-  private closeAllPastePopups(): void {
-    if (this.openPasteSide) this.closePastePopup(this.openPasteSide);
-  }
-
-  private onPastePopupPaste(event: ClipboardEvent, side: "attacker" | "target"): void {
-    const text = event.clipboardData?.getData("text/plain");
-    if (!text) return;
-    event.preventDefault();
-    this.closePastePopup(side);
-    void this.importFittingFromText(side, text);
+    this.attackerSide.setSkillLevel(5);
+    this.targetSide.setSkillLevel(5);
+    this.attackerSide.setOverloadActive(true);
+    this.targetSide.setOverloadActive(true);
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
     const hasOpenPopup =
-      this.openSkillSide !== null ||
-      this.openPasteSide !== null ||
+      this.attackerSide.isSkillPopupOpen() ||
+      this.targetSide.isSkillPopupOpen() ||
+      this.attackerSide.isPastePopupOpen() ||
+      this.targetSide.isPastePopupOpen() ||
       this.openFittingSide !== null ||
       this.openPropulsionVariantSide !== null ||
       this.importSidePopupOpen ||
@@ -2078,11 +1956,11 @@ export class DomControls implements Controls {
     if (!hasOpenPopup) return;
     const target = event.target;
     if (!isEventTargetWithClosest(target)) return;
-    if (this.openSkillSide !== null) {
+    if (this.attackerSide.isSkillPopupOpen() || this.targetSide.isSkillPopupOpen()) {
       const insideSkill = target.closest("#attacker-skill-field, #target-skill-field");
       if (!insideSkill) this.closeAllSkillPopups();
     }
-    if (this.openPasteSide !== null) {
+    if (this.attackerSide.isPastePopupOpen() || this.targetSide.isPastePopupOpen()) {
       const insidePaste = target.closest("#attacker-paste-popup, #target-paste-popup, #attacker-import-fitting, #target-import-fitting");
       if (!insidePaste) this.closeAllPastePopups();
     }
@@ -2119,15 +1997,19 @@ export class DomControls implements Controls {
       this.hidePreview(side);
       eye.focus();
     }
-    if (this.openSkillSide !== null) {
-      const side = this.openSkillSide;
-      this.closeSkillPopup(side);
-      this.els[`${side}SkillTrigger`].focus();
+    if (this.attackerSide.isSkillPopupOpen()) {
+      this.attackerSide.closeSkillPopup();
+      this.els.attackerSkillTrigger.focus();
+    } else if (this.targetSide.isSkillPopupOpen()) {
+      this.targetSide.closeSkillPopup();
+      this.els.targetSkillTrigger.focus();
     }
-    if (this.openPasteSide !== null) {
-      const side = this.openPasteSide;
-      this.closePastePopup(side);
-      this.els[`${side}ImportFitting`].focus();
+    if (this.attackerSide.isPastePopupOpen()) {
+      this.attackerSide.closePastePopup();
+      this.els.attackerImportFitting.focus();
+    } else if (this.targetSide.isPastePopupOpen()) {
+      this.targetSide.closePastePopup();
+      this.els.targetImportFitting.focus();
     }
     if (this.openFittingSide !== null) {
       const side = this.openFittingSide;
@@ -2147,12 +2029,14 @@ export class DomControls implements Controls {
     }
   }
 
-  private setOverloadActive(side: "attacker" | "target", active: boolean): void {
-    const input = this.els[`${side}Overload`];
-    const button = this.els[`${side}OverloadButton`];
-    input.checked = active;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
+  private closeAllSkillPopups(): void {
+    this.attackerSide.closeSkillPopup();
+    this.targetSide.closeSkillPopup();
+  }
+
+  private closeAllPastePopups(): void {
+    this.attackerSide.closePastePopup();
+    this.targetSide.closePastePopup();
   }
 
   private setPropulsionActive(side: "attacker" | "target", propulsionId: string): void {
@@ -2166,14 +2050,6 @@ export class DomControls implements Controls {
     }
   }
 
-  private currentSkillLevel(side: "attacker" | "target"): SkillLevel | undefined {
-    const value = this.els[`${side}Skills`].value;
-    if (value === "") return undefined;
-    const level = skillLevelFromString(value);
-    if (level === 0 && value !== "0") return undefined;
-    return level;
-  }
-
   private onPropulsionButtonClick(side: "attacker" | "target", propulsionId: string): void {
     const profile = side === "attacker" ? this.attackerSide.profile : this.targetSide.profile;
     if (!profile) return;
@@ -2183,32 +2059,6 @@ export class DomControls implements Controls {
     const next = currentId === id ? PROPULSION_NONE : id;
     this.setPropulsionActive(side, next);
     this.els[`${side}Propulsion`].dispatchEvent(new Event("change"));
-  }
-
-  private onSkillButtonClick(side: "attacker" | "target", level: SkillLevel): void {
-    this.setSkillActive(side, level);
-    this.els[`${side}Skills`].value = String(level);
-    this.els[`${side}Skills`].dispatchEvent(new Event("change"));
-    this.closeSkillPopup(side);
-    this.els[`${side}SkillTrigger`].focus();
-  }
-
-  private onOverloadButtonClick(side: "attacker" | "target"): void {
-    const input = this.els[`${side}Overload`];
-    this.setOverloadActive(side, !input.checked);
-    input.dispatchEvent(new Event("change"));
-  }
-
-  private createButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.setAttribute("data-value", value);
-    button.setAttribute("aria-pressed", "false");
-    button.textContent = text;
-    button.setAttribute("title", text);
-    button.addEventListener("click", onClick);
-    container.appendChild(button);
-    return button;
   }
 
   private createPropulsionButton(container: HTMLElement, module: PropulsionModule, onClick: () => void): HTMLButtonElement {
@@ -2232,33 +2082,6 @@ export class DomControls implements Controls {
     button.addEventListener("click", onClick);
     container.appendChild(button);
     return button;
-  }
-
-  private createPlaceholderButton(container: HTMLElement): HTMLButtonElement {
-    const button = this.createButton(container, "placeholder", "—", () => {});
-    button.disabled = true;
-    button.setAttribute("aria-disabled", "true");
-    return button;
-  }
-
-  private renderSkillOptions(side: "attacker" | "target", selectedValue: SkillLevel = this.currentSkillLevel(side) ?? 5): void {
-    const select = this.els[`${side}Skills`];
-    const group = this.els[`${side}SkillOptions`];
-    const selected = String(selectedValue);
-    select.innerHTML = "";
-    group.innerHTML = "";
-    group.setAttribute("aria-label", this.i18n.t("label.skillLevel"));
-    for (let level = 0; level <= 5; level++) {
-      const skill = skillLevelFromString(String(level));
-      const option = document.createElement("option");
-      option.value = String(level);
-      option.textContent = skillOptionLabel(this.i18n, skill);
-      select.appendChild(option);
-      const button = this.createButton(group, String(level), String(level), () => this.onSkillButtonClick(side, skill));
-      button.title = skillOptionLabel(this.i18n, skill);
-    }
-    select.value = selected;
-    this.setSkillActive(side, skillLevelFromString(selected));
   }
 
   private bindChoiceGroup(group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): void {

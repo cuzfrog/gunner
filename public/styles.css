@@ -958,19 +958,6 @@ body {
   letter-spacing: 0;
 }
 
-.hull-label-row .import-status {
-  font-size: 10px;
-  color: var(--text-dim);
-}
-
-.hull-label-row .import-status.error {
-  color: var(--danger-red);
-}
-
-.hull-label-row .import-status:empty {
-  display: none;
-}
-
 .paste-popup {
   position: absolute;
   top: calc(100% + 4px);

@@ -1,12 +1,13 @@
-import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import type { ImportedFitting } from "../fitting";
 import { alignTime } from "../sim";
-import { num, setText } from "./controlsDom";
-import { formatNumber } from "./controlsFormat";
+import { isHtmlButtonElement, num, setText } from "./controlsDom";
+import { escapeHtml, formatNumber, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
 import type { I18n } from "./i18n";
 import type { ImageCatalog } from "./imageCatalog";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "./settings";
 import type { SavedFitting } from "./savedFittings";
+import type { TimeoutId, Timer } from "./timer";
 
 interface SidePanelElements {
   readonly hull: HTMLInputElement;
@@ -20,25 +21,38 @@ interface SidePanelElements {
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
   readonly targetSig?: HTMLInputElement;
+  readonly skills: HTMLSelectElement;
+  readonly skillOptions: HTMLElement;
+  readonly skillSummary: HTMLElement;
+  readonly skillTrigger: HTMLButtonElement;
+  readonly skillPopup: HTMLElement;
+  readonly overload: HTMLInputElement;
+  readonly overloadButton: HTMLButtonElement;
+  readonly pastePopup: HTMLElement;
+  readonly pasteInput: HTMLTextAreaElement;
+  readonly importFitting: HTMLButtonElement;
 }
 
 export interface SidePanelHost {
   currentPropulsionSelection(): PropulsionSelection | undefined;
   currentPropulsionId(): PropulsionId | undefined;
   currentPropulsionModule(): PropulsionModule | undefined;
-  skillConditions(): { skillLevel: SkillLevel; overloaded: boolean };
   renderPropulsionOptions(selectedId?: string): void;
   updateFittingTrigger(enabled: boolean): void;
   isFittingPopupOpen(): boolean;
   renderFittingPopup(): void;
   closeFittingPopup(): void;
   hidePreview(): void;
-  clearImportHint(): void;
   closeAttackerAmmoPopup(): void;
   onAttackerFittedHullCleared(): void;
   importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
   mostRecentFittingFor(hullName: string): SavedFitting | undefined;
-  persistConfigChange(): void;
+  persistConfigChange(notify?: boolean): void;
+  closeAllSkillPopups(): void;
+  closeAllPastePopups(): void;
+  restoreAttackerTurret(): void;
+  importFittingFromText(text: string): Promise<void>;
+  importFitting(): Promise<void>;
 }
 
 export class SidePanel {
@@ -48,11 +62,15 @@ export class SidePanel {
   private readonly i18n: I18n;
   private readonly ships: Ships;
   private readonly imageCatalog: ImageCatalog;
+  private readonly timer: Timer;
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
   private fittingTextValue?: string;
   private overridesValue: Partial<ProfileParamOverrides> = {};
   private lastCommittedHullValue?: string;
+  private skillPopupOpen = false;
+  private pastePopupOpen = false;
+  private importHintTimeout?: TimeoutId;
 
   constructor({
     side,
@@ -61,6 +79,7 @@ export class SidePanel {
     i18n,
     ships,
     imageCatalog,
+    timer,
   }: {
     side: "attacker" | "target";
     host: SidePanelHost;
@@ -68,6 +87,7 @@ export class SidePanel {
     i18n: I18n;
     ships: Ships;
     imageCatalog: ImageCatalog;
+    timer: Timer;
   }) {
     this.side = side;
     this.host = host;
@@ -75,6 +95,7 @@ export class SidePanel {
     this.i18n = i18n;
     this.ships = ships;
     this.imageCatalog = imageCatalog;
+    this.timer = timer;
   }
 
   get profile(): ShipProfile | undefined {
@@ -183,7 +204,7 @@ export class SidePanel {
   restoreFittingSummary(summary: FittedHullSummary): void {
     this.fittedHull = summary;
     this.host.renderPropulsionOptions(this.host.currentPropulsionSelection() ?? "");
-    this.host.clearImportHint();
+    this.clearImportHint();
     this.updateHullHint(this.currentFittedPropulsionModule(summary));
   }
 
@@ -217,7 +238,7 @@ export class SidePanel {
       this.host.onAttackerFittedHullCleared();
     }
     this.host.hidePreview();
-    this.host.clearImportHint();
+    this.clearImportHint();
   }
 
   updateShipImage(): void {
@@ -241,7 +262,7 @@ export class SidePanel {
     const fitted = this.fittedHull;
     const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.host.currentPropulsionModule();
     const hintModule = fitted ? this.currentFittedPropulsionModule(fitted) : this.host.currentPropulsionModule();
-    const conditions = this.host.skillConditions();
+    const conditions = this.skillConditions();
     const massKey: keyof ProfileParamOverrides = this.side === "attacker" ? "attackerMass" : "targetMass";
     const inertiaKey: keyof ProfileParamOverrides = this.side === "attacker" ? "attackerInertia" : "targetInertia";
     const speedKey: keyof ProfileParamOverrides = this.side === "attacker" ? "attackerSpeed" : "targetSpeed";
@@ -294,7 +315,7 @@ export class SidePanel {
     if (this.isOverridden(speedKey)) return;
     if (!this.profile) return;
     const fitted = this.fittedHull;
-    const conditions = this.host.skillConditions();
+    const conditions = this.skillConditions();
     const mass = num(this.els.mass);
     const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.host.currentPropulsionModule();
     const speed = this.ships.maxSpeedForFittedMass(this.profile, fitted?.fitted, mass, propulsion, conditions);
@@ -344,6 +365,196 @@ export class SidePanel {
 
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void {
     this.overridesValue[key] = value;
+  }
+
+  skillConditions(): StatConditions {
+    return {
+      skillLevel: skillLevelFromString(this.els.skills.value),
+      overloaded: this.els.overload.checked,
+    };
+  }
+
+  setOverloadDisabled(): void {
+    const disabled = this.host.currentPropulsionId() === undefined;
+    const active = !disabled && this.els.overload.checked;
+    this.els.overloadButton.classList.toggle("active", active);
+    this.els.overloadButton.setAttribute("aria-pressed", String(active));
+    this.els.overload.disabled = disabled;
+    this.els.overloadButton.disabled = disabled;
+    this.els.overloadButton.setAttribute("aria-disabled", String(disabled));
+  }
+
+  onSkillOrOverloadChange(updateInertia: boolean): void {
+    this.updateShipStats({ updateInertia, updateMass: false, updateSig: false });
+    if (this.side === "attacker" && this.profile && this.fittingText) {
+      this.host.restoreAttackerTurret();
+    }
+    this.host.persistConfigChange(this.profile !== undefined);
+  }
+
+  setSkillLevel(level: SkillLevel): void {
+    this.els.skills.value = String(level);
+    this.setSkillActive(level);
+  }
+
+  setSkillActive(level: SkillLevel): void {
+    const group = this.els.skillOptions;
+    const value = String(level);
+    for (const button of group.children) {
+      const active = button.getAttribute("data-value") === value;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+    const summary = skillOptionLabel(this.i18n, level);
+    setText(this.els.skillSummary, summary);
+  }
+
+  toggleSkillPopup(): void {
+    if (this.isSkillPopupOpen()) {
+      this.closeSkillPopup();
+      return;
+    }
+    this.host.closeAllSkillPopups();
+    this.host.closeAttackerAmmoPopup();
+    this.openSkillPopup();
+  }
+
+  openSkillPopup(): void {
+    const popup = this.els.skillPopup;
+    const trigger = this.els.skillTrigger;
+    popup.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    this.skillPopupOpen = true;
+    const active = Array.from(this.els.skillOptions.children).find((button) => button.getAttribute("aria-pressed") === "true");
+    const activeButton = active && isHtmlButtonElement(active) ? active : undefined;
+    activeButton?.focus();
+  }
+
+  closeSkillPopup(): void {
+    this.els.skillPopup.hidden = true;
+    this.els.skillTrigger.setAttribute("aria-expanded", "false");
+    this.skillPopupOpen = false;
+  }
+
+  isSkillPopupOpen(): boolean {
+    return this.skillPopupOpen;
+  }
+
+  openPastePopup(): void {
+    this.host.closeAllPastePopups();
+    this.host.closeAttackerAmmoPopup();
+    this.els.pastePopup.hidden = false;
+    this.els.pasteInput.focus();
+    this.pastePopupOpen = true;
+  }
+
+  closePastePopup(): void {
+    this.els.pastePopup.hidden = true;
+    this.els.pasteInput.blur();
+    this.pastePopupOpen = false;
+  }
+
+  isPastePopupOpen(): boolean {
+    return this.pastePopupOpen;
+  }
+
+  onPastePopupPaste(event: ClipboardEvent): void {
+    const text = event.clipboardData?.getData("text/plain");
+    if (!text) return;
+    event.preventDefault();
+    this.closePastePopup();
+    void this.host.importFittingFromText(text);
+  }
+
+  setOverloadActive(active: boolean): void {
+    this.els.overload.checked = active;
+    this.els.overloadButton.classList.toggle("active", active);
+    this.els.overloadButton.setAttribute("aria-pressed", String(active));
+  }
+
+  onOverloadButtonClick(): void {
+    const input = this.els.overload;
+    this.setOverloadActive(!input.checked);
+    input.dispatchEvent(new Event("change"));
+  }
+
+  onSkillButtonClick(level: SkillLevel): void {
+    this.setSkillActive(level);
+    this.els.skills.value = String(level);
+    this.els.skills.dispatchEvent(new Event("change"));
+    this.closeSkillPopup();
+    this.els.skillTrigger.focus();
+  }
+
+  onImportFittingClick(): void {
+    void this.host.importFitting();
+  }
+
+  currentSkillLevel(): SkillLevel | undefined {
+    const value = this.els.skills.value;
+    if (value === "") return undefined;
+    const level = skillLevelFromString(value);
+    if (level === 0 && value !== "0") return undefined;
+    return level;
+  }
+
+  renderSkillOptions(selectedValue: SkillLevel = this.currentSkillLevel() ?? 5): void {
+    const select = this.els.skills;
+    const group = this.els.skillOptions;
+    const selected = String(selectedValue);
+    select.innerHTML = "";
+    group.innerHTML = "";
+    group.setAttribute("aria-label", this.i18n.t("label.skillLevel"));
+    for (let level = 0; level <= 5; level++) {
+      const skill = skillLevelFromString(String(level));
+      const option = document.createElement("option");
+      option.value = String(level);
+      option.textContent = skillOptionLabel(this.i18n, skill);
+      select.appendChild(option);
+      const button = this.createButton(group, String(level), String(level), () => this.onSkillButtonClick(skill));
+      button.title = skillOptionLabel(this.i18n, skill);
+    }
+    select.value = selected;
+    this.setSkillActive(skillLevelFromString(selected));
+  }
+
+  showImportHint(key: string, isError = false): void {
+    this.clearImportHintTimeout();
+    const element = this.els.fittingName;
+    element.classList.toggle("error", isError);
+    element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
+    element.hidden = false;
+    this.importHintTimeout = this.timer.setTimeout(() => {
+      this.importHintTimeout = undefined;
+      this.clearImportHint();
+    }, 5000);
+  }
+
+  clearImportHint(): void {
+    this.clearImportHintTimeout();
+    const element = this.els.fittingName;
+    element.classList.toggle("error", false);
+    element.innerHTML = "";
+    element.hidden = true;
+  }
+
+  clearImportHintTimeout(): void {
+    if (this.importHintTimeout) {
+      this.timer.clearTimeout(this.importHintTimeout);
+      this.importHintTimeout = undefined;
+    }
+  }
+
+  private createButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("data-value", value);
+    button.setAttribute("aria-pressed", "false");
+    button.textContent = text;
+    button.setAttribute("title", text);
+    button.addEventListener("click", onClick);
+    container.appendChild(button);
+    return button;
   }
 
   private applyHull(
