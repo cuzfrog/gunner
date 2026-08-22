@@ -25,6 +25,7 @@ import {
   type PresetFittings,
 } from "../fitting";
 import type { I18n, Language } from "./i18n";
+import { PALETTE } from "./palette";
 import type { ImageCatalog } from "./imageCatalog";
 import { DomFittingPreview, type FittingPreview } from "./fittingPreview";
 import type { SavedFittings } from "./savedFittings";
@@ -2694,11 +2695,11 @@ function formatWithCommas(value: number, decimals = 0): string {
 }
 
 function hitChanceColor(chance: number): string {
-  if (chance >= 0.9) return "#9cc954";
-  if (chance >= 0.5) return "#5ccbcb";
-  if (chance >= 0.25) return "#fce447";
-  if (chance >= 0.05) return "#f67c0f";
-  return "#d81f27";
+  if (chance >= 0.9) return PALETTE.optimalGreen;
+  if (chance >= 0.5) return PALETTE.accentTeal;
+  if (chance >= 0.25) return PALETTE.warnYellow;
+  if (chance >= 0.05) return PALETTE.accentOrange;
+  return PALETTE.dangerRed;
 }
 
 function propulsionOptionLabel(module: PropulsionModule): string {

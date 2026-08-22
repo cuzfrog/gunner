@@ -1,5 +1,6 @@
 import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
 import type { I18n } from "./i18n";
+import { PALETTE, withAlpha } from "./palette";
 
 export interface Renderer {
   setGridBrightness(brightness: number): void;
@@ -7,19 +8,18 @@ export interface Renderer {
 }
 
 const COLORS = {
-  bg: "#05080c",
-  attacker: "#5ccbcb",
-  target: "#f67c0f",
-  command: "#e8eef0",
-  transversal: "#fce447",
-  los: "rgba(92, 203, 203, 0.5)",
-  text: "#e8eef0",
-  scrim: "rgba(5, 8, 12, 0.7)",
-  optimalRing: "#9cc954",
-  falloffRing: "#f67c0f",
+  bg: PALETTE.bgDeep,
+  attacker: PALETTE.accentTeal,
+  target: PALETTE.accentOrange,
+  command: PALETTE.textPrimary,
+  transversal: PALETTE.warnYellow,
+  los: withAlpha(PALETTE.accentTeal, 0.5),
+  text: PALETTE.textPrimary,
+  scrim: withAlpha(PALETTE.bgDeep, 0.7),
+  optimalRing: PALETTE.optimalGreen,
+  falloffRing: PALETTE.accentOrange,
 } as const;
 
-const GRID_RGB = "92, 203, 203";
 const GRID_MAX_ALPHA = 0.4;
 const DEFAULT_GRID_BRIGHTNESS = 0.2;
 
@@ -125,7 +125,7 @@ export class CanvasRenderer implements Renderer {
     const endY = Math.ceil(max.y / spacing) * spacing;
 
     const alpha = Math.round(this.gridBrightness * GRID_MAX_ALPHA * 100) / 100;
-    this.ctx.strokeStyle = `rgba(${GRID_RGB}, ${alpha})`;
+    this.ctx.strokeStyle = withAlpha(PALETTE.accentTeal, alpha);
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let x = startX; x <= endX; x += spacing) {

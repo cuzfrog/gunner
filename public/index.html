@@ -107,7 +107,7 @@
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
           <span class="tracking-label-row">
-            <span id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
               <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
@@ -144,14 +144,14 @@
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.optimalRange">Optimal range</span>
+            <span class="field-label" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit">
               <input type="number" id="optimal" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.falloffRange">Falloff range</span>
+            <span class="field-label" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit">
               <input type="number" id="falloff" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -186,7 +186,7 @@
 
         <div class="hull-field">
           <div class="hull-label-row">
-            <span data-i18n="label.hull">Ship</span>
+            <span class="field-label" data-i18n="label.hull">Ship</span>
             <button type="button" id="attacker-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
@@ -242,14 +242,14 @@
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.mass">Mass</span>
+            <span class="field-label" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-inertia" value="3" step="any" min="0">
               <span class="input-suffix" id="attacker-align-time" aria-hidden="true">5.0s</span>
@@ -267,7 +267,7 @@
             </select>
           </div>
           <label>
-            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-range" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -276,7 +276,7 @@
         </div>
         <div class="slider-field maneuver-field">
           <span class="slider-label-row">
-            <span data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
+            <span class="field-label" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
             <button type="button" class="info-hint"
                     data-i18n-title="hint.maneuverAggressivity"
                     data-i18n-aria-label="hint.maneuverAggressivity"
@@ -337,7 +337,7 @@
         <h2 data-i18n="section.targetShip">Target</h2>
         <div class="hull-field">
           <div class="hull-label-row">
-            <span data-i18n="label.hull">Ship</span>
+            <span class="field-label" data-i18n="label.hull">Ship</span>
             <button type="button" id="target-import-fitting" class="import-fitting-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
@@ -376,7 +376,7 @@
           <div class="field-group">
             <span class="field-label-row">
               <label for="initial-distance">
-                <span data-i18n="label.initialDistance">Initial distance</span>
+                <span class="field-label" data-i18n="label.initialDistance">Initial distance</span>
               </label>
               <button type="button" class="info-hint"
                       data-i18n-title="hint.initialDistance"
@@ -390,7 +390,7 @@
             </span>
           </div>
           <label>
-            <span data-i18n="label.signatureRadius">Signature radius</span>
+            <span class="field-label" data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
               <input type="number" id="target-sig" value="40" step="any" min="1">
               <span class="input-suffix" aria-hidden="true">m</span>
@@ -418,14 +418,14 @@
         </div>
         <div class="field-row">
           <label>
-            <span data-i18n="label.mass">Mass</span>
+            <span class="field-label" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="target-mass" value="10000000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="target-inertia" value="0.45" step="any" min="0">
               <span class="input-suffix" id="target-align-time" aria-hidden="true">6.2s</span>
@@ -443,7 +443,7 @@
             </select>
           </div>
           <label>
-            <span data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="target-range" value="5000" step="any" min="0">
               <span class="input-suffix" aria-hidden="true">m</span>
