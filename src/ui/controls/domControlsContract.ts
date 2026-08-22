@@ -11,7 +11,7 @@ import type { EngagementReadout } from "./engagementReadout";
 import type { EventRouterHost } from "./eventRouter";
 import type { FittingPopupController } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { IHintRotator } from "./hintRotator";
+import type { HintRotator } from "./hintRotator";
 import type { HullDatalist } from "./hullDatalist";
 import type { ImportController } from "./importController";
 import type { LanguageRefresh } from "./languageRefresh";
@@ -43,7 +43,7 @@ export interface DomControlsParts {
   deps: DomControlsDeps;
   els: Els;
   popupGroup: PopupGroup;
-  hintRotator: IHintRotator;
+  hintRotator: HintRotator;
   hullDatalist: HullDatalist;
   preferencesController: PreferencesController;
   profileController: ProfileController;

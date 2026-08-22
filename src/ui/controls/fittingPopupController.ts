@@ -2,7 +2,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../../fitti
 import type { SavedFittings } from "../settings";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import { PopupGroup, type Popup } from "./popupGroup";
+import { type Popup, type PopupGroup } from "./popupGroup";
 import { fittingAreaSelector } from "./controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FittingPopupRenderer } from "./fittingPopupRenderer";
@@ -25,7 +25,14 @@ interface FittingPopupControllerDeps {
   previews: FittingPreviewManager;
 }
 
-export class FittingPopupController {
+export interface FittingPopupController {
+  readonly popup: Popup;
+  setTriggerEnabled(enabled: boolean): void;
+  renderIfOpen(): void;
+  closeIfOpen(): void;
+}
+
+export class FittingPopupControllerImpl implements FittingPopupController {
   private readonly side: Side;
   private readonly popupGroup: PopupGroup;
   private readonly savedFittings: SavedFittings;

@@ -6,7 +6,18 @@ import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Side } from "./sidePanel";
 
-export class FittingPreviewManager {
+export interface FittingPreviewManager {
+  toggle(side: Side): void;
+  showInMenu(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement): void;
+  hide(side: Side): void;
+  openSide(): Side | undefined;
+  isMenuPreview(): boolean;
+  refresh(): void;
+  handlePointerDown(target: EventTarget): void;
+  handleEscape(): void;
+}
+
+export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;

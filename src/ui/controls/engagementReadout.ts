@@ -12,7 +12,11 @@ export interface ReadoutEls {
   readonly resHit: HTMLElement;
 }
 
-export class EngagementReadout {
+export interface EngagementReadout {
+  update(frame: EngagementFrame, hit: HitChanceBreakdown, t: (key: string) => string): void;
+}
+
+export class EngagementReadoutImpl implements EngagementReadout {
   private readonly els: ReadoutEls;
 
   constructor(els: ReadoutEls) {

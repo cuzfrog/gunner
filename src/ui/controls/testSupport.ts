@@ -5,13 +5,13 @@ import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ClipboardProvider, ProfileParamOverrides, SavedFittings, SettingsStore } from "../settings";
 import { TrackingInput } from "./trackingInput";
-import { TurretController } from "./turretController";
+import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { DomControls } from "./domControls";
 import { DomControlsFactory } from "./domControlsFactory";
 import type { TurretEls } from "./turretEls";
-import { SidePanel, type Side, collectSideEls } from "./sidePanel";
-import { PopupGroup } from "./popupGroup";
+import { createSidePanel, type Side, collectSideEls } from "./sidePanel";
+import { PopupGroupImpl } from "./popupGroup";
 import { createControlsEls } from "./elements";
 import { fakeDocument, getFake } from "./fakeDocument";
 import { FakeElement } from "./fakeElement";
@@ -243,7 +243,7 @@ export function buildTurret(
     contains: vi.fn(),
   };
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
-  const controller = new TurretController({
+  const controller = new TurretControllerImpl({
     els,
     popup,
     chargeCatalog,
@@ -302,10 +302,10 @@ export function buildSidePanel(
     itemIconUrl: vi.fn(() => undefined),
     droneIconUrl: vi.fn(),
   });
-  const panel = new SidePanel({
+  const panel = createSidePanel({
     side,
     host,
-    popupGroup: new PopupGroup(),
+    popupGroup: new PopupGroupImpl(),
     els,
     i18n,
     ships,

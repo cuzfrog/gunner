@@ -1,22 +1,18 @@
 import { ClipboardUnavailableError, parseProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../settings";
 import { type FittingImport, type ImportedFitting } from "../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "./controlsFormat";
-import { PopupGroup, type Popup } from "./popupGroup";
+import { type Popup, type PopupGroup } from "./popupGroup";
 import { type Side, type SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import { EftSideImporter } from "./eftSideImporter";
 import { ProfileTextImporter } from "./profileTextImporter";
+import type { ImportController, ImportEls } from "./importControllerContract";
 
-export interface ImportEls {
-  readonly importProfile: HTMLButtonElement;
-  readonly importSidePopup: HTMLElement;
-  readonly importSideAttacker: HTMLButtonElement;
-  readonly importSideTarget: HTMLButtonElement;
-}
+export type { ImportController, ImportEls } from "./importControllerContract";
 
-export class ImportController {
+export class ImportControllerImpl implements ImportController {
   private readonly clipboard: ClipboardProvider;
   private readonly fittingImport: FittingImport;
   private readonly savedFittings: SavedFittings;

@@ -3,6 +3,7 @@ import type { I18n } from "../i18n";
 import type { SavedFitting, SavedFittings } from "../settings";
 import { isHtmlButtonElement } from "./controlsDom";
 import type { FittingPopupEls } from "./fittingPopupEls";
+import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side, SidePanel } from "./sidePanel";
 
 interface FittingPopupRendererDeps {
@@ -13,7 +14,7 @@ interface FittingPopupRendererDeps {
   readonly i18n: I18n;
   readonly els: FittingPopupEls;
   readonly panelFor: (side: Side) => SidePanel;
-  readonly previews: { showInMenu(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement): void };
+  readonly previews: FittingPreviewManager;
 }
 
 interface FittingPopupRenderActions {
@@ -29,7 +30,7 @@ export class FittingPopupRenderer {
   private readonly i18n: I18n;
   private readonly els: FittingPopupEls;
   private readonly panelFor: (side: Side) => SidePanel;
-  private readonly previews: { showInMenu(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement): void };
+  private readonly previews: FittingPreviewManager;
 
   constructor(deps: FittingPopupRendererDeps) {
     this.side = deps.side;

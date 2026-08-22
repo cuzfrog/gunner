@@ -1,6 +1,7 @@
 import type { Els } from "./elementsContract";
 import {
   createControlsEls,
+  collectFittingPopupEls,
   collectImportEls,
   collectPreferencesEls,
   collectProfileEls,
@@ -8,23 +9,23 @@ import {
 } from "./elements";
 import { el } from "./controlsDom";
 import { profileSettingsOf } from "./controlsFormat";
-import { SidePanel, collectSideEls } from "./sidePanel";
-import { PopupGroup, type Popup } from "./popupGroup";
-import { ChoiceGroup } from "./choiceGroup";
-import { EngagementReadout } from "./engagementReadout";
-import { SessionCodec } from "./sessionCodec";
-import { TurretController } from "./turretController";
+import { createSidePanel, collectSideEls, type Side, type SidePanel } from "./sidePanel";
+import { PopupGroupImpl, type Popup, type PopupGroup } from "./popupGroup";
+import { ChoiceGroupImpl, type ChoiceGroup } from "./choiceGroup";
+import { EngagementReadoutImpl, type EngagementReadout } from "./engagementReadout";
+import { SessionCodecImpl, type SessionCodec } from "./sessionCodec";
+import { TurretControllerImpl, type TurretController } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { DomFittingPreview } from "./fittingPreview";
-import { FittingPreviewManager } from "./fittingPreviewManager";
-import { FittingPopupBuilder } from "./fittingPopupBuilder";
-import { ImportController } from "./importController";
-import { PreferencesController } from "./preferencesController";
-import { ProfileController } from "./profileController";
-import { HintRotator, type IHintRotator } from "./hintRotator";
+import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
+import { FittingPopupControllerImpl, type FittingPopupController } from "./fittingPopupController";
+import { ImportControllerImpl, type ImportController } from "./importController";
+import { PreferencesControllerImpl, type PreferencesController } from "./preferencesController";
+import { ProfileControllerImpl, type ProfileController } from "./profileController";
+import { HintRotatorImpl, type HintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
-import { LanguageRefresh } from "./languageRefresh";
-import { HullDatalist } from "./hullDatalist";
+import { LanguageRefreshImpl, type LanguageRefresh } from "./languageRefresh";
+import { HullDatalistImpl, type HullDatalist } from "./hullDatalist";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
 import { EventRouter } from "./eventRouter";
 import { SIG_RESOLUTIONS } from "../../sim";
@@ -48,17 +49,17 @@ export class DomControlsFactory {
       persistConfigChange: () => {},
     };
     const els = createControlsEls();
-    const popupGroup = new PopupGroup();
-    const hintRotator: IHintRotator = new HintRotator({
+    const popupGroup: PopupGroup = new PopupGroupImpl();
+    const hintRotator: HintRotator = new HintRotatorImpl({
       element: el("slide-hints"), i18n: deps.i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES,
       timer: deps.timer, intervalMs: 20_000,
     });
-    const hullDatalist = new HullDatalist(els, deps.presetFittings);
-    const engagementReadout = new EngagementReadout({
+    const hullDatalist: HullDatalist = new HullDatalistImpl(els, deps.presetFittings);
+    const engagementReadout: EngagementReadout = new EngagementReadoutImpl({
       resDistance: el("res-distance"), resTransversal: el("res-transversal"), resAngular: el("res-angular"),
       resRadial: el("res-radial"), resTrackPen: el("res-track-pen"), resRangePen: el("res-range-pen"), resHit: el("res-hit"),
     });
-    const sigResChoice = new ChoiceGroup(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
+    const sigResChoice: ChoiceGroup = new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
     let turretController!: TurretController;
     let importController!: ImportController;
     let attackerSide!: SidePanel;
@@ -87,26 +88,26 @@ export class DomControlsFactory {
       onAttackerFittedHullCleared: () => { popupGroup.close(attackerAmmoPopup); turretController.clear(); },
       persistConfigChange: (notify = true) => host.persistConfigChange(notify),
     });
-    attackerSide = new SidePanel({
+    attackerSide = createSidePanel({
       side: "attacker", host: sidePanelHostBuilder.build("attacker"), popupGroup,
       els: collectSideEls(els, "attacker"), i18n: deps.i18n, ships: deps.ships,
       fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
     });
-    targetSide = new SidePanel({
+    targetSide = createSidePanel({
       side: "target", host: sidePanelHostBuilder.build("target"), popupGroup,
       els: collectSideEls(els, "target"), i18n: deps.i18n, ships: deps.ships,
       fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
     });
-    const preferencesController = new PreferencesController({
+    const preferencesController = new PreferencesControllerImpl({
       els: collectPreferencesEls(els), i18n: deps.i18n, settingsStore: deps.settingsStore,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       onLanguageChanged: () => languageRefresh.refresh(host.isPlaying()),
     });
-    const profileController = new ProfileController({
+    const profileController = new ProfileControllerImpl({
       els: collectProfileEls(els), settingsStore: deps.settingsStore, timer: deps.timer, i18n: deps.i18n,
       captureCurrent: () => profileSettingsOf(sessionCodec.capture()), onLoaded: (name) => host.onProfileLoaded(name),
     });
-    turretController = new TurretController({
+    turretController = new TurretControllerImpl({
       els: collectTurretEls(els), popup: attackerAmmoPopup, chargeCatalog: deps.chargeCatalog,
       gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, trackingInput: preferencesController.trackingInput,
       i18n: deps.i18n, fittingImport: deps.fittingImport,
@@ -122,13 +123,13 @@ export class DomControlsFactory {
         host.fireConfigChange();
       },
     });
-    sessionCodec = new SessionCodec({
+    sessionCodec = new SessionCodecImpl({
       els, attackerSide, targetSide, turret: turretController, preferences: preferencesController,
       profileController, i18n: deps.i18n, chargeCatalog: deps.chargeCatalog, sigResChoice, hintRotator,
       settingsStore: deps.settingsStore, hitChance: deps.hitChance,
       isPlaying: () => host.isPlaying(), setPlaying: (playing) => host.setPlaying(playing),
     });
-    importController = new ImportController({
+    importController = new ImportControllerImpl({
       clipboard: deps.clipboard, fittingImport: deps.fittingImport,
       savedFittings: deps.savedFittings, popupGroup,
       els: collectImportEls(els),
@@ -138,7 +139,7 @@ export class DomControlsFactory {
       getSettings: () => host.captureSettings(), onConfigPersisted: () => host.persistConfigChange(true),
       onProfileTextLoaded: (settings) => host.onProfileTextLoaded(settings),
     });
-    const previewManager = new FittingPreviewManager({
+    const previewManager: FittingPreviewManager = new FittingPreviewManagerImpl({
       fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, i18n: deps.i18n,
       previewsBySide: { attacker: attackerPreview, target: targetPreview } as const,
       shipImageBySide: { attacker: els.attackerShipImage, target: els.targetShipImage } as const,
@@ -146,18 +147,22 @@ export class DomControlsFactory {
       profileOf: (side) => (side === "attacker" ? attackerSide : targetSide).profile,
       fittingTextOf: (side) => (side === "attacker" ? attackerSide : targetSide).fittingText,
     });
-    const fittingPopupBuilder = new FittingPopupBuilder({
+    const fittingPopupDeps = {
       popupGroup, savedFittings: deps.savedFittings, presetFittings: deps.presetFittings,
       fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, i18n: deps.i18n,
-      panelFor: (side) => (side === "attacker" ? attackerSide : targetSide), previews: previewManager,
+      panelFor: (side: Side) => (side === "attacker" ? attackerSide : targetSide), previews: previewManager,
+    };
+    const attackerFittingPopup: FittingPopupController = new FittingPopupControllerImpl({
+      side: "attacker", ...fittingPopupDeps,
+      els: collectFittingPopupEls(els, "attacker"),
+      applyFitting: (text) => importController.importEftFitting("attacker", text, true),
     });
-    const attackerFittingPopup = fittingPopupBuilder.create(
-      "attacker", els, (text) => importController.importEftFitting("attacker", text, true),
-    );
-    const targetFittingPopup = fittingPopupBuilder.create(
-      "target", els, (text) => importController.importEftFitting("target", text, true),
-    );
-    languageRefresh = new LanguageRefresh({
+    const targetFittingPopup: FittingPopupController = new FittingPopupControllerImpl({
+      side: "target", ...fittingPopupDeps,
+      els: collectFittingPopupEls(els, "target"),
+      applyFitting: (text) => importController.importEftFitting("target", text, true),
+    });
+    languageRefresh = new LanguageRefreshImpl({
       i18n: deps.i18n, hullDatalist, profileController,
       attackerSide, targetSide, turretController,
       attackerFittingPopup, targetFittingPopup,

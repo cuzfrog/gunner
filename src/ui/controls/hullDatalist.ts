@@ -1,7 +1,11 @@
 import type { PresetFittings } from "../../fitting";
 import type { Els } from "./elementsContract";
 
-export class HullDatalist {
+export interface HullDatalist {
+  populate(): void;
+}
+
+export class HullDatalistImpl implements HullDatalist {
   private readonly els: Els;
   private readonly presetFittings: PresetFittings;
 

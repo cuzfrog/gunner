@@ -1,0 +1,257 @@
+import { num } from "./controlsDom";
+import { EventRouter, type EventRouterHost } from "./eventRouter";
+import { createControlsEls } from "./elements";
+import { fakeDocument, getFake, FakeElement } from "./testSupport";
+import { type Popup, type PopupGroup } from "./popupGroup";
+import type { FittingPopupController } from "./fittingPopupController";
+import type { FittingPreviewManager } from "./fittingPreviewManager";
+import type { ImportController } from "./importController";
+import type { PreferencesController } from "./preferencesController";
+import type { ProfileController } from "./profileController";
+import type { SidePanel } from "./sidePanel";
+import type { TurretController } from "./turretController";
+
+function makeEls() {
+  globalThis.document = fakeDocument() as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
+  return createControlsEls();
+}
+
+function makePopup(): Popup {
+  const state = { open: false };
+  return {
+    isOpen: vi.fn(() => state.open),
+    open: vi.fn(() => { state.open = true; }),
+    close: vi.fn(() => { state.open = false; }),
+    focusTrigger: vi.fn(),
+    contains: vi.fn(() => false),
+  };
+}
+
+function makeFittingPopup(): FittingPopupController {
+  return { popup: makePopup(), setTriggerEnabled: vi.fn(), renderIfOpen: vi.fn(), closeIfOpen: vi.fn() } as unknown as FittingPopupController;
+}
+
+function makePopupGroup(): PopupGroup {
+  const popups: Popup[] = [];
+  return {
+    register: (popup) => { popups.push(popup); },
+    open: (popup) => {
+      for (const p of popups) if (p !== popup && p.isOpen()) p.close();
+      if (!popup.isOpen()) popup.open();
+    },
+    toggle: (popup) => { if (popup.isOpen()) popup.close(); else popup.open(); },
+    close: (popup) => { if (popup.isOpen()) popup.close(); },
+    closeAll: () => { for (const p of popups) if (p.isOpen()) p.close(); },
+    hasOpen: () => popups.some((p) => p.isOpen()),
+    onPointerDown: (target) => {
+      if (!target) return;
+      for (const p of popups) if (p.isOpen() && !p.contains(target)) p.close();
+    },
+    onKeyDown: (event) => {
+      if (event.key !== "Escape") return;
+      for (const p of popups) if (p.isOpen()) { p.close(); p.focusTrigger(); }
+    },
+  };
+}
+
+describe("EventRouter", () => {
+  test("play, reset and speed input route to the host callbacks", () => {
+    const els = makeEls();
+    const host = {
+      onPlayPause: vi.fn(),
+      onReset: vi.fn(),
+      onSpeedChange: vi.fn(),
+      onConfigChange: vi.fn(),
+      onDisplayChange: vi.fn(),
+    } as unknown as EventRouterHost;
+    const preferences = {
+      getSpeed: vi.fn(() => num(els.simSpeed)),
+      trackingInput: { rad: 0.32 },
+    } as unknown as PreferencesController;
+    const popupGroup = makePopupGroup();
+    new EventRouter({
+      els,
+      preferences,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      attackerSide: {} as SidePanel,
+      targetSide: {} as SidePanel,
+      turret: {} as TurretController,
+      popupGroup,
+      previewManager: {} as FittingPreviewManager,
+      attackerAmmoPopup: makePopup(),
+      attackerFittingPopup: makeFittingPopup(),
+      targetFittingPopup: makeFittingPopup(),
+      host,
+    });
+
+    getFake(globalThis.document, "play").trigger("click");
+    expect(host.onPlayPause).toHaveBeenCalled();
+
+    getFake(globalThis.document, "reset").trigger("click");
+    expect(host.onReset).toHaveBeenCalled();
+
+    getFake(globalThis.document, "sim-speed").value = "2";
+    getFake(globalThis.document, "sim-speed").trigger("change");
+    expect(preferences.getSpeed).toHaveBeenCalled();
+    expect(host.onSpeedChange).toHaveBeenCalledWith(2);
+  });
+
+  test("Escape closes open popups", () => {
+    const els = makeEls();
+    const popupGroup = makePopupGroup();
+    const attackerFittingPopup = makeFittingPopup();
+    const targetFittingPopup = makeFittingPopup();
+    const attackerAmmoPopup = makePopup();
+    popupGroup.register(attackerFittingPopup.popup);
+    popupGroup.register(targetFittingPopup.popup);
+    popupGroup.register(attackerAmmoPopup);
+    new EventRouter({
+      els,
+      preferences: {} as PreferencesController,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      attackerSide: {} as SidePanel,
+      targetSide: {} as SidePanel,
+      turret: {} as TurretController,
+      popupGroup,
+      previewManager: { openSide: vi.fn(() => undefined) } as unknown as FittingPreviewManager,
+      attackerAmmoPopup,
+      attackerFittingPopup,
+      targetFittingPopup,
+      host: {} as EventRouterHost,
+    });
+
+    attackerFittingPopup.popup.open();
+    expect(popupGroup.hasOpen()).toBe(true);
+
+    const escape = { type: "keydown", key: "Escape" } as unknown as KeyboardEvent;
+    (globalThis.document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(escape as unknown as Event);
+
+    expect(attackerFittingPopup.popup.close).toHaveBeenCalled();
+    expect(attackerFittingPopup.popup.focusTrigger).toHaveBeenCalled();
+  });
+
+  test("display and ship inputs dispatch to the right controller methods", () => {
+    const els = makeEls();
+    const host = {
+      onConfigChange: vi.fn(),
+      onDisplayChange: vi.fn(),
+    } as unknown as EventRouterHost;
+    const preferences = {
+      trackingInput: { rad: 0.42 },
+      updateTrackingFromInput: vi.fn(),
+      updateTrackingForSigResolution: vi.fn(),
+      updateManeuverAggressivityEnabled: vi.fn(),
+    } as unknown as PreferencesController;
+    const turret = { currentSigResClass: vi.fn(() => "M" as const) } as unknown as TurretController;
+    const attackerSide = {
+      recordOverride: vi.fn(),
+      updateSpeedFromMass: vi.fn(),
+      updateAlignTime: vi.fn(),
+    } as unknown as SidePanel;
+    const targetSide = {
+      recordOverride: vi.fn(),
+      updateSpeedFromMass: vi.fn(),
+      updateAlignTime: vi.fn(),
+    } as unknown as SidePanel;
+    new EventRouter({
+      els,
+      preferences,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      attackerSide,
+      targetSide,
+      turret,
+      popupGroup: makePopupGroup(),
+      previewManager: {} as FittingPreviewManager,
+      attackerAmmoPopup: makePopup(),
+      attackerFittingPopup: makeFittingPopup(),
+      targetFittingPopup: makeFittingPopup(),
+      host,
+    });
+
+    const tracking = getFake(globalThis.document, "tracking");
+    tracking.value = "0.42";
+    tracking.trigger("input");
+    expect(preferences.updateTrackingFromInput).toHaveBeenCalled();
+    expect(attackerSide.recordOverride).toHaveBeenCalledWith("tracking", 0.42);
+
+    const sigRes = getFake(globalThis.document, "sigRes");
+    sigRes.value = "M";
+    sigRes.trigger("input");
+    expect(preferences.updateTrackingForSigResolution).toHaveBeenCalled();
+    expect(turret.currentSigResClass).toHaveBeenCalled();
+    expect(attackerSide.recordOverride).toHaveBeenCalledWith("sigRes", "M");
+
+    const optimal = getFake(globalThis.document, "optimal");
+    optimal.value = "2500";
+    optimal.trigger("input");
+    expect(attackerSide.recordOverride).toHaveBeenCalledWith("optimal", 2500);
+
+    const targetSig = getFake(globalThis.document, "target-sig");
+    targetSig.value = "40";
+    targetSig.trigger("input");
+    expect(targetSide.recordOverride).toHaveBeenCalledWith("targetSig", 40);
+    expect(host.onDisplayChange).toHaveBeenCalled();
+
+    const attackerMode = getFake(globalThis.document, "attacker-mode");
+    attackerMode.value = "keepAtRange";
+    attackerMode.trigger("input");
+    expect(preferences.updateManeuverAggressivityEnabled).toHaveBeenCalledWith(false);
+
+    const attackerMass = getFake(globalThis.document, "attacker-mass");
+    attackerMass.value = "1200000";
+    attackerMass.trigger("input");
+    expect(attackerSide.updateSpeedFromMass).toHaveBeenCalled();
+    expect(attackerSide.updateAlignTime).toHaveBeenCalled();
+    expect(attackerSide.recordOverride).toHaveBeenCalledWith("attackerMass", 1_200_000);
+
+    const targetMass = getFake(globalThis.document, "target-mass");
+    targetMass.value = "1100000";
+    targetMass.trigger("input");
+    expect(targetSide.updateSpeedFromMass).toHaveBeenCalled();
+    expect(targetSide.updateAlignTime).toHaveBeenCalled();
+    expect(targetSide.recordOverride).toHaveBeenCalledWith("targetMass", 1_100_000);
+
+    expect(host.onConfigChange).toHaveBeenCalled();
+  });
+
+  test("pointerdown outside closes popups", () => {
+    const els = makeEls();
+    const popupGroup = makePopupGroup();
+    const attackerFittingPopup = makeFittingPopup();
+    const targetFittingPopup = makeFittingPopup();
+    const attackerAmmoPopup = makePopup();
+    popupGroup.register(attackerFittingPopup.popup);
+    popupGroup.register(targetFittingPopup.popup);
+    popupGroup.register(attackerAmmoPopup);
+    const previewManager = { openSide: vi.fn(() => undefined), handlePointerDown: vi.fn() } as unknown as FittingPreviewManager;
+    new EventRouter({
+      els,
+      preferences: {} as PreferencesController,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      attackerSide: {} as SidePanel,
+      targetSide: {} as SidePanel,
+      turret: {} as TurretController,
+      popupGroup,
+      previewManager,
+      attackerAmmoPopup,
+      attackerFittingPopup,
+      targetFittingPopup,
+      host: {} as EventRouterHost,
+    });
+
+    attackerFittingPopup.popup.open();
+    expect(popupGroup.hasOpen()).toBe(true);
+
+    const target = getFake(globalThis.document, "target-hull");
+    const pointer = { type: "pointerdown", target } as unknown as PointerEvent;
+    (globalThis.document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(pointer as unknown as Event);
+
+    expect(attackerFittingPopup.popup.close).toHaveBeenCalled();
+    expect(previewManager.handlePointerDown).toHaveBeenCalledWith(target);
+  });
+});

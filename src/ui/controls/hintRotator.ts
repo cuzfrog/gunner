@@ -2,12 +2,6 @@ import type { I18n } from "../i18n";
 import type { SlideText } from "./hints";
 import type { IntervalId, Timer } from "../timer";
 
-export interface IHintRotator {
-  showNext(): void;
-  refresh(): void;
-  stop(): void;
-}
-
 export interface HintRotatorConfig {
   readonly element: HTMLElement;
   readonly i18n: I18n;
@@ -18,7 +12,13 @@ export interface HintRotatorConfig {
   readonly intervalMs?: number;
 }
 
-export class HintRotator implements IHintRotator {
+export interface HintRotator {
+  showNext(): void;
+  refresh(): void;
+  stop(): void;
+}
+
+export class HintRotatorImpl implements HintRotator {
   private readonly element: HTMLElement;
   private readonly i18n: I18n;
   private readonly candidates: readonly SlideText[];

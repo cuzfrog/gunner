@@ -5,7 +5,7 @@ import type { ImageCatalog } from "../../icons";
 import { type FittedHullSummary, type PropulsionSelection } from "../../settings";
 import { setText } from "../controlsDom";
 import type { Side } from "./side";
-import type { ISidePanel } from "./sidePanelContract";
+import type { SidePanel } from "./sidePanelContract";
 import type { IHullSection } from "./sidePanelSections";
 
 export interface HullSectionEls {
@@ -15,7 +15,7 @@ export interface HullSectionEls {
 }
 
 export class HullSection implements IHullSection {
-  private readonly panel: ISidePanel;
+  private readonly panel: SidePanel;
   private readonly els: HullSectionEls;
   private readonly ships: Ships;
   private readonly i18n: I18n;
@@ -23,7 +23,7 @@ export class HullSection implements IHullSection {
 
   constructor({
     panel, els, ships, i18n, imageCatalog,
-  }: { panel: ISidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
+  }: { panel: SidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;

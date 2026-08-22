@@ -1,5 +1,5 @@
 import type { I18n, Language } from "../i18n";
-import { HintRotator } from "./hintRotator";
+import { HintRotatorImpl, type HintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { IntervalId, TimeoutId, Timer } from "../timer";
 
@@ -58,7 +58,7 @@ function fakeI18n(language: Language = "en"): I18n {
 }
 
 function createRotator(element: HTMLElement, timer: Timer, language: Language = "en"): HintRotator {
-  return new HintRotator({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+  return new HintRotatorImpl({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
 }
 
 describe("HintRotator", () => {
@@ -74,7 +74,7 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
     i18n.setLanguage("zh");
     rotator.refresh();
     expect(element.textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
@@ -162,7 +162,7 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
     rotator.showNext();
     timer.runTimeout();
     i18n.setLanguage("zh");
@@ -174,7 +174,7 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotator({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
     rotator.showNext();
     timer.runTimeout();
     rotator.showNext();

@@ -24,7 +24,26 @@ export interface PreferencesEls {
   readonly simSpeed: HTMLSelectElement;
 }
 
-export class PreferencesController {
+export interface PreferencesController {
+  readonly trackingInput: TrackingInput;
+  getSpeed(): number;
+  getGridBrightness(): number;
+  setLanguage(language: Language): void;
+  applyPreferences(preferences: DisplayPreferences): void;
+  restore(preferences: DisplayPreferences): void;
+  savePreferences(): void;
+  capture(): DisplayPreferences;
+  setTrackingUnit(unit: TrackingUnit): void;
+  updateTrackingFromInput(): void;
+  updateTrackingForSigResolution(): void;
+  onGridBrightnessChange(): void;
+  updateGridBrightnessDisplay(value?: number): void;
+  onManeuverAggressivityChange(): void;
+  updateManeuverAggressivityDisplay(value?: number): void;
+  updateManeuverAggressivityEnabled(isMidships: boolean): void;
+}
+
+export class PreferencesControllerImpl implements PreferencesController {
   readonly trackingInput: TrackingInput;
   private readonly els: PreferencesEls;
   private readonly i18n: I18n;
@@ -96,10 +115,6 @@ export class PreferencesController {
   }
 
   updateTrackingForSigResolution(): void {
-    this.els.tracking.value = String(this.trackingInput.displayValue(this.sigResolution()));
-  }
-
-  displayTrackingInput(): void {
     this.els.tracking.value = String(this.trackingInput.displayValue(this.sigResolution()));
   }
 

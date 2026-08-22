@@ -2,8 +2,8 @@ import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } fr
 import type { SavedFitting, SavedFittings } from "../settings";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import { PopupGroup } from "./popupGroup";
-import { FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
+import type { PopupGroup } from "./popupGroup";
+import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, buildSidePanel, getFake } from "./testSupport";
 import type { Side, SidePanel } from "./sidePanel";
@@ -27,6 +27,19 @@ function createI18n(): I18n {
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
+  };
+}
+
+function makePopupGroup(): PopupGroup {
+  return {
+    register: vi.fn(),
+    open: (popup) => { if (!popup.isOpen()) popup.open(); },
+    toggle: (popup) => { if (popup.isOpen()) popup.close(); else popup.open(); },
+    close: (popup) => { if (popup.isOpen()) popup.close(); },
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
   };
 }
 
@@ -58,7 +71,7 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
 
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = createI18n();
-  const popupGroup = new PopupGroup();
+  const popupGroup = makePopupGroup();
   const applyFitting = vi.fn(() => options.applyFitting ?? IMPORTED_RIFTER);
   const previews = {
     toggle: vi.fn(),
@@ -83,7 +96,7 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
     shipImage: getFake(document, "attacker-ship-image") as unknown as HTMLImageElement,
   };
 
-  const controller = new FittingPopupController({
+  const controller = new FittingPopupControllerImpl({
     side: "attacker" as Side,
     popupGroup,
     savedFittings,

@@ -10,7 +10,7 @@ import { formatNumber } from "../controlsFormat";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
-import { PopupGroup, type Popup } from "../popupGroup";
+import { type Popup } from "../popupGroup";
 import type { SidePanelElements } from "./elements";
 import { HullSection } from "./hullSection";
 import { PasteImportSection } from "./pasteImportSection";
@@ -20,17 +20,16 @@ import { StatsSection } from "./statsSection";
 import type { Side } from "./side";
 import {
   stateSliceOf,
-  type AttackerTurretHooks,
   type FittingPopupControl,
   type FittingPreviewControl,
-  type FittingImporter,
-  type ISidePanel,
+  type SidePanel,
+  type SidePanelDeps,
   type SidePanelHost,
   type SidePanelState,
 } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
-export class SidePanel implements ISidePanel {
+export class SidePanelImpl implements SidePanel {
   readonly side: Side;
   readonly host: SidePanelHost;
   readonly els: SidePanelElements;
@@ -48,10 +47,7 @@ export class SidePanel implements ISidePanel {
   private fittingPopup?: FittingPopupControl;
   private fittingPreview?: FittingPreviewControl;
 
-  constructor(deps: {
-    side: Side; host: SidePanelHost; popupGroup: PopupGroup; els: SidePanelElements;
-    i18n: I18n; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; timer: Timer;
-  }) {
+  constructor(deps: SidePanelDeps) {
     const { side, host, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer } = deps;
     this.side = side;
     this.host = host;

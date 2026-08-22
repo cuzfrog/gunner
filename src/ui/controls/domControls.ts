@@ -10,7 +10,7 @@ import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
 import { DomControlsFactory } from "./domControlsFactory";
 import type { Popup, PopupGroup } from "./popupGroup";
-import type { IHintRotator } from "./hintRotator";
+import type { HintRotator } from "./hintRotator";
 import type { HullDatalist } from "./hullDatalist";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
@@ -30,7 +30,7 @@ export class DomControls implements Controls {
   private readonly deps!: DomControlsDeps;
   private readonly els!: Els;
   private readonly popupGroup!: PopupGroup;
-  private readonly hintRotator!: IHintRotator;
+  private readonly hintRotator!: HintRotator;
   private readonly hullDatalist!: HullDatalist;
   private readonly preferencesController!: PreferencesController;
   private readonly profileController!: ProfileController;

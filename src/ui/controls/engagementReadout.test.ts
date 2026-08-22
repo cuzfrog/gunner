@@ -1,5 +1,5 @@
 import { Vec2, type ShipState } from "../../sim";
-import { EngagementReadout, type ReadoutEls } from "./engagementReadout";
+import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeReadoutEls(): ReadoutEls {
   const make = (): HTMLElement =>
@@ -34,7 +34,7 @@ function fakeShipState(): ShipState {
 describe("EngagementReadout", () => {
   test("formats short distance in meters and long distance in kilometers", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 12345, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
@@ -45,7 +45,7 @@ describe("EngagementReadout", () => {
 
   test("rounds short distances to whole meters", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1234.4, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
@@ -56,7 +56,7 @@ describe("EngagementReadout", () => {
 
   test("writes speed, angular and radial readouts with units", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 1234.5, transversalVelocity: new Vec2(0, 0), transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
@@ -69,7 +69,7 @@ describe("EngagementReadout", () => {
 
   test("computes tracking and range penalties from terms", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
@@ -82,7 +82,7 @@ describe("EngagementReadout", () => {
 
   test("treats non-finite terms as zero penalty", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
@@ -94,7 +94,7 @@ describe("EngagementReadout", () => {
 
   test("colors hit chance by threshold", () => {
     const els = fakeReadoutEls();
-    const readout = new EngagementReadout(els);
+    const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 

@@ -4,15 +4,22 @@ import type { I18n } from "../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../settings";
 import { num } from "./controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber, parseManeuverAggressivity } from "./controlsFormat";
-import { ChoiceGroup } from "./choiceGroup";
+import type { ChoiceGroup } from "./choiceGroup";
 import type { Els } from "./elementsContract";
-import type { IHintRotator } from "./hintRotator";
+import type { HintRotator } from "./hintRotator";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
-export class SessionCodec {
+export interface SessionCodec {
+  capture(): UserSettings;
+  restore(settings: UserSettings, selectedName?: string): void;
+  fromProfile(profile: ProfileSettings): UserSettings;
+  restoreStartup(startup: StartupState): void;
+}
+
+export class SessionCodecImpl implements SessionCodec {
   private readonly els: Els;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
@@ -22,7 +29,7 @@ export class SessionCodec {
   private readonly i18n: I18n;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly sigResChoice: ChoiceGroup;
-  private readonly hintRotator: IHintRotator;
+  private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
   private readonly hitChance: HitChance;
   private readonly isPlaying: () => boolean;
@@ -30,7 +37,7 @@ export class SessionCodec {
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; preferences: PreferencesController;
-    profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: IHintRotator;
+    profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
     settingsStore: SettingsStore; hitChance: HitChance; isPlaying: () => boolean; setPlaying: (playing: boolean) => void;
   }) {
     this.els = deps.els;

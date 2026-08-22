@@ -4,7 +4,7 @@ import { type FittedHullSummary, type ProfileParamOverrides } from "../../settin
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
 import type { Side } from "./side";
-import type { ISidePanel } from "./sidePanelContract";
+import type { SidePanel } from "./sidePanelContract";
 import type { IStatsSection } from "./sidePanelSections";
 
 export interface StatsSectionEls {
@@ -16,12 +16,12 @@ export interface StatsSectionEls {
 }
 
 export class StatsSection implements IStatsSection {
-  private readonly panel: ISidePanel;
+  private readonly panel: SidePanel;
   private readonly els: StatsSectionEls;
   private readonly ships: Ships;
   private readonly i18n: I18n;
 
-  constructor({ panel, els, ships, i18n }: { panel: ISidePanel; els: StatsSectionEls; ships: Ships; i18n: I18n }) {
+  constructor({ panel, els, ships, i18n }: { panel: SidePanel; els: StatsSectionEls; ships: Ships; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;

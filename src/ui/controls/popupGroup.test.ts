@@ -1,4 +1,4 @@
-import { PopupGroup, type Popup } from "./popupGroup";
+import { PopupGroupImpl, type Popup, type PopupGroup } from "./popupGroup";
 
 class StubPopup implements Popup {
   openCalled = false;
@@ -44,7 +44,7 @@ describe("PopupGroup", () => {
     a.openResult = true;
     b.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.register(c);
@@ -60,7 +60,7 @@ describe("PopupGroup", () => {
     const [a, b] = makePopups(2);
     a.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.open(a);
@@ -75,7 +75,7 @@ describe("PopupGroup", () => {
     const [a] = makePopups(1);
     a.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.toggle(a);
 
@@ -87,7 +87,7 @@ describe("PopupGroup", () => {
     const [a] = makePopups(1);
     a.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.close(a);
 
@@ -98,7 +98,7 @@ describe("PopupGroup", () => {
   test("close is no-op on an already closed popup", () => {
     const [a] = makePopups(1);
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.close(a);
 
@@ -109,7 +109,7 @@ describe("PopupGroup", () => {
     const [a, b] = makePopups(2);
     b.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.toggle(a);
@@ -124,7 +124,7 @@ describe("PopupGroup", () => {
     a.openResult = true;
     c.openResult = true;
 
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.register(c);
@@ -137,7 +137,7 @@ describe("PopupGroup", () => {
 
   test("hasOpen is true only when at least one popup is open", () => {
     const [a, b] = makePopups(2);
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     expect(group.hasOpen()).toBe(false);
@@ -151,7 +151,7 @@ describe("PopupGroup", () => {
 describe("PopupGroup input handling", () => {
   test("onPointerDown does nothing when no popup is open", () => {
     const [a] = makePopups(1);
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.onPointerDown(new EventTarget());
     expect(a.closeCalled).toBe(false);
@@ -164,7 +164,7 @@ describe("PopupGroup input handling", () => {
     const target = new EventTarget();
     a.setContains(target, true);
     b.setContains(target, false);
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.onPointerDown(target);
@@ -175,7 +175,7 @@ describe("PopupGroup input handling", () => {
   test("onPointerDown ignores a null target", () => {
     const [a] = makePopups(1);
     a.openResult = true;
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.onPointerDown(null);
     expect(a.closeCalled).toBe(false);
@@ -184,7 +184,7 @@ describe("PopupGroup input handling", () => {
   test("onKeyDown does nothing for non-Escape keys", () => {
     const [a] = makePopups(1);
     a.openResult = true;
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.onKeyDown({ key: "Enter" });
     expect(a.closeCalled).toBe(false);
@@ -195,7 +195,7 @@ describe("PopupGroup input handling", () => {
     const [a, b] = makePopups(2);
     a.openResult = true;
     b.openResult = true;
-    const group = new PopupGroup();
+    const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
     group.onKeyDown({ key: "Escape" });

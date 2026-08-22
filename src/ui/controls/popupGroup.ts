@@ -6,7 +6,18 @@ export interface Popup {
   contains(target: EventTarget): boolean;
 }
 
-export class PopupGroup {
+export interface PopupGroup {
+  register(popup: Popup): void;
+  open(popup: Popup): void;
+  toggle(popup: Popup): void;
+  close(popup: Popup): void;
+  closeAll(): void;
+  hasOpen(): boolean;
+  onPointerDown(target: EventTarget | null): void;
+  onKeyDown(event: { readonly key: string }): void;
+}
+
+export class PopupGroupImpl implements PopupGroup {
   private readonly popups: Popup[] = [];
 
   register(popup: Popup): void {

@@ -1,4 +1,8 @@
-export class ChoiceGroup {
+export interface ChoiceGroup {
+  set(value: string): void;
+}
+
+export class ChoiceGroupImpl implements ChoiceGroup {
   private readonly group: HTMLElement;
   private readonly select: HTMLSelectElement;
   private readonly values: readonly string[];

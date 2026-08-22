@@ -1,3 +1,4 @@
-export { SidePanel } from "./sidePanel";
-export type { Side } from "./side";
 export { collectSideEls } from "./elements";
+export { createSidePanel } from "./sidePanelFactory";
+export type { Side } from "./side";
+export type { SidePanel } from "./sidePanelContract";

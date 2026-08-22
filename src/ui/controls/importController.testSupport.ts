@@ -5,8 +5,8 @@ import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
-import { ImportController } from "./importController";
-import { PopupGroup } from "./popupGroup";
+import { ImportControllerImpl } from "./importController";
+import { PopupGroupImpl } from "./popupGroup";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "./testSupport";
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -103,11 +103,11 @@ export function buildImportController(document: Document) {
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
   const getSettings = vi.fn(() => DEFAULT_USER_SETTINGS);
-  const controller = new ImportController({
+  const controller = new ImportControllerImpl({
     clipboard: clipboard as unknown as ClipboardProvider,
     fittingImport,
     savedFittings,
-    popupGroup: new PopupGroup(),
+    popupGroup: new PopupGroupImpl(),
     els: {
       importProfile: getFake(document, "import-profile") as unknown as HTMLButtonElement,
       importSidePopup: getFake(document, "import-side-popup") as unknown as HTMLElement,

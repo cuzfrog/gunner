@@ -1,6 +1,6 @@
 import type { I18n } from "../i18n";
 import type { DisplayPreferences, SettingsStore } from "../settings";
-import { PreferencesController, type PreferencesEls } from "./preferencesController";
+import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {
   value = "";
@@ -71,7 +71,7 @@ function build() {
   const i18n = mockI18n();
   const settingsStore = vi.mocked<SettingsStore>(mockSettingsStore());
   const onLanguageChanged = vi.fn();
-  const controller = new PreferencesController({
+  const controller = new PreferencesControllerImpl({
     els,
     i18n,
     settingsStore,

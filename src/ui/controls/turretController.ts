@@ -2,40 +2,28 @@ import { SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../..
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../fitting";
 import type { StatConditions } from "../../ships";
 import { num } from "./controlsDom";
-import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../icons";
-import type { Popup } from "./popupGroup";
-import type { ProfileParamOverrides } from "../settings";
-import { TrackingInput } from "./trackingInput";
 import { AmmoList, type AmmoListEls } from "./ammoList";
 import { SigResButtons } from "./sigResButtons";
 import { SigResIcons } from "./sigResIcons";
-import { TurretEls } from "./turretEls";
 import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
+import type { TurretController, TurretControllerDeps } from "./turretControllerContract";
 
-interface TurretControllerDeps {
-  readonly els: TurretEls; readonly popup: Popup;
-  readonly chargeCatalog: ChargeCatalog; readonly gunFamilies: GunFamilies;
-  readonly imageCatalog: ImageCatalog; readonly trackingInput: TrackingInput;
-  readonly i18n: I18n; readonly fittingImport: FittingImport;
-  readonly resolver: TurretStateResolver; readonly overrides: () => Partial<ProfileParamOverrides>;
-  readonly clearTurretOverrides: () => void; readonly onConfigChange: (persist: boolean) => void;
-}
+export type { TurretController } from "./turretControllerContract";
 
-export class TurretController {
-  private readonly els: TurretEls;
-  private readonly popup: Popup;
-  private readonly chargeCatalog: ChargeCatalog;
-  private readonly fittingImport: FittingImport;
-  private readonly trackingInput: TrackingInput;
-  private readonly overrides: () => Partial<ProfileParamOverrides>;
-  private readonly clearTurretOverrides: () => void;
-  private readonly onConfigChange: (persist: boolean) => void;
+export class TurretControllerImpl implements TurretController {
+  private readonly els: TurretControllerDeps["els"];
+  private readonly popup: TurretControllerDeps["popup"];
+  private readonly chargeCatalog: TurretControllerDeps["chargeCatalog"];
+  private readonly fittingImport: TurretControllerDeps["fittingImport"];
+  private readonly trackingInput: TurretControllerDeps["trackingInput"];
+  private readonly overrides: TurretControllerDeps["overrides"];
+  private readonly clearTurretOverrides: TurretControllerDeps["clearTurretOverrides"];
+  private readonly onConfigChange: TurretControllerDeps["onConfigChange"];
   private readonly ammoList: AmmoList;
   private readonly sigResIcons: SigResIcons;
   private readonly inputSet: TurretInputSet;
-  private readonly resolver: TurretStateResolver;
+  private readonly resolver: TurretControllerDeps["resolver"];
   private attackerTurret?: ImportedTurret;
   private attackerCargoCharges: readonly CargoCharge[] = [];
   private attackerAmmo: string;
@@ -132,6 +120,7 @@ export class TurretController {
   currentSigResClass(): SigResolutionClass {
     return this.inputSet.currentSigResValue();
   }
+
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
     return {
       sigRes: this.inputSet.currentSigResValue(), optimal: num(this.els.optimal),
@@ -142,6 +131,7 @@ export class TurretController {
   isAmmoPopupOpen(): boolean {
     return this.ammoPopupOpen;
   }
+
   openAmmoPopup(): void {
     if (!this.attackerTurret) return;
     this.ammoPopupOpen = true;
@@ -154,6 +144,7 @@ export class TurretController {
     this.ammoPopupOpen = false;
     this.ammoList.setPopupOpen(false);
   }
+
   render(): void {
     this.ammoList.render({
       turret: this.attackerTurret, ammo: this.attackerAmmo,
@@ -174,15 +165,18 @@ export class TurretController {
     this.onConfigChange(false);
     return true;
   }
+
   private onAmmoItemClick(name: string): void {
     if (!this.applyAmmo(name)) return;
     this.closeAmmoPopup();
     this.popup.focusTrigger();
   }
+
   private onAmmoExpandClick(): void {
     this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
     this.render();
   }
+
   private ammoListEls(): AmmoListEls {
     return {
       attackerAmmoTrigger: this.els.attackerAmmoTrigger,

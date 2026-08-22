@@ -5,7 +5,7 @@ import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../settings";
 import { propulsionOptionLabel } from "../controlsFormat";
 import { type Popup } from "../popupGroup";
-import type { ISidePanel } from "./sidePanelContract";
+import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
 
@@ -15,7 +15,7 @@ export interface PropulsionSectionEls extends PropulsionVariantSectionEls {
 }
 
 export class PropulsionSection implements IPropulsionSection {
-  private readonly panel: ISidePanel;
+  private readonly panel: SidePanel;
   private readonly els: PropulsionSectionEls;
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
@@ -25,7 +25,7 @@ export class PropulsionSection implements IPropulsionSection {
 
   constructor({
     panel, els, ships, fittingImport, imageCatalog, i18n,
-  }: { panel: ISidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n }) {
+  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;

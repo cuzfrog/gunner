@@ -11,7 +11,19 @@ export interface ProfileEls {
   readonly shareStatus: HTMLElement;
 }
 
-export class ProfileController {
+export interface ProfileController {
+  selectedName(): string;
+  restoreFromStartup(startup: StartupState): boolean;
+  refresh(selected?: string): void;
+  markLoaded(selected: string): void;
+  updateDirtyState(): void;
+  saveProfile(): void;
+  loadProfile(): void;
+  deleteProfile(): void;
+  showStatus(key: string): void;
+}
+
+export class ProfileControllerImpl implements ProfileController {
   private readonly els: ProfileEls;
   private readonly settingsStore: SettingsStore;
   private readonly timer: Timer;

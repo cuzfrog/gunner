@@ -1,4 +1,4 @@
-import { ChoiceGroup } from "./choiceGroup";
+import { ChoiceGroupImpl, type ChoiceGroup } from "./choiceGroup";
 
 interface FakeButton {
   readonly value: string;
@@ -32,7 +32,7 @@ function fakeGroup(values: string[], selected: string, extra: string[] = []): { 
 describe("ChoiceGroup", () => {
   test("set marks the matching button active and updates aria-pressed", () => {
     const { group, select, buttons } = fakeGroup(["S", "M", "L", "XL"], "S");
-    const choice = new ChoiceGroup(group, select, ["S", "M", "L", "XL"]);
+    const choice = new ChoiceGroupImpl(group, select, ["S", "M", "L", "XL"]);
     choice.set("L");
 
     expect(buttons[0].classList.toggle).toHaveBeenCalledWith("active", false);
@@ -43,7 +43,7 @@ describe("ChoiceGroup", () => {
 
   test("clicking a button updates the select, toggles visuals and dispatches an input event", () => {
     const { group, select, buttons } = fakeGroup(["S", "M", "L", "XL"], "S");
-    const choice = new ChoiceGroup(group, select, ["S", "M", "L", "XL"]);
+    const choice = new ChoiceGroupImpl(group, select, ["S", "M", "L", "XL"]);
     buttons[1].handler?.();
 
     expect(select.value).toBe("M");
@@ -58,7 +58,7 @@ describe("ChoiceGroup", () => {
 
   test("ignores clicks on buttons whose value is not in the configured list", () => {
     const { group, select, buttons } = fakeGroup(["S", "M", "L", "XL"], "S", ["?"]);
-    const choice = new ChoiceGroup(group, select, ["S", "M", "L", "XL"]);
+    const choice = new ChoiceGroupImpl(group, select, ["S", "M", "L", "XL"]);
     buttons[4].handler?.();
 
     expect(select.value).toBe("S");

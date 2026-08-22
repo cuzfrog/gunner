@@ -1,6 +1,6 @@
 import type { FittingSummary } from "../../fitting";
 import { FakeElement, RIFTER } from "./testSupport";
-import { FittingPreviewManager } from "./fittingPreviewManager";
+import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
 import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
@@ -46,7 +46,7 @@ function createManager(options: {
     translateDocument: vi.fn(),
   });
   return {
-    manager: new FittingPreviewManager({
+    manager: new FittingPreviewManagerImpl({
       fittingImport,
       imageCatalog,
       i18n,

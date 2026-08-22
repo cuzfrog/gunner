@@ -3,7 +3,7 @@ import type { TimeoutId, Timer } from "../../timer";
 import { escapeHtml } from "../controlsFormat";
 import { type Popup } from "../popupGroup";
 import type { Side } from "./side";
-import type { ISidePanel } from "./sidePanelContract";
+import type { SidePanel } from "./sidePanelContract";
 import type { IPasteImportSection } from "./sidePanelSections";
 
 export interface PasteImportSectionEls {
@@ -14,14 +14,14 @@ export interface PasteImportSectionEls {
 }
 
 export class PasteImportSection implements IPasteImportSection {
-  private readonly panel: ISidePanel;
+  private readonly panel: SidePanel;
   private readonly els: PasteImportSectionEls;
   private readonly i18n: I18n;
   private readonly timer: Timer;
   private importHintTimeout?: TimeoutId;
   readonly popup: Popup;
 
-  constructor({ panel, els, i18n, timer }: { panel: ISidePanel; els: PasteImportSectionEls; i18n: I18n; timer: Timer }) {
+  constructor({ panel, els, i18n, timer }: { panel: SidePanel; els: PasteImportSectionEls; i18n: I18n; timer: Timer }) {
     this.panel = panel;
     this.els = els;
     this.i18n = i18n;

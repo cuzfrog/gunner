@@ -1,13 +1,17 @@
 import type { I18n } from "../i18n";
 import type { FittingPopupController } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { IHintRotator } from "./hintRotator";
+import type { HintRotator } from "./hintRotator";
 import type { HullDatalist } from "./hullDatalist";
 import type { ProfileController } from "./profileController";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
-export class LanguageRefresh {
+export interface LanguageRefresh {
+  refresh(playing: boolean): void;
+}
+
+export class LanguageRefreshImpl implements LanguageRefresh {
   private readonly i18n: I18n;
   private readonly hullDatalist: HullDatalist;
   private readonly profileController: ProfileController;
@@ -17,7 +21,7 @@ export class LanguageRefresh {
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
   private readonly previewManager: FittingPreviewManager;
-  private readonly hintRotator: IHintRotator;
+  private readonly hintRotator: HintRotator;
   private readonly setPlaying: (playing: boolean) => void;
   private readonly onDisplayChange: () => void;
 
@@ -31,7 +35,7 @@ export class LanguageRefresh {
     attackerFittingPopup: FittingPopupController;
     targetFittingPopup: FittingPopupController;
     previewManager: FittingPreviewManager;
-    hintRotator: IHintRotator;
+    hintRotator: HintRotator;
     setPlaying: (playing: boolean) => void;
     onDisplayChange: () => void;
   }) {
