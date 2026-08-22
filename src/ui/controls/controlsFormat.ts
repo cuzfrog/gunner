@@ -1,9 +1,9 @@
-import type { ChargeOption } from "../fitting";
-import { PALETTE } from "./palette";
-import type { PropulsionModule, SkillLevel, StatConditions } from "../ships";
-import type { AutopilotMode, SigResolutionClass } from "../sim";
-import type { I18n } from "./i18n";
-import type { ProfileSettings, UserSettings } from "./settings";
+import type { ChargeOption } from "../../fitting";
+import { PALETTE } from "../palette";
+import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
+import type { AutopilotMode, SigResolutionClass } from "../../sim";
+import type { I18n } from "../i18n";
+import type { ProfileSettings, UserSettings } from "../settings";
 
 export const AGGRESSIVITY_MIN = 0.01;
 export const AGGRESSIVITY_MAX = 100;

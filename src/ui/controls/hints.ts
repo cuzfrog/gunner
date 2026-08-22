@@ -1,4 +1,4 @@
-import type { Language } from "./i18n";
+import type { Language } from "../i18n";
 
 export interface SlideText {
   readonly text: Readonly<Record<Language, string>>;

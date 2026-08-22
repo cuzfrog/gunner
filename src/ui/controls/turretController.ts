@@ -1,13 +1,13 @@
 import { SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../fitting";
 import type { StatConditions } from "../../ships";
-import { isSigResClass } from "../controlsFormat";
-import { num } from "../controlsDom";
+import { isSigResClass } from "./controlsFormat";
+import { num } from "./controlsDom";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import type { Popup } from "../popupGroup";
+import type { Popup } from "./popupGroup";
 import type { ProfileParamOverrides } from "../settings";
-import { TrackingInput } from "../trackingInput";
+import { TrackingInput } from "./trackingInput";
 import { AmmoList, type AmmoListEls } from "./ammoList";
 import { SigResIcons } from "./sigResIcons";
 
@@ -105,15 +105,19 @@ export class TurretController {
     this.render();
   }
 
-  restore(fittingText?: string, conditions?: StatConditions, ammo?: string): void {
+  restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string }): void;
+  restore(fittingText?: string, conditions?: StatConditions, ammo?: string): void;
+  restore(arg1?: string | { fitting?: string; conditions?: StatConditions; ammo?: string }, arg2?: StatConditions, arg3?: string): void {
+    const settings = typeof arg1 === "object" ? arg1 : { fitting: arg1, conditions: arg2, ammo: arg3 };
+    const { fitting, conditions, ammo } = settings ?? {};
     this.attackerAmmoAllExpanded = false;
     if (ammo !== undefined) this.attackerAmmo = ammo;
-    if (!fittingText || !conditions) {
+    if (!fitting || !conditions) {
       this.attackerTurret = undefined;
       this.attackerCargoCharges = [];
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
     } else {
-      const imported = this.fittingImport.importFitting(fittingText, conditions);
+      const imported = this.fittingImport.importFitting(fitting, conditions);
       if (imported?.turret) {
         const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
         this.attackerTurret = restored;
@@ -146,8 +150,8 @@ export class TurretController {
     };
   }
 
-  capture(): { ammo: string } {
-    return { ammo: this.attackerAmmo };
+  capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
+    return { sigRes: this.currentSigResValue(), optimal: num(this.els.optimal), falloff: num(this.els.falloff), ammo: this.attackerAmmo };
   }
 
   isAmmoPopupOpen(): boolean {

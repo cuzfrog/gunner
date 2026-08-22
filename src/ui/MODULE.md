@@ -1,19 +1,19 @@
 ---
 no-new-exports:
-  - controls.ts
+  # - controls.ts          # moved into src/ui/controls/ sub-module
+  # - controls.test.ts     # moved into src/ui/controls/ sub-module
   # - index.ts  # ClipboardProvider/LocationProvider/StorageProvider and ClipboardUnavailableError are cross-boundary DI contracts used by the root container and composition root
   - loop.ts
   - module.ts
   - renderer.ts
-  - controls.test.ts
+  # - trackingInput.test.ts # moved into src/ui/controls/ sub-module
+  # - trackingInput.ts      # TrackingUnit moved to settings.ts; file moved into src/ui/controls/ sub-module
   - i18n.test.ts
   - i18n.ts
   - savedFittings.test.ts
   - settings.test.ts
   - savedFittings.ts
   # - settings.ts  # ProfileSettings is a cross-boundary DTO, exempt from no-new-exports
-  - trackingInput.test.ts
-  # - trackingInput.ts  # TrackingUnit is a cross-boundary DTO type; public re-export is required
   - renderer.test.ts
 ---
 

@@ -1,3 +1,5 @@
+import { el, elOf, isHtmlButtonElement, isHtmlImageElement, isHtmlInputElement, isHtmlSelectElement, isHtmlTextAreaElement } from "./controlsDom";
+
 export interface Els {
   readonly tracking: HTMLInputElement;
   readonly trackingUnitRad: HTMLButtonElement;
@@ -6,7 +8,6 @@ export interface Els {
   readonly sigResOptions: HTMLElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
-  readonly attackerAmmoField: HTMLElement;
   readonly attackerAmmoTrigger: HTMLButtonElement;
   readonly attackerAmmoSummary: HTMLElement;
   readonly attackerAmmoSummaryIcon: HTMLImageElement;
@@ -44,9 +45,7 @@ export interface Els {
   readonly attackerSkillPopup: HTMLElement;
   readonly attackerOverload: HTMLInputElement;
   readonly attackerOverloadButton: HTMLButtonElement;
-  readonly attackerSpeed: HTMLInputElement;
-  readonly attackerMass: HTMLInputElement;
-  readonly attackerInertia: HTMLInputElement;
+  readonly attackerSpeed: HTMLInputElement; readonly attackerMass: HTMLInputElement; readonly attackerInertia: HTMLInputElement;
   readonly attackerAlignTime: HTMLElement;
   readonly attackerMode: HTMLSelectElement;
   readonly attackerRange: HTMLInputElement;
@@ -107,7 +106,6 @@ export interface Els {
   readonly gridBrightnessSlider: HTMLInputElement;
   readonly gridBrightnessValue: HTMLElement;
 }
-
 export function createControlsEls(): Els {
   return {
     tracking: elOf("tracking", isHtmlInputElement),
@@ -117,7 +115,6 @@ export function createControlsEls(): Els {
     sigResOptions: el("sig-res-options"),
     optimal: elOf("optimal", isHtmlInputElement),
     falloff: elOf("falloff", isHtmlInputElement),
-    attackerAmmoField: el("attacker-ammo-field"),
     attackerAmmoTrigger: elOf("attacker-ammo-trigger", isHtmlButtonElement),
     attackerAmmoSummary: el("attacker-ammo-summary"),
     attackerAmmoSummaryIcon: elOf("attacker-ammo-summary-icon", isHtmlImageElement),
@@ -218,54 +215,4 @@ export function createControlsEls(): Els {
     gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
     gridBrightnessValue: el("grid-brightness-value"),
   };
-}
-
-export function el(id: string): HTMLElement {
-  const e = document.getElementById(id);
-  if (e === null) throw new Error(`Missing DOM element #${id}`);
-  return e;
-}
-
-export function elOf<T extends HTMLElement>(id: string, guard: (el: Element) => el is T): T {
-  const e = el(id);
-  if (!guard(e)) throw new Error(`Expected #${id} to be a ${guard.name}`);
-  return e;
-}
-
-export function isHtmlButtonElement(el: Element): el is HTMLButtonElement {
-  return el.tagName === "BUTTON";
-}
-
-export function isHtmlImageElement(el: Element): el is HTMLImageElement {
-  return el.tagName === "IMG";
-}
-
-export function isHtmlInputElement(el: Element): el is HTMLInputElement {
-  return el.tagName === "INPUT";
-}
-
-export function isHtmlSelectElement(el: Element): el is HTMLSelectElement {
-  return el.tagName === "SELECT";
-}
-
-export function isHtmlTextAreaElement(el: Element): el is HTMLTextAreaElement {
-  return el.tagName === "TEXTAREA";
-}
-
-export function isEventTargetWithClosest(target: EventTarget | null): target is Element {
-  return target instanceof Element;
-}
-
-export function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): number {
-  const value = input.value;
-  const n = parseFloat(value);
-  return Number.isNaN(n) ? 0 : Math.max(0, n);
-}
-
-export function setText(el: HTMLElement, text: string): void {
-  el.textContent = text;
-}
-
-export function fittingAreaSelector(side: "attacker" | "target"): string {
-  return [`#${side}-hull`, `#${side}-ship-image`, `#${side}-fitting-trigger`, `#${side}-fitting-eye`, `#${side}-fitting-popup`, `#${side}-fitting-preview`].join(", ");
 }

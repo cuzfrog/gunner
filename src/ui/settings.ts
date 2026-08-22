@@ -2,10 +2,10 @@ import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionStats, Ships, SkillLevel } from "../ships";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Language } from "./i18n";
-import type { TrackingUnit } from "./trackingInput";
 
 export const USER_SETTINGS_VERSION = 6 as const;
 export const PROPULSION_NONE = "none" as const;
+export type TrackingUnit = "rad" | "score";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 
 export interface FittedHullSummary {

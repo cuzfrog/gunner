@@ -1,5 +1,5 @@
-import { setText } from "../controlsDom";
-import { settingsEqual } from "../controlsFormat";
+import { setText } from "./controlsDom";
+import { settingsEqual } from "./controlsFormat";
 import type { I18n } from "../i18n";
 import type { ProfileSettings, SettingsStore, StartupState } from "../settings";
 import type { TimeoutId, Timer } from "../timer";

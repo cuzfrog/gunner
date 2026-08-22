@@ -8,9 +8,9 @@ import {
 import { type FittingImport, type ImportedFitting } from "../../fitting";
 import { type SavedFittings } from "../savedFittings";
 import { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "../profileText";
-import { NEUTRAL_STAT_CONDITIONS, profileSettingsOf } from "../controlsFormat";
-import { PopupGroup, type Popup } from "../popupGroup";
-import { type Side, type SidePanel } from "../sidePanel";
+import { NEUTRAL_STAT_CONDITIONS, profileSettingsOf } from "./controlsFormat";
+import { PopupGroup, type Popup } from "./popupGroup";
+import { type Side, type SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";

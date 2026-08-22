@@ -2,11 +2,11 @@ import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } fr
 import type { SavedFitting, SavedFittings } from "../savedFittings";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import { PopupGroup } from "../popupGroup";
+import { PopupGroup } from "./popupGroup";
 import { FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "./testSupport";
-import type { PanelView, Side } from "../sidePanel";
+import type { PanelView, Side } from "./sidePanel";
 
 const SAVED_RIFTER: SavedFitting = {
   id: "Rifter::Brawler",

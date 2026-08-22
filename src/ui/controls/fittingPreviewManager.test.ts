@@ -1,12 +1,12 @@
 import type { FittingSummary } from "../../fitting";
 import { FakeElement, RIFTER } from "./testSupport";
 import { FittingPreviewManager } from "./fittingPreviewManager";
-import type { FittingPreview } from "../fittingPreview";
+import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
 import type { FittingImport } from "../../fitting";
 import type { ShipProfile } from "../../ships";
-import type { Side } from "../sidePanel";
+import type { Side } from "./sidePanel";
 
 const PREVIEW_SUMMARY: FittingSummary = {
   hullName: "Rifter",

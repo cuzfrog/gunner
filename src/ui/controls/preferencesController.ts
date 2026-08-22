@@ -1,13 +1,13 @@
-import { num, setText } from "../controlsDom";
+import { num, setText } from "./controlsDom";
 import {
   DEFAULT_GRID_BRIGHTNESS,
   aggressivityFromPosition,
   parseManeuverAggressivity,
   positionFromAggressivity,
-} from "../controlsFormat";
+} from "./controlsFormat";
 import type { I18n, Language } from "../i18n";
-import type { DisplayPreferences, SettingsStore } from "../settings";
-import { TrackingInput, type TrackingUnit } from "../trackingInput";
+import { TrackingInput } from "./trackingInput";
+import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../settings";
 
 export interface PreferencesEls {
   readonly tracking: HTMLInputElement;

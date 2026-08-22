@@ -1,7 +1,7 @@
-import type { I18n, Language } from "./i18n";
+import type { I18n, Language } from "../i18n";
 import { HintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
-import type { IntervalId, TimeoutId, Timer } from "./timer";
+import type { IntervalId, TimeoutId, Timer } from "../timer";
 
 class FakeElement {
   textContent = "";

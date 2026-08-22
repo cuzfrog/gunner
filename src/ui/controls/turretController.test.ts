@@ -172,4 +172,17 @@ describe("TurretController", () => {
     expect(spec.falloff).toBe(3000);
     expect(controller.currentTurretSpec().tracking).toBe(trackingInput.rad);
   });
+
+  test("capture returns the current turret inputs and ammo", () => {
+    const { document, controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    getFake(document, "optimal").value = "5000";
+    getFake(document, "falloff").value = "4000";
+    getFake(document, "sigRes").value = "M";
+    const captured = controller.capture();
+    expect(captured.sigRes).toBe("M");
+    expect(captured.optimal).toBe(5000);
+    expect(captured.falloff).toBe(4000);
+    expect(captured.ammo).toBe("Hail S");
+  });
 });

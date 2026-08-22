@@ -1,4 +1,4 @@
-export type TrackingUnit = "rad" | "score";
+import type { TrackingUnit } from "../settings";
 
 export class TrackingInput {
   private currentUnit: TrackingUnit = "rad";

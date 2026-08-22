@@ -1,8 +1,8 @@
 import type { SigResolutionClass } from "../../sim";
 import type { GunFamilies, ImportedTurret } from "../../fitting";
 import type { ImageCatalog } from "../imageCatalog";
-import { isHtmlButtonElement, isHtmlImageElement } from "../controlsDom";
-import { isSigResClass } from "../controlsFormat";
+import { isHtmlButtonElement, isHtmlImageElement } from "./controlsDom";
+import { isSigResClass } from "./controlsFormat";
 
 export interface SigResIconEls {
   readonly sigResOptions: HTMLElement;

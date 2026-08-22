@@ -2,10 +2,10 @@ import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } fr
 import type { SavedFitting, SavedFittings } from "../savedFittings";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import { PopupGroup, type Popup } from "../popupGroup";
-import { fittingAreaSelector, isHtmlButtonElement } from "../controlsDom";
+import { PopupGroup, type Popup } from "./popupGroup";
+import { fittingAreaSelector, isHtmlButtonElement } from "./controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { PanelView, Side } from "../sidePanel";
+import type { PanelView, Side } from "./sidePanel";
 
 export interface FittingPopupEls {
   readonly trigger: HTMLButtonElement;

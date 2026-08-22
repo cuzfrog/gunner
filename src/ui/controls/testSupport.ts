@@ -1,11 +1,18 @@
-import { type ChargeCatalog, type FittingImport, type GunFamilies, type GunFamily, type ImportedFitting, type ImportedTurret } from "../../fitting";
-import type { FittedHull, ShipProfile, StatConditions } from "../../ships";
-import type { SigResolutionClass } from "../../sim";
-import { TrackingInput } from "../trackingInput";
+import { type ChargeCatalog, type FittingImport, type GunFamilies, type GunFamily, type ImportedFitting, type ImportedTurret, type PresetFittings } from "../../fitting";
+import type { FittedHull, HullView, ShipProfile, Ships, StatConditions } from "../../ships";
+import type { HitChance, SigResolutionClass } from "../../sim";
+import { TrackingInput } from "./trackingInput";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import type { ProfileParamOverrides } from "../settings";
+import type { ProfileParamOverrides, SettingsStore, ClipboardProvider } from "../settings";
+import type { Timer } from "../timer";
+import type { SavedFittings } from "../savedFittings";
 import { TurretController, type TurretEls } from "./turretController";
+import { DomControls, type Controls, type ControlsCallbacks } from "./domControls";
+import { SidePanel, type Side, type SidePanelHost } from "./sidePanel";
+import { PopupGroup } from "./popupGroup";
+import { createControlsEls } from "./elements";
+import { collectSideEls } from "./elementSlices";
 
 export const RIFTER: ShipProfile = {
   name: "Rifter",
@@ -59,11 +66,20 @@ export class FakeElement {
   disabled = false;
   isConnected = true;
   children: FakeElement[] = [];
-  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
+  classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: vi.fn(() => false) };
+  style: Record<string, string | number> & { setProperty(this: Record<string, string | number>, name: string, value: string): void } = Object.assign(Object.create(null), { setProperty(this: Record<string, string | number>, name: string, value: string) { this[name] = value; } });
+  offsetParent: FakeElement | null = null;
+  offsetWidth = 0;
+  offsetHeight = 0;
   private _innerHTML = "";
   private attributes: Record<string, string | null> = {};
   private handlers: Record<string, Array<(event?: unknown) => void>> = {};
   focus = vi.fn();
+  blur = vi.fn();
+
+  getBoundingClientRect(): { left: number; top: number; right: number; bottom: number; width: number; height: number; x: number; y: number } {
+    return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0 };
+  }
 
   get innerHTML(): string { return this._innerHTML; }
   set innerHTML(value: string) {
@@ -87,31 +103,31 @@ export class FakeElement {
   }
 }
 
-const TAG_BY_ID: Record<string, string> = {
-  tracking: "INPUT",
-  sigRes: "SELECT",
-  "sig-res-options": "DIV",
-  optimal: "INPUT",
-  falloff: "INPUT",
-  "attacker-ammo-trigger": "BUTTON",
-  "attacker-ammo-summary": "SPAN",
-  "attacker-ammo-summary-icon": "IMG",
-  "attacker-ammo-popup": "DIV",
-  "attacker-ammo-cargo-label": "SPAN",
-  "attacker-ammo-cargo-list": "UL",
-  "attacker-ammo-expand": "BUTTON",
-  "attacker-ammo-all-section": "DIV",
-  "attacker-ammo-all-list": "UL",
-};
+const SELECT_IDS = new Set(["sigRes", "attacker-mode", "target-mode", "attacker-skills", "target-skills", "attacker-propulsion", "target-propulsion", "sim-speed", "profile-select"]);
+const TEXTAREA_IDS = new Set(["attacker-paste-input", "target-paste-input"]);
+const IMAGE_IDS = new Set(["attacker-ship-image", "target-ship-image", "attacker-ammo-summary-icon"]);
+const BUTTON_IDS = new Set(["play", "reset", "profile-save", "profile-delete", "share-link", "import-profile", "import-side-attacker", "import-side-target", "attacker-import-fitting", "target-import-fitting", "attacker-fitting-trigger", "attacker-fitting-eye", "target-fitting-trigger", "target-fitting-eye", "attacker-ammo-trigger", "attacker-ammo-expand", "attacker-propulsion-gear", "target-propulsion-gear", "attacker-skill-trigger", "target-skill-trigger", "attacker-overload-button", "target-overload-button", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja"]);
+
+function tagForId(id: string): string {
+  if (SELECT_IDS.has(id)) return "SELECT";
+  if (TEXTAREA_IDS.has(id)) return "TEXTAREA";
+  if (IMAGE_IDS.has(id)) return "IMG";
+  if (BUTTON_IDS.has(id)) return "BUTTON";
+  if (id.endsWith("-input") || id === "tracking" || id === "optimal" || id === "falloff" || id === "attacker-hull" || id === "target-hull" || id === "attacker-speed" || id === "attacker-mass" || id === "attacker-inertia" || id === "attacker-range" || id === "target-speed" || id === "target-mass" || id === "target-inertia" || id === "target-range" || id === "target-sig" || id === "initial-distance" || id === "maneuver-aggressivity" || id === "maneuver-aggressivity-slider" || id === "grid-brightness-slider" || id === "profile-name" || id === "attacker-overload" || id === "target-overload") return "INPUT";
+  return "DIV";
+}
 
 export function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
+  const docHandlers: Record<string, Array<(event?: unknown) => void>> = {};
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
-      if (!elements.has(id)) elements.set(id, new FakeElement());
-      const tag = TAG_BY_ID[id] ?? "DIV";
-      elements.get(id)!.tagName = tag;
+      if (!elements.has(id)) {
+        const el = new FakeElement();
+        el.tagName = tagForId(id);
+        elements.set(id, el);
+      }
       return elements.get(id) as unknown as HTMLElement;
     },
     querySelectorAll: () => [] as unknown as NodeListOf<Element>,
@@ -120,9 +136,9 @@ export function fakeDocument(): Document {
       el.tagName = tag.toUpperCase();
       return el as unknown as HTMLElement;
     },
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
+    addEventListener: (event: string, handler: (event?: unknown) => void) => { (docHandlers[event] ??= []).push(handler); },
+    removeEventListener: (event: string, handler: (event?: unknown) => void) => { const hs = docHandlers[event]; if (hs) docHandlers[event] = hs.filter((h) => h !== handler); },
+    dispatchEvent: (event: Event) => { docHandlers[event.type]?.forEach((h) => h(event)); },
   } as unknown as Document;
 }
 
@@ -185,6 +201,156 @@ export interface BuildTurretResult {
   popup: { isOpen: ReturnType<typeof vi.fn>; open: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn>; focusTrigger: ReturnType<typeof vi.fn>; contains: ReturnType<typeof vi.fn> };
 }
 
+function setControlDefaults(document: Document): void {
+  const defaults: Record<string, string> = {
+    sigRes: "S",
+    tracking: "0.32",
+    optimal: "1000",
+    falloff: "3000",
+    "attacker-speed": "300",
+    "attacker-mass": "1000000",
+    "attacker-inertia": "3",
+    "attacker-range": "5000",
+    "attacker-mode": "orbit",
+    "attacker-skills": "5",
+    "target-speed": "300",
+    "target-mass": "1000000",
+    "target-inertia": "3",
+    "target-range": "5000",
+    "target-sig": "36",
+    "target-mode": "orbit",
+    "target-skills": "5",
+    "initial-distance": "5000",
+    "maneuver-aggressivity": "1",
+    "maneuver-aggressivity-slider": "0.5",
+    "grid-brightness-slider": "0.2",
+    "sim-speed": "4",
+    "profile-name": "",
+  };
+  for (const [id, value] of Object.entries(defaults)) {
+    const el = getFake(document, id);
+    el.value = value;
+    if (id === "attacker-overload" || id === "target-overload") el.checked = true;
+  }
+  const attackerOverload = getFake(document, "attacker-overload");
+  attackerOverload.checked = true;
+  const targetOverload = getFake(document, "target-overload");
+  targetOverload.checked = true;
+  addSigResButtons(document);
+}
+
+function mockSettingsStore(): SettingsStore {
+  return {
+    loadStartupState: vi.fn(() => ({ settings: null, selectedProfileName: null })),
+    listProfiles: vi.fn(() => []),
+    saveProfile: vi.fn(),
+    loadProfile: vi.fn(() => null),
+    deleteProfile: vi.fn(),
+    selectProfile: vi.fn(),
+    encodeUrl: vi.fn(() => ""),
+    loadPreferences: vi.fn(() => ({ language: "en" as const, trackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 })),
+    savePreferences: vi.fn(),
+  };
+}
+
+function mockShips(): Ships {
+  return {
+    hulls: vi.fn(() => []),
+    hullView: vi.fn((profile: ShipProfile, _language: Language): HullView => ({ name: profile.name, hullType: "Frigate", faction: "Unknown" })),
+    findHull: vi.fn(() => undefined),
+    parsePropulsionId: vi.fn(() => undefined),
+    fittingOptions: vi.fn(() => []),
+    allFittingOptions: vi.fn(() => []),
+    fittingOption: vi.fn(() => undefined),
+    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, alignTime: 0 })),
+    maxSpeedForFittedMass: vi.fn(() => 0),
+    alignTime: vi.fn(() => 0),
+  };
+}
+
+function mockFittingImport(): FittingImport {
+  return {
+    importFitting: vi.fn(() => undefined),
+    propulsionVariantNames: vi.fn(() => []),
+    propulsionStats: vi.fn(() => undefined),
+    summarize: vi.fn(() => undefined),
+  };
+}
+
+function mockChargeCatalog(): ChargeCatalog {
+  return {
+    usualForChargeSize: vi.fn(() => "Hail S"),
+    chargesForSize: vi.fn(() => []),
+    chargesForTurret: vi.fn(() => []),
+    withCharge: vi.fn((turret) => turret),
+  };
+}
+
+function mockPresetFittings(): PresetFittings {
+  return { listHulls: vi.fn(() => []), fittingsFor: vi.fn(() => []), eftText: vi.fn(() => "") };
+}
+
+function mockSavedFittings(): SavedFittings {
+  return { listForHull: vi.fn(() => []), mostRecentFor: vi.fn(() => undefined), record: vi.fn(() => undefined), remove: vi.fn() };
+}
+
+function mockClipboard(): ClipboardProvider {
+  return { readText: vi.fn(() => Promise.resolve("")), writeText: vi.fn(() => Promise.resolve()) };
+}
+
+function mockTimer(): Timer {
+  return { setTimeout: vi.fn(() => 0), clearTimeout: vi.fn(), setInterval: vi.fn(() => 0), clearInterval: vi.fn() };
+}
+
+function mockHitChance(): HitChance {
+  return { compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })), findBestDistance: vi.fn(() => 5000) };
+}
+
+export interface BuildDomControlsResult {
+  document: Document;
+  controls: Controls;
+  settingsStore: SettingsStore;
+  hitChance: HitChance;
+  i18n: I18n;
+  clipboard: ClipboardProvider;
+}
+
+export function buildDomControls(
+  options: { i18n?: Partial<I18n>; hitChance?: Partial<HitChance>; ships?: Partial<Ships>; settingsStore?: Partial<SettingsStore>; chargeCatalog?: Partial<ChargeCatalog>; fittingImport?: Partial<FittingImport> } = {},
+): BuildDomControlsResult {
+  const document = fakeDocument();
+  globalThis.document = document as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
+  setControlDefaults(document);
+  const i18n = vi.mocked<I18n>({ current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key) => key), translateDocument: vi.fn(), ...options.i18n });
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(() => undefined), droneIconUrl: vi.fn() });
+  const gunFamilies = vi.mocked<GunFamilies>({
+    familyOf: vi.fn((moduleName: string) => (moduleName.includes("Howitzer") || moduleName.includes("Artillery") ? "artillery" : "autocannon")),
+    representativeOf: vi.fn((family: GunFamily, sigRes: SigResolutionClass) => MOCK_REPRESENTATIVES[family][sigRes]),
+  });
+  const settingsStore = vi.mocked<SettingsStore>({ ...mockSettingsStore(), ...options.settingsStore });
+  const chargeCatalog = vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog });
+  const fittingImport = vi.mocked<FittingImport>({ ...mockFittingImport(), ...options.fittingImport });
+  const hitChance = vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance });
+  const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
+  const clipboard = mockClipboard();
+  const controls = new DomControls({
+    hitChance,
+    i18n,
+    settingsStore,
+    ships,
+    fittingImport,
+    gunFamilies,
+    presetFittings: mockPresetFittings(),
+    savedFittings: mockSavedFittings(),
+    clipboard,
+    timer: mockTimer(),
+    chargeCatalog,
+    imageCatalog,
+  });
+  return { document, controls, settingsStore, hitChance, i18n, clipboard };
+}
+
 export function buildTurret(
   options: { overrides?: Partial<ProfileParamOverrides>; imageCatalog?: Partial<ImageCatalog>; chargeCatalog?: Partial<ChargeCatalog>; fittingImport?: Partial<FittingImport> } = {},
 ): BuildTurretResult {
@@ -209,4 +375,30 @@ export function buildTurret(
   const popup = { isOpen: vi.fn(() => false), open: vi.fn(), close: vi.fn(), focusTrigger: vi.fn(), contains: vi.fn() };
   const controller = new TurretController({ els, popup, chargeCatalog, gunFamilies, imageCatalog, trackingInput, i18n, fittingImport, overrides, clearTurretOverrides, onConfigChange });
   return { document, controller, chargeCatalog, imageCatalog, fittingImport, gunFamilies, i18n, trackingInput, clearTurretOverrides, onConfigChange, popup };
+}
+
+export interface BuildSidePanelResult {
+  document: Document;
+  panel: SidePanel;
+}
+
+export function buildSidePanel(side: Side = "attacker"): BuildSidePanelResult {
+  const document = fakeDocument();
+  globalThis.document = document as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
+  const els = collectSideEls(createControlsEls(), side);
+  const host = vi.mocked<SidePanelHost>({
+    updateFittingTrigger: vi.fn(),
+    onAttackerFittedHullCleared: vi.fn(),
+    importEftFitting: vi.fn(),
+    mostRecentFittingFor: vi.fn(),
+    persistConfigChange: vi.fn(),
+    restoreAttackerTurret: vi.fn(),
+    importFittingFromText: vi.fn(() => Promise.resolve()),
+    importFitting: vi.fn(() => Promise.resolve()),
+  });
+  const i18n = vi.mocked<I18n>({ current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key) => key), translateDocument: vi.fn() });
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(() => undefined), droneIconUrl: vi.fn() });
+  const panel = new SidePanel({ side, host, popupGroup: new PopupGroup(), els, i18n, ships: mockShips(), fittingImport: mockFittingImport(), imageCatalog, timer: mockTimer() });
+  return { document, panel };
 }

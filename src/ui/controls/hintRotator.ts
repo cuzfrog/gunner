@@ -1,6 +1,6 @@
-import type { I18n } from "./i18n";
+import type { I18n } from "../i18n";
 import type { SlideText } from "./hints";
-import type { IntervalId, Timer } from "./timer";
+import type { IntervalId, Timer } from "../timer";
 
 export interface IHintRotator {
   showNext(): void;

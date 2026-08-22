@@ -1,10 +1,10 @@
 import type { FittingImport } from "../../fitting";
 import type { ShipProfile } from "../../ships";
-import { fittingAreaSelector, isEventTargetWithClosest } from "../controlsDom";
-import type { FittingPreview } from "../fittingPreview";
+import { fittingAreaSelector, isEventTargetWithClosest } from "./controlsDom";
+import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import type { Side } from "../sidePanel";
+import type { Side } from "./sidePanel";
 
 export class FittingPreviewManager {
   private readonly fittingImport: FittingImport;

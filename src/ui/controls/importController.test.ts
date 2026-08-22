@@ -1,8 +1,8 @@
 import type { FittingImport } from "../../fitting";
 import type { SavedFittings } from "../savedFittings";
 import { ClipboardUnavailableError, USER_SETTINGS_VERSION, type ClipboardProvider, type UserSettings } from "../settings";
-import { PopupGroup } from "../popupGroup";
-import type { Side, SidePanel } from "../sidePanel";
+import { PopupGroup } from "./popupGroup";
+import type { Side, SidePanel } from "./sidePanel";
 import { serializeProfile } from "../profileText";
 import type { TurretController } from "./turretController";
 import type { PreferencesController } from "./preferencesController";

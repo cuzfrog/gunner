@@ -1,8 +1,8 @@
 import type { CargoCharge, ChargeCatalog, ImportedTurret } from "../../fitting";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../imageCatalog";
-import { chargeStatSuffix } from "../controlsFormat";
-import { isHtmlButtonElement, setText } from "../controlsDom";
+import { chargeStatSuffix } from "./controlsFormat";
+import { isHtmlButtonElement, setText } from "./controlsDom";
 
 export interface AmmoListEls {
   readonly attackerAmmoTrigger: HTMLButtonElement;

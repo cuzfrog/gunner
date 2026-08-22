@@ -1,12 +1,13 @@
-import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
-import type { FittingImport, ImportedFitting } from "../fitting";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../../ships";
+import type { FittingImport, ImportedFitting } from "../../fitting";
+import type { AutopilotMode } from "../../sim";
 import { isHtmlButtonElement, num, setText } from "./controlsDom";
-import { escapeHtml, formatNumber, propulsionOptionLabel, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
-import type { I18n } from "./i18n";
-import type { ImageCatalog } from "./imageCatalog";
-import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "./settings";
-import type { SavedFitting } from "./savedFittings";
-import type { TimeoutId, Timer } from "./timer";
+import { escapeHtml, formatNumber, isAutopilotMode, propulsionOptionLabel, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
+import type { I18n } from "../i18n";
+import type { ImageCatalog } from "../imageCatalog";
+import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "../settings";
+import type { SavedFitting } from "../savedFittings";
+import type { TimeoutId, Timer } from "../timer";
 import { PopupGroup, type Popup } from "./popupGroup";
 
 export type Side = "attacker" | "target";
@@ -27,6 +28,22 @@ export interface FittingPreviewControl {
   hide(side: Side): void;
 }
 
+export interface SidePanelState {
+  readonly speed: number;
+  readonly mass: number;
+  readonly inertia: number;
+  readonly mode: AutopilotMode;
+  readonly range: number;
+  readonly skillLevel: SkillLevel | undefined;
+  readonly overload: boolean;
+  readonly hull: string | undefined;
+  readonly propulsion: PropulsionSelection | undefined;
+  readonly fitting: string | undefined;
+  readonly overrides: Partial<ProfileParamOverrides>;
+  readonly fittedHull: FittedHullSummary | undefined;
+  readonly sig?: number;
+}
+
 export interface SidePanelHost {
   updateFittingTrigger(enabled: boolean): void;
   onAttackerFittedHullCleared(): void;
@@ -38,7 +55,7 @@ export interface SidePanelHost {
   importFitting(): Promise<void>;
 }
 
-interface SidePanelElements {
+export interface SidePanelElements {
   readonly hull: HTMLInputElement;
   readonly shipImage: HTMLImageElement;
   readonly fittingName: HTMLElement;
@@ -183,6 +200,49 @@ export class SidePanel implements PanelView {
 
   setFittingPreview(preview: FittingPreviewControl): void {
     this.fittingPreview = preview;
+  }
+
+  capture(): SidePanelState {
+    return {
+      speed: num(this.els.speed),
+      mass: num(this.els.mass),
+      inertia: num(this.els.inertia),
+      mode: this.currentMode(),
+      range: num(this.els.range),
+      skillLevel: this.currentSkillLevel(),
+      overload: this.els.overload.checked,
+      hull: this.profile?.name,
+      propulsion: this.currentPropulsionSelection(),
+      fitting: this.fittingText,
+      overrides: this.overrides,
+      fittedHull: this.fittedHull,
+      sig: this.side === "target" ? Math.max(num(this.els.targetSig!), 1) : undefined,
+    };
+  }
+
+  restore(state: SidePanelState): void {
+    this.fittingText = state.fitting;
+    this.overrides = state.overrides;
+    this.els.speed.value = formatNumber(state.speed);
+    this.els.mass.value = String(state.mass);
+    this.els.inertia.value = formatNumber(state.inertia, 6);
+    this.els.mode.value = state.mode;
+    this.els.range.value = String(state.range);
+    this.loadHull(state.hull, state.propulsion);
+    this.setSkillLevel(state.skillLevel ?? 5);
+    this.setOverloadActive(state.overload ?? true);
+    this.setOverloadDisabled();
+    if (state.fittedHull) this.restoreFittingSummary(state.fittedHull);
+    if (this.side === "target" && state.sig !== undefined) {
+      this.els.targetSig!.value = String(state.sig);
+    }
+    this.updateAlignTime();
+  }
+
+  private currentMode(): AutopilotMode {
+    const value = this.els.mode.value;
+    if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
+    return value;
   }
 
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void {
