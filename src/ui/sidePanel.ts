@@ -9,12 +9,26 @@ import type { SavedFitting } from "./savedFittings";
 import type { TimeoutId, Timer } from "./timer";
 import { PopupGroup, type Popup } from "./popupGroup";
 
+export type Side = "attacker" | "target";
+
+export interface PanelView {
+  readonly profile: ShipProfile | undefined;
+  readonly fittingText: string | undefined;
+  skillConditions(): StatConditions;
+}
+
+export interface FittingPopupControl {
+  readonly popup: Popup;
+  renderIfOpen(): void;
+  closeIfOpen(): void;
+}
+
+export interface FittingPreviewControl {
+  hide(side: Side): void;
+}
+
 export interface SidePanelHost {
   updateFittingTrigger(enabled: boolean): void;
-  isFittingPopupOpen(): boolean;
-  renderFittingPopup(): void;
-  closeFittingPopup(): void;
-  hidePreview(): void;
   onAttackerFittedHullCleared(): void;
   importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
   mostRecentFittingFor(hullName: string): SavedFitting | undefined;
@@ -52,8 +66,8 @@ interface SidePanelElements {
   readonly propulsionVariants: HTMLElement;
 }
 
-export class SidePanel {
-  private readonly side: "attacker" | "target";
+export class SidePanel implements PanelView {
+  private readonly side: Side;
   private readonly host: SidePanelHost;
   private readonly els: SidePanelElements;
   private readonly i18n: I18n;
@@ -70,6 +84,8 @@ export class SidePanel {
   private pastePopupOpen = false;
   private propulsionVariantPopupOpen = false;
   private importHintTimeout?: TimeoutId;
+  private fittingPopup?: FittingPopupControl;
+  private fittingPreview?: FittingPreviewControl;
   private readonly popupGroup: PopupGroup;
   private readonly skillPopup: Popup;
   private readonly pastePopup: Popup;
@@ -86,7 +102,7 @@ export class SidePanel {
     imageCatalog,
     timer,
   }: {
-    side: "attacker" | "target";
+    side: Side;
     host: SidePanelHost;
     popupGroup: PopupGroup;
     els: SidePanelElements;
@@ -159,6 +175,14 @@ export class SidePanel {
 
   getPropulsionVariantPopup(): Popup {
     return this.propulsionVariantPopup;
+  }
+
+  setFittingPopup(popup: FittingPopupControl): void {
+    this.fittingPopup = popup;
+  }
+
+  setFittingPreview(preview: FittingPreviewControl): void {
+    this.fittingPreview = preview;
   }
 
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void {
@@ -238,7 +262,7 @@ export class SidePanel {
   clearHull(resetInput: boolean, persist: boolean): void {
     this.profileValue = undefined;
     this.clearFittedHull();
-    this.host.hidePreview();
+    this.fittingPreview?.hide(this.side);
     this.clearShipImage();
     this.lastCommittedHull = undefined;
 
@@ -246,7 +270,7 @@ export class SidePanel {
       this.els.hull.value = "";
     }
     this.host.updateFittingTrigger(false);
-    this.host.closeFittingPopup();
+    this.fittingPopup?.closeIfOpen();
     this.updateHullHint();
     this.renderPropulsionOptions();
     if (persist) {
@@ -261,7 +285,7 @@ export class SidePanel {
     if (this.side === "attacker") {
       this.host.onAttackerFittedHullCleared();
     }
-    this.host.hidePreview();
+    this.fittingPreview?.hide(this.side);
     this.clearImportHint();
   }
 
@@ -681,7 +705,7 @@ export class SidePanel {
     this.updateShipImage();
     this.setHullValidation(false);
     this.host.updateFittingTrigger(true);
-    if (this.host.isFittingPopupOpen()) this.host.renderFittingPopup();
+    this.fittingPopup?.renderIfOpen();
     this.renderPropulsionOptions(propulsionId ?? "");
 
     if (updateStats) {
