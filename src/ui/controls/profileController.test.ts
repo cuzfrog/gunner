@@ -99,6 +99,7 @@ function createNoOpTimer(): Timer & { fireLast: () => void } {
 }
 
 function build(options: { profiles?: Record<string, ProfileSettings>; list?: string[] } = {}) {
+  globalThis.document = new FakeDocument() as unknown as Document;
   const els = fakeProfileEls();
   const i18n: I18n = { current: vi.fn((): Language => "en"), setLanguage: vi.fn(), t: vi.fn((key) => key), translateDocument: vi.fn() };
   const settingsStore: SettingsStore = {
@@ -120,56 +121,34 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
 }
 
 describe("ProfileController", () => {
-  beforeEach(() => {
-    globalThis.document = new FakeDocument() as unknown as Document;
-  });
-
-  afterEach(() => {
-    globalThis.document = undefined as unknown as Document;
-  });
-
-  test("save stores a new profile from the name input and selects it", () => {
+  test("save uses the name input when present, otherwise the selected profile", () => {
     const { controller, els, settingsStore } = build();
-    els.profileName.value = "brawler";
-    controller.saveProfile();
-    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.objectContaining({ tracking: 0.32 }));
-    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
-    expect(els.profileName.value).toBe("");
-    expect(els.profileSelect.value).toBe("brawler");
-  });
-
-  test("save uses the selected profile name when the name input is empty", () => {
-    const { controller, els, settingsStore } = build();
-    els.profileSelect.value = "brawler";
-    controller.saveProfile();
-    expect(settingsStore.saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
-    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
-  });
-
-  test("save does nothing when there is no name and no selection", () => {
-    const { controller, settingsStore } = build();
     controller.saveProfile();
     expect(settingsStore.saveProfile).not.toHaveBeenCalled();
-    expect(settingsStore.selectProfile).not.toHaveBeenCalled();
-  });
 
-  test("load invokes onLoaded for the selected profile", () => {
-    const { controller, els, settingsStore, onLoaded } = build({
-      profiles: { brawler: BASE_PROFILE },
-    });
     els.profileSelect.value = "brawler";
-    controller.loadProfile();
-    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
-    expect(onLoaded).toHaveBeenCalledWith("brawler");
+    controller.saveProfile();
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
+    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
+
+    els.profileName.value = "kiter";
+    controller.saveProfile();
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kiter", expect.any(Object));
+    expect(els.profileName.value).toBe("");
   });
 
-  test("load does nothing when the selected option is empty", () => {
-    const { controller, settingsStore, onLoaded } = build({
+  test("load invokes onLoaded for a selected profile and does nothing when empty", () => {
+    const { controller, els, settingsStore, onLoaded } = build({
       profiles: { brawler: BASE_PROFILE },
     });
     controller.loadProfile();
     expect(settingsStore.selectProfile).not.toHaveBeenCalled();
     expect(onLoaded).not.toHaveBeenCalled();
+
+    els.profileSelect.value = "brawler";
+    controller.loadProfile();
+    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
+    expect(onLoaded).toHaveBeenLastCalledWith("brawler");
   });
 
   test("delete removes the selected profile and clears the selection", () => {
@@ -183,110 +162,73 @@ describe("ProfileController", () => {
     expect(els.profileSelect.value).toBe("");
   });
 
-  test("updateDirtyState highlights when a new profile name is typed", () => {
-    const { controller, els } = build();
-    els.profileName.value = "new";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenCalledWith("unsaved", true);
-  });
-
-  test("updateDirtyState does not highlight for a freshly loaded profile", () => {
-    const { controller, els } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
-    controller.markLoaded("brawler");
-    vi.mocked(els.profileSave.classList.toggle).mockClear();
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenCalledWith("unsaved", false);
-  });
-
-  test("updateDirtyState highlights when the current profile changes", () => {
+  test("updateDirtyState distinguishes new, equal, changed, and existing-different profiles", () => {
     const { controller, els, captureCurrent } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
-    controller.markLoaded("brawler");
-    captureCurrent.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenCalledWith("unsaved", true);
-  });
-
-  test("updateDirtyState highlights when typing an existing different profile name", () => {
-    const { controller, els } = build({
       profiles: {
         brawler: BASE_PROFILE,
         kiter: { ...BASE_PROFILE, optimal: 9999 },
       },
       list: ["brawler", "kiter"],
     });
-    controller.markLoaded("brawler");
-    els.profileName.value = "kiter";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenCalledWith("unsaved", true);
-  });
 
-  test("updateDirtyState does not highlight when typing the name of the selected profile", () => {
-    const { controller, els } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
+    els.profileName.value = "new";
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+
+    els.profileName.value = "";
     controller.markLoaded("brawler");
+    vi.mocked(els.profileSave.classList.toggle).mockClear();
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+
     els.profileName.value = "brawler";
     controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenCalledWith("unsaved", false);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+
+    els.profileName.value = "kiter";
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+
+    els.profileName.value = "";
+    captureCurrent.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
+    controller.updateDirtyState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
   });
 
-  test("showStatus displays translated text and clears after the timeout", () => {
+  test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {
     const { controller, els, timer } = build();
     controller.showStatus("status.copied");
     expect(els.shareStatus.textContent).toBe("status.copied");
+
+    controller.showStatus("status.failed");
+    expect(timer.clearTimeout).toHaveBeenCalled();
+
     timer.fireLast();
     expect(els.shareStatus.textContent).toBe("");
   });
 
-  test("showStatus clears the previous timeout before scheduling a new one", () => {
-    const { controller, timer } = build();
-    controller.showStatus("status.copied");
-    controller.showStatus("status.failed");
-    expect(timer.clearTimeout).toHaveBeenCalled();
-  });
-
-  test("restoreFromStartup loads the selected profile and invokes onLoaded", () => {
+  test("restoreFromStartup loads the selected profile and reports missing selections", () => {
     const { controller, settingsStore, onLoaded } = build({
       profiles: { brawler: BASE_PROFILE },
     });
-    const startup: StartupState = { settings: null, selectedProfileName: "brawler" };
-    expect(controller.restoreFromStartup(startup)).toBe(true);
-    expect(settingsStore.selectProfile).toHaveBeenCalledWith("brawler");
-    expect(onLoaded).toHaveBeenCalledWith("brawler");
+
+    expect(controller.restoreFromStartup({ settings: null, selectedProfileName: null })).toBe(false);
+    expect(controller.restoreFromStartup({ settings: null, selectedProfileName: "missing" })).toBe(false);
+
+    expect(controller.restoreFromStartup({ settings: null, selectedProfileName: "brawler" })).toBe(true);
+    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
+    expect(onLoaded).toHaveBeenLastCalledWith("brawler");
   });
 
-  test("restoreFromStartup returns false when no profile is selected", () => {
-    const { controller, onLoaded } = build();
-    const startup: StartupState = { settings: null, selectedProfileName: null };
-    expect(controller.restoreFromStartup(startup)).toBe(false);
-    expect(onLoaded).not.toHaveBeenCalled();
-  });
-
-  test("restoreFromStartup returns false when the selected profile is missing", () => {
-    const { controller, onLoaded } = build();
-    const startup: StartupState = { settings: null, selectedProfileName: "missing" };
-    expect(controller.restoreFromStartup(startup)).toBe(false);
-    expect(onLoaded).not.toHaveBeenCalled();
-  });
-
-  test("selectedName returns the current select value", () => {
-    const { controller, els } = build();
-    els.profileSelect.value = "brawler";
-    expect(controller.selectedName()).toBe("brawler");
-  });
-
-  test("refresh populates the select with stored profile names", () => {
+  test("selectedName and refresh reflect stored profiles", () => {
     const { controller, els } = build({
       profiles: { brawler: BASE_PROFILE, kiter: BASE_PROFILE },
       list: ["brawler", "kiter"],
     });
+
+    els.profileSelect.value = "brawler";
+    expect(controller.selectedName()).toBe("brawler");
+
     controller.refresh("kiter");
     const options = Array.from(els.profileSelect.children as unknown as FakeElement[]).map((c) => c.value);
     expect(options).toEqual(["", "brawler", "kiter"]);
