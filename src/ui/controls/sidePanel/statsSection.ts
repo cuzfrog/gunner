@@ -3,7 +3,9 @@ import type { I18n } from "../../i18n";
 import { type FittedHullSummary, type ProfileParamOverrides } from "../../settings";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
-import type { SidePanel } from "./sidePanel";
+import type { Side } from "./side";
+import type { ISidePanel } from "./sidePanelContract";
+import type { IStatsSection } from "./sidePanelSections";
 
 export interface StatsSectionEls {
   readonly speed: HTMLInputElement;
@@ -13,13 +15,13 @@ export interface StatsSectionEls {
   readonly targetSig?: HTMLInputElement;
 }
 
-export class StatsSection {
-  private readonly panel: SidePanel;
+export class StatsSection implements IStatsSection {
+  private readonly panel: ISidePanel;
   private readonly els: StatsSectionEls;
   private readonly ships: Ships;
   private readonly i18n: I18n;
 
-  constructor({ panel, els, ships, i18n }: { panel: SidePanel; els: StatsSectionEls; ships: Ships; i18n: I18n }) {
+  constructor({ panel, els, ships, i18n }: { panel: ISidePanel; els: StatsSectionEls; ships: Ships; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;

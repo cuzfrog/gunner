@@ -15,6 +15,7 @@ import type { Els } from "./elements";
 import type { IHintRotator } from "./hintRotator";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
+import { sidePanelState } from "./sessionCodecState";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 
@@ -137,8 +138,8 @@ export class SessionCodec {
     this.els.targetRange.value = String(settings.targetRange);
     this.els.targetSig.value = String(settings.targetSig);
 
-    this.attackerSide.restore(this.sidePanelState(settings, "attacker"));
-    this.targetSide.restore(this.sidePanelState(settings, "target"));
+    this.attackerSide.restore(sidePanelState(settings, "attacker"));
+    this.targetSide.restore(sidePanelState(settings, "target"));
 
     this.i18n.translateDocument();
     this.turretController.restore({ fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo });
@@ -171,39 +172,5 @@ export class SessionCodec {
     this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
     this.onSetInitialDefaults();
-  }
-
-  private sidePanelState(settings: UserSettings, side: "attacker" | "target"): Parameters<SidePanel["restore"]>[0] {
-    if (side === "attacker") {
-      return {
-        speed: settings.attackerSpeed,
-        mass: settings.attackerMass,
-        inertia: settings.attackerInertia,
-        mode: settings.attackerMode,
-        range: settings.attackerRange,
-        skillLevel: settings.attackerSkillLevel,
-        overload: settings.attackerOverload ?? true,
-        hull: settings.attackerHull,
-        propulsion: settings.attackerPropulsion,
-        fitting: settings.attackerFitting,
-        overrides: settings.attackerOverrides ?? {},
-        fittedHull: settings.attackerFittedHull,
-      };
-    }
-    return {
-      speed: settings.targetSpeed,
-      mass: settings.targetMass,
-      inertia: settings.targetInertia,
-      mode: settings.targetMode,
-      range: settings.targetRange,
-      skillLevel: settings.targetSkillLevel,
-      overload: settings.targetOverload ?? true,
-      hull: settings.targetHull,
-      propulsion: settings.targetPropulsion,
-      fitting: settings.targetFitting,
-      overrides: settings.targetOverrides ?? {},
-      fittedHull: settings.targetFittedHull,
-      sig: settings.targetSig,
-    };
   }
 }

@@ -4,7 +4,9 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { type FittedHullSummary, type PropulsionSelection } from "../../settings";
 import { setText } from "../controlsDom";
-import type { SidePanel } from "./sidePanel";
+import type { Side } from "./side";
+import type { ISidePanel } from "./sidePanelContract";
+import type { IHullSection } from "./sidePanelSections";
 
 export interface HullSectionEls {
   readonly hull: HTMLInputElement;
@@ -12,14 +14,14 @@ export interface HullSectionEls {
   readonly hullHint: HTMLElement;
 }
 
-export class HullSection {
-  private readonly panel: SidePanel;
+export class HullSection implements IHullSection {
+  private readonly panel: ISidePanel;
   private readonly els: HullSectionEls;
   private readonly ships: Ships;
   private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
 
-  constructor({ panel, els, ships, i18n, imageCatalog }: { panel: SidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
+  constructor({ panel, els, ships, i18n, imageCatalog }: { panel: ISidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;

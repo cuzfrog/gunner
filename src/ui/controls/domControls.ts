@@ -8,12 +8,14 @@ import { DomFittingPreview } from "./fittingPreview";
 import { PreferencesController } from "./preferencesController";
 import { ProfileController } from "./profileController";
 import { TurretController } from "./turretController";
+import { TurretStateResolver } from "./turretStateResolver";
 import { FittingPreviewManager } from "./fittingPreviewManager";
 import { ImportController } from "./importController";
 import { HintRotator, type IHintRotator } from "./hintRotator";
 import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { Timer } from "../timer";
-import { createControlsEls, type Els } from "./elements";
+import { createControlsEls } from "./createElements";
+import type { Els } from "./elements";
 import { el, num } from "./controlsDom";
 import { SidePanel, type Side, collectSideEls } from "./sidePanel";
 import { PopupGroup } from "./popupGroup";
@@ -106,7 +108,13 @@ export class DomControls implements Controls, EventRouterHost {
     this.attackerSide = new SidePanel({ side: "attacker", host: this.createSidePanelHost("attacker"), popupGroup: this.popupGroup, els: collectSideEls(this.els, "attacker"), i18n: this.i18n, ships: this.ships, fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, timer: this.timer });
     this.targetSide = new SidePanel({ side: "target", host: this.createSidePanelHost("target"), popupGroup: this.popupGroup, els: collectSideEls(this.els, "target"), i18n: this.i18n, ships: this.ships, fittingImport: this.fittingImport, imageCatalog: this.imageCatalog, timer: this.timer });
     this.attackerAmmoPopup = { isOpen: () => this.turretController.isAmmoPopupOpen(), open: () => this.turretController.openAmmoPopup(), close: () => this.turretController.closeAmmoPopup(), focusTrigger: () => this.els.attackerAmmoTrigger.focus(), contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null };
-    this.turretController = new TurretController({ els: collectTurretEls(this.els), popup: this.attackerAmmoPopup, chargeCatalog: this.chargeCatalog, gunFamilies: this.gunFamilies, imageCatalog: this.imageCatalog, trackingInput: this.preferencesController.trackingInput, i18n: this.i18n, fittingImport: this.fittingImport, overrides: () => this.attackerSide.overrides, clearTurretOverrides: () => { delete this.attackerSide.overrides.tracking; delete this.attackerSide.overrides.sigRes; delete this.attackerSide.overrides.optimal; delete this.attackerSide.overrides.falloff; }, onConfigChange: (persist) => { this.preferencesController.savePreferences(); if (persist) this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); } });
+    this.turretController = new TurretController({
+      els: collectTurretEls(this.els), popup: this.attackerAmmoPopup, chargeCatalog: this.chargeCatalog, gunFamilies: this.gunFamilies, imageCatalog: this.imageCatalog,
+      trackingInput: this.preferencesController.trackingInput, i18n: this.i18n, fittingImport: this.fittingImport,
+      resolver: new TurretStateResolver({ chargeCatalog: this.chargeCatalog, fittingImport: this.fittingImport }),
+      overrides: () => this.attackerSide.overrides, clearTurretOverrides: () => { delete this.attackerSide.overrides.tracking; delete this.attackerSide.overrides.sigRes; delete this.attackerSide.overrides.optimal; delete this.attackerSide.overrides.falloff; },
+      onConfigChange: (persist) => { this.preferencesController.savePreferences(); if (persist) this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); },
+    });
     this.sessionCodec = new SessionCodec({ els: this.els, attackerSide: this.attackerSide, targetSide: this.targetSide, turret: this.turretController, preferences: this.preferencesController, profileController: this.profileController, i18n: this.i18n, chargeCatalog: this.chargeCatalog, sigResChoice: this.sigResChoice, hintRotator: this.hintRotator, settingsStore: this.settingsStore, isPlaying: () => this.playing, setPlaying: (playing: boolean) => this.setPlaying(playing), onSetInitialDefaults: () => setInitialDefaults({ els: this.els, hitChance: this.hitChance, attackerSide: this.attackerSide, targetSide: this.targetSide, turretController: this.turretController, preferencesController: this.preferencesController, profileController: this.profileController, setPlaying: (playing: boolean) => this.setPlaying(playing) }) });
     this.importController = new ImportController({ clipboard: this.clipboard, fittingImport: this.fittingImport, savedFittings: this.savedFittings, popupGroup: this.popupGroup, els: collectImportEls(this.els), sidePanel: (side) => this.side(side), turret: this.turretController, preferences: this.preferencesController, profileController: this.profileController, getSettings: () => this.sessionCodec.capture(), onConfigPersisted: () => this.onConfigPersisted(), onProfileTextLoaded: (settings) => this.onProfileTextLoaded(settings) });
     const attackerPreview = new DomFittingPreview({ container: this.els.attackerFittingPreview, i18n: this.i18n, imageCatalog: this.imageCatalog, viewport: () => window });
@@ -156,15 +164,12 @@ export class DomControls implements Controls, EventRouterHost {
       },
     };
   }
-
   private onAttackerFittedHullCleared(): void { this.popupGroup.close(this.attackerAmmoPopup); this.turretController.clear(); }
   private persistConfigChange(notify = true): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); if (notify) this.callbacks?.onConfigChange(); }
   private onProfileLoaded(name: string): void { const profile = this.settingsStore.loadProfile(name); if (!profile) return; this.sessionCodec.restore(this.sessionCodec.fromProfile(profile), name); this.callbacks?.onReset(); }
   private onConfigPersisted(): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); }
   private onProfileTextLoaded(settings: UserSettings): void { this.sessionCodec.restore(settings); this.profileController.showStatus("status.profileImported"); this.callbacks?.onReset(); }
-
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad); } getTargetSig(): number { return num(this.els.targetSig); }
-
   getConfig(): SimConfig {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);
     const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity);
@@ -172,25 +177,18 @@ export class DomControls implements Controls, EventRouterHost {
     const target: ShipConfig = { id: "target", maxSpeed: num(this.els.targetSpeed), mass: num(this.els.targetMass), inertiaModifier: num(this.els.targetInertia), mode: this.currentMode("target"), desiredRange: num(this.els.targetRange), aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw" };
     return { attacker, target, initialDistance };
   }
-
   getSpeed(): number { return this.preferencesController.getSpeed(); } getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void { this.engagementReadout.update(frame, hit, (key) => this.i18n.t(key)); }
-
   setPlaying(playing: boolean): void { this.playing = playing; this.els.play.textContent = this.i18n.t(playing ? "button.pause" : "button.play"); }
-
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-
   onPlayPause(): void { this.callbacks?.onPlayPause(); } onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
   onConfigChange(): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); this.callbacks?.onConfigChange(); }
   onDisplayChange(): void { this.preferencesController.savePreferences(); this.profileController.updateDirtyState(); this.callbacks?.onDisplayChange(); }
-
   private currentSigResolution(): number { return SIG_RESOLUTIONS[currentSigResValue(this.els)]; }
-
   private currentMode(side: Side): AutopilotMode {
     const value = this.els[`${side}Mode`].value;
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
     return value;
   }
-
 }

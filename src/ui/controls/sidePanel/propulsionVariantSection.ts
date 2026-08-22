@@ -4,7 +4,9 @@ import type { ImageCatalog } from "../../icons";
 import { type FittedHullSummary } from "../../settings";
 import { isHtmlButtonElement } from "../controlsDom";
 import { type Popup } from "../popupGroup";
-import type { SidePanel } from "./sidePanel";
+import type { Side } from "./side";
+import type { ISidePanel } from "./sidePanelContract";
+import type { IPropulsionSection } from "./sidePanelSections";
 
 export interface PropulsionVariantSectionEls {
   readonly propulsionGear: HTMLButtonElement;
@@ -12,14 +14,14 @@ export interface PropulsionVariantSectionEls {
 }
 
 export class PropulsionVariantSection {
-  private readonly panel: SidePanel;
+  private readonly panel: ISidePanel;
   private readonly els: PropulsionVariantSectionEls;
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private propulsionVariantPopupOpen = false;
   readonly popup: Popup;
 
-  constructor({ panel, els, fittingImport, imageCatalog }: { panel: SidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; imageCatalog: ImageCatalog }) {
+  constructor({ panel, els, fittingImport, imageCatalog }: { panel: ISidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.fittingImport = fittingImport;

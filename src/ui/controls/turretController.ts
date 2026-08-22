@@ -1,7 +1,6 @@
 import { SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../fitting";
 import type { StatConditions } from "../../ships";
-import { isSigResClass } from "./controlsFormat";
 import { num } from "./controlsDom";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
@@ -9,37 +8,16 @@ import type { Popup } from "./popupGroup";
 import type { ProfileParamOverrides } from "../settings";
 import { TrackingInput } from "./trackingInput";
 import { AmmoList, type AmmoListEls } from "./ammoList";
+import { SigResButtons } from "./sigResButtons";
 import { SigResIcons } from "./sigResIcons";
-
-export interface TurretEls {
-  readonly tracking: HTMLInputElement;
-  readonly sigRes: HTMLSelectElement;
-  readonly sigResOptions: HTMLElement;
-  readonly optimal: HTMLInputElement;
-  readonly falloff: HTMLInputElement;
-  readonly attackerAmmoTrigger: HTMLButtonElement;
-  readonly attackerAmmoSummary: HTMLElement;
-  readonly attackerAmmoSummaryIcon: HTMLImageElement;
-  readonly attackerAmmoPopup: HTMLElement;
-  readonly attackerAmmoCargoLabel: HTMLElement;
-  readonly attackerAmmoCargoList: HTMLElement;
-  readonly attackerAmmoExpand: HTMLButtonElement;
-  readonly attackerAmmoAllSection: HTMLElement;
-  readonly attackerAmmoAllList: HTMLElement;
-}
+import { TurretEls } from "./turretEls";
+import { TurretInputSet } from "./turretInputSet";
+import { TurretStateResolver } from "./turretStateResolver";
 
 interface TurretControllerDeps {
-  readonly els: TurretEls;
-  readonly popup: Popup;
-  readonly chargeCatalog: ChargeCatalog;
-  readonly gunFamilies: GunFamilies;
-  readonly imageCatalog: ImageCatalog;
-  readonly trackingInput: TrackingInput;
-  readonly i18n: I18n;
-  readonly fittingImport: FittingImport;
-  readonly overrides: () => Partial<ProfileParamOverrides>;
-  readonly clearTurretOverrides: () => void;
-  readonly onConfigChange: (persist: boolean) => void;
+  readonly els: TurretEls; readonly popup: Popup; readonly chargeCatalog: ChargeCatalog; readonly gunFamilies: GunFamilies; readonly imageCatalog: ImageCatalog;
+  readonly trackingInput: TrackingInput; readonly i18n: I18n; readonly fittingImport: FittingImport; readonly resolver: TurretStateResolver;
+  readonly overrides: () => Partial<ProfileParamOverrides>; readonly clearTurretOverrides: () => void; readonly onConfigChange: (persist: boolean) => void;
 }
 
 export class TurretController {
@@ -53,6 +31,8 @@ export class TurretController {
   private readonly onConfigChange: (persist: boolean) => void;
   private readonly ammoList: AmmoList;
   private readonly sigResIcons: SigResIcons;
+  private readonly inputSet: TurretInputSet;
+  private readonly resolver: TurretStateResolver;
   private attackerTurret?: ImportedTurret;
   private attackerCargoCharges: readonly CargoCharge[] = [];
   private attackerAmmo: string;
@@ -68,6 +48,7 @@ export class TurretController {
     this.overrides = deps.overrides;
     this.clearTurretOverrides = deps.clearTurretOverrides;
     this.onConfigChange = deps.onConfigChange;
+    this.resolver = deps.resolver;
     this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
     this.ammoList = new AmmoList({
       els: this.ammoListEls(),
@@ -78,6 +59,12 @@ export class TurretController {
       onExpand: () => this.onAmmoExpandClick(),
     });
     this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog });
+    this.inputSet = new TurretInputSet({
+      els: this.els,
+      trackingInput: this.trackingInput,
+      sigResButtons: new SigResButtons({ sigResOptions: this.els.sigResOptions }),
+      overrides: this.overrides,
+    });
     this.render();
   }
 
@@ -91,16 +78,13 @@ export class TurretController {
 
   applyImported(imported: ImportedFitting): void {
     this.attackerAmmoAllExpanded = false;
-    const turret = imported.turret;
-    this.attackerCargoCharges = imported.cargoCharges;
+    const { turret, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
+    this.attackerCargoCharges = cargoCharges;
+    this.attackerTurret = turret;
+    this.attackerAmmo = ammo;
     if (turret) {
-      this.attackerTurret = turret;
-      this.attackerAmmo = turret.charge;
       this.clearTurretOverrides();
-      this.setTurretInputs(turret);
-    } else {
-      this.attackerTurret = undefined;
-      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.inputSet.set(turret);
     }
     this.render();
   }
@@ -117,18 +101,11 @@ export class TurretController {
       this.attackerCargoCharges = [];
       this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
     } else {
-      const imported = this.fittingImport.importFitting(fitting, conditions);
-      if (imported?.turret) {
-        const restored = this.chargeCatalog.withCharge(imported.turret, this.attackerAmmo);
-        this.attackerTurret = restored;
-        this.attackerCargoCharges = imported.cargoCharges;
-        this.attackerAmmo = restored.charge;
-        this.setTurretInputs(restored);
-      } else {
-        this.attackerTurret = undefined;
-        this.attackerCargoCharges = [];
-        this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-      }
+      const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(fitting, conditions, this.attackerAmmo);
+      this.attackerTurret = turret;
+      this.attackerCargoCharges = cargoCharges;
+      this.attackerAmmo = resolvedAmmo;
+      if (turret) this.inputSet.set(turret);
     }
     this.render();
   }
@@ -144,14 +121,14 @@ export class TurretController {
   currentTurretSpec(trackingOverride?: number): TurretSpec {
     return {
       tracking: trackingOverride ?? this.trackingInput.rad,
-      sigResolution: SIG_RESOLUTIONS[this.currentSigResValue()],
+      sigResolution: SIG_RESOLUTIONS[this.inputSet.currentSigResValue()],
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
     };
   }
 
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
-    return { sigRes: this.currentSigResValue(), optimal: num(this.els.optimal), falloff: num(this.els.falloff), ammo: this.attackerAmmo };
+    return { sigRes: this.inputSet.currentSigResValue(), optimal: num(this.els.optimal), falloff: num(this.els.falloff), ammo: this.attackerAmmo };
   }
 
   isAmmoPopupOpen(): boolean {
@@ -183,7 +160,7 @@ export class TurretController {
     this.attackerTurret = updated;
     this.attackerAmmo = updated.charge;
     this.clearTurretOverrides();
-    this.setTurretInputs(updated);
+    this.inputSet.set(updated);
     this.render();
     this.onConfigChange(false);
     return true;
@@ -198,33 +175,6 @@ export class TurretController {
   private onAmmoExpandClick(): void {
     this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
     this.render();
-  }
-
-  private setTurretInputs(turret: ImportedTurret): void {
-    const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
-    const overrides = this.overrides();
-    if (overrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
-    if (overrides.sigRes === undefined) {
-      this.els.sigRes.value = turret.sigResolutionClass;
-      this.setSigResButtons(turret.sigResolutionClass);
-    }
-    if (overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
-    if (overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
-    this.els.tracking.value = String(this.trackingInput.displayValue(sigResolution));
-  }
-
-  private setSigResButtons(value: SigResolutionClass): void {
-    for (const button of Array.from(this.els.sigResOptions.children)) {
-      const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    }
-  }
-
-  private currentSigResValue(): SigResolutionClass {
-    const value = this.els.sigRes.value;
-    if (!isSigResClass(value)) throw new Error(`Invalid sigRes value: ${value}`);
-    return value;
   }
 
   private ammoListEls(): AmmoListEls {

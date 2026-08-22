@@ -1,12 +1,9 @@
 ---
 no-new-exports:
-  # - controls.ts          # moved into src/ui/controls/ sub-module
-  # - controls.test.ts     # moved into src/ui/controls/ sub-module
   - index.ts  # public surface re-exports cross-boundary DI contracts and DTOs
   - loop.ts
   - module.ts
   - renderer.ts
-  # - trackingInput.test.ts # moved into src/ui/controls/ sub-module
   - renderer.test.ts
 ---
 

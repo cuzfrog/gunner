@@ -1,5 +1,5 @@
 import type { Els } from "../elements";
-import type { Side } from "./sidePanel";
+import type { Side } from "./side";
 
 export interface SidePanelElements {
   readonly hull: HTMLInputElement;

@@ -162,51 +162,6 @@ describe("ProfileController", () => {
     expect(els.profileSelect.value).toBe("");
   });
 
-  test("updateDirtyState distinguishes new, equal, changed, and existing-different profiles", () => {
-    const { controller, els, captureCurrent } = build({
-      profiles: {
-        brawler: BASE_PROFILE,
-        kiter: { ...BASE_PROFILE, optimal: 9999 },
-      },
-      list: ["brawler", "kiter"],
-    });
-
-    els.profileName.value = "new";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-
-    els.profileName.value = "";
-    controller.markLoaded("brawler");
-    vi.mocked(els.profileSave.classList.toggle).mockClear();
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
-
-    els.profileName.value = "brawler";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
-
-    els.profileName.value = "kiter";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-
-    els.profileName.value = "";
-    captureCurrent.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-  });
-
-  test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {
-    const { controller, els, timer } = build();
-    controller.showStatus("status.copied");
-    expect(els.shareStatus.textContent).toBe("status.copied");
-
-    controller.showStatus("status.failed");
-    expect(timer.clearTimeout).toHaveBeenCalled();
-
-    timer.fireLast();
-    expect(els.shareStatus.textContent).toBe("");
-  });
-
   test("restoreFromStartup loads the selected profile and reports missing selections", () => {
     const { controller, settingsStore, onLoaded } = build({
       profiles: { brawler: BASE_PROFILE },

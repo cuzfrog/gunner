@@ -1,11 +1,11 @@
 import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
-import type { FittingImport, ImportedFitting } from "../../../fitting";
+import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
 import { num } from "../controlsDom";
 import { formatNumber, isAutopilotMode } from "../controlsFormat";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { PROPULSION_NONE, type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection, type SavedFitting } from "../../settings";
+import { type FittedHullSummary, type ProfileParamOverrides, type PropulsionSelection } from "../../settings";
 import type { Timer } from "../../timer";
 import { PopupGroup, type Popup } from "../popupGroup";
 import type { SidePanelElements } from "./elements";
@@ -14,63 +14,19 @@ import { PasteImportSection } from "./pasteImportSection";
 import { PropulsionSection } from "./propulsionSection";
 import { SkillOverloadSection } from "./skillOverloadSection";
 import { StatsSection } from "./statsSection";
+import type { Side } from "./side";
+import type {
+  AttackerTurretHooks,
+  FittingPopupControl,
+  FittingPreviewControl,
+  FittingImporter,
+  ISidePanel,
+  SidePanelHost,
+  SidePanelState,
+} from "./sidePanelContract";
+import type { ISidePanelSections } from "./sidePanelSections";
 
-export type Side = "attacker" | "target";
-
-export interface FittingPopupControl {
-  readonly popup: Popup;
-  renderIfOpen(): void;
-  closeIfOpen(): void;
-}
-
-export interface FittingPreviewControl {
-  hide(side: Side): void;
-}
-
-export interface SidePanelState {
-  readonly speed: number;
-  readonly mass: number;
-  readonly inertia: number;
-  readonly mode: AutopilotMode;
-  readonly range: number;
-  readonly skillLevel: SkillLevel | undefined;
-  readonly overload: boolean;
-  readonly hull: string | undefined;
-  readonly propulsion: PropulsionSelection | undefined;
-  readonly fitting: string | undefined;
-  readonly overrides: Partial<ProfileParamOverrides>;
-  readonly fittedHull: FittedHullSummary | undefined;
-  readonly sig?: number;
-}
-
-export interface AttackerTurretHooks {
-  onFittedHullCleared(): void;
-  restoreTurret(): void;
-}
-
-export interface FittingImporter {
-  mostRecentFittingFor(hullName: string): SavedFitting | undefined;
-  importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
-  importFromText(text: string): Promise<void>;
-  importFromClipboard(): Promise<void>;
-}
-
-export interface SidePanelHost {
-  updateFittingTrigger(enabled: boolean): void;
-  persistConfigChange(notify?: boolean): void;
-  attackerTurretHooks: AttackerTurretHooks;
-  importer: FittingImporter;
-}
-
-interface SidePanelSections {
-  readonly hull: HullSection;
-  readonly stats: StatsSection;
-  readonly skill: SkillOverloadSection;
-  readonly propulsion: PropulsionSection;
-  readonly paste: PasteImportSection;
-}
-
-export class SidePanel {
+export class SidePanel implements ISidePanel {
   readonly side: Side;
   readonly host: SidePanelHost;
   readonly els: SidePanelElements;
@@ -84,9 +40,10 @@ export class SidePanel {
   private fittingTextValue?: string;
   private overridesValue: Partial<ProfileParamOverrides> = {};
   private lastCommittedHullValue?: string;
-  readonly sections: SidePanelSections;
+  readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
   private fittingPreview?: FittingPreviewControl;
+
   constructor(deps: {
     side: Side; host: SidePanelHost; popupGroup: PopupGroup; els: SidePanelElements;
     i18n: I18n; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; timer: Timer;
@@ -110,6 +67,7 @@ export class SidePanel {
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
   }
+
   get profile(): ShipProfile | undefined { return this.profileValue; }
   set profile(value: ShipProfile | undefined) { this.profileValue = value; }
   get fittedHull(): FittedHullSummary | undefined { return this.fittedHullValue; }
@@ -120,6 +78,7 @@ export class SidePanel {
   set overrides(value: Partial<ProfileParamOverrides>) { this.overridesValue = value; }
   get lastCommittedHull(): string | undefined { return this.lastCommittedHullValue; }
   set lastCommittedHull(value: string | undefined) { this.lastCommittedHullValue = value; }
+
   getSkillPopup(): Popup { return this.sections.skill.popup; }
   getPastePopup(): Popup { return this.sections.paste.popup; }
   getPropulsionVariantPopup(): Popup { return this.sections.propulsion.popup; }
@@ -128,6 +87,7 @@ export class SidePanel {
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
+
   capture(): SidePanelState {
     return {
       speed: num(this.els.speed),
@@ -145,6 +105,7 @@ export class SidePanel {
       sig: this.side === "target" && this.els.targetSig !== undefined ? Math.max(num(this.els.targetSig), 1) : undefined,
     };
   }
+
   restore(state: SidePanelState): void {
     this.fittingText = state.fitting;
     this.overrides = state.overrides;
@@ -161,11 +122,13 @@ export class SidePanel {
     if (this.els.targetSig !== undefined && state.sig !== undefined) this.els.targetSig.value = String(state.sig);
     this.sections.stats.updateAlignTime();
   }
+
   private currentMode(): AutopilotMode {
     const value = this.els.mode.value;
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
     return value;
   }
+
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void { this.sections.hull.loadHull(hullName, propulsionId); }
   applyImportedFitting(summary: FittedHullSummary): void { this.sections.hull.applyImportedFitting(summary); }
   clearFittedHull(): void { this.sections.hull.clearFittedHull(); }

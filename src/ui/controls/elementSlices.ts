@@ -4,7 +4,7 @@ import type { ImportEls } from "./importController";
 import type { PreferencesEls } from "./preferencesController";
 import type { ProfileEls } from "./profileController";
 import type { Side } from "./sidePanel";
-import type { TurretEls } from "./turretController";
+import type { TurretEls } from "./turretEls";
 
 export function collectPreferencesEls(els: Els): PreferencesEls {
   return {

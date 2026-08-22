@@ -3,7 +3,9 @@ import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
 import { type Popup } from "../popupGroup";
-import type { SidePanel } from "./sidePanel";
+import type { Side } from "./side";
+import type { ISidePanel } from "./sidePanelContract";
+import type { ISkillOverloadSection } from "./sidePanelSections";
 
 export interface SkillOverloadSectionEls {
   readonly skills: HTMLSelectElement;
@@ -15,14 +17,14 @@ export interface SkillOverloadSectionEls {
   readonly overloadButton: HTMLButtonElement;
 }
 
-export class SkillOverloadSection {
-  private readonly panel: SidePanel;
+export class SkillOverloadSection implements ISkillOverloadSection {
+  private readonly panel: ISidePanel;
   private readonly els: SkillOverloadSectionEls;
   private readonly i18n: I18n;
   private skillPopupOpen = false;
   readonly popup: Popup;
 
-  constructor({ panel, els, i18n }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n }) {
+  constructor({ panel, els, i18n }: { panel: ISidePanel; els: SkillOverloadSectionEls; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.i18n = i18n;

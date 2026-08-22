@@ -1,21 +1,13 @@
-import {
-  ClipboardUnavailableError,
-  parseProfile,
-  PROFILE_TEXT_HEADER,
-  serializeProfile,
-  type ClipboardProvider,
-  type FittedHullSummary,
-  type ProfileSettings,
-  type SavedFittings,
-  type UserSettings,
-} from "../settings";
+import { ClipboardUnavailableError, parseProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../settings";
 import { type FittingImport, type ImportedFitting } from "../../fitting";
-import { NEUTRAL_STAT_CONDITIONS, profileSettingsOf } from "./controlsFormat";
+import { NEUTRAL_STAT_CONDITIONS } from "./controlsFormat";
 import { PopupGroup, type Popup } from "./popupGroup";
 import { type Side, type SidePanel } from "./sidePanel";
 import type { TurretController } from "./turretController";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
+import { EftSideImporter } from "./eftSideImporter";
+import { ProfileTextImporter } from "./profileTextImporter";
 
 export interface ImportEls {
   readonly importProfile: HTMLButtonElement;
@@ -31,12 +23,13 @@ export class ImportController {
   private readonly popupGroup: PopupGroup;
   private readonly els: ImportEls;
   private readonly sidePanel: (side: Side) => SidePanel;
-  private readonly turret: TurretController;
   private readonly preferences: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly getSettings: () => UserSettings;
   private readonly onConfigPersisted: () => void;
   private readonly onProfileTextLoaded: (settings: UserSettings) => void;
+  private readonly eftSideImporter: EftSideImporter;
+  private readonly profileTextImporter: ProfileTextImporter;
   private readonly popupValue: Popup;
   private pendingImportText?: string;
   private importSidePopupOpen = false;
@@ -61,12 +54,25 @@ export class ImportController {
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
     this.sidePanel = deps.sidePanel;
-    this.turret = deps.turret;
     this.preferences = deps.preferences;
     this.profileController = deps.profileController;
     this.getSettings = deps.getSettings;
     this.onConfigPersisted = deps.onConfigPersisted;
     this.onProfileTextLoaded = deps.onProfileTextLoaded;
+    this.eftSideImporter = new EftSideImporter({
+      sidePanel: deps.sidePanel,
+      turret: deps.turret,
+      fittingImport: deps.fittingImport,
+      onConfigPersisted: deps.onConfigPersisted,
+    });
+    this.profileTextImporter = new ProfileTextImporter({
+      fittingImport: deps.fittingImport,
+      turret: deps.turret,
+      preferences: deps.preferences,
+      clipboard: deps.clipboard,
+      getSettings: deps.getSettings,
+      profileController: deps.profileController,
+    });
     this.popupValue = {
       isOpen: () => this.importSidePopupOpen,
       open: () => this.openImportSidePopup(),
@@ -76,9 +82,7 @@ export class ImportController {
     };
   }
 
-  get popup(): Popup {
-    return this.popupValue;
-  }
+  get popup(): Popup { return this.popupValue; }
 
   async importFromClipboard(side: Side): Promise<void> {
     const panel = this.sidePanel(side);
@@ -108,7 +112,7 @@ export class ImportController {
     const panel = this.sidePanel(side);
     panel.clearImportHintTimeout();
     const trimmed = text.trimStart();
-    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
+    if (this.profileTextImporter.isProfileText(trimmed)) {
       const parsed = parseProfile(trimmed);
       const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
       if (fitting === undefined) {
@@ -137,8 +141,8 @@ export class ImportController {
       return;
     }
     const trimmed = text.trimStart();
-    if (trimmed.startsWith(PROFILE_TEXT_HEADER)) {
-      const settings = this.profileFromText(text);
+    if (this.profileTextImporter.isProfileText(trimmed)) {
+      const settings = this.profileTextImporter.profileFromText(text);
       if (!settings) {
         this.profileController.showStatus("status.importInvalid");
         return;
@@ -162,34 +166,11 @@ export class ImportController {
   }
 
   importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
-    const panel = this.sidePanel(side);
-    const conditions = panel.skillConditions();
-    const imported = this.fittingImport.importFitting(text, conditions);
-    if (!imported) {
-      panel.showImportHint("status.fittingInvalid", true);
-      return undefined;
-    }
-    panel.clearFittedHull();
-    panel.fittingText = text;
-    panel.overrides = {};
-    panel.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
-    panel.applyImportedFitting(fittedHullSummary(imported));
-    if (side === "attacker") this.turret.applyImported(imported);
-    if (persist) {
-      panel.lastCommittedHull = imported.profile.name;
-      this.onConfigPersisted();
-    }
-    panel.showImportHint("status.fittingImported");
-    return imported;
+    return this.eftSideImporter.importEftFitting(side, text, persist);
   }
 
-  async copyProfile(): Promise<void> {
-    try {
-      await this.clipboard.writeText(serializeProfile(profileSettingsOf(this.getSettings())));
-      this.profileController.showStatus("status.copied");
-    } catch {
-      this.profileController.showStatus("status.failed");
-    }
+  copyProfile(): Promise<void> {
+    return this.profileTextImporter.copyProfile();
   }
 
   private openImportSidePopup(): void {
@@ -209,33 +190,4 @@ export class ImportController {
   private recordSavedFitting(imported: ImportedFitting, text: string): void {
     this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
   }
-
-  private profileFromText(text: string): UserSettings | undefined {
-    const parsed = parseProfile(text.trimStart());
-    if (!parsed) return undefined;
-    const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo, ...this.preferences.capture() };
-  }
-
-  private resolveProfileAmmo(parsed: ProfileSettings): string {
-    if (parsed.attackerAmmo) return parsed.attackerAmmo;
-    if (parsed.attackerFitting) {
-      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
-        skillLevel: parsed.attackerSkillLevel ?? 5,
-        overloaded: parsed.attackerOverload ?? true,
-      });
-      if (imported?.turret) return imported.turret.charge;
-    }
-    return this.turret.ammo();
-  }
-}
-
-function fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
-  return {
-    fittingName: imported.fittingName,
-    propulsionId: imported.propulsion?.propulsionId,
-    propulsionName: imported.propulsion?.propulsionName,
-    fitted: imported.fitted,
-    propulsion: imported.propulsion,
-  };
 }
