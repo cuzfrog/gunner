@@ -1,4 +1,5 @@
 import {
+  alignTime as computeAlignTime,
   fittedStats as computeFittedStats,
   maxSpeedForFittedMass as computeMaxSpeedForFittedMass,
   type ShipStats,
@@ -29,6 +30,7 @@ export interface Ships {
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined;
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions): ShipStats;
   maxSpeedForFittedMass(profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions): number;
+  alignTime(mass: number, inertiaModifier: number): number;
 }
 
 export class ShipsImpl implements Ships {
@@ -71,5 +73,9 @@ export class ShipsImpl implements Ships {
 
   maxSpeedForFittedMass(profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions): number {
     return computeMaxSpeedForFittedMass(profile, fitted, mass, module, conditions);
+  }
+
+  alignTime(mass: number, inertiaModifier: number): number {
+    return computeAlignTime(mass, inertiaModifier);
   }
 }

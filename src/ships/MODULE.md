@@ -1,7 +1,7 @@
 ---
 no-new-exports:
   - effectiveStats.test.ts
-  # - effectiveStats.ts  # shared stat engine exposes fittedStats/maxSpeedForFittedMass with optional FittedHull
+  # - effectiveStats.ts  # shared stat engine exposes fittedStats/maxSpeedForFittedMass/alignTime
   - fitting.test.ts
   - fitting.ts
   - faction-i18n.ts
@@ -14,7 +14,7 @@ no-new-exports:
   - ship-names-i18n.ts
   - shipNames.ts
   - ships.test.ts
-  # - ships.ts  # Ships interface exposes fittedStats/maxSpeedForFittedMass with optional FittedHull
+  # - ships.ts  # Ships interface exposes fittedStats/maxSpeedForFittedMass/alignTime
   - tiers.test.ts
   - tiers.ts
   # - types.ts  # gains FittedHull and PropulsionStats cross-boundary types

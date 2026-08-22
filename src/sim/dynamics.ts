@@ -10,10 +10,6 @@ export function timeConstant(mass: number, inertiaModifier: number): number {
   return mass * inertiaModifier * 1e-6;
 }
 
-export function alignTime(mass: number, inertiaModifier: number): number {
-  return Math.log(4) * timeConstant(mass, inertiaModifier);
-}
-
 export function integrateShip(state: ShipState, commandedVelocity: Vec2, dt: number): ShipMotion {
   const clampedCommand = clampToMaxSpeed(commandedVelocity, state.maxSpeed);
   if (dt <= 0) {

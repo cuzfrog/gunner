@@ -4,10 +4,10 @@ no-new-exports:
   - autopilot-dynamics.test.ts
   - autopilot.ts
   - dynamics.test.ts
-  # - dynamics.ts  # exports alignTime per ui-improvements; domain utility exposed through index
+  - dynamics.ts  # no cross-boundary exports; timeConstant/integrateShip are module-internal
   - hitChance.test.ts
   - hitChance.ts
-  # - index.ts  # re-exports alignTime as a cross-boundary domain utility
+  - index.ts  # public sim boundary; no alignTime re-export
   - kinematics.test.ts
   - kinematics.ts
   - module.ts

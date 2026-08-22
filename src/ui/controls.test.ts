@@ -1,5 +1,5 @@
 import type { ChargeCatalog, ChargeOption, FittingImport, FittingSummary, GunFamilies, GunFamily, ImportedFitting, ImportedTurret, PresetFitting, PresetFittings } from "../fitting";
-import { alignTime, Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState, type SigResolutionClass } from "../sim";
+import { Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type ShipState, type SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, ShipStats, SkillLevel } from "../ships";
 import { DomControls } from "./controls";
 import type { I18n, Language } from "./i18n";
@@ -127,15 +127,15 @@ const VARIANT_NAMES: Record<string, string[]> = {
   "ab-10mn": ["10MN Afterburner I", "10MN Y-S8 Compact Afterburner"],
 };
 
-const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36 };
-const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 };
-const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36 };
-const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36 };
-const RIFTER_AB10_COMPACT_SKILL5: ShipStats = { mass: 6_000_000, inertiaModifier: 2, maxSpeed: 2238.48, sigRadius: 36 };
-const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210 };
-const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210 };
-const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210 };
-const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70 };
+const RIFTER_BASE_SKILL0: ShipStats = { mass: 1_000_000, inertiaModifier: 3, maxSpeed: 365, sigRadius: 36, alignTime: 1_000_000 * 3 * Math.log(4) * 1e-6 };
+const RIFTER_BASE_SKILL5: ShipStats = { mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36, alignTime: 1_000_000 * 2 * Math.log(4) * 1e-6 };
+const RIFTER_AB1_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 982.28, sigRadius: 36, alignTime: 1_500_000 * 3 * Math.log(4) * 1e-6 };
+const RIFTER_AB1_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 1420.75, sigRadius: 36, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
+const RIFTER_AB10_COMPACT_SKILL5: ShipStats = { mass: 6_000_000, inertiaModifier: 2, maxSpeed: 2238.48, sigRadius: 36, alignTime: 6_000_000 * 2 * Math.log(4) * 1e-6 };
+const RIFTER_MWD_SKILL0: ShipStats = { mass: 1_500_000, inertiaModifier: 3, maxSpeed: 3048.82, sigRadius: 210, alignTime: 1_500_000 * 3 * Math.log(4) * 1e-6 };
+const RIFTER_MWD_SKILL5: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 3251.90, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
+const RIFTER_MWD_SKILL5_OVERLOADED: ShipStats = { mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 };
+const THRASHER_BASE: ShipStats = { mass: 1_500_000, inertiaModifier: 2.5, maxSpeed: 300, sigRadius: 70, alignTime: 1_500_000 * 2.5 * Math.log(4) * 1e-6 };
 
 const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
@@ -293,6 +293,7 @@ function createMockShips() {
     fittingOption: vi.fn((profile: ShipProfile, id: PropulsionId) => createMockShips_fittingOption(profile, id)),
     fittedStats: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions)),
     maxSpeedForFittedMass: vi.fn((profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: MockedPropulsion, conditions?: { skillLevel: SkillLevel; overloaded: boolean }) => mockStatsFor(profile, module, conditions).maxSpeed),
+    alignTime: vi.fn((mass: number, inertiaModifier: number) => Math.log(4) * mass * inertiaModifier * 1e-6),
   });
 
   mockShips.fittingOption.mockImplementation((profile: ShipProfile, id: PropulsionId) => {
@@ -842,8 +843,8 @@ describe("DomControls", () => {
 
   test("initial load displays align time as an input suffix", () => {
     buildControls(globalThis.document);
-    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(1_200_000, 3).toFixed(1)}unit.second`);
-    expect(getFake(globalThis.document, "target-align-time").textContent).toBe(`${alignTime(10_000_000, 0.45).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${(Math.log(4) * 3.6).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "target-align-time").textContent).toBe(`${(Math.log(4) * 4.5).toFixed(1)}unit.second`);
   });
 
   test("editing mass or inertia updates the align time suffix and title", () => {
@@ -853,13 +854,13 @@ describe("DomControls", () => {
 
     mass.value = "2400000";
     mass.trigger("input");
-    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
-    expect(inertia.title).toContain(`${alignTime(2_400_000, 3).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${(Math.log(4) * 7.2).toFixed(1)}unit.second`);
+    expect(inertia.title).toContain(`${(Math.log(4) * 7.2).toFixed(1)}unit.second`);
 
     inertia.value = "1.5";
     inertia.trigger("input");
-    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
-    expect(inertia.title).toContain(`${alignTime(2_400_000, 1.5).toFixed(1)}unit.second`);
+    expect(getFake(globalThis.document, "attacker-align-time").textContent).toBe(`${(Math.log(4) * 3.6).toFixed(1)}unit.second`);
+    expect(inertia.title).toContain(`${(Math.log(4) * 3.6).toFixed(1)}unit.second`);
   });
 
   test("getConfig clamps an empty initial distance to 1", () => {

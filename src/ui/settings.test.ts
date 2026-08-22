@@ -204,6 +204,7 @@ function makeShips() {
     fittingOption: vi.fn(),
     fittedStats: vi.fn(),
     maxSpeedForFittedMass: vi.fn(),
+    alignTime: vi.fn(),
   });
 }
 
@@ -384,7 +385,7 @@ describe("LocalSettingsStore", () => {
   test("rebuild with explicit none keeps the fitted hull but uses base stats", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_000_000, inertiaModifier: 2, maxSpeed: 456.25, sigRadius: 36, alignTime: 1_000_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 456.25);
 
     const settings: UserSettings = {
@@ -679,7 +680,7 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips v6 fitting basis with per-side overrides", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
 
     const settings: UserSettings = {
@@ -712,7 +713,7 @@ describe("LocalSettingsStore", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     fittingImport.propulsionStats = vi.fn((name: string) => (name === "5MN Y-T8 Compact Microwarpdrive" ? COMPACT_MWD : undefined));
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 4_650);
 
     const settings: UserSettings = {
@@ -736,7 +737,7 @@ describe("LocalSettingsStore", () => {
   test("basis re-import on load overwrites stale parameter cache", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
 
     const stale: UserSettings = {
@@ -765,7 +766,7 @@ describe("LocalSettingsStore", () => {
   test("re-import on load recomputes speed using the overridden mass", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn((_profile, _fitted, mass) => mass / 500);
 
     const settings: UserSettings = {
@@ -801,7 +802,7 @@ describe("LocalSettingsStore", () => {
   test("basis re-import applies a stored charge that matches the turret size", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
     chargeCatalog.chargesForSize = vi.fn(() => [
       { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
@@ -826,7 +827,7 @@ describe("LocalSettingsStore", () => {
   test("basis re-import falls back to the imported charge when the stored charge is invalid", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
-    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210 }));
+    ships.fittedStats = vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 2, maxSpeed: 4_649.72, sigRadius: 210, alignTime: 1_500_000 * 2 * Math.log(4) * 1e-6 }));
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
     chargeCatalog.chargesForSize = vi.fn(() => [{ name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 }]);
     chargeCatalog.withCharge = vi.fn((turret) => turret);

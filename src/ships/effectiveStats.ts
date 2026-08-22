@@ -5,6 +5,7 @@ export interface ShipStats {
   readonly inertiaModifier: number;
   readonly maxSpeed: number;
   readonly sigRadius: number;
+  readonly alignTime: number;
 }
 
 const NAVIGATION_SPEED_BONUS_PER_LEVEL = 0.05;
@@ -12,6 +13,7 @@ const ACCELERATION_CONTROL_BONUS_PER_LEVEL = 0.05;
 const EVASIVE_MANEUVERING_BONUS_PER_LEVEL = 0.05;
 const SPACESHIP_COMMAND_BONUS_PER_LEVEL = 0.02;
 const PROPULSION_OVERLOAD_FACTOR = 1.5;
+const ALIGN_TIME_FACTOR = Math.log(4) * 1e-6;
 
 export function fittedStats(
   profile: ShipProfile,
@@ -29,13 +31,19 @@ export function fittedStats(
   const maxSpeed = profile.baseSpeed * hull.speedMultiplier * navFactor * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
   const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
   const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
+  const alignTime = mass * inertiaModifier * ALIGN_TIME_FACTOR;
 
   return {
     mass,
     inertiaModifier,
     maxSpeed,
     sigRadius,
+    alignTime,
   };
+}
+
+export function alignTime(mass: number, inertiaModifier: number): number {
+  return mass * inertiaModifier * ALIGN_TIME_FACTOR;
 }
 
 export function maxSpeedForFittedMass(

@@ -1,6 +1,5 @@
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, Ships, SkillLevel, StatConditions } from "../ships";
 import type { FittingImport, ImportedFitting } from "../fitting";
-import { alignTime } from "../sim";
 import { isHtmlButtonElement, num, setText } from "./controlsDom";
 import { escapeHtml, formatNumber, propulsionOptionLabel, skillLevelFromString, skillOptionLabel } from "./controlsFormat";
 import type { I18n } from "./i18n";
@@ -351,7 +350,7 @@ export class SidePanel {
   updateAlignTime(): void {
     const mass = num(this.els.mass);
     const inertia = num(this.els.inertia);
-    const t = alignTime(mass, inertia);
+    const t = this.ships.alignTime(mass, inertia);
     const input = this.els.inertia;
     const suffix = this.els.alignTime;
     if (Number.isFinite(t) && t > 0) {
