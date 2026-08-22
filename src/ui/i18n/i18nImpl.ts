@@ -40,7 +40,7 @@ export class I18nImpl implements I18n {
     }
     for (const element of this.document.querySelectorAll("[data-i18n-placeholder]")) {
       const key = element.getAttribute("data-i18n-placeholder");
-      if (key) (element as HTMLInputElement).placeholder = this.t(key);
+      if (key) element.setAttribute("placeholder", this.t(key));
     }
     for (const element of this.document.querySelectorAll("[data-i18n-aria-label]")) {
       const key = element.getAttribute("data-i18n-aria-label");
@@ -48,7 +48,7 @@ export class I18nImpl implements I18n {
     }
     for (const element of this.document.querySelectorAll("[data-i18n-title]")) {
       const key = element.getAttribute("data-i18n-title");
-      if (key) (element as HTMLElement).title = this.t(key);
+      if (key) element.setAttribute("title", this.t(key));
     }
   }
 }

@@ -12,6 +12,8 @@ class FakeElement {
 
   setAttribute(name: string, value: string): void {
     this._attributes.set(name, value);
+    if (name === "title") this._title = value;
+    if (name === "placeholder") this._placeholder = value;
   }
 
   get textContent(): string {
