@@ -10,8 +10,6 @@ no-new-exports:
   - elements.ts
   - elementsContract.ts
   - engagementReadout.ts
-  - fakeDocument.ts
-  - fakeElement.ts
   - hints/hintMessages.ts
   - hints/hintRotator.ts
   - hints/hints.ts
@@ -53,7 +51,6 @@ no-new-exports:
   - sidePanel/skillOverloadSection.ts
   - sidePanel/statsSection.ts
   - sidePanelHostBuilder.ts
-  - testConstants.ts
   - turret/ammoList.ts
   - turret/sigResButtons.ts
   - turret/sigResIcons.ts

@@ -5,8 +5,7 @@ import type { ProfileParamOverrides } from "../../settings";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretEls } from "./turretEls";
-import { addSigResButtons, fakeDocument, getFake, FakeElement } from "../testSupport";
-import { mockChargeCatalog, mockFittingImport, mockGunFamilies, mockTrackingInput } from "../mockFactories";
+import { addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockTrackingInput } from "../testSupport";
 
 export function collectTurretEls(document: Document): TurretEls {
   const get = (id: string) => getFake(document, id) as unknown as HTMLElement;

@@ -9,7 +9,7 @@ no-new-exports:
 
 # ui
 
-Browser presentation, input, and persistence: DOM form controls, canvas renderer, requestAnimationFrame loop, and the settings/i18n/icons sub-modules.
+Browser presentation, input, and persistence: DOM form controls, canvas renderer, requestAnimationFrame loop, and the settings/i18n/icons sub-modules. The `testing/` sub-module is test-only: fake DOM, mocks, and shared fixtures.
 
 `DomControls` reads turret/scenario settings from the form, seeds the initial distance with the best hit-chance range via the injected `hitChance`, and mirrors per-frame engagement readouts back into the DOM. `DomControls` and `LocalSettingsStore` consume the injected `Ships` service for hull lookup, localized hull read models, propulsion validation, fitting options, and effective-stat calculations. Import buttons let the attacker and target be populated from an EFT fitting via the injected `FittingImport`. `Loop.setTickHandler` receives the fixed-step callback from the app so the loop stays free of simulation knowledge.
 

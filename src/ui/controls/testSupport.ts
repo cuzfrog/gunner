@@ -4,56 +4,49 @@ import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { SavedFittings, SettingsStore } from "../settings";
+import type { SavedFittings, SettingsStore, TrackingUnit } from "../settings";
+import {
+  FakeElement,
+  fakeDocument,
+  getFake,
+  mockChargeCatalog,
+  mockClipboard,
+  mockFittingImport,
+  mockGunFamilies,
+  mockHitChance,
+  mockPresetFittings,
+  mockSavedFittings,
+  mockSettingsStore,
+  mockShips,
+  mockTimer,
+} from "../testing";
+import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { DomControls } from "./domControls";
 import type { DomControlsFactory } from "./domControlsFactory";
 import type { Els } from "./elementsContract";
 import { createControlsEls } from "./elements";
-import { fakeDocument, getFake } from "./fakeDocument";
-import { FakeElement } from "./fakeElement";
 import { registerControlsModule } from "./module";
-import {
-  mockChargeCatalog,
-  mockClipboard,
-  mockFittingImport,
-  mockGunFamilies,
-  mockHitChance,
-  mockPresetFittings,
-  mockSavedFittings,
-  mockSettingsStore,
-  mockShips,
-  mockTimer,
-} from "./mockFactories";
-import { CHARGE_OPTIONS, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "./testConstants";
 import type { Popup, PopupGroup } from "./popup";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 
-export { createControlsEls };
-export { FakeElement } from "./fakeElement";
-export { fakeDocument, getFake } from "./fakeDocument";
-export {
-  mockShips,
-  mockFittingImport,
-  mockChargeCatalog,
-  mockPresetFittings,
-  mockSavedFittings,
-  mockClipboard,
-  mockTimer,
-  mockHitChance,
-  mockSettingsStore,
-  mockGunFamilies,
-  mockTrackingInput,
-  fakeTrackingInput,
-} from "./mockFactories";
-export {
-  RIFTER,
-  FITTED,
-  TURRET,
-  MOCK_REPRESENTATIVES,
-  IMPORTED_RIFTER,
-  IMPORTED_RIFTER_WITH_CARGO,
-  CHARGE_OPTIONS,
-} from "./testConstants";
+export { createControlsEls } from "./elements";
+export * from "../testing";
+
+export function mockTrackingInput(): TrackingInput {
+  return new TrackingInputImpl();
+}
+
+export function fakeTrackingInput(rad = 0.32, currentUnit: TrackingUnit = "rad"): TrackingInput {
+  let currentRad = rad;
+  return {
+    get rad(): number { return currentRad; },
+    get unit(): TrackingUnit { return currentUnit; },
+    setRadValue(value: number, _sigResolution: number): number { currentRad = value; return currentRad; },
+    setUnit(unit: TrackingUnit, _sigResolution: number): number { currentUnit = unit; return currentRad; },
+    setDisplayValue(value: number, _sigResolution: number): number { currentRad = value; return currentRad; },
+    displayValue(_sigResolution: number): number { return currentRad; },
+  };
+}
 
 export function addSigResButtons(document: Document): void {
   const group = getFake(document, "sig-res-options");

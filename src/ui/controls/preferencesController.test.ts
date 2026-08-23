@@ -1,5 +1,5 @@
 import type { I18n } from "../i18n";
-import { mockTrackingInput } from "./mockFactories";
+import { mockTrackingInput } from "./testSupport";
 import type { DisplayPreferences, SettingsStore } from "../settings";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
