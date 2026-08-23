@@ -1,24 +1,20 @@
 [Breacher, Tackle Rocket Shield Breacher]
-Rocket Launcher I, Nova Rocket
-Rocket Launcher I, Nova Rocket
-Rocket Launcher I, Nova Rocket
+Ballistic Control System II
+IFFA Compact Damage Control
+Nanofiber Internal Structure II
 
-Small Shield Booster I
-Warp Disruptor I
-Stasis Webifier I
-1MN Afterburner I
+1MN Afterburner II
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
+Medium Ancillary Shield Booster, Navy Cap Booster 25
 
-Ballistic Control System I
-Damage Control I
-Nanofiber Internal Structure I
+Rocket Launcher II, Mjolnir Rage Rocket
+Rocket Launcher II, Mjolnir Rage Rocket
+Rocket Launcher II, Mjolnir Rage Rocket
 
-Small Processor Overclocking Unit I
-Small Processor Overclocking Unit I
-
-
-Hobgoblin I x2
+Small Anti-EM Screen Reinforcer I
+Small Anti-Thermal Screen Reinforcer I
+Small Warhead Calefaction Catalyst I
 
 
-Nova Rocket x278
-Mjolnir Rocket x500
-Inferno Rocket x2000
+Warrior II x2

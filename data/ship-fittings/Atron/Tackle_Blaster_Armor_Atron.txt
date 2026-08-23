@@ -1,21 +1,19 @@
 [Atron, Tackle Blaster Armor Atron]
-Light Neutron Blaster II, Null S
-Light Neutron Blaster II, Null S
-Small Ghoul Compact Energy Nosferatu
-Light Neutron Blaster II
+Small Armor Repairer I
+Limited Energized Explosive Membrane I
+Damage Control I
 
-Small Compact Pb-Acid Cap Battery
-1MN Y-S8 Compact Afterburner
-J5b Enduring Warp Scrambler
+Stasis Webifier I
+1MN Afterburner I
+Tracking Computer I, Optimal Range Script
 
-Small Ancillary Armor Repairer
-Magnetic Field Stabilizer II
-Damage Control II
+Light Neutron Blaster I, Antimatter Charge S
+Light Neutron Blaster I, Antimatter Charge S
+Light Neutron Blaster I, Antimatter Charge S
+[empty high slot]
+
+Small Trimark Armor Pump I
+Small Hybrid Collision Accelerator I
+Small Hybrid Locus Coordinator I
 
 
-Antimatter Charge S x1200
-Void S x1440
-Null S x1040
-Small Auxiliary Nano Pump I, Antimatter Charge S
-Nanite Repair Paste x24
-Small Ancillary Current Router I, Antimatter Charge S

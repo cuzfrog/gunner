@@ -1,0 +1,31 @@
+[Stabber, Tackle AC Armor Stabber]
+Medium I-a Enduring Armor Repairer
+Reactive Armor Hardener
+Multispectrum Energized Membrane II
+Medium I-a Enduring Armor Repairer
+
+Medium Compact Pb-Acid Cap Battery
+Stasis Webifier II
+10MN Monopropellant Enduring Afterburner
+Medium Compact Pb-Acid Cap Battery
+
+220mm Vulcan AutoCannon II
+'Arbalest' Rocket Launcher I
+220mm Vulcan AutoCannon II
+'Arbalest' Rocket Launcher I
+220mm Vulcan AutoCannon II
+220mm Vulcan AutoCannon II
+
+Medium Auxiliary Nano Pump I
+Medium Projectile Burst Aerator I
+Medium Nanobot Accelerator I
+
+
+Hobgoblin II x5
+
+
+Mjolnir Rocket x2500
+Republic Fleet EMP M x2500
+Republic Fleet Fusion M x2500
+Nova Rocket x2500
+Nanite Repair Paste x100

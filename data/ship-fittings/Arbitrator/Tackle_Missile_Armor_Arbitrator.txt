@@ -1,0 +1,23 @@
+[Arbitrator, Tackle Missile Armor Arbitrator]
+Damage Control II
+Energized Adaptive Nano Membrane II
+Energized Adaptive Nano Membrane II
+800mm Steel Plates II
+Drone Damage Amplifier II
+
+10MN Monopropellant Enduring Afterburner
+Balmer Series Compact Tracking Disruptor I, Optimal Range Disruption Script
+Medium Capacitor Booster II, Navy Cap Booster 400
+Warp Disruptor II
+
+Medium Solace Scoped Remote Armor Repairer
+Medium Solace Scoped Remote Armor Repairer
+Prototype 'Arbalest' Light Missile Launcher, Caldari Navy Scourge Light Missile
+Prototype 'Arbalest' Light Missile Launcher, Caldari Navy Scourge Light Missile
+
+Medium Remote Repair Augmentor I
+Medium Remote Repair Augmentor I
+Medium Trimark Armor Pump II
+
+
+Hammerhead II x5

@@ -1,0 +1,20 @@
+[Executioner, Tackle Beam Shield Executioner]
+Inertial Stabilizers II
+Inertial Stabilizers II
+Inertial Stabilizers II
+
+1MN Monopropellant Enduring Afterburner
+F-90 Compact Sensor Booster
+Warp Disruptor II
+
+Dual Light Beam Laser II
+Dual Light Beam Laser II
+Dual Light Beam Laser II
+
+Small Hyperspatial Velocity Optimizer I
+Small Low Friction Nozzle Joints I
+Small Hyperspatial Velocity Optimizer I
+
+
+Scan Resolution Script x1
+Aurora S x5

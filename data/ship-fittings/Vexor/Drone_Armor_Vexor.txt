@@ -1,0 +1,24 @@
+[Vexor, Drone Armor Vexor]
+Medium Armor Repairer II
+Prototype Armor Thermal Hardener I
+Prototype Armor Kinetic Hardener I
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+
+10MN Monopropellant Enduring Afterburner
+Cap Recharger II
+Cap Recharger II
+Medium Cap Battery II
+
+Drone Link Augmentor I
+Small Tractor Beam I
+Dual 150mm Prototype Gauss Gun, Antimatter Charge M
+Dual 150mm Prototype Gauss Gun, Antimatter Charge M
+
+Medium Capacitor Control Circuit I
+Medium Capacitor Control Circuit I
+Medium Processor Overclocking Unit I
+
+
+Hammerhead I x5
+Hobgoblin I x5
