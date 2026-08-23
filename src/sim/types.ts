@@ -70,6 +70,7 @@ export interface StasisWebSpec {
   readonly moduleName: string;
   readonly maxRange: number;
   readonly speedFactor: number;
+  readonly overloadRangeBonusPercent: number;
 }
 
 export interface TrackingDisruptorSpec {
@@ -78,6 +79,7 @@ export interface TrackingDisruptorSpec {
   readonly falloff: number;
   readonly disruption: number;
   readonly defaultScript: DisruptionScript;
+  readonly overloadStrengthBonusPercent: number;
 }
 
 export interface EwarLoadout {

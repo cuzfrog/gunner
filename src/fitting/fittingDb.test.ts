@@ -1,4 +1,4 @@
-import { CHARGES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, TURRETS } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -118,6 +118,30 @@ describe("fittingDb", () => {
 
   test("includes weapon rig tracking bonus percent", () => {
     expect(FITTING_MODULES["Medium Energy Metastasis Adjuster II"]).toEqual({ turretTrackingPercent: 20 });
+  });
+
+  test("includes stasis webs with raw negative speed factor and overload range bonus", () => {
+    expect(STASIS_WEBS["Stasis Webifier II"]).toEqual({
+      maxRange: 10000,
+      speedFactorPercent: -60,
+      overloadRangeBonusPercent: 30,
+    });
+    expect(FITTING_MODULES["Stasis Webifier II"]).toEqual({ stasisWeb: STASIS_WEBS["Stasis Webifier II"] });
+  });
+
+  test("includes tracking disruptors and excludes guidance disruptors", () => {
+    expect(TRACKING_DISRUPTORS["Tracking Disruptor II"]).toEqual({
+      optimal: 48000,
+      falloff: 24000,
+      disruptionPercent: -17.19,
+      overloadStrengthBonusPercent: 20,
+    });
+    expect(FITTING_MODULES["Tracking Disruptor II"]).toEqual({ trackingDisruptor: TRACKING_DISRUPTORS["Tracking Disruptor II"] });
+  });
+
+  test("includes disruption scripts with raw bonus deltas", () => {
+    expect(DISRUPTION_SCRIPTS["Optimal Range Disruption Script"]).toEqual({ trackingDeltaBonus: -100, rangeDeltaBonus: 100 });
+    expect(DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"]).toEqual({ trackingDeltaBonus: 100, rangeDeltaBonus: -100 });
   });
 
   test("includes tracking computer scripts", () => {

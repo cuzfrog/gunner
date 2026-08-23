@@ -19,7 +19,8 @@ export class EwarResolverImpl implements EwarResolver {
       const spec = projection.loadout.webs[i];
       const activation = projection.activation.webs[i];
       if (!activation?.active) continue;
-      const range = spec.maxRange * (projection.overloaded ? WEB_OVERLOAD_RANGE : 1);
+      const overloadBonus = projection.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      const range = spec.maxRange * overloadBonus;
       if (range >= distance) multipliers.push(1 - spec.speedFactor);
     }
     return this.stacking.apply(multipliers);
@@ -35,7 +36,8 @@ export class EwarResolverImpl implements EwarResolver {
       const activation = projection.activation.disruptors[i];
       if (!activation?.active) continue;
 
-      const strength = spec.disruption * (projection.overloaded ? TD_OVERLOAD_STRENGTH : 1);
+      const overloadBonus = projection.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const strength = spec.disruption * overloadBonus;
       const effectiveness = turretEffectiveness(distance, spec);
       const effects = scriptEffects(activation.script, strength);
 
@@ -76,6 +78,3 @@ function scriptEffects(script: DisruptionScript, disruption: number): ScriptEffe
       return { tracking: disruption, optimal: disruption, falloff: disruption };
   }
 }
-
-const WEB_OVERLOAD_RANGE = 1.3;
-const TD_OVERLOAD_STRENGTH = 1.2;

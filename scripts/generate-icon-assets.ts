@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { readFileSync, writeFileSync } from "node:fs";
 import * as process from "node:process";
-import { CHARGES, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
 import { MODULE_SLOTS } from "../src/fitting/moduleSlots";
 import { PROPULSION_MODULES } from "../src/ships/propulsion";
 
@@ -62,7 +62,7 @@ function main(): void {
     Object.keys(TURRETS),
     PROPULSION_MODULES.map((module) => module.label),
     Object.keys(MODULE_SLOTS),
-    Object.keys(SCRIPTS),
+    [...Object.keys(SCRIPTS), ...Object.keys(DISRUPTION_SCRIPTS)],
   );
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);

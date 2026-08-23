@@ -449,7 +449,7 @@ export function buildTrackingDisruptorStats(values: Map<string, number>): Tracki
   };
 }
 
-export function buildDisruptionScriptStats(values: Map<string, number>): DisruptionScriptStats | undefined {
+export function buildDisruptionScriptStats(values: Map<string, number>): DisruptionScriptStats {
   return {
     trackingDeltaBonus: values.get("trackingSpeedBonusBonus") ?? 0,
     rangeDeltaBonus: values.get("maxRangeBonusBonus") ?? 0,

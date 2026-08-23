@@ -32,19 +32,19 @@ function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded
 describe("EwarResolverImpl", () => {
   describe("webSpeedMultiplier", () => {
     test("single T2 web at 5 km multiplies by 1 - 0.6", () => {
-      const projection = webProjection([{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6 }]);
+      const projection = webProjection([{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }]);
       expect(resolver.webSpeedMultiplier(projection, 5000)).toBeCloseTo(0.4, 10);
       expect(resolver.webSpeedMultiplier(projection, 10001)).toBe(1);
     });
 
     test("overloaded web extends range by 30% with unchanged strength", () => {
-      const projection = webProjection([{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6 }], true);
+      const projection = webProjection([{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }], true);
       expect(resolver.webSpeedMultiplier(projection, 11000)).toBeCloseTo(0.4, 10);
       expect(resolver.webSpeedMultiplier(projection, 14000)).toBe(1);
     });
 
     test("two identical webs penalizes the second", () => {
-      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6 };
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection = webProjection([web, web]);
       const secondPenalty = Math.exp(-1 / 7.1289);
       const expected = 0.4 * (1 + (0.4 - 1) * secondPenalty);
@@ -52,8 +52,8 @@ describe("EwarResolverImpl", () => {
     });
 
     test("mixed web strengths are ordered strongest-first", () => {
-      const strong: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6 };
-      const weak: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5 };
+      const strong: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const weak: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 30 };
       const strongFirst = webProjection([strong, weak]);
       const weakFirst = webProjection([weak, strong]);
       expect(resolver.webSpeedMultiplier(strongFirst, 5000)).toBeCloseTo(resolver.webSpeedMultiplier(weakFirst, 5000), 10);
@@ -72,6 +72,7 @@ describe("EwarResolverImpl", () => {
       falloff: 24000,
       disruption: 0.1719,
       defaultScript: "none",
+      overloadStrengthBonusPercent: 20,
     };
 
     test("unscripted TD reduces all three attributes at 10 km", () => {
