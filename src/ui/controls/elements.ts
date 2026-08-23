@@ -10,9 +10,9 @@ import {
 
 import type { PreferencesEls } from "./preferencesController";
 import type { ProfileEls } from "./profileController";
-import type { ImportEls } from "./import/importControllerContract";
-import type { FittingPopupEls } from "./popup/fittingPopupEls";
-import type { TurretEls } from "./turret/turretEls";
+import type { ImportEls } from "./import";
+import type { FittingPopupEls } from "./popup";
+import type { TurretEls } from "./turret";
 import type { Side } from "./sidePanel";
 import type { Els } from "./elementsContract";
 export function createControlsEls(): Els {

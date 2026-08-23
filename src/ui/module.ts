@@ -13,13 +13,15 @@ export function registerUiModule<T extends UiCradle>(cradle: AwilixContainer<T>)
   cradle.register({
     uiEvents: asClass(UiEventsImpl).singleton(),
   });
-  registerControlsModule(cradle);
   registerI18nModule(cradle);
-  registerAppstateModule(cradle);
   registerIconsModule(cradle);
+  registerAppstateModule(cradle);
+  cradle.register({
+    timer: asClass(DefaultTimer).singleton(),
+  });
+  registerControlsModule(cradle);
   cradle.register({
     renderer: asClass(CanvasRenderer).singleton(),
     loop: asClass(RafLoop).singleton(),
-    timer: asClass(DefaultTimer).singleton(),
   });
 }

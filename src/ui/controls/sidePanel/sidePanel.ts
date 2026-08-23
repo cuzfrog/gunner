@@ -35,9 +35,13 @@ import {
 } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
+const NOOP_HOST: SidePanelHost = {
+  persistConfigChange() {},
+};
+
 export class SidePanelImpl implements SidePanel {
   readonly side: Side;
-  readonly host: SidePanelHost;
+  get host(): SidePanelHost { return this.hostValue; }
   readonly els: SidePanelElements;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
@@ -47,6 +51,7 @@ export class SidePanelImpl implements SidePanel {
   private readonly popupGroup: PopupGroup;
   private readonly turret?: TurretController;
   private readonly turretOverrides?: TurretOverrides;
+  private hostValue: SidePanelHost = NOOP_HOST;
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
   private fittingTextValue?: string;
@@ -58,9 +63,8 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, host, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, turret, turretOverrides } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, turret, turretOverrides } = deps;
     this.side = side;
-    this.host = host;
     this.popupGroup = popupGroup;
     this.els = els;
     this.i18n = i18n;
@@ -104,6 +108,7 @@ export class SidePanelImpl implements SidePanel {
   getSkillPopup(): Popup { return this.sections.skill.popup; }
   getPastePopup(): Popup { return this.sections.paste.popup; }
   getPropulsionVariantPopup(): Popup { return this.sections.propulsion.popup; }
+  setHost(host: SidePanelHost): void { this.hostValue = host; }
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
   setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }
@@ -169,7 +174,8 @@ export class SidePanelImpl implements SidePanel {
 
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void {
     if (this.side === "attacker" && this.turretOverrides) {
-      this.turretOverrides.set({ [key]: value } as Partial<ProfileParamOverrides>);
+      const patch: Partial<ProfileParamOverrides> = { [key]: value };
+      this.turretOverrides.set(patch);
     } else {
       this.overridesValue[key] = value;
     }

@@ -1,22 +1,27 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
+import { collectTurretEls } from "../elements";
+import type { ControlsCradle } from "../cradle";
 import { TurretControllerImpl } from "./turretController";
-import type { TurretController, TurretControllerDeps } from "./turretControllerContract";
 import { TurretStateResolver } from "./turretStateResolver";
-import { TurretOverridesStore, type TurretOverrides } from "./turretOverrides";
+import { TurretOverridesStore } from "./turretOverrides";
 
-type TurretControllerFactoryDeps = Omit<TurretControllerDeps, "resolver">;
-
-interface TurretCradle {
-  readonly turretOverrides: TurretOverrides;
-  readonly createTurretController: (deps: TurretControllerFactoryDeps) => TurretController;
-}
-
-export function registerTurretModule<T extends TurretCradle>(cradle: AwilixContainer<T>): void {
+export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     turretOverrides: asClass(TurretOverridesStore).singleton(),
-    createTurretController: asFunction(() => (deps: TurretControllerFactoryDeps): TurretController => {
-      const resolver = new TurretStateResolver({ chargeCatalog: deps.chargeCatalog, fittingImport: deps.fittingImport });
-      return new TurretControllerImpl({ ...deps, resolver });
-    }),
+    turretController: asFunction(({ els, chargeCatalog, gunFamilies, imageCatalog, trackingInput, i18n, fittingImport, turretOverrides, uiEvents }) => {
+      const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
+      return new TurretControllerImpl({
+        els: collectTurretEls(els),
+        chargeCatalog,
+        gunFamilies,
+        imageCatalog,
+        trackingInput,
+        i18n,
+        fittingImport,
+        resolver,
+        turretOverrides,
+        events: uiEvents,
+      });
+    }).singleton(),
   });
 }

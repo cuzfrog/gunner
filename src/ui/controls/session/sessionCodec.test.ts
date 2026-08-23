@@ -89,9 +89,9 @@ describe("SessionCodec", () => {
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: {} as ChoiceGroup, hintRotator: {} as HintRotator,
       settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
-      sessionControl: { isPlaying: () => false, setPlaying: vi.fn() },
       trackingInput: fakeTrackingInput(),
     });
+    codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
 
     const settings = codec.capture();
 
@@ -191,8 +191,9 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      sessionControl, trackingInput,
+      trackingInput,
     });
+    codec.setSessionControl(sessionControl);
 
     codec.restoreStartup({ settings, selectedProfileName: null });
 
@@ -236,8 +237,9 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      sessionControl, trackingInput,
+      trackingInput,
     });
+    codec.setSessionControl(sessionControl);
 
     codec.restoreStartup({ settings: null, selectedProfileName: null });
 

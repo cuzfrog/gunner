@@ -2,6 +2,7 @@ import { ClipboardUnavailableError, parseProfile, type ClipboardProvider, type S
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
+import type { SessionCodec } from "../session";
 import type { Side, SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import type { PreferencesController } from "../preferencesController";
@@ -22,9 +23,10 @@ export class ImportControllerImpl implements ImportController {
   private readonly targetSide: SidePanel;
   private readonly preferences: PreferencesController;
   private readonly profileController: ProfileController;
-  private readonly getSettings: () => UserSettings;
-  private readonly onConfigPersisted: () => void;
-  private readonly onProfileTextLoaded: (settings: UserSettings) => void;
+  private readonly turret: AttackerTurret;
+  private sessionCodec?: SessionCodec;
+  private onConfigPersisted?: () => void;
+  private onProfileTextLoaded?: (settings: UserSettings) => void;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly popupValue: Popup;
@@ -42,9 +44,6 @@ export class ImportControllerImpl implements ImportController {
     turret: AttackerTurret;
     preferences: PreferencesController;
     profileController: ProfileController;
-    getSettings: () => UserSettings;
-    onConfigPersisted: () => void;
-    onProfileTextLoaded: (settings: UserSettings) => void;
   }) {
     this.clipboard = deps.clipboard;
     this.fittingImport = deps.fittingImport;
@@ -53,24 +52,22 @@ export class ImportControllerImpl implements ImportController {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
+    this.turret = deps.turret;
     this.preferences = deps.preferences;
     this.profileController = deps.profileController;
-    this.getSettings = deps.getSettings;
-    this.onConfigPersisted = deps.onConfigPersisted;
-    this.onProfileTextLoaded = deps.onProfileTextLoaded;
     this.eftSideImporter = new EftSideImporter({
       attackerSide: deps.attackerSide,
       targetSide: deps.targetSide,
       turret: deps.turret,
       fittingImport: deps.fittingImport,
-      onConfigPersisted: deps.onConfigPersisted,
+      onConfigPersisted: () => this.persistConfigChange(),
     });
     this.profileTextImporter = new ProfileTextImporter({
       fittingImport: deps.fittingImport,
       turret: deps.turret,
       preferences: deps.preferences,
       clipboard: deps.clipboard,
-      getSettings: deps.getSettings,
+      getSettings: () => this.captureSettings(),
       profileController: deps.profileController,
     });
     this.popupValue = {
@@ -83,6 +80,19 @@ export class ImportControllerImpl implements ImportController {
   }
 
   get popup(): Popup { return this.popupValue; }
+
+  setSessionCodec(sessionCodec: SessionCodec): void { this.sessionCodec = sessionCodec; }
+  setOnConfigPersisted(onConfigPersisted: () => void): void { this.onConfigPersisted = onConfigPersisted; }
+  setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void { this.onProfileTextLoaded = onProfileTextLoaded; }
+
+  private captureSettings(): UserSettings {
+    if (!this.sessionCodec) throw new Error("SessionCodec not set");
+    return this.sessionCodec.capture();
+  }
+
+  private persistConfigChange(): void {
+    this.onConfigPersisted?.();
+  }
 
   private panel(side: Side): SidePanel {
     return side === "attacker" ? this.attackerSide : this.targetSide;
@@ -151,7 +161,7 @@ export class ImportControllerImpl implements ImportController {
         this.profileController.showStatus("status.importInvalid");
         return;
       }
-      this.onProfileTextLoaded(settings);
+      this.onProfileTextLoaded?.(settings);
       return;
     }
     if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {

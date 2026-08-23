@@ -1,19 +1,29 @@
 import { asFunction, type AwilixContainer } from "awilix";
+import type { ControlsCradle } from "../cradle";
 import { collectSideEls } from "./elements";
-import type { Els } from "../elementsContract";
-import type { SidePanelElements } from "./elements";
-import type { Side } from "./side";
 import { SidePanelImpl } from "./sidePanel";
-import type { SidePanel, SidePanelDeps, SidePanelHost } from "./sidePanelContract";
+import type { Side } from "./side";
+import type { SidePanelDeps } from "./sidePanelContract";
 
-interface SidePanelCradle {
-  readonly createSidePanelEls: (els: Els, side: Side) => SidePanelElements;
-  readonly createSidePanel: (deps: SidePanelDeps) => SidePanel;
+export function registerSidePanelModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
+  cradle.register({
+    attackerSide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "attacker"))).singleton(),
+    targetSide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "target"))).singleton(),
+  });
 }
 
-export function registerSidePanelModule<T extends SidePanelCradle>(cradle: AwilixContainer<T>): void {
-  cradle.register({
-    createSidePanelEls: asFunction(() => (els: Els, side: Side): SidePanelElements => collectSideEls(els, side)),
-    createSidePanel: asFunction(() => (deps: SidePanelDeps): SidePanel => new SidePanelImpl(deps)),
-  });
+function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps {
+  return {
+    side,
+    popupGroup: proxy.popupGroup,
+    els: collectSideEls(proxy.els, side),
+    i18n: proxy.i18n,
+    ships: proxy.ships,
+    fittingImport: proxy.fittingImport,
+    imageCatalog: proxy.imageCatalog,
+    timer: proxy.timer,
+    events: proxy.uiEvents,
+    turret: side === "attacker" ? proxy.turretController : undefined,
+    turretOverrides: side === "attacker" ? proxy.turretOverrides : undefined,
+  };
 }

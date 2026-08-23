@@ -25,8 +25,8 @@ function main(): void {
   });
   registerShipsModule(container);
   registerFittingModule(container);
-  registerUiModule(container);
   registerSimModule(container);
+  registerUiModule(container);
   container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });
   registerAppModule(container);
 

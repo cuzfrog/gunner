@@ -1,52 +1,41 @@
 import { asFunction, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, PresetFittings } from "../../../fitting";
-import type { HitChance } from "../../../sim";
-import type { I18n } from "../../i18n";
-import type { SettingsStore } from "../../../appstate";
-import type { ChoiceGroup } from "../choiceGroup";
-import type { Els } from "../elementsContract";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
-import type { HintRotator } from "../hints";
-import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "../popup";
-import type { SidePanel } from "../sidePanel";
-import type { TurretController, TurretOverrides } from "../turret";
-import type { TrackingInput } from "../trackingInput";
-import type { ImportController } from "../import";
-import type { UiEvents } from "../../events";
+import type { ControlsCradle } from "../cradle";
 import { EventRouter } from "./eventRouter";
-import type { EventRouterHost } from "./eventRouter";
 import { HullDatalistImpl } from "./hullDatalist";
-import type { HullDatalist } from "./hullDatalist";
 import { SessionCodecImpl } from "./sessionCodec";
-import type { SessionCodec } from "./sessionCodec";
-import type { SessionControl } from "./sessionControl";
 
-interface SessionCodecDeps {
-  els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
-  preferences: PreferencesController; profileController: ProfileController; i18n: I18n;
-  chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl; trackingInput: TrackingInput;
-}
-
-interface EventRouterDeps {
-  els: Els; preferences: PreferencesController; profile: ProfileController;
-  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; trackingInput: TrackingInput; popupGroup: PopupGroup;
-  previewManager: FittingPreviewManager;
-  attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController; host: EventRouterHost;
-  import: ImportController;
-}
-
-interface SessionCradle {
-  readonly createHullDatalist: (els: Els, presetFittings: PresetFittings, events: UiEvents) => HullDatalist;
-  readonly createSessionCodec: (deps: SessionCodecDeps) => SessionCodec;
-  readonly createEventRouter: (deps: EventRouterDeps) => EventRouter;
-}
-
-export function registerSessionModule<T extends SessionCradle>(cradle: AwilixContainer<T>): void {
+export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    createHullDatalist: asFunction(() => (els: Els, presetFittings: PresetFittings, events: UiEvents): HullDatalist => new HullDatalistImpl(els, presetFittings, events)),
-    createSessionCodec: asFunction(() => (deps: SessionCodecDeps): SessionCodec => new SessionCodecImpl(deps)),
-    createEventRouter: asFunction(() => (deps: EventRouterDeps): EventRouter => new EventRouter(deps)),
+    hullDatalist: asFunction(({ els, presetFittings, uiEvents }) => new HullDatalistImpl(els, presetFittings, uiEvents)).singleton(),
+    sessionCodec: asFunction((proxy) => new SessionCodecImpl({
+      els: proxy.els,
+      attackerSide: proxy.attackerSide,
+      targetSide: proxy.targetSide,
+      turret: proxy.turretController,
+      turretOverrides: proxy.turretOverrides,
+      preferences: proxy.preferencesController,
+      profileController: proxy.profileController,
+      i18n: proxy.i18n,
+      chargeCatalog: proxy.chargeCatalog,
+      sigResChoice: proxy.sigResChoice,
+      hintRotator: proxy.hintRotator,
+      settingsStore: proxy.settingsStore,
+      hitChance: proxy.hitChance,
+      trackingInput: proxy.trackingInput,
+    })).singleton(),
+    eventRouter: asFunction(({ els, preferencesController, profileController, importController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup }) => new EventRouter({
+      els,
+      preferences: preferencesController,
+      profile: profileController,
+      import: importController,
+      attackerSide,
+      targetSide,
+      turret: turretController,
+      trackingInput,
+      popupGroup,
+      previewManager,
+      attackerFittingPopup,
+      targetFittingPopup,
+    })).singleton(),
   });
 }

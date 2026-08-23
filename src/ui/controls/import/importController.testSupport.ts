@@ -3,10 +3,23 @@ import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type S
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
+import type { SessionCodec } from "../session";
 import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
+
+class FakeSessionCodec implements SessionCodec {
+  capture: () => UserSettings;
+  restore = vi.fn();
+  fromProfile = vi.fn();
+  restoreStartup = vi.fn();
+  setSessionControl = vi.fn();
+
+  constructor(capture: () => UserSettings) {
+    this.capture = capture;
+  }
+}
 
 class FakePopupGroup implements PopupGroup {
   register(): void {}
@@ -121,9 +134,10 @@ export function buildImportController(document: Document) {
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
   const getSettings = vi.fn(() => DEFAULT_USER_SETTINGS);
+  const sessionCodec = new FakeSessionCodec(getSettings);
   const popupGroup: PopupGroup = new FakePopupGroup();
   const controller = new ImportControllerImpl({
-    clipboard: clipboard as unknown as ClipboardProvider,
+    clipboard,
     fittingImport,
     savedFittings,
     popupGroup,
@@ -138,10 +152,10 @@ export function buildImportController(document: Document) {
     turret,
     preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,
-    getSettings,
-    onConfigPersisted,
-    onProfileTextLoaded,
   });
+  controller.setSessionCodec(sessionCodec);
+  controller.setOnConfigPersisted(onConfigPersisted);
+  controller.setOnProfileTextLoaded(onProfileTextLoaded);
   return {
     controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret, preferences,
     profileController, onConfigPersisted, onProfileTextLoaded, getSettings,

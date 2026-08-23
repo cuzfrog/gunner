@@ -57,7 +57,7 @@ describe("EventRouter", () => {
       trackingInput: { rad: 0.32 },
     } as unknown as PreferencesController;
     const popupGroup = makePopupGroup();
-    new EventRouter({
+    const router = new EventRouter({
       els,
       preferences,
       profile: {} as ProfileController,
@@ -70,8 +70,8 @@ describe("EventRouter", () => {
       previewManager: {} as FittingPreviewManager,
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
-      host,
     });
+    router.setHost(host);
 
     getFake(globalThis.document, "play").trigger("click");
     expect(host.onPlayPause).toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe("EventRouter", () => {
     vi.mocked(popupGroup.hasOpen).mockReturnValue(true);
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
-    new EventRouter({
+    const router = new EventRouter({
       els,
       preferences: {} as PreferencesController,
       profile: {} as ProfileController,
@@ -104,8 +104,8 @@ describe("EventRouter", () => {
       previewManager: { openSide: vi.fn(() => undefined) } as unknown as FittingPreviewManager,
       attackerFittingPopup,
       targetFittingPopup,
-      host: {} as EventRouterHost,
     });
+    router.setHost({} as EventRouterHost);
 
     const escape = { type: "keydown", key: "Escape" } as unknown as KeyboardEvent;
     (globalThis.document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(escape as unknown as Event);
@@ -136,7 +136,7 @@ describe("EventRouter", () => {
       updateSpeedFromMass: vi.fn(),
       updateAlignTime: vi.fn(),
     } as unknown as SidePanel;
-    new EventRouter({
+    const router = new EventRouter({
       els,
       preferences,
       profile: {} as ProfileController,
@@ -149,8 +149,8 @@ describe("EventRouter", () => {
       previewManager: {} as FittingPreviewManager,
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
-      host,
     });
+    router.setHost(host);
 
     const tracking = getFake(globalThis.document, "tracking");
     tracking.value = "0.42";
@@ -205,7 +205,7 @@ describe("EventRouter", () => {
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
     const previewManager = { openSide: vi.fn(() => undefined), handlePointerDown: vi.fn() } as unknown as FittingPreviewManager;
-    new EventRouter({
+    const router = new EventRouter({
       els,
       preferences: {} as PreferencesController,
       profile: {} as ProfileController,
@@ -218,8 +218,8 @@ describe("EventRouter", () => {
       previewManager,
       attackerFittingPopup,
       targetFittingPopup,
-      host: {} as EventRouterHost,
     });
+    router.setHost({} as EventRouterHost);
 
     const target = getFake(globalThis.document, "target-hull");
     const pointer = { type: "pointerdown", target } as unknown as PointerEvent;

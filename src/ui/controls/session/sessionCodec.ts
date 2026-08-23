@@ -20,6 +20,7 @@ export interface SessionCodec {
   restore(settings: UserSettings, selectedName?: string): void;
   fromProfile(profile: ProfileSettings): UserSettings;
   restoreStartup(startup: StartupState): void;
+  setSessionControl(sessionControl: SessionControl): void;
 }
 
 export class SessionCodecImpl implements SessionCodec {
@@ -36,14 +37,14 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
   private readonly hitChance: HitChance;
-  private readonly sessionControl: SessionControl;
+  private sessionControl?: SessionControl;
   private readonly trackingInput: TrackingInput;
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
     sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; hitChance: HitChance;
-    sessionControl: SessionControl; trackingInput: TrackingInput;
+    trackingInput: TrackingInput;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -58,8 +59,11 @@ export class SessionCodecImpl implements SessionCodec {
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
     this.hitChance = deps.hitChance;
-    this.sessionControl = deps.sessionControl;
     this.trackingInput = deps.trackingInput;
+  }
+
+  setSessionControl(sessionControl: SessionControl): void {
+    this.sessionControl = sessionControl;
   }
 
   capture(): UserSettings {
@@ -138,7 +142,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.turretController.restore({
       fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
     });
-    this.sessionControl.setPlaying(this.sessionControl.isPlaying());
+    if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
     this.attackerSide.updateAlignTime();
@@ -175,7 +179,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.setBestInitialDistance();
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-    this.sessionControl.setPlaying(false);
+    this.sessionControl?.setPlaying(false);
     this.attackerSide.renderPropulsionOptions();
     this.targetSide.renderPropulsionOptions();
     this.profileController.refresh();

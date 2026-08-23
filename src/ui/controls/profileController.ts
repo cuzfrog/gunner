@@ -17,6 +17,7 @@ export interface ProfileController {
   restoreFromStartup(startup: StartupState): boolean;
   refresh(selected?: string): void;
   setSnapshotSource(source: () => ProfileSettings): void;
+  setOnProfileLoaded(onProfileLoaded: (name: string) => void): void;
   markLoaded(selected?: string): void;
   updateDirtyState(): void;
   saveProfile(): void;
@@ -30,7 +31,6 @@ interface ProfileControllerDeps {
   readonly settingsStore: SettingsStore;
   readonly timer: Timer;
   readonly i18n: I18n;
-  readonly onLoaded: (name: string) => void;
   readonly events: UiEvents;
 }
 
@@ -39,8 +39,8 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly settingsStore: SettingsStore;
   private readonly timer: Timer;
   private readonly i18n: I18n;
-  private readonly onLoaded: (name: string) => void;
   private readonly events: UiEvents;
+  private onProfileLoaded?: (name: string) => void;
   private snapshotSource: (() => ProfileSettings) | undefined;
   private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
@@ -50,9 +50,12 @@ export class ProfileControllerImpl implements ProfileController {
     this.settingsStore = deps.settingsStore;
     this.timer = deps.timer;
     this.i18n = deps.i18n;
-    this.onLoaded = deps.onLoaded;
     this.events = deps.events;
     this.events.onLanguageChanged(() => this.refresh(this.selectedName()));
+  }
+
+  setOnProfileLoaded(onProfileLoaded: (name: string) => void): void {
+    this.onProfileLoaded = onProfileLoaded;
   }
 
   selectedName(): string {
@@ -64,7 +67,7 @@ export class ProfileControllerImpl implements ProfileController {
     const profile = selected ? this.settingsStore.loadProfile(selected) : null;
     if (selected && profile) {
       this.settingsStore.selectProfile(selected);
-      this.onLoaded(selected);
+      this.onProfileLoaded?.(selected);
       return true;
     }
     return false;
@@ -136,7 +139,7 @@ export class ProfileControllerImpl implements ProfileController {
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) return;
     this.settingsStore.selectProfile(name);
-    this.onLoaded(name);
+    this.onProfileLoaded?.(name);
   }
 
   deleteProfile(): void {

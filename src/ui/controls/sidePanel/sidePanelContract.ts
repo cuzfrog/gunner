@@ -30,6 +30,7 @@ export interface SidePanel {
   getSkillPopup(): Popup;
   getPastePopup(): Popup;
   getPropulsionVariantPopup(): Popup;
+  setHost(host: SidePanelHost): void;
   setFittingPopup(popup: FittingPopupControl): void;
   setFittingPreview(preview: FittingPreviewControl): void;
   setFittingTriggerEnabled(enabled: boolean): void;
@@ -145,7 +146,6 @@ export interface SidePanelHost {
 
 export interface SidePanelDeps {
   side: Side;
-  host: SidePanelHost;
   popupGroup: PopupGroup;
   els: SidePanelElements;
   i18n: I18n;

@@ -12,7 +12,6 @@ import { num } from "./controlsDom";
 import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
-import { DomControlsFactory } from "./domControlsFactory";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
 import type { EventRouter, HullDatalist, SessionCodec } from "./session";
@@ -25,6 +24,26 @@ import type { TurretController } from "./turret";
 import type { ImportController } from "./import";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
+
+interface DomControlsAllDeps extends DomControlsDeps {
+  els: Els;
+  popupGroup: PopupGroup;
+  hintRotator: HintRotator;
+  hullDatalist: HullDatalist;
+  preferencesController: PreferencesController;
+  profileController: ProfileController;
+  engagementReadout: EngagementReadout;
+  sigResChoice: ChoiceGroup;
+  attackerSide: SidePanel;
+  targetSide: SidePanel;
+  turretController: TurretController;
+  sessionCodec: SessionCodec;
+  importController: ImportController;
+  previewManager: FittingPreviewManager;
+  attackerFittingPopup: FittingPopupController;
+  targetFittingPopup: FittingPopupController;
+  eventRouter: EventRouter;
+}
 
 export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
@@ -48,39 +67,30 @@ export class DomControls implements Controls, DomControlsHost {
   private callbacks?: ControlsCallbacks;
   private playing = false;
 
-  constructor({ domControlsDeps, domControlsFactory }: { domControlsDeps: DomControlsDeps; domControlsFactory: DomControlsFactory }) {
-    const parts = domControlsFactory.buildParts(domControlsDeps, this);
-    this.deps = parts.deps;
-    this.els = parts.els;
-    this.popupGroup = parts.popupGroup;
-    this.hintRotator = parts.hintRotator;
-    this.hullDatalist = parts.hullDatalist;
-    this.preferencesController = parts.preferencesController;
-    this.profileController = parts.profileController;
-    this.engagementReadout = parts.engagementReadout;
-    this.sigResChoice = parts.sigResChoice;
-    this.attackerSide = parts.attackerSide;
-    this.targetSide = parts.targetSide;
-    this.turretController = parts.turretController;
-    this.sessionCodec = parts.sessionCodec;
-    this.importController = parts.importController;
-    this.previewManager = parts.previewManager;
-    this.attackerFittingPopup = parts.attackerFittingPopup;
-    this.targetFittingPopup = parts.targetFittingPopup;
-    this.eventRouter = parts.eventRouter;
-    this.wireControls();
+  constructor(all: DomControlsAllDeps) {
+    this.deps = all;
+    this.els = all.els;
+    this.popupGroup = all.popupGroup;
+    this.hintRotator = all.hintRotator;
+    this.hullDatalist = all.hullDatalist;
+    this.preferencesController = all.preferencesController;
+    this.profileController = all.profileController;
+    this.engagementReadout = all.engagementReadout;
+    this.sigResChoice = all.sigResChoice;
+    this.attackerSide = all.attackerSide;
+    this.targetSide = all.targetSide;
+    this.turretController = all.turretController;
+    this.sessionCodec = all.sessionCodec;
+    this.importController = all.importController;
+    this.previewManager = all.previewManager;
+    this.attackerFittingPopup = all.attackerFittingPopup;
+    this.targetFittingPopup = all.targetFittingPopup;
+    this.eventRouter = all.eventRouter;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
-    this.sessionCodec.restoreStartup(this.deps.settingsStore.loadStartupState());
-    this.attackerSide.updateAlignTime();
-    this.targetSide.updateAlignTime();
   }
 
-  private wireControls(): void {
-    this.attackerSide.setFittingPopup(this.attackerFittingPopup);
-    this.targetSide.setFittingPopup(this.targetFittingPopup);
-    this.attackerSide.setFittingPreview(this.previewManager);
-    this.targetSide.setFittingPreview(this.previewManager);
+  wireControls(): void {
     this.popupGroup.register(this.attackerFittingPopup.popup);
     this.popupGroup.register(this.targetFittingPopup.popup);
     this.popupGroup.register(this.importController.popup);

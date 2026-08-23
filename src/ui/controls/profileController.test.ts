@@ -123,8 +123,9 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const snapshotSource = vi.fn(() => ({ ...BASE_PROFILE }));
   const onLoaded = vi.fn();
   const events = new UiEventsImpl();
-  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, onLoaded, events });
+  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, events });
   controller.setSnapshotSource(snapshotSource);
+  controller.setOnProfileLoaded(onLoaded);
   return { controller, els, settingsStore, timer, snapshotSource, onLoaded, events };
 }
 

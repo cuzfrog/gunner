@@ -6,17 +6,7 @@ import type { ImageCatalog } from "../icons";
 import type { SavedFittings, ClipboardProvider, SettingsStore, UserSettings } from "../../appstate";
 import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
-import type { ChoiceGroup } from "./choiceGroup";
-import type { Els } from "./elementsContract";
-import type { EngagementReadout } from "./engagementReadout";
-import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
-import type { EventRouter, EventRouterHost, HullDatalist, SessionCodec, SessionControl } from "./session";
-import type { HintRotator } from "./hints";
-import type { ImportController } from "./import";
-import type { PreferencesController } from "./preferencesController";
-import type { ProfileController } from "./profileController";
-import type { SidePanel } from "./sidePanel";
-import type { TurretController } from "./turret";
+import type { EventRouterHost, SessionControl } from "./session";
 
 export interface DomControlsDeps {
   hitChance: HitChance; i18n: I18n; settingsStore: SettingsStore; ships: Ships; fittingImport: FittingImport;
@@ -32,23 +22,3 @@ interface ProfileEvents {
 }
 
 export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {}
-export interface DomControlsParts {
-  deps: DomControlsDeps;
-  els: Els;
-  popupGroup: PopupGroup;
-  hintRotator: HintRotator;
-  hullDatalist: HullDatalist;
-  preferencesController: PreferencesController;
-  profileController: ProfileController;
-  engagementReadout: EngagementReadout;
-  sigResChoice: ChoiceGroup;
-  attackerSide: SidePanel;
-  targetSide: SidePanel;
-  turretController: TurretController;
-  sessionCodec: SessionCodec;
-  importController: ImportController;
-  previewManager: FittingPreviewManager;
-  attackerFittingPopup: FittingPopupController;
-  targetFittingPopup: FittingPopupController;
-  eventRouter: EventRouter;
-}

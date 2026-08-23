@@ -4,7 +4,7 @@ import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "
 import type { ImportController } from "../import";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { Side, SidePanel } from "../sidePanel";
+import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 
@@ -28,8 +28,8 @@ export class EventRouter {
   private readonly previewManager: FittingPreviewManager;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
-  private readonly host: EventRouterHost;
   private readonly trackingInput: TrackingInput;
+  private host?: EventRouterHost;
 
   constructor(deps: {
     els: Els;
@@ -44,7 +44,6 @@ export class EventRouter {
     previewManager: FittingPreviewManager;
     attackerFittingPopup: FittingPopupController;
     targetFittingPopup: FittingPopupController;
-    host: EventRouterHost;
   }) {
     this.els = deps.els;
     this.preferences = deps.preferences;
@@ -57,15 +56,20 @@ export class EventRouter {
     this.previewManager = deps.previewManager;
     this.attackerFittingPopup = deps.attackerFittingPopup;
     this.targetFittingPopup = deps.targetFittingPopup;
-    this.host = deps.host;
     this.trackingInput = deps.trackingInput;
+  }
+
+  setHost(host: EventRouterHost): void {
+    this.host = host;
     this.bind();
   }
 
   private bind(): void {
-    this.els.play.addEventListener("click", () => this.host.onPlayPause());
-    this.els.reset.addEventListener("click", () => this.host.onReset());
-    this.els.simSpeed.addEventListener("change", () => this.host.onSpeedChange(this.preferences.getSpeed()));
+    const host = this.host;
+    if (!host) return;
+    this.els.play.addEventListener("click", () => host.onPlayPause());
+    this.els.reset.addEventListener("click", () => host.onReset());
+    this.els.simSpeed.addEventListener("change", () => host.onSpeedChange(this.preferences.getSpeed()));
     this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
     this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
     this.els.langEn.addEventListener("click", () => this.preferences.setLanguage("en"));
@@ -112,7 +116,7 @@ export class EventRouter {
 
     const displayInputs: (keyof Els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
-      this.els[id].addEventListener("input", () => { this.applyDisplayInput(id); this.host.onDisplayChange(); });
+      this.els[id].addEventListener("input", () => { this.applyDisplayInput(id); host.onDisplayChange(); });
     }
 
     const shipInputs: (keyof Els)[] = [
@@ -132,17 +136,17 @@ export class EventRouter {
       this.els[id].addEventListener("input", () => {
         if (id === "attackerMode") this.preferences.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
         this.applyShipInput(id);
-        this.host.onConfigChange();
+        host.onConfigChange();
       });
     }
 
     this.els.maneuverAggressivitySlider.addEventListener("input", () => {
       this.preferences.onManeuverAggressivityChange();
-      this.host.onConfigChange();
+      host.onConfigChange();
     });
     this.els.gridBrightnessSlider.addEventListener("input", () => {
       this.preferences.onGridBrightnessChange();
-      this.host.onDisplayChange();
+      host.onDisplayChange();
     });
 
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
@@ -150,9 +154,11 @@ export class EventRouter {
   }
 
   private onTrackingUnitClick(unit: "rad" | "score"): void {
+    const host = this.host;
+    if (!host) return;
     this.preferences.setTrackingUnit(unit);
     this.profile.updateDirtyState();
-    this.host.onDisplayChange();
+    host.onDisplayChange();
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
