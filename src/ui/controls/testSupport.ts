@@ -42,6 +42,8 @@ export {
   mockHitChance,
   mockSettingsStore,
   mockGunFamilies,
+  mockTrackingInput,
+  fakeTrackingInput,
 } from "./mockFactories";
 export {
   RIFTER,

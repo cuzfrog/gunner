@@ -6,6 +6,7 @@ import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Side, SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
+import type { TrackingInput } from "../trackingInput";
 
 export interface EventRouterHost {
   onPlayPause(): void;
@@ -29,6 +30,7 @@ export class EventRouter {
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
   private readonly host: EventRouterHost;
+  private readonly trackingInput: TrackingInput;
 
   constructor(deps: {
     els: Els;
@@ -38,6 +40,7 @@ export class EventRouter {
     attackerSide: SidePanel;
     targetSide: SidePanel;
     turret: TurretController;
+    trackingInput: TrackingInput;
     popupGroup: PopupGroup;
     previewManager: FittingPreviewManager;
     attackerAmmoPopup: Popup;
@@ -58,6 +61,7 @@ export class EventRouter {
     this.attackerFittingPopup = deps.attackerFittingPopup;
     this.targetFittingPopup = deps.targetFittingPopup;
     this.host = deps.host;
+    this.trackingInput = deps.trackingInput;
     this.bind();
   }
 
@@ -171,7 +175,7 @@ export class EventRouter {
   private applyDisplayInput(id: keyof Els): void {
     if (id === "tracking") this.preferences.updateTrackingFromInput();
     if (id === "sigRes") this.preferences.updateTrackingForSigResolution();
-    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.preferences.trackingInput.rad);
+    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.trackingInput.rad);
     if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.turret.currentSigResClass());
     if (id === "optimal") this.attackerSide.recordOverride("optimal", num(this.els.optimal));
     if (id === "falloff") this.attackerSide.recordOverride("falloff", num(this.els.falloff));

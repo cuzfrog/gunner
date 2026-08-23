@@ -72,7 +72,7 @@ type CreateSessionCodec = (deps: {
   els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController;
   preferences: PreferencesController; profileController: ProfileController; i18n: I18n;
   chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: DomControlsHost;
+  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: DomControlsHost; trackingInput: TrackingInput;
 }) => SessionCodec;
 type CreateLanguageRefresh = (deps: {
   i18n: I18n; hullDatalist: HullDatalist; profileController: ProfileController;
@@ -83,7 +83,7 @@ type CreateLanguageRefresh = (deps: {
 }) => LanguageRefresh;
 type CreateEventRouter = (deps: {
   els: Els; preferences: PreferencesController; profile: ProfileController; import: ImportController;
-  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; popupGroup: PopupGroup;
+  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; trackingInput: TrackingInput; popupGroup: PopupGroup;
   previewManager: FittingPreviewManager; attackerAmmoPopup: Popup;
   attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController; host: EventRouterHost;
 }) => EventRouter;
@@ -168,7 +168,7 @@ export class DomControlsFactory {
       chargeCatalog: deps.chargeCatalog,
       gunFamilies: deps.gunFamilies,
       imageCatalog: deps.imageCatalog,
-      trackingInput: preferencesController.trackingInput,
+      trackingInput,
       i18n: deps.i18n,
       fittingImport: deps.fittingImport,
       overrides: () => attackerSide.overrides,
@@ -186,7 +186,7 @@ export class DomControlsFactory {
       els, attackerSide, targetSide, turret: turretController, preferences: preferencesController,
       profileController, i18n: deps.i18n, chargeCatalog: deps.chargeCatalog, sigResChoice, hintRotator,
       settingsStore: deps.settingsStore, hitChance: deps.hitChance,
-      sessionControl: host,
+      sessionControl: host, trackingInput,
     });
     importController = this.cradle.resolve<CreateImportController>("createImportController")({
       clipboard: deps.clipboard,
@@ -256,6 +256,7 @@ export class DomControlsFactory {
       attackerSide,
       targetSide,
       turret: turretController,
+      trackingInput,
       popupGroup,
       previewManager,
       attackerAmmoPopup,

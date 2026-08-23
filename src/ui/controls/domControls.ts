@@ -133,7 +133,7 @@ export class DomControls implements Controls, DomControlsHost {
     if (notify) this.callbacks?.onConfigChange();
   }
 
-  getTurret(): TurretSpec { return this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad); }
+  getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
   getTargetSig(): number { return num(this.els.targetSig); }
   getConfig(): SimConfig {
     const initialDistance = Math.max(num(this.els.initialDistance), 1);

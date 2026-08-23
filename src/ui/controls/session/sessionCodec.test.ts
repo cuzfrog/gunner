@@ -1,8 +1,8 @@
-import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type TrackingUnit, type UserSettings } from "../../settings";
+import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type UserSettings } from "../../settings";
 import type { ChargeCatalog } from "../../../fitting";
 import { type AutopilotMode, type HitChance, SIG_RESOLUTIONS } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
-import { createControlsEls, fakeDocument, FakeElement } from "../testSupport";
+import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput } from "../testSupport";
 import type { I18n } from "../../i18n";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { HintRotator } from "../hints";
@@ -11,30 +11,6 @@ import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
-
-function fakeTrackingInput(rad = 0.32): TrackingInput {
-  let currentRad = rad;
-  let currentUnit: TrackingUnit = "rad";
-  return {
-    get rad(): number { return currentRad; },
-    get unit(): TrackingUnit { return currentUnit; },
-    setRadValue(value: number, _sigResolution: number): number {
-      currentRad = value;
-      return currentRad;
-    },
-    setUnit(unit: TrackingUnit, _sigResolution: number): number {
-      currentUnit = unit;
-      return currentRad;
-    },
-    setDisplayValue(value: number, _sigResolution: number): number {
-      currentRad = value;
-      return currentRad;
-    },
-    displayValue(_sigResolution: number): number {
-      return currentRad;
-    },
-  };
-}
 
 function fakeEls() {
   globalThis.document = fakeDocument() as unknown as Document;
@@ -104,6 +80,7 @@ describe("SessionCodec", () => {
       chargeCatalog: {} as ChargeCatalog, sigResChoice: {} as ChoiceGroup, hintRotator: {} as HintRotator,
       settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
       sessionControl: { isPlaying: () => false, setPlaying: vi.fn() },
+      trackingInput: fakeTrackingInput(),
     });
 
     const settings = codec.capture();
@@ -201,7 +178,7 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      sessionControl,
+      sessionControl, trackingInput,
     });
 
     codec.restoreStartup({ settings, selectedProfileName: null });
@@ -244,7 +221,7 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
-      sessionControl,
+      sessionControl, trackingInput,
     });
 
     codec.restoreStartup({ settings: null, selectedProfileName: null });

@@ -3,7 +3,7 @@ import type { HullView, ShipProfile, Ships } from "../../ships";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
 import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
-import type { ClipboardProvider, SavedFittings, SettingsStore } from "../settings";
+import type { ClipboardProvider, SavedFittings, SettingsStore, TrackingUnit } from "../settings";
 import type { Timer } from "../timer";
 import { CHARGE_OPTIONS, MOCK_REPRESENTATIVES } from "./testConstants";
 
@@ -83,4 +83,17 @@ export function mockGunFamilies(): GunFamilies {
 
 export function mockTrackingInput(): TrackingInput {
   return new TrackingInputImpl();
+}
+
+export function fakeTrackingInput(rad = 0.32): TrackingInput {
+  let currentRad = rad;
+  let currentUnit: TrackingUnit = "rad";
+  return {
+    get rad(): number { return currentRad; },
+    get unit(): TrackingUnit { return currentUnit; },
+    setRadValue(value: number, _sigResolution: number): number { currentRad = value; return currentRad; },
+    setUnit(unit: TrackingUnit, _sigResolution: number): number { currentUnit = unit; return currentRad; },
+    setDisplayValue(value: number, _sigResolution: number): number { currentRad = value; return currentRad; },
+    displayValue(_sigResolution: number): number { return currentRad; },
+  };
 }

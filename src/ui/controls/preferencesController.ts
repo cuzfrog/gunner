@@ -20,7 +20,6 @@ export interface PreferencesEls {
 }
 
 export interface PreferencesController {
-  readonly trackingInput: TrackingInput;
   getSpeed(): number;
   getGridBrightness(): number;
   setLanguage(language: Language): void;

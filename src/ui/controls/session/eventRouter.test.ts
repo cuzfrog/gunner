@@ -1,5 +1,5 @@
 import { EventRouter, type EventRouterHost } from "./eventRouter";
-import { createControlsEls, fakeDocument, getFake, FakeElement } from "../testSupport";
+import { createControlsEls, fakeDocument, fakeTrackingInput, getFake, FakeElement } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import type { FittingPopupController } from "../popup";
 import type { FittingPreviewManager } from "../popup";
@@ -65,6 +65,7 @@ describe("EventRouter", () => {
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,
+      trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager: {} as FittingPreviewManager,
       attackerAmmoPopup: makePopup(),
@@ -100,6 +101,7 @@ describe("EventRouter", () => {
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,
+      trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager: { openSide: vi.fn(() => undefined) } as unknown as FittingPreviewManager,
       attackerAmmoPopup,
@@ -120,8 +122,8 @@ describe("EventRouter", () => {
       onConfigChange: vi.fn(),
       onDisplayChange: vi.fn(),
     } as unknown as EventRouterHost;
+    const trackingInput = fakeTrackingInput(0.42);
     const preferences = {
-      trackingInput: { rad: 0.42 },
       updateTrackingFromInput: vi.fn(),
       updateTrackingForSigResolution: vi.fn(),
       updateManeuverAggressivityEnabled: vi.fn(),
@@ -145,6 +147,7 @@ describe("EventRouter", () => {
       attackerSide,
       targetSide,
       turret,
+      trackingInput,
       popupGroup: makePopupGroup(),
       previewManager: {} as FittingPreviewManager,
       attackerAmmoPopup: makePopup(),
@@ -215,6 +218,7 @@ describe("EventRouter", () => {
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,
+      trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager,
       attackerAmmoPopup,

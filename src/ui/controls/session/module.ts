@@ -11,6 +11,7 @@ import type { HintRotator } from "../hints";
 import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
+import type { TrackingInput } from "../trackingInput";
 import type { ImportController } from "../import";
 import { EventRouter } from "./eventRouter";
 import type { EventRouterHost } from "./eventRouter";
@@ -26,12 +27,12 @@ interface SessionCodecDeps {
   els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController;
   preferences: PreferencesController; profileController: ProfileController; i18n: I18n;
   chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl;
+  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl; trackingInput: TrackingInput;
 }
 
 interface EventRouterDeps {
   els: Els; preferences: PreferencesController; profile: ProfileController;
-  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; popupGroup: PopupGroup;
+  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; trackingInput: TrackingInput; popupGroup: PopupGroup;
   previewManager: FittingPreviewManager; attackerAmmoPopup: Popup;
   attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController; host: EventRouterHost;
   import: ImportController;

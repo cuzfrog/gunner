@@ -12,6 +12,7 @@ import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
+import type { TrackingInput } from "../trackingInput";
 
 export interface SessionCodec {
   capture(): UserSettings;
@@ -34,11 +35,12 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly settingsStore: SettingsStore;
   private readonly hitChance: HitChance;
   private readonly sessionControl: SessionControl;
+  private readonly trackingInput: TrackingInput;
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; preferences: PreferencesController;
     profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-    settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl;
+    settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl; trackingInput: TrackingInput;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -53,6 +55,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.settingsStore = deps.settingsStore;
     this.hitChance = deps.hitChance;
     this.sessionControl = deps.sessionControl;
+    this.trackingInput = deps.trackingInput;
   }
 
   capture(): UserSettings {
@@ -62,7 +65,7 @@ export class SessionCodecImpl implements SessionCodec {
     const preferences = this.preferencesController.capture();
     return {
       version: USER_SETTINGS_VERSION,
-      tracking: this.preferencesController.trackingInput.rad,
+      tracking: this.trackingInput.rad,
       ...preferences,
       sigRes: turret.sigRes,
       optimal: turret.optimal,
@@ -102,7 +105,7 @@ export class SessionCodecImpl implements SessionCodec {
     const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
     this.els.sigRes.value = settings.sigRes;
     this.sigResChoice.set(settings.sigRes);
-    this.preferencesController.trackingInput.setRadValue(settings.tracking, sigResolution);
+    this.trackingInput.setRadValue(settings.tracking, sigResolution);
     this.preferencesController.restore({
       language: settings.language,
       trackingUnit: settings.trackingUnit,
@@ -181,7 +184,7 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   private setBestInitialDistance(): void {
-    const turret = this.turretController.currentTurretSpec(this.preferencesController.trackingInput.rad);
+    const turret = this.turretController.currentTurretSpec(this.trackingInput.rad);
     const targetSig = Math.max(num(this.els.targetSig), 1);
     const targetSpeed = num(this.els.targetSpeed);
     const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
