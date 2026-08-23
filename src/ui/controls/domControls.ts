@@ -1,7 +1,7 @@
 import {
+  type CombatantConfig,
   type EngagementFrame,
   type HitChanceBreakdown,
-  type ShipConfig,
   type SimConfig,
   type TurretSpec,
 } from "../../sim";
@@ -19,6 +19,7 @@ import type { EngagementReadout } from "./engagementReadout";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turret";
+import type { EwarController } from "./ewar";
 import type { ImportController } from "./import";
 import type { ShareController } from "./share";
 
@@ -38,6 +39,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   turretController: TurretController;
   sessionCodec: SessionCodec;
   importController: ImportController;
+  ewarController: EwarController;
   shareController: ShareController;
   previewManager: FittingPreviewManager;
   attackerFittingPopup: FittingPopupController;
@@ -60,6 +62,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly turretController: TurretController;
   private readonly sessionCodec: SessionCodec;
   private readonly importController: ImportController;
+  private readonly ewarController: EwarController;
   private readonly shareController: ShareController;
   private readonly previewManager: FittingPreviewManager;
   private readonly attackerFittingPopup: FittingPopupController;
@@ -83,6 +86,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.turretController = all.turretController;
     this.sessionCodec = all.sessionCodec;
     this.importController = all.importController;
+    this.ewarController = all.ewarController;
     this.shareController = all.shareController;
     this.previewManager = all.previewManager;
     this.attackerFittingPopup = all.attackerFittingPopup;
@@ -108,7 +112,11 @@ export class DomControls implements Controls, DomControlsHost {
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
-  onConfigChange(): void { this.persistConfigChange(); }
+  onConfigChange(): void {
+    this.attackerSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("attacker"));
+    this.targetSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("target"));
+    this.persistConfigChange();
+  }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
@@ -155,19 +163,23 @@ export class DomControls implements Controls, DomControlsHost {
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
   getTargetSig(): number { return this.targetSide.capture().sig ?? 1; }
   getConfig(): SimConfig {
+    const attackerOverload = this.els.attackerOverload.checked;
+    const targetOverload = this.els.targetOverload.checked;
     const initialDistance = this.sessionCodec.getInitialDistance();
     const aggressivity = this.preferencesController.getManeuverAggressivity();
     const attackerState = this.attackerSide.capture();
     const targetState = this.targetSide.capture();
-    const attacker: ShipConfig = {
+    const attacker: CombatantConfig = {
       id: "attacker", maxSpeed: attackerState.speed, mass: attackerState.mass,
       inertiaModifier: attackerState.inertia, mode: attackerState.mode,
       desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
+      ewar: this.ewarController.projection("attacker", attackerOverload),
     };
-    const target: ShipConfig = {
+    const target: CombatantConfig = {
       id: "target", maxSpeed: targetState.speed, mass: targetState.mass,
       inertiaModifier: targetState.inertia, mode: targetState.mode,
       desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
+      ewar: this.ewarController.projection("target", targetOverload),
     };
     return { attacker, target, initialDistance };
   }

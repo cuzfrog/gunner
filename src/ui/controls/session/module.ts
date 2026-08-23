@@ -22,8 +22,10 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       settingsStore: proxy.settingsStore,
       hitChance: proxy.hitChance,
       trackingInput: proxy.trackingInput,
+      ewarController: proxy.ewarController,
+      fittingImport: proxy.fittingImport,
     })).singleton(),
-    eventRouter: asFunction(({ els, preferencesController, profileController, importController, shareController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup }) => new EventRouter({
+    eventRouter: asFunction(({ els, preferencesController, profileController, importController, shareController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup, ewarController }) => new EventRouter({
       els,
       preferences: preferencesController,
       profile: profileController,
@@ -37,6 +39,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       previewManager,
       attackerFittingPopup,
       targetFittingPopup,
+      ewarController,
     })).singleton(),
   });
 }

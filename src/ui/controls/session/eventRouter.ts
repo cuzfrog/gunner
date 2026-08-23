@@ -8,6 +8,7 @@ import type { ShareController } from "../share";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
+import type { EwarController } from "../ewar";
 import { applyDisplayInput, applyShipInput } from "./inputHandlers";
 
 export interface EventRouterHost {
@@ -32,6 +33,7 @@ export class EventRouter {
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
   private readonly trackingInput: TrackingInput;
+  private readonly ewarController: EwarController;
   private host?: EventRouterHost;
 
   constructor(deps: {
@@ -48,6 +50,7 @@ export class EventRouter {
     previewManager: FittingPreviewManager;
     attackerFittingPopup: FittingPopupController;
     targetFittingPopup: FittingPopupController;
+    ewarController: EwarController;
   }) {
     this.els = deps.els;
     this.preferences = deps.preferences;
@@ -62,6 +65,7 @@ export class EventRouter {
     this.attackerFittingPopup = deps.attackerFittingPopup;
     this.targetFittingPopup = deps.targetFittingPopup;
     this.trackingInput = deps.trackingInput;
+    this.ewarController = deps.ewarController;
   }
 
   setHost(host: EventRouterHost): void {
@@ -120,6 +124,8 @@ export class EventRouter {
 
     this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getSkillPopup()));
     this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getSkillPopup()));
+    this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ewarController.popup("attacker")));
+    this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ewarController.popup("target")));
 
     const displayContext = {
       attackerSide: this.attackerSide,

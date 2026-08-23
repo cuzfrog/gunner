@@ -21,4 +21,5 @@ export interface ImportController {
   importEftFitting(side: Side, text: string, persist?: boolean): ImportedFitting | undefined;
   setOnConfigPersisted(onConfigPersisted: () => void): void;
   setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void;
+  setOnFittingImported(onFittingImported: ((side: Side, imported: ImportedFitting) => void) | undefined): void;
 }

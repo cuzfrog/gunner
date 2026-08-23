@@ -6,6 +6,7 @@ import type { ImportEls } from "./import";
 import type { FittingPopupEls } from "./popup";
 import type { TurretEls } from "./turret";
 import type { Side } from "./sidePanel";
+import type { EwarEls } from "./ewar";
 
 export function collectPreferencesEls(els: Els): PreferencesEls {
   return {
@@ -71,6 +72,17 @@ export function collectReadoutEls(els: Els): ReadoutEls {
     resTrackPen: els.resTrackPen,
     resRangePen: els.resRangePen,
     resHit: els.resHit,
+  };
+}
+
+export function collectEwarEls(els: Els): EwarEls {
+  return {
+    attackerEwarTrigger: els.attackerEwarTrigger,
+    attackerEwarPopup: els.attackerEwarPopup,
+    attackerEwarSummary: els.attackerEwarSummary,
+    targetEwarTrigger: els.targetEwarTrigger,
+    targetEwarPopup: els.targetEwarPopup,
+    targetEwarSummary: els.targetEwarSummary,
   };
 }
 

@@ -11,6 +11,8 @@ import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
+import type { FittingImport, ImportedFitting } from "../../../fitting";
+import type { EwarController } from "../ewar";
 
 function fakeEls() {
   globalThis.document = fakeDocument() as unknown as Document;
@@ -53,6 +55,23 @@ function mockSidePanel(side: "attacker" | "target", captured: ReturnType<SidePan
   } as unknown as SidePanel;
 }
 
+function mockEwarController(): EwarController {
+  return {
+    setHost: vi.fn(),
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(),
+    capture: vi.fn(),
+    fittedCount: vi.fn(() => 0),
+    popup: vi.fn(),
+    render: vi.fn(),
+  } as unknown as EwarController;
+}
+
+function mockFittingImport(): FittingImport {
+  return { importFitting: vi.fn(), moduleNameFor: vi.fn() } as unknown as FittingImport;
+}
+
 function mockTurretOverrides(overrides: Record<string, unknown> = {}): TurretOverrides {
   const store = { overrides };
   return {
@@ -88,9 +107,11 @@ describe("SessionCodec", () => {
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
-      chargeCatalog: {} as ChargeCatalog, sigResChoice: {} as ChoiceGroup, hintRotator: {} as HintRotator,
+      chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
       settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
       trackingInput: fakeTrackingInput(),
+      ewarController: mockEwarController(),
+      fittingImport: mockFittingImport(),
     });
     codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
 
@@ -193,6 +214,8 @@ describe("SessionCodec", () => {
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
       trackingInput,
+      ewarController: mockEwarController(),
+      fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);
 
@@ -209,6 +232,38 @@ describe("SessionCodec", () => {
     expect(setPlaying).toHaveBeenCalledWith(true);
     expect(turretOverrides.set).toHaveBeenCalledWith({});
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
+  });
+
+  test("capture and restore include ewar activations", () => {
+    const els = fakeEls();
+    const ewarController = mockEwarController();
+    const fittingImport = mockFittingImport();
+    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
+    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    vi.mocked(ewarController.capture).mockReturnValue({ webs: [true], disruptors: [{ active: true, script: "none" }] });
+    vi.mocked(fittingImport.importFitting).mockReturnValue({ profile: {} as unknown, fittingName: "Brawler", ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [] }, weapon: undefined, defense: undefined, modules: [] } as unknown as ImportedFitting);
+    const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
+    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), updateManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
+    const settingsStore = {} as SettingsStore;
+
+    const codec = new SessionCodecImpl({
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides: mockTurretOverrides(),
+      preferences, profileController, i18n,
+      chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
+      settingsStore, hitChance: {} as HitChance, trackingInput: fakeTrackingInput(),
+      ewarController,
+      fittingImport,
+    });
+
+    const settings = codec.capture();
+    expect(settings.attackerEwarActivation).toEqual({ webs: [true], disruptors: [{ active: true, script: "none" }] });
+
+    codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
+    codec.restore(settings);
+    expect(ewarController.restore).toHaveBeenCalledWith("attacker", expect.any(Object), settings.attackerEwarActivation);
+    expect(ewarController.restore).toHaveBeenCalledWith("target", undefined, settings.targetEwarActivation);
   });
 
   test("corrupt startup data falls back to defaults", () => {
@@ -239,6 +294,8 @@ describe("SessionCodec", () => {
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
       trackingInput,
+      ewarController: mockEwarController(),
+      fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);
 

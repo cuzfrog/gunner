@@ -72,7 +72,7 @@ no-new-exports:
   - index.ts
   - profileController.test.ts
   - module.test.ts
-  - elementCollectors.ts
+  # - elementCollectors.ts  # M6 ewar element collector
 ---
 
 

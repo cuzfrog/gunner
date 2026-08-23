@@ -36,6 +36,7 @@ const controlsCradleKeys = {
   targetFittingPopup: "targetFittingPopup",
   sessionCodec: "sessionCodec",
   importController: "importController",
+  ewarController: "ewarController",
   shareController: "shareController",
   eventRouter: "eventRouter",
   controls: "controls",

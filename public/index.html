@@ -253,6 +253,16 @@
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
+
+        <div class="field-group ewar-group" id="attacker-ewar-field">
+          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ewar-popup" disabled>
+            <span class="ewar-label" data-i18n="label.ewar.web">Stasis Webifiers</span>
+            <span class="ewar-summary-row"><span class="ewar-summary-value" id="attacker-ewar-summary"></span></span>
+          </button>
+          <div class="ewar-popup" id="attacker-ewar-popup" hidden role="group"></div>
+        </div>
+
         <div class="field-row">
           <label>
             <span class="field-label" data-i18n="label.mass">Mass</span>
@@ -434,6 +444,16 @@
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
         </div>
+
+        <div class="field-group ewar-group" id="target-ewar-field">
+          <button type="button" id="target-ewar-trigger" class="ewar-trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="target-ewar-popup" disabled>
+            <span class="ewar-label" data-i18n="label.ewar.disruptor">Gun Disruptors</span>
+            <span class="ewar-summary-row"><span class="ewar-summary-value" id="target-ewar-summary"></span></span>
+          </button>
+          <div class="ewar-popup" id="target-ewar-popup" hidden role="group"></div>
+        </div>
+
         <div class="field-row">
           <label>
             <span class="field-label" data-i18n="label.mass">Mass</span>

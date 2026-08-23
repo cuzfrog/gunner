@@ -1,7 +1,8 @@
 import { SIG_RESOLUTIONS, type HitChance } from "../../../sim";
-import type { ChargeCatalog } from "../../../fitting";
+import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
-import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
+import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type StoredEwarActivation, type UserSettings } from "../../../appstate";
+import type { EwarController } from "../ewar";
 import { num } from "../controlsDom";
 import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
@@ -41,12 +42,14 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly hitChance: HitChance;
   private sessionControl?: SessionControl;
   private readonly trackingInput: TrackingInput;
+  private readonly ewarController: EwarController;
+  private readonly fittingImport: FittingImport;
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
     sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; hitChance: HitChance;
-    trackingInput: TrackingInput;
+    trackingInput: TrackingInput; ewarController: EwarController; fittingImport: FittingImport;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -62,6 +65,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.settingsStore = deps.settingsStore;
     this.hitChance = deps.hitChance;
     this.trackingInput = deps.trackingInput;
+    this.ewarController = deps.ewarController;
+    this.fittingImport = deps.fittingImport;
   }
 
   setSessionControl(sessionControl: SessionControl): void {
@@ -108,6 +113,8 @@ export class SessionCodecImpl implements SessionCodec {
       targetOverrides: target.overrides,
       targetFittedHull: target.fittedHull,
       attackerAmmo: turret.ammo,
+      attackerEwarActivation: this.ewarController.capture("attacker"),
+      targetEwarActivation: this.ewarController.capture("target"),
     };
   }
 
@@ -144,6 +151,10 @@ export class SessionCodecImpl implements SessionCodec {
     this.turretController.restore({
       fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
     });
+    this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
+    this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
+    this.attackerSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("attacker"));
+    this.targetSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("target"));
     if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
@@ -164,6 +175,12 @@ export class SessionCodecImpl implements SessionCodec {
 
   getInitialDistance(): number {
     return Math.max(num(this.els.initialDistance), 1);
+  }
+
+  private restoreEwar(side: "attacker" | "target", fitting: string | undefined, activation: StoredEwarActivation | undefined): void {
+    const panel = side === "attacker" ? this.attackerSide : this.targetSide;
+    const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.ewar : undefined;
+    this.ewarController.restore(side, loadout, activation);
   }
 
   restoreStartup(startup: StartupState): void {

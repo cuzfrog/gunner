@@ -30,6 +30,7 @@ export class ImportControllerImpl implements ImportController {
   private importSidePopupOpen = false;
   private onConfigPersisted?: () => void;
   private onProfileTextLoaded?: (settings: UserSettings) => void;
+  private onFittingImported?: (side: Side, imported: ImportedFitting) => void;
 
   constructor(deps: {
     clipboard: ClipboardProvider;
@@ -78,6 +79,7 @@ export class ImportControllerImpl implements ImportController {
 
   setOnConfigPersisted(onConfigPersisted: () => void): void { this.onConfigPersisted = onConfigPersisted; }
   setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void { this.onProfileTextLoaded = onProfileTextLoaded; }
+  setOnFittingImported(onFittingImported: ((side: Side, imported: ImportedFitting) => void) | undefined): void { this.onFittingImported = onFittingImported; }
 
   private persistConfigChange(): void {
     this.onConfigPersisted?.();
@@ -169,7 +171,9 @@ export class ImportControllerImpl implements ImportController {
   }
 
   importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
-    return this.eftSideImporter.importEftFitting(side, text, persist);
+    const imported = this.eftSideImporter.importEftFitting(side, text, persist);
+    if (imported) this.onFittingImported?.(side, imported);
+    return imported;
   }
 
   private openImportSidePopup(): void {

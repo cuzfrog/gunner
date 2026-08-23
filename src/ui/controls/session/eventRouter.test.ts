@@ -9,6 +9,7 @@ import type { ProfileController } from "../profileController";
 import type { ShareController } from "../share";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
+import type { EwarController } from "../ewar";
 
 function makeEls() {
   globalThis.document = fakeDocument() as unknown as Document;
@@ -28,6 +29,10 @@ function makePopup(): Popup {
 
 function makeFittingPopup(): FittingPopupController {
   return { popup: makePopup(), setTriggerEnabled: vi.fn(), renderIfOpen: vi.fn(), closeIfOpen: vi.fn() } as unknown as FittingPopupController;
+}
+
+function makeEwarController(): EwarController {
+  return { setHost: vi.fn(), setLoadout: vi.fn(), restore: vi.fn(), projection: vi.fn(), capture: vi.fn(), fittedCount: vi.fn(() => 0), popup: () => makePopup(), render: vi.fn() } as unknown as EwarController;
 }
 
 function makePopupGroup(): PopupGroup {
@@ -80,6 +85,7 @@ describe("EventRouter", () => {
       previewManager: {} as FittingPreviewManager,
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
+      ewarController: makeEwarController(),
     });
     router.setHost(host);
 
@@ -115,6 +121,7 @@ describe("EventRouter", () => {
       previewManager: { openSide: vi.fn(() => undefined) } as unknown as FittingPreviewManager,
       attackerFittingPopup,
       targetFittingPopup,
+      ewarController: makeEwarController(),
     });
     router.setHost({} as EventRouterHost);
 
@@ -180,6 +187,7 @@ describe("EventRouter", () => {
       previewManager: {} as FittingPreviewManager,
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
+      ewarController: makeEwarController(),
     });
     router.setHost(host);
 
@@ -247,6 +255,7 @@ describe("EventRouter", () => {
       previewManager: {} as FittingPreviewManager,
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
+      ewarController: makeEwarController(),
     });
     router.setHost({} as EventRouterHost);
 
@@ -281,6 +290,7 @@ describe("EventRouter", () => {
       previewManager,
       attackerFittingPopup,
       targetFittingPopup,
+      ewarController: makeEwarController(),
     });
     router.setHost({} as EventRouterHost);
 
