@@ -47,7 +47,7 @@ export class EwarControllerImpl implements EwarController {
   setLoadout(side: Side, loadout: EwarLoadout): void {
     this.states.set(side, { loadout, activation: toMutableActivation(ALL_ACTIVE(loadout)) });
     this.host?.onConfigChange();
-    this.render();
+    this.renderSide(side);
   }
 
   restore(side: Side, loadout: EwarLoadout | undefined, saved?: StoredEwarActivation): void {
@@ -56,7 +56,7 @@ export class EwarControllerImpl implements EwarController {
     } else {
       this.states.set(side, { loadout, activation: this.clampActivation(loadout, saved) });
     }
-    this.render();
+    this.renderSide(side);
   }
 
   projection(side: Side, overloaded: boolean): EwarProjection | undefined {
@@ -101,6 +101,50 @@ export class EwarControllerImpl implements EwarController {
     };
   }
 
+  private renderSide(side: Side): void {
+    const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
+    const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
+    const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
+    const state = this.states.get(side);
+    const label = this.ewarLabel(state);
+    const labelSpan = trigger.querySelector?.(".ewar-label");
+    if (labelSpan) labelSpan.textContent = label;
+    trigger.setAttribute("aria-label", label);
+    popup.setAttribute("aria-label", label);
+    popup.innerHTML = "";
+    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
+      trigger.disabled = true;
+      trigger.title = this.i18n.t("title.ewar.empty");
+      summary.textContent = "";
+      return;
+    }
+    trigger.disabled = false;
+    trigger.title = "";
+    this.updateSummary(side);
+    this.renderWebs(side, state, popup);
+    this.renderDisruptors(side, state, popup);
+  }
+
+  private ewarLabel(state: EwarState | undefined): string {
+    const hasWebs = state !== undefined && state.loadout.webs.length > 0;
+    const hasDisruptors = state !== undefined && state.loadout.disruptors.length > 0;
+    if (hasWebs && !hasDisruptors) return this.i18n.t("label.ewar.web");
+    if (!hasWebs && hasDisruptors) return this.i18n.t("label.ewar.disruptor");
+    return this.i18n.t("label.ewar.mixed");
+  }
+
+  private updateSummary(side: Side): void {
+    const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
+    const state = this.states.get(side);
+    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
+      summary.textContent = "";
+      return;
+    }
+    const activeCount = state.activation.webs.filter((w) => w.active).length + state.activation.disruptors.filter((d) => d.active).length;
+    const totalCount = state.loadout.webs.length + state.loadout.disruptors.length;
+    summary.textContent = totalCount > 0 ? `${activeCount}/${totalCount}` : "";
+  }
+
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
     return {
       webs: loadout.webs.map((_, i) => ({ active: saved?.webs?.[i] ?? true })),
@@ -111,33 +155,17 @@ export class EwarControllerImpl implements EwarController {
     };
   }
 
-  private renderSide(side: Side): void {
-    const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
-    const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
-    const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
-    const state = this.states.get(side);
-    const label = side === "attacker" ? this.i18n.t("label.ewar.web") : this.i18n.t("label.ewar.disruptor");
-    trigger.setAttribute("aria-label", label);
-    popup.innerHTML = "";
-    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
-      trigger.disabled = true;
-      summary.textContent = "";
-      return;
-    }
-    trigger.disabled = false;
-    const activeCount = state.activation.webs.filter((w) => w.active).length + state.activation.disruptors.filter((d) => d.active).length;
-    const totalCount = state.loadout.webs.length + state.loadout.disruptors.length;
-    summary.textContent = totalCount > 0 ? `${activeCount}/${totalCount}` : "";
-    this.renderWebs(side, state, popup);
-    this.renderDisruptors(side, state, popup);
-  }
-
   private renderWebs(side: Side, state: EwarState, popup: HTMLElement): void {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
       const active = state.activation.webs[i].active;
-      const button = this.createModuleButton(active, web.moduleName, () => this.toggleWeb(side, i));
-      popup.appendChild(button);
+      let button: HTMLButtonElement;
+      const onClick = () => this.toggleWeb(side, i, button);
+      button = this.createModuleButton(active, web.moduleName, onClick);
+      const row = document.createElement("div");
+      row.className = "ewar-row";
+      row.appendChild(button);
+      popup.appendChild(row);
     }
   }
 
@@ -146,8 +174,10 @@ export class EwarControllerImpl implements EwarController {
       const disruptor = state.loadout.disruptors[i];
       const active = state.activation.disruptors[i].active;
       const row = document.createElement("div");
-      row.className = "ewar-row";
-      const button = this.createModuleButton(active, disruptor.moduleName, () => this.toggleDisruptor(side, i));
+      row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      let button: HTMLButtonElement;
+      const onClick = () => this.toggleDisruptor(side, i, button, row);
+      button = this.createModuleButton(active, disruptor.moduleName, onClick);
       row.appendChild(button);
       const select = document.createElement("select");
       select.hidden = true;
@@ -162,12 +192,14 @@ export class EwarControllerImpl implements EwarController {
       row.appendChild(select);
       const group = document.createElement("div");
       group.setAttribute("role", "group");
+      group.setAttribute("aria-label", disruptor.moduleName);
       group.className = "ewar-script-choice";
       for (const value of SCRIPT_VALUES) {
         const scriptButton = document.createElement("button");
         scriptButton.type = "button";
         scriptButton.setAttribute("data-value", value);
         scriptButton.textContent = this.i18n.t(scriptI18nKey(value));
+        scriptButton.title = this.i18n.t(scriptHintI18nKey(value));
         group.appendChild(scriptButton);
       }
       row.appendChild(group);
@@ -177,21 +209,23 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private createModuleButton(active: boolean, moduleName: string, onClick: () => void): HTMLButtonElement {
+  private createModuleButton(active: boolean, moduleName: string, onClick?: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
+    button.title = moduleName;
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
     const img = document.createElement("img");
-    img.src = iconUrl ?? "";
+    if (iconUrl !== undefined) img.src = iconUrl;
     img.alt = "";
     img.hidden = iconUrl === undefined;
     button.appendChild(img);
     const nameSpan = document.createElement("span");
     nameSpan.textContent = moduleName;
+    nameSpan.title = moduleName;
     button.appendChild(nameSpan);
-    button.addEventListener("click", onClick);
+    if (onClick) button.addEventListener("click", onClick);
     return button;
   }
 
@@ -204,19 +238,23 @@ export class EwarControllerImpl implements EwarController {
     this.host?.onConfigChange();
   }
 
-  private toggleWeb(side: Side, index: number): void {
+  private toggleWeb(side: Side, index: number, button: HTMLButtonElement): void {
     const state = this.states.get(side);
     if (!state) return;
     state.activation.webs[index].active = !state.activation.webs[index].active;
-    this.render();
+    button.setAttribute("aria-pressed", String(state.activation.webs[index].active));
+    this.updateSummary(side);
     this.host?.onConfigChange();
   }
 
-  private toggleDisruptor(side: Side, index: number): void {
+  private toggleDisruptor(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
     const state = this.states.get(side);
     if (!state) return;
-    state.activation.disruptors[index].active = !state.activation.disruptors[index].active;
-    this.render();
+    const active = !state.activation.disruptors[index].active;
+    state.activation.disruptors[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    this.updateSummary(side);
     this.host?.onConfigChange();
   }
 }
@@ -234,4 +272,8 @@ function toDisruptionScript(value: string): DisruptionScript | undefined {
 
 function scriptI18nKey(script: DisruptionScript): "ewar.script.none" | "ewar.script.optimal" | "ewar.script.tracking" {
   return script === "none" ? "ewar.script.none" : script === "optimalRange" ? "ewar.script.optimal" : "ewar.script.tracking";
+}
+
+function scriptHintI18nKey(script: DisruptionScript): "ewar.script.none.hint" | "ewar.script.optimal.hint" | "ewar.script.tracking.hint" {
+  return script === "none" ? "ewar.script.none.hint" : script === "optimalRange" ? "ewar.script.optimal.hint" : "ewar.script.tracking.hint";
 }

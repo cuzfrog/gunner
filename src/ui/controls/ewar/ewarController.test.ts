@@ -69,16 +69,23 @@ describe("EwarController", () => {
     const summary = getFake(document, "attacker-ewar-summary");
     const popup = getFake(document, "attacker-ewar-popup");
     expect(trigger.disabled).toBe(false);
-    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.web");
+    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.mixed");
+    expect(trigger.title).toBe("");
+    expect(popup.getAttribute("aria-label")).toBe("label.ewar.mixed");
     expect(summary.textContent).toBe("3/3");
     expect(popup.children.length).toBe(3);
 
-    const webButton = popup.children[0] as FakeElement;
+    const webRow = popup.children[0] as FakeElement;
+    expect(webRow.tagName).toBe("DIV");
+    expect(webRow.className).toBe("ewar-row");
+    const webButton = webRow.children[0];
     expect(webButton.tagName).toBe("BUTTON");
     expect(webButton.getAttribute("aria-pressed")).toBe("true");
+    expect(webButton.title).toBe(WEB.moduleName);
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
     expect(webButton.children[1].textContent).toBe(WEB.moduleName);
+    expect(webButton.children[1].title).toBe(WEB.moduleName);
 
     const disruptorRow = popup.children[1] as FakeElement;
     expect(disruptorRow.tagName).toBe("DIV");
@@ -89,18 +96,24 @@ describe("EwarController", () => {
 
     const group = disruptorRow.children[2];
     expect(group.getAttribute("role")).toBe("group");
+    expect(group.getAttribute("aria-label")).toBe(DISRUPTOR.moduleName);
     expect(group.className).toBe("ewar-script-choice");
     expect(group.children.length).toBe(3);
     expect(group.children[0].getAttribute("data-value")).toBe("none");
     expect(group.children[1].getAttribute("data-value")).toBe("optimalRange");
     expect(group.children[2].getAttribute("data-value")).toBe("trackingSpeed");
+    expect(group.children[0].title).toBe("ewar.script.none.hint");
+    expect(group.children[1].title).toBe("ewar.script.optimal.hint");
+    expect(group.children[2].title).toBe("ewar.script.tracking.hint");
     expect(activeScriptButton(group)?.getAttribute("data-value")).toBe("none");
 
     const secondRow = popup.children[2] as FakeElement;
     expect(activeScriptButton(secondRow.children[2])?.getAttribute("data-value")).toBe("optimalRange");
 
     controller.setLoadout("target", EMPTY_EWAR_LOADOUT);
-    expect(getFake(document, "target-ewar-trigger").disabled).toBe(true);
+    const targetTrigger = getFake(document, "target-ewar-trigger");
+    expect(targetTrigger.disabled).toBe(true);
+    expect(targetTrigger.title).toBe("title.ewar.empty");
     expect(getFake(document, "target-ewar-summary").textContent).toBe("");
     expect(getFake(document, "target-ewar-popup").children.length).toBe(0);
   });
@@ -114,17 +127,51 @@ describe("EwarController", () => {
     const summary = getFake(document, "attacker-ewar-summary");
 
     expect(summary.textContent).toBe("2/2");
-    (popup.children[0] as FakeElement).trigger("click");
+    (popup.children[0] as FakeElement).children[0].trigger("click");
     expect(summary.textContent).toBe("1/2");
     expect(popup.hidden).toBe(false);
-    expect((popup.children[0] as FakeElement).getAttribute("aria-pressed")).toBe("false");
-    expect((popup.children[1] as FakeElement).getAttribute("aria-pressed")).toBe("true");
+    expect((popup.children[0] as FakeElement).children[0].getAttribute("aria-pressed")).toBe("false");
+    expect((popup.children[1] as FakeElement).children[0].getAttribute("aria-pressed")).toBe("true");
     expect(controller.capture("attacker")?.webs).toEqual([false, true]);
     expect(host.onConfigChange).toHaveBeenCalled();
 
-    (popup.children[0] as FakeElement).trigger("click");
+    (popup.children[0] as FakeElement).children[0].trigger("click");
     expect(summary.textContent).toBe("2/2");
     expect(controller.capture("attacker")?.webs).toEqual([true, true]);
+  });
+
+  test("toggling a disruptor dims its script choice group", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("target", { webs: [], disruptors: [DISRUPTOR] });
+
+    const popup = getFake(document, "target-ewar-popup");
+    popup.hidden = false;
+    const row = popup.children[0] as FakeElement;
+    expect(row.className).toBe("ewar-row");
+    row.children[0].trigger("click");
+    expect(row.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.children[0].getAttribute("aria-pressed")).toBe("false");
+    row.children[0].trigger("click");
+    expect(row.className).toBe("ewar-row");
+    expect(row.children[0].getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("labels are derived from the loadout contents", () => {
+    const { controller, document } = buildEwarController();
+    const trigger = getFake(document, "attacker-ewar-trigger");
+    const popup = getFake(document, "attacker-ewar-popup");
+
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [] });
+    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.web");
+    expect(popup.getAttribute("aria-label")).toBe("label.ewar.web");
+
+    controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR] });
+    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.disruptor");
+    expect(popup.getAttribute("aria-label")).toBe("label.ewar.disruptor");
+
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR] });
+    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.mixed");
+    expect(popup.getAttribute("aria-label")).toBe("label.ewar.mixed");
   });
 
   test("TD script choice persists per row and survives capture/restore round-trip", () => {
@@ -209,7 +256,7 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
 
-    (popup.children[1] as FakeElement).trigger("click");
+    (popup.children[1] as FakeElement).children[0].trigger("click");
     (popup.children[3] as FakeElement).children[0].trigger("click");
     const firstGroup = (popup.children[2] as FakeElement).children[2] as FakeElement;
     firstGroup.children[2].trigger("click");

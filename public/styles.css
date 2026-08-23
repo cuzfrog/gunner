@@ -1768,6 +1768,15 @@ canvas {
   cursor: default;
 }
 
+.ewar-trigger .chevron {
+  color: var(--accent-teal);
+  transition: transform 0.15s ease;
+}
+
+.ewar-trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
 .ewar-trigger:hover:not(:disabled) {
   border-color: var(--accent-teal);
 }
@@ -1891,6 +1900,11 @@ canvas {
   background: var(--accent-teal-35);
   border-color: var(--accent-teal);
   color: var(--text-primary);
+}
+
+.ewar-row-inactive .ewar-script-choice {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .footer {
