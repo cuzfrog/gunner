@@ -9,7 +9,7 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS, type DisruptionScript, type EwarLoadout, type SigResolutionClass, type StackingPenalty, type StasisWebSpec, type TrackingDisruptorSpec } from "../sim";
+import { SIG_RESOLUTIONS, type DisruptionScript, type EwarLoadout, type SigResolutionClass, type StackingPenalty, type StasisWebSpec, type TrackingDisruptorSpec } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
@@ -370,7 +370,7 @@ function resolveEwar(db: FittingDb, parsed: ParsedFitting): EwarLoadout {
     }
   }
 
-  if (webs.length === 0 && disruptors.length === 0) return EMPTY_EWAR_LOADOUT;
+  if (webs.length === 0 && disruptors.length === 0) return { webs: [], disruptors: [] };
   return { webs, disruptors };
 }
 

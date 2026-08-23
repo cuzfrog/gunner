@@ -32,7 +32,8 @@ The public boundary is `index.ts`, which exports the `FittingImport`,
 `ImportedFitting`, `ImportedTurret`, `CargoCharge`, `ChargeOption`,
 `PresetFitting`, `FittingRow`, `FittingSection`, `FittingSummary`,
 and the module registration. `ImportedFitting.ewar` is an `EwarLoadout` from
-the `sim` boundary. `FittingImport.summarize` produces a structural fitting
+the `sim` boundary. `FittingImport` consumes a `StackingPenalty` from the `sim`
+boundary via DI. `FittingImport.summarize` produces a structural fitting
 summary for UI previews. Icon and drone image identifiers have moved to the
 `src/ui` module because they are presentational data. Internal files such as
 `eft.ts`, `fittingImport.ts`, `fittingPresets.ts`, `chargeCatalog.ts`,

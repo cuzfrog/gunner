@@ -18,6 +18,8 @@ import { MODULE_SLOTS } from "./moduleSlots";
 import { parseEft } from "./eft";
 
 class TestStackingPenalty implements StackingPenalty {
+  // Mirrors the sim StackingPenaltyImpl so fitting tests can assert expected
+  // multipliers without instantiating the full sim module. Keep in sync.
   apply(multipliers: readonly number[]): number {
     const values = multipliers.filter((value) => value !== 1);
     const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
@@ -588,12 +590,54 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
     const result = importer.importFitting(
       `[Rifter, No Ewar]
 200mm AutoCannon I, Hail S
-Stasis Webifier II / OFFLINE`,
+Stasis Webifier II/OFFLINE`,
       conditions,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
+  });
+
+  test("preserves duplicate ewar instances and mixed variants", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const result = importer.importFitting(
+      `[Rifter, Duplicates]
+200mm AutoCannon I, Hail S
+Stasis Webifier II
+Fleeting Compact Stasis Webifier
+Tracking Disruptor II
+Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.webs.length).toBe(2);
+    expect(result!.ewar.disruptors.length).toBe(2);
+    expect(result!.ewar.disruptors[1].defaultScript).toBe("trackingSpeed");
+  });
+
+  test("tracking disruptor without a charge defaults to none", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const result = importer.importFitting(
+      `[Rifter, Unscripted TD]
+200mm AutoCannon I, Hail S
+Tracking Disruptor II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.disruptors).toEqual([
+      {
+        moduleName: "Tracking Disruptor II",
+        optimal: 48000,
+        falloff: 24000,
+        disruption: 0.1719,
+        defaultScript: "none",
+        overloadStrengthBonusPercent: 20,
+      },
+    ]);
   });
 
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
