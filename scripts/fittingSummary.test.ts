@@ -4,17 +4,7 @@ import {
   resolveWeapon,
   summarizeFitting,
 } from "./fittingSummary";
-import type { ParsedFitting } from "../src/fitting/eft";
-
-function makeParsed(modules: ParsedFitting["modules"], drones: ParsedFitting["drones"] = []): ParsedFitting {
-  return {
-    hullName: "TestShip",
-    fittingName: "Killmail 12345",
-    modules,
-    drones,
-    cargo: [],
-  };
-}
+import type { EftModule, QuantityItem } from "../src/fitting/eft";
 
 describe("resolveWeapon", () => {
   test("returns Blaster for blaster-based fit", () => {

@@ -18,7 +18,7 @@ import {
   type StasisWebSpec,
   type TrackingDisruptorSpec,
 } from "../sim";
-import { parseEft, type ParsedFitting } from "./eft";
+import { moduleLines, parseEft, type BankKind, type EftDocument } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
   ChargeStats,
@@ -30,7 +30,7 @@ import type {
   TurretScriptStats,
   TurretStats,
 } from "./fittingDb";
-import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
+
 
 export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
 
@@ -38,10 +38,13 @@ export interface FittingRow {
   readonly name: string;
   readonly charge?: string;
   readonly quantity?: number;
+  readonly empty?: boolean;
 }
 
+export type FittingSectionKind = BankKind | "cargo" | "drones";
+
 export interface FittingSection {
-  readonly kind: ModuleSlot | "cargo" | "drones";
+  readonly kind: FittingSectionKind;
   readonly rows: readonly FittingRow[];
 }
 
@@ -165,7 +168,7 @@ interface HullSideAggregation {
 function aggregateHullSide(
   profile: ShipProfile,
   db: FittingDb,
-  parsed: ParsedFitting,
+  parsed: EftDocument,
   hullBonuses: readonly HullBonus[],
   skillLevel: number,
   stacking: StackingPenalty,
@@ -178,7 +181,7 @@ function aggregateHullSide(
   let sigRadiusAdd = 0;
   let propulsionName: string | undefined;
 
-  for (const line of parsed.modules) {
+  for (const line of moduleLines(parsed)) {
     if (line.offline) continue;
     const stats = db.modules[line.name];
     if (!stats) continue;
@@ -226,7 +229,7 @@ function resolvePropulsion(
   profile: ShipProfile,
   ships: Ships,
   db: FittingDb,
-  parsed: ParsedFitting,
+  parsed: EftDocument,
   propulsionName: string | undefined,
 ): (PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName: string }) | undefined {
   const name = propulsionName ?? findFirstPropulsion(parsed, db);
@@ -241,8 +244,8 @@ function resolvePropulsion(
   return { ...stats, propulsionId, propulsionName: name };
 }
 
-function findFirstPropulsion(parsed: ParsedFitting, db: FittingDb): string | undefined {
-  for (const line of parsed.modules) {
+function findFirstPropulsion(parsed: EftDocument, db: FittingDb): string | undefined {
+  for (const line of moduleLines(parsed)) {
     if (line.offline) continue;
     const stats = db.modules[line.name];
     if (stats?.propulsion) return line.name;
@@ -263,7 +266,7 @@ function findGenericPropulsionId(
 function resolveTurret(
   db: FittingDb,
   chargeCatalog: ChargeCatalog,
-  parsed: ParsedFitting,
+  parsed: EftDocument,
   skillLevel: number,
   hullBonuses: readonly HullBonus[],
   stacking: StackingPenalty,
@@ -275,7 +278,7 @@ function resolveTurret(
   let chargeName: string | undefined;
   let moduleName: string | undefined;
 
-  for (const line of parsed.modules) {
+  for (const line of moduleLines(parsed)) {
     if (line.offline) continue;
 
     const lineTurret = db.turrets[line.name];
@@ -337,7 +340,7 @@ function resolveTurret(
   };
 }
 
-function resolveCargoCharges(db: FittingDb, parsed: ParsedFitting): readonly CargoCharge[] {
+function resolveCargoCharges(db: FittingDb, parsed: EftDocument): readonly CargoCharge[] {
   const charges: CargoCharge[] = [];
   for (const item of parsed.cargo) {
     if (!db.charges[item.name]) continue;
@@ -346,11 +349,11 @@ function resolveCargoCharges(db: FittingDb, parsed: ParsedFitting): readonly Car
   return charges;
 }
 
-function resolveEwar(db: FittingDb, parsed: ParsedFitting): EwarLoadout {
+function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
   const webs: StasisWebSpec[] = [];
   const disruptors: TrackingDisruptorSpec[] = [];
 
-  for (const line of parsed.modules) {
+  for (const line of moduleLines(parsed)) {
     if (line.offline) continue;
 
     const webStats = db.stasisWebs[line.name];
@@ -426,20 +429,44 @@ function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClas
   return "S";
 }
 
-function buildSections(parsed: ParsedFitting, db: FittingDb): readonly FittingSection[] {
-  const buckets: Record<ModuleSlot | "cargo" | "drones", FittingRow[]> = { high: [], mid: [], low: [], rig: [], cargo: [], drones: [] };
+const SECTION_ORDER: readonly FittingSectionKind[] = [
+  "high",
+  "mid",
+  "low",
+  "rig",
+  "subsystem",
+  "service",
+  "cargo",
+  "drones",
+];
 
-  for (const line of parsed.modules) {
-    const slot = MODULE_SLOTS[line.name];
-    if (slot === undefined) continue;
-    buckets[slot].push({ name: line.name, charge: line.charge });
+function buildSections(document: EftDocument, db: FittingDb): readonly FittingSection[] {
+  const buckets: Record<FittingSectionKind, FittingRow[]> = {
+    low: [],
+    mid: [],
+    high: [],
+    rig: [],
+    subsystem: [],
+    service: [],
+    cargo: [],
+    drones: [],
+  };
+
+  for (const bank of document.banks) {
+    for (const line of bank.lines) {
+      if (line.kind === "module") {
+        buckets[bank.bank].push({ name: line.name, charge: line.charge });
+      } else {
+        buckets[bank.bank].push({ name: line.label, empty: true });
+      }
+    }
   }
 
-  for (const item of parsed.cargo) {
+  for (const item of document.cargo) {
     buckets.cargo.push({ name: item.name, quantity: item.quantity });
   }
 
-  for (const item of parsed.drones) {
+  for (const item of document.drones) {
     if (item.name in db.charges) {
       buckets.cargo.push({ name: item.name, quantity: item.quantity });
     } else {
@@ -448,7 +475,7 @@ function buildSections(parsed: ParsedFitting, db: FittingDb): readonly FittingSe
   }
 
   const sections: FittingSection[] = [];
-  for (const kind of ["high", "mid", "low", "rig", "cargo", "drones"] as const) {
+  for (const kind of SECTION_ORDER) {
     if (buckets[kind].length > 0) sections.push({ kind, rows: buckets[kind] });
   }
   return sections;

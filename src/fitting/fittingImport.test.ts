@@ -15,7 +15,7 @@ import {
   TURRETS,
 } from "./fittingDb";
 import { MODULE_SLOTS } from "./moduleSlots";
-import { parseEft } from "./eft";
+import { moduleLines, parseEft } from "./eft";
 
 class TestStackingPenalty implements StackingPenalty {
   // Mirrors the sim StackingPenaltyImpl so fitting tests can assert expected
@@ -744,17 +744,18 @@ describe("FittingImportImpl.summarize", () => {
     expect(importer.summarize(INVALID_TEXT)).toBeUndefined();
   });
 
-  test("skips module names that are not in the slot map", () => {
+  test("places unknown module names in the block's intended bank", () => {
     const text = `[Rifter, Unknown]\nUnknown Module Name\n5MN Microwarpdrive I\n`;
     const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
     const summary = importer.summarize(text);
-    expect(summary!.sections).toHaveLength(1);
+    expect(summary!.sections).toHaveLength(2);
     expect(summary!.sections[0].kind).toBe("mid");
+    expect(summary!.sections[1].kind).toBe("low");
   });
 
   test("fixture modules are all present in the generated slot map", () => {
     const parsed = parseEft(RIFTER_BRAWLER);
-    for (const line of parsed!.modules) {
+    for (const line of moduleLines(parsed!)) {
       expect(MODULE_SLOTS[line.name]).toBeDefined();
     }
   });

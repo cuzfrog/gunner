@@ -1,7 +1,7 @@
 // Generated from EVE fitting analysis heuristics (2026-08-20). Do not edit by hand.
 
-import { parseEft } from "../src/fitting/eft";
-import type { ParsedFitting } from "../src/fitting/eft";
+import { moduleLines, parseEft } from "../src/fitting/eft";
+import type { EftDocument, EftModule, QuantityItem } from "../src/fitting/eft";
 
 export interface FittingSummary {
   readonly role: string;
@@ -33,7 +33,7 @@ export function summarizeFitting(text: string): FittingSummary | undefined {
   const parsed = parseEft(text);
   if (!parsed) return undefined;
 
-  const modules = parsed.modules.filter((m) => !m.offline);
+  const modules = moduleLines(parsed).filter((m) => !m.offline);
   if (modules.length === 0) return undefined;
 
   const tankType = _resolveTankType(modules);
@@ -71,7 +71,7 @@ export function renameFittingText(text: string): string | undefined {
 
 // --- Weapon detection ---
 
-function _resolveWeapon(modules: ParsedFitting["modules"], drones: ParsedFitting["drones"]): string {
+function _resolveWeapon(modules: readonly EftModule[], drones: readonly QuantityItem[]): string {
   for (const module of modules) {
     // Skip probe/scanner equipment before weapon detection
     if (/Probe Launcher|Relic Analyzer|Data Analyzer|Salvager/i.test(module.name)) continue;
@@ -106,7 +106,7 @@ function _resolveWeapon(modules: ParsedFitting["modules"], drones: ParsedFitting
 
 // --- Tank type detection ---
 
-function _resolveTankType(modules: ParsedFitting["modules"]): string {
+function _resolveTankType(modules: readonly EftModule[]): string {
   let armorCount = 0;
   let shieldCount = 0;
 
@@ -163,7 +163,7 @@ const ROLE_EWAR: readonly string[] = [
   "Energy Nosferatu",
 ];
 
-function _resolveRole(modules: ParsedFitting["modules"], drones: ParsedFitting["drones"]): string {
+function _resolveRole(modules: readonly EftModule[], drones: readonly QuantityItem[]): string {
   const moduleNames = modules.map((m) => m.name);
 
   // Tackle
