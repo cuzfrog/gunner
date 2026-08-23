@@ -1,4 +1,4 @@
-import type { EngagementEvaluator, Kinematics, Simulation } from "../sim";
+import type { EngagementEvaluator, HitChance, Kinematics, Simulation } from "../sim";
 import type { Controls, Loop, Renderer } from "../ui";
 
 export interface App {
@@ -10,6 +10,7 @@ export class AppImpl implements App {
   private readonly controls: Controls;
   private readonly simulation: Simulation;
   private readonly kinematics: Kinematics;
+  private readonly hitChance: HitChance;
   private readonly engagementEvaluator: EngagementEvaluator;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
@@ -18,6 +19,7 @@ export class AppImpl implements App {
     controls: Controls;
     simulation: Simulation;
     kinematics: Kinematics;
+    hitChance: HitChance;
     engagementEvaluator: EngagementEvaluator;
     renderer: Renderer;
     loop: Loop;
@@ -25,6 +27,7 @@ export class AppImpl implements App {
     this.controls = deps.controls;
     this.simulation = deps.simulation;
     this.kinematics = deps.kinematics;
+    this.hitChance = deps.hitChance;
     this.engagementEvaluator = deps.engagementEvaluator;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
@@ -62,11 +65,13 @@ export class AppImpl implements App {
     const snapshot = this.simulation.snapshot();
     const frame = this.kinematics.computeEngagement(snapshot.attacker, snapshot.target, snapshot.time);
     const turret = this.controls.getTurret();
+    const sig = this.controls.getTargetSig();
     const assessment = this.engagementEvaluator.evaluate(snapshot, {
-      attacker: { turret, targetSigRadius: this.controls.getTargetSig() },
+      attacker: { turret, targetSigRadius: sig },
     });
-    const effectiveTurret = assessment.attacker ? assessment.attacker.effectiveTurret : turret;
-    const hit = assessment.attacker ? assessment.attacker.hit : { chance: 0, trackingTerm: 0, rangeTerm: 0 };
+    const attacker = assessment.attacker;
+    const effectiveTurret = attacker ? attacker.effectiveTurret : turret;
+    const hit = attacker ? attacker.hit : this.hitChance.compute(frame, turret, sig);
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.draw(snapshot, frame, hit, effectiveTurret);
     this.controls.update(frame, hit);

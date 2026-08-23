@@ -1,4 +1,4 @@
-import { Vec2, type AttackAssessment, type EngagementEvaluator, type EngagementFrame, type HitChanceBreakdown, type Kinematics, type ShipConfig, type ShipState, type SimConfig, type Simulation, type SimSnapshot, type TurretSpec } from "../sim";
+import { Vec2, type AttackAssessment, type EngagementEvaluator, type EngagementFrame, type HitChance, type HitChanceBreakdown, type Kinematics, type ShipConfig, type ShipState, type SimConfig, type Simulation, type SimSnapshot, type TurretSpec } from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
@@ -14,6 +14,7 @@ const controls = vi.mocked<Controls>({
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn() });
+const hitChance = vi.mocked<HitChance>({ compute: vi.fn(), findBestDistance: vi.fn() });
 const engagementEvaluator = vi.mocked<EngagementEvaluator>({ evaluate: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn() });
 const loop = vi.mocked<Loop>({
@@ -67,12 +68,13 @@ describe("AppImpl", () => {
     simulation.snapshot.mockReturnValue(snapshot);
     kinematics.computeEngagement.mockReturnValue(frame);
     engagementEvaluator.evaluate.mockReturnValue({ attacker: assessment });
+    hitChance.compute.mockReturnValue(hit);
     controls.getTurret.mockReturnValue(turret);
     controls.getTargetSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
-    app = new AppImpl({ controls, simulation, kinematics, engagementEvaluator, renderer, loop });
+    app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -86,6 +88,15 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
+    expect(controls.update).toHaveBeenCalledWith(frame, hit);
+  });
+
+  test("falls back to hitChance and the base turret when engagement evaluator returns no attacker assessment", () => {
+    engagementEvaluator.evaluate.mockReturnValue({});
+    app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
+    app.start();
+    expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, 40);
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
     expect(controls.update).toHaveBeenCalledWith(frame, hit);
   });

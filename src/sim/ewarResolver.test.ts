@@ -63,6 +63,10 @@ describe("EwarResolverImpl", () => {
       const projection = webProjection([]);
       expect(resolver.webSpeedMultiplier(projection, 5000)).toBe(1);
     });
+
+    test("undefined projection is identity", () => {
+      expect(resolver.webSpeedMultiplier(undefined, 5000)).toBe(1);
+    });
   });
 
   describe("disruptedTurret", () => {
@@ -137,6 +141,11 @@ describe("EwarResolverImpl", () => {
     test("empty loadout leaves turret untouched", () => {
       const projection = { loadout: EMPTY_EWAR_LOADOUT, activation: ALL_ACTIVE(EMPTY_EWAR_LOADOUT), overloaded: false };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
+      expect(turret).toEqual(defaultTurret);
+    });
+
+    test("undefined projection leaves turret untouched", () => {
+      const turret = resolver.disruptedTurret(defaultTurret, undefined, 10000);
       expect(turret).toEqual(defaultTurret);
     });
   });
