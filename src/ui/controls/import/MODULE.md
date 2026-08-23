@@ -9,7 +9,9 @@ no-new-exports:
   - module.ts
   - importController.test.ts
   - index.ts
+  - module.test.ts
 ---
+
 
 
 # import

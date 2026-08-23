@@ -13,7 +13,9 @@ no-new-exports:
   - module.ts
   - turretController.test.ts
   - index.ts
+  - module.test.ts
 ---
+
 
 
 # turret

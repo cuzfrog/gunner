@@ -22,7 +22,9 @@ no-new-exports:
   - index.ts
   - turretLink.ts
   - overrides.ts
+  - module.test.ts
 ---
+
 
 
 

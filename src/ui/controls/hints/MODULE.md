@@ -4,7 +4,9 @@ no-new-exports:
   - module.ts
   - hintRotator.test.ts
   - index.ts
+  - module.test.ts
 ---
+
 
 
 # hints

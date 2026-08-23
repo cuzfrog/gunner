@@ -1,16 +1,53 @@
 import { buildDomControls } from "./testSupport";
 import { DomControls } from "./domControls";
+import type { ControlsCradle } from "./cradle";
+
+const controlsCradleKeys = {
+  hitChance: "hitChance",
+  i18n: "i18n",
+  settingsStore: "settingsStore",
+  ships: "ships",
+  fittingImport: "fittingImport",
+  gunFamilies: "gunFamilies",
+  presetFittings: "presetFittings",
+  savedFittings: "savedFittings",
+  clipboard: "clipboard",
+  timer: "timer",
+  chargeCatalog: "chargeCatalog",
+  imageCatalog: "imageCatalog",
+  uiEvents: "uiEvents",
+  turretOverrides: "turretOverrides",
+  popupGroup: "popupGroup",
+  els: "els",
+  trackingInput: "trackingInput",
+  sigResChoice: "sigResChoice",
+  engagementReadout: "engagementReadout",
+  hullDatalist: "hullDatalist",
+  hintRotator: "hintRotator",
+  preferencesController: "preferencesController",
+  profileController: "profileController",
+  turretController: "turretController",
+  attackerSide: "attackerSide",
+  targetSide: "targetSide",
+  attackerFittingPreview: "attackerFittingPreview",
+  targetFittingPreview: "targetFittingPreview",
+  previewManager: "previewManager",
+  attackerFittingPopup: "attackerFittingPopup",
+  targetFittingPopup: "targetFittingPopup",
+  sessionCodec: "sessionCodec",
+  importController: "importController",
+  eventRouter: "eventRouter",
+  controls: "controls",
+} as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {
   test("composes the controls graph through typed cradle keys", () => {
     const { cradle, controls } = buildDomControls();
     expect(controls).toBeInstanceOf(DomControls);
-    expect(cradle.cradle.turretController).toBeDefined();
-    expect(cradle.cradle.attackerSide).toBeDefined();
-    expect(cradle.cradle.targetSide).toBeDefined();
-    expect(cradle.cradle.sessionCodec).toBeDefined();
-    expect(cradle.cradle.importController).toBeDefined();
-    expect(cradle.cradle.eventRouter).toBeDefined();
+    const allKeys: (keyof ControlsCradle)[] = [...Object.values(controlsCradleKeys)];
+    for (const key of allKeys) {
+      expect(cradle.cradle[key]).toBeDefined();
+    }
   });
 
   test("does not register old Create* factory keys", () => {

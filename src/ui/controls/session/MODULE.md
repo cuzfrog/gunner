@@ -10,7 +10,9 @@ no-new-exports:
   - index.ts
   - inputHandlers.ts
   - startupDefaults.ts
+  - module.test.ts
 ---
+
 
 
 

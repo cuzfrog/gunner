@@ -12,7 +12,9 @@ no-new-exports:
   - index.ts
   - popupGroup.test.ts
   - fittingPreviewManager.test.ts
+  - module.test.ts
 ---
+
 
 
 # popup
