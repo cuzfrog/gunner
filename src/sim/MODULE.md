@@ -7,7 +7,7 @@ no-new-exports:
   - dynamics.ts
   - hitChance.test.ts
   - hitChance.ts
-  - index.ts
+  # - index.ts  # public sim boundary; ewar cross-boundary contracts consumed by fitting/ui/app
   - cradle.ts
   - kinematics.test.ts
   - kinematics.ts
@@ -16,9 +16,13 @@ no-new-exports:
   - predictiveAutopilot.ts
   - simulation.test.ts
   - simulation.ts
-  - types.ts
+  # - types.ts  # ewar cross-boundary contract types (EwarLoadout, EwarProjection, etc.)
   - vec2.test.ts
   - vec2.ts
+  - stackingPenalty.ts
+  - stackingPenalty.test.ts
+  - ewarResolver.ts
+  - ewarResolver.test.ts
 ---
 
 

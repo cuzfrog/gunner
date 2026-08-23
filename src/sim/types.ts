@@ -24,8 +24,8 @@ export interface ShipState extends ShipConfig {
 }
 
 export interface SimConfig {
-  readonly attacker: ShipConfig;
-  readonly target: ShipConfig;
+  readonly attacker: CombatantConfig;
+  readonly target: CombatantConfig;
   readonly initialDistance: number;
 }
 
@@ -62,4 +62,58 @@ export interface HitChanceBreakdown {
   readonly chance: number; // 0..1
   readonly trackingTerm: number;
   readonly rangeTerm: number;
+}
+
+export type DisruptionScript = "none" | "optimalRange" | "trackingSpeed";
+
+export interface StasisWebSpec {
+  readonly moduleName: string;
+  readonly maxRange: number;
+  readonly speedFactor: number;
+}
+
+export interface TrackingDisruptorSpec {
+  readonly moduleName: string;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly disruption: number;
+  readonly script: DisruptionScript;
+}
+
+export interface EwarLoadout {
+  readonly webs: readonly StasisWebSpec[];
+  readonly disruptors: readonly TrackingDisruptorSpec[];
+}
+
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [] };
+
+export interface WebActivation {
+  readonly active: boolean;
+}
+
+export interface DisruptorActivation {
+  readonly active: boolean;
+  readonly script: DisruptionScript;
+}
+
+export interface EwarActivation {
+  readonly webs: readonly WebActivation[];
+  readonly disruptors: readonly DisruptorActivation[];
+}
+
+export function ALL_ACTIVE(loadout: EwarLoadout): EwarActivation {
+  return {
+    webs: loadout.webs.map(() => ({ active: true })),
+    disruptors: loadout.disruptors.map((disruptor) => ({ active: true, script: disruptor.script })),
+  };
+}
+
+export interface EwarProjection {
+  readonly loadout: EwarLoadout;
+  readonly activation: EwarActivation;
+  readonly overloaded: boolean;
+}
+
+export interface CombatantConfig extends ShipConfig {
+  readonly ewar?: EwarProjection;
 }
