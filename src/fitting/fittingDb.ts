@@ -1,4 +1,4 @@
-// Generated from EVE Online SDE via Pyfa staticdata (2026-08-21). Do not edit by hand.
+// Generated from EVE Online SDE via Pyfa staticdata (2026-08-23). Do not edit by hand.
 /* eslint-disable */
 
 import type { HullTier } from "../ships";
@@ -26,6 +26,8 @@ export interface FittingModuleStats {
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
+  readonly stasisWeb?: StasisWebStats;
+  readonly trackingDisruptor?: TrackingDisruptorStats;
 }
 
 export interface TurretStats {
@@ -57,6 +59,24 @@ export interface TurretScriptStats {
   readonly falloffMultiplier: number;
 }
 
+export interface StasisWebStats {
+  readonly maxRange: number;
+  readonly speedFactorPercent: number;
+  readonly overloadRangeBonusPercent: number;
+}
+
+export interface TrackingDisruptorStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly disruptionPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+export interface DisruptionScriptStats {
+  readonly trackingDeltaBonus: number;
+  readonly rangeDeltaBonus: number;
+}
+
 
 export const SCRIPTS = {
   "Optimal Range Script": {
@@ -70,6 +90,149 @@ export const SCRIPTS = {
     "falloffMultiplier": 0
   }
 } as unknown as Readonly<Record<string, TurretScriptStats>>;
+
+export const STASIS_WEBS = {
+  "Stasis Webifier I": {
+    "maxRange": 10000,
+    "speedFactorPercent": -50,
+    "overloadRangeBonusPercent": 30
+  },
+  "Stasis Webifier II": {
+    "maxRange": 10000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "X5 Enduring Stasis Webifier": {
+    "maxRange": 10000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "Fleeting Compact Stasis Webifier": {
+    "maxRange": 10000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "Dark Blood Stasis Webifier": {
+    "maxRange": 15000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "Domination Stasis Webifier": {
+    "maxRange": 15000,
+    "speedFactorPercent": -50,
+    "overloadRangeBonusPercent": 30
+  },
+  "Dread Guristas Stasis Webifier": {
+    "maxRange": 13000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "True Sansha Stasis Webifier": {
+    "maxRange": 15000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "Shadow Serpentis Stasis Webifier": {
+    "maxRange": 14000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Mizuro's Modified Stasis Webifier": {
+    "maxRange": 17000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Hakim's Modified Stasis Webifier": {
+    "maxRange": 18000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Gotan's Modified Stasis Webifier": {
+    "maxRange": 19000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Tobias' Modified Stasis Webifier": {
+    "maxRange": 20000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Caldari Navy Stasis Webifier": {
+    "maxRange": 13000,
+    "speedFactorPercent": -55,
+    "overloadRangeBonusPercent": 30
+  },
+  "Federation Navy Stasis Webifier": {
+    "maxRange": 14000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Khanid Navy Stasis Webifier": {
+    "maxRange": 12000,
+    "speedFactorPercent": -60,
+    "overloadRangeBonusPercent": 30
+  },
+  "Civilian Stasis Webifier": {
+    "maxRange": 10000,
+    "speedFactorPercent": -35,
+    "overloadRangeBonusPercent": 30
+  },
+  "Republic Fleet Stasis Webifier": {
+    "maxRange": 15000,
+    "speedFactorPercent": -50,
+    "overloadRangeBonusPercent": 30
+  }
+} as unknown as Readonly<Record<string, StasisWebStats>>;
+
+export const TRACKING_DISRUPTORS = {
+  "Tracking Disruptor I": {
+    "optimal": 40000,
+    "falloff": 20000,
+    "disruptionPercent": -15.3,
+    "overloadStrengthBonusPercent": 20
+  },
+  "Tracking Disruptor II": {
+    "optimal": 48000,
+    "falloff": 24000,
+    "disruptionPercent": -17.19,
+    "overloadStrengthBonusPercent": 20
+  },
+  "Baker Nunn Enduring Tracking Disruptor I": {
+    "optimal": 40000,
+    "falloff": 20000,
+    "disruptionPercent": -16.24,
+    "overloadStrengthBonusPercent": 20
+  },
+  "Balmer Series Compact Tracking Disruptor I": {
+    "optimal": 40000,
+    "falloff": 20000,
+    "disruptionPercent": -16.24,
+    "overloadStrengthBonusPercent": 20
+  },
+  "DDO Scoped Tracking Disruptor I": {
+    "optimal": 44000,
+    "falloff": 22000,
+    "disruptionPercent": -16.24,
+    "overloadStrengthBonusPercent": 20
+  },
+  "'Investor' Tracking Disruptor I": {
+    "optimal": 48000,
+    "falloff": 24000,
+    "disruptionPercent": -17.19,
+    "overloadStrengthBonusPercent": 20
+  }
+} as unknown as Readonly<Record<string, TrackingDisruptorStats>>;
+
+export const DISRUPTION_SCRIPTS = {
+  "Optimal Range Disruption Script": {
+    "trackingDeltaBonus": -100,
+    "rangeDeltaBonus": 100
+  },
+  "Tracking Speed Disruption Script": {
+    "trackingDeltaBonus": 100,
+    "rangeDeltaBonus": -100
+  }
+} as unknown as Readonly<Record<string, DisruptionScriptStats>>;
 
 
 export const FITTING_MODULES = {
@@ -117,6 +280,20 @@ export const FITTING_MODULES = {
       "speedBonus": 5.1,
       "massAddition": 500000,
       "sigBloom": 4.75
+    }
+  },
+  "Stasis Webifier I": {
+    "stasisWeb": {
+      "maxRange": 10000,
+      "speedFactorPercent": -50,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Stasis Webifier II": {
+    "stasisWeb": {
+      "maxRange": 10000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
     }
   },
   "'Basic' Overdrive Injector System": {
@@ -178,6 +355,22 @@ export const FITTING_MODULES = {
     "turretOptimalPercent": 10,
     "turretFalloffPercent": 20
   },
+  "Tracking Disruptor I": {
+    "trackingDisruptor": {
+      "optimal": 40000,
+      "falloff": 20000,
+      "disruptionPercent": -15.3,
+      "overloadStrengthBonusPercent": 20
+    }
+  },
+  "Tracking Disruptor II": {
+    "trackingDisruptor": {
+      "optimal": 48000,
+      "falloff": 24000,
+      "disruptionPercent": -17.19,
+      "overloadStrengthBonusPercent": 20
+    }
+  },
   "Nanofiber Internal Structure I": {
     "speedBonusPercent": 7.75,
     "agilityMultiplier": 0.87
@@ -197,6 +390,44 @@ export const FITTING_MODULES = {
   },
   "Large Shield Extender II": {
     "sigRadiusAdd": 25
+  },
+  "X5 Enduring Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 10000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Fleeting Compact Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 10000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Baker Nunn Enduring Tracking Disruptor I": {
+    "trackingDisruptor": {
+      "optimal": 40000,
+      "falloff": 20000,
+      "disruptionPercent": -16.24,
+      "overloadStrengthBonusPercent": 20
+    }
+  },
+  "Balmer Series Compact Tracking Disruptor I": {
+    "trackingDisruptor": {
+      "optimal": 40000,
+      "falloff": 20000,
+      "disruptionPercent": -16.24,
+      "overloadStrengthBonusPercent": 20
+    }
+  },
+  "DDO Scoped Tracking Disruptor I": {
+    "trackingDisruptor": {
+      "optimal": 44000,
+      "falloff": 22000,
+      "disruptionPercent": -16.24,
+      "overloadStrengthBonusPercent": 20
+    }
   },
   "Type-D Restrained Inertial Stabilizers": {
     "agilityMultiplier": 0.815,
@@ -587,6 +818,41 @@ export const FITTING_MODULES = {
     "turretOptimalPercent": 8,
     "turretFalloffPercent": 16
   },
+  "Dark Blood Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 15000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Domination Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 15000,
+      "speedFactorPercent": -50,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Dread Guristas Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 13000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "True Sansha Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 15000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Shadow Serpentis Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 14000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
   "Mizuro's Modified 100MN Afterburner": {
     "propulsion": {
       "kind": "afterburner",
@@ -767,6 +1033,34 @@ export const FITTING_MODULES = {
     "turretOptimalPercent": 12.5,
     "turretFalloffPercent": 25
   },
+  "Mizuro's Modified Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 17000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Hakim's Modified Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 18000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Gotan's Modified Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 19000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Tobias' Modified Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 20000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
   "Brynn's Modified Tracking Computer": {
     "turretTrackingPercent": 18.4,
     "turretOptimalPercent": 8.7,
@@ -923,6 +1217,20 @@ export const FITTING_MODULES = {
     "turretTrackingPercent": 10,
     "turretOptimalPercent": 10.5,
     "turretFalloffPercent": 21
+  },
+  "Caldari Navy Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 13000,
+      "speedFactorPercent": -55,
+      "overloadRangeBonusPercent": 30
+    }
+  },
+  "Federation Navy Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 14000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
   },
   "Gistii C-Type 1MN Afterburner": {
     "propulsion": {
@@ -1437,6 +1745,14 @@ export const FITTING_MODULES = {
     "turretOptimalPercent": 7.5,
     "turretFalloffPercent": 15
   },
+  "'Investor' Tracking Disruptor I": {
+    "trackingDisruptor": {
+      "optimal": 48000,
+      "falloff": 24000,
+      "disruptionPercent": -17.19,
+      "overloadStrengthBonusPercent": 20
+    }
+  },
   "'Abatis' 100mm Steel Plates": {
     "massAddition": 35000
   },
@@ -1634,6 +1950,13 @@ export const FITTING_MODULES = {
   "Small Remote Repair Augmentor I": {
     "agilityDrawbackPercent": 10
   },
+  "Khanid Navy Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 12000,
+      "speedFactorPercent": -60,
+      "overloadRangeBonusPercent": 30
+    }
+  },
   "Thukker Large Shield Extender": {
     "sigRadiusAdd": 15
   },
@@ -1654,6 +1977,13 @@ export const FITTING_MODULES = {
   },
   "Syndicate 800mm Steel Plates": {
     "massAddition": 1000000
+  },
+  "Civilian Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 10000,
+      "speedFactorPercent": -35,
+      "overloadRangeBonusPercent": 30
+    }
   },
   "Small Trimark Armor Pump I": {
     "agilityDrawbackPercent": 10
@@ -2353,6 +2683,13 @@ export const FITTING_MODULES = {
   },
   "Capital Shield Extender II": {
     "sigRadiusAdd": 1200
+  },
+  "Republic Fleet Stasis Webifier": {
+    "stasisWeb": {
+      "maxRange": 15000,
+      "speedFactorPercent": -50,
+      "overloadRangeBonusPercent": 30
+    }
   },
   "10000MN Afterburner I": {
     "propulsion": {

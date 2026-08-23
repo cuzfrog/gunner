@@ -116,6 +116,9 @@ const db: FittingDb = {
     "Tracking Speed Script": { trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
     "Optimal Range Script": { trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
   },
+  stasisWebs: {},
+  trackingDisruptors: {},
+  disruptionScripts: {},
   hullBonuses: {},
 };
 
@@ -145,6 +148,9 @@ const fullFittingDb: FittingDb = {
   turrets: TURRETS,
   charges: CHARGES,
   scripts: SCRIPTS,
+  stasisWebs: {},
+  trackingDisruptors: {},
+  disruptionScripts: {},
   hullBonuses: HULL_BONUSES,
 };
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies });
@@ -562,7 +568,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, hullBonuses: {} };
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, disruptionScripts: {}, hullBonuses: {} };
 }
 
 describe("FittingImportImpl.summarize", () => {

@@ -12,7 +12,16 @@ import type {
 import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
-import type { ChargeStats, FittingModuleStats, HullBonus, TurretScriptStats, TurretStats } from "./fittingDb";
+import type {
+  ChargeStats,
+  DisruptionScriptStats,
+  FittingModuleStats,
+  HullBonus,
+  StasisWebStats,
+  TrackingDisruptorStats,
+  TurretScriptStats,
+  TurretStats,
+} from "./fittingDb";
 import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
 
 export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
@@ -48,6 +57,9 @@ export interface FittingDb {
   readonly turrets: Readonly<Record<string, TurretStats>>;
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
+  readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
+  readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
+  readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
   readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
 }
 

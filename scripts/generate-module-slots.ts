@@ -20,6 +20,8 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Projectile Weapon": "high",
   "Propulsion Module": "mid",
   "Tracking Computer": "mid",
+  "Stasis Web": "mid",
+  "Weapon Disruptor": "mid",
   "Armor Plate": "low",
   "Inertial Stabilizer": "low",
   "Nanofiber Internal Structure": "low",

@@ -225,6 +225,10 @@ const MODULE_GROUPS = new Set([
 ]);
 
 const SCRIPT_GROUPS = new Set([907]);
+const EWAR_SCRIPT_GROUPS = new Set([909]);
+
+const STASIS_WEB_GROUP = 65;
+const WEAPON_DISRUPTOR_GROUP = 291;
 
 const TURRET_GROUPS = new Set([53, 55, 74]);
 
@@ -313,6 +317,8 @@ interface FittingModuleStats {
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
+  readonly stasisWeb?: StasisWebStats;
+  readonly trackingDisruptor?: TrackingDisruptorStats;
 }
 
 interface TurretStats {
@@ -333,6 +339,24 @@ interface TurretScriptStats {
   readonly trackingMultiplier: number;
   readonly optimalMultiplier: number;
   readonly falloffMultiplier: number;
+}
+
+export interface StasisWebStats {
+  readonly maxRange: number;
+  readonly speedFactorPercent: number;
+  readonly overloadRangeBonusPercent: number;
+}
+
+export interface TrackingDisruptorStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly disruptionPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+export interface DisruptionScriptStats {
+  readonly trackingDeltaBonus: number;
+  readonly rangeDeltaBonus: number;
 }
 
 function optionalNumber(value: number | undefined): number | undefined {
@@ -403,6 +427,35 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   return stats as FittingModuleStats;
 }
 
+export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {
+  const speedFactor = values.get("speedFactor");
+  const maxRange = values.get("maxRange");
+  if (speedFactor === undefined || maxRange === undefined) return undefined;
+  return {
+    maxRange,
+    speedFactorPercent: speedFactor,
+    overloadRangeBonusPercent: values.get("overloadRangeBonus") ?? 0,
+  };
+}
+
+export function buildTrackingDisruptorStats(values: Map<string, number>): TrackingDisruptorStats | undefined {
+  const disruptionPercent = values.get("trackingSpeedBonus");
+  if (disruptionPercent === undefined) return undefined;
+  return {
+    optimal: values.get("maxRange") ?? 0,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    disruptionPercent,
+    overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
+  };
+}
+
+export function buildDisruptionScriptStats(values: Map<string, number>): DisruptionScriptStats | undefined {
+  return {
+    trackingDeltaBonus: values.get("trackingSpeedBonusBonus") ?? 0,
+    rangeDeltaBonus: values.get("maxRangeBonusBonus") ?? 0,
+  };
+}
+
 function buildHullBonuses(attributeNames: Map<number, string>, typeDogma: SdeTypeDogma | undefined): readonly HullBonus[] {
   if (!typeDogma) return [];
   const values = buildAttributeValues(attributeNames, typeDogma);
@@ -456,6 +509,9 @@ async function main() {
   const turrets: Record<string, TurretStats> = {};
   const charges: Record<string, ChargeStats> = {};
   const scripts: Record<string, TurretScriptStats> = {};
+  const stasisWebs: Record<string, StasisWebStats> = {};
+  const trackingDisruptors: Record<string, TrackingDisruptorStats> = {};
+  const disruptionScripts: Record<string, DisruptionScriptStats> = {};
   const hullBonuses: Record<string, readonly HullBonus[]> = {};
 
   for (const type of Object.values(types)) {
@@ -512,6 +568,30 @@ async function main() {
       continue;
     }
 
+    if (EWAR_SCRIPT_GROUPS.has(type.groupID)) {
+      const stats = buildDisruptionScriptStats(values);
+      if (stats) disruptionScripts[type["typeName_en-us"]] = stats;
+      continue;
+    }
+
+    if (type.groupID === STASIS_WEB_GROUP) {
+      const stats = buildStasisWebStats(values);
+      if (stats) {
+        stasisWebs[type["typeName_en-us"]] = stats;
+        fittingModules[type["typeName_en-us"]] = { stasisWeb: stats };
+      }
+      continue;
+    }
+
+    if (type.groupID === WEAPON_DISRUPTOR_GROUP) {
+      const stats = buildTrackingDisruptorStats(values);
+      if (stats) {
+        trackingDisruptors[type["typeName_en-us"]] = stats;
+        fittingModules[type["typeName_en-us"]] = { trackingDisruptor: stats };
+      }
+      continue;
+    }
+
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
@@ -546,6 +626,8 @@ export interface FittingModuleStats {
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
+  readonly stasisWeb?: StasisWebStats;
+  readonly trackingDisruptor?: TrackingDisruptorStats;
 }
 
 export interface TurretStats {
@@ -577,9 +659,33 @@ export interface TurretScriptStats {
   readonly falloffMultiplier: number;
 }
 
+export interface StasisWebStats {
+  readonly maxRange: number;
+  readonly speedFactorPercent: number;
+  readonly overloadRangeBonusPercent: number;
+}
+
+export interface TrackingDisruptorStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly disruptionPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+export interface DisruptionScriptStats {
+  readonly trackingDeltaBonus: number;
+  readonly rangeDeltaBonus: number;
+}
+
 `;
 
   const scriptDefinitions = `export const SCRIPTS = ${JSON.stringify(scripts, null, 2)} as unknown as Readonly<Record<string, TurretScriptStats>>;
+
+export const STASIS_WEBS = ${JSON.stringify(stasisWebs, null, 2)} as unknown as Readonly<Record<string, StasisWebStats>>;
+
+export const TRACKING_DISRUPTORS = ${JSON.stringify(trackingDisruptors, null, 2)} as unknown as Readonly<Record<string, TrackingDisruptorStats>>;
+
+export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts, null, 2)} as unknown as Readonly<Record<string, DisruptionScriptStats>>;
 
 `;
 
@@ -600,7 +706,7 @@ export interface TurretScriptStats {
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   console.log(
-    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} scripts, ${Object.keys(hullBonuses).length} hull bonus sets to ${OUT_FILE}`,
+    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets to ${OUT_FILE}`,
   );
 }
 
