@@ -25,6 +25,7 @@ function main(): void {
   });
   registerShipsModule(container);
   registerFittingModule(container);
+  // sim before ui: controls wiring resolves sessionCodec eagerly, which needs hitChance.
   registerSimModule(container);
   registerUiModule(container);
   container.register({ simConfig: asValue(container.cradle.controls.getConfig()) });

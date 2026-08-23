@@ -20,5 +20,5 @@ type UiCradle = ControlsCradle & AppstateCradle & { readonly renderer: Renderer;
 export type AppCradle = RuntimeValues & SimCradle & FittingCradle & ShipsCradle & AppstateCradle & AppModuleCradle & UiCradle;
 
 // PROXY injection: classes destructure the cradle by property name, which
-// survives bundler minification (CLASSIC parses mangled parameter names).
+// survives bundler minification (CLASSIC mode parses constructor parameter names).
 export const container: AwilixContainer<AppCradle> = createContainer<AppCradle>({ injectionMode: InjectionMode.PROXY });
