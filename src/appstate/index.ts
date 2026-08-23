@@ -15,5 +15,6 @@ export type { ClipboardProvider, LocationProvider, StorageProvider } from "./pro
 export { ClipboardUnavailableError } from "./providers";
 export type { SettingsStore } from "./settingsStore";
 export type { SavedFitting, SavedFittings } from "./savedFittings";
+export type { AppstateCradle } from "./cradle";
 export { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
 export { registerAppstateModule } from "./module";

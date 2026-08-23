@@ -4,7 +4,7 @@ import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../ap
 import type { PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { SidePanel } from "../sidePanel";
+import type { Side, SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -25,7 +25,11 @@ interface ImportControllerDeps {
   readonly onProfileTextLoaded: (settings: UserSettings) => void;
 }
 
-export function registerImportModule(cradle: AwilixContainer<object>): void {
+interface ImportCradle {
+  readonly createImportController: (deps: ImportControllerDeps) => ImportController;
+}
+
+export function registerImportModule<T extends ImportCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     createImportController: asFunction(() => (deps: ImportControllerDeps): ImportController => new ImportControllerImpl(deps)),
   });

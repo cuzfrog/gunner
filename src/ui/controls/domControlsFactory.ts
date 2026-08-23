@@ -29,6 +29,7 @@ import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost }
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretControllerDeps, TurretEls, TurretOverrides } from "./turret";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
+import type { ControlsCradle } from "./cradle";
 
 type CreateChoiceGroup = (group: HTMLElement, select: HTMLSelectElement, values: readonly string[]) => ChoiceGroup;
 type CreateEngagementReadout = (readoutEls: ReadoutEls) => EngagementReadout;
@@ -62,18 +63,7 @@ type CreateFittingPopupController = (deps: {
   panel: SidePanel; applyFitting: (text: string) => ImportedFitting | undefined;
   previews: FittingPreviewManager; events: UiEvents;
 }) => FittingPopupController;
-type CreateImportController = (deps: {
-  clipboard: ClipboardProvider; fittingImport: FittingImport; savedFittings: SavedFittings; popupGroup: PopupGroup;
-  els: ImportEls; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController;
-  preferences: PreferencesController; profileController: ProfileController; getSettings: () => UserSettings;
-  onConfigPersisted: () => void; onProfileTextLoaded: (settings: UserSettings) => void;
-}) => ImportController;
-type CreateSessionCodec = (deps: {
-  els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
-  preferences: PreferencesController; profileController: ProfileController; i18n: I18n;
-  chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: DomControlsHost; trackingInput: TrackingInput;
-}) => SessionCodec;
+
 type CreateEventRouter = (deps: {
   els: Els; preferences: PreferencesController; profile: ProfileController; import: ImportController;
   attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; trackingInput: TrackingInput; popupGroup: PopupGroup;
@@ -85,27 +75,27 @@ type CreateSidePanel = (deps: SidePanelDeps) => SidePanel;
 type CreateSidePanelEls = (els: Els, side: Side) => SidePanelElements;
 
 export class DomControlsFactory {
-  private readonly cradle: AwilixContainer<object>;
+  private readonly cradle: AwilixContainer<ControlsCradle>;
 
-  constructor(cradle: AwilixContainer<object>) {
+  constructor(cradle: AwilixContainer<ControlsCradle>) {
     this.cradle = cradle;
   }
 
   buildParts(deps: DomControlsDeps, host: DomControlsHost): DomControlsParts {
-    const els = this.cradle.resolve<Els>("els");
-    const popupGroup = this.cradle.resolve<PopupGroup>("popupGroup");
-    const hintRotator = this.cradle.resolve<CreateHintRotator>("createHintRotator")({
-      element: this.cradle.resolve<HTMLElement>("hintElement"),
+    const els = this.cradle.resolve("els");
+    const popupGroup = this.cradle.resolve("popupGroup");
+    const hintRotator = this.cradle.resolve("createHintRotator")({
+      element: this.cradle.resolve("hintElement"),
       i18n: deps.i18n,
       timer: deps.timer,
       events: deps.events,
     });
-    const hullDatalist = this.cradle.resolve<CreateHullDatalist>("createHullDatalist")(els, deps.presetFittings, deps.events);
-    const engagementReadout = this.cradle.resolve<CreateEngagementReadout>("createEngagementReadout")(this.readoutEls());
-    const sigResChoice = this.cradle.resolve<CreateChoiceGroup>("createChoiceGroup")(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
-    const trackingInput = this.cradle.resolve<TrackingInput>("trackingInput");
-    const turretOverrides = this.cradle.resolve<TurretOverrides>("turretOverrides");
-    const turretController = this.cradle.resolve<CreateTurretController>("createTurretController")({
+    const hullDatalist = this.cradle.resolve("createHullDatalist")(els, deps.presetFittings, deps.events);
+    const engagementReadout = this.cradle.resolve("createEngagementReadout")(this.readoutEls());
+    const sigResChoice = this.cradle.resolve("createChoiceGroup")(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
+    const trackingInput = this.cradle.resolve("trackingInput");
+    const turretOverrides = this.cradle.resolve("turretOverrides");
+    const turretController = this.cradle.resolve("createTurretController")({
       els: collectTurretEls(els),
       chargeCatalog: deps.chargeCatalog,
       gunFamilies: deps.gunFamilies,
@@ -117,17 +107,17 @@ export class DomControlsFactory {
       events: deps.events,
     });
     const sidePanelHost: SidePanelHost = { persistConfigChange: (notify = true) => host.persistConfigChange(notify) };
-    const attackerSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
+    const attackerSide = this.cradle.resolve("createSidePanel")(this.sidePanelDeps({
       side: "attacker", host: sidePanelHost, popupGroup, els,
       i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer, events: deps.events,
       turret: turretController, turretOverrides,
     }));
-    const targetSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
+    const targetSide = this.cradle.resolve("createSidePanel")(this.sidePanelDeps({
       side: "target", host: sidePanelHost, popupGroup, els,
       i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer, events: deps.events,
       turret: undefined, turretOverrides: undefined,
     }));
-    const preferencesController = this.cradle.resolve<CreatePreferencesController>("createPreferencesController")({
+    const preferencesController = this.cradle.resolve("createPreferencesController")({
       els: this.preferencesEls(els),
       i18n: deps.i18n,
       settingsStore: deps.settingsStore,
@@ -135,7 +125,7 @@ export class DomControlsFactory {
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       events: deps.events,
     });
-    const profileController = this.cradle.resolve<CreateProfileController>("createProfileController")({
+    const profileController = this.cradle.resolve("createProfileController")({
       els: this.profileEls(els),
       settingsStore: deps.settingsStore,
       timer: deps.timer,
@@ -143,7 +133,7 @@ export class DomControlsFactory {
       onLoaded: (name) => host.onProfileLoaded(name),
       events: deps.events,
     });
-    const sessionCodec = this.cradle.resolve<CreateSessionCodec>("createSessionCodec")({
+    const sessionCodec = this.cradle.resolve("createSessionCodec")({
       els, attackerSide, targetSide, turret: turretController, turretOverrides,
       preferences: preferencesController, profileController, i18n: deps.i18n,
       chargeCatalog: deps.chargeCatalog, sigResChoice, hintRotator,
@@ -151,7 +141,7 @@ export class DomControlsFactory {
       sessionControl: host, trackingInput,
     });
     profileController.setSnapshotSource(() => profileSettingsOf(sessionCodec.capture()));
-    const importController = this.cradle.resolve<CreateImportController>("createImportController")({
+    const importController = this.cradle.resolve("createImportController")({
       clipboard: deps.clipboard,
       fittingImport: deps.fittingImport,
       savedFittings: deps.savedFittings,
@@ -168,13 +158,13 @@ export class DomControlsFactory {
     });
     attackerSide.setImporter(this.sideImporterFor("attacker", importController, deps.savedFittings));
     targetSide.setImporter(this.sideImporterFor("target", importController, deps.savedFittings));
-    const attackerPreview = this.cradle.resolve<CreateFittingPreview>("createFittingPreview")({
+    const attackerPreview = this.cradle.resolve("createFittingPreview")({
       container: els.attackerFittingPreview, i18n: deps.i18n, imageCatalog: deps.imageCatalog, viewport: () => window,
     });
-    const targetPreview = this.cradle.resolve<CreateFittingPreview>("createFittingPreview")({
+    const targetPreview = this.cradle.resolve("createFittingPreview")({
       container: els.targetFittingPreview, i18n: deps.i18n, imageCatalog: deps.imageCatalog, viewport: () => window,
     });
-    const previewManager = this.cradle.resolve<CreateFittingPreviewManager>("createFittingPreviewManager")({
+    const previewManager = this.cradle.resolve("createFittingPreviewManager")({
       fittingImport: deps.fittingImport,
       imageCatalog: deps.imageCatalog,
       i18n: deps.i18n,
@@ -195,21 +185,21 @@ export class DomControlsFactory {
       previews: previewManager,
       events: deps.events,
     };
-    const attackerFittingPopup = this.cradle.resolve<CreateFittingPopupController>("createFittingPopupController")({
+    const attackerFittingPopup = this.cradle.resolve("createFittingPopupController")({
       side: "attacker",
       ...fittingPopupBase,
       els: collectFittingPopupEls(els, "attacker"),
       panel: attackerSide,
       applyFitting: (text) => importController.importEftFitting("attacker", text, true),
     });
-    const targetFittingPopup = this.cradle.resolve<CreateFittingPopupController>("createFittingPopupController")({
+    const targetFittingPopup = this.cradle.resolve("createFittingPopupController")({
       side: "target",
       ...fittingPopupBase,
       els: collectFittingPopupEls(els, "target"),
       panel: targetSide,
       applyFitting: (text) => importController.importEftFitting("target", text, true),
     });
-    const eventRouter = this.cradle.resolve<CreateEventRouter>("createEventRouter")({
+    const eventRouter = this.cradle.resolve("createEventRouter")({
       els,
       preferences: preferencesController,
       profile: profileController,
@@ -287,7 +277,7 @@ export class DomControlsFactory {
   }): SidePanelDeps {
     return {
       ...base,
-      els: this.cradle.resolve<CreateSidePanelEls>("createSidePanelEls")(base.els, base.side),
+      els: this.cradle.resolve("createSidePanelEls")(base.els, base.side),
     };
   }
 }

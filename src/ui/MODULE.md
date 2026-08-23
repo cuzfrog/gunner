@@ -12,7 +12,9 @@ no-new-exports:
   - events.ts
   - events.test.ts
   - index.ts
+  - cradle.ts
 ---
+
 
 
 # ui

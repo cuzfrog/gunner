@@ -1,24 +1,27 @@
 ---
 no-new-exports:
   - effectiveStats.test.ts
-  # - effectiveStats.ts  # shared stat engine exposes fittedStats/maxSpeedForFittedMass/alignTime
+  - cradle.ts
+  - effectiveStats.ts
+  - faction-i18n.ts
   - fitting.test.ts
   - fitting.ts
-  - faction-i18n.ts
   - hull-types-i18n.ts
-  # - index.ts  # controlled public boundary re-exports cross-boundary FittedHull/PropulsionStats/PropulsionKind types
-  # - module.ts
+  - index.ts
+  - module.ts
   - profiles.ts
   - propulsion.test.ts
   - propulsion.ts
   - ship-names-i18n.ts
+  - shipNames.test.ts
   - shipNames.ts
   - ships.test.ts
-  # - ships.ts  # Ships interface exposes fittedStats/maxSpeedForFittedMass/alignTime
+  - ships.ts
   - tiers.test.ts
   - tiers.ts
-  # - types.ts  # gains FittedHull and PropulsionStats cross-boundary types
+  - types.ts
 ---
+
 
 
 

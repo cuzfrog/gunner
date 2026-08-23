@@ -13,7 +13,14 @@ interface HintRotatorDeps {
   readonly events: UiEvents;
 }
 
-export function registerHintsModule(cradle: AwilixContainer<object>): void {
+interface HintsCradle {
+  readonly i18n: I18n;
+  readonly timer: Timer;
+  readonly uiEvents: UiEvents;
+  readonly createHintRotator: (deps: HintRotatorDeps) => HintRotator;
+}
+
+export function registerHintsModule<T extends HintsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     createHintRotator: asFunction(() => (deps: HintRotatorDeps): HintRotator => new HintRotatorImpl({
       ...deps,

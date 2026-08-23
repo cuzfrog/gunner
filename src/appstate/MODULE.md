@@ -1,10 +1,11 @@
 ---
 no-new-exports:
   - fittingBasis.ts
+  - cradle.ts
   - index.ts
   - language.ts
-  - localSettingsStore.testSupport.ts
   - localSettingsStore.test.ts
+  - localSettingsStore.testSupport.ts
   - localSettingsStore.ts
   - module.ts
   - providers.ts
@@ -19,6 +20,7 @@ no-new-exports:
   - validators.test.ts
   - validators.ts
 ---
+
 
 # appstate
 

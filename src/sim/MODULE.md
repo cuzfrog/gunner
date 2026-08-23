@@ -4,10 +4,11 @@ no-new-exports:
   - autopilot-dynamics.test.ts
   - autopilot.ts
   - dynamics.test.ts
-  - dynamics.ts  # no cross-boundary exports; timeConstant/integrateShip are module-internal
+  - dynamics.ts
   - hitChance.test.ts
   - hitChance.ts
-  - index.ts  # public sim boundary; no alignTime re-export
+  - index.ts
+  - cradle.ts
   - kinematics.test.ts
   - kinematics.ts
   - module.ts
@@ -22,8 +23,9 @@ no-new-exports:
 
 
 
+
 # sim
 
-Engagement simulation domain: ship reactive and predictive autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper.
+Engagement simulation domain: ship reactive and predictive autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper. `dynamics.ts` is module-internal: its `timeConstant` and `integrateShip` helpers have no cross-boundary exports.
 
 DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the reactive autopilot, `kinematics`, `hitChance` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.

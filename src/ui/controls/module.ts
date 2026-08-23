@@ -28,6 +28,7 @@ import { registerPopupModule } from "./popup";
 import { registerSessionModule } from "./session";
 import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
+import type { ControlsCradle } from "./cradle";
 
 interface PreferencesControllerDeps {
   els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
@@ -39,7 +40,7 @@ interface ProfileControllerDeps {
   onLoaded: (name: string) => void; events: UiEvents;
 }
 
-export function registerControlsModule(cradle: AwilixContainer<object>): void {
+export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   registerHintsModule(cradle);
   registerImportModule(cradle);
   registerPopupModule(cradle);
@@ -53,7 +54,7 @@ export function registerControlsModule(cradle: AwilixContainer<object>): void {
     domControlsDeps: asFunction(({
       hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies,
       presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog, uiEvents,
-    }): DomControlsDeps => ({
+    }: ControlsCradle): DomControlsDeps => ({
       hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies,
       presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog, events: uiEvents,
     })).singleton(),

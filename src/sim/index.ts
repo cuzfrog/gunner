@@ -17,4 +17,5 @@ export type {
 } from "./types";
 export { SIG_RESOLUTIONS } from "./types";
 export { Vec2 } from "./vec2";
+export type { SimCradle } from "./cradle";
 export { registerSimModule } from "./module";

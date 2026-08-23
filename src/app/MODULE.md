@@ -2,9 +2,11 @@
 no-new-exports:
   - app.test.ts
   - app.ts
+  - cradle.ts
   - index.ts
   - module.ts
 ---
+
 
 
 # app

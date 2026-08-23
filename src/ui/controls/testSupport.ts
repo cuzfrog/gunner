@@ -1,4 +1,4 @@
-import { asClass, createContainer, InjectionMode, type AwilixContainer } from "awilix";
+import { asClass, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
@@ -30,6 +30,7 @@ import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { ControlsCradle } from "./cradle";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
@@ -108,12 +109,43 @@ interface BuildDomControlsOptions {
   savedFittings?: Partial<SavedFittings>;
 }
 
-function buildControlsCradle(document: Document): AwilixContainer<object> {
+function mockI18n(): I18n {
+  return vi.mocked<I18n>({
+    current: vi.fn((): Language => "en"),
+    setLanguage: vi.fn(),
+    t: vi.fn((key) => key),
+    translateDocument: vi.fn(),
+  });
+}
+
+function mockImageCatalog(): ImageCatalog {
+  return vi.mocked<ImageCatalog>({
+    shipImageUrl: vi.fn(),
+    itemIconUrl: vi.fn(() => undefined),
+    droneIconUrl: vi.fn(),
+  });
+}
+
+function buildControlsCradle(document: Document): AwilixContainer<ControlsCradle> {
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
-  const cradle = createContainer({ injectionMode: InjectionMode.PROXY });
+  const cradle = createContainer<ControlsCradle>({ injectionMode: InjectionMode.PROXY });
   registerControlsModule(cradle);
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
+  cradle.register({
+    i18n: asValue(mockI18n()),
+    imageCatalog: asValue(mockImageCatalog()),
+    hitChance: asValue(mockHitChance()),
+    ships: asValue(mockShips()),
+    settingsStore: asValue(mockSettingsStore()),
+    fittingImport: asValue(mockFittingImport()),
+    gunFamilies: asValue(mockGunFamilies()),
+    presetFittings: asValue(mockPresetFittings()),
+    savedFittings: asValue(mockSavedFittings()),
+    clipboard: asValue(mockClipboard()),
+    timer: asValue(mockTimer()),
+    chargeCatalog: asValue(mockChargeCatalog()),
+  });
   return cradle;
 }
 
@@ -142,8 +174,8 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const clipboard = mockClipboard();
   const presetFittings = vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings });
   const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings });
-  const domControlsFactory = cradle.resolve<DomControlsFactory>("domControlsFactory");
-  const events = cradle.resolve<UiEvents>("uiEvents");
+  const domControlsFactory = cradle.resolve("domControlsFactory");
+  const events = cradle.resolve("uiEvents");
   const controls = new DomControls({
     domControlsDeps: {
       hitChance,
@@ -182,7 +214,7 @@ export function buildSidePanel(
 ) {
   const document = fakeDocument();
   const cradle = buildControlsCradle(document);
-  const els = cradle.resolve<(els: Els, side: Side) => SidePanelElements>("createSidePanelEls")(createControlsEls(), side);
+  const els = cradle.resolve("createSidePanelEls")(createControlsEls(), side);
   const host: SidePanelHost = { persistConfigChange: vi.fn() };
   const turretOverrides: TurretOverrides = new StubTurretOverrides();
   const turret: TurretController = {
@@ -220,8 +252,8 @@ export function buildSidePanel(
     onPointerDown: vi.fn(),
     onKeyDown: vi.fn(),
   });
-  const events = cradle.resolve<UiEvents>("uiEvents");
-  const panel = cradle.resolve<(deps: SidePanelDeps) => SidePanel>("createSidePanel")({
+  const events = cradle.resolve("uiEvents");
+  const panel = cradle.resolve("createSidePanel")({
     side,
     host,
     popupGroup,

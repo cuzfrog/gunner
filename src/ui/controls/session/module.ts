@@ -8,7 +8,7 @@ import type { Els } from "../elementsContract";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { HintRotator } from "../hints";
-import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "../popup";
+import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
@@ -37,7 +37,13 @@ interface EventRouterDeps {
   import: ImportController;
 }
 
-export function registerSessionModule(cradle: AwilixContainer<object>): void {
+interface SessionCradle {
+  readonly createHullDatalist: (els: Els, presetFittings: PresetFittings, events: UiEvents) => HullDatalist;
+  readonly createSessionCodec: (deps: SessionCodecDeps) => SessionCodec;
+  readonly createEventRouter: (deps: EventRouterDeps) => EventRouter;
+}
+
+export function registerSessionModule<T extends SessionCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     createHullDatalist: asFunction(() => (els: Els, presetFittings: PresetFittings, events: UiEvents): HullDatalist => new HullDatalistImpl(els, presetFittings, events)),
     createSessionCodec: asFunction(() => (deps: SessionCodecDeps): SessionCodec => new SessionCodecImpl(deps)),

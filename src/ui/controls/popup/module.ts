@@ -48,7 +48,14 @@ interface FittingPopupControllerDeps {
   readonly events: UiEvents;
 }
 
-export function registerPopupModule(cradle: AwilixContainer<object>): void {
+interface PopupCradle {
+  readonly popupGroup: PopupGroup;
+  readonly createFittingPreview: (deps: FittingPreviewDeps) => FittingPreview;
+  readonly createFittingPreviewManager: (deps: FittingPreviewManagerDeps) => FittingPreviewManager;
+  readonly createFittingPopupController: (deps: FittingPopupControllerDeps) => FittingPopupController;
+}
+
+export function registerPopupModule<T extends PopupCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     popupGroup: asClass(PopupGroupImpl).singleton(),
     createFittingPreview: asFunction(() => (deps: FittingPreviewDeps): FittingPreview => new DomFittingPreview(deps)),
