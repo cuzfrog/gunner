@@ -23,11 +23,12 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       hitChance: proxy.hitChance,
       trackingInput: proxy.trackingInput,
     })).singleton(),
-    eventRouter: asFunction(({ els, preferencesController, profileController, importController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup }) => new EventRouter({
+    eventRouter: asFunction(({ els, preferencesController, profileController, importController, shareController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup }) => new EventRouter({
       els,
       preferences: preferencesController,
       profile: profileController,
       import: importController,
+      share: shareController,
       attackerSide,
       targetSide,
       turret: turretController,

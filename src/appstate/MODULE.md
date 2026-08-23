@@ -1,5 +1,6 @@
 ---
 no-new-exports:
+  - defaultPreferences.ts
   - fittingBasis.ts
   - cradle.ts
   - index.ts

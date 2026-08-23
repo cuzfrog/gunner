@@ -1,6 +1,7 @@
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Ships } from "../ships";
 import { PROPULSION_NONE, USER_SETTINGS_VERSION, type ProfileSettings, type PropulsionSelection, type UserSettings } from "./userSettings";
+import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
 import {
@@ -9,6 +10,7 @@ import {
   isNonNegative,
   isOptionalBoolean,
   isOptionalFittedHullSummary,
+  isFiniteNumber,
   isOptionalFittingText,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
@@ -39,11 +41,16 @@ export class SettingsParser {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!this.isUserSettings(parsed)) return null;
-      parsed.version = USER_SETTINGS_VERSION;
-      if (parsed.attackerAmmo === undefined) {
-        parsed.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+      const withDefaults = parsed as Partial<UserSettings>;
+      withDefaults.version = USER_SETTINGS_VERSION;
+      if (withDefaults.attackerAmmo === undefined) {
+        withDefaults.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
       }
-      return parsed;
+      withDefaults.language ??= DEFAULT_PREFERENCES.language;
+      withDefaults.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
+      withDefaults.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
+      withDefaults.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
+      return withDefaults as UserSettings;
     } catch {
       return null;
     }
@@ -128,7 +135,12 @@ export class SettingsParser {
   private isUserSettings(value: unknown): value is UserSettings {
     if (!this.isProfileSettings(value)) return false;
     const s = value as Record<string, unknown>;
-    return isLanguage(s.language) && (s.trackingUnit === "rad" || s.trackingUnit === "score");
+    return (
+      (s.language === undefined || isLanguage(s.language)) &&
+      (s.trackingUnit === undefined || s.trackingUnit === "rad" || s.trackingUnit === "score") &&
+      (s.simSpeed === undefined || isPositive(s.simSpeed)) &&
+      (s.gridBrightness === undefined || isFiniteNumber(s.gridBrightness))
+    );
   }
   private isOptionalPropulsionSelection(value: unknown): value is PropulsionSelection | undefined {
     return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;

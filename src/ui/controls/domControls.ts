@@ -20,6 +20,7 @@ import type { ChoiceGroup } from "./choiceGroup";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turret";
 import type { ImportController } from "./import";
+import type { ShareController } from "./share";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 
@@ -37,6 +38,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   turretController: TurretController;
   sessionCodec: SessionCodec;
   importController: ImportController;
+  shareController: ShareController;
   previewManager: FittingPreviewManager;
   attackerFittingPopup: FittingPopupController;
   targetFittingPopup: FittingPopupController;
@@ -58,6 +60,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly turretController: TurretController;
   private readonly sessionCodec: SessionCodec;
   private readonly importController: ImportController;
+  private readonly shareController: ShareController;
   private readonly previewManager: FittingPreviewManager;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
@@ -80,6 +83,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.turretController = all.turretController;
     this.sessionCodec = all.sessionCodec;
     this.importController = all.importController;
+    this.shareController = all.shareController;
     this.previewManager = all.previewManager;
     this.attackerFittingPopup = all.attackerFittingPopup;
     this.targetFittingPopup = all.targetFittingPopup;
@@ -92,6 +96,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.attackerFittingPopup.popup);
     this.popupGroup.register(this.targetFittingPopup.popup);
     this.popupGroup.register(this.importController.popup);
+    this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretController.popup);
     this.hullDatalist.populate();
     this.attackerSide.sections.skill.renderSkillOptions();

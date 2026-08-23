@@ -11,6 +11,8 @@ import {
 } from "./userSettings";
 export type { UserSettings, DisplayPreferences, ProfileSettings } from "./userSettings";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
+import { DEFAULT_PREFERENCES } from "./defaultPreferences";
+export { DEFAULT_PREFERENCES } from "./defaultPreferences";
 export function base64Url(value: unknown): string { return Buffer.from(JSON.stringify(value)).toString("base64url"); }
 export function urlFor(value: unknown): string { return `http://localhost/?c=${base64Url(value)}`; }
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -65,7 +67,6 @@ export function profileFrom(settings: UserSettings): ProfileSettings {
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);
-export const DEFAULT_PREFERENCES: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 };
 export const FITTED_HULL: FittedHull = { mass: 1_500_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
 export const FITTED_PROPULSION = {
   thrust: 1_500_000,

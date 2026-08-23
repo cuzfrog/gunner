@@ -93,6 +93,9 @@ export interface Els {
   readonly profileSelect: HTMLSelectElement;
   readonly profileDelete: HTMLButtonElement;
   readonly shareLink: HTMLButtonElement;
+  readonly sharePopup: HTMLElement;
+  readonly shareCopyUrl: HTMLButtonElement;
+  readonly shareCopyText: HTMLButtonElement;
   readonly importProfile: HTMLButtonElement;
   readonly importSidePopup: HTMLElement;
   readonly importSideAttacker: HTMLButtonElement;

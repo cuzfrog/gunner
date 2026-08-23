@@ -4,6 +4,7 @@ import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "
 import type { ImportController } from "../import";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
+import type { ShareController } from "../share";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
@@ -22,6 +23,7 @@ export class EventRouter {
   private readonly preferences: PreferencesController;
   private readonly profile: ProfileController;
   private readonly importController: ImportController;
+  private readonly shareController: ShareController;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly turret: TurretController;
@@ -37,6 +39,7 @@ export class EventRouter {
     preferences: PreferencesController;
     profile: ProfileController;
     import: ImportController;
+    share: ShareController;
     attackerSide: SidePanel;
     targetSide: SidePanel;
     turret: TurretController;
@@ -50,6 +53,7 @@ export class EventRouter {
     this.preferences = deps.preferences;
     this.profile = deps.profile;
     this.importController = deps.import;
+    this.shareController = deps.share;
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
     this.turret = deps.turret;
@@ -79,7 +83,9 @@ export class EventRouter {
     this.els.profileSave.addEventListener("click", () => this.profile.saveProfile());
     this.els.profileSelect.addEventListener("change", () => this.profile.loadProfile());
     this.els.profileDelete.addEventListener("click", () => this.profile.deleteProfile());
-    this.els.shareLink.addEventListener("click", () => void this.importController.copyProfile());
+    this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.shareController.popup));
+    this.els.shareCopyUrl.addEventListener("click", () => void this.shareController.onCopyUrlClicked());
+    this.els.shareCopyText.addEventListener("click", () => void this.shareController.onCopyTextClicked());
     this.els.importProfile.addEventListener("click", () => void this.importController.importProfileClicked());
     this.els.importSideAttacker.addEventListener("click", () => void this.importController.onImportSideClick("attacker"));
     this.els.importSideTarget.addEventListener("click", () => void this.importController.onImportSideClick("target"));

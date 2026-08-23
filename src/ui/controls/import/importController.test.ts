@@ -123,13 +123,4 @@ describe("ImportController", () => {
     expect(attackerPanel.fittingText).toBe(text);
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
-
-  test("copyProfile writes the serialized current settings to the clipboard", async () => {
-    const { controller, clipboard, profileController, getSettings } = buildImportController(globalThis.document);
-    await controller.copyProfile();
-    const [text] = clipboard.writeText.mock.calls[0];
-    expect(text).toContain("# gunner v1");
-    expect(getSettings).toHaveBeenCalled();
-    expect(profileController.showStatus).toHaveBeenCalledWith("status.copied");
-  });
 });

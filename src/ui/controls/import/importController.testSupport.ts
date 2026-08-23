@@ -1,26 +1,12 @@
 import type { FittingImport } from "../../../fitting";
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
+import { serializeProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
-import type { SessionCodec } from "../session";
 import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
-
-class FakeSessionCodec implements SessionCodec {
-  capture: () => UserSettings;
-  getInitialDistance = vi.fn(() => 5000);
-  restore = vi.fn();
-  fromProfile = vi.fn();
-  restoreStartup = vi.fn();
-  setSessionControl = vi.fn();
-
-  constructor(capture: () => UserSettings) {
-    this.capture = capture;
-  }
-}
 
 class FakePopupGroup implements PopupGroup {
   register(): void {}
@@ -34,7 +20,7 @@ class FakePopupGroup implements PopupGroup {
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
-  version: USER_SETTINGS_VERSION,
+  version: 6,
   tracking: 0.32,
   trackingUnit: "rad",
   sigRes: "S",
@@ -59,7 +45,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
 
 export function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
   return serializeProfile({
-    version: USER_SETTINGS_VERSION,
+    version: 6,
     tracking: 0.32,
     sigRes: "S",
     optimal: 5000,
@@ -133,8 +119,6 @@ export function buildImportController(document: Document) {
   const profileController = { showStatus: vi.fn() };
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
-  const getSettings = vi.fn(() => DEFAULT_USER_SETTINGS);
-  const sessionCodec = new FakeSessionCodec(getSettings);
   const popupGroup: PopupGroup = new FakePopupGroup();
   const controller = new ImportControllerImpl({
     clipboard,
@@ -153,11 +137,10 @@ export function buildImportController(document: Document) {
     preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,
   });
-  controller.setSessionCodec(sessionCodec);
   controller.setOnConfigPersisted(onConfigPersisted);
   controller.setOnProfileTextLoaded(onProfileTextLoaded);
   return {
     controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret, preferences,
-    profileController, onConfigPersisted, onProfileTextLoaded, getSettings,
+    profileController, onConfigPersisted, onProfileTextLoaded,
   };
 }

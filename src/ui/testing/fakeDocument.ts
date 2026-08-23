@@ -3,7 +3,7 @@ import { FakeElement } from "./fakeElement";
 const SELECT_IDS = new Set(["sigRes", "attacker-mode", "target-mode", "attacker-skills", "target-skills", "attacker-propulsion", "target-propulsion", "sim-speed", "profile-select"]);
 const TEXTAREA_IDS = new Set(["attacker-paste-input", "target-paste-input"]);
 const IMAGE_IDS = new Set(["attacker-ship-image", "target-ship-image", "attacker-ammo-summary-icon"]);
-const BUTTON_IDS = new Set(["play", "reset", "profile-save", "profile-delete", "share-link", "import-profile", "import-side-attacker", "import-side-target", "attacker-import-fitting", "target-import-fitting", "attacker-fitting-trigger", "attacker-fitting-eye", "target-fitting-trigger", "target-fitting-eye", "attacker-ammo-trigger", "attacker-ammo-expand", "attacker-propulsion-gear", "target-propulsion-gear", "attacker-skill-trigger", "target-skill-trigger", "attacker-overload-button", "target-overload-button", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja"]);
+const BUTTON_IDS = new Set(["play", "reset", "profile-save", "profile-delete", "share-link", "share-copy-url", "share-copy-text", "import-profile", "import-side-attacker", "import-side-target", "attacker-import-fitting", "target-import-fitting", "attacker-fitting-trigger", "attacker-fitting-eye", "target-fitting-trigger", "target-fitting-eye", "attacker-ammo-trigger", "attacker-ammo-expand", "attacker-propulsion-gear", "target-propulsion-gear", "attacker-skill-trigger", "target-skill-trigger", "attacker-overload-button", "target-overload-button", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja"]);
 
 function tagForId(id: string): string {
   if (SELECT_IDS.has(id)) return "SELECT";

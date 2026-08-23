@@ -18,6 +18,12 @@ no-new-exports:
   - import/importControllerContract.ts
   - import/module.ts
   - import/profileTextImporter.ts
+  - share/index.ts
+  - share/module.ts
+  - share/shareController.ts
+  - share/shareController.test.ts
+  - share/shareControllerContract.ts
+  - share/MODULE.md
   - module.ts
   - popup/fittingPopupController.ts
   - popup/fittingPopupEls.ts
@@ -77,6 +83,6 @@ no-new-exports:
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `hints`, and `sidePanel`. `DomControls` exposes the `Controls` facade. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, and `registerControlsModule`. Each sub-module owns its implementation and registers it through its own `module.ts`; the root `module.ts` composes the full graph declaratively in the DI container.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, and `sidePanel`. `DomControls` exposes the `Controls` facade. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, and `registerControlsModule`. Each sub-module owns its implementation and registers it through its own `module.ts`; the root `module.ts` composes the full graph declaratively in the DI container.
 
-Construction order in `module.ts` is acyclic and registration-driven: value leaves (`els`, `popupGroup`, `hullDatalist`, `hintRotator`, `readout`, `sigResChoice`, `trackingInput`) → `turretController` (with its own `TurretOverrides` singleton) → `attackerSide`/`targetSide` → `preferencesController`/`profileController` → `sessionCodec` → `importController` → setter-injected reverse edges (`SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, `ProfileController.setSnapshotSource`, `EventRouter.setHost`) → `previewManager`/`fittingPopup` → `eventRouter`.
+Construction order in `module.ts` is acyclic and registration-driven: value leaves (`els`, `popupGroup`, `hullDatalist`, `hintRotator`, `readout`, `sigResChoice`, `trackingInput`) → `turretController` (with its own `TurretOverrides` singleton) → `attackerSide`/`targetSide` → `preferencesController`/`profileController` → `sessionCodec` → `importController`/`shareController` → setter-injected reverse edges (`SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, `ProfileController.setSnapshotSource`, `EventRouter.setHost`) → `previewManager`/`fittingPopup` → `eventRouter`.

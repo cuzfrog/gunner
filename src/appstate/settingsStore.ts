@@ -7,7 +7,7 @@ export interface SettingsStore {
   loadProfile(name: string): ProfileSettings | null;
   deleteProfile(name: string): void;
   selectProfile(name: string): void;
-  encodeUrl(settings: UserSettings): string;
+  encodeUrl(settings: ProfileSettings): string;
   loadPreferences(): DisplayPreferences;
   savePreferences(preferences: DisplayPreferences): void;
 }

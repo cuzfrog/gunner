@@ -15,6 +15,7 @@ import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
 import { registerPopupModule } from "./popup";
 import { registerSessionModule } from "./session";
+import { registerShareModule } from "./share";
 import { registerSidePanelModule, type Side } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 
@@ -24,6 +25,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSidePanelModule(cradle);
   registerPopupModule(cradle);
   registerImportModule(cradle);
+  registerShareModule(cradle);
   registerSessionModule(cradle);
   cradle.register({
     els: asFunction(createControlsEls).singleton(),
@@ -72,6 +74,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       turretController: proxy.turretController,
       sessionCodec: proxy.sessionCodec,
       importController: proxy.importController,
+      shareController: proxy.shareController,
       previewManager: proxy.previewManager,
       attackerFittingPopup: proxy.attackerFittingPopup,
       targetFittingPopup: proxy.targetFittingPopup,
@@ -91,7 +94,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.targetSide.setFittingPreview(c.previewManager);
   c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings));
   c.targetSide.setImporter(sideImporterFor("target", c.importController, c.savedFittings));
-  c.importController.setSessionCodec(c.sessionCodec);
   c.importController.setOnConfigPersisted(() => c.controls.persistConfigChange(true));
   c.importController.setOnProfileTextLoaded((settings) => c.controls.onProfileTextLoaded(settings));
   c.profileController.setOnProfileLoaded((name) => c.controls.onProfileLoaded(name));

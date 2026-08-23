@@ -2,6 +2,7 @@ import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
 import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
+import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
 import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
 
@@ -10,7 +11,6 @@ const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
 const MIGRATED_PROFILES_KEY = "gunner-profiles-v5";
 const MIGRATED_SELECTED_PROFILE_KEY = "gunner-selected-profile-v5";
 const PREFERENCES_KEY = "gunner-prefs-v1";
-const DEFAULT_PREFERENCES: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 };
 
 export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
@@ -73,9 +73,9 @@ export class LocalSettingsStore implements SettingsStore {
     this.storage.setItem(SELECTED_PROFILE_KEY, name);
   }
 
-  encodeUrl(settings: UserSettings): string {
+  encodeUrl(settings: ProfileSettings): string {
     const url = new URL(this.location.href);
-    url.searchParams.set(URL_PARAM, encodeBase64(settings));
+    url.searchParams.set(URL_PARAM, encodeBase64(stripDisplayPreferences(settings)));
     return url.toString();
   }
 

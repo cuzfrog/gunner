@@ -148,6 +148,8 @@ describe("DomControls", () => {
     expect(loadProfile).toHaveBeenCalledWith("brawler");
     expect(callbacks.onReset).toHaveBeenCalled();
     getFake(document, "share-link").trigger("click");
+    getFake(document, "share-copy-text").trigger("click");
+    await Promise.resolve();
     await Promise.resolve();
     expect(clipboard.writeText).toHaveBeenCalled();
   });

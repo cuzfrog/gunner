@@ -80,7 +80,7 @@ describe("LocalSettingsStore", () => {
     const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation(url) });
     store.saveProfile("shared", profileFrom(URL_SETTINGS));
     store.selectProfile("shared");
-    expect(store.loadStartupState()).toEqual({ settings: URL_SETTINGS, selectedProfileName: "shared" });
+    expect(store.loadStartupState()).toEqual({ settings: { ...URL_SETTINGS, ...DEFAULT_PREFERENCES }, selectedProfileName: "shared" });
   });
 
   test("loadStartupState drops the selection for a foreign URL but keeps it stored", () => {
@@ -370,7 +370,7 @@ describe("LocalSettingsStore", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.gridBrightness;
     const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
-    expect(store.loadStartupState().settings).toEqual(partial);
+    expect(store.loadStartupState().settings).toEqual({ ...partial, gridBrightness: DEFAULT_PREFERENCES.gridBrightness });
   });
 
   test("loadStartupState round-trips a non-default maneuverAggressivity", () => {

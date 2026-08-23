@@ -6,6 +6,7 @@ import type { FittingPreviewManager } from "../popup";
 import type { ImportController } from "../import";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
+import type { ShareController } from "../share";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 
@@ -42,6 +43,14 @@ function makePopupGroup(): PopupGroup {
   });
 }
 
+function makeShareController(): ShareController {
+  return {
+    popup: makePopup(),
+    onCopyUrlClicked: vi.fn(),
+    onCopyTextClicked: vi.fn(),
+  } as unknown as ShareController;
+}
+
 describe("EventRouter", () => {
   test("play, reset and speed input route to the host callbacks", () => {
     const els = makeEls();
@@ -62,6 +71,7 @@ describe("EventRouter", () => {
       preferences,
       profile: {} as ProfileController,
       import: {} as ImportController,
+      share: makeShareController(),
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,
@@ -96,6 +106,7 @@ describe("EventRouter", () => {
       preferences: {} as PreferencesController,
       profile: {} as ProfileController,
       import: {} as ImportController,
+      share: makeShareController(),
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,
@@ -160,6 +171,7 @@ describe("EventRouter", () => {
       preferences,
       profile: {} as ProfileController,
       import: {} as ImportController,
+      share: makeShareController(),
       attackerSide,
       targetSide,
       turret,
@@ -229,6 +241,7 @@ describe("EventRouter", () => {
       preferences: {} as PreferencesController,
       profile: {} as ProfileController,
       import: {} as ImportController,
+      share: makeShareController(),
       attackerSide: {} as SidePanel,
       targetSide: {} as SidePanel,
       turret: {} as TurretController,

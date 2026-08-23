@@ -3,7 +3,6 @@ import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../ap
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { SessionCodec } from "../session";
 import type { Side, SidePanel } from "../sidePanel";
 
 export interface ImportEls {
@@ -20,8 +19,6 @@ export interface ImportController {
   importProfileClicked(): Promise<void>;
   onImportSideClick(side: Side): Promise<void>;
   importEftFitting(side: Side, text: string, persist?: boolean): ImportedFitting | undefined;
-  copyProfile(): Promise<void>;
-  setSessionCodec(sessionCodec: SessionCodec): void;
   setOnConfigPersisted(onConfigPersisted: () => void): void;
   setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void;
 }

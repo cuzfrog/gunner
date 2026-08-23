@@ -36,6 +36,7 @@ const controlsCradleKeys = {
   targetFittingPopup: "targetFittingPopup",
   sessionCodec: "sessionCodec",
   importController: "importController",
+  shareController: "shareController",
   eventRouter: "eventRouter",
   controls: "controls",
 } as const satisfies { [K in keyof ControlsCradle]: K };

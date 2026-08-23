@@ -16,6 +16,7 @@ import type { ImportController } from "./import";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
+import type { ShareController } from "./share";
 import type { EventRouter, HullDatalist, SessionCodec } from "./session";
 import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
@@ -55,6 +56,7 @@ export interface ControlsCradle {
   readonly targetFittingPopup: FittingPopupController;
   readonly sessionCodec: SessionCodec;
   readonly importController: ImportController;
+  readonly shareController: ShareController;
   readonly eventRouter: EventRouter;
   readonly controls: Controls & DomControlsHost;
 }
