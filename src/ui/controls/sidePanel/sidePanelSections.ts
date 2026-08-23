@@ -43,7 +43,7 @@ export interface IStatsSection {
 export interface ISkillOverloadSection {
   readonly popup: Popup;
   skillConditions(): StatConditions;
-  setOverloadDisabled(ewarCount?: number): void;
+  setOverloadDisabled(): void;
   setOverloadActive(active: boolean): void;
   onOverloadButtonClick(): void;
   onSkillOrOverloadChange(updateInertia: boolean): void;

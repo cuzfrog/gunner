@@ -32,7 +32,9 @@ function makeFittingPopup(): FittingPopupController {
 }
 
 function makeEwarController(): EwarController {
-  return { setHost: vi.fn(), setLoadout: vi.fn(), restore: vi.fn(), projection: vi.fn(), capture: vi.fn(), fittedCount: vi.fn(() => 0), popup: () => makePopup(), render: vi.fn() } as unknown as EwarController;
+  const attackerPopup = makePopup();
+  const targetPopup = makePopup();
+  return { setHost: vi.fn(), setLoadout: vi.fn(), restore: vi.fn(), projection: vi.fn(), capture: vi.fn(), fittedCount: vi.fn(() => 0), popup: (side: "attacker" | "target") => side === "attacker" ? attackerPopup : targetPopup, render: vi.fn() } as unknown as EwarController;
 }
 
 function makePopupGroup(): PopupGroup {
@@ -267,6 +269,34 @@ describe("EventRouter", () => {
 
     getFake(globalThis.document, "share-copy-text").trigger("click");
     expect(shareController.onCopyTextClicked).toHaveBeenCalled();
+  });
+
+  test("ewar triggers toggle the ewar popups", () => {
+    const els = makeEls();
+    const popupGroup = makePopupGroup();
+    const ewarController = makeEwarController();
+    const router = new EventRouter({
+      els,
+      preferences: {} as PreferencesController,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      share: makeShareController(),
+      attackerSide: {} as SidePanel,
+      targetSide: {} as SidePanel,
+      turret: {} as TurretController,
+      trackingInput: fakeTrackingInput(),
+      popupGroup,
+      previewManager: {} as FittingPreviewManager,
+      attackerFittingPopup: makeFittingPopup(),
+      targetFittingPopup: makeFittingPopup(),
+      ewarController,
+    });
+    router.setHost({} as EventRouterHost);
+
+    getFake(globalThis.document, "attacker-ewar-trigger").trigger("click");
+    getFake(globalThis.document, "target-ewar-trigger").trigger("click");
+    expect(popupGroup.toggle).toHaveBeenCalledWith(ewarController.popup("attacker"));
+    expect(popupGroup.toggle).toHaveBeenCalledWith(ewarController.popup("target"));
   });
 
   test("pointerdown outside routes to popupGroup and previewManager", () => {

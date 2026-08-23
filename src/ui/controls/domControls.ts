@@ -113,8 +113,8 @@ export class DomControls implements Controls, DomControlsHost {
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
   onConfigChange(): void {
-    this.attackerSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("attacker"));
-    this.targetSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("target"));
+    this.attackerSide.sections.skill.setOverloadDisabled();
+    this.targetSide.sections.skill.setOverloadDisabled();
     this.persistConfigChange();
   }
   onDisplayChange(): void {
@@ -130,6 +130,7 @@ export class DomControls implements Controls, DomControlsHost {
 
   private onLanguageChanged(): void {
     this.deps.i18n.translateDocument();
+    this.ewarController.render();
     this.setPlaying(this.playing);
     this.notifyDisplayChange();
   }

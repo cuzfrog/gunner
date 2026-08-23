@@ -1,6 +1,6 @@
 ---
 no-new-exports:
-  - index.ts  # public surface re-exports cross-boundary DI contracts and DTOs
+  - index.ts
   - loop.ts
   - module.ts
   - palette.ts
@@ -11,9 +11,10 @@ no-new-exports:
   - timer.test.ts
   - events.ts
   - events.test.ts
-  - index.ts
   - cradle.ts
+  - iconIds.ts
 ---
+
 
 
 

@@ -3,24 +3,25 @@ no-new-exports:
   - defaultPreferences.ts
   - fittingBasis.ts
   - cradle.ts
-  # - index.ts  # M5 public DTO exports for stored ewar activation
-  - language.ts
-  - localSettingsStore.test.ts
-  - localSettingsStore.testSupport.ts
-  - localSettingsStore.ts
-  - module.ts
-  - providers.ts
-  - savedFittings.test.ts
+  - validators.ts
   - savedFittings.ts
+  - validators.test.ts
   - settingsParser.test.ts
-  - settingsParser.ts
-  - settingsStore.ts
+  - module.ts
+  - localSettingsStore.test.ts
   - urlCodec.test.ts
   - urlCodec.ts
-  # - userSettings.ts  # M5 ewar stored activation DTOs
-  - validators.test.ts
-  # - validators.ts  # M5 ewar stored activation validators
+  - userSettings.ts
+  - localSettingsStore.testSupport.ts
+  - providers.ts
+  - settingsParser.ts
+  - localSettingsStore.ts
+  - savedFittings.test.ts
+  - index.ts
+  - settingsStore.ts
+  - language.ts
 ---
+
 
 
 # appstate

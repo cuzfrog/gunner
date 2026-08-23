@@ -37,7 +37,8 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     };
   }
 
-  setOverloadDisabled(ewarCount = 0): void {
+  setOverloadDisabled(): void {
+    const ewarCount = this.panel.host.ewarFittedCount?.() ?? 0;
     const disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined && ewarCount === 0;
     const active = !disabled && this.els.overload.checked;
     this.els.overloadButton.classList.toggle("active", active);

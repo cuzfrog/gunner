@@ -11,8 +11,15 @@ import { EwarControllerImpl } from "./ewarController";
 
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
-const DISRUPTOR: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor I", optimal: 10000, falloff: 30000, disruption: -0.2, defaultScript: "none", overloadStrengthBonusPercent: 20 };
-const DISRUPTOR2: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", optimal: 12000, falloff: 35000, disruption: -0.25, defaultScript: "optimalRange", overloadStrengthBonusPercent: 20 };
+const WEB3: StasisWebSpec = { ...WEB, moduleName: "Stasis Webifier III" };
+const DISRUPTOR: TrackingDisruptorSpec = {
+  moduleName: "Tracking Disruptor I", optimal: 10000, falloff: 30000,
+  disruption: -0.2, defaultScript: "none", overloadStrengthBonusPercent: 20,
+};
+const DISRUPTOR2: TrackingDisruptorSpec = {
+  moduleName: "Tracking Disruptor II", optimal: 12000, falloff: 35000,
+  disruption: -0.25, defaultScript: "optimalRange", overloadStrengthBonusPercent: 20,
+};
 
 function buildEwarController() {
   const document = fakeDocument();
@@ -156,7 +163,7 @@ describe("EwarController", () => {
 
   test("stale saved activation is clamped to a shorter loadout", () => {
     const { controller } = buildEwarController();
-    const longLoadout: EwarLoadout = { webs: [WEB, WEB2, { ...WEB, moduleName: "Stasis Webifier III" }], disruptors: [DISRUPTOR, DISRUPTOR2] };
+    const longLoadout: EwarLoadout = { webs: [WEB, WEB2, WEB3], disruptors: [DISRUPTOR, DISRUPTOR2] };
     const saved: StoredEwarActivation = {
       webs: [false, true, false, true],
       disruptors: [{ active: false, script: "trackingSpeed" }, { active: true, script: "none" }, { active: true, script: "optimalRange" }],

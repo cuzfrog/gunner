@@ -153,8 +153,8 @@ export class SessionCodecImpl implements SessionCodec {
     });
     this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
     this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
-    this.attackerSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("attacker"));
-    this.targetSide.sections.skill.setOverloadDisabled(this.ewarController.fittedCount("target"));
+    this.attackerSide.sections.skill.setOverloadDisabled();
+    this.targetSide.sections.skill.setOverloadDisabled();
     if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");

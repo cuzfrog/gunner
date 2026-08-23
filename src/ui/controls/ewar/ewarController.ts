@@ -185,6 +185,7 @@ export class EwarControllerImpl implements EwarController {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
     const img = document.createElement("img");
     img.src = iconUrl ?? "";
+    img.alt = "";
     img.hidden = iconUrl === undefined;
     button.appendChild(img);
     const nameSpan = document.createElement("span");

@@ -89,8 +89,14 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
 
 function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  c.attackerSide.setHost({ persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) });
-  c.targetSide.setHost({ persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) });
+  c.attackerSide.setHost({
+    persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
+    ewarFittedCount: () => c.ewarController.fittedCount("attacker"),
+  });
+  c.targetSide.setHost({
+    persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
+    ewarFittedCount: () => c.ewarController.fittedCount("target"),
+  });
   c.attackerSide.setFittingPopup(c.attackerFittingPopup);
   c.targetSide.setFittingPopup(c.targetFittingPopup);
   c.ewarController.setHost(c.controls);
@@ -101,8 +107,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.importController.setOnConfigPersisted(() => c.controls.persistConfigChange(true));
   c.importController.setOnFittingImported((side, imported) => {
     c.ewarController.setLoadout(side, imported.ewar);
-    c.attackerSide.sections.skill.setOverloadDisabled(c.ewarController.fittedCount("attacker"));
-    c.targetSide.sections.skill.setOverloadDisabled(c.ewarController.fittedCount("target"));
   });
   c.importController.setOnProfileTextLoaded((settings) => c.controls.onProfileTextLoaded(settings));
   c.profileController.setOnProfileLoaded((name) => c.controls.onProfileLoaded(name));

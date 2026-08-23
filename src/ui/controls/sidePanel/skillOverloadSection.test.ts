@@ -41,7 +41,7 @@ function buildSkillSection() {
     } as unknown as ISidePanelSections["paste"],
   } as unknown as ISidePanelSections);
 
-  const host = { persistConfigChange: vi.fn() };
+  const host = { persistConfigChange: vi.fn(), ewarFittedCount: vi.fn(() => 0) };
   const panel = vi.mocked<SidePanel>({
     side: "attacker",
     host,
@@ -54,7 +54,7 @@ function buildSkillSection() {
 
   const i18n = mockI18n();
   const section = new SkillOverloadSection({ panel, els, i18n });
-  return { document, panel, section };
+  return { document, panel, section, host };
 }
 
 describe("SkillOverloadSection", () => {
@@ -98,5 +98,13 @@ describe("SkillOverloadSection", () => {
     section.setOverloadDisabled();
     expect(getFake(document, "attacker-overload").disabled).toBe(true);
     expect(getFake(document, "attacker-overload-button").disabled).toBe(true);
+  });
+
+  test("setOverloadDisabled enables the overload when ewar is fitted", () => {
+    const { document, section, host } = buildSkillSection();
+    host.ewarFittedCount = vi.fn(() => 2);
+    section.setOverloadDisabled();
+    expect(getFake(document, "attacker-overload").disabled).toBe(false);
+    expect(getFake(document, "attacker-overload-button").disabled).toBe(false);
   });
 });

@@ -6,9 +6,10 @@ no-new-exports:
   - profileText.test.ts
   - profileText.testSupport.ts
   - profileText.ts
-  # - profileTextFields.ts  # M5 ewar activation profile-text fields
-  # - profileTextValidate.ts  # M5 ewar activation profile-text parsing
+  - profileTextFields.ts
+  - profileTextValidate.ts
 ---
+
 
 # profileText
 
