@@ -98,7 +98,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.profileController.setSnapshotSource(() => profileSettingsOf(c.sessionCodec.capture()));
   c.sessionCodec.setSessionControl(c.controls);
   c.eventRouter.setHost(c.controls);
-  if (c.controls instanceof DomControls) c.controls.wireControls();
+  c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
   c.attackerSide.sections.stats.updateAlignTime();
   c.targetSide.sections.stats.updateAlignTime();

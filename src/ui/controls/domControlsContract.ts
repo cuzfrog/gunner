@@ -21,4 +21,6 @@ interface ProfileEvents {
   persistConfigChange(notify?: boolean): void;
 }
 
-export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {}
+export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {
+  wireControls(): void;
+}
