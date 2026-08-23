@@ -1,10 +1,15 @@
 import { Vec2 } from "./vec2";
+import { ReactiveAutopilot } from "./autopilot";
 import type { Autopilot } from "./autopilot";
+import type { EwarResolver } from "./ewarResolver";
+import { EwarResolverImpl } from "./ewarResolver";
 import { SimulationImpl } from "./simulation";
-import type { ShipConfig, SimConfig } from "./types";
+import { StackingPenaltyImpl } from "./stackingPenalty";
+import type { EwarProjection, ShipConfig, SimConfig } from "./types";
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
+const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret };
 
 const INSTANT_MASS = 1;
 const INSTANT_INERTIA = 1e-6;
@@ -27,7 +32,7 @@ function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inerti
 }
 
 function makeSim(config: SimConfig): SimulationImpl {
-  return new SimulationImpl({ attackerSteering, targetSteering, simConfig: config });
+  return new SimulationImpl({ attackerSteering, targetSteering, ewarResolver, simConfig: config });
 }
 
 describe("SimulationImpl", () => {
@@ -110,6 +115,72 @@ describe("SimulationImpl", () => {
     expect(after.target.position).toEqual(before.target.position);
     expect(after.target.velocity).toEqual(before.target.velocity);
     expect(after.attacker.position.dist(after.target.position)).toBeCloseTo(beforeDistance, 6);
+  });
+
+  test("applies an active opponent web to reduce the ship's effective max speed", () => {
+    const resolver: EwarResolver = {
+      webSpeedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
+      disruptedTurret: (turret) => turret,
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config = simConfig("orbit");
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    const snapshot = sim.snapshot();
+    expect(snapshot.target.velocity.x).toBeCloseTo(40, 6);
+  });
+
+  test("keeps trajectories unchanged when no ewar is projected", () => {
+    const steering = new ReactiveAutopilot();
+    const noEwarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+    const baseline = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: noEwarResolver, simConfig: simConfig("orbit") });
+    const comparison = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver, simConfig: simConfig("orbit") });
+    const dt = 0.25;
+    for (let i = 0; i < 40; i++) {
+      baseline.step(dt);
+      comparison.step(dt);
+      const baseSnap = baseline.snapshot();
+      const compSnap = comparison.snapshot();
+      expect(compSnap.attacker.position).toEqual(baseSnap.attacker.position);
+      expect(compSnap.target.position).toEqual(baseSnap.target.position);
+      expect(compSnap.attacker.velocity).toEqual(baseSnap.attacker.velocity);
+      expect(compSnap.target.velocity).toEqual(baseSnap.target.velocity);
+    }
+  });
+
+  test("target velocity recovers when it moves outside web range", () => {
+    const web: EwarProjection = {
+      loadout: {
+        webs: [{ moduleName: "Stasis Webifier II", maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        disruptors: [],
+      },
+      activation: { webs: [{ active: true }], disruptors: [] },
+      overloaded: false,
+    };
+    const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+    const attackerSteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const targetSteering = new ReactiveAutopilot();
+    const config: SimConfig = {
+      attacker: { id: "attacker", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "midships", desiredRange: 0, aggressivity: 1, ewar: web },
+      target: { id: "target", maxSpeed: 100, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 10000, aggressivity: 1 },
+      initialDistance: 4000,
+    };
+    const sim = new SimulationImpl({ attackerSteering, targetSteering, ewarResolver: resolver, simConfig: config });
+
+    sim.step(0.1);
+    expect(sim.snapshot().target.velocity.len()).toBeCloseTo(40, 6);
+
+    let lastDistance = 4000;
+    for (let i = 0; i < 1000; i++) {
+      sim.step(0.1);
+      lastDistance = sim.snapshot().target.position.dist(sim.snapshot().attacker.position);
+      if (lastDistance > 5000) {
+        sim.step(0.1);
+        break;
+      }
+    }
+    expect(lastDistance).toBeGreaterThan(5000);
+    expect(sim.snapshot().target.velocity.len()).toBeGreaterThan(99);
   });
 
   test("computes attacker command before target command and passes the current time", () => {

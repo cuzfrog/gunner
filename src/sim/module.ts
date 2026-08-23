@@ -2,6 +2,7 @@ import { aliasTo, asClass, type AwilixContainer } from "awilix";
 import { ReactiveAutopilot } from "./autopilot";
 import type { Autopilot } from "./autopilot";
 import { EwarResolverImpl } from "./ewarResolver";
+import { EngagementEvaluatorImpl } from "./fireControl";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
@@ -19,5 +20,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     targetSteering: aliasTo<Autopilot>("reactiveSteering"),
     attackerSteering: asClass(PredictiveAutopilot).singleton(),
     simulation: asClass(SimulationImpl).singleton(),
+    engagementEvaluator: asClass(EngagementEvaluatorImpl).singleton(),
   });
 }

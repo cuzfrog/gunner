@@ -1,4 +1,4 @@
-import type { Autopilot, EwarResolver, HitChance, Kinematics, Simulation, StackingPenalty } from "./index";
+import type { Autopilot, EwarResolver, EngagementEvaluator, HitChance, Kinematics, Simulation, StackingPenalty } from "./index";
 import type { SimConfig } from "./types";
 
 export interface SimCradle {
@@ -10,5 +10,6 @@ export interface SimCradle {
   readonly targetSteering: Autopilot;
   readonly attackerSteering: Autopilot;
   readonly simulation: Simulation;
+  readonly engagementEvaluator: EngagementEvaluator;
   readonly simConfig: SimConfig;
 }

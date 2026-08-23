@@ -4,6 +4,7 @@ export type { HitChance } from "./hitChance";
 export type { Kinematics } from "./kinematics";
 export type { Simulation } from "./simulation";
 export type { EwarResolver } from "./ewarResolver";
+export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AutopilotMode,

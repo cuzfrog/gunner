@@ -21,6 +21,7 @@ export interface ShipConfig {
 export interface ShipState extends ShipConfig {
   position: Vec2;
   velocity: Vec2;
+  ewar?: EwarProjection;
 }
 
 export interface SimConfig {

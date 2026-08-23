@@ -2,8 +2,8 @@ import type { StackingPenalty } from "./stackingPenalty";
 import type { DisruptionScript, EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
-  webSpeedMultiplier(projection: EwarProjection, distance: number): number;
-  disruptedTurret(turret: TurretSpec, projection: EwarProjection, distance: number): TurretSpec;
+  webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number;
+  disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec;
 }
 
 export class EwarResolverImpl implements EwarResolver {
@@ -13,7 +13,8 @@ export class EwarResolverImpl implements EwarResolver {
     this.stacking = stackingPenalty;
   }
 
-  webSpeedMultiplier(projection: EwarProjection, distance: number): number {
+  webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number {
+    if (!projection) return 1;
     const multipliers: number[] = [];
     for (let i = 0; i < projection.loadout.webs.length; i++) {
       const spec = projection.loadout.webs[i];
@@ -26,7 +27,8 @@ export class EwarResolverImpl implements EwarResolver {
     return this.stacking.apply(multipliers);
   }
 
-  disruptedTurret(turret: TurretSpec, projection: EwarProjection, distance: number): TurretSpec {
+  disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec {
+    if (!projection) return turret;
     const trackingModifiers: number[] = [];
     const optimalModifiers: number[] = [];
     const falloffModifiers: number[] = [];

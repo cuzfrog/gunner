@@ -1,8 +1,11 @@
 import { ReactiveAutopilot } from "../../src/sim/autopilot";
+import type { EwarResolver } from "../../src/sim/ewarResolver";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { PredictiveAutopilot } from "../../src/sim/predictiveAutopilot";
 import { SimulationImpl } from "../../src/sim/simulation";
 import type { ShipConfig, SimConfig } from "../../src/sim/types";
+
+const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret };
 
 describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
   test("predictive steering reduces mean angular velocity versus the reactive baseline", () => {
@@ -29,9 +32,9 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
 
     const reactive = new ReactiveAutopilot();
     const kinematicsForSim = new KinematicsImpl();
-    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, simConfig });
+    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, ewarResolver, simConfig });
     const predictive = new PredictiveAutopilot({ reactiveSteering: new ReactiveAutopilot(), kinematics: kinematicsForSim });
-    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), simConfig });
+    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), ewarResolver, simConfig });
 
     const dt = 0.25;
     const steps = Math.round(120 / dt);

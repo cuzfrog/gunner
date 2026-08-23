@@ -1,7 +1,10 @@
 import type { Vec2 } from "./vec2";
 import { ReactiveAutopilot } from "./autopilot";
+import type { EwarResolver } from "./ewarResolver";
 import { SimulationImpl } from "./simulation";
 import type { SimConfig } from "./types";
+
+const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret };
 
 const simConfig: SimConfig = {
   attacker: { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
@@ -20,7 +23,7 @@ const STEPS = 180 * 60;
 
 function runToSteadyState(): ReturnType<SimulationImpl["snapshot"]> {
   const steering = new ReactiveAutopilot();
-  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig });
+  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver, simConfig });
   for (let i = 0; i < STEPS; i++) {
     sim.step(DT);
   }
@@ -33,7 +36,7 @@ function minDistance(config: SimConfig, steps: number): number {
 
 function approachResult(config: SimConfig, steps: number): { min: number; final: number } {
   const steering = new ReactiveAutopilot();
-  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, simConfig: config });
+  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver, simConfig: config });
   let min = Number.POSITIVE_INFINITY;
   for (let i = 0; i < steps; i++) {
     sim.step(DT);

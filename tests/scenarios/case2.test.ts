@@ -1,8 +1,11 @@
 import { ReactiveAutopilot } from "../../src/sim/autopilot";
+import type { EwarResolver } from "../../src/sim/ewarResolver";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { PredictiveAutopilot } from "../../src/sim/predictiveAutopilot";
 import { SimulationImpl } from "../../src/sim/simulation";
 import type { ShipConfig, SimConfig } from "../../src/sim/types";
+
+const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret };
 
 describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
   test("predictive attacker reaches and holds within 15% of 2km", () => {
@@ -31,7 +34,7 @@ describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
     const kinematics = new KinematicsImpl();
     const reactive = new ReactiveAutopilot();
     const predictive = new PredictiveAutopilot({ reactiveSteering: reactive, kinematics });
-    const sim = new SimulationImpl({ attackerSteering: predictive, targetSteering: reactive, simConfig });
+    const sim = new SimulationImpl({ attackerSteering: predictive, targetSteering: reactive, ewarResolver, simConfig });
 
     const dt = 0.25;
     const steps = Math.round(180 / dt);
