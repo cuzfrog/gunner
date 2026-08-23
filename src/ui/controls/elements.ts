@@ -8,6 +8,7 @@ import {
   isHtmlTextAreaElement,
 } from "./controlsDom";
 
+import type { ReadoutEls } from "./engagementReadout";
 import type { PreferencesEls } from "./preferencesController";
 import type { ProfileEls } from "./profileController";
 import type { ImportEls } from "./import";
@@ -182,6 +183,17 @@ export function collectImportEls(els: Els): ImportEls {
     importSidePopup: els.importSidePopup,
     importSideAttacker: els.importSideAttacker,
     importSideTarget: els.importSideTarget,
+  };
+}
+export function collectReadoutEls(els: Els): ReadoutEls {
+  return {
+    resDistance: els.resDistance,
+    resTransversal: els.resTransversal,
+    resAngular: els.resAngular,
+    resRadial: els.resRadial,
+    resTrackPen: els.resTrackPen,
+    resRangePen: els.resRangePen,
+    resHit: els.resHit,
   };
 }
 export function collectFittingPopupEls(els: Els, side: Side): FittingPopupEls {

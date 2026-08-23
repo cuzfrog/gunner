@@ -3,11 +3,10 @@ import { SIG_RESOLUTIONS } from "../../sim";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { profileSettingsOf } from "./controlsFormat";
-import { createControlsEls, collectPreferencesEls, collectProfileEls } from "./elements";
+import { createControlsEls, collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elements";
 import { DomControls } from "./domControls";
 import { ChoiceGroupImpl } from "./choiceGroup";
 import { EngagementReadoutImpl } from "./engagementReadout";
-import type { EngagementReadout, ReadoutEls } from "./engagementReadout";
 import { PreferencesControllerImpl } from "./preferencesController";
 import { ProfileControllerImpl } from "./profileController";
 import { TrackingInputImpl } from "./trackingInput";
@@ -17,7 +16,6 @@ import { registerPopupModule } from "./popup";
 import { registerSessionModule } from "./session";
 import { registerSidePanelModule, type Side } from "./sidePanel";
 import { registerTurretModule } from "./turret";
-import type { Els } from "./elementsContract";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   registerHintsModule(cradle);
@@ -111,17 +109,5 @@ function sideImporterFor(side: Side, importer: ImportController, savedFittings: 
     importEftFitting: (text: string, persist: boolean) => importer.importEftFitting(side, text, persist),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
-  };
-}
-
-function collectReadoutEls(els: Els): ReadoutEls {
-  return {
-    resDistance: els.resDistance,
-    resTransversal: els.resTransversal,
-    resAngular: els.resAngular,
-    resRadial: els.resRadial,
-    resTrackPen: els.resTrackPen,
-    resRangePen: els.resRangePen,
-    resHit: els.resHit,
   };
 }
