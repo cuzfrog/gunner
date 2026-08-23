@@ -259,6 +259,20 @@ describe("DomFittingPreview", () => {
     expect(row.children[0].src).toBe("");
   });
 
+  test("empty rows render with a muted style and no icon", () => {
+    const { container, anchor, preview } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "high", rows: [{ name: "[Empty High slot]", empty: true }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const row = container.children[1].children[1];
+    expect(row.className).toBe("preview-row preview-row-empty");
+    expect(row.children[0].src).toBe("");
+    expect(row.children[1].children[0].textContent).toBe("[Empty High slot]");
+  });
+
   test("hide clears and hides the container", () => {
     const { container, anchor, preview } = buildPreview();
     preview.show(anchor as unknown as HTMLElement, SUMMARY);

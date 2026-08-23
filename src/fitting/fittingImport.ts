@@ -443,18 +443,6 @@ const SECTION_ORDER: readonly FittingSectionKind[] = [
   "drones",
 ];
 
-function classifyQuantity(
-  db: FittingDb,
-  buckets: Record<FittingSectionKind, FittingRow[]>,
-  item: QuantityItem,
-): void {
-  if (db.drones[item.name]) {
-    buckets.drones.push({ name: item.name, quantity: item.quantity });
-  } else {
-    buckets.cargo.push({ name: item.name, quantity: item.quantity });
-  }
-}
-
 function buildSections(document: EftDocument, db: FittingDb): readonly FittingSection[] {
   const buckets: Record<FittingSectionKind, FittingRow[]> = {
     low: [],
@@ -485,6 +473,18 @@ function buildSections(document: EftDocument, db: FittingDb): readonly FittingSe
     if (buckets[kind].length > 0) sections.push({ kind, rows: buckets[kind] });
   }
   return sections;
+}
+
+function classifyQuantity(
+  db: FittingDb,
+  buckets: Record<FittingSectionKind, FittingRow[]>,
+  item: QuantityItem,
+): void {
+  if (db.drones[item.name]) {
+    buckets.drones.push({ name: item.name, quantity: item.quantity });
+  } else {
+    buckets.cargo.push({ name: item.name, quantity: item.quantity });
+  }
 }
 
 

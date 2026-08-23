@@ -94,6 +94,8 @@ export const JA: LanguageSlice<"ja"> = {
   "fitting.section.mid": { ja: "ミッドスロット" },
   "fitting.section.low": { ja: "ロースロット" },
   "fitting.section.rig": { ja: "リグ" },
+  "fitting.section.subsystem": { ja: "サブシステム" },
+  "fitting.section.service": { ja: "サービス" },
   "fitting.section.cargo": { ja: "カーゴ" },
   "fitting.section.drones": { ja: "ドローン" },
   "status.importInvalid": { ja: "クリップボードにプロファイルまたはフィッティングがありません" },

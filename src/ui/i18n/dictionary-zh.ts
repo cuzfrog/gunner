@@ -94,6 +94,8 @@ export const ZH: LanguageSlice<"zh"> = {
   "fitting.section.mid": { zh: "中槽" },
   "fitting.section.low": { zh: "低槽" },
   "fitting.section.rig": { zh: "船插" },
+  "fitting.section.subsystem": { zh: "子系统" },
+  "fitting.section.service": { zh: "服务" },
   "fitting.section.cargo": { zh: "货舱" },
   "fitting.section.drones": { zh: "无人机" },
   "status.importInvalid": { zh: "剪贴板中没有可导入的配置或装配" },

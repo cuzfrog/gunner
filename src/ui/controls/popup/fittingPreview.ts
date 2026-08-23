@@ -108,9 +108,13 @@ function renderSection(i18n: I18n, imageCatalog: ImageCatalog, section: FittingS
 
 function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: FittingSection["kind"]): HTMLElement {
   const rowEl = document.createElement("div");
-  rowEl.className = "preview-row";
+  rowEl.className = row.empty ? "preview-row preview-row-empty" : "preview-row";
 
-  const iconUrl = sectionKind === "drones" ? imageCatalog.droneIconUrl(row.name) : imageCatalog.itemIconUrl(row.name);
+  const iconUrl = row.empty
+    ? undefined
+    : sectionKind === "drones"
+      ? imageCatalog.droneIconUrl(row.name)
+      : imageCatalog.itemIconUrl(row.name);
   const icon = document.createElement("img");
   icon.className = "preview-icon";
   icon.alt = "";

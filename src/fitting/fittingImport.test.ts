@@ -776,6 +776,36 @@ Hobgoblin I x3
     expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
   });
 
+  test("renders empty slots and subsystem sections in order", () => {
+    const text = `[Tengu, Subsystem]
+[Empty High slot]
+[Empty High slot]
+
+Republic Fleet 10MN Afterburner
+
+[Empty Low slot]
+
+Tengu Defensive - Adaptive Shielding
+[Empty Subsystem slot]
+Tengu Engineering - Capacitor Regenerative Matrix
+
+Hobgoblin II x5
+`;
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const summary = importer.summarize(text);
+    const kinds = summary!.sections.map((section) => section.kind);
+    expect(kinds).toEqual(["high", "mid", "low", "subsystem", "drones"]);
+    const high = summary!.sections.find((section) => section.kind === "high");
+    expect(high!.rows[0]).toEqual({ name: "[Empty High slot]", empty: true });
+    expect(high!.rows[1]).toEqual({ name: "[Empty High slot]", empty: true });
+    const subsystem = summary!.sections.find((section) => section.kind === "subsystem");
+    expect(subsystem!.rows.map((row) => row.name)).toEqual([
+      "Tengu Defensive - Adaptive Shielding",
+      "[Empty Subsystem slot]",
+      "Tengu Engineering - Capacitor Regenerative Matrix",
+    ]);
+  });
+
   test("moves charge quantity items from the first quantity block to cargo", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
     const summary = importer.summarize(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);

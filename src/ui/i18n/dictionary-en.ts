@@ -94,6 +94,8 @@ export const EN: LanguageSlice<"en"> = {
   "fitting.section.mid": { en: "Mid" },
   "fitting.section.low": { en: "Low" },
   "fitting.section.rig": { en: "Rig" },
+  "fitting.section.subsystem": { en: "Subsystem" },
+  "fitting.section.service": { en: "Service" },
   "fitting.section.cargo": { en: "Cargo" },
   "fitting.section.drones": { en: "Drones" },
   "status.importInvalid": { en: "No profile or fitting in clipboard" },
