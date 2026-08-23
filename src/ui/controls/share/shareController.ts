@@ -1,4 +1,4 @@
-import { serializeProfile, type ClipboardProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
+import { serializeProfile, type ClipboardProvider, type SettingsStore } from "../../../appstate";
 import { profileSettingsOf } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profileController";

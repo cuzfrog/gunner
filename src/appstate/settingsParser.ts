@@ -41,16 +41,15 @@ export class SettingsParser {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!this.isUserSettings(parsed)) return null;
-      const withDefaults = parsed as Partial<UserSettings>;
-      withDefaults.version = USER_SETTINGS_VERSION;
-      if (withDefaults.attackerAmmo === undefined) {
-        withDefaults.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+      parsed.version = USER_SETTINGS_VERSION;
+      if (parsed.attackerAmmo === undefined) {
+        parsed.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
       }
-      withDefaults.language ??= DEFAULT_PREFERENCES.language;
-      withDefaults.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
-      withDefaults.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
-      withDefaults.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
-      return withDefaults as UserSettings;
+      parsed.language ??= DEFAULT_PREFERENCES.language;
+      parsed.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
+      parsed.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
+      parsed.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
+      return parsed as UserSettings;
     } catch {
       return null;
     }
@@ -132,7 +131,7 @@ export class SettingsParser {
     );
   }
 
-  private isUserSettings(value: unknown): value is UserSettings {
+  private isUserSettings(value: unknown): value is Partial<UserSettings> {
     if (!this.isProfileSettings(value)) return false;
     const s = value as Record<string, unknown>;
     return (

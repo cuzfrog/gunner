@@ -193,5 +193,5 @@ describe("ShareController", () => {
 
 function expectedProfileFor(captured: UserSettings): ProfileSettings {
   const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = captured;
-  return rest as ProfileSettings;
+  return rest;
 }

@@ -130,7 +130,7 @@ describe("DomControls", () => {
     expect(controls.getGridBrightness()).toBe(0.5);
   });
 
-  test("profile save, load and copy round-trip", async () => {
+  test("profile save, load and share-text round-trip", async () => {
     const saveProfile = vi.fn();
     const loadProfile = vi.fn(() => null);
     const { document, controls, clipboard } = buildDomControls({ settingsStore: { saveProfile, loadProfile } });

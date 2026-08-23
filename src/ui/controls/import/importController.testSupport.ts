@@ -1,5 +1,5 @@
 import type { FittingImport } from "../../../fitting";
-import { serializeProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
+import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings } from "../../../appstate";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
@@ -19,33 +19,9 @@ class FakePopupGroup implements PopupGroup {
   onKeyDown(): void {}
 }
 
-export const DEFAULT_USER_SETTINGS: UserSettings = {
-  version: 6,
-  tracking: 0.32,
-  trackingUnit: "rad",
-  sigRes: "S",
-  optimal: 5000,
-  falloff: 5000,
-  attackerSpeed: 1000,
-  attackerMode: "keepAtRange",
-  attackerRange: 5000,
-  attackerMass: 1_200_000,
-  attackerInertia: 3,
-  initialDistance: 5000,
-  targetSpeed: 1000,
-  targetMode: "orbit",
-  targetRange: 5000,
-  targetMass: 10_000_000,
-  targetInertia: 0.45,
-  targetSig: 40,
-  attackerAmmo: "Hail S",
-  simSpeed: 4,
-  language: "en",
-};
-
 export function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
   return serializeProfile({
-    version: 6,
+    version: USER_SETTINGS_VERSION,
     tracking: 0.32,
     sigRes: "S",
     optimal: 5000,

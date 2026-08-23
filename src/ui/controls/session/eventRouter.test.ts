@@ -229,6 +229,37 @@ describe("EventRouter", () => {
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 
+  test("share link toggles the popup and copy buttons call the share controller", () => {
+    const els = makeEls();
+    const popupGroup = makePopupGroup();
+    const shareController = makeShareController();
+    const router = new EventRouter({
+      els,
+      preferences: {} as PreferencesController,
+      profile: {} as ProfileController,
+      import: {} as ImportController,
+      share: shareController,
+      attackerSide: {} as SidePanel,
+      targetSide: {} as SidePanel,
+      turret: {} as TurretController,
+      trackingInput: fakeTrackingInput(),
+      popupGroup,
+      previewManager: {} as FittingPreviewManager,
+      attackerFittingPopup: makeFittingPopup(),
+      targetFittingPopup: makeFittingPopup(),
+    });
+    router.setHost({} as EventRouterHost);
+
+    getFake(globalThis.document, "share-link").trigger("click");
+    expect(popupGroup.toggle).toHaveBeenCalledWith(shareController.popup);
+
+    getFake(globalThis.document, "share-copy-url").trigger("click");
+    expect(shareController.onCopyUrlClicked).toHaveBeenCalled();
+
+    getFake(globalThis.document, "share-copy-text").trigger("click");
+    expect(shareController.onCopyTextClicked).toHaveBeenCalled();
+  });
+
   test("pointerdown outside routes to popupGroup and previewManager", () => {
     const els = makeEls();
     const popupGroup = makePopupGroup();
