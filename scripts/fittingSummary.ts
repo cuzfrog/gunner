@@ -1,7 +1,7 @@
 // Generated from EVE fitting analysis heuristics (2026-08-20). Do not edit by hand.
 
 import { moduleLines, parseEft } from "../src/fitting/eft";
-import type { EftDocument, EftModule, QuantityItem } from "../src/fitting/eft";
+import type { EftModule, QuantityItem } from "../src/fitting/eft";
 
 export interface FittingSummary {
   readonly role: string;

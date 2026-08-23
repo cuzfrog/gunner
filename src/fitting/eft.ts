@@ -33,7 +33,7 @@ export interface EftDocument {
 const HEADER_PATTERN = /^\[(?<hull>[^,]+),\s*(?<name>.+)\]$/;
 const EMPTY_SLOT_PATTERN = /^\[Empty\s+(low|med|medium|high|rig|sub\s*system|subsystem|service)\s+slot\]$/i;
 const QUANTITY_PATTERN = /^(.+?) x(\d+)$/;
-const MODULE_PATTERN = /^([^,/\[\]]+?)(?:,\s*([^,/\[\]]+?))?(\s*\/(OFFLINE|offline))?$/;
+const MODULE_PATTERN = /^([^,/\[\]]+?)(?:,\s*([^,/\[\]]+?))?(\s*\/(OFFLINE))?$/i;
 
 const BANK_ORDER: readonly BankKind[] = ["low", "mid", "high", "rig", "subsystem", "service"];
 const BANK_BY_NORMAL_NAME: Readonly<Record<string, BankKind>> = {
@@ -250,7 +250,15 @@ function assignModuleBanks(blocks: Block[]): (BankKind | undefined)[] {
 
   const anchors: { readonly index: number; readonly bank: BankKind }[] = [];
   for (const i of moduleBlockIndices) {
-    if (blocks[i].anchor) anchors.push({ index: i, bank: blocks[i].anchor! });
+    const anchor = blocks[i].anchor;
+    if (anchor) anchors.push({ index: i, bank: anchor });
+  }
+
+  // An anchored block itself belongs to its anchor bank unless a known
+  // module's slot contradicts it and the per-line MODULE_SLOTS lookup
+  // overrides the block assignment.
+  for (const i of moduleBlockIndices) {
+    if (blocks[i].anchor) intended[i] = blocks[i].anchor;
   }
 
   if (anchors.length === 0) {

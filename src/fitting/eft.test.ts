@@ -45,10 +45,12 @@ describe("parseEft", () => {
   test("parses module names with optional charges and offline flags", () => {
     const text = `[Rifter, Offline]
 Damage Control II /OFFLINE
-200mm AutoCannon I, EMP S /offline`;
+200mm AutoCannon I, EMP S /offline
+Nanofiber Internal Structure II /Offline`;
     const parsed = parseEft(text);
     expect(moduleLines(parsed!)).toEqual([
       { name: "Damage Control II", offline: true },
+      { name: "Nanofiber Internal Structure II", offline: true },
       { name: "200mm AutoCannon I", charge: "EMP S", offline: true },
     ]);
   });
@@ -121,6 +123,17 @@ Unknown Rig Module A`;
     expect(bankLines(parsed!, "mid")).toEqual([
       { kind: "empty", label: "[Empty Med slot]" },
       { kind: "module", name: "1MN Afterburner I", offline: false },
+    ]);
+  });
+
+  test("keeps unknown modules in an anchored block instead of dropping them", () => {
+    const text = `[Rifter, Anchored Unknown]
+[Empty High slot]
+Dread Guristas Capacitor Power Relay`;
+    const parsed = parseEft(text);
+    expect(bankLines(parsed!, "high")).toEqual([
+      { kind: "empty", label: "[Empty High slot]" },
+      { kind: "module", name: "Dread Guristas Capacitor Power Relay", offline: false },
     ]);
   });
 
