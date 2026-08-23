@@ -9,6 +9,8 @@
 - Do not reference doc in the code. Code should be agnostic of any external doc.
 - No emojis in commits, issues, PR comments, or code
 - Do not use newline to break sentences, no newline in the same paragraph. Let IDE wrap text.
+- Follow @doc/UI_STYLE_GUIDE.md
+- Follow @doc/EFT_FORMAT.md
 
 ## Conversation style
 - Be concise, but must explain the reason and provide context information.
@@ -48,9 +50,6 @@
 - Use `./scripts/gh-bot.mjs` with your identity `abao-bot`. Do not use the `gh` CLI directly unless the user asks you to merge PRs.
 - Do not add agent info into the commit message.
 - If there are dev branch/PRs, do not create new branch/PRs.
-
-### Web UI
-Follow @doc/UI_STYLE_GUIDE.md
 
 ### Coding Principles
 - Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes. Given a change, do not first attempt to insert into current code base. First look at it from a higher perspective, discover refactor opportunities.
