@@ -7,7 +7,9 @@ describe("registerPopupModule", () => {
     const cradle = parent.createScope();
     registerPopupModule(cradle);
 
-    expect(cradle.cradle.popupGroup).toBeDefined();
+    const popupGroup = cradle.cradle.popupGroup;
+    expect(popupGroup).toBeDefined();
+    expect(cradle.cradle.popupGroup).toBe(popupGroup);
 
     const attackerPreview = cradle.cradle.attackerFittingPreview;
     const targetPreview = cradle.cradle.targetFittingPreview;
