@@ -1,10 +1,13 @@
 ---
 no-new-exports:
+  - index.ts
+  - module.ts
+  - profileText.parse.test.ts
+  - profileText.test.ts
   - profileText.testSupport.ts
   - profileText.ts
   - profileTextFields.ts
   - profileTextValidate.ts
-  - module.ts
 ---
 
 # profileText

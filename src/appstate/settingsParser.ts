@@ -1,5 +1,5 @@
-import type { ChargeCatalog, FittingImport } from "../../fitting";
-import type { Ships } from "../../ships";
+import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { Ships } from "../ships";
 import { PROPULSION_NONE, USER_SETTINGS_VERSION, type ProfileSettings, type PropulsionSelection, type UserSettings } from "./userSettings";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";

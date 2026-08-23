@@ -1,4 +1,4 @@
-import type { AutopilotMode, SigResolutionClass } from "../../../sim";
+import type { AutopilotMode, SigResolutionClass } from "../../sim";
 import {
   USER_SETTINGS_VERSION,
   type FittedHullSummary,

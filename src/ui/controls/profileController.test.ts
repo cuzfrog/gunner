@@ -1,5 +1,5 @@
 import type { I18n, Language } from "../i18n";
-import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState } from "../settings";
+import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { Timer } from "../timer";
 import { ProfileControllerImpl, type ProfileController, type ProfileEls } from "./profileController";
 

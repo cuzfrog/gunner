@@ -2,7 +2,7 @@ import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitt
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
-import type { ClipboardProvider, SavedFittings, SettingsStore } from "../settings";
+import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
 import type { Timer } from "../timer";
 
 export function mockSettingsStore(): SettingsStore {

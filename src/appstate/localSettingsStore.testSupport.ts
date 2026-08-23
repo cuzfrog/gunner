@@ -1,5 +1,5 @@
-import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../../ships";
-import type { ChargeCatalog, FittingImport, ImportedFitting } from "../../fitting";
+import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
+import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
 import {

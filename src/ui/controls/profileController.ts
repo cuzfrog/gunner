@@ -1,5 +1,5 @@
 import { setText } from "./controlsDom";
-import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../settings";
+import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { TimeoutId, Timer } from "../timer";
 

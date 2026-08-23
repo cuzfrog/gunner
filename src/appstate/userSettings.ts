@@ -1,6 +1,6 @@
-import type { AutopilotMode, SigResolutionClass } from "../../sim";
-import type { FittedHull, PropulsionId, PropulsionStats, SkillLevel } from "../../ships";
-import type { Language } from "../i18n";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { FittedHull, PropulsionId, PropulsionStats, SkillLevel } from "../ships";
+import type { Language } from "./language";
 
 export const USER_SETTINGS_VERSION = 6 as const;
 export const PROPULSION_NONE = "none" as const;

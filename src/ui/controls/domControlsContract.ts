@@ -3,7 +3,7 @@ import type { HitChance } from "../../sim";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { SavedFittings, ClipboardProvider, SettingsStore, UserSettings } from "../settings";
+import type { SavedFittings, ClipboardProvider, SettingsStore, UserSettings } from "../../appstate";
 import type { Timer } from "../timer";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { Els } from "./elementsContract";

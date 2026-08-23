@@ -4,7 +4,7 @@ import { LocalSavedFittings } from "./savedFittings";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
 
-export function registerSettingsModule(cradle: AwilixContainer<object>): void {
+export function registerAppstateModule(cradle: AwilixContainer<object>): void {
   registerProfileTextModule(cradle);
   cradle.register({
     settingsStore: asClass(LocalSettingsStore).singleton(),

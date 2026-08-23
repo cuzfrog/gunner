@@ -1,7 +1,7 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n, Language } from "../../i18n";
-import type { ProfileParamOverrides } from "../../settings";
+import type { ProfileParamOverrides } from "../../../appstate";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretEls } from "./turretEls";

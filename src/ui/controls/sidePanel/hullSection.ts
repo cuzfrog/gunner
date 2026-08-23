@@ -2,7 +2,7 @@ import type { ImportedFitting } from "../../../fitting";
 import type { ShipProfile, PropulsionModule, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { FittedHullSummary, PropulsionSelection } from "../../settings";
+import type { FittedHullSummary, PropulsionSelection } from "../../../appstate";
 import { setText } from "../controlsDom";
 import type { Side } from "./side";
 import type { SidePanel } from "./sidePanelContract";

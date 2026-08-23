@@ -7,7 +7,7 @@ import {
   type ProfileParamOverrides,
   type PropulsionSelection,
   type UserSettings,
-} from "../../settings";
+} from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
 import type { I18n } from "../../i18n";

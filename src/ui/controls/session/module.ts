@@ -2,7 +2,7 @@ import { asFunction, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, PresetFittings } from "../../../fitting";
 import type { HitChance } from "../../../sim";
 import type { I18n } from "../../i18n";
-import type { SettingsStore } from "../../settings";
+import type { SettingsStore } from "../../../appstate";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { Els } from "../elementsContract";
 import type { PreferencesController } from "../preferencesController";

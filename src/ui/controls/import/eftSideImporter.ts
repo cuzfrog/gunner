@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { FittedHullSummary } from "../../settings";
+import type { FittedHullSummary } from "../../../appstate";
 import type { Side, SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 

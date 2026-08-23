@@ -2,7 +2,7 @@ import type { ChargeOption } from "../../fitting";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import { PALETTE } from "../palette";
 import type { I18n } from "../i18n";
-import type { UserSettings } from "../settings";
+import type { UserSettings } from "../../appstate";
 import {
   AGGRESSIVITY_MAX,
   AGGRESSIVITY_MIN,

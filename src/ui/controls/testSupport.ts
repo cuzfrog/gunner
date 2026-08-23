@@ -4,7 +4,7 @@ import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { SavedFittings, SettingsStore, TrackingUnit } from "../settings";
+import type { SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import {
   FakeElement,
   fakeDocument,

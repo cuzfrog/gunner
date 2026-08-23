@@ -1,6 +1,6 @@
-import type { AutopilotMode, SigResolutionClass } from "../../sim";
-import type { FittedHull, PropulsionStats, SkillLevel } from "../../ships";
-import type { Language } from "../i18n";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
+import type { Language } from "./language";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, UserSettings } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {

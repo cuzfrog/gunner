@@ -1,7 +1,7 @@
 import type { SigResolutionClass } from "../../../sim";
 import type { GunFamilies, ImportedTurret } from "../../../fitting";
 import type { ImageCatalog } from "../../icons";
-import { isSigResolutionClass } from "../../settings";
+import { isSigResolutionClass } from "../../../appstate";
 import { isHtmlButtonElement, isHtmlImageElement } from "../controlsDom";
 
 export interface SigResIconEls {

@@ -1,5 +1,5 @@
-import type { ChargeCatalog, FittingImport } from "../../fitting";
-import type { PropulsionId, PropulsionStats, Ships } from "../../ships";
+import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { PropulsionId, PropulsionStats, Ships } from "../ships";
 import { PROPULSION_NONE, type FittedHullSummary, type UserSettings } from "./userSettings";
 
 export class FittingBasis {

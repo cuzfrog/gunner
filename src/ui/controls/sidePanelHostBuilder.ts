@@ -1,4 +1,4 @@
-import type { SavedFittings } from "../settings";
+import type { SavedFittings } from "../../appstate";
 import type { ImportController } from "./import";
 import type { PopupGroup } from "./popup";
 import type { TurretController } from "./turret";

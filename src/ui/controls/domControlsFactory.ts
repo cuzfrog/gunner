@@ -1,7 +1,7 @@
 import type { AwilixContainer } from "awilix";
 import { SIG_RESOLUTIONS, type HitChance } from "../../sim";
 import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, PresetFittings } from "../../fitting";
-import type { ClipboardProvider, ProfileSettings, SavedFittings, SettingsStore, UserSettings } from "../settings";
+import type { ClipboardProvider, ProfileSettings, SavedFittings, SettingsStore, UserSettings } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ShipProfile, Ships } from "../../ships";

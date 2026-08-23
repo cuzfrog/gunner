@@ -1,6 +1,6 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fitting";
-import type { SavedFittings } from "../../settings";
+import type { SavedFittings } from "../../../appstate";
 import type { ShipProfile } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";

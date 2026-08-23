@@ -1,7 +1,7 @@
-import type { UserSettings, SavedFittings, SavedFitting } from "../settings";
+import type { UserSettings, SavedFittings, SavedFitting } from "../../appstate";
 import type { FittingImport } from "../../fitting";
 import type { Ships } from "../../ships";
-import { USER_SETTINGS_VERSION } from "../settings";
+import { USER_SETTINGS_VERSION } from "../../appstate";
 import {
   buildDomControls,
   getFake,

@@ -10,9 +10,10 @@ export type {
   TrackingUnit,
   UserSettings,
 } from "./userSettings";
+export type { Language } from "./language";
 export type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 export { ClipboardUnavailableError } from "./providers";
 export type { SettingsStore } from "./settingsStore";
 export type { SavedFitting, SavedFittings } from "./savedFittings";
 export { parseProfile, PROFILE_TEXT_HEADER, serializeProfile } from "./profileText";
-export { registerSettingsModule } from "./module";
+export { registerAppstateModule } from "./module";

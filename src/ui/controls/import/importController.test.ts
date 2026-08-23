@@ -1,4 +1,4 @@
-import { ClipboardUnavailableError } from "../../settings";
+import { ClipboardUnavailableError } from "../../../appstate";
 import { fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
 import { buildImportController, gunnerProfileText } from "./importController.testSupport";
 

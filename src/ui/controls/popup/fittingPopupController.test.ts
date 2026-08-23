@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../../../fitting";
-import type { SavedFitting, SavedFittings } from "../../settings";
+import type { SavedFitting, SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { PopupGroup } from "./popupGroup";

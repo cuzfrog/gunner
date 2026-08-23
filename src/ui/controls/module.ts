@@ -2,7 +2,7 @@ import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
-import type { ClipboardProvider, SavedFittings, SettingsStore, ProfileSettings } from "../settings";
+import type { ClipboardProvider, SavedFittings, SettingsStore, ProfileSettings } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";

@@ -1,6 +1,6 @@
 import { asFunction, type AwilixContainer } from "awilix";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { ClipboardProvider, SavedFittings, UserSettings } from "../../settings";
+import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";

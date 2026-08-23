@@ -3,7 +3,7 @@ import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting } from 
 import type { SigResolutionClass, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { ProfileParamOverrides } from "../../settings";
+import type { ProfileParamOverrides } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
 import type { TurretEls } from "./turretEls";
 import type { TurretStateResolver } from "./turretStateResolver";

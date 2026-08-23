@@ -1,4 +1,4 @@
-import type { TrackingUnit } from "../settings";
+import type { TrackingUnit } from "../../appstate";
 
 export interface TrackingInput {
   readonly rad: number;

@@ -1,5 +1,5 @@
 import type { FittingImport } from "../../../fitting";
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../settings";
+import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
 import type { Side, SidePanel } from "../sidePanel";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";

@@ -7,7 +7,7 @@ import {
   SIG_RESOLUTIONS,
   type TurretSpec,
 } from "../../sim";
-import { isAutopilotMode, type UserSettings } from "../settings";
+import { isAutopilotMode, type UserSettings } from "../../appstate";
 import type { Els } from "./elementsContract";
 import { num } from "./controlsDom";
 import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";

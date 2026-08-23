@@ -1,6 +1,6 @@
 import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ImportedTurret } from "../../../fitting";
-import { type ProfileParamOverrides, isSigResolutionClass } from "../../settings";
+import { type ProfileParamOverrides, isSigResolutionClass } from "../../../appstate";
 import type { SigResButtons } from "./sigResButtons";
 import type { TrackingInput } from "../trackingInput";
 import type { TurretEls } from "./turretEls";

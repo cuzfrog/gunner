@@ -1,6 +1,6 @@
 import type { I18n } from "../i18n";
 import { mockTrackingInput } from "./testSupport";
-import type { DisplayPreferences, SettingsStore } from "../settings";
+import type { DisplayPreferences, SettingsStore } from "../../appstate";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {

@@ -1,6 +1,6 @@
 import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fitting";
 import type { I18n } from "../../i18n";
-import type { SavedFitting, SavedFittings } from "../../settings";
+import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";

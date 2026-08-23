@@ -2,7 +2,7 @@ import { num, setText } from "./controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggressivity, positionFromAggressivity } from "./controlsFormat";
 import type { I18n, Language } from "../i18n";
 import type { TrackingInput } from "./trackingInput";
-import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../settings";
+import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../appstate";
 
 export interface PreferencesEls {
   readonly tracking: HTMLInputElement;

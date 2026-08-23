@@ -1,4 +1,4 @@
-import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type UserSettings } from "../../settings";
+import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
 import type { ChargeCatalog } from "../../../fitting";
 import { type AutopilotMode, type HitChance, SIG_RESOLUTIONS } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";

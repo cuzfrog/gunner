@@ -1,7 +1,7 @@
 import { SIG_RESOLUTIONS, type HitChance } from "../../../sim";
 import type { ChargeCatalog } from "../../../fitting";
 import type { I18n } from "../../i18n";
-import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../../settings";
+import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
 import { num } from "../controlsDom";
 import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber, parseManeuverAggressivity } from "../controlsFormat";
