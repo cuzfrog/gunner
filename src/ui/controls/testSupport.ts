@@ -1,10 +1,11 @@
-import { createContainer, InjectionMode, type AwilixContainer } from "awilix";
+import { asClass, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
+import { UiEventsImpl, type UiEvents } from "../events";
 import {
   FakeElement,
   fakeDocument,
@@ -111,6 +112,7 @@ function buildControlsCradle(document: Document): AwilixContainer<object> {
   globalThis.Element = FakeElement as unknown as typeof Element;
   const cradle = createContainer({ injectionMode: InjectionMode.PROXY });
   registerControlsModule(cradle);
+  cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
   return cradle;
 }
 
@@ -140,6 +142,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const presetFittings = vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings });
   const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings });
   const domControlsFactory = cradle.resolve<DomControlsFactory>("domControlsFactory");
+  const events = cradle.resolve<UiEvents>("uiEvents");
   const controls = new DomControls({
     domControlsDeps: {
       hitChance,
@@ -154,6 +157,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
       timer: mockTimer(),
       chargeCatalog,
       imageCatalog,
+      events,
     },
     domControlsFactory,
   });
@@ -199,6 +203,7 @@ export function buildSidePanel(
     onPointerDown: vi.fn(),
     onKeyDown: vi.fn(),
   });
+  const events = cradle.resolve<UiEvents>("uiEvents");
   const panel = cradle.resolve<(deps: SidePanelDeps) => SidePanel>("createSidePanel")({
     side,
     host,
@@ -209,6 +214,7 @@ export function buildSidePanel(
     fittingImport,
     imageCatalog,
     timer: mockTimer(),
+    events,
   });
   return { document, panel };
 }

@@ -2,6 +2,7 @@ import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } fr
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { UiEventsImpl } from "../../events";
 import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
@@ -78,6 +79,7 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
   const i18n = createI18n();
   const popupGroup = makePopupGroup();
   const applyFitting = vi.fn(() => options.applyFitting ?? IMPORTED_RIFTER);
+  const events = new UiEventsImpl();
   const previews = {
     toggle: vi.fn(),
     showInMenu: vi.fn(),
@@ -113,6 +115,7 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
     panelFor: () => panel,
     applyFitting,
     previews,
+    events,
   });
   popupGroup.register(controller.popup);
 

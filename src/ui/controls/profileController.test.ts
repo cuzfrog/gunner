@@ -1,6 +1,7 @@
 import type { I18n, Language } from "../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { Timer } from "../timer";
+import { UiEventsImpl } from "../events";
 import { ProfileControllerImpl, type ProfileController, type ProfileEls } from "./profileController";
 
 const BASE_PROFILE: ProfileSettings = {
@@ -121,8 +122,9 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const timer = createNoOpTimer();
   const captureCurrent = vi.fn(() => ({ ...BASE_PROFILE }));
   const onLoaded = vi.fn();
-  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, captureCurrent, onLoaded });
-  return { controller, els, settingsStore, timer, captureCurrent, onLoaded };
+  const events = new UiEventsImpl();
+  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, captureCurrent, onLoaded, events });
+  return { controller, els, settingsStore, timer, captureCurrent, onLoaded, events };
 }
 
 describe("ProfileController", () => {

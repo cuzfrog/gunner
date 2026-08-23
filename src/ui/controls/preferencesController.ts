@@ -3,6 +3,7 @@ import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggress
 import type { I18n, Language } from "../i18n";
 import type { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../appstate";
+import type { UiEvents } from "../events";
 
 export interface PreferencesEls {
   readonly tracking: HTMLInputElement;
@@ -43,7 +44,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
   private readonly sigResolution: () => number;
-  private readonly onLanguageChanged: () => void;
+  private readonly events: UiEvents;
 
   constructor(deps: {
     els: PreferencesEls;
@@ -51,14 +52,14 @@ export class PreferencesControllerImpl implements PreferencesController {
     settingsStore: SettingsStore;
     trackingInput: TrackingInput;
     sigResolution: () => number;
-    onLanguageChanged: () => void;
+    events: UiEvents;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.settingsStore = deps.settingsStore;
     this.trackingInput = deps.trackingInput;
     this.sigResolution = deps.sigResolution;
-    this.onLanguageChanged = deps.onLanguageChanged;
+    this.events = deps.events;
   }
 
   getSpeed(): number {
@@ -74,7 +75,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   setLanguage(language: Language): void {
     this.applyLanguage(language);
     this.savePreferences();
-    this.onLanguageChanged();
+    this.events.emitLanguageChanged();
   }
 
   applyPreferences(preferences: DisplayPreferences): void {

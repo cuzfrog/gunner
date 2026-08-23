@@ -1,6 +1,7 @@
 import { asFunction, type AwilixContainer } from "awilix";
 import { HINT_CANDIDATES, LORES, TIP_TEXT, type I18n } from "../../i18n";
 import type { Timer } from "../../timer";
+import type { UiEvents } from "../../events";
 import { HintRotatorImpl } from "./hintRotator";
 import type { HintRotator } from "./hintRotator";
 
@@ -9,6 +10,7 @@ interface HintRotatorDeps {
   readonly i18n: I18n;
   readonly timer: Timer;
   readonly intervalMs?: number;
+  readonly events: UiEvents;
 }
 
 export function registerHintsModule(cradle: AwilixContainer<object>): void {

@@ -6,6 +6,7 @@ import type { ClipboardProvider, SavedFittings, SettingsStore, ProfileSettings }
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
+import type { UiEvents } from "../events";
 import { ChoiceGroupImpl } from "./choiceGroup";
 import type { ChoiceGroup } from "./choiceGroup";
 import { createControlsEls } from "./elements";
@@ -30,12 +31,12 @@ import { registerTurretModule } from "./turret";
 
 interface PreferencesControllerDeps {
   els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
-  trackingInput: TrackingInput; sigResolution: () => number; onLanguageChanged: () => void;
+  trackingInput: TrackingInput; sigResolution: () => number; events: UiEvents;
 }
 
 interface ProfileControllerDeps {
   els: ProfileEls; settingsStore: SettingsStore; timer: Timer; i18n: I18n;
-  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void;
+  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void; events: UiEvents;
 }
 
 export function registerControlsModule(cradle: AwilixContainer<object>): void {
@@ -51,10 +52,10 @@ export function registerControlsModule(cradle: AwilixContainer<object>): void {
     trackingInput: asClass(TrackingInputImpl).singleton(),
     domControlsDeps: asFunction(({
       hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies,
-      presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog,
+      presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog, uiEvents,
     }): DomControlsDeps => ({
       hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies,
-      presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog,
+      presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog, events: uiEvents,
     })).singleton(),
     createChoiceGroup: asFunction(() => (group: HTMLElement, select: HTMLSelectElement, values: readonly string[]): ChoiceGroup => new ChoiceGroupImpl(group, select, values)),
     createEngagementReadout: asFunction(() => (readoutEls: ReadoutEls): EngagementReadout => new EngagementReadoutImpl(readoutEls)),

@@ -5,6 +5,7 @@ import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Side } from "../sidePanel";
+import type { UiEvents } from "../../events";
 
 export interface FittingPreviewManager {
   toggle(side: Side): void;
@@ -41,6 +42,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
     profileOf: (side: Side) => ShipProfile | undefined;
     fittingTextOf: (side: Side) => string | undefined;
+    events: UiEvents;
   }) {
     this.fittingImport = deps.fittingImport;
     this.imageCatalog = deps.imageCatalog;
@@ -50,6 +52,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     this.eyeBySide = deps.eyeBySide;
     this.profileOf = deps.profileOf;
     this.fittingTextOf = deps.fittingTextOf;
+    deps.events.onLanguageChanged(() => this.refresh());
   }
 
   toggle(side: Side): void {

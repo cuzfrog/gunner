@@ -2,6 +2,7 @@ import type { FittingSummary } from "../../../fitting";
 import { FakeElement, RIFTER } from "../testSupport";
 import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
 import type { FittingPreview } from "./fittingPreview";
+import { UiEventsImpl } from "../../events";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittingImport } from "../../../fitting";
@@ -32,6 +33,7 @@ function createManager(options: {
   const shipImage = new FakeElement();
   const eye = new FakeElement();
   eye.tagName = "BUTTON";
+  const events = new UiEventsImpl();
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(),
     propulsionVariantNames: vi.fn(),
@@ -55,6 +57,7 @@ function createManager(options: {
       eyeBySide: { attacker: eye as unknown as HTMLButtonElement, target: eye as unknown as HTMLButtonElement } as const,
       profileOf: (side: Side): ShipProfile | undefined => (side === "attacker" ? RIFTER : undefined),
       fittingTextOf: options.fittingTextOf ?? (() => "[Rifter, Brawler]\n200mm AutoCannon I"),
+      events,
     }),
     preview,
     shipImage,

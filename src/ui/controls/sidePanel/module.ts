@@ -6,6 +6,7 @@ import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
 import type { PopupGroup } from "./popup";
 import type { Side } from "./side";
+import type { UiEvents } from "../../events";
 import { collectSideEls } from "./elements";
 import type { Els } from "../elementsContract";
 import type { SidePanelElements } from "./elements";
@@ -22,6 +23,7 @@ interface SidePanelFactoryDeps {
   fittingImport: FittingImport;
   imageCatalog: ImageCatalog;
   timer: Timer;
+  events: UiEvents;
 }
 
 export function registerSidePanelModule(cradle: AwilixContainer<object>): void {

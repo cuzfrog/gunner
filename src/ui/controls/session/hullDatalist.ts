@@ -1,4 +1,5 @@
 import type { PresetFittings } from "../../../fitting";
+import type { UiEvents } from "../../events";
 import type { Els } from "../elementsContract";
 
 export interface HullDatalist {
@@ -9,9 +10,10 @@ export class HullDatalistImpl implements HullDatalist {
   private readonly els: Els;
   private readonly presetFittings: PresetFittings;
 
-  constructor(els: Els, presetFittings: PresetFittings) {
+  constructor(els: Els, presetFittings: PresetFittings, events: UiEvents) {
     this.els = els;
     this.presetFittings = presetFittings;
+    events.onLanguageChanged(() => this.populate());
   }
 
   populate(): void {

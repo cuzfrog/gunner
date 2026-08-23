@@ -187,4 +187,11 @@ describe("TurretController", () => {
     expect(captured.falloff).toBe(4000);
     expect(captured.ammo).toBe("Hail S");
   });
+
+  test("language change re-renders", () => {
+    const { controller, events } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    const render = vi.spyOn(controller, "render");
+    events.emitLanguageChanged();
+    expect(render).toHaveBeenCalled();
+  });
 });

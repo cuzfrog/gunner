@@ -6,6 +6,7 @@ import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ShipProfile, Ships } from "../../ships";
 import type { Timer } from "../timer";
+import type { UiEvents } from "../events";
 import {
   collectFittingPopupEls,
   collectImportEls,
@@ -23,7 +24,7 @@ import type { ImportController, ImportEls } from "./import";
 import type { FittingPopupController, FittingPopupEls, FittingPreview, FittingPreviewManager, Popup, PopupGroup } from "./popup";
 import type { PreferencesController, PreferencesEls } from "./preferencesController";
 import type { ProfileController, ProfileEls } from "./profileController";
-import type { EventRouter, EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { EventRouter, EventRouterHost, HullDatalist, SessionCodec } from "./session";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
 import type { TrackingInput } from "./trackingInput";
@@ -33,16 +34,16 @@ import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domCo
 type CreateChoiceGroup = (group: HTMLElement, select: HTMLSelectElement, values: readonly string[]) => ChoiceGroup;
 type CreateEngagementReadout = (readoutEls: ReadoutEls) => EngagementReadout;
 type CreateHintRotator = (deps: {
-  element: HTMLElement; i18n: I18n; timer: Timer; intervalMs?: number;
+  element: HTMLElement; i18n: I18n; timer: Timer; events: UiEvents; intervalMs?: number;
 }) => HintRotator;
-type CreateHullDatalist = (els: Els, presetFittings: PresetFittings) => HullDatalist;
+type CreateHullDatalist = (els: Els, presetFittings: PresetFittings, events: UiEvents) => HullDatalist;
 type CreatePreferencesController = (deps: {
   els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
-  trackingInput: TrackingInput; sigResolution: () => number; onLanguageChanged: () => void;
+  trackingInput: TrackingInput; sigResolution: () => number; events: UiEvents;
 }) => PreferencesController;
 type CreateProfileController = (deps: {
   els: ProfileEls; settingsStore: SettingsStore; timer: Timer; i18n: I18n;
-  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void;
+  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void; events: UiEvents;
 }) => ProfileController;
 type CreateFittingPreview = (deps: {
   container: HTMLElement; i18n: I18n; imageCatalog: ImageCatalog;
@@ -55,12 +56,13 @@ type CreateFittingPreviewManager = (deps: {
   eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
   profileOf: (side: Side) => ShipProfile | undefined;
   fittingTextOf: (side: Side) => string | undefined;
+  events: UiEvents;
 }) => FittingPreviewManager;
 type CreateFittingPopupController = (deps: {
   side: Side; popupGroup: PopupGroup; savedFittings: SavedFittings; presetFittings: PresetFittings;
   fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; els: FittingPopupEls;
   panelFor: (side: Side) => SidePanel; applyFitting: (text: string) => ImportedFitting | undefined;
-  previews: FittingPreviewManager;
+  previews: FittingPreviewManager; events: UiEvents;
 }) => FittingPopupController;
 type CreateImportController = (deps: {
   clipboard: ClipboardProvider; fittingImport: FittingImport; savedFittings: SavedFittings; popupGroup: PopupGroup;
@@ -74,13 +76,6 @@ type CreateSessionCodec = (deps: {
   chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
   settingsStore: SettingsStore; hitChance: HitChance; sessionControl: DomControlsHost; trackingInput: TrackingInput;
 }) => SessionCodec;
-type CreateLanguageRefresh = (deps: {
-  i18n: I18n; hullDatalist: HullDatalist; profileController: ProfileController;
-  attackerSide: SidePanel; targetSide: SidePanel; turretController: TurretController;
-  attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController;
-  previewManager: FittingPreviewManager; hintRotator: HintRotator;
-  setPlaying: (playing: boolean) => void; onDisplayChange: () => void;
-}) => LanguageRefresh;
 type CreateEventRouter = (deps: {
   els: Els; preferences: PreferencesController; profile: ProfileController; import: ImportController;
   attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; trackingInput: TrackingInput; popupGroup: PopupGroup;
@@ -105,8 +100,9 @@ export class DomControlsFactory {
       element: this.cradle.resolve<HTMLElement>("hintElement"),
       i18n: deps.i18n,
       timer: deps.timer,
+      events: deps.events,
     });
-    const hullDatalist = this.cradle.resolve<CreateHullDatalist>("createHullDatalist")(els, deps.presetFittings);
+    const hullDatalist = this.cradle.resolve<CreateHullDatalist>("createHullDatalist")(els, deps.presetFittings, deps.events);
     const engagementReadout = this.cradle.resolve<CreateEngagementReadout>("createEngagementReadout")(this.readoutEls());
     const sigResChoice = this.cradle.resolve<CreateChoiceGroup>("createChoiceGroup")(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
     let turretController!: TurretController;
@@ -114,7 +110,6 @@ export class DomControlsFactory {
     let attackerSide!: SidePanel;
     let targetSide!: SidePanel;
     let sessionCodec!: SessionCodec;
-    let languageRefresh!: LanguageRefresh;
     const attackerAmmoPopup: Popup = {
       isOpen: () => turretController.isAmmoPopupOpen(),
       open: () => turretController.openAmmoPopup(),
@@ -139,11 +134,11 @@ export class DomControlsFactory {
     });
     attackerSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
       side: "attacker", host: sidePanelHostBuilder.build("attacker"), popupGroup, els,
-      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
+      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer, events: deps.events,
     }));
     targetSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
       side: "target", host: sidePanelHostBuilder.build("target"), popupGroup, els,
-      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
+      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer, events: deps.events,
     }));
     const trackingInput = this.cradle.resolve<TrackingInput>("trackingInput");
     const preferencesController = this.cradle.resolve<CreatePreferencesController>("createPreferencesController")({
@@ -152,7 +147,7 @@ export class DomControlsFactory {
       settingsStore: deps.settingsStore,
       trackingInput,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
-      onLanguageChanged: () => languageRefresh.refresh(host.isPlaying()),
+      events: deps.events,
     });
     const profileController = this.cradle.resolve<CreateProfileController>("createProfileController")({
       els: this.profileEls(els),
@@ -161,6 +156,7 @@ export class DomControlsFactory {
       i18n: deps.i18n,
       captureCurrent: () => profileSettingsOf(sessionCodec.capture()),
       onLoaded: (name) => host.onProfileLoaded(name),
+      events: deps.events,
     });
     turretController = this.cradle.resolve<CreateTurretController>("createTurretController")({
       els: collectTurretEls(els),
@@ -181,6 +177,7 @@ export class DomControlsFactory {
         if (persist) profileController.updateDirtyState();
         host.fireConfigChange();
       },
+      events: deps.events,
     });
     sessionCodec = this.cradle.resolve<CreateSessionCodec>("createSessionCodec")({
       els, attackerSide, targetSide, turret: turretController, preferences: preferencesController,
@@ -211,6 +208,7 @@ export class DomControlsFactory {
       eyeBySide: { attacker: els.attackerFittingEye, target: els.targetFittingEye } as const,
       profileOf: (side) => (side === "attacker" ? attackerSide : targetSide).profile,
       fittingTextOf: (side) => (side === "attacker" ? attackerSide : targetSide).fittingText,
+      events: deps.events,
     });
     const fittingPopupBase = {
       popupGroup,
@@ -221,6 +219,7 @@ export class DomControlsFactory {
       i18n: deps.i18n,
       panelFor: (side: Side) => (side === "attacker" ? attackerSide : targetSide),
       previews: previewManager,
+      events: deps.events,
     };
     const attackerFittingPopup = this.cradle.resolve<CreateFittingPopupController>("createFittingPopupController")({
       side: "attacker",
@@ -233,20 +232,6 @@ export class DomControlsFactory {
       ...fittingPopupBase,
       els: collectFittingPopupEls(els, "target"),
       applyFitting: (text) => importController.importEftFitting("target", text, true),
-    });
-    languageRefresh = this.cradle.resolve<CreateLanguageRefresh>("createLanguageRefresh")({
-      i18n: deps.i18n,
-      hullDatalist,
-      profileController,
-      attackerSide,
-      targetSide,
-      turretController,
-      attackerFittingPopup,
-      targetFittingPopup,
-      previewManager,
-      hintRotator,
-      setPlaying: (playing) => host.setPlaying(playing),
-      onDisplayChange: () => host.fireDisplayChange(),
     });
     const eventRouter = this.cradle.resolve<CreateEventRouter>("createEventRouter")({
       els,
@@ -267,7 +252,7 @@ export class DomControlsFactory {
     return {
       deps, els, popupGroup, hintRotator, hullDatalist, preferencesController, profileController,
       engagementReadout, sigResChoice, attackerSide, targetSide, attackerAmmoPopup, turretController,
-      sessionCodec, importController, previewManager, attackerFittingPopup, targetFittingPopup, languageRefresh,
+      sessionCodec, importController, previewManager, attackerFittingPopup, targetFittingPopup,
       eventRouter,
     };
   }
@@ -313,7 +298,7 @@ export class DomControlsFactory {
 
   private sidePanelDeps(base: {
     side: Side; host: SidePanelHost; popupGroup: PopupGroup; els: Els; i18n: I18n; ships: Ships;
-    fittingImport: FittingImport; imageCatalog: ImageCatalog; timer: Timer;
+    fittingImport: FittingImport; imageCatalog: ImageCatalog; timer: Timer; events: UiEvents;
   }): SidePanelDeps {
     return {
       ...base,

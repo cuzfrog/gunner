@@ -6,6 +6,7 @@ import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting, UserSettings } from "../../../appstate";
 import type { Popup, PopupGroup } from "./popup";
 import type { Timer } from "../../timer";
+import type { UiEvents } from "../../events";
 import type { Side } from "./side";
 import type { ISidePanelSections } from "./sidePanelSections";
 import type { SidePanelElements } from "./elements";
@@ -153,4 +154,5 @@ export interface SidePanelDeps {
   fittingImport: FittingImport;
   imageCatalog: ImageCatalog;
   timer: Timer;
+  events: UiEvents;
 }

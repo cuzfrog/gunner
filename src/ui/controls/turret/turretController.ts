@@ -1,6 +1,7 @@
 import { SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { StatConditions } from "../../../ships";
+import type { UiEvents } from "../../events";
 import { num } from "../controlsDom";
 import { AmmoList, type AmmoListEls } from "./ammoList";
 import { SigResButtons } from "./sigResButtons";
@@ -24,6 +25,7 @@ export class TurretControllerImpl implements TurretController {
   private readonly sigResIcons: SigResIcons;
   private readonly inputSet: TurretInputSet;
   private readonly resolver: TurretControllerDeps["resolver"];
+  private readonly events: UiEvents;
   private attackerTurret?: ImportedTurret;
   private attackerCargoCharges: readonly CargoCharge[] = [];
   private attackerAmmo: string;
@@ -40,6 +42,7 @@ export class TurretControllerImpl implements TurretController {
     this.clearTurretOverrides = deps.clearTurretOverrides;
     this.onConfigChange = deps.onConfigChange;
     this.resolver = deps.resolver;
+    this.events = deps.events;
     this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
     this.ammoList = new AmmoList({
       els: this.ammoListEls(),
@@ -56,6 +59,7 @@ export class TurretControllerImpl implements TurretController {
       sigResButtons: new SigResButtons({ sigResOptions: this.els.sigResOptions }),
       overrides: this.overrides,
     });
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 

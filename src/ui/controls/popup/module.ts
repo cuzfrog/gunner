@@ -5,6 +5,7 @@ import type { ShipProfile } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Side, SidePanel } from "../sidePanel";
+import type { UiEvents } from "../../events";
 import { DomFittingPreview } from "./fittingPreview";
 import type { FittingPreview } from "./fittingPreview";
 import { FittingPopupControllerImpl } from "./fittingPopupController";
@@ -30,6 +31,7 @@ interface FittingPreviewManagerDeps {
   readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
   readonly profileOf: (side: Side) => ShipProfile | undefined;
   readonly fittingTextOf: (side: Side) => string | undefined;
+  readonly events: UiEvents;
 }
 
 interface FittingPopupControllerDeps {
@@ -44,6 +46,7 @@ interface FittingPopupControllerDeps {
   readonly panelFor: (side: Side) => SidePanel;
   readonly applyFitting: (text: string) => ImportedFitting | undefined;
   readonly previews: FittingPreviewManager;
+  readonly events: UiEvents;
 }
 
 export function registerPopupModule(cradle: AwilixContainer<object>): void {

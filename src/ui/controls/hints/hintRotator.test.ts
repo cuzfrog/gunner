@@ -1,4 +1,5 @@
 import { HINT_CANDIDATES, LORES, TIP_TEXT, type I18n, type Language } from "../../i18n";
+import { UiEventsImpl } from "../../events";
 import { HintRotatorImpl, type HintRotator } from "./hintRotator";
 import type { IntervalId, TimeoutId, Timer } from "../../timer";
 
@@ -57,7 +58,9 @@ function fakeI18n(language: Language = "en"): I18n {
 }
 
 function createRotator(element: HTMLElement, timer: Timer, language: Language = "en"): HintRotator {
-  return new HintRotatorImpl({ element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+  return new HintRotatorImpl({
+    element, i18n: fakeI18n(language), candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, events: new UiEventsImpl(),
+  });
 }
 
 describe("HintRotator", () => {
@@ -73,7 +76,9 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({
+      element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, events: new UiEventsImpl(),
+    });
     i18n.setLanguage("zh");
     rotator.refresh();
     expect(element.textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
@@ -161,7 +166,9 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({
+      element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, events: new UiEventsImpl(),
+    });
     rotator.showNext();
     timer.runTimeout();
     i18n.setLanguage("zh");
@@ -173,7 +180,9 @@ describe("HintRotator", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const i18n = fakeI18n("en");
     const timer = new ManualTimer();
-    const rotator = new HintRotatorImpl({ element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer });
+    const rotator = new HintRotatorImpl({
+      element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, events: new UiEventsImpl(),
+    });
     rotator.showNext();
     timer.runTimeout();
     rotator.showNext();
@@ -181,5 +190,18 @@ describe("HintRotator", () => {
     i18n.setLanguage("zh");
     rotator.refresh();
     expect(element.textContent).toBe(LORES[0].text.zh);
+  });
+
+  test("language changed refreshes the current slide", () => {
+    const element = new FakeElement() as unknown as HTMLElement;
+    const i18n = fakeI18n("en");
+    const timer = new ManualTimer();
+    const events = new UiEventsImpl();
+    new HintRotatorImpl({
+      element, i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES, timer, events,
+    });
+    i18n.setLanguage("zh");
+    events.emitLanguageChanged();
+    expect(element.textContent).toBe("hint.prefix 你可以从剪贴板导入舰船装配。");
   });
 });

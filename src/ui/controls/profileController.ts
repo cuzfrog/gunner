@@ -2,6 +2,7 @@ import { setText } from "./controlsDom";
 import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { TimeoutId, Timer } from "../timer";
+import type { UiEvents } from "../events";
 
 export interface ProfileEls {
   readonly profileName: HTMLInputElement;
@@ -30,6 +31,7 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly i18n: I18n;
   private readonly captureCurrent: () => ProfileSettings;
   private readonly onLoaded: (name: string) => void;
+  private readonly events: UiEvents;
   private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
 
@@ -40,6 +42,7 @@ export class ProfileControllerImpl implements ProfileController {
     i18n: I18n;
     captureCurrent: () => ProfileSettings;
     onLoaded: (name: string) => void;
+    events: UiEvents;
   }) {
     this.els = deps.els;
     this.settingsStore = deps.settingsStore;
@@ -47,6 +50,8 @@ export class ProfileControllerImpl implements ProfileController {
     this.i18n = deps.i18n;
     this.captureCurrent = deps.captureCurrent;
     this.onLoaded = deps.onLoaded;
+    this.events = deps.events;
+    this.events.onLanguageChanged(() => this.refresh(this.selectedName()));
   }
 
   selectedName(): string {

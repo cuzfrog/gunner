@@ -31,7 +31,6 @@ no-new-exports:
   - profileController.ts
   - session/eventRouter.ts
   - session/hullDatalist.ts
-  - session/languageRefresh.ts
   - session/module.ts
   - session/sessionCodec.ts
   - sidePanel/elements.ts

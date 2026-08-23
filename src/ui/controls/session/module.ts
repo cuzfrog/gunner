@@ -13,12 +13,11 @@ import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 import type { ImportController } from "../import";
+import type { UiEvents } from "../../events";
 import { EventRouter } from "./eventRouter";
 import type { EventRouterHost } from "./eventRouter";
 import { HullDatalistImpl } from "./hullDatalist";
 import type { HullDatalist } from "./hullDatalist";
-import { LanguageRefreshImpl } from "./languageRefresh";
-import type { LanguageRefresh } from "./languageRefresh";
 import { SessionCodecImpl } from "./sessionCodec";
 import type { SessionCodec } from "./sessionCodec";
 import type { SessionControl } from "./sessionControl";
@@ -38,19 +37,10 @@ interface EventRouterDeps {
   import: ImportController;
 }
 
-interface LanguageRefreshDeps {
-  i18n: I18n; hullDatalist: HullDatalist; profileController: ProfileController;
-  attackerSide: SidePanel; targetSide: SidePanel; turretController: TurretController;
-  attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController;
-  previewManager: FittingPreviewManager; hintRotator: HintRotator;
-  setPlaying: (playing: boolean) => void; onDisplayChange: () => void;
-}
-
 export function registerSessionModule(cradle: AwilixContainer<object>): void {
   cradle.register({
-    createHullDatalist: asFunction(() => (els: Els, presetFittings: PresetFittings): HullDatalist => new HullDatalistImpl(els, presetFittings)),
+    createHullDatalist: asFunction(() => (els: Els, presetFittings: PresetFittings, events: UiEvents): HullDatalist => new HullDatalistImpl(els, presetFittings, events)),
     createSessionCodec: asFunction(() => (deps: SessionCodecDeps): SessionCodec => new SessionCodecImpl(deps)),
-    createLanguageRefresh: asFunction(() => (deps: LanguageRefreshDeps): LanguageRefresh => new LanguageRefreshImpl(deps)),
     createEventRouter: asFunction(() => (deps: EventRouterDeps): EventRouter => new EventRouter(deps)),
   });
 }

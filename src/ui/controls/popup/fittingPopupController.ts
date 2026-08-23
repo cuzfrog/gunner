@@ -3,6 +3,7 @@ import type { SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Popup, PopupGroup } from "./popupGroup";
+import type { UiEvents } from "../../events";
 import { fittingAreaSelector } from "../controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FittingPopupRenderer } from "./fittingPopupRenderer";
@@ -23,6 +24,7 @@ interface FittingPopupControllerDeps {
   panelFor: (side: Side) => SidePanel;
   applyFitting: (text: string) => ImportedFitting | undefined;
   previews: FittingPreviewManager;
+  events: UiEvents;
 }
 
 export interface FittingPopupController {
@@ -65,6 +67,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
       focusTrigger: () => deps.els.trigger.focus(),
       contains: (target) => target instanceof Element && target.closest(fittingAreaSelector(this.side)) !== null,
     };
+    deps.events.onLanguageChanged(() => this.renderIfOpen());
   }
 
   get popup(): Popup { return this.popupValue; }

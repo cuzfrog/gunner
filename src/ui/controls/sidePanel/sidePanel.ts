@@ -13,6 +13,7 @@ import { formatNumber } from "../controlsFormat";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
+import type { UiEvents } from "../../events";
 import type { Popup } from "./popup";
 import type { SidePanelElements } from "./elements";
 import { HullSection } from "./hullSection";
@@ -51,7 +52,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, host, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer } = deps;
+    const { side, host, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events } = deps;
     this.side = side;
     this.host = host;
     this.els = els;
@@ -69,6 +70,13 @@ export class SidePanelImpl implements SidePanel {
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
+    events.onLanguageChanged(() => {
+      this.renderPropulsionOptions();
+      this.clearImportHint();
+      this.refreshHullInputs();
+      this.updateHullHint();
+      this.renderSkillOptions();
+    });
   }
 
   get profile(): ShipProfile | undefined { return this.profileValue; }

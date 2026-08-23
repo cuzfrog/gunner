@@ -7,6 +7,7 @@ import type { ProfileParamOverrides } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
 import type { TurretEls } from "./turretEls";
 import type { TurretStateResolver } from "./turretStateResolver";
+import type { UiEvents } from "../../events";
 
 export interface TurretControllerDeps {
   readonly els: TurretEls;
@@ -21,6 +22,7 @@ export interface TurretControllerDeps {
   readonly overrides: () => Partial<ProfileParamOverrides>;
   readonly clearTurretOverrides: () => void;
   readonly onConfigChange: (persist: boolean) => void;
+  readonly events: UiEvents;
 }
 
 export interface TurretController {

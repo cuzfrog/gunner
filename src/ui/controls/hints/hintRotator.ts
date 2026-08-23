@@ -1,5 +1,6 @@
 import type { I18n, SlideText } from "../../i18n";
 import type { IntervalId, Timer } from "../../timer";
+import type { UiEvents } from "../../events";
 
 export interface HintRotatorConfig {
   readonly element: HTMLElement;
@@ -9,6 +10,7 @@ export interface HintRotatorConfig {
   readonly lores: readonly SlideText[];
   readonly timer: Timer;
   readonly intervalMs?: number;
+  readonly events: UiEvents;
 }
 
 export interface HintRotator {
@@ -25,11 +27,12 @@ export class HintRotatorImpl implements HintRotator {
   private readonly lores: readonly SlideText[];
   private readonly timer: Timer;
   private readonly intervalMs: number;
+  private readonly events: UiEvents;
   private currentIndex = 0;
   private intervalId?: IntervalId;
   private isAnimating = false;
 
-  constructor({ element, i18n, candidates, tipText, lores, timer, intervalMs = 20_000 }: HintRotatorConfig) {
+  constructor({ element, i18n, candidates, tipText, lores, timer, intervalMs = 20_000, events }: HintRotatorConfig) {
     this.element = element;
     this.i18n = i18n;
     this.candidates = candidates;
@@ -37,6 +40,8 @@ export class HintRotatorImpl implements HintRotator {
     this.lores = lores;
     this.timer = timer;
     this.intervalMs = intervalMs;
+    this.events = events;
+    events.onLanguageChanged(() => this.refresh());
     this.renderFirst();
     this.start();
   }

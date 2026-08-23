@@ -2,6 +2,7 @@ import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n, Language } from "../../i18n";
 import type { ProfileParamOverrides } from "../../../appstate";
+import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretEls } from "./turretEls";
@@ -90,6 +91,7 @@ export function buildTurret(
     contains: vi.fn(),
   };
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
+  const events = new UiEventsImpl();
   const controller = new TurretControllerImpl({
     els,
     popup,
@@ -103,6 +105,7 @@ export function buildTurret(
     overrides,
     clearTurretOverrides,
     onConfigChange,
+    events,
   });
   return {
     document,
@@ -116,5 +119,6 @@ export function buildTurret(
     clearTurretOverrides,
     onConfigChange,
     popup,
+    events,
   };
 }

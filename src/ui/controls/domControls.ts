@@ -16,7 +16,7 @@ import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import { DomControlsFactory } from "./domControlsFactory";
 import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
-import type { EventRouter, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { EventRouter, HullDatalist, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
@@ -46,7 +46,6 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly previewManager: FittingPreviewManager;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
-  private readonly languageRefresh: LanguageRefresh;
   private readonly eventRouter: EventRouter;
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -71,9 +70,9 @@ export class DomControls implements Controls, DomControlsHost {
     this.previewManager = parts.previewManager;
     this.attackerFittingPopup = parts.attackerFittingPopup;
     this.targetFittingPopup = parts.targetFittingPopup;
-    this.languageRefresh = parts.languageRefresh;
     this.eventRouter = parts.eventRouter;
     this.wireControls();
+    this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.sessionCodec.restoreStartup(this.deps.settingsStore.loadStartupState());
     this.attackerSide.updateAlignTime();
     this.targetSide.updateAlignTime();
@@ -105,12 +104,21 @@ export class DomControls implements Controls, DomControlsHost {
   }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
-    this.profileController.updateDirtyState();
-    this.callbacks?.onDisplayChange();
+    this.notifyDisplayChange();
   }
 
   fireConfigChange(): void { this.callbacks?.onConfigChange(); }
-  fireDisplayChange(): void { this.callbacks?.onDisplayChange(); }
+
+  private onLanguageChanged(): void {
+    this.deps.i18n.translateDocument();
+    this.setPlaying(this.playing);
+    this.notifyDisplayChange();
+  }
+
+  private notifyDisplayChange(): void {
+    this.profileController.updateDirtyState();
+    this.callbacks?.onDisplayChange();
+  }
 
   onProfileLoaded(name: string): void {
     const profile = this.deps.settingsStore.loadProfile(name);

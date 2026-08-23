@@ -9,6 +9,8 @@ no-new-exports:
   - renderer.test.ts
   - timer.ts
   - timer.test.ts
+  - events.ts
+  - events.test.ts
 ---
 
 # ui
