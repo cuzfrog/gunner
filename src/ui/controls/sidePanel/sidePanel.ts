@@ -1,4 +1,4 @@
-import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
+import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
 import {
@@ -84,11 +84,11 @@ export class SidePanelImpl implements SidePanel {
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
     events.onLanguageChanged(() => {
-      this.renderPropulsionOptions();
-      this.clearImportHint();
-      this.refreshHullInputs();
-      this.updateHullHint();
-      this.renderSkillOptions();
+      this.sections.propulsion.renderPropulsionOptions();
+      this.sections.paste.clearImportHint();
+      this.sections.hull.refreshHullInputs();
+      this.sections.hull.updateHullHint();
+      this.sections.skill.renderSkillOptions();
     });
   }
 
@@ -128,7 +128,7 @@ export class SidePanelImpl implements SidePanel {
       skillLevel: this.sections.skill.currentSkillLevel(),
       overload: this.els.overload.checked,
       hull: this.profile?.name,
-      propulsion: this.currentPropulsionSelection(),
+      propulsion: this.sections.propulsion.currentPropulsionSelection(),
       fitting: this.fittingText,
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
@@ -145,9 +145,9 @@ export class SidePanelImpl implements SidePanel {
     this.els.mode.value = state.mode;
     this.els.range.value = String(state.range);
     this.sections.hull.loadHull(state.hull, state.propulsion);
-    this.setSkillLevel(state.skillLevel ?? 5);
-    this.setOverloadActive(state.overload ?? true);
-    this.setOverloadDisabled();
+    this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
+    this.sections.skill.setOverloadActive(state.overload ?? true);
+    this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (this.els.targetSig !== undefined && state.sig !== undefined) this.els.targetSig.value = String(state.sig);
     this.sections.stats.updateAlignTime();
@@ -158,14 +158,6 @@ export class SidePanelImpl implements SidePanel {
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
     return value;
   }
-
-  loadHull(hullName?: string, propulsionId?: PropulsionSelection): void { this.sections.hull.loadHull(hullName, propulsionId); }
-  applyImportedFitting(summary: FittedHullSummary): void { this.sections.hull.applyImportedFitting(summary); }
-  clearFittedHull(): void { this.sections.hull.clearFittedHull(); }
-  updateSpeedFromMass(): void { this.sections.stats.updateSpeedFromMass(); }
-  updateAlignTime(): void { this.sections.stats.updateAlignTime(); }
-  updateHullHint(module?: PropulsionModule): void { this.sections.hull.updateHullHint(module); }
-  refreshHullInputs(): void { this.sections.hull.refreshHullInputs(); }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
     return this.overrides.isOverridden(key);
@@ -188,24 +180,4 @@ export class SidePanelImpl implements SidePanel {
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
-  setOverloadDisabled(): void { this.sections.skill.setOverloadDisabled(); }
-  setOverloadActive(active: boolean): void { this.sections.skill.setOverloadActive(active); }
-  onOverloadButtonClick(): void { this.sections.skill.onOverloadButtonClick(); }
-  onSkillOrOverloadChange(updateInertia: boolean): void { this.sections.skill.onSkillOrOverloadChange(updateInertia); }
-  setSkillLevel(level: SkillLevel): void { this.sections.skill.setSkillLevel(level); }
-  renderSkillOptions(selectedValue: SkillLevel = this.sections.skill.currentSkillLevel() ?? 5): void {
-    this.sections.skill.renderSkillOptions(selectedValue);
-  }
-  showImportHint(key: string, isError = false): void { this.sections.paste.showImportHint(key, isError); }
-  clearImportHint(): void { this.sections.paste.clearImportHint(); }
-  clearImportHintTimeout(): void { this.sections.paste.clearImportHintTimeout(); }
-  onPastePopupPaste(event: ClipboardEvent): void { this.sections.paste.onPastePopupPaste(event); }
-  onImportFittingClick(): void { this.sections.paste.onImportFittingClick(); }
-  currentPropulsionSelection(): PropulsionSelection | undefined { return this.sections.propulsion.currentPropulsionSelection(); }
-  renderPropulsionOptions(selectedId: string = this.currentPropulsionSelection() ?? ""): void {
-    this.sections.propulsion.renderPropulsionOptions(selectedId);
-  }
-  onPropulsionChange(): void { this.sections.propulsion.onPropulsionChange(); }
-  onHullInput(): void { this.sections.hull.onHullInput(); }
-  onHullChange(): void { this.sections.hull.onHullChange(); }
 }

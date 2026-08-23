@@ -1,5 +1,5 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
-import { collectTurretEls } from "../elements";
+import { collectTurretEls } from "../elementCollectors";
 import type { ControlsCradle } from "../cradle";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";

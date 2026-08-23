@@ -139,8 +139,9 @@ describe("EventRouter", () => {
         inertia: Number.parseFloat(els.attackerInertia.value),
       })),
       recordOverride: vi.fn(),
-      updateSpeedFromMass: vi.fn(),
-      updateAlignTime: vi.fn(),
+      sections: {
+        stats: { updateSpeedFromMass: vi.fn(), updateAlignTime: vi.fn() },
+      },
     } as unknown as SidePanel;
     const targetSide = {
       capture: vi.fn(() => ({
@@ -150,8 +151,9 @@ describe("EventRouter", () => {
         sig: Number.parseFloat(els.targetSig.value),
       })),
       recordOverride: vi.fn(),
-      updateSpeedFromMass: vi.fn(),
-      updateAlignTime: vi.fn(),
+      sections: {
+        stats: { updateSpeedFromMass: vi.fn(), updateAlignTime: vi.fn() },
+      },
     } as unknown as SidePanel;
     const router = new EventRouter({
       els,
@@ -201,15 +203,15 @@ describe("EventRouter", () => {
     const attackerMass = getFake(globalThis.document, "attacker-mass");
     attackerMass.value = "1200000";
     attackerMass.trigger("input");
-    expect(attackerSide.updateSpeedFromMass).toHaveBeenCalled();
-    expect(attackerSide.updateAlignTime).toHaveBeenCalled();
+    expect(attackerSide.sections.stats.updateSpeedFromMass).toHaveBeenCalled();
+    expect(attackerSide.sections.stats.updateAlignTime).toHaveBeenCalled();
     expect(attackerSide.recordOverride).toHaveBeenCalledWith("attackerMass", 1_200_000);
 
     const targetMass = getFake(globalThis.document, "target-mass");
     targetMass.value = "1100000";
     targetMass.trigger("input");
-    expect(targetSide.updateSpeedFromMass).toHaveBeenCalled();
-    expect(targetSide.updateAlignTime).toHaveBeenCalled();
+    expect(targetSide.sections.stats.updateSpeedFromMass).toHaveBeenCalled();
+    expect(targetSide.sections.stats.updateAlignTime).toHaveBeenCalled();
     expect(targetSide.recordOverride).toHaveBeenCalledWith("targetMass", 1_100_000);
 
     expect(host.onConfigChange).toHaveBeenCalled();

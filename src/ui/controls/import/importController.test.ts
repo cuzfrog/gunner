@@ -30,7 +30,7 @@ describe("ImportController", () => {
     clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
     await controller.importFromClipboard("attacker");
     expect(attackerPanel.pastePopup.open).toHaveBeenCalled();
-    expect(attackerPanel.showImportHint).not.toHaveBeenCalled();
+    expect(attackerPanel.sections.paste.showImportHint).not.toHaveBeenCalled();
   });
 
   test("importFromClipboard shows a denied hint for a non-unavailable clipboard error", async () => {
@@ -38,7 +38,7 @@ describe("ImportController", () => {
     clipboard.readText.mockRejectedValue(new Error("denied"));
     await controller.importFromClipboard("attacker");
     expect(attackerPanel.pastePopup.open).not.toHaveBeenCalled();
-    expect(attackerPanel.showImportHint).toHaveBeenCalledWith("status.clipboardDenied", true);
+    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.clipboardDenied", true);
   });
 
   test("importFromClipboard closes an already-open paste popup and returns", async () => {
@@ -62,7 +62,7 @@ describe("ImportController", () => {
     const { controller, fittingImport, attackerPanel, savedFittings } = buildImportController(globalThis.document);
     fittingImport.importFitting.mockReturnValue(undefined);
     await controller.importFromText("attacker", "garbage");
-    expect(attackerPanel.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
+    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
 
@@ -83,7 +83,7 @@ describe("ImportController", () => {
       targetFitting: "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive",
     });
     await controller.importFromText("attacker", text);
-    expect(attackerPanel.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
+    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
 

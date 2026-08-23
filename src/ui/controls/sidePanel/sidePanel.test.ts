@@ -122,7 +122,7 @@ describe("SidePanel", () => {
   test("onHullChange delegates to the hull section", () => {
     const { document, panel } = buildSidePanel("attacker", shipsWithHull());
     getFake(document, "attacker-hull").value = "Rifter";
-    panel.onHullChange();
+    panel.sections.hull.onHullChange();
     expect(panel.profile).toBe(RIFTER);
     expect(panel.lastCommittedHull).toBe("Rifter");
   });

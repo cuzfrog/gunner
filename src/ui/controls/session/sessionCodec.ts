@@ -5,6 +5,7 @@ import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type S
 import { num } from "../controlsDom";
 import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
+import { applyStartupDefaults } from "./startupDefaults";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { Els } from "../elementsContract";
 import type { HintRotator } from "../hints";
@@ -146,8 +147,8 @@ export class SessionCodecImpl implements SessionCodec {
     if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-    this.attackerSide.updateAlignTime();
-    this.targetSide.updateAlignTime();
+    this.attackerSide.sections.stats.updateAlignTime();
+    this.targetSide.sections.stats.updateAlignTime();
     this.hintRotator.refresh();
     this.profileController.markLoaded(selectedName);
     this.preferencesController.savePreferences();
@@ -174,35 +175,16 @@ export class SessionCodecImpl implements SessionCodec {
     const preferences = this.settingsStore.loadPreferences();
     this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
-    this.setInitialDefaults();
-  }
-
-  private setInitialDefaults(): void {
-    this.setDefaultSkillAndOverload();
-    this.attackerSide.setOverloadDisabled();
-    this.targetSide.setOverloadDisabled();
-    this.setBestInitialDistance();
-    this.preferencesController.updateManeuverAggressivityDisplay();
-    this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-    this.sessionControl?.setPlaying(false);
-    this.attackerSide.renderPropulsionOptions();
-    this.targetSide.renderPropulsionOptions();
-    this.profileController.refresh();
-  }
-
-  private setDefaultSkillAndOverload(): void {
-    this.attackerSide.setSkillLevel(5);
-    this.targetSide.setSkillLevel(5);
-    this.attackerSide.setOverloadActive(true);
-    this.targetSide.setOverloadActive(true);
-  }
-
-  private setBestInitialDistance(): void {
-    const turret = this.turretController.currentTurretSpec(this.trackingInput.rad);
-    const targetState = this.targetSide.capture();
-    const best = this.hitChance.findBestDistance(targetState.speed, turret, targetState.sig ?? 1);
-    if (!Number.isFinite(best) || best <= 0) return;
-    this.els.initialDistance.value = String(Math.round(best));
-    this.els.targetRange.value = String(Math.round(best));
+    applyStartupDefaults({
+      attackerSide: this.attackerSide,
+      targetSide: this.targetSide,
+      turretController: this.turretController,
+      trackingInput: this.trackingInput,
+      els: this.els,
+      hitChance: this.hitChance,
+      preferencesController: this.preferencesController,
+      profileController: this.profileController,
+      sessionControl: this.sessionControl,
+    });
   }
 }

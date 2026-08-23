@@ -115,8 +115,8 @@ export class ImportControllerImpl implements ImportController {
         this.popupGroup.open(pastePopup);
         return;
       }
-      panel.clearImportHintTimeout();
-      panel.showImportHint("status.clipboardDenied", true);
+      panel.sections.paste.clearImportHintTimeout();
+      panel.sections.paste.showImportHint("status.clipboardDenied", true);
       return;
     }
     await this.importFromText(side, text);
@@ -124,13 +124,13 @@ export class ImportControllerImpl implements ImportController {
 
   async importFromText(side: Side, text: string): Promise<void> {
     const panel = this.panel(side);
-    panel.clearImportHintTimeout();
+    panel.sections.paste.clearImportHintTimeout();
     const trimmed = text.trimStart();
     if (this.profileTextImporter.isProfileText(trimmed)) {
       const parsed = parseProfile(trimmed);
       const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
       if (fitting === undefined) {
-        panel.showImportHint("status.fittingInvalid", true);
+        panel.sections.paste.showImportHint("status.fittingInvalid", true);
         return;
       }
       const imported = this.importEftFitting(side, fitting);

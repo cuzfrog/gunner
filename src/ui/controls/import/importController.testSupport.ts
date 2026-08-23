@@ -84,18 +84,17 @@ export function gunnerProfileText(overrides: { attackerFitting?: string; targetF
 }
 
 export class FakeSidePanel {
-  clearImportHintTimeout = vi.fn();
-  showImportHint = vi.fn();
-  clearFittedHull = vi.fn();
   clearOverrides = vi.fn();
   fittingText?: string;
   overrides: Record<string, unknown> = {};
   lastCommittedHull?: string;
-  loadHull = vi.fn();
-  applyImportedFitting = vi.fn();
   skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true }));
   pastePopup = fakePopup();
   getPastePopup = () => this.pastePopup;
+  sections = {
+    paste: { clearImportHintTimeout: vi.fn(), showImportHint: vi.fn() },
+    hull: { clearFittedHull: vi.fn(), loadHull: vi.fn(), applyImportedFitting: vi.fn() },
+  };
 }
 
 interface FakePopup {

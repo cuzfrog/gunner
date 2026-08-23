@@ -35,20 +35,20 @@ export class EftSideImporter {
     const conditions = panel.skillConditions();
     const imported = this.fittingImport.importFitting(text, conditions);
     if (!imported) {
-      panel.showImportHint("status.fittingInvalid", true);
+      panel.sections.paste.showImportHint("status.fittingInvalid", true);
       return undefined;
     }
-    panel.clearFittedHull();
+    panel.sections.hull.clearFittedHull();
     panel.fittingText = text;
     panel.clearOverrides();
-    panel.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
-    panel.applyImportedFitting(this.fittedHullSummary(imported));
+    panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
+    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(imported));
     if (side === "attacker") this.turret.applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
       this.onConfigPersisted();
     }
-    panel.showImportHint("status.fittingImported");
+    panel.sections.paste.showImportHint("status.fittingImported");
     return imported;
   }
 

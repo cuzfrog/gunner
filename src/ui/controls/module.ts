@@ -3,7 +3,8 @@ import { SIG_RESOLUTIONS } from "../../sim";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { profileSettingsOf } from "./controlsFormat";
-import { createControlsEls, collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elements";
+import { createControlsEls } from "./elements";
+import { collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
 import { DomControls } from "./domControls";
 import { ChoiceGroupImpl } from "./choiceGroup";
 import { EngagementReadoutImpl } from "./engagementReadout";
@@ -99,8 +100,8 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.eventRouter.setHost(c.controls);
   if (c.controls instanceof DomControls) c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
-  c.attackerSide.updateAlignTime();
-  c.targetSide.updateAlignTime();
+  c.attackerSide.sections.stats.updateAlignTime();
+  c.targetSide.sections.stats.updateAlignTime();
 }
 
 function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings) {

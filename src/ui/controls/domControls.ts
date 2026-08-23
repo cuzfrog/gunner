@@ -94,8 +94,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.turretController.popup);
     this.hullDatalist.populate();
-    this.attackerSide.renderSkillOptions();
-    this.targetSide.renderSkillOptions();
+    this.attackerSide.sections.skill.renderSkillOptions();
+    this.targetSide.sections.skill.renderSkillOptions();
   }
 
   isPlaying(): boolean { return this.playing; }

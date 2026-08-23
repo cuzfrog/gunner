@@ -1,6 +1,6 @@
 import { asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../cradle";
-import { collectImportEls } from "../elements";
+import { collectImportEls } from "../elementCollectors";
 import { ImportControllerImpl } from "./importController";
 
 export function registerImportModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {

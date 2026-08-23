@@ -8,7 +8,10 @@ no-new-exports:
   - module.ts
   - eventRouter.test.ts
   - index.ts
+  - inputHandlers.ts
+  - startupDefaults.ts
 ---
+
 
 
 # session

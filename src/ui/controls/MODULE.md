@@ -66,7 +66,9 @@ no-new-exports:
   - index.ts
   - profileController.test.ts
   - module.test.ts
+  - elementCollectors.ts
 ---
+
 
 
 

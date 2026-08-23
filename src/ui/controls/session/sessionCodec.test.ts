@@ -44,12 +44,12 @@ function mockSidePanel(side: "attacker" | "target", captured: ReturnType<SidePan
     stateFrom: vi.fn(() => captured),
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
-    setSkillLevel: vi.fn(),
-    setOverloadActive: vi.fn(),
-    setOverloadDisabled: vi.fn(),
-    updateAlignTime: vi.fn(),
-    renderPropulsionOptions: vi.fn(),
-    refreshHullInputs: vi.fn(),
+    sections: {
+      stats: { updateAlignTime: vi.fn() },
+      skill: { setSkillLevel: vi.fn(), setOverloadActive: vi.fn(), setOverloadDisabled: vi.fn() },
+      propulsion: { renderPropulsionOptions: vi.fn() },
+      hull: { refreshHullInputs: vi.fn(), updateHullHint: vi.fn() },
+    },
   } as unknown as SidePanel;
 }
 
@@ -247,14 +247,14 @@ describe("SessionCodec", () => {
     expect(profileController.restoreFromStartup).toHaveBeenCalled();
     expect(settingsStore.loadPreferences).toHaveBeenCalled();
     expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
-    expect(attacker.setSkillLevel).toHaveBeenCalledWith(5);
-    expect(attacker.setOverloadActive).toHaveBeenCalledWith(true);
-    expect(attacker.setOverloadDisabled).toHaveBeenCalled();
-    expect(attacker.renderPropulsionOptions).toHaveBeenCalled();
-    expect(target.setSkillLevel).toHaveBeenCalledWith(5);
-    expect(target.setOverloadActive).toHaveBeenCalledWith(true);
-    expect(target.setOverloadDisabled).toHaveBeenCalled();
-    expect(target.renderPropulsionOptions).toHaveBeenCalled();
+    expect(attacker.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
+    expect(attacker.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
+    expect(attacker.sections.skill.setOverloadDisabled).toHaveBeenCalled();
+    expect(attacker.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
+    expect(target.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
+    expect(target.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
+    expect(target.sections.skill.setOverloadDisabled).toHaveBeenCalled();
+    expect(target.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
     expect(setPlaying).toHaveBeenCalledWith(false);
     expect(profileController.refresh).toHaveBeenCalled();
   });

@@ -7,6 +7,7 @@ import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
+import { applyDisplayInput, applyShipInput } from "./inputHandlers";
 
 export interface EventRouterHost {
   onPlayPause(): void;
@@ -87,36 +88,45 @@ export class EventRouter {
     this.els.attackerImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("attacker"));
     this.els.targetImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("target"));
 
-    this.els.attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.attackerSide.onPastePopupPaste(event));
-    this.els.targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.targetSide.onPastePopupPaste(event));
+    this.els.attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.attackerSide.sections.paste.onPastePopupPaste(event));
+    this.els.targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.targetSide.sections.paste.onPastePopupPaste(event));
 
-    this.els.attackerHull.addEventListener("input", () => this.attackerSide.onHullInput());
-    this.els.attackerHull.addEventListener("change", () => this.attackerSide.onHullChange());
+    this.els.attackerHull.addEventListener("input", () => this.attackerSide.sections.hull.onHullInput());
+    this.els.attackerHull.addEventListener("change", () => this.attackerSide.sections.hull.onHullChange());
     this.els.attackerFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerFittingPopup.popup));
     this.els.attackerFittingEye.addEventListener("click", () => this.previewManager.toggle("attacker"));
     this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.turret.popup));
-    this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.onPropulsionChange());
+    this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.sections.propulsion.onPropulsionChange());
     this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getPropulsionVariantPopup()));
-    this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
-    this.els.attackerOverload.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(false));
-    this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.onOverloadButtonClick());
+    this.els.attackerSkills.addEventListener("change", () => this.attackerSide.sections.skill.onSkillOrOverloadChange(true));
+    this.els.attackerOverload.addEventListener("change", () => this.attackerSide.sections.skill.onSkillOrOverloadChange(false));
+    this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.sections.skill.onOverloadButtonClick());
 
-    this.els.targetHull.addEventListener("input", () => this.targetSide.onHullInput());
-    this.els.targetHull.addEventListener("change", () => this.targetSide.onHullChange());
+    this.els.targetHull.addEventListener("input", () => this.targetSide.sections.hull.onHullInput());
+    this.els.targetHull.addEventListener("change", () => this.targetSide.sections.hull.onHullChange());
     this.els.targetFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetFittingPopup.popup));
     this.els.targetFittingEye.addEventListener("click", () => this.previewManager.toggle("target"));
-    this.els.targetPropulsion.addEventListener("change", () => this.targetSide.onPropulsionChange());
+    this.els.targetPropulsion.addEventListener("change", () => this.targetSide.sections.propulsion.onPropulsionChange());
     this.els.targetPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getPropulsionVariantPopup()));
-    this.els.targetSkills.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(true));
-    this.els.targetOverload.addEventListener("change", () => this.targetSide.onSkillOrOverloadChange(false));
-    this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.onOverloadButtonClick());
+    this.els.targetSkills.addEventListener("change", () => this.targetSide.sections.skill.onSkillOrOverloadChange(true));
+    this.els.targetOverload.addEventListener("change", () => this.targetSide.sections.skill.onSkillOrOverloadChange(false));
+    this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.sections.skill.onOverloadButtonClick());
 
     this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getSkillPopup()));
     this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getSkillPopup()));
 
     const displayInputs: (keyof Els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
-      this.els[id].addEventListener("input", () => { this.applyDisplayInput(id); host.onDisplayChange(); });
+      this.els[id].addEventListener("input", () => {
+        applyDisplayInput(id, {
+          attackerSide: this.attackerSide,
+          targetSide: this.targetSide,
+          preferences: this.preferences,
+          turret: this.turret,
+          trackingInput: this.trackingInput,
+        });
+        host.onDisplayChange();
+      });
     }
 
     const shipInputs: (keyof Els)[] = [
@@ -135,7 +145,7 @@ export class EventRouter {
     for (const id of shipInputs) {
       this.els[id].addEventListener("input", () => {
         if (id === "attackerMode") this.preferences.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-        this.applyShipInput(id);
+        applyShipInput(id, this.attackerSide, this.targetSide);
         host.onConfigChange();
       });
     }
@@ -175,36 +185,4 @@ export class EventRouter {
     this.popupGroup.onKeyDown(event);
   }
 
-  private applyDisplayInput(id: keyof Els): void {
-    if (id === "tracking") this.preferences.updateTrackingFromInput();
-    if (id === "sigRes") this.preferences.updateTrackingForSigResolution();
-    if (id === "tracking") this.attackerSide.recordOverride("tracking", this.trackingInput.rad);
-    if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.turret.currentSigResClass());
-    if (id === "optimal" || id === "falloff") {
-      const spec = this.turret.currentTurretSpec();
-      if (id === "optimal") this.attackerSide.recordOverride("optimal", spec.optimal);
-      if (id === "falloff") this.attackerSide.recordOverride("falloff", spec.falloff);
-    }
-    if (id === "targetSig") {
-      const sig = this.targetSide.capture().sig ?? 1;
-      this.targetSide.recordOverride("targetSig", sig);
-    }
-  }
-
-  private applyShipInput(id: keyof Els): void {
-    if (id === "attackerMass") this.attackerSide.updateSpeedFromMass();
-    if (id === "targetMass") this.targetSide.updateSpeedFromMass();
-    if (id === "attackerMass" || id === "attackerInertia") this.attackerSide.updateAlignTime();
-    if (id === "targetMass" || id === "targetInertia") this.targetSide.updateAlignTime();
-    if (id === "attackerSpeed" || id === "attackerMass" || id === "attackerInertia") {
-      const state = this.attackerSide.capture();
-      const key = id === "attackerSpeed" ? "speed" : id === "attackerMass" ? "mass" : "inertia";
-      this.attackerSide.recordOverride(id, state[key]);
-    }
-    if (id === "targetSpeed" || id === "targetMass" || id === "targetInertia") {
-      const state = this.targetSide.capture();
-      const key = id === "targetSpeed" ? "speed" : id === "targetMass" ? "mass" : "inertia";
-      this.targetSide.recordOverride(id, state[key]);
-    }
-  }
 }

@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { PropulsionModule, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
+import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -47,30 +47,7 @@ export interface SidePanel {
   hideFittingPreview(): void;
   capture(): SidePanelState;
   restore(state: SidePanelState): void;
-  loadHull(hullName?: string, propulsionId?: PropulsionSelection): void;
-  applyImportedFitting(summary: FittedHullSummary): void;
-  clearFittedHull(): void;
-  updateSpeedFromMass(): void;
-  updateAlignTime(): void;
-  updateHullHint(module?: PropulsionModule): void;
-  refreshHullInputs(): void;
   skillConditions(): StatConditions;
-  setOverloadDisabled(): void;
-  setOverloadActive(active: boolean): void;
-  onOverloadButtonClick(): void;
-  onSkillOrOverloadChange(updateInertia: boolean): void;
-  setSkillLevel(level: SkillLevel): void;
-  renderSkillOptions(selectedValue?: SkillLevel): void;
-  showImportHint(key: string, isError?: boolean): void;
-  clearImportHint(): void;
-  clearImportHintTimeout(): void;
-  onPastePopupPaste(event: ClipboardEvent): void;
-  onImportFittingClick(): void;
-  currentPropulsionSelection(): PropulsionSelection | undefined;
-  renderPropulsionOptions(selectedId?: string): void;
-  onPropulsionChange(): void;
-  onHullInput(): void;
-  onHullChange(): void;
 }
 
 export interface SidePanelState {
