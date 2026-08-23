@@ -1,6 +1,6 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import { ReactiveAutopilot, registerSimModule, Vec2, ALL_ACTIVE, type AutopilotMode, type CombatantConfig, type EwarProjection, type Kinematics, type ShipConfig, type SimConfig, type SimCradle, type Simulation } from "../src/sim";
-import { registerShipsModule, type ShipsCradle } from "../src/ships";
+import { registerShipsModule, type ShipsCradle, type StatConditions } from "../src/ships";
 import { registerFittingModule, type FittingCradle, type FittingImport } from "../src/fitting";
 import { readFileSync } from "node:fs";
 
@@ -160,8 +160,8 @@ function parseNumber(flag: string, raw: string): number {
 }
 
 function parseBoolean(flag: string, raw: string): boolean {
-  if (raw === "true" || raw === "1") return true;
-  if (raw === "false" || raw === "0") return false;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
   throw new Error(`${flag} expects "true" or "false", got "${raw}"`);
 }
 
@@ -189,7 +189,7 @@ function parseMode(raw: string): AutopilotMode {
 
 function loadEwarProjection(fittingImport: FittingImport, path: string, overloaded: boolean): EwarProjection {
   const text = readFileSync(path, "utf-8");
-  const conditions = { skillLevel: 5 as const, overloaded: false };
+  const conditions: StatConditions = { skillLevel: 5, overloaded: false };
   const imported = fittingImport.importFitting(text, conditions);
   if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
   return { loadout: imported.ewar, activation: ALL_ACTIVE(imported.ewar), overloaded };

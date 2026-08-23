@@ -1,10 +1,7 @@
 import { createContainer, InjectionMode } from "awilix";
-import { registerSimModule } from "../src/sim";
-import { registerShipsModule } from "../src/ships";
-import { registerFittingModule } from "../src/fitting";
-import type { FittingCradle } from "../src/fitting";
-import type { ShipsCradle } from "../src/ships";
-import type { SimCradle } from "../src/sim";
+import { registerSimModule, type SimCradle } from "../src/sim";
+import { registerShipsModule, type ShipsCradle } from "../src/ships";
+import { registerFittingModule, type FittingCradle } from "../src/fitting";
 import { loadEwarProjection, parseParams } from "./sim-trace";
 
 type TestCradle = SimCradle & FittingCradle & ShipsCradle;
