@@ -20,7 +20,10 @@ no-new-exports:
   - sidePanelContract.ts
   - statsSection.test.ts
   - index.ts
+  - turretLink.ts
+  - overrides.ts
 ---
+
 
 
 # sidePanel

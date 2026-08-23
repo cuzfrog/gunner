@@ -3,7 +3,6 @@ import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
 import type { Popup } from "./popup";
-import type { Side } from "./side";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISkillOverloadSection } from "./sidePanelSections";
 
@@ -62,7 +61,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
 
   onSkillOrOverloadChange(updateInertia: boolean): void {
     this.panel.sections.stats.updateShipStats({ updateInertia, updateMass: false, updateSig: false });
-    if (this.panel.side === "attacker" && this.panel.profile && this.panel.fittingText) {
+    if (this.panel.profile && this.panel.fittingText) {
       this.panel.restoreTurret();
     }
     this.panel.host.persistConfigChange(this.panel.profile !== undefined);

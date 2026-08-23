@@ -9,7 +9,8 @@ import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
 import type { Side } from "./side";
 import type { ISidePanelSections } from "./sidePanelSections";
-import type { TurretController, TurretOverrides } from "../turret";
+import type { PanelOverrides } from "./overrides";
+import type { PanelTurretLink } from "./turretLink";
 import type { SidePanelElements } from "./elements";
 
 export interface SidePanel {
@@ -154,6 +155,6 @@ export interface SidePanelDeps {
   imageCatalog: ImageCatalog;
   timer: Timer;
   events: UiEvents;
-  turret?: TurretController;
-  turretOverrides?: TurretOverrides;
+  overrides: PanelOverrides;
+  turretLink: PanelTurretLink;
 }

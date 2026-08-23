@@ -65,6 +65,45 @@ describe("SidePanel", () => {
     expect(panel.lastCommittedHull).toBe("Rifter");
   });
 
+  test("attacker record lands in the turret overrides store", () => {
+    const { panel, turretOverrides } = buildSidePanel("attacker");
+    panel.recordOverride("attackerMass", 1000);
+    expect(panel.isOverridden("attackerMass")).toBe(true);
+    expect(turretOverrides.get().attackerMass).toBe(1000);
+  });
+
+  test("target record lands locally and does not affect the turret store", () => {
+    const { panel, turretOverrides } = buildSidePanel("target");
+    panel.recordOverride("targetMass", 2000);
+    expect(panel.isOverridden("targetMass")).toBe(true);
+    expect(turretOverrides.get().targetMass).toBeUndefined();
+  });
+
+  test("target restore round-trips overrides", () => {
+    const { panel } = buildSidePanel("target", shipsWithHull());
+    panel.profile = RIFTER;
+    panel.recordOverride("targetMass", 2000);
+    const state = panel.capture();
+    expect(state.overrides.targetMass).toBe(2000);
+    expect(state.hull).toBe("Rifter");
+    panel.clearOverrides();
+    expect(panel.isOverridden("targetMass")).toBe(false);
+    panel.restore(state);
+    expect(panel.isOverridden("targetMass")).toBe(true);
+  });
+
+  test("attacker restore does not clear the turret overrides store", () => {
+    const { panel, turretOverrides } = buildSidePanel("attacker", shipsWithHull());
+    panel.profile = RIFTER;
+    panel.recordOverride("attackerSpeed", 500);
+    const state = panel.capture();
+    expect(state.overrides).toEqual({});
+    expect(state.hull).toBe("Rifter");
+    panel.restore(state);
+    expect(turretOverrides.get().attackerSpeed).toBe(500);
+    expect(panel.isOverridden("attackerSpeed")).toBe(true);
+  });
+
   test("target overrides are captured and restored", () => {
     const { panel } = buildSidePanel("target");
     panel.recordOverride("targetMass", 2000);

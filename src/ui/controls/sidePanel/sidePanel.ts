@@ -22,7 +22,8 @@ import { PropulsionSection } from "./propulsionSection";
 import { SkillOverloadSection } from "./skillOverloadSection";
 import { StatsSection } from "./statsSection";
 import type { Side } from "./side";
-import type { TurretController, TurretOverrides } from "../turret";
+import type { PanelOverrides } from "./overrides";
+import type { PanelTurretLink } from "./turretLink";
 import {
   stateSliceOf,
   type FittingPopupControl,
@@ -49,13 +50,12 @@ export class SidePanelImpl implements SidePanel {
   readonly i18n: I18n;
   readonly timer: Timer;
   private readonly popupGroup: PopupGroup;
-  private readonly turret?: TurretController;
-  private readonly turretOverrides?: TurretOverrides;
+  private readonly overrides: PanelOverrides;
+  private readonly turretLink: PanelTurretLink;
   private hostValue: SidePanelHost = NOOP_HOST;
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
   private fittingTextValue?: string;
-  private overridesValue: Partial<ProfileParamOverrides> = {};
   private lastCommittedHullValue?: string;
   private importerValue?: SideImporter;
   readonly sections: ISidePanelSections;
@@ -63,7 +63,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, turret, turretOverrides } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink } = deps;
     this.side = side;
     this.popupGroup = popupGroup;
     this.els = els;
@@ -72,8 +72,8 @@ export class SidePanelImpl implements SidePanel {
     this.fittingImport = fittingImport;
     this.imageCatalog = imageCatalog;
     this.timer = timer;
-    this.turret = turret;
-    this.turretOverrides = turretOverrides;
+    this.overrides = overrides;
+    this.turretLink = turretLink;
     const hull = new HullSection({ panel: this, els, ships, i18n, imageCatalog });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
     const skill = new SkillOverloadSection({ panel: this, els, i18n });
@@ -130,7 +130,7 @@ export class SidePanelImpl implements SidePanel {
       hull: this.profile?.name,
       propulsion: this.currentPropulsionSelection(),
       fitting: this.fittingText,
-      overrides: this.side === "attacker" ? {} : this.overridesValue,
+      overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
       sig: this.side === "target" && this.els.targetSig !== undefined ? Math.max(num(this.els.targetSig), 1) : undefined,
     };
@@ -138,7 +138,7 @@ export class SidePanelImpl implements SidePanel {
 
   restore(state: SidePanelState): void {
     this.fittingText = state.fitting;
-    this.overridesValue = this.side === "attacker" ? {} : state.overrides;
+    this.overrides.set(state.overrides);
     this.els.speed.value = formatNumber(state.speed);
     this.els.mass.value = String(state.mass);
     this.els.inertia.value = formatNumber(state.inertia, 6);
@@ -168,38 +168,23 @@ export class SidePanelImpl implements SidePanel {
   refreshHullInputs(): void { this.sections.hull.refreshHullInputs(); }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
-    if (this.side === "attacker" && this.turretOverrides) return this.turretOverrides.get()[key] !== undefined;
-    return this.overridesValue[key] !== undefined;
+    return this.overrides.isOverridden(key);
   }
 
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void {
-    if (this.side === "attacker" && this.turretOverrides) {
-      const patch: Partial<ProfileParamOverrides> = { [key]: value };
-      this.turretOverrides.set(patch);
-    } else {
-      this.overridesValue[key] = value;
-    }
+    this.overrides.record(key, value);
   }
 
   clearOverrides(): void {
-    if (this.side === "attacker" && this.turretOverrides) {
-      this.turretOverrides.clear();
-    } else {
-      this.overridesValue = {};
-    }
+    this.overrides.clear();
   }
 
   clearTurret(): void {
-    if (this.side === "attacker" && this.turret) {
-      this.popupGroup.close(this.turret.popup);
-      this.turret.clear();
-    }
+    this.turretLink.clear();
   }
 
   restoreTurret(): void {
-    if (this.side === "attacker" && this.turret) {
-      this.turret.restore(this.fittingText, this.skillConditions());
-    }
+    this.turretLink.restore(this.fittingText, this.skillConditions());
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
