@@ -21,7 +21,7 @@ function nameToIdFixture(): {
 const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Propulsion Module": "mid",
   "Hybrid Weapon": "high",
-  "Shield Extender": "low",
+  "Shield Extender": "mid",
   "Rig Armor": "rig",
 };
 
@@ -36,7 +36,7 @@ describe("generateModuleSlotsContent", () => {
     expect(content).toMatch(/^export type ModuleSlot = "high" \| "mid" \| "low" \| "rig";\n/);
     expect(content).toContain('"1MN Afterburner I": "mid",');
     expect(content).toContain('"250mm Railgun I": "high",');
-    expect(content).toContain('"Medium Shield Extender II": "low",');
+    expect(content).toContain('"Medium Shield Extender II": "mid",');
   });
 
   test("throws when a name is missing from nameToId", () => {

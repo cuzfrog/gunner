@@ -27,7 +27,7 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Nanofiber Internal Structure": "low",
   "Overdrive Injector System": "low",
   "Reinforced Bulkhead": "low",
-  "Shield Extender": "low",
+  "Shield Extender": "mid",
   "Tracking Enhancer": "low",
   "Energized Armor Membrane": "low",
   "Rig Anchor": "rig",

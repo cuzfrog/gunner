@@ -776,6 +776,17 @@ Hobgoblin I x3
     expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
   });
 
+  test("places shield extenders in the mid section", async () => {
+    const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Widow", "Missile_Shield_Widow.txt");
+    const text = await Bun.file(path).text();
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const summary = importer.summarize(text);
+    const mid = summary!.sections.find((section) => section.kind === "mid");
+    expect(mid).toBeDefined();
+    const names = mid!.rows.map((row) => row.name);
+    expect(names).toContain("Thukker Large Shield Extender");
+  });
+
   test("renders empty slots and subsystem sections in order", () => {
     const text = `[Tengu, Subsystem]
 [Empty High slot]
