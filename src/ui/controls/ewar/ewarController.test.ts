@@ -81,7 +81,6 @@ describe("EwarController", () => {
     const webButton = webRow.children[0];
     expect(webButton.tagName).toBe("BUTTON");
     expect(webButton.getAttribute("aria-pressed")).toBe("true");
-    expect(webButton.title).toBe(WEB.moduleName);
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
     expect(webButton.children[1].textContent).toBe(WEB.moduleName);
@@ -147,13 +146,21 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
     const row = popup.children[0] as FakeElement;
+    const group = row.children[2];
     expect(row.className).toBe("ewar-row");
+    expect(group.children[0].disabled).toBe(false);
     row.children[0].trigger("click");
     expect(row.className).toBe("ewar-row ewar-row-inactive");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("false");
+    expect(group.children[0].disabled).toBe(true);
+    expect(group.children[1].disabled).toBe(true);
+    expect(group.children[2].disabled).toBe(true);
     row.children[0].trigger("click");
     expect(row.className).toBe("ewar-row");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("true");
+    expect(group.children[0].disabled).toBe(false);
+    expect(group.children[1].disabled).toBe(false);
+    expect(group.children[2].disabled).toBe(false);
   });
 
   test("labels are derived from the loadout contents", () => {

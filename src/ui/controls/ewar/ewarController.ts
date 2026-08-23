@@ -159,9 +159,8 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
       const active = state.activation.webs[i].active;
-      let button: HTMLButtonElement;
-      const onClick = () => this.toggleWeb(side, i, button);
-      button = this.createModuleButton(active, web.moduleName, onClick);
+      const button = this.createModuleButton(active, web.moduleName);
+      button.addEventListener("click", () => this.toggleWeb(side, i, button));
       const row = document.createElement("div");
       row.className = "ewar-row";
       row.appendChild(button);
@@ -175,9 +174,8 @@ export class EwarControllerImpl implements EwarController {
       const active = state.activation.disruptors[i].active;
       const row = document.createElement("div");
       row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      let button: HTMLButtonElement;
-      const onClick = () => this.toggleDisruptor(side, i, button, row);
-      button = this.createModuleButton(active, disruptor.moduleName, onClick);
+      const button = this.createModuleButton(active, disruptor.moduleName);
+      button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
       row.appendChild(button);
       const select = document.createElement("select");
       select.hidden = true;
@@ -200,6 +198,7 @@ export class EwarControllerImpl implements EwarController {
         scriptButton.setAttribute("data-value", value);
         scriptButton.textContent = this.i18n.t(scriptI18nKey(value));
         scriptButton.title = this.i18n.t(scriptHintI18nKey(value));
+        scriptButton.disabled = !active;
         group.appendChild(scriptButton);
       }
       row.appendChild(group);
@@ -209,12 +208,11 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private createModuleButton(active: boolean, moduleName: string, onClick?: () => void): HTMLButtonElement {
+  private createModuleButton(active: boolean, moduleName: string): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
-    button.title = moduleName;
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
     const img = document.createElement("img");
     if (iconUrl !== undefined) img.src = iconUrl;
@@ -225,7 +223,6 @@ export class EwarControllerImpl implements EwarController {
     nameSpan.textContent = moduleName;
     nameSpan.title = moduleName;
     button.appendChild(nameSpan);
-    if (onClick) button.addEventListener("click", onClick);
     return button;
   }
 
@@ -254,6 +251,10 @@ export class EwarControllerImpl implements EwarController {
     state.activation.disruptors[index].active = active;
     button.setAttribute("aria-pressed", String(active));
     row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    const scriptGroup = row.children[2];
+    for (const child of scriptGroup.children) {
+      (child as HTMLButtonElement).disabled = !active;
+    }
     this.updateSummary(side);
     this.host?.onConfigChange();
   }
