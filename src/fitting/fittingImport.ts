@@ -9,7 +9,15 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { SIG_RESOLUTIONS, type DisruptionScript, type EwarLoadout, type SigResolutionClass, type StackingPenalty, type StasisWebSpec, type TrackingDisruptorSpec } from "../sim";
+import {
+  SIG_RESOLUTIONS,
+  type DisruptionScript,
+  type EwarLoadout,
+  type SigResolutionClass,
+  type StackingPenalty,
+  type StasisWebSpec,
+  type TrackingDisruptorSpec,
+} from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
