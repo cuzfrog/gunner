@@ -63,6 +63,29 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
   });
 
+  test("parseUserSettings round-trips ewar activation", () => {
+    const parsed = makeParser().parseUserSettings(JSON.stringify(DEFAULT_SETTINGS));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation).toEqual(DEFAULT_SETTINGS.attackerEwarActivation);
+    expect(parsed!.targetEwarActivation).toEqual(DEFAULT_SETTINGS.targetEwarActivation);
+  });
+
+  test("parseUserSettings rejects an invalid disruptor script", () => {
+    const bad = {
+      ...DEFAULT_SETTINGS,
+      attackerEwarActivation: { disruptors: [{ active: true, script: "range" }] },
+    };
+    expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
+  });
+
+  test("parseUserSettings accepts missing ewar activation fields", () => {
+    const { attackerEwarActivation: _, targetEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
+    const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation).toBeUndefined();
+    expect(parsed!.targetEwarActivation).toBeUndefined();
+  });
+
   test("parseProfiles skips invalid profiles", () => {
     const profiles: Record<string, unknown> = { good: DEFAULT_PROFILE, bad: { ...DEFAULT_PROFILE, version: 4 } };
     const parsed = makeParser().parseProfiles(JSON.stringify(profiles));

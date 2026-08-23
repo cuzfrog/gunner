@@ -43,4 +43,23 @@ describe("profileText", () => {
     const fitting = `[Rifter, Brawler]\n---\n5MN Microwarpdrive`;
     expect(() => serializeProfile({ ...MINIMAL_PROFILE, attackerFitting: fitting })).toThrow();
   });
+
+  test("round-trips a profile with ewar activations", () => {
+    const profile: ProfileSettings = {
+      ...MINIMAL_PROFILE,
+      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "trackingSpeed" }] },
+      targetEwarActivation: { webs: [false], disruptors: [{ active: false, script: "none" }] },
+    };
+    const text = serializeProfile(profile);
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(profile);
+  });
+
+  test("a legacy profile without ewar activations parses with defaults", () => {
+    const text = `${PROFILE_TEXT_HEADER}\nversion=6\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nammo=Hail S`;
+    const parsed = parseProfile(text);
+    expect(parsed).not.toBeUndefined();
+    expect(parsed?.attackerEwarActivation).toBeUndefined();
+    expect(parsed?.targetEwarActivation).toBeUndefined();
+  });
 });

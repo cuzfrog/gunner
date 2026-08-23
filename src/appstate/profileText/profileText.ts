@@ -81,7 +81,10 @@ export function parseProfile(text: string): ProfileSettings | undefined {
     const field = DOT_KEY_TO_FIELD.get(dotKey);
     if (field === undefined) continue;
     const parsed = parseScalarValue(field, value);
-    if (parsed === undefined) return undefined;
+    if (parsed === undefined) {
+      if (field === "attackerEwarActivation" || field === "targetEwarActivation") continue;
+      return undefined;
+    }
     raw = { ...raw, [field]: parsed };
   }
 

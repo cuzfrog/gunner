@@ -4,10 +4,12 @@ import {
   type FittedHullSummary,
   type ProfileParamOverrides,
   type ProfileSettings,
+  type StoredEwarActivation,
 } from "../userSettings";
 import {
   isAutopilotMode,
   isNonNegative,
+  isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isPositive,
   isSigResolutionClass,
@@ -27,6 +29,7 @@ export function parseScalarValue(field: ScalarField, value: string): ScalarValue
   }
   if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
+  if (field === "attackerEwarActivation" || field === "targetEwarActivation") return parseEwarActivation(value);
   if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
   if (field === "attackerAmmo") return value;
 
@@ -115,6 +118,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     attackerFitting: raw.attackerFitting,
     attackerOverrides: raw.attackerOverrides,
     attackerFittedHull: raw.attackerFittedHull,
+    attackerEwarActivation: raw.attackerEwarActivation,
     attackerAmmo: raw.attackerAmmo,
     targetSkillLevel: raw.targetSkillLevel,
     targetOverload: raw.targetOverload,
@@ -123,8 +127,18 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     targetFitting: raw.targetFitting,
     targetOverrides: raw.targetOverrides,
     targetFittedHull: raw.targetFittedHull,
+    targetEwarActivation: raw.targetEwarActivation,
     maneuverAggressivity: raw.maneuverAggressivity,
   };
+}
+
+export function parseEwarActivation(value: string): StoredEwarActivation | undefined {
+  try {
+    const parsed = JSON.parse(value);
+    return isOptionalEwarActivation(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {

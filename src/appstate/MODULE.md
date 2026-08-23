@@ -3,7 +3,7 @@ no-new-exports:
   - defaultPreferences.ts
   - fittingBasis.ts
   - cradle.ts
-  - index.ts
+  # - index.ts  # M5 public DTO exports for stored ewar activation
   - language.ts
   - localSettingsStore.test.ts
   - localSettingsStore.testSupport.ts
@@ -17,9 +17,9 @@ no-new-exports:
   - settingsStore.ts
   - urlCodec.test.ts
   - urlCodec.ts
-  - userSettings.ts
+  # - userSettings.ts  # M5 ewar stored activation DTOs
   - validators.test.ts
-  - validators.ts
+  # - validators.ts  # M5 ewar stored activation validators
 ---
 
 
@@ -27,4 +27,4 @@ no-new-exports:
 
 Application state persistence and serialization for user settings, profiles, saved fittings, URL sharing, and EFT profile text. Depends on ships/fitting/sim domain modules. Consumed by ui through its index.
 
-The public surface is the cross-boundary DTOs and provider interfaces plus the profile-text functions. Profile-text parsing and serialization lives in the `profileText` sub-module, which exposes `parseProfile`, `serializeProfile`, and `PROFILE_TEXT_HEADER` through its index. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.
+The public surface is the cross-boundary DTOs and provider interfaces plus the profile-text functions. `UserSettings` and `ProfileSettings` now carry optional per-side e-war activation (`attackerEwarActivation`, `targetEwarActivation`) for persisting web on/off states and disruptor script choices. Profile-text parsing and serialization lives in the `profileText` sub-module, which exposes `parseProfile`, `serializeProfile`, and `PROFILE_TEXT_HEADER` through its index. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.

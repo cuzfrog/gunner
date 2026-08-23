@@ -1,5 +1,5 @@
 import type { ProfileSettings } from "./userSettings";
-import { profilesEqual } from "./validators";
+import { isOptionalEwarActivation, profilesEqual } from "./validators";
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
@@ -24,6 +24,32 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
     ...overrides,
   };
 }
+
+describe("isOptionalEwarActivation", () => {
+  test("accepts a valid activation with webs and scripted disruptors", () => {
+    expect(isOptionalEwarActivation({ webs: [true, false], disruptors: [{ active: true, script: "optimalRange" }] })).toBe(true);
+  });
+
+  test("accepts undefined", () => {
+    expect(isOptionalEwarActivation(undefined)).toBe(true);
+  });
+
+  test("accepts empty activation", () => {
+    expect(isOptionalEwarActivation({})).toBe(true);
+  });
+
+  test("rejects a non-boolean web entry", () => {
+    expect(isOptionalEwarActivation({ webs: [true, "false"] })).toBe(false);
+  });
+
+  test("rejects an unknown disruptor script", () => {
+    expect(isOptionalEwarActivation({ disruptors: [{ active: true, script: "range" }] })).toBe(false);
+  });
+
+  test("rejects a disruptor row missing the active flag", () => {
+    expect(isOptionalEwarActivation({ disruptors: [{ script: "none" }] })).toBe(false);
+  });
+});
 
 describe("profilesEqual", () => {
   test("detects equality independent of key order", () => {

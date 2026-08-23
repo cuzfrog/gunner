@@ -55,6 +55,14 @@ export const FULL_PROFILE: ProfileSettings = {
   targetOverrides: { targetMass: 11_000_000 },
   attackerFittedHull: ATTACKER_FITTED_HULL,
   targetFittedHull: TARGET_FITTED_HULL,
+  attackerEwarActivation: {
+    webs: [true, false],
+    disruptors: [
+      { active: true, script: "optimalRange" },
+      { active: false, script: "trackingSpeed" },
+    ],
+  },
+  targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "none" }] },
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {

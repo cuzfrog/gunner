@@ -1,7 +1,7 @@
-import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { AutopilotMode, DisruptionScript, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, UserSettings } from "./userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation, UserSettings } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -13,6 +13,26 @@ export function isSigResolutionClass(value: unknown): value is SigResolutionClas
 
 export function isAutopilotMode(value: unknown): value is AutopilotMode {
   return value === "orbit" || value === "keepAtRange" || value === "midships";
+}
+
+export function isDisruptionScript(value: unknown): value is DisruptionScript {
+  return value === "none" || value === "optimalRange" || value === "trackingSpeed";
+}
+
+export function isOptionalEwarActivation(value: unknown): value is StoredEwarActivation | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const s = value as Record<string, unknown>;
+  if (s.webs !== undefined && (!Array.isArray(s.webs) || !s.webs.every((v) => typeof v === "boolean"))) return false;
+  if (s.disruptors !== undefined) {
+    if (!Array.isArray(s.disruptors)) return false;
+    for (const item of s.disruptors) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+      const d = item as Record<string, unknown>;
+      if (typeof d.active !== "boolean" || !isDisruptionScript(d.script)) return false;
+    }
+  }
+  return true;
 }
 
 export function isSkillLevel(value: unknown): value is SkillLevel {

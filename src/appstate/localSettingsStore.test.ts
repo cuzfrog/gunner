@@ -248,6 +248,29 @@ describe("LocalSettingsStore", () => {
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
 
+  test("saveProfile and loadProfile round-trip ewar activations", () => {
+    const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const profile = profileFrom(DEFAULT_SETTINGS);
+    store.saveProfile("brawler", profile);
+    expect(store.loadProfile("brawler")).toEqual(profile);
+  });
+
+  test("saveProfile rejects a profile with an invalid ewar activation script", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, script: "range" }] } };
+    store.saveProfile("brawler", bad as ProfileSettings);
+    expect(store.listProfiles()).toEqual([]);
+  });
+
+  test("loadProfile strips legacy profiles without ewar activation fields", () => {
+    const storage = fakeStorage();
+    const { attackerEwarActivation: _, targetEwarActivation: __, ...legacy } = DEFAULT_PROFILE;
+    storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: legacy }));
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadProfile("brawler")).toEqual(legacy);
+  });
+
   test("saveProfile strips display preference fields from the stored profile", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });

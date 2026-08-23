@@ -40,6 +40,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   targetSkillLevel: 5,
   targetOverload: true,
   targetSig: 40,
+  attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "none" }] },
+  targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
   attackerAmmo: "Hail S",
   simSpeed: 4,
   language: "en",

@@ -7,6 +7,8 @@ export type {
   ProfileSettings,
   PropulsionSelection,
   StartupState,
+  StoredDisruptionScript,
+  StoredEwarActivation,
   TrackingUnit,
   UserSettings,
 } from "./userSettings";

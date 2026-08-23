@@ -9,6 +9,7 @@ import {
   isLanguage,
   isNonNegative,
   isOptionalBoolean,
+  isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isFiniteNumber,
   isOptionalFittingText,
@@ -127,6 +128,8 @@ export class SettingsParser {
       isOptionalFittingText(s.targetFitting) &&
       isOptionalProfileParamOverrides(s.attackerOverrides) &&
       isOptionalProfileParamOverrides(s.targetOverrides) &&
+      isOptionalEwarActivation(s.attackerEwarActivation) &&
+      isOptionalEwarActivation(s.targetEwarActivation) &&
       isOptionalNonEmptyString(s.attackerAmmo)
     );
   }

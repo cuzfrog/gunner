@@ -84,6 +84,18 @@ describe("profileText parsing", () => {
     expect(parsed).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
   });
 
+  test("parseProfile ignores an ewar activation line with an invalid disruptor script", () => {
+    const text = `${serializeProfile(MINIMAL_PROFILE)}\nattacker.ewarActivation={"webs":[true],"disruptors":[{"active":true,"script":"range"}]}`;
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(MINIMAL_PROFILE);
+  });
+
+  test("parseProfile ignores an ewar activation line with malformed JSON", () => {
+    const text = `${serializeProfile(MINIMAL_PROFILE)}\nattacker.ewarActivation={not json`;
+    const parsed = parseProfile(text);
+    expect(parsed).toEqual(MINIMAL_PROFILE);
+  });
+
   test("parseProfile still accepts a legacy attacker.ammo line", () => {
     const text = `${PROFILE_TEXT_HEADER}\nversion=6\nattacker.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
     const parsed = parseProfile(text);
