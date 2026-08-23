@@ -12,9 +12,9 @@ export interface FittingSummary {
 }
 
 const WEAPON_PATTERNS: { readonly pattern: RegExp; readonly label: string }[] = [
-  { pattern: /Blaster/, label: "Blaster" },
+  { pattern: /Blaster|Particle Accelerator/, label: "Blaster" },
   { pattern: /Rail(?:gun)?/, label: "Rail" },
-  { pattern: /AutoCannon/, label: "AC" },
+  { pattern: /AutoCannon|Machine Gun/, label: "AC" },
   { pattern: /Artillery/, label: "Art" },
   { pattern: /Howitzer/, label: "Art" },
   { pattern: /Light Missile Launcher/, label: "Missile" },

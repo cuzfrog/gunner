@@ -74,6 +74,16 @@ describe("resolveWeapon", () => {
     expect(resolveWeapon(modules, drones)).toBe("Fighter");
   });
 
+  test("returns Blaster for Particle Accelerator variant", () => {
+    const modules = [{ name: "Modal Light Neutron Particle Accelerator I", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("Blaster");
+  });
+
+  test("returns AC for Machine Gun autocannon variant", () => {
+    const modules = [{ name: "150mm Light Gallium Machine Gun", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("AC");
+  });
+
   test("returns DPS for fit without identifiable weapon", () => {
     const modules = [{ name: "Stasis Webifier II", offline: false }];
     expect(resolveWeapon(modules, [])).toBe("");
