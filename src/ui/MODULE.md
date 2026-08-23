@@ -12,7 +12,6 @@ no-new-exports:
   - events.ts
   - events.test.ts
   - cradle.ts
-  - iconIds.ts
 ---
 
 

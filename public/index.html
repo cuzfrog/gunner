@@ -234,6 +234,18 @@
           </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </div>
+
+        <div class="field-group ewar-group" id="attacker-ewar-field">
+          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger"
+                  aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
+                  aria-describedby="attacker-ewar-summary" disabled>
+            <span class="ewar-label" data-i18n="label.modules">Modules</span>
+            <span class="ewar-summary-row" id="attacker-ewar-summary"></span>
+            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+          </button>
+          <div class="ewar-popup" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
+        </div>
+
         <div class="field-group propulsion-group">
           <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
@@ -252,17 +264,6 @@
             <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
-        </div>
-
-        <div class="field-group ewar-group" id="attacker-ewar-field">
-          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger"
-                  aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
-                  aria-describedby="attacker-ewar-summary" disabled>
-            <span class="ewar-label" data-i18n="label.ewar.mixed">E-war</span>
-            <span class="ewar-summary-row"><span class="ewar-summary-value" id="attacker-ewar-summary"></span></span>
-            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
-          </button>
-          <div class="ewar-popup" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-row">
@@ -402,6 +403,18 @@
           </div>
           <span class="hull-hint" id="target-hull-hint"></span>
         </div>
+
+        <div class="field-group ewar-group" id="target-ewar-field">
+          <button type="button" id="target-ewar-trigger" class="ewar-trigger"
+                  aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
+                  aria-describedby="target-ewar-summary" disabled>
+            <span class="ewar-label" data-i18n="label.modules">Modules</span>
+            <span class="ewar-summary-row" id="target-ewar-summary"></span>
+            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+          </button>
+          <div class="ewar-popup" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
+        </div>
+
         <div class="field-row">
           <div class="field-group">
             <span class="field-label-row">
@@ -445,17 +458,6 @@
             <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
-        </div>
-
-        <div class="field-group ewar-group" id="target-ewar-field">
-          <button type="button" id="target-ewar-trigger" class="ewar-trigger"
-                  aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
-                  aria-describedby="target-ewar-summary" disabled>
-            <span class="ewar-label" data-i18n="label.ewar.mixed">E-war</span>
-            <span class="ewar-summary-row"><span class="ewar-summary-value" id="target-ewar-summary"></span></span>
-            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
-          </button>
-          <div class="ewar-popup" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-row">

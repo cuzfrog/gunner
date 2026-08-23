@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 import { readFileSync, writeFileSync } from "node:fs";
 import * as process from "node:process";
-import { CHARGES, DISRUPTION_SCRIPTS, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS } from "../src/fitting/fittingDb";
 import { MODULE_SLOTS } from "../src/fitting/moduleSlots";
 import { PROPULSION_MODULES } from "../src/ships/propulsion";
 
-const OUTPUT_PATH = "src/ui/iconIds.ts";
+const OUTPUT_PATH = "src/ui/icons/iconIds.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
 
 interface NameToId {
@@ -21,6 +21,8 @@ export function generateIconIdsContent(
   propulsionLabels: readonly string[],
   moduleSlotNames: readonly string[],
   scriptNames: readonly string[],
+  stasisWebNames: readonly string[],
+  trackingDisruptorNames: readonly string[],
 ): string {
   const missing: string[] = [];
   const ids: Record<string, number> = {};
@@ -30,6 +32,8 @@ export function generateIconIdsContent(
   for (const name of propulsionLabels) collectIconId(name);
   for (const name of moduleSlotNames) collectIconId(name);
   for (const name of scriptNames) collectIconId(name);
+  for (const name of stasisWebNames) collectIconId(name);
+  for (const name of trackingDisruptorNames) collectIconId(name);
 
   if (missing.length > 0) {
     missing.sort();
@@ -63,6 +67,8 @@ function main(): void {
     PROPULSION_MODULES.map((module) => module.label),
     Object.keys(MODULE_SLOTS),
     [...Object.keys(SCRIPTS), ...Object.keys(DISRUPTION_SCRIPTS)],
+    Object.keys(STASIS_WEBS),
+    Object.keys(TRACKING_DISRUPTORS),
   );
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);

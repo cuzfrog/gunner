@@ -59,41 +59,73 @@ function activeScriptButton(group: FakeElement): FakeElement | undefined {
   return group.children.find((button) => button.getAttribute("aria-pressed") === "true");
 }
 
+function webSection(popup: FakeElement): FakeElement | undefined {
+  return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.web");
+}
+
+function disruptorSection(popup: FakeElement): FakeElement | undefined {
+  return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
+}
+
 describe("EwarController", () => {
-  test("setLoadout renders one row per instance and disables trigger for empty loadouts", () => {
+  test("setLoadout renders sections, rows, and per-kind summary for mixed loadouts and disables trigger for empty loadouts", () => {
     const { controller, document } = buildEwarController();
-    const loadout: EwarLoadout = { webs: [WEB], disruptors: [DISRUPTOR, DISRUPTOR2] };
+    const loadout: EwarLoadout = { webs: [WEB2], disruptors: [DISRUPTOR, DISRUPTOR2] };
     controller.setLoadout("attacker", loadout);
 
     const trigger = getFake(document, "attacker-ewar-trigger");
     const summary = getFake(document, "attacker-ewar-summary");
     const popup = getFake(document, "attacker-ewar-popup");
     expect(trigger.disabled).toBe(false);
-    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.mixed");
+    expect(trigger.getAttribute("aria-label")).toBe("label.modules");
     expect(trigger.title).toBe("");
-    expect(popup.getAttribute("aria-label")).toBe("label.ewar.mixed");
-    expect(summary.textContent).toBe("3/3");
-    expect(popup.children.length).toBe(3);
+    expect(popup.getAttribute("aria-label")).toBe("label.modules");
+    expect(summary.children.length).toBe(2);
 
-    const webRow = popup.children[0] as FakeElement;
-    expect(webRow.tagName).toBe("DIV");
+    const webSummary = summary.children[0];
+    expect(webSummary.className).toBe("ewar-summary-item");
+    expect(webSummary.children[0].tagName).toBe("IMG");
+    expect(webSummary.children[0].src).toBe("icons/Stasis_Webifier_II.png");
+    expect(webSummary.children[0].hidden).toBe(false);
+    expect(webSummary.children[1].className).toBe("ewar-summary-count");
+    expect(webSummary.children[1].textContent).toBe("1/1");
+
+    const disruptorSummary = summary.children[1];
+    expect(disruptorSummary.className).toBe("ewar-summary-item");
+    expect(disruptorSummary.children[0].tagName).toBe("IMG");
+    expect(disruptorSummary.children[0].src).toBe("icons/Tracking_Disruptor_I.png");
+    expect(disruptorSummary.children[0].hidden).toBe(false);
+    expect(disruptorSummary.children[1].textContent).toBe("2/2");
+
+    expect(popup.children.length).toBe(2);
+    const webs = webSection(popup)!;
+    expect(webs.className).toBe("preview-section");
+    expect(webs.children[0].className).toBe("preview-section-label");
+    expect(webs.children[0].textContent).toBe("label.ewar.web");
+    expect(webs.children.length).toBe(2);
+
+    const webRow = webs.children[1];
     expect(webRow.className).toBe("ewar-row");
     const webButton = webRow.children[0];
     expect(webButton.tagName).toBe("BUTTON");
     expect(webButton.getAttribute("aria-pressed")).toBe("true");
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
-    expect(webButton.children[1].textContent).toBe(WEB.moduleName);
-    expect(webButton.children[1].title).toBe(WEB.moduleName);
+    expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
+    expect(webButton.children[1].title).toBe(WEB2.moduleName);
 
-    const disruptorRow = popup.children[1] as FakeElement;
-    expect(disruptorRow.tagName).toBe("DIV");
-    expect(disruptorRow.className).toBe("ewar-row");
-    const toggle = disruptorRow.children[0];
+    const disruptors = disruptorSection(popup)!;
+    expect(disruptors.className).toBe("preview-section");
+    expect(disruptors.children[0].textContent).toBe("label.ewar.disruptor");
+    expect(disruptors.children.length).toBe(3);
+
+    const firstDisruptorRow = disruptors.children[1];
+    expect(firstDisruptorRow.className).toBe("ewar-row");
+    const toggle = firstDisruptorRow.children[0];
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
     expect(toggle.children[1].textContent).toBe(DISRUPTOR.moduleName);
 
-    const group = disruptorRow.children[2];
+    const group = firstDisruptorRow.children[2];
     expect(group.getAttribute("role")).toBe("group");
     expect(group.getAttribute("aria-label")).toBe(DISRUPTOR.moduleName);
     expect(group.className).toBe("ewar-script-choice");
@@ -106,18 +138,18 @@ describe("EwarController", () => {
     expect(group.children[2].title).toBe("ewar.script.tracking.hint");
     expect(activeScriptButton(group)?.getAttribute("data-value")).toBe("none");
 
-    const secondRow = popup.children[2] as FakeElement;
+    const secondRow = disruptors.children[2];
     expect(activeScriptButton(secondRow.children[2])?.getAttribute("data-value")).toBe("optimalRange");
 
     controller.setLoadout("target", EMPTY_EWAR_LOADOUT);
     const targetTrigger = getFake(document, "target-ewar-trigger");
     expect(targetTrigger.disabled).toBe(true);
     expect(targetTrigger.title).toBe("title.ewar.empty");
-    expect(getFake(document, "target-ewar-summary").textContent).toBe("");
+    expect(getFake(document, "target-ewar-summary").children.length).toBe(0);
     expect(getFake(document, "target-ewar-popup").children.length).toBe(0);
   });
 
-  test("toggling a web flips state, updates summary, and does not close popup", () => {
+  test("toggling a web flips state, updates its section summary, and does not close popup", () => {
     const { controller, document, host } = buildEwarController();
     controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [] });
 
@@ -125,17 +157,18 @@ describe("EwarController", () => {
     popup.hidden = false;
     const summary = getFake(document, "attacker-ewar-summary");
 
-    expect(summary.textContent).toBe("2/2");
-    (popup.children[0] as FakeElement).children[0].trigger("click");
-    expect(summary.textContent).toBe("1/2");
+    const section = webSection(popup)!;
+    expect(summary.children[0].children[1].textContent).toBe("2/2");
+    section.children[1].children[0].trigger("click");
+    expect(summary.children[0].children[1].textContent).toBe("1/2");
     expect(popup.hidden).toBe(false);
-    expect((popup.children[0] as FakeElement).children[0].getAttribute("aria-pressed")).toBe("false");
-    expect((popup.children[1] as FakeElement).children[0].getAttribute("aria-pressed")).toBe("true");
+    expect(section.children[1].children[0].getAttribute("aria-pressed")).toBe("false");
+    expect(section.children[2].children[0].getAttribute("aria-pressed")).toBe("true");
     expect(controller.capture("attacker")?.webs).toEqual([false, true]);
     expect(host.onConfigChange).toHaveBeenCalled();
 
-    (popup.children[0] as FakeElement).children[0].trigger("click");
-    expect(summary.textContent).toBe("2/2");
+    section.children[1].children[0].trigger("click");
+    expect(summary.children[0].children[1].textContent).toBe("2/2");
     expect(controller.capture("attacker")?.webs).toEqual([true, true]);
   });
 
@@ -145,7 +178,8 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
-    const row = popup.children[0] as FakeElement;
+    const section = disruptorSection(popup)!;
+    const row = section.children[1];
     const group = row.children[2];
     expect(row.className).toBe("ewar-row");
     expect(group.children[0].disabled).toBe(false);
@@ -163,22 +197,28 @@ describe("EwarController", () => {
     expect(group.children[2].disabled).toBe(false);
   });
 
-  test("labels are derived from the loadout contents", () => {
+  test("renders one, two, or zero sections based on loadout contents", () => {
     const { controller, document } = buildEwarController();
     const trigger = getFake(document, "attacker-ewar-trigger");
     const popup = getFake(document, "attacker-ewar-popup");
 
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [] });
-    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.web");
-    expect(popup.getAttribute("aria-label")).toBe("label.ewar.web");
+    expect(trigger.getAttribute("aria-label")).toBe("label.modules");
+    expect(popup.getAttribute("aria-label")).toBe("label.modules");
+    expect(popup.children.length).toBe(1);
+    expect(popup.children[0].children[0].textContent).toBe("label.ewar.web");
 
     controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR] });
-    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.disruptor");
-    expect(popup.getAttribute("aria-label")).toBe("label.ewar.disruptor");
+    expect(popup.children.length).toBe(1);
+    expect(popup.children[0].children[0].textContent).toBe("label.ewar.disruptor");
 
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR] });
-    expect(trigger.getAttribute("aria-label")).toBe("label.ewar.mixed");
-    expect(popup.getAttribute("aria-label")).toBe("label.ewar.mixed");
+    expect(popup.children.length).toBe(2);
+    expect(popup.children[0].children[0].textContent).toBe("label.ewar.web");
+    expect(popup.children[1].children[0].textContent).toBe("label.ewar.disruptor");
+
+    controller.setLoadout("attacker", EMPTY_EWAR_LOADOUT);
+    expect(popup.children.length).toBe(0);
   });
 
   test("TD script choice persists per row and survives capture/restore round-trip", () => {
@@ -189,12 +229,13 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
 
-    const firstRow = popup.children[0] as FakeElement;
+    const section = disruptorSection(popup)!;
+    const firstRow = section.children[1];
     const firstGroup = firstRow.children[2] as FakeElement;
     firstGroup.children[1].trigger("click");
     expect(activeScriptButton(firstGroup)?.getAttribute("data-value")).toBe("optimalRange");
 
-    const secondRow = popup.children[1] as FakeElement;
+    const secondRow = section.children[2];
     const secondGroup = secondRow.children[2] as FakeElement;
     secondGroup.children[2].trigger("click");
     expect(activeScriptButton(secondGroup)?.getAttribute("data-value")).toBe("trackingSpeed");
@@ -209,10 +250,9 @@ describe("EwarController", () => {
     const restored = controller.capture("target");
     expect(restored).toEqual(captured);
 
-    const restoredFirst = popup.children[0] as FakeElement;
-    expect(activeScriptButton(restoredFirst.children[2])?.getAttribute("data-value")).toBe("optimalRange");
-    const restoredSecond = popup.children[1] as FakeElement;
-    expect(activeScriptButton(restoredSecond.children[2])?.getAttribute("data-value")).toBe("trackingSpeed");
+    const restoredSection = disruptorSection(popup)!;
+    expect(activeScriptButton(restoredSection.children[1].children[2])?.getAttribute("data-value")).toBe("optimalRange");
+    expect(activeScriptButton(restoredSection.children[2].children[2])?.getAttribute("data-value")).toBe("trackingSpeed");
   });
 
   test("stale saved activation is clamped to a shorter loadout", () => {
@@ -263,9 +303,11 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
 
-    (popup.children[1] as FakeElement).children[0].trigger("click");
-    (popup.children[3] as FakeElement).children[0].trigger("click");
-    const firstGroup = (popup.children[2] as FakeElement).children[2] as FakeElement;
+    const webSec = webSection(popup)!;
+    webSec.children[2].children[0].trigger("click");
+    const disruptorSec = disruptorSection(popup)!;
+    disruptorSec.children[2].children[0].trigger("click");
+    const firstGroup = disruptorSec.children[1].children[2] as FakeElement;
     firstGroup.children[2].trigger("click");
 
     expect(controller.capture("target")).toEqual({
@@ -291,5 +333,19 @@ describe("EwarController", () => {
     expect(p.isOpen()).toBe(false);
     expect(popup.hidden).toBe(true);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("summary hides an icon when no icon URL is available", () => {
+    const { controller, document, imageCatalog } = buildEwarController();
+    imageCatalog.itemIconUrl.mockImplementation((name) =>
+      name === WEB.moduleName ? undefined : `icons/${name.replaceAll(" ", "_")}.png`
+    );
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR] });
+
+    const summary = getFake(document, "attacker-ewar-summary");
+    expect(summary.children[0].children[0].tagName).toBe("IMG");
+    expect(summary.children[0].children[0].hidden).toBe(true);
+    expect(summary.children[0].children[0].src).toBe("");
+    expect(summary.children[1].children[0].src).toBe("icons/Tracking_Disruptor_I.png");
   });
 });

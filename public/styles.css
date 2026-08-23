@@ -256,6 +256,7 @@ body {
 .fitting-trigger:focus-visible,
 .fitting-eye:focus-visible,
 .ammo-trigger:focus-visible,
+.ewar-trigger:focus-visible,
 .ammo-popup button:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: 2px;
@@ -1799,10 +1800,28 @@ canvas {
 .ewar-trigger .ewar-summary-row {
   display: flex;
   align-items: center;
+  gap: 8px;
   flex: 0 0 auto;
 }
 
-.ewar-trigger .ewar-summary-value {
+.ewar-trigger .ewar-summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ewar-trigger .ewar-summary-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ewar-trigger .ewar-summary-icon[hidden] {
+  display: none;
+}
+
+.ewar-trigger .ewar-summary-count {
   font-family: "Share Tech Mono", monospace;
   font-size: 11px;
   color: var(--accent-teal);

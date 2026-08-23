@@ -1,5 +1,4 @@
-import { ALL_ACTIVE } from "../../../sim";
-import type { DisruptionScript, EwarActivation, EwarLoadout, EwarProjection } from "../../../sim";
+import { ALL_ACTIVE, type DisruptionScript, type EwarActivation, type EwarLoadout, type EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -106,43 +105,71 @@ export class EwarControllerImpl implements EwarController {
     const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
     const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
     const state = this.states.get(side);
-    const label = this.ewarLabel(state);
+    const modulesLabel = this.i18n.t("label.modules");
     const labelSpan = trigger.querySelector?.(".ewar-label");
-    if (labelSpan) labelSpan.textContent = label;
-    trigger.setAttribute("aria-label", label);
-    popup.setAttribute("aria-label", label);
+    if (labelSpan) labelSpan.textContent = modulesLabel;
+    trigger.setAttribute("aria-label", modulesLabel);
+    popup.setAttribute("aria-label", modulesLabel);
     popup.innerHTML = "";
     if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
       trigger.disabled = true;
       trigger.title = this.i18n.t("title.ewar.empty");
-      summary.textContent = "";
+      summary.innerHTML = "";
       return;
     }
     trigger.disabled = false;
     trigger.title = "";
     this.updateSummary(side);
-    this.renderWebs(side, state, popup);
-    this.renderDisruptors(side, state, popup);
+    if (state.loadout.webs.length > 0) {
+      this.renderSection(popup, "label.ewar.web", (section) => this.renderWebs(side, state, section));
+    }
+    if (state.loadout.disruptors.length > 0) {
+      this.renderSection(popup, "label.ewar.disruptor", (section) => this.renderDisruptors(side, state, section));
+    }
   }
 
-  private ewarLabel(state: EwarState | undefined): string {
-    const hasWebs = state !== undefined && state.loadout.webs.length > 0;
-    const hasDisruptors = state !== undefined && state.loadout.disruptors.length > 0;
-    if (hasWebs && !hasDisruptors) return this.i18n.t("label.ewar.web");
-    if (!hasWebs && hasDisruptors) return this.i18n.t("label.ewar.disruptor");
-    return this.i18n.t("label.ewar.mixed");
+  private renderSection(popup: HTMLElement, labelKey: "label.ewar.web" | "label.ewar.disruptor", renderRows: (section: HTMLElement) => void): void {
+    const section = document.createElement("div");
+    section.className = "preview-section";
+    const label = document.createElement("div");
+    label.className = "preview-section-label";
+    label.textContent = this.i18n.t(labelKey);
+    section.appendChild(label);
+    renderRows(section);
+    popup.appendChild(section);
   }
 
   private updateSummary(side: Side): void {
     const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
     const state = this.states.get(side);
+    summary.innerHTML = "";
     if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
       summary.textContent = "";
       return;
     }
-    const activeCount = state.activation.webs.filter((w) => w.active).length + state.activation.disruptors.filter((d) => d.active).length;
-    const totalCount = state.loadout.webs.length + state.loadout.disruptors.length;
-    summary.textContent = totalCount > 0 ? `${activeCount}/${totalCount}` : "";
+    const webTotal = state.loadout.webs.length;
+    const webActive = state.activation.webs.filter((w) => w.active).length;
+    if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal);
+    const disruptorTotal = state.loadout.disruptors.length;
+    const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
+    if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal);
+  }
+
+  private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number): void {
+    const item = document.createElement("span");
+    item.className = "ewar-summary-item";
+    const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
+    const img = document.createElement("img");
+    img.className = "ewar-summary-icon";
+    img.alt = "";
+    if (iconUrl !== undefined) img.src = iconUrl;
+    img.hidden = iconUrl === undefined;
+    item.appendChild(img);
+    const count = document.createElement("span");
+    count.className = "ewar-summary-count";
+    count.textContent = `${active}/${total}`;
+    item.appendChild(count);
+    summary.appendChild(item);
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -155,7 +182,7 @@ export class EwarControllerImpl implements EwarController {
     };
   }
 
-  private renderWebs(side: Side, state: EwarState, popup: HTMLElement): void {
+  private renderWebs(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
       const active = state.activation.webs[i].active;
@@ -164,11 +191,11 @@ export class EwarControllerImpl implements EwarController {
       const row = document.createElement("div");
       row.className = "ewar-row";
       row.appendChild(button);
-      popup.appendChild(row);
+      section.appendChild(row);
     }
   }
 
-  private renderDisruptors(side: Side, state: EwarState, popup: HTMLElement): void {
+  private renderDisruptors(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
       const active = state.activation.disruptors[i].active;
@@ -204,7 +231,7 @@ export class EwarControllerImpl implements EwarController {
       row.appendChild(group);
       const choice = new ChoiceGroupImpl(group, select, SCRIPT_VALUES);
       choice.set(state.activation.disruptors[i].script);
-      popup.appendChild(row);
+      section.appendChild(row);
     }
   }
 

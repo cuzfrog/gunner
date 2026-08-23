@@ -13,6 +13,8 @@ function nameToIdFixture(): {
         "1MN Afterburner I": [{ id: 789 }],
         "Tracking Computer II": [{ id: 999 }],
         "Optimal Range Script": [{ id: 111 }],
+        "Stasis Webifier II": [{ id: 1284 }],
+        "Tracking Disruptor II": [{ id: 1639 }],
         "Multi-Entry Item": [{ id: 111 }, { id: 222 }],
       },
     },
@@ -28,6 +30,8 @@ describe("generateIconIdsContent", () => {
       ["1MN Afterburner I"],
       ["Tracking Computer II"],
       ["Optimal Range Script"],
+      ["Stasis Webifier II"],
+      ["Tracking Disruptor II"],
     );
     expect(content).toMatch(/^export const ITEM_ICON_IDS: Readonly<Record<string, number>> = \{/);
     expect(content).toContain('"1MN Afterburner I": 789,');
@@ -35,6 +39,8 @@ describe("generateIconIdsContent", () => {
     expect(content).toContain('"Hail S": 123,');
     expect(content).toContain('"Tracking Computer II": 999,');
     expect(content).toContain('"Optimal Range Script": 111,');
+    expect(content).toContain('"Stasis Webifier II": 1284,');
+    expect(content).toContain('"Tracking Disruptor II": 1639,');
     expect(content).toContain('"Multi-Entry Item": 111,');
     expect(content).toContain("export const DRONE_ICON_ID = 1084;");
   });
@@ -44,6 +50,8 @@ describe("generateIconIdsContent", () => {
       generateIconIdsContent(
         nameToIdFixture(),
         ["Hail S", "Missing Charge", "Another Missing"],
+        [],
+        [],
         [],
         [],
         [],
