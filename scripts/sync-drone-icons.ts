@@ -4,12 +4,12 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import * as process from "node:process";
-import { parseEft } from "../src/fitting/eft";
+import { moduleLines, parseEft } from "../src/fitting/eft";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const FITTINGS_DIR = "data/ship-fittings";
 const ICONS_DIR = "data/ship-modules/icons";
-const OUTPUT_PATH = "src/ui/droneIconIds.ts";
+const OUTPUT_PATH = "src/ui/icons/droneIconIds.ts";
 
 interface SdeGroup {
   readonly categoryID: number;
@@ -48,8 +48,8 @@ async function main(): Promise<void> {
     const text = await readFile(join(entry.parentPath, entry.name), "utf8");
     const parsed = parseEft(text);
     if (!parsed) continue;
-    for (const drone of parsed.drones) {
-      if (drone.name in typeByName) usedDrones.add(drone.name);
+    for (const item of [...parsed.drones, ...parsed.cargo]) {
+      if (item.name in typeByName) usedDrones.add(item.name);
     }
   }
 

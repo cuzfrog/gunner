@@ -16,23 +16,15 @@ function nameToIdFixture(): {
         "Stasis Webifier II": [{ id: 1284 }],
         "Tracking Disruptor II": [{ id: 1639 }],
         "Multi-Entry Item": [{ id: 111 }, { id: 222 }],
+        "Nanite Repair Paste": [{ id: 3302 }],
       },
     },
   };
 }
 
 describe("generateIconIdsContent", () => {
-  test("resolves known names to their first icon id", () => {
-    const content = generateIconIdsContent(
-      nameToIdFixture(),
-      ["Hail S", "Multi-Entry Item"],
-      ["150mm Railgun I"],
-      ["1MN Afterburner I"],
-      ["Tracking Computer II"],
-      ["Optimal Range Script"],
-      ["Stasis Webifier II"],
-      ["Tracking Disruptor II"],
-    );
+  test("resolves every name in nameToId to its first icon id", () => {
+    const content = generateIconIdsContent(nameToIdFixture());
     expect(content).toMatch(/^export const ITEM_ICON_IDS: Readonly<Record<string, number>> = \{/);
     expect(content).toContain('"1MN Afterburner I": 789,');
     expect(content).toContain('"150mm Railgun I": 456,');
@@ -42,21 +34,7 @@ describe("generateIconIdsContent", () => {
     expect(content).toContain('"Stasis Webifier II": 1284,');
     expect(content).toContain('"Tracking Disruptor II": 1639,');
     expect(content).toContain('"Multi-Entry Item": 111,');
-    expect(content).toContain("export const DRONE_ICON_ID = 1084;");
-  });
-
-  test("throws a sorted error when names are missing", () => {
-    expect(() =>
-      generateIconIdsContent(
-        nameToIdFixture(),
-        ["Hail S", "Missing Charge", "Another Missing"],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ),
-    ).toThrow('Missing icon ids for: "Another Missing", "Missing Charge"');
+    expect(content).toContain('"Nanite Repair Paste": 3302,');
+    expect(content).not.toContain("DRONE_ICON_ID");
   });
 });

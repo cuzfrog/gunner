@@ -90,7 +90,7 @@ function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
     itemIconUrl: (itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined),
-    droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : "images/icons/1084@1x.png"),
+    droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : undefined),
   };
 }
 
@@ -238,7 +238,7 @@ describe("DomFittingPreview", () => {
     expect(droneRow.children[0].src).toBe("images/icons/2456@1x.png");
   });
 
-  test("drone rows fall back to the generic drone icon for unknown drones", () => {
+  test("drone rows have no icon for unknown drones", () => {
     const { container, anchor, preview } = buildPreview();
     const summary: FittingSummary = {
       hullName: "Rifter",
@@ -248,7 +248,7 @@ describe("DomFittingPreview", () => {
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];
     expect(droneRow.children[0].tagName).toBe("img");
-    expect(droneRow.children[0].src).toBe("images/icons/1084@1x.png");
+    expect(droneRow.children[0].src).toBe("");
   });
 
   test("show hides the icon for items without an icon url", () => {
