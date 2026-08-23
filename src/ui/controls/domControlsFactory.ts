@@ -1,54 +1,113 @@
-import type { Els } from "./elementsContract";
+import type { AwilixContainer } from "awilix";
+import { SIG_RESOLUTIONS, type HitChance } from "../../sim";
+import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, PresetFittings } from "../../fitting";
+import type { ClipboardProvider, ProfileSettings, SavedFittings, SettingsStore, UserSettings } from "../settings";
+import type { I18n } from "../i18n";
+import type { ImageCatalog } from "../icons";
+import type { ShipProfile, Ships } from "../../ships";
+import type { Timer } from "../timer";
 import {
-  createControlsEls,
   collectFittingPopupEls,
   collectImportEls,
   collectPreferencesEls,
   collectProfileEls,
   collectTurretEls,
 } from "./elements";
+import type { Els } from "./elementsContract";
 import { el } from "./controlsDom";
 import { profileSettingsOf } from "./controlsFormat";
-import { createSidePanel, collectSideEls, type Side, type SidePanel } from "./sidePanel";
-import { PopupGroupImpl } from "./popup/popupGroup";
-import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
-import { ChoiceGroupImpl, type ChoiceGroup } from "./choiceGroup";
-import { EngagementReadoutImpl, type EngagementReadout } from "./engagementReadout";
-import { SessionCodecImpl } from "./session/sessionCodec";
-import type { HullDatalist, LanguageRefresh, SessionCodec } from "./session";
-import { TurretControllerImpl } from "./turret/turretController";
-import type { TurretController } from "./turret";
-import { TurretStateResolver } from "./turret/turretStateResolver";
-import { DomFittingPreview } from "./popup/fittingPreview";
-import { FittingPreviewManagerImpl } from "./popup/fittingPreviewManager";
-import { FittingPopupControllerImpl } from "./popup/fittingPopupController";
-import { ImportControllerImpl } from "./import/importController";
-import type { ImportController } from "./import";
-import { PreferencesControllerImpl, type PreferencesController } from "./preferencesController";
-import { ProfileControllerImpl, type ProfileController } from "./profileController";
-import { HintRotatorImpl } from "./hints/hintRotator";
-import { HINT_CANDIDATES, LORES, TIP_TEXT, type HintRotator } from "./hints";
-import { LanguageRefreshImpl } from "./session/languageRefresh";
-import { HullDatalistImpl } from "./session/hullDatalist";
-import { EventRouter } from "./session/eventRouter";
+import type { ChoiceGroup } from "./choiceGroup";
+import type { EngagementReadout, ReadoutEls } from "./engagementReadout";
+import type { HintRotator } from "./hints";
+import type { ImportController, ImportEls } from "./import";
+import type { FittingPopupController, FittingPopupEls, FittingPreview, FittingPreviewManager, Popup, PopupGroup } from "./popup";
+import type { PreferencesController, PreferencesEls } from "./preferencesController";
+import type { ProfileController, ProfileEls } from "./profileController";
+import type { EventRouter, EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
+import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
-import { SIG_RESOLUTIONS } from "../../sim";
+import type { TurretController, TurretControllerDeps, TurretEls } from "./turret";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
 
+type CreateChoiceGroup = (group: HTMLElement, select: HTMLSelectElement, values: readonly string[]) => ChoiceGroup;
+type CreateEngagementReadout = (readoutEls: ReadoutEls) => EngagementReadout;
+type CreateHintRotator = (deps: {
+  element: HTMLElement; i18n: I18n; timer: Timer; intervalMs?: number;
+}) => HintRotator;
+type CreateHullDatalist = (els: Els, presetFittings: PresetFittings) => HullDatalist;
+type CreatePreferencesController = (deps: {
+  els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
+  sigResolution: () => number; onLanguageChanged: () => void;
+}) => PreferencesController;
+type CreateProfileController = (deps: {
+  els: ProfileEls; settingsStore: SettingsStore; timer: Timer; i18n: I18n;
+  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void;
+}) => ProfileController;
+type CreateFittingPreview = (deps: {
+  container: HTMLElement; i18n: I18n; imageCatalog: ImageCatalog;
+  viewport: () => { readonly innerWidth: number; readonly innerHeight: number };
+}) => FittingPreview;
+type CreateFittingPreviewManager = (deps: {
+  fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n;
+  previewsBySide: Readonly<Record<Side, FittingPreview>>;
+  shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
+  eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
+  profileOf: (side: Side) => ShipProfile | undefined;
+  fittingTextOf: (side: Side) => string | undefined;
+}) => FittingPreviewManager;
+type CreateFittingPopupController = (deps: {
+  side: Side; popupGroup: PopupGroup; savedFittings: SavedFittings; presetFittings: PresetFittings;
+  fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; els: FittingPopupEls;
+  panelFor: (side: Side) => SidePanel; applyFitting: (text: string) => ImportedFitting | undefined;
+  previews: FittingPreviewManager;
+}) => FittingPopupController;
+type CreateImportController = (deps: {
+  clipboard: ClipboardProvider; fittingImport: FittingImport; savedFittings: SavedFittings; popupGroup: PopupGroup;
+  els: ImportEls; sidePanel: (side: Side) => SidePanel; turret: TurretController;
+  preferences: PreferencesController; profileController: ProfileController; getSettings: () => UserSettings;
+  onConfigPersisted: () => void; onProfileTextLoaded: (settings: UserSettings) => void;
+}) => ImportController;
+type CreateSessionCodec = (deps: {
+  els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController;
+  preferences: PreferencesController; profileController: ProfileController; i18n: I18n;
+  chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
+  settingsStore: SettingsStore; hitChance: HitChance; sessionControl: DomControlsHost;
+}) => SessionCodec;
+type CreateLanguageRefresh = (deps: {
+  i18n: I18n; hullDatalist: HullDatalist; profileController: ProfileController;
+  attackerSide: SidePanel; targetSide: SidePanel; turretController: TurretController;
+  attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController;
+  previewManager: FittingPreviewManager; hintRotator: HintRotator;
+  setPlaying: (playing: boolean) => void; onDisplayChange: () => void;
+}) => LanguageRefresh;
+type CreateEventRouter = (deps: {
+  els: Els; preferences: PreferencesController; profile: ProfileController; import: ImportController;
+  attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; popupGroup: PopupGroup;
+  previewManager: FittingPreviewManager; attackerAmmoPopup: Popup;
+  attackerFittingPopup: FittingPopupController; targetFittingPopup: FittingPopupController; host: EventRouterHost;
+}) => EventRouter;
+type CreateTurretController = (deps: Omit<TurretControllerDeps, "resolver">) => TurretController;
+type CreateSidePanel = (deps: SidePanelDeps) => SidePanel;
+type CreateSidePanelEls = (els: Els, side: Side) => SidePanelElements;
+
 export class DomControlsFactory {
+  private readonly cradle: AwilixContainer<object>;
+
+  constructor(cradle: AwilixContainer<object>) {
+    this.cradle = cradle;
+  }
+
   buildParts(deps: DomControlsDeps, host: DomControlsHost): DomControlsParts {
-    const els = createControlsEls();
-    const popupGroup: PopupGroup = new PopupGroupImpl();
-    const hintRotator: HintRotator = new HintRotatorImpl({
-      element: el("slide-hints"), i18n: deps.i18n, candidates: HINT_CANDIDATES, tipText: TIP_TEXT, lores: LORES,
-      timer: deps.timer, intervalMs: 20_000,
+    const els = this.cradle.resolve<Els>("els");
+    const popupGroup = this.cradle.resolve<PopupGroup>("popupGroup");
+    const hintRotator = this.cradle.resolve<CreateHintRotator>("createHintRotator")({
+      element: this.cradle.resolve<HTMLElement>("hintElement"),
+      i18n: deps.i18n,
+      timer: deps.timer,
     });
-    const hullDatalist: HullDatalist = new HullDatalistImpl(els, deps.presetFittings);
-    const engagementReadout: EngagementReadout = new EngagementReadoutImpl({
-      resDistance: el("res-distance"), resTransversal: el("res-transversal"), resAngular: el("res-angular"),
-      resRadial: el("res-radial"), resTrackPen: el("res-track-pen"), resRangePen: el("res-range-pen"), resHit: el("res-hit"),
-    });
-    const sigResChoice: ChoiceGroup = new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
+    const hullDatalist = this.cradle.resolve<CreateHullDatalist>("createHullDatalist")(els, deps.presetFittings);
+    const engagementReadout = this.cradle.resolve<CreateEngagementReadout>("createEngagementReadout")(this.readoutEls());
+    const sigResChoice = this.cradle.resolve<CreateChoiceGroup>("createChoiceGroup")(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"]);
     let turretController!: TurretController;
     let importController!: ImportController;
     let attackerSide!: SidePanel;
@@ -62,10 +121,10 @@ export class DomControlsFactory {
       focusTrigger: () => els.attackerAmmoTrigger.focus(),
       contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
     };
-    const attackerPreview = new DomFittingPreview({
+    const attackerPreview = this.cradle.resolve<CreateFittingPreview>("createFittingPreview")({
       container: els.attackerFittingPreview, i18n: deps.i18n, imageCatalog: deps.imageCatalog, viewport: () => window,
     });
-    const targetPreview = new DomFittingPreview({
+    const targetPreview = this.cradle.resolve<CreateFittingPreview>("createFittingPreview")({
       container: els.targetFittingPreview, i18n: deps.i18n, imageCatalog: deps.imageCatalog, viewport: () => window,
     });
     const sidePanelHostBuilder = new SidePanelHostBuilder({
@@ -77,30 +136,38 @@ export class DomControlsFactory {
       onAttackerFittedHullCleared: () => { popupGroup.close(attackerAmmoPopup); turretController.clear(); },
       persistConfigChange: (notify = true) => host.persistConfigChange(notify),
     });
-    attackerSide = createSidePanel({
-      side: "attacker", host: sidePanelHostBuilder.build("attacker"), popupGroup,
-      els: collectSideEls(els, "attacker"), i18n: deps.i18n, ships: deps.ships,
-      fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
-    });
-    targetSide = createSidePanel({
-      side: "target", host: sidePanelHostBuilder.build("target"), popupGroup,
-      els: collectSideEls(els, "target"), i18n: deps.i18n, ships: deps.ships,
-      fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
-    });
-    const preferencesController = new PreferencesControllerImpl({
-      els: collectPreferencesEls(els), i18n: deps.i18n, settingsStore: deps.settingsStore,
+    attackerSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
+      side: "attacker", host: sidePanelHostBuilder.build("attacker"), popupGroup, els,
+      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
+    }));
+    targetSide = this.cradle.resolve<CreateSidePanel>("createSidePanel")(this.sidePanelDeps({
+      side: "target", host: sidePanelHostBuilder.build("target"), popupGroup, els,
+      i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
+    }));
+    const preferencesController = this.cradle.resolve<CreatePreferencesController>("createPreferencesController")({
+      els: this.preferencesEls(els),
+      i18n: deps.i18n,
+      settingsStore: deps.settingsStore,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       onLanguageChanged: () => languageRefresh.refresh(host.isPlaying()),
     });
-    const profileController = new ProfileControllerImpl({
-      els: collectProfileEls(els), settingsStore: deps.settingsStore, timer: deps.timer, i18n: deps.i18n,
-      captureCurrent: () => profileSettingsOf(sessionCodec.capture()), onLoaded: (name) => host.onProfileLoaded(name),
+    const profileController = this.cradle.resolve<CreateProfileController>("createProfileController")({
+      els: this.profileEls(els),
+      settingsStore: deps.settingsStore,
+      timer: deps.timer,
+      i18n: deps.i18n,
+      captureCurrent: () => profileSettingsOf(sessionCodec.capture()),
+      onLoaded: (name) => host.onProfileLoaded(name),
     });
-    turretController = new TurretControllerImpl({
-      els: collectTurretEls(els), popup: attackerAmmoPopup, chargeCatalog: deps.chargeCatalog,
-      gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, trackingInput: preferencesController.trackingInput,
-      i18n: deps.i18n, fittingImport: deps.fittingImport,
-      resolver: new TurretStateResolver({ chargeCatalog: deps.chargeCatalog, fittingImport: deps.fittingImport }),
+    turretController = this.cradle.resolve<CreateTurretController>("createTurretController")({
+      els: collectTurretEls(els),
+      popup: attackerAmmoPopup,
+      chargeCatalog: deps.chargeCatalog,
+      gunFamilies: deps.gunFamilies,
+      imageCatalog: deps.imageCatalog,
+      trackingInput: preferencesController.trackingInput,
+      i18n: deps.i18n,
+      fittingImport: deps.fittingImport,
       overrides: () => attackerSide.overrides,
       clearTurretOverrides: () => {
         delete attackerSide.overrides.tracking; delete attackerSide.overrides.sigRes;
@@ -112,63 +179,141 @@ export class DomControlsFactory {
         host.fireConfigChange();
       },
     });
-    sessionCodec = new SessionCodecImpl({
+    sessionCodec = this.cradle.resolve<CreateSessionCodec>("createSessionCodec")({
       els, attackerSide, targetSide, turret: turretController, preferences: preferencesController,
       profileController, i18n: deps.i18n, chargeCatalog: deps.chargeCatalog, sigResChoice, hintRotator,
       settingsStore: deps.settingsStore, hitChance: deps.hitChance,
       sessionControl: host,
     });
-    importController = new ImportControllerImpl({
-      clipboard: deps.clipboard, fittingImport: deps.fittingImport,
-      savedFittings: deps.savedFittings, popupGroup,
+    importController = this.cradle.resolve<CreateImportController>("createImportController")({
+      clipboard: deps.clipboard,
+      fittingImport: deps.fittingImport,
+      savedFittings: deps.savedFittings,
+      popupGroup,
       els: collectImportEls(els),
       sidePanel: (side) => (side === "attacker" ? attackerSide : targetSide),
       turret: turretController,
-      preferences: preferencesController, profileController,
-      getSettings: () => host.captureSettings(), onConfigPersisted: () => host.persistConfigChange(true),
+      preferences: preferencesController,
+      profileController,
+      getSettings: () => host.captureSettings(),
+      onConfigPersisted: () => host.persistConfigChange(true),
       onProfileTextLoaded: (settings) => host.onProfileTextLoaded(settings),
     });
-    const previewManager: FittingPreviewManager = new FittingPreviewManagerImpl({
-      fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, i18n: deps.i18n,
+    const previewManager = this.cradle.resolve<CreateFittingPreviewManager>("createFittingPreviewManager")({
+      fittingImport: deps.fittingImport,
+      imageCatalog: deps.imageCatalog,
+      i18n: deps.i18n,
       previewsBySide: { attacker: attackerPreview, target: targetPreview } as const,
       shipImageBySide: { attacker: els.attackerShipImage, target: els.targetShipImage } as const,
       eyeBySide: { attacker: els.attackerFittingEye, target: els.targetFittingEye } as const,
       profileOf: (side) => (side === "attacker" ? attackerSide : targetSide).profile,
       fittingTextOf: (side) => (side === "attacker" ? attackerSide : targetSide).fittingText,
     });
-    const fittingPopupDeps = {
-      popupGroup, savedFittings: deps.savedFittings, presetFittings: deps.presetFittings,
-      fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, i18n: deps.i18n,
-      panelFor: (side: Side) => (side === "attacker" ? attackerSide : targetSide), previews: previewManager,
+    const fittingPopupBase = {
+      popupGroup,
+      savedFittings: deps.savedFittings,
+      presetFittings: deps.presetFittings,
+      fittingImport: deps.fittingImport,
+      imageCatalog: deps.imageCatalog,
+      i18n: deps.i18n,
+      panelFor: (side: Side) => (side === "attacker" ? attackerSide : targetSide),
+      previews: previewManager,
     };
-    const attackerFittingPopup: FittingPopupController = new FittingPopupControllerImpl({
-      side: "attacker", ...fittingPopupDeps,
+    const attackerFittingPopup = this.cradle.resolve<CreateFittingPopupController>("createFittingPopupController")({
+      side: "attacker",
+      ...fittingPopupBase,
       els: collectFittingPopupEls(els, "attacker"),
       applyFitting: (text) => importController.importEftFitting("attacker", text, true),
     });
-    const targetFittingPopup: FittingPopupController = new FittingPopupControllerImpl({
-      side: "target", ...fittingPopupDeps,
+    const targetFittingPopup = this.cradle.resolve<CreateFittingPopupController>("createFittingPopupController")({
+      side: "target",
+      ...fittingPopupBase,
       els: collectFittingPopupEls(els, "target"),
       applyFitting: (text) => importController.importEftFitting("target", text, true),
     });
-    languageRefresh = new LanguageRefreshImpl({
-      i18n: deps.i18n, hullDatalist, profileController,
-      attackerSide, targetSide, turretController,
-      attackerFittingPopup, targetFittingPopup,
-      previewManager, hintRotator,
-      setPlaying: (playing) => host.setPlaying(playing), onDisplayChange: () => host.fireDisplayChange(),
+    languageRefresh = this.cradle.resolve<CreateLanguageRefresh>("createLanguageRefresh")({
+      i18n: deps.i18n,
+      hullDatalist,
+      profileController,
+      attackerSide,
+      targetSide,
+      turretController,
+      attackerFittingPopup,
+      targetFittingPopup,
+      previewManager,
+      hintRotator,
+      setPlaying: (playing) => host.setPlaying(playing),
+      onDisplayChange: () => host.fireDisplayChange(),
     });
-    const eventRouter = new EventRouter({
-      els, preferences: preferencesController, profile: profileController, import: importController,
-      attackerSide, targetSide, turret: turretController, popupGroup,
-      previewManager, attackerAmmoPopup,
-      attackerFittingPopup, targetFittingPopup, host,
+    const eventRouter = this.cradle.resolve<CreateEventRouter>("createEventRouter")({
+      els,
+      preferences: preferencesController,
+      profile: profileController,
+      import: importController,
+      attackerSide,
+      targetSide,
+      turret: turretController,
+      popupGroup,
+      previewManager,
+      attackerAmmoPopup,
+      attackerFittingPopup,
+      targetFittingPopup,
+      host,
     });
     return {
       deps, els, popupGroup, hintRotator, hullDatalist, preferencesController, profileController,
       engagementReadout, sigResChoice, attackerSide, targetSide, attackerAmmoPopup, turretController,
       sessionCodec, importController, previewManager, attackerFittingPopup, targetFittingPopup, languageRefresh,
       eventRouter,
+    };
+  }
+
+  private readoutEls(): ReadoutEls {
+    return {
+      resDistance: el("res-distance"),
+      resTransversal: el("res-transversal"),
+      resAngular: el("res-angular"),
+      resRadial: el("res-radial"),
+      resTrackPen: el("res-track-pen"),
+      resRangePen: el("res-range-pen"),
+      resHit: el("res-hit"),
+    };
+  }
+
+  private preferencesEls(els: Els): PreferencesEls {
+    return {
+      tracking: els.tracking,
+      trackingUnitRad: els.trackingUnitRad,
+      trackingUnitScore: els.trackingUnitScore,
+      langEn: els.langEn,
+      langZh: els.langZh,
+      langJa: els.langJa,
+      gridBrightnessSlider: els.gridBrightnessSlider,
+      gridBrightnessValue: els.gridBrightnessValue,
+      maneuverAggressivity: els.maneuverAggressivity,
+      maneuverAggressivitySlider: els.maneuverAggressivitySlider,
+      maneuverAggressivityValue: els.maneuverAggressivityValue,
+      simSpeed: els.simSpeed,
+    };
+  }
+
+  private profileEls(els: Els): ProfileEls {
+    return {
+      profileName: els.profileName,
+      profileSave: els.profileSave,
+      profileSelect: els.profileSelect,
+      profileDelete: els.profileDelete,
+      shareStatus: els.shareStatus,
+    };
+  }
+
+  private sidePanelDeps(base: {
+    side: Side; host: SidePanelHost; popupGroup: PopupGroup; els: Els; i18n: I18n; ships: Ships;
+    fittingImport: FittingImport; imageCatalog: ImageCatalog; timer: Timer;
+  }): SidePanelDeps {
+    return {
+      ...base,
+      els: this.cradle.resolve<CreateSidePanelEls>("createSidePanelEls")(base.els, base.side),
     };
   }
 }

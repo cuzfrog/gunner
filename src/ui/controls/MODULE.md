@@ -16,11 +16,13 @@ no-new-exports:
   - hints/hintRotator.ts
   - hints/hints.ts
   - hints/loreMessages.ts
+  - hints/module.ts
   - import/attackerTurret.ts
   - import/eftSideImporter.ts
   - import/importController.testSupport.ts
   - import/importController.ts
   - import/importControllerContract.ts
+  - import/module.ts
   - import/profileTextImporter.ts
   - mockFactories.ts
   - module.ts
@@ -29,12 +31,14 @@ no-new-exports:
   - popup/fittingPopupRenderer.ts
   - popup/fittingPreview.ts
   - popup/fittingPreviewManager.ts
+  - popup/module.ts
   - popup/popupGroup.ts
   - preferencesController.ts
   - profileController.ts
   - session/eventRouter.ts
   - session/hullDatalist.ts
   - session/languageRefresh.ts
+  - session/module.ts
   - session/sessionCodec.ts
   - sidePanel/elements.ts
   - sidePanel/hullSection.ts
@@ -44,8 +48,8 @@ no-new-exports:
   - sidePanel/propulsionVariantSection.ts
   - sidePanel/side.ts
   - sidePanel/sidePanel.ts
+  - sidePanel/module.ts
   - sidePanel/sidePanelContract.ts
-  - sidePanel/sidePanelFactory.ts
   - sidePanel/sidePanelSections.ts
   - sidePanel/skillOverloadSection.ts
   - sidePanel/statsSection.ts
@@ -59,12 +63,14 @@ no-new-exports:
   - turret/turretController.ts
   - turret/turretControllerContract.ts
   - turret/turretEls.ts
+  - turret/module.ts
   - turret/turretInputSet.ts
   - turret/turretStateResolver.ts
+  - turret/testSupport.ts
 ---
 
 # controls
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `hints`, and the existing `sidePanel`. `DomControls` collects element slices, constructs the controller graph, and exposes the `Controls` facade. The public surface remains `Controls`, `ControlsCallbacks`, and `registerControlsModule`. Implementation classes are registered via `module.ts`, and `domControlsFactory.ts` is the composition root allowed to construct from deep sub-module paths.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `hints`, and `sidePanel`. `DomControls` exposes the `Controls` facade. The public surface remains `Controls`, `ControlsCallbacks`, and `registerControlsModule`. Each sub-module owns its implementation and wires it through its own `module.ts`; `domControlsFactory.ts` resolves collaborators from the DI container and does not import implementation files directly.

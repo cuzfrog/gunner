@@ -1,4 +1,5 @@
-import { buildTurret, CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, TURRET } from "../testSupport";
+import { buildTurret } from "./testSupport";
+import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
 
 describe("TurretController", () => {

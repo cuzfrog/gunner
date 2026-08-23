@@ -1,1 +1,2 @@
-export type { ImportController } from "./importController";
+export type { ImportController, ImportEls } from "./importControllerContract";
+export { registerImportModule } from "./module";

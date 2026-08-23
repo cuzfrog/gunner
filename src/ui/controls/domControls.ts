@@ -51,8 +51,8 @@ export class DomControls implements Controls, DomControlsHost {
   private callbacks?: ControlsCallbacks;
   private playing = false;
 
-  constructor(deps: DomControlsDeps) {
-    const parts = new DomControlsFactory().buildParts(deps, this);
+  constructor({ domControlsDeps, domControlsFactory }: { domControlsDeps: DomControlsDeps; domControlsFactory: DomControlsFactory }) {
+    const parts = domControlsFactory.buildParts(domControlsDeps, this);
     this.deps = parts.deps;
     this.els = parts.els;
     this.popupGroup = parts.popupGroup;

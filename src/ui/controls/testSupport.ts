@@ -1,20 +1,17 @@
-import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
+import { createContainer, InjectionMode, type AwilixContainer } from "awilix";
+import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { ClipboardProvider, ProfileParamOverrides, SavedFittings, SettingsStore } from "../settings";
-import { TrackingInput } from "./trackingInput";
-import { TurretControllerImpl } from "./turret/turretController";
-import { TurretStateResolver } from "./turret/turretStateResolver";
+import type { SavedFittings, SettingsStore } from "../settings";
 import { DomControls } from "./domControls";
-import type { TurretEls } from "./turret/turretEls";
-import { createSidePanel, type Side, collectSideEls } from "./sidePanel";
-import type { Popup, PopupGroup } from "./popup";
+import type { DomControlsFactory } from "./domControlsFactory";
+import type { Els } from "./elementsContract";
 import { createControlsEls } from "./elements";
 import { fakeDocument, getFake } from "./fakeDocument";
 import { FakeElement } from "./fakeElement";
-import { CHARGE_OPTIONS, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "./testConstants";
+import { registerControlsModule } from "./module";
 import {
   mockChargeCatalog,
   mockClipboard,
@@ -27,6 +24,9 @@ import {
   mockShips,
   mockTimer,
 } from "./mockFactories";
+import { CHARGE_OPTIONS, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "./testConstants";
+import type { Popup, PopupGroup } from "./popup";
+import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 
 export { FakeElement } from "./fakeElement";
 export { fakeDocument, getFake } from "./fakeDocument";
@@ -51,35 +51,6 @@ export {
   IMPORTED_RIFTER_WITH_CARGO,
   CHARGE_OPTIONS,
 } from "./testConstants";
-
-export function collectTurretEls(document: Document): TurretEls {
-  return {
-    tracking: getFake(document, "tracking") as unknown as HTMLInputElement,
-    sigRes: getFake(document, "sigRes") as unknown as HTMLSelectElement,
-    sigResOptions: getFake(document, "sig-res-options") as unknown as HTMLElement,
-    optimal: getFake(document, "optimal") as unknown as HTMLInputElement,
-    falloff: getFake(document, "falloff") as unknown as HTMLInputElement,
-    attackerAmmoTrigger: getFake(document, "attacker-ammo-trigger") as unknown as HTMLButtonElement,
-    attackerAmmoSummary: getFake(document, "attacker-ammo-summary") as unknown as HTMLElement,
-    attackerAmmoSummaryIcon: getFake(document, "attacker-ammo-summary-icon") as unknown as HTMLImageElement,
-    attackerAmmoPopup: getFake(document, "attacker-ammo-popup") as unknown as HTMLElement,
-    attackerAmmoCargoLabel: getFake(document, "attacker-ammo-cargo-label") as unknown as HTMLElement,
-    attackerAmmoCargoList: getFake(document, "attacker-ammo-cargo-list") as unknown as HTMLElement,
-    attackerAmmoExpand: getFake(document, "attacker-ammo-expand") as unknown as HTMLButtonElement,
-    attackerAmmoAllSection: getFake(document, "attacker-ammo-all-section") as unknown as HTMLElement,
-    attackerAmmoAllList: getFake(document, "attacker-ammo-all-list") as unknown as HTMLElement,
-  };
-}
-
-export function setTurretInputs(document: Document): void {
-  getFake(document, "tracking").value = "0.42";
-  getFake(document, "sigRes").value = "S";
-  getFake(document, "optimal").value = "5000";
-  getFake(document, "falloff").value = "5000";
-  getFake(document, "attacker-ammo-all-section").hidden = true;
-  getFake(document, "attacker-ammo-trigger").setAttribute("aria-expanded", "false");
-  getFake(document, "attacker-ammo-popup").hidden = true;
-}
 
 export function addSigResButtons(document: Document): void {
   const group = getFake(document, "sig-res-options");
@@ -139,10 +110,17 @@ interface BuildDomControlsOptions {
   savedFittings?: Partial<SavedFittings>;
 }
 
-export function buildDomControls(options: BuildDomControlsOptions = {}) {
-  const document = fakeDocument();
+function buildControlsCradle(document: Document): AwilixContainer<object> {
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
+  const cradle = createContainer({ injectionMode: InjectionMode.PROXY });
+  registerControlsModule(cradle);
+  return cradle;
+}
+
+export function buildDomControls(options: BuildDomControlsOptions = {}) {
+  const document = fakeDocument();
+  const cradle = buildControlsCradle(document);
   setControlDefaults(document);
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
@@ -165,125 +143,25 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const clipboard = mockClipboard();
   const presetFittings = vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings });
   const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings });
+  const domControlsFactory = cradle.resolve<DomControlsFactory>("domControlsFactory");
   const controls = new DomControls({
-    hitChance,
-    i18n,
-    settingsStore,
-    ships,
-    fittingImport,
-    gunFamilies,
-    presetFittings,
-    savedFittings,
-    clipboard,
-    timer: mockTimer(),
-    chargeCatalog,
-    imageCatalog,
+    domControlsDeps: {
+      hitChance,
+      i18n,
+      settingsStore,
+      ships,
+      fittingImport,
+      gunFamilies,
+      presetFittings,
+      savedFittings,
+      clipboard,
+      timer: mockTimer(),
+      chargeCatalog,
+      imageCatalog,
+    },
+    domControlsFactory,
   });
   return { document, controls, settingsStore, hitChance, i18n, clipboard };
-}
-
-export function buildTurret(
-  options: {
-    overrides?: Partial<ProfileParamOverrides>;
-    imageCatalog?: Partial<ImageCatalog>;
-    chargeCatalog?: Partial<ChargeCatalog>;
-    fittingImport?: Partial<FittingImport>;
-  } = {},
-) {
-  const document = fakeDocument();
-  globalThis.document = document as unknown as Document;
-  globalThis.Element = FakeElement as unknown as typeof Element;
-  const els = collectTurretEls(document);
-  setTurretInputs(document);
-  addSigResButtons(document);
-  const trackingInput = new TrackingInput();
-  const i18n = vi.mocked<I18n>({
-    current: vi.fn((): Language => "en"),
-    setLanguage: vi.fn(),
-    t: vi.fn((key) => key),
-    translateDocument: vi.fn(),
-  });
-  const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn(),
-    itemIconUrl: vi.fn(() => undefined),
-    droneIconUrl: vi.fn(),
-    ...options.imageCatalog,
-  });
-  const gunFamilies = mockGunFamilies();
-  const chargeCatalog = vi.mocked<ChargeCatalog>({
-    usualForChargeSize: vi.fn(() => "Hail S"),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret) => turret),
-    ...options.chargeCatalog,
-  });
-  const fittingImport = vi.mocked<FittingImport>({
-    importFitting: vi.fn(() => undefined),
-    propulsionVariantNames: vi.fn(),
-    propulsionStats: vi.fn(),
-    summarize: vi.fn(),
-    ...options.fittingImport,
-  });
-  const overrides = () => options.overrides ?? {};
-  const clearTurretOverrides = vi.fn();
-  const onConfigChange = vi.fn();
-  const popup = {
-    isOpen: vi.fn(() => false),
-    open: vi.fn(),
-    close: vi.fn(),
-    focusTrigger: vi.fn(),
-    contains: vi.fn(),
-  };
-  const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
-  const controller = new TurretControllerImpl({
-    els,
-    popup,
-    chargeCatalog,
-    gunFamilies,
-    imageCatalog,
-    trackingInput,
-    i18n,
-    fittingImport,
-    resolver,
-    overrides,
-    clearTurretOverrides,
-    onConfigChange,
-  });
-  return {
-    document,
-    controller,
-    chargeCatalog,
-    imageCatalog,
-    fittingImport,
-    gunFamilies,
-    i18n,
-    trackingInput,
-    clearTurretOverrides,
-    onConfigChange,
-    popup,
-  };
-}
-
-
-class FakePopupGroup implements PopupGroup {
-  private readonly popups: Popup[] = [];
-  register(popup: Popup): void { this.popups.push(popup); }
-  open(popup: Popup): void {
-    for (const p of this.popups) { if (p !== popup && p.isOpen()) p.close(); }
-    if (!popup.isOpen()) popup.open();
-  }
-  toggle(popup: Popup): void { if (popup.isOpen()) this.close(popup); else this.open(popup); }
-  close(popup: Popup): void { if (popup.isOpen()) popup.close(); }
-  closeAll(): void { for (const p of this.popups) if (p.isOpen()) p.close(); }
-  hasOpen(): boolean { return this.popups.some((p) => p.isOpen()); }
-  onPointerDown(target: EventTarget | null): void {
-    if (!target) return;
-    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
-  }
-  onKeyDown(event: { readonly key: string }): void {
-    if (event.key !== "Escape") return;
-    for (const p of this.popups) if (p.isOpen()) { p.close(); p.focusTrigger(); }
-  }
 }
 
 export function buildSidePanel(
@@ -292,10 +170,9 @@ export function buildSidePanel(
   fittingImport: FittingImport = mockFittingImport(),
 ) {
   const document = fakeDocument();
-  globalThis.document = document as unknown as Document;
-  globalThis.Element = FakeElement as unknown as typeof Element;
-  const els = collectSideEls(createControlsEls(), side);
-  const host = {
+  const cradle = buildControlsCradle(document);
+  const els = cradle.resolve<(els: Els, side: Side) => SidePanelElements>("createSidePanelEls")(createControlsEls(), side);
+  const host: SidePanelHost = {
     persistConfigChange: vi.fn(),
     attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
     importer: {
@@ -316,10 +193,20 @@ export function buildSidePanel(
     itemIconUrl: vi.fn(() => undefined),
     droneIconUrl: vi.fn(),
   });
-  const panel = createSidePanel({
+  const popupGroup = vi.mocked<PopupGroup>({
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
+  });
+  const panel = cradle.resolve<(deps: SidePanelDeps) => SidePanel>("createSidePanel")({
     side,
     host,
-    popupGroup: new FakePopupGroup(),
+    popupGroup,
     els,
     i18n,
     ships,
