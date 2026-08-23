@@ -1,4 +1,4 @@
-import { CHARGES, DISRUPTION_SCRIPTS, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -155,5 +155,12 @@ describe("fittingDb", () => {
       optimalMultiplier: 2,
       falloffMultiplier: 2,
     });
+  });
+
+  test("includes combat and mining drones", () => {
+    expect(DRONES["Hobgoblin I"]).toBe(true);
+    expect(DRONES["Hobgoblin II"]).toBe(true);
+    expect(DRONES["Mining Drone I"]).toBe(true);
+    expect(DRONES["Salvage Drone I"]).toBe(true);
   });
 });

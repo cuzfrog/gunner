@@ -7,6 +7,7 @@ import { GunFamiliesImpl } from "./gunFamilies";
 import {
   CHARGES,
   DISRUPTION_SCRIPTS,
+  DRONES,
   FITTING_MODULES,
   HULL_BONUSES,
   SCRIPTS,
@@ -151,6 +152,7 @@ const db: FittingDb = {
   trackingDisruptors: {},
   disruptionScripts: {},
   hullBonuses: {},
+  drones: {},
 };
 
 const hullBonusDb: FittingDb = {
@@ -183,6 +185,7 @@ const fullFittingDb: FittingDb = {
   trackingDisruptors: TRACKING_DISRUPTORS,
   disruptionScripts: DISRUPTION_SCRIPTS,
   hullBonuses: HULL_BONUSES,
+  drones: DRONES,
 };
 const fullChargeCatalog = new ChargeCatalogImpl({ fittingDb: fullFittingDb, gunFamilies });
 
@@ -652,6 +655,26 @@ Tracking Disruptor II`,
     expect(names).toContain("Conflagration L");
     expect(names).toContain("Scorch L");
   });
+
+  test("classifies charges in a first quantity block as cargo", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const result = importer.importFitting(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK, conditions);
+    expect(result).toBeDefined();
+    const names = result!.cargoCharges.map((charge) => charge.name);
+    expect(names).toEqual(["Hail S", "Republic Fleet EMP S"]);
+  });
+
+  test("classifies cargo before drones by item kind", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const result = importer.importFitting(RIFTER_DRONE_AFTER_CARGO, conditions);
+    expect(result).toBeDefined();
+    const names = result!.cargoCharges.map((charge) => charge.name);
+    expect(names).toEqual(["Republic Fleet EMP S"]);
+  });
 });
 
 const RIFTER_BRAWLER = `[Rifter, Brawler]
@@ -678,11 +701,20 @@ Hail S x1000
 Republic Fleet EMP S x500
 `;
 
+const RIFTER_DRONE_AFTER_CARGO = `[Rifter, Brawler]
+200mm AutoCannon I, Hail S
+5MN Microwarpdrive I
+
+Republic Fleet EMP S x500
+
+Hobgoblin I x3
+`;
+
 const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, disruptionScripts: {}, hullBonuses: {} };
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {
@@ -727,15 +759,32 @@ describe("FittingImportImpl.summarize", () => {
     expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
   });
 
-  test("moves charge quantity items from the drone block to cargo", () => {
+  test("classifies cargo and drones by item kind regardless of position", () => {
+    const text = `[Rifter, Mixed]
+200mm AutoCannon I, Hail S
+5MN Microwarpdrive I
+
+Republic Fleet EMP S x500
+
+Hobgoblin I x3
+`;
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const summary = importer.summarize(text);
+    const cargo = summary!.sections.find((section) => section.kind === "cargo");
+    const drones = summary!.sections.find((section) => section.kind === "drones");
+    expect(cargo!.rows).toEqual([{ name: "Republic Fleet EMP S", quantity: 500 }]);
+    expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+  });
+
+  test("moves charge quantity items from the first quantity block to cargo", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
     const summary = importer.summarize(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
     const kinds = summary!.sections.map((section) => section.kind);
     expect(kinds).toEqual(["high", "mid", "cargo"]);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
-      { name: "Republic Fleet EMP S", quantity: 500 },
       { name: "Hail S", quantity: 1000 },
+      { name: "Republic Fleet EMP S", quantity: 500 },
     ]);
   });
 

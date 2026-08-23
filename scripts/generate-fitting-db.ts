@@ -243,6 +243,7 @@ const CHARGE_GROUPS = new Set([
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
+const DRONE_CATEGORY_ID = 18;
 
 async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
   const files = (await readdir(SDE_DIR))
@@ -513,6 +514,7 @@ async function main() {
   const trackingDisruptors: Record<string, TrackingDisruptorStats> = {};
   const disruptionScripts: Record<string, DisruptionScriptStats> = {};
   const hullBonuses: Record<string, readonly HullBonus[]> = {};
+  const drones: Record<string, true> = {};
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
@@ -574,6 +576,11 @@ async function main() {
       continue;
     }
 
+    if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
+      drones[type["typeName_en-us"]] = true;
+      continue;
+    }
+
     if (type.groupID === STASIS_WEB_GROUP) {
       const stats = buildStasisWebStats(values);
       if (stats) {
@@ -602,6 +609,8 @@ async function main() {
       }
     }
   }
+
+  const sortedDrones = Object.fromEntries(Object.keys(drones).sort().map((name) => [name, true]));
 
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${new Date().toISOString().split("T")[0]}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
@@ -701,12 +710,14 @@ export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts, null, 2)} 
     ``,
     `export const HULL_BONUSES = ${JSON.stringify(hullBonuses, null, 2)} as unknown as Readonly<Record<string, readonly HullBonus[]>>;`,
     ``,
+    `export const DRONES = ${JSON.stringify(sortedDrones, null, 2)} as unknown as Readonly<Record<string, true>>;`,
+    ``,
   ];
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   console.log(
-    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets to ${OUT_FILE}`,
+    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets, ${Object.keys(sortedDrones).length} drones to ${OUT_FILE}`,
   );
 }
 

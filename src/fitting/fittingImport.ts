@@ -18,7 +18,7 @@ import {
   type StasisWebSpec,
   type TrackingDisruptorSpec,
 } from "../sim";
-import { moduleLines, parseEft, type BankKind, type EftDocument } from "./eft";
+import { moduleLines, parseEft, type BankKind, type EftDocument, type QuantityItem } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
   ChargeStats,
@@ -73,6 +73,7 @@ export interface FittingDb {
   readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
   readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
   readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
+  readonly drones: Readonly<Record<string, true>>;
 }
 
 export interface FittingImport {
@@ -340,11 +341,13 @@ function resolveTurret(
   };
 }
 
-function resolveCargoCharges(db: FittingDb, parsed: EftDocument): readonly CargoCharge[] {
+function resolveCargoCharges(db: FittingDb, document: EftDocument): readonly CargoCharge[] {
   const charges: CargoCharge[] = [];
-  for (const item of parsed.cargo) {
-    if (!db.charges[item.name]) continue;
-    charges.push({ name: item.name, quantity: item.quantity });
+  for (const item of document.drones) {
+    if (db.charges[item.name]) charges.push({ name: item.name, quantity: item.quantity });
+  }
+  for (const item of document.cargo) {
+    if (db.charges[item.name]) charges.push({ name: item.name, quantity: item.quantity });
   }
   return charges;
 }
@@ -440,6 +443,18 @@ const SECTION_ORDER: readonly FittingSectionKind[] = [
   "drones",
 ];
 
+function classifyQuantity(
+  db: FittingDb,
+  buckets: Record<FittingSectionKind, FittingRow[]>,
+  item: QuantityItem,
+): void {
+  if (db.drones[item.name]) {
+    buckets.drones.push({ name: item.name, quantity: item.quantity });
+  } else {
+    buckets.cargo.push({ name: item.name, quantity: item.quantity });
+  }
+}
+
 function buildSections(document: EftDocument, db: FittingDb): readonly FittingSection[] {
   const buckets: Record<FittingSectionKind, FittingRow[]> = {
     low: [],
@@ -462,17 +477,8 @@ function buildSections(document: EftDocument, db: FittingDb): readonly FittingSe
     }
   }
 
-  for (const item of document.cargo) {
-    buckets.cargo.push({ name: item.name, quantity: item.quantity });
-  }
-
-  for (const item of document.drones) {
-    if (item.name in db.charges) {
-      buckets.cargo.push({ name: item.name, quantity: item.quantity });
-    } else {
-      buckets.drones.push({ name: item.name, quantity: item.quantity });
-    }
-  }
+  for (const item of document.drones) classifyQuantity(db, buckets, item);
+  for (const item of document.cargo) classifyQuantity(db, buckets, item);
 
   const sections: FittingSection[] = [];
   for (const kind of SECTION_ORDER) {

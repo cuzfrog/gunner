@@ -4,6 +4,7 @@ import { FittingImportImpl, type FittingDb } from "./fittingImport";
 import {
   CHARGES,
   DISRUPTION_SCRIPTS,
+  DRONES,
   FITTING_MODULES,
   HULL_BONUSES,
   SCRIPTS,
@@ -25,6 +26,7 @@ export function registerFittingModule<T extends FittingCradle>(cradle: AwilixCon
     trackingDisruptors: TRACKING_DISRUPTORS,
     disruptionScripts: DISRUPTION_SCRIPTS,
     hullBonuses: HULL_BONUSES,
+    drones: DRONES,
   };
   cradle.register({
     fittingDb: asValue(fittingDb),
