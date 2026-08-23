@@ -1,15 +1,13 @@
 import {
-  type AutopilotMode,
   type EngagementFrame,
   type HitChanceBreakdown,
   type ShipConfig,
   type SimConfig,
   type TurretSpec,
 } from "../../sim";
-import { isAutopilotMode, type UserSettings } from "../../appstate";
+import type { UserSettings } from "../../appstate";
 import type { Els } from "./elementsContract";
-import { num } from "./controlsDom";
-import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";
+import { AGGRESSIVITY_MIN } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
@@ -19,7 +17,7 @@ import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
 import type { ChoiceGroup } from "./choiceGroup";
-import type { Side, SidePanel } from "./sidePanel";
+import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turret";
 import type { ImportController } from "./import";
 
@@ -150,19 +148,21 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
-  getTargetSig(): number { return num(this.els.targetSig); }
+  getTargetSig(): number { return this.targetSide.capture().sig ?? 1; }
   getConfig(): SimConfig {
-    const initialDistance = Math.max(num(this.els.initialDistance), 1);
-    const aggressivity = parseManeuverAggressivity(this.els.maneuverAggressivity);
+    const initialDistance = this.sessionCodec.getInitialDistance();
+    const aggressivity = this.preferencesController.getManeuverAggressivity();
+    const attackerState = this.attackerSide.capture();
+    const targetState = this.targetSide.capture();
     const attacker: ShipConfig = {
-      id: "attacker", maxSpeed: num(this.els.attackerSpeed), mass: num(this.els.attackerMass),
-      inertiaModifier: num(this.els.attackerInertia), mode: this.currentMode("attacker"),
-      desiredRange: num(this.els.attackerRange), aggressivity, orbitDirection: "cw",
+      id: "attacker", maxSpeed: attackerState.speed, mass: attackerState.mass,
+      inertiaModifier: attackerState.inertia, mode: attackerState.mode,
+      desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
     };
     const target: ShipConfig = {
-      id: "target", maxSpeed: num(this.els.targetSpeed), mass: num(this.els.targetMass),
-      inertiaModifier: num(this.els.targetInertia), mode: this.currentMode("target"),
-      desiredRange: num(this.els.targetRange), aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
+      id: "target", maxSpeed: targetState.speed, mass: targetState.mass,
+      inertiaModifier: targetState.inertia, mode: targetState.mode,
+      desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
     };
     return { attacker, target, initialDistance };
   }
@@ -176,9 +176,4 @@ export class DomControls implements Controls, DomControlsHost {
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-  private currentMode(side: Side): AutopilotMode {
-    const value = this.els[`${side}Mode`].value;
-    if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
-    return value;
-  }
 }

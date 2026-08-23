@@ -36,6 +36,7 @@ export interface PreferencesController {
   onManeuverAggressivityChange(): void;
   updateManeuverAggressivityDisplay(value?: number): void;
   updateManeuverAggressivityEnabled(isMidships: boolean): void;
+  getManeuverAggressivity(): number;
 }
 
 export class PreferencesControllerImpl implements PreferencesController {
@@ -142,7 +143,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     const input = this.els.maneuverAggressivity;
     const slider = this.els.maneuverAggressivitySlider;
     const output = this.els.maneuverAggressivityValue;
-    const current = value ?? parseManeuverAggressivity(input);
+    const current = value ?? this.getManeuverAggressivity();
     input.value = String(current);
     setText(output, current.toFixed(2));
     const pos = positionFromAggressivity(current);
@@ -154,6 +155,10 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   updateManeuverAggressivityEnabled(isMidships: boolean): void {
     this.els.maneuverAggressivitySlider.disabled = isMidships;
+  }
+
+  getManeuverAggressivity(): number {
+    return parseManeuverAggressivity(this.els.maneuverAggressivity);
   }
 
   private applyLanguage(language: Language): void {

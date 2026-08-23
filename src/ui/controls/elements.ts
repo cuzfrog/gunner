@@ -123,6 +123,14 @@ export function createControlsEls(): Els {
     reset: elOf("reset", isHtmlButtonElement),
     gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
     gridBrightnessValue: el("grid-brightness-value"),
+    slideHints: el("slide-hints"),
+    resDistance: el("res-distance"),
+    resTransversal: el("res-transversal"),
+    resAngular: el("res-angular"),
+    resRadial: el("res-radial"),
+    resTrackPen: el("res-track-pen"),
+    resRangePen: el("res-range-pen"),
+    resHit: el("res-hit"),
   };
 }
 export function collectPreferencesEls(els: Els): PreferencesEls {

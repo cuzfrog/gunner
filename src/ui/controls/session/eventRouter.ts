@@ -1,4 +1,4 @@
-import { isEventTargetWithClosest, num } from "../controlsDom";
+import { isEventTargetWithClosest } from "../controlsDom";
 import type { Els } from "../elementsContract";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "../popup";
 import type { ImportController } from "../import";
@@ -180,9 +180,15 @@ export class EventRouter {
     if (id === "sigRes") this.preferences.updateTrackingForSigResolution();
     if (id === "tracking") this.attackerSide.recordOverride("tracking", this.trackingInput.rad);
     if (id === "sigRes") this.attackerSide.recordOverride("sigRes", this.turret.currentSigResClass());
-    if (id === "optimal") this.attackerSide.recordOverride("optimal", num(this.els.optimal));
-    if (id === "falloff") this.attackerSide.recordOverride("falloff", num(this.els.falloff));
-    if (id === "targetSig") this.targetSide.recordOverride("targetSig", Math.max(num(this.els.targetSig), 1));
+    if (id === "optimal" || id === "falloff") {
+      const spec = this.turret.currentTurretSpec();
+      if (id === "optimal") this.attackerSide.recordOverride("optimal", spec.optimal);
+      if (id === "falloff") this.attackerSide.recordOverride("falloff", spec.falloff);
+    }
+    if (id === "targetSig") {
+      const sig = this.targetSide.capture().sig ?? 1;
+      this.targetSide.recordOverride("targetSig", sig);
+    }
   }
 
   private applyShipInput(id: keyof Els): void {
@@ -190,11 +196,15 @@ export class EventRouter {
     if (id === "targetMass") this.targetSide.updateSpeedFromMass();
     if (id === "attackerMass" || id === "attackerInertia") this.attackerSide.updateAlignTime();
     if (id === "targetMass" || id === "targetInertia") this.targetSide.updateAlignTime();
-    if (id === "attackerSpeed") this.attackerSide.recordOverride("attackerSpeed", num(this.els.attackerSpeed));
-    if (id === "attackerMass") this.attackerSide.recordOverride("attackerMass", num(this.els.attackerMass));
-    if (id === "attackerInertia") this.attackerSide.recordOverride("attackerInertia", num(this.els.attackerInertia));
-    if (id === "targetSpeed") this.targetSide.recordOverride("targetSpeed", num(this.els.targetSpeed));
-    if (id === "targetMass") this.targetSide.recordOverride("targetMass", num(this.els.targetMass));
-    if (id === "targetInertia") this.targetSide.recordOverride("targetInertia", num(this.els.targetInertia));
+    if (id === "attackerSpeed" || id === "attackerMass" || id === "attackerInertia") {
+      const state = this.attackerSide.capture();
+      const key = id === "attackerSpeed" ? "speed" : id === "attackerMass" ? "mass" : "inertia";
+      this.attackerSide.recordOverride(id, state[key]);
+    }
+    if (id === "targetSpeed" || id === "targetMass" || id === "targetInertia") {
+      const state = this.targetSide.capture();
+      const key = id === "targetSpeed" ? "speed" : id === "targetMass" ? "mass" : "inertia";
+      this.targetSide.recordOverride(id, state[key]);
+    }
   }
 }

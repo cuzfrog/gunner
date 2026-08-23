@@ -71,6 +71,7 @@ describe("SessionCodec", () => {
     const preferences = {
       trackingInput,
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),

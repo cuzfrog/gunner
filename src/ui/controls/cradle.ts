@@ -38,7 +38,6 @@ export interface ControlsCradle {
   readonly turretOverrides: TurretOverrides;
   readonly popupGroup: PopupGroup;
   readonly els: Els;
-  readonly hintElement: HTMLElement;
   readonly trackingInput: TrackingInput;
   readonly sigResChoice: ChoiceGroup;
   readonly engagementReadout: EngagementReadout;

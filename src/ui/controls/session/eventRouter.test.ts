@@ -125,13 +125,30 @@ describe("EventRouter", () => {
       updateTrackingForSigResolution: vi.fn(),
       updateManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
-    const turret = { currentSigResClass: vi.fn(() => "M" as const) } as unknown as TurretController;
+    const turret = {
+      currentSigResClass: vi.fn(() => "M" as const),
+      currentTurretSpec: vi.fn(() => ({
+        optimal: Number.parseFloat(els.optimal.value),
+        falloff: Number.parseFloat(els.falloff.value),
+      })),
+    } as unknown as TurretController;
     const attackerSide = {
+      capture: vi.fn(() => ({
+        speed: Number.parseFloat(els.attackerSpeed.value),
+        mass: Number.parseFloat(els.attackerMass.value),
+        inertia: Number.parseFloat(els.attackerInertia.value),
+      })),
       recordOverride: vi.fn(),
       updateSpeedFromMass: vi.fn(),
       updateAlignTime: vi.fn(),
     } as unknown as SidePanel;
     const targetSide = {
+      capture: vi.fn(() => ({
+        speed: Number.parseFloat(els.targetSpeed.value),
+        mass: Number.parseFloat(els.targetMass.value),
+        inertia: Number.parseFloat(els.targetInertia.value),
+        sig: Number.parseFloat(els.targetSig.value),
+      })),
       recordOverride: vi.fn(),
       updateSpeedFromMass: vi.fn(),
       updateAlignTime: vi.fn(),

@@ -105,4 +105,12 @@ export interface Els {
   readonly reset: HTMLButtonElement;
   readonly gridBrightnessSlider: HTMLInputElement;
   readonly gridBrightnessValue: HTMLElement;
+  readonly slideHints: HTMLElement;
+  readonly resDistance: HTMLElement;
+  readonly resTransversal: HTMLElement;
+  readonly resAngular: HTMLElement;
+  readonly resRadial: HTMLElement;
+  readonly resTrackPen: HTMLElement;
+  readonly resRangePen: HTMLElement;
+  readonly resHit: HTMLElement;
 }

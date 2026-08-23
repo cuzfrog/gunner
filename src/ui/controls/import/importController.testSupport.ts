@@ -11,6 +11,7 @@ import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupp
 
 class FakeSessionCodec implements SessionCodec {
   capture: () => UserSettings;
+  getInitialDistance = vi.fn(() => 5000);
   restore = vi.fn();
   fromProfile = vi.fn();
   restoreStartup = vi.fn();

@@ -5,8 +5,8 @@ import { HintRotatorImpl } from "./hintRotator";
 
 export function registerHintsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    hintRotator: asFunction(({ hintElement, i18n, timer, uiEvents }) => new HintRotatorImpl({
-      element: hintElement,
+    hintRotator: asFunction(({ els, i18n, timer, uiEvents }) => new HintRotatorImpl({
+      element: els.slideHints,
       i18n,
       timer,
       events: uiEvents,

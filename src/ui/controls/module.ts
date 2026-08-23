@@ -2,13 +2,12 @@ import { asClass, asFunction, type AwilixContainer } from "awilix";
 import { SIG_RESOLUTIONS } from "../../sim";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
-import { el } from "./controlsDom";
 import { profileSettingsOf } from "./controlsFormat";
 import { createControlsEls, collectPreferencesEls, collectProfileEls } from "./elements";
 import { DomControls } from "./domControls";
 import { ChoiceGroupImpl } from "./choiceGroup";
 import { EngagementReadoutImpl } from "./engagementReadout";
-import type { EngagementReadout } from "./engagementReadout";
+import type { EngagementReadout, ReadoutEls } from "./engagementReadout";
 import { PreferencesControllerImpl } from "./preferencesController";
 import { ProfileControllerImpl } from "./profileController";
 import { TrackingInputImpl } from "./trackingInput";
@@ -18,6 +17,7 @@ import { registerPopupModule } from "./popup";
 import { registerSessionModule } from "./session";
 import { registerSidePanelModule, type Side } from "./sidePanel";
 import { registerTurretModule } from "./turret";
+import type { Els } from "./elementsContract";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   registerHintsModule(cradle);
@@ -28,18 +28,9 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSessionModule(cradle);
   cradle.register({
     els: asFunction(createControlsEls).singleton(),
-    hintElement: asFunction((): HTMLElement => el("slide-hints")).singleton(),
     trackingInput: asClass(TrackingInputImpl).singleton(),
     sigResChoice: asFunction(({ els }: ControlsCradle) => new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"])).singleton(),
-    engagementReadout: asFunction((): EngagementReadout => new EngagementReadoutImpl({
-      resDistance: el("res-distance"),
-      resTransversal: el("res-transversal"),
-      resAngular: el("res-angular"),
-      resRadial: el("res-radial"),
-      resTrackPen: el("res-track-pen"),
-      resRangePen: el("res-range-pen"),
-      resHit: el("res-hit"),
-    })).singleton(),
+    engagementReadout: asFunction(({ els }: ControlsCradle) => new EngagementReadoutImpl(collectReadoutEls(els))).singleton(),
     preferencesController: asFunction(({ els, i18n, settingsStore, trackingInput, turretController, uiEvents }: ControlsCradle) => new PreferencesControllerImpl({
       els: collectPreferencesEls(els),
       i18n,
@@ -120,5 +111,17 @@ function sideImporterFor(side: Side, importer: ImportController, savedFittings: 
     importEftFitting: (text: string, persist: boolean) => importer.importEftFitting(side, text, persist),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
+  };
+}
+
+function collectReadoutEls(els: Els): ReadoutEls {
+  return {
+    resDistance: els.resDistance,
+    resTransversal: els.resTransversal,
+    resAngular: els.resAngular,
+    resRadial: els.resRadial,
+    resTrackPen: els.resTrackPen,
+    resRangePen: els.resRangePen,
+    resHit: els.resHit,
   };
 }

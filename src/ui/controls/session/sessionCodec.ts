@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
 import { num } from "../controlsDom";
 import type { SessionControl } from "./sessionControl";
-import { DEFAULT_GRID_BRIGHTNESS, formatNumber, parseManeuverAggressivity } from "../controlsFormat";
+import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { Els } from "../elementsContract";
 import type { HintRotator } from "../hints";
@@ -17,6 +17,7 @@ import type { TrackingInput } from "../trackingInput";
 
 export interface SessionCodec {
   capture(): UserSettings;
+  getInitialDistance(): number;
   restore(settings: UserSettings, selectedName?: string): void;
   fromProfile(profile: ProfileSettings): UserSettings;
   restoreStartup(startup: StartupState): void;
@@ -81,7 +82,7 @@ export class SessionCodecImpl implements SessionCodec {
       attackerSpeed: attacker.speed,
       attackerMode: attacker.mode,
       attackerRange: attacker.range,
-      maneuverAggressivity: parseManeuverAggressivity(this.els.maneuverAggressivity),
+      maneuverAggressivity: this.preferencesController.getManeuverAggressivity(),
       attackerMass: attacker.mass,
       attackerInertia: attacker.inertia,
       attackerSkillLevel: attacker.skillLevel,
@@ -91,7 +92,7 @@ export class SessionCodecImpl implements SessionCodec {
       attackerFitting: attacker.fitting,
       attackerOverrides: this.turretOverrides.get(),
       attackerFittedHull: attacker.fittedHull,
-      initialDistance: Math.max(num(this.els.initialDistance), 1),
+      initialDistance: this.getInitialDistance(),
       targetSpeed: target.speed,
       targetMode: target.mode,
       targetRange: target.range,
@@ -160,6 +161,10 @@ export class SessionCodecImpl implements SessionCodec {
     };
   }
 
+  getInitialDistance(): number {
+    return Math.max(num(this.els.initialDistance), 1);
+  }
+
   restoreStartup(startup: StartupState): void {
     if (startup.settings) {
       this.restore(startup.settings, startup.selectedProfileName ?? "");
@@ -194,9 +199,8 @@ export class SessionCodecImpl implements SessionCodec {
 
   private setBestInitialDistance(): void {
     const turret = this.turretController.currentTurretSpec(this.trackingInput.rad);
-    const targetSig = Math.max(num(this.els.targetSig), 1);
-    const targetSpeed = num(this.els.targetSpeed);
-    const best = this.hitChance.findBestDistance(targetSpeed, turret, targetSig);
+    const targetState = this.targetSide.capture();
+    const best = this.hitChance.findBestDistance(targetState.speed, turret, targetState.sig ?? 1);
     if (!Number.isFinite(best) || best <= 0) return;
     this.els.initialDistance.value = String(Math.round(best));
     this.els.targetRange.value = String(Math.round(best));
