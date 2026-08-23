@@ -1,58 +1,179 @@
-import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
+import type { Ships } from "../../../ships";
+import type { I18n, Language } from "../../i18n";
+import type { ImageCatalog } from "../../icons";
+import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
+import { HullSection, type HullSectionEls } from "./hullSection";
+import type { Popup } from "./popup";
+import type { SidePanel } from "./sidePanelContract";
+import type { ISidePanelSections } from "./sidePanelSections";
 
-function shipsWithHull() {
-  const ships = mockShips();
+function shipsWithHull(): Ships {
+  const ships = vi.mocked<Ships>(mockShips());
   ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER : undefined));
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
   return ships;
 }
 
+function mockI18n(): I18n {
+  return vi.mocked<I18n>({
+    current: vi.fn((): Language => "en"),
+    setLanguage: vi.fn(),
+    t: vi.fn((key: string) => key),
+    translateDocument: vi.fn(),
+  });
+}
+
+function mockImageCatalog(): ImageCatalog {
+  return vi.mocked<ImageCatalog>({
+    shipImageUrl: vi.fn(() => "ship.png"),
+    itemIconUrl: vi.fn(),
+    droneIconUrl: vi.fn(),
+  });
+}
+
+function buildHullSection(ships: Ships = shipsWithHull()) {
+  const document = fakeDocument();
+  globalThis.document = document as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
+
+  const els: HullSectionEls = {
+    hull: getFake(document, "attacker-hull") as unknown as HTMLInputElement,
+    shipImage: getFake(document, "attacker-ship-image") as unknown as HTMLImageElement,
+    hullHint: getFake(document, "attacker-hull-hint") as unknown as HTMLElement,
+  };
+
+  const host = vi.mocked<SidePanel["host"]>({
+    persistConfigChange: vi.fn(),
+    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
+    importer: {
+      mostRecentFittingFor: vi.fn(),
+      importEftFitting: vi.fn(),
+      importFromText: vi.fn(() => Promise.resolve()),
+      importFromClipboard: vi.fn(() => Promise.resolve()),
+    },
+  });
+
+  const sections = vi.mocked<ISidePanelSections>({
+    hull: {} as unknown as ISidePanelSections["hull"],
+    stats: {
+      updateShipStats: vi.fn(),
+      updateSpeedFromMass: vi.fn(),
+      updateAlignTime: vi.fn(),
+      isOverridden: vi.fn(),
+      currentFittedPropulsion: vi.fn(),
+      currentFittedPropulsionModule: vi.fn(),
+    } as unknown as ISidePanelSections["stats"],
+    skill: {
+      skillConditions: vi.fn(),
+      setOverloadDisabled: vi.fn(),
+      setOverloadActive: vi.fn(),
+      onOverloadButtonClick: vi.fn(),
+      onSkillOrOverloadChange: vi.fn(),
+      currentSkillLevel: vi.fn(),
+      setSkillLevel: vi.fn(),
+      setSkillActive: vi.fn(),
+      renderSkillOptions: vi.fn(),
+      openSkillPopup: vi.fn(),
+      closeSkillPopup: vi.fn(),
+      isSkillPopupOpen: vi.fn(),
+      onSkillButtonClick: vi.fn(),
+      popup: {} as unknown as Popup,
+    } as unknown as ISidePanelSections["skill"],
+    propulsion: {
+      currentPropulsionSelection: vi.fn(),
+      currentPropulsionId: vi.fn(),
+      currentPropulsionModule: vi.fn(),
+      renderPropulsionOptions: vi.fn(),
+      onPropulsionChange: vi.fn(),
+      setPropulsionActive: vi.fn(),
+      defaultPropulsionName: vi.fn(),
+      nakedFitted: vi.fn(),
+      popup: {} as unknown as Popup,
+    } as unknown as ISidePanelSections["propulsion"],
+    paste: {
+      onImportFittingClick: vi.fn(),
+      onPastePopupPaste: vi.fn(),
+      showImportHint: vi.fn(),
+      clearImportHint: vi.fn(),
+      clearImportHintTimeout: vi.fn(),
+      openPastePopup: vi.fn(),
+      closePastePopup: vi.fn(),
+      isPastePopupOpen: vi.fn(),
+      popup: {} as unknown as Popup,
+    } as unknown as ISidePanelSections["paste"],
+  } as unknown as ISidePanelSections);
+
+  const panel = vi.mocked<SidePanel>({
+    side: "attacker",
+    host,
+    sections,
+    profile: undefined,
+    fittedHull: undefined,
+    fittingText: undefined,
+    overrides: {},
+    lastCommittedHull: undefined,
+    setFittingTriggerEnabled: vi.fn(),
+    renderFittingPopupIfOpen: vi.fn(),
+    closeFittingPopupIfOpen: vi.fn(),
+    hideFittingPreview: vi.fn(),
+    getSkillPopup: vi.fn(),
+    getPastePopup: vi.fn(),
+    getPropulsionVariantPopup: vi.fn(),
+  } as unknown as SidePanel);
+
+  const i18n = mockI18n();
+  const imageCatalog = mockImageCatalog();
+  const section = new HullSection({ panel, els, ships, i18n, imageCatalog });
+  return { document, panel, section, host };
+}
+
 describe("HullSection", () => {
   test("onHullInput applies a valid hull while typing", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
+    const { document, panel, section } = buildHullSection();
     getFake(document, "attacker-hull").value = "Rifter";
-    panel.onHullInput();
+    section.onHullInput();
     expect(panel.profile).toBe(RIFTER);
     expect(getFake(document, "attacker-hull").classList.toggle).toHaveBeenCalledWith("hull-invalid", false);
   });
 
   test("onHullChange commits a valid hull", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
+    const { document, panel, section, host } = buildHullSection();
     getFake(document, "attacker-hull").value = "Rifter";
-    panel.onHullChange();
+    section.onHullChange();
     expect(panel.profile).toBe(RIFTER);
     expect(panel.lastCommittedHull).toBe("Rifter");
-    expect(panel.host.persistConfigChange).toHaveBeenCalled();
+    expect(host.persistConfigChange).toHaveBeenCalled();
   });
 
   test("onHullChange marks an unknown hull invalid", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
+    const { document, panel, section } = buildHullSection();
     getFake(document, "attacker-hull").value = "Unknown";
-    panel.onHullChange();
+    section.onHullChange();
     expect(panel.profile).toBeUndefined();
     expect(getFake(document, "attacker-hull").classList.toggle).toHaveBeenCalledWith("hull-invalid", true);
   });
 
   test("clearHull resets the hull and image", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
-    panel.sections.hull.applyProfile(RIFTER, false);
-    panel.sections.hull.clearHull(true, true);
+    const { document, panel, section } = buildHullSection();
+    section.applyProfile(RIFTER, false);
+    section.clearHull(true, true);
     expect(panel.profile).toBeUndefined();
     expect(getFake(document, "attacker-hull").value).toBe("");
     expect(getFake(document, "attacker-ship-image").hidden).toBe(true);
   });
 
   test("updateHullHint renders the hull type and faction", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
-    panel.sections.hull.applyProfile(RIFTER, false);
+    const { document, panel, section } = buildHullSection();
+    panel.profile = RIFTER;
+    section.updateHullHint();
     expect(getFake(document, "attacker-hull-hint").textContent).toBe("Frigate · Minmatar Republic");
   });
 
   test("refreshHullInputs rewrites the input from the current profile", () => {
-    const { document, panel } = buildSidePanel("attacker", shipsWithHull());
-    panel.sections.hull.applyProfile(RIFTER, false);
+    const { document, panel, section } = buildHullSection();
+    panel.profile = RIFTER;
     getFake(document, "attacker-hull").value = "typed";
-    panel.sections.hull.refreshHullInputs();
+    section.refreshHullInputs();
     expect(getFake(document, "attacker-hull").value).toBe("Rifter");
   });
 });

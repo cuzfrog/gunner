@@ -1,6 +1,12 @@
-import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
-import { RIFTER, buildSidePanel, getFake, mockFittingImport, mockShips } from "../testSupport";
+import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
+import type { I18n, Language } from "../../i18n";
+import type { ImageCatalog } from "../../icons";
+import { fakeDocument, getFake, FakeElement, mockFittingImport, mockShips, RIFTER } from "../testSupport";
+import type { Popup } from "./popup";
+import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
+import type { SidePanel } from "./sidePanelContract";
+import type { ISidePanelSections } from "./sidePanelSections";
 
 const AB_1MN = "ab-1mn" as const;
 
@@ -16,14 +22,14 @@ const AB_MODULE: PropulsionModule = {
 };
 
 function fittingForPropulsion(): FittingImport {
-  const fitting = mockFittingImport();
+  const fitting = vi.mocked<FittingImport>(mockFittingImport());
   fitting.propulsionVariantNames = vi.fn(() => ["1MN Afterburner I"]);
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
   return fitting;
 }
 
 function shipsWithPropulsion(): Ships {
-  const ships = mockShips();
+  const ships = vi.mocked<Ships>(mockShips());
   ships.findHull = vi.fn(() => RIFTER);
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
   ships.fittingOptions = vi.fn(() => [AB_MODULE]);
@@ -33,38 +39,114 @@ function shipsWithPropulsion(): Ships {
   return ships;
 }
 
-function loadProfile({ document, panel }: ReturnType<typeof buildSidePanel>) {
-  getFake(document, "attacker-hull").value = "Rifter";
-  panel.onHullChange();
+function mockI18n(): I18n {
+  return vi.mocked<I18n>({
+    current: vi.fn((): Language => "en"),
+    setLanguage: vi.fn(),
+    t: vi.fn((key: string) => key),
+    translateDocument: vi.fn(),
+  });
+}
+
+function mockImageCatalog(): ImageCatalog {
+  return vi.mocked<ImageCatalog>({
+    shipImageUrl: vi.fn(),
+    itemIconUrl: vi.fn(),
+    droneIconUrl: vi.fn(),
+  });
+}
+
+function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImport: FittingImport = fittingForPropulsion()) {
+  const document = fakeDocument();
+  globalThis.document = document as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
+
+  const els: PropulsionSectionEls = {
+    propulsion: getFake(document, "attacker-propulsion") as unknown as HTMLSelectElement,
+    propulsionOptions: getFake(document, "attacker-propulsion-options") as unknown as HTMLElement,
+    propulsionGear: getFake(document, "attacker-propulsion-gear") as unknown as HTMLButtonElement,
+    propulsionVariants: getFake(document, "attacker-propulsion-variants") as unknown as HTMLElement,
+  };
+
+  const host = vi.mocked<SidePanel["host"]>({
+    persistConfigChange: vi.fn(),
+    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
+    importer: {
+      mostRecentFittingFor: vi.fn(),
+      importEftFitting: vi.fn(),
+      importFromText: vi.fn(() => Promise.resolve()),
+      importFromClipboard: vi.fn(() => Promise.resolve()),
+    },
+  });
+
+  const sections = vi.mocked<ISidePanelSections>({
+    hull: {} as unknown as ISidePanelSections["hull"],
+    stats: {
+      updateShipStats: vi.fn(),
+      updateSpeedFromMass: vi.fn(),
+      updateAlignTime: vi.fn(),
+      isOverridden: vi.fn(),
+      currentFittedPropulsion: vi.fn(),
+      currentFittedPropulsionModule: vi.fn(),
+    } as unknown as ISidePanelSections["stats"],
+    skill: {
+      setOverloadDisabled: vi.fn(),
+    } as unknown as ISidePanelSections["skill"],
+    paste: {
+      popup: {} as unknown as Popup,
+    } as unknown as ISidePanelSections["paste"],
+    propulsion: {} as unknown as ISidePanelSections["propulsion"],
+  } as unknown as ISidePanelSections);
+
+  const panel = vi.mocked<SidePanel>({
+    side: "attacker",
+    host,
+    sections,
+    profile: undefined,
+    fittedHull: undefined,
+    fittingText: undefined,
+    overrides: {},
+    lastCommittedHull: undefined,
+    setFittingTriggerEnabled: vi.fn(),
+    renderFittingPopupIfOpen: vi.fn(),
+    closeFittingPopupIfOpen: vi.fn(),
+    hideFittingPreview: vi.fn(),
+    getSkillPopup: vi.fn(),
+    getPastePopup: vi.fn(),
+    getPropulsionVariantPopup: vi.fn(),
+  } as unknown as SidePanel);
+
+  const i18n = mockI18n();
+  const imageCatalog = mockImageCatalog();
+  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n });
+  (panel.sections as unknown as { propulsion: typeof section }).propulsion = section;
+  return { document, panel, section, host, imageCatalog };
 }
 
 describe("PropulsionSection", () => {
   test("renderPropulsionOptions creates options and buttons", () => {
-    const result = buildSidePanel("attacker", shipsWithPropulsion(), fittingForPropulsion());
-    loadProfile(result);
-    const { document, panel } = result;
-    panel.renderPropulsionOptions();
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    section.renderPropulsionOptions();
     expect(getFake(document, "attacker-propulsion").children.length).toBeGreaterThan(0);
     expect(getFake(document, "attacker-propulsion-options").children.length).toBeGreaterThan(0);
   });
 
   test("onPropulsionChange fits a propulsion to the hull", () => {
-    const result = buildSidePanel("attacker", shipsWithPropulsion(), fittingForPropulsion());
-    loadProfile(result);
-    const { document, panel } = result;
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
     getFake(document, "attacker-propulsion").value = AB_1MN;
-    panel.onPropulsionChange();
+    section.onPropulsionChange();
     expect(panel.fittedHull?.propulsionId).toBe(AB_1MN);
     expect(panel.fittedHull?.propulsionName).toBe("1MN Afterburner I");
   });
 
   test("variant popup renders variant buttons", () => {
-    const result = buildSidePanel("attacker", shipsWithPropulsion(), fittingForPropulsion());
-    loadProfile(result);
-    const { document, panel } = result;
-    panel.imageCatalog.itemIconUrl = vi.fn(() => "icon.png");
-    panel.renderPropulsionOptions();
-    panel.getPropulsionVariantPopup().open();
+    const { document, panel, section, imageCatalog } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    imageCatalog.itemIconUrl = vi.fn(() => "icon.png");
+    section.renderPropulsionOptions();
+    section.popup.open();
     const variants = getFake(document, "attacker-propulsion-variants");
     expect(variants.hidden).toBe(false);
     expect(variants.children.length).toBeGreaterThan(0);

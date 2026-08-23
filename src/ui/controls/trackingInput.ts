@@ -1,6 +1,15 @@
 import type { TrackingUnit } from "../settings";
 
-export class TrackingInput {
+export interface TrackingInput {
+  readonly rad: number;
+  readonly unit: TrackingUnit;
+  setRadValue(rad: number, sigResolution: number): number;
+  setUnit(unit: TrackingUnit, sigResolution: number): number;
+  setDisplayValue(displayValue: number, sigResolution: number): number;
+  displayValue(sigResolution: number): number;
+}
+
+export class TrackingInputImpl implements TrackingInput {
   private currentUnit: TrackingUnit = "rad";
   private radValue: number = 0.32;
 

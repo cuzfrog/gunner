@@ -5,11 +5,8 @@ import type { ProfileParamOverrides } from "../../settings";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretEls } from "./turretEls";
-import { addSigResButtons } from "../testSupport";
-import { fakeDocument, getFake } from "../fakeDocument";
-import { FakeElement } from "../fakeElement";
-import { mockChargeCatalog, mockFittingImport, mockGunFamilies } from "../mockFactories";
-import { TrackingInput } from "../trackingInput";
+import { addSigResButtons, fakeDocument, getFake, FakeElement } from "../testSupport";
+import { mockChargeCatalog, mockFittingImport, mockGunFamilies, mockTrackingInput } from "../mockFactories";
 
 export function collectTurretEls(document: Document): TurretEls {
   const get = (id: string) => getFake(document, id) as unknown as HTMLElement;
@@ -55,7 +52,7 @@ export function buildTurret(
   const els = collectTurretEls(document);
   setTurretInputs(document);
   addSigResButtons(document);
-  const trackingInput = new TrackingInput();
+  const trackingInput = mockTrackingInput();
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
     setLanguage: vi.fn(),

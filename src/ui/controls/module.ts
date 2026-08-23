@@ -20,7 +20,7 @@ import { PreferencesControllerImpl } from "./preferencesController";
 import type { PreferencesController, PreferencesEls } from "./preferencesController";
 import { ProfileControllerImpl } from "./profileController";
 import type { ProfileController, ProfileEls } from "./profileController";
-import { TrackingInput } from "./trackingInput";
+import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { registerHintsModule } from "./hints";
 import { registerImportModule } from "./import";
 import { registerPopupModule } from "./popup";
@@ -30,7 +30,7 @@ import { registerTurretModule } from "./turret";
 
 interface PreferencesControllerDeps {
   els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
-  sigResolution: () => number; onLanguageChanged: () => void;
+  trackingInput: TrackingInput; sigResolution: () => number; onLanguageChanged: () => void;
 }
 
 interface ProfileControllerDeps {
@@ -48,7 +48,7 @@ export function registerControlsModule(cradle: AwilixContainer<object>): void {
   cradle.register({
     els: asFunction(createControlsEls).singleton(),
     hintElement: asFunction(() => el("slide-hints")).singleton(),
-    trackingInput: asClass(TrackingInput).singleton(),
+    trackingInput: asClass(TrackingInputImpl).singleton(),
     domControlsDeps: asFunction(({
       hitChance, i18n, settingsStore, ships, fittingImport, gunFamilies,
       presetFittings, savedFittings, clipboard, timer, chargeCatalog, imageCatalog,

@@ -28,6 +28,7 @@ import { CHARGE_OPTIONS, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TU
 import type { Popup, PopupGroup } from "./popup";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 
+export { createControlsEls };
 export { FakeElement } from "./fakeElement";
 export { fakeDocument, getFake } from "./fakeDocument";
 export {

@@ -24,7 +24,6 @@ no-new-exports:
   - import/importControllerContract.ts
   - import/module.ts
   - import/profileTextImporter.ts
-  - mockFactories.ts
   - module.ts
   - popup/fittingPopupController.ts
   - popup/fittingPopupEls.ts
@@ -55,8 +54,6 @@ no-new-exports:
   - sidePanel/statsSection.ts
   - sidePanelHostBuilder.ts
   - testConstants.ts
-  - testSupport.ts
-  - trackingInput.ts
   - turret/ammoList.ts
   - turret/sigResButtons.ts
   - turret/sigResIcons.ts

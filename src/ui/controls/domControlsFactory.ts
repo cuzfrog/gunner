@@ -26,6 +26,7 @@ import type { ProfileController, ProfileEls } from "./profileController";
 import type { EventRouter, EventRouterHost, HullDatalist, LanguageRefresh, SessionCodec } from "./session";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
 import { SidePanelHostBuilder } from "./sidePanelHostBuilder";
+import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretControllerDeps, TurretEls } from "./turret";
 import type { DomControlsDeps, DomControlsHost, DomControlsParts } from "./domControlsContract";
 
@@ -37,7 +38,7 @@ type CreateHintRotator = (deps: {
 type CreateHullDatalist = (els: Els, presetFittings: PresetFittings) => HullDatalist;
 type CreatePreferencesController = (deps: {
   els: PreferencesEls; i18n: I18n; settingsStore: SettingsStore;
-  sigResolution: () => number; onLanguageChanged: () => void;
+  trackingInput: TrackingInput; sigResolution: () => number; onLanguageChanged: () => void;
 }) => PreferencesController;
 type CreateProfileController = (deps: {
   els: ProfileEls; settingsStore: SettingsStore; timer: Timer; i18n: I18n;
@@ -144,10 +145,12 @@ export class DomControlsFactory {
       side: "target", host: sidePanelHostBuilder.build("target"), popupGroup, els,
       i18n: deps.i18n, ships: deps.ships, fittingImport: deps.fittingImport, imageCatalog: deps.imageCatalog, timer: deps.timer,
     }));
+    const trackingInput = this.cradle.resolve<TrackingInput>("trackingInput");
     const preferencesController = this.cradle.resolve<CreatePreferencesController>("createPreferencesController")({
       els: this.preferencesEls(els),
       i18n: deps.i18n,
       settingsStore: deps.settingsStore,
+      trackingInput,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       onLanguageChanged: () => languageRefresh.refresh(host.isPlaying()),
     });

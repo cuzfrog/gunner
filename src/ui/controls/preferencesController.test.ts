@@ -1,4 +1,5 @@
 import type { I18n } from "../i18n";
+import { mockTrackingInput } from "./mockFactories";
 import type { DisplayPreferences, SettingsStore } from "../settings";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
@@ -75,6 +76,7 @@ function build() {
     els,
     i18n,
     settingsStore,
+    trackingInput: mockTrackingInput(),
     sigResolution: () => 40,
     onLanguageChanged,
   });

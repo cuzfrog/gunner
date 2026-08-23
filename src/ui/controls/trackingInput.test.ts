@@ -1,10 +1,10 @@
-import { TrackingInput } from "./trackingInput";
+import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 
 describe("TrackingInput", () => {
   let input: TrackingInput;
 
   beforeEach(() => {
-    input = new TrackingInput();
+    input = new TrackingInputImpl();
   });
 
   test("defaults to rad mode with 0.32 rad/s", () => {

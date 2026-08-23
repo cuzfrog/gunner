@@ -1,7 +1,5 @@
-import { num } from "../controlsDom";
 import { EventRouter, type EventRouterHost } from "./eventRouter";
-import { createControlsEls } from "../elements";
-import { fakeDocument, getFake, FakeElement } from "../testSupport";
+import { createControlsEls, fakeDocument, getFake, FakeElement } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import type { FittingPopupController } from "../popup";
 import type { FittingPreviewManager } from "../popup";
@@ -18,11 +16,10 @@ function makeEls() {
 }
 
 function makePopup(): Popup {
-  const state = { open: false };
   return {
-    isOpen: vi.fn(() => state.open),
-    open: vi.fn(() => { state.open = true; }),
-    close: vi.fn(() => { state.open = false; }),
+    isOpen: vi.fn(() => false),
+    open: vi.fn(),
+    close: vi.fn(),
     focusTrigger: vi.fn(),
     contains: vi.fn(() => false),
   };
@@ -33,26 +30,16 @@ function makeFittingPopup(): FittingPopupController {
 }
 
 function makePopupGroup(): PopupGroup {
-  const popups: Popup[] = [];
-  return {
-    register: (popup) => { popups.push(popup); },
-    open: (popup) => {
-      for (const p of popups) if (p !== popup && p.isOpen()) p.close();
-      if (!popup.isOpen()) popup.open();
-    },
-    toggle: (popup) => { if (popup.isOpen()) popup.close(); else popup.open(); },
-    close: (popup) => { if (popup.isOpen()) popup.close(); },
-    closeAll: () => { for (const p of popups) if (p.isOpen()) p.close(); },
-    hasOpen: () => popups.some((p) => p.isOpen()),
-    onPointerDown: (target) => {
-      if (!target) return;
-      for (const p of popups) if (p.isOpen() && !p.contains(target)) p.close();
-    },
-    onKeyDown: (event) => {
-      if (event.key !== "Escape") return;
-      for (const p of popups) if (p.isOpen()) { p.close(); p.focusTrigger(); }
-    },
-  };
+  return vi.mocked<PopupGroup>({
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
+  });
 }
 
 describe("EventRouter", () => {
@@ -66,7 +53,7 @@ describe("EventRouter", () => {
       onDisplayChange: vi.fn(),
     } as unknown as EventRouterHost;
     const preferences = {
-      getSpeed: vi.fn(() => num(els.simSpeed)),
+      getSpeed: vi.fn(() => Number(els.simSpeed.value)),
       trackingInput: { rad: 0.32 },
     } as unknown as PreferencesController;
     const popupGroup = makePopupGroup();
@@ -98,15 +85,13 @@ describe("EventRouter", () => {
     expect(host.onSpeedChange).toHaveBeenCalledWith(2);
   });
 
-  test("Escape closes open popups", () => {
+  test("Escape routes to popupGroup", () => {
     const els = makeEls();
     const popupGroup = makePopupGroup();
+    vi.mocked(popupGroup.hasOpen).mockReturnValue(true);
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
     const attackerAmmoPopup = makePopup();
-    popupGroup.register(attackerFittingPopup.popup);
-    popupGroup.register(targetFittingPopup.popup);
-    popupGroup.register(attackerAmmoPopup);
     new EventRouter({
       els,
       preferences: {} as PreferencesController,
@@ -123,14 +108,10 @@ describe("EventRouter", () => {
       host: {} as EventRouterHost,
     });
 
-    attackerFittingPopup.popup.open();
-    expect(popupGroup.hasOpen()).toBe(true);
-
     const escape = { type: "keydown", key: "Escape" } as unknown as KeyboardEvent;
     (globalThis.document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(escape as unknown as Event);
 
-    expect(attackerFittingPopup.popup.close).toHaveBeenCalled();
-    expect(attackerFittingPopup.popup.focusTrigger).toHaveBeenCalled();
+    expect(popupGroup.onKeyDown).toHaveBeenCalledWith(escape);
   });
 
   test("display and ship inputs dispatch to the right controller methods", () => {
@@ -218,15 +199,13 @@ describe("EventRouter", () => {
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 
-  test("pointerdown outside closes popups", () => {
+  test("pointerdown outside routes to popupGroup and previewManager", () => {
     const els = makeEls();
     const popupGroup = makePopupGroup();
+    vi.mocked(popupGroup.hasOpen).mockReturnValue(true);
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
     const attackerAmmoPopup = makePopup();
-    popupGroup.register(attackerFittingPopup.popup);
-    popupGroup.register(targetFittingPopup.popup);
-    popupGroup.register(attackerAmmoPopup);
     const previewManager = { openSide: vi.fn(() => undefined), handlePointerDown: vi.fn() } as unknown as FittingPreviewManager;
     new EventRouter({
       els,
@@ -244,14 +223,11 @@ describe("EventRouter", () => {
       host: {} as EventRouterHost,
     });
 
-    attackerFittingPopup.popup.open();
-    expect(popupGroup.hasOpen()).toBe(true);
-
     const target = getFake(globalThis.document, "target-hull");
     const pointer = { type: "pointerdown", target } as unknown as PointerEvent;
     (globalThis.document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(pointer as unknown as Event);
 
-    expect(attackerFittingPopup.popup.close).toHaveBeenCalled();
+    expect(popupGroup.onPointerDown).toHaveBeenCalledWith(target);
     expect(previewManager.handlePointerDown).toHaveBeenCalledWith(target);
   });
 });

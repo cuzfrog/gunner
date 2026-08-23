@@ -2,6 +2,7 @@ import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, PresetFittin
 import type { HullView, ShipProfile, Ships } from "../../ships";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
+import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import type { ClipboardProvider, SavedFittings, SettingsStore } from "../settings";
 import type { Timer } from "../timer";
 import { CHARGE_OPTIONS, MOCK_REPRESENTATIVES } from "./testConstants";
@@ -78,4 +79,8 @@ export function mockGunFamilies(): GunFamilies {
     familyOf: vi.fn((moduleName: string) => (moduleName.includes("Howitzer") || moduleName.includes("Artillery") ? "artillery" : "autocannon")),
     representativeOf: vi.fn((family: GunFamily, sigRes: SigResolutionClass) => MOCK_REPRESENTATIVES[family][sigRes]),
   };
+}
+
+export function mockTrackingInput(): TrackingInput {
+  return new TrackingInputImpl();
 }

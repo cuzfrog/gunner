@@ -1,7 +1,7 @@
 import { num, setText } from "./controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggressivity, positionFromAggressivity } from "./controlsFormat";
 import type { I18n, Language } from "../i18n";
-import { TrackingInput } from "./trackingInput";
+import type { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../settings";
 
 export interface PreferencesEls {
@@ -50,15 +50,16 @@ export class PreferencesControllerImpl implements PreferencesController {
     els: PreferencesEls;
     i18n: I18n;
     settingsStore: SettingsStore;
+    trackingInput: TrackingInput;
     sigResolution: () => number;
     onLanguageChanged: () => void;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.settingsStore = deps.settingsStore;
+    this.trackingInput = deps.trackingInput;
     this.sigResolution = deps.sigResolution;
     this.onLanguageChanged = deps.onLanguageChanged;
-    this.trackingInput = new TrackingInput();
   }
 
   getSpeed(): number {
