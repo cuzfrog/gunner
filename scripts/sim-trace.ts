@@ -1,5 +1,15 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
-import { ReactiveAutopilot, registerSimModule, Vec2, ALL_ACTIVE, type AutopilotMode, type CombatantConfig, type EwarProjection, type Kinematics, type ShipConfig, type SimConfig, type SimCradle, type Simulation } from "../src/sim";
+import {
+  ALL_ACTIVE,
+  ReactiveAutopilot,
+  registerSimModule,
+  Vec2,
+  type AutopilotMode,
+  type CombatantConfig,
+  type EwarProjection,
+  type SimConfig,
+  type SimCradle,
+} from "../src/sim";
 import { registerShipsModule, type ShipsCradle, type StatConditions } from "../src/ships";
 import { registerFittingModule, type FittingCradle, type FittingImport } from "../src/fitting";
 import { readFileSync } from "node:fs";
