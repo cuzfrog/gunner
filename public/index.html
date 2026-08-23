@@ -26,7 +26,7 @@
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.9.0</span>
+        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.11.0</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -49,11 +49,19 @@
         <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
       <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
-      <button type="button" id="share-link" class="icon-button"
-              data-i18n-title="title.copyProfile" data-i18n-aria-label="button.copyProfile"
-              title="Copy current profile to clipboard" aria-label="Copy">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#copy"></use></svg>
-      </button>
+      <div class="profile-share-field">
+        <button type="button" id="share-link" class="icon-button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="share-popup"
+                data-i18n-title="title.shareProfile" data-i18n-aria-label="button.copyProfile"
+                title="Share current profile" aria-label="Copy">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#copy"></use></svg>
+        </button>
+        <div class="import-side-popup share-popup" id="share-popup" hidden role="menu"
+             data-i18n-aria-label="menu.share" aria-label="Copy profile as">
+          <button type="button" id="share-copy-url" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
+          <button type="button" id="share-copy-text" role="menuitem" data-i18n="menu.copyAsText">Copy as Text</button>
+        </div>
+      </div>
       <div class="profile-import-field">
         <button type="button" id="import-profile" class="icon-button"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"

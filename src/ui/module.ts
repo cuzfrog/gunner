@@ -1,22 +1,27 @@
 import { asClass, type AwilixContainer } from "awilix";
-import { DomControls } from "./controls";
-import { I18nImpl } from "./i18n";
-import { StaticImageCatalog } from "./imageCatalog";
+import { registerAppstateModule } from "../appstate";
+import { registerControlsModule } from "./controls";
+import { registerI18nModule } from "./i18n";
+import { registerIconsModule } from "./icons";
+import { UiEventsImpl } from "./events";
 import { RafLoop } from "./loop";
-import { LocalSettingsStore } from "./settings";
-import { LocalSavedFittings } from "./savedFittings";
 import { CanvasRenderer } from "./renderer";
 import { DefaultTimer } from "./timer";
+import type { UiCradle } from "./cradle";
 
-export function registerUiModule(cradle: AwilixContainer<object>): void {
+export function registerUiModule<T extends UiCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    controls: asClass(DomControls).singleton(),
-    i18n: asClass(I18nImpl).singleton(),
-    settingsStore: asClass(LocalSettingsStore).singleton(),
-    savedFittings: asClass(LocalSavedFittings).singleton(),
+    uiEvents: asClass(UiEventsImpl).singleton(),
+  });
+  registerI18nModule(cradle);
+  registerIconsModule(cradle);
+  registerAppstateModule(cradle);
+  cradle.register({
+    timer: asClass(DefaultTimer).singleton(),
+  });
+  registerControlsModule(cradle);
+  cradle.register({
     renderer: asClass(CanvasRenderer).singleton(),
     loop: asClass(RafLoop).singleton(),
-    timer: asClass(DefaultTimer).singleton(),
-    imageCatalog: asClass(StaticImageCatalog).singleton(),
   });
 }

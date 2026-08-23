@@ -1,13 +1,9 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
-import { ReactiveAutopilot, registerSimModule, Vec2, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type Simulation } from "../src/sim";
+import { ReactiveAutopilot, registerSimModule, Vec2, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type SimCradle, type Simulation } from "../src/sim";
 
 const FIXED_DT = 1 / 60;
 
-interface TraceCradle {
-  simConfig: SimConfig;
-  simulation: Simulation;
-  kinematics: Kinematics;
-}
+interface TraceCradle extends SimCradle {}
 
 type MutableShipConfig = { -readonly [K in keyof ShipConfig]: ShipConfig[K] };
 

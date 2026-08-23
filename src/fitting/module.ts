@@ -4,8 +4,9 @@ import { FittingImportImpl, type FittingDb } from "./fittingImport";
 import { CHARGES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, TURRETS } from "./fittingDb";
 import { GunFamiliesImpl } from "./gunFamilies";
 import { PresetFittingsImpl } from "./presetFittings";
+import type { FittingCradle } from "./cradle";
 
-export function registerFittingModule(cradle: AwilixContainer<object>): void {
+export function registerFittingModule<T extends FittingCradle>(cradle: AwilixContainer<T>): void {
   const fittingDb: FittingDb = { modules: FITTING_MODULES, turrets: TURRETS, charges: CHARGES, scripts: SCRIPTS, hullBonuses: HULL_BONUSES };
   cradle.register({
     fittingDb: asValue(fittingDb),

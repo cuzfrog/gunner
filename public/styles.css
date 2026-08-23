@@ -1909,11 +1909,13 @@ canvas {
   justify-content: center;
 }
 
-.profile-import-field {
+.profile-import-field,
+.profile-share-field {
   position: relative;
 }
 
-.import-side-popup {
+.import-side-popup,
+.share-popup {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -1927,5 +1929,10 @@ canvas {
   box-shadow: 0 4px 16px var(--shadow-color);
   padding: 4px;
   white-space: nowrap;
+}
+
+.share-popup {
+  right: auto;
+  left: 0;
 }
 

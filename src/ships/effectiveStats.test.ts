@@ -1,4 +1,4 @@
-import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
+import { alignTime, fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { fittingOptions } from "./fitting";
 import type { FittedHull, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
 
@@ -28,13 +28,24 @@ const ab10 = fittingOptions(frigate).find((m) => m.id === "ab-10mn")!;
 const mwd500 = fittingOptions(battleship).find((m) => m.id === "mwd-500mn")!;
 
 describe("naked hull", () => {
-  test("returns base hull values without a module", () => {
-    expect(fittedStats(frigate, undefined)).toEqual({
+  test("returns base hull values and align time without a module", () => {
+    const stats = fittedStats(frigate, undefined);
+    expect(stats).toMatchObject({
       mass: 1_000_000,
       inertiaModifier: 3,
       maxSpeed: 400,
       sigRadius: 35,
     });
+    expect(stats.alignTime).toBeCloseTo(3 * Math.log(4), 6);
+  });
+
+  test("alignTime scales with inertia skill factor and propulsion mass", () => {
+    const noSkill = fittedStats(frigate, undefined, undefined, conditions(0));
+    expect(noSkill.alignTime).toBeCloseTo(3 * Math.log(4), 6);
+    const maxSkill = fittedStats(frigate, undefined, undefined, conditions(5));
+    expect(maxSkill.alignTime).toBeCloseTo(2.025 * Math.log(4), 6);
+    const withPropulsion = fittedStats(frigate, undefined, ab1, conditions(0));
+    expect(withPropulsion.alignTime).toBeCloseTo(4.5 * Math.log(4), 6);
   });
 
   test("frigate with 5MN MWD reaches six times speed, mass and signature", () => {
@@ -91,6 +102,7 @@ describe("naked hull", () => {
       const stats = fittedStats(frigate, undefined, undefined, conditions(level));
       expect(stats.maxSpeed).toBeCloseTo(expectedSpeed, 3);
       expect(stats.inertiaModifier).toBeCloseTo(expectedInertia, 3);
+      expect(stats.alignTime).toBeCloseTo(expectedInertia * Math.log(4), 3);
       expect(stats.mass).toBe(1_000_000);
       expect(stats.sigRadius).toBe(frigate.sigRadius);
     },
@@ -152,12 +164,13 @@ describe("naked hull", () => {
 describe("fittedStats", () => {
   const fitted: FittedHull = { mass: 1_250_000, massMultiplier: 1, speedMultiplier: 1.1, inertiaMultiplier: 0.9, sigMultiplier: 1, sigRadiusAdd: 15 };
 
-  test("without propulsion applies multipliers to speed, inertia and signature", () => {
+  test("without propulsion applies multipliers to speed, inertia, signature and align time", () => {
     const stats = fittedStats(frigate, fitted, undefined, conditions(5));
     expect(stats.mass).toBe(1_250_000);
     expect(stats.maxSpeed).toBeCloseTo(550, 6);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
     expect(stats.sigRadius).toBe(50);
+    expect(stats.alignTime).toBeCloseTo(1.8225 * 1_250_000 * Math.log(4) * 1e-6, 6);
   });
 
   test("applies the signature multiplier separately from the flat addition", () => {
@@ -166,31 +179,42 @@ describe("fittedStats", () => {
     expect(stats.sigRadius).toBeCloseTo(55, 6);
   });
 
-  test("with propulsion adds active mass and applies the speed bonus", () => {
+  test("with propulsion adds active mass and applies the speed and align time", () => {
     const stats = fittedStats(frigate, fitted, ab1, conditions(0));
     expect(stats.mass).toBe(1_750_000);
     expect(stats.maxSpeed).toBeCloseTo(873.714, 3);
     expect(stats.inertiaModifier).toBeCloseTo(2.7, 6);
     expect(stats.sigRadius).toBe(50);
+    expect(stats.alignTime).toBeCloseTo(2.7 * 1_750_000 * Math.log(4) * 1e-6, 6);
   });
 
-  test("with MWD multiplies signature and active mass", () => {
+  test("with MWD multiplies signature, active mass and align time", () => {
     const stats = fittedStats(frigate, fitted, mwd5, conditions(0));
     expect(stats.mass).toBe(1_750_000);
     expect(stats.sigRadius).toBe(300);
+    expect(stats.alignTime).toBeCloseTo(2.7 * 1_750_000 * Math.log(4) * 1e-6, 6);
   });
 
-  test("with overload and skills scales the propulsion speed bonus only", () => {
+  test("with overload and skills scales the propulsion speed bonus only, leaving align time unchanged", () => {
     const stats = fittedStats(frigate, fitted, ab1, { skillLevel: 5, overloaded: true });
     expect(stats.maxSpeed).toBeGreaterThan(440);
     expect(stats.mass).toBe(1_750_000);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
+    expect(stats.alignTime).toBeCloseTo(1.8225 * 1_750_000 * Math.log(4) * 1e-6, 6);
   });
 
-  test("mass multiplier applies to hull and propulsion mass together", () => {
+  test("mass multiplier applies to hull and propulsion mass together, increasing align time", () => {
     const higgsFitted: FittedHull = { ...fitted, massMultiplier: 2 };
     const stats = fittedStats(frigate, higgsFitted, ab1, conditions(0));
     expect(stats.mass).toBe(3_500_000);
+    expect(stats.alignTime).toBeCloseTo(2.7 * 3_500_000 * Math.log(4) * 1e-6, 6);
+  });
+});
+
+describe("alignTime", () => {
+  test("returns ln(4) * mass * inertiaModifier * 1e-6", () => {
+    expect(alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
+    expect(alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);
   });
 });
 

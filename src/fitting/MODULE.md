@@ -1,3 +1,24 @@
+---
+sealed:
+  - chargeCatalog.test.ts
+  - chargeCatalog.ts
+  - cradle.ts
+  - eft.test.ts
+  - eft.ts
+  - fittingDb.test.ts
+  - fittingDb.ts
+  - fittingImport.test.ts
+  - fittingImport.ts
+  - fittingPresets.ts
+  - gunFamilies.test.ts
+  - gunFamilies.ts
+  - index.ts
+  - module.ts
+  - moduleSlots.ts
+  - presetFittings.test.ts
+  - presetFittings.ts
+---
+
 # fitting
 
 EFT fitting import support. The module is responsible for parsing EFT text,

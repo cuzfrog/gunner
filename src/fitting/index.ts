@@ -3,4 +3,5 @@ export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } fro
 export type { PresetFitting, PresetFittings } from "./presetFittings";
 export type { ModuleSlot } from "./moduleSlots";
 export type { GunFamilies, GunFamily } from "./gunFamilies";
+export type { FittingCradle } from "./cradle";
 export { registerFittingModule } from "./module";

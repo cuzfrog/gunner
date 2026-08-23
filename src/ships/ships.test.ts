@@ -86,4 +86,9 @@ describe("ShipsImpl", () => {
     expect(speed).toBeCloseTo(stats.maxSpeed, 6);
     expect(speed).toBeCloseTo(maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false }), 6);
   });
+
+  test("alignTime returns ln(4) * mass * inertiaModifier * 1e-6", () => {
+    expect(ships.alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
+    expect(ships.alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);
+  });
 });
