@@ -4,7 +4,12 @@ no-new-exports:
   - hullDatalist.ts
   - sessionCodec.ts
   - sessionControl.ts
+  - sessionCodec.test.ts
+  - module.ts
+  - eventRouter.test.ts
+  - index.ts
 ---
+
 
 # session
 

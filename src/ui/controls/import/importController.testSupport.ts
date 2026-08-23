@@ -1,9 +1,9 @@
 import type { FittingImport } from "../../../fitting";
 import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
-import type { Side, SidePanel } from "../sidePanel";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
+import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
@@ -73,6 +73,7 @@ export class FakeSidePanel {
   clearImportHintTimeout = vi.fn();
   showImportHint = vi.fn();
   clearFittedHull = vi.fn();
+  clearOverrides = vi.fn();
   fittingText?: string;
   overrides: Record<string, unknown> = {};
   lastCommittedHull?: string;
@@ -101,7 +102,6 @@ export function buildImportController(document: Document) {
   getFake(document, "import-profile").setAttribute("aria-expanded", "false");
   const attackerPanel = new FakeSidePanel();
   const targetPanel = new FakeSidePanel();
-  const sidePanel = (side: Side) => (side === "attacker" ? attackerPanel : targetPanel);
   const clipboard = { readText: vi.fn(async () => ""), writeText: vi.fn(async (text: string) => {}) };
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : undefined)),
@@ -133,7 +133,8 @@ export function buildImportController(document: Document) {
       importSideAttacker: getFake(document, "import-side-attacker") as unknown as HTMLButtonElement,
       importSideTarget: getFake(document, "import-side-target") as unknown as HTMLButtonElement,
     },
-    sidePanel: sidePanel as unknown as (side: Side) => SidePanel,
+    attackerSide: attackerPanel as unknown as SidePanel,
+    targetSide: targetPanel as unknown as SidePanel,
     turret,
     preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,

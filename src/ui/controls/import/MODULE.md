@@ -6,7 +6,11 @@ no-new-exports:
   - importController.ts
   - importControllerContract.ts
   - profileTextImporter.ts
+  - module.ts
+  - importController.test.ts
+  - index.ts
 ---
+
 
 # import
 

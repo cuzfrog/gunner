@@ -8,7 +8,13 @@ no-new-exports:
   - turretEls.ts
   - turretInputSet.ts
   - turretStateResolver.ts
+  - turretOverrides.ts
+  - testSupport.ts
+  - module.ts
+  - turretController.test.ts
+  - index.ts
 ---
+
 
 # turret
 

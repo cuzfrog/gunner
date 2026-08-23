@@ -2,7 +2,7 @@ import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
-import type { ClipboardProvider, SavedFittings, SettingsStore, ProfileSettings } from "../../appstate";
+import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
@@ -36,7 +36,7 @@ interface PreferencesControllerDeps {
 
 interface ProfileControllerDeps {
   els: ProfileEls; settingsStore: SettingsStore; timer: Timer; i18n: I18n;
-  captureCurrent: () => ProfileSettings; onLoaded: (name: string) => void; events: UiEvents;
+  onLoaded: (name: string) => void; events: UiEvents;
 }
 
 export function registerControlsModule(cradle: AwilixContainer<object>): void {

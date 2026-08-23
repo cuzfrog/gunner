@@ -112,7 +112,7 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
     imageCatalog,
     i18n,
     els,
-    panelFor: () => panel,
+    panel,
     applyFitting,
     previews,
     events,

@@ -9,7 +9,7 @@ import type { UiEvents } from "../events";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { Els } from "./elementsContract";
 import type { EngagementReadout } from "./engagementReadout";
-import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
+import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { EventRouter, EventRouterHost, HullDatalist, SessionCodec, SessionControl } from "./session";
 import type { HintRotator } from "./hints";
 import type { ImportController } from "./import";
@@ -31,11 +31,7 @@ interface ProfileEvents {
   persistConfigChange(notify?: boolean): void;
 }
 
-interface ConfigEvents {
-  fireConfigChange(): void;
-}
-
-export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents, ConfigEvents {}
+export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {}
 export interface DomControlsParts {
   deps: DomControlsDeps;
   els: Els;
@@ -48,7 +44,6 @@ export interface DomControlsParts {
   sigResChoice: ChoiceGroup;
   attackerSide: SidePanel;
   targetSide: SidePanel;
-  attackerAmmoPopup: Popup;
   turretController: TurretController;
   sessionCodec: SessionCodec;
   importController: ImportController;

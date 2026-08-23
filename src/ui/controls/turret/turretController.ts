@@ -3,24 +3,24 @@ import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFi
 import type { StatConditions } from "../../../ships";
 import type { UiEvents } from "../../events";
 import { num } from "../controlsDom";
+import type { Popup } from "../popup";
 import { AmmoList, type AmmoListEls } from "./ammoList";
 import { SigResButtons } from "./sigResButtons";
 import { SigResIcons } from "./sigResIcons";
 import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretController, TurretControllerDeps } from "./turretControllerContract";
+import type { TurretOverrides } from "./turretOverrides";
 
 export type { TurretController } from "./turretControllerContract";
 
 export class TurretControllerImpl implements TurretController {
   private readonly els: TurretControllerDeps["els"];
-  private readonly popup: TurretControllerDeps["popup"];
+  private readonly popupValue: Popup;
   private readonly chargeCatalog: TurretControllerDeps["chargeCatalog"];
   private readonly fittingImport: TurretControllerDeps["fittingImport"];
   private readonly trackingInput: TurretControllerDeps["trackingInput"];
-  private readonly overrides: TurretControllerDeps["overrides"];
-  private readonly clearTurretOverrides: TurretControllerDeps["clearTurretOverrides"];
-  private readonly onConfigChange: TurretControllerDeps["onConfigChange"];
+  private readonly turretOverrides: TurretOverrides;
   private readonly ammoList: AmmoList;
   private readonly sigResIcons: SigResIcons;
   private readonly inputSet: TurretInputSet;
@@ -34,16 +34,14 @@ export class TurretControllerImpl implements TurretController {
 
   constructor(deps: TurretControllerDeps) {
     this.els = deps.els;
-    this.popup = deps.popup;
     this.chargeCatalog = deps.chargeCatalog;
     this.fittingImport = deps.fittingImport;
     this.trackingInput = deps.trackingInput;
-    this.overrides = deps.overrides;
-    this.clearTurretOverrides = deps.clearTurretOverrides;
-    this.onConfigChange = deps.onConfigChange;
+    this.turretOverrides = deps.turretOverrides;
     this.resolver = deps.resolver;
     this.events = deps.events;
     this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+    this.popupValue = this.createAmmoPopup();
     this.ammoList = new AmmoList({
       els: this.ammoListEls(),
       chargeCatalog: this.chargeCatalog,
@@ -57,11 +55,13 @@ export class TurretControllerImpl implements TurretController {
       els: this.els,
       trackingInput: this.trackingInput,
       sigResButtons: new SigResButtons({ sigResOptions: this.els.sigResOptions }),
-      overrides: this.overrides,
+      turretOverrides: this.turretOverrides,
     });
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
+
+  get popup(): Popup { return this.popupValue; }
 
   turret(): ImportedTurret | undefined {
     return this.attackerTurret;
@@ -78,7 +78,7 @@ export class TurretControllerImpl implements TurretController {
     this.attackerTurret = turret;
     this.attackerAmmo = ammo;
     if (turret) {
-      this.clearTurretOverrides();
+      this.turretOverrides.clearTurret();
       this.inputSet.set(turret);
     }
     this.render();
@@ -163,22 +163,32 @@ export class TurretControllerImpl implements TurretController {
     if (updated === this.attackerTurret) return false;
     this.attackerTurret = updated;
     this.attackerAmmo = updated.charge;
-    this.clearTurretOverrides();
+    this.turretOverrides.clearTurret();
     this.inputSet.set(updated);
     this.render();
-    this.onConfigChange(false);
+    this.events.emitConfigInvalidated(false);
     return true;
   }
 
   private onAmmoItemClick(name: string): void {
     if (!this.applyAmmo(name)) return;
     this.closeAmmoPopup();
-    this.popup.focusTrigger();
+    this.popupValue.focusTrigger();
   }
 
   private onAmmoExpandClick(): void {
     this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
     this.render();
+  }
+
+  private createAmmoPopup(): Popup {
+    return {
+      isOpen: () => this.isAmmoPopupOpen(),
+      open: () => this.openAmmoPopup(),
+      close: () => this.closeAmmoPopup(),
+      focusTrigger: () => this.els.attackerAmmoTrigger.focus(),
+      contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
+    };
   }
 
   private ammoListEls(): AmmoListEls {

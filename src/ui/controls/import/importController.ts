@@ -18,7 +18,8 @@ export class ImportControllerImpl implements ImportController {
   private readonly savedFittings: SavedFittings;
   private readonly popupGroup: PopupGroup;
   private readonly els: ImportEls;
-  private readonly sidePanel: (side: Side) => SidePanel;
+  private readonly attackerSide: SidePanel;
+  private readonly targetSide: SidePanel;
   private readonly preferences: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly getSettings: () => UserSettings;
@@ -36,7 +37,8 @@ export class ImportControllerImpl implements ImportController {
     savedFittings: SavedFittings;
     popupGroup: PopupGroup;
     els: ImportEls;
-    sidePanel: (side: Side) => SidePanel;
+    attackerSide: SidePanel;
+    targetSide: SidePanel;
     turret: AttackerTurret;
     preferences: PreferencesController;
     profileController: ProfileController;
@@ -49,14 +51,16 @@ export class ImportControllerImpl implements ImportController {
     this.savedFittings = deps.savedFittings;
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
-    this.sidePanel = deps.sidePanel;
+    this.attackerSide = deps.attackerSide;
+    this.targetSide = deps.targetSide;
     this.preferences = deps.preferences;
     this.profileController = deps.profileController;
     this.getSettings = deps.getSettings;
     this.onConfigPersisted = deps.onConfigPersisted;
     this.onProfileTextLoaded = deps.onProfileTextLoaded;
     this.eftSideImporter = new EftSideImporter({
-      sidePanel: deps.sidePanel,
+      attackerSide: deps.attackerSide,
+      targetSide: deps.targetSide,
       turret: deps.turret,
       fittingImport: deps.fittingImport,
       onConfigPersisted: deps.onConfigPersisted,
@@ -80,15 +84,19 @@ export class ImportControllerImpl implements ImportController {
 
   get popup(): Popup { return this.popupValue; }
 
+  private panel(side: Side): SidePanel {
+    return side === "attacker" ? this.attackerSide : this.targetSide;
+  }
+
   async importFromClipboard(side: Side): Promise<void> {
-    const panel = this.sidePanel(side);
+    const panel = this.panel(side);
     const pastePopup = panel.getPastePopup();
     if (pastePopup.isOpen()) {
       this.popupGroup.close(pastePopup);
       return;
     }
-    this.popupGroup.close(this.sidePanel("attacker").getPastePopup());
-    this.popupGroup.close(this.sidePanel("target").getPastePopup());
+    this.popupGroup.close(this.attackerSide.getPastePopup());
+    this.popupGroup.close(this.targetSide.getPastePopup());
     let text: string;
     try {
       text = await this.clipboard.readText();
@@ -105,7 +113,7 @@ export class ImportControllerImpl implements ImportController {
   }
 
   async importFromText(side: Side, text: string): Promise<void> {
-    const panel = this.sidePanel(side);
+    const panel = this.panel(side);
     panel.clearImportHintTimeout();
     const trimmed = text.trimStart();
     if (this.profileTextImporter.isProfileText(trimmed)) {

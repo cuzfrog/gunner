@@ -4,7 +4,6 @@ import {
   type HitChanceBreakdown,
   type ShipConfig,
   type SimConfig,
-  SIG_RESOLUTIONS,
   type TurretSpec,
 } from "../../sim";
 import { isAutopilotMode, type UserSettings } from "../../appstate";
@@ -14,7 +13,7 @@ import { AGGRESSIVITY_MIN, parseManeuverAggressivity } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import { DomControlsFactory } from "./domControlsFactory";
-import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "./popup";
+import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
 import type { EventRouter, HullDatalist, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
@@ -39,7 +38,6 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly sigResChoice: ChoiceGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
-  private readonly attackerAmmoPopup: Popup;
   private readonly turretController: TurretController;
   private readonly sessionCodec: SessionCodec;
   private readonly importController: ImportController;
@@ -63,7 +61,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.sigResChoice = parts.sigResChoice;
     this.attackerSide = parts.attackerSide;
     this.targetSide = parts.targetSide;
-    this.attackerAmmoPopup = parts.attackerAmmoPopup;
     this.turretController = parts.turretController;
     this.sessionCodec = parts.sessionCodec;
     this.importController = parts.importController;
@@ -73,6 +70,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.eventRouter = parts.eventRouter;
     this.wireControls();
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
+    this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.sessionCodec.restoreStartup(this.deps.settingsStore.loadStartupState());
     this.attackerSide.updateAlignTime();
     this.targetSide.updateAlignTime();
@@ -86,7 +84,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.attackerFittingPopup.popup);
     this.popupGroup.register(this.targetFittingPopup.popup);
     this.popupGroup.register(this.importController.popup);
-    this.popupGroup.register(this.attackerAmmoPopup);
+    this.popupGroup.register(this.turretController.popup);
     this.hullDatalist.populate();
     this.attackerSide.renderSkillOptions();
     this.targetSide.renderSkillOptions();
@@ -97,17 +95,17 @@ export class DomControls implements Controls, DomControlsHost {
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
-  onConfigChange(): void {
-    this.preferencesController.savePreferences();
-    this.profileController.updateDirtyState();
-    this.callbacks?.onConfigChange();
-  }
+  onConfigChange(): void { this.persistConfigChange(); }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
   }
 
-  fireConfigChange(): void { this.callbacks?.onConfigChange(); }
+  private onConfigInvalidated(persist: boolean): void {
+    this.preferencesController.savePreferences();
+    if (persist) this.profileController.updateDirtyState();
+    this.callbacks?.onConfigChange();
+  }
 
   private onLanguageChanged(): void {
     this.deps.i18n.translateDocument();
@@ -168,7 +166,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
-  private currentSigResolution(): number { return SIG_RESOLUTIONS[this.turretController.currentSigResClass()]; }
   private currentMode(side: Side): AutopilotMode {
     const value = this.els[`${side}Mode`].value;
     if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);

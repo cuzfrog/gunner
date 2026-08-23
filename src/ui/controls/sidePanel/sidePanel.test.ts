@@ -57,12 +57,20 @@ describe("SidePanel", () => {
     panel.profile = RIFTER;
     panel.fittedHull = undefined;
     panel.fittingText = "fit";
-    panel.overrides = { attackerMass: 1000 };
+    panel.recordOverride("attackerMass", 1000);
     panel.lastCommittedHull = "Rifter";
     expect(panel.profile).toBe(RIFTER);
     expect(panel.fittingText).toBe("fit");
-    expect(panel.overrides).toEqual({ attackerMass: 1000 });
+    expect(panel.isOverridden("attackerMass")).toBe(true);
     expect(panel.lastCommittedHull).toBe("Rifter");
+  });
+
+  test("target overrides are captured and restored", () => {
+    const { panel } = buildSidePanel("target");
+    panel.recordOverride("targetMass", 2000);
+    expect(panel.isOverridden("targetMass")).toBe(true);
+    panel.clearOverrides();
+    expect(panel.isOverridden("targetMass")).toBe(false);
   });
 
   test("skillConditions reflects skill and overload inputs", () => {

@@ -4,7 +4,15 @@ no-new-exports:
   - messages/hintMessages.ts
   - messages/loreMessages.ts
   - module.ts
+  - dictionary-ja.ts
+  - dictionary.ts
+  - dictionary-en.ts
+  - i18n.test.ts
+  - dictionary-zh.ts
+  - index.ts
+  - dictionaryTypes.ts
 ---
+
 
 # i18n
 

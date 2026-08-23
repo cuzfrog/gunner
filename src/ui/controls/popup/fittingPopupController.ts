@@ -21,7 +21,7 @@ interface FittingPopupControllerDeps {
   imageCatalog: ImageCatalog;
   i18n: I18n;
   els: FittingPopupEls;
-  panelFor: (side: Side) => SidePanel;
+  panel: SidePanel;
   applyFitting: (text: string) => ImportedFitting | undefined;
   previews: FittingPreviewManager;
   events: UiEvents;
@@ -57,7 +57,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
       fittingImport: deps.fittingImport,
       i18n: deps.i18n,
       els: deps.els,
-      panelFor: deps.panelFor,
+      panel: deps.panel,
       previews: deps.previews,
     });
     this.popupValue = {

@@ -29,14 +29,13 @@ function buildPasteSection() {
 
   const host = vi.mocked<SidePanel["host"]>({
     persistConfigChange: vi.fn(),
-    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
-    importer: {
-      mostRecentFittingFor: vi.fn(),
-      importEftFitting: vi.fn(),
-      importFromText: vi.fn(() => Promise.resolve()),
-      importFromClipboard: vi.fn(() => Promise.resolve()),
-    },
   });
+  const importer = {
+    mostRecentFittingFor: vi.fn(),
+    importEftFitting: vi.fn(),
+    importFromText: vi.fn(() => Promise.resolve()),
+    importFromClipboard: vi.fn(() => Promise.resolve()),
+  };
 
   const sections = vi.mocked<ISidePanelSections>({
     hull: {} as unknown as ISidePanelSections["hull"],
@@ -52,6 +51,7 @@ function buildPasteSection() {
     sections,
     profile: undefined,
     fittedHull: undefined,
+    importer,
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
@@ -62,9 +62,9 @@ function buildPasteSection() {
 
 describe("PasteImportSection", () => {
   test("onImportFittingClick imports from clipboard", () => {
-    const { panel, section, host } = buildPasteSection();
+    const { panel, section } = buildPasteSection();
     section.onImportFittingClick();
-    expect(host.importer.importFromClipboard).toHaveBeenCalled();
+    expect(panel.importer.importFromClipboard).toHaveBeenCalled();
   });
 
   test("showImportHint renders a translated hint", () => {

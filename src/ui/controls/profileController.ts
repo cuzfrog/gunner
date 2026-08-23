@@ -16,7 +16,8 @@ export interface ProfileController {
   selectedName(): string;
   restoreFromStartup(startup: StartupState): boolean;
   refresh(selected?: string): void;
-  markLoaded(selected: string): void;
+  setSnapshotSource(source: () => ProfileSettings): void;
+  markLoaded(selected?: string): void;
   updateDirtyState(): void;
   saveProfile(): void;
   loadProfile(): void;
@@ -24,31 +25,31 @@ export interface ProfileController {
   showStatus(key: string): void;
 }
 
+interface ProfileControllerDeps {
+  readonly els: ProfileEls;
+  readonly settingsStore: SettingsStore;
+  readonly timer: Timer;
+  readonly i18n: I18n;
+  readonly onLoaded: (name: string) => void;
+  readonly events: UiEvents;
+}
+
 export class ProfileControllerImpl implements ProfileController {
   private readonly els: ProfileEls;
   private readonly settingsStore: SettingsStore;
   private readonly timer: Timer;
   private readonly i18n: I18n;
-  private readonly captureCurrent: () => ProfileSettings;
   private readonly onLoaded: (name: string) => void;
   private readonly events: UiEvents;
+  private snapshotSource: (() => ProfileSettings) | undefined;
   private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
 
-  constructor(deps: {
-    els: ProfileEls;
-    settingsStore: SettingsStore;
-    timer: Timer;
-    i18n: I18n;
-    captureCurrent: () => ProfileSettings;
-    onLoaded: (name: string) => void;
-    events: UiEvents;
-  }) {
+  constructor(deps: ProfileControllerDeps) {
     this.els = deps.els;
     this.settingsStore = deps.settingsStore;
     this.timer = deps.timer;
     this.i18n = deps.i18n;
-    this.captureCurrent = deps.captureCurrent;
     this.onLoaded = deps.onLoaded;
     this.events = deps.events;
     this.events.onLanguageChanged(() => this.refresh(this.selectedName()));
@@ -86,9 +87,13 @@ export class ProfileControllerImpl implements ProfileController {
     select.value = selected;
   }
 
-  markLoaded(selected: string): void {
-    this.selectedProfile = this.captureCurrent();
-    this.refresh(selected);
+  setSnapshotSource(source: () => ProfileSettings): void {
+    this.snapshotSource = source;
+  }
+
+  markLoaded(selected?: string): void {
+    this.selectedProfile = this.snapshotSource?.() ?? null;
+    this.refresh(selected ?? this.selectedName());
     this.updateDirtyState();
   }
 
@@ -98,10 +103,14 @@ export class ProfileControllerImpl implements ProfileController {
     let saved: ProfileSettings | null = null;
     if (name && name !== selected) {
       saved = this.settingsStore.loadProfile(name);
-    } else if (selected) {
+    } else {
       saved = this.selectedProfile;
     }
-    const current = this.captureCurrent();
+    const current = this.snapshotSource?.() ?? null;
+    if (!current) {
+      this.els.profileSave.classList.toggle("unsaved", false);
+      return;
+    }
     const pending = saved ? !profilesEqual(saved, current) : name.length > 0;
     this.els.profileSave.classList.toggle("unsaved", pending);
   }
@@ -111,7 +120,8 @@ export class ProfileControllerImpl implements ProfileController {
     const name = this.els.profileName.value.trim();
     const profileName = name || selected;
     if (!profileName) return;
-    const profile = this.captureCurrent();
+    const profile = this.snapshotSource?.();
+    if (!profile) return;
     this.settingsStore.saveProfile(profileName, profile);
     this.settingsStore.selectProfile(profileName);
     this.els.profileName.value = "";

@@ -1,10 +1,10 @@
 import { asFunction, type AwilixContainer } from "awilix";
-import type { FittingImport, ImportedFitting } from "../../../fitting";
+import type { FittingImport } from "../../../fitting";
 import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../appstate";
-import type { Popup, PopupGroup } from "../popup";
+import type { PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { Side, SidePanel } from "../sidePanel";
+import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -15,7 +15,8 @@ interface ImportControllerDeps {
   readonly savedFittings: SavedFittings;
   readonly popupGroup: PopupGroup;
   readonly els: ImportEls;
-  readonly sidePanel: (side: Side) => SidePanel;
+  readonly attackerSide: SidePanel;
+  readonly targetSide: SidePanel;
   readonly turret: AttackerTurret;
   readonly preferences: PreferencesController;
   readonly profileController: ProfileController;

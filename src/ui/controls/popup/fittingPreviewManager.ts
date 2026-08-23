@@ -5,6 +5,7 @@ import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Side } from "../sidePanel";
+import type { SidePanel } from "../sidePanel";
 import type { UiEvents } from "../../events";
 
 export interface FittingPreviewManager {
@@ -22,11 +23,11 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
+  private readonly attackerSide: SidePanel;
+  private readonly targetSide: SidePanel;
   private readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
   private readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   private readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
-  private readonly profileOf: (side: Side) => ShipProfile | undefined;
-  private readonly fittingTextOf: (side: Side) => string | undefined;
   private openPreviewSide: Side | null = null;
   private currentPreviewAnchor?: HTMLElement;
   private currentPreviewText?: string;
@@ -37,21 +38,21 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     fittingImport: FittingImport;
     imageCatalog: ImageCatalog;
     i18n: I18n;
+    attackerSide: SidePanel;
+    targetSide: SidePanel;
     previewsBySide: Readonly<Record<Side, FittingPreview>>;
     shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
-    profileOf: (side: Side) => ShipProfile | undefined;
-    fittingTextOf: (side: Side) => string | undefined;
     events: UiEvents;
   }) {
     this.fittingImport = deps.fittingImport;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
+    this.attackerSide = deps.attackerSide;
+    this.targetSide = deps.targetSide;
     this.previewsBySide = deps.previewsBySide;
     this.shipImageBySide = deps.shipImageBySide;
     this.eyeBySide = deps.eyeBySide;
-    this.profileOf = deps.profileOf;
-    this.fittingTextOf = deps.fittingTextOf;
     deps.events.onLanguageChanged(() => this.refresh());
   }
 
@@ -119,6 +120,18 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
 
   private previewOf(side: Side): FittingPreview {
     return this.previewsBySide[side];
+  }
+
+  private sidePanel(side: Side): SidePanel {
+    return side === "attacker" ? this.attackerSide : this.targetSide;
+  }
+
+  private profileOf(side: Side): ShipProfile | undefined {
+    return this.sidePanel(side).profile;
+  }
+
+  private fittingTextOf(side: Side): string | undefined {
+    return this.sidePanel(side).fittingText;
   }
 
   private show(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement, inMenu: boolean): void {

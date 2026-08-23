@@ -4,7 +4,7 @@ import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
+import type { ProfileParamOverrides, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import { UiEventsImpl, type UiEvents } from "../events";
 import {
   FakeElement,
@@ -29,6 +29,7 @@ import { createControlsEls } from "./elements";
 import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
 import type { Side, SidePanel, SidePanelDeps, SidePanelElements, SidePanelHost } from "./sidePanel";
+import type { TurretController, TurretOverrides } from "./turret";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
@@ -164,6 +165,16 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   return { document, controls, settingsStore, hitChance, i18n, clipboard };
 }
 
+class StubTurretOverrides implements TurretOverrides {
+  private overrides: Partial<ProfileParamOverrides> = {};
+  get(): Partial<ProfileParamOverrides> { return { ...this.overrides }; }
+  set(patch: Partial<ProfileParamOverrides>): void { this.overrides = { ...this.overrides, ...patch }; }
+  clearTurret(): void {
+    for (const key of ["tracking", "sigRes", "optimal", "falloff"] as const) delete this.overrides[key];
+  }
+  clear(): void { this.overrides = {}; }
+}
+
 export function buildSidePanel(
   side: Side = "attacker",
   ships: Ships = mockShips(),
@@ -172,16 +183,22 @@ export function buildSidePanel(
   const document = fakeDocument();
   const cradle = buildControlsCradle(document);
   const els = cradle.resolve<(els: Els, side: Side) => SidePanelElements>("createSidePanelEls")(createControlsEls(), side);
-  const host: SidePanelHost = {
-    persistConfigChange: vi.fn(),
-    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
-    importer: {
-      mostRecentFittingFor: vi.fn(),
-      importEftFitting: vi.fn(),
-      importFromText: vi.fn(() => Promise.resolve()),
-      importFromClipboard: vi.fn(() => Promise.resolve()),
-    },
-  };
+  const host: SidePanelHost = { persistConfigChange: vi.fn() };
+  const turretOverrides: TurretOverrides = new StubTurretOverrides();
+  const turret: TurretController = {
+    popup: { isOpen: vi.fn(), open: vi.fn(), close: vi.fn(), focusTrigger: vi.fn(), contains: vi.fn() },
+    clear: vi.fn(),
+    restore: vi.fn(),
+    applyImported: vi.fn(),
+    ammo: vi.fn(() => "Hail S"),
+    capture: vi.fn(),
+    currentSigResClass: vi.fn(),
+    currentTurretSpec: vi.fn(),
+    isAmmoPopupOpen: vi.fn(),
+    openAmmoPopup: vi.fn(),
+    closeAmmoPopup: vi.fn(),
+    render: vi.fn(),
+  } as unknown as TurretController;
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
     setLanguage: vi.fn(),
@@ -215,6 +232,14 @@ export function buildSidePanel(
     imageCatalog,
     timer: mockTimer(),
     events,
+    turret: side === "attacker" ? turret : undefined,
+    turretOverrides: side === "attacker" ? turretOverrides : undefined,
   });
-  return { document, panel };
+  panel.setImporter({
+    mostRecentFittingFor: vi.fn(),
+    importEftFitting: vi.fn(),
+    importFromText: vi.fn(() => Promise.resolve()),
+    importFromClipboard: vi.fn(() => Promise.resolve()),
+  });
+  return { document, panel, turret, turretOverrides };
 }

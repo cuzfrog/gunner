@@ -1,6 +1,6 @@
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Els } from "../elementsContract";
-import type { FittingPopupController, FittingPreviewManager, Popup, PopupGroup } from "../popup";
+import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "../popup";
 import type { ImportController } from "../import";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
@@ -26,7 +26,6 @@ export class EventRouter {
   private readonly turret: TurretController;
   private readonly popupGroup: PopupGroup;
   private readonly previewManager: FittingPreviewManager;
-  private readonly attackerAmmoPopup: Popup;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
   private readonly host: EventRouterHost;
@@ -43,7 +42,6 @@ export class EventRouter {
     trackingInput: TrackingInput;
     popupGroup: PopupGroup;
     previewManager: FittingPreviewManager;
-    attackerAmmoPopup: Popup;
     attackerFittingPopup: FittingPopupController;
     targetFittingPopup: FittingPopupController;
     host: EventRouterHost;
@@ -57,7 +55,6 @@ export class EventRouter {
     this.turret = deps.turret;
     this.popupGroup = deps.popupGroup;
     this.previewManager = deps.previewManager;
-    this.attackerAmmoPopup = deps.attackerAmmoPopup;
     this.attackerFittingPopup = deps.attackerFittingPopup;
     this.targetFittingPopup = deps.targetFittingPopup;
     this.host = deps.host;
@@ -93,7 +90,7 @@ export class EventRouter {
     this.els.attackerHull.addEventListener("change", () => this.attackerSide.onHullChange());
     this.els.attackerFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerFittingPopup.popup));
     this.els.attackerFittingEye.addEventListener("click", () => this.previewManager.toggle("attacker"));
-    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerAmmoPopup));
+    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.turret.popup));
     this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.onPropulsionChange());
     this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getPropulsionVariantPopup()));
     this.els.attackerSkills.addEventListener("change", () => this.attackerSide.onSkillOrOverloadChange(true));
@@ -181,6 +178,7 @@ export class EventRouter {
     if (id === "falloff") this.attackerSide.recordOverride("falloff", num(this.els.falloff));
     if (id === "targetSig") this.targetSide.recordOverride("targetSig", Math.max(num(this.els.targetSig), 1));
   }
+
   private applyShipInput(id: keyof Els): void {
     if (id === "attackerMass") this.attackerSide.updateSpeedFromMass();
     if (id === "targetMass") this.targetSide.updateSpeedFromMass();

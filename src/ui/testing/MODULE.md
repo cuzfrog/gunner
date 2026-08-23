@@ -3,7 +3,9 @@ no-new-exports:
   - fakeDocument.ts
   - fakeElement.ts
   - mockFittings.ts
+  - index.ts
 ---
+
 
 # testing
 

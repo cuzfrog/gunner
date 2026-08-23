@@ -2,7 +2,12 @@
 no-new-exports:
   - imageCatalog.ts
   - module.ts
+  - imageCatalog.test.ts
+  - index.ts
+  - iconIds.ts
+  - droneIconIds.ts
 ---
+
 
 # icons
 

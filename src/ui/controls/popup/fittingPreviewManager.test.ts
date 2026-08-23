@@ -7,7 +7,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittingImport } from "../../../fitting";
 import type { ShipProfile } from "../../../ships";
-import type { Side } from "../sidePanel";
+import type { Side, SidePanel } from "../sidePanel";
 
 const PREVIEW_SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -47,16 +47,21 @@ function createManager(options: {
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
+  const attackerSide = {
+    profile: RIFTER,
+    get fittingText() { return options.fittingTextOf ? options.fittingTextOf("attacker") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
+  } as unknown as SidePanel;
+  const targetSide = { profile: undefined, fittingText: undefined } as unknown as SidePanel;
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,
       imageCatalog,
       i18n,
+      attackerSide,
+      targetSide,
       previewsBySide: { attacker: attackerPreview, target: targetPreview } as const,
       shipImageBySide: { attacker: shipImage as unknown as HTMLImageElement, target: shipImage as unknown as HTMLImageElement } as const,
       eyeBySide: { attacker: eye as unknown as HTMLButtonElement, target: eye as unknown as HTMLButtonElement } as const,
-      profileOf: (side: Side): ShipProfile | undefined => (side === "attacker" ? RIFTER : undefined),
-      fittingTextOf: options.fittingTextOf ?? (() => "[Rifter, Brawler]\n200mm AutoCannon I"),
       events,
     }),
     preview,

@@ -3,15 +3,15 @@ import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting } from 
 import type { SigResolutionClass, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { ProfileParamOverrides } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
+import type { Popup } from "../popup";
 import type { TurretEls } from "./turretEls";
+import type { TurretOverrides } from "./turretOverrides";
 import type { TurretStateResolver } from "./turretStateResolver";
 import type { UiEvents } from "../../events";
 
 export interface TurretControllerDeps {
   readonly els: TurretEls;
-  readonly popup: { isOpen(): boolean; open(): void; close(): void; focusTrigger(): void; };
   readonly chargeCatalog: ChargeCatalog;
   readonly gunFamilies: GunFamilies;
   readonly imageCatalog: ImageCatalog;
@@ -19,13 +19,12 @@ export interface TurretControllerDeps {
   readonly i18n: I18n;
   readonly fittingImport: FittingImport;
   readonly resolver: TurretStateResolver;
-  readonly overrides: () => Partial<ProfileParamOverrides>;
-  readonly clearTurretOverrides: () => void;
-  readonly onConfigChange: (persist: boolean) => void;
+  readonly turretOverrides: TurretOverrides;
   readonly events: UiEvents;
 }
 
 export interface TurretController {
+  readonly popup: Popup;
   ammo(): string;
   applyImported(imported: ImportedFitting): void;
   restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string }): void;

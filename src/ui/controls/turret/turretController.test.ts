@@ -112,7 +112,7 @@ describe("TurretController", () => {
   });
 
   test("selecting a different charge updates turret inputs and clears overrides", () => {
-    const { document, controller, chargeCatalog, clearTurretOverrides, onConfigChange } = buildTurret({
+    const { document, controller, chargeCatalog, turretOverrides, events } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       chargeCatalog: {
         chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
@@ -120,15 +120,17 @@ describe("TurretController", () => {
       },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    turretOverrides.set({ attackerMass: 1234 });
     getFake(document, "optimal").value = "12345";
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.openAmmoPopup();
     getFake(document, "attacker-ammo-all-list").children[1].trigger("click");
 
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
     expect(getFake(document, "attacker-ammo-summary").textContent).toBe("Republic Fleet EMP S");
     expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ charge: "Hail S" }), "Republic Fleet EMP S");
-    expect(clearTurretOverrides).toHaveBeenCalled();
-    expect(onConfigChange).toHaveBeenCalledWith(false);
+    expect(turretOverrides.get()).toEqual({ attackerMass: 1234 });
+    expect(emitConfigInvalidated).toHaveBeenCalledWith(false);
     expect(getFake(document, "tracking").value).toBe("0.42");
     expect(getFake(document, "optimal").value).toBe("1200");
     expect(getFake(document, "falloff").value).toBe("3000");

@@ -30,7 +30,7 @@ export class PasteImportSection implements IPasteImportSection {
   }
 
   onImportFittingClick(): void {
-    void this.panel.host.importer.importFromClipboard();
+    void this.panel.importer.importFromClipboard();
   }
 
   onPastePopupPaste(event: ClipboardEvent): void {
@@ -38,7 +38,7 @@ export class PasteImportSection implements IPasteImportSection {
     if (!text) return;
     event.preventDefault();
     this.closePastePopup();
-    void this.panel.host.importer.importFromText(text);
+    void this.panel.importer.importFromText(text);
   }
 
   showImportHint(key: string, isError = false): void {

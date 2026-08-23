@@ -120,11 +120,12 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
     savePreferences: vi.fn(),
   };
   const timer = createNoOpTimer();
-  const captureCurrent = vi.fn(() => ({ ...BASE_PROFILE }));
+  const snapshotSource = vi.fn(() => ({ ...BASE_PROFILE }));
   const onLoaded = vi.fn();
   const events = new UiEventsImpl();
-  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, captureCurrent, onLoaded, events });
-  return { controller, els, settingsStore, timer, captureCurrent, onLoaded, events };
+  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, onLoaded, events });
+  controller.setSnapshotSource(snapshotSource);
+  return { controller, els, settingsStore, timer, snapshotSource, onLoaded, events };
 }
 
 describe("ProfileController", () => {
@@ -198,7 +199,7 @@ describe("ProfileController", () => {
   });
 
   test("updateDirtyState distinguishes new, equal, changed, and existing-different profiles", () => {
-    const { controller, els, captureCurrent } = build({
+    const { controller, els, snapshotSource } = build({
       profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
       list: ["brawler", "kiter"],
     });
@@ -206,7 +207,7 @@ describe("ProfileController", () => {
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
     els.profileName.value = "";
-    controller.markLoaded("brawler");
+    controller.markLoaded();
     vi.mocked(els.profileSave.classList.toggle).mockClear();
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
@@ -217,7 +218,7 @@ describe("ProfileController", () => {
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
     els.profileName.value = "";
-    captureCurrent.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
+    snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
   });

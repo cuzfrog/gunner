@@ -70,14 +70,13 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
 
   const host = vi.mocked<SidePanel["host"]>({
     persistConfigChange: vi.fn(),
-    attackerTurretHooks: { onFittedHullCleared: vi.fn(), restoreTurret: vi.fn() },
-    importer: {
-      mostRecentFittingFor: vi.fn(),
-      importEftFitting: vi.fn(),
-      importFromText: vi.fn(() => Promise.resolve()),
-      importFromClipboard: vi.fn(() => Promise.resolve()),
-    },
   });
+  const importer = {
+    mostRecentFittingFor: vi.fn(),
+    importEftFitting: vi.fn(),
+    importFromText: vi.fn(() => Promise.resolve()),
+    importFromClipboard: vi.fn(() => Promise.resolve()),
+  };
 
   const sections = vi.mocked<ISidePanelSections>({
     hull: {} as unknown as ISidePanelSections["hull"],
@@ -105,8 +104,8 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     profile: undefined,
     fittedHull: undefined,
     fittingText: undefined,
-    overrides: {},
     lastCommittedHull: undefined,
+    importer,
     setFittingTriggerEnabled: vi.fn(),
     renderFittingPopupIfOpen: vi.fn(),
     closeFittingPopupIfOpen: vi.fn(),
@@ -114,6 +113,11 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     getSkillPopup: vi.fn(),
     getPastePopup: vi.fn(),
     getPropulsionVariantPopup: vi.fn(),
+    isOverridden: vi.fn(),
+    recordOverride: vi.fn(),
+    clearOverrides: vi.fn(),
+    clearTurret: vi.fn(),
+    restoreTurret: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();

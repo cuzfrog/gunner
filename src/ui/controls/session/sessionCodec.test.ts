@@ -9,7 +9,7 @@ import type { HintRotator } from "../hints";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
-import type { TurretController } from "../turret";
+import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 
 function fakeEls() {
@@ -31,7 +31,7 @@ function panelStateFrom(settings: UserSettings, side: "attacker" | "target"): Re
     hull: side === "attacker" ? settings.attackerHull : settings.targetHull,
     propulsion: side === "attacker" ? settings.attackerPropulsion : settings.targetPropulsion,
     fitting: side === "attacker" ? settings.attackerFitting : settings.targetFitting,
-    overrides: side === "attacker" ? settings.attackerOverrides ?? {} : settings.targetOverrides ?? {},
+    overrides: side === "attacker" ? {} : settings.targetOverrides ?? {},
     fittedHull: side === "attacker" ? settings.attackerFittedHull : settings.targetFittedHull,
   };
   if (side === "target") return { ...base, sig: settings.targetSig };
@@ -53,6 +53,15 @@ function mockSidePanel(side: "attacker" | "target", captured: ReturnType<SidePan
   } as unknown as SidePanel;
 }
 
+function mockTurretOverrides(overrides: Record<string, unknown> = {}): TurretOverrides {
+  const store = { overrides };
+  return {
+    get: vi.fn(() => ({ ...store.overrides })),
+    set: vi.fn((patch) => { store.overrides = { ...store.overrides, ...patch }; }),
+    clear: vi.fn(() => { store.overrides = {}; }),
+  } as unknown as TurretOverrides;
+}
+
 describe("SessionCodec", () => {
   test("capture returns a complete UserSettings from current controls", () => {
     const els = fakeEls();
@@ -71,11 +80,12 @@ describe("SessionCodec", () => {
     const turret = {
       capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })),
     } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides({ attackerMass: 1_400_000 });
     els.maneuverAggressivity.value = "1";
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret,
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: {} as ChoiceGroup, hintRotator: {} as HintRotator,
       settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
@@ -105,6 +115,8 @@ describe("SessionCodec", () => {
     expect(settings.simSpeed).toBe(4);
     expect(settings.language).toBe("en");
     expect(settings.attackerAmmo).toBe("Hail S");
+    expect(settings.attackerOverrides).toEqual({ attackerMass: 1_400_000 });
+    expect(turretOverrides.get).toHaveBeenCalled();
   });
 
   test("restoreStartup round-trips stored settings", () => {
@@ -166,6 +178,7 @@ describe("SessionCodec", () => {
       restore: vi.fn(),
       currentTurretSpec: vi.fn(() => ({ tracking: 0.5, sigResolution: SIG_RESOLUTIONS.M, optimal: 2000, falloff: 4000 })),
     } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides();
     const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
     const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -175,7 +188,7 @@ describe("SessionCodec", () => {
     const sessionControl = { isPlaying: () => true, setPlaying };
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret,
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
       sessionControl, trackingInput,
@@ -192,6 +205,7 @@ describe("SessionCodec", () => {
     expect(i18n.translateDocument).toHaveBeenCalled();
     expect(hintRotator.refresh).toHaveBeenCalled();
     expect(setPlaying).toHaveBeenCalledWith(true);
+    expect(turretOverrides.set).toHaveBeenCalledWith({});
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });
 
@@ -209,6 +223,7 @@ describe("SessionCodec", () => {
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), refresh: vi.fn() } as unknown as ProfileController;
     const turret = { currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides();
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn() } as unknown as SettingsStore;
     const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -218,7 +233,7 @@ describe("SessionCodec", () => {
     const sessionControl = { isPlaying: () => false, setPlaying };
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret,
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
       sessionControl, trackingInput,

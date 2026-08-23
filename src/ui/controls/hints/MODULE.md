@@ -2,7 +2,10 @@
 no-new-exports:
   - hintRotator.ts
   - module.ts
+  - hintRotator.test.ts
+  - index.ts
 ---
+
 
 # hints
 

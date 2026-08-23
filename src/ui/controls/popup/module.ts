@@ -1,7 +1,6 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fitting";
 import type { SavedFittings } from "../../../appstate";
-import type { ShipProfile } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Side, SidePanel } from "../sidePanel";
@@ -26,11 +25,11 @@ interface FittingPreviewManagerDeps {
   readonly fittingImport: FittingImport;
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
+  readonly attackerSide: SidePanel;
+  readonly targetSide: SidePanel;
   readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
   readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
-  readonly profileOf: (side: Side) => ShipProfile | undefined;
-  readonly fittingTextOf: (side: Side) => string | undefined;
   readonly events: UiEvents;
 }
 
@@ -43,7 +42,7 @@ interface FittingPopupControllerDeps {
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly els: FittingPopupEls;
-  readonly panelFor: (side: Side) => SidePanel;
+  readonly panel: SidePanel;
   readonly applyFitting: (text: string) => ImportedFitting | undefined;
   readonly previews: FittingPreviewManager;
   readonly events: UiEvents;

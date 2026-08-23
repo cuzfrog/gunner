@@ -68,7 +68,6 @@ describe("EventRouter", () => {
       trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager: {} as FittingPreviewManager,
-      attackerAmmoPopup: makePopup(),
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
       host,
@@ -92,7 +91,6 @@ describe("EventRouter", () => {
     vi.mocked(popupGroup.hasOpen).mockReturnValue(true);
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
-    const attackerAmmoPopup = makePopup();
     new EventRouter({
       els,
       preferences: {} as PreferencesController,
@@ -104,7 +102,6 @@ describe("EventRouter", () => {
       trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager: { openSide: vi.fn(() => undefined) } as unknown as FittingPreviewManager,
-      attackerAmmoPopup,
       attackerFittingPopup,
       targetFittingPopup,
       host: {} as EventRouterHost,
@@ -150,7 +147,6 @@ describe("EventRouter", () => {
       trackingInput,
       popupGroup: makePopupGroup(),
       previewManager: {} as FittingPreviewManager,
-      attackerAmmoPopup: makePopup(),
       attackerFittingPopup: makeFittingPopup(),
       targetFittingPopup: makeFittingPopup(),
       host,
@@ -208,7 +204,6 @@ describe("EventRouter", () => {
     vi.mocked(popupGroup.hasOpen).mockReturnValue(true);
     const attackerFittingPopup = makeFittingPopup();
     const targetFittingPopup = makeFittingPopup();
-    const attackerAmmoPopup = makePopup();
     const previewManager = { openSide: vi.fn(() => undefined), handlePointerDown: vi.fn() } as unknown as FittingPreviewManager;
     new EventRouter({
       els,
@@ -221,7 +216,6 @@ describe("EventRouter", () => {
       trackingInput: fakeTrackingInput(),
       popupGroup,
       previewManager,
-      attackerAmmoPopup,
       attackerFittingPopup,
       targetFittingPopup,
       host: {} as EventRouterHost,

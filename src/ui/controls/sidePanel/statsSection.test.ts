@@ -1,6 +1,7 @@
 import type { Ships, StatConditions } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
+import type { ProfileParamOverrides } from "../../../appstate";
 import type { Popup } from "./popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
@@ -56,17 +57,18 @@ function buildStatsSection(ships: Ships = shipsWithStats()) {
     } as unknown as ISidePanelSections["paste"],
   } as unknown as ISidePanelSections);
 
+  const overrides: Partial<ProfileParamOverrides> = {};
   const panel = vi.mocked<SidePanel>({
     side: "attacker",
     sections,
     profile: undefined,
     fittedHull: undefined,
-    overrides: {},
+    isOverridden: vi.fn((key: keyof ProfileParamOverrides) => overrides[key] !== undefined),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
   const section = new StatsSection({ panel, els, ships, i18n });
-  return { document, panel, section };
+  return { document, panel, section, overrides };
 }
 
 describe("StatsSection", () => {
@@ -83,9 +85,9 @@ describe("StatsSection", () => {
   });
 
   test("updateShipStats respects mass override", () => {
-    const { document, panel, section } = buildStatsSection();
+    const { document, panel, section, overrides } = buildStatsSection();
     panel.profile = RIFTER;
-    panel.overrides = { attackerMass: 800_000 };
+    overrides.attackerMass = 800_000;
     getFake(document, "attacker-mass").value = "800000";
     section.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
     expect(getFake(document, "attacker-mass").value).toBe("800000");
@@ -109,8 +111,8 @@ describe("StatsSection", () => {
   });
 
   test("isOverridden reads the panel overrides", () => {
-    const { panel, section } = buildStatsSection();
-    panel.overrides = { attackerSpeed: 300 };
+    const { section, overrides } = buildStatsSection();
+    overrides.attackerSpeed = 300;
     expect(section.isOverridden("attackerSpeed")).toBe(true);
     expect(section.isOverridden("attackerMass")).toBe(false);
   });

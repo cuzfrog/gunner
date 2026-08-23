@@ -11,7 +11,9 @@ no-new-exports:
   - timer.test.ts
   - events.ts
   - events.test.ts
+  - index.ts
 ---
+
 
 # ui
 

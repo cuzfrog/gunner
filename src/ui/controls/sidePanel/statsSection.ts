@@ -91,7 +91,7 @@ export class StatsSection implements IStatsSection {
   }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
-    return this.panel.overrides[key] !== undefined;
+    return this.panel.isOverridden(key);
   }
 
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined {

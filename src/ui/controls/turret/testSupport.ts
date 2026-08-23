@@ -1,10 +1,10 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n, Language } from "../../i18n";
-import type { ProfileParamOverrides } from "../../../appstate";
 import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
+import { TurretOverridesStore } from "./turretOverrides";
 import type { TurretEls } from "./turretEls";
 import { addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockTrackingInput } from "../testSupport";
 
@@ -40,7 +40,6 @@ export function setTurretInputs(document: Document): void {
 
 export function buildTurret(
   options: {
-    overrides?: Partial<ProfileParamOverrides>;
     imageCatalog?: Partial<ImageCatalog>;
     chargeCatalog?: Partial<ChargeCatalog>;
     fittingImport?: Partial<FittingImport>;
@@ -80,21 +79,11 @@ export function buildTurret(
     summarize: vi.fn(),
     ...options.fittingImport,
   });
-  const overrides = () => options.overrides ?? {};
-  const clearTurretOverrides = vi.fn();
-  const onConfigChange = vi.fn();
-  const popup = {
-    isOpen: vi.fn(() => false),
-    open: vi.fn(),
-    close: vi.fn(),
-    focusTrigger: vi.fn(),
-    contains: vi.fn(),
-  };
+  const turretOverrides = new TurretOverridesStore();
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
   const events = new UiEventsImpl();
   const controller = new TurretControllerImpl({
     els,
-    popup,
     chargeCatalog,
     gunFamilies,
     imageCatalog,
@@ -102,9 +91,7 @@ export function buildTurret(
     i18n,
     fittingImport,
     resolver,
-    overrides,
-    clearTurretOverrides,
-    onConfigChange,
+    turretOverrides,
     events,
   });
   return {
@@ -116,9 +103,7 @@ export function buildTurret(
     gunFamilies,
     i18n,
     trackingInput,
-    clearTurretOverrides,
-    onConfigChange,
-    popup,
+    turretOverrides,
     events,
   };
 }

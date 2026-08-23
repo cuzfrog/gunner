@@ -9,6 +9,7 @@ import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
 import type { Side } from "./side";
 import type { ISidePanelSections } from "./sidePanelSections";
+import type { TurretController, TurretOverrides } from "../turret";
 import type { SidePanelElements } from "./elements";
 
 export interface SidePanel {
@@ -24,14 +25,20 @@ export interface SidePanel {
   profile: ShipProfile | undefined;
   fittedHull: FittedHullSummary | undefined;
   fittingText: string | undefined;
-  overrides: Partial<ProfileParamOverrides>;
   lastCommittedHull: string | undefined;
+  importer: SideImporter;
   getSkillPopup(): Popup;
   getPastePopup(): Popup;
   getPropulsionVariantPopup(): Popup;
   setFittingPopup(popup: FittingPopupControl): void;
   setFittingPreview(preview: FittingPreviewControl): void;
   setFittingTriggerEnabled(enabled: boolean): void;
+  setImporter(importer: SideImporter): void;
+  isOverridden(key: keyof ProfileParamOverrides): boolean;
+  recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void;
+  clearOverrides(): void;
+  clearTurret(): void;
+  restoreTurret(): void;
   stateFrom(settings: UserSettings): SidePanelState;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
@@ -45,7 +52,6 @@ export interface SidePanel {
   updateAlignTime(): void;
   updateHullHint(module?: PropulsionModule): void;
   refreshHullInputs(): void;
-  recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void;
   skillConditions(): StatConditions;
   setOverloadDisabled(): void;
   setOverloadActive(active: boolean): void;
@@ -94,7 +100,7 @@ export function stateSliceOf(settings: UserSettings, side: Side): SidePanelState
       hull: settings.attackerHull,
       propulsion: settings.attackerPropulsion,
       fitting: settings.attackerFitting,
-      overrides: settings.attackerOverrides ?? {},
+      overrides: {},
       fittedHull: settings.attackerFittedHull,
     };
   }
@@ -126,12 +132,7 @@ export interface FittingPreviewControl {
   hide(side: Side): void;
 }
 
-export interface AttackerTurretHooks {
-  onFittedHullCleared(): void;
-  restoreTurret(): void;
-}
-
-export interface FittingImporter {
+export interface SideImporter {
   mostRecentFittingFor(hullName: string): SavedFitting | undefined;
   importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
   importFromText(text: string): Promise<void>;
@@ -140,8 +141,6 @@ export interface FittingImporter {
 
 export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
-  attackerTurretHooks: AttackerTurretHooks;
-  importer: FittingImporter;
 }
 
 export interface SidePanelDeps {
@@ -155,4 +154,6 @@ export interface SidePanelDeps {
   imageCatalog: ImageCatalog;
   timer: Timer;
   events: UiEvents;
+  turret?: TurretController;
+  turretOverrides?: TurretOverrides;
 }

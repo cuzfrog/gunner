@@ -12,6 +12,7 @@ import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
+import type { TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 
 export interface SessionCodec {
@@ -26,6 +27,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly turretController: TurretController;
+  private readonly turretOverrides: TurretOverrides;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly i18n: I18n;
@@ -38,14 +40,16 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly trackingInput: TrackingInput;
 
   constructor(deps: {
-    els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; preferences: PreferencesController;
-    profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog; sigResChoice: ChoiceGroup; hintRotator: HintRotator;
-    settingsStore: SettingsStore; hitChance: HitChance; sessionControl: SessionControl; trackingInput: TrackingInput;
+    els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
+    preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
+    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; hitChance: HitChance;
+    sessionControl: SessionControl; trackingInput: TrackingInput;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
     this.turretController = deps.turret;
+    this.turretOverrides = deps.turretOverrides;
     this.preferencesController = deps.preferences;
     this.profileController = deps.profileController;
     this.i18n = deps.i18n;
@@ -81,7 +85,7 @@ export class SessionCodecImpl implements SessionCodec {
       attackerHull: attacker.hull,
       attackerPropulsion: attacker.propulsion,
       attackerFitting: attacker.fitting,
-      attackerOverrides: attacker.overrides,
+      attackerOverrides: this.turretOverrides.get(),
       attackerFittedHull: attacker.fittedHull,
       initialDistance: Math.max(num(this.els.initialDistance), 1),
       targetSpeed: target.speed,
@@ -130,6 +134,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.attackerSide.restore(this.attackerSide.stateFrom(settings));
     this.targetSide.restore(this.targetSide.stateFrom(settings));
     this.i18n.translateDocument();
+    this.turretOverrides.set(settings.attackerOverrides ?? {});
     this.turretController.restore({
       fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
     });

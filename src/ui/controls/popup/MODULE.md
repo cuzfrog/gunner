@@ -6,7 +6,14 @@ no-new-exports:
   - fittingPreview.ts
   - fittingPreviewManager.ts
   - popupGroup.ts
+  - module.ts
+  - fittingPreview.test.ts
+  - fittingPopupController.test.ts
+  - index.ts
+  - popupGroup.test.ts
+  - fittingPreviewManager.test.ts
 ---
+
 
 # popup
 

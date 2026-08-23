@@ -41,12 +41,15 @@ function buildSkillSection() {
     } as unknown as ISidePanelSections["paste"],
   } as unknown as ISidePanelSections);
 
+  const host = { persistConfigChange: vi.fn() };
   const panel = vi.mocked<SidePanel>({
     side: "attacker",
+    host,
     sections,
     profile: undefined,
     fittedHull: undefined,
-    overrides: {},
+    fittingText: undefined,
+    restoreTurret: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();

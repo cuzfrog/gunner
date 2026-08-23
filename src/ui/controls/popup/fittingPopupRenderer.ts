@@ -13,7 +13,7 @@ interface FittingPopupRendererDeps {
   readonly fittingImport: FittingImport;
   readonly i18n: I18n;
   readonly els: FittingPopupEls;
-  readonly panelFor: (side: Side) => SidePanel;
+  readonly panel: SidePanel;
   readonly previews: FittingPreviewManager;
 }
 
@@ -29,7 +29,7 @@ export class FittingPopupRenderer {
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly els: FittingPopupEls;
-  private readonly panelFor: (side: Side) => SidePanel;
+  private readonly panel: SidePanel;
   private readonly previews: FittingPreviewManager;
 
   constructor(deps: FittingPopupRendererDeps) {
@@ -39,14 +39,14 @@ export class FittingPopupRenderer {
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.els = deps.els;
-    this.panelFor = deps.panelFor;
+    this.panel = deps.panel;
     this.previews = deps.previews;
   }
 
   get fittingEls(): FittingPopupEls { return this.els; }
 
   render(actions: FittingPopupRenderActions): void {
-    const panel = this.panelFor(this.side);
+    const panel = this.panel;
     const savedList = this.els.savedList;
     const presetList = this.els.presetList;
     const savedLabel = this.els.savedLabel;

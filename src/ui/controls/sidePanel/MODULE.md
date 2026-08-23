@@ -2,7 +2,6 @@
 no-new-exports:
   - side.ts
   - sidePanel.ts
-  - sidePanelContract.ts
   - popup.ts
   - elements.ts
   - hullSection.ts
@@ -12,7 +11,17 @@ no-new-exports:
   - skillOverloadSection.ts
   - statsSection.ts
   - sidePanelSections.ts
+  - sidePanel.test.ts
+  - skillOverloadSection.test.ts
+  - pasteImportSection.test.ts
+  - propulsionSection.test.ts
+  - module.ts
+  - hullSection.test.ts
+  - sidePanelContract.ts
+  - statsSection.test.ts
+  - index.ts
 ---
+
 
 # sidePanel
 

@@ -68,8 +68,8 @@ export class HullSection implements IHullSection {
 
     let imported: ImportedFitting | undefined;
     if (isGenuineChange && autoSelect) {
-      const recent = this.panel.host.importer.mostRecentFittingFor(profile.name);
-      if (recent) imported = this.panel.host.importer.importEftFitting(recent.text, false);
+      const recent = this.panel.importer.mostRecentFittingFor(profile.name);
+      if (recent) imported = this.panel.importer.importEftFitting(recent.text, false);
     }
 
     if (persist) {
@@ -125,8 +125,8 @@ export class HullSection implements IHullSection {
   clearFittedHull(): void {
     this.panel.fittedHull = undefined;
     this.panel.fittingText = undefined;
-    this.panel.overrides = {};
-    if (this.panel.side === "attacker") this.panel.host.attackerTurretHooks.onFittedHullCleared();
+    this.panel.clearOverrides();
+    this.panel.clearTurret();
     this.panel.hideFittingPreview();
     this.panel.sections.paste.clearImportHint();
   }
