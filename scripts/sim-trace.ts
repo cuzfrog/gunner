@@ -1,16 +1,23 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
-import { ReactiveAutopilot, registerSimModule, Vec2, type AutopilotMode, type Kinematics, type ShipConfig, type SimConfig, type SimCradle, type Simulation } from "../src/sim";
+import { ReactiveAutopilot, registerSimModule, Vec2, ALL_ACTIVE, type AutopilotMode, type CombatantConfig, type EwarProjection, type Kinematics, type ShipConfig, type SimConfig, type SimCradle, type Simulation } from "../src/sim";
+import { registerShipsModule, type ShipsCradle } from "../src/ships";
+import { registerFittingModule, type FittingCradle, type FittingImport } from "../src/fitting";
+import { readFileSync } from "node:fs";
 
 const FIXED_DT = 1 / 60;
 
-interface TraceCradle extends SimCradle {}
+interface TraceCradle extends SimCradle, FittingCradle, ShipsCradle {}
 
-type MutableShipConfig = { -readonly [K in keyof ShipConfig]: ShipConfig[K] };
+type MutableCombatantConfig = { -readonly [K in keyof SimConfig["attacker"]]: SimConfig["attacker"][K] };
 
 interface TraceParams {
   durationSeconds: number;
   sampleSeconds: number;
   attackerSteering: "predictive" | "reactive";
+  attackerEwarFile: string | undefined;
+  attackerEwarOverload: boolean;
+  targetEwarFile: string | undefined;
+  targetEwarOverload: boolean;
   config: SimConfig;
 }
 
@@ -18,7 +25,7 @@ const AUTOPILOT_MODES: readonly AutopilotMode[] = ["orbit", "keepAtRange"];
 const DEFAULT_ATTACKER_MODE: AutopilotMode = "keepAtRange";
 const DEFAULT_TARGET_MODE: AutopilotMode = "orbit";
 
-const DEFAULT_ATTACKER: MutableShipConfig = {
+const DEFAULT_ATTACKER: MutableCombatantConfig = {
   id: "attacker",
   maxSpeed: 0,
   mass: 1_200_000,
@@ -29,7 +36,7 @@ const DEFAULT_ATTACKER: MutableShipConfig = {
   orbitDirection: "cw",
 };
 
-const DEFAULT_TARGET: MutableShipConfig = {
+const DEFAULT_TARGET: MutableCombatantConfig = {
   id: "target",
   maxSpeed: 1000,
   mass: 10_000_000,
@@ -46,8 +53,12 @@ function parseParams(args: string[]): TraceParams {
     sampleSeconds: number;
     attackerSteering: "predictive" | "reactive";
     initialDistance: number;
-    attacker: MutableShipConfig;
-    target: MutableShipConfig;
+    attacker: MutableCombatantConfig;
+    target: MutableCombatantConfig;
+    attackerEwarFile: string | undefined;
+    attackerEwarOverload: boolean;
+    targetEwarFile: string | undefined;
+    targetEwarOverload: boolean;
   } = {
     durationSeconds: 120,
     sampleSeconds: 1,
@@ -55,6 +66,10 @@ function parseParams(args: string[]): TraceParams {
     initialDistance: 5000,
     attacker: { ...DEFAULT_ATTACKER },
     target: { ...DEFAULT_TARGET },
+    attackerEwarFile: undefined,
+    attackerEwarOverload: false,
+    targetEwarFile: undefined,
+    targetEwarOverload: false,
   };
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
@@ -91,6 +106,12 @@ function parseParams(args: string[]): TraceParams {
       case "--attacker-steering":
         draft.attackerSteering = parseAttackerSteering(raw);
         break;
+      case "--attacker-ewar":
+        draft.attackerEwarFile = raw;
+        break;
+      case "--attacker-ewar-overload":
+        draft.attackerEwarOverload = parseBoolean(flag, raw);
+        break;
       case "--target-speed":
         draft.target.maxSpeed = parseNumber(flag, raw);
         break;
@@ -106,6 +127,12 @@ function parseParams(args: string[]): TraceParams {
       case "--target-inertia":
         draft.target.inertiaModifier = parseNumber(flag, raw);
         break;
+      case "--target-ewar":
+        draft.targetEwarFile = raw;
+        break;
+      case "--target-ewar-overload":
+        draft.targetEwarOverload = parseBoolean(flag, raw);
+        break;
       default:
         throw new Error(`Unknown flag ${flag}\n${USAGE}`);
     }
@@ -114,6 +141,10 @@ function parseParams(args: string[]): TraceParams {
     durationSeconds: draft.durationSeconds,
     sampleSeconds: draft.sampleSeconds,
     attackerSteering: draft.attackerSteering,
+    attackerEwarFile: draft.attackerEwarFile,
+    attackerEwarOverload: draft.attackerEwarOverload,
+    targetEwarFile: draft.targetEwarFile,
+    targetEwarOverload: draft.targetEwarOverload,
     config: {
       attacker: draft.attacker,
       target: draft.target,
@@ -126,6 +157,12 @@ function parseNumber(flag: string, raw: string): number {
   const value = Number(raw);
   if (!Number.isFinite(value)) throw new Error(`${flag} expects a number, got "${raw}"`);
   return value;
+}
+
+function parseBoolean(flag: string, raw: string): boolean {
+  if (raw === "true" || raw === "1") return true;
+  if (raw === "false" || raw === "0") return false;
+  throw new Error(`${flag} expects "true" or "false", got "${raw}"`);
 }
 
 function parseAggressivity(flag: string, raw: string): number {
@@ -150,13 +187,35 @@ function parseMode(raw: string): AutopilotMode {
   return raw;
 }
 
+function loadEwarProjection(fittingImport: FittingImport, path: string, overloaded: boolean): EwarProjection {
+  const text = readFileSync(path, "utf-8");
+  const conditions = { skillLevel: 5 as const, overloaded: false };
+  const imported = fittingImport.importFitting(text, conditions);
+  if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
+  return { loadout: imported.ewar, activation: ALL_ACTIVE(imported.ewar), overloaded };
+}
+
 function trace(params: TraceParams): void {
   const container = createContainer<TraceCradle>({ injectionMode: InjectionMode.PROXY });
   registerSimModule(container);
+  registerShipsModule(container);
+  registerFittingModule(container);
   if (params.attackerSteering === "reactive") {
     container.register({ attackerSteering: asClass(ReactiveAutopilot).singleton() });
   }
-  container.register({ simConfig: asValue(params.config) });
+  const fittingImport = container.cradle.fittingImport;
+  const attacker: CombatantConfig = params.config.attacker;
+  const target: CombatantConfig = params.config.target;
+  const simConfig: SimConfig = {
+    initialDistance: params.config.initialDistance,
+    attacker: params.attackerEwarFile
+      ? { ...attacker, ewar: loadEwarProjection(fittingImport, params.attackerEwarFile, params.attackerEwarOverload) }
+      : attacker,
+    target: params.targetEwarFile
+      ? { ...target, ewar: loadEwarProjection(fittingImport, params.targetEwarFile, params.targetEwarOverload) }
+      : target,
+  };
+  container.register({ simConfig: asValue(simConfig) });
   const simulation = container.cradle.simulation;
   const kinematics = container.cradle.kinematics;
 
@@ -205,20 +264,28 @@ function scenarioSummary(params: TraceParams): string {
   ].join("\n");
 }
 
-const USAGE = `Usage: bun run trace -- [flags]
+const USAGE = `Usage: bun run scripts/sim-trace.ts -- [flags]
   --duration <s>          simulated seconds to run (default 120)
   --sample <s>            output interval in simulated seconds (default 1)
   --distance <m>          initial distance between ships (default 5000)
   --attacker-speed <m/s>  --attacker-mode <mode>    --attacker-range <m>
   --attacker-mass <kg>    --attacker-inertia <modifier>
   --attacker-aggressivity <value>  --attacker-steering <predictive|reactive>
+  --attacker-ewar <path>  EFT fitting to read attacker ewar from
+  --attacker-ewar-overload <true|false>
   --target-speed <m/s>    --target-mode <mode>      --target-range <m>
   --target-mass <kg>      --target-inertia <modifier>
+  --target-ewar <path>    EFT fitting to read target ewar from
+  --target-ewar-overload <true|false>
 Modes: ${AUTOPILOT_MODES.join(", ")}`;
 
-try {
-  trace(parseParams(process.argv.slice(2)));
-} catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
+export { parseParams, loadEwarProjection };
+
+if (import.meta.main) {
+  try {
+    trace(parseParams(process.argv.slice(2)));
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
 }
