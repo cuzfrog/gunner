@@ -1,13 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type {
-  DisruptionScript,
-  DisruptorActivation,
-  EwarProjection,
-  StasisWebSpec,
-  TrackingDisruptorSpec,
-  TurretSpec,
-  WebActivation,
-} from "./types";
+import type { DisruptionScript, EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
   webSpeedMultiplier(projection: EwarProjection, distance: number): number;

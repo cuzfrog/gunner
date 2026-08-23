@@ -77,7 +77,7 @@ export interface TrackingDisruptorSpec {
   readonly optimal: number;
   readonly falloff: number;
   readonly disruption: number;
-  readonly script: DisruptionScript;
+  readonly defaultScript: DisruptionScript;
 }
 
 export interface EwarLoadout {
@@ -104,7 +104,7 @@ export interface EwarActivation {
 export function ALL_ACTIVE(loadout: EwarLoadout): EwarActivation {
   return {
     webs: loadout.webs.map(() => ({ active: true })),
-    disruptors: loadout.disruptors.map((disruptor) => ({ active: true, script: disruptor.script })),
+    disruptors: loadout.disruptors.map((disruptor) => ({ active: true, script: disruptor.defaultScript })),
   };
 }
 

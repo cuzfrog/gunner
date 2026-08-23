@@ -71,7 +71,7 @@ describe("EwarResolverImpl", () => {
       optimal: 48000,
       falloff: 24000,
       disruption: 0.1719,
-      script: "none",
+      defaultScript: "none",
     };
 
     test("unscripted TD reduces all three attributes at 10 km", () => {
@@ -85,7 +85,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("optimal-range script doubles range penalty and leaves tracking", () => {
-      const projection = disruptorProjection([{ ...td, script: "optimalRange" }]);
+      const projection = disruptorProjection([{ ...td, defaultScript: "optimalRange" }]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking, 10);
@@ -94,7 +94,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("tracking-speed script doubles tracking penalty and leaves range", () => {
-      const projection = disruptorProjection([{ ...td, script: "trackingSpeed" }]);
+      const projection = disruptorProjection([{ ...td, defaultScript: "trackingSpeed" }]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const trackingFactor = 1 - 2 * 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking * trackingFactor, 10);
