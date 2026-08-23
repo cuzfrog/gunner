@@ -1,13 +1,9 @@
 ---
 no-new-exports:
-  - hintMessages.ts
   - hintRotator.ts
-  - hints.ts
-  - loreMessages.ts
+  - module.ts
 ---
 
 # hints
 
-Hint rotation and hint/lore text data.
-
-The public surface is `HintRotator`, the `SlideText` type, and the `HINT_CANDIDATES`, `LORES`, and `TIP_TEXT` data arrays.
+Hint rotation presentation logic. The public surface is `HintRotator` and `registerHintsModule`. Localized hint, tip, and lore content is owned by the `i18n` module and consumed through its index.

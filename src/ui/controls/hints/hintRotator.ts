@@ -1,5 +1,4 @@
-import type { I18n } from "../../i18n";
-import type { SlideText } from "./hints";
+import type { I18n, SlideText } from "../../i18n";
 import type { IntervalId, Timer } from "../../timer";
 
 export interface HintRotatorConfig {

@@ -1,6 +1,5 @@
-import type { I18n, Language } from "../../i18n";
+import { HINT_CANDIDATES, LORES, TIP_TEXT, type I18n, type Language } from "../../i18n";
 import { HintRotatorImpl, type HintRotator } from "./hintRotator";
-import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import type { IntervalId, TimeoutId, Timer } from "../../timer";
 
 class FakeElement {

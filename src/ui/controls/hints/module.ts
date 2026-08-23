@@ -1,7 +1,6 @@
 import { asFunction, type AwilixContainer } from "awilix";
-import type { I18n } from "../../i18n";
+import { HINT_CANDIDATES, LORES, TIP_TEXT, type I18n } from "../../i18n";
 import type { Timer } from "../../timer";
-import { HINT_CANDIDATES, LORES, TIP_TEXT } from "./hints";
 import { HintRotatorImpl } from "./hintRotator";
 import type { HintRotator } from "./hintRotator";
 
