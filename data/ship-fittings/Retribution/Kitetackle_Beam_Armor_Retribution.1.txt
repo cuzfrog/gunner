@@ -1,17 +1,19 @@
 [Retribution, Kitetackle Beam Armor Retribution]
-Small Focused Beam Laser II, Gleam S
-Small Focused Beam Laser II, Gleam S
-Small Focused Beam Laser II, Gleam S
-Small Focused Beam Laser II, Gleam S
+
+200mm Rolled Tungsten Compact Plates
+Extruded Compact Heat Sink
+EFFA Compact Assault Damage Control
+[Empty Low slot]
+[Empty Low slot]
 
 Faint Epsilon Scoped Warp Scrambler
 5MN Quad LiF Restrained Microwarpdrive
 
-Multispectrum Coating II
-200mm Rolled Tungsten Compact Plates
-Extruded Compact Heat Sink
-Centii A-Type Thermal Coating
-EFFA Compact Assault Damage Control
+Small Focused Beam Laser II, Gleam S
+Small Focused Beam Laser II, Gleam S
+Small Focused Beam Laser II, Gleam S
+Small Focused Beam Laser II, Gleam S
+[Empty High slot]
 
 Small Ancillary Current Router I
 Small Energy Locus Coordinator II

@@ -1,17 +1,18 @@
 [Cruor, Kitetackle Beam Armor Cruor]
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-Corpii A-Type Small Energy Nosferatu
-Corpii A-Type Small Energy Nosferatu
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-
-Federation Navy Stasis Webifier
-5MN Y-T8 Compact Microwarpdrive
-Domination Warp Disruptor
 
 Damage Control II
 Nanofiber Internal Structure II
 Domination Tracking Enhancer
 Small Ancillary Armor Repairer
+
+Federation Navy Stasis Webifier
+5MN Y-T8 Compact Microwarpdrive
+Domination Warp Disruptor
+
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
+Corpii A-Type Small Energy Nosferatu
+Corpii A-Type Small Energy Nosferatu
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
 
 Small Auxiliary Thrusters I
 Small Auxiliary Thrusters I

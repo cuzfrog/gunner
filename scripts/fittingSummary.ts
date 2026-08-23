@@ -14,7 +14,7 @@ export interface FittingSummary {
 const WEAPON_PATTERNS: { readonly pattern: RegExp; readonly label: string }[] = [
   { pattern: /Blaster|Particle Accelerator/, label: "Blaster" },
   { pattern: /Rail(?:gun)?/, label: "Rail" },
-  { pattern: /AutoCannon|Machine Gun/, label: "AC" },
+  { pattern: /AutoCannon|Machine Gun|Repeating Cannon/, label: "AC" },
   { pattern: /Artillery/, label: "Art" },
   { pattern: /Howitzer/, label: "Art" },
   { pattern: /Light Missile Launcher/, label: "Missile" },
@@ -25,7 +25,7 @@ const WEAPON_PATTERNS: { readonly pattern: RegExp; readonly label: string }[] = 
   { pattern: /Torpedo Launcher/, label: "Torp" },
 ];
 
-const NON_TANK_MODULE = /Afterburner|Microwarpdrive|Heat Sink|Gyrostabilizer|Magnetic Field Stabilizer|Drone Damage Amplifier|Probe Launcher|Relic Analyzer|Data Analyzer|Cargo Scanner|Ship Scanner|Salvager|Capacitor Relay|Capacitor Power|Mining Foreman Burst|Shield Command Burst|Information Command Burst|Skirmish Command Burst|Energized Adaptive Nano|Multispectrum Energized|Drone Link|Drone Navigation|Drone Sizer|Civilian|Tracking Computer|Tracking Enhancer|Nominal|Inertial Stabilizers|Nanofiber Internal|Overdrive Injector|Reinforced Bulkheads|Armor Plating|Trimark Armor Pump|Auxiliary Thrusters|Low Friction Nozzle|Hyperspatial Velocity|Warp Core Optimizer|Energy/i;
+const NON_TANK_MODULE = /Afterburner|Microwarpdrive|Heat Sink|Gyrostabilizer|Magnetic Field Stabilizer|Drone Damage Amplifier|Probe Launcher|Relic Analyzer|Data Analyzer|Cargo Scanner|Ship Scanner|Salvager|Capacitor Relay|Capacitor Power|Mining Foreman Burst|Shield Command Burst|Information Command Burst|Skirmish Command Burst|Energized Adaptive Nano|Multispectrum Energized|Drone Link|Drone Navigation|Drone Sizer|Civilian|Tracking Computer|Tracking Enhancer|Nominal|Inertial Stabilizers|Nanofiber Internal|Overdrive Injector|Reinforced Bulkheads|Armor Plating|Trimark Armor Pump|Auxiliary Thrusters|Low Friction Nozzle|Hyperspatial Velocity|Warp Core Optimizer|Energy\b/i;
 
 const NON_TANK_BODY = /Laser|Blaster|Rail(?:gun)?|Cannon|Launcher|Artillery|Howitzer|Torpedo|Rocket|Missile|Tracking Computer/;
 
@@ -93,15 +93,9 @@ function _resolveWeapon(modules: ParsedFitting["modules"], drones: ParsedFitting
   // Check drones
   if (drones.length > 0) {
     for (const drone of drones) {
-      // Fighter / sentinel drones
-      if (/(Fighter|Infiltrator|Marauder|Pioneer|Ranger)/i.test(drone.name)) return "Fighter";
-      // Combat drones (quad-prefix drone sizes)
-      if (
-        /^(Hobgoblin|Warrior|Hammerhead|Acolyte|Warden|Valkyrie|Praetor|Berserker)/.test(drone.name)
-      )
-        return "Drone";
-      // Corp-branded combat drones
-      if (/(Drone|Acolyte|Warrior|Hammerhead|Hobgoblin)\b/.test(drone.name) && !/Mining\s+Drone/.test(drone.name)) {
+      if (/Mining\s+Drone/.test(drone.name)) continue;
+      if (/(Fighter|Infiltrator|Pioneer|Ranger)/i.test(drone.name)) return "Fighter";
+      if (/\b(Acolyte|Warrior|Hobgoblin|Hornet|Valkyrie|Infiltrator|Vespa|Hammerhead|Warden|Bouncer|Garde|Curator|Wasp|Praetor|Berserker|Ogre|Gecko)\b/.test(drone.name)) {
         return "Drone";
       }
     }
@@ -219,7 +213,7 @@ function _resolveRole(modules: ParsedFitting["modules"], drones: ParsedFitting["
   // Drone DPS: no weapon launchers, has combat drones
   if (drones.length > 0 && !moduleNames.some((n) => /Launcher/.test(n))) {
     if (drones.some((d) =>
-      /^Hobgoblin|^Warrior|^Hammerhead|^Acolyte|^Infiltrator|^Warden|^Valkyrie|^Praetor|^Berserker/.test(d.name),
+      /\b(Acolyte|Warrior|Hobgoblin|Hornet|Valkyrie|Infiltrator|Vespa|Hammerhead|Warden|Bouncer|Garde|Curator|Wasp|Praetor|Berserker|Ogre|Gecko)\b/.test(d.name),
     )) {
       return "Drone";
     }

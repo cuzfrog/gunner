@@ -1,16 +1,4 @@
 [Oracle, Pulse Shield Oracle]
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-Mega Pulse Laser II, Scorch L
-
-Tracking Computer II, Optimal Range Script
-50MN Quad LiF Restrained Microwarpdrive
-Tracking Computer II, Optimal Range Script
 
 Heat Sink II
 Heat Sink II
@@ -19,9 +7,22 @@ Inertial Stabilizers II
 Heat Sink II
 Heat Sink II
 
-Medium Energy Collision Accelerator II
+Tracking Computer II, Optimal Range Script
+50MN Quad LiF Restrained Microwarpdrive
+Tracking Computer II, Optimal Range Script
+
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+Mega Pulse Laser II, Scorch L
+
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
+[Empty Rig slot]
 
 
 Conflagration L x3

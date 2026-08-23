@@ -1,21 +1,22 @@
 [Caracal Navy Issue, Missile Shield Caracal Navy Issue]
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-Rapid Light Missile Launcher II, Inferno Fury Light Missile
-
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-50MN Y-T8 Compact Microwarpdrive
-Large Shield Extender II
 
 Ballistic Control System II
 Damage Control II
 Ballistic Control System II
+
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+50MN Y-T8 Compact Microwarpdrive
+
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
+Rapid Light Missile Launcher II, Inferno Fury Light Missile
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

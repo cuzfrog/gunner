@@ -1,27 +1,24 @@
 [Claw, Kitetackle Art Armor Claw]
-280mm Howitzer Artillery II, Republic Fleet EMP S
-280mm Howitzer Artillery II, Republic Fleet EMP S
-280mm Howitzer Artillery II, Republic Fleet EMP S
-
-5MN Y-T8 Compact Microwarpdrive
-Warp Disruptor II
 
 Overdrive Injector System II
 Inertial Stabilizers II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Gyrostabilizer II
 
+5MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+280mm Howitzer Artillery II, Republic Fleet EMP S
+280mm Howitzer Artillery II, Republic Fleet EMP S
+280mm Howitzer Artillery II, Republic Fleet EMP S
+[Empty High slot]
+
 Small Polycarbon Engine Housing I
 Small Polycarbon Engine Housing I
 
 
-Tourists x2
 Republic Fleet Phased Plasma S x391
 Tremor S x300
-Slaver Hound x1
 Republic Fleet EMP S x890
-Wheat x1
-Cladistic-5 'Krai Perun' Filament x1
 Nanite Repair Paste x32
 Republic Fleet Fusion S x500
-Glorification-1 'Devana' Filament x1

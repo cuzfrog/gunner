@@ -1,13 +1,4 @@
 [Absolution, Support Armor Absolution]
-Core Probe Launcher II, Core Scanner Probe I
-Armor Command Burst II, Armor Reinforcement Charge
-Information Command Burst II, Electronic Hardening Charge
-Armor Command Burst II, Armor Energizing Charge
-Armor Command Burst II, Rapid Repair Charge
-
-Ta3 Compact Ship Scanner
-50MN Quad LiF Restrained Microwarpdrive
-Medium Micro Jump Drive
 
 Nanofiber Internal Structure II
 Multispectrum Energized Membrane II
@@ -17,8 +8,20 @@ Reactive Armor Hardener
 Nanofiber Internal Structure II
 Multispectrum Energized Membrane II
 
-Medium Command Processor I
-Medium Command Processor I
+50MN Quad LiF Restrained Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+
+Armor Command Burst II, Armor Reinforcement Charge
+Information Command Burst II, Electronic Hardening Charge
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Rapid Repair Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Core Scanner Probe I x8

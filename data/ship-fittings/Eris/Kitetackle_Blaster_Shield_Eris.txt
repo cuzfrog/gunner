@@ -1,19 +1,21 @@
 [Eris, Kitetackle Blaster Shield Eris]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Interdiction Sphere Launcher I, Warp Disrupt Probe
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Prototype Cloaking Device I
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Inertial Stabilizers II
+Inertial Stabilizers II
 
 J5b Enduring Warp Scrambler
 5MN Y-T8 Compact Microwarpdrive
 
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Inertial Stabilizers II
-Inertial Stabilizers II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer II
 Small Hyperspatial Velocity Optimizer II

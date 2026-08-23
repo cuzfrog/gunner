@@ -1,17 +1,4 @@
 [Scorpion, Missile Shield Scorpion]
-'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
-'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
-'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
-'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
-
-Multispectrum Shield Hardener II
-Gloom Enduring Radar ECM
-Large Azeotropic Restrained Shield Extender
-Large C5-L Compact Shield Booster
-Gloom Enduring Radar ECM
-Large Azeotropic Restrained Shield Extender
-Gloom Enduring Radar ECM
-500MN Quad LiF Restrained Microwarpdrive
 
 Damage Control II
 Type-D Restrained Inertial Stabilizers
@@ -19,7 +6,24 @@ Type-D Restrained Inertial Stabilizers
 Type-D Restrained Nanofiber Structure
 Type-D Restrained Inertial Stabilizers
 
-Large Higgs Anchor I
+Large Azeotropic Restrained Shield Extender
+Large Azeotropic Restrained Shield Extender
+Multispectrum Shield Hardener II
+Large C5-L Compact Shield Booster
+500MN Quad LiF Restrained Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
+'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
+'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
+'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
+'Arbalest' Rapid Heavy Missile Launcher I, Mjolnir Heavy Missile
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Valkyrie I x7

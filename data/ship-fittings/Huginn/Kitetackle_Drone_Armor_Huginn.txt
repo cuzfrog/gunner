@@ -1,6 +1,9 @@
 [Huginn, Kitetackle Drone Armor Huginn]
-Drone Link Augmentor II
-Drone Link Augmentor II
+
+Imperial Navy 1600mm Steel Plates
+Domination Explosive Armor Hardener
+Imperial Navy Multispectrum Energized Membrane
+[Empty Low slot]
 
 Republic Fleet Medium Cap Battery
 Abyssal Stasis Webifier
@@ -9,10 +12,11 @@ Abyssal Stasis Webifier
 10MN Y-S8 Compact Afterburner
 Warp Disruptor II
 
-Corpum C-Type Kinetic Energized Membrane
-Imperial Navy 1600mm Steel Plates
-Domination Explosive Armor Hardener
-Imperial Navy Multispectrum Energized Membrane
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II

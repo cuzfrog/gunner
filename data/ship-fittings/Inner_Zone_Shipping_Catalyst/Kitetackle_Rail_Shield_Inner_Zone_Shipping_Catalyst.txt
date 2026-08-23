@@ -1,22 +1,24 @@
 [Inner Zone Shipping Catalyst, Kitetackle Rail Shield Inner Zone Shipping Catalyst]
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
-125mm Railgun II, Javelin S
+
+Type-D Restrained Capacitor Power Relay
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Warp Scrambler II
 5MN Y-T8 Compact Microwarpdrive
 
-Micro Auxiliary Power Core I
-Type-D Restrained Capacitor Power Relay
-Magnetic Field Stabilizer II
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
+125mm Railgun II, Javelin S
 
-Small Hybrid Collision Accelerator I
 Small Processor Overclocking Unit I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Javelin S x9096

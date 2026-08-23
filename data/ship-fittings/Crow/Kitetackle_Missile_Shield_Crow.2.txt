@@ -1,16 +1,17 @@
 [Crow, Kitetackle Missile Shield Crow]
-Light Missile Launcher II, Caldari Navy Nova Light Missile
-Light Missile Launcher II, Caldari Navy Nova Light Missile
-Light Missile Launcher II, Caldari Navy Nova Light Missile
-Light Missile Launcher II, Caldari Navy Nova Light Missile
+
+Overdrive Injector System II
+Overdrive Injector System II
 
 Warp Disruptor II
 Sensor Booster II, Targeting Range Script
 EM Shield Amplifier II
 5MN Cold-Gas Enduring Microwarpdrive
 
-Overdrive Injector System II
-Overdrive Injector System II
+Light Missile Launcher II, Caldari Navy Nova Light Missile
+Light Missile Launcher II, Caldari Navy Nova Light Missile
+Light Missile Launcher II, Caldari Navy Nova Light Missile
+Light Missile Launcher II, Caldari Navy Nova Light Missile
 
 Small Auxiliary Thrusters II
 Small Auxiliary Thrusters II

@@ -1,22 +1,24 @@
 [Aliastra Catalyst, Blaster Shield Aliastra Catalyst]
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
-Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 F-90 Compact Sensor Booster, Scan Resolution Script
 5MN Y-T8 Compact Microwarpdrive
 
-Micro Auxiliary Power Core I
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
+Light Neutron Blaster I, Caldari Navy Antimatter Charge S
 
-Small Hybrid Collision Accelerator I
-Small Hybrid Burst Aerator I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Caldari Navy Antimatter Charge S x1360

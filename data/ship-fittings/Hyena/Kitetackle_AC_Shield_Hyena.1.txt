@@ -1,16 +1,17 @@
 [Hyena, Kitetackle AC Shield Hyena]
-Auto Targeting System I
-125mm Gatling AutoCannon II, Hail S
-125mm Gatling AutoCannon II, Hail S
-
-Stasis Webifier II
-Target Painter II
-5MN Quad LiF Restrained Microwarpdrive
-Target Painter II
 
 Type-D Restrained Nanofiber Structure
 Damage Control II
 Power Diagnostic System II
+
+Stasis Webifier II
+5MN Quad LiF Restrained Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+[Empty High slot]
 
 Small Core Defense Field Extender II
 Small Polycarbon Engine Housing II

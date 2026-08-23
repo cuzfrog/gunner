@@ -1,15 +1,17 @@
 [Vigil Fleet Issue, Kitetackle Rocket Shield Vigil Fleet Issue]
-Rocket Launcher II, Nova Rage Rocket
-Rocket Launcher II, Nova Rage Rocket
-
-Faint Scoped Warp Disruptor
-Republic Fleet Medium Shield Extender
-Caldari Navy Stasis Webifier
-5MN Cold-Gas Enduring Microwarpdrive
 
 Ballistic Control System II
 IFFA Compact Damage Control
 Ballistic Control System II
+
+Republic Fleet Medium Shield Extender
+Faint Scoped Warp Disruptor
+Caldari Navy Stasis Webifier
+5MN Cold-Gas Enduring Microwarpdrive
+
+Rocket Launcher II, Nova Rage Rocket
+Rocket Launcher II, Nova Rage Rocket
+[Empty High slot]
 
 Small Polycarbon Engine Housing II
 Small Core Defense Field Extender II

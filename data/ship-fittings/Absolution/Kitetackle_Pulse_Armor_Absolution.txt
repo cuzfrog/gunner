@@ -1,4 +1,17 @@
 [Absolution, Kitetackle Pulse Armor Absolution]
+
+800mm Crystalline Carbonide Restrained Plates
+Heat Sink II
+Federation Navy Multispectrum Energized Membrane
+Federation Navy Multispectrum Energized Membrane
+Damage Control II
+Heat Sink II
+[Empty Low slot]
+
+50MN Y-T8 Compact Microwarpdrive
+Initiated Compact Warp Scrambler
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+
 Heavy Pulse Laser II, Conflagration M
 Armor Command Burst II, Armor Energizing Charge
 Heavy Pulse Laser II, Conflagration M
@@ -7,20 +20,8 @@ Heavy Pulse Laser II, Conflagration M
 Armor Command Burst II, Rapid Repair Charge
 Heavy Pulse Laser II, Conflagration M
 
-50MN Y-T8 Compact Microwarpdrive
-Initiated Compact Warp Scrambler
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
-
-800mm Crystalline Carbonide Restrained Plates
-Heat Sink II
-Federation Navy Multispectrum Energized Membrane
-Federation Navy Multispectrum Energized Membrane
-Damage Control II
-Centum C-Type Thermal Energized Membrane
-Heat Sink II
-
 Medium Trimark Armor Pump II
-Medium Energy Burst Aerator II
+[Empty Rig slot]
 
 
 Armor Energizing Charge x288

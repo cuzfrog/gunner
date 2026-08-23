@@ -1,22 +1,24 @@
 [Caiman, Ewar Torp Shield Caiman]
-Medium Energy Nosferatu II
-Siege Module II
-Rapid Torpedo Launcher II, Nova Rage Torpedo
-Rapid Torpedo Launcher II, Nova Rage Torpedo
-Rapid Torpedo Launcher II, Nova Rage Torpedo
-
-Capital Capacitor Booster II, Cap Booster 3200
-Enduring Multispectrum Shield Hardener
-CONCORD Capital Shield Booster
-Capital Capacitor Booster II
-Multispectrum Shield Hardener II
-Capital Azeotropic Restrained Shield Extender
-EM Shield Hardener II
 
 Damage Control II
 Caldari Navy Power Diagnostic System
 Ballistic Control System II
 Caldari Navy Power Diagnostic System
+[Empty Low slot]
+
+Capital Azeotropic Restrained Shield Extender
+Capital Capacitor Booster II, Cap Booster 3200
+Enduring Multispectrum Shield Hardener
+CONCORD Capital Shield Booster
+Capital Capacitor Booster II
+Multispectrum Shield Hardener II
+EM Shield Hardener II
+
+Medium Energy Nosferatu II
+Rapid Torpedo Launcher II, Nova Rage Torpedo
+Rapid Torpedo Launcher II, Nova Rage Torpedo
+Rapid Torpedo Launcher II, Nova Rage Torpedo
+[Empty High slot]
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I

@@ -1,16 +1,17 @@
 [Imperial Navy Slicer, Kitetackle Pulse Armor Imperial Navy Slicer]
-Festival Launcher, Capsule Cascade Firework
-Small Focused Pulse Laser II, Conflagration S
-Small Focused Pulse Laser II, Conflagration S
+
+Small Ancillary Armor Repairer
+Heat Sink II
+Damage Control II
+Heat Sink II
+[Empty Low slot]
 
 5MN Y-T8 Compact Microwarpdrive
 Initiated Compact Warp Scrambler
 
-Small Ancillary Armor Repairer
-Multispectrum Coating II
-Heat Sink II
-Damage Control II
-Heat Sink II
+Small Focused Pulse Laser II, Conflagration S
+Small Focused Pulse Laser II, Conflagration S
+[Empty High slot]
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I

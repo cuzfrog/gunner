@@ -1,13 +1,14 @@
 [Echo, Ewar Art Shield Echo]
-280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
-280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
+
+Nanofiber Internal Structure II
+[Empty Low slot]
 
 5MN Microwarpdrive II
 Small Ancillary Shield Booster, Navy Cap Booster 50
-Peripheral Compact Target Painter
+[Empty Med slot]
 
-Nanofiber Internal Structure II
-Vigor Compact Micro Auxiliary Power Core
+280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
+280mm Howitzer Artillery II, Republic Fleet Depleted Uranium S
 
 
 Navy Cap Booster 50 x3

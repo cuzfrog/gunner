@@ -1,14 +1,4 @@
 [Ashimmu, Kitetackle Armor Ashimmu]
-Medium Energy Nosferatu II
-Medium Energy Neutralizer II
-Medium Energy Neutralizer II
-Medium Energy Nosferatu II
-Medium Energy Neutralizer II
-
-Stasis Webifier II
-Stasis Webifier II
-50MN Quad LiF Restrained Microwarpdrive
-Stasis Webifier II
 
 Federation Navy 1600mm Steel Plates
 True Sansha Explosive Armor Hardener
@@ -16,6 +6,17 @@ Damage Control II
 Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
 True Sansha Kinetic Armor Hardener
+
+Stasis Webifier II
+Stasis Webifier II
+50MN Quad LiF Restrained Microwarpdrive
+Stasis Webifier II
+
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
 
 Medium Ancillary Current Router I
 Medium Trimark Armor Pump II

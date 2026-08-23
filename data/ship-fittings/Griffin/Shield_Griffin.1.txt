@@ -1,12 +1,16 @@
 [Griffin, Shield Griffin]
-CZ-4 Compact Gravimetric ECM
-Morpheus Enduring Magnetometric ECM
-10MN Y-S8 Compact Afterburner
-Enfeebling Scoped Ladar ECM
-Gloom Enduring Radar ECM
 
-Micro Auxiliary Power Core II
-Hypnos Compact Signal Distortion Amplifier I
+[Empty Low slot]
+[Empty Low slot]
+
+10MN Y-S8 Compact Afterburner
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
+[Empty High slot]
+[Empty High slot]
 
 Small Particle Dispersion Projector I
 Small Particle Dispersion Projector I

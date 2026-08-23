@@ -1,16 +1,20 @@
 [Vigil, Ewar Shield Vigil]
+
+Type-D Restrained Nanofiber Structure
+[Empty Low slot]
+
 Medium Shield Extender II
 5MN Cold-Gas Enduring Microwarpdrive
-Phased Scoped Target Painter
-Phased Scoped Target Painter
 Sensor Booster II, Scan Resolution Script
+[Empty Med slot]
+[Empty Med slot]
 
-Micro Auxiliary Power Core II
-Type-D Restrained Nanofiber Structure
+[Empty High slot]
+[Empty High slot]
 
-Small Capacitor Control Circuit I
 Small Hyperspatial Velocity Optimizer II
 Small EM Shield Reinforcer I
+[Empty Rig slot]
 
 
 Warrior II x1

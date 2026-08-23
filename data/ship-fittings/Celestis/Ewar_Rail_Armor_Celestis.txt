@@ -1,13 +1,4 @@
 [Celestis, Ewar Rail Armor Celestis]
-250mm Railgun II, Spike M
-250mm Railgun II, Spike M
-Drone Link Augmentor II
-
-Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
-Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
-50MN Quad LiF Restrained Microwarpdrive
-Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
-Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
 
 Multispectrum Energized Membrane II
 400mm Rolled Tungsten Compact Plates
@@ -15,9 +6,19 @@ Tracking Enhancer II
 Tracking Enhancer II
 Reactive Armor Hardener
 
-Medium Ionic Field Projector I
+Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
+Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
+50MN Quad LiF Restrained Microwarpdrive
+Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
+Phased Muon Scoped Sensor Dampener, Targeting Range Dampening Script
+
+250mm Railgun II, Spike M
+250mm Railgun II, Spike M
+[Empty High slot]
+
 Medium Particle Dispersion Projector I
 Medium Particle Dispersion Projector I
+[Empty Rig slot]
 
 
 Hobgoblin II x6

@@ -1,11 +1,9 @@
 [Ferox Navy Issue, Kitetackle Blaster Shield Ferox Navy Issue]
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Expanded Probe Launcher I, Sisters Combat Scanner Probe
-Heavy Neutron Blaster II, Void M
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
 
 50MN Y-T8 Compact Microwarpdrive
 Sensor Booster II, Scan Resolution Script
@@ -15,10 +13,13 @@ Tracking Computer II, Tracking Speed Script
 Dread Guristas Stasis Webifier
 Dread Guristas Warp Scrambler
 
-Damage Control II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+[Empty High slot]
 
 Medium Core Defense Field Extender II
 Medium Core Defense Field Extender II

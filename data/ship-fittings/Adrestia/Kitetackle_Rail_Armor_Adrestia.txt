@@ -1,14 +1,4 @@
 [Adrestia, Kitetackle Rail Armor Adrestia]
-250mm Railgun II
-250mm Railgun II
-250mm Railgun II
-250mm Railgun II
-250mm Railgun II
-
-50MN Y-T8 Compact Microwarpdrive
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-Tracking Computer II, Optimal Range Script
-Warp Scrambler II
 
 Magnetic Field Stabilizer II
 Multispectrum Energized Membrane II
@@ -17,8 +7,19 @@ Reactive Armor Hardener
 Magnetic Field Stabilizer II
 1600mm Rolled Tungsten Compact Plates
 
-Medium Hybrid Collision Accelerator I
+50MN Y-T8 Compact Microwarpdrive
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Tracking Computer II, Optimal Range Script
+Warp Scrambler II
+
+250mm Railgun II
+250mm Railgun II
+250mm Railgun II
+250mm Railgun II
+250mm Railgun II
+
 Medium EM Armor Reinforcer I
+[Empty Rig slot]
 
 
 Hornet EC-300 x5

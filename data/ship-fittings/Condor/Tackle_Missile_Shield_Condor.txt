@@ -1,4 +1,5 @@
 [Condor, Tackle Missile Shield Condor]
+
 Damage Control II
 Ballistic Control System II
 
@@ -10,7 +11,8 @@ Cap Recharger II
 Light Missile Launcher II, Scourge Light Missile
 Light Missile Launcher II, Scourge Light Missile
 Light Missile Launcher II, Scourge Light Missile
-[empty high slot]
+[Empty High slot]
 
-
-
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]

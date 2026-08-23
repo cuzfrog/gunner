@@ -1,15 +1,4 @@
 [Prophecy Navy Issue, Kitetackle Pulse Armor Prophecy Navy Issue]
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Armor Command Burst II, Armor Energizing Charge
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-
-50MN Y-T8 Compact Microwarpdrive
-Federation Navy Stasis Webifier
-Medium F-RX Compact Capacitor Booster
-Dread Guristas Warp Disruptor
 
 Damage Control II
 Heat Sink II
@@ -19,9 +8,21 @@ Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
 Heat Sink II
 
+50MN Y-T8 Compact Microwarpdrive
+Federation Navy Stasis Webifier
+Medium F-RX Compact Capacitor Booster
+Dread Guristas Warp Disruptor
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Armor Command Burst II, Armor Energizing Charge
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+
 Medium Energy Locus Coordinator II
-Medium Energy Discharge Elutriation I
 Medium Energy Locus Coordinator II
+[Empty Rig slot]
 
 
 Imperial Navy Microwave M x10

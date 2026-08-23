@@ -1,16 +1,4 @@
 [Vehement, Tackle Blaster Armor Vehement]
-Ion Siege Blaster II, Shadow Antimatter Charge XL
-Siege Module II
-Ion Siege Blaster II, Shadow Antimatter Charge XL
-Corpus X-Type Heavy Energy Neutralizer
-Ion Siege Blaster II, Shadow Antimatter Charge XL
-
-Abyssal Stasis Webifier
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Abyssal Stasis Webifier
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Federation Navy Tracking Computer, Tracking Speed Script
-Republic Fleet Target Painter
 
 Corpum A-Type Multispectrum Energized Membrane
 Shadow Serpentis Damage Control
@@ -19,6 +7,19 @@ CONCORD Capital Armor Repairer
 Abyssal Magnetic Field Stabilizer
 Abyssal Magnetic Field Stabilizer
 CONCORD Capital Armor Repairer
+
+Abyssal Stasis Webifier
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Abyssal Stasis Webifier
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Federation Navy Tracking Computer, Tracking Speed Script
+[Empty Med slot]
+
+Ion Siege Blaster II, Shadow Antimatter Charge XL
+Ion Siege Blaster II, Shadow Antimatter Charge XL
+Corpus X-Type Heavy Energy Neutralizer
+Ion Siege Blaster II, Shadow Antimatter Charge XL
+[Empty High slot]
 
 Capital Nanobot Accelerator I
 Capital Auxiliary Nano Pump I

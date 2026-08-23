@@ -1,20 +1,21 @@
 [Hound, Tackle Blaster Armor Hound]
+
+Damage Control II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Magnetic Field Stabilizer II
+
+1MN Y-S8 Compact Afterburner
+Stasis Webifier II
+Warp Scrambler II
+
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Rocket Launcher II, Nova Rage Rocket
 Small Energy Neutralizer II
 Covert Ops Cloaking Device II
 
-1MN Y-S8 Compact Afterburner
-Stasis Webifier II
-Warp Scrambler II
-
-Damage Control II
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Magnetic Field Stabilizer II
-
 Small Polycarbon Engine Housing I
-Small Hybrid Collision Accelerator II
+[Empty Rig slot]
 
 
 Nova Rage Rocket x394

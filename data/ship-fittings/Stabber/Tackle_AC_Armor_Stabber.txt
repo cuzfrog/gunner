@@ -1,4 +1,5 @@
 [Stabber, Tackle AC Armor Stabber]
+
 Medium I-a Enduring Armor Repairer
 Reactive Armor Hardener
 Multispectrum Energized Membrane II
@@ -17,8 +18,8 @@ Medium Compact Pb-Acid Cap Battery
 220mm Vulcan AutoCannon II
 
 Medium Auxiliary Nano Pump I
-Medium Projectile Burst Aerator I
 Medium Nanobot Accelerator I
+[Empty Rig slot]
 
 
 Hobgoblin II x5

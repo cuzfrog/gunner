@@ -1,34 +1,34 @@
 [Cyclone Fleet Issue, Kitetackle Missile Shield Cyclone Fleet Issue]
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Skirmish Command Burst II, Rapid Deployment Charge
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Large Ancillary Remote Shield Booster, Navy Cap Booster 150
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
 
-Multispectrum Shield Hardener II
+Ballistic Control System II
+Nanofiber Internal Structure II
+Ballistic Control System II
+Ballistic Control System II
+Nanofiber Internal Structure II
+
 Large Shield Extender II
+Multispectrum Shield Hardener II
 50MN Microwarpdrive II
 EM Shield Amplifier II
 Warp Disruptor II
 
-Ballistic Control System II
-Nanofiber Internal Structure II
-Ballistic Control System II
-Ballistic Control System II
-Nanofiber Internal Structure II
+Large Ancillary Remote Shield Booster, Navy Cap Booster 150
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Skirmish Command Burst II, Rapid Deployment Charge
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
 
 Medium Thermal Shield Reinforcer II
 Medium Polycarbon Engine Housing II
-Medium Hydraulic Bay Thrusters II
+[Empty Rig slot]
 
 
 Mjolnir Rage Heavy Assault Missile x1502
 Navy Cap Booster 150 x18
 Rapid Deployment Charge x600
-Agency 'Overclocker' SB5 Dose II x2
 Inferno Rage Heavy Assault Missile x2000
 Caldari Navy Scourge Heavy Assault Missile x1000
 Nova Rage Heavy Assault Missile x2000

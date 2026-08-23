@@ -1,19 +1,17 @@
 [Inquisitor, Logi Armor Inquisitor]
-Small Coaxial Compact Remote Armor Repairer
-Small Coaxial Compact Remote Armor Repairer
-Small Coaxial Compact Remote Armor Repairer
+
+Type-D Restrained Capacitor Flux Coil
+400mm Crystalline Carbonide Restrained Plates
+[Empty Low slot]
+[Empty Low slot]
 
 1MN Monopropellant Enduring Afterburner
 Eutectic Compact Cap Recharger
 
-Multispectrum Coating II
-Multispectrum Coating II
-Type-D Restrained Capacitor Flux Coil
-400mm Crystalline Carbonide Restrained Plates
+Small Coaxial Compact Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
 
-Small Capacitor Control Circuit I
-Small Capacitor Control Circuit I
-Small Capacitor Control Circuit I
-
-
-Light Hull Maintenance Bot I x1
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]

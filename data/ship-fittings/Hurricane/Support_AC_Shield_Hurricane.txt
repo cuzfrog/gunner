@@ -1,16 +1,4 @@
 [Hurricane, Support AC Shield Hurricane]
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-Skirmish Command Burst II, Rapid Deployment Charge
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-
-Large Shield Extender II
-Multispectrum Shield Hardener II
-50MN Microwarpdrive II
-Large Shield Extender II
 
 Damage Control II
 Gyrostabilizer II
@@ -18,6 +6,19 @@ Gyrostabilizer II
 Tracking Enhancer II
 Gyrostabilizer II
 Tracking Enhancer II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Microwarpdrive II
+
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+Skirmish Command Burst II, Rapid Deployment Charge
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
 
 Medium EM Shield Reinforcer I
 Medium Thermal Shield Reinforcer I

@@ -1,19 +1,21 @@
 [Svipul, Kitetackle Art Shield Svipul]
-280mm Howitzer Artillery II, Tremor S
-280mm Howitzer Artillery II, Tremor S
-280mm Howitzer Artillery II, Tremor S
-Expanded Probe Launcher II
-280mm Howitzer Artillery II, Tremor S
+
+Gyrostabilizer II
+IFFA Compact Damage Control
+Gyrostabilizer II
+[Empty Low slot]
 
 Medium F-S9 Regolith Compact Shield Extender
 Compact Multispectrum Shield Hardener
 Warp Disruptor II
 5MN Quad LiF Restrained Microwarpdrive
 
-Micro Auxiliary Power Core II
-Gyrostabilizer II
-IFFA Compact Damage Control
-Gyrostabilizer II
+280mm Howitzer Artillery II, Tremor S
+280mm Howitzer Artillery II, Tremor S
+280mm Howitzer Artillery II, Tremor S
+280mm Howitzer Artillery II, Tremor S
+[Empty High slot]
+[Empty High slot]
 
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit II
@@ -24,9 +26,7 @@ Republic Fleet Phased Plasma S x1000
 Republic Fleet EMP S x1000
 Republic Fleet Depleted Uranium S x1000
 Tremor S x1843
-Cladistic-5 'Krai Perun' Filament x2
 Nanite Repair Paste x200
 Quake S x1992
 Republic Fleet Titanium Sabot S x1000
 Republic Fleet Fusion S x1000
-Glorification-1 'Devana' Filament x1

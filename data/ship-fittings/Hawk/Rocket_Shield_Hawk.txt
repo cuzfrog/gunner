@@ -1,21 +1,22 @@
 [Hawk, Rocket Shield Hawk]
-Polarized Rocket Launcher, Scourge Rage Rocket
-Polarized Rocket Launcher, Scourge Rage Rocket
-Polarized Rocket Launcher, Scourge Rage Rocket
-Polarized Rocket Launcher, Scourge Rage Rocket
-
-Small Clarity Ward Enduring Shield Booster
-Cap Recharger II
-Small Clarity Ward Enduring Shield Booster
-Copasetic Compact Shield Boost Amplifier
-Cap Recharger II
 
 Ballistic Control System II
 Ballistic Control System II
 
-Small Capacitor Control Circuit I
-Small Warhead Calefaction Catalyst II
+Small Clarity Ward Enduring Shield Booster
+Cap Recharger II
+Small Clarity Ward Enduring Shield Booster
+Cap Recharger II
+[Empty Med slot]
+
+Polarized Rocket Launcher, Scourge Rage Rocket
+Polarized Rocket Launcher, Scourge Rage Rocket
+Polarized Rocket Launcher, Scourge Rage Rocket
+Polarized Rocket Launcher, Scourge Rage Rocket
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
-Mobile Tractor Unit x1
 Scourge Rage Rocket x10004

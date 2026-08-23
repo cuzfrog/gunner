@@ -1,15 +1,16 @@
 [Inquisitor, Logi Armor Inquisitor]
-Small I-ax Enduring Remote Armor Repairer
-Small I-ax Enduring Remote Armor Repairer
-Small I-ax Enduring Remote Armor Repairer
-
-Small F-RX Compact Capacitor Booster, Cap Booster 200
-1MN Monopropellant Enduring Afterburner
 
 Compact Multispectrum Energized Membrane
 Compact Multispectrum Energized Membrane
 Damage Control II
 400mm Crystalline Carbonide Restrained Plates
+
+Small F-RX Compact Capacitor Booster, Cap Booster 200
+1MN Monopropellant Enduring Afterburner
+
+Small I-ax Enduring Remote Armor Repairer
+Small I-ax Enduring Remote Armor Repairer
+Small I-ax Enduring Remote Armor Repairer
 
 Small Trimark Armor Pump I
 Small Ancillary Current Router I

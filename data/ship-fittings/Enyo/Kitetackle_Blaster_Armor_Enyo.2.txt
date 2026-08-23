@@ -1,18 +1,19 @@
 [Enyo, Kitetackle Blaster Armor Enyo]
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Core Probe Launcher I, Sisters Core Scanner Probe
+
+Assault Damage Control II
+Compact Multispectrum Energized Membrane
+Small Ancillary Armor Repairer, Nanite Repair Paste
+[Empty Low slot]
 
 J5b Enduring Warp Scrambler
 5MN Y-T8 Compact Microwarpdrive
 1MN Y-S8 Compact Afterburner
 
-Corpum C-Type Explosive Energized Membrane
-Assault Damage Control II
-Compact Multispectrum Energized Membrane
-Small Ancillary Armor Repairer, Nanite Repair Paste
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+[Empty High slot]
 
 Small Processor Overclocking Unit I
 Small Ancillary Current Router II

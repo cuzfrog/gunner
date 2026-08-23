@@ -1,21 +1,22 @@
 [Orthrus, Missile Shield Orthrus]
-Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
-Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
-Core Probe Launcher I, Sisters Core Scanner Probe
-Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
-Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
-Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
-
-10MN Afterburner II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Large Shield Extender II
-Large Shield Extender II
 
 Ballistic Control System II
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
+
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
+10MN Afterburner II
+Multispectrum Shield Hardener II
+
+Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
+Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
+Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
+Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
+Rapid Light Missile Launcher II, Scourge Auto-Targeting Light Missile I
+[Empty High slot]
 
 Medium Core Defense Field Extender II
 Medium Core Defense Field Extender II
@@ -28,4 +29,3 @@ Caldari Navy Hornet x5
 Sisters Core Scanner Probe x8
 Scourge Fury Light Missile x883
 Scourge Auto-Targeting Light Missile I x2585
-Medium Standard Container x1

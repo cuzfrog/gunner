@@ -1,20 +1,22 @@
 [Cruor, Tackle Beam Armor Cruor]
-Small Focused Beam Laser II, Aurora S
-Small Energy Neutralizer II
-Small Focused Beam Laser II, Aurora S
-Small Energy Nosferatu II
-
-Dread Guristas Stasis Webifier
-1MN Afterburner II
-Dread Guristas Warp Disruptor
 
 Heat Sink II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Damage Control II
 Fourier Compact Tracking Enhancer
 
+Dread Guristas Stasis Webifier
+1MN Afterburner II
+Dread Guristas Warp Disruptor
+
+Small Focused Beam Laser II, Aurora S
+Small Energy Neutralizer II
+Small Focused Beam Laser II, Aurora S
+Small Energy Nosferatu II
+
 Small Polycarbon Engine Housing II
-Small Energy Burst Aerator I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Gleam S x3

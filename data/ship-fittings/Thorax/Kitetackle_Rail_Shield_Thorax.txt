@@ -1,20 +1,21 @@
 [Thorax, Kitetackle Rail Shield Thorax]
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-
-Large Shield Extender II
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-50MN Y-T8 Compact Microwarpdrive
-Warp Disruptor II
 
 Tracking Enhancer II
 Magnetic Field Stabilizer II
 Tracking Enhancer II
 Nanofiber Internal Structure II
 Magnetic Field Stabilizer II
+
+Large Shield Extender II
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+50MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
 
 Medium Ancillary Current Router I
 Medium EM Shield Reinforcer I

@@ -1,7 +1,10 @@
 [Phantasm, Tackle Beam Shield Phantasm]
-Heavy Beam Laser II, Imperial Navy Standard M
-Heavy Beam Laser II, Imperial Navy Standard M
-Heavy Beam Laser II, Imperial Navy Standard M
+
+Heat Sink II
+Damage Control II
+Heat Sink II
+Nanofiber Internal Structure II
+Heat Sink II
 
 Gist X-Type Large Shield Booster
 Dread Guristas Warp Disruptor
@@ -10,11 +13,10 @@ Multispectrum Shield Hardener II
 Multispectrum Shield Hardener II
 Republic Fleet 10MN Afterburner
 
-Heat Sink II
-Damage Control II
-Heat Sink II
-Nanofiber Internal Structure II
-Heat Sink II
+Heavy Beam Laser II, Imperial Navy Standard M
+Heavy Beam Laser II, Imperial Navy Standard M
+Heavy Beam Laser II, Imperial Navy Standard M
+[Empty High slot]
 
 Medium Energy Locus Coordinator II
 Medium Polycarbon Engine Housing II

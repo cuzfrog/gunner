@@ -1,4 +1,17 @@
 [Harbinger, Tackle Pulse Armor Harbinger]
+
+Damage Control II
+1600mm Rolled Tungsten Compact Plates
+Heat Sink II
+Reactive Armor Hardener
+[Empty Low slot]
+[Empty Low slot]
+
+10MN Y-S8 Compact Afterburner
+Faint Epsilon Scoped Warp Scrambler
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+[Empty Med slot]
+
 Heavy Pulse Laser II, Scorch M
 Armor Command Burst II, Armor Energizing Charge
 Heavy Pulse Laser II, Scorch M
@@ -6,18 +19,6 @@ Heavy Pulse Laser II, Scorch M
 Heavy Pulse Laser II, Scorch M
 Heavy Pulse Laser II, Scorch M
 Heavy Pulse Laser II, Scorch M
-
-10MN Y-S8 Compact Afterburner
-Faint Epsilon Scoped Warp Scrambler
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-Medium Micro Jump Drive
-
-Damage Control II
-Multispectrum Coating II
-1600mm Rolled Tungsten Compact Plates
-Heat Sink II
-Multispectrum Coating II
-Reactive Armor Hardener
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I

@@ -1,7 +1,8 @@
 [Chremoas, Kitetackle Art Shield Chremoas]
-280mm Howitzer Artillery II, Quake S
-'Smokescreen' Covert Ops Cloaking Device II
-280mm Howitzer Artillery II, Quake S
+
+Gotan's Modified Gyrostabilizer
+Gotan's Modified Gyrostabilizer
+[Empty Low slot]
 
 1MN Abyssal Afterburner
 5MN Abyssal Microwarpdrive
@@ -9,12 +10,13 @@ Abyssal Warp Disruptor
 Abyssal Stasis Webifier
 Medium Abyssal Shield Extender
 
-Gotan's Modified Gyrostabilizer
-Navy Micro Auxiliary Power Core
-Gotan's Modified Gyrostabilizer
+280mm Howitzer Artillery II, Quake S
+'Smokescreen' Covert Ops Cloaking Device II
+280mm Howitzer Artillery II, Quake S
 
 Small Projectile Locus Coordinator II
 Small Projectile Locus Coordinator II
+[Empty Rig slot]
 
 
 'Augmented' Warrior x1
@@ -25,9 +27,7 @@ Domination Titanium Sabot S x998
 Domination EMP S x930
 Domination Phased Plasma S x1000
 Domination Depleted Uranium S x34
-Agency 'Pyrolancea' DB5 Dose II x9
 Tremor S x4190
 Nanite Repair Paste x4709
 Domination Fusion S x958
 Quake S x782
-Small Standard Container x1

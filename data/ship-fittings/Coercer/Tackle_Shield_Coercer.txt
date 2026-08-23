@@ -1,23 +1,24 @@
 [Coercer, Tackle Shield Coercer]
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
-
-1MN Y-S8 Compact Afterburner
-Fleeting Compact Stasis Webifier
 
 Extruded Compact Heat Sink
 Damage Control I
 Extruded Compact Heat Sink
 
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
+1MN Y-S8 Compact Afterburner
+Fleeting Compact Stasis Webifier
+
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+Small Focused Modulated Pulse Energy Beam I, Imperial Navy Multifrequency S
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Imperial Navy Standard S x6

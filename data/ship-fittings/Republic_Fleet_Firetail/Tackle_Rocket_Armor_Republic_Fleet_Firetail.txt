@@ -1,20 +1,21 @@
 [Republic Fleet Firetail, Tackle Rocket Armor Republic Fleet Firetail]
-Rocket Launcher II, Scourge Rage Rocket
-280mm Howitzer Artillery II, Phased Plasma S
-280mm Howitzer Artillery II, Phased Plasma S
+
+Small Ancillary Armor Repairer, Nanite Repair Paste
+IFFA Compact Damage Control
+Gyrostabilizer II
 
 Fleeting Compact Stasis Webifier
 Fleeting Compact Stasis Webifier
 1MN Afterburner II
 Warp Scrambler II
 
-Small Ancillary Armor Repairer, Nanite Repair Paste
-IFFA Compact Damage Control
-Gyrostabilizer II
+Rocket Launcher II, Scourge Rage Rocket
+280mm Howitzer Artillery II, Phased Plasma S
+280mm Howitzer Artillery II, Phased Plasma S
 
-Small Projectile Collision Accelerator I
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Fusion S x1500

@@ -1,17 +1,19 @@
 [Algos, Kitetackle AC Shield Algos]
-125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
-125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
-125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
-125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
-125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
 
 Remote Sensor Dampener I, Targeting Range Dampening Script
 5MN Quad LiF Restrained Microwarpdrive
 Faint Scoped Warp Disruptor
 
-Drone Damage Amplifier II
-Drone Damage Amplifier II
-Drone Damage Amplifier II
+125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+125mm Gatling AutoCannon I, Republic Fleet Phased Plasma S
+[Empty High slot]
 
 Small Processor Overclocking Unit I
 Small Core Defense Field Extender I

@@ -1,16 +1,17 @@
 [Merlin, Tackle Blaster Shield Merlin]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script
 10MN Y-S8 Compact Afterburner
 X5 Enduring Stasis Webifier
 Faint Epsilon Scoped Warp Scrambler
 
-Micro Auxiliary Power Core II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
 
 Small Ancillary Current Router I
 Small Hybrid Metastasis Adjuster II

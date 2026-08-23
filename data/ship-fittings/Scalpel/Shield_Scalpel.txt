@@ -1,16 +1,17 @@
 [Scalpel, Shield Scalpel]
-Small S95a Scoped Remote Shield Booster
-Small Murky Compact Remote Shield Booster
-Small S95a Scoped Remote Shield Booster
-
-Multispectrum Shield Hardener II
-Republic Fleet Medium Shield Extender
-Small Capacitor Booster II
-5MN Quad LiF Restrained Microwarpdrive
 
 Power Diagnostic System II
 Power Diagnostic System II
 IFFA Compact Damage Control
+
+Republic Fleet Medium Shield Extender
+Multispectrum Shield Hardener II
+Small Capacitor Booster II
+5MN Quad LiF Restrained Microwarpdrive
+
+Small S95a Scoped Remote Shield Booster
+Small Murky Compact Remote Shield Booster
+Small S95a Scoped Remote Shield Booster
 
 Small Core Defense Field Extender II
 Small Core Defense Field Extender II

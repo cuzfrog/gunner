@@ -1,4 +1,5 @@
 [Freki, Kitetackle AC Armor Freki]
+
 Sentient Damage Control
 Reactive Armor Hardener
 Small Armor Repairer II
@@ -13,5 +14,5 @@ True Sansha Warp Scrambler
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 
-
-
+[Empty Rig slot]
+[Empty Rig slot]

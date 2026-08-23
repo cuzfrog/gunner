@@ -1,16 +1,4 @@
 [Brutix Navy Issue, Kitetackle Blaster Shield Brutix Navy Issue]
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Medium Ghoul Compact Energy Nosferatu
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-
-Stasis Webifier II
-50MN Cold-Gas Enduring Microwarpdrive
-Warp Scrambler II
-Stasis Webifier II
 
 Reinforced Bulkheads II
 Damage Control II
@@ -20,9 +8,22 @@ Magnetic Field Stabilizer II
 Reinforced Bulkheads II
 Reinforced Bulkheads II
 
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
+Stasis Webifier II
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Scrambler II
+Stasis Webifier II
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Medium Ghoul Compact Energy Nosferatu
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hornet EC-300 x5

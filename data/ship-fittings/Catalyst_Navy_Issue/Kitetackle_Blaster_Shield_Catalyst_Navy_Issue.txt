@@ -1,23 +1,24 @@
 [Catalyst Navy Issue, Kitetackle Blaster Shield Catalyst Navy Issue]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Expanded Probe Launcher I, Sisters Combat Scanner Probe
-Light Neutron Blaster II, Void S
+
+Co-Processor II
+Co-Processor II
+Co-Processor II
 
 F-90 Compact Sensor Booster, Scan Resolution Script
 5MN Y-T8 Compact Microwarpdrive
 Fleeting Compact Stasis Webifier
 
-Co-Processor II
-Co-Processor II
-Co-Processor II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+[Empty High slot]
 
 Small Processor Overclocking Unit I
-Small Transverse Bulkhead I
 Small Processor Overclocking Unit I
+[Empty Rig slot]
 
 
 Void S x9520

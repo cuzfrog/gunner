@@ -1,20 +1,21 @@
 [Sabre, Kitetackle AC Shield Sabre]
-125mm Gatling AutoCannon II, Hail S
-125mm Gatling AutoCannon II, Hail S
-Improved Cloaking Device II
-125mm Gatling AutoCannon II, Hail S
-125mm Gatling AutoCannon II, Hail S
-125mm Gatling AutoCannon II, Hail S
-125mm Gatling AutoCannon II, Hail S
-Interdiction Sphere Launcher I, Warp Disrupt Probe
+
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
 
 Medium Azeotropic Restrained Shield Extender
 Medium Azeotropic Restrained Shield Extender
 Faint Epsilon Scoped Warp Scrambler
 5MN Quad LiF Restrained Microwarpdrive
 
-Nanofiber Internal Structure II
-Nanofiber Internal Structure II
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+125mm Gatling AutoCannon II, Hail S
+[Empty High slot]
+[Empty High slot]
 
 Small Polycarbon Engine Housing II
 Small Hyperspatial Velocity Optimizer II

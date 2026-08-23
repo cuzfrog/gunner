@@ -1,20 +1,21 @@
 [Thunderchild, Shield Thunderchild]
-Large Vorton Projector II, ElectroPunch Ultra L
-Auto Targeting System I
 
-Sensor Booster II, Scan Resolution Script
+Inertial Stabilizers II
+Inertial Stabilizers II
+[Empty Low slot]
+[Empty Low slot]
+[Empty Low slot]
+
 Large Shield Extender II
+Large Shield Extender II
+Sensor Booster II, Scan Resolution Script
 Multispectrum Shield Hardener II
 Sensor Booster II, Scan Resolution Script
-Large Shield Extender II
 Pith X-Type Kinetic Shield Hardener
 Multispectrum Shield Hardener II
 
-Vorton Tuning System II
-Vorton Tuning System II
-Inertial Stabilizers II
-Inertial Stabilizers II
-Vorton Tuning System II
+[Empty High slot]
+[Empty High slot]
 
 Large Core Defense Field Extender I
 Large Hyperspatial Velocity Optimizer II

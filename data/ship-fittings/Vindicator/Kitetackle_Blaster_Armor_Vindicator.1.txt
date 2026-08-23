@@ -1,12 +1,12 @@
 [Vindicator, Kitetackle Blaster Armor Vindicator]
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
-Federation Navy Neutron Blaster Cannon, Void L
+
+Imperial Navy 1600mm Steel Plates
+Syndicate Damage Control
+Imperial Navy 1600mm Steel Plates
+Federation Navy Magnetic Field Stabilizer
+Federation Navy Magnetic Field Stabilizer
+[Empty Low slot]
+[Empty Low slot]
 
 Dread Guristas Warp Scrambler
 Federation Navy Stasis Webifier
@@ -14,13 +14,14 @@ Shadow Serpentis Stasis Webifier
 Dread Guristas Warp Disruptor
 Gist X-Type 500MN Microwarpdrive
 
-Imperial Navy 1600mm Steel Plates
-Centii A-Type Multispectrum Coating
-Syndicate Damage Control
-Imperial Navy 1600mm Steel Plates
-Federation Navy Magnetic Field Stabilizer
-Centii A-Type Multispectrum Coating
-Federation Navy Magnetic Field Stabilizer
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
+Federation Navy Neutron Blaster Cannon, Void L
 
 Large Trimark Armor Pump II
 Large Trimark Armor Pump II

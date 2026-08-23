@@ -1,6 +1,8 @@
 [Keres, Kitetackle AC Armor Keres]
-125mm Gatling AutoCannon II, Barrage S
-125mm Gatling AutoCannon II, Barrage S
+
+Damage Control II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Federation Navy 200mm Steel Plates
 
 Remote Sensor Dampener II, Targeting Range Dampening Script
 Dread Guristas Warp Disruptor
@@ -8,12 +10,11 @@ Remote Sensor Dampener II, Targeting Range Dampening Script
 5MN Quad LiF Restrained Microwarpdrive
 Remote Sensor Dampener II, Targeting Range Dampening Script
 
-Damage Control II
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Federation Navy 200mm Steel Plates
+125mm Gatling AutoCannon II, Barrage S
+125mm Gatling AutoCannon II, Barrage S
 
 Small Particle Dispersion Projector II
-Small Ionic Field Projector II
+[Empty Rig slot]
 
 
 Hobgoblin II x1

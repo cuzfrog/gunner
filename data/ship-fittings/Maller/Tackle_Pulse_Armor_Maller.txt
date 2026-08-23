@@ -1,4 +1,5 @@
 [Maller, Tackle Pulse Armor Maller]
+
 1600mm Steel Plates II
 800mm Steel Plates II
 Damage Control II
@@ -19,5 +20,3 @@ Focused Medium Pulse Laser II, Multifrequency M
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I
-
-

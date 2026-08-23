@@ -1,9 +1,0 @@
-[Monitor, Ewar Shield Monitor]
-Sisters Expanded Probe Launcher, Sisters Combat Scanner Probe
-
-50MN Microwarpdrive II
-10MN Afterburner II
-Phased Scoped Target Painter
-
-
-Sisters Core Scanner Probe x8

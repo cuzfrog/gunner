@@ -1,16 +1,17 @@
 [Claw, Kitetackle AC Armor Claw]
-200mm AutoCannon II, Republic Fleet EMP S
-Interdiction Nullifier I
-200mm AutoCannon II, Republic Fleet EMP S
-200mm AutoCannon II, Republic Fleet EMP S
-
-5MN Quad LiF Restrained Microwarpdrive
-Warp Scrambler II
 
 Overdrive Injector System II
 Damage Control II
 Small Ancillary Armor Repairer
 Overdrive Injector System II
+
+5MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+
+200mm AutoCannon II, Republic Fleet EMP S
+Interdiction Nullifier I
+200mm AutoCannon II, Republic Fleet EMP S
+200mm AutoCannon II, Republic Fleet EMP S
 
 Small Low Friction Nozzle Joints II
 Small Low Friction Nozzle Joints II
@@ -18,6 +19,5 @@ Small Low Friction Nozzle Joints II
 
 Republic Fleet EMP S x1440
 Hail S x1482
-Agency 'Overclocker' SB5 Dose II x2
 Caldari Navy Scourge Rocket x27
 Nanite Repair Paste x197

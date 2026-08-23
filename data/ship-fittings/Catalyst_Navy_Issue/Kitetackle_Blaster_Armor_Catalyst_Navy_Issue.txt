@@ -1,22 +1,24 @@
 [Catalyst Navy Issue, Kitetackle Blaster Armor Catalyst Navy Issue]
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-
-5MN Y-T8 Compact Microwarpdrive
-Warp Scrambler II
-X5 Enduring Stasis Webifier
 
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 400mm Rolled Tungsten Compact Plates
 
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
+5MN Y-T8 Compact Microwarpdrive
+Warp Scrambler II
+X5 Enduring Stasis Webifier
+
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Null S x1140

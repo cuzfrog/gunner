@@ -1,20 +1,22 @@
 [Cruor, Tackle Pulse Armor Cruor]
-Small Energy Nosferatu II
-Small Focused Pulse Laser II, Conflagration S
-Small Focused Pulse Laser II, Conflagration S
-Small Energy Nosferatu II
+
+Heat Sink II
+Small Ancillary Armor Repairer
+Reactive Armor Hardener
+[Empty Low slot]
 
 Stasis Webifier II
 Warp Disruptor II
 1MN Afterburner II
 
-Heat Sink II
-Small Ancillary Armor Repairer
-Multispectrum Coating II
-Reactive Armor Hardener
+Small Energy Nosferatu II
+Small Focused Pulse Laser II, Conflagration S
+Small Focused Pulse Laser II, Conflagration S
+Small Energy Nosferatu II
 
 Small Processor Overclocking Unit II
 Small Explosive Armor Reinforcer I
+[Empty Rig slot]
 
 
 Conflagration S x30

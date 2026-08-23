@@ -1,15 +1,4 @@
 [Victor, Kitetackle Rail Shield Victor]
-250mm Railgun II, Dread Guristas Plutonium Charge M
-250mm Railgun II, Dread Guristas Plutonium Charge M
-'Smokescreen' Covert Ops Cloaking Device II
-250mm Railgun II, Dread Guristas Plutonium Charge M
-Small Abyssal Energy Neutralizer
-
-X-Large Abyssal Ancillary Shield Booster, Navy Cap Booster 400
-Large Abyssal Shield Extender
-Abyssal Stasis Webifier
-50MN Abyssal Microwarpdrive
-Abyssal Warp Disruptor
 
 Domination Nanofiber Structure
 Abyssal Magnetic Field Stabilizer
@@ -17,23 +6,26 @@ Abyssal Magnetic Field Stabilizer
 Unit P-343554's Modified Damage Control
 Abyssal Magnetic Field Stabilizer
 
+X-Large Abyssal Ancillary Shield Booster, Navy Cap Booster 400
+Large Abyssal Shield Extender
+Abyssal Stasis Webifier
+50MN Abyssal Microwarpdrive
+Abyssal Warp Disruptor
+
+250mm Railgun II, Dread Guristas Plutonium Charge M
+250mm Railgun II, Dread Guristas Plutonium Charge M
+'Smokescreen' Covert Ops Cloaking Device II
+250mm Railgun II, Dread Guristas Plutonium Charge M
+Small Abyssal Energy Neutralizer
+
 Medium Polycarbon Engine Housing II
 Medium EM Shield Reinforcer II
+[Empty Rig slot]
 
 
 'Augmented' Valkyrie x5
-Light Mutated Drone x2
-Light Mutated Drone x3
 
 
-Expired Caldari Union Day Range Booster IV x4
-Synth Frentix Booster x1
-Agency 'Hardshell' TB9 Dose IV x3
-Agency 'Pyrolancea' DB9 Dose IV x2
-Expired Caldari Union Day Accuracy Booster IV x5
-Expired Caldari Union Day Damage Booster IV x4
-Quafe Zero Classic x3
-Agency 'Overclocker' SB9 Dose IV x3
 Dread Guristas Plutonium Charge M x79
 Spike M x1125
 Liquid Ozone x90

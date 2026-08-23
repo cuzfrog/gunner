@@ -1,23 +1,24 @@
 [Bellicose, Kitetackle Missile Shield Bellicose]
-Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
-
-Multispectrum Shield Hardener II
-X-Large Ancillary Shield Booster, Navy Cap Booster 800
-50MN Cold-Gas Enduring Microwarpdrive
-Initiated Compact Warp Disruptor
-Target Painter II
 
 Damage Control II
 Reactor Control Unit II
 Ballistic Control System II
 Co-Processor II
 
+Multispectrum Shield Hardener II
+X-Large Ancillary Shield Booster, Navy Cap Booster 800
+50MN Cold-Gas Enduring Microwarpdrive
+Initiated Compact Warp Disruptor
+[Empty Med slot]
+
+Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Inferno Rage Heavy Assault Missile
+
 Medium Processor Overclocking Unit I
 Medium EM Shield Reinforcer II
-Medium Capacitor Control Circuit I
+[Empty Rig slot]
 
 
 Mjolnir Rage Heavy Assault Missile x1000

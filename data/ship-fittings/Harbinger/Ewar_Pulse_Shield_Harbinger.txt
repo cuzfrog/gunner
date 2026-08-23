@@ -1,16 +1,4 @@
 [Harbinger, Ewar Pulse Shield Harbinger]
-Heavy Pulse Laser II, Scorch M
-Heavy Pulse Laser II, Scorch M
-Heavy Pulse Laser II, Scorch M
-Heavy Pulse Laser II, Scorch M
-Heavy Pulse Laser II, Scorch M
-Heavy Pulse Laser II, Scorch M
-Small Energy Neutralizer II
-
-Medium F-RX Compact Capacitor Booster, Cap Booster 800
-Multispectrum Shield Hardener II
-50MN Quad LiF Restrained Microwarpdrive
-EM Shield Amplifier II
 
 Heat Sink II
 Heat Sink II
@@ -18,6 +6,19 @@ Tracking Enhancer II
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Heat Sink II
+
+Medium F-RX Compact Capacitor Booster, Cap Booster 800
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+EM Shield Amplifier II
+
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Heavy Pulse Laser II, Scorch M
+Small Energy Neutralizer II
 
 Medium Energy Locus Coordinator II
 Medium Energy Locus Coordinator II

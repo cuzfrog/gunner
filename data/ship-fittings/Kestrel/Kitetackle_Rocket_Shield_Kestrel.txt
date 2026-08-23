@@ -1,16 +1,17 @@
 [Kestrel, Kitetackle Rocket Shield Kestrel]
-'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
-'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
-'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
-'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
+
+Ballistic Control System I
+Ballistic Control System I
 
 Medium Azeotropic Restrained Shield Extender
 5MN Y-T8 Compact Microwarpdrive
 X5 Enduring Stasis Webifier
 Faint Epsilon Scoped Warp Scrambler
 
-Ballistic Control System I
-Ballistic Control System I
+'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Nova Rocket
 
 Small Core Defense Field Extender I
 Small Core Defense Field Extender I

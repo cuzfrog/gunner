@@ -1,15 +1,4 @@
 [Hurricane Fleet Issue, Art Shield Hurricane Fleet Issue]
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
-
-50MN Quad LiF Restrained Microwarpdrive
-Large Shield Extender II
-Multispectrum Shield Hardener II
-Large Shield Extender II
 
 Damage Control II
 Nanofiber Internal Structure II
@@ -17,6 +6,20 @@ Gyrostabilizer II
 Gyrostabilizer II
 Tracking Enhancer II
 Power Diagnostic System II
+
+Large Shield Extender II
+Large Shield Extender II
+50MN Quad LiF Restrained Microwarpdrive
+Multispectrum Shield Hardener II
+
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+720mm Howitzer Artillery II, Republic Fleet Carbonized Lead M
+[Empty High slot]
+[Empty High slot]
 
 Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender I

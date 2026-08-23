@@ -1,4 +1,5 @@
 [Condor, Kitetackle Rocket Shield Condor]
+
 Micro Auxiliary Power Core I
 Crosslink Compact Ballistic Control System
 
@@ -10,10 +11,8 @@ J5b Enduring Warp Scrambler
 OE-5200 Rocket Launcher, Caldari Navy Scourge Rocket
 OE-5200 Rocket Launcher, Caldari Navy Scourge Rocket
 OE-5200 Rocket Launcher, Caldari Navy Scourge Rocket
-[empty high slot]
+[Empty High slot]
 
 Small Anti-EM Screen Reinforcer I
 Small Core Defense Field Extender I
 Small Warhead Calefaction Catalyst I
-
-

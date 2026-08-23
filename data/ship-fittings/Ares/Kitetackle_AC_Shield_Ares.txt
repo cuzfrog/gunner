@@ -1,16 +1,17 @@
 [Ares, Kitetackle AC Shield Ares]
-125mm Gatling AutoCannon II, Titanium Sabot S
-Salvager II
-125mm Gatling AutoCannon II, Titanium Sabot S
 
-5MN Y-T8 Compact Microwarpdrive
-Warp Disruptor II
-Medium Shield Extender I
-
-Expanded Cargohold II
 Inertial Stabilizers II
 Damage Control II
-F-89 Compact Signal Amplifier
+[Empty Low slot]
+[Empty Low slot]
+
+Medium Shield Extender I
+5MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+125mm Gatling AutoCannon II, Titanium Sabot S
+125mm Gatling AutoCannon II, Titanium Sabot S
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer I
 Small Processor Overclocking Unit I

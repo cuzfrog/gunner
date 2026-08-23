@@ -1,16 +1,17 @@
 [Griffin Navy Issue, Kitetackle Rail Shield Griffin Navy Issue]
-150mm Railgun II, Javelin S
-Prototype Cloaking Device I
-150mm Railgun II, Javelin S
-
-5MN Quad LiF Restrained Microwarpdrive
-Small Cap Battery II
-Multispectral ECM II
-Stasis Webifier II
-Warp Disruptor II
 
 Co-Processor II
 Inertial Stabilizers II
+
+5MN Quad LiF Restrained Microwarpdrive
+Small Cap Battery II
+Stasis Webifier II
+Warp Disruptor II
+[Empty Med slot]
+
+150mm Railgun II, Javelin S
+150mm Railgun II, Javelin S
+[Empty High slot]
 
 Small Semiconductor Memory Cell II
 Small EM Shield Reinforcer II

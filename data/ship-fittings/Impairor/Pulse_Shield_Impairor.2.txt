@@ -1,10 +1,13 @@
 [Impairor, Pulse Shield Impairor]
-Civilian Miner
-Civilian Gatling Pulse Laser
+
+[Empty Low slot]
+[Empty Low slot]
 
 1MN Civilian Afterburner
+1MN Y-S8 Compact Afterburner
+
+Civilian Gatling Pulse Laser
+Small Focused Modulated Pulse Energy Beam I, Gamma S
 
 
 Gamma S x8
-1MN Y-S8 Compact Afterburner, Gamma S
-Small Focused Modulated Pulse Energy Beam I, Gamma S

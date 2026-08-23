@@ -1,16 +1,17 @@
 [Thalia, Logi Armor Thalia]
-Small Solace Scoped Remote Armor Repairer
-Small Coaxial Compact Remote Armor Repairer
-Small Solace Scoped Remote Armor Repairer
+
+Damage Control II
+Multispectrum Energized Membrane II
+400mm Rolled Tungsten Compact Plates
+[Empty Low slot]
 
 Small Capacitor Booster II, Navy Cap Booster 400
 5MN Y-T8 Compact Microwarpdrive
-FZ-3a Enduring Gravimetric ECM
+[Empty Med slot]
 
-Damage Control II
-Multispectrum Coating II
-Multispectrum Energized Membrane II
-400mm Rolled Tungsten Compact Plates
+Small Solace Scoped Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
+Small Solace Scoped Remote Armor Repairer
 
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II

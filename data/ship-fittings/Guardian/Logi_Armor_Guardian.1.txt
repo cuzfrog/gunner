@@ -1,19 +1,20 @@
 [Guardian, Logi Armor Guardian]
-Large Remote Armor Repairer II
-Large Inductive Compact Remote Capacitor Transmitter
-Large Inductive Compact Remote Capacitor Transmitter
-Large Remote Armor Repairer II
-Large Remote Armor Repairer II
-Large Remote Armor Repairer II
-
-F-90 Compact Sensor Booster
-10MN Y-S8 Compact Afterburner
 
 IFFA Compact Damage Control
 True Sansha Thermal Armor Hardener
 1600mm Crystalline Carbonide Restrained Plates
 True Sansha EM Armor Hardener
-Shadow Serpentis Multispectrum Coating
+[Empty Low slot]
+
+F-90 Compact Sensor Booster
+10MN Y-S8 Compact Afterburner
+
+Large Remote Armor Repairer II
+Large Remote Armor Repairer II
+Large Remote Armor Repairer II
+Large Remote Armor Repairer II
+[Empty High slot]
+[Empty High slot]
 
 Medium Ancillary Current Router II
 Medium Ancillary Current Router II

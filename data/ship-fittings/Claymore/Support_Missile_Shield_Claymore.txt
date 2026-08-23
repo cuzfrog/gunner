@@ -1,48 +1,27 @@
 [Claymore, Support Missile Shield Claymore]
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Information Command Burst II, Electronic Superiority Charge
-Information Command Burst II, Sensor Optimization Charge
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
 
-Multispectrum Shield Hardener II
-Pithum A-Type Kinetic Shield Amplifier
-Multispectrum Shield Hardener II
-Republic Fleet Large Shield Extender
-50MN Quad LiF Restrained Microwarpdrive
-Republic Fleet Large Shield Extender
+Capacitor Flux Coil II
+Capacitor Flux Coil II
+Republic Fleet Ballistic Control System
+Republic Fleet Ballistic Control System
 
-Damage Control II
-Nanofiber Internal Structure II
-Power Diagnostic System II
-Nanofiber Internal Structure II
+Gist X-Type X-Large Shield Booster
+Pith X-Type Shield Boost Amplifier
+Gistum C-Type Adaptive Invulnerability Field
+Gistum C-Type Adaptive Invulnerability Field
+Imperial Navy Cap Recharger
+Imperial Navy Cap Recharger
 
-Medium Core Defense Field Extender II
-Medium Core Defense Field Extender II
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Shield Command Burst II, Shield Harmonizing Charge
+[Empty High slot]
 
-
-Hornet EC-300 x5
+Medium Bay Loading Accelerator I
+Medium Warhead Calefaction Catalyst I
 
 
-Caldari Navy Nova Heavy Missile x1179
-Electronic Hardening Charge x300
-Caldari Navy Scourge Heavy Missile x723
-Shield Extension Charge x300
-Caldari Navy Inferno Heavy Missile x792
-Active Shielding Charge x300
-100MN Y-S8 Compact Afterburner, Caldari Navy Nova Heavy Missile
-Caldari Navy Mjolnir Heavy Missile x432
-Electronic Superiority Charge x253
-Agency 'Overclocker' SB5 Dose II x1
-Scourge Precision Heavy Missile x500
-Shield Harmonizing Charge x300
-Nova Precision Heavy Missile x500
-Nova Fury Heavy Missile x1500
-Synth Frentix Booster x2
-Sensor Optimization Charge x252
-Scourge Fury Heavy Missile x1500
-Nanite Repair Paste x95
-Inferno Fury Heavy Missile x1500
-Interdiction Maneuvers Charge x300
+Valkyrie II x5

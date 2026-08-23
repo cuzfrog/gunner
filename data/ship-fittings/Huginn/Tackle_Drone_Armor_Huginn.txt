@@ -1,6 +1,9 @@
 [Huginn, Tackle Drone Armor Huginn]
-Drone Link Augmentor II
-650mm Medium 'Scout' Artillery I, EMP M
+
+Centum C-Type Multispectrum Energized Membrane
+Centum C-Type Multispectrum Energized Membrane
+Reactive Armor Hardener
+1600mm Steel Plates II
 
 Shadow Serpentis Stasis Webifier
 Shadow Serpentis Stasis Webifier
@@ -9,10 +12,11 @@ True Sansha Warp Disruptor
 10MN Afterburner II
 Shadow Serpentis Stasis Webifier
 
-Centum C-Type Multispectrum Energized Membrane
-Centum C-Type Multispectrum Energized Membrane
-Reactive Armor Hardener
-1600mm Steel Plates II
+650mm Medium 'Scout' Artillery I, EMP M
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Trimark Armor Pump II
 Medium Explosive Armor Reinforcer II

@@ -1,25 +1,26 @@
 [Widow, Missile Shield Widow]
-Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-Consortium Small Tractor Beam
-Caldari Navy Cloaking Device
-Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
-
-EM Shield Hardener II
-Thukker Large Shield Extender
-Republic Fleet Large Cap Battery
-Multispectrum Shield Hardener II
-Thukker Large Shield Extender
-Multispectrum Shield Hardener II
-Thukker Large Shield Extender
-Gist X-Type 500MN Microwarpdrive
 
 Damage Control II
 Ballistic Control System II
 Ballistic Control System II
 Ballistic Control System II
+
+Thukker Large Shield Extender
+Thukker Large Shield Extender
+Thukker Large Shield Extender
+EM Shield Hardener II
+Republic Fleet Large Cap Battery
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+Gist X-Type 500MN Microwarpdrive
+
+Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
+Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
+Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
+Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
+Caldari Navy Cruise Missile Launcher, Mjolnir Fury Cruise Missile
+[Empty High slot]
+[Empty High slot]
 
 Large Core Defense Field Extender II
 Large Core Defense Field Extender II

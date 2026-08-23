@@ -1,10 +1,9 @@
 [Cerberus, Tackle Missile Shield Cerberus]
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
-Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+
+Abyssal Ballistic Control System
+Abyssal Ballistic Control System
+Assault Damage Control II
+Abyssal Ballistic Control System
 
 Thukker Large Cap Battery
 Federation Navy Stasis Webifier
@@ -12,10 +11,12 @@ Gistum C-Type Multispectrum Shield Hardener
 Pith X-Type Large Shield Booster
 Gistum C-Type 10MN Afterburner
 
-Abyssal Ballistic Control System
-Abyssal Ballistic Control System
-Assault Damage Control II
-Abyssal Ballistic Control System
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
+Dread Guristas Heavy Assault Missile Launcher, Scourge Rage Heavy Assault Missile
 
 Medium Core Defense Capacitor Safeguard II
 Medium Core Defense Operational Solidifier I
@@ -24,12 +25,7 @@ Medium Core Defense Operational Solidifier I
 Federation Navy Hobgoblin x3
 
 
-Crystalline Isogen-10 x22
-Triglavian Survey Database x245
-Mobile Tractor Unit x1
 Caldari Navy Scourge Heavy Assault Missile x1482
 Scourge Rage Heavy Assault Missile x2485
 Nanite Repair Paste x144
-Zero-Point Condensate x127
-Chaotic Firestorm Filament x1
 Caldari Navy Inferno Heavy Assault Missile x170

@@ -1,4 +1,12 @@
 [Intaki Syndicate Catalyst, Tackle Blaster Shield Intaki Syndicate Catalyst]
+
+Photonic Upgraded Co-Processor
+[Empty Low slot]
+[Empty Low slot]
+
+1MN Monopropellant Enduring Afterburner
+Faint Epsilon Scoped Warp Scrambler
+
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
@@ -7,13 +15,6 @@ Light Neutron Blaster II, Void S
 Light Neutron Blaster II, Void S
 Small Energy Nosferatu II
 Light Neutron Blaster II, Void S
-
-1MN Monopropellant Enduring Afterburner
-Faint Epsilon Scoped Warp Scrambler
-
-Photonic Upgraded Co-Processor
-Gauss Field Balancer I
-Gauss Field Balancer I
 
 Small Ancillary Current Router I
 Small Ancillary Current Router I

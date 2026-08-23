@@ -1,19 +1,20 @@
 [Corax Navy Issue, Ewar Missile Shield Corax Navy Issue]
-Light Missile Launcher II, Scourge Fury Light Missile
-Light Missile Launcher II, Scourge Fury Light Missile
-Light Missile Launcher II, Scourge Fury Light Missile
-Light Missile Launcher II, Scourge Fury Light Missile
-Light Missile Launcher II, Scourge Fury Light Missile
-Light Missile Launcher II, Scourge Fury Light Missile
+
+Ballistic Control System II
+Ballistic Control System II
 
 Small Shield Extender II
-Phased Scoped Target Painter
-Missile Guidance Computer II, Missile Precision Script
+Small Shield Extender II
 5MN Quad LiF Restrained Microwarpdrive
-Small Shield Extender II
+[Empty Med slot]
+[Empty Med slot]
 
-Ballistic Control System II
-Ballistic Control System II
+Light Missile Launcher II, Scourge Fury Light Missile
+Light Missile Launcher II, Scourge Fury Light Missile
+Light Missile Launcher II, Scourge Fury Light Missile
+Light Missile Launcher II, Scourge Fury Light Missile
+Light Missile Launcher II, Scourge Fury Light Missile
+Light Missile Launcher II, Scourge Fury Light Missile
 
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit II

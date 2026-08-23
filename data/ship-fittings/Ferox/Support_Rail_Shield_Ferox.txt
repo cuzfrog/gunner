@@ -1,4 +1,17 @@
 [Ferox, Support Rail Shield Ferox]
+
+Damage Control II
+Magnetic Field Stabilizer II
+Tracking Enhancer II
+Magnetic Field Stabilizer II
+
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+EM Shield Hardener II
+Tracking Computer II, Tracking Speed Script
+50MN Cold-Gas Enduring Microwarpdrive
+
 250mm Railgun II, Antimatter Charge M
 250mm Railgun II, Antimatter Charge M
 Skirmish Command Burst I, Evasive Maneuvers Charge
@@ -6,18 +19,6 @@ Skirmish Command Burst I, Evasive Maneuvers Charge
 250mm Railgun II, Antimatter Charge M
 250mm Railgun II, Antimatter Charge M
 250mm Railgun II, Antimatter Charge M
-
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Multispectrum Shield Hardener II
-EM Shield Hardener II
-Tracking Computer II, Tracking Speed Script
-50MN Cold-Gas Enduring Microwarpdrive
-
-Damage Control II
-Magnetic Field Stabilizer II
-Tracking Enhancer II
-Magnetic Field Stabilizer II
 
 Medium Thermal Shield Reinforcer I
 Medium Ancillary Current Router I

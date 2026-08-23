@@ -1,23 +1,24 @@
 [Alligator, Missile Shield Alligator]
-Heavy Missile Launcher II, Scourge Heavy Missile
-Heavy Missile Launcher II, Scourge Heavy Missile
-Heavy Missile Launcher II, Scourge Heavy Missile
-Heavy Missile Launcher II, Scourge Heavy Missile
-Drone Link Augmentor I
-Heavy Missile Launcher II, Scourge Heavy Missile
-Heavy Missile Launcher II, Scourge Heavy Missile
 
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+[Empty Low slot]
+[Empty Low slot]
+
+Large Shield Extender II
+Large Shield Extender II
 Enduring Multispectrum Shield Hardener
 Shield Recharger II
-Large Shield Extender II
-Large Shield Extender II
 50MN Y-T8 Compact Microwarpdrive
 Shield Recharger II
 
-Mark I Compact Shield Flux Coil
-Drone Damage Amplifier II
-Mark I Compact Shield Flux Coil
-Drone Damage Amplifier II
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+Heavy Missile Launcher II, Scourge Heavy Missile
+[Empty High slot]
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

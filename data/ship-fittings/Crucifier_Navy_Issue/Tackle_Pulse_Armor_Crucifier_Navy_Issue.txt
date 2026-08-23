@@ -1,15 +1,17 @@
 [Crucifier Navy Issue, Tackle Pulse Armor Crucifier Navy Issue]
-Gatling Pulse Laser II, Scorch S
-Gatling Pulse Laser II, Scorch S
+
+400mm Rolled Tungsten Compact Plates
+Multispectrum Energized Membrane II
+Damage Control II
 
 Tracking Disruptor II, Optimal Range Disruption Script
 Stasis Webifier II
 1MN Y-S8 Compact Afterburner
 Warp Scrambler II
 
-400mm Rolled Tungsten Compact Plates
-Multispectrum Energized Membrane II
-Damage Control II
+Gatling Pulse Laser II, Scorch S
+Gatling Pulse Laser II, Scorch S
+[Empty High slot]
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I

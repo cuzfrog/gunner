@@ -1,23 +1,24 @@
 [Inner Zone Shipping Catalyst, Kitetackle Blaster Shield Inner Zone Shipping Catalyst]
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-Light Neutron Blaster II, Caldari Navy Antimatter Charge S
-
-J5b Enduring Warp Scrambler
-5MN Y-T8 Compact Microwarpdrive
 
 Nanofiber Internal Structure II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
+J5b Enduring Warp Scrambler
+5MN Y-T8 Compact Microwarpdrive
+
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+Light Neutron Blaster II, Caldari Navy Antimatter Charge S
+
 Small Low Friction Nozzle Joints I
-Small Hybrid Collision Accelerator II
 Small Low Friction Nozzle Joints I
+[Empty Rig slot]
 
 
 Null S x2000

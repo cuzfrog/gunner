@@ -1,13 +1,4 @@
 [Oneiros, Logi Armor Oneiros]
-Medium Remote Armor Repairer II
-Medium Remote Armor Repairer II
-Medium Remote Armor Repairer II
-Medium Remote Armor Repairer II
-
-Large Compact Pb-Acid Cap Battery
-50MN Quad LiF Restrained Microwarpdrive
-Cap Recharger II
-Cap Recharger II
 
 Reactive Armor Hardener
 Explosive Armor Hardener II
@@ -15,10 +6,18 @@ Explosive Armor Hardener II
 Damage Control II
 Multispectrum Energized Membrane II
 
+Large Compact Pb-Acid Cap Battery
+50MN Quad LiF Restrained Microwarpdrive
+Cap Recharger II
+Cap Recharger II
+
+Medium Remote Armor Repairer II
+Medium Remote Armor Repairer II
+Medium Remote Armor Repairer II
+Medium Remote Armor Repairer II
+
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II
 
 
-Light Hull Maintenance Bot I x3
-Light Hull Maintenance Bot I x2
 Light Armor Maintenance Bot I x5

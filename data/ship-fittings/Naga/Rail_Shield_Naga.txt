@@ -1,12 +1,8 @@
 [Naga, Rail Shield Naga]
-425mm Railgun II, Caldari Navy Uranium Charge L
-425mm Railgun II, Caldari Navy Uranium Charge L
-425mm Railgun II, Javelin L
-425mm Railgun II, Javelin L
-425mm Railgun II, Javelin L
-425mm Railgun II, Caldari Navy Uranium Charge L
-425mm Railgun II, Javelin L
-425mm Railgun II, Caldari Navy Uranium Charge L
+
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
 
 Tracking Computer II, Tracking Speed Script
 Sensor Booster II, Targeting Range Script
@@ -15,9 +11,14 @@ Sensor Booster II, Scan Resolution Script
 Tracking Computer II, Tracking Speed Script
 Sensor Booster II, Scan Resolution Script
 
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Javelin L
+425mm Railgun II, Caldari Navy Uranium Charge L
+425mm Railgun II, Javelin L
+425mm Railgun II, Caldari Navy Uranium Charge L
 
 Medium Hybrid Locus Coordinator I
 Medium Hybrid Locus Coordinator I

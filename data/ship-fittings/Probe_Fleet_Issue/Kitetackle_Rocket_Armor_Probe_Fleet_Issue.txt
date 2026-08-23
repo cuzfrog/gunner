@@ -1,21 +1,22 @@
 [Probe Fleet Issue, Kitetackle Rocket Armor Probe Fleet Issue]
-Caldari Navy Rocket Launcher, Mjolnir Rage Rocket
-Small Knave Scoped Energy Nosferatu
-Caldari Navy Rocket Launcher, Mjolnir Rage Rocket
-Expanded Probe Launcher II, Sisters Combat Scanner Probe
+
+Damage Control II
+Ballistic Control System II
+Small Ancillary Armor Repairer
 
 Coreli A-Type 1MN Afterburner
 Caldari Navy Warp Scrambler
 Stasis Webifier II
 5MN Quad LiF Restrained Microwarpdrive
 
-Damage Control II
-Ballistic Control System II
-Small Ancillary Armor Repairer
+Caldari Navy Rocket Launcher, Mjolnir Rage Rocket
+Small Knave Scoped Energy Nosferatu
+Caldari Navy Rocket Launcher, Mjolnir Rage Rocket
+[Empty High slot]
 
-Small Targeting System Subcontroller II
 Small Low Friction Nozzle Joints II
-Small Targeting System Subcontroller II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Core Scanner Probe I x8

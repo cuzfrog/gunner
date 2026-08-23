@@ -84,6 +84,35 @@ describe("resolveWeapon", () => {
     expect(resolveWeapon(modules, [])).toBe("AC");
   });
 
+  test("returns AC for Repeating Cannon autocannon variant", () => {
+    const modules = [{ name: "800mm Repeating Cannon I", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("AC");
+  });
+
+  test("returns Drone for faction-branded combat drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Republic Fleet Valkyrie", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Caldari Navy Wasp heavy drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Caldari Navy Wasp", quantity: 4 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Hornet light drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Hornet II", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Bouncer sentry drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Bouncer II", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
   test("returns DPS for fit without identifiable weapon", () => {
     const modules = [{ name: "Stasis Webifier II", offline: false }];
     expect(resolveWeapon(modules, [])).toBe("");

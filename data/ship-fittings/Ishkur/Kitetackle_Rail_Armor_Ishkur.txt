@@ -1,16 +1,18 @@
 [Ishkur, Kitetackle Rail Armor Ishkur]
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
+
+Drone Damage Amplifier II
+Centii B-Type Small Armor Repairer
+Assault Damage Control II
 
 Warp Disruptor II
 Stasis Webifier II
 Small Capacitor Booster II
 5MN Quad LiF Restrained Microwarpdrive
 
-Drone Damage Amplifier II
-Centii B-Type Small Armor Repairer
-Assault Damage Control II
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+[Empty High slot]
 
 Small Processor Overclocking Unit I
 Small Auxiliary Nano Pump II

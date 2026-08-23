@@ -1,26 +1,28 @@
 [Tornado, Art Shield Tornado]
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
 
 F-12 Enduring Tracking Computer, Tracking Speed Script
 Alumel-Wired Enduring Sensor Booster, Scan Resolution Script
-Medium Micro Jump Drive
 F-12 Enduring Tracking Computer, Tracking Speed Script
 Alumel-Wired Enduring Sensor Booster, Scan Resolution Script
+[Empty Med slot]
 
-Gyrostabilizer II
-Gyrostabilizer II
-Gyrostabilizer II
-Gyrostabilizer II
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
 
-Medium Targeting System Subcontroller I
 Medium Ancillary Current Router II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Republic Fleet Fusion L x1840

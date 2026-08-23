@@ -1,4 +1,5 @@
 [Atron, Tackle Blaster Shield Atron]
+
 Damage Control II
 Overdrive Injector System II
 Overdrive Injector System II
@@ -15,5 +16,3 @@ Small Infectious Scoped Energy Neutralizer
 Small Auxiliary Thrusters I
 Small EM Shield Reinforcer I
 Small Thermal Shield Reinforcer I
-
-

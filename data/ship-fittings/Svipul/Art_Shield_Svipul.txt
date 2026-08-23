@@ -1,25 +1,27 @@
 [Svipul, Art Shield Svipul]
-280mm Howitzer Artillery II, Quake S
-280mm Howitzer Artillery II, Quake S
-280mm Howitzer Artillery II, Quake S
-280mm Howitzer Artillery II, Quake S
-Festival Launcher, Scarlet Embrace Firework
+
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
+Gyrostabilizer II
 
 Sensor Booster II, Scan Resolution Script
 Sensor Booster II, Scan Resolution Script
 Sensor Booster II, Scan Resolution Script
 Sensor Booster II, Scan Resolution Script
 
-Gyrostabilizer II
-Gyrostabilizer II
-Gyrostabilizer II
-Gyrostabilizer II
+280mm Howitzer Artillery II, Quake S
+280mm Howitzer Artillery II, Quake S
+280mm Howitzer Artillery II, Quake S
+280mm Howitzer Artillery II, Quake S
+[Empty High slot]
+[Empty High slot]
 
 Small Projectile Metastasis Adjuster I
-Small Projectile Collision Accelerator II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
-Signal-5 'Needlejack' Filament x1
 Tremor S x1736
 Infinite Celebrations Firework x246
 Flames of the Rebellion Firework x219

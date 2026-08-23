@@ -1,23 +1,24 @@
 [Corax, Kitetackle Missile Shield Corax]
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
-
-Initiated Compact Warp Disruptor
-Compact Multispectrum Shield Hardener
-5MN Y-T8 Compact Microwarpdrive
-Small Shield Extender I
 
 Damage Control I
 Ballistic Control System I
 
+Small Shield Extender I
+Initiated Compact Warp Disruptor
+Compact Multispectrum Shield Hardener
+5MN Y-T8 Compact Microwarpdrive
+
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Scourge Light Missile
+
 Small EM Shield Reinforcer I
 Small Core Defense Field Extender I
-Small Bay Loading Accelerator I
+[Empty Rig slot]
 
 
 Caldari Navy Scourge Light Missile x2000

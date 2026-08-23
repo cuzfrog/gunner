@@ -1,25 +1,27 @@
 [Skua, Support Rocket Shield Skua]
+
+Abyssal Ballistic Control System
+Abyssal Ballistic Control System
+Abyssal Ballistic Control System
+
+5MN Abyssal Microwarpdrive
+Pithum A-Type Multispectrum Shield Hardener
+Medium Abyssal Shield Extender
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Shield Command Burst II, Shield Extension Charge
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
 Dread Guristas Rocket Launcher, Dread Guristas Scourge Rocket
+[Empty High slot]
 
-Missile Guidance Computer II, Missile Range Script
-Missile Guidance Computer II, Missile Range Script
-Micro Jump Field Generator
-5MN Abyssal Microwarpdrive
-Pithum A-Type Multispectrum Shield Hardener
-Medium Abyssal Shield Extender
-
-Abyssal Ballistic Control System
-Abyssal Ballistic Control System
-Abyssal Ballistic Control System
-
-Small Rocket Fuel Cache Partition II
-Small Hydraulic Bay Thrusters II
 Small EM Shield Reinforcer II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Nova Rage Rocket x1360

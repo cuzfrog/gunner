@@ -1,18 +1,4 @@
 [Phoenix Navy Issue, Tackle Torp Shield Phoenix Navy Issue]
-XL Torpedo Launcher II, Scourge Rage XL Torpedo
-Siege Module II
-Caldari Navy Large Graviton Smartbomb
-XL Torpedo Launcher II, Scourge Rage XL Torpedo
-XL Torpedo Launcher II, Scourge Rage XL Torpedo
-
-Capital Cap Battery II
-Cap Recharger II
-Capital Cap Battery II
-CONCORD Capital Shield Booster
-Heavy Warp Scrambler II
-Cap Recharger II
-Shield Boost Amplifier II
-Shield Boost Amplifier II
 
 Damage Control II
 Crosslink Compact Ballistic Control System
@@ -20,9 +6,24 @@ Capacitor Flux Coil II
 Capacitor Flux Coil II
 Capacitor Flux Coil II
 
-Capital Capacitor Control Circuit I
-Capital Capacitor Control Circuit II
-Capital Capacitor Control Circuit II
+Capital Cap Battery II
+Cap Recharger II
+Capital Cap Battery II
+CONCORD Capital Shield Booster
+Heavy Warp Scrambler II
+Cap Recharger II
+[Empty Med slot]
+[Empty Med slot]
+
+XL Torpedo Launcher II, Scourge Rage XL Torpedo
+Caldari Navy Large Graviton Smartbomb
+XL Torpedo Launcher II, Scourge Rage XL Torpedo
+XL Torpedo Launcher II, Scourge Rage XL Torpedo
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Strontium Clathrates x212

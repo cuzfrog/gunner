@@ -1,17 +1,4 @@
 [Cyclone, Tackle Missile Shield Cyclone]
-Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
-Medium Energy Neutralizer II
-Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
-Medium Energy Neutralizer II
-
-Compact Multispectrum Shield Hardener
-Fleeting Compact Stasis Webifier
-10MN Afterburner II
-Fleeting Compact Stasis Webifier
-X-Large Ancillary Shield Booster
 
 Ballistic Control System II
 Power Diagnostic System II
@@ -19,15 +6,27 @@ Damage Control II
 Ballistic Control System II
 Ballistic Control System II
 
+Compact Multispectrum Shield Hardener
+Fleeting Compact Stasis Webifier
+10MN Afterburner II
+Fleeting Compact Stasis Webifier
+X-Large Ancillary Shield Booster
+
+Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
+Medium Energy Neutralizer II
+Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Javelin Heavy Assault Missile
+Medium Energy Neutralizer II
+
 Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
 Mjolnir Rage Heavy Assault Missile x1385
-Noise-5 'Needlejack' Filament x1
 Inferno Rage Heavy Assault Missile x800
-Signal-5 'Needlejack' Filament x2
 Nova Rage Heavy Assault Missile x992
 Mjolnir Javelin Heavy Assault Missile x670
 Scourge Rage Heavy Assault Missile x724
@@ -35,4 +34,3 @@ Caldari Navy Nova Heavy Assault Missile x400
 Nanite Repair Paste x52
 Caldari Navy Mjolnir Heavy Assault Missile x270
 Nova Javelin Heavy Assault Missile x1000
-Medium Standard Container x1

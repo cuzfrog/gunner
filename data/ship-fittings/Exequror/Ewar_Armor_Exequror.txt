@@ -1,12 +1,4 @@
 [Exequror, Ewar Armor Exequror]
-Medium I-ax Enduring Remote Armor Repairer
-Medium I-ax Enduring Remote Armor Repairer
-Medium I-ax Enduring Remote Armor Repairer
-
-Tracking Disruptor II, Tracking Speed Disruption Script
-Tracking Disruptor II, Tracking Speed Disruption Script
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
-50MN Y-T8 Compact Microwarpdrive
 
 800mm Rolled Tungsten Compact Plates
 Nanofiber Internal Structure II
@@ -14,6 +6,15 @@ Multispectrum Energized Membrane II
 Damage Control II
 Nanofiber Internal Structure II
 Multispectrum Energized Membrane II
+
+Tracking Disruptor II, Tracking Speed Disruption Script
+Tracking Disruptor II, Tracking Speed Disruption Script
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+50MN Y-T8 Compact Microwarpdrive
+
+Medium I-ax Enduring Remote Armor Repairer
+Medium I-ax Enduring Remote Armor Repairer
+Medium I-ax Enduring Remote Armor Repairer
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I

@@ -1,20 +1,21 @@
 [Garmur, Kitetackle Missile Shield Garmur]
-Light Missile Launcher II, Nova Fury Light Missile
-Light Missile Launcher II, Nova Fury Light Missile
-Light Missile Launcher II, Nova Fury Light Missile
+
+IFFA Compact Damage Control
+Nanofiber Internal Structure II
+Power Diagnostic System II
 
 Republic Fleet Medium Shield Extender
 5MN Abyssal Microwarpdrive
 Dark Blood Warp Disruptor
 Enduring Multispectrum Shield Hardener
 
-IFFA Compact Damage Control
-Nanofiber Internal Structure II
-Power Diagnostic System II
+Light Missile Launcher II, Nova Fury Light Missile
+Light Missile Launcher II, Nova Fury Light Missile
+Light Missile Launcher II, Nova Fury Light Missile
 
-Small Ionic Field Projector II
 Small Core Defense Field Extender II
 Small Ancillary Current Router II
+[Empty Rig slot]
 
 
 Mjolnir Fury Light Missile x1000

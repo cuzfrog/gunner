@@ -1,21 +1,22 @@
 [Eagle, Kitetackle Blaster Shield Eagle]
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-
-Warp Scrambler II
-50MN Y-T8 Compact Microwarpdrive
-Stasis Webifier II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Large Shield Extender II
 
 Magnetic Field Stabilizer II
 Tracking Enhancer II
 Assault Damage Control II
 Magnetic Field Stabilizer II
+
+Large Shield Extender II
+Large Shield Extender II
+Warp Scrambler II
+50MN Y-T8 Compact Microwarpdrive
+Stasis Webifier II
+Multispectrum Shield Hardener II
+
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
 
 Medium Core Defense Field Extender II
 Medium EM Shield Reinforcer II

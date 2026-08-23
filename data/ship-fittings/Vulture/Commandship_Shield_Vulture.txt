@@ -1,11 +1,9 @@
 [Vulture, Commandship Shield Vulture]
-Shield Command Burst II, Active Shielding Charge
-Shield Command Burst II, Shield Extension Charge
-Improved Cloaking Device II
-Shield Command Burst II, Shield Harmonizing Charge
-Civilian Gatling Autocannon
-Small Tractor Beam II
-Information Command Burst II, Sensor Optimization Charge
+
+Damage Control II
+Power Diagnostic System II
+Power Diagnostic System II
+Power Diagnostic System II
 
 Large Shield Extender II
 Large Shield Extender II
@@ -14,13 +12,16 @@ Pithum C-Type EM Shield Amplifier
 Explosive Shield Amplifier II
 100MN Afterburner II
 
-Damage Control II
-Power Diagnostic System II
-Power Diagnostic System II
-Power Diagnostic System II
+Shield Command Burst II, Active Shielding Charge
+Shield Command Burst II, Shield Extension Charge
+Shield Command Burst II, Shield Harmonizing Charge
+Civilian Gatling Autocannon
+Information Command Burst II, Sensor Optimization Charge
+[Empty High slot]
+[Empty High slot]
 
-Medium Command Processor I
-Medium Command Processor I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Shield Extension Charge x14654

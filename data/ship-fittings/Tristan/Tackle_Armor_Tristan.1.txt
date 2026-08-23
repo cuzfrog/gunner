@@ -1,15 +1,16 @@
 [Tristan, Tackle Armor Tristan]
-Small Infectious Scoped Energy Neutralizer
-Small Infectious Scoped Energy Neutralizer
-Small Gremlin Compact Energy Neutralizer
+
+Damage Control II
+Multispectrum Energized Membrane II
+Small Ancillary Armor Repairer, Nanite Repair Paste
 
 Small Capacitor Booster II, Navy Cap Booster 400
 Initiated Compact Warp Scrambler
 1MN Y-S8 Compact Afterburner
 
-Damage Control II
-Multispectrum Energized Membrane II
-Small Ancillary Armor Repairer, Nanite Repair Paste
+Small Infectious Scoped Energy Neutralizer
+Small Infectious Scoped Energy Neutralizer
+Small Gremlin Compact Energy Neutralizer
 
 Small Ancillary Current Router I
 Small Auxiliary Nano Pump I

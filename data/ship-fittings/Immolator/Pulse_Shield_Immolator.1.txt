@@ -1,17 +1,15 @@
 [Immolator, Pulse Shield Immolator]
-Dual Light Pulse Laser II, Scorch S
-
-Shield Boost Amplifier II
-Small Shield Extender II
-Small Shield Booster II
 
 Damage Control II
 Overdrive Injector System II
 
+Small Shield Extender II
+Small Shield Booster II
+[Empty Med slot]
 
-Genolution Core Augmentation CA-1 x2
+Dual Light Pulse Laser II, Scorch S
+[Empty High slot]
+
+
 Conflagration S x5
-Oura Madusaari x1
-Men's Capsuleer Day XVI T-Shirt x1
-Women's Capsuleer Day XVI T-Shirt x1
 Scorch S x4

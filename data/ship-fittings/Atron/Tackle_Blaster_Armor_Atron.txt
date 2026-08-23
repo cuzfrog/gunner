@@ -1,4 +1,5 @@
 [Atron, Tackle Blaster Armor Atron]
+
 Small Armor Repairer I
 Limited Energized Explosive Membrane I
 Damage Control I
@@ -10,10 +11,8 @@ Tracking Computer I, Optimal Range Script
 Light Neutron Blaster I, Antimatter Charge S
 Light Neutron Blaster I, Antimatter Charge S
 Light Neutron Blaster I, Antimatter Charge S
-[empty high slot]
+[Empty High slot]
 
 Small Trimark Armor Pump I
 Small Hybrid Collision Accelerator I
 Small Hybrid Locus Coordinator I
-
-

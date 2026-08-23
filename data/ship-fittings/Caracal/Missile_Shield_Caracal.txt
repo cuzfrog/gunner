@@ -1,20 +1,21 @@
 [Caracal, Missile Shield Caracal]
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-
-Multispectrum Shield Hardener I
-EM Shield Hardener I
-Large Shield Extender I
-10MN Afterburner I
-Large Shield Extender I
 
 Power Diagnostic System I
 Shield Power Relay I
 Ballistic Control System I
 Ballistic Control System I
+
+Large Shield Extender I
+Large Shield Extender I
+Multispectrum Shield Hardener I
+EM Shield Hardener I
+10MN Afterburner I
+
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
 
 Medium Core Defense Field Purger I
 Medium Core Defense Field Purger I

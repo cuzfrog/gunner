@@ -1,23 +1,24 @@
 [Flycatcher, Kitetackle Missile Shield Flycatcher]
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Defender Launcher I, Defender Missile I
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Interdiction Sphere Launcher I, Warp Disrupt Probe
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
 
-Enduring Multispectrum Shield Hardener
+Co-Processor II
+
 Medium Shield Extender II
+Enduring Multispectrum Shield Hardener
 EM Shield Amplifier II
 5MN Quad LiF Restrained Microwarpdrive
 Warp Scrambler II
 
-Co-Processor II
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+[Empty High slot]
+[Empty High slot]
 
 Small Ancillary Current Router I
-Small Hydraulic Bay Thrusters II
+[Empty Rig slot]
 
 
 Caldari Navy Scourge Light Missile x308

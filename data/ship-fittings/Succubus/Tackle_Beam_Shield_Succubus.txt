@@ -1,16 +1,17 @@
 [Succubus, Tackle Beam Shield Succubus]
-Small Focused Beam Laser II, Imperial Navy Standard S
-Small Energy Nosferatu I
-Small Focused Beam Laser II, Imperial Navy Standard S
-
-Stasis Webifier II
-Warp Disruptor II
-Medium Shield Extender II
-Domination 1MN Afterburner
 
 Nanofiber Internal Structure II
 Heat Sink II
 Heat Sink II
+
+Medium Shield Extender II
+Stasis Webifier II
+Warp Disruptor II
+Domination 1MN Afterburner
+
+Small Focused Beam Laser II, Imperial Navy Standard S
+Small Energy Nosferatu I
+Small Focused Beam Laser II, Imperial Navy Standard S
 
 Small EM Shield Reinforcer I
 Small Polycarbon Engine Housing II

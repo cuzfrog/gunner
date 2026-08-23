@@ -1,24 +1,25 @@
 [Karura, Blaster Shield Karura]
-Triple Neutron Blaster Cannon II, Void XL
-Triple Neutron Blaster Cannon II, Void XL
-Shadow Serpentis Large Plasma Smartbomb
-Siege Module II
-Triple Neutron Blaster Cannon II, Void XL
-'Steel Yari' Kinetic Disruptive Lance
-
-Capital Shield Extender II
-Multispectrum Shield Hardener II
-Capital Shield Extender II
-Capital Shield Extender II
-Multispectrum Shield Hardener II
-Gist X-Type EM Shield Hardener
-Capital Shield Extender II
 
 Power Diagnostic System II
 Damage Control II
 Power Diagnostic System II
 Power Diagnostic System II
 Power Diagnostic System II
+
+Capital Shield Extender II
+Capital Shield Extender II
+Capital Shield Extender II
+Capital Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+Gist X-Type EM Shield Hardener
+
+Triple Neutron Blaster Cannon II, Void XL
+Triple Neutron Blaster Cannon II, Void XL
+Shadow Serpentis Large Plasma Smartbomb
+Triple Neutron Blaster Cannon II, Void XL
+[Empty High slot]
+[Empty High slot]
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I

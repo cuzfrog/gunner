@@ -1,16 +1,4 @@
 [Vargur, Art Shield Vargur]
-1200mm Artillery Cannon II, Quake L
-1200mm Artillery Cannon II, Quake L
-1200mm Artillery Cannon II, Quake L
-Bastion Module I
-1200mm Artillery Cannon II, Quake L
-
-X-Large Ancillary Shield Booster, Cap Booster 400
-Large Micro Jump Drive
-Shield Boost Amplifier II
-Multispectrum Shield Hardener II
-Tracking Computer II
-Multispectrum Shield Hardener II
 
 Damage Control II
 Gyrostabilizer II
@@ -18,6 +6,21 @@ Gyrostabilizer II
 Gyrostabilizer II
 Tracking Enhancer II
 Gyrostabilizer II
+
+X-Large Ancillary Shield Booster, Cap Booster 400
+Multispectrum Shield Hardener II
+Tracking Computer II
+Multispectrum Shield Hardener II
+[Empty Med slot]
+[Empty Med slot]
+
+1200mm Artillery Cannon II, Quake L
+1200mm Artillery Cannon II, Quake L
+1200mm Artillery Cannon II, Quake L
+Bastion Module I
+1200mm Artillery Cannon II, Quake L
+[Empty High slot]
+[Empty High slot]
 
 Large Core Defense Field Extender II
 Large Core Defense Field Extender II

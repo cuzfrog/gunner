@@ -1,18 +1,21 @@
 [Arazu, Shield Arazu]
-Covert Ops Cloaking Device II
-Cynosural Field Generator I
-
-Large F-S9 Regolith Compact Shield Extender
-Multispectrum Shield Hardener II
-50MN Cold-Gas Enduring Microwarpdrive
-EM Shield Hardener II
-Medium F-S9 Regolith Compact Shield Extender
-Multispectrum Shield Hardener II
 
 1600mm Crystalline Carbonide Restrained Plates
 Damage Control II
 Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
+
+Large F-S9 Regolith Compact Shield Extender
+Medium F-S9 Regolith Compact Shield Extender
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+EM Shield Hardener II
+Multispectrum Shield Hardener II
+
+Covert Ops Cloaking Device II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Core Defense Field Extender II
 Medium Core Defense Field Extender II

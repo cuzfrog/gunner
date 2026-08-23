@@ -1,14 +1,21 @@
 [Vherokior Probe, AC Shield Vherokior Probe]
-Core Probe Launcher I, Core Scanner Probe I
-200mm AutoCannon I, EMP S
-200mm AutoCannon I, EMP S
 
-Data Analyzer I
+[Empty Low slot]
+[Empty Low slot]
+[Empty Low slot]
+
 1MN Afterburner I
 Small Shield Booster I
+[Empty Med slot]
+[Empty Med slot]
+
+200mm AutoCannon I, EMP S
+200mm AutoCannon I, EMP S
+[Empty High slot]
 
 Small Gravity Capacitor Upgrade I
 Small Gravity Capacitor Upgrade I
+[Empty Rig slot]
 
 
 EMP S x300

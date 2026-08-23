@@ -1,19 +1,21 @@
 [Arazu, Kitetackle Shield Arazu]
-Covert Cynosural Field Generator I
-Cynosural Field Generator I
-Covert Ops Cloaking Device II
-
-Large Shield Extender II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-50MN Cold-Gas Enduring Microwarpdrive
-Warp Scrambler II
-Multispectrum Shield Hardener II
 
 Nanofiber Internal Structure II
 Inertial Stabilizers II
 Damage Control II
 Nanofiber Internal Structure II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+Warp Scrambler II
+Multispectrum Shield Hardener II
+
+Covert Ops Cloaking Device II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

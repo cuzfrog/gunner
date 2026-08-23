@@ -1,22 +1,23 @@
 [Sunesis, Kitetackle Rocket Armor Sunesis]
-Rocket Launcher II, Nova Rage Rocket
-Rocket Launcher II, Nova Rage Rocket
-Small Energy Neutralizer II
-Rocket Launcher II, Nova Rage Rocket
-
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 200
-Warp Scrambler II
-5MN Y-T8 Compact Microwarpdrive
-Fleeting Compact Stasis Webifier
 
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Damage Control II
 Compact Multispectrum Energized Membrane
 400mm Rolled Tungsten Compact Plates
 
-Small Warhead Calefaction Catalyst II
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 200
+Warp Scrambler II
+5MN Y-T8 Compact Microwarpdrive
+Fleeting Compact Stasis Webifier
+
+Rocket Launcher II, Nova Rage Rocket
+Rocket Launcher II, Nova Rage Rocket
+Small Energy Neutralizer II
+Rocket Launcher II, Nova Rage Rocket
+
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I
+[Empty Rig slot]
 
 
 Acolyte II x2
@@ -24,8 +25,6 @@ Acolyte II x2
 
 
 Nova Rage Rocket x832
-Neural Network Analyzer x8
-Neural Network Analyzer x2
 Scourge Rage Rocket x1000
 Nanite Repair Paste x20
 Inferno Rage Rocket x970

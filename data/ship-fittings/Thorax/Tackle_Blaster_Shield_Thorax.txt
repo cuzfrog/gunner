@@ -1,4 +1,5 @@
 [Thorax, Tackle Blaster Shield Thorax]
+
 Damage Control II
 Tracking Enhancer II
 Magnetic Field Stabilizer II
@@ -18,6 +19,7 @@ Heavy Ion Blaster II, Caldari Navy Antimatter Charge M
 
 Medium Hybrid Burst Aerator I
 Medium Hybrid Collision Accelerator I
+[Empty Rig slot]
 
 
 Hammerhead II x5

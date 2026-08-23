@@ -1,20 +1,22 @@
 [Heron Navy Issue, Kitetackle Rocket Shield Heron Navy Issue]
-Expanded Probe Launcher I, Core Scanner Probe I
-Improved Cloaking Device II
-Rocket Launcher II, Mjolnir Rage Rocket
-Rocket Launcher II, Mjolnir Rage Rocket
 
-Data Analyzer I
+Ballistic Control System II
+Ballistic Control System II
+
 Initiated Compact Warp Disruptor
-Relic Analyzer I
-Type-E Enduring Cargo Scanner
 5MN Y-T8 Compact Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
 
-Ballistic Control System II
-Ballistic Control System II
+Rocket Launcher II, Mjolnir Rage Rocket
+Rocket Launcher II, Mjolnir Rage Rocket
+[Empty High slot]
+[Empty High slot]
 
 Small Gravity Capacitor Upgrade I
 Small Gravity Capacitor Upgrade I
+[Empty Rig slot]
 
 
 Combat Scanner Probe I x8

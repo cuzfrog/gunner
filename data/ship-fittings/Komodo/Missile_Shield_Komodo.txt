@@ -1,21 +1,4 @@
 [Komodo, Missile Shield Komodo]
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-Caldari Phenomena Generator
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-Jump Portal Generator I
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
-
-Capital Capacitor Booster II, Navy Cap Booster 3200
-CONCORD Capital Shield Extender
-CONCORD Capital Shield Extender
-Pithum A-Type Multispectrum Shield Hardener
-Pithum A-Type Multispectrum Shield Hardener
-Pithum A-Type Multispectrum Shield Hardener
-CONCORD Capital Shield Extender
-CONCORD Capital Shield Extender
 
 Domination Ballistic Control System
 Caldari Navy Power Diagnostic System
@@ -23,13 +6,30 @@ Domination Ballistic Control System
 Shadow Serpentis Damage Control
 Estamel's Modified Ballistic Control System
 
+CONCORD Capital Shield Extender
+CONCORD Capital Shield Extender
+CONCORD Capital Shield Extender
+CONCORD Capital Shield Extender
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Pithum A-Type Multispectrum Shield Hardener
+Pithum A-Type Multispectrum Shield Hardener
+Pithum A-Type Multispectrum Shield Hardener
+
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+XL Cruise Missile Launcher II, Inferno Precision XL Cruise Missile
+[Empty High slot]
+[Empty High slot]
+
 Capital Core Defense Field Extender II
 Capital Core Defense Field Extender II
 Capital Core Defense Field Extender II
 
 
 Inferno Precision XL Cruise Missile x10386
-Agency 'Pyrolancea' DB9 Dose IV x2
 Inferno Fury XL Cruise Missile x10078
 Guristas Inferno XL Cruise Missile x4000
 Navy Cap Booster 3200 x35
@@ -38,8 +38,5 @@ Strontium Clathrates x2545
 Nitrogen Isotopes x177956
 Oxygen Isotopes x1457173
 Navy Cap Booster 3200 x329
-Bosonic Field Generator, Navy Cap Booster 3200
-'Phalarica' Thermal Lance, Navy Cap Booster 3200
-'Aurora Ominae' Thermal Doomsday, Navy Cap Booster 3200
 Strontium Clathrates x7605
 Oxygen Isotopes x229545

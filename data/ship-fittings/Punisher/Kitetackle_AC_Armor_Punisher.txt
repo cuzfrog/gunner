@@ -1,17 +1,18 @@
 [Punisher, Kitetackle AC Armor Punisher]
-150mm Light AutoCannon II, Republic Fleet EMP S
-150mm Light AutoCannon II, Republic Fleet EMP S
-150mm Light AutoCannon II, Republic Fleet EMP S
-150mm Light AutoCannon II, Republic Fleet EMP S
-
-5MN Y-T8 Compact Microwarpdrive
-Faint Epsilon Scoped Warp Scrambler
 
 400mm Crystalline Carbonide Restrained Plates
 Damage Control II
 Multispectrum Energized Membrane II
 400mm Rolled Tungsten Compact Plates
-Multispectrum Coating II
+[Empty Low slot]
+
+5MN Y-T8 Compact Microwarpdrive
+Faint Epsilon Scoped Warp Scrambler
+
+150mm Light AutoCannon II, Republic Fleet EMP S
+150mm Light AutoCannon II, Republic Fleet EMP S
+150mm Light AutoCannon II, Republic Fleet EMP S
+150mm Light AutoCannon II, Republic Fleet EMP S
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I

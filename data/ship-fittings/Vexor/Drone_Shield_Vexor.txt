@@ -1,21 +1,24 @@
 [Vexor, Drone Shield Vexor]
-Drone Link Augmentor I
-
-Large Clarity Ward Enduring Shield Booster
-Large Compact Pb-Acid Cap Battery
-Large Compact Pb-Acid Cap Battery
-Compact Kinetic Shield Hardener
 
 Drone Damage Amplifier II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
-Drone Damage Amplifier II
-Omnidirectional Tracking Enhancer II
+Damage Control II
+Co-Processor II
 
-Medium Thermal Shield Reinforcer I
-Medium Kinetic Shield Reinforcer I
-Medium Thermal Shield Reinforcer I
+Adaptive Invulnerability Field II
+EM Ward Field II
+10MN Afterburner II
+Medium F-S9 Regolith Compact Shield Extender
+
+Drone Link Augmentor II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
+Medium Core Defense Field Extender I
 
 
-Scourge Rocket x19
-Scourge Rocket x18
+Hammerhead II x5

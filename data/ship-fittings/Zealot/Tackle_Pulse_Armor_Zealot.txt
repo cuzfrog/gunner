@@ -1,13 +1,4 @@
 [Zealot, Tackle Pulse Armor Zealot]
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 400
-Abyssal Warp Scrambler
-100MN Y-S8 Compact Afterburner
 
 Power Diagnostic System II
 Damage Control II
@@ -15,6 +6,17 @@ Medium Ancillary Armor Repairer, Nanite Repair Paste
 Heat Sink II
 Multispectrum Energized Membrane II
 Heat Sink II
+[Empty Low slot]
+
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Abyssal Warp Scrambler
+100MN Y-S8 Compact Afterburner
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
 
 Medium Trimark Armor Pump II
 Medium Ancillary Current Router II

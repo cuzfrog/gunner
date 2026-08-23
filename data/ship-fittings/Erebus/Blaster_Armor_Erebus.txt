@@ -1,12 +1,12 @@
 [Erebus, Blaster Armor Erebus]
-Ion Siege Blaster II
-Jump Portal Generator I
-Ion Siege Blaster II
-Ion Siege Blaster II
-Prototype Cloaking Device I
-Ion Siege Blaster II
-Ion Siege Blaster II
-Ion Siege Blaster II
+
+Corpum A-Type Multispectrum Energized Membrane
+CONCORD 25000mm Steel Plates
+Centum A-Type Multispectrum Energized Membrane
+Corelum A-Type Multispectrum Energized Membrane
+Tuvan's Modified Damage Control
+CONCORD 25000mm Steel Plates
+[Empty Low slot]
 
 Shadow Serpentis Sensor Booster
 Shadow Serpentis Tracking Computer
@@ -15,13 +15,14 @@ True Sansha Cap Recharger
 Capital Capacitor Booster II, Navy Cap Booster 3200
 Shadow Serpentis Tracking Computer
 
-Corpum A-Type Multispectrum Energized Membrane
-CONCORD 25000mm Steel Plates
-Corpum A-Type Explosive Energized Membrane
-Centum A-Type Multispectrum Energized Membrane
-Corelum A-Type Multispectrum Energized Membrane
-Tuvan's Modified Damage Control
-CONCORD 25000mm Steel Plates
+Ion Siege Blaster II
+Ion Siege Blaster II
+Ion Siege Blaster II
+Ion Siege Blaster II
+Ion Siege Blaster II
+Ion Siege Blaster II
+[Empty High slot]
+[Empty High slot]
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II

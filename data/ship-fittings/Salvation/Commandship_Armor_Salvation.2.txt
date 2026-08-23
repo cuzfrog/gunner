@@ -1,15 +1,4 @@
 [Salvation, Commandship Armor Salvation]
-Fighter Support Unit II
-Information Command Burst II, Electronic Superiority Charge
-Armor Command Burst II, Rapid Repair Charge
-Fighter Support Unit II
-Information Command Burst II, Electronic Hardening Charge
-Fighter Support Unit II
-
-Drone Navigation Computer II
-Drone Navigation Computer II
-Capital Capacitor Booster II, Cap Booster 3200
-Capital Micro Jump Drive
 
 Syndicate Damage Control
 Core X-Type Kinetic Armor Hardener
@@ -19,6 +8,18 @@ Core X-Type Thermal Armor Hardener
 25000mm Steel Plates II
 Centum C-Type Multispectrum Energized Membrane
 25000mm Steel Plates II
+
+Capital Capacitor Booster II, Cap Booster 3200
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
+Information Command Burst II, Electronic Superiority Charge
+Armor Command Burst II, Rapid Repair Charge
+Information Command Burst II, Electronic Hardening Charge
+Information Command Burst II, Electronic Superiority Charge
+Armor Command Burst II, Armor Energizing Charge
+[Empty High slot]
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II
@@ -32,5 +33,3 @@ Strontium Clathrates x1000
 Helium Isotopes x42532
 Helium Isotopes x91958
 Cap Booster 3200 x43
-Information Command Burst II, Cap Booster 3200
-Armor Command Burst II, Cap Booster 3200

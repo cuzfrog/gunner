@@ -1,16 +1,17 @@
 [Deacon, Logi Armor Deacon]
-Coreli A-Type Small Remote Armor Repairer
-Coreli A-Type Small Remote Armor Repairer
-Coreli A-Type Small Remote Armor Repairer
+
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Multispectrum Energized Membrane II
+Coreli A-Type Small Armor Repairer
+200mm Rolled Tungsten Compact Plates
+[Empty Low slot]
 
 Small Capacitor Booster II, Navy Cap Booster 400
 10MN Afterburner II
 
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Navy Micro Auxiliary Power Core
-Multispectrum Energized Membrane II
-Coreli A-Type Small Armor Repairer
-200mm Rolled Tungsten Compact Plates
+Coreli A-Type Small Remote Armor Repairer
+Coreli A-Type Small Remote Armor Repairer
+Coreli A-Type Small Remote Armor Repairer
 
 Small Ancillary Current Router II
 Small Auxiliary Nano Pump II
@@ -19,7 +20,5 @@ Small Auxiliary Nano Pump II
 Light Armor Maintenance Bot II x1
 
 
-Standard Exile Booster x1
-Agency 'Hardshell' TB5 Dose II x1
 Navy Cap Booster 400 x16
 Nanite Repair Paste x228

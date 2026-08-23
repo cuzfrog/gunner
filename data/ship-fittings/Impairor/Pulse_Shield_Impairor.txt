@@ -1,10 +1,10 @@
 [Impairor, Pulse Shield Impairor]
-Civilian Miner
+
+[Empty Low slot]
+[Empty Low slot]
+
+1MN Civilian Afterburner
+1MN Civilian Afterburner
+
 Civilian Gatling Pulse Laser
-
-1MN Civilian Afterburner
-
-
 Civilian Gatling Railgun
-Civilian Miner
-1MN Civilian Afterburner

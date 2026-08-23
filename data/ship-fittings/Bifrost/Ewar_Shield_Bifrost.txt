@@ -1,23 +1,26 @@
 [Bifrost, Ewar Shield Bifrost]
-Skirmish Command Burst II, Evasive Maneuvers Charge
-Defender Launcher I, Defender Missile I
-Skirmish Command Burst II, Rapid Deployment Charge
 
-Sensor Booster II, Targeting Range Script
-Medium Shield Extender II
-5MN Cold-Gas Enduring Microwarpdrive
-Target Painter II
-Micro Jump Field Generator
-
-Signal Amplifier II
-F-89 Compact Signal Amplifier
 Damage Control II
+[Empty Low slot]
+[Empty Low slot]
+
+Medium Shield Extender II
+Sensor Booster II, Targeting Range Script
+5MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+
+Skirmish Command Burst II, Evasive Maneuvers Charge
+Skirmish Command Burst II, Rapid Deployment Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Small Particle Dispersion Projector II
-Small Command Processor I
+[Empty Rig slot]
 
 
 Interdiction Maneuvers Charge x300
 Scan Resolution Script x1
-Cladistic-5 'Krai Veles' Filament x1
 Nanite Repair Paste x50

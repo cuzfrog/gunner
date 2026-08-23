@@ -1,26 +1,26 @@
 [Wolf, Kitetackle Art Armor Wolf]
-280mm Howitzer Artillery II, Republic Fleet EMP S
-280mm Howitzer Artillery II, Republic Fleet EMP S
-280mm Howitzer Artillery II, Republic Fleet EMP S
-280mm Howitzer Artillery II, Republic Fleet EMP S
+
+True Sansha Small Armor Repairer
+Counterbalanced Compact Gyrostabilizer
+Counterbalanced Compact Gyrostabilizer
+[Empty Low slot]
+[Empty Low slot]
 
 Faint Scoped Warp Disruptor
 5MN Cold-Gas Enduring Microwarpdrive
 
-True Sansha Small Armor Repairer
-Centii A-Type Kinetic Coating
-Centii A-Type Explosive Coating
-Counterbalanced Compact Gyrostabilizer
-Counterbalanced Compact Gyrostabilizer
+280mm Howitzer Artillery II, Republic Fleet EMP S
+280mm Howitzer Artillery II, Republic Fleet EMP S
+280mm Howitzer Artillery II, Republic Fleet EMP S
+280mm Howitzer Artillery II, Republic Fleet EMP S
+[Empty High slot]
 
 Small Ancillary Current Router I
-Small Capacitor Control Circuit II
+[Empty Rig slot]
 
 
 Republic Fleet Phased Plasma S x1200
 Republic Fleet EMP S x1280
-Agency 'Overclocker' SB3 Dose I x3
-Signal-5 'Needlejack' Filament x8
 Nanite Repair Paste x240
 Republic Fleet Titanium Sabot S x1000
 Republic Fleet Fusion S x1292

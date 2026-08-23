@@ -1,23 +1,24 @@
 [Ferox, Tackle Shield Ferox]
-Medium Energy Nosferatu II
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Medium Energy Nosferatu II
-Medium Energy Nosferatu II
-Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
-Medium Energy Nosferatu II
 
+Power Diagnostic System II
+Power Diagnostic System II
+Power Diagnostic System II
+Power Diagnostic System II
+
+Large Shield Extender II
 100MN Afterburner II
 Multispectrum Shield Hardener II
 Warp Scrambler II
 Multispectrum Shield Hardener II
 Large Shield Booster II
-Large Shield Extender II
 
-Power Diagnostic System II
-Power Diagnostic System II
-Power Diagnostic System II
-Power Diagnostic System II
+Medium Energy Nosferatu II
+Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
+Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
+Medium Energy Nosferatu II
+Medium Energy Nosferatu II
+Modal Light Neutron Particle Accelerator I, Caldari Navy Antimatter Charge S
+Medium Energy Nosferatu II
 
 Medium Core Defense Capacitor Safeguard II
 Medium EM Shield Reinforcer II

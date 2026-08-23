@@ -1,17 +1,18 @@
 [Punisher, Kitetackle Armor Punisher]
-150mm Light Gallium Machine Gun, Republic Fleet EMP S
-150mm Light Gallium Machine Gun, Republic Fleet EMP S
-150mm Light Gallium Machine Gun, Republic Fleet EMP S
-150mm Light Gallium Machine Gun, Republic Fleet EMP S
-
-Faint Epsilon Scoped Warp Scrambler
-5MN Cold-Gas Enduring Microwarpdrive
 
 Compact Multispectrum Energized Membrane
 Damage Control II
 400mm Rolled Tungsten Compact Plates
 400mm Rolled Tungsten Compact Plates
-Multispectrum Coating II
+[Empty Low slot]
+
+Faint Epsilon Scoped Warp Scrambler
+5MN Cold-Gas Enduring Microwarpdrive
+
+150mm Light Gallium Machine Gun, Republic Fleet EMP S
+150mm Light Gallium Machine Gun, Republic Fleet EMP S
+150mm Light Gallium Machine Gun, Republic Fleet EMP S
+150mm Light Gallium Machine Gun, Republic Fleet EMP S
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I

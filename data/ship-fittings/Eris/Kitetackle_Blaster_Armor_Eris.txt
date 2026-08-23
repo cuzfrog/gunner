@@ -1,20 +1,21 @@
 [Eris, Kitetackle Blaster Armor Eris]
-Light Electron Blaster II, Void S
-Light Electron Blaster II, Void S
-Improved Cloaking Device II
-Light Electron Blaster II, Void S
-Interdiction Sphere Launcher I, Warp Disrupt Probe
-Light Electron Blaster II, Void S
-Light Electron Blaster II, Void S
-Light Electron Blaster II, Void S
-
-Warp Scrambler II
-5MN Quad LiF Restrained Microwarpdrive
 
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Imperial Navy 400mm Steel Plates
 Damage Control II
-Shadow Serpentis Multispectrum Coating
+[Empty Low slot]
+
+Warp Scrambler II
+5MN Quad LiF Restrained Microwarpdrive
+
+Light Electron Blaster II, Void S
+Light Electron Blaster II, Void S
+Light Electron Blaster II, Void S
+Light Electron Blaster II, Void S
+Light Electron Blaster II, Void S
+Light Electron Blaster II, Void S
+[Empty High slot]
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer II
 Small Hyperspatial Velocity Optimizer II

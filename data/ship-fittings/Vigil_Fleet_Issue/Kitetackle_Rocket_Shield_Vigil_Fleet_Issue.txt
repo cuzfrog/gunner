@@ -1,20 +1,21 @@
 [Vigil Fleet Issue, Kitetackle Rocket Shield Vigil Fleet Issue]
-Rocket Launcher II, Caldari Navy Nova Rocket
-Rocket Launcher II, Caldari Navy Nova Rocket
-125mm Light Prototype Automatic Cannon, Republic Fleet EMP S
-
-J5 Enduring Warp Disruptor
-5MN Cold-Gas Enduring Microwarpdrive
-X5 Enduring Stasis Webifier
-Medium Azeotropic Restrained Shield Extender
 
 Power Diagnostic System II
 Damage Control II
 Ballistic Control System II
 
+Medium Azeotropic Restrained Shield Extender
+J5 Enduring Warp Disruptor
+5MN Cold-Gas Enduring Microwarpdrive
+X5 Enduring Stasis Webifier
+
+Rocket Launcher II, Caldari Navy Nova Rocket
+Rocket Launcher II, Caldari Navy Nova Rocket
+125mm Light Prototype Automatic Cannon, Republic Fleet EMP S
+
 Small EM Shield Reinforcer I
-Small Hydraulic Bay Thrusters I
 Small Thermal Shield Reinforcer I
+[Empty Rig slot]
 
 
 Hobgoblin II x3

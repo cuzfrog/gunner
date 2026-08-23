@@ -1,4 +1,5 @@
 [Breacher, Tackle Rocket Shield Breacher]
+
 Ballistic Control System II
 IFFA Compact Damage Control
 Nanofiber Internal Structure II
@@ -12,9 +13,9 @@ Rocket Launcher II, Mjolnir Rage Rocket
 Rocket Launcher II, Mjolnir Rage Rocket
 Rocket Launcher II, Mjolnir Rage Rocket
 
-Small Anti-EM Screen Reinforcer I
-Small Anti-Thermal Screen Reinforcer I
-Small Warhead Calefaction Catalyst I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Warrior II x2

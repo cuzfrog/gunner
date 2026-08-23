@@ -1,13 +1,14 @@
 [Echo, Tackle AC Shield Echo]
-200mm AutoCannon II, Hail S
-200mm AutoCannon II, Hail S
+
+Shadow Serpentis Inertial Stabilizers
+Domination Nanofiber Structure
 
 Pith X-Type EM Shield Hardener
 Dark Blood Warp Scrambler
 Coreli A-Type 1MN Afterburner
 
-Shadow Serpentis Inertial Stabilizers
-Domination Nanofiber Structure
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
 
 
 Barrage S x2000

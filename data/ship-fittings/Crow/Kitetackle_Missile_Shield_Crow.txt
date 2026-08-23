@@ -1,16 +1,17 @@
 [Crow, Kitetackle Missile Shield Crow]
-Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
-
-Initiated Compact Warp Disruptor
-Small F-S9 Regolith Compact Shield Extender
-5MN Y-T8 Compact Microwarpdrive
-Small F-S9 Regolith Compact Shield Extender
 
 Damage Control II
 Ballistic Control System II
+
+Small F-S9 Regolith Compact Shield Extender
+Small F-S9 Regolith Compact Shield Extender
+Initiated Compact Warp Disruptor
+5MN Y-T8 Compact Microwarpdrive
+
+Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
 
 Small EM Shield Reinforcer II
 Small Core Defense Field Extender II

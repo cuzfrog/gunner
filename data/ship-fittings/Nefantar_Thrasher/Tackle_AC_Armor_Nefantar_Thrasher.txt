@@ -1,4 +1,12 @@
 [Nefantar Thrasher, Tackle AC Armor Nefantar Thrasher]
+
+400mm Steel Plates II
+Gyrostabilizer II
+
+Warp Scrambler II
+Fleeting Compact Stasis Webifier
+Fleeting Compact Stasis Webifier
+
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
@@ -7,13 +15,6 @@
 Rocket Launcher II, Scourge Rage Rocket
 200mm AutoCannon II, Hail S
 200mm AutoCannon II, Hail S
-
-Warp Scrambler II
-Fleeting Compact Stasis Webifier
-Fleeting Compact Stasis Webifier
-
-400mm Steel Plates II
-Gyrostabilizer II
 
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II

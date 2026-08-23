@@ -1,12 +1,14 @@
 [Impairor, Pulse Shield Impairor]
-Civilian Miner
-Civilian Gatling Pulse Laser
+
+AE-K Compact Drone Damage Amplifier
+[Empty Low slot]
 
 1MN Civilian Afterburner
+5MN Quad LiF Restrained Microwarpdrive
 
-
-AE-K Compact Drone Damage Amplifier, Caldari Navy Nova Light Missile
-5MN Quad LiF Restrained Microwarpdrive, Caldari Navy Nova Light Missile
+Civilian Gatling Pulse Laser
 Arbalest Compact Light Missile Launcher, Caldari Navy Nova Light Missile
+
+
 Caldari Navy Nova Light Missile x34
 Caldari Navy Nova Light Missile x380

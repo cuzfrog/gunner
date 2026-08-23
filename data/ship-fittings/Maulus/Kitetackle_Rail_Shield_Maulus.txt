@@ -1,19 +1,20 @@
 [Maulus, Kitetackle Rail Shield Maulus]
-150mm Railgun II, Caldari Navy Iridium Charge S
-150mm Railgun II, Caldari Navy Iridium Charge S
+
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+[Empty Low slot]
 
 Remote Sensor Dampener II, Targeting Range Dampening Script
 5MN Quad LiF Restrained Microwarpdrive
 J5 Enduring Warp Disruptor
 Remote Sensor Dampener II, Targeting Range Dampening Script
 
-Drone Damage Amplifier II
-Vigor Compact Micro Auxiliary Power Core
-Drone Damage Amplifier II
+150mm Railgun II, Caldari Navy Iridium Charge S
+150mm Railgun II, Caldari Navy Iridium Charge S
 
-Small Capacitor Control Circuit I
-Small Capacitor Control Circuit I
-Small Capacitor Control Circuit II
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Warrior II x2

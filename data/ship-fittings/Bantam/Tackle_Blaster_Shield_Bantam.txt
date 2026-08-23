@@ -1,14 +1,16 @@
 [Bantam, Tackle Blaster Shield Bantam]
-Light Neutron Blaster I
-Light Neutron Blaster I
+
+Nanofiber Internal Structure I
+Nanofiber Internal Structure I
 
 Initiated Compact Warp Scrambler
 Enduring EM Shield Hardener
 Enduring EM Shield Hardener
 Enduring EM Shield Hardener
 
-Nanofiber Internal Structure I
-Nanofiber Internal Structure I
+Light Neutron Blaster I
+Light Neutron Blaster I
+[Empty High slot]
 
 Small Core Defense Capacitor Safeguard I
 Small Core Defense Capacitor Safeguard I

@@ -1,0 +1,27 @@
+[Abaddon, Beam Armor Abaddon]
+
+Adaptive Nano Plating II
+Explosive Plating II
+Kinetic Plating II
+Thermal Plating II
+Damage Control II
+Large Armor Repairer II
+Heat Sink II
+
+Tracking Computer II, Optimal Range Script
+Tracking Computer II, Optimal Range Script
+Cap Recharger II
+Cap Recharger II
+
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+Tachyon Beam Laser II, Aurora L
+
+Large Capacitor Control Circuit II
+Large Ancillary Current Router II
+Large Energy Locus Coordinator I

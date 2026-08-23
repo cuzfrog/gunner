@@ -1,15 +1,17 @@
 [Condor, Kitetackle Missile Shield Condor]
-Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
-Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
+
+Ballistic Control System II
+Overdrive Injector System I
 
 Faint Epsilon Scoped Warp Scrambler
 X5 Enduring Stasis Webifier
 Compact Multispectrum Shield Hardener
 5MN Cold-Gas Enduring Microwarpdrive
 
-Ballistic Control System II
-Overdrive Injector System I
+Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
+Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
+[Empty High slot]
 
 Small Core Defense Field Extender I
 Small Core Defense Field Extender I

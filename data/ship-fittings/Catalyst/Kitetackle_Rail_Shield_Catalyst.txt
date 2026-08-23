@@ -1,26 +1,26 @@
 [Catalyst, Kitetackle Rail Shield Catalyst]
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-125mm Railgun II, Caldari Navy Antimatter Charge S
-
-5MN Y-T8 Compact Microwarpdrive
-Warp Disruptor II
 
 Damage Control II
 Overdrive Injector System II
 Magnetic Field Stabilizer II
 
-Small Hybrid Burst Aerator I
+5MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+125mm Railgun II, Caldari Navy Antimatter Charge S
+
 Small Semiconductor Memory Cell II
 Small Low Friction Nozzle Joints I
+[Empty Rig slot]
 
 
-Agency 'Pyrolancea' DB3 Dose I x1
 Caldari Navy Antimatter Charge S x2140
 Javelin S x1500
 Spike S x1348

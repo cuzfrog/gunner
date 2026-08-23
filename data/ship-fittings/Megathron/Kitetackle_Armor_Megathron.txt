@@ -1,25 +1,30 @@
 [Megathron, Kitetackle Armor Megathron]
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
-
-Large Cap Battery II
-F-90 Compact Sensor Booster, Scan Resolution Script
-500MN Quad LiF Restrained Microwarpdrive
-Heavy Karelin Scoped Stasis Grappler
 
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Multispectrum Energized Membrane II
 Large Armor Repairer II
-'Halcyon' Core Equalizer I
 Multispectrum Energized Membrane II
 Reactive Armor Hardener
+[Empty Low slot]
+
+Large Cap Battery II
+F-90 Compact Sensor Booster, Scan Resolution Script
+500MN Quad LiF Restrained Microwarpdrive
+Heavy Karelin Scoped Stasis Grappler
+
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+Modal Mega Neutron Particle Accelerator I, Antimatter Charge L
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Caldari Navy Vespa x2

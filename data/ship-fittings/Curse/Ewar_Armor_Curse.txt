@@ -1,27 +1,27 @@
 [Curse, Ewar Armor Curse]
-Medium Energy Nosferatu II
-Medium Energy Neutralizer II
-Medium Energy Neutralizer II
-Medium Energy Nosferatu II
-Medium Energy Neutralizer II
-
-Tracking Disruptor II, Tracking Speed Disruption Script
-Tracking Disruptor II, Optimal Range Disruption Script
-Guidance Disruptor II, Missile Precision Disruption Script
-Tracking Disruptor II, Tracking Speed Disruption Script
-10MN Afterburner II
-Guidance Disruptor II, Missile Range Disruption Script
 
 Multispectrum Energized Membrane II
 Power Diagnostic System II
 800mm Steel Plates II
 Multispectrum Energized Membrane II
 
+Tracking Disruptor II, Tracking Speed Disruption Script
+Tracking Disruptor II, Optimal Range Disruption Script
+Tracking Disruptor II, Tracking Speed Disruption Script
+10MN Afterburner II
+[Empty Med slot]
+[Empty Med slot]
+
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+Medium Energy Neutralizer II
+Medium Energy Nosferatu II
+Medium Energy Neutralizer II
+
 Medium Processor Overclocking Unit II
 Medium Ancillary Current Router I
 
 
-Guidance Disruptor II, Missile Range Disruption Script
 Missile Range Disruption Script x3
 Tracking Speed Disruption Script x2
 Navy Cap Booster 800 x9

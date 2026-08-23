@@ -1,14 +1,4 @@
 [Scythe Fleet Issue, Kitetackle Missile Shield Scythe Fleet Issue]
-Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
-Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
-Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
-Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
-
-X-Large Ancillary Shield Booster, Navy Cap Booster 400
-Multispectrum Shield Hardener II
-50MN Y-T8 Compact Microwarpdrive
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-Warp Disruptor II
 
 Ballistic Control System II
 Nanofiber Internal Structure II
@@ -16,9 +6,21 @@ Co-Processor II
 Nanofiber Internal Structure II
 Ballistic Control System II
 
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+Multispectrum Shield Hardener II
+50MN Y-T8 Compact Microwarpdrive
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+Warp Disruptor II
+
+Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+Rapid Light Missile Launcher II, Caldari Navy Mjolnir Light Missile
+[Empty High slot]
+
 Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
-Medium Hydraulic Bay Thrusters II
+[Empty Rig slot]
 
 
 Nova Fury Light Missile x1000

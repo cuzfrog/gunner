@@ -1,9 +1,0 @@
-[Zephyr, Shield Zephyr]
-Prototype Iris Probe Launcher
-
-
-Iridium Charge S x66
-Plutonium Charge S x66
-Thorium Charge S x73
-Signal-5 'Needlejack' Filament x1
-Glorification-1 'Devana' Filament x3

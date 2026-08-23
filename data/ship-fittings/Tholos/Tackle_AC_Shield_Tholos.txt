@@ -1,33 +1,25 @@
 [Tholos, Tackle AC Shield Tholos]
-200mm AutoCannon II, Hail S
-Rocket Launcher II, Inferno Javelin Rocket
-200mm AutoCannon II, Hail S
-Small Breacher Pod Launcher, SCARAB Breacher Pod S
-Rocket Launcher II, Inferno Javelin Rocket
-Covert Ops Cloaking Device II
-
-Sensor Booster II, Scan Resolution Script
-Warp Scrambler II
-Medium F-S9 Regolith Compact Shield Extender
-1MN Y-S8 Compact Afterburner
-Enduring Multispectrum Shield Hardener
-Shadow Serpentis Stasis Webifier
 
 Damage Control II
 Gyrostabilizer II
 
+Medium F-S9 Regolith Compact Shield Extender
+Sensor Booster II, Scan Resolution Script
+Warp Scrambler II
+1MN Y-S8 Compact Afterburner
+Enduring Multispectrum Shield Hardener
+Shadow Serpentis Stasis Webifier
+
+200mm AutoCannon II, Hail S
+Rocket Launcher II, Inferno Javelin Rocket
+200mm AutoCannon II, Hail S
+Rocket Launcher II, Inferno Javelin Rocket
+Covert Ops Cloaking Device II
+[Empty High slot]
+
 Small EM Shield Reinforcer I
-Small Projectile Burst Aerator I
 Small Ancillary Current Router I
-
-
-Stigmella SD-300-I x1
-Stigmella SD-300-I x1
-Tick EV-300-I x3
-Tick EV-300-I x2
-Skimmer TP-300-I x1
-Stellate TD-300-I x1
-Stellate TD-300-I x1
+[Empty Rig slot]
 
 
 Inferno Javelin Rocket x250

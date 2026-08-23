@@ -1,4 +1,17 @@
 [Drake, Ewar Missile Shield Drake]
+
+Damage Control II
+Crosslink Compact Ballistic Control System
+Nanofiber Internal Structure II
+Crosslink Compact Ballistic Control System
+
+Large Azeotropic Restrained Shield Extender
+Large Azeotropic Restrained Shield Extender
+Multispectrum Shield Hardener II
+10MN Afterburner II
+Multispectrum Shield Hardener II
+[Empty Med slot]
+
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Skirmish Command Burst II, Rapid Deployment Charge
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
@@ -7,26 +20,12 @@ Information Command Burst II, Sensor Optimization Charge
 Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 Information Command Burst II, Electronic Hardening Charge
 
-Multispectrum Shield Hardener II
-Large Azeotropic Restrained Shield Extender
-10MN Afterburner II
-Target Painter II
-Multispectrum Shield Hardener II
-Large Azeotropic Restrained Shield Extender
-
-Damage Control II
-Crosslink Compact Ballistic Control System
-Nanofiber Internal Structure II
-Crosslink Compact Ballistic Control System
-
-Medium Command Processor I
 Medium EM Shield Reinforcer I
-Medium Command Processor I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Nanite Repair Paste x50
 Caldari Navy Scourge Heavy Assault Missile x528
 Scourge Rage Heavy Assault Missile x528
 Scourge Javelin Heavy Assault Missile x528
-Cladistic-5 'Krai Veles' Filament x1
-Glorification-1 'Devana' Filament x1

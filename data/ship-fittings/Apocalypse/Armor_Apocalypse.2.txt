@@ -1,17 +1,4 @@
 [Apocalypse, Armor Apocalypse]
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
-
-Cap Recharger II
-Sensor Booster II
-Tracking Computer II
-Tracking Computer II
 
 Prototype Compact Thermal Armor Hardener I
 Heat Sink II
@@ -21,9 +8,23 @@ Heat Sink II
 Heat Sink II
 Medium Armor Repairer II
 
-Large Capacitor Control Circuit I
-Large Capacitor Control Circuit I
-Large Capacitor Control Circuit I
+Cap Recharger II
+Sensor Booster II
+Tracking Computer II
+Tracking Computer II
+
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+Tachyon Modulated Energy Beam I, Imperial Navy Gamma L
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Optimal Range Script x2

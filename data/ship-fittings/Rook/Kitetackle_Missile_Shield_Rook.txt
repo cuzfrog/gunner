@@ -1,9 +1,8 @@
 [Rook, Kitetackle Missile Shield Rook]
-Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
 
 Large Shield Extender II
 Large Shield Extender II
@@ -13,12 +12,14 @@ Stasis Webifier II
 Warp Scrambler II
 50MN Cold-Gas Enduring Microwarpdrive
 
-Ballistic Control System II
-Ballistic Control System II
-Ballistic Control System II
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Scourge Rage Heavy Assault Missile
 
 Medium EM Shield Reinforcer II
-Medium Rocket Fuel Cache Partition II
+[Empty Rig slot]
 
 
 Caldari Navy Scourge Heavy Assault Missile x2000

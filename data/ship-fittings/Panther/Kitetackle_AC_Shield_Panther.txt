@@ -1,4 +1,18 @@
 [Panther, Kitetackle AC Shield Panther]
+
+Gyrostabilizer II
+Gyrostabilizer II
+Nanofiber Internal Structure II
+Nanofiber Internal Structure II
+IFFA Compact Damage Control
+Gyrostabilizer II
+
+Caldari Navy Large Shield Extender
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Warp Scrambler II
+Stasis Webifier II
+500MN Abyssal Microwarpdrive
+
 Dual 425mm AutoCannon II, Hail L
 Dual 425mm AutoCannon II, Hail L
 'YF-12a' Compact Large Plasma Smartbomb
@@ -7,19 +21,6 @@ Dual 425mm AutoCannon II, Hail L
 Dual 425mm AutoCannon II, Hail L
 'Concussion' Compact Large Graviton Smartbomb
 'YF-12a' Compact Large Plasma Smartbomb
-
-Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Warp Scrambler II
-Caldari Navy Large Shield Extender
-Stasis Webifier II
-500MN Abyssal Microwarpdrive
-
-Gyrostabilizer II
-Gyrostabilizer II
-Nanofiber Internal Structure II
-Nanofiber Internal Structure II
-IFFA Compact Damage Control
-Gyrostabilizer II
 
 Large Core Defense Field Extender I
 Large Core Defense Field Extender I

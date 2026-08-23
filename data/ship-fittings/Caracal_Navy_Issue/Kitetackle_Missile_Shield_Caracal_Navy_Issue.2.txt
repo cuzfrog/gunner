@@ -1,30 +1,29 @@
 [Caracal Navy Issue, Kitetackle Missile Shield Caracal Navy Issue]
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
-
-Multispectrum Shield Hardener II
-Abyssal Warp Scrambler
-Large F-S9 Regolith Compact Shield Extender
-Large F-S9 Regolith Compact Shield Extender
-50MN Y-T8 Compact Microwarpdrive
-Stasis Webifier II
 
 Ballistic Control System II
 Ballistic Control System II
 Abyssal Ballistic Control System
 
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+Multispectrum Shield Hardener II
+Abyssal Warp Scrambler
+50MN Y-T8 Compact Microwarpdrive
+Stasis Webifier II
+
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Mjolnir Rage Heavy Assault Missile
+
 Medium EM Shield Reinforcer II
-Medium Warhead Calefaction Catalyst I
 Medium Core Defense Field Extender I
+[Empty Rig slot]
 
 
 Mjolnir Rage Heavy Assault Missile x3104
-Cladistic-5 'Krai Svarog' Filament x1
-Signal-5 'Needlejack' Filament x2
 Nova Rage Heavy Assault Missile x3500
 Scourge Rage Heavy Assault Missile x3320
 Nanite Repair Paste x100

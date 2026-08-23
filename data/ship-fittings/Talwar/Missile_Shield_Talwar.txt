@@ -1,20 +1,24 @@
 [Talwar, Missile Shield Talwar]
-Light Missile Launcher I, Inferno Light Missile
-Light Missile Launcher I, Inferno Light Missile
-Light Missile Launcher I, Inferno Light Missile
-Core Probe Launcher I
-Light Missile Launcher I, Inferno Light Missile
-Light Missile Launcher I, Inferno Light Missile
-Light Missile Launcher I, Inferno Light Missile
-
-5MN Microwarpdrive I
-Relic Analyzer I
-Data Analyzer I
 
 Capacitor Power Relay I
+[Empty Low slot]
+[Empty Low slot]
+
+5MN Microwarpdrive I
+Small Cap Battery I
+[Empty Med slot]
+
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+[Empty High slot]
 
 Small Core Defense Field Extender I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Inferno Light Missile x157
-Small Cap Battery I, Inferno Light Missile

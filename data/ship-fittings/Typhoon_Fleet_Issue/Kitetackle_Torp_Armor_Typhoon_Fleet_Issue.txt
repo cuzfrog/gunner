@@ -1,20 +1,27 @@
 [Typhoon Fleet Issue, Kitetackle Torp Armor Typhoon Fleet Issue]
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-Torpedo Launcher II
-
-Domination Stasis Webifier
-Dark Blood Warp Disruptor
-Gist X-Type 500MN Microwarpdrive
-Large Micro Jump Drive
 
 Shadow Serpentis Damage Control
 Federation Navy 1600mm Steel Plates
 Dark Blood Multispectrum Energized Membrane
 Federation Navy 1600mm Steel Plates
+[Empty Low slot]
+[Empty Low slot]
+[Empty Low slot]
+
+Domination Stasis Webifier
+Dark Blood Warp Disruptor
+Gist X-Type 500MN Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+
+Torpedo Launcher II
+Torpedo Launcher II
+Torpedo Launcher II
+Torpedo Launcher II
+Torpedo Launcher II
+Torpedo Launcher II
+[Empty High slot]
+[Empty High slot]
 
 Large Trimark Armor Pump II
 Large Trimark Armor Pump II

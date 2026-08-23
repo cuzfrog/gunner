@@ -1,24 +1,25 @@
 [Cerberus, Missile Shield Cerberus]
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
-
-Large Shield Extender II
-Multispectrum Shield Hardener II
-50MN Cold-Gas Enduring Microwarpdrive
-Missile Guidance Computer II, Missile Range Script
-Missile Guidance Computer II, Missile Range Script
 
 Ballistic Control System II
 Assault Damage Control II
 Ballistic Control System II
 Ballistic Control System II
 
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+[Empty Med slot]
+
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+Heavy Assault Missile Launcher II, Caldari Navy Scourge Heavy Assault Missile
+
 Medium EM Shield Reinforcer II
-Medium Hydraulic Bay Thrusters II
+[Empty Rig slot]
 
 
 Mjolnir Rage Heavy Assault Missile x1500

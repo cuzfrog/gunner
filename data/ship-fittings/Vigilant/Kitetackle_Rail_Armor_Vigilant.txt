@@ -1,14 +1,4 @@
 [Vigilant, Kitetackle Rail Armor Vigilant]
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-200mm Railgun II, Federation Navy Antimatter Charge M
-
-50MN Digital Booster Microwarpdrive
-Domination Warp Disruptor
-Federation Navy Stasis Webifier
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
 
 Imperial Navy Multispectrum Energized Membrane
 Imperial Navy 800mm Steel Plates
@@ -16,6 +6,17 @@ Medium Ancillary Armor Repairer, Nanite Repair Paste
 Federation Navy Magnetic Field Stabilizer
 Federation Navy Magnetic Field Stabilizer
 Imperial Navy Multispectrum Energized Membrane
+
+50MN Digital Booster Microwarpdrive
+Domination Warp Disruptor
+Federation Navy Stasis Webifier
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+
+200mm Railgun II, Federation Navy Antimatter Charge M
+200mm Railgun II, Federation Navy Antimatter Charge M
+200mm Railgun II, Federation Navy Antimatter Charge M
+200mm Railgun II, Federation Navy Antimatter Charge M
+200mm Railgun II, Federation Navy Antimatter Charge M
 
 Medium Polycarbon Engine Housing II
 Medium Hybrid Metastasis Adjuster II
@@ -28,5 +29,4 @@ Federation Navy Thorium Charge M x2400
 Navy Cap Booster 400 x24
 Nanite Repair Paste x940
 Nanite Repair Paste x48
-Corpse Female x1
 Javelin M x2400
