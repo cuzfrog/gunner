@@ -9,7 +9,7 @@ import type {
   Ships,
   StatConditions,
 } from "../ships";
-import { SIG_RESOLUTIONS, type SigResolutionClass } from "../sim";
+import { EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS, type DisruptionScript, type EwarLoadout, type SigResolutionClass, type StackingPenalty, type StasisWebSpec, type TrackingDisruptorSpec } from "../sim";
 import { parseEft, type ParsedFitting } from "./eft";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
@@ -50,6 +50,7 @@ export interface ImportedFitting {
   readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
   readonly cargoCharges: readonly CargoCharge[];
+  readonly ewar: EwarLoadout;
 }
 
 export interface FittingDb {
@@ -74,11 +75,23 @@ export class FittingImportImpl implements FittingImport {
   private readonly ships: Ships;
   private readonly db: FittingDb;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly stacking: StackingPenalty;
 
-  constructor({ ships, fittingDb, chargeCatalog }: { ships: Ships; fittingDb: FittingDb; chargeCatalog: ChargeCatalog }) {
+  constructor({
+    ships,
+    fittingDb,
+    chargeCatalog,
+    stackingPenalty,
+  }: {
+    ships: Ships;
+    fittingDb: FittingDb;
+    chargeCatalog: ChargeCatalog;
+    stackingPenalty: StackingPenalty;
+  }) {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
+    this.stacking = stackingPenalty;
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly string[] {
@@ -108,10 +121,11 @@ export class FittingImportImpl implements FittingImport {
     if (!profile) return undefined;
 
     const hullBonuses = this.db.hullBonuses[profile.name] ?? [];
-    const hullSide = aggregateHullSide(profile, this.db, parsed, hullBonuses, conditions.skillLevel);
+    const hullSide = aggregateHullSide(profile, this.db, parsed, hullBonuses, conditions.skillLevel, this.stacking);
     const propulsion = resolvePropulsion(profile, this.ships, this.db, parsed, hullSide.propulsionName);
-    const turret = resolveTurret(this.db, this.chargeCatalog, parsed, conditions.skillLevel, hullBonuses);
+    const turret = resolveTurret(this.db, this.chargeCatalog, parsed, conditions.skillLevel, hullBonuses, this.stacking);
     const cargoCharges = resolveCargoCharges(this.db, parsed);
+    const ewar = resolveEwar(this.db, parsed);
 
     return {
       profile,
@@ -120,6 +134,7 @@ export class FittingImportImpl implements FittingImport {
       propulsion,
       turret,
       cargoCharges,
+      ewar,
     };
   }
 
@@ -145,6 +160,7 @@ function aggregateHullSide(
   parsed: ParsedFitting,
   hullBonuses: readonly HullBonus[],
   skillLevel: number,
+  stacking: StackingPenalty,
 ): HullSideAggregation {
   let flatMass = 0;
   const massPercentages: number[] = [];
@@ -180,10 +196,10 @@ function aggregateHullSide(
     if (bonus.attribute === "agility") agilityMultipliers.push(1 + percent / 100);
   }
 
-  const massMultiplier = applyStackingPenalty(massPercentages.map((p) => 1 + p));
-  const speedMultiplier = applyStackingPenalty(speedPercents.map((p) => 1 + p));
-  const inertiaMultiplier = applyStackingPenalty(agilityMultipliers);
-  const sigMultiplier = applyStackingPenalty(sigPercents.map((p) => 1 + p));
+  const massMultiplier = stacking.apply(massPercentages.map((p) => 1 + p));
+  const speedMultiplier = stacking.apply(speedPercents.map((p) => 1 + p));
+  const inertiaMultiplier = stacking.apply(agilityMultipliers);
+  const sigMultiplier = stacking.apply(sigPercents.map((p) => 1 + p));
 
   return {
     fitted: {
@@ -242,6 +258,7 @@ function resolveTurret(
   parsed: ParsedFitting,
   skillLevel: number,
   hullBonuses: readonly HullBonus[],
+  stacking: StackingPenalty,
 ): ImportedTurret | undefined {
   const trackingPercents: number[] = [];
   const optimalPercents: number[] = [];
@@ -283,9 +300,9 @@ function resolveTurret(
   const skillOptimalMultiplier = 1 + OPTIMAL_SKILL_BONUS * skillLevel;
   const skillFalloffMultiplier = 1 + FALLOFF_SKILL_BONUS * skillLevel;
 
-  const trackingBonus = applyStackingPenalty(trackingPercents.map((p) => 1 + p / 100));
-  const optimalBonus = applyStackingPenalty(optimalPercents.map((p) => 1 + p / 100));
-  const falloffBonus = applyStackingPenalty(falloffPercents.map((p) => 1 + p / 100));
+  const trackingBonus = stacking.apply(trackingPercents.map((p) => 1 + p / 100));
+  const optimalBonus = stacking.apply(optimalPercents.map((p) => 1 + p / 100));
+  const falloffBonus = stacking.apply(falloffPercents.map((p) => 1 + p / 100));
 
   const trackingScore = turret.tracking * skillTrackingMultiplier * trackingBonus;
   const optimalScore = turret.optimal * skillOptimalMultiplier * optimalBonus;
@@ -319,6 +336,49 @@ function resolveCargoCharges(db: FittingDb, parsed: ParsedFitting): readonly Car
     charges.push({ name: item.name, quantity: item.quantity });
   }
   return charges;
+}
+
+function resolveEwar(db: FittingDb, parsed: ParsedFitting): EwarLoadout {
+  const webs: StasisWebSpec[] = [];
+  const disruptors: TrackingDisruptorSpec[] = [];
+
+  for (const line of parsed.modules) {
+    if (line.offline) continue;
+
+    const webStats = db.stasisWebs[line.name];
+    if (webStats) {
+      webs.push({
+        moduleName: line.name,
+        maxRange: webStats.maxRange,
+        speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000,
+        overloadRangeBonusPercent: webStats.overloadRangeBonusPercent,
+      });
+      continue;
+    }
+
+    const disruptorStats = db.trackingDisruptors[line.name];
+    if (disruptorStats) {
+      const scriptStats = line.charge ? db.disruptionScripts[line.charge] : undefined;
+      disruptors.push({
+        moduleName: line.name,
+        optimal: disruptorStats.optimal,
+        falloff: disruptorStats.falloff,
+        disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000,
+        defaultScript: resolveDisruptionScript(scriptStats),
+        overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent,
+      });
+    }
+  }
+
+  if (webs.length === 0 && disruptors.length === 0) return EMPTY_EWAR_LOADOUT;
+  return { webs, disruptors };
+}
+
+function resolveDisruptionScript(stats: DisruptionScriptStats | undefined): DisruptionScript {
+  if (!stats) return "none";
+  if (stats.rangeDeltaBonus > 0 && stats.trackingDeltaBonus <= 0) return "optimalRange";
+  if (stats.trackingDeltaBonus > 0 && stats.rangeDeltaBonus <= 0) return "trackingSpeed";
+  return "none";
 }
 
 function collectTurretPercents(
@@ -386,19 +446,4 @@ function buildSections(parsed: ParsedFitting, db: FittingDb): readonly FittingSe
   return sections;
 }
 
-function applyStackingPenalty(multipliers: number[]): number {
-  const values = multipliers.filter((value) => value !== 1);
-  const positive = values.filter((value) => value > 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
-  const negative = values.filter((value) => value < 1).sort((a, b) => Math.abs(b - 1) - Math.abs(a - 1));
 
-  let product = 1;
-  for (const list of [positive, negative]) {
-    for (let i = 0; i < list.length; i++) {
-      const bonus = list[i];
-      product *= 1 + (bonus - 1) * Math.exp(-(i * i) / 7.1289);
-    }
-  }
-  return product;
-}
-
-export { applyStackingPenalty as _applyStackingPenalty };

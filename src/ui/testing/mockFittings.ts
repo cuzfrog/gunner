@@ -111,7 +111,15 @@ export const TURRET: ImportedTurret = {
   moduleName: "200mm AutoCannon I",
 };
 
-export const IMPORTED_RIFTER: ImportedFitting = { profile: RIFTER, fittingName: "Brawler", fitted: FITTED, propulsion: undefined, turret: TURRET, cargoCharges: [] };
+export const IMPORTED_RIFTER: ImportedFitting = {
+  profile: RIFTER,
+  fittingName: "Brawler",
+  fitted: FITTED,
+  propulsion: undefined,
+  turret: TURRET,
+  cargoCharges: [],
+  ewar: { webs: [], disruptors: [] },
+};
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
 
 export const CHARGE_OPTIONS = [

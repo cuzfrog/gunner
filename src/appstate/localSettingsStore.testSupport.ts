@@ -133,6 +133,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     moduleName: "200mm AutoCannon I",
   },
   cargoCharges: [],
+  ewar: { webs: [], disruptors: [] },
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

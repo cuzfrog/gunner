@@ -1,5 +1,6 @@
 import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, PresetFittings } from "./index";
 import type { Ships } from "../ships";
+import type { StackingPenalty } from "../sim";
 
 export interface FittingCradle {
   readonly fittingDb: FittingDb;
@@ -8,4 +9,5 @@ export interface FittingCradle {
   readonly gunFamilies: GunFamilies;
   readonly presetFittings: PresetFittings;
   readonly ships: Ships;
+  readonly stackingPenalty: StackingPenalty;
 }
