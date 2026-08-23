@@ -132,7 +132,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
   };
 }
 
-export function parseEwarActivation(value: string): StoredEwarActivation | undefined {
+function parseEwarActivation(value: string): StoredEwarActivation | undefined {
   try {
     const parsed = JSON.parse(value);
     return isOptionalEwarActivation(parsed) ? parsed : undefined;
