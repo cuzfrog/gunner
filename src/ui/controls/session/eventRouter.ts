@@ -115,20 +115,22 @@ export class EventRouter {
     this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getSkillPopup()));
     this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getSkillPopup()));
 
+    const displayContext = {
+      attackerSide: this.attackerSide,
+      targetSide: this.targetSide,
+      preferences: this.preferences,
+      turret: this.turret,
+      trackingInput: this.trackingInput,
+    };
     const displayInputs: (keyof Els)[] = ["tracking", "sigRes", "optimal", "falloff", "targetSig"];
     for (const id of displayInputs) {
       this.els[id].addEventListener("input", () => {
-        applyDisplayInput(id, {
-          attackerSide: this.attackerSide,
-          targetSide: this.targetSide,
-          preferences: this.preferences,
-          turret: this.turret,
-          trackingInput: this.trackingInput,
-        });
+        applyDisplayInput(id, displayContext);
         host.onDisplayChange();
       });
     }
 
+    const shipContext = { attackerSide: this.attackerSide, targetSide: this.targetSide };
     const shipInputs: (keyof Els)[] = [
       "attackerSpeed",
       "attackerMass",
@@ -145,7 +147,7 @@ export class EventRouter {
     for (const id of shipInputs) {
       this.els[id].addEventListener("input", () => {
         if (id === "attackerMode") this.preferences.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
-        applyShipInput(id, this.attackerSide, this.targetSide);
+        applyShipInput(id, shipContext);
         host.onConfigChange();
       });
     }

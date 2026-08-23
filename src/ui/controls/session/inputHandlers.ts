@@ -4,16 +4,21 @@ import type { SidePanel } from "../sidePanel";
 import type { TurretController } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 
-export function applyDisplayInput(
-  id: keyof Els,
-  { attackerSide, targetSide, preferences, turret, trackingInput }: {
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
-    preferences: PreferencesController;
-    turret: TurretController;
-    trackingInput: TrackingInput;
-  },
-): void {
+interface DisplayInputContext {
+  attackerSide: SidePanel;
+  targetSide: SidePanel;
+  preferences: PreferencesController;
+  turret: TurretController;
+  trackingInput: TrackingInput;
+}
+
+interface ShipInputContext {
+  attackerSide: SidePanel;
+  targetSide: SidePanel;
+}
+
+export function applyDisplayInput(id: keyof Els, context: DisplayInputContext): void {
+  const { attackerSide, targetSide, preferences, turret, trackingInput } = context;
   if (id === "tracking") {
     preferences.updateTrackingFromInput();
     attackerSide.recordOverride("tracking", trackingInput.rad);
@@ -33,11 +38,8 @@ export function applyDisplayInput(
   }
 }
 
-export function applyShipInput(
-  id: keyof Els,
-  attackerSide: SidePanel,
-  targetSide: SidePanel,
-): void {
+export function applyShipInput(id: keyof Els, context: ShipInputContext): void {
+  const { attackerSide, targetSide } = context;
   if (id === "attackerMass") attackerSide.sections.stats.updateSpeedFromMass();
   if (id === "targetMass") targetSide.sections.stats.updateSpeedFromMass();
   if (id === "attackerMass" || id === "attackerInertia") attackerSide.sections.stats.updateAlignTime();
