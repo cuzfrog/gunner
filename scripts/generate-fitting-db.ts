@@ -640,7 +640,10 @@ async function main() {
   const sortedDrones = Object.fromEntries(Object.keys(drones).sort().map((name) => [name, true]));
 
   const date = new Date().toISOString().split("T")[0];
-  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
+  const header =
+    `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
+    `/* eslint-disable */\n\n` +
+    `import type { HullTier } from "../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
   readonly sizeTier: HullTier;
@@ -745,15 +748,33 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
 
   await addItemNamesFromIconCatalog(itemNames, nameToType);
 
-  const dbTableNames = collectDbTableNames(fittingModules, turrets, charges, scripts, stasisWebs, trackingDisruptors, disruptionScripts, drones);
+  const dbTableNames = collectDbTableNames(
+    fittingModules,
+    turrets,
+    charges,
+    scripts,
+    stasisWebs,
+    trackingDisruptors,
+    disruptionScripts,
+    drones,
+  );
   const filteredItemNames = filterItemNames(itemNames, nameToType, groups, dbTableNames);
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   await writeI18nFiles(filteredItemNames, date);
-  console.log(
-    `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets, ${Object.keys(sortedDrones).length} drones to ${OUT_FILE}`,
-  );
+  const counts = [
+    `${Object.keys(fittingModules).length} modules`,
+    `${Object.keys(turrets).length} turrets`,
+    `${Object.keys(charges).length} charges`,
+    `${Object.keys(scripts).length} turret scripts`,
+    `${Object.keys(stasisWebs).length} stasis webs`,
+    `${Object.keys(trackingDisruptors).length} tracking disruptors`,
+    `${Object.keys(disruptionScripts).length} disruption scripts`,
+    `${Object.keys(hullBonuses).length} hull bonus sets`,
+    `${Object.keys(sortedDrones).length} drones`,
+  ];
+  console.log(`Wrote ${counts.join(", ")} to ${OUT_FILE}`);
   console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
 }
 
