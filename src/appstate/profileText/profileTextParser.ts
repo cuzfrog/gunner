@@ -1,4 +1,5 @@
-import type { ProfileParamOverrides, ProfileSettings } from "../userSettings";
+import type { ProfileParamOverrides, ProfileSettings, StoredEwarActivation } from "../userSettings";
+import { isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
@@ -17,6 +18,8 @@ export class ProfileTextParser {
     let raw: Partial<ProfileSettings> = {};
     let attackerOverrides: Partial<ProfileParamOverrides> = {};
     let targetOverrides: Partial<ProfileParamOverrides> = {};
+    let attackerEwarActivationRaw: string | undefined;
+    let targetEwarActivationRaw: string | undefined;
 
     let i = firstLine + 1;
     while (i < rawLines.length) {
@@ -55,16 +58,30 @@ export class ProfileTextParser {
 
       const field = DOT_KEY_TO_FIELD.get(dotKey);
       if (field === undefined) continue;
-      const parsed = parseScalarValue(field, value);
-      if (parsed === undefined) {
-        if (field === "attackerEwarActivation" || field === "targetEwarActivation") continue;
-        return undefined;
+      if (field === "attackerEwarActivation") {
+        attackerEwarActivationRaw = value;
+        continue;
       }
+      if (field === "targetEwarActivation") {
+        targetEwarActivationRaw = value;
+        continue;
+      }
+      const parsed = parseScalarValue(field, value);
+      if (parsed === undefined) return undefined;
       raw = { ...raw, [field]: parsed };
     }
 
     if (Object.keys(attackerOverrides).length > 0) raw = { ...raw, attackerOverrides };
     if (Object.keys(targetOverrides).length > 0) raw = { ...raw, targetOverrides };
+
+    if (attackerEwarActivationRaw !== undefined) {
+      const activation = parseEwarActivation(attackerEwarActivationRaw, raw.attackerOverload !== false);
+      if (activation !== undefined) raw = { ...raw, attackerEwarActivation: activation };
+    }
+    if (targetEwarActivationRaw !== undefined) {
+      const activation = parseEwarActivation(targetEwarActivationRaw, raw.targetOverload !== false);
+      if (activation !== undefined) raw = { ...raw, targetEwarActivation: activation };
+    }
 
     return profileSettingsFromRaw(raw);
   }
@@ -84,4 +101,42 @@ function readFittingBlock(lines: string[], start: number): { body: string | unde
   }
   if (bodyLines.length === 0) return { body: undefined, nextIndex: i };
   return { body: bodyLines.join("\n"), nextIndex: i };
+}
+
+function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarActivation | undefined {
+  try {
+    const parsed = JSON.parse(value);
+    if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
+      const migratedWebs = parsed.webs?.map((item) => migrateWebActivation(item, sideOverload));
+      const migratedDisruptors = parsed.disruptors?.map((item) => migrateDisruptorActivation(item, sideOverload));
+      const result: StoredEwarActivation = {
+        ...(migratedWebs !== undefined ? { webs: migratedWebs } : {}),
+        ...(migratedDisruptors !== undefined ? { disruptors: migratedDisruptors } : {}),
+      };
+      return result;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function migrateWebActivation(
+  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
+  sideOverload: boolean,
+): Readonly<{ active: boolean; overloaded: boolean }> {
+  if (typeof item === "boolean") return { active: item, overloaded: sideOverload };
+  return { active: item.active, overloaded: item.overloaded ?? sideOverload };
+}
+
+function migrateDisruptorActivation(
+  item: Readonly<{ active: boolean; overloaded?: boolean; script: string }>,
+  sideOverload: boolean,
+): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
+  const map: Record<string, string> = {
+    optimalRange: "Optimal Range Disruption Script",
+    trackingSpeed: "Tracking Speed Disruption Script",
+  };
+  const script = map[item.script] ?? item.script;
+  return { active: item.active, overloaded: item.overloaded ?? sideOverload, script };
 }

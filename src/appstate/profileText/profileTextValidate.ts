@@ -4,12 +4,10 @@ import {
   type FittedHullSummary,
   type ProfileParamOverrides,
   type ProfileSettings,
-  type StoredEwarActivation,
 } from "../userSettings";
 import {
   isAutopilotMode,
   isNonNegative,
-  isOptionalEwarActivation,
   isOptionalFittedHullSummary,
   isPositive,
   isSigResolutionClass,
@@ -29,7 +27,6 @@ export function parseScalarValue(field: ScalarField, value: string): ScalarValue
   }
   if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
-  if (field === "attackerEwarActivation" || field === "targetEwarActivation") return parseEwarActivation(value);
   if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
   if (field === "attackerAmmo") return value;
 
@@ -130,40 +127,6 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     targetEwarActivation: raw.targetEwarActivation,
     maneuverAggressivity: raw.maneuverAggressivity,
   };
-}
-
-function parseEwarActivation(value: string): StoredEwarActivation | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
-      return {
-        ...parsed,
-        webs: parsed.webs?.map(migrateWebActivation),
-        disruptors: parsed.disruptors?.map(migrateDisruptorActivation),
-      };
-    }
-    return undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function migrateWebActivation(
-  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
-): Readonly<{ active: boolean; overloaded: boolean }> {
-  if (typeof item === "boolean") return { active: item, overloaded: true };
-  return { active: item.active, overloaded: item.overloaded ?? true };
-}
-
-function migrateDisruptorActivation(
-  item: Readonly<{ active: boolean; overloaded?: boolean; script: string }>,
-): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
-  const map: Record<string, string> = {
-    optimalRange: "Optimal Range Disruption Script",
-    trackingSpeed: "Tracking Speed Disruption Script",
-  };
-  const script = map[item.script] ?? item.script;
-  return { active: item.active, overloaded: item.overloaded ?? true, script };
 }
 
 export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {

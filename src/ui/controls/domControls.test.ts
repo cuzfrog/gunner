@@ -157,7 +157,7 @@ describe("DomControls", () => {
     expect(clipboard.writeText).toHaveBeenCalled();
   });
 
-  test("getConfig includes per-side ewar projections without the old global overload flag", () => {
+  test("getConfig includes per-side ewar projections with per-module activation and no global overload flag", () => {
     const { controls, cradle } = buildDomControls();
     const attackerEwar: EwarLoadout = {
       webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
@@ -168,6 +168,7 @@ describe("DomControls", () => {
     const config = controls.getConfig();
     expect(config.attacker.ewar?.loadout.webs).toHaveLength(1);
     expect(config.attacker.ewar).not.toHaveProperty("overloaded");
+    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [] });
     expect(config.target.ewar).toBeUndefined();
   });
 

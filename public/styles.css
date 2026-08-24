@@ -1950,13 +1950,17 @@ canvas {
   cursor: not-allowed;
 }
 
-.ewar-script-gear:hover:not(:disabled),
-.ewar-overload-button:hover:not(:disabled) {
+.ewar-script-gear:hover:not(:disabled) {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
 }
 
-.ewar-overload-button.active {
+.ewar-overload-button:hover:not(:disabled):not(.active) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.ewar-overload-button.active:not(:disabled) {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);

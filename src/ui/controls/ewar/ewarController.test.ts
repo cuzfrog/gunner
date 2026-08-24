@@ -545,4 +545,56 @@ describe("EwarController", () => {
     expect(webOverload.disabled).toBe(true);
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
   });
+
+  test("overload state is preserved when its module is toggled off and back on", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const webRow = webSection(popup)!.children[1];
+    const webOverload = overloadFor(webRow);
+    webOverload.trigger("click");
+    expect(webOverload.getAttribute("aria-pressed")).toBe("true");
+
+    webRow.children[0].trigger("click");
+    expect(webRow.className).toBe("ewar-row ewar-row-inactive");
+    expect(webOverload.disabled).toBe(true);
+
+    webRow.children[0].trigger("click");
+    expect(webRow.className).toBe("ewar-row");
+    expect(webOverload.disabled).toBe(false);
+    expect(webOverload.getAttribute("aria-pressed")).toBe("true");
+    expect(controller.capture("attacker")?.webs?.[0]).toEqual({ active: true, overloaded: true });
+  });
+
+  test("overload button has an accessible label that includes the module name", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR2], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const webRow = webSection(popup)!.children[1];
+    const webOverload = overloadFor(webRow);
+    expect(webOverload.getAttribute("aria-label")).toBe(`label.overload ${WEB.moduleName}`);
+    expect(webOverload.title).toBe(`label.overload ${WEB.moduleName}`);
+
+    const disruptorRow = disruptorSection(popup)!.children[1];
+    const disruptorOverload = overloadFor(disruptorRow);
+    expect(disruptorOverload.getAttribute("aria-label")).toBe(`label.overload ${DISRUPTOR2.moduleName}`);
+  });
+
+  test("web rows are marked inactive when their module is off", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const webRow = webSection(popup)!.children[1];
+    expect(webRow.className).toBe("ewar-row");
+    webRow.children[0].trigger("click");
+    expect(webRow.className).toBe("ewar-row ewar-row-inactive");
+    webRow.children[0].trigger("click");
+    expect(webRow.className).toBe("ewar-row");
+  });
 });

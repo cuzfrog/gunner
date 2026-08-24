@@ -243,9 +243,9 @@ export class EwarControllerImpl implements EwarController {
       const active = state.activation.webs[i].active;
       const overloaded = state.activation.webs[i].overloaded;
       const row = document.createElement("div");
-      row.className = "ewar-row";
+      row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const button = this.createModuleButton(active, web.moduleName);
-      const overloadButton = this.createOverloadButton(active, overloaded, i, () => this.toggleWebOverload(side, i, overloadButton));
+      const overloadButton = this.createOverloadButton(active, overloaded, i, web.moduleName, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -261,7 +261,7 @@ export class EwarControllerImpl implements EwarController {
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const button = this.createModuleButton(activation.active, disruptor.moduleName);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, onToggle);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor.moduleName, onToggle);
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -309,13 +309,19 @@ export class EwarControllerImpl implements EwarController {
     return gear;
   }
 
-  private createOverloadButton(active: boolean, overloaded: boolean, index: number, onToggle: () => void): HTMLButtonElement {
+  private createOverloadButton(
+    active: boolean,
+    overloaded: boolean,
+    index: number,
+    moduleName: string,
+    onToggle: () => void,
+  ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-overload-button";
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
-    const label = this.i18n.t("label.overload");
+    const label = `${this.i18n.t("label.overload")} ${this.fittingImport.itemName(moduleName, this.i18n.current())}`;
     button.title = label;
     button.setAttribute("aria-label", label);
     button.innerHTML = (
@@ -438,6 +444,7 @@ export class EwarControllerImpl implements EwarController {
     const active = !state.activation.webs[index].active;
     state.activation.webs[index].active = active;
     button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
     for (const child of row.children) {
       if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
         child.disabled = !active;

@@ -84,4 +84,28 @@ describe("profileTextParser", () => {
     const text = `# gunner v1\nversion=8\nattacker.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
   });
+
+  test("ewar activation can appear before the side overload field", () => {
+    const base = `# gunner v1
+version=8
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+attacker.speed=0
+attacker.mode=keepAtRange
+attacker.range=5000
+attacker.mass=1200000
+attacker.inertia=3
+initialDistance=5000
+target.speed=1000
+target.mode=orbit
+target.range=5000
+target.mass=10000000
+target.inertia=0.45
+target.sig=40`;
+    const text = `${base}\nattacker.ewarActivation={"webs":[{"active":true}]}\nattacker.overload=false`;
+    const parsed = parser.parse(text);
+    expect(parsed?.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
+  });
 });

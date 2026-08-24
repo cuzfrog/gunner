@@ -72,6 +72,35 @@ describe("profileTextCodec", () => {
     expect(parsed?.targetEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
   });
 
+  test("migrates v5 boolean web activation and inherits side overload from the profile", () => {
+    const base = codec.serialize(MINIMAL_PROFILE);
+    const attackerEwar = JSON.stringify({ webs: [true] });
+    const targetEwar = JSON.stringify({ webs: [false] });
+    const parsed = codec.parse(`${base}\nattacker.overload=false\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=false\ntarget.ewarActivation=${targetEwar}`);
+    expect(parsed?.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
+    expect(parsed?.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: false });
+  });
+
+  test("migrates missing per-module overload from explicit side overload", () => {
+    const base = codec.serialize(MINIMAL_PROFILE);
+    const attackerEwar = JSON.stringify({ webs: [{ active: true }], disruptors: [{ active: true, script: "none" }] });
+    const targetEwar = JSON.stringify({ webs: [{ active: false }], disruptors: [{ active: true, script: "optimalRange" }] });
+    const parsed = codec.parse(`${base}\nattacker.overload=false\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=true\ntarget.ewarActivation=${targetEwar}`);
+    expect(parsed?.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
+    expect(parsed?.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: false, script: "none" });
+    expect(parsed?.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
+    expect(parsed?.targetEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+  });
+
+  test("migration is idempotent for already-migrated version 8 activation", () => {
+    const base = codec.serialize(MINIMAL_PROFILE);
+    const attackerEwar = JSON.stringify({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
+    const targetEwar = JSON.stringify({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
+    const parsed = codec.parse(`${base}\nattacker.overload=true\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=true\ntarget.ewarActivation=${targetEwar}`);
+    expect(parsed?.attackerEwarActivation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
+    expect(parsed?.targetEwarActivation).toEqual({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
+  });
+
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
 version=8
