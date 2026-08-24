@@ -136,7 +136,11 @@ function parseEwarActivation(value: string): StoredEwarActivation | undefined {
   try {
     const parsed = JSON.parse(value);
     if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
-      return { ...parsed, disruptors: parsed.disruptors?.map(migrateDisruptorScript) };
+      return {
+        ...parsed,
+        webs: parsed.webs?.map(migrateWebActivation),
+        disruptors: parsed.disruptors?.map(migrateDisruptorActivation),
+      };
     }
     return undefined;
   } catch {
@@ -144,13 +148,22 @@ function parseEwarActivation(value: string): StoredEwarActivation | undefined {
   }
 }
 
-function migrateDisruptorScript(item: Readonly<{ active: boolean; script: string }>): Readonly<{ active: boolean; script: string }> {
+function migrateWebActivation(
+  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
+): Readonly<{ active: boolean; overloaded: boolean }> {
+  if (typeof item === "boolean") return { active: item, overloaded: true };
+  return { active: item.active, overloaded: item.overloaded ?? true };
+}
+
+function migrateDisruptorActivation(
+  item: Readonly<{ active: boolean; overloaded?: boolean; script: string }>,
+): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
   const map: Record<string, string> = {
     optimalRange: "Optimal Range Disruption Script",
     trackingSpeed: "Tracking Speed Disruption Script",
   };
   const script = map[item.script] ?? item.script;
-  return { ...item, script };
+  return { active: item.active, overloaded: item.overloaded ?? true, script };
 }
 
 export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {

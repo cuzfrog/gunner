@@ -106,11 +106,9 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
   c.attackerSide.setHost({
     persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
-    ewarFittedCount: () => c.ewarController.fittedCount("attacker"),
   });
   c.targetSide.setHost({
     persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
-    ewarFittedCount: () => c.ewarController.fittedCount("target"),
   });
   c.attackerSide.setFittingPopup(c.attackerFittingPopup);
   c.targetSide.setFittingPopup(c.targetFittingPopup);

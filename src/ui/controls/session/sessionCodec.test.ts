@@ -62,7 +62,6 @@ function mockEwarController(): EwarController {
     restore: vi.fn(),
     projection: vi.fn(),
     capture: vi.fn(),
-    fittedCount: vi.fn(() => 0),
     popup: vi.fn(),
     render: vi.fn(),
   } as unknown as EwarController;
@@ -242,7 +241,10 @@ describe("SessionCodec", () => {
     const fittingImport = mockFittingImport();
     const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
     const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
-    vi.mocked(ewarController.capture).mockReturnValue({ webs: [true], disruptors: [{ active: true, script: "none" }] });
+    vi.mocked(ewarController.capture).mockReturnValue({
+      webs: [{ active: true, overloaded: false }],
+      disruptors: [{ active: true, overloaded: false, script: "none" }],
+    });
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
@@ -267,7 +269,10 @@ describe("SessionCodec", () => {
     });
 
     const settings = codec.capture();
-    expect(settings.attackerEwarActivation).toEqual({ webs: [true], disruptors: [{ active: true, script: "none" }] });
+    expect(settings.attackerEwarActivation).toEqual({
+      webs: [{ active: true, overloaded: false }],
+      disruptors: [{ active: true, overloaded: false, script: "none" }],
+    });
 
     codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
     codec.restore(settings);

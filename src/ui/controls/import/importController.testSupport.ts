@@ -20,7 +20,7 @@ class FakePopupGroup implements PopupGroup {
 }
 
 const GUNNER_PROFILE_BODY = `# gunner v1
-version=7
+version=8
 tracking=0.32
 sigRes=S
 optimal=5000
@@ -67,7 +67,7 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       const trimmed = text.trimStart();
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
-        version: 7,
+        version: 8,
         tracking: 0.32,
         sigRes: "S",
         optimal: 5000,

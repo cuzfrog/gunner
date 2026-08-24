@@ -11,7 +11,7 @@ describe("profileTextCodec", () => {
   });
 
   test("hasHeader detects the header with leading whitespace", () => {
-    expect(codec.hasHeader("# gunner v1\nversion=7")).toBe(true);
+    expect(codec.hasHeader("# gunner v1\nversion=8")).toBe(true);
     expect(codec.hasHeader("  # gunner v1")).toBe(true);
     expect(codec.hasHeader("not a profile")).toBe(false);
   });
@@ -49,26 +49,32 @@ describe("profileTextCodec", () => {
   test("round-trips a profile with ewar activations", () => {
     const profile: ProfileSettings = {
       ...MINIMAL_PROFILE,
-      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "Tracking Speed Disruption Script" }] },
-      targetEwarActivation: { webs: [false], disruptors: [{ active: false, script: "none" }] },
+      attackerEwarActivation: {
+        webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
+        disruptors: [{ active: true, overloaded: true, script: "Tracking Speed Disruption Script" }],
+      },
+      targetEwarActivation: {
+        webs: [{ active: false, overloaded: false }],
+        disruptors: [{ active: false, overloaded: true, script: "none" }],
+      },
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
   test("migrates legacy v6 enum disruptor scripts in profile text", () => {
-    const text = codec.serialize({
-      ...MINIMAL_PROFILE,
-      attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] },
-      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
-    });
-    const parsed = codec.parse(text);
+    const base = codec.serialize(MINIMAL_PROFILE);
+    const attackerEwar = JSON.stringify({ webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] });
+    const targetEwar = JSON.stringify({ webs: [false], disruptors: [{ active: true, script: "optimalRange" }] });
+    const parsed = codec.parse(`${base}\nattacker.ewarActivation=${attackerEwar}\ntarget.ewarActivation=${targetEwar}`);
     expect(parsed?.attackerEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
+    expect(parsed?.attackerEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
     expect(parsed?.targetEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    expect(parsed?.targetEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
   });
 
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=7
+version=8
 tracking=0.32
 sigRes=S
 optimal=5000

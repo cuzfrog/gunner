@@ -151,19 +151,37 @@ export class SettingsParser {
   }
 
   private migrateEwarActivation(value: Record<string, unknown>): void {
-    this.migrateSideEwarActivation(value.attackerEwarActivation);
-    this.migrateSideEwarActivation(value.targetEwarActivation);
+    this.migrateSideEwarActivation(value.attackerEwarActivation, this.sideOverload(value, "attacker"));
+    this.migrateSideEwarActivation(value.targetEwarActivation, this.sideOverload(value, "target"));
   }
 
-  private migrateSideEwarActivation(saved: unknown): void {
+  private sideOverload(value: Record<string, unknown>, side: "attacker" | "target"): boolean {
+    const key = side === "attacker" ? "attackerOverload" : "targetOverload";
+    if (value[key] === true) return true;
+    if (value[key] === false) return false;
+    return true;
+  }
+
+  private migrateSideEwarActivation(saved: unknown, defaultOverload: boolean): void {
     if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
     const s = saved as Record<string, unknown>;
+    if (s.webs !== undefined && Array.isArray(s.webs)) {
+      s.webs = s.webs.map((item) => {
+        if (typeof item === "boolean") return { active: item, overloaded: defaultOverload };
+        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+        const w = item as Record<string, unknown>;
+        if (typeof w.active !== "boolean") return item;
+        w.overloaded ??= defaultOverload;
+        return w;
+      });
+    }
     if (s.disruptors !== undefined && Array.isArray(s.disruptors)) {
       s.disruptors = s.disruptors.map((item) => {
         if (!item || typeof item !== "object" || Array.isArray(item)) return item;
         const d = { ...(item as Record<string, unknown>) };
         if (d.script === "optimalRange") d.script = "Optimal Range Disruption Script";
         if (d.script === "trackingSpeed") d.script = "Tracking Speed Disruption Script";
+        if (typeof d.active === "boolean") d.overloaded ??= defaultOverload;
         return d;
       });
     }

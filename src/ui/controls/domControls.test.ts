@@ -157,25 +157,34 @@ describe("DomControls", () => {
     expect(clipboard.writeText).toHaveBeenCalled();
   });
 
-  test("getConfig includes ewar projections and passes overload state", () => {
-    const { controls, cradle, document } = buildDomControls();
-    const ewar: EwarLoadout = { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [], scripts: [] };
-    cradle.cradle.ewarController.setLoadout("attacker", ewar);
-    getFake(document, "attacker-overload").checked = true;
-    getFake(document, "target-overload").checked = false;
+  test("getConfig includes per-side ewar projections without the old global overload flag", () => {
+    const { controls, cradle } = buildDomControls();
+    const attackerEwar: EwarLoadout = {
+      webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
+      disruptors: [],
+      scripts: [],
+    };
+    cradle.cradle.ewarController.setLoadout("attacker", attackerEwar);
     const config = controls.getConfig();
     expect(config.attacker.ewar?.loadout.webs).toHaveLength(1);
-    expect(config.attacker.ewar?.overloaded).toBe(true);
+    expect(config.attacker.ewar).not.toHaveProperty("overloaded");
     expect(config.target.ewar).toBeUndefined();
   });
 
-  test("getConfig uses ewar overload state for the target side", () => {
+  test("getConfig includes ewar projection for the target side", () => {
     const { controls, cradle } = buildDomControls();
-    const ewar: EwarLoadout = { webs: [], disruptors: [{ moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2, defaultScript: undefined, overloadStrengthBonusPercent: 0 }], scripts: [] };
-    cradle.cradle.ewarController.setLoadout("target", ewar);
+    const targetEwar: EwarLoadout = {
+      webs: [],
+      disruptors: [{
+        moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2,
+        defaultScript: undefined, overloadStrengthBonusPercent: 0,
+      }],
+      scripts: [],
+    };
+    cradle.cradle.ewarController.setLoadout("target", targetEwar);
     const config = controls.getConfig();
     expect(config.target.ewar?.loadout.disruptors).toHaveLength(1);
-    expect(config.target.ewar?.overloaded).toBe(true);
+    expect(config.target.ewar).not.toHaveProperty("overloaded");
   });
 
   test("target fitting popup applies fitting to the target side", () => {

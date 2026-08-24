@@ -98,10 +98,12 @@ export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [], scrip
 
 export interface WebActivation {
   readonly active: boolean;
+  readonly overloaded: boolean;
 }
 
 export interface DisruptorActivation {
   readonly active: boolean;
+  readonly overloaded: boolean;
   readonly script: DisruptionScriptSpec | undefined;
 }
 
@@ -113,7 +115,6 @@ export interface EwarActivation {
 export interface EwarProjection {
   readonly loadout: EwarLoadout;
   readonly activation?: EwarActivation;
-  readonly overloaded: boolean;
 }
 
 export interface CombatantConfig extends ShipConfig {

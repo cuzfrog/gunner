@@ -41,7 +41,7 @@ function buildSkillSection() {
     } as unknown as ISidePanelSections["paste"],
   } as unknown as ISidePanelSections);
 
-  const host = { persistConfigChange: vi.fn(), ewarFittedCount: vi.fn(() => 0) };
+  const host = { persistConfigChange: vi.fn() };
   const panel = vi.mocked<SidePanel>({
     side: "attacker",
     host,
@@ -100,9 +100,9 @@ describe("SkillOverloadSection", () => {
     expect(getFake(document, "attacker-overload-button").disabled).toBe(true);
   });
 
-  test("setOverloadDisabled enables the overload when ewar is fitted", () => {
-    const { document, section, host } = buildSkillSection();
-    host.ewarFittedCount = vi.fn(() => 2);
+  test("setOverloadDisabled enables the overload when propulsion is selected", () => {
+    const { document, section, panel } = buildSkillSection();
+    panel.sections.propulsion.currentPropulsionId = vi.fn(() => "mwd-5mn" as const);
     section.setOverloadDisabled();
     expect(getFake(document, "attacker-overload").disabled).toBe(false);
     expect(getFake(document, "attacker-overload-button").disabled).toBe(false);

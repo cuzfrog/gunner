@@ -3,7 +3,7 @@ import { isOptionalEwarActivation, profilesEqual } from "./validators";
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
-    version: 7,
+    version: 8,
     tracking: 0.32,
     sigRes: "S",
     optimal: 5000,
@@ -27,7 +27,14 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
 
 describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
-    expect(isOptionalEwarActivation({ webs: [true, false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] })).toBe(true);
+    expect(isOptionalEwarActivation({
+      webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
+      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+    })).toBe(true);
+  });
+
+  test("accepts legacy boolean webs and disruptors without overloaded", () => {
+    expect(isOptionalEwarActivation({ webs: [true, false], disruptors: [{ active: true, script: "none" }] })).toBe(true);
   });
 
   test("accepts undefined", () => {
@@ -40,6 +47,10 @@ describe("isOptionalEwarActivation", () => {
 
   test("rejects a non-boolean web entry", () => {
     expect(isOptionalEwarActivation({ webs: [true, "false"] })).toBe(false);
+  });
+
+  test("rejects a web object missing the active flag", () => {
+    expect(isOptionalEwarActivation({ webs: [{ overloaded: true }] })).toBe(false);
   });
 
   test("rejects a non-string disruptor script", () => {

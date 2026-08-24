@@ -256,6 +256,7 @@ body {
 .fitting-eye:focus-visible,
 .ammo-trigger:focus-visible,
 .ewar-trigger:focus-visible,
+.ewar-overload-button:focus-visible,
 .ammo-popup button:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: 2px;
@@ -1926,7 +1927,8 @@ canvas {
   font-size: 12px;
 }
 
-.ewar-script-gear {
+.ewar-script-gear,
+.ewar-overload-button {
   flex: 0 0 22px;
   min-width: 22px;
   min-height: 22px;
@@ -1941,14 +1943,24 @@ canvas {
   cursor: pointer;
 }
 
-.ewar-script-gear:disabled {
+.ewar-script-gear:disabled,
+.ewar-overload-button:disabled,
+.ewar-row-inactive .ewar-overload-button {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.ewar-script-gear:hover:not(:disabled) {
+.ewar-script-gear:hover:not(:disabled),
+.ewar-overload-button:hover:not(:disabled) {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
+}
+
+.ewar-overload-button.active {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+  background: var(--accent-orange-12);
+  box-shadow: 0 0 8px var(--accent-orange-35);
 }
 
 .ewar-script-gear[aria-expanded="true"] {

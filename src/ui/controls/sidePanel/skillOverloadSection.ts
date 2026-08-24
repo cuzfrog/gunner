@@ -38,8 +38,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   }
 
   setOverloadDisabled(): void {
-    const ewarCount = this.panel.host.ewarFittedCount?.() ?? 0;
-    const disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined && ewarCount === 0;
+    const disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined;
     const active = !disabled && this.els.overload.checked;
     this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));

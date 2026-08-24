@@ -63,7 +63,7 @@ describe("loadEwarProjection", () => {
     expect(projection.loadout.webs).toHaveLength(1);
     expect(projection.loadout.webs[0]?.moduleName).toBe("Stasis Webifier II");
     expect(projection.loadout.disruptors).toHaveLength(0);
-    expect(projection.overloaded).toBe(true);
+    expect(projection.activation?.webs[0]?.overloaded).toBe(true);
   });
 
   test("loads a Curse fit with tracking disruptors and scripts", () => {
@@ -77,7 +77,7 @@ describe("loadEwarProjection", () => {
     expect(projection.loadout.disruptors.length).toBeGreaterThanOrEqual(2);
     expect(projection.loadout.disruptors.some((d) => d.defaultScript?.name === "Optimal Range Disruption Script")).toBe(true);
     expect(projection.loadout.disruptors.some((d) => d.defaultScript?.name === "Tracking Speed Disruption Script")).toBe(true);
-    expect(projection.overloaded).toBe(false);
+    expect(projection.activation?.disruptors[0]?.overloaded).toBe(false);
   });
 
   test("throws when the fitting file does not exist", () => {

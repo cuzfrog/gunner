@@ -38,7 +38,6 @@ import type { ISidePanelSections } from "./sidePanelSections";
 
 const NOOP_HOST: SidePanelHost = {
   persistConfigChange() {},
-  ewarFittedCount() { return 0; },
 };
 
 export class SidePanelImpl implements SidePanel {

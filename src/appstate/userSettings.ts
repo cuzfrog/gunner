@@ -2,15 +2,15 @@ import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 7 as const;
+export const USER_SETTINGS_VERSION = 8 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 export type StoredDisruptionScript = string;
 
 export interface StoredEwarActivation {
-  readonly webs?: readonly boolean[];
-  readonly disruptors?: readonly { readonly active: boolean; readonly script: StoredDisruptionScript }[];
+  readonly webs?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
+  readonly disruptors?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
 }
 
 export interface FittedHullSummary {

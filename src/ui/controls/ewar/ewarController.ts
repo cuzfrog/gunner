@@ -9,8 +9,8 @@ import type { Side } from "../sidePanel";
 import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
 
 interface MutableEwarActivation {
-  webs: { active: boolean }[];
-  disruptors: { active: boolean; script: DisruptionScriptSpec | undefined }[];
+  webs: { active: boolean; overloaded: boolean }[];
+  disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
 }
 
 interface EwarState {
@@ -65,25 +65,23 @@ export class EwarControllerImpl implements EwarController {
     this.renderSide(side);
   }
 
-  projection(side: Side, overloaded: boolean): EwarProjection | undefined {
+  projection(side: Side): EwarProjection | undefined {
     const state = this.states.get(side);
     if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) return undefined;
-    return { loadout: state.loadout, activation: state.activation, overloaded };
+    return { loadout: state.loadout, activation: state.activation };
   }
 
   capture(side: Side): StoredEwarActivation | undefined {
     const state = this.states.get(side);
     if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) return undefined;
     return {
-      webs: state.activation.webs.map((w) => w.active),
-      disruptors: state.activation.disruptors.map((d) => ({ active: d.active, script: d.script?.name ?? "none" })),
+      webs: state.activation.webs.map((w) => ({ active: w.active, overloaded: w.overloaded })),
+      disruptors: state.activation.disruptors.map((d) => ({
+        active: d.active,
+        overloaded: d.overloaded,
+        script: d.script?.name ?? "none",
+      })),
     };
-  }
-
-  fittedCount(side: Side): number {
-    const state = this.states.get(side);
-    if (!state) return 0;
-    return state.loadout.webs.length + state.loadout.disruptors.length;
   }
 
   popup(side: Side): Popup {
@@ -213,9 +211,15 @@ export class EwarControllerImpl implements EwarController {
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
     return {
-      webs: loadout.webs.map((_, i) => ({ active: saved?.webs?.[i] ?? true })),
+      webs: loadout.webs.map((_, i) => {
+        const savedWeb = saved?.webs?.[i];
+        const active = typeof savedWeb === "boolean" ? savedWeb : savedWeb?.active ?? true;
+        const overloaded = typeof savedWeb === "boolean" ? false : savedWeb?.overloaded ?? false;
+        return { active, overloaded };
+      }),
       disruptors: loadout.disruptors.map((disruptor, i) => {
-        const savedScript = saved?.disruptors?.[i]?.script;
+        const savedDisruptor = saved?.disruptors?.[i];
+        const savedScript = savedDisruptor?.script;
         let script: DisruptionScriptSpec | undefined;
         if (savedScript === "none") {
           script = undefined;
@@ -225,7 +229,8 @@ export class EwarControllerImpl implements EwarController {
           script = disruptor.defaultScript;
         }
         return {
-          active: saved?.disruptors?.[i]?.active ?? true,
+          active: savedDisruptor?.active ?? true,
+          overloaded: savedDisruptor?.overloaded ?? false,
           script,
         };
       }),
@@ -236,11 +241,14 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.webs.length; i++) {
       const web = state.loadout.webs[i];
       const active = state.activation.webs[i].active;
-      const button = this.createModuleButton(active, web.moduleName);
-      button.addEventListener("click", () => this.toggleWeb(side, i, button));
+      const overloaded = state.activation.webs[i].overloaded;
       const row = document.createElement("div");
       row.className = "ewar-row";
+      const button = this.createModuleButton(active, web.moduleName);
+      const overloadButton = this.createOverloadButton(active, overloaded, i, () => this.toggleWebOverload(side, i, overloadButton));
+      button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
       row.appendChild(button);
+      row.appendChild(overloadButton);
       section.appendChild(row);
     }
   }
@@ -248,13 +256,16 @@ export class EwarControllerImpl implements EwarController {
   private renderDisruptors(side: Side, state: EwarState, section: HTMLElement): void {
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
-      const active = state.activation.disruptors[i].active;
+      const activation = state.activation.disruptors[i];
       const row = document.createElement("div");
-      row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(active, disruptor.moduleName);
+      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      const button = this.createModuleButton(activation.active, disruptor.moduleName);
+      const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, onToggle);
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
       row.appendChild(button);
-      const gear = this.createScriptGear(side, i, state.activation.disruptors[i].script, active);
+      row.appendChild(overloadButton);
+      const gear = this.createScriptGear(side, i, activation.script, activation.active);
       row.appendChild(gear);
       section.appendChild(row);
     }
@@ -296,6 +307,25 @@ export class EwarControllerImpl implements EwarController {
     gear.disabled = !active;
     gear.addEventListener("click", () => this.openScriptPopup(side, index, gear));
     return gear;
+  }
+
+  private createOverloadButton(active: boolean, overloaded: boolean, index: number, onToggle: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ewar-overload-button";
+    button.setAttribute("data-index", String(index));
+    button.setAttribute("aria-pressed", String(overloaded));
+    const label = this.i18n.t("label.overload");
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.innerHTML = (
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
+      '<use href="icons.svg#overload"></use></svg>'
+    );
+    button.disabled = !active;
+    button.classList.toggle("active", overloaded);
+    button.addEventListener("click", onToggle);
+    return button;
   }
 
   private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
@@ -402,11 +432,28 @@ export class EwarControllerImpl implements EwarController {
     gear.setAttribute("aria-label", title);
   }
 
-  private toggleWeb(side: Side, index: number, button: HTMLButtonElement): void {
+  private toggleWeb(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
     const state = this.states.get(side);
     if (!state) return;
-    state.activation.webs[index].active = !state.activation.webs[index].active;
-    button.setAttribute("aria-pressed", String(state.activation.webs[index].active));
+    const active = !state.activation.webs[index].active;
+    state.activation.webs[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleWebOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.webs[index].overloaded;
+    state.activation.webs[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+    button.classList.toggle("active", overloaded);
     this.updateSummary(side);
     this.host?.onConfigChange();
   }
@@ -423,6 +470,17 @@ export class EwarControllerImpl implements EwarController {
         child.disabled = !active;
       }
     }
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleDisruptorOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.disruptors[index].overloaded;
+    state.activation.disruptors[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+    button.classList.toggle("active", overloaded);
     this.updateSummary(side);
     this.host?.onConfigChange();
   }

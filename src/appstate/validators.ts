@@ -19,16 +19,32 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
-  if (s.webs !== undefined && (!Array.isArray(s.webs) || !s.webs.every((v) => typeof v === "boolean"))) return false;
+  if (s.webs !== undefined && (!Array.isArray(s.webs) || !s.webs.every(isStoredWebActivation))) return false;
   if (s.disruptors !== undefined) {
     if (!Array.isArray(s.disruptors)) return false;
     for (const item of s.disruptors) {
-      if (!item || typeof item !== "object" || Array.isArray(item)) return false;
-      const d = item as Record<string, unknown>;
-      if (typeof d.active !== "boolean" || typeof d.script !== "string" || d.script.length === 0) return false;
+      if (!isStoredDisruptorActivation(item)) return false;
     }
   }
   return true;
+}
+
+function isStoredWebActivation(value: unknown): boolean {
+  if (typeof value === "boolean") return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
+}
+
+function isStoredDisruptorActivation(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.active === "boolean" &&
+    (item.overloaded === undefined || typeof item.overloaded === "boolean") &&
+    typeof item.script === "string" &&
+    item.script.length > 0
+  );
 }
 
 export function isSkillLevel(value: unknown): value is SkillLevel {
@@ -63,8 +79,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 {
-  return value === 5 || value === 6 || value === 7;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 {
+  return value === 5 || value === 6 || value === 7 || value === 8;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {

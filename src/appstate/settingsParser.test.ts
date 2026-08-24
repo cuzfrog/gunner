@@ -29,13 +29,13 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 and 6 and stamps 7", () => {
+  test("parseUserSettings accepts version 5, 6 and 7 and stamps 8", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(7);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(7);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(7);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(8);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(8);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(8);
   });
 
   test("parseUserSettings defaults missing attackerAmmo", () => {
@@ -72,17 +72,39 @@ describe("SettingsParser", () => {
     expect(parsed!.targetEwarActivation).toEqual(DEFAULT_SETTINGS.targetEwarActivation);
   });
 
-  test("parseUserSettings migrates v6 enum disruptor scripts to item names", () => {
+  test("parseUserSettings migrates v6 enum disruptor scripts to item names and adds per-module overload", () => {
     const v6 = {
       ...DEFAULT_SETTINGS,
       version: 6,
-      attackerEwarActivation: { disruptors: [{ active: true, script: "trackingSpeed" }] },
-      targetEwarActivation: { disruptors: [{ active: true, script: "optimalRange" }] },
+      attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] },
+      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v6));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
-    expect(parsed!.targetEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    expect(parsed!.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Tracking Speed Disruption Script" });
+    expect(parsed!.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: true });
+    expect(parsed!.targetEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+    expect(parsed!.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
+  });
+
+  test("parseUserSettings migrates v7 activations and inherits per-module overload from the side overload flag", () => {
+    const v7 = {
+      ...DEFAULT_SETTINGS,
+      version: 7,
+      attackerOverload: false,
+      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "none" }] },
+      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] },
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v7));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation).toEqual({
+      webs: [{ active: true, overloaded: false }, { active: false, overloaded: false }],
+      disruptors: [{ active: true, overloaded: false, script: "none" }],
+    });
+    expect(parsed!.targetEwarActivation).toEqual({
+      webs: [{ active: false, overloaded: true }],
+      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+    });
   });
 
   test("parseUserSettings rejects an invalid disruptor script", () => {

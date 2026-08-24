@@ -155,8 +155,7 @@ describe("SimulationImpl", () => {
         disruptors: [],
         scripts: [],
       },
-      activation: { webs: [{ active: true }], disruptors: [] },
-      overloaded: false,
+      activation: { webs: [{ active: true, overloaded: false }], disruptors: [] },
     };
     const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
     const attackerSteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };

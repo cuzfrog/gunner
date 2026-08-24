@@ -34,7 +34,7 @@ function makeFittingPopup(): FittingPopupController {
 function makeEwarController(): EwarController {
   const attackerPopup = makePopup();
   const targetPopup = makePopup();
-  return { setHost: vi.fn(), setLoadout: vi.fn(), restore: vi.fn(), projection: vi.fn(), capture: vi.fn(), fittedCount: vi.fn(() => 0), popup: (side: "attacker" | "target") => side === "attacker" ? attackerPopup : targetPopup, render: vi.fn() } as unknown as EwarController;
+  return { setHost: vi.fn(), setLoadout: vi.fn(), restore: vi.fn(), projection: vi.fn(), capture: vi.fn(), popup: (side: "attacker" | "target") => side === "attacker" ? attackerPopup : targetPopup, render: vi.fn() } as unknown as EwarController;
 }
 
 function makePopupGroup(): PopupGroup {

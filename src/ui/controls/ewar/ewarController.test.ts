@@ -74,8 +74,14 @@ function disruptorSection(popup: FakeElement): FakeElement | undefined {
   return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
 }
 
+function overloadFor(row: FakeElement): FakeElement {
+  const button = row.children.find((child) => child.className === "ewar-overload-button");
+  if (!button) throw new Error("Missing overload button");
+  return button;
+}
+
 function gearFor(row: FakeElement): FakeElement {
-  const gear = row.children[1];
+  const gear = row.children.find((child) => child.className === "ewar-script-gear");
   if (!gear) throw new Error("Missing script gear");
   return gear;
 }
@@ -186,21 +192,33 @@ describe("EwarController", () => {
     const summary = getFake(document, "attacker-ewar-summary");
 
     const section = webSection(popup)!;
+    const firstRow = section.children[1];
+    const firstToggle = firstRow.children[0];
+    const firstOverload = overloadFor(firstRow);
     expect(summary.children[0].children[1].textContent).toBe("2/2");
-    section.children[1].children[0].trigger("click");
+    expect(firstOverload.disabled).toBe(false);
+    firstToggle.trigger("click");
     expect(summary.children[0].children[1].textContent).toBe("1/2");
     expect(popup.hidden).toBe(false);
-    expect(section.children[1].children[0].getAttribute("aria-pressed")).toBe("false");
+    expect(firstToggle.getAttribute("aria-pressed")).toBe("false");
+    expect(firstOverload.disabled).toBe(true);
     expect(section.children[2].children[0].getAttribute("aria-pressed")).toBe("true");
-    expect(controller.capture("attacker")?.webs).toEqual([false, true]);
+    expect(controller.capture("attacker")?.webs).toEqual([
+      { active: false, overloaded: false },
+      { active: true, overloaded: false },
+    ]);
     expect(host.onConfigChange).toHaveBeenCalled();
 
-    section.children[1].children[0].trigger("click");
+    firstToggle.trigger("click");
     expect(summary.children[0].children[1].textContent).toBe("2/2");
-    expect(controller.capture("attacker")?.webs).toEqual([true, true]);
+    expect(firstOverload.disabled).toBe(false);
+    expect(controller.capture("attacker")?.webs).toEqual([
+      { active: true, overloaded: false },
+      { active: true, overloaded: false },
+    ]);
   });
 
-  test("toggling a disruptor disables its script gear", () => {
+  test("toggling a disruptor disables its overload button and script gear", () => {
     const { controller, document } = buildEwarController();
     controller.setLoadout("target", { webs: [], disruptors: [DISRUPTOR], scripts: SCRIPTS });
 
@@ -209,16 +227,20 @@ describe("EwarController", () => {
     const section = disruptorSection(popup)!;
     const row = section.children[1];
     const gear = gearFor(row);
+    const overload = overloadFor(row);
     expect(row.className).toBe("ewar-row");
     expect(gear.disabled).toBe(false);
+    expect(overload.disabled).toBe(false);
     row.children[0].trigger("click");
     expect(row.className).toBe("ewar-row ewar-row-inactive");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("false");
     expect(gear.disabled).toBe(true);
+    expect(overload.disabled).toBe(true);
     row.children[0].trigger("click");
     expect(row.className).toBe("ewar-row");
     expect(row.children[0].getAttribute("aria-pressed")).toBe("true");
     expect(gear.disabled).toBe(false);
+    expect(overload.disabled).toBe(false);
   });
 
   test("renders one, two, or zero sections based on loadout contents", () => {
@@ -273,7 +295,10 @@ describe("EwarController", () => {
     const captured = controller.capture("target");
     expect(captured).toEqual({
       webs: [],
-      disruptors: [{ active: true, script: "Optimal Range Disruption Script" }, { active: true, script: "Tracking Speed Disruption Script" }],
+      disruptors: [
+        { active: true, overloaded: false, script: "Optimal Range Disruption Script" },
+        { active: true, overloaded: false, script: "Tracking Speed Disruption Script" },
+      ],
     });
 
     controller.restore("target", loadout, captured);
@@ -289,11 +314,16 @@ describe("EwarController", () => {
     const { controller } = buildEwarController();
     const longLoadout: EwarLoadout = { webs: [WEB, WEB2, WEB3], disruptors: [DISRUPTOR, DISRUPTOR2], scripts: SCRIPTS };
     const saved: StoredEwarActivation = {
-      webs: [false, true, false, true],
+      webs: [
+        { active: false, overloaded: true },
+        { active: true, overloaded: false },
+        { active: false, overloaded: true },
+        { active: true, overloaded: false },
+      ],
       disruptors: [
-        { active: false, script: "Tracking Speed Disruption Script" },
-        { active: true, script: "none" },
-        { active: true, script: "Optimal Range Disruption Script" },
+        { active: false, overloaded: true, script: "Tracking Speed Disruption Script" },
+        { active: true, overloaded: false, script: "none" },
+        { active: true, overloaded: true, script: "Optimal Range Disruption Script" },
       ],
     };
     controller.setLoadout("attacker", longLoadout);
@@ -301,31 +331,25 @@ describe("EwarController", () => {
     controller.restore("attacker", shortLoadout, saved);
 
     expect(controller.capture("attacker")).toEqual({
-      webs: [false, true],
-      disruptors: [{ active: false, script: "Tracking Speed Disruption Script" }],
+      webs: [{ active: false, overloaded: true }, { active: true, overloaded: false }],
+      disruptors: [{ active: false, overloaded: true, script: "Tracking Speed Disruption Script" }],
     });
   });
 
-  test("projection returns undefined for empty loadouts and carries the overload flag", () => {
+  test("projection returns undefined for empty loadouts and carries per-module overload", () => {
     const { controller } = buildEwarController();
-    expect(controller.projection("attacker", false)).toBeUndefined();
-    expect(controller.projection("target", true)).toBeUndefined();
+    expect(controller.projection("attacker")).toBeUndefined();
+    expect(controller.projection("target")).toBeUndefined();
 
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], scripts: SCRIPTS };
     controller.setLoadout("attacker", loadout);
-    expect(controller.projection("attacker", true)).toEqual({
+    expect(controller.projection("attacker")).toEqual({
       loadout,
-      activation: { webs: [{ active: true }], disruptors: [] },
-      overloaded: true,
-    });
-    expect(controller.projection("attacker", false)).toEqual({
-      loadout,
-      activation: { webs: [{ active: true }], disruptors: [] },
-      overloaded: false,
+      activation: { webs: [{ active: true, overloaded: false }], disruptors: [] },
     });
 
     controller.setLoadout("attacker", EMPTY_EWAR_LOADOUT);
-    expect(controller.projection("attacker", false)).toBeUndefined();
+    expect(controller.projection("attacker")).toBeUndefined();
   });
 
   test("capture returns StoredEwarActivation matching the current state", () => {
@@ -347,8 +371,11 @@ describe("EwarController", () => {
     scriptOptionFor(scriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
 
     expect(controller.capture("target")).toEqual({
-      webs: [true, false],
-      disruptors: [{ active: true, script: "Tracking Speed Disruption Script" }, { active: false, script: "none" }],
+      webs: [{ active: true, overloaded: false }, { active: false, overloaded: false }],
+      disruptors: [
+        { active: true, overloaded: false, script: "Tracking Speed Disruption Script" },
+        { active: false, overloaded: false, script: "none" },
+      ],
     });
   });
 
@@ -397,7 +424,7 @@ describe("EwarController", () => {
     expect(host.onConfigChange).toHaveBeenCalled();
     expect(controller.capture("attacker")).toEqual({
       webs: [],
-      disruptors: [{ active: true, script: "Tracking Speed Disruption Script" }],
+      disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }],
     });
   });
 
@@ -468,5 +495,54 @@ describe("EwarController", () => {
     expect(fittingImport.itemName).toHaveBeenCalledWith("Optimal Range Disruption Script", "zh");
     expect(optimalOption.title).toBe("optimal x2 · falloff x2 · track x0");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Optimal Range Disruption Script");
+  });
+
+  test("overload buttons are present per web and disruptor row", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [DISRUPTOR], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    const webRows = webSection(popup)!.children.slice(1);
+    const disruptorRows = disruptorSection(popup)!.children.slice(1);
+    for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button");
+    for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button");
+  });
+
+  test("clicking an overload button toggles its aria-pressed and capture output", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR2], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const webRow = webSection(popup)!.children[1];
+    const webOverload = overloadFor(webRow);
+    const disruptorRow = disruptorSection(popup)!.children[1];
+    const disruptorOverload = overloadFor(disruptorRow);
+
+    expect(webOverload.getAttribute("aria-pressed")).toBe("false");
+    expect(disruptorOverload.getAttribute("aria-pressed")).toBe("false");
+    webOverload.trigger("click");
+    disruptorOverload.trigger("click");
+    expect(webOverload.getAttribute("aria-pressed")).toBe("true");
+    expect(disruptorOverload.getAttribute("aria-pressed")).toBe("true");
+    expect(controller.capture("attacker")).toEqual({
+      webs: [{ active: true, overloaded: true }],
+      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+    });
+  });
+
+  test("overload button is disabled when its module is off", () => {
+    const { controller, document } = buildEwarController();
+    controller.setLoadout("target", { webs: [WEB], disruptors: [DISRUPTOR], scripts: SCRIPTS });
+
+    const popup = getFake(document, "target-ewar-popup");
+    popup.hidden = false;
+    const webRow = webSection(popup)!.children[1];
+    const webOverload = overloadFor(webRow);
+    webOverload.trigger("click");
+    expect(webOverload.getAttribute("aria-pressed")).toBe("true");
+    webRow.children[0].trigger("click");
+    expect(webOverload.disabled).toBe(true);
+    expect(webOverload.getAttribute("aria-pressed")).toBe("true");
   });
 });

@@ -20,7 +20,7 @@ export class EwarResolverImpl implements EwarResolver {
       const spec = projection.loadout.webs[i];
       const activation = projection.activation?.webs[i];
       if (activation && !activation.active) continue;
-      const overloadBonus = projection.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
       if (range >= distance) multipliers.push(1 - spec.speedFactor);
     }
@@ -38,7 +38,7 @@ export class EwarResolverImpl implements EwarResolver {
       const activation = projection.activation?.disruptors[i];
       if (activation && !activation.active) continue;
 
-      const overloadBonus = projection.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const strength = spec.disruption * overloadBonus;
       const effectiveness = this.disruptorEffectiveness(distance, spec);
       const script = activation?.script ?? spec.defaultScript;

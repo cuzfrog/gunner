@@ -122,7 +122,6 @@ export interface SideImporter {
 
 export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
-  ewarFittedCount?(): number;
 }
 
 export interface SidePanelDeps {

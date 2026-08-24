@@ -170,8 +170,6 @@ export class DomControls implements Controls, DomControlsHost {
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
   getTargetSig(): number { return this.targetSide.capture().sig ?? 1; }
   getConfig(): SimConfig {
-    const attackerOverload = this.els.attackerOverload.checked;
-    const targetOverload = this.els.targetOverload.checked;
     const initialDistance = this.sessionCodec.getInitialDistance();
     const aggressivity = this.preferencesController.getManeuverAggressivity();
     const attackerState = this.attackerSide.capture();
@@ -180,13 +178,13 @@ export class DomControls implements Controls, DomControlsHost {
       id: "attacker", maxSpeed: attackerState.speed, mass: attackerState.mass,
       inertiaModifier: attackerState.inertia, mode: attackerState.mode,
       desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
-      ewar: this.ewarController.projection("attacker", attackerOverload),
+      ewar: this.ewarController.projection("attacker"),
     };
     const target: CombatantConfig = {
       id: "target", maxSpeed: targetState.speed, mass: targetState.mass,
       inertiaModifier: targetState.inertia, mode: targetState.mode,
       desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
-      ewar: this.ewarController.projection("target", targetOverload),
+      ewar: this.ewarController.projection("target"),
     };
     return { attacker, target, initialDistance };
   }
