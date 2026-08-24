@@ -4,7 +4,7 @@ import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { ProfileParamOverrides, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
+import type { ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import { UiEventsImpl, type UiEvents } from "../events";
 import {
   FakeElement,
@@ -138,6 +138,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
     settingsStore: asValue(vi.mocked<SettingsStore>({ ...mockSettingsStore(), ...options.settingsStore })),
+    profileTextCodec: asValue(vi.mocked<ProfileTextCodec>({ parse: vi.fn(() => undefined), serialize: vi.fn(() => ""), hasHeader: vi.fn(() => false) })),
     fittingImport: asValue(vi.mocked<FittingImport>({ ...mockFittingImport(), ...options.fittingImport })),
     gunFamilies: asValue(mockGunFamilies()),
     presetFittings: asValue(vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings })),

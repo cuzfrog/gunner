@@ -1,4 +1,4 @@
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
+import { type ClipboardProvider, type ProfileTextCodec, USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
 import { FakeElement, fakeDocument, getFake } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profileController";
@@ -54,6 +54,7 @@ interface ShareControllerOverrides {
   clipboard?: Partial<ClipboardProvider>;
   popupGroup?: Partial<PopupGroup>;
   profileController?: Partial<ProfileController>;
+  profileTextCodec?: Partial<ProfileTextCodec>;
 }
 
 function makeShareController(document: Document, overrides: ShareControllerOverrides = {}) {
@@ -112,12 +113,19 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     showStatus: vi.fn(),
     ...overrides.profileController,
   });
+  const profileTextCodec = vi.mocked<ProfileTextCodec>({
+    parse: vi.fn(),
+    serialize: vi.fn(() => "serialized profile text"),
+    hasHeader: vi.fn(),
+    ...overrides.profileTextCodec,
+  });
   const controller = new ShareControllerImpl({
     clipboard,
     settingsStore,
     sessionCodec,
     popupGroup,
     profileController,
+    profileTextCodec,
     els: {
       shareLink: getFake(document, "share-link") as unknown as HTMLButtonElement,
       sharePopup: getFake(document, "share-popup") as unknown as HTMLElement,
@@ -125,7 +133,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
       shareCopyText: getFake(document, "share-copy-text") as unknown as HTMLButtonElement,
     },
   });
-  return { controller, settingsStore, sessionCodec, clipboard, popupGroup, profileController, captured };
+  return { controller, settingsStore, sessionCodec, clipboard, popupGroup, profileController, profileTextCodec, captured };
 }
 
 beforeEach(() => {
@@ -148,9 +156,10 @@ describe("ShareController", () => {
   });
 
   test("copy text writes the serialized profile text and shows copied", async () => {
-    const { controller, clipboard, profileController, popupGroup, captured } = makeShareController(globalThis.document);
+    const { controller, clipboard, profileController, popupGroup, profileTextCodec, captured } = makeShareController(globalThis.document);
     await controller.onCopyTextClicked();
-    expect(clipboard.writeText).toHaveBeenCalledWith(serializeProfile(expectedProfileFor(captured)));
+    expect(profileTextCodec.serialize).toHaveBeenCalledWith(expectedProfileFor(captured));
+    expect(clipboard.writeText).toHaveBeenCalledWith("serialized profile text");
     expect(profileController.showStatus).toHaveBeenCalledWith("status.copied");
     expect(popupGroup.close).toHaveBeenCalledWith(controller.popup);
   });

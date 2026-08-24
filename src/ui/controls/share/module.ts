@@ -6,13 +6,14 @@ import type { ShareEls } from "./shareControllerContract";
 
 export function registerShareModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    shareController: asFunction(({ els, clipboard, settingsStore, sessionCodec, popupGroup, profileController }: ControlsCradle) => new ShareControllerImpl({
+    shareController: asFunction(({ els, clipboard, settingsStore, sessionCodec, popupGroup, profileController, profileTextCodec }: ControlsCradle) => new ShareControllerImpl({
       clipboard,
       settingsStore,
       sessionCodec,
       popupGroup,
       els: collectShareEls(els),
       profileController,
+      profileTextCodec,
     })).singleton(),
   });
 }

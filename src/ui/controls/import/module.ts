@@ -5,7 +5,7 @@ import { ImportControllerImpl } from "./importController";
 
 export function registerImportModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    importController: asFunction(({ els, clipboard, fittingImport, savedFittings, popupGroup, attackerSide, targetSide, turretController, preferencesController, profileController }: ControlsCradle) => new ImportControllerImpl({
+    importController: asFunction(({ els, clipboard, fittingImport, savedFittings, popupGroup, attackerSide, targetSide, turretController, preferencesController, profileController, profileTextCodec }: ControlsCradle) => new ImportControllerImpl({
       clipboard,
       fittingImport,
       savedFittings,
@@ -16,6 +16,7 @@ export function registerImportModule<T extends ControlsCradle>(cradle: AwilixCon
       turret: turretController,
       preferences: preferencesController,
       profileController,
+      profileTextCodec,
     })).singleton(),
   });
 }

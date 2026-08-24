@@ -1,4 +1,4 @@
-import { serializeProfile, type ClipboardProvider, type SettingsStore } from "../../../appstate";
+import { type ClipboardProvider, type ProfileTextCodec, type SettingsStore } from "../../../appstate";
 import { profileSettingsOf } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profileController";
@@ -14,6 +14,7 @@ export class ShareControllerImpl implements ShareController {
   private readonly popupGroup: PopupGroup;
   private readonly els: ShareEls;
   private readonly profileController: ProfileController;
+  private readonly profileTextCodec: ProfileTextCodec;
   private readonly popupValue: Popup;
   private sharePopupOpen = false;
 
@@ -24,6 +25,7 @@ export class ShareControllerImpl implements ShareController {
     popupGroup: PopupGroup;
     els: ShareEls;
     profileController: ProfileController;
+    profileTextCodec: ProfileTextCodec;
   }) {
     this.clipboard = deps.clipboard;
     this.settingsStore = deps.settingsStore;
@@ -31,6 +33,7 @@ export class ShareControllerImpl implements ShareController {
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
     this.profileController = deps.profileController;
+    this.profileTextCodec = deps.profileTextCodec;
     this.popupValue = {
       isOpen: () => this.sharePopupOpen,
       open: () => this.openSharePopup(),
@@ -49,7 +52,7 @@ export class ShareControllerImpl implements ShareController {
   }
 
   async onCopyTextClicked(): Promise<void> {
-    const text = serializeProfile(profileSettingsOf(this.sessionCodec.capture()));
+    const text = this.profileTextCodec.serialize(profileSettingsOf(this.sessionCodec.capture()));
     await this.writeAndClose(text);
   }
 

@@ -1,4 +1,4 @@
-import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
+import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsStore } from "../../appstate";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { HitChance } from "../../sim";
 import type { Ships } from "../../ships";
@@ -48,6 +48,7 @@ export interface ControlsCradle {
   readonly hintRotator: HintRotator;
   readonly preferencesController: PreferencesController;
   readonly profileController: ProfileController;
+  readonly profileTextCodec: ProfileTextCodec;
   readonly turretController: TurretController;
   readonly attackerSide: SidePanel;
   readonly targetSide: SidePanel;

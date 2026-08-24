@@ -1,4 +1,4 @@
-import { ClipboardUnavailableError, parseProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
+import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings, type UserSettings } from "../../../appstate";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
@@ -22,6 +22,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly targetSide: SidePanel;
   private readonly preferences: PreferencesController;
   private readonly profileController: ProfileController;
+  private readonly profileTextCodec: ProfileTextCodec;
   private readonly turret: AttackerTurret;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
@@ -43,6 +44,7 @@ export class ImportControllerImpl implements ImportController {
     turret: AttackerTurret;
     preferences: PreferencesController;
     profileController: ProfileController;
+    profileTextCodec: ProfileTextCodec;
   }) {
     this.clipboard = deps.clipboard;
     this.fittingImport = deps.fittingImport;
@@ -54,6 +56,7 @@ export class ImportControllerImpl implements ImportController {
     this.turret = deps.turret;
     this.preferences = deps.preferences;
     this.profileController = deps.profileController;
+    this.profileTextCodec = deps.profileTextCodec;
     this.eftSideImporter = new EftSideImporter({
       attackerSide: deps.attackerSide,
       targetSide: deps.targetSide,
@@ -65,6 +68,7 @@ export class ImportControllerImpl implements ImportController {
       fittingImport: deps.fittingImport,
       turret: deps.turret,
       preferences: deps.preferences,
+      profileTextCodec: deps.profileTextCodec,
     });
     this.popupValue = {
       isOpen: () => this.importSidePopupOpen,
@@ -118,8 +122,7 @@ export class ImportControllerImpl implements ImportController {
     panel.sections.paste.clearImportHintTimeout();
     const trimmed = text.trimStart();
     if (this.profileTextImporter.isProfileText(trimmed)) {
-      const parsed = parseProfile(trimmed);
-      const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
+      const fitting = this.profileTextImporter.fittingFromProfileText(side, trimmed);
       if (fitting === undefined) {
         panel.sections.paste.showImportHint("status.fittingInvalid", true);
         return;

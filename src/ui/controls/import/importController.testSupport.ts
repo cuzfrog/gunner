@@ -1,5 +1,5 @@
 import type { FittingImport } from "../../../fitting";
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings } from "../../../appstate";
+import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
@@ -19,30 +19,80 @@ class FakePopupGroup implements PopupGroup {
   onKeyDown(): void {}
 }
 
+const GUNNER_PROFILE_BODY = `# gunner v1
+version=6
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+ammo=Hail S
+initialDistance=5000
+attacker.speed=1000
+attacker.mode=keepAtRange
+attacker.range=5000
+attacker.mass=1200000
+attacker.inertia=3
+attacker.hull=Rifter
+target.speed=1000
+target.mode=orbit
+target.range=5000
+target.mass=10000000
+target.inertia=0.45
+target.sig=40
+target.hull=Thrasher`;
+
 export function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
-  return serializeProfile({
-    version: USER_SETTINGS_VERSION,
-    tracking: 0.32,
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: 1_200_000,
-    attackerInertia: 3,
-    attackerHull: "Rifter",
-    targetHull: "Thrasher",
-    initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 10_000_000,
-    targetInertia: 0.45,
-    targetSig: 40,
-    attackerAmmo: "Hail S",
-    ...overrides,
-  });
+  let text = GUNNER_PROFILE_BODY;
+  if (overrides.attackerFitting !== undefined) {
+    text = `${text}\nattacker.fitting:\n${overrides.attackerFitting}\n---`;
+  }
+  if (overrides.targetFitting !== undefined) {
+    text = `${text}\ntarget.fitting:\n${overrides.targetFitting}\n---`;
+  }
+  return text;
+}
+
+function makeMockProfileTextCodec(): ProfileTextCodec {
+  function extractFitting(text: string, side: "attacker" | "target"): string | undefined {
+    const marker = `${side}.fitting:\n`;
+    const startIdx = text.indexOf(marker);
+    if (startIdx < 0) return undefined;
+    const bodyStart = startIdx + marker.length;
+    const endIdx = text.indexOf("\n---", bodyStart);
+    return endIdx < 0 ? text.slice(bodyStart).trim() : text.slice(bodyStart, endIdx);
+  }
+  return {
+    hasHeader: (text: string) => text.trimStart().startsWith("# gunner v1"),
+    parse: (text: string): ProfileSettings | undefined => {
+      const trimmed = text.trimStart();
+      if (!trimmed.startsWith("# gunner v1")) return undefined;
+      return {
+        version: 6,
+        tracking: 0.32,
+        sigRes: "S",
+        optimal: 5000,
+        falloff: 5000,
+        attackerSpeed: 1000,
+        attackerMode: "keepAtRange",
+        attackerRange: 5000,
+        attackerMass: 1_200_000,
+        attackerInertia: 3,
+        initialDistance: 5000,
+        targetSpeed: 1000,
+        targetMode: "orbit",
+        targetRange: 5000,
+        targetMass: 10_000_000,
+        targetInertia: 0.45,
+        targetSig: 40,
+        attackerAmmo: "Hail S",
+        attackerHull: "Rifter",
+        targetHull: "Thrasher",
+        attackerFitting: extractFitting(trimmed, "attacker"),
+        targetFitting: extractFitting(trimmed, "target"),
+      };
+    },
+    serialize: () => "",
+  };
 }
 
 export class FakeSidePanel {
@@ -93,6 +143,7 @@ export function buildImportController(document: Document) {
   const turret: AttackerTurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
   const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })) };
   const profileController = { showStatus: vi.fn() };
+  const profileTextCodec = makeMockProfileTextCodec();
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
   const popupGroup: PopupGroup = new FakePopupGroup();
@@ -112,6 +163,7 @@ export function buildImportController(document: Document) {
     turret,
     preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,
+    profileTextCodec,
   });
   controller.setOnConfigPersisted(onConfigPersisted);
   controller.setOnProfileTextLoaded(onProfileTextLoaded);

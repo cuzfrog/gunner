@@ -26,6 +26,7 @@ const controlsCradleKeys = {
   hintRotator: "hintRotator",
   preferencesController: "preferencesController",
   profileController: "profileController",
+  profileTextCodec: "profileTextCodec",
   turretController: "turretController",
   attackerSide: "attackerSide",
   targetSide: "targetSide",
