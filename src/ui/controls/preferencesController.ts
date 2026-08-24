@@ -31,8 +31,6 @@ export interface PreferencesController {
   savePreferences(): void;
   capture(): DisplayPreferences;
   setTrackingUnit(unit: TrackingUnit): void;
-  updateTrackingFromInput(): void;
-  updateTrackingForSigResolution(): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
   onManeuverAggressivityChange(): void;
@@ -121,15 +119,6 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.updateUnitToggle();
     this.savePreferences();
     this.events.emitDisplayInvalidated();
-  }
-
-  updateTrackingFromInput(): void {
-    const value = num(this.els.tracking);
-    this.els.tracking.value = String(this.trackingInput.setDisplayValue(value, this.sigResolution()));
-  }
-
-  updateTrackingForSigResolution(): void {
-    this.els.tracking.value = String(this.trackingInput.displayValue(this.sigResolution()));
   }
 
   onGridBrightnessChange(): void {

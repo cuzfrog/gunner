@@ -131,7 +131,9 @@ export class SidePanelImpl implements SidePanel {
   }
 
   private onModeInput(): void {
-    this.host.updateManeuverAggressivityEnabled(this.els.mode.value === "midships");
+    if (this.side === "attacker") {
+      this.host.updateManeuverAggressivityEnabled(this.els.mode.value === "midships");
+    }
     this.host.onConfigChange();
   }
 

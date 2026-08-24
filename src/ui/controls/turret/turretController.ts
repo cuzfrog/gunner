@@ -75,7 +75,7 @@ export class TurretControllerImpl implements TurretController {
       turretOverrides: this.turretOverrides,
     });
     this.els.tracking.addEventListener("input", () => this.onTrackingInput());
-    this.els.sigRes.addEventListener("change", () => this.onSigResChange());
+    this.els.sigRes.addEventListener("input", () => this.onSigResChange());
     this.els.optimal.addEventListener("input", () => this.onTurretSpecInput("optimal"));
     this.els.falloff.addEventListener("input", () => this.onTurretSpecInput("falloff"));
     this.events.onLanguageChanged(() => this.render());

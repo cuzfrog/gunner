@@ -204,22 +204,6 @@ describe("PreferencesController", () => {
     expect(controller.trackingInput.rad).toBeCloseTo(0.32);
   });
 
-  test("updateTrackingFromInput converts a score display value to rad", () => {
-    const { controller, els } = build();
-    controller.setTrackingUnit("score");
-    els.tracking.value = "320";
-    controller.updateTrackingFromInput();
-    expect(controller.trackingInput.rad).toBeCloseTo(0.32);
-    expect(els.tracking.value).toBe("320");
-  });
-
-  test("updateTrackingForSigResolution updates the displayed score for a new signature resolution", () => {
-    const { controller, els } = build();
-    controller.trackingInput.setRadValue(0.32, 40);
-    controller.setTrackingUnit("score");
-    expect(els.tracking.value).toBe("320");
-  });
-
   test("getGridBrightness clamps values to [0, 1]", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "-0.5";

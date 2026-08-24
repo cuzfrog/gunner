@@ -116,8 +116,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       shareController: proxy.shareController,
       rangeOverlayController: proxy.rangeOverlayController,
       previewManager: proxy.previewManager,
-      attackerFittingPopup: proxy.attackerFittingPopup,
-      targetFittingPopup: proxy.targetFittingPopup,
     })).singleton(),
   });
   wire(cradle);

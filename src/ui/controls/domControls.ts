@@ -14,7 +14,7 @@ import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsC
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { RangeOverlayHost } from "./rangeOverlay";
-import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
+import type { FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
 import type { HullDatalist, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
@@ -52,8 +52,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
   previewManager: FittingPreviewManager;
-  attackerFittingPopup: FittingPopupController;
-  targetFittingPopup: FittingPopupController;
 }
 
 export class DomControls implements Controls, DomControlsHost, RangeOverlayHost {
@@ -78,8 +76,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly previewManager: FittingPreviewManager;
   private currentDistanceValue: number;
-  private readonly attackerFittingPopup: FittingPopupController;
-  private readonly targetFittingPopup: FittingPopupController;
+
   private callbacks?: ControlsCallbacks;
   private playing = false;
 
@@ -105,16 +102,12 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.rangeOverlayController = all.rangeOverlayController;
     this.previewManager = all.previewManager;
     this.currentDistanceValue = this.sessionCodec.getInitialDistance();
-    this.attackerFittingPopup = all.attackerFittingPopup;
-    this.targetFittingPopup = all.targetFittingPopup;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
   }
 
   wireControls(): void {
-    this.popupGroup.register(this.attackerFittingPopup.popup);
-    this.popupGroup.register(this.targetFittingPopup.popup);
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretController.popup);
