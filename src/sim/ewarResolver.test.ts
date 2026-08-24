@@ -1,7 +1,6 @@
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { EwarResolverImpl } from "./ewarResolver";
 import {
-  ALL_ACTIVE,
   EMPTY_EWAR_LOADOUT,
   type EwarProjection,
   type StasisWebSpec,
@@ -21,12 +20,12 @@ const defaultTurret: TurretSpec = {
 
 function webProjection(specs: readonly StasisWebSpec[], overloaded = false): EwarProjection {
   const loadout = { webs: specs, disruptors: [] };
-  return { loadout, activation: ALL_ACTIVE(loadout), overloaded };
+  return { loadout, overloaded };
 }
 
 function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false): EwarProjection {
   const loadout = { webs: [], disruptors: specs };
-  return { loadout, activation: ALL_ACTIVE(loadout), overloaded };
+  return { loadout, overloaded };
 }
 
 describe("EwarResolverImpl", () => {
@@ -67,6 +66,18 @@ describe("EwarResolverImpl", () => {
     test("undefined projection is identity", () => {
       expect(resolver.webSpeedMultiplier(undefined, 5000)).toBe(1);
     });
+
+    test("a web missing from a partial activation array is treated as active", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection = { loadout: { webs: [web], disruptors: [] }, overloaded: false, activation: { webs: [], disruptors: [] } };
+      expect(resolver.webSpeedMultiplier(projection, 5000)).toBeCloseTo(0.4, 10);
+    });
+
+    test("explicit active false still disables a web", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection = { loadout: { webs: [web], disruptors: [] }, overloaded: false, activation: { webs: [{ active: false }], disruptors: [] } };
+      expect(resolver.webSpeedMultiplier(projection, 5000)).toBe(1);
+    });
   });
 
   describe("disruptedTurret", () => {
@@ -96,6 +107,14 @@ describe("EwarResolverImpl", () => {
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking, 10);
       expect(turret.optimal).toBeCloseTo(defaultTurret.optimal * rangeFactor, 10);
       expect(turret.falloff).toBeCloseTo(defaultTurret.falloff * rangeFactor, 10);
+    });
+
+    test("disruptor without activation defaults to its spec script", () => {
+      const projection: EwarProjection = { loadout: { webs: [], disruptors: [{ ...td, defaultScript: "optimalRange" }] }, overloaded: false };
+      const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
+      const rangeFactor = 1 - 2 * 0.1719;
+      expect(turret.tracking).toBeCloseTo(defaultTurret.tracking, 10);
+      expect(turret.optimal).toBeCloseTo(defaultTurret.optimal * rangeFactor, 10);
     });
 
     test("tracking-speed script doubles tracking penalty and leaves range", () => {
@@ -139,7 +158,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("empty loadout leaves turret untouched", () => {
-      const projection = { loadout: EMPTY_EWAR_LOADOUT, activation: ALL_ACTIVE(EMPTY_EWAR_LOADOUT), overloaded: false };
+      const projection = { loadout: EMPTY_EWAR_LOADOUT, overloaded: false };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       expect(turret).toEqual(defaultTurret);
     });

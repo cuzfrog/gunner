@@ -18,8 +18,8 @@ export class EwarResolverImpl implements EwarResolver {
     const multipliers: number[] = [];
     for (let i = 0; i < projection.loadout.webs.length; i++) {
       const spec = projection.loadout.webs[i];
-      const activation = projection.activation.webs[i];
-      if (!activation?.active) continue;
+      const activation = projection.activation?.webs[i];
+      if (activation && !activation.active) continue;
       const overloadBonus = projection.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
       if (range >= distance) multipliers.push(1 - spec.speedFactor);
@@ -35,13 +35,13 @@ export class EwarResolverImpl implements EwarResolver {
 
     for (let i = 0; i < projection.loadout.disruptors.length; i++) {
       const spec = projection.loadout.disruptors[i];
-      const activation = projection.activation.disruptors[i];
-      if (!activation?.active) continue;
+      const activation = projection.activation?.disruptors[i];
+      if (activation && !activation.active) continue;
 
       const overloadBonus = projection.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const strength = spec.disruption * overloadBonus;
       const effectiveness = turretEffectiveness(distance, spec);
-      const effects = scriptEffects(activation.script, strength);
+      const effects = scriptEffects(activation?.script ?? spec.defaultScript, strength);
 
       if (effects.tracking > 0) trackingModifiers.push(1 - effects.tracking * effectiveness);
       if (effects.optimal > 0) optimalModifiers.push(1 - effects.optimal * effectiveness);

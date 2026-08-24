@@ -1,4 +1,4 @@
-import { ALL_ACTIVE, type DisruptionScript, type EwarActivation, type EwarLoadout, type EwarProjection } from "../../../sim";
+import { type DisruptionScript, type EwarLoadout, type EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -44,7 +44,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   setLoadout(side: Side, loadout: EwarLoadout): void {
-    this.states.set(side, { loadout, activation: toMutableActivation(ALL_ACTIVE(loadout)) });
+    this.states.set(side, { loadout, activation: this.clampActivation(loadout) });
     this.host?.onConfigChange();
     this.renderSide(side);
   }
@@ -285,13 +285,6 @@ export class EwarControllerImpl implements EwarController {
     this.updateSummary(side);
     this.host?.onConfigChange();
   }
-}
-
-function toMutableActivation(activation: EwarActivation): MutableEwarActivation {
-  return {
-    webs: activation.webs.map((w) => ({ active: w.active })),
-    disruptors: activation.disruptors.map((d) => ({ active: d.active, script: d.script })),
-  };
 }
 
 function toDisruptionScript(value: string): DisruptionScript | undefined {

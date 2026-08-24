@@ -104,16 +104,9 @@ export interface EwarActivation {
   readonly disruptors: readonly DisruptorActivation[];
 }
 
-export function ALL_ACTIVE(loadout: EwarLoadout): EwarActivation {
-  return {
-    webs: loadout.webs.map(() => ({ active: true })),
-    disruptors: loadout.disruptors.map((disruptor) => ({ active: true, script: disruptor.defaultScript })),
-  };
-}
-
 export interface EwarProjection {
   readonly loadout: EwarLoadout;
-  readonly activation: EwarActivation;
+  readonly activation?: EwarActivation;
   readonly overloaded: boolean;
 }
 

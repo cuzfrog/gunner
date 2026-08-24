@@ -27,7 +27,7 @@ export type {
   TurretSpec,
   WebActivation,
 } from "./types";
-export { ALL_ACTIVE, EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";
+export { EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";
 export { registerSimModule } from "./module";

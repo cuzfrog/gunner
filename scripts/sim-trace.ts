@@ -1,6 +1,5 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import {
-  ALL_ACTIVE,
   ReactiveAutopilot,
   registerSimModule,
   Vec2,
@@ -202,7 +201,7 @@ function loadEwarProjection(fittingImport: FittingImport, path: string, overload
   const conditions: StatConditions = { skillLevel: 5, overloaded: false };
   const imported = fittingImport.importFitting(text, conditions);
   if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
-  return { loadout: imported.ewar, activation: ALL_ACTIVE(imported.ewar), overloaded };
+  return { loadout: imported.ewar, overloaded };
 }
 
 function trace(params: TraceParams): void {

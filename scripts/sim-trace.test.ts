@@ -62,7 +62,6 @@ describe("loadEwarProjection", () => {
     );
     expect(projection.loadout.webs).toHaveLength(1);
     expect(projection.loadout.webs[0]?.moduleName).toBe("Stasis Webifier II");
-    expect(projection.activation.webs[0]?.active).toBe(true);
     expect(projection.loadout.disruptors).toHaveLength(0);
     expect(projection.overloaded).toBe(true);
   });
@@ -78,7 +77,6 @@ describe("loadEwarProjection", () => {
     expect(projection.loadout.disruptors.length).toBeGreaterThanOrEqual(2);
     expect(projection.loadout.disruptors.some((d) => d.defaultScript === "optimalRange")).toBe(true);
     expect(projection.loadout.disruptors.some((d) => d.defaultScript === "trackingSpeed")).toBe(true);
-    expect(projection.activation.disruptors.every((d) => d.active)).toBe(true);
     expect(projection.overloaded).toBe(false);
   });
 
