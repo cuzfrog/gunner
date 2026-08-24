@@ -7,6 +7,7 @@ export type {
   ProfileSettings,
   PropulsionSelection,
   StartupState,
+  StoredBoosterActivation,
   StoredDisruptionScript,
   StoredEwarActivation,
   TrackingUnit,

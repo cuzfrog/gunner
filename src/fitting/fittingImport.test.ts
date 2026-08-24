@@ -14,6 +14,7 @@ import {
   SCRIPTS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
+  TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
   TURRETS,
   WARP_SCRAMBLERS,
@@ -186,6 +187,7 @@ const db: FittingDb = {
   },
   stasisWebs: {},
   stasisGrapplers: {},
+  trackingComputers: {},
   trackingDisruptors: {},
   warpScramblers: {},
   disruptionScripts: {},
@@ -221,6 +223,7 @@ const fullFittingDb: FittingDb = {
   scripts: SCRIPTS,
   stasisWebs: STASIS_WEBS,
   stasisGrapplers: STASIS_GRAPPLERS,
+  trackingComputers: TRACKING_COMPUTERS,
   trackingDisruptors: TRACKING_DISRUPTORS,
   warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
@@ -727,6 +730,40 @@ Heavy Stasis Grappler I`,
     expect(result!.ewar.scramblers).toEqual([]);
   });
 
+  test("resolves a tracking computer and its default script", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const result = importer.importFitting(
+      `[Rifter, Tc]
+200mm AutoCannon I, Hail S
+Tracking Computer I, Optimal Range Script`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.boosts.computers).toEqual([
+      { moduleName: "Tracking Computer I", trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: result!.boosts.scripts.find((s) => s.name === "Optimal Range Script") },
+    ]);
+    expect(result!.boosts.scripts).toEqual([
+      { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
+      { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
+    ]);
+  });
+
+  test("ignores an offline tracking computer", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const result = importer.importFitting(
+      `[Rifter, Tc]
+200mm AutoCannon I, Hail S
+Tracking Computer I/OFFLINE`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.boosts.computers).toEqual([]);
+  });
+
   test("resolves a warp scrambler with a charge line", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
@@ -825,7 +862,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

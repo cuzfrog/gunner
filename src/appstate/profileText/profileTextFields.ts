@@ -1,8 +1,8 @@
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation } from "../userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
 
 export type Side = "attacker" | "target";
 export type ScalarField = keyof Omit<ProfileSettings, "attackerFitting" | "targetFitting" | "attackerOverrides" | "targetOverrides">;
-export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation;
+export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[];
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
@@ -27,6 +27,7 @@ export const ATTACKER_FIELDS: readonly ScalarField[] = [
   "attackerPropulsion",
   "attackerFittedHull",
   "attackerEwarActivation",
+  "attackerBoosterActivation",
 ] as const;
 
 export const TARGET_FIELDS: readonly ScalarField[] = [
@@ -42,6 +43,7 @@ export const TARGET_FIELDS: readonly ScalarField[] = [
   "targetPropulsion",
   "targetFittedHull",
   "targetEwarActivation",
+  "targetBoosterActivation",
 ] as const;
 
 export const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...ATTACKER_FIELDS, ...TARGET_FIELDS] as const;

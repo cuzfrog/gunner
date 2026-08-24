@@ -1,6 +1,6 @@
 import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "../legacyScriptNames";
-import type { ProfileParamOverrides, ProfileSettings, StoredEwarActivation } from "../userSettings";
-import { isOptionalEwarActivation } from "../validators";
+import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
+import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
@@ -21,6 +21,8 @@ export class ProfileTextParser {
     let targetOverrides: Partial<ProfileParamOverrides> = {};
     let attackerEwarActivationRaw: string | undefined;
     let targetEwarActivationRaw: string | undefined;
+    let attackerBoosterActivationRaw: string | undefined;
+    let targetBoosterActivationRaw: string | undefined;
 
     let i = firstLine + 1;
     while (i < rawLines.length) {
@@ -67,6 +69,14 @@ export class ProfileTextParser {
         targetEwarActivationRaw = value;
         continue;
       }
+      if (field === "attackerBoosterActivation") {
+        attackerBoosterActivationRaw = value;
+        continue;
+      }
+      if (field === "targetBoosterActivation") {
+        targetBoosterActivationRaw = value;
+        continue;
+      }
       const parsed = parseScalarValue(field, value);
       if (parsed === undefined) return undefined;
       raw = { ...raw, [field]: parsed };
@@ -74,6 +84,15 @@ export class ProfileTextParser {
 
     if (Object.keys(attackerOverrides).length > 0) raw = { ...raw, attackerOverrides };
     if (Object.keys(targetOverrides).length > 0) raw = { ...raw, targetOverrides };
+
+    if (attackerBoosterActivationRaw !== undefined) {
+      const activation = parseBoosterActivation(attackerBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, attackerBoosterActivation: activation };
+    }
+    if (targetBoosterActivationRaw !== undefined) {
+      const activation = parseBoosterActivation(targetBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, targetBoosterActivation: activation };
+    }
 
     if (attackerEwarActivationRaw !== undefined) {
       const activation = parseEwarActivation(attackerEwarActivationRaw, raw.attackerOverload !== false);
@@ -140,4 +159,15 @@ function migrateDisruptorActivation(
 ): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
   const script = LEGACY_DISRUPTION_SCRIPT_NAMES[item.script] ?? item.script;
   return { active: item.active, overloaded: item.overloaded ?? sideOverload, script };
+}
+
+function parseBoosterActivation(raw: string): readonly StoredBoosterActivation[] | undefined {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return undefined;
+    const result = parsed.map((item) => (typeof item === "boolean" ? { active: item, script: "" } : item));
+    return isOptionalBoosterActivations(result) ? result : undefined;
+  } catch {
+    return undefined;
+  }
 }

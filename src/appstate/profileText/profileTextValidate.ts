@@ -4,9 +4,11 @@ import {
   type FittedHullSummary,
   type ProfileParamOverrides,
   type ProfileSettings,
+  type StoredBoosterActivation,
 } from "../userSettings";
 import {
   isNonNegative,
+  isOptionalBoosterActivations,
   isOptionalFittedHullSummary,
   isPositive,
   isSkillLevel,
@@ -114,6 +116,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     attackerOverrides: raw.attackerOverrides,
     attackerFittedHull: raw.attackerFittedHull,
     attackerEwarActivation: raw.attackerEwarActivation,
+    attackerBoosterActivation: raw.attackerBoosterActivation,
     attackerAmmo: raw.attackerAmmo,
     targetSkillLevel: raw.targetSkillLevel,
     targetOverload: raw.targetOverload,
@@ -123,6 +126,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     targetOverrides: raw.targetOverrides,
     targetFittedHull: raw.targetFittedHull,
     targetEwarActivation: raw.targetEwarActivation,
+    targetBoosterActivation: raw.targetBoosterActivation,
     maneuverAggressivity: raw.maneuverAggressivity,
   };
 }

@@ -140,6 +140,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+  boosts: { computers: [], scripts: [] },
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

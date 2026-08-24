@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -115,6 +115,28 @@ describe("buildWarpScramblerStats", () => {
 
   test("returns undefined when range is missing", () => {
     expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1 }))).toBeUndefined();
+  });
+});
+
+describe("buildTrackingComputerStats", () => {
+  test("returns undefined when tracking bonus is missing", () => {
+    expect(buildTrackingComputerStats(values({}))).toBeUndefined();
+  });
+
+  test("builds a tracking computer from bonus attributes", () => {
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 10, maxRangeBonus: 5, falloffBonus: 10 }))).toEqual({
+      trackingBonusPercent: 10,
+      optimalBonusPercent: 5,
+      falloffBonusPercent: 10,
+    });
+  });
+
+  test("defaults missing range and falloff bonuses to zero", () => {
+    expect(buildTrackingComputerStats(values({ trackingSpeedBonus: 15 }))).toEqual({
+      trackingBonusPercent: 15,
+      optimalBonusPercent: 0,
+      falloffBonusPercent: 0,
+    });
   });
 });
 

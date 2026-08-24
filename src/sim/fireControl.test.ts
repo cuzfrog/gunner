@@ -3,6 +3,7 @@ import { EngagementEvaluatorImpl } from "./fireControl";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { Kinematics } from "./kinematics";
+import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "./types";
 
 const turret: TurretSpec = { tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000 };
@@ -56,13 +57,15 @@ function makeEvaluator(): {
   kinematics: Kinematics;
   hitChance: HitChance;
   ewarResolver: EwarResolver;
+  turretBoosterResolver: TurretBoosterResolver;
   evaluator: EngagementEvaluatorImpl;
 } {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
   const ewarResolver = vi.mocked<EwarResolver>({ speedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret), propulsionSuppressed: vi.fn(() => false) });
-  const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver });
-  return { kinematics, hitChance, ewarResolver, evaluator };
+  const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn((t) => t) });
+  const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver, turretBoosterResolver });
+  return { kinematics, hitChance, ewarResolver, turretBoosterResolver, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {
@@ -84,6 +87,18 @@ describe("EngagementEvaluatorImpl", () => {
     expect(kinematics.computeEngagement).toHaveBeenCalledWith(target, attacker, 1);
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(turret, attacker.ewar, 6000);
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 30);
+  });
+
+  test("applies own boosts before enemy disruption", () => {
+    const { ewarResolver, turretBoosterResolver, evaluator } = makeEvaluator();
+    const boosted: TurretSpec = { tracking: 0.12, sigResolution: 40, optimal: 5500, falloff: 5500 };
+    vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
+    const attackerWithBoosts = { ...attacker, boosts: { loadout: { computers: [], scripts: [] } } };
+    const snapshotWithBoosts = { ...snapshot, attacker: attackerWithBoosts };
+    const result = evaluator.evaluate(snapshotWithBoosts, { attacker: { turret, targetSigRadius: 40 } });
+    expect(result.attacker?.effectiveTurret).toEqual(effectiveTurret);
+    expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, attackerWithBoosts.boosts);
+    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boosted, target.ewar, 6000);
   });
 
   test("returns empty result when no attacks are requested", () => {

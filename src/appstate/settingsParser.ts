@@ -9,6 +9,7 @@ import { FittingBasis } from "./fittingBasis";
 import {
   isLanguage,
   isNonNegative,
+  isOptionalBoosterActivations,
   isOptionalBoolean,
   isOptionalEwarActivation,
   isOptionalFittedHullSummary,
@@ -132,6 +133,8 @@ export class SettingsParser {
       isOptionalProfileParamOverrides(s.targetOverrides) &&
       isOptionalEwarActivation(s.attackerEwarActivation) &&
       isOptionalEwarActivation(s.targetEwarActivation) &&
+      isOptionalBoosterActivations(s.attackerBoosterActivation) &&
+      isOptionalBoosterActivations(s.targetBoosterActivation) &&
       isOptionalNonEmptyString(s.attackerAmmo)
     );
   }

@@ -34,6 +34,7 @@ export interface ShipState extends ShipConfig {
   position: Vec2;
   velocity: Vec2;
   ewar?: EwarProjection;
+  boosts?: TurretBoostProjection;
 }
 
 export interface SimConfig {
@@ -84,6 +85,13 @@ export interface DisruptionScriptSpec {
   readonly falloffMultiplier: number;
 }
 
+export interface TurretScriptSpec {
+  readonly name: string;
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+}
+
 export interface StasisWebSpec {
   readonly moduleName: string;
   readonly maxRange: number;
@@ -113,6 +121,21 @@ export interface WarpScramblerSpec {
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
 }
+
+export interface TrackingBoosterSpec {
+  readonly moduleName: string;
+  readonly trackingBonusPercent: number;
+  readonly optimalBonusPercent: number;
+  readonly falloffBonusPercent: number;
+  readonly defaultScript: TurretScriptSpec | undefined;
+}
+
+export interface BoostLoadout {
+  readonly computers: readonly TrackingBoosterSpec[];
+  readonly scripts: readonly TurretScriptSpec[];
+}
+
+export const EMPTY_BOOST_LOADOUT: BoostLoadout = { computers: [], scripts: [] };
 
 export interface ScramblerActivation {
   readonly active: boolean;
@@ -162,6 +185,21 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
+export interface BoosterActivation {
+  readonly active: boolean;
+  readonly script: TurretScriptSpec | undefined;
+}
+
+export interface BoostActivation {
+  readonly computers: readonly BoosterActivation[];
+}
+
+export interface TurretBoostProjection {
+  readonly loadout: BoostLoadout;
+  readonly activation?: BoostActivation;
+}
+
 export interface CombatantConfig extends ShipConfig {
   readonly ewar?: EwarProjection;
+  readonly boosts?: TurretBoostProjection;
 }

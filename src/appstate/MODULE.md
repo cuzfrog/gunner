@@ -4,7 +4,6 @@ no-new-exports:
   - fittingBasis.ts
   - legacyScriptNames.ts
   - cradle.ts
-  - validators.ts
   - savedFittings.ts
   - validators.test.ts
   - settingsParser.test.ts
@@ -12,8 +11,6 @@ no-new-exports:
   - localSettingsStore.test.ts
   - urlCodec.test.ts
   - urlCodec.ts
-  - userSettings.ts
-  - index.ts
   - language.ts
   - localSettingsStore.testSupport.ts
   - localSettingsStore.ts
@@ -25,11 +22,8 @@ no-new-exports:
   - settingsStore.ts
 ---
 
-
-
-
 # appstate
 
 Application state persistence and serialization for user settings, profiles, saved fittings, URL sharing, and EFT profile text. Depends on ships/fitting/sim domain modules. Consumed by ui through its index.
 
-The public surface is the cross-boundary DTOs, provider interfaces, and the `ProfileTextCodec` abstraction type. `UserSettings` and `ProfileSettings` carry optional per-side e-war activation (`attackerEwarActivation`, `targetEwarActivation`) for persisting web on/off states and disruptor script choices. Profile-text parsing and serialization lives in the `profileText` sub-module, exposed as the `ProfileTextCodec` interface implemented by `LocalProfileTextCodec` and registered as `profileTextCodec` in the DI container; raw parse/serialize functions are internal to the sub-module. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.
+The public surface is the cross-boundary DTOs, provider interfaces, and the `ProfileTextCodec` abstraction type. `UserSettings` and `ProfileSettings` carry optional per-side e-war activation (`attackerEwarActivation`, `targetEwarActivation`) and turret-booster activation (`attackerBoosterActivation`, `targetBoosterActivation`) for persisting module on/off and script choices. Profile-text parsing and serialization lives in the `profileText` sub-module, exposed as the `ProfileTextCodec` interface implemented by `LocalProfileTextCodec` and registered as `profileTextCodec` in the DI container; raw parse/serialize functions are internal to the sub-module. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.

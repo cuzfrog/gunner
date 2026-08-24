@@ -1,4 +1,4 @@
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -103,16 +103,16 @@ describe("fittingDb", () => {
     });
   });
 
-  test("includes tracking enhancer and computer turret bonus percents", () => {
+  test("includes tracking enhancer turret bonus percents and tracking computer stats", () => {
     expect(FITTING_MODULES["Tracking Enhancer II"]).toEqual({
       turretTrackingPercent: 9.5,
       turretOptimalPercent: 10,
       turretFalloffPercent: 20,
     });
-    expect(FITTING_MODULES["Tracking Computer II"]).toEqual({
-      turretTrackingPercent: 15,
-      turretOptimalPercent: 7.5,
-      turretFalloffPercent: 15,
+    expect(TRACKING_COMPUTERS["Tracking Computer II"]).toEqual({
+      trackingBonusPercent: 15,
+      optimalBonusPercent: 7.5,
+      falloffBonusPercent: 15,
     });
   });
 

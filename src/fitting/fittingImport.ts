@@ -12,13 +12,16 @@ import type {
 } from "../ships";
 import {
   SIG_RESOLUTIONS,
+  type BoostLoadout,
   type DisruptionScriptSpec,
   type EwarLoadout,
   type SigResolutionClass,
   type StackingPenalty,
   type StasisGrapplerSpec,
   type StasisWebSpec,
+  type TrackingBoosterSpec,
   type TrackingDisruptorSpec,
+  type TurretScriptSpec,
   type WarpScramblerSpec,
 } from "../sim";
 import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
@@ -31,6 +34,7 @@ import type {
   HullBonus,
   StasisGrapplerStats,
   StasisWebStats,
+  TrackingComputerStats,
   TrackingDisruptorStats,
   TurretScriptStats,
   TurretStats,
@@ -68,6 +72,7 @@ export interface ImportedFitting {
   readonly turret?: ImportedTurret;
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
+  readonly boosts: BoostLoadout;
 }
 
 export interface FittingDb {
@@ -77,6 +82,7 @@ export interface FittingDb {
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
   readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
   readonly stasisGrapplers: Readonly<Record<string, StasisGrapplerStats>>;
+  readonly trackingComputers: Readonly<Record<string, TrackingComputerStats>>;
   readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
   readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
   readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
@@ -158,6 +164,7 @@ export class FittingImportImpl implements FittingImport {
     const turret = resolveTurret(this.db, this.chargeCatalog, document, conditions.skillLevel, hullBonuses, this.stacking);
     const cargoCharges = resolveCargoCharges(this.db, document);
     const ewar = resolveEwar(this.db, document);
+    const boosts = resolveBoosts(this.db, document);
 
     return {
       profile,
@@ -167,6 +174,7 @@ export class FittingImportImpl implements FittingImport {
       turret,
       cargoCharges,
       ewar,
+      boosts,
     };
   }
 
@@ -397,6 +405,36 @@ function resolveCargoCharges(db: FittingDb, document: EftDocument): readonly Car
     if (db.charges[item.name]) charges.push({ name: item.name, quantity: item.quantity });
   }
   return charges;
+}
+
+function resolveBoosts(db: FittingDb, parsed: EftDocument): BoostLoadout {
+  const scripts: TurretScriptSpec[] = Object.entries(db.scripts).map(([name, stats]) => ({
+    name,
+    trackingMultiplier: stats.trackingMultiplier,
+    optimalMultiplier: stats.optimalMultiplier,
+    falloffMultiplier: stats.falloffMultiplier,
+  }));
+  const scriptByName = new Map(scripts.map((s) => [s.name, s]));
+  const computers: TrackingBoosterSpec[] = [];
+
+  for (const line of moduleLines(parsed)) {
+    if (line.offline) continue;
+
+    const computerStats = db.trackingComputers[line.name];
+    if (computerStats) {
+      const scriptName = line.charge ?? undefined;
+      const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
+      computers.push({
+        moduleName: line.name,
+        trackingBonusPercent: computerStats.trackingBonusPercent,
+        optimalBonusPercent: computerStats.optimalBonusPercent,
+        falloffBonusPercent: computerStats.falloffBonusPercent,
+        defaultScript,
+      });
+    }
+  }
+
+  return { computers, scripts };
 }
 
 function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {

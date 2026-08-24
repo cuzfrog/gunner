@@ -4,10 +4,14 @@ export type { HitChance } from "./hitChance";
 export type { Kinematics } from "./kinematics";
 export type { Simulation } from "./simulation";
 export type { EwarResolver } from "./ewarResolver";
+export type { TurretBoosterResolver } from "./turretBoosterResolver";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AutopilotMode,
+  BoosterActivation,
+  BoostActivation,
+  BoostLoadout,
   CombatantConfig,
   DisruptionScriptSpec,
   DisruptorActivation,
@@ -26,12 +30,15 @@ export type {
   SimSnapshot,
   StasisGrapplerSpec,
   StasisWebSpec,
+  TrackingBoosterSpec,
   TrackingDisruptorSpec,
+  TurretBoostProjection,
+  TurretScriptSpec,
   TurretSpec,
   WarpScramblerSpec,
   WebActivation,
 } from "./types";
-export { EMPTY_EWAR_LOADOUT, isAutopilotMode, isSigResolutionClass, SIG_RESOLUTIONS } from "./types";
+export { EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, isAutopilotMode, isSigResolutionClass, SIG_RESOLUTIONS } from "./types";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";
 export { registerSimModule } from "./module";

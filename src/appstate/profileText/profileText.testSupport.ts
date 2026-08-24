@@ -23,7 +23,7 @@ export const TARGET_FITTED_HULL: FittedHullSummary = {
 };
 
 export const FULL_PROFILE: ProfileSettings = {
-  version: 9,
+  version: 10,
   tracking: 0.315,
   sigRes: "S",
   optimal: 600,
@@ -64,10 +64,12 @@ export const FULL_PROFILE: ProfileSettings = {
     ],
   },
   targetEwarActivation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }] },
+  attackerBoosterActivation: [{ active: true, script: "Optimal Range Script" }],
+  targetBoosterActivation: [{ active: false, script: "none" }],
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {
-  version: 9,
+  version: 10,
   tracking: 0.32,
   sigRes: "S",
   optimal: 5000,

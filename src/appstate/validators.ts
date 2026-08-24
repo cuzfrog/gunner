@@ -1,7 +1,7 @@
 import { isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation, UserSettings } from "./userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -21,6 +21,20 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
   }
   if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
   return true;
+}
+
+export function isOptionalBoosterActivation(value: unknown): value is StoredBoosterActivation | undefined {
+  if (value === undefined) return true;
+  if (typeof value === "boolean") return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.active === "boolean" && typeof item.script === "string";
+}
+
+export function isOptionalBoosterActivations(value: unknown): value is readonly StoredBoosterActivation[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isOptionalBoosterActivation);
 }
 
 function isStoredWebActivation(value: unknown): boolean {
@@ -80,8 +94,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {

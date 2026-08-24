@@ -124,6 +124,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   turret: TURRET,
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+  boosts: { computers: [], scripts: [] },
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
 
