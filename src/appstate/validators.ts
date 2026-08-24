@@ -1,4 +1,4 @@
-import { isAutopilotMode, isSigResolutionClass, type AutopilotMode, type SigResolutionClass } from "../sim";
+import { isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation, UserSettings } from "./userSettings";

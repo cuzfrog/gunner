@@ -1,5 +1,4 @@
-import type { ProfileSettings } from "../../appstate";
-import type { ProfileEquality } from "../../appstate";
+import type { ProfileEquality, ProfileSettings } from "../../appstate";
 
 export interface ProfileChangeTracker {
   setBaseline(profile: ProfileSettings | undefined): void;

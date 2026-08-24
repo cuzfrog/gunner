@@ -9,7 +9,11 @@ no-new-exports:
   - profileTextParser.test.ts
   - profileTextSerializer.test.ts
   - profileTextValidate.ts
+  - profileTextCodec.ts
+  - profileTextParser.ts
+  - profileTextSerializer.ts
 ---
+
 
 
 # profileText

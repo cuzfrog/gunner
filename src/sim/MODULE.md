@@ -11,21 +11,23 @@ no-new-exports:
   - hitChance.ts
   - ewarResolver.test.ts
   - vec2.ts
-  # - types.ts (temporarily lifted for ewar-v2 cross-boundary DTOs)
+  - cradle.ts
+  - ewarResolver.ts
+  - index.ts
+  - kinematics.test.ts
   - kinematics.ts
+  - module.ts
   - predictiveAutopilot.test.ts
+  - predictiveAutopilot.ts
+  - simulation.test.ts
   - simulation.ts
   - stackingPenalty.test.ts
-  - module.ts
-  - vec2.test.ts
-  - simulation.test.ts
   - stackingPenalty.ts
-  - cradle.ts
-  - predictiveAutopilot.ts
-  - kinematics.test.ts
-  - ewarResolver.ts
-  # - index.ts (temporarily lifted for ewar-v2 cross-boundary DTOs)
+  - types.test.ts
+  - types.ts
+  - vec2.test.ts
 ---
+
 
 
 

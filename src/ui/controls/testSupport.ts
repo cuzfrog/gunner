@@ -160,7 +160,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     clipboard: asValue(mockClipboard()),
     timer: asValue(mockTimer()),
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
-    profileEquality: asValue<ProfileEquality>({ equal: () => true }),
+    profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
   });
   return cradle;
 }

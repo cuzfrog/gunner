@@ -78,7 +78,13 @@ no-new-exports:
   - ewar/module.ts
   - ewar/MODULE.md
   - elementCollectors.ts
+  - confirmController.test.ts
+  - confirmController.ts
+  - controlsFormat.ts
+  - profileChangeTracker.test.ts
+  - profileChangeTracker.ts
 ---
+
 
 
 

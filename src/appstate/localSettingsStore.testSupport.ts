@@ -203,7 +203,7 @@ export function makeParser(): SettingsParser {
 }
 
 export function fakeEquality(equal = true): ProfileEquality {
-  return { equal: () => equal };
+  return { equal() { return equal; } };
 }
 
 export function makeStore(options: {

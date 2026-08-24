@@ -12,15 +12,18 @@ no-new-exports:
   - urlCodec.test.ts
   - urlCodec.ts
   - userSettings.ts
-  # - localSettingsStore.testSupport.ts (temporarily lifted for ProfileEquality test fakes)
-  - providers.ts
-  - settingsParser.ts
-  - localSettingsStore.ts
-  - savedFittings.test.ts
-  # - index.ts (temporarily lifted for ProfileEquality provider contract)
-  - settingsStore.ts
+  - index.ts
   - language.ts
+  - localSettingsStore.testSupport.ts
+  - localSettingsStore.ts
+  - profileEquality.test.ts
+  - profileEquality.ts
+  - providers.ts
+  - savedFittings.test.ts
+  - settingsParser.ts
+  - settingsStore.ts
 ---
+
 
 
 

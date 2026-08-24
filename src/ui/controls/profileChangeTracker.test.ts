@@ -1,5 +1,4 @@
-import type { ProfileSettings } from "../../appstate";
-import { USER_SETTINGS_VERSION } from "../../appstate";
+import { USER_SETTINGS_VERSION, type ProfileEquality, type ProfileSettings } from "../../appstate";
 import { ProfileChangeTrackerImpl } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {
@@ -23,8 +22,8 @@ const BASE_PROFILE: ProfileSettings = {
   attackerAmmo: "Hail S",
 };
 
-function fakeEquality(result: boolean) {
-  return { equal: () => result };
+function fakeEquality(result: boolean): ProfileEquality {
+  return { equal() { return result; } };
 }
 
 describe("ProfileChangeTracker", () => {
