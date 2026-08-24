@@ -9,6 +9,7 @@ import { createControlsEls } from "../elements";
 import type { PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { EwarControllerImpl } from "./ewarController";
+import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
@@ -58,12 +59,17 @@ function buildEwarController(language: Language = "en") {
   const els = collectEwarEls(createControlsEls());
   getFake(document, "attacker-ewar-popup").hidden = true;
   getFake(document, "target-ewar-popup").hidden = true;
-  const host = { onConfigChange: vi.fn() };
+  const host = { onConfigChange: vi.fn(), currentDistance: vi.fn(() => 5000) };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
-  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n });
+  const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
+    webDescription: vi.fn(() => "web-title"),
+    disruptorDescription: vi.fn(() => "disruptor-title"),
+    scramblerDescription: vi.fn(() => "scrambler-title"),
+  });
+  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber });
   controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, ewarEffectDescriber };
 }
 
 function webSection(popup: FakeElement): FakeElement | undefined {
@@ -602,5 +608,40 @@ describe("EwarController", () => {
     expect(webRow.className).toBe("ewar-row ewar-row-inactive");
     webRow.children[0].trigger("click");
     expect(webRow.className).toBe("ewar-row");
+  });
+
+  test("summary items receive title attributes from the effect describer", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], scramblers: [], scripts: SCRIPTS });
+
+    const summary = getFake(document, "attacker-ewar-summary");
+    expect(summary.children[0].getAttribute("title")).toBe("web-title");
+    expect(summary.children[1].getAttribute("title")).toBe("disruptor-title");
+    expect(ewarEffectDescriber.webDescription).toHaveBeenCalled();
+    expect(ewarEffectDescriber.disruptorDescription).toHaveBeenCalled();
+  });
+
+  test("toggling a module refreshes the summary title", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    ewarEffectDescriber.webDescription.mockReturnValue("web-active");
+    const section = webSection(popup)!;
+    section.children[1].children[0].trigger("click");
+    expect(getFake(document, "attacker-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
+  });
+
+  test("updateSummaries refreshes both sides and reads the host current distance", () => {
+    const { controller, host, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], scripts: SCRIPTS });
+    controller.setLoadout("target", { webs: [WEB2], disruptors: [], scripts: SCRIPTS });
+    host.currentDistance.mockReturnValue(12_000);
+    ewarEffectDescriber.webDescription.mockClear();
+
+    controller.updateSummaries();
+    expect(host.currentDistance).toHaveBeenCalled();
+    expect(ewarEffectDescriber.webDescription).toHaveBeenCalledTimes(2);
   });
 });

@@ -15,6 +15,7 @@ export interface EwarEls {
 
 export interface EwarHost {
   onConfigChange(): void;
+  currentDistance(): number;
 }
 
 export interface EwarController {
@@ -25,4 +26,5 @@ export interface EwarController {
   capture(side: "attacker" | "target"): StoredEwarActivation | undefined;
   popup(side: "attacker" | "target"): Popup;
   render(): void;
+  updateSummaries(): void;
 }

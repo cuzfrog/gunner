@@ -115,8 +115,10 @@ export class DomControls implements Controls, DomControlsHost {
   onConfigChange(): void {
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
+    this.ewarController.updateSummaries();
     this.persistConfigChange();
   }
+  currentDistance(): number { return this.sessionCodec.getInitialDistance(); }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();

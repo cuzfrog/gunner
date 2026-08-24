@@ -23,4 +23,5 @@ interface ProfileEvents {
 
 export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {
   wireControls(): void;
+  currentDistance(): number;
 }

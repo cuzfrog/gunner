@@ -3,6 +3,8 @@ no-new-exports:
   - ewarController.ts
   - ewarController.test.ts
   - ewarControllerContract.ts
+  - ewarEffectDescriber.ts
+  - ewarEffectDescriber.test.ts
   - module.ts
   - index.ts
 ---

@@ -7,6 +7,7 @@ import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../sidePanel";
 import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
+import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
 interface MutableEwarActivation {
   webs: { active: boolean; overloaded: boolean }[];
@@ -25,6 +26,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly imageCatalog: ImageCatalog;
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
+  private readonly ewarEffectDescriber: EwarEffectDescriber;
   private readonly states = new Map<Side, EwarState>();
   private readonly popups: Record<Side, Popup>;
   private readonly scriptPopups: Record<Side, Popup>;
@@ -32,12 +34,13 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private host?: EwarHost;
 
-  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n }) {
+  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber }) {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.imageCatalog = deps.imageCatalog;
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
+    this.ewarEffectDescriber = deps.ewarEffectDescriber;
     this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
     this.popups = { attacker: this.buildPopup("attacker"), target: this.buildPopup("target") };
     this.popupGroup.register(this.scriptPopups.attacker);
@@ -107,6 +110,11 @@ export class EwarControllerImpl implements EwarController {
   render(): void {
     this.renderSide("attacker");
     this.renderSide("target");
+  }
+
+  updateSummaries(): void {
+    this.updateSummary("attacker");
+    this.updateSummary("target");
   }
 
   private buildPopup(side: Side): Popup {
@@ -215,17 +223,22 @@ export class EwarControllerImpl implements EwarController {
       summary.textContent = "";
       return;
     }
+    const projection: EwarProjection = { loadout: state.loadout, activation: state.activation };
+    const distance = this.host?.currentDistance() ?? 0;
     const webTotal = state.loadout.webs.length;
     const webActive = state.activation.webs.filter((w) => w.active).length;
-    if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal);
+    const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webDescription(projection, distance) : "";
+    if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal, webTitle);
     const disruptorTotal = state.loadout.disruptors.length;
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
-    if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal);
+    const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorDescription(projection, distance) : "";
+    if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal, disruptorTitle);
     const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
-    if (scramblers.length > 0) this.appendSummaryItem(summary, scramblers[0].moduleName, scramblerActive, scramblers.length);
+    const scramblerTitle = scramblers.length > 0 ? this.ewarEffectDescriber.scramblerDescription(projection, distance) : "";
+    if (scramblers.length > 0) this.appendSummaryItem(summary, scramblers[0].moduleName, scramblerActive, scramblers.length, scramblerTitle);
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number): void {
+  private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number, title: string): void {
     const item = document.createElement("span");
     item.className = "ewar-summary-item";
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
@@ -239,6 +252,7 @@ export class EwarControllerImpl implements EwarController {
     count.className = "ewar-summary-count";
     count.textContent = `${active}/${total}`;
     item.appendChild(count);
+    item.setAttribute("title", title);
     summary.appendChild(item);
   }
 

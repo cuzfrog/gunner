@@ -1,7 +1,7 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, FittingCradle, FittingImport, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
-import type { HitChance } from "../../sim";
+import type { EwarResolver, HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
@@ -144,6 +144,11 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
     itemNames: asValue(vi.mocked<FittingCradle["itemNames"]>({ ...mockItemNames(), ...options.itemNames })),
     imageCatalog: asValue(mockImageCatalog()),
+    ewarResolver: asValue(vi.mocked<EwarResolver>({
+      webSpeedMultiplier: vi.fn(() => 1),
+      disruptedTurret: vi.fn((turret) => turret),
+      propulsionSuppressed: vi.fn(() => false),
+    })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
     settingsStore: asValue(vi.mocked<SettingsStore>({ ...mockSettingsStore(), ...options.settingsStore })),
