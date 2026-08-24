@@ -195,34 +195,6 @@ describe("EventRouter", () => {
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 
-  test("ewar triggers toggle the ewar popups", () => {
-    const els = makeEls();
-    const popupGroup = makePopupGroup();
-    const ewarController = makeEwarController();
-    const router = new EventRouter({
-      els,
-      preferences: {} as PreferencesController,
-      profile: {} as ProfileController,
-      import: {} as ImportController,
-      share: makeShareController(),
-      attackerSide: {} as SidePanel,
-      targetSide: {} as SidePanel,
-      turret: {} as TurretController,
-      trackingInput: fakeTrackingInput(),
-      popupGroup,
-      previewManager: {} as FittingPreviewManager,
-      attackerFittingPopup: makeFittingPopup(),
-      targetFittingPopup: makeFittingPopup(),
-      ewarController,
-    });
-    router.setHost({} as EventRouterHost);
-
-    getFake(globalThis.document, "attacker-ewar-trigger").trigger("click");
-    getFake(globalThis.document, "target-ewar-trigger").trigger("click");
-    expect(popupGroup.toggle).toHaveBeenCalledWith(ewarController.popup("attacker"));
-    expect(popupGroup.toggle).toHaveBeenCalledWith(ewarController.popup("target"));
-  });
-
   test("pointerdown outside routes to popupGroup and previewManager", () => {
     const els = makeEls();
     const popupGroup = makePopupGroup();

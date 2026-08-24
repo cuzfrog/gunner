@@ -29,6 +29,8 @@ export class HullSection implements IHullSection {
     this.ships = ships;
     this.i18n = i18n;
     this.imageCatalog = imageCatalog;
+    this.els.hull.addEventListener("input", () => this.onHullInput());
+    this.els.hull.addEventListener("change", () => this.onHullChange());
   }
 
   onHullInput(): void {

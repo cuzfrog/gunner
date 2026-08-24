@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { propulsionOptionLabel } from "../controlsFormat";
-import type { Popup } from "./popup";
+import type { Popup, PopupGroup } from "./popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
@@ -21,21 +21,25 @@ export class PropulsionSection implements IPropulsionSection {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
+  private readonly popupGroup: PopupGroup;
   private readonly variants: PropulsionVariantSection;
 
   constructor({
-    panel, els, ships, fittingImport, imageCatalog, i18n,
-  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n }) {
+    panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup,
+  }: { panel: SidePanel; els: PropulsionSectionEls; ships: Ships; fittingImport: FittingImport; imageCatalog: ImageCatalog; i18n: I18n; popupGroup: PopupGroup }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
     this.fittingImport = fittingImport;
     this.imageCatalog = imageCatalog;
     this.i18n = i18n;
+    this.popupGroup = popupGroup;
     this.variants = new PropulsionVariantSection({
       panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants },
       fittingImport, i18n, imageCatalog,
     });
+    this.els.propulsion.addEventListener("change", () => this.onPropulsionChange());
+    this.els.propulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.variants.popup));
   }
 
   get popup(): Popup {

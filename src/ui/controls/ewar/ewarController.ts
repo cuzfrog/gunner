@@ -48,6 +48,8 @@ export class EwarControllerImpl implements EwarController {
     this.popupGroup.register(this.scriptPopups.target);
     this.popupGroup.register(this.popups.attacker);
     this.popupGroup.register(this.popups.target);
+    this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
+    this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.render();
   }
 

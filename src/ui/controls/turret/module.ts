@@ -9,7 +9,7 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
   cradle.register({
     turretOverrides: asClass(TurretOverridesStore).singleton(),
     turretController: asFunction(({
-      els, chargeCatalog, gunFamilies, imageCatalog, trackingInput, i18n, fittingImport, turretOverrides, ships, uiEvents,
+      els, chargeCatalog, gunFamilies, imageCatalog, trackingInput, i18n, fittingImport, turretOverrides, ships, uiEvents, popupGroup,
     }) => {
       const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
       return new TurretControllerImpl({
@@ -24,6 +24,7 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
         turretOverrides,
         ships,
         events: uiEvents,
+        popupGroup,
       });
     }).singleton(),
   });

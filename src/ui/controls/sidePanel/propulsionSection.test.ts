@@ -3,7 +3,7 @@ import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../.
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { fakeDocument, getFake, FakeElement, mockFittingImport, mockShips, RIFTER } from "../testSupport";
-import type { Popup } from "./popup";
+import type { Popup, PopupGroup } from "./popup";
 import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
@@ -122,9 +122,19 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
 
   const i18n = mockI18n();
   const imageCatalog = mockImageCatalog();
-  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n });
+  const popupGroup = vi.mocked<PopupGroup>({
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
+  });
+  const section = new PropulsionSection({ panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
   (panel.sections as unknown as { propulsion: typeof section }).propulsion = section;
-  return { document, panel, section, host, imageCatalog };
+  return { document, panel, section, host, imageCatalog, popupGroup };
 }
 
 describe("PropulsionSection", () => {

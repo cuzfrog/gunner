@@ -81,35 +81,6 @@ export class EventRouter {
 
 
 
-    this.els.attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.attackerSide.sections.paste.onPastePopupPaste(event));
-    this.els.targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.targetSide.sections.paste.onPastePopupPaste(event));
-
-    this.els.attackerHull.addEventListener("input", () => this.attackerSide.sections.hull.onHullInput());
-    this.els.attackerHull.addEventListener("change", () => this.attackerSide.sections.hull.onHullChange());
-    this.els.attackerFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerFittingPopup.popup));
-    this.els.attackerFittingEye.addEventListener("click", () => this.previewManager.toggle("attacker"));
-    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.turret.popup));
-    this.els.attackerPropulsion.addEventListener("change", () => this.attackerSide.sections.propulsion.onPropulsionChange());
-    this.els.attackerPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getPropulsionVariantPopup()));
-    this.els.attackerSkills.addEventListener("change", () => this.attackerSide.sections.skill.onSkillOrOverloadChange(true));
-    this.els.attackerOverload.addEventListener("change", () => this.attackerSide.sections.skill.onSkillOrOverloadChange(false));
-    this.els.attackerOverloadButton.addEventListener("click", () => this.attackerSide.sections.skill.onOverloadButtonClick());
-
-    this.els.targetHull.addEventListener("input", () => this.targetSide.sections.hull.onHullInput());
-    this.els.targetHull.addEventListener("change", () => this.targetSide.sections.hull.onHullChange());
-    this.els.targetFittingTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetFittingPopup.popup));
-    this.els.targetFittingEye.addEventListener("click", () => this.previewManager.toggle("target"));
-    this.els.targetPropulsion.addEventListener("change", () => this.targetSide.sections.propulsion.onPropulsionChange());
-    this.els.targetPropulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getPropulsionVariantPopup()));
-    this.els.targetSkills.addEventListener("change", () => this.targetSide.sections.skill.onSkillOrOverloadChange(true));
-    this.els.targetOverload.addEventListener("change", () => this.targetSide.sections.skill.onSkillOrOverloadChange(false));
-    this.els.targetOverloadButton.addEventListener("click", () => this.targetSide.sections.skill.onOverloadButtonClick());
-
-    this.els.attackerSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attackerSide.getSkillPopup()));
-    this.els.targetSkillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.targetSide.getSkillPopup()));
-    this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ewarController.popup("attacker")));
-    this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ewarController.popup("target")));
-
     const displayContext = {
       attackerSide: this.attackerSide,
       targetSide: this.targetSide,

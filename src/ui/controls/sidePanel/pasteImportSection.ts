@@ -27,6 +27,8 @@ export class PasteImportSection implements IPasteImportSection {
     this.i18n = i18n;
     this.timer = timer;
     this.popup = this.createPastePopup();
+    this.els.importFitting.addEventListener("click", () => this.onImportFittingClick());
+    this.els.pastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event));
   }
 
   onImportFittingClick(): void {

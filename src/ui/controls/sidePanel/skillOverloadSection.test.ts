@@ -1,6 +1,6 @@
 import type { I18n, Language } from "../../i18n";
 import { fakeDocument, getFake, FakeElement } from "../testSupport";
-import type { Popup } from "./popup";
+import type { Popup, PopupGroup } from "./popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 import { SkillOverloadSection, type SkillOverloadSectionEls } from "./skillOverloadSection";
@@ -31,7 +31,7 @@ function buildSkillSection() {
 
   const sections = vi.mocked<ISidePanelSections>({
     hull: {} as unknown as ISidePanelSections["hull"],
-    stats: {} as unknown as ISidePanelSections["stats"],
+    stats: { updateShipStats: vi.fn() } as unknown as ISidePanelSections["stats"],
     skill: {} as unknown as ISidePanelSections["skill"],
     propulsion: {
       currentPropulsionId: vi.fn(),
@@ -53,8 +53,18 @@ function buildSkillSection() {
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
-  const section = new SkillOverloadSection({ panel, els, i18n });
-  return { document, panel, section, host };
+  const popupGroup = vi.mocked<PopupGroup>({
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
+  });
+  const section = new SkillOverloadSection({ panel, els, i18n, popupGroup });
+  return { document, panel, section, host, popupGroup };
 }
 
 describe("SkillOverloadSection", () => {

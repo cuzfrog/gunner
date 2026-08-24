@@ -11,6 +11,7 @@ import {
   addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockShips,
   mockTrackingInput,
 } from "../testSupport";
+import type { PopupGroup } from "../popup";
 
 export function collectTurretEls(document: Document): TurretEls {
   const get = (id: string) => getFake(document, id) as unknown as HTMLElement;
@@ -92,6 +93,16 @@ export function buildTurret(
   const turretOverrides = new TurretOverridesStore();
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
   const events = new UiEventsImpl();
+  const popupGroup = vi.mocked<PopupGroup>({
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
+  });
   const controller = new TurretControllerImpl({
     els,
     chargeCatalog,
@@ -104,6 +115,7 @@ export function buildTurret(
     turretOverrides,
     ships,
     events,
+    popupGroup,
   });
   return {
     document,
@@ -116,6 +128,7 @@ export function buildTurret(
     trackingInput,
     turretOverrides,
     events,
+    popupGroup,
   };
 }
 

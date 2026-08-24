@@ -12,6 +12,7 @@ import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
 import type { TurretController, TurretControllerDeps } from "./turretControllerContract";
 import type { TurretOverrides } from "./turretOverrides";
+import type { PopupGroup } from "../popup";
 
 const SIG_RESOLUTIONS_ORDER: readonly SigResolutionClass[] = ["S", "M", "L", "XL"] as const;
 const HULL_TIER_TO_SIG_RES: Record<HullTier, SigResolutionClass> = {
@@ -23,6 +24,7 @@ export type { TurretController } from "./turretControllerContract";
 export class TurretControllerImpl implements TurretController {
   private readonly els: TurretControllerDeps["els"];
   private readonly popupValue: Popup;
+  private readonly popupGroup: PopupGroup;
   private readonly chargeCatalog: TurretControllerDeps["chargeCatalog"];
   private readonly fittingImport: TurretControllerDeps["fittingImport"];
   private readonly trackingInput: TurretControllerDeps["trackingInput"];
@@ -43,6 +45,7 @@ export class TurretControllerImpl implements TurretController {
 
   constructor(deps: TurretControllerDeps) {
     this.els = deps.els;
+    this.popupGroup = deps.popupGroup;
     this.chargeCatalog = deps.chargeCatalog;
     this.fittingImport = deps.fittingImport;
     this.trackingInput = deps.trackingInput;
@@ -53,6 +56,7 @@ export class TurretControllerImpl implements TurretController {
     this.events = deps.events;
     this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
+    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.ammoList = new AmmoList({
       els: this.ammoListEls(),
       chargeCatalog: this.chargeCatalog,

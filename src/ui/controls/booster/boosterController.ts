@@ -43,6 +43,8 @@ export class BoosterControllerImpl implements BoosterController {
     this.popupGroup.register(this.scriptPopups.target);
     this.popupGroup.register(this.popups.attacker);
     this.popupGroup.register(this.popups.target);
+    this.els.attackerBoosterTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
+    this.els.targetBoosterTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.render();
   }
 

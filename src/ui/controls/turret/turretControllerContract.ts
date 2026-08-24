@@ -9,6 +9,7 @@ import type { TurretEls } from "./turretEls";
 import type { TurretOverrides } from "./turretOverrides";
 import type { TurretStateResolver } from "./turretStateResolver";
 import type { UiEvents } from "../../events";
+import type { PopupGroup } from "../popup";
 
 export interface TurretControllerDeps {
   readonly els: TurretEls;
@@ -22,6 +23,7 @@ export interface TurretControllerDeps {
   readonly turretOverrides: TurretOverrides;
   readonly ships: Ships;
   readonly events: UiEvents;
+  readonly popupGroup: PopupGroup;
 }
 
 export interface TurretController {

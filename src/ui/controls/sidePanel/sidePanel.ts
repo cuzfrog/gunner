@@ -75,8 +75,8 @@ export class SidePanelImpl implements SidePanel {
     this.turretLink = turretLink;
     const hull = new HullSection({ panel: this, els, ships, i18n, imageCatalog });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
-    const skill = new SkillOverloadSection({ panel: this, els, i18n });
-    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n });
+    const skill = new SkillOverloadSection({ panel: this, els, i18n, popupGroup });
+    const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, stats, skill, propulsion, paste };
     popupGroup.register(skill.popup);
