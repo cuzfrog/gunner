@@ -1,5 +1,5 @@
-import type { ImportedFitting } from "../fitting";
-import type { UserSettings } from "../appstate";
+import { IMPORTED_RIFTER } from "./testing";
+import { DEFAULT_SETTINGS } from "../appstate/localSettingsStore.testSupport";
 import { UiEventsImpl } from "./events";
 
 describe("UiEvents", () => {
@@ -87,10 +87,9 @@ describe("UiEvents", () => {
   test("emitFittingImported passes side and imported fitting", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();
-    const imported = {} as unknown as ImportedFitting;
     events.onFittingImported(listener);
-    events.emitFittingImported("attacker", imported);
-    expect(listener).toHaveBeenCalledWith("attacker", imported);
+    events.emitFittingImported("attacker", IMPORTED_RIFTER);
+    expect(listener).toHaveBeenCalledWith("attacker", IMPORTED_RIFTER);
   });
 
   test("offFittingImported removes a listener", () => {
@@ -100,7 +99,7 @@ describe("UiEvents", () => {
     events.onFittingImported(a);
     events.onFittingImported(b);
     events.offFittingImported(a);
-    events.emitFittingImported("target", {} as unknown as ImportedFitting);
+    events.emitFittingImported("target", IMPORTED_RIFTER);
     expect(a).not.toHaveBeenCalled();
     expect(b).toHaveBeenCalled();
   });
@@ -120,9 +119,8 @@ describe("UiEvents", () => {
   test("emitProfileTextLoaded passes settings", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();
-    const settings = {} as unknown as UserSettings;
     events.onProfileTextLoaded(listener);
-    events.emitProfileTextLoaded(settings);
-    expect(listener).toHaveBeenCalledWith(settings);
+    events.emitProfileTextLoaded(DEFAULT_SETTINGS);
+    expect(listener).toHaveBeenCalledWith(DEFAULT_SETTINGS);
   });
 });

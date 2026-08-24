@@ -54,7 +54,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     profile: options.panel?.profile ?? RIFTER,
     fittingText: options.panel?.fittingText,
     skillConditions: options.panel?.skillConditions ?? vi.fn((): ReturnType<FittingPopupHost["skillConditions"]> => ({ skillLevel: 5, overloaded: false })),
-  } as unknown as FittingPopupHost);
+  });
 
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => [SAVED_RIFTER]),

@@ -51,12 +51,12 @@ function createManager(options: {
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
-  const attackerSide = {
+  const attackerSide: FittingPopupHost = {
     profile: RIFTER,
     get fittingText() { return options.fittingTextOf ? options.fittingTextOf("attacker") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
     skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }),
-  } as unknown as FittingPopupHost;
-  const targetSide = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) } as unknown as FittingPopupHost;
+  };
+  const targetSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) };
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,
