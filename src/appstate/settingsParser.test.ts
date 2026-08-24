@@ -165,6 +165,7 @@ describe("SettingsParser", () => {
       propulsionName: RIFTER_MODULE.label,
       fitted: IMPORTED_RIFTER.fitted,
       propulsion: RIFTER_MODULE,
+      baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
     });
     expect(decoded!.attackerMass).toBe(1_500_000);
     expect(decoded!.attackerSpeed).toBe(4_649.72);

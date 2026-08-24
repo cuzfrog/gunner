@@ -175,13 +175,13 @@ export class DomControls implements Controls, DomControlsHost {
     const attackerState = this.attackerSide.capture();
     const targetState = this.targetSide.capture();
     const attacker: CombatantConfig = {
-      id: "attacker", maxSpeed: attackerState.speed, mass: attackerState.mass,
+      id: "attacker", maxSpeed: attackerState.speed, baseMaxSpeed: attackerState.baseMaxSpeed ?? attackerState.speed, mass: attackerState.mass,
       inertiaModifier: attackerState.inertia, mode: attackerState.mode,
       desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
       ewar: this.ewarController.projection("attacker"),
     };
     const target: CombatantConfig = {
-      id: "target", maxSpeed: targetState.speed, mass: targetState.mass,
+      id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed, mass: targetState.mass,
       inertiaModifier: targetState.inertia, mode: targetState.mode,
       desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
       ewar: this.ewarController.projection("target"),

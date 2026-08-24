@@ -18,6 +18,7 @@ import {
   type StackingPenalty,
   type StasisWebSpec,
   type TrackingDisruptorSpec,
+  type WarpScramblerSpec,
 } from "../sim";
 import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 import type { ItemNames } from "./itemNames";
@@ -31,6 +32,7 @@ import type {
   TrackingDisruptorStats,
   TurretScriptStats,
   TurretStats,
+  WarpScramblerStats,
 } from "./fittingDb";
 
 
@@ -73,6 +75,7 @@ export interface FittingDb {
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
   readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
   readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
+  readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
   readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
   readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
   readonly drones: Readonly<Record<string, true>>;
@@ -403,6 +406,7 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
   const scriptByName = new Map(scripts.map((s) => [s.name, s]));
   const webs: StasisWebSpec[] = [];
   const disruptors: TrackingDisruptorSpec[] = [];
+  const scramblers: WarpScramblerSpec[] = [];
 
   for (const line of moduleLines(parsed)) {
     if (line.offline) continue;
@@ -430,11 +434,21 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
         defaultScript,
         overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent,
       });
+      continue;
+    }
+
+    const scramblerStats = db.warpScramblers[line.name];
+    if (scramblerStats) {
+      scramblers.push({
+        moduleName: line.name,
+        maxRange: scramblerStats.maxRange,
+        overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent,
+      });
     }
   }
 
-  if (webs.length === 0 && disruptors.length === 0 && scripts.length === 0) return { webs: [], disruptors: [], scripts: [] };
-  return { webs, disruptors, scripts };
+  if (webs.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], disruptors: [], scramblers: [], scripts: [] };
+  return { webs, disruptors, scramblers, scripts };
 }
 
 function collectTurretPercents(

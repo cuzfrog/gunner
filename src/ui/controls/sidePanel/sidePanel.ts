@@ -136,6 +136,7 @@ export class SidePanelImpl implements SidePanel {
   capture(): SidePanelState {
     return {
       speed: num(this.els.speed),
+      baseMaxSpeed: this.fittedHull?.baseMaxSpeed ?? num(this.els.speed),
       mass: num(this.els.mass),
       inertia: num(this.els.inertia),
       mode: this.currentMode(),
@@ -165,6 +166,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (this.els.targetSig !== undefined && state.sig !== undefined) this.els.targetSig.value = String(state.sig);
+    this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: false });
     this.sections.stats.updateAlignTime();
   }
 

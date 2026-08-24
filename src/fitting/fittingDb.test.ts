@@ -1,4 +1,4 @@
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -170,5 +170,17 @@ describe("fittingDb", () => {
     expect(DRONES["Hobgoblin II"]).toBe(true);
     expect(DRONES["Mining Drone I"]).toBe(true);
     expect(DRONES["Salvage Drone I"]).toBe(true);
+  });
+
+  test("includes warp scramblers and excludes long warp disruptors", () => {
+    expect(WARP_SCRAMBLERS["Warp Scrambler II"]).toEqual({
+      maxRange: 9000,
+      overloadRangeBonusPercent: 20,
+    });
+    expect(FITTING_MODULES["Warp Scrambler II"]).toEqual({
+      warpScrambler: WARP_SCRAMBLERS["Warp Scrambler II"],
+    });
+    expect(WARP_SCRAMBLERS["Warp Disruptor II"]).toBeUndefined();
+    expect(FITTING_MODULES["Warp Disruptor II"]).toBeUndefined();
   });
 });

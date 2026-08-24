@@ -9,7 +9,7 @@ import type { EwarProjection, ShipConfig, SimConfig } from "./types";
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret };
+const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
 
 const INSTANT_MASS = 1;
 const INSTANT_INERTIA = 1e-6;
@@ -19,8 +19,9 @@ function shipConfig(
   mode: ShipConfig["mode"],
   mass = INSTANT_MASS,
   inertiaModifier = INSTANT_INERTIA,
+  baseMaxSpeed = 100,
 ): ShipConfig {
-  return { id, maxSpeed: 100, mass, inertiaModifier, mode, desiredRange: 5000, aggressivity: 1 };
+  return { id, maxSpeed: 100, baseMaxSpeed, mass, inertiaModifier, mode, desiredRange: 5000, aggressivity: 1 };
 }
 
 function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inertiaModifier = INSTANT_INERTIA): SimConfig {
@@ -121,6 +122,7 @@ describe("SimulationImpl", () => {
     const resolver: EwarResolver = {
       webSpeedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
       disruptedTurret: (turret) => turret,
+      propulsionSuppressed: () => false,
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -153,16 +155,17 @@ describe("SimulationImpl", () => {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
         disruptors: [],
+        scramblers: [],
         scripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], disruptors: [] },
+      activation: { webs: [{ active: true, overloaded: false }], disruptors: [], scramblers: [] },
     };
     const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
     const attackerSteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const targetSteering = new ReactiveAutopilot();
     const config: SimConfig = {
-      attacker: { id: "attacker", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "midships", desiredRange: 0, aggressivity: 1, ewar: web },
-      target: { id: "target", maxSpeed: 100, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 10000, aggressivity: 1 },
+      attacker: { id: "attacker", maxSpeed: 0, baseMaxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "midships", desiredRange: 0, aggressivity: 1, ewar: web },
+      target: { id: "target", maxSpeed: 100, baseMaxSpeed: 100, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 10000, aggressivity: 1 },
       initialDistance: 4000,
     };
     const sim = new SimulationImpl({ attackerSteering, targetSteering, ewarResolver: resolver, simConfig: config });
@@ -181,6 +184,39 @@ describe("SimulationImpl", () => {
     }
     expect(lastDistance).toBeGreaterThan(5000);
     expect(sim.snapshot().target.velocity.len()).toBeGreaterThan(99);
+  });
+
+  test("an active scrambler caps the target at its base speed while in range", () => {
+    const scram: EwarProjection = {
+      loadout: {
+        webs: [],
+        disruptors: [],
+        scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
+        scripts: [],
+      },
+      activation: { webs: [], disruptors: [], scramblers: [{ active: true, overloaded: false }] },
+    };
+    const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
+    const attackerSteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const targetSteering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      attacker: { id: "attacker", maxSpeed: 0, baseMaxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "midships", desiredRange: 0, aggressivity: 1, ewar: scram },
+      target: { id: "target", maxSpeed: 1200, baseMaxSpeed: 200, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 10000, aggressivity: 1 },
+      initialDistance: 9000,
+    };
+    const sim = new SimulationImpl({ attackerSteering, targetSteering, ewarResolver: resolver, simConfig: config });
+
+    sim.step(1);
+    expect(sim.snapshot().target.velocity.x).toBeCloseTo(200, 6);
+
+    sim.update({
+      ...config,
+      target: { ...config.target, maxSpeed: 1200, baseMaxSpeed: 200, ewar: scram },
+      attacker: { ...config.attacker, maxSpeed: 0, baseMaxSpeed: 0, ewar: undefined },
+      initialDistance: 9001,
+    });
+    sim.step(1);
+    expect(sim.snapshot().target.velocity.x).toBeCloseTo(1200, 6);
   });
 
   test("computes attacker command before target command and passes the current time", () => {

@@ -22,6 +22,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.modules": { en: "Modules" },
   "label.ewar.web": { en: "Stasis Webifiers" },
   "label.ewar.disruptor": { en: "Gun Disruptors" },
+  "label.ewar.scrambler": { en: "Warp Scramblers" },
   "title.ewar.empty": { en: "No e-war modules fitted" },
   "ewar.script.none": { en: "None" },
   "ewar.script.none.hint": { en: "Affects tracking, optimal range, and falloff" },

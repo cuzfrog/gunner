@@ -36,6 +36,7 @@ describe("naked hull", () => {
       maxSpeed: 400,
       sigRadius: 35,
     });
+    expect(stats.baseMaxSpeed).toBeCloseTo(400, 6);
     expect(stats.alignTime).toBeCloseTo(3 * Math.log(4), 6);
   });
 
@@ -168,6 +169,7 @@ describe("fittedStats", () => {
     const stats = fittedStats(frigate, fitted, undefined, conditions(5));
     expect(stats.mass).toBe(1_250_000);
     expect(stats.maxSpeed).toBeCloseTo(550, 6);
+    expect(stats.baseMaxSpeed).toBeCloseTo(550, 6);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
     expect(stats.sigRadius).toBe(50);
     expect(stats.alignTime).toBeCloseTo(1.8225 * 1_250_000 * Math.log(4) * 1e-6, 6);
@@ -182,6 +184,7 @@ describe("fittedStats", () => {
   test("with propulsion adds active mass and applies the speed and align time", () => {
     const stats = fittedStats(frigate, fitted, ab1, conditions(0));
     expect(stats.mass).toBe(1_750_000);
+    expect(stats.baseMaxSpeed).toBeCloseTo(440, 6);
     expect(stats.maxSpeed).toBeCloseTo(873.714, 3);
     expect(stats.inertiaModifier).toBeCloseTo(2.7, 6);
     expect(stats.sigRadius).toBe(50);

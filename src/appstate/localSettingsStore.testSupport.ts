@@ -40,8 +40,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   targetSkillLevel: 5,
   targetOverload: true,
   targetSig: 40,
-  attackerEwarActivation: { webs: [{ active: true, overloaded: true }], disruptors: [{ active: true, overloaded: true, script: "none" }] },
-  targetEwarActivation: { webs: [{ active: false, overloaded: true }], disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }] },
+  attackerEwarActivation: { webs: [{ active: true, overloaded: true }], disruptors: [{ active: true, overloaded: true, script: "none" }], scramblers: [] },
+  targetEwarActivation: { webs: [{ active: false, overloaded: true }], disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }], scramblers: [] },
   attackerAmmo: "Hail S",
   simSpeed: 4,
   language: "en",
@@ -82,6 +82,7 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   propulsionName: "1MN Afterburner I",
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
+  baseMaxSpeed: 456.25,
 };
 export const RIFTER_PROFILE: ShipProfile = {
   name: "Rifter",
@@ -109,6 +110,7 @@ export const RIFTER_BASE_STATS: ShipStats = {
   mass: 1_000_000,
   inertiaModifier: 2,
   maxSpeed: 456.25,
+  baseMaxSpeed: 456.25,
   sigRadius: 36,
   alignTime: Math.log(4) * 2,
 };
@@ -116,6 +118,7 @@ export const RIFTER_MWD_STATS: ShipStats = {
   mass: 1_500_000,
   inertiaModifier: 2,
   maxSpeed: 4_649.72,
+  baseMaxSpeed: 456.25,
   sigRadius: 210,
   alignTime: Math.log(4) * 3,
 };
@@ -135,7 +138,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     moduleName: "200mm AutoCannon I",
   },
   cargoCharges: [],
-  ewar: { webs: [], disruptors: [], scripts: [] },
+  ewar: { webs: [], disruptors: [], scramblers: [], scripts: [] },
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

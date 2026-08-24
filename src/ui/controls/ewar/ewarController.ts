@@ -1,4 +1,4 @@
-import { type DisruptionScriptSpec, type EwarLoadout, type EwarProjection } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -11,6 +11,7 @@ import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract
 interface MutableEwarActivation {
   webs: { active: boolean; overloaded: boolean }[];
   disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
+  scramblers: { active: boolean; overloaded: boolean }[];
 }
 
 interface EwarState {
@@ -51,13 +52,17 @@ export class EwarControllerImpl implements EwarController {
   }
 
   setLoadout(side: Side, loadout: EwarLoadout): void {
-    this.states.set(side, { loadout, activation: this.clampActivation(loadout) });
+    if (this.isEmpty(loadout)) {
+      this.states.delete(side);
+    } else {
+      this.states.set(side, { loadout, activation: this.clampActivation(loadout) });
+    }
     this.host?.onConfigChange();
     this.renderSide(side);
   }
 
   restore(side: Side, loadout: EwarLoadout | undefined, saved?: StoredEwarActivation): void {
-    if (!loadout || (loadout.webs.length === 0 && loadout.disruptors.length === 0)) {
+    if (!loadout || this.isEmpty(loadout)) {
       this.states.delete(side);
     } else {
       this.states.set(side, { loadout, activation: this.clampActivation(loadout, saved) });
@@ -67,13 +72,23 @@ export class EwarControllerImpl implements EwarController {
 
   projection(side: Side): EwarProjection | undefined {
     const state = this.states.get(side);
-    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) return undefined;
-    return { loadout: state.loadout, activation: state.activation };
+    const scramblers = state?.loadout.scramblers ?? [];
+    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0 && scramblers.length === 0)) return undefined;
+    const activation: EwarActivation = {
+      webs: state.activation.webs,
+      disruptors: state.activation.disruptors,
+      ...(state.activation.scramblers.length > 0 ? { scramblers: state.activation.scramblers } : {}),
+    };
+    return { loadout: state.loadout, activation };
   }
 
   capture(side: Side): StoredEwarActivation | undefined {
     const state = this.states.get(side);
-    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) return undefined;
+    const scramblers = state?.loadout.scramblers ?? [];
+    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0 && scramblers.length === 0)) return undefined;
+    const storedScramblers = state.activation.scramblers.length > 0
+      ? state.activation.scramblers.map((s) => ({ active: s.active, overloaded: s.overloaded }))
+      : undefined;
     return {
       webs: state.activation.webs.map((w) => ({ active: w.active, overloaded: w.overloaded })),
       disruptors: state.activation.disruptors.map((d) => ({
@@ -81,6 +96,7 @@ export class EwarControllerImpl implements EwarController {
         overloaded: d.overloaded,
         script: d.script?.name ?? "none",
       })),
+      ...(storedScramblers !== undefined ? { scramblers: storedScramblers } : {}),
     };
   }
 
@@ -144,7 +160,14 @@ export class EwarControllerImpl implements EwarController {
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
     popup.innerHTML = "";
-    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
+    if (!state) {
+      trigger.disabled = true;
+      trigger.title = this.i18n.t("title.ewar.empty");
+      summary.innerHTML = "";
+      return;
+    }
+    const scramblers = state.loadout.scramblers ?? [];
+    if (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0 && scramblers.length === 0) {
       trigger.disabled = true;
       trigger.title = this.i18n.t("title.ewar.empty");
       summary.innerHTML = "";
@@ -159,11 +182,14 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.disruptors.length > 0) {
       this.renderSection(popup, "label.ewar.disruptor", (section) => this.renderDisruptors(side, state, section));
     }
+    if (scramblers.length > 0) {
+      this.renderSection(popup, "label.ewar.scrambler", (section) => this.renderScramblers(side, state, section));
+    }
   }
 
   private renderSection(
     popup: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.disruptor",
+    labelKey: "label.ewar.web" | "label.ewar.disruptor" | "label.ewar.scrambler",
     renderRows: (section: HTMLElement) => void,
   ): void {
     const section = document.createElement("div");
@@ -180,7 +206,12 @@ export class EwarControllerImpl implements EwarController {
     const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
     const state = this.states.get(side);
     summary.innerHTML = "";
-    if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) {
+    if (!state) {
+      summary.textContent = "";
+      return;
+    }
+    const scramblers = state.loadout.scramblers ?? [];
+    if (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0 && scramblers.length === 0) {
       summary.textContent = "";
       return;
     }
@@ -190,6 +221,8 @@ export class EwarControllerImpl implements EwarController {
     const disruptorTotal = state.loadout.disruptors.length;
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
     if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal);
+    const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
+    if (scramblers.length > 0) this.appendSummaryItem(summary, scramblers[0].moduleName, scramblerActive, scramblers.length);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number): void {
@@ -207,6 +240,10 @@ export class EwarControllerImpl implements EwarController {
     count.textContent = `${active}/${total}`;
     item.appendChild(count);
     summary.appendChild(item);
+  }
+
+  private isEmpty(loadout: EwarLoadout): boolean {
+    return loadout.webs.length === 0 && loadout.disruptors.length === 0 && (loadout.scramblers ?? []).length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -233,6 +270,12 @@ export class EwarControllerImpl implements EwarController {
           overloaded: savedDisruptor?.overloaded ?? false,
           script,
         };
+      }),
+      scramblers: (loadout.scramblers ?? []).map((_, i) => {
+        const savedScrambler = saved?.scramblers?.[i];
+        const active = typeof savedScrambler === "boolean" ? savedScrambler : savedScrambler?.active ?? true;
+        const overloaded = typeof savedScrambler === "boolean" ? false : savedScrambler?.overloaded ?? false;
+        return { active, overloaded };
       }),
     };
   }
@@ -267,6 +310,23 @@ export class EwarControllerImpl implements EwarController {
       row.appendChild(overloadButton);
       const gear = this.createScriptGear(side, i, activation.script, activation.active);
       row.appendChild(gear);
+      section.appendChild(row);
+    }
+  }
+
+  private renderScramblers(side: Side, state: EwarState, section: HTMLElement): void {
+    const scramblers = state.loadout.scramblers ?? [];
+    for (let i = 0; i < scramblers.length; i++) {
+      const scrambler: WarpScramblerSpec = scramblers[i];
+      const activation = state.activation.scramblers[i];
+      const row = document.createElement("div");
+      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      const button = this.createModuleButton(activation.active, scrambler.moduleName);
+      const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler.moduleName, onToggle);
+      button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
+      row.appendChild(button);
+      row.appendChild(overloadButton);
       section.appendChild(row);
     }
   }
@@ -486,6 +546,33 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     const overloaded = !state.activation.disruptors[index].overloaded;
     state.activation.disruptors[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+    button.classList.toggle("active", overloaded);
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleScrambler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.scramblers[index].active;
+    state.activation.scramblers[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleScramblerOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.scramblers[index].overloaded;
+    state.activation.scramblers[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);

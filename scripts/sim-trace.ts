@@ -201,12 +201,13 @@ function loadEwarProjection(fittingImport: FittingImport, path: string, overload
   const conditions: StatConditions = { skillLevel: 5, overloaded: false };
   const imported = fittingImport.importFitting(text, conditions);
   if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
-  const { webs, disruptors } = imported.ewar;
+  const { webs, disruptors, scramblers = [] } = imported.ewar;
   return {
     loadout: imported.ewar,
     activation: {
       webs: webs.map(() => ({ active: true, overloaded })),
       disruptors: disruptors.map(() => ({ active: true, overloaded, script: undefined })),
+      scramblers: scramblers.map(() => ({ active: true, overloaded })),
     },
   };
 }

@@ -75,8 +75,10 @@ export class SimulationImpl implements Simulation {
 
 function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipState, distance: number): ShipState {
   const multiplier = resolver.webSpeedMultiplier(opponent.ewar, distance);
-  if (multiplier === 1) return ship;
-  return { ...ship, maxSpeed: ship.maxSpeed * multiplier };
+  const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance);
+  if (multiplier === 1 && !suppressed) return ship;
+  const baseSpeed = suppressed ? (ship.baseMaxSpeed ?? ship.maxSpeed) : ship.maxSpeed;
+  return { ...ship, maxSpeed: baseSpeed * multiplier };
 }
 
 function asState(config: CombatantConfig, position: Vec2): ShipState {

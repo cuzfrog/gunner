@@ -41,6 +41,9 @@ export class StatsSection implements IStatsSection {
 
     if (updateMass || updateInertia || (this.panel.side === "target" && updateSig)) {
       const stats = this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, conditions);
+      if (fitted) {
+        this.panel.fittedHull = { ...fitted, baseMaxSpeed: stats.baseMaxSpeed };
+      }
       if (updateMass && !this.isOverridden(massKey)) {
         mass = stats.mass;
         this.els.mass.value = String(mass);

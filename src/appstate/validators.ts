@@ -26,6 +26,7 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
       if (!isStoredDisruptorActivation(item)) return false;
     }
   }
+  if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
   return true;
 }
 
@@ -45,6 +46,13 @@ function isStoredDisruptorActivation(value: unknown): boolean {
     typeof item.script === "string" &&
     item.script.length > 0
   );
+}
+
+function isStoredScramblerActivation(value: unknown): boolean {
+  if (typeof value === "boolean") return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
 }
 
 export function isSkillLevel(value: unknown): value is SkillLevel {
@@ -152,6 +160,7 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   if (!isOptionalPropulsionStats(s.propulsion)) return false;
   if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
   if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
+  if (s.baseMaxSpeed !== undefined && !isNonNegative(s.baseMaxSpeed)) return false;
   return true;
 }
 

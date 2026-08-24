@@ -11,6 +11,7 @@ export type StoredDisruptionScript = string;
 export interface StoredEwarActivation {
   readonly webs?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly disruptors?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
+  readonly scramblers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
 }
 
 export interface FittedHullSummary {
@@ -19,6 +20,7 @@ export interface FittedHullSummary {
   readonly propulsionName?: string;
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
+  readonly baseMaxSpeed?: number;
 }
 
 export type ProfileParamOverrides = Pick<

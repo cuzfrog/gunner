@@ -143,6 +143,7 @@ function toShipConfig(ship: ShipState): ShipConfig {
   return {
     id: ship.id,
     maxSpeed: ship.maxSpeed,
+    baseMaxSpeed: ship.baseMaxSpeed,
     mass: ship.mass,
     inertiaModifier: ship.inertiaModifier,
     mode: ship.mode,
@@ -153,7 +154,7 @@ function toShipConfig(ship: ShipState): ShipConfig {
 }
 
 function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
-  return a.id === b.id && a.maxSpeed === b.maxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
+  return a.id === b.id && a.maxSpeed === b.maxSpeed && a.baseMaxSpeed === b.baseMaxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
     a.mode === b.mode && a.desiredRange === b.desiredRange && a.aggressivity === b.aggressivity && a.orbitDirection === b.orbitDirection;
 }
 

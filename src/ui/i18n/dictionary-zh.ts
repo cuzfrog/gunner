@@ -22,6 +22,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.modules": { zh: "模块" },
   "label.ewar.web": { zh: "停滞缠绕网" },
   "label.ewar.disruptor": { zh: "炮台干扰器" },
+  "label.ewar.scrambler": { zh: "跃迁扰频器" },
   "title.ewar.empty": { zh: "未装配电子战模块" },
   "ewar.script.none": { zh: "无" },
   "ewar.script.none.hint": { zh: "影响跟踪、最佳射程和衰减" },

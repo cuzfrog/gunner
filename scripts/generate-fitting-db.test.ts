@@ -1,4 +1,4 @@
-import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, _filterItemNames } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -87,6 +87,31 @@ describe("_filterItemNames", () => {
     const groups = { "1": { groupID: 1, categoryID: 7 } };
     const result = _filterItemNames(itemNames, nameToType, groups, new Set(["Table Key"]));
     expect(Object.keys(result)).toContain("Table Key");
+  });
+});
+
+describe("buildWarpScramblerStats", () => {
+  test("returns undefined when propulsion block attribute is missing or non-positive", () => {
+    expect(buildWarpScramblerStats(values({ maxRange: 9000 }))).toBeUndefined();
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 0, maxRange: 9000 }))).toBeUndefined();
+  });
+
+  test("builds a warp scrambler from propulsion block, range, and overload bonus", () => {
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 9000, overloadRangeBonus: 20 }))).toEqual({
+      maxRange: 9000,
+      overloadRangeBonusPercent: 20,
+    });
+  });
+
+  test("defaults missing overload range bonus to zero", () => {
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1, maxRange: 7500 }))).toEqual({
+      maxRange: 7500,
+      overloadRangeBonusPercent: 0,
+    });
+  });
+
+  test("returns undefined when range is missing", () => {
+    expect(buildWarpScramblerStats(values({ activationBlockedStrenght: 1 }))).toBeUndefined();
   });
 });
 

@@ -7,6 +7,7 @@ import {
   type StasisWebSpec,
   type TrackingDisruptorSpec,
   type TurretSpec,
+  type WarpScramblerSpec,
 } from "./types";
 
 const stacking = new StackingPenaltyImpl();
@@ -27,14 +28,20 @@ const TRACKING_SCRIPT: DisruptionScriptSpec = {
 };
 
 function webProjection(specs: readonly StasisWebSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: specs, disruptors: [], scripts: [] };
-  const activation = { webs: specs.map(() => ({ active: true, overloaded })), disruptors: [] };
+  const loadout = { webs: specs, disruptors: [], scramblers: [], scripts: [] };
+  const activation = { webs: specs.map(() => ({ active: true, overloaded })), disruptors: [], scramblers: [] };
   return { loadout, activation };
 }
 
 function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: [], disruptors: specs, scripts: [] };
-  const activation = { webs: [], disruptors: specs.map(() => ({ active: true, overloaded, script: undefined })) };
+  const loadout = { webs: [], disruptors: specs, scramblers: [], scripts: [] };
+  const activation = { webs: [], disruptors: specs.map(() => ({ active: true, overloaded, script: undefined })), scramblers: [] };
+  return { loadout, activation };
+}
+
+function scramblerProjection(specs: readonly WarpScramblerSpec[], overloaded = false, active = true): EwarProjection {
+  const loadout = { webs: [], disruptors: [], scramblers: specs, scripts: [] };
+  const activation = { webs: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })) };
   return { loadout, activation };
 }
 
@@ -89,13 +96,13 @@ describe("EwarResolverImpl", () => {
 
     test("a web missing from a partial activation array is treated as active", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], disruptors: [], scripts: [] }, activation: { webs: [], disruptors: [] } };
+      const projection = { loadout: { webs: [web], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [], disruptors: [], scramblers: [] } };
       expect(resolver.webSpeedMultiplier(projection, 5000)).toBeCloseTo(0.4, 10);
     });
 
     test("explicit active false still disables a web", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], disruptors: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], disruptors: [] } };
+      const projection = { loadout: { webs: [web], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], disruptors: [], scramblers: [] } };
       expect(resolver.webSpeedMultiplier(projection, 5000)).toBe(1);
     });
   });
@@ -131,7 +138,7 @@ describe("EwarResolverImpl", () => {
 
     test("disruptor without activation defaults to its spec script", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], disruptors: [{ ...td, defaultScript: OPTIMAL_SCRIPT }], scripts: [] },
+        loadout: { webs: [], disruptors: [{ ...td, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], scripts: [] },
       };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
@@ -182,8 +189,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one disruptor applies the strength bonus only to that module", () => {
       const base: TrackingDisruptorSpec = { ...td, disruption: 0.15 };
       const heated: TrackingDisruptorSpec = td;
-      const loadout = { webs: [], disruptors: [base, heated], scripts: [] };
-      const activation = { webs: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }] };
+      const loadout = { webs: [], disruptors: [base, heated], scramblers: [], scripts: [] };
+      const activation = { webs: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: [] };
       const projection: EwarProjection = { loadout, activation };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const baseFactor = 1 - 0.15;
@@ -222,6 +229,36 @@ describe("EwarResolverImpl", () => {
     test("undefined projection leaves turret untouched", () => {
       const turret = resolver.disruptedTurret(defaultTurret, undefined, 10000);
       expect(turret).toEqual(defaultTurret);
+    });
+  });
+
+  describe("propulsionSuppressed", () => {
+    test("no projection is not suppressed", () => {
+      expect(resolver.propulsionSuppressed(undefined, 5000)).toBe(false);
+    });
+
+    test("single T2 scram suppresses inside range", () => {
+      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }]);
+      expect(resolver.propulsionSuppressed(projection, 8999)).toBe(true);
+      expect(resolver.propulsionSuppressed(projection, 9000)).toBe(true);
+      expect(resolver.propulsionSuppressed(projection, 9001)).toBe(false);
+    });
+
+    test("overload extends scram range by 20%", () => {
+      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }], true);
+      expect(resolver.propulsionSuppressed(projection, 10_799)).toBe(true);
+      expect(resolver.propulsionSuppressed(projection, 10_801)).toBe(false);
+    });
+
+    test("inactive scrambler does not suppress", () => {
+      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
+      expect(resolver.propulsionSuppressed(projection, 5000)).toBe(false);
+    });
+
+    test("a scrambler missing from a partial activation array is treated as active", () => {
+      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+      const projection: EwarProjection = { loadout: { webs: [], disruptors: [], scramblers: [scrambler], scripts: [] }, activation: { webs: [], disruptors: [], scramblers: [] } };
+      expect(resolver.propulsionSuppressed(projection, 5000)).toBe(true);
     });
   });
 });

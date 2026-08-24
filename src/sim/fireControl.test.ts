@@ -57,7 +57,7 @@ function makeEvaluator(): {
 } {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
-  const ewarResolver = vi.mocked<EwarResolver>({ webSpeedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret) });
+  const ewarResolver = vi.mocked<EwarResolver>({ webSpeedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret), propulsionSuppressed: vi.fn(() => false) });
   const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver });
   return { kinematics, hitChance, ewarResolver, evaluator };
 }

@@ -621,6 +621,7 @@ describe("LocalSettingsStore", () => {
       propulsionName: RIFTER_MODULE.label,
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
+      baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
     });
     expect(loaded!.attackerMass).toBe(2_000_000);
     expect(loaded!.attackerInertia).toBe(2);

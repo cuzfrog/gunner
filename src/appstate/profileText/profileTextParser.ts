@@ -109,9 +109,11 @@ function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarAc
     if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
       const migratedWebs = parsed.webs?.map((item) => migrateWebActivation(item, sideOverload));
       const migratedDisruptors = parsed.disruptors?.map((item) => migrateDisruptorActivation(item, sideOverload));
+      const migratedScramblers = parsed.scramblers?.map((item) => migrateScramblerActivation(item, sideOverload));
       const result: StoredEwarActivation = {
         ...(migratedWebs !== undefined ? { webs: migratedWebs } : {}),
         ...(migratedDisruptors !== undefined ? { disruptors: migratedDisruptors } : {}),
+        ...(migratedScramblers !== undefined ? { scramblers: migratedScramblers } : {}),
       };
       return result;
     }
@@ -139,4 +141,12 @@ function migrateDisruptorActivation(
   };
   const script = map[item.script] ?? item.script;
   return { active: item.active, overloaded: item.overloaded ?? sideOverload, script };
+}
+
+function migrateScramblerActivation(
+  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
+  sideOverload: boolean,
+): Readonly<{ active: boolean; overloaded: boolean }> {
+  if (typeof item === "boolean") return { active: item, overloaded: sideOverload };
+  return { active: item.active, overloaded: item.overloaded ?? sideOverload };
 }

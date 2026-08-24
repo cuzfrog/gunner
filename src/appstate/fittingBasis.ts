@@ -61,14 +61,15 @@ export class FittingBasis {
     const fittedPropulsion = explicitNone ? importedPropulsion : activePropulsion;
     const fittedPropulsionId = explicitNone ? importedPropulsionId : activePropulsionId;
     const fittedPropulsionName = explicitNone ? importedPropulsion?.propulsionName : activePropulsionName;
+    const stats = this.ships.fittedStats(profile, imported.fitted, activePropulsion, conditions);
     const fittedHull: FittedHullSummary = {
       fittingName: imported.fittingName,
       propulsionId: fittedPropulsionId,
       propulsionName: fittedPropulsionName,
       fitted: imported.fitted,
       propulsion: fittedPropulsion,
+      baseMaxSpeed: stats.baseMaxSpeed,
     };
-    const stats = this.ships.fittedStats(profile, fittedHull.fitted, activePropulsion, conditions);
     const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
     const override = overrides ?? {};
     const massOverride = side === "attacker" ? override.attackerMass : override.targetMass;

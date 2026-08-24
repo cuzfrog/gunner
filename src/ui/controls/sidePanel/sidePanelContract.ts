@@ -54,6 +54,7 @@ export interface SidePanel {
 
 export interface SidePanelState {
   readonly speed: number;
+  readonly baseMaxSpeed?: number;
   readonly mass: number;
   readonly inertia: number;
   readonly mode: AutopilotMode;
@@ -72,6 +73,7 @@ export function stateSliceOf(settings: UserSettings, side: Side): SidePanelState
   if (side === "attacker") {
     return {
       speed: settings.attackerSpeed,
+      baseMaxSpeed: settings.attackerFittedHull?.baseMaxSpeed ?? settings.attackerSpeed,
       mass: settings.attackerMass,
       inertia: settings.attackerInertia,
       mode: settings.attackerMode,
@@ -87,6 +89,7 @@ export function stateSliceOf(settings: UserSettings, side: Side): SidePanelState
   }
   return {
     speed: settings.targetSpeed,
+    baseMaxSpeed: settings.targetFittedHull?.baseMaxSpeed ?? settings.targetSpeed,
     mass: settings.targetMass,
     inertia: settings.targetInertia,
     mode: settings.targetMode,

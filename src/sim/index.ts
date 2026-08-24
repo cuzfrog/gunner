@@ -17,6 +17,7 @@ export type {
   EwarProjection,
   HitChanceBreakdown,
   OrbitDirection,
+  ScramblerActivation,
   ShipConfig,
   ShipState,
   SigResolutionClass,
@@ -25,6 +26,7 @@ export type {
   StasisWebSpec,
   TrackingDisruptorSpec,
   TurretSpec,
+  WarpScramblerSpec,
   WebActivation,
 } from "./types";
 export { EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";

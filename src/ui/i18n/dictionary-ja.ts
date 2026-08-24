@@ -22,6 +22,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.modules": { ja: "モジュール" },
   "label.ewar.web": { ja: "スタシスウェブ" },
   "label.ewar.disruptor": { ja: "ガンディスラプター" },
+  "label.ewar.scrambler": { ja: "ワープスクランブラー" },
   "title.ewar.empty": { ja: "電子戦モジュール未装備" },
   "ewar.script.none": { ja: "なし" },
   "ewar.script.none.hint": { ja: "追跡、最適射程、フォールオフに影響" },

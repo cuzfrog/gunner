@@ -1,9 +1,10 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type { DisruptionScriptSpec, EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
+import type { EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
   webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number;
   disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec;
+  propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
 }
 
 export class EwarResolverImpl implements EwarResolver {
@@ -57,6 +58,20 @@ export class EwarResolverImpl implements EwarResolver {
       falloff: turret.falloff * this.stacking.apply(falloffModifiers),
       sigResolution: turret.sigResolution,
     };
+  }
+
+  propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean {
+    if (!projection) return false;
+    const scramblers = projection.loadout.scramblers ?? [];
+    for (let i = 0; i < scramblers.length; i++) {
+      const spec = scramblers[i];
+      const activation = projection.activation?.scramblers?.[i];
+      if (activation && !activation.active) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      const range = spec.maxRange * overloadBonus;
+      if (range >= distance) return true;
+    }
+    return false;
   }
 
   private disruptorEffectiveness(distance: number, spec: TrackingDisruptorSpec): number {

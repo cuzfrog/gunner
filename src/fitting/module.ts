@@ -11,6 +11,7 @@ import {
   STASIS_WEBS,
   TRACKING_DISRUPTORS,
   TURRETS,
+  WARP_SCRAMBLERS,
 } from "./fittingDb";
 import { GunFamiliesImpl } from "./gunFamilies";
 import { ItemNamesImpl } from "./itemNames";
@@ -25,6 +26,7 @@ export function registerFittingModule<T extends FittingCradle>(cradle: AwilixCon
     scripts: SCRIPTS,
     stasisWebs: STASIS_WEBS,
     trackingDisruptors: TRACKING_DISRUPTORS,
+    warpScramblers: WARP_SCRAMBLERS,
     disruptionScripts: DISRUPTION_SCRIPTS,
     hullBonuses: HULL_BONUSES,
     drones: DRONES,

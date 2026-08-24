@@ -30,7 +30,7 @@ export function mockShips(): Ships {
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(() => undefined),
     turretSizeOptions: vi.fn(() => [] as const),
-    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, alignTime: 0 })),
+    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 })),
     maxSpeedForFittedMass: vi.fn(() => 0),
     alignTime: vi.fn(() => 0),
   };
@@ -123,7 +123,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   propulsion: undefined,
   turret: TURRET,
   cargoCharges: [],
-  ewar: { webs: [], disruptors: [], scripts: [] },
+  ewar: { webs: [], disruptors: [], scramblers: [], scripts: [] },
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
 

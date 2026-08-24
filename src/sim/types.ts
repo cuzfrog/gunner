@@ -10,6 +10,7 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "attacker" | "target";
   readonly maxSpeed: number;
+  readonly baseMaxSpeed?: number;
   readonly mass: number;
   readonly inertiaModifier: number;
   readonly mode: AutopilotMode;
@@ -88,13 +89,25 @@ export interface TrackingDisruptorSpec {
   readonly overloadStrengthBonusPercent: number;
 }
 
+export interface WarpScramblerSpec {
+  readonly moduleName: string;
+  readonly maxRange: number;
+  readonly overloadRangeBonusPercent: number;
+}
+
+export interface ScramblerActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly disruptors: readonly TrackingDisruptorSpec[];
+  readonly scramblers?: readonly WarpScramblerSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [], scripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [], scramblers: [], scripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -107,9 +120,15 @@ export interface DisruptorActivation {
   readonly script: DisruptionScriptSpec | undefined;
 }
 
+export interface ScramblerActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly disruptors: readonly DisruptorActivation[];
+  readonly scramblers?: readonly ScramblerActivation[];
 }
 
 export interface EwarProjection {

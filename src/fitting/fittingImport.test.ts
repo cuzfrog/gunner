@@ -15,6 +15,7 @@ import {
   STASIS_WEBS,
   TRACKING_DISRUPTORS,
   TURRETS,
+  WARP_SCRAMBLERS,
 } from "./fittingDb";
 import { MODULE_SLOTS } from "./moduleSlots";
 import { moduleLines, parseEft } from "./eft";
@@ -184,6 +185,7 @@ const db: FittingDb = {
   },
   stasisWebs: {},
   trackingDisruptors: {},
+  warpScramblers: {},
   disruptionScripts: {},
   hullBonuses: {},
   drones: {},
@@ -217,6 +219,7 @@ const fullFittingDb: FittingDb = {
   scripts: SCRIPTS,
   stasisWebs: STASIS_WEBS,
   trackingDisruptors: TRACKING_DISRUPTORS,
+  warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   drones: DRONES,
@@ -634,6 +637,7 @@ Stasis Webifier II/OFFLINE`,
     expect(result).toBeDefined();
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
+    expect(result!.ewar.scramblers).toEqual([]);
   });
 
   test("preserves duplicate ewar instances and mixed variants", () => {
@@ -679,6 +683,41 @@ Tracking Disruptor II`,
       },
     ]);
     expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
+  });
+
+  test("resolves warp scramblers and ignores long warp disruptors", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const result = importer.importFitting(
+      `[Rifter, Scram]
+Warp Scrambler II
+Warp Disruptor II`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.scramblers).toEqual([
+      { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 },
+    ]);
+    expect(result!.ewar.webs).toEqual([]);
+    expect(result!.ewar.disruptors).toEqual([]);
+  });
+
+  test("resolves a warp scrambler with a charge line", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const result = importer.importFitting(
+      `[Rifter, ScramCharge]
+Warp Scrambler II, Gremlin K5`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.scramblers).toEqual([
+      { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 },
+    ]);
+    expect(result!.ewar.webs).toEqual([]);
+    expect(result!.ewar.disruptors).toEqual([]);
   });
 
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
@@ -762,7 +801,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {
