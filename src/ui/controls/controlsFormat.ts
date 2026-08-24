@@ -30,6 +30,11 @@ export function formatWithCommas(value: number, decimals = 0): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
+export function formatDistance(m: number, t: (key: string) => string): string {
+  if (m >= 10000) return `${formatWithCommas(m / 1000, 1)} ${t("unit.kilometer")}`;
+  return `${formatWithCommas(Math.round(m))} ${t("unit.meter")}`;
+}
+
 export function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
 }

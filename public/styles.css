@@ -1572,6 +1572,27 @@ canvas {
   pointer-events: none;
 }
 
+.panel .effective-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  pointer-events: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel .effective-value.affected {
+  color: var(--danger-red);
+}
+
+.panel .input-with-unit:has(.effective-value) > .input-suffix {
+  display: none;
+}
+
 .panel input[type="number"] {
   -moz-appearance: textfield;
 }

@@ -10,6 +10,7 @@ import type { Controls } from "./controlsContract";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { DomControlsHost } from "./domControlsContract";
 import type { Els } from "./elementsContract";
+import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
@@ -49,6 +50,7 @@ export interface ControlsCradle {
   readonly trackingInput: TrackingInput;
   readonly sigResChoice: ChoiceGroup;
   readonly engagementReadout: EngagementReadout;
+  readonly effectiveReadout: EffectiveReadout;
   readonly hullDatalist: HullDatalist;
   readonly hintRotator: HintRotator;
   readonly preferencesController: PreferencesController;

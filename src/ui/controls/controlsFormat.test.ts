@@ -10,6 +10,7 @@ import {
   aggressivityFromPosition,
   chargeStatSuffix,
   escapeHtml,
+  formatDistance,
   formatMultiplier,
   formatNumber,
   formatWithCommas,
@@ -86,6 +87,12 @@ describe("formatting", () => {
     expect(formatMultiplier(1)).toBe("1");
     expect(formatMultiplier(1.5)).toBe("1.5");
     expect(formatMultiplier(1.556)).toBe("1.56");
+  });
+
+  test("formats short distances in meters and long distances in kilometers", () => {
+    const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km" }[key] ?? key);
+    expect(formatDistance(1234.4, t)).toBe("1,234 m");
+    expect(formatDistance(12345, t)).toBe("12.3 km");
   });
 });
 

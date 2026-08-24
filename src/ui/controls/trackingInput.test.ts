@@ -40,4 +40,12 @@ describe("TrackingInput", () => {
     expect(input.displayValue(125)).toBe(0.32);
     expect(input.rad).toBe(0.32);
   });
+
+  test("computes the display value for an arbitrary rad value in the active unit", () => {
+    input.setDisplayValue(0.32, 40);
+    input.setUnit("score", 40);
+    expect(input.displayFor(0.16, 40)).toBe(160);
+    input.setUnit("rad", 40);
+    expect(input.displayFor(0.16, 40)).toBe(0.16);
+  });
 });

@@ -6,9 +6,10 @@ import type { ControlsCradle } from "./cradle";
 import { ConfirmControllerImpl } from "./confirmController";
 import { profileSettingsOf } from "./controlsFormat";
 import { createControlsEls } from "./elements";
-import { collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
+import { collectEffectiveReadoutEls, collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
 import { DomControls } from "./domControls";
 import { ChoiceGroupImpl } from "./choiceGroup";
+import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { EngagementReadoutImpl } from "./engagementReadout";
 import { PreferencesControllerImpl } from "./preferencesController";
 import { ProfileControllerImpl } from "./profileController";
@@ -41,6 +42,12 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
     trackingInput: asClass(TrackingInputImpl).singleton(),
     sigResChoice: asFunction(({ els }: ControlsCradle) => new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"])).singleton(),
     engagementReadout: asFunction(({ els }: ControlsCradle) => new EngagementReadoutImpl(collectReadoutEls(els))).singleton(),
+    effectiveReadout: asFunction(({ els, i18n, trackingInput, turretController }: ControlsCradle) => new EffectiveReadoutImpl({
+      els: collectEffectiveReadoutEls(els),
+      i18n,
+      trackingInput,
+      sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
+    })).singleton(),
     preferencesController: asFunction(({ els, i18n, itemNames, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController }: ControlsCradle) => new PreferencesControllerImpl({
       els: collectPreferencesEls(els),
       i18n,
@@ -96,6 +103,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       preferencesController: proxy.preferencesController,
       profileController: proxy.profileController,
       engagementReadout: proxy.engagementReadout,
+      effectiveReadout: proxy.effectiveReadout,
       sigResChoice: proxy.sigResChoice,
       attackerSide: proxy.attackerSide,
       targetSide: proxy.targetSide,

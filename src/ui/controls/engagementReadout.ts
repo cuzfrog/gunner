@@ -1,6 +1,6 @@
 import type { EngagementFrame, HitChanceBreakdown } from "../../sim";
 import { setText } from "./controlsDom";
-import { formatWithCommas, hitChanceColor } from "./controlsFormat";
+import { formatDistance, formatWithCommas, hitChanceColor } from "./controlsFormat";
 
 export interface ReadoutEls {
   readonly resDistance: HTMLElement;
@@ -36,9 +36,4 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(this.els.resHit, `${formatWithCommas(hit.chance * 100, 1)}%`);
     this.els.resHit.style.color = hitChanceColor(hit.chance);
   }
-}
-
-function formatDistance(m: number, t: (key: string) => string): string {
-  if (m >= 10000) return `${formatWithCommas(m / 1000, 1)} ${t("unit.kilometer")}`;
-  return `${formatWithCommas(Math.round(m))} ${t("unit.meter")}`;
 }

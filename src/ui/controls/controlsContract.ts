@@ -9,6 +9,14 @@ export interface ControlsCallbacks {
   readonly onSpeedChange: (speed: number) => void;
 }
 
+export interface EffectiveReadouts {
+  readonly attackerSpeed: number;
+  readonly targetSpeed: number;
+  readonly tracking: number;
+  readonly optimal: number;
+  readonly falloff: number;
+}
+
 export interface Controls {
   getTurret(): TurretSpec;
   getTargetSig(): number;
@@ -16,7 +24,7 @@ export interface Controls {
   getSpeed(): number;
   getGridBrightness(): number;
   getOverlays(): readonly RangeOverlay[];
-  update(frame: EngagementFrame, hit: HitChanceBreakdown): void;
+  update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }

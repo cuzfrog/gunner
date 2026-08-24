@@ -9,8 +9,9 @@ import {
 import type { UserSettings } from "../../appstate";
 import type { Els } from "./elementsContract";
 import { AGGRESSIVITY_MIN } from "./controlsFormat";
-import type { Controls, ControlsCallbacks } from "./controlsContract";
+import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
+import type { EffectiveReadout } from "./effectiveReadout";
 import type { RangeOverlayHost } from "./rangeOverlay";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
@@ -38,6 +39,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   preferencesController: PreferencesController;
   profileController: ProfileController;
   engagementReadout: EngagementReadout;
+  effectiveReadout: EffectiveReadout;
   sigResChoice: ChoiceGroup;
   attackerSide: SidePanel;
   targetSide: SidePanel;
@@ -63,6 +65,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly engagementReadout: EngagementReadout;
+  private readonly effectiveReadout: EffectiveReadout;
   private readonly sigResChoice: ChoiceGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
@@ -90,6 +93,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.preferencesController = all.preferencesController;
     this.profileController = all.profileController;
     this.engagementReadout = all.engagementReadout;
+    this.effectiveReadout = all.effectiveReadout;
     this.sigResChoice = all.sigResChoice;
     this.attackerSide = all.attackerSide;
     this.targetSide = all.targetSide;
@@ -215,9 +219,10 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
-  update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
+  update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
     this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
+    this.effectiveReadout.update(effective);
     this.rangeOverlayController.update();
   }
   setPlaying(playing: boolean): void {

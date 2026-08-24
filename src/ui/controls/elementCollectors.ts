@@ -1,4 +1,5 @@
 import type { Els } from "./elementsContract";
+import type { EffectiveReadoutEls } from "./effectiveReadout";
 import type { ReadoutEls } from "./engagementReadout";
 import type { PreferencesEls } from "./preferencesController";
 import type { ProfileEls } from "./profileController";
@@ -79,6 +80,21 @@ export function collectReadoutEls(els: Els): ReadoutEls {
     resTrackPen: els.resTrackPen,
     resRangePen: els.resRangePen,
     resHit: els.resHit,
+  };
+}
+
+export function collectEffectiveReadoutEls(els: Els): EffectiveReadoutEls {
+  return {
+    attackerSpeed: els.attackerSpeed,
+    targetSpeed: els.targetSpeed,
+    tracking: els.tracking,
+    optimal: els.optimal,
+    falloff: els.falloff,
+    attackerSpeedReadout: els.attackerSpeedReadout,
+    targetSpeedReadout: els.targetSpeedReadout,
+    trackingReadout: els.trackingReadout,
+    optimalReadout: els.optimalReadout,
+    falloffReadout: els.falloffReadout,
   };
 }
 

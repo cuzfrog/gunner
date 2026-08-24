@@ -6,6 +6,11 @@ export interface Els {
   readonly sigResOptions: HTMLElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
+  readonly trackingReadout: HTMLElement;
+  readonly optimalReadout: HTMLElement;
+  readonly falloffReadout: HTMLElement;
+  readonly attackerSpeedReadout: HTMLElement;
+  readonly targetSpeedReadout: HTMLElement;
   readonly attackerAmmoTrigger: HTMLButtonElement;
   readonly attackerAmmoSummary: HTMLElement;
   readonly attackerAmmoSummaryIcon: HTMLImageElement;

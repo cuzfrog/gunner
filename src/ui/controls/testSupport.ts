@@ -49,6 +49,7 @@ export function fakeTrackingInput(rad = 0.32, currentUnit: TrackingUnit = "rad")
     setUnit(unit: TrackingUnit, _sigResolution: number): number { currentUnit = unit; return currentRad; },
     setDisplayValue(value: number, _sigResolution: number): number { currentRad = value; return currentRad; },
     displayValue(_sigResolution: number): number { return currentRad; },
+    displayFor(rad: number, _sigResolution: number): number { return rad; },
   };
 }
 

@@ -25,6 +25,7 @@ const controlsCradleKeys = {
   trackingInput: "trackingInput",
   sigResChoice: "sigResChoice",
   engagementReadout: "engagementReadout",
+  effectiveReadout: "effectiveReadout",
   hullDatalist: "hullDatalist",
   hintRotator: "hintRotator",
   preferencesController: "preferencesController",

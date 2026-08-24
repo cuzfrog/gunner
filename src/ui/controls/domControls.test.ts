@@ -1,6 +1,6 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../appstate";
 import type { FittingImport } from "../../fitting";
-import type { EwarLoadout, WarpScramblerSpec } from "../../sim";
+import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown } from "../../sim";
 import type { Ships } from "../../ships";
 import { USER_SETTINGS_VERSION } from "../../appstate";
 import {
@@ -232,5 +232,33 @@ describe("DomControls", () => {
     expect(config.target.baseMaxSpeed).toBe(300);
     expect(config.target.ewar?.loadout.scramblers).toHaveLength(1);
     expect(config.target.ewar?.activation?.scramblers).toEqual([{ active: true, overloaded: false }]);
+  });
+
+  test("update displays effective attributes and highlights affected values", () => {
+    const { document, controls } = buildDomControls();
+    const attackerState = {
+      id: "attacker" as const,
+      position: new Vec2(0, 0),
+      velocity: new Vec2(0, 0),
+      maxSpeed: 0,
+      mass: 1,
+      inertiaModifier: 1,
+      mode: "orbit" as const,
+      desiredRange: 0,
+      aggressivity: 1,
+    };
+    const targetState = { ...attackerState, id: "target" as const };
+    const frame: EngagementFrame = {
+      time: 0, attacker: attackerState, target: targetState,
+      relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
+      radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
+    };
+    const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+    const effective = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000 };
+    controls.update(frame, hit, effective);
+    expect(getFake(document, "effective-attacker-speed").textContent).toBe("300 m/s");
+    expect(getFake(document, "effective-target-speed").textContent).toBe("150 m/s");
+    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("affected");
+    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("affected");
   });
 });

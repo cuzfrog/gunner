@@ -157,7 +157,10 @@
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
-          <input type="number" id="tracking" value="0.32" step="any" min="0">
+          <span class="input-with-unit">
+            <input type="number" id="tracking" value="0.32" step="any" min="0">
+            <span class="effective-value" id="effective-tracking"></span>
+          </span>
         </label>
         <div class="field-group sigres-group">
           <span class="field-label" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
@@ -191,6 +194,7 @@
             <span class="field-label" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit">
               <input type="number" id="optimal" value="5000" step="any" min="0">
+              <span class="effective-value" id="effective-optimal"></span>
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
@@ -198,6 +202,7 @@
             <span class="field-label" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit">
               <input type="number" id="falloff" value="5000" step="any" min="0">
+              <span class="effective-value" id="effective-falloff"></span>
               <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
@@ -308,6 +313,7 @@
           </button>
           <span class="input-with-unit">
             <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <span class="effective-value" id="effective-attacker-speed"></span>
             <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
@@ -514,6 +520,7 @@
           </button>
           <span class="input-with-unit">
             <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <span class="effective-value" id="effective-target-speed"></span>
             <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
