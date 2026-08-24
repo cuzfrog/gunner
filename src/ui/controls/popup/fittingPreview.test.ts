@@ -1,6 +1,8 @@
 import type { FittingSummary } from "../../../fitting";
+import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { mockFittingImport } from "../testSupport";
 import { DomFittingPreview } from "./fittingPreview";
 
 interface Rect {
@@ -126,19 +128,22 @@ describe("DomFittingPreview", () => {
     globalThis.document = undefined as unknown as Document;
   });
 
-  function buildPreview(): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview } {
+  function buildPreview(language: Language = "en"): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview; fittingImport: ReturnType<typeof mockFittingImport> } {
     const container = new FakeElement();
     container.offsetWidth = 300;
     container.offsetHeight = 200;
     const anchor = new FakeElement();
     anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
+    const fittingImport = vi.mocked(mockFittingImport());
+    fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
-      i18n: createI18n(),
+      i18n: { ...createI18n(), current: () => language },
       imageCatalog: createImageCatalog(),
+      fittingImport,
       viewport: () => ({ innerWidth: 1024, innerHeight: 768 }),
     });
-    return { container, anchor, preview };
+    return { container, anchor, preview, fittingImport };
   }
 
   test("show renders header and sections", () => {
@@ -271,6 +276,17 @@ describe("DomFittingPreview", () => {
     expect(row.className).toBe("preview-row preview-row-empty");
     expect(row.children[0].src).toBe("");
     expect(row.children[1].children[0].textContent).toBe("[Empty High slot]");
+  });
+
+  test("show translates item and charge names with the current language", () => {
+    const { container, anchor, preview, fittingImport } = buildPreview("zh");
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    const highSection = container.children[1];
+    const row = highSection.children[1];
+    expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I (zh)");
+    expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
+    expect(fittingImport.itemName).toHaveBeenCalledWith("200mm AutoCannon I", "zh");
+    expect(fittingImport.itemName).toHaveBeenCalledWith("Hail S", "zh");
   });
 
   test("hide clears and hides the container", () => {

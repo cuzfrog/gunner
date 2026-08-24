@@ -58,6 +58,7 @@ export class TurretControllerImpl implements TurretController {
       els: this.ammoListEls(),
       chargeCatalog: this.chargeCatalog,
       imageCatalog: deps.imageCatalog,
+      fittingImport: this.fittingImport,
       i18n: deps.i18n,
       onSelect: (name) => this.onAmmoItemClick(name),
       onExpand: () => this.onAmmoExpandClick(),

@@ -1,4 +1,4 @@
-import type { CargoCharge, ChargeCatalog, ImportedTurret } from "../../../fitting";
+import type { CargoCharge, ChargeCatalog, FittingImport, ImportedTurret } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { chargeStatSuffix } from "../controlsFormat";
@@ -27,6 +27,7 @@ export class AmmoList {
   private readonly els: AmmoListEls;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly imageCatalog: ImageCatalog;
+  private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly onSelect: (name: string) => void;
   private readonly onExpand: () => void;
@@ -35,6 +36,7 @@ export class AmmoList {
     els: AmmoListEls;
     chargeCatalog: ChargeCatalog;
     imageCatalog: ImageCatalog;
+    fittingImport: FittingImport;
     i18n: I18n;
     onSelect: (name: string) => void;
     onExpand: () => void;
@@ -42,6 +44,7 @@ export class AmmoList {
     this.els = deps.els;
     this.chargeCatalog = deps.chargeCatalog;
     this.imageCatalog = deps.imageCatalog;
+    this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.onSelect = deps.onSelect;
     this.onExpand = deps.onExpand;
@@ -64,7 +67,7 @@ export class AmmoList {
   render(state: AmmoListState): void {
     const hasTurret = state.turret !== undefined;
     this.els.attackerAmmoTrigger.disabled = !hasTurret;
-    setText(this.els.attackerAmmoSummary, hasTurret ? state.ammo : "—");
+    setText(this.els.attackerAmmoSummary, hasTurret ? this.fittingImport.itemName(state.ammo, this.i18n.current()) : "—");
     this.renderIcon(state.ammo, hasTurret);
     this.renderCargoList(state);
     this.renderAllList(state);
@@ -162,10 +165,11 @@ export class AmmoList {
       icon.alt = "";
       item.appendChild(icon);
     }
+    const displayName = this.fittingImport.itemName(name, this.i18n.current());
     const label = document.createElement("span");
     label.className = "ammo-item-name";
-    label.textContent = name;
-    label.title = name;
+    label.textContent = displayName;
+    label.title = displayName;
     item.appendChild(label);
     return item;
   }

@@ -1,12 +1,13 @@
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
 import type { EwarLoadout, StasisWebSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
+import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { collectEwarEls } from "../elementCollectors";
 import { createControlsEls } from "../elements";
 import type { PopupGroup } from "../popup";
-import { FakeElement, fakeDocument, getFake } from "../../testing";
+import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { EwarControllerImpl } from "./ewarController";
 
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
@@ -21,13 +22,13 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
   disruption: -0.25, defaultScript: "optimalRange", overloadStrengthBonusPercent: 20,
 };
 
-function buildEwarController() {
+function buildEwarController(language: Language = "en") {
   const document = fakeDocument();
   globalThis.document = document;
   globalThis.Element = FakeElement as unknown as typeof Element;
   globalThis.HTMLButtonElement = FakeElement as unknown as typeof HTMLButtonElement;
   const i18n = vi.mocked<I18n>({
-    current: vi.fn(),
+    current: vi.fn(() => language),
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
@@ -51,9 +52,11 @@ function buildEwarController() {
   getFake(document, "attacker-ewar-popup").hidden = true;
   getFake(document, "target-ewar-popup").hidden = true;
   const host = { onConfigChange: vi.fn() };
-  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, i18n });
+  const fittingImport = vi.mocked(mockFittingImport());
+  fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
+  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n });
   controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport };
 }
 
 function webSection(popup: FakeElement): FakeElement | undefined {
@@ -385,6 +388,16 @@ describe("EwarController", () => {
       webs: [],
       disruptors: [{ active: true, script: "trackingSpeed" }],
     });
+  });
+
+  test("setLoadout renders translated module names", () => {
+    const { controller, document, fittingImport } = buildEwarController("zh");
+    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR] });
+    const popup = getFake(document, "attacker-ewar-popup");
+    const webButton = webSection(popup)!.children[1].children[0];
+    expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
+    expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
+    expect(fittingImport.itemName).toHaveBeenCalledWith(WEB.moduleName, "zh");
   });
 
   test("summary hides an icon when no icon URL is available", () => {

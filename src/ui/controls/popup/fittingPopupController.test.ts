@@ -73,6 +73,9 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
+    canonicalEftText: vi.fn(),
+    itemName: vi.fn((name: string) => name),
+    canonicalName: vi.fn((name: string) => name),
   });
 
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });

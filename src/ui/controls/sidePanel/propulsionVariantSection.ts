@@ -1,5 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import type { FittedHull, PropulsionModule, ShipProfile } from "../../../ships";
+import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
@@ -17,16 +18,18 @@ export class PropulsionVariantSection {
   private readonly panel: SidePanel;
   private readonly els: PropulsionVariantSectionEls;
   private readonly fittingImport: FittingImport;
+  private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
   private propulsionVariantPopupOpen = false;
   readonly popup: Popup;
 
   constructor({
-    panel, els, fittingImport, imageCatalog,
-  }: { panel: SidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; imageCatalog: ImageCatalog }) {
+    panel, els, fittingImport, i18n, imageCatalog,
+  }: { panel: SidePanel; els: PropulsionVariantSectionEls; fittingImport: FittingImport; i18n: I18n; imageCatalog: ImageCatalog }) {
     this.panel = panel;
     this.els = els;
     this.fittingImport = fittingImport;
+    this.i18n = i18n;
     this.imageCatalog = imageCatalog;
     this.popup = this.createPropulsionVariantPopup();
   }
@@ -84,9 +87,10 @@ export class PropulsionVariantSection {
     const currentName = fitted?.propulsionName ?? this.panel.sections.propulsion.defaultPropulsionName(module);
     for (const name of this.fittingImport.propulsionVariantNames(module)) {
       const iconUrl = this.imageCatalog.itemIconUrl(name);
-      const item = this.createVariantButton(name, currentName, iconUrl, () => this.onPropulsionVariantClick(name));
+      const displayName = this.fittingImport.itemName(name, this.i18n.current());
+      const item = this.createVariantButton(name, currentName, iconUrl, displayName, () => this.onPropulsionVariantClick(name));
       item.setAttribute("data-value", name);
-      item.setAttribute("title", name);
+      item.setAttribute("title", displayName);
       popup.appendChild(item);
     }
   }
@@ -96,7 +100,13 @@ export class PropulsionVariantSection {
     this.renderPropulsionVariants();
   }
 
-  private createVariantButton(name: string, currentName: string, iconUrl: string | undefined, onClick: () => void): HTMLButtonElement {
+  private createVariantButton(
+    name: string,
+    currentName: string,
+    iconUrl: string | undefined,
+    displayName: string,
+    onClick: () => void,
+  ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
@@ -111,8 +121,8 @@ export class PropulsionVariantSection {
     }
     const span = document.createElement("span");
     span.className = "fitting-item-name";
-    span.textContent = name;
-    span.title = name;
+    span.textContent = displayName;
+    span.title = displayName;
     button.appendChild(span);
     button.addEventListener("click", onClick);
     return button;

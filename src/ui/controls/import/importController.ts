@@ -128,11 +128,11 @@ export class ImportControllerImpl implements ImportController {
         return;
       }
       const imported = this.importEftFitting(side, fitting);
-      if (imported) this.recordSavedFitting(imported, fitting);
+      if (imported) this.recordSavedFitting(imported, panel.fittingText ?? fitting);
       return;
     }
     const imported = this.importEftFitting(side, text);
-    if (imported) this.recordSavedFitting(imported, text);
+    if (imported) this.recordSavedFitting(imported, panel.fittingText ?? text);
   }
 
   async importProfileClicked(): Promise<void> {

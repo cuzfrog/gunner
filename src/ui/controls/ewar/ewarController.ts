@@ -1,5 +1,6 @@
 import { type DisruptionScript, type EwarLoadout, type EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
+import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Popup, PopupGroup } from "../popup";
@@ -22,6 +23,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly els: EwarEls;
   private readonly popupGroup: PopupGroup;
   private readonly imageCatalog: ImageCatalog;
+  private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly states = new Map<Side, EwarState>();
   private readonly popups: Record<Side, Popup>;
@@ -30,10 +32,11 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private host?: EwarHost;
 
-  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; i18n: I18n }) {
+  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n }) {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.imageCatalog = deps.imageCatalog;
+    this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
     this.popups = { attacker: this.buildPopup("attacker"), target: this.buildPopup("target") };
@@ -248,10 +251,12 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private createModuleButton(active: boolean, moduleName: string): HTMLButtonElement {
+    const displayName = this.fittingImport.itemName(moduleName, this.i18n.current());
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
+    button.setAttribute("aria-label", displayName);
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
     const img = document.createElement("img");
     if (iconUrl !== undefined) img.src = iconUrl;
@@ -259,8 +264,8 @@ export class EwarControllerImpl implements EwarController {
     img.hidden = iconUrl === undefined;
     button.appendChild(img);
     const nameSpan = document.createElement("span");
-    nameSpan.textContent = moduleName;
-    nameSpan.title = moduleName;
+    nameSpan.textContent = displayName;
+    nameSpan.title = displayName;
     button.appendChild(nameSpan);
     return button;
   }
@@ -296,10 +301,11 @@ export class EwarControllerImpl implements EwarController {
     if (!popup || !state) return;
     popup.innerHTML = "";
     const current = state.activation.disruptors[index].script;
+    const disruptor = state.loadout.disruptors[index];
     const label = document.createElement("div");
     label.id = `${side}-ewar-script-label`;
     label.className = "ewar-script-popup-label";
-    label.textContent = state.loadout.disruptors[index].moduleName;
+    label.textContent = this.fittingImport.itemName(disruptor.moduleName, this.i18n.current());
     popup.setAttribute("aria-labelledby", label.id);
     popup.appendChild(label);
     for (const value of SCRIPT_VALUES) {

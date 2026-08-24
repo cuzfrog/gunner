@@ -1,9 +1,10 @@
 import { join } from "path";
-import type { PropulsionModule, ShipProfile, Ships, StatConditions } from "../ships";
+import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
 import type { StackingPenalty } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, type FittingDb } from "./fittingImport";
 import { GunFamiliesImpl } from "./gunFamilies";
+import { ItemNamesImpl, type ItemNames } from "./itemNames";
 import {
   CHARGES,
   DISRUPTION_SCRIPTS,
@@ -38,6 +39,21 @@ class TestStackingPenalty implements StackingPenalty {
 }
 
 const stackingPenalty = new TestStackingPenalty();
+
+class TestItemNames implements ItemNames {
+  displayName(name: string, language: ShipNameLanguage): string {
+    if (language === "zh") return `${name} (zh)`;
+    if (language === "ja") return `${name} (ja)`;
+    return name;
+  }
+
+  canonicalName(name: string): string {
+    return name.replace(" (zh)", "").replace(" (ja)", "");
+  }
+}
+
+const itemNames = new ItemNamesImpl();
+const mockItemNames = new TestItemNames();
 
 const profile: ShipProfile = {
   name: "Harbinger",
@@ -205,18 +221,18 @@ describe("FittingImportImpl", () => {
   });
 
   test("returns undefined for non-EFT text", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     expect(importer.importFitting("not a fitting", conditions)).toBeUndefined();
   });
 
   test("returns undefined when hull is unknown", () => {
     ships.findHull.mockReturnValue(undefined);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     expect(importer.importFitting("[Unknown Hull, fit]\n5MN Microwarpdrive I", conditions)).toBeUndefined();
   });
 
   test("resolves hull and fitting name", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting("[Harbinger, Brawler]\n5MN Microwarpdrive I", conditions);
     expect(result).toBeDefined();
     expect(result!.profile).toBe(profile);
@@ -224,7 +240,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("sums flat mass from plates without bulkhead item mass fallback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Tank]\n1600mm Steel Plates II\nReinforced Bulkheads II`,
       conditions,
@@ -234,14 +250,14 @@ describe("FittingImportImpl", () => {
   });
 
   test("adds shield extender signature radius", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(`[Harbinger, Shieldy]\nMedium Shield Extender II`, conditions);
     expect(result!.fitted.sigRadiusAdd).toBe(7);
     expect(result!.fitted.sigMultiplier).toBe(1);
   });
 
   test("applies stacking penalty to two agility modules", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Agile]\nInertial Stabilizers II\nNanofiber Internal Structure II`,
       conditions,
@@ -253,7 +269,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("two inertial stabilizers apply stacking-penalized signature bonus", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Siggy]\nInertial Stabilizers II\nInertial Stabilizers II`,
       conditions,
@@ -265,7 +281,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("three trimarks stack-penalize agility drawback", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Armor]\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -276,7 +292,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("shield extender rig multiplies signature by 1.1", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(`[Harbinger, Shield Rig]\nMedium Core Defense Field Extender I`, conditions);
     const expected = stackingPenalty.apply([1.1]);
     expect(result!.fitted.sigMultiplier).toBeCloseTo(expected, 6);
@@ -284,7 +300,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and trimarks share the same agility stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\nInertial Stabilizers II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II\nMedium Trimark Armor Pump II`,
       conditions,
@@ -294,7 +310,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("inertial stabilizer and shield rig share the same signature stacking chain", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Sig Rig]\nInertial Stabilizers II\nMedium Core Defense Field Extender I`,
       conditions,
@@ -304,13 +320,13 @@ describe("FittingImportImpl", () => {
   });
 
   test("overdrive applies speed bonus percent", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(`[Harbinger, Kiter]\nOverdrive Injector System II`, conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.125, 6);
   });
 
   test("applies mass percentage bonuses with stacking penalty", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Heavy]\nMedium Higgs Anchor I\n1600mm Steel Plates II`,
       conditions,
@@ -322,7 +338,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("maps exact propulsion to a generic propulsion id", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, AB]\n100MN Y-S8 Compact Afterburner`,
       conditions,
@@ -335,19 +351,19 @@ describe("FittingImportImpl", () => {
   });
 
   test("propulsionVariantNames returns matching module names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const mwd = propulsionModules.find((m) => m.id === "mwd-5mn")!;
     expect(importer.propulsionVariantNames(mwd)).toEqual(["5MN Microwarpdrive I"]);
   });
 
   test("propulsionVariantNames returns an empty list when no variants match", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const ab10 = propulsionModules.find((m) => m.id === "ab-10mn")!;
     expect(importer.propulsionVariantNames(ab10)).toEqual([]);
   });
 
   test("propulsionStats returns stats for a named propulsion module", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     expect(importer.propulsionStats("5MN Microwarpdrive I")).toEqual({
       thrust: 1_500_000,
       speedBonus: 5,
@@ -363,13 +379,13 @@ describe("FittingImportImpl", () => {
   });
 
   test("propulsionStats returns undefined for an unknown or non-propulsion module", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     expect(importer.propulsionStats("1600mm Steel Plates II")).toBeUndefined();
     expect(importer.propulsionStats("Unknown")).toBeUndefined();
   });
 
   test("skips unknown module names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Mixed]\n1600mm Steel Plates II\nUnknown module that does not exist\nMedium Shield Extender II`,
       conditions,
@@ -379,7 +395,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("resolves the first turret and charge", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M\nMedium Shield Extender II`,
       conditions,
@@ -398,7 +414,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret skill level scales tracking, optimal and falloff", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Conflagration M`,
       skillConditions,
@@ -409,7 +425,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("turret without loaded charge selects the usual ammo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II\nHeavy Pulse Laser II, Conflagration M`,
       conditions,
@@ -425,7 +441,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("unknown loaded charge is replaced by the usual ammo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Lasers]\nHeavy Pulse Laser II, Mjolnir Rocket`,
       conditions,
@@ -436,7 +452,7 @@ describe("FittingImportImpl", () => {
   });
 
   test("cargoCharges filters cargo to known charges in EFT order", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Lasers]
 Heavy Pulse Laser II, Conflagration M
@@ -452,7 +468,7 @@ Conflagration M x100`,
   });
 
   test("three metastasis rigs stack-penalize tracking", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Rigs]
 Heavy Pulse Laser II, Conflagration M
@@ -468,7 +484,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("tracking enhancer, tracking computer and rig share one stacking chain per attribute", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Tracking]
 Heavy Pulse Laser II, Conflagration M
@@ -486,7 +502,7 @@ Medium Energy Metastasis Adjuster II`,
   });
 
   test("tracking speed script doubles tracking and zeros range bonuses from a tracking computer", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Scripted]
 Heavy Pulse Laser II, Conflagration M
@@ -499,7 +515,7 @@ Tracking Computer II, Tracking Speed Script`,
   });
 
   test("offline turret line is skipped and a later online turret is resolved", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Offline]\nHeavy Pulse Laser II /OFFLINE\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -509,7 +525,7 @@ Tracking Computer II, Tracking Speed Script`,
   });
 
   test("all-offline propulsion is not applied", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Offline]\n100MN Y-S8 Compact Afterburner /OFFLINE\n5MN Microwarpdrive I /OFFLINE`,
       conditions,
@@ -519,7 +535,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("maps small turret to S sig resolution class", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Rifter, AC]\n200mm AutoCannon II, EMP S`,
       conditions,
@@ -530,7 +546,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("skill-scaled hull velocity and agility bonuses apply", () => {
     ships.findHull.mockReturnValueOnce(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting("[Vagabond, Bonuses]\n200mm AutoCannon II, EMP S", skillConditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.2, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.84, 6);
@@ -538,7 +554,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("hull velocity and agility bonuses are flat without a skill", () => {
     ships.findHull.mockReturnValueOnce(roleBonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting("[Muninn, Role]\n200mm AutoCannon II, EMP S", conditions);
     expect(result!.fitted.speedMultiplier).toBeCloseTo(1.5, 6);
     expect(result!.fitted.inertiaMultiplier).toBeCloseTo(0.95, 6);
@@ -546,7 +562,7 @@ Tracking Computer II, Tracking Speed Script`,
 
   test("hull turret bonuses match turret skill and share the module stacking chain", () => {
     ships.findHull.mockReturnValueOnce(bonusProfile);
-    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Vagabond, Turrets]
 200mm AutoCannon II, EMP S
@@ -563,7 +579,7 @@ Tracking Enhancer II`,
   test("resolves stasis webs and tracking disruptors with converted fractions and scripts", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Rifter, Ewar]
 Stasis Webifier II
@@ -589,7 +605,7 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
   test("ignores offline ewar and returns empty ewar loadout when none are fitted", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Rifter, No Ewar]
 200mm AutoCannon I, Hail S
@@ -604,7 +620,7 @@ Stasis Webifier II/OFFLINE`,
   test("preserves duplicate ewar instances and mixed variants", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Rifter, Duplicates]
 200mm AutoCannon I, Hail S
@@ -623,7 +639,7 @@ Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script`,
   test("tracking disruptor without a charge defaults to none", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Rifter, Unscripted TD]
 200mm AutoCannon I, Hail S
@@ -648,7 +664,7 @@ Tracking Disruptor II`,
     const text = await Bun.file(path).text();
     ships.findHull.mockReturnValueOnce(abaddonProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(text, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => charge.name);
@@ -659,7 +675,7 @@ Tracking Disruptor II`,
   test("classifies charges in a first quantity block as cargo", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => charge.name);
@@ -669,11 +685,21 @@ Tracking Disruptor II`,
   test("classifies cargo before drones by item kind", () => {
     ships.findHull.mockReturnValueOnce(frigateProfile);
     ships.fittingOptions.mockReturnValueOnce(propulsionModules);
-    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(RIFTER_DRONE_AFTER_CARGO, conditions);
     expect(result).toBeDefined();
     const names = result!.cargoCharges.map((charge) => charge.name);
     expect(names).toEqual(["Republic Fleet EMP S"]);
+  });
+
+  test("itemName and canonicalName delegate to ItemNames", () => {
+    const mock = new TestItemNames();
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames: mock });
+    expect(importer.itemName("X", "zh")).toBe("X (zh)");
+    expect(importer.itemName("X", "ja")).toBe("X (ja)");
+    expect(importer.itemName("X", "en")).toBe("X");
+    expect(importer.canonicalName("X (zh)")).toBe("X");
+    expect(importer.canonicalName("X (ja)")).toBe("X");
   });
 });
 
@@ -719,7 +745,7 @@ function summarizeDb(): FittingDb {
 
 describe("FittingImportImpl.summarize", () => {
   test("parses hull and fitting names", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_BRAWLER);
     expect(summary).toBeDefined();
     expect(summary!.hullName).toBe("Rifter");
@@ -727,7 +753,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("groups modules by slot in fixed order", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_BRAWLER);
     expect(summary).toBeDefined();
     const kinds = summary!.sections.map((section) => section.kind);
@@ -735,7 +761,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures charges on module rows", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const high = summary!.sections.find((section) => section.kind === "high");
     expect(high!.rows[0].charge).toBe("Hail S");
@@ -743,7 +769,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures cargo quantities", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
@@ -753,7 +779,7 @@ describe("FittingImportImpl.summarize", () => {
   });
 
   test("captures drone quantities", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const drones = summary!.sections.find((section) => section.kind === "drones");
     expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
@@ -768,7 +794,7 @@ Republic Fleet EMP S x500
 
 Hobgoblin I x3
 `;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(text);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     const drones = summary!.sections.find((section) => section.kind === "drones");
@@ -779,7 +805,7 @@ Hobgoblin I x3
   test("places shield extenders in the mid section", async () => {
     const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Widow", "Missile_Shield_Widow.txt");
     const text = await Bun.file(path).text();
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(text);
     const mid = summary!.sections.find((section) => section.kind === "mid");
     expect(mid).toBeDefined();
@@ -802,7 +828,7 @@ Tengu Engineering - Capacitor Regenerative Matrix
 
 Hobgoblin II x5
 `;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(text);
     const kinds = summary!.sections.map((section) => section.kind);
     expect(kinds).toEqual(["high", "mid", "low", "subsystem", "drones"]);
@@ -818,7 +844,7 @@ Hobgoblin II x5
   });
 
   test("moves charge quantity items from the first quantity block to cargo", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
     const kinds = summary!.sections.map((section) => section.kind);
     expect(kinds).toEqual(["high", "mid", "cargo"]);
@@ -830,13 +856,13 @@ Hobgoblin II x5
   });
 
   test("returns undefined for unparseable text", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     expect(importer.summarize(INVALID_TEXT)).toBeUndefined();
   });
 
   test("places unknown module names in the block's intended bank", () => {
     const text = `[Rifter, Unknown]\nUnknown Module Name\n5MN Microwarpdrive I\n`;
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty });
+    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNames });
     const summary = importer.summarize(text);
     expect(summary!.sections).toHaveLength(2);
     expect(summary!.sections[0].kind).toBe("mid");
@@ -848,5 +874,99 @@ Hobgoblin II x5
     for (const line of moduleLines(parsed!)) {
       expect(MODULE_SLOTS[line.name]).toBeDefined();
     }
+  });
+});
+
+describe("FittingImportImpl localization", () => {
+  const RIFTER_BRAWLER_ZH = `[裂谷级, Brawler]
+200mm自动加农炮 I, 冰雹 S
+200mm自动加农炮 I, 冰雹 S
+5MN微型跃迁推进器 I
+400mm钢附甲板 II
+惯性稳定器 II
+小型三角装甲聚合器 I
+小型射弹武器范围扩大装置 I
+
+地精灵 I x3
+
+冰雹 S x1000
+共和舰队电磁脉冲弹 S x500
+`;
+
+  const RIFTER_BRAWLER_JA = `[リフター, Brawler]
+200mmオートキャノンI, ヘイル弾S
+200mmオートキャノンI, ヘイル弾S
+5MNマイクロワープドライブI
+400mm スチールプレートII
+慣性スタビライザーII
+小型トライマークアーマーポンプI
+小型プロジェクタイルアンビットエクステンションI
+
+ホブゴブリンI x3
+
+ヘイル弾S x1000
+共和国海軍仕様EMP弾S x500
+`;
+
+  const conditions: StatConditions = { skillLevel: 5, overloaded: true };
+
+  beforeEach(() => {
+    ships.findHull.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+  });
+
+  test("imports a Chinese EFT to the same canonical result as English", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const english = importer.importFitting(RIFTER_BRAWLER, conditions);
+    const chinese = importer.importFitting(RIFTER_BRAWLER_ZH, conditions);
+    expect(chinese).toBeDefined();
+    expect(english?.turret?.charge).toBe(chinese?.turret?.charge);
+    expect(english?.cargoCharges.map((c) => c.name)).toEqual(chinese?.cargoCharges.map((c) => c.name));
+    expect(english?.fitted.mass).toBe(chinese?.fitted.mass);
+  });
+
+  test("imports a Japanese EFT to the same canonical result as English", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const english = importer.importFitting(RIFTER_BRAWLER, conditions);
+    const japanese = importer.importFitting(RIFTER_BRAWLER_JA, conditions);
+    expect(japanese).toBeDefined();
+    expect(english?.turret?.charge).toBe(japanese?.turret?.charge);
+    expect(english?.cargoCharges.map((c) => c.name)).toEqual(japanese?.cargoCharges.map((c) => c.name));
+    expect(english?.fitted.mass).toBe(japanese?.fitted.mass);
+  });
+
+  test("summarize canonicalizes localized item names to English", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const summary = importer.summarize(RIFTER_BRAWLER_ZH);
+    expect(summary).toBeDefined();
+    const high = summary!.sections.find((section) => section.kind === "high");
+    expect(high!.rows[0].name).toBe("200mm AutoCannon I");
+    expect(high!.rows[0].charge).toBe("Hail S");
+    const drones = summary!.sections.find((section) => section.kind === "drones");
+    expect(drones!.rows[0].name).toBe("Hobgoblin I");
+  });
+
+  test("canonicalEftText produces English-only EFT from localized input", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const canonical = importer.canonicalEftText(RIFTER_BRAWLER_ZH);
+    expect(canonical).toBeDefined();
+    expect(canonical).not.toContain("200mm自动加农炮 I");
+    expect(canonical).toContain("200mm AutoCannon I");
+    expect(canonical).toContain("Hail S");
+    expect(canonical).toContain("Hobgoblin I");
+  });
+
+  test("canonicalEftText preserves fitting name and unknown or mixed names", () => {
+    const text = `[裂谷级, Brawler]
+200mm自动加农炮 I, 冰雹 S
+Unknown Custom Module I
+5MN微型跃迁推进器 I
+`;
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const canonical = importer.canonicalEftText(text);
+    expect(canonical).toBeDefined();
+    expect(canonical).toContain("Brawler");
+    expect(canonical).toContain("Unknown Custom Module I");
+    expect(canonical).toContain("5MN Microwarpdrive I");
   });
 });

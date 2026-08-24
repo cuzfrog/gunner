@@ -4,10 +4,13 @@ import { join } from "node:path";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingDb.ts");
+const I18N_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-i18n.ts");
 
 interface SdeType {
   typeID: number;
   "typeName_en-us": string;
+  typeName_zh?: string;
+  typeName_ja?: string;
   groupID: number;
   published: number;
 }
@@ -515,15 +518,17 @@ async function main() {
   const disruptionScripts: Record<string, DisruptionScriptStats> = {};
   const hullBonuses: Record<string, readonly HullBonus[]> = {};
   const drones: Record<string, true> = {};
+  const itemNames: Record<string, { readonly zh: string; readonly ja: string }> = {};
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
     const typeDogma = typedogmas[String(type.typeID)];
     const values = buildAttributeValues(attributeNames, typeDogma);
+    const enName = type["typeName_en-us"];
 
     if (shipGroupIds.has(type.groupID)) {
       const bonuses = buildHullBonuses(attributeNames, typeDogma);
-      if (bonuses.length > 0) hullBonuses[type["typeName_en-us"]] = bonuses;
+      if (bonuses.length > 0) hullBonuses[enName] = bonuses;
       continue;
     }
 
@@ -531,13 +536,14 @@ async function main() {
       const tracking = values.get("trackingSpeed");
       const optimal = values.get("maxRange");
       if (tracking !== undefined && optimal !== undefined) {
-        turrets[type["typeName_en-us"]] = {
+        turrets[enName] = {
           tracking,
           optimal,
           falloff: values.get("falloff") ?? 0,
           chargeSize: values.get("chargeSize") ?? 1,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
         };
+        addItemName(itemNames, enName, type);
       }
       continue;
     }
@@ -547,11 +553,8 @@ async function main() {
       const rangeMultiplier = values.get("weaponRangeMultiplier");
       const falloffMultiplier = values.get("fallofMultiplier");
       if (trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined) {
-        charges[type["typeName_en-us"]] = {
-          trackingMultiplier,
-          rangeMultiplier,
-          falloffMultiplier,
-        };
+        charges[enName] = { trackingMultiplier, rangeMultiplier, falloffMultiplier };
+        addItemName(itemNames, enName, type);
       }
       continue;
     }
@@ -561,31 +564,37 @@ async function main() {
       const optimal = values.get("maxRangeBonusBonus");
       const falloff = values.get("falloffBonusBonus");
       if (tracking !== undefined || optimal !== undefined || falloff !== undefined) {
-        scripts[type["typeName_en-us"]] = {
+        scripts[enName] = {
           trackingMultiplier: 1 + (tracking ?? 0) / 100,
           optimalMultiplier: 1 + (optimal ?? 0) / 100,
           falloffMultiplier: 1 + (falloff ?? 0) / 100,
         };
+        addItemName(itemNames, enName, type);
       }
       continue;
     }
 
     if (EWAR_SCRIPT_GROUPS.has(type.groupID)) {
       const stats = buildDisruptionScriptStats(values);
-      if (stats) disruptionScripts[type["typeName_en-us"]] = stats;
+      if (stats) {
+        disruptionScripts[enName] = stats;
+        addItemName(itemNames, enName, type);
+      }
       continue;
     }
 
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
-      drones[type["typeName_en-us"]] = true;
+      drones[enName] = true;
+      addItemName(itemNames, enName, type);
       continue;
     }
 
     if (type.groupID === STASIS_WEB_GROUP) {
       const stats = buildStasisWebStats(values);
       if (stats) {
-        stasisWebs[type["typeName_en-us"]] = stats;
-        fittingModules[type["typeName_en-us"]] = { stasisWeb: stats };
+        stasisWebs[enName] = stats;
+        fittingModules[enName] = { stasisWeb: stats };
+        addItemName(itemNames, enName, type);
       }
       continue;
     }
@@ -593,8 +602,9 @@ async function main() {
     if (type.groupID === WEAPON_DISRUPTOR_GROUP) {
       const stats = buildTrackingDisruptorStats(values);
       if (stats) {
-        trackingDisruptors[type["typeName_en-us"]] = stats;
-        fittingModules[type["typeName_en-us"]] = { trackingDisruptor: stats };
+        trackingDisruptors[enName] = stats;
+        fittingModules[enName] = { trackingDisruptor: stats };
+        addItemName(itemNames, enName, type);
       }
       continue;
     }
@@ -602,17 +612,22 @@ async function main() {
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
-        fittingModules[type["typeName_en-us"]] = buildPropulsionStats(values, type);
+        fittingModules[enName] = buildPropulsionStats(values, type);
+        addItemName(itemNames, enName, type);
       } else {
         const stats = buildModuleStats(values, effects);
-        if (stats) fittingModules[type["typeName_en-us"]] = stats;
+        if (stats) {
+          fittingModules[enName] = stats;
+          addItemName(itemNames, enName, type);
+        }
       }
     }
   }
 
   const sortedDrones = Object.fromEntries(Object.keys(drones).sort().map((name) => [name, true]));
 
-  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${new Date().toISOString().split("T")[0]}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
+  const date = new Date().toISOString().split("T")[0];
+  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\nimport type { HullTier } from "../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
   readonly sizeTier: HullTier;
@@ -688,13 +703,13 @@ export interface DisruptionScriptStats {
 
 `;
 
-  const scriptDefinitions = `export const SCRIPTS = ${JSON.stringify(scripts, null, 2)} as unknown as Readonly<Record<string, TurretScriptStats>>;
+  const scriptDefinitions = `export const SCRIPTS = ${JSON.stringify(scripts)} as unknown as Readonly<Record<string, TurretScriptStats>>;
 
-export const STASIS_WEBS = ${JSON.stringify(stasisWebs, null, 2)} as unknown as Readonly<Record<string, StasisWebStats>>;
+export const STASIS_WEBS = ${JSON.stringify(stasisWebs)} as unknown as Readonly<Record<string, StasisWebStats>>;
 
-export const TRACKING_DISRUPTORS = ${JSON.stringify(trackingDisruptors, null, 2)} as unknown as Readonly<Record<string, TrackingDisruptorStats>>;
+export const TRACKING_DISRUPTORS = ${JSON.stringify(trackingDisruptors)} as unknown as Readonly<Record<string, TrackingDisruptorStats>>;
 
-export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts, null, 2)} as unknown as Readonly<Record<string, DisruptionScriptStats>>;
+export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts)} as unknown as Readonly<Record<string, DisruptionScriptStats>>;
 
 `;
 
@@ -702,23 +717,45 @@ export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts, null, 2)} 
     header,
     typeDefinitions,
     scriptDefinitions,
-    `export const FITTING_MODULES = ${JSON.stringify(fittingModules, null, 2)} as unknown as Readonly<Record<string, FittingModuleStats>>;`,
+    `export const FITTING_MODULES = ${JSON.stringify(fittingModules)} as unknown as Readonly<Record<string, FittingModuleStats>>;`,
     ``,
-    `export const TURRETS = ${JSON.stringify(turrets, null, 2)} as unknown as Readonly<Record<string, TurretStats>>;`,
+    `export const TURRETS = ${JSON.stringify(turrets)} as unknown as Readonly<Record<string, TurretStats>>;`,
     ``,
-    `export const CHARGES = ${JSON.stringify(charges, null, 2)} as unknown as Readonly<Record<string, ChargeStats>>;`,
+    `export const CHARGES = ${JSON.stringify(charges)} as unknown as Readonly<Record<string, ChargeStats>>;`,
     ``,
-    `export const HULL_BONUSES = ${JSON.stringify(hullBonuses, null, 2)} as unknown as Readonly<Record<string, readonly HullBonus[]>>;`,
+    `export const HULL_BONUSES = ${JSON.stringify(hullBonuses)} as unknown as Readonly<Record<string, readonly HullBonus[]>>;`,
     ``,
-    `export const DRONES = ${JSON.stringify(sortedDrones, null, 2)} as unknown as Readonly<Record<string, true>>;`,
+    `export const DRONES = ${JSON.stringify(sortedDrones)} as unknown as Readonly<Record<string, true>>;`,
     ``,
   ];
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
+  await writeI18nFile(itemNames, date);
   console.log(
     `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets, ${Object.keys(sortedDrones).length} drones to ${OUT_FILE}`,
   );
+  console.log(`Wrote ${Object.keys(itemNames).length} item names to ${I18N_FILE}`);
+}
+
+function addItemName(
+  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  name: string,
+  type: SdeType,
+): void {
+  itemNames[name] = {
+    zh: type.typeName_zh && type.typeName_zh.trim().length > 0 ? type.typeName_zh.trim() : name,
+    ja: type.typeName_ja && type.typeName_ja.trim().length > 0 ? type.typeName_ja.trim() : name,
+  };
+}
+
+async function writeI18nFile(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {
+  const en = Object.keys(itemNames).sort((a, b) => a.localeCompare(b));
+  const zh = en.map((name) => itemNames[name].zh);
+  const ja = en.map((name) => itemNames[name].ja);
+  const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
+  const content = `${header}export const ITEM_NAMES: Readonly<{ en: readonly string[]; zh: readonly string[]; ja: readonly string[] }> = { "en": ${JSON.stringify(en)}, "zh": ${JSON.stringify(zh)}, "ja": ${JSON.stringify(ja)} };\n`;
+  await writeFile(I18N_FILE, content);
 }
 
 main().catch((error) => {

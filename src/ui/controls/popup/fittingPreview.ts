@@ -1,4 +1,4 @@
-import type { FittingRow, FittingSection, FittingSummary } from "../../../fitting";
+import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 
@@ -11,6 +11,7 @@ interface PreviewDependencies {
   readonly container: HTMLElement;
   readonly i18n: I18n;
   readonly imageCatalog: ImageCatalog;
+  readonly fittingImport: FittingImport;
   readonly viewport: () => { readonly innerWidth: number; readonly innerHeight: number };
 }
 
@@ -18,12 +19,14 @@ export class DomFittingPreview implements FittingPreview {
   private readonly container: HTMLElement;
   private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
+  private readonly fittingImport: FittingImport;
   private readonly viewport: () => { readonly innerWidth: number; readonly innerHeight: number };
 
-  constructor({ container, i18n, imageCatalog, viewport }: PreviewDependencies) {
+  constructor({ container, i18n, imageCatalog, fittingImport, viewport }: PreviewDependencies) {
     this.container = container;
     this.i18n = i18n;
     this.imageCatalog = imageCatalog;
+    this.fittingImport = fittingImport;
     this.viewport = viewport;
   }
 
@@ -31,7 +34,7 @@ export class DomFittingPreview implements FittingPreview {
     this.container.innerHTML = "";
     this.container.appendChild(renderHeader(this.i18n, summary, shipImageUrl, onClose));
     for (const section of summary.sections) {
-      this.container.appendChild(renderSection(this.i18n, this.imageCatalog, section));
+      this.container.appendChild(renderSection(this.i18n, this.imageCatalog, this.fittingImport, section));
     }
     this.container.hidden = false;
     this.container.setAttribute("aria-hidden", "false");
@@ -91,7 +94,7 @@ const CLOSE_ICON_SVG =
   '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
   'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
-function renderSection(i18n: I18n, imageCatalog: ImageCatalog, section: FittingSection): HTMLElement {
+function renderSection(i18n: I18n, imageCatalog: ImageCatalog, fittingImport: FittingImport, section: FittingSection): HTMLElement {
   const container = document.createElement("div");
   container.className = "preview-section";
 
@@ -101,12 +104,18 @@ function renderSection(i18n: I18n, imageCatalog: ImageCatalog, section: FittingS
   container.appendChild(label);
 
   for (const row of section.rows) {
-    container.appendChild(renderRow(imageCatalog, row, section.kind));
+    container.appendChild(renderRow(i18n, imageCatalog, fittingImport, row, section.kind));
   }
   return container;
 }
 
-function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: FittingSection["kind"]): HTMLElement {
+function renderRow(
+  i18n: I18n,
+  imageCatalog: ImageCatalog,
+  fittingImport: FittingImport,
+  row: FittingRow,
+  sectionKind: FittingSection["kind"],
+): HTMLElement {
   const rowEl = document.createElement("div");
   rowEl.className = row.empty ? "preview-row preview-row-empty" : "preview-row";
 
@@ -126,7 +135,8 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: Fit
 
   const name = document.createElement("span");
   name.className = "preview-name";
-  name.textContent = row.name;
+  name.textContent = fittingImport.itemName(row.name, i18n.current());
+  name.title = row.empty ? row.name : fittingImport.itemName(row.name, i18n.current());
   main.appendChild(name);
 
   if (row.charge) {
@@ -139,7 +149,7 @@ function renderRow(imageCatalog: ImageCatalog, row: FittingRow, sectionKind: Fit
 
     const charge = document.createElement("span");
     charge.className = "preview-charge";
-    charge.textContent = `, ${row.charge}`;
+    charge.textContent = `, ${fittingImport.itemName(row.charge, i18n.current())}`;
     main.appendChild(charge);
   }
 

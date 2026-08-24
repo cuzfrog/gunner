@@ -153,7 +153,7 @@ export class SidePanelImpl implements SidePanel {
   }
 
   restore(state: SidePanelState): void {
-    this.fittingText = state.fitting;
+    this.fittingText = state.fitting ? this.fittingImport.canonicalEftText(state.fitting) ?? state.fitting : state.fitting;
     this.overrides.set(state.overrides);
     this.els.speed.value = formatNumber(state.speed);
     this.els.mass.value = String(state.mass);

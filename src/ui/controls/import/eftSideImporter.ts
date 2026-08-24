@@ -39,7 +39,7 @@ export class EftSideImporter {
       return undefined;
     }
     panel.sections.hull.clearFittedHull();
-    panel.fittingText = text;
+    panel.fittingText = this.fittingImport.canonicalEftText(text) ?? text;
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(imported));

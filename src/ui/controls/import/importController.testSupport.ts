@@ -133,6 +133,9 @@ export function buildImportController(document: Document) {
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
+    canonicalEftText: vi.fn(),
+    itemName: vi.fn((name: string) => name),
+    canonicalName: vi.fn((name: string) => name),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),

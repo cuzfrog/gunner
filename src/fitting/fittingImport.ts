@@ -5,6 +5,7 @@ import type {
   PropulsionKind,
   PropulsionModule,
   PropulsionStats,
+  ShipNameLanguage,
   ShipProfile,
   Ships,
   StatConditions,
@@ -18,7 +19,8 @@ import {
   type StasisWebSpec,
   type TrackingDisruptorSpec,
 } from "../sim";
-import { moduleLines, parseEft, type BankKind, type EftDocument, type QuantityItem } from "./eft";
+import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
+import type { ItemNames } from "./itemNames";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
   ChargeStats,
@@ -81,6 +83,9 @@ export interface FittingImport {
   propulsionVariantNames(module: PropulsionModule): readonly string[];
   propulsionStats(name: string): PropulsionStats | undefined;
   summarize(text: string): FittingSummary | undefined;
+  canonicalEftText(text: string): string | undefined;
+  itemName(name: string, language: ShipNameLanguage): string;
+  canonicalName(name: string): string;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -88,27 +93,36 @@ export class FittingImportImpl implements FittingImport {
   private readonly db: FittingDb;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly stacking: StackingPenalty;
+  private readonly itemNames: ItemNames;
 
   constructor({
     ships,
     fittingDb,
     chargeCatalog,
     stackingPenalty,
+    itemNames,
   }: {
     ships: Ships;
     fittingDb: FittingDb;
     chargeCatalog: ChargeCatalog;
     stackingPenalty: StackingPenalty;
+    itemNames: ItemNames;
   }) {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
     this.stacking = stackingPenalty;
+    this.itemNames = itemNames;
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly string[] {
+    const matches = ([, stats]: [string, FittingModuleStats]) =>
+      stats.propulsion?.kind === module.kind &&
+      stats.propulsion?.sizeTier === module.sizeTier &&
+      stats.propulsion.thrust > 0 &&
+      stats.propulsion.speedBonus > 0;
     return Object.entries(this.db.modules)
-      .filter(([, stats]) => stats.propulsion?.kind === module.kind && stats.propulsion?.sizeTier === module.sizeTier && stats.propulsion.thrust > 0 && stats.propulsion.speedBonus > 0)
+      .filter(matches)
       .map(([name]) => name)
       .sort((a, b) => {
         const aStats = this.db.modules[a]?.propulsion;
@@ -126,22 +140,22 @@ export class FittingImportImpl implements FittingImport {
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
-    const parsed = parseEft(text);
-    if (!parsed) return undefined;
+    const document = this.parseAndCanonicalize(text);
+    if (!document) return undefined;
 
-    const profile = this.ships.findHull(parsed.hullName);
+    const profile = this.ships.findHull(document.hullName);
     if (!profile) return undefined;
 
     const hullBonuses = this.db.hullBonuses[profile.name] ?? [];
-    const hullSide = aggregateHullSide(profile, this.db, parsed, hullBonuses, conditions.skillLevel, this.stacking);
-    const propulsion = resolvePropulsion(profile, this.ships, this.db, parsed, hullSide.propulsionName);
-    const turret = resolveTurret(this.db, this.chargeCatalog, parsed, conditions.skillLevel, hullBonuses, this.stacking);
-    const cargoCharges = resolveCargoCharges(this.db, parsed);
-    const ewar = resolveEwar(this.db, parsed);
+    const hullSide = aggregateHullSide(profile, this.db, document, hullBonuses, conditions.skillLevel, this.stacking);
+    const propulsion = resolvePropulsion(profile, this.ships, this.db, document, hullSide.propulsionName);
+    const turret = resolveTurret(this.db, this.chargeCatalog, document, conditions.skillLevel, hullBonuses, this.stacking);
+    const cargoCharges = resolveCargoCharges(this.db, document);
+    const ewar = resolveEwar(this.db, document);
 
     return {
       profile,
-      fittingName: parsed.fittingName,
+      fittingName: document.fittingName,
       fitted: hullSide.fitted,
       propulsion,
       turret,
@@ -151,13 +165,40 @@ export class FittingImportImpl implements FittingImport {
   }
 
   summarize(text: string): FittingSummary | undefined {
+    const document = this.parseAndCanonicalize(text);
+    if (!document) return undefined;
+    const hullName = this.canonicalHullName(document.hullName);
+    return {
+      hullName,
+      fittingName: document.fittingName,
+      sections: buildSections({ ...document, hullName }, this.db),
+    };
+  }
+
+  canonicalEftText(text: string): string | undefined {
+    const document = this.parseAndCanonicalize(text);
+    if (!document) return undefined;
+    const hullName = this.canonicalHullName(document.hullName);
+    return serializeEftDocument({ ...document, hullName });
+  }
+
+  itemName(name: string, language: ShipNameLanguage): string {
+    return this.itemNames.displayName(name, language);
+  }
+
+  canonicalName(name: string): string {
+    return this.itemNames.canonicalName(name);
+  }
+
+  private parseAndCanonicalize(text: string): EftDocument | undefined {
     const parsed = parseEft(text);
     if (!parsed) return undefined;
-    return {
-      hullName: parsed.hullName,
-      fittingName: parsed.fittingName,
-      sections: buildSections(parsed, this.db),
-    };
+    const normalized = normalizeEftDocument(parsed, (name) => this.itemNames.canonicalName(name));
+    return parseEft(serializeEftDocument(normalized));
+  }
+
+  private canonicalHullName(hullName: string): string {
+    return this.ships.findHull(hullName)?.name ?? hullName;
   }
 }
 
@@ -485,6 +526,48 @@ function classifyQuantity(
   } else {
     buckets.cargo.push({ name: item.name, quantity: item.quantity });
   }
+}
+
+function normalizeEftDocument(document: EftDocument, canonicalName: (name: string) => string): EftDocument {
+  return {
+    hullName: canonicalName(document.hullName),
+    fittingName: document.fittingName,
+    banks: document.banks.map((bank) => ({ bank: bank.bank, lines: bank.lines.map((line) => normalizeEftLine(line, canonicalName)) })),
+    drones: document.drones.map((item) => ({ name: canonicalName(item.name), quantity: item.quantity })),
+    cargo: document.cargo.map((item) => ({ name: canonicalName(item.name), quantity: item.quantity })),
+  };
+}
+
+function normalizeEftLine(line: EftLine, canonicalName: (name: string) => string): EftLine {
+  if (line.kind === "empty") return line;
+  const charge = line.charge !== undefined ? canonicalName(line.charge) : line.charge;
+  return { kind: "module", name: canonicalName(line.name), charge, offline: line.offline };
+}
+
+function serializeEftDocument(document: EftDocument): string {
+  const lines: string[] = [`[${document.hullName}, ${document.fittingName}]`];
+  for (const bank of document.banks) {
+    if (lines.length > 1) lines.push("");
+    for (const line of bank.lines) {
+      if (line.kind === "empty") {
+        lines.push(line.label);
+      } else {
+        const parts: string[] = [line.name];
+        if (line.charge !== undefined) parts.push(line.charge);
+        const suffix = line.offline ? " /OFFLINE" : "";
+        lines.push(parts.join(", ") + suffix);
+      }
+    }
+  }
+  if (document.drones.length > 0) {
+    if (lines.length > 1) lines.push("");
+    for (const item of document.drones) lines.push(`${item.name} x${item.quantity}`);
+  }
+  if (document.cargo.length > 0) {
+    if (lines.length > 1) lines.push("");
+    for (const item of document.cargo) lines.push(`${item.name} x${item.quantity}`);
+  }
+  return lines.join("\n");
 }
 
 

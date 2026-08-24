@@ -84,6 +84,9 @@ export function buildTurret(
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
+    canonicalEftText: vi.fn(() => undefined),
+    itemName: vi.fn((name: string) => name),
+    canonicalName: vi.fn((name: string) => name),
     ...options.fittingImport,
   });
   const turretOverrides = new TurretOverridesStore();

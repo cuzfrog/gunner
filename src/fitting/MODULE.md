@@ -13,6 +13,9 @@ sealed:
   - gunFamilies.test.ts
   - gunFamilies.ts
   - index.ts
+  - item-names-i18n.ts
+  - itemNames.test.ts
+  - itemNames.ts
   - module.ts
   - moduleSlots.ts
   - presetFittings.test.ts

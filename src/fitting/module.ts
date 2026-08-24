@@ -13,6 +13,7 @@ import {
   TURRETS,
 } from "./fittingDb";
 import { GunFamiliesImpl } from "./gunFamilies";
+import { ItemNamesImpl } from "./itemNames";
 import { PresetFittingsImpl } from "./presetFittings";
 import type { FittingCradle } from "./cradle";
 
@@ -33,6 +34,7 @@ export function registerFittingModule<T extends FittingCradle>(cradle: AwilixCon
     chargeCatalog: asClass(ChargeCatalogImpl).singleton(),
     fittingImport: asClass(FittingImportImpl).singleton(),
     gunFamilies: asClass(GunFamiliesImpl).singleton(),
+    itemNames: asClass(ItemNamesImpl).singleton(),
     presetFittings: asClass(PresetFittingsImpl).singleton(),
   });
 }

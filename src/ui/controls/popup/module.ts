@@ -33,6 +33,7 @@ function previewDeps<T extends ControlsCradle>(proxy: T, side: Side) {
     container: side === "attacker" ? proxy.els.attackerFittingPreview : proxy.els.targetFittingPreview,
     i18n: proxy.i18n,
     imageCatalog: proxy.imageCatalog,
+    fittingImport: proxy.fittingImport,
     viewport: () => window,
   };
 }

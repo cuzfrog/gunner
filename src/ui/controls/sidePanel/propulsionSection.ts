@@ -34,7 +34,7 @@ export class PropulsionSection implements IPropulsionSection {
     this.i18n = i18n;
     this.variants = new PropulsionVariantSection({
       panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants },
-      fittingImport, imageCatalog,
+      fittingImport, i18n, imageCatalog,
     });
   }
 

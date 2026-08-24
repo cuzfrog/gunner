@@ -156,6 +156,9 @@ export function makeFittingImport() {
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
+    canonicalEftText: vi.fn(() => undefined),
+    itemName: vi.fn((name) => name),
+    canonicalName: vi.fn((name) => name),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
