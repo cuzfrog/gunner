@@ -113,13 +113,13 @@ describe("ItemNamesImpl", () => {
 });
 
 describe("ItemNamesImpl lazy loading", () => {
-  function buildLoader(expected: ShipNameLanguage, pack: readonly string[]) {
+  function buildLoader(expected: ShipNameLanguage, pack: readonly string[], overrides: Record<string, string> = {}) {
     let calls = 0;
     return {
-      loader: async (language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+      loader: async (language: ShipNameLanguage) => {
         calls++;
-        if (language === expected) return { names: pack };
-        return { names: [] };
+        if (language === expected) return { names: pack, overrides };
+        return { names: [], overrides: {} };
       },
       getCallCount: () => calls,
     };
@@ -128,7 +128,7 @@ describe("ItemNamesImpl lazy loading", () => {
   test("ensureLanguage loads a language pack and enables translation", async () => {
     const firstEn = ITEM_NAMES_EN[0];
     const { loader, getCallCount } = buildLoader("zh", ITEM_NAMES_ZH);
-    const itemNames = new ItemNamesImpl(loader);
+    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
     expect(itemNames.displayName(firstEn, "zh")).toBe(firstEn);
     await itemNames.ensureLanguage("zh");
     expect(itemNames.displayName(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
@@ -138,13 +138,13 @@ describe("ItemNamesImpl lazy loading", () => {
   test("ensureLanguage is idempotent and shares in-flight loads", async () => {
     const firstEn = ITEM_NAMES_EN[0];
     let calls = 0;
-    const loader = async (language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+    const loader = async (language: ShipNameLanguage) => {
       calls++;
       await new Promise((resolve) => setTimeout(resolve, 10));
-      if (language === "zh") return { names: ITEM_NAMES_ZH };
-      return { names: [] };
+      if (language === "zh") return { names: ITEM_NAMES_ZH, overrides: {} };
+      return { names: [], overrides: {} };
     };
-    const itemNames = new ItemNamesImpl(loader);
+    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
     const a = itemNames.ensureLanguage("zh");
     const b = itemNames.ensureLanguage("zh");
     await Promise.all([a, b]);
@@ -154,11 +154,11 @@ describe("ItemNamesImpl lazy loading", () => {
 
   test("ensureLanguage resolves immediately for English", async () => {
     let calls = 0;
-    const loader = async (_language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+    const loader = async (_language: ShipNameLanguage) => {
       calls++;
-      return { names: [] };
+      return { names: [], overrides: {} };
     };
-    const itemNames = new ItemNamesImpl(loader);
+    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
     await itemNames.ensureLanguage("en");
     expect(calls).toBe(0);
   });
@@ -171,7 +171,7 @@ describe("ItemNamesImpl lazy loading", () => {
   test("canonicalName maps localized names after the pack loads", async () => {
     const firstEn = ITEM_NAMES_EN[0];
     const { loader } = buildLoader("zh", ITEM_NAMES_ZH);
-    const itemNames = new ItemNamesImpl(loader);
+    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
     await itemNames.ensureLanguage("zh");
     const zh = itemNames.displayName(firstEn, "zh");
     expect(itemNames.canonicalName(zh)).toBe(firstEn);

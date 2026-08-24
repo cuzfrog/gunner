@@ -12,6 +12,7 @@ interface RuntimeValues {
   readonly storage: StorageProvider;
   readonly location: LocationProvider;
   readonly clipboard: ClipboardProvider;
+  readonly navigatorLanguage: string;
   readonly simConfig: SimConfig;
 }
 

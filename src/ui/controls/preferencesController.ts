@@ -79,10 +79,11 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   setLanguage(language: Language): void {
     this.applyLanguage(language);
-    void this.itemNames.ensureLanguage(language).then(() => {
-      this.savePreferences();
-      this.events.emitLanguageChanged();
-    });
+    this.savePreferences();
+    void this.itemNames
+      .ensureLanguage(language)
+      .then(() => this.events.emitLanguageChanged())
+      .catch(() => this.events.emitLanguageChanged());
   }
 
   applyPreferences(preferences: DisplayPreferences): void {
@@ -179,9 +180,10 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.updateUnitToggle();
     if (preferences.language !== "en") {
-      void this.itemNames.ensureLanguage(preferences.language).then(() => {
-        this.events.emitLanguageChanged();
-      });
+      void this.itemNames
+        .ensureLanguage(preferences.language)
+        .then(() => this.events.emitLanguageChanged())
+        .catch(() => this.events.emitLanguageChanged());
     }
   }
 

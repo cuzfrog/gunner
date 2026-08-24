@@ -1,32 +1,6 @@
 import { ITEM_NAMES_EN } from "./item-names-en";
 import type { ShipNameLanguage } from "../ships";
 
-// The SDE localized names for a handful of distinct items are identical.
-// These overrides choose the most specific matching English name
-// (e.g. the size/tier/damage-type variant that the shared string denotes).
-const CANONICAL_OVERRIDES: Readonly<Record<ShipNameLanguage, Readonly<Record<string, string>>>> = {
-  en: {},
-  zh: {
-    "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
-  },
-  ja: {
-    "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
-    "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
-    "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
-    "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
-    "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
-    "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
-    "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
-  },
-};
-
-interface ItemNameEntry {
-  zh: string;
-  ja: string;
-}
-
-type ItemNameLoader = (language: ShipNameLanguage) => Promise<{ readonly names: readonly string[] }>;
-
 export interface ItemNames {
   displayName(name: string, language: ShipNameLanguage): string;
   canonicalName(name: string): string;
@@ -36,12 +10,12 @@ export interface ItemNames {
 export class ItemNamesImpl implements ItemNames {
   private readonly forward: Map<string, ItemNameEntry>;
   private readonly reverse: Map<string, string>;
-  private readonly loader: ItemNameLoader;
+  private readonly itemNameLoader: ItemNameLoader;
   private readonly loaded: Set<ShipNameLanguage> = new Set(["en"]);
   private readonly inFlight: Map<ShipNameLanguage, Promise<void>> = new Map();
 
-  constructor(loader: ItemNameLoader = productionLoader) {
-    this.loader = loader;
+  constructor({ itemNameLoader = productionItemNameLoader }: { itemNameLoader?: ItemNameLoader } = {}) {
+    this.itemNameLoader = itemNameLoader;
     this.forward = new Map<string, ItemNameEntry>();
     this.reverse = new Map<string, string>();
     for (const name of ITEM_NAMES_EN) {
@@ -67,16 +41,21 @@ export class ItemNamesImpl implements ItemNames {
     if (existing) return existing;
     const promise = this.loadAndApply(language);
     this.inFlight.set(language, promise);
-    await promise;
+    try {
+      await promise;
+    } catch (error) {
+      this.inFlight.delete(language);
+      throw error;
+    }
   }
 
   private async loadAndApply(language: ShipNameLanguage): Promise<void> {
-    const pack = await this.loader(language);
+    const pack = await this.itemNameLoader(language);
     const names = pack.names;
     const groups = groupByValue(ITEM_NAMES_EN, names);
     const display = new Map<string, string>();
     for (const [localized, candidates] of groups) {
-      const winner = canonicalForGroup(candidates, localized, language);
+      const winner = canonicalForGroup(candidates, localized, pack.overrides);
       display.set(winner, localized);
     }
     for (let i = 0; i < ITEM_NAMES_EN.length; i++) {
@@ -94,10 +73,17 @@ export class ItemNamesImpl implements ItemNames {
   }
 }
 
-function productionLoader(language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> {
-  if (language === "zh") return import("./item-names-zh").then((m) => ({ names: m.ITEM_NAMES_ZH }));
-  if (language === "ja") return import("./item-names-ja").then((m) => ({ names: m.ITEM_NAMES_JA }));
-  return Promise.resolve({ names: [] });
+interface ItemNameEntry {
+  zh: string;
+  ja: string;
+}
+
+type ItemNameLoader = (language: ShipNameLanguage) => Promise<{ readonly names: readonly string[]; readonly overrides: Readonly<Record<string, string>> }>;
+
+function productionItemNameLoader(language: ShipNameLanguage): Promise<{ readonly names: readonly string[]; readonly overrides: Readonly<Record<string, string>> }> {
+  if (language === "zh") return import("./item-names-zh").then((m) => ({ names: m.ITEM_NAMES_ZH, overrides: m.ITEM_NAMES_ZH_OVERRIDES }));
+  if (language === "ja") return import("./item-names-ja").then((m) => ({ names: m.ITEM_NAMES_JA, overrides: m.ITEM_NAMES_JA_OVERRIDES }));
+  return Promise.resolve({ names: [], overrides: {} });
 }
 
 function groupByValue(en: readonly string[], localized: readonly string[]): Map<string, string[]> {
@@ -112,8 +98,12 @@ function groupByValue(en: readonly string[], localized: readonly string[]): Map<
   return groups;
 }
 
-function canonicalForGroup(candidates: readonly string[], localized: string, language: ShipNameLanguage): string {
-  const override = CANONICAL_OVERRIDES[language][localized];
+function canonicalForGroup(
+  candidates: readonly string[],
+  localized: string,
+  overrides: Readonly<Record<string, string>>,
+): string {
+  const override = overrides[localized];
   if (override && candidates.includes(override)) return override;
   return bestCandidate(candidates, localized);
 }

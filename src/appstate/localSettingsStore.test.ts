@@ -128,6 +128,18 @@ describe("LocalSettingsStore", () => {
     expect(reloaded.loadStartupState().settings).toEqual(DEFAULT_SETTINGS);
   });
 
+  test("loadStartupState prefers the URL language over the navigator language", () => {
+    const storage = fakeStorage();
+    const urlSettings: UserSettings = { ...DEFAULT_SETTINGS, language: "ja" };
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage,
+      location: fakeLocation(urlFor(urlSettings)),
+      navigatorLanguage: "zh-CN",
+    });
+    expect(store.loadStartupState().settings?.language).toBe("ja");
+  });
+
   test("loadStartupState rejects a version-2 payload", () => {
     const v2 = {
       version: 2,

@@ -19,7 +19,17 @@ export class LocalSettingsStore implements SettingsStore {
   private readonly parser: SettingsParser;
   private readonly navigatorLanguage: string;
 
-  constructor({ storage, location, parser, navigatorLanguage = "" }: { storage: StorageProvider; location: LocationProvider; parser: SettingsParser; navigatorLanguage?: string }) {
+  constructor({
+    storage,
+    location,
+    parser,
+    navigatorLanguage = "",
+  }: {
+    storage: StorageProvider;
+    location: LocationProvider;
+    parser: SettingsParser;
+    navigatorLanguage?: string;
+  }) {
     this.storage = storage;
     this.location = location;
     this.parser = parser;

@@ -22,6 +22,7 @@ class FakeElement {
   tagName = "div";
   className = "";
   textContent = "";
+  title = "";
   hidden = false;
   src = "";
   alt = "";
@@ -91,7 +92,11 @@ function createI18n(): I18n {
 function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
-    itemIconUrl: vi.fn((itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined)),
+    itemIconUrl: vi.fn((itemName: string) => {
+      if (itemName === "200mm AutoCannon I") return "images/icons/1@1x.png";
+      if (itemName === "Hail S") return "images/icons/hail_s.png";
+      return undefined;
+    }),
     droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : undefined),
   };
 }
@@ -128,7 +133,13 @@ describe("DomFittingPreview", () => {
     globalThis.document = undefined as unknown as Document;
   });
 
-  function buildPreview(language: Language = "en"): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview; fittingImport: ReturnType<typeof mockFittingImport>; imageCatalog: ImageCatalog } {
+  function buildPreview(language: Language = "en"): {
+    container: FakeElement;
+    anchor: FakeElement;
+    preview: DomFittingPreview;
+    fittingImport: ReturnType<typeof mockFittingImport>;
+    imageCatalog: ImageCatalog;
+  } {
     const container = new FakeElement();
     container.offsetWidth = 300;
     container.offsetHeight = 200;
@@ -285,11 +296,14 @@ describe("DomFittingPreview", () => {
     const highSection = container.children[1];
     const row = highSection.children[1];
     expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I (zh)");
+    expect(row.children[1].children[0].title).toBe("200mm AutoCannon I (zh)");
     expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
     expect(fittingImport.itemName).toHaveBeenCalledWith("200mm AutoCannon I", "zh");
     expect(fittingImport.itemName).toHaveBeenCalledWith("Hail S", "zh");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Hail S");
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("200mm AutoCannon I (zh)");
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("Hail S (zh)");
   });
 
   test("hide clears and hides the container", () => {

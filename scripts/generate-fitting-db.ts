@@ -824,14 +824,30 @@ function filterItemNames(
   return filtered;
 }
 
+const CANONICAL_OVERRIDES = {
+  zh: {
+    "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
+  },
+  ja: {
+    "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
+    "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
+    "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
+    "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
+    "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
+    "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
+    "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
+  },
+} as const;
+
 async function writeI18nFiles(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {
   const en = Object.keys(itemNames).sort((a, b) => a.localeCompare(b));
   const zh = en.map((name) => itemNames[name].zh);
   const ja = en.map((name) => itemNames[name].ja);
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
+  const overrideType = "{ readonly [key: string]: string }";
   await writeFile(I18N_EN_FILE, `${header}export const ITEM_NAMES_EN: readonly string[] = ${JSON.stringify(en)};\n`);
-  await writeFile(I18N_ZH_FILE, `${header}export const ITEM_NAMES_ZH: readonly string[] = ${JSON.stringify(zh)};\n`);
-  await writeFile(I18N_JA_FILE, `${header}export const ITEM_NAMES_JA: readonly string[] = ${JSON.stringify(ja)};\n`);
+  await writeFile(I18N_ZH_FILE, `${header}export const ITEM_NAMES_ZH: readonly string[] = ${JSON.stringify(zh)};\nexport const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${JSON.stringify(CANONICAL_OVERRIDES.zh)};\n`);
+  await writeFile(I18N_JA_FILE, `${header}export const ITEM_NAMES_JA: readonly string[] = ${JSON.stringify(ja)};\nexport const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${JSON.stringify(CANONICAL_OVERRIDES.ja)};\n`);
 }
 
 export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };
