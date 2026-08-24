@@ -135,7 +135,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
 function parseEwarActivation(value: string): StoredEwarActivation | undefined {
   try {
     const parsed = JSON.parse(value);
-    if (parsed && isOptionalEwarActivation(parsed) && parsed) {
+    if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
       return { ...parsed, disruptors: parsed.disruptors?.map(migrateDisruptorScript) };
     }
     return undefined;
