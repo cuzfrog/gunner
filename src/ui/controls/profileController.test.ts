@@ -71,7 +71,6 @@ function fakeProfileEls(): ProfileEls {
     profileName: new FakeElement() as unknown as HTMLInputElement,
     profileSave: new FakeElement() as unknown as HTMLButtonElement,
     profileSelect: new FakeElement() as unknown as HTMLSelectElement,
-    profileDirtyMarker: new FakeElement() as unknown as HTMLElement,
     profileDelete: new FakeElement() as unknown as HTMLButtonElement,
     shareStatus: new FakeElement() as unknown as HTMLElement,
   };
@@ -144,7 +143,6 @@ describe("ProfileController", () => {
     els.profileName.value = "typed";
     controller.markLoaded("brawler");
     expect(els.profileName.value).toBe("");
-    expect(els.profileDirtyMarker.hidden).toBe(true);
     expect(els.profileSelect.value).toBe("brawler");
   });
 
@@ -301,18 +299,13 @@ describe("ProfileController", () => {
     els.profileName.value = "new";
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-    expect(els.profileSelect.classList.toggle).toHaveBeenLastCalledWith("dirty", true);
-    expect(els.profileDirtyMarker.hidden).toBe(false);
     expect(els.profileSave.disabled).toBe(false);
 
     els.profileName.value = "";
     controller.markLoaded();
     vi.mocked(els.profileSave.classList.toggle).mockClear();
-    vi.mocked(els.profileSelect.classList.toggle).mockClear();
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
-    expect(els.profileSelect.classList.toggle).toHaveBeenLastCalledWith("dirty", false);
-    expect(els.profileDirtyMarker.hidden).toBe(true);
     expect(els.profileSave.disabled).toBe(true);
 
     els.profileName.value = "brawler";
@@ -343,7 +336,6 @@ describe("ProfileController", () => {
     controller.updateDirtyState();
     expect(els.profileSave.disabled).toBe(false);
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
-    expect(els.profileSelect.classList.toggle).toHaveBeenLastCalledWith("dirty", false);
   });
 
   test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {

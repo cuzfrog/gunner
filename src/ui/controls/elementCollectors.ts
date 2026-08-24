@@ -30,7 +30,6 @@ export function collectProfileEls(els: Els): ProfileEls {
     profileName: els.profileName,
     profileSave: els.profileSave,
     profileSelect: els.profileSelect,
-    profileDirtyMarker: els.profileDirtyMarker,
     profileDelete: els.profileDelete,
     shareStatus: els.shareStatus,
   };

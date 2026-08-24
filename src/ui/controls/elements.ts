@@ -109,7 +109,6 @@ export function createControlsEls(): Els {
     profileName: elOf("profile-name", isHtmlInputElement),
     profileSave: elOf("profile-save", isHtmlButtonElement),
     profileSelect: elOf("profile-select", isHtmlSelectElement),
-    profileDirtyMarker: el("profile-dirty-marker"),
     profileDelete: elOf("profile-delete", isHtmlButtonElement),
     profileNew: elOf("profile-new", isHtmlButtonElement),
     confirmPopup: el("confirm-popup"),

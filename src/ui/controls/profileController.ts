@@ -9,7 +9,6 @@ export interface ProfileEls {
   readonly profileName: HTMLInputElement;
   readonly profileSave: HTMLButtonElement;
   readonly profileSelect: HTMLSelectElement;
-  readonly profileDirtyMarker: HTMLElement;
   readonly profileDelete: HTMLButtonElement;
   readonly shareStatus: HTMLElement;
 }
@@ -114,8 +113,6 @@ export class ProfileControllerImpl implements ProfileController {
     const name = this.els.profileName.value.trim();
     const dirty = this.isDirty();
     this.els.profileSave.classList.toggle("unsaved", dirty);
-    this.els.profileSelect.classList.toggle("dirty", dirty);
-    this.els.profileDirtyMarker.hidden = !dirty;
     this.els.profileSave.disabled = !this.isSaveEnabled(name, selected, dirty);
   }
 
