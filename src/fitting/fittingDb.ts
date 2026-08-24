@@ -1,4 +1,4 @@
-// Generated from EVE Online SDE via Pyfa staticdata (2026-08-23). Do not edit by hand.
+// Generated from EVE Online SDE via Pyfa staticdata (2026-08-24). Do not edit by hand.
 /* eslint-disable */
 
 import type { HullTier } from "../ships";
