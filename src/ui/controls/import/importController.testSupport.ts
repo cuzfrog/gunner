@@ -1,6 +1,5 @@
 import type { FittingImport } from "../../../fitting";
 import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
-import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
@@ -145,7 +144,6 @@ export function buildImportController(document: Document) {
     remove: vi.fn(),
   });
   const turret: AttackerTurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
-  const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })) };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -168,13 +166,12 @@ export function buildImportController(document: Document) {
     attackerSide: attackerPanel as unknown as SidePanel,
     targetSide: targetPanel as unknown as SidePanel,
     turret,
-    preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret, preferences,
+    controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

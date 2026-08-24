@@ -1,4 +1,4 @@
-import type { SettingsStore, UserSettings } from "../../appstate";
+import type { ProfileSettings, SettingsStore } from "../../appstate";
 import type { I18n } from "../i18n";
 import type { UiEvents } from "../events";
 
@@ -18,7 +18,6 @@ export interface DomControlsHost {
   onConfigChange(): void;
   onDisplayChange(): void;
   persistConfigChange(notify?: boolean): void;
-  captureSettings(): UserSettings;
   onProfileLoaded(name: string): void;
-  onProfileTextLoaded(settings: UserSettings): void;
+  onProfileTextLoaded(settings: ProfileSettings): void;
 }

@@ -1,5 +1,5 @@
 import type { ImportedFitting } from "../fitting";
-import type { UserSettings } from "../appstate";
+import type { ProfileSettings } from "../appstate";
 
 export interface UiEvents {
   onLanguageChanged(listener: () => void): void;
@@ -20,9 +20,9 @@ export interface UiEvents {
   onNewProfile(listener: () => void): void;
   offNewProfile(listener: () => void): void;
   emitNewProfile(): void;
-  onProfileTextLoaded(listener: (settings: UserSettings) => void): void;
-  offProfileTextLoaded(listener: (settings: UserSettings) => void): void;
-  emitProfileTextLoaded(settings: UserSettings): void;
+  onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
+  offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
+  emitProfileTextLoaded(settings: ProfileSettings): void;
 }
 
 export class UiEventsImpl implements UiEvents {
@@ -32,7 +32,7 @@ export class UiEventsImpl implements UiEvents {
   private readonly fittingImported = new Set<(side: "attacker" | "target", imported: ImportedFitting) => void>();
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
-  private readonly profileTextLoaded = new Set<(settings: UserSettings) => void>();
+  private readonly profileTextLoaded = new Set<(settings: ProfileSettings) => void>();
 
   onLanguageChanged(listener: () => void): void { this.languageChanged.add(listener); }
   offLanguageChanged(listener: () => void): void { this.languageChanged.delete(listener); }
@@ -64,9 +64,9 @@ export class UiEventsImpl implements UiEvents {
   offNewProfile(listener: () => void): void { this.newProfile.delete(listener); }
   emitNewProfile(): void { this.emit(this.newProfile); }
 
-  onProfileTextLoaded(listener: (settings: UserSettings) => void): void { this.profileTextLoaded.add(listener); }
-  offProfileTextLoaded(listener: (settings: UserSettings) => void): void { this.profileTextLoaded.delete(listener); }
-  emitProfileTextLoaded(settings: UserSettings): void {
+  onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void { this.profileTextLoaded.add(listener); }
+  offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void { this.profileTextLoaded.delete(listener); }
+  emitProfileTextLoaded(settings: ProfileSettings): void {
     for (const listener of Array.from(this.profileTextLoaded)) listener(settings);
   }
 

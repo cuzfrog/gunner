@@ -9,6 +9,7 @@ import {
   type StoredBoosterActivation,
   type StoredEwarActivation,
   type TrackingUnit,
+  type UserSettings as UserSettingsWire,
 } from "./userSettings";
 import type { Language } from "./language";
 
@@ -48,4 +49,42 @@ export interface UserSettings {
   readonly falloff: number;
   readonly initialDistance: number;
   readonly attackerAmmo: string;
+}
+
+export function toCombatantSettings(settings: UserSettingsWire, side: "attacker" | "target"): CombatantSettings {
+  if (side === "attacker") {
+    return {
+      speed: settings.attackerSpeed,
+      mode: settings.attackerMode,
+      range: settings.attackerRange,
+      mass: settings.attackerMass,
+      inertia: settings.attackerInertia,
+      skillLevel: settings.attackerSkillLevel,
+      overload: settings.attackerOverload,
+      hull: settings.attackerHull,
+      propulsion: settings.attackerPropulsion,
+      fitting: settings.attackerFitting,
+      overrides: settings.attackerOverrides,
+      fittedHull: settings.attackerFittedHull,
+      ewarActivation: settings.attackerEwarActivation,
+      boosterActivation: settings.attackerBoosterActivation,
+    };
+  }
+  return {
+    speed: settings.targetSpeed,
+    mode: settings.targetMode,
+    range: settings.targetRange,
+    mass: settings.targetMass,
+    inertia: settings.targetInertia,
+    skillLevel: settings.targetSkillLevel,
+    overload: settings.targetOverload,
+    hull: settings.targetHull,
+    propulsion: settings.targetPropulsion,
+    fitting: settings.targetFitting,
+    overrides: settings.targetOverrides,
+    fittedHull: settings.targetFittedHull,
+    ewarActivation: settings.targetEwarActivation,
+    boosterActivation: settings.targetBoosterActivation,
+    sig: settings.targetSig,
+  };
 }

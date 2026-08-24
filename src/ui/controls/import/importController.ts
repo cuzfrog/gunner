@@ -1,9 +1,8 @@
-import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings, type UserSettings } from "../../../appstate";
+import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings } from "../../../appstate";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
-import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
 import type { Side } from "..";
 import type { SidePanel } from "../sidePanel";
@@ -22,7 +21,6 @@ export class ImportControllerImpl implements ImportController {
   private readonly els: ImportEls;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
-  private readonly preferences: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly profileTextCodec: ProfileTextCodec;
   private readonly turret: AttackerTurret;
@@ -42,7 +40,6 @@ export class ImportControllerImpl implements ImportController {
     attackerSide: SidePanel;
     targetSide: SidePanel;
     turret: AttackerTurret;
-    preferences: PreferencesController;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
@@ -55,7 +52,6 @@ export class ImportControllerImpl implements ImportController {
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
     this.turret = deps.turret;
-    this.preferences = deps.preferences;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
@@ -68,7 +64,6 @@ export class ImportControllerImpl implements ImportController {
     this.profileTextImporter = new ProfileTextImporter({
       fittingImport: deps.fittingImport,
       turret: deps.turret,
-      preferences: deps.preferences,
       profileTextCodec: deps.profileTextCodec,
     });
     this.els.importProfile.addEventListener("click", () => void this.importProfileClicked());

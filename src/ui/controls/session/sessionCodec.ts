@@ -1,7 +1,16 @@
 import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
-import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type StoredBoosterActivation, type StoredEwarActivation, type UserSettings } from "../../../appstate";
+import {
+  USER_SETTINGS_VERSION,
+  toCombatantSettings,
+  type ProfileSettings,
+  type SettingsStore,
+  type StartupState,
+  type StoredBoosterActivation,
+  type StoredEwarActivation,
+  type UserSettings,
+} from "../../../appstate";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import { num } from "../controlsDom";
@@ -214,8 +223,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.els.targetMode.value = settings.targetMode;
     this.els.targetRange.value = String(settings.targetRange);
     this.els.targetSig.value = String(settings.targetSig);
-    this.attackerSide.restore(this.attackerSide.stateFrom(settings));
-    this.targetSide.restore(this.targetSide.stateFrom(settings));
+    this.attackerSide.restore(this.attackerSide.stateFrom(toCombatantSettings(settings, "attacker")));
+    this.targetSide.restore(this.targetSide.stateFrom(toCombatantSettings(settings, "target")));
     this.turretOverrides.set(settings.attackerOverrides ?? {});
     this.turretController.restore({
       fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,

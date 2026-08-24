@@ -4,7 +4,8 @@ import { container } from "./container";
 import { registerFittingModule } from "./fitting";
 import { registerShipsModule } from "./ships";
 import { registerSimModule } from "./sim";
-import { ClipboardUnavailableError, registerUiModule } from "./ui";
+import { ClipboardUnavailableError } from "./appstate";
+import { registerUiModule } from "./ui";
 
 function main(): void {
   const canvas = document.getElementById("scene");

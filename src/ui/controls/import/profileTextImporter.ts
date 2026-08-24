@@ -1,26 +1,22 @@
-import { type ProfileTextCodec, type ProfileSettings, type UserSettings } from "../../../appstate";
+import { type ProfileTextCodec, type ProfileSettings } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
-import type { PreferencesController } from "../preferencesController";
 import type { Side } from "..";
 import type { AttackerTurret } from "./attackerTurret";
 
 interface ProfileTextImporterDeps {
   readonly fittingImport: FittingImport;
   readonly turret: AttackerTurret;
-  readonly preferences: PreferencesController;
   readonly profileTextCodec: ProfileTextCodec;
 }
 
 export class ProfileTextImporter {
   private readonly fittingImport: FittingImport;
   private readonly turret: AttackerTurret;
-  private readonly preferences: PreferencesController;
   private readonly profileTextCodec: ProfileTextCodec;
 
   constructor(deps: ProfileTextImporterDeps) {
     this.fittingImport = deps.fittingImport;
     this.turret = deps.turret;
-    this.preferences = deps.preferences;
     this.profileTextCodec = deps.profileTextCodec;
   }
 
@@ -28,11 +24,11 @@ export class ProfileTextImporter {
     return this.profileTextCodec.hasHeader(text);
   }
 
-  profileFromText(text: string): UserSettings | undefined {
+  profileFromText(text: string): ProfileSettings | undefined {
     const parsed = this.profileTextCodec.parse(text.trimStart());
     if (!parsed) return undefined;
     const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo, ...this.preferences.capture() };
+    return { ...parsed, attackerAmmo: ammo };
   }
 
   fittingFromProfileText(side: Side, text: string): string | undefined {

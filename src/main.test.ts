@@ -1,5 +1,5 @@
 import { container } from "./container";
-import { ClipboardUnavailableError } from "./ui";
+import { ClipboardUnavailableError } from "./appstate";
 
 const DEFAULT_SETTINGS = {
   version: 5 as const,

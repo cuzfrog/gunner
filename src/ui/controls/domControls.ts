@@ -5,7 +5,7 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../../sim";
-import type { UserSettings } from "../../appstate";
+import type { ProfileSettings } from "../../appstate";
 import { isEventTargetWithClosest } from "./controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
@@ -181,13 +181,11 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost,
     this.callbacks?.onReset();
   }
 
-  onProfileTextLoaded(settings: UserSettings): void {
-    this.sessionCodec.restore(settings);
+  onProfileTextLoaded(settings: ProfileSettings): void {
+    this.sessionCodec.restore(this.sessionCodec.fromProfile(settings));
     this.profileController.showStatus("status.profileImported");
     this.callbacks?.onReset();
   }
-
-  captureSettings(): UserSettings { return this.sessionCodec.capture(); }
 
   persistConfigChange(notify = true): void {
     this.preferencesController.savePreferences();

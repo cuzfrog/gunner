@@ -2,10 +2,10 @@ import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
 import { isAutopilotMode, type AutopilotMode } from "../../../sim";
 import {
+  type CombatantSettings,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type PropulsionSelection,
-  type UserSettings,
 } from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
@@ -160,7 +160,7 @@ export class SidePanelImpl implements SidePanel {
     if (enabled) this.sections.skill.setOverloadDisabled();
   }
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
-  stateFrom(settings: UserSettings): SidePanelState { return stateSliceOf(settings, this.side); }
+  stateFrom(combatant: CombatantSettings): SidePanelState { return stateSliceOf(combatant, this.side); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }

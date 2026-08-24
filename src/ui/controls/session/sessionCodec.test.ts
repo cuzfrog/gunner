@@ -1,4 +1,10 @@
-import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
+import {
+  USER_SETTINGS_VERSION,
+  toCombatantSettings,
+  type SettingsStore,
+  type StartupState,
+  type UserSettings,
+} from "../../../appstate";
 import type { ChargeCatalog } from "../../../fitting";
 import { type AutopilotMode, SIG_RESOLUTIONS } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
@@ -239,8 +245,9 @@ describe("SessionCodec", () => {
 
     codec.restoreStartup({ settings, selectedProfileName: null });
 
-    expect(attacker.stateFrom).toHaveBeenCalledWith(settings);
+    expect(attacker.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "attacker"));
     expect(attacker.restore).toHaveBeenCalledWith(panelStateFrom(settings, "attacker"));
+    expect(target.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "target"));
     expect(target.restore).toHaveBeenCalledWith(panelStateFrom(settings, "target"));
     expect(turret.restore).toHaveBeenCalledWith({ fitting: settings.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: settings.attackerAmmo });
     expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.75 });

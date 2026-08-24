@@ -3,7 +3,7 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting, UserSettings } from "../../../appstate";
+import type { CombatantSettings, FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
@@ -43,7 +43,7 @@ export interface SidePanel {
   clearTurret(): void;
   restoreTurret(): void;
   setTurretProfile(profile: ShipProfile | undefined): void;
-  stateFrom(settings: UserSettings): SidePanelState;
+  stateFrom(combatant: CombatantSettings): SidePanelState;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;
@@ -69,40 +69,24 @@ export interface SidePanelState {
   readonly sig?: number;
 }
 
-export function stateSliceOf(settings: UserSettings, side: Side): SidePanelState {
-  if (side === "attacker") {
-    return {
-      speed: settings.attackerSpeed,
-      baseMaxSpeed: settings.attackerFittedHull?.baseMaxSpeed ?? settings.attackerSpeed,
-      mass: settings.attackerMass,
-      inertia: settings.attackerInertia,
-      mode: settings.attackerMode,
-      range: settings.attackerRange,
-      skillLevel: settings.attackerSkillLevel,
-      overload: settings.attackerOverload ?? true,
-      hull: settings.attackerHull,
-      propulsion: settings.attackerPropulsion,
-      fitting: settings.attackerFitting,
-      overrides: {},
-      fittedHull: settings.attackerFittedHull,
-    };
-  }
-  return {
-    speed: settings.targetSpeed,
-    baseMaxSpeed: settings.targetFittedHull?.baseMaxSpeed ?? settings.targetSpeed,
-    mass: settings.targetMass,
-    inertia: settings.targetInertia,
-    mode: settings.targetMode,
-    range: settings.targetRange,
-    skillLevel: settings.targetSkillLevel,
-    overload: settings.targetOverload ?? true,
-    hull: settings.targetHull,
-    propulsion: settings.targetPropulsion,
-    fitting: settings.targetFitting,
-    overrides: settings.targetOverrides ?? {},
-    fittedHull: settings.targetFittedHull,
-    sig: settings.targetSig,
+export function stateSliceOf(combatant: CombatantSettings, side: Side): SidePanelState {
+  const base: Omit<SidePanelState, "sig"> = {
+    speed: combatant.speed,
+    baseMaxSpeed: combatant.fittedHull?.baseMaxSpeed ?? combatant.speed,
+    mass: combatant.mass,
+    inertia: combatant.inertia,
+    mode: combatant.mode,
+    range: combatant.range,
+    skillLevel: combatant.skillLevel,
+    overload: combatant.overload ?? true,
+    hull: combatant.hull,
+    propulsion: combatant.propulsion,
+    fitting: combatant.fitting,
+    overrides: side === "attacker" ? {} : (combatant.overrides ?? {}),
+    fittedHull: combatant.fittedHull,
   };
+  if (side === "attacker") return base;
+  return { ...base, sig: combatant.sig ?? 1 };
 }
 
 export interface FittingPopupControl {
