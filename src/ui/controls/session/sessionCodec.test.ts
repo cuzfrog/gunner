@@ -189,6 +189,8 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
@@ -197,6 +199,7 @@ describe("SessionCodec", () => {
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
     const turret: TurretController = {
+      capture: vi.fn(() => ({ sigRes: "S", optimal: 2000, falloff: 4000, ammo: "Hail S" })),
       restore: vi.fn(),
       currentTurretSpec: vi.fn(() => ({ tracking: 0.5, sigResolution: SIG_RESOLUTIONS.M, optimal: 2000, falloff: 4000 })),
     } as unknown as TurretController;
@@ -273,13 +276,15 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
       updateManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn() } as unknown as ProfileController;
-    const turret = { currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
+    const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn() } as unknown as SettingsStore;
     const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
@@ -316,20 +321,24 @@ describe("SessionCodec", () => {
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });
 
-  test("resetToDefaults clears the selected profile and restores defaults", () => {
+  test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
     const els = fakeEls();
-    const attacker = mockSidePanel("attacker", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const pristineAttacker = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
+    const pristineTarget = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const attacker = mockSidePanel("attacker", pristineAttacker);
+    const target = mockSidePanel("target", pristineTarget);
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
       updateManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
-    const turret = { currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
+    const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn(), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const clearSelectedProfile = vi.fn();
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
@@ -339,13 +348,14 @@ describe("SessionCodec", () => {
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
     const sessionControl = { isPlaying: () => false, setPlaying };
+    const ewarController = mockEwarController();
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore, hitChance,
       trackingInput,
-      ewarController: mockEwarController(),
+      ewarController,
       fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);
@@ -353,6 +363,15 @@ describe("SessionCodec", () => {
     codec.resetToDefaults();
 
     expect(clearSelectedProfile).toHaveBeenCalled();
+    expect(attacker.restore).toHaveBeenCalledWith(pristineAttacker);
+    expect(target.restore).toHaveBeenCalledWith(pristineTarget);
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: undefined, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
+    expect(ewarController.restore).toHaveBeenCalledWith("attacker", undefined, undefined);
+    expect(ewarController.restore).toHaveBeenCalledWith("target", undefined, undefined);
+    expect(els.sigRes.value).toBe("S");
+    expect(els.optimal.value).toBe("1000");
+    expect(els.falloff.value).toBe("3000");
+    expect(trackingInput.rad).toBe(0.32);
     expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });

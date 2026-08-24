@@ -45,6 +45,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly trackingInput: TrackingInput;
   private readonly ewarController: EwarController;
   private readonly fittingImport: FittingImport;
+  private readonly pristineSettings: UserSettings;
 
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
@@ -68,6 +69,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.trackingInput = deps.trackingInput;
     this.ewarController = deps.ewarController;
     this.fittingImport = deps.fittingImport;
+    this.pristineSettings = this.capture();
   }
 
   setSessionControl(sessionControl: SessionControl): void {
@@ -120,40 +122,14 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   restore(settings: UserSettings, selectedName = ""): void {
-    const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
-    this.els.sigRes.value = settings.sigRes;
-    this.sigResChoice.set(settings.sigRes);
-    this.trackingInput.setRadValue(settings.tracking, sigResolution);
+    this.applyShipState(settings);
     this.preferencesController.restore({
       language: settings.language,
       trackingUnit: settings.trackingUnit,
       simSpeed: settings.simSpeed,
       gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
     });
-    this.els.optimal.value = String(settings.optimal);
-    this.els.falloff.value = String(settings.falloff);
-    this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
-    this.els.attackerMass.value = String(settings.attackerMass);
-    this.els.attackerInertia.value = formatNumber(settings.attackerInertia, 6);
-    this.els.attackerMode.value = settings.attackerMode;
-    this.els.attackerRange.value = String(settings.attackerRange);
-    this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
-    this.els.initialDistance.value = String(settings.initialDistance);
-    this.els.targetSpeed.value = formatNumber(settings.targetSpeed);
-    this.els.targetMass.value = String(settings.targetMass);
-    this.els.targetInertia.value = formatNumber(settings.targetInertia, 6);
-    this.els.targetMode.value = settings.targetMode;
-    this.els.targetRange.value = String(settings.targetRange);
-    this.els.targetSig.value = String(settings.targetSig);
-    this.attackerSide.restore(this.attackerSide.stateFrom(settings));
-    this.targetSide.restore(this.targetSide.stateFrom(settings));
     this.i18n.translateDocument();
-    this.turretOverrides.set(settings.attackerOverrides ?? {});
-    this.turretController.restore({
-      fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
-    });
-    this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
-    this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
     if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
@@ -186,7 +162,38 @@ export class SessionCodecImpl implements SessionCodec {
 
   resetToDefaults(): void {
     this.settingsStore.clearSelectedProfile();
+    this.applyShipState(this.pristineSettings);
     this.applyDefaultStartup();
+  }
+
+  private applyShipState(settings: UserSettings): void {
+    const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
+    this.els.sigRes.value = settings.sigRes;
+    this.sigResChoice.set(settings.sigRes);
+    this.trackingInput.setRadValue(settings.tracking, sigResolution);
+    this.els.optimal.value = String(settings.optimal);
+    this.els.falloff.value = String(settings.falloff);
+    this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
+    this.els.attackerMass.value = String(settings.attackerMass);
+    this.els.attackerInertia.value = formatNumber(settings.attackerInertia, 6);
+    this.els.attackerMode.value = settings.attackerMode;
+    this.els.attackerRange.value = String(settings.attackerRange);
+    this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
+    this.els.initialDistance.value = String(settings.initialDistance);
+    this.els.targetSpeed.value = formatNumber(settings.targetSpeed);
+    this.els.targetMass.value = String(settings.targetMass);
+    this.els.targetInertia.value = formatNumber(settings.targetInertia, 6);
+    this.els.targetMode.value = settings.targetMode;
+    this.els.targetRange.value = String(settings.targetRange);
+    this.els.targetSig.value = String(settings.targetSig);
+    this.attackerSide.restore(this.attackerSide.stateFrom(settings));
+    this.targetSide.restore(this.targetSide.stateFrom(settings));
+    this.turretOverrides.set(settings.attackerOverrides ?? {});
+    this.turretController.restore({
+      fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
+    });
+    this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
+    this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
   }
 
   restoreStartup(startup: StartupState): void {
