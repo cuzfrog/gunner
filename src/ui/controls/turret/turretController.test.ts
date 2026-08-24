@@ -198,6 +198,26 @@ describe("TurretController", () => {
     expect(render).toHaveBeenCalled();
   });
 
+  test("ammo labels use itemName while the stored ammo value stays canonical", () => {
+    const { document, controller, imageCatalog, fittingImport } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
+      chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
+      imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
+    });
+    fittingImport.itemName = vi.fn((name: string) => (name === "Hail S" ? "海怪 S" : name));
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.openAmmoPopup();
+
+    expect(getFake(document, "attacker-ammo-summary").textContent).toBe("海怪 S");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Hail S");
+
+    const cargoList = getFake(document, "attacker-ammo-cargo-list");
+    expect(cargoList.children.length).toBe(2);
+    expect(cargoList.children[0].children[1].textContent).toBe("海怪 S");
+    expect(cargoList.children[1].children[1].textContent).toBe("Republic Fleet EMP S");
+    expect(controller.ammo()).toBe("Hail S");
+  });
+
   test("setHullProfile with no profile disables every sig-res button and option", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: vi.fn(() => [] as const) } });
     controller.setHullProfile(undefined);

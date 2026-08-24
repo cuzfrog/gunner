@@ -493,6 +493,58 @@ describe("LocalSettingsStore", () => {
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
+  test("loadPreferences detects the navigator language for a first-time user", () => {
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage: fakeStorage(),
+      location: fakeLocation("http://localhost/"),
+      navigatorLanguage: "zh-CN",
+    });
+    expect(store.loadPreferences().language).toBe("zh");
+  });
+
+  test("loadPreferences detects Japanese and normalizes navigator casing", () => {
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage: fakeStorage(),
+      location: fakeLocation("http://localhost/"),
+      navigatorLanguage: "ja-JP",
+    });
+    expect(store.loadPreferences().language).toBe("ja");
+  });
+
+  test("loadPreferences detects Chinese with underscore separators", () => {
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage: fakeStorage(),
+      location: fakeLocation("http://localhost/"),
+      navigatorLanguage: "zh_TW",
+    });
+    expect(store.loadPreferences().language).toBe("zh");
+  });
+
+  test("loadPreferences falls back to English for an unsupported navigator language", () => {
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage: fakeStorage(),
+      location: fakeLocation("http://localhost/"),
+      navigatorLanguage: "fr-FR",
+    });
+    expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
+  });
+
+  test("loadPreferences keeps a stored language even when the navigator language differs", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ ...DEFAULT_PREFERENCES, language: "en" }));
+    const store = new LocalSettingsStore({
+      parser: makeParser(),
+      storage,
+      location: fakeLocation("http://localhost/"),
+      navigatorLanguage: "ja-JP",
+    });
+    expect(store.loadPreferences().language).toBe("en");
+  });
+
   test("savePreferences and loadPreferences round-trip", () => {
     const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
     const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.8 };

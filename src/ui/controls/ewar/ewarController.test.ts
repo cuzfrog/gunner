@@ -428,14 +428,20 @@ describe("EwarController", () => {
     });
   });
 
-  test("setLoadout renders translated module names", () => {
-    const { controller, document, fittingImport } = buildEwarController("zh");
+  test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
+    const { controller, document, fittingImport, imageCatalog } = buildEwarController("zh");
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], scripts: SCRIPTS });
     const popup = getFake(document, "attacker-ewar-popup");
-    const webButton = webSection(popup)!.children[1].children[0];
+    const webSectionEl = webSection(popup)!;
+    const webButton = webSectionEl.children[1].children[0];
+    const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
+    expect(webButton.children[1].title).toBe(`${WEB.moduleName} (zh)`);
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
+    expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
     expect(fittingImport.itemName).toHaveBeenCalledWith(WEB.moduleName, "zh");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(WEB.moduleName);
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith(`${WEB.moduleName} (zh)`);
   });
 
   test("summary hides an icon when no icon URL is available", () => {

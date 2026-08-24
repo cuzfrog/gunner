@@ -2,6 +2,7 @@ import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
 import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
+import type { Language } from "./language";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
 import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
@@ -16,11 +17,13 @@ export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
   private readonly parser: SettingsParser;
+  private readonly navigatorLanguage: string;
 
-  constructor({ storage, location, parser }: { storage: StorageProvider; location: LocationProvider; parser: SettingsParser }) {
+  constructor({ storage, location, parser, navigatorLanguage = "" }: { storage: StorageProvider; location: LocationProvider; parser: SettingsParser; navigatorLanguage?: string }) {
     this.storage = storage;
     this.location = location;
     this.parser = parser;
+    this.navigatorLanguage = navigatorLanguage;
   }
 
   loadStartupState(): StartupState {
@@ -86,7 +89,7 @@ export class LocalSettingsStore implements SettingsStore {
 
   loadPreferences(): DisplayPreferences {
     const raw = this.storage.getItem(PREFERENCES_KEY);
-    if (!raw) return { ...DEFAULT_PREFERENCES };
+    if (!raw) return { ...DEFAULT_PREFERENCES, language: detectInitialLanguage(this.navigatorLanguage) };
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { ...DEFAULT_PREFERENCES };
@@ -142,4 +145,11 @@ export class LocalSettingsStore implements SettingsStore {
     if (!raw) return {};
     return this.parser.parseProfiles(raw);
   }
+}
+
+function detectInitialLanguage(navigatorLanguage: string): Language {
+  const prefix = navigatorLanguage.split(/[-_]/, 1)[0].toLowerCase();
+  if (prefix === "zh") return "zh";
+  if (prefix === "ja") return "ja";
+  return "en";
 }

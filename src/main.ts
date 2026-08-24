@@ -18,6 +18,7 @@ function main(): void {
         return window.location.href;
       },
     }),
+    navigatorLanguage: asValue(window.navigator.language),
     clipboard: asValue({
       readText: readClipboardText,
       writeText: (text: string) => window.navigator.clipboard.writeText(text),

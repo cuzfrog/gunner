@@ -91,7 +91,7 @@ function createI18n(): I18n {
 function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
-    itemIconUrl: (itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined),
+    itemIconUrl: vi.fn((itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined)),
     droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : undefined),
   };
 }
@@ -128,7 +128,7 @@ describe("DomFittingPreview", () => {
     globalThis.document = undefined as unknown as Document;
   });
 
-  function buildPreview(language: Language = "en"): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview; fittingImport: ReturnType<typeof mockFittingImport> } {
+  function buildPreview(language: Language = "en"): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview; fittingImport: ReturnType<typeof mockFittingImport>; imageCatalog: ImageCatalog } {
     const container = new FakeElement();
     container.offsetWidth = 300;
     container.offsetHeight = 200;
@@ -136,14 +136,15 @@ describe("DomFittingPreview", () => {
     anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
     const fittingImport = vi.mocked(mockFittingImport());
     fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
+    const imageCatalog = createImageCatalog();
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
       i18n: { ...createI18n(), current: () => language },
-      imageCatalog: createImageCatalog(),
+      imageCatalog,
       fittingImport,
       viewport: () => ({ innerWidth: 1024, innerHeight: 768 }),
     });
-    return { container, anchor, preview, fittingImport };
+    return { container, anchor, preview, fittingImport, imageCatalog };
   }
 
   test("show renders header and sections", () => {
@@ -278,8 +279,8 @@ describe("DomFittingPreview", () => {
     expect(row.children[1].children[0].textContent).toBe("[Empty High slot]");
   });
 
-  test("show translates item and charge names with the current language", () => {
-    const { container, anchor, preview, fittingImport } = buildPreview("zh");
+  test("show translates item and charge names and keeps icon inputs canonical", () => {
+    const { container, anchor, preview, fittingImport, imageCatalog } = buildPreview("zh");
     preview.show(anchor as unknown as HTMLElement, SUMMARY);
     const highSection = container.children[1];
     const row = highSection.children[1];
@@ -287,6 +288,8 @@ describe("DomFittingPreview", () => {
     expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
     expect(fittingImport.itemName).toHaveBeenCalledWith("200mm AutoCannon I", "zh");
     expect(fittingImport.itemName).toHaveBeenCalledWith("Hail S", "zh");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("200mm AutoCannon I (zh)");
   });
 
   test("hide clears and hides the container", () => {

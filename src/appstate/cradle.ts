@@ -13,6 +13,7 @@ export interface AppstateCradle {
   readonly profileTextCodec: ProfileTextCodec;
   readonly storage: StorageProvider;
   readonly location: LocationProvider;
+  readonly navigatorLanguage: string;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
   readonly chargeCatalog: ChargeCatalog;

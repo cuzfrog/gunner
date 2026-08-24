@@ -157,4 +157,22 @@ describe("PropulsionSection", () => {
     const button = variants.children[0];
     expect(button.children[0]?.src).toBe("icon.png");
   });
+
+  test("variant button label and title are translated while data-value stays canonical", () => {
+    const fitting = vi.mocked<FittingImport>(fittingForPropulsion());
+    fitting.itemName = vi.fn(() => "1MN加力燃烧器 I");
+    const { document, panel, section, imageCatalog } = buildPropulsionSection(undefined, fitting);
+    panel.profile = RIFTER;
+    imageCatalog.itemIconUrl = vi.fn((name: string) => `icons/${name.replaceAll(" ", "_")}.png`);
+    section.renderPropulsionOptions();
+    section.popup.open();
+
+    const variants = getFake(document, "attacker-propulsion-variants");
+    const button = variants.children[0] as unknown as HTMLElement;
+    expect(button.getAttribute("data-value")).toBe("1MN Afterburner I");
+    expect(button.getAttribute("title")).toBe("1MN加力燃烧器 I");
+    expect(button.children[1].textContent).toBe("1MN加力燃烧器 I");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("1MN Afterburner I");
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("1MN加力燃烧器 I");
+  });
 });
