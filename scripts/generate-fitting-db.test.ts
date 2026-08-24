@@ -1,4 +1,7 @@
-import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames } from "./generate-fitting-db";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -134,5 +137,94 @@ describe("buildDisruptionScriptStats", () => {
       rangeDeltaBonus: 0,
       falloffDeltaBonus: 0,
     });
+  });
+});
+
+describe("_writeI18nFiles", () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), "i18n-XXXXXX"));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  function filePaths() {
+    return {
+      enFile: join(tempDir, "item-names-en.ts"),
+      zhFile: join(tempDir, "item-names-zh.ts"),
+      jaFile: join(tempDir, "item-names-ja.ts"),
+    };
+  }
+
+  function parseExport(filePath: string, constName: string): unknown {
+    const content = readFileSync(filePath, "utf8");
+    const match = content.match(new RegExp(`export const ${constName}[^=]*=([\\s\\S]*?);`));
+    if (!match) throw new Error(`Export ${constName} not found in ${filePath}`);
+    return JSON.parse(match[1].trim());
+  }
+
+  test("sorts English names and keeps zh/ja arrays index-aligned", async () => {
+    const itemNames = {
+      B: { zh: "b-zh", ja: "b-ja" },
+      A: { zh: "a-zh", ja: "a-ja" },
+      C: { zh: "c-zh", ja: "c-ja" },
+    };
+    const paths = filePaths();
+    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
+    const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
+    const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
+    expect(en).toEqual(["A", "B", "C"]);
+    expect(zh).toEqual(["a-zh", "b-zh", "c-zh"]);
+    expect(ja).toEqual(["a-ja", "b-ja", "c-ja"]);
+  });
+
+  test("falls back to the English name when a localization is blank or missing", async () => {
+    const itemNames = {
+      B: { zh: "b-zh" },
+      A: { zh: "", ja: "" },
+      C: { ja: "c-ja" },
+    };
+    const paths = filePaths();
+    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
+    const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
+    const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
+    expect(en).toEqual(["A", "B", "C"]);
+    expect(zh).toEqual(["A", "b-zh", "C"]);
+    expect(ja).toEqual(["A", "B", "c-ja"]);
+  });
+
+  test("writes override objects alongside zh and ja arrays", async () => {
+    const itemNames = { A: { zh: "a-zh", ja: "a-ja" } };
+    const paths = filePaths();
+    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
+    const zhOverrides = parseExport(paths.zhFile, "ITEM_NAMES_ZH_OVERRIDES");
+    const jaOverrides = parseExport(paths.jaFile, "ITEM_NAMES_JA_OVERRIDES");
+    expect(zh).toEqual(["a-zh"]);
+    expect(zhOverrides).toEqual({
+      "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
+    });
+    expect(jaOverrides).toEqual({
+      "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
+      "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
+      "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
+      "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
+      "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
+      "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
+      "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
+    });
+  });
+
+  test("does not write overrides in the English file", async () => {
+    const itemNames = { A: { zh: "a-zh", ja: "a-ja" } };
+    const paths = filePaths();
+    await _writeI18nFiles(itemNames, "2026-08-24", paths);
+    const enContent = readFileSync(paths.enFile, "utf8");
+    expect(enContent).not.toContain("OVERRIDES");
   });
 });

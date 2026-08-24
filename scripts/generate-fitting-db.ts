@@ -24,6 +24,8 @@ interface SdeType {
   published: number;
 }
 
+type LocalizedName = { readonly zh?: string; readonly ja?: string };
+
 interface SdeDogmaAttribute {
   attributeID: number;
   name: string;
@@ -547,7 +549,7 @@ async function main() {
   const disruptionScripts: Record<string, DisruptionScriptStats> = {};
   const hullBonuses: Record<string, readonly HullBonus[]> = {};
   const drones: Record<string, true> = {};
-  const itemNames: Record<string, { readonly zh: string; readonly ja: string }> = {};
+  const itemNames: Record<string, LocalizedName> = {};
   const nameToType = new Map<string, SdeType>();
 
   for (const type of Object.values(types)) {
@@ -817,7 +819,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
 }
 
 function addItemName(
-  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  itemNames: Record<string, LocalizedName>,
   name: string,
   type?: SdeType,
 ): void {
@@ -828,7 +830,7 @@ function addItemName(
 }
 
 async function addItemNamesFromIconCatalog(
-  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  itemNames: Record<string, LocalizedName>,
   nameToType: ReadonlyMap<string, SdeType>,
 ): Promise<void> {
   const raw: { byName?: { iconID?: Record<string, unknown> } } = JSON.parse(await readFile(NAME_TO_ID_FILE, "utf8"));
@@ -871,12 +873,12 @@ function isFittableItem(type: SdeType | undefined, groups: Record<string, SdeGro
 }
 
 function filterItemNames(
-  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  itemNames: Record<string, LocalizedName>,
   nameToType: ReadonlyMap<string, SdeType>,
   groups: Record<string, SdeGroup>,
   dbTableNames: ReadonlySet<string>,
-): Record<string, { readonly zh: string; readonly ja: string }> {
-  const filtered: Record<string, { readonly zh: string; readonly ja: string }> = {};
+): Record<string, LocalizedName> {
+  const filtered: Record<string, LocalizedName> = {};
   for (const [name, localizations] of Object.entries(itemNames)) {
     if (dbTableNames.has(name) || isFittableItem(nameToType.get(name), groups)) {
       filtered[name] = localizations;
@@ -900,10 +902,20 @@ const CANONICAL_OVERRIDES = {
   },
 } as const;
 
-async function writeI18nFiles(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {
+interface WriteI18nOptions {
+  readonly enFile?: string;
+  readonly zhFile?: string;
+  readonly jaFile?: string;
+}
+
+async function writeI18nFiles(
+  itemNames: Record<string, LocalizedName>,
+  date: string,
+  { enFile = I18N_EN_FILE, zhFile = I18N_ZH_FILE, jaFile = I18N_JA_FILE }: WriteI18nOptions = {},
+): Promise<void> {
   const en = Object.keys(itemNames).sort((a, b) => a.localeCompare(b));
-  const zh = en.map((name) => itemNames[name].zh);
-  const ja = en.map((name) => itemNames[name].ja);
+  const zh = en.map((name) => itemNames[name].zh || name);
+  const ja = en.map((name) => itemNames[name].ja || name);
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
   const overrideType = "{ readonly [key: string]: string }";
   const enNames = JSON.stringify(en);
@@ -916,9 +928,9 @@ async function writeI18nFiles(itemNames: Record<string, { readonly zh: string; r
   const zhOverrideContent = `export const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${zhOverrides};\n`;
   const jaArray = `${header}export const ITEM_NAMES_JA: readonly string[] = ${jaNames};\n`;
   const jaOverrideContent = `export const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${jaOverrides};\n`;
-  await writeFile(I18N_EN_FILE, enContent);
-  await writeFile(I18N_ZH_FILE, zhArray + zhOverrideContent);
-  await writeFile(I18N_JA_FILE, jaArray + jaOverrideContent);
+  await writeFile(enFile, enContent);
+  await writeFile(zhFile, zhArray + zhOverrideContent);
+  await writeFile(jaFile, jaArray + jaOverrideContent);
 }
 
 export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };
