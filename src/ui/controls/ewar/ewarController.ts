@@ -110,10 +110,6 @@ export class EwarControllerImpl implements EwarController {
     this.updateSummary("target");
   }
 
-  popup(side: Side): Popup {
-    return this.popups[side];
-  }
-
   private buildPopup(side: Side): Popup {
     const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
     const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;

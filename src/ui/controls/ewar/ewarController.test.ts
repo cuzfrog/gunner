@@ -6,7 +6,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { collectEwarEls } from "../elementCollectors";
 import { createControlsEls } from "../elements";
-import type { PopupGroup } from "../popup";
+import type { Popup, PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { EwarControllerImpl } from "./ewarController";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
@@ -32,6 +32,38 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
 const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
 const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 
+class FakePopupGroup implements PopupGroup {
+  private readonly popups: Popup[] = [];
+
+  register(popup: Popup): void { this.popups.push(popup); }
+
+  open(popup: Popup): void {
+    for (const p of this.popups) if (p !== popup && p.isOpen()) p.close();
+    if (!popup.isOpen()) popup.open();
+  }
+
+  toggle(popup: Popup): void {
+    if (popup.isOpen()) this.close(popup);
+    else this.open(popup);
+  }
+
+  close(popup: Popup): void {
+    if (popup.isOpen()) popup.close();
+  }
+
+  closeAll(): void {
+    for (const p of this.popups) if (p.isOpen()) p.close();
+  }
+
+  hasOpen(): boolean {
+    return this.popups.some((p) => p.isOpen());
+  }
+
+  onPointerDown(_target: EventTarget | null): void {}
+
+  onKeyDown(_event: { readonly key: string }): void {}
+}
+
 function buildEwarController(language: Language = "en") {
   const document = fakeDocument();
   globalThis.document = document;
@@ -48,16 +80,7 @@ function buildEwarController(language: Language = "en") {
     itemIconUrl: vi.fn((name) => `icons/${name.replaceAll(" ", "_")}.png`),
     droneIconUrl: vi.fn(),
   });
-  const popupGroup = vi.mocked<PopupGroup>({
-    register: vi.fn(),
-    open: vi.fn(),
-    toggle: vi.fn(),
-    close: vi.fn(),
-    closeAll: vi.fn(),
-    hasOpen: vi.fn(),
-    onPointerDown: vi.fn(),
-    onKeyDown: vi.fn(),
-  });
+  const popupGroup = new FakePopupGroup();
   const els = collectEwarEls(createControlsEls());
   getFake(document, "attacker-ewar-popup").hidden = true;
   getFake(document, "target-ewar-popup").hidden = true;
@@ -450,14 +473,12 @@ describe("EwarController", () => {
 
     const trigger = getFake(document, "attacker-ewar-trigger");
     const popup = getFake(document, "attacker-ewar-popup");
-    const p = controller.popup("attacker");
-    expect(p.isOpen()).toBe(false);
-    p.open();
-    expect(p.isOpen()).toBe(true);
+    expect(popup.hidden).toBe(true);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    trigger.trigger("click");
     expect(popup.hidden).toBe(false);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    p.close();
-    expect(p.isOpen()).toBe(false);
+    trigger.trigger("click");
     expect(popup.hidden).toBe(true);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
