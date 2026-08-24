@@ -1,15 +1,27 @@
 import { ITEM_NAMES } from "./item-names-i18n";
 import type { ShipNameLanguage } from "../ships";
 
-// The SDE Japanese names for a handful of distinct items are identical.
+// The SDE localized names for a handful of distinct items are identical.
 // These overrides choose the most specific matching English name
-// (e.g. the size/tier variant that the shared Japanese string denotes).
-const JA_CANONICAL_OVERRIDES: Readonly<Record<string, string>> = {
-  "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
-  "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
-  "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
-  "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
-  "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
+// (e.g. the size/tier/damage-type variant that the shared string denotes).
+const CANONICAL_OVERRIDES: Readonly<Record<ShipNameLanguage, Readonly<Record<string, string>>>> = {
+  en: {},
+  zh: {
+    "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
+  },
+  ja: {
+    "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
+    "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
+    "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
+    "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
+    "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
+    "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
+    "スタンドアップ大型ミサイル航行プロセッサII": "Standup L-Set Missile Flight Processor II",
+    "スタンドアップ中型標準小型艦製造資源効率I": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency I",
+    "スタンドアップ中型ME研究加速器I": "Standup M-Set ME Research Accelerator I",
+    "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
+    "アップウェルM3R-Oアウトポストリグ": "Upwell M3R-O Outpost Rig",
+  },
 };
 
 export interface ItemNames {
@@ -55,13 +67,13 @@ function resolveLocalizations(): ResolvedItemNames {
 
   const zhDisplay = new Map<string, string>();
   for (const [localized, candidates] of zhGroups) {
-    const winner = bestCandidate(candidates, localized);
+    const winner = canonicalForGroup(candidates, localized, "zh");
     zhDisplay.set(winner, localized);
   }
 
   const jaDisplay = new Map<string, string>();
   for (const [localized, candidates] of jaGroups) {
-    const winner = canonicalForGroup(candidates, localized);
+    const winner = canonicalForGroup(candidates, localized, "ja");
     jaDisplay.set(winner, localized);
   }
 
@@ -90,8 +102,8 @@ function groupByValue(en: readonly string[], localized: readonly string[]): Map<
   return groups;
 }
 
-function canonicalForGroup(candidates: readonly string[], localized: string): string {
-  const override = JA_CANONICAL_OVERRIDES[localized];
+function canonicalForGroup(candidates: readonly string[], localized: string, language: ShipNameLanguage): string {
+  const override = CANONICAL_OVERRIDES[language][localized];
   if (override && candidates.includes(override)) return override;
   return bestCandidate(candidates, localized);
 }
@@ -119,13 +131,12 @@ function score(english: string, localized: string): number {
   const lower = localized.toLowerCase();
   const tokens = english.split(/\s+/u).filter((t) => t.length > 0);
   if (tokens.length === 0) return 0;
-  const lastToken = tokens[tokens.length - 1].toLowerCase();
-  if (lower.endsWith(lastToken)) return lastToken.length;
-
   let sum = 0;
   for (const token of tokens) {
     const normalized = token.toLowerCase();
     if (lower.includes(normalized)) sum += normalized.length;
   }
+  const lastToken = tokens[tokens.length - 1].toLowerCase();
+  if (lower.endsWith(lastToken)) sum += lastToken.length;
   return sum;
 }

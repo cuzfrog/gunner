@@ -5,6 +5,7 @@ import { join } from "node:path";
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingDb.ts");
 const I18N_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-i18n.ts");
+const NAME_TO_ID_FILE = join(import.meta.dir, "..", "data", "ship-modules", "nameToId.json");
 
 interface SdeType {
   typeID: number;
@@ -255,7 +256,8 @@ async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
   const all: Record<string, T> = {};
   for (const file of files) {
     const text = await readFile(join(SDE_DIR, file), "utf8");
-    Object.assign(all, JSON.parse(text) as Record<string, T>);
+    const parsed: Record<string, T> = JSON.parse(text);
+    Object.assign(all, parsed);
   }
   return all;
 }
@@ -387,7 +389,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
 }
 
 function buildModuleStats(values: Map<string, number>, effects: Set<number>): FittingModuleStats | undefined {
-  const stats: Record<string, unknown> = {};
+  const stats: Record<string, number> = {};
 
   const massAddition = optionalNumber(values.get("massAddition"));
   if (massAddition !== undefined) stats.massAddition = massAddition;
@@ -428,7 +430,7 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
   }
 
   if (Object.keys(stats).length === 0) return undefined;
-  return stats as FittingModuleStats;
+  return { ...stats };
 }
 
 export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {
@@ -519,12 +521,14 @@ async function main() {
   const hullBonuses: Record<string, readonly HullBonus[]> = {};
   const drones: Record<string, true> = {};
   const itemNames: Record<string, { readonly zh: string; readonly ja: string }> = {};
+  const nameToType = new Map<string, SdeType>();
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
     const typeDogma = typedogmas[String(type.typeID)];
     const values = buildAttributeValues(attributeNames, typeDogma);
     const enName = type["typeName_en-us"];
+    nameToType.set(enName, type);
 
     if (shipGroupIds.has(type.groupID)) {
       const bonuses = buildHullBonuses(attributeNames, typeDogma);
@@ -703,13 +707,13 @@ export interface DisruptionScriptStats {
 
 `;
 
-  const scriptDefinitions = `export const SCRIPTS = ${JSON.stringify(scripts)} as unknown as Readonly<Record<string, TurretScriptStats>>;
+  const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${JSON.stringify(scripts)};
 
-export const STASIS_WEBS = ${JSON.stringify(stasisWebs)} as unknown as Readonly<Record<string, StasisWebStats>>;
+export const STASIS_WEBS: Readonly<Record<string, StasisWebStats>> = ${JSON.stringify(stasisWebs)};
 
-export const TRACKING_DISRUPTORS = ${JSON.stringify(trackingDisruptors)} as unknown as Readonly<Record<string, TrackingDisruptorStats>>;
+export const TRACKING_DISRUPTORS: Readonly<Record<string, TrackingDisruptorStats>> = ${JSON.stringify(trackingDisruptors)};
 
-export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts)} as unknown as Readonly<Record<string, DisruptionScriptStats>>;
+export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>> = ${JSON.stringify(disruptionScripts)};
 
 `;
 
@@ -717,17 +721,19 @@ export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts)} as unknow
     header,
     typeDefinitions,
     scriptDefinitions,
-    `export const FITTING_MODULES = ${JSON.stringify(fittingModules)} as unknown as Readonly<Record<string, FittingModuleStats>>;`,
+    `export const FITTING_MODULES: Readonly<Record<string, FittingModuleStats>> = ${JSON.stringify(fittingModules)};`,
     ``,
-    `export const TURRETS = ${JSON.stringify(turrets)} as unknown as Readonly<Record<string, TurretStats>>;`,
+    `export const TURRETS: Readonly<Record<string, TurretStats>> = ${JSON.stringify(turrets)};`,
     ``,
-    `export const CHARGES = ${JSON.stringify(charges)} as unknown as Readonly<Record<string, ChargeStats>>;`,
+    `export const CHARGES: Readonly<Record<string, ChargeStats>> = ${JSON.stringify(charges)};`,
     ``,
-    `export const HULL_BONUSES = ${JSON.stringify(hullBonuses)} as unknown as Readonly<Record<string, readonly HullBonus[]>>;`,
+    `export const HULL_BONUSES: Readonly<Record<string, readonly HullBonus[]>> = ${JSON.stringify(hullBonuses)};`,
     ``,
-    `export const DRONES = ${JSON.stringify(sortedDrones)} as unknown as Readonly<Record<string, true>>;`,
+    `export const DRONES: Readonly<Record<string, true>> = ${JSON.stringify(sortedDrones)};`,
     ``,
   ];
+
+  await addItemNamesFromIconCatalog(itemNames, nameToType);
 
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
@@ -741,12 +747,24 @@ export const DISRUPTION_SCRIPTS = ${JSON.stringify(disruptionScripts)} as unknow
 function addItemName(
   itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
   name: string,
-  type: SdeType,
+  type?: SdeType,
 ): void {
   itemNames[name] = {
-    zh: type.typeName_zh && type.typeName_zh.trim().length > 0 ? type.typeName_zh.trim() : name,
-    ja: type.typeName_ja && type.typeName_ja.trim().length > 0 ? type.typeName_ja.trim() : name,
+    zh: type?.typeName_zh && type.typeName_zh.trim().length > 0 ? type.typeName_zh.trim() : name,
+    ja: type?.typeName_ja && type.typeName_ja.trim().length > 0 ? type.typeName_ja.trim() : name,
   };
+}
+
+async function addItemNamesFromIconCatalog(
+  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  nameToType: ReadonlyMap<string, SdeType>,
+): Promise<void> {
+  const raw: { byName?: { iconID?: Record<string, unknown> } } = JSON.parse(await readFile(NAME_TO_ID_FILE, "utf8"));
+  const catalog = raw.byName?.iconID ?? {};
+  for (const name of Object.keys(catalog)) {
+    if (name in itemNames) continue;
+    addItemName(itemNames, name, nameToType.get(name));
+  }
 }
 
 async function writeI18nFile(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {

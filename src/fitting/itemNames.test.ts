@@ -13,7 +13,7 @@ describe("ITEM_NAMES", () => {
     expect(ITEM_NAMES.en).toEqual(sorted);
   });
 
-  test("every fitting item name appears exactly once", () => {
+  test("fitting db names are present and there are no duplicates", () => {
     const expected = new Set([
       ...Object.keys(FITTING_MODULES),
       ...Object.keys(TURRETS),
@@ -25,10 +25,10 @@ describe("ITEM_NAMES", () => {
       ...Object.keys(DRONES),
     ]);
     const actual = new Set(ITEM_NAMES.en);
-    expect(actual.size).toBe(expected.size);
     for (const name of expected) {
       expect(actual.has(name)).toBe(true);
     }
+    expect(ITEM_NAMES.en.length).toBe(actual.size);
   });
 
   test("zh and ja values fall back to the english name when missing", () => {
@@ -90,6 +90,20 @@ describe("ItemNamesImpl", () => {
     expect(itemNames.canonicalName("デュアルアフォーカルパルスレーザーI")).toBe("Dual Afocal Pulse Laser I");
     expect(itemNames.canonicalName("大型エクスプローシブ・アーマーレインフォーサーII")).toBe("Large Explosive Armor Reinforcer II");
     expect(itemNames.canonicalName("大型キネティック・アーマーレインフォーサーI")).toBe("Large Kinetic Armor Reinforcer I");
+    expect(itemNames.canonicalName("中型重力子スマートボムII")).toBe("Medium Graviton Smartbomb II");
     expect(itemNames.canonicalName("共和国海軍仕様炭化鉛弾S")).toBe("Republic Fleet Carbonized Lead S");
+    expect(itemNames.canonicalName("スタンドアップ大型ミサイル航行プロセッサII")).toBe("Standup L-Set Missile Flight Processor II");
+    expect(itemNames.canonicalName("スタンドアップ中型標準小型艦製造資源効率I")).toBe("Standup M-Set Basic Small Ship Manufacturing Material Efficiency I");
+    expect(itemNames.canonicalName("スタンドアップ中型ME研究加速器I")).toBe("Standup M-Set ME Research Accelerator I");
+    expect(itemNames.canonicalName("トゥルーサンシャEMコーティング")).toBe("True Sansha EM Coating");
+    expect(itemNames.canonicalName("アップウェルM3R-Oアウトポストリグ")).toBe("Upwell M3R-O Outpost Rig");
+  });
+
+  test("canonicalName resolves ambiguous Chinese names to the most specific variant", () => {
+    expect(itemNames.canonicalName("莱塞勒氏改良型爆炸装甲增强器")).toBe("Raysere's Modified Explosive Armor Hardener");
+  });
+
+  test("item names cover modules that are not in the fitting stats db", () => {
+    expect(itemNames.displayName("J5b Enduring Warp Scrambler", "ja")).not.toBe("J5b Enduring Warp Scrambler");
   });
 });
