@@ -1,3 +1,4 @@
+import type { DisruptionScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import { PALETTE } from "../palette";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
@@ -60,6 +61,15 @@ export function chargeStatSuffix(option: ChargeOption): string {
   if (option.falloffMultiplier !== 1) {
     parts.splice(1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
   }
+  return parts.join(" · ");
+}
+
+export function scriptStatSuffix(script: DisruptionScriptSpec): string {
+  const parts = [
+    `optimal x${formatMultiplier(script.optimalMultiplier)}`,
+    `falloff x${formatMultiplier(script.falloffMultiplier)}`,
+    `track x${formatMultiplier(script.trackingMultiplier)}`,
+  ];
   return parts.join(" · ");
 }
 

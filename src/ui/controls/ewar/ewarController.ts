@@ -3,7 +3,7 @@ import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { formatMultiplier } from "../controlsFormat";
+import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../sidePanel";
 import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
@@ -216,10 +216,17 @@ export class EwarControllerImpl implements EwarController {
       webs: loadout.webs.map((_, i) => ({ active: saved?.webs?.[i] ?? true })),
       disruptors: loadout.disruptors.map((disruptor, i) => {
         const savedScript = saved?.disruptors?.[i]?.script;
-        const script = savedScript ? loadout.scripts.find((s) => s.name === savedScript) : undefined;
+        let script: DisruptionScriptSpec | undefined;
+        if (savedScript === "none") {
+          script = undefined;
+        } else if (savedScript !== undefined) {
+          script = loadout.scripts.find((s) => s.name === savedScript) ?? disruptor.defaultScript;
+        } else {
+          script = disruptor.defaultScript;
+        }
         return {
           active: saved?.disruptors?.[i]?.active ?? true,
-          script: script ?? disruptor.defaultScript,
+          script,
         };
       }),
     };
@@ -312,13 +319,27 @@ export class EwarControllerImpl implements EwarController {
     popup.setAttribute("aria-labelledby", label.id);
     popup.appendChild(label);
 
-    const noneButton = this.createScriptOptionButton("none", this.i18n.t("ewar.script.none"), this.i18n.t("ewar.script.none.hint"), undefined, current === undefined);
+    const noneHint = this.i18n.t("ewar.script.none.hint");
+    const noneButton = this.createScriptOptionButton(
+      "none",
+      this.i18n.t("ewar.script.none"),
+      noneHint,
+      undefined,
+      current === undefined,
+    );
     noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
       const name = this.fittingImport.itemName(script.name, this.i18n.current());
-      const button = this.createScriptOptionButton(script.name, name, scriptStatSuffix(script), this.imageCatalog.itemIconUrl(script.name), current?.name === script.name);
+      const iconUrl = this.imageCatalog.itemIconUrl(script.name);
+      const button = this.createScriptOptionButton(
+        script.name,
+        name,
+        scriptStatSuffix(script),
+        iconUrl,
+        current?.name === script.name,
+      );
       button.addEventListener("click", () => this.onScriptSelected(side, index, script.name));
       popup.appendChild(button);
     }
@@ -407,7 +428,3 @@ export class EwarControllerImpl implements EwarController {
   }
 }
 
-function scriptStatSuffix(script: DisruptionScriptSpec): string {
-  const parts = [`optimal x${formatMultiplier(script.optimalMultiplier)}`, `falloff x${formatMultiplier(script.falloffMultiplier)}`, `track x${formatMultiplier(script.trackingMultiplier)}`];
-  return parts.join(" · ");
-}

@@ -424,4 +424,49 @@ describe("EwarController", () => {
     expect(summary.children[0].children[0].src).toBe("");
     expect(summary.children[1].children[0].src).toBe("icons/Tracking_Disruptor_I.png");
   });
+
+  test("selecting None persists over capture/restore round-trip", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [DISRUPTOR2], scripts: SCRIPTS };
+    controller.setLoadout("attacker", loadout);
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const section = disruptorSection(popup)!;
+    const gear = gearFor(section.children[1]);
+    gear.trigger("click");
+
+    const scriptPopup = scriptPopupFor(document, "attacker");
+    scriptOptionFor(scriptPopup, "none")!.trigger("click");
+    expect(controller.capture("attacker")?.disruptors?.[0]?.script).toBe("none");
+    expect(gear.getAttribute("title")).toBe("ewar.script.none");
+
+    controller.restore("attacker", loadout, controller.capture("attacker"));
+    expect(gearFor(disruptorSection(popup)!.children[1]).getAttribute("title")).toBe("ewar.script.none");
+    expect(controller.capture("attacker")?.disruptors?.[0]?.script).toBe("none");
+  });
+
+  test("script popup renders localized names, icons, and multiplier tooltips", () => {
+    const { controller, document, imageCatalog, fittingImport } = buildEwarController("zh");
+    controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR2], scripts: SCRIPTS });
+
+    const popup = getFake(document, "attacker-ewar-popup");
+    popup.hidden = false;
+    const section = disruptorSection(popup)!;
+    gearFor(section.children[1]).trigger("click");
+
+    const scriptPopup = scriptPopupFor(document, "attacker");
+    const noneOption = scriptOptionFor(scriptPopup, "none")!;
+    expect(noneOption.children.length).toBe(1);
+    expect(noneOption.children[0].textContent).toBe("ewar.script.none");
+    expect(noneOption.title).toBe("ewar.script.none.hint");
+
+    const optimalOption = scriptOptionFor(scriptPopup, "Optimal Range Disruption Script")!;
+    expect(optimalOption.children[0].tagName).toBe("IMG");
+    expect(optimalOption.children[0].src).toBe("icons/Optimal_Range_Disruption_Script.png");
+    expect(optimalOption.children[1].textContent).toBe("Optimal Range Disruption Script (zh)");
+    expect(fittingImport.itemName).toHaveBeenCalledWith("Optimal Range Disruption Script", "zh");
+    expect(optimalOption.title).toBe("optimal x2 · falloff x2 · track x0");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Optimal Range Disruption Script");
+  });
 });

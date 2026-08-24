@@ -1,3 +1,4 @@
+import type { DisruptionScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import { PALETTE } from "../palette";
@@ -16,6 +17,7 @@ import {
   positionFromAggressivity,
   profileSettingsOf,
   propulsionOptionLabel,
+  scriptStatSuffix,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
@@ -152,6 +154,18 @@ describe("charge stat suffix", () => {
   test("includes falloff when it differs from one", () => {
     const option: ChargeOption = { name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5 };
     expect(chargeStatSuffix(option)).toBe("range x0.5 · falloff x1.5 · track x0.75");
+  });
+});
+
+describe("script stat suffix", () => {
+  test("formats all three disruption multipliers", () => {
+    const script: DisruptionScriptSpec = {
+      name: "Optimal Range Disruption Script",
+      trackingMultiplier: 0,
+      optimalMultiplier: 2,
+      falloffMultiplier: 2,
+    };
+    expect(scriptStatSuffix(script)).toBe("optimal x2 · falloff x2 · track x0");
   });
 });
 

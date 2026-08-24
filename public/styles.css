@@ -2001,6 +2001,14 @@ canvas {
   flex: none;
 }
 
+.ewar-script-option span {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .ewar-script-option:hover,
 .ewar-script-option:focus-visible {
   background: var(--bg-inset);

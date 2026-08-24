@@ -243,7 +243,14 @@ describe("SessionCodec", () => {
     const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
     const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     vi.mocked(ewarController.capture).mockReturnValue({ webs: [true], disruptors: [{ active: true, script: "none" }] });
-    vi.mocked(fittingImport.importFitting).mockReturnValue({ profile: {} as unknown, fittingName: "Brawler", ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [] }, weapon: undefined, defense: undefined, modules: [] } as unknown as ImportedFitting);
+    vi.mocked(fittingImport.importFitting).mockReturnValue({
+      profile: {} as unknown,
+      fittingName: "Brawler",
+      ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [], scripts: [] },
+      weapon: undefined,
+      defense: undefined,
+      modules: [],
+    } as unknown as ImportedFitting);
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
     const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), updateManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;

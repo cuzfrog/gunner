@@ -55,6 +55,17 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("migrates legacy v6 enum disruptor scripts in profile text", () => {
+    const text = codec.serialize({
+      ...MINIMAL_PROFILE,
+      attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] },
+      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
+    });
+    const parsed = codec.parse(text);
+    expect(parsed?.attackerEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
+    expect(parsed?.targetEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+  });
+
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
 version=7

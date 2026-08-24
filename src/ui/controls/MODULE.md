@@ -3,7 +3,7 @@ no-new-exports:
   - choiceGroup.ts
   - controlsContract.ts
   - controlsDom.ts
-  - controlsFormat.ts
+  # - controlsFormat.ts (temporarily lifted for ewar-v2 scriptStatSuffix)
   - domControls.ts
   - domControlsContract.ts
   - elements.ts

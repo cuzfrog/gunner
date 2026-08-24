@@ -268,8 +268,8 @@ describe("LocalSettingsStore", () => {
   test("saveProfile rejects a profile with an invalid ewar activation script", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
-    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, script: 123 }] } };
-    store.saveProfile("brawler", bad as ProfileSettings);
+    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, script: "" }] } };
+    store.saveProfile("brawler", bad);
     expect(store.listProfiles()).toEqual([]);
   });
 

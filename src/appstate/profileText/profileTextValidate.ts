@@ -135,10 +135,22 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
 function parseEwarActivation(value: string): StoredEwarActivation | undefined {
   try {
     const parsed = JSON.parse(value);
-    return isOptionalEwarActivation(parsed) ? parsed : undefined;
+    if (parsed && isOptionalEwarActivation(parsed) && parsed) {
+      return { ...parsed, disruptors: parsed.disruptors?.map(migrateDisruptorScript) };
+    }
+    return undefined;
   } catch {
     return undefined;
   }
+}
+
+function migrateDisruptorScript(item: Readonly<{ active: boolean; script: string }>): Readonly<{ active: boolean; script: string }> {
+  const map: Record<string, string> = {
+    optimalRange: "Optimal Range Disruption Script",
+    trackingSpeed: "Tracking Speed Disruption Script",
+  };
+  const script = map[item.script] ?? item.script;
+  return { ...item, script };
 }
 
 export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
