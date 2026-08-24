@@ -19,7 +19,7 @@ const attacker: ShipState = {
   aggressivity: 1,
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
-  ewar: { loadout: { webs: [], disruptors: [], scripts: [] }, activation: { webs: [], disruptors: [] } },
+  ewar: { loadout: { webs: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [], disruptors: [], scramblers: [] } },
 };
 
 const target: ShipState = {

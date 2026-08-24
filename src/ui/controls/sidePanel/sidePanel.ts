@@ -135,7 +135,7 @@ export class SidePanelImpl implements SidePanel {
   capture(): SidePanelState {
     return {
       speed: num(this.els.speed),
-      baseMaxSpeed: this.fittedHull?.baseMaxSpeed ?? num(this.els.speed),
+      baseMaxSpeed: this.sections.stats.currentBaseMaxSpeed(),
       mass: num(this.els.mass),
       inertia: num(this.els.inertia),
       mode: this.currentMode(),

@@ -1,4 +1,12 @@
+import { createContainer, InjectionMode } from "awilix";
+import { registerShipsModule, type ShipsCradle } from "../../../ships";
 import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
+
+function realShips() {
+  const cradle = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+  registerShipsModule(cradle);
+  return cradle.cradle.ships;
+}
 
 function shipsWithHull() {
   const ships = mockShips();
@@ -153,6 +161,20 @@ describe("SidePanel", () => {
     const { document, panel } = buildSidePanel("target");
     panel.setConfigInputsEnabled(false);
     expect(getFake(document, "target-sig").disabled).toBe(true);
+  });
+
+  test("capture derives baseMaxSpeed from current ship and propulsion for manual config", () => {
+    const ships = realShips();
+    const { document, panel } = buildSidePanel("attacker", ships);
+    const rifter = ships.findHull("Rifter")!;
+    panel.profile = rifter;
+    panel.sections.propulsion.setPropulsionActive("mwd-5mn");
+    panel.sections.propulsion.onPropulsionChange();
+
+    const state = panel.capture();
+    const base = ships.fittedStats(rifter, undefined, undefined, { skillLevel: state.skillLevel ?? 5, overloaded: state.overload }).baseMaxSpeed;
+    expect(state.baseMaxSpeed).toBeCloseTo(base, 6);
+    expect(state.baseMaxSpeed).toBeLessThan(state.speed);
   });
 
   test("setConfigInputsEnabled(true) re-enables config controls and reapplies the overload rule", () => {

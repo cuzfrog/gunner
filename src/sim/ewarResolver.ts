@@ -62,10 +62,10 @@ export class EwarResolverImpl implements EwarResolver {
 
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean {
     if (!projection) return false;
-    const scramblers = projection.loadout.scramblers ?? [];
+    const scramblers = projection.loadout.scramblers;
     for (let i = 0; i < scramblers.length; i++) {
       const spec = scramblers[i];
-      const activation = projection.activation?.scramblers?.[i];
+      const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;

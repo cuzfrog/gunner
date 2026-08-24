@@ -21,6 +21,7 @@ export function fittedStats(
   fitted?: FittedHull,
   propulsion?: PropulsionStats,
   conditions?: StatConditions,
+  maxSpeedOverride?: number,
 ): ShipStats {
   const hull = fitted ?? nakedHull(profile);
   const level = conditions?.skillLevel ?? 0;
@@ -31,6 +32,7 @@ export function fittedStats(
   const baseMaxSpeed = profile.baseSpeed * hull.speedMultiplier * navFactor;
   const moduleSpeed = propulsion ? propulsionSpeedBonus(propulsion, level, overloaded) : 0;
   const maxSpeed = baseMaxSpeed * (propulsion ? 1 + (moduleSpeed * propulsion.thrust) / mass : 1);
+  const effectiveBase = maxSpeedOverride !== undefined && maxSpeed > 0 ? baseMaxSpeed * (maxSpeedOverride / maxSpeed) : baseMaxSpeed;
   const inertiaModifier = profile.inertiaModifier * hull.inertiaMultiplier * inertiaFactor;
   const sigRadius = (profile.sigRadius + hull.sigRadiusAdd) * hull.sigMultiplier * (1 + (propulsion ? propulsion.sigBloom : 0));
   const alignTime = mass * inertiaModifier * ALIGN_TIME_FACTOR;
@@ -39,7 +41,7 @@ export function fittedStats(
     mass,
     inertiaModifier,
     maxSpeed,
-    baseMaxSpeed,
+    baseMaxSpeed: effectiveBase,
     sigRadius,
     alignTime,
   };

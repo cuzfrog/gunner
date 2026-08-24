@@ -1,3 +1,5 @@
+import { createContainer, InjectionMode } from "awilix";
+import { registerShipsModule, type ShipsCradle } from "../ships";
 import { SettingsParser } from "./settingsParser";
 import {
   chargeCatalog,
@@ -13,6 +15,7 @@ import {
   RIFTER_MODULE,
   RIFTER_BASE_STATS,
   RIFTER_MWD_STATS,
+  RIFTER_PROPULSION,
   IMPORTED_RIFTER,
   type UserSettings,
   type ProfileSettings,
@@ -105,6 +108,47 @@ describe("SettingsParser", () => {
       webs: [{ active: false, overloaded: true }],
       disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
     });
+  });
+
+  test("parseUserSettings migrates boolean and partial scrambler entries and inherits overload from side flag", () => {
+    const v8 = {
+      ...DEFAULT_SETTINGS,
+      version: 8,
+      attackerOverload: false,
+      attackerEwarActivation: { scramblers: [true, { active: true }] },
+      targetEwarActivation: { scramblers: [false, { active: true, overloaded: true }] },
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v8));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation?.scramblers).toEqual([
+      { active: true, overloaded: false },
+      { active: true, overloaded: false },
+    ]);
+    expect(parsed!.targetEwarActivation?.scramblers).toEqual([
+      { active: false, overloaded: true },
+      { active: true, overloaded: true },
+    ]);
+  });
+
+  test("parseUserSettings migration is idempotent for already-migrated ewar activations", () => {
+    const input = {
+      ...DEFAULT_SETTINGS,
+      attackerEwarActivation: { webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "none" }], scramblers: [] },
+    };
+    const first = makeParser().parseUserSettings(JSON.stringify(input));
+    expect(first).not.toBeNull();
+    const second = makeParser().parseUserSettings(JSON.stringify(first));
+    expect(second).toEqual(first);
+  });
+
+  test("parseUserSettings leaves unknown disruptor script names unchanged", () => {
+    const input = {
+      ...DEFAULT_SETTINGS,
+      attackerEwarActivation: { disruptors: [{ active: true, script: "custom script" }] },
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(input));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "custom script" });
   });
 
   test("parseUserSettings rejects an invalid disruptor script", () => {
@@ -229,5 +273,40 @@ describe("SettingsParser", () => {
     expect(decoded!.tracking).toBe(0.42);
     expect(decoded!.optimal).toBe(1200);
     expect(decoded!.falloff).toBe(3000);
+  });
+
+  test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when attackerSpeed is overridden", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+    registerShipsModule(realShips);
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog });
+    const override = 2000;
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      attackerOverrides: { attackerSpeed: override },
+    };
+    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.attackerSpeed).toBe(override);
+    const conditions = { skillLevel: settings.attackerSkillLevel ?? 5, overloaded: settings.attackerOverload ?? true };
+    const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions, override).baseMaxSpeed;
+    expect(decoded!.attackerFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
+  });
+
+  test("decodeUrlSettings keeps baseMaxSpeed unscaled when attackerSpeed is not overridden", () => {
+    fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+    registerShipsModule(realShips);
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog });
+    const settings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+    };
+    const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    const conditions = { skillLevel: settings.attackerSkillLevel ?? 5, overloaded: settings.attackerOverload ?? true };
+    const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions).baseMaxSpeed;
+    expect(decoded!.attackerFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });
 });

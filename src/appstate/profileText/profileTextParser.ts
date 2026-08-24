@@ -1,3 +1,4 @@
+import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "../legacyScriptNames";
 import type { ProfileParamOverrides, ProfileSettings, StoredEwarActivation } from "../userSettings";
 import { isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
@@ -107,9 +108,9 @@ function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarAc
   try {
     const parsed = JSON.parse(value);
     if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
-      const migratedWebs = parsed.webs?.map((item) => migrateWebActivation(item, sideOverload));
+      const migratedWebs = parsed.webs?.map((item) => migrateToggleableActivation(item, sideOverload));
       const migratedDisruptors = parsed.disruptors?.map((item) => migrateDisruptorActivation(item, sideOverload));
-      const migratedScramblers = parsed.scramblers?.map((item) => migrateScramblerActivation(item, sideOverload));
+      const migratedScramblers = parsed.scramblers?.map((item) => migrateToggleableActivation(item, sideOverload));
       const result: StoredEwarActivation = {
         ...(migratedWebs !== undefined ? { webs: migratedWebs } : {}),
         ...(migratedDisruptors !== undefined ? { disruptors: migratedDisruptors } : {}),
@@ -123,7 +124,7 @@ function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarAc
   }
 }
 
-function migrateWebActivation(
+function migrateToggleableActivation(
   item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
   sideOverload: boolean,
 ): Readonly<{ active: boolean; overloaded: boolean }> {
@@ -135,18 +136,6 @@ function migrateDisruptorActivation(
   item: Readonly<{ active: boolean; overloaded?: boolean; script: string }>,
   sideOverload: boolean,
 ): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
-  const map: Record<string, string> = {
-    optimalRange: "Optimal Range Disruption Script",
-    trackingSpeed: "Tracking Speed Disruption Script",
-  };
-  const script = map[item.script] ?? item.script;
+  const script = LEGACY_DISRUPTION_SCRIPT_NAMES[item.script] ?? item.script;
   return { active: item.active, overloaded: item.overloaded ?? sideOverload, script };
-}
-
-function migrateScramblerActivation(
-  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
-  sideOverload: boolean,
-): Readonly<{ active: boolean; overloaded: boolean }> {
-  if (typeof item === "boolean") return { active: item, overloaded: sideOverload };
-  return { active: item.active, overloaded: item.overloaded ?? sideOverload };
 }

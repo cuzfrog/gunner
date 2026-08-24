@@ -38,6 +38,7 @@ export interface IStatsSection {
   isOverridden(key: keyof ProfileParamOverrides): boolean;
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined;
   currentFittedPropulsionModule(fitted: FittedHullSummary | undefined): PropulsionModule | undefined;
+  currentBaseMaxSpeed(): number;
 }
 
 export interface ISkillOverloadSection {

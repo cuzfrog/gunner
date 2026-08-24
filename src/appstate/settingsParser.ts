@@ -1,6 +1,7 @@
 import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Ships } from "../ships";
+import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "./legacyScriptNames";
 import { PROPULSION_NONE, USER_SETTINGS_VERSION, type ProfileSettings, type PropulsionSelection, type UserSettings } from "./userSettings";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
@@ -165,25 +166,29 @@ export class SettingsParser {
     if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
     const s = saved as Record<string, unknown>;
     if (s.webs !== undefined && Array.isArray(s.webs)) {
-      s.webs = s.webs.map((item) => {
-        if (typeof item === "boolean") return { active: item, overloaded: defaultOverload };
-        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-        const w = item as Record<string, unknown>;
-        if (typeof w.active !== "boolean") return item;
-        w.overloaded ??= defaultOverload;
-        return w;
-      });
+      s.webs = s.webs.map((item) => this.migrateToggleEntry(item, defaultOverload));
     }
     if (s.disruptors !== undefined && Array.isArray(s.disruptors)) {
       s.disruptors = s.disruptors.map((item) => {
         if (!item || typeof item !== "object" || Array.isArray(item)) return item;
         const d = { ...(item as Record<string, unknown>) };
-        if (d.script === "optimalRange") d.script = "Optimal Range Disruption Script";
-        if (d.script === "trackingSpeed") d.script = "Tracking Speed Disruption Script";
+        if (typeof d.script === "string") d.script = LEGACY_DISRUPTION_SCRIPT_NAMES[d.script] ?? d.script;
         if (typeof d.active === "boolean") d.overloaded ??= defaultOverload;
         return d;
       });
     }
+    if (s.scramblers !== undefined && Array.isArray(s.scramblers)) {
+      s.scramblers = s.scramblers.map((item) => this.migrateToggleEntry(item, defaultOverload));
+    }
+  }
+
+  private migrateToggleEntry(item: unknown, defaultOverload: boolean): unknown {
+    if (typeof item === "boolean") return { active: item, overloaded: defaultOverload };
+    if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+    const record = item as Record<string, unknown>;
+    if (typeof record.active !== "boolean") return item;
+    record.overloaded ??= defaultOverload;
+    return record;
   }
 }
 

@@ -18,6 +18,9 @@ export type OrbitDirection = "cw" | "ccw";
 export interface ShipConfig {
   readonly id: "attacker" | "target";
   readonly maxSpeed: number;
+  // New configurations should carry the naked-hull (propulsion-independent) speed.
+  // Older saved profiles and URLs may not have the field; `DomControls` and state
+  // restoration use `maxSpeed` as a fallback so they still simulate identically.
   readonly baseMaxSpeed?: number;
   readonly mass: number;
   readonly inertiaModifier: number;
@@ -111,7 +114,7 @@ export interface ScramblerActivation {
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly disruptors: readonly TrackingDisruptorSpec[];
-  readonly scramblers?: readonly WarpScramblerSpec[];
+  readonly scramblers: readonly WarpScramblerSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
 }
 
@@ -136,7 +139,7 @@ export interface ScramblerActivation {
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly disruptors: readonly DisruptorActivation[];
-  readonly scramblers?: readonly ScramblerActivation[];
+  readonly scramblers: readonly ScramblerActivation[];
 }
 
 export interface EwarProjection {

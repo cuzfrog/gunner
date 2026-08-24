@@ -198,6 +198,20 @@ describe("fittedStats", () => {
     expect(stats.alignTime).toBeCloseTo(2.7 * 1_750_000 * Math.log(4) * 1e-6, 6);
   });
 
+  test("speed override scales baseMaxSpeed proportionally while maxSpeed stays computed", () => {
+    const base = fittedStats(frigate, undefined, mwd5, conditions(0));
+    const scaled = fittedStats(frigate, undefined, mwd5, conditions(0), 1200);
+    expect(scaled.maxSpeed).toBeCloseTo(base.maxSpeed, 0);
+    expect(scaled.baseMaxSpeed).toBeCloseTo(400 * (1200 / base.maxSpeed), 6);
+  });
+
+  test("speed override with skills still applies the navigation factor to the scaled base", () => {
+    const base = fittedStats(frigate, undefined, mwd5, conditions(5));
+    const scaled = fittedStats(frigate, undefined, mwd5, conditions(5), 1812.5);
+    expect(scaled.baseMaxSpeed).toBeCloseTo(250, 6);
+    expect(scaled.maxSpeed).toBeCloseTo(base.maxSpeed, 0);
+  });
+
   test("with overload and skills scales the propulsion speed bonus only, leaving align time unchanged", () => {
     const stats = fittedStats(frigate, fitted, ab1, { skillLevel: 5, overloaded: true });
     expect(stats.maxSpeed).toBeGreaterThan(440);

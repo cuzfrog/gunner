@@ -2,6 +2,7 @@
 no-new-exports:
   - defaultPreferences.ts
   - fittingBasis.ts
+  - legacyScriptNames.ts
   - cradle.ts
   - validators.ts
   - savedFittings.ts

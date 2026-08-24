@@ -62,8 +62,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one web extends only that web's range", () => {
       const baseWeb: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const heatedWeb: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [baseWeb, heatedWeb], disruptors: [], scripts: [] };
-      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], disruptors: [] };
+      const loadout = { webs: [baseWeb, heatedWeb], disruptors: [], scramblers: [], scripts: [] };
+      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], disruptors: [], scramblers: [] };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.webSpeedMultiplier(projection, 11000)).toBeCloseTo(0.4, 10);
       expect(resolver.webSpeedMultiplier(projection, 13001)).toBe(1);

@@ -1,6 +1,6 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../appstate";
 import type { FittingImport } from "../../fitting";
-import type { EwarLoadout } from "../../sim";
+import type { EwarLoadout, WarpScramblerSpec } from "../../sim";
 import type { Ships } from "../../ships";
 import { USER_SETTINGS_VERSION } from "../../appstate";
 import {
@@ -162,13 +162,14 @@ describe("DomControls", () => {
     const attackerEwar: EwarLoadout = {
       webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
       disruptors: [],
+      scramblers: [],
       scripts: [],
     };
     cradle.cradle.ewarController.setLoadout("attacker", attackerEwar);
     const config = controls.getConfig();
     expect(config.attacker.ewar?.loadout.webs).toHaveLength(1);
     expect(config.attacker.ewar).not.toHaveProperty("overloaded");
-    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [] });
+    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [], scramblers: [] });
     expect(config.target.ewar).toBeUndefined();
   });
 
@@ -180,6 +181,7 @@ describe("DomControls", () => {
         moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2,
         defaultScript: undefined, overloadStrengthBonusPercent: 0,
       }],
+      scramblers: [],
       scripts: [],
     };
     cradle.cradle.ewarController.setLoadout("target", targetEwar);
@@ -200,5 +202,33 @@ describe("DomControls", () => {
     item.trigger("click");
     expect(controls["targetSide"].fittingText).toBe(SAVED_RIFTER.text);
     expect(controls["attackerSide"].fittingText).toBeUndefined();
+  });
+
+  test("getConfig uses a manually derived baseMaxSpeed for target and includes an active scrambler projection", () => {
+    const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+    const mwd5 = {
+      id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
+      thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5,
+    } as const;
+    const ships = vi.mocked<Ships>({
+      ...mockShips(),
+      parsePropulsionId: vi.fn((value: unknown) => (value === "mwd-5mn" ? "mwd-5mn" : undefined)),
+      fittingOptions: vi.fn(() => [mwd5]),
+      fittingOption: vi.fn(() => mwd5),
+      fittedStats: vi.fn(() => ({ mass: 1_500_000, inertiaModifier: 3, sigRadius: 35, maxSpeed: 1800, baseMaxSpeed: 300, alignTime: 2.5 })),
+      maxSpeedForFittedMass: vi.fn(() => 1800),
+    });
+    const { document, controls, cradle } = buildDomControls({ ships });
+    const targetSide = controls["targetSide"];
+    targetSide.profile = RIFTER;
+    targetSide.sections.propulsion.setPropulsionActive("mwd-5mn");
+    targetSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+    cradle.cradle.ewarController.setLoadout("target", { webs: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
+
+    const config = controls.getConfig();
+    expect(config.target.maxSpeed).toBe(1800);
+    expect(config.target.baseMaxSpeed).toBe(300);
+    expect(config.target.ewar?.loadout.scramblers).toHaveLength(1);
+    expect(config.target.ewar?.activation?.scramblers).toEqual([{ active: true, overloaded: false }]);
   });
 });
