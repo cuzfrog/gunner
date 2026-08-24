@@ -1,7 +1,9 @@
 import type { Autopilot, EwarResolver, EngagementEvaluator, HitChance, Kinematics, Simulation, StackingPenalty, TurretBoosterResolver } from "./index";
 import type { SimConfig } from "./types";
+import type { SettingGuards } from "../appstate";
 
 export interface SimCradle {
+  readonly settingGuards: SettingGuards;
   readonly stackingPenalty: StackingPenalty;
   readonly ewarResolver: EwarResolver;
   readonly turretBoosterResolver: TurretBoosterResolver;

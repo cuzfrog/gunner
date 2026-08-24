@@ -6,6 +6,7 @@ import type { ProfileTextCodec } from "./profileText";
 import type { ProfileEquality } from "./profileEquality";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Ships } from "../ships";
+import type { SettingGuards } from "./settingGuards";
 
 export interface AppstateCradle {
   readonly settingsStore: SettingsStore;
@@ -13,6 +14,7 @@ export interface AppstateCradle {
   readonly savedFittings: SavedFittings;
   readonly profileTextCodec: ProfileTextCodec;
   readonly profileEquality: ProfileEquality;
+  readonly settingGuards: SettingGuards;
   readonly storage: StorageProvider;
   readonly location: LocationProvider;
   readonly navigatorLanguage: string;

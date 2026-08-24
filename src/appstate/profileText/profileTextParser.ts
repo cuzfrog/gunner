@@ -1,11 +1,18 @@
 import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "../legacyScriptNames";
 import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
+import type { SettingGuards } from "../settingGuards";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
 
 export class ProfileTextParser {
+  private readonly guards: SettingGuards;
+
+  constructor(settingGuards: SettingGuards) {
+    this.guards = settingGuards;
+  }
+
   hasHeader(text: string): boolean {
     return text.trimStart().startsWith(PROFILE_TEXT_HEADER);
   }
@@ -49,7 +56,7 @@ export class ProfileTextParser {
 
       const override = OVERRIDE_DOT_KEY_TO_FULL.get(dotKey);
       if (override !== undefined) {
-        const parsed = parseOverrideValue(override, value);
+        const parsed = parseOverrideValue(override, value, this.guards);
         if (parsed === undefined) return undefined;
         if (dotKey.startsWith("override.attacker.")) {
           attackerOverrides = { ...attackerOverrides, [override]: parsed };
@@ -77,7 +84,7 @@ export class ProfileTextParser {
         targetBoosterActivationRaw = value;
         continue;
       }
-      const parsed = parseScalarValue(field, value);
+      const parsed = parseScalarValue(field, value, this.guards);
       if (parsed === undefined) return undefined;
       raw = { ...raw, [field]: parsed };
     }

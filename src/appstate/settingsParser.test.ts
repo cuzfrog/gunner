@@ -1,6 +1,8 @@
 import { createContainer, InjectionMode } from "awilix";
+import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import { registerShipsModule, type ShipsCradle } from "../ships";
 import { SettingsParser } from "./settingsParser";
+import type { SettingGuards } from "./settingGuards";
 import {
   chargeCatalog,
   ships,
@@ -20,6 +22,8 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
+
+const testGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 
 beforeEach(() => resetMocks());
 
@@ -344,7 +348,7 @@ describe("SettingsParser", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
     const override = 2000;
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
@@ -363,7 +367,7 @@ describe("SettingsParser", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
@@ -373,5 +377,26 @@ describe("SettingsParser", () => {
     const conditions = { skillLevel: settings.attackerSkillLevel ?? 5, overloaded: settings.attackerOverload ?? true };
     const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions).baseMaxSpeed;
     expect(decoded!.attackerFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
+  });
+
+  test("golden localStorage round-trip preserves DEFAULT_SETTINGS", () => {
+    const parser = makeParser();
+    const serialized = parser.serialize(DEFAULT_SETTINGS);
+    const restored = parser.parseUserSettings(serialized);
+    expect(restored).toEqual(DEFAULT_SETTINGS);
+  });
+
+  test("golden localStorage round-trip preserves URL_SETTINGS", () => {
+    const parser = makeParser();
+    const serialized = parser.serialize(URL_SETTINGS);
+    const restored = parser.parseUserSettings(serialized);
+    expect(restored).toEqual(URL_SETTINGS);
+  });
+
+  test("golden profile record round-trip preserves DEFAULT_PROFILE", () => {
+    const parser = makeParser();
+    const profiles = { brawler: DEFAULT_PROFILE };
+    const restored = parser.parseProfiles(JSON.stringify(profiles));
+    expect(restored).toEqual(profiles);
   });
 });

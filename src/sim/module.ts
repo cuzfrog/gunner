@@ -9,10 +9,12 @@ import { KinematicsImpl } from "./kinematics";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
+import { SimSettingGuards } from "./settingGuards";
 import type { SimCradle } from "./cradle";
 
 export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
+    settingGuards: asClass(SimSettingGuards).singleton(),
     stackingPenalty: asClass(StackingPenaltyImpl).singleton(),
     ewarResolver: asClass(EwarResolverImpl).singleton(),
     turretBoosterResolver: asClass(TurretBoosterResolverImpl).singleton(),

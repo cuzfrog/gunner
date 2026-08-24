@@ -1,8 +1,11 @@
+import { isAutopilotMode, isSigResolutionClass } from "../../sim";
 import { LocalProfileTextCodec } from "./profileTextCodec";
 import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
+import type { SettingGuards } from "../settingGuards";
 
-const codec = new LocalProfileTextCodec();
+const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
+const codec = new LocalProfileTextCodec(guards);
 
 describe("profileTextCodec", () => {
   test("serialize starts with the v1 header", () => {
@@ -16,7 +19,7 @@ describe("profileTextCodec", () => {
     expect(codec.hasHeader("not a profile")).toBe(false);
   });
 
-  test("round-trips a full profile with fittings, overrides and fitted hulls", () => {
+  test("golden profile text round-trip preserves FULL_PROFILE", () => {
     const text = codec.serialize(FULL_PROFILE);
     expect(codec.parse(text)).toEqual(FULL_PROFILE);
   });

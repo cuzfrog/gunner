@@ -1,6 +1,6 @@
-import { isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
+import type { SettingGuards } from "./settingGuards";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
@@ -119,14 +119,14 @@ const PROFILE_PARAM_OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
   "falloff",
 ];
 
-export function isOptionalProfileParamOverrides(value: unknown): value is Partial<ProfileParamOverrides> | undefined {
+export function isOptionalProfileParamOverrides(value: unknown, guards: SettingGuards): value is Partial<ProfileParamOverrides> | undefined {
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
   for (const key of Object.keys(s)) {
     if (!PROFILE_PARAM_OVERRIDE_KEYS.includes(key as keyof ProfileParamOverrides)) return false;
     if (key === "sigRes") {
-      if (!(s[key] === undefined || isSigResolutionClass(s[key]))) return false;
+      if (!(s[key] === undefined || guards.isSigResolutionClass(s[key]))) return false;
     } else if (key === "targetSig") {
       if (!(s[key] === undefined || isPositive(s[key]))) return false;
     } else {

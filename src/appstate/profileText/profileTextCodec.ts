@@ -1,4 +1,5 @@
 import type { ProfileSettings } from "../userSettings";
+import type { SettingGuards } from "../settingGuards";
 import { ProfileTextParser } from "./profileTextParser";
 import { ProfileTextSerializer } from "./profileTextSerializer";
 
@@ -9,8 +10,12 @@ export interface ProfileTextCodec {
 }
 
 export class LocalProfileTextCodec implements ProfileTextCodec {
-  private readonly parser = new ProfileTextParser();
+  private readonly parser: ProfileTextParser;
   private readonly serializer = new ProfileTextSerializer();
+
+  constructor(settingGuards: SettingGuards) {
+    this.parser = new ProfileTextParser(settingGuards);
+  }
 
   parse(text: string): ProfileSettings | undefined {
     return this.parser.parse(text);

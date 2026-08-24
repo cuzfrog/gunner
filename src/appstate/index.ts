@@ -14,6 +14,7 @@ export type {
   UserSettings,
 } from "./userSettings";
 export type { Language } from "./language";
+export type { SettingGuards } from "./settingGuards";
 export type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 export { ClipboardUnavailableError } from "./providers";
 export type { SettingsStore } from "./settingsStore";

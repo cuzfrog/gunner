@@ -770,6 +770,11 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.falloff).toBe(3000);
   });
 
+  test("golden URL round-trip preserves URL_SETTINGS", () => {
+    const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(URL_SETTINGS)) });
+    expect(store.loadStartupState().settings).toEqual(URL_SETTINGS);
+  });
+
   test("basis re-import falls back to the imported charge when the stored charge is invalid", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);

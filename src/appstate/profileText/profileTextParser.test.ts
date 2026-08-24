@@ -1,9 +1,12 @@
+import { isAutopilotMode, isSigResolutionClass } from "../../sim";
 import { ProfileTextParser } from "./profileTextParser";
 import { ProfileTextSerializer } from "./profileTextSerializer";
 import { MINIMAL_PROFILE, ATTACKER_FITTED_HULL } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
+import type { SettingGuards } from "../settingGuards";
 
-const parser = new ProfileTextParser();
+const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
+const parser = new ProfileTextParser(guards);
 const serializer = new ProfileTextSerializer();
 
 describe("profileTextParser", () => {

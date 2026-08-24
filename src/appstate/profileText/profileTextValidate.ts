@@ -1,4 +1,3 @@
-import { isAutopilotMode, isSigResolutionClass } from "../../sim";
 import {
   USER_SETTINGS_VERSION,
   type FittedHullSummary,
@@ -13,19 +12,20 @@ import {
   isPositive,
   isSkillLevel,
 } from "../validators";
+import type { SettingGuards } from "../settingGuards";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
 
-export function parseScalarValue(field: ScalarField, value: string): ScalarValue | undefined {
+export function parseScalarValue(field: ScalarField, value: string, guards: SettingGuards): ScalarValue | undefined {
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
   if (field === "attackerOverload" || field === "targetOverload") return value === "true" ? true : value === "false" ? false : undefined;
-  if (field === "attackerMode" || field === "targetMode") return isAutopilotMode(value) ? value : undefined;
+  if (field === "attackerMode" || field === "targetMode") return guards.isAutopilotMode(value) ? value : undefined;
   if (field === "attackerSkillLevel" || field === "targetSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
   }
-  if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
+  if (field === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
   if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
   if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
   if (field === "attackerAmmo") return value;
@@ -40,9 +40,10 @@ export function parseScalarValue(field: ScalarField, value: string): ScalarValue
 export function parseOverrideValue(
   key: keyof ProfileParamOverrides,
   value: string,
+  guards: SettingGuards,
 ): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
   if (value === "") return undefined;
-  if (key === "sigRes") return isSigResolutionClass(value) ? value : undefined;
+  if (key === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
   if (key === "targetSig") return isPositive(num) ? num : undefined;

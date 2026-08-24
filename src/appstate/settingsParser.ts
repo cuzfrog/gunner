@@ -1,11 +1,18 @@
-import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Ships } from "../ships";
 import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "./legacyScriptNames";
-import { PROPULSION_NONE, USER_SETTINGS_VERSION, type ProfileSettings, type PropulsionSelection, type UserSettings } from "./userSettings";
+import {
+  PROPULSION_NONE,
+  USER_SETTINGS_VERSION,
+  type ProfileSettings as ProfileSettingsWire,
+  type PropulsionSelection,
+  type UserSettings as UserSettingsWire,
+} from "./userSettings";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
+import type { SettingGuards } from "./settingGuards";
+import type { CombatantSettings, TargetCombatantSettings, UserSettings as InternalUserSettings } from "./combatantSettings";
 import {
   isLanguage,
   isNonNegative,
@@ -31,41 +38,37 @@ export class SettingsParser {
   private readonly fittingImport: FittingImport;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly fittingBasis: FittingBasis;
+  private readonly guards: SettingGuards;
 
-  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog }) {
+  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; settingGuards: SettingGuards }) {
     this.ships = deps.ships;
     this.fittingImport = deps.fittingImport;
     this.chargeCatalog = deps.chargeCatalog;
+    this.guards = deps.settingGuards;
     this.fittingBasis = new FittingBasis(deps);
   }
 
-  parseUserSettings(raw: string): UserSettings | null {
+  parseUserSettings(raw: string): UserSettingsWire | null {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
       const record = parsed as Record<string, unknown>;
       this.migrateBoosterActivation(record);
       this.migrateEwarActivation(record);
+      this.applyUserDefaults(record);
       if (!this.isUserSettings(record)) return null;
       record.version = USER_SETTINGS_VERSION;
-      if (record.attackerAmmo === undefined) {
-        record.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
-      }
-      record.language ??= DEFAULT_PREFERENCES.language;
-      record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
-      record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
-      record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
-      return record as UserSettings;
+      return toWireSettings(fromWireSettings(record));
     } catch {
       return null;
     }
   }
 
-  parseProfiles(raw: string): Record<string, ProfileSettings> {
+  parseProfiles(raw: string): Record<string, ProfileSettingsWire> {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!isProfileStorage(parsed)) return {};
-      const result: Record<string, ProfileSettings> = {};
+      const result: Record<string, ProfileSettingsWire> = {};
       for (const name of Object.keys(parsed)) {
         const settings = this.profileFromUnknown(parsed[name]);
         if (settings) result[name] = settings;
@@ -76,7 +79,7 @@ export class SettingsParser {
     }
   }
 
-  decodeUrlSettings(encoded: string): UserSettings | null {
+  decodeUrlSettings(encoded: string): UserSettingsWire | null {
     try {
       const settings = this.parseUserSettings(decodeBase64(encoded));
       if (!settings) return null;
@@ -88,7 +91,7 @@ export class SettingsParser {
     }
   }
 
-  profileFromUnknown(value: unknown): ProfileSettings | null {
+  profileFromUnknown(value: unknown): ProfileSettingsWire | null {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const record = { ...value } as Record<string, unknown>;
     this.migrateBoosterActivation(record);
@@ -98,20 +101,27 @@ export class SettingsParser {
     if (record.attackerAmmo === undefined) {
       record.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
-    return stripDisplayPreferences(record as ProfileSettings);
+    return stripDisplayPreferences(record as ProfileSettingsWire);
   }
 
-  private isProfileSettings(value: unknown): value is ProfileSettings {
+  serialize(settings: UserSettingsWire | ProfileSettingsWire | InternalUserSettings): string {
+    if (isInternalUserSettings(settings)) {
+      return JSON.stringify(toWireSettings(settings));
+    }
+    return JSON.stringify(settings);
+  }
+
+  private isProfileSettings(value: unknown): value is ProfileSettingsWire {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     const s = value as Record<string, unknown>;
     return (
       isSettingsVersion(s.version) &&
       isNonNegative(s.tracking) &&
-      isSigResolutionClass(s.sigRes) &&
+      this.guards.isSigResolutionClass(s.sigRes) &&
       isNonNegative(s.optimal) &&
       isNonNegative(s.falloff) &&
       isNonNegative(s.attackerSpeed) &&
-      isAutopilotMode(s.attackerMode) &&
+      this.guards.isAutopilotMode(s.attackerMode) &&
       isNonNegative(s.attackerRange) &&
       isOptionalNonNegative(s.maneuverAggressivity) &&
       isNonNegative(s.attackerMass) &&
@@ -120,7 +130,7 @@ export class SettingsParser {
       isOptionalBoolean(s.attackerOverload) &&
       isPositive(s.initialDistance) &&
       isNonNegative(s.targetSpeed) &&
-      isAutopilotMode(s.targetMode) &&
+      this.guards.isAutopilotMode(s.targetMode) &&
       isNonNegative(s.targetRange) &&
       isNonNegative(s.targetMass) &&
       isNonNegative(s.targetInertia) &&
@@ -135,8 +145,8 @@ export class SettingsParser {
       isOptionalFittedHullSummary(s.targetFittedHull) &&
       isOptionalFittingText(s.attackerFitting) &&
       isOptionalFittingText(s.targetFitting) &&
-      isOptionalProfileParamOverrides(s.attackerOverrides) &&
-      isOptionalProfileParamOverrides(s.targetOverrides) &&
+      isOptionalProfileParamOverrides(s.attackerOverrides, this.guards) &&
+      isOptionalProfileParamOverrides(s.targetOverrides, this.guards) &&
       isOptionalEwarActivation(s.attackerEwarActivation) &&
       isOptionalEwarActivation(s.targetEwarActivation) &&
       isOptionalBoosterActivations(s.attackerBoosterActivation) &&
@@ -145,18 +155,31 @@ export class SettingsParser {
     );
   }
 
-  private isUserSettings(value: unknown): value is Partial<UserSettings> {
+  private isUserSettings(value: unknown): value is UserSettingsWire {
     if (!this.isProfileSettings(value)) return false;
     const s = value as Record<string, unknown>;
     return (
-      (s.language === undefined || isLanguage(s.language)) &&
-      (s.trackingUnit === undefined || s.trackingUnit === "rad" || s.trackingUnit === "score") &&
-      (s.simSpeed === undefined || isPositive(s.simSpeed)) &&
-      (s.gridBrightness === undefined || isFiniteNumber(s.gridBrightness))
+      isLanguage(s.language) &&
+      (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
+      isPositive(s.simSpeed) &&
+      isFiniteNumber(s.gridBrightness) &&
+      typeof s.attackerAmmo === "string" &&
+      s.attackerAmmo.length > 0
     );
   }
+
   private isOptionalPropulsionSelection(value: unknown): value is PropulsionSelection | undefined {
     return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;
+  }
+
+  private applyUserDefaults(record: Record<string, unknown>): void {
+    if (record.attackerAmmo === undefined) {
+      record.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+    }
+    record.language ??= DEFAULT_PREFERENCES.language;
+    record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
+    record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
+    record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
   }
 
   private migrateBoosterActivation(value: Record<string, unknown>): void {
@@ -226,4 +249,120 @@ export class SettingsParser {
 
 function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function isInternalUserSettings(value: UserSettingsWire | ProfileSettingsWire | InternalUserSettings): value is InternalUserSettings {
+  return "attacker" in value;
+}
+
+function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
+  const gridBrightness = wire.gridBrightness ?? DEFAULT_PREFERENCES.gridBrightness;
+  return {
+    version: wire.version,
+    language: wire.language,
+    simSpeed: wire.simSpeed,
+    trackingUnit: wire.trackingUnit,
+    gridBrightness,
+    display: {
+      language: wire.language,
+      trackingUnit: wire.trackingUnit,
+      simSpeed: wire.simSpeed,
+      gridBrightness,
+    },
+    maneuverAggressivity: wire.maneuverAggressivity,
+    attacker: {
+      speed: wire.attackerSpeed,
+      mode: wire.attackerMode,
+      range: wire.attackerRange,
+      mass: wire.attackerMass,
+      inertia: wire.attackerInertia,
+      skillLevel: wire.attackerSkillLevel,
+      overload: wire.attackerOverload,
+      hull: wire.attackerHull,
+      propulsion: wire.attackerPropulsion,
+      fitting: wire.attackerFitting,
+      overrides: wire.attackerOverrides,
+      fittedHull: wire.attackerFittedHull,
+      ewarActivation: wire.attackerEwarActivation,
+      boosterActivation: wire.attackerBoosterActivation,
+    },
+    target: {
+      speed: wire.targetSpeed,
+      mode: wire.targetMode,
+      range: wire.targetRange,
+      mass: wire.targetMass,
+      inertia: wire.targetInertia,
+      skillLevel: wire.targetSkillLevel,
+      overload: wire.targetOverload,
+      hull: wire.targetHull,
+      propulsion: wire.targetPropulsion,
+      fitting: wire.targetFitting,
+      overrides: wire.targetOverrides,
+      fittedHull: wire.targetFittedHull,
+      ewarActivation: wire.targetEwarActivation,
+      boosterActivation: wire.targetBoosterActivation,
+      sig: wire.targetSig,
+    },
+    tracking: wire.tracking,
+    sigRes: wire.sigRes,
+    optimal: wire.optimal,
+    falloff: wire.falloff,
+    initialDistance: wire.initialDistance,
+    attackerAmmo: wire.attackerAmmo,
+  };
+}
+
+function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
+  const wire: UserSettingsWire = {
+    version: internal.version,
+    language: internal.language,
+    trackingUnit: internal.trackingUnit,
+    simSpeed: internal.simSpeed,
+    gridBrightness: internal.gridBrightness,
+    tracking: internal.tracking,
+    sigRes: internal.sigRes,
+    optimal: internal.optimal,
+    falloff: internal.falloff,
+    attackerSpeed: internal.attacker.speed,
+    attackerMode: internal.attacker.mode,
+    attackerRange: internal.attacker.range,
+    attackerMass: internal.attacker.mass,
+    attackerInertia: internal.attacker.inertia,
+    initialDistance: internal.initialDistance,
+    targetSpeed: internal.target.speed,
+    targetMode: internal.target.mode,
+    targetRange: internal.target.range,
+    targetMass: internal.target.mass,
+    targetInertia: internal.target.inertia,
+    targetSig: internal.target.sig,
+    attackerAmmo: internal.attackerAmmo,
+  };
+  if (internal.maneuverAggressivity !== undefined) wire.maneuverAggressivity = internal.maneuverAggressivity;
+  setOptionalAttackerFields(wire, internal.attacker);
+  setOptionalTargetFields(wire, internal.target);
+  return wire;
+}
+
+function setOptionalAttackerFields(wire: UserSettingsWire, combatant: CombatantSettings): void {
+  if (combatant.skillLevel !== undefined) wire.attackerSkillLevel = combatant.skillLevel;
+  if (combatant.overload !== undefined) wire.attackerOverload = combatant.overload;
+  if (combatant.hull !== undefined) wire.attackerHull = combatant.hull;
+  if (combatant.propulsion !== undefined) wire.attackerPropulsion = combatant.propulsion;
+  if (combatant.fitting !== undefined) wire.attackerFitting = combatant.fitting;
+  if (combatant.overrides !== undefined) wire.attackerOverrides = combatant.overrides;
+  if (combatant.fittedHull !== undefined) wire.attackerFittedHull = combatant.fittedHull;
+  if (combatant.ewarActivation !== undefined) wire.attackerEwarActivation = combatant.ewarActivation;
+  if (combatant.boosterActivation !== undefined) wire.attackerBoosterActivation = combatant.boosterActivation;
+}
+
+function setOptionalTargetFields(wire: UserSettingsWire, combatant: CombatantSettings): void {
+  if (combatant.skillLevel !== undefined) wire.targetSkillLevel = combatant.skillLevel;
+  if (combatant.overload !== undefined) wire.targetOverload = combatant.overload;
+  if (combatant.hull !== undefined) wire.targetHull = combatant.hull;
+  if (combatant.propulsion !== undefined) wire.targetPropulsion = combatant.propulsion;
+  if (combatant.fitting !== undefined) wire.targetFitting = combatant.fitting;
+  if (combatant.overrides !== undefined) wire.targetOverrides = combatant.overrides;
+  if (combatant.fittedHull !== undefined) wire.targetFittedHull = combatant.fittedHull;
+  if (combatant.ewarActivation !== undefined) wire.targetEwarActivation = combatant.ewarActivation;
+  if (combatant.boosterActivation !== undefined) wire.targetBoosterActivation = combatant.boosterActivation;
 }
