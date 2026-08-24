@@ -112,6 +112,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     lastCommittedHull: undefined,
     importer,
     setFittingTriggerEnabled: vi.fn(),
+    setConfigInputsEnabled: vi.fn(),
     renderFittingPopupIfOpen: vi.fn(),
     closeFittingPopupIfOpen: vi.fn(),
     hideFittingPreview: vi.fn(),
@@ -164,6 +165,20 @@ describe("HullSection", () => {
     expect(panel.profile).toBeUndefined();
     expect(getFake(document, "attacker-hull").value).toBe("");
     expect(getFake(document, "attacker-ship-image").hidden).toBe(true);
+  });
+
+  test("applyHull enables the ship configuration controls", () => {
+    const { panel, section } = buildHullSection();
+    section.applyHull(RIFTER);
+    expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(true);
+  });
+
+  test("clearHull disables the ship configuration controls", () => {
+    const { panel, section } = buildHullSection();
+    section.applyHull(RIFTER);
+    panel.setConfigInputsEnabled.mockClear();
+    section.clearHull(true, false);
+    expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(false);
   });
 
   test("updateHullHint renders the hull type and faction", () => {

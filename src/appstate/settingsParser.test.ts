@@ -55,7 +55,7 @@ describe("SettingsParser", () => {
     expect(parsed!.language).toBe("en");
     expect(parsed!.trackingUnit).toBe("rad");
     expect(parsed!.simSpeed).toBe(4);
-    expect(parsed!.gridBrightness).toBe(0.2);
+    expect(parsed!.gridBrightness).toBe(0.5);
   });
 
   test("parseUserSettings rejects a non-positive initialDistance", () => {
@@ -140,7 +140,7 @@ describe("SettingsParser", () => {
     expect(decoded!.language).toBe("en");
     expect(decoded!.trackingUnit).toBe("rad");
     expect(decoded!.simSpeed).toBe(4);
-    expect(decoded!.gridBrightness).toBe(0.2);
+    expect(decoded!.gridBrightness).toBe(0.5);
   });
 
   test("decodeUrlSettings preserves supplied display preferences", () => {
@@ -148,7 +148,7 @@ describe("SettingsParser", () => {
     expect(decoded).not.toBeNull();
     expect(decoded!.language).toBe("ja");
     expect(decoded!.simSpeed).toBe(2);
-    expect(decoded!.gridBrightness).toBe(0.2);
+    expect(decoded!.gridBrightness).toBe(0.5);
   });
 
   test("decodeUrlSettings preserves explicit none propulsion", () => {

@@ -113,6 +113,21 @@ export class SidePanelImpl implements SidePanel {
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
   setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }
+  setConfigInputsEnabled(enabled: boolean): void {
+    const { els } = this;
+    els.speed.disabled = !enabled;
+    els.mass.disabled = !enabled;
+    els.inertia.disabled = !enabled;
+    els.mode.disabled = !enabled;
+    els.range.disabled = !enabled;
+    if (els.targetSig !== undefined) els.targetSig.disabled = !enabled;
+    els.skills.disabled = !enabled;
+    this.setButtonDisabled(els.skillTrigger, enabled);
+    els.overload.disabled = !enabled;
+    this.setButtonDisabled(els.overloadButton, enabled);
+    for (const child of els.skillOptions.children) (child as HTMLButtonElement).disabled = !enabled;
+    if (enabled) this.sections.skill.setOverloadDisabled();
+  }
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
   stateFrom(settings: UserSettings): SidePanelState { return stateSliceOf(settings, this.side); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
@@ -152,6 +167,11 @@ export class SidePanelImpl implements SidePanel {
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (this.els.targetSig !== undefined && state.sig !== undefined) this.els.targetSig.value = String(state.sig);
     this.sections.stats.updateAlignTime();
+  }
+
+  private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {
+    button.disabled = !enabled;
+    button.setAttribute("aria-disabled", String(!enabled));
   }
 
   private currentMode(): AutopilotMode {

@@ -35,6 +35,7 @@ export interface SidePanel {
   setFittingPopup(popup: FittingPopupControl): void;
   setFittingPreview(preview: FittingPreviewControl): void;
   setFittingTriggerEnabled(enabled: boolean): void;
+  setConfigInputsEnabled(enabled: boolean): void;
   setImporter(importer: SideImporter): void;
   isOverridden(key: keyof ProfileParamOverrides): boolean;
   recordOverride<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void;

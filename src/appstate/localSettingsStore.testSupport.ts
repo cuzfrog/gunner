@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   attackerMode: "keepAtRange",
   attackerRange: 5000,
   maneuverAggressivity: 1,
-  gridBrightness: 0.2,
+  gridBrightness: 0.5,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,

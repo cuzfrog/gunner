@@ -128,7 +128,7 @@ describe("CanvasRenderer", () => {
   test("drawGrid uses the default brightness when not overridden", () => {
     const canvas = fakeCanvas();
     const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-    expect(gridColorOf(renderer, canvas)).toBe("rgba(92, 203, 203, 0.08)");
+    expect(gridColorOf(renderer, canvas)).toBe("rgba(92, 203, 203, 0.2)");
   });
 
   test("setGridBrightness clamps negative values to 0", () => {

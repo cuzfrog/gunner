@@ -6,7 +6,7 @@ import type { ProfileSettings, UserSettings } from "../../appstate";
 
 export const AGGRESSIVITY_MIN = 0.01;
 export const AGGRESSIVITY_MAX = 100;
-export const DEFAULT_GRID_BRIGHTNESS = 0.2;
+export const DEFAULT_GRID_BRIGHTNESS = 0.5;
 export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
 
 export function aggressivityFromPosition(pos: number): number {

@@ -552,7 +552,7 @@ body {
   color: var(--text-dim);
   cursor: pointer;
   padding: 2px;
-  margin: 0 4px 0 0;
+  margin: 0;
   border-radius: 2px;
   line-height: 0;
 }
@@ -1513,6 +1513,11 @@ canvas {
   margin: 0;
 }
 
+.panel input[type="number"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .segmented-control {
   display: flex;
   flex-wrap: wrap;
@@ -1611,6 +1616,12 @@ canvas {
 .overload-button:hover:not(:disabled) {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
+}
+
+.skill-tuner button:disabled,
+.overload-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .segmented-control.disabled,

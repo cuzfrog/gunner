@@ -1,4 +1,4 @@
-import { SIG_RESOLUTIONS, type HitChance } from "../../../sim";
+import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type StoredEwarActivation, type UserSettings } from "../../../appstate";
@@ -40,7 +40,6 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly sigResChoice: ChoiceGroup;
   private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
-  private readonly hitChance: HitChance;
   private sessionControl?: SessionControl;
   private readonly trackingInput: TrackingInput;
   private readonly ewarController: EwarController;
@@ -50,7 +49,7 @@ export class SessionCodecImpl implements SessionCodec {
   constructor(deps: {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
-    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; hitChance: HitChance;
+    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore;
     trackingInput: TrackingInput; ewarController: EwarController; fittingImport: FittingImport;
   }) {
     this.els = deps.els;
@@ -65,7 +64,6 @@ export class SessionCodecImpl implements SessionCodec {
     this.sigResChoice = deps.sigResChoice;
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
-    this.hitChance = deps.hitChance;
     this.trackingInput = deps.trackingInput;
     this.ewarController = deps.ewarController;
     this.fittingImport = deps.fittingImport;
@@ -212,10 +210,7 @@ export class SessionCodecImpl implements SessionCodec {
     applyStartupDefaults({
       attackerSide: this.attackerSide,
       targetSide: this.targetSide,
-      turretController: this.turretController,
-      trackingInput: this.trackingInput,
       els: this.els,
-      hitChance: this.hitChance,
       preferencesController: this.preferencesController,
       profileController: this.profileController,
       sessionControl: this.sessionControl,

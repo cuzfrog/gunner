@@ -126,4 +126,49 @@ describe("SidePanel", () => {
     expect(panel.profile).toBe(RIFTER);
     expect(panel.lastCommittedHull).toBe("Rifter");
   });
+
+  test("setConfigInputsEnabled(false) disables the ship configuration controls", () => {
+    const { document, panel } = buildSidePanel("attacker");
+    const options = getFake(document, "attacker-skill-options");
+    const skillOption = document.createElement("button");
+    options.appendChild(skillOption);
+
+    panel.setConfigInputsEnabled(false);
+
+    expect(getFake(document, "attacker-speed").disabled).toBe(true);
+    expect(getFake(document, "attacker-mass").disabled).toBe(true);
+    expect(getFake(document, "attacker-inertia").disabled).toBe(true);
+    expect(getFake(document, "attacker-mode").disabled).toBe(true);
+    expect(getFake(document, "attacker-range").disabled).toBe(true);
+    expect(getFake(document, "attacker-skills").disabled).toBe(true);
+    expect(getFake(document, "attacker-skill-trigger").disabled).toBe(true);
+    expect(getFake(document, "attacker-skill-trigger").getAttribute("aria-disabled")).toBe("true");
+    expect(getFake(document, "attacker-overload").disabled).toBe(true);
+    expect(getFake(document, "attacker-overload-button").disabled).toBe(true);
+    expect(getFake(document, "attacker-overload-button").getAttribute("aria-disabled")).toBe("true");
+    expect(options.children[0].disabled).toBe(true);
+  });
+
+  test("setConfigInputsEnabled(false) disables target signature on the target panel", () => {
+    const { document, panel } = buildSidePanel("target");
+    panel.setConfigInputsEnabled(false);
+    expect(getFake(document, "target-sig").disabled).toBe(true);
+  });
+
+  test("setConfigInputsEnabled(true) re-enables config controls and reapplies the overload rule", () => {
+    const { document, panel } = buildSidePanel("attacker");
+    panel.setConfigInputsEnabled(false);
+
+    panel.setConfigInputsEnabled(true);
+
+    expect(getFake(document, "attacker-speed").disabled).toBe(false);
+    expect(getFake(document, "attacker-mass").disabled).toBe(false);
+    expect(getFake(document, "attacker-inertia").disabled).toBe(false);
+    expect(getFake(document, "attacker-mode").disabled).toBe(false);
+    expect(getFake(document, "attacker-range").disabled).toBe(false);
+    expect(getFake(document, "attacker-skills").disabled).toBe(false);
+    expect(getFake(document, "attacker-skill-trigger").disabled).toBe(false);
+    // overload refollows the propulsion/ewar rule: with no ship or propulsion it stays disabled
+    expect(getFake(document, "attacker-overload").disabled).toBe(true);
+  });
 });

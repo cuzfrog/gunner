@@ -21,7 +21,7 @@ const COLORS = {
 } as const;
 
 const GRID_MAX_ALPHA = 0.4;
-const DEFAULT_GRID_BRIGHTNESS = 0.2;
+const DEFAULT_GRID_BRIGHTNESS = 0.5;
 
 const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
 const MIN_SEPARATION_PX = 140;

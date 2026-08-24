@@ -152,7 +152,7 @@ describe("PreferencesController", () => {
   test("getGridBrightness returns default for non-finite input", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "NaN";
-    expect(controller.getGridBrightness()).toBe(0.2);
+    expect(controller.getGridBrightness()).toBe(0.5);
   });
 
   test("onGridBrightnessChange updates the output, fills the slider, and saves", () => {

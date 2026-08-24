@@ -20,7 +20,6 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       sigResChoice: proxy.sigResChoice,
       hintRotator: proxy.hintRotator,
       settingsStore: proxy.settingsStore,
-      hitChance: proxy.hitChance,
       trackingInput: proxy.trackingInput,
       ewarController: proxy.ewarController,
       fittingImport: proxy.fittingImport,

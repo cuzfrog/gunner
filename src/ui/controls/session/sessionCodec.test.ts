@@ -1,6 +1,6 @@
 import { USER_SETTINGS_VERSION, type SettingsStore, type StartupState, type UserSettings } from "../../../appstate";
 import type { ChargeCatalog } from "../../../fitting";
-import { type AutopilotMode, type HitChance, SIG_RESOLUTIONS } from "../../../sim";
+import { type AutopilotMode, SIG_RESOLUTIONS } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
 import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput } from "../testSupport";
 import type { I18n } from "../../i18n";
@@ -108,7 +108,7 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
-      settingsStore: {} as SettingsStore, hitChance: {} as HitChance,
+      settingsStore: {} as SettingsStore,
       trackingInput: fakeTrackingInput(),
       ewarController: mockEwarController(),
       fittingImport: mockFittingImport(),
@@ -205,8 +205,7 @@ describe("SessionCodec", () => {
     } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
-    const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
-    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+        const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
@@ -215,7 +214,7 @@ describe("SessionCodec", () => {
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
-      sigResChoice, hintRotator, settingsStore, hitChance,
+      sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController: mockEwarController(),
       fittingImport: mockFittingImport(),
@@ -255,7 +254,7 @@ describe("SessionCodec", () => {
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides: mockTurretOverrides(),
       preferences, profileController, i18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
-      settingsStore, hitChance: {} as HitChance, trackingInput: fakeTrackingInput(),
+      settingsStore, trackingInput: fakeTrackingInput(),
       ewarController,
       fittingImport,
     });
@@ -287,8 +286,7 @@ describe("SessionCodec", () => {
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn() } as unknown as SettingsStore;
-    const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
-    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+        const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
@@ -297,7 +295,7 @@ describe("SessionCodec", () => {
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
-      sigResChoice, hintRotator, settingsStore, hitChance,
+      sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController: mockEwarController(),
       fittingImport: mockFittingImport(),
@@ -342,8 +340,7 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides();
     const clearSelectedProfile = vi.fn();
     const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
-    const hitChance = { findBestDistance: vi.fn(() => 5000) } as unknown as HitChance;
-    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+        const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
     const setPlaying = vi.fn();
@@ -353,7 +350,7 @@ describe("SessionCodec", () => {
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
-      sigResChoice, hintRotator, settingsStore, hitChance,
+      sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController,
       fittingImport: mockFittingImport(),

@@ -91,8 +91,8 @@ describe("HintRotator", () => {
     const tip = "If you like this tool, may consider tip me in the game, thank you!";
     const expected = [
       { text: tip, category: "tip" },
-      { text: LORES[0].text.en, category: "lore" },
-      { text: LORES[1].text.en, category: "lore" },
+      { text: `hint.prefix ${LORES[0].text.en}`, category: "lore" },
+      { text: `hint.prefix ${LORES[1].text.en}`, category: "lore" },
       { text: `hint.prefix ${HINT_CANDIDATES[1].text.en}`, category: "hint" },
     ];
     for (const { text, category } of expected) {
@@ -123,7 +123,7 @@ describe("HintRotator", () => {
         expect(element.classList.add).toHaveBeenLastCalledWith("tip");
       } else {
         const lore = LORES[(Math.floor(i / 4) * 2 + (slot - 2)) % LORES.length];
-        expect(element.textContent).toBe(lore.text.en);
+        expect(element.textContent).toBe(`hint.prefix ${lore.text.en}`);
         expect(element.classList.add).toHaveBeenLastCalledWith("lore");
       }
     }
@@ -189,7 +189,7 @@ describe("HintRotator", () => {
     timer.runTimeout();
     i18n.setLanguage("zh");
     rotator.refresh();
-    expect(element.textContent).toBe(LORES[0].text.zh);
+    expect(element.textContent).toBe(`hint.prefix ${LORES[0].text.zh}`);
   });
 
   test("language changed refreshes the current slide", () => {

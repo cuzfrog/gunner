@@ -122,7 +122,7 @@ export class HintRotatorImpl implements HintRotator {
       }
       case "lore": {
         const lore = this.lores[this.loreIndex(index)];
-        return lore ? lore.text[lang] : "";
+        return lore ? `${this.i18n.t("hint.prefix")} ${lore.text[lang]}` : "";
       }
     }
   }
