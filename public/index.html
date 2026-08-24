@@ -44,9 +44,12 @@
 
     <section class="profile-bar">
       <div class="profile-select-field">
-        <select id="profile-select" class="profile-select">
-          <option value="" data-i18n="select.profile">Select profile...</option>
-        </select>
+        <button type="button" id="profile-select-trigger" class="profile-select-trigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="profile-popup">
+          <span id="profile-select-label" data-i18n="select.profile">Select profile...</span>
+          <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+        </button>
+        <div id="profile-popup" class="profile-popup" hidden role="menu"></div>
         <div class="confirm-popup" id="confirm-popup" hidden role="dialog" aria-modal="true">
           <span id="confirm-message" class="confirm-message" aria-live="polite"></span>
           <div class="confirm-buttons">

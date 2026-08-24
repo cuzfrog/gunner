@@ -36,6 +36,7 @@ export class FakeElement {
   get firstElementChild(): FakeElement | null { return this.children[0] ?? null; }
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
   setAttribute(name: string, value: string): void { this.attributes[name] = value; }
+  removeAttribute(name: string): void { delete this.attributes[name]; }
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }

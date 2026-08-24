@@ -95,7 +95,9 @@ export interface Els {
   readonly targetSig: HTMLInputElement;
   readonly simSpeed: HTMLSelectElement;
   readonly profileSave: HTMLButtonElement;
-  readonly profileSelect: HTMLSelectElement;
+  readonly profileSelectTrigger: HTMLButtonElement;
+  readonly profileSelectLabel: HTMLElement;
+  readonly profilePopup: HTMLElement;
   readonly profileDelete: HTMLButtonElement;
   readonly profileNew: HTMLButtonElement;
   readonly newProfilePopup: HTMLElement;

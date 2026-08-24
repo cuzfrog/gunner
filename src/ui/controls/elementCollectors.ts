@@ -28,7 +28,9 @@ export function collectPreferencesEls(els: Els): PreferencesEls {
 export function collectProfileEls(els: Els): ProfileEls {
   return {
     profileSave: els.profileSave,
-    profileSelect: els.profileSelect,
+    profileSelectTrigger: els.profileSelectTrigger,
+    profileSelectLabel: els.profileSelectLabel,
+    profilePopup: els.profilePopup,
     profileDelete: els.profileDelete,
     profileNew: els.profileNew,
     newProfilePopup: els.newProfilePopup,

@@ -86,7 +86,7 @@ export class EventRouter {
     this.els.langZh.addEventListener("click", () => this.preferences.setLanguage("zh"));
     this.els.langJa.addEventListener("click", () => this.preferences.setLanguage("ja"));
     this.els.profileSave.addEventListener("click", () => void this.profile.saveProfile());
-    this.els.profileSelect.addEventListener("change", () => void this.profile.loadProfile());
+    this.els.profileSelectTrigger.addEventListener("click", () => this.profile.toggleProfileSelector());
     this.els.profileDelete.addEventListener("click", () => void this.profile.deleteProfile());
     this.els.profileNew.addEventListener("click", () => this.profile.toggleNewProfilePopup());
     this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.shareController.popup));

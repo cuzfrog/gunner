@@ -134,7 +134,7 @@ describe("DomControls", () => {
   test("profile save, load and share-text round-trip", async () => {
     const saveProfile = vi.fn();
     const loadProfile = vi.fn(() => null);
-    const { document, controls, clipboard } = buildDomControls({ settingsStore: { saveProfile, loadProfile } });
+    const { document, controls, clipboard } = buildDomControls({ settingsStore: { saveProfile, loadProfile, listProfiles: vi.fn(() => ["brawler"]) } });
     const callbacks = mockCallbacks();
     controls.setCallbacks(callbacks);
     getFake(document, "profile-new").trigger("click");
@@ -144,10 +144,9 @@ describe("DomControls", () => {
     expect(saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
     const saved = saveProfile.mock.calls[0][1];
     loadProfile.mockReturnValue(saved);
-    const option = getFake(document, "profile-select").children[0] ?? getFake(document, "profile-select");
-    option.value = "brawler";
-    getFake(document, "profile-select").value = "brawler";
-    getFake(document, "profile-select").trigger("change");
+    getFake(document, "profile-select-trigger").trigger("click");
+    await Promise.resolve();
+    getFake(document, "profile-popup").children[0].trigger("click");
     await Promise.resolve();
     expect(loadProfile).toHaveBeenCalledWith("brawler");
     expect(callbacks.onReset).toHaveBeenCalled();

@@ -8,7 +8,9 @@ import type { UiEvents } from "../events";
 
 export interface ProfileEls {
   readonly profileSave: HTMLButtonElement;
-  readonly profileSelect: HTMLSelectElement;
+  readonly profileSelectTrigger: HTMLButtonElement;
+  readonly profileSelectLabel: HTMLElement;
+  readonly profilePopup: HTMLElement;
   readonly profileDelete: HTMLButtonElement;
   readonly profileNew: HTMLButtonElement;
   readonly newProfilePopup: HTMLElement;
@@ -27,9 +29,10 @@ export interface ProfileController {
   setOnNewProfile(onNewProfile: () => void): void;
   markLoaded(selected?: string): void;
   updateDirtyState(): void;
+  toggleProfileSelector(): void;
   toggleNewProfilePopup(): void;
   saveProfile(): Promise<void>;
-  loadProfile(): Promise<void>;
+  loadProfile(name: string): Promise<void>;
   deleteProfile(): Promise<void>;
   showStatus(key: string): void;
 }
@@ -52,6 +55,7 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly events: UiEvents;
   private readonly confirmController: ConfirmController;
   private readonly popupGroup: PopupGroup;
+  private readonly selectorPopupValue: Popup;
   private readonly newProfilePopupValue: Popup;
   private onProfileLoaded?: (name: string) => void;
   private onNewProfile?: () => void;
@@ -59,6 +63,9 @@ export class ProfileControllerImpl implements ProfileController {
   private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
   private lastAppliedSelection = "";
+  private selectedNameValue = "";
+  private profileMenuItems: HTMLButtonElement[] = [];
+  private selectorOpen = false;
   private newProfileOpen = false;
 
   constructor(deps: ProfileControllerDeps) {
@@ -69,6 +76,13 @@ export class ProfileControllerImpl implements ProfileController {
     this.events = deps.events;
     this.confirmController = deps.confirmController;
     this.popupGroup = deps.popupGroup;
+    this.selectorPopupValue = {
+      isOpen: () => this.selectorOpen,
+      open: () => this.openProfileSelector(),
+      close: () => this.closeProfileSelector(),
+      focusTrigger: () => this.els.profileSelectTrigger.focus(),
+      contains: (target) => this.containsProfileSelector(target),
+    };
     this.newProfilePopupValue = {
       isOpen: () => this.newProfileOpen,
       open: () => this.openNewProfilePopup(),
@@ -76,10 +90,11 @@ export class ProfileControllerImpl implements ProfileController {
       focusTrigger: () => this.els.profileNew.focus(),
       contains: (target) => this.containsNewProfile(target),
     };
+    this.popupGroup.register(this.selectorPopupValue);
     this.popupGroup.register(this.newProfilePopupValue);
     this.els.newProfileConfirm.addEventListener("click", () => void this.onConfirmNewProfile());
     this.els.newProfileCancel.addEventListener("click", () => this.closeNewProfilePopup());
-    this.events.onLanguageChanged(() => this.refresh(this.selectedName()));
+    this.events.onLanguageChanged(() => this.refresh(this.selectedNameValue));
   }
 
   setOnProfileLoaded(onProfileLoaded: (name: string) => void): void {
@@ -91,7 +106,7 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   selectedName(): string {
-    return this.els.profileSelect.value;
+    return this.selectedNameValue;
   }
 
   restoreFromStartup(startup: StartupState): boolean {
@@ -108,19 +123,22 @@ export class ProfileControllerImpl implements ProfileController {
 
   refresh(selected = ""): void {
     const names = this.settingsStore.listProfiles();
-    const select = this.els.profileSelect;
-    select.innerHTML = "";
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = this.i18n.t("select.profile");
-    select.appendChild(placeholder);
+    const popup = this.els.profilePopup;
+    popup.innerHTML = "";
+    this.profileMenuItems = [];
     for (const name of names) {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      select.appendChild(option);
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "profile-menu-item";
+      item.setAttribute("role", "menuitem");
+      item.textContent = name;
+      item.addEventListener("click", () => void this.loadProfile(name));
+      if (name === selected) item.setAttribute("aria-current", "true");
+      popup.appendChild(item);
+      this.profileMenuItems.push(item);
     }
-    select.value = names.includes(selected) ? selected : "";
+    this.selectedNameValue = names.includes(selected) ? selected : "";
+    this.updateTriggerLabel();
   }
 
   setSnapshotSource(source: () => ProfileSettings): void {
@@ -130,16 +148,21 @@ export class ProfileControllerImpl implements ProfileController {
   markLoaded(selected?: string): void {
     this.els.newProfileName.value = "";
     this.selectedProfile = this.snapshotSource?.() ?? null;
-    this.refresh(selected ?? this.selectedName());
-    this.lastAppliedSelection = this.els.profileSelect.value;
+    this.refresh(selected ?? this.selectedNameValue);
+    this.lastAppliedSelection = this.selectedNameValue;
     this.updateDirtyState();
   }
 
   updateDirtyState(): void {
     const dirty = this.isDirty();
-    const saved = this.els.profileSelect.value.length > 0 && dirty;
+    const saved = this.selectedNameValue.length > 0 && dirty;
     this.els.profileSave.classList.toggle("unsaved", dirty);
     this.els.profileSave.disabled = !saved;
+  }
+
+  toggleProfileSelector(): void {
+    if (this.selectorOpen) this.closeProfileSelector();
+    else this.popupGroup.open(this.selectorPopupValue);
   }
 
   toggleNewProfilePopup(): void {
@@ -148,7 +171,7 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   async saveProfile(): Promise<void> {
-    const selected = this.els.profileSelect.value;
+    const selected = this.selectedNameValue;
     if (!selected) return;
     const profile = this.snapshotSource?.();
     if (!profile) return;
@@ -161,26 +184,27 @@ export class ProfileControllerImpl implements ProfileController {
     this.showStatus("status.profileSaved");
   }
 
-  async loadProfile(): Promise<void> {
-    const name = this.els.profileSelect.value;
+  async loadProfile(name: string): Promise<void> {
     if (!name) return;
     if (this.isDirty() && !(await this.confirmController.confirm("confirm.discardChanges"))) {
-      this.els.profileSelect.value = this.lastAppliedSelection;
+      this.refresh(this.lastAppliedSelection);
       return;
     }
     const profile = this.settingsStore.loadProfile(name);
     if (!profile) {
-      this.els.profileSelect.value = this.lastAppliedSelection;
+      this.refresh(this.lastAppliedSelection);
       return;
     }
     this.settingsStore.selectProfile(name);
     this.onProfileLoaded?.(name);
     this.lastAppliedSelection = name;
+    this.refresh(name);
+    this.closeProfileSelector();
     this.showStatus("status.profileLoaded");
   }
 
   async deleteProfile(): Promise<void> {
-    const name = this.els.profileSelect.value;
+    const name = this.selectedNameValue;
     if (!name) return;
     if (!(await this.confirmController.confirm("confirm.deleteProfile"))) return;
     this.settingsStore.deleteProfile(name);
@@ -211,6 +235,38 @@ export class ProfileControllerImpl implements ProfileController {
     this.lastAppliedSelection = name;
     this.updateDirtyState();
     this.showStatus("status.profileSaved");
+  }
+
+  private openProfileSelector(): void {
+    this.els.profilePopup.hidden = false;
+    this.selectorOpen = true;
+    this.els.profileSelectTrigger.setAttribute("aria-expanded", "true");
+    this.focusSelectedProfileItem();
+  }
+
+  private closeProfileSelector(): void {
+    if (!this.selectorOpen && this.els.profilePopup.hidden) return;
+    this.els.profilePopup.hidden = true;
+    this.selectorOpen = false;
+    this.els.profileSelectTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  private containsProfileSelector(target: EventTarget): boolean {
+    if (!(target instanceof Element)) return false;
+    return this.els.profilePopup.contains(target) || target === this.els.profileSelectTrigger;
+  }
+
+  private focusSelectedProfileItem(): void {
+    const index = this.profileMenuItems.findIndex((item) => item.getAttribute("aria-current") === "true");
+    const item = index >= 0 ? this.profileMenuItems[index] : this.profileMenuItems[0];
+    item?.focus();
+  }
+
+  private updateTriggerLabel(): void {
+    const name = this.selectedNameValue;
+    this.els.profileSelectLabel.textContent = name || this.i18n.t("select.profile");
+    if (name) this.els.profileSelectLabel.removeAttribute("data-i18n");
+    else this.els.profileSelectLabel.setAttribute("data-i18n", "select.profile");
   }
 
   private openNewProfilePopup(): void {
