@@ -140,8 +140,16 @@ describe("fittingDb", () => {
   });
 
   test("includes disruption scripts with raw bonus deltas", () => {
-    expect(DISRUPTION_SCRIPTS["Optimal Range Disruption Script"]).toEqual({ trackingDeltaBonus: -100, rangeDeltaBonus: 100 });
-    expect(DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"]).toEqual({ trackingDeltaBonus: 100, rangeDeltaBonus: -100 });
+    expect(DISRUPTION_SCRIPTS["Optimal Range Disruption Script"]).toEqual({
+      trackingDeltaBonus: -100,
+      rangeDeltaBonus: 100,
+      falloffDeltaBonus: 100,
+    });
+    expect(DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"]).toEqual({
+      trackingDeltaBonus: 100,
+      rangeDeltaBonus: -100,
+      falloffDeltaBonus: -100,
+    });
   });
 
   test("includes tracking computer scripts", () => {

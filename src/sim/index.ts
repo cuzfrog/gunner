@@ -9,7 +9,7 @@ export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AutopilotMode,
   CombatantConfig,
-  DisruptionScript,
+  DisruptionScriptSpec,
   DisruptorActivation,
   EngagementFrame,
   EwarActivation,

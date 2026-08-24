@@ -75,8 +75,8 @@ describe("loadEwarProjection", () => {
     );
     expect(projection.loadout.webs).toHaveLength(0);
     expect(projection.loadout.disruptors.length).toBeGreaterThanOrEqual(2);
-    expect(projection.loadout.disruptors.some((d) => d.defaultScript === "optimalRange")).toBe(true);
-    expect(projection.loadout.disruptors.some((d) => d.defaultScript === "trackingSpeed")).toBe(true);
+    expect(projection.loadout.disruptors.some((d) => d.defaultScript?.name === "Optimal Range Disruption Script")).toBe(true);
+    expect(projection.loadout.disruptors.some((d) => d.defaultScript?.name === "Tracking Speed Disruption Script")).toBe(true);
     expect(projection.overloaded).toBe(false);
   });
 

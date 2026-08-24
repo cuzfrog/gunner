@@ -12,7 +12,7 @@ import type {
 } from "../ships";
 import {
   SIG_RESOLUTIONS,
-  type DisruptionScript,
+  type DisruptionScriptSpec,
   type EwarLoadout,
   type SigResolutionClass,
   type StackingPenalty,
@@ -394,6 +394,13 @@ function resolveCargoCharges(db: FittingDb, document: EftDocument): readonly Car
 }
 
 function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
+  const scripts = Object.entries(db.disruptionScripts).map(([name, stats]) => ({
+    name,
+    trackingMultiplier: 1 + stats.trackingDeltaBonus / 100,
+    optimalMultiplier: 1 + stats.rangeDeltaBonus / 100,
+    falloffMultiplier: 1 + stats.falloffDeltaBonus / 100,
+  }));
+  const scriptByName = new Map(scripts.map((s) => [s.name, s]));
   const webs: StasisWebSpec[] = [];
   const disruptors: TrackingDisruptorSpec[] = [];
 
@@ -413,27 +420,21 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
 
     const disruptorStats = db.trackingDisruptors[line.name];
     if (disruptorStats) {
-      const scriptStats = line.charge ? db.disruptionScripts[line.charge] : undefined;
+      const scriptName = line.charge ?? undefined;
+      const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
       disruptors.push({
         moduleName: line.name,
         optimal: disruptorStats.optimal,
         falloff: disruptorStats.falloff,
         disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000,
-        defaultScript: resolveDisruptionScript(scriptStats),
+        defaultScript,
         overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent,
       });
     }
   }
 
-  if (webs.length === 0 && disruptors.length === 0) return { webs: [], disruptors: [] };
-  return { webs, disruptors };
-}
-
-function resolveDisruptionScript(stats: DisruptionScriptStats | undefined): DisruptionScript {
-  if (!stats) return "none";
-  if (stats.rangeDeltaBonus > 0 && stats.trackingDeltaBonus <= 0) return "optimalRange";
-  if (stats.trackingDeltaBonus > 0 && stats.rangeDeltaBonus <= 0) return "trackingSpeed";
-  return "none";
+  if (webs.length === 0 && disruptors.length === 0 && scripts.length === 0) return { webs: [], disruptors: [], scripts: [] };
+  return { webs, disruptors, scripts };
 }
 
 function collectTurretPercents(

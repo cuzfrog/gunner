@@ -159,7 +159,7 @@ describe("DomControls", () => {
 
   test("getConfig includes ewar projections and passes overload state", () => {
     const { controls, cradle, document } = buildDomControls();
-    const ewar: EwarLoadout = { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [] };
+    const ewar: EwarLoadout = { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [], scripts: [] };
     cradle.cradle.ewarController.setLoadout("attacker", ewar);
     getFake(document, "attacker-overload").checked = true;
     getFake(document, "target-overload").checked = false;
@@ -171,7 +171,7 @@ describe("DomControls", () => {
 
   test("getConfig uses ewar overload state for the target side", () => {
     const { controls, cradle } = buildDomControls();
-    const ewar: EwarLoadout = { webs: [], disruptors: [{ moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2, defaultScript: "none", overloadStrengthBonusPercent: 0 }] };
+    const ewar: EwarLoadout = { webs: [], disruptors: [{ moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2, defaultScript: undefined, overloadStrengthBonusPercent: 0 }], scripts: [] };
     cradle.cradle.ewarController.setLoadout("target", ewar);
     const config = controls.getConfig();
     expect(config.target.ewar?.loadout.disruptors).toHaveLength(1);

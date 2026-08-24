@@ -1,5 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type { DisruptionScript, EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
+import type { DisruptionScriptSpec, EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
   webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -40,12 +40,15 @@ export class EwarResolverImpl implements EwarResolver {
 
       const overloadBonus = projection.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const strength = spec.disruption * overloadBonus;
-      const effectiveness = turretEffectiveness(distance, spec);
-      const effects = scriptEffects(activation?.script ?? spec.defaultScript, strength);
+      const effectiveness = this.disruptorEffectiveness(distance, spec);
+      const script = activation?.script ?? spec.defaultScript;
+      const trackingEffect = strength * (script?.trackingMultiplier ?? 1);
+      const optimalEffect = strength * (script?.optimalMultiplier ?? 1);
+      const falloffEffect = strength * (script?.falloffMultiplier ?? 1);
 
-      if (effects.tracking > 0) trackingModifiers.push(1 - effects.tracking * effectiveness);
-      if (effects.optimal > 0) optimalModifiers.push(1 - effects.optimal * effectiveness);
-      if (effects.falloff > 0) falloffModifiers.push(1 - effects.falloff * effectiveness);
+      if (trackingEffect > 0) trackingModifiers.push(1 - trackingEffect * effectiveness);
+      if (optimalEffect > 0) optimalModifiers.push(1 - optimalEffect * effectiveness);
+      if (falloffEffect > 0) falloffModifiers.push(1 - falloffEffect * effectiveness);
     }
 
     return {
@@ -55,28 +58,11 @@ export class EwarResolverImpl implements EwarResolver {
       sigResolution: turret.sigResolution,
     };
   }
-}
 
-interface ScriptEffects {
-  readonly tracking: number;
-  readonly optimal: number;
-  readonly falloff: number;
-}
-
-function turretEffectiveness(distance: number, spec: TrackingDisruptorSpec): number {
-  if (distance <= spec.optimal) return 1;
-  if (spec.falloff === 0) return 0;
-  const ratio = (distance - spec.optimal) / spec.falloff;
-  return 0.5 ** (ratio * ratio);
-}
-
-function scriptEffects(script: DisruptionScript, disruption: number): ScriptEffects {
-  switch (script) {
-    case "optimalRange":
-      return { tracking: 0, optimal: 2 * disruption, falloff: 2 * disruption };
-    case "trackingSpeed":
-      return { tracking: 2 * disruption, optimal: 0, falloff: 0 };
-    default:
-      return { tracking: disruption, optimal: disruption, falloff: disruption };
+  private disruptorEffectiveness(distance: number, spec: TrackingDisruptorSpec): number {
+    if (distance <= spec.optimal) return 1;
+    if (spec.falloff === 0) return 0;
+    const ratio = (distance - spec.optimal) / spec.falloff;
+    return 0.5 ** (ratio * ratio);
   }
 }

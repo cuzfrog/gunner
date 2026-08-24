@@ -29,11 +29,13 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 and 6", () => {
+  test("parseUserSettings accepts version 5 and 6 and stamps 7", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(6);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(6);
+    const v7 = { ...DEFAULT_SETTINGS, version: 7 };
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(7);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(7);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(7);
   });
 
   test("parseUserSettings defaults missing attackerAmmo", () => {
@@ -70,10 +72,23 @@ describe("SettingsParser", () => {
     expect(parsed!.targetEwarActivation).toEqual(DEFAULT_SETTINGS.targetEwarActivation);
   });
 
+  test("parseUserSettings migrates v6 enum disruptor scripts to item names", () => {
+    const v6 = {
+      ...DEFAULT_SETTINGS,
+      version: 6,
+      attackerEwarActivation: { disruptors: [{ active: true, script: "trackingSpeed" }] },
+      targetEwarActivation: { disruptors: [{ active: true, script: "optimalRange" }] },
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v6));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
+    expect(parsed!.targetEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+  });
+
   test("parseUserSettings rejects an invalid disruptor script", () => {
     const bad = {
       ...DEFAULT_SETTINGS,
-      attackerEwarActivation: { disruptors: [{ active: true, script: "range" }] },
+      attackerEwarActivation: { disruptors: [{ active: true, script: 123 }] },
     };
     expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
   });

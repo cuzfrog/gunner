@@ -3,7 +3,7 @@ import { isOptionalEwarActivation, profilesEqual } from "./validators";
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
-    version: 6,
+    version: 7,
     tracking: 0.32,
     sigRes: "S",
     optimal: 5000,
@@ -27,7 +27,7 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
 
 describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
-    expect(isOptionalEwarActivation({ webs: [true, false], disruptors: [{ active: true, script: "optimalRange" }] })).toBe(true);
+    expect(isOptionalEwarActivation({ webs: [true, false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] })).toBe(true);
   });
 
   test("accepts undefined", () => {
@@ -42,8 +42,8 @@ describe("isOptionalEwarActivation", () => {
     expect(isOptionalEwarActivation({ webs: [true, "false"] })).toBe(false);
   });
 
-  test("rejects an unknown disruptor script", () => {
-    expect(isOptionalEwarActivation({ disruptors: [{ active: true, script: "range" }] })).toBe(false);
+  test("rejects a non-string disruptor script", () => {
+    expect(isOptionalEwarActivation({ disruptors: [{ active: true, script: 123 }] })).toBe(false);
   });
 
   test("rejects a disruptor row missing the active flag", () => {

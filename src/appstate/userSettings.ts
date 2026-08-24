@@ -1,12 +1,12 @@
-import type { AutopilotMode, DisruptionScript, SigResolutionClass } from "../sim";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 6 as const;
+export const USER_SETTINGS_VERSION = 7 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
-export type StoredDisruptionScript = DisruptionScript;
+export type StoredDisruptionScript = string;
 
 export interface StoredEwarActivation {
   readonly webs?: readonly boolean[];

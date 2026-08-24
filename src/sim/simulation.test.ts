@@ -153,6 +153,7 @@ describe("SimulationImpl", () => {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
         disruptors: [],
+        scripts: [],
       },
       activation: { webs: [{ active: true }], disruptors: [] },
       overloaded: false,

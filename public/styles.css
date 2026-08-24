@@ -1980,7 +1980,9 @@ canvas {
 }
 
 .ewar-script-option {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   width: 100%;
   padding: 4px 6px;
   background: transparent;
@@ -1991,6 +1993,12 @@ canvas {
   font-size: 12px;
   text-align: left;
   cursor: pointer;
+}
+
+.ewar-script-option img {
+  width: 20px;
+  height: 20px;
+  flex: none;
 }
 
 .ewar-script-option:hover,

@@ -11,7 +11,7 @@ describe("profileTextCodec", () => {
   });
 
   test("hasHeader detects the header with leading whitespace", () => {
-    expect(codec.hasHeader("# gunner v1\nversion=6")).toBe(true);
+    expect(codec.hasHeader("# gunner v1\nversion=7")).toBe(true);
     expect(codec.hasHeader("  # gunner v1")).toBe(true);
     expect(codec.hasHeader("not a profile")).toBe(false);
   });
@@ -49,7 +49,7 @@ describe("profileTextCodec", () => {
   test("round-trips a profile with ewar activations", () => {
     const profile: ProfileSettings = {
       ...MINIMAL_PROFILE,
-      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "trackingSpeed" }] },
+      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "Tracking Speed Disruption Script" }] },
       targetEwarActivation: { webs: [false], disruptors: [{ active: false, script: "none" }] },
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
@@ -57,7 +57,7 @@ describe("profileTextCodec", () => {
 
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=6
+version=7
 tracking=0.32
 sigRes=S
 optimal=5000

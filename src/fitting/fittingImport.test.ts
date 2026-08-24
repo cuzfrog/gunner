@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
-import type { StackingPenalty } from "../sim";
+import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, type FittingDb } from "./fittingImport";
 import { GunFamiliesImpl } from "./gunFamilies";
@@ -18,6 +18,20 @@ import {
 } from "./fittingDb";
 import { MODULE_SLOTS } from "./moduleSlots";
 import { moduleLines, parseEft } from "./eft";
+
+const OPTIMAL_RANGE_SCRIPT: DisruptionScriptSpec = {
+  name: "Optimal Range Disruption Script",
+  trackingMultiplier: 1 + DISRUPTION_SCRIPTS["Optimal Range Disruption Script"].trackingDeltaBonus / 100,
+  optimalMultiplier: 1 + DISRUPTION_SCRIPTS["Optimal Range Disruption Script"].rangeDeltaBonus / 100,
+  falloffMultiplier: 1 + DISRUPTION_SCRIPTS["Optimal Range Disruption Script"].falloffDeltaBonus / 100,
+};
+const TRACKING_SPEED_SCRIPT: DisruptionScriptSpec = {
+  name: "Tracking Speed Disruption Script",
+  trackingMultiplier: 1 + DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"].trackingDeltaBonus / 100,
+  optimalMultiplier: 1 + DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"].rangeDeltaBonus / 100,
+  falloffMultiplier: 1 + DISRUPTION_SCRIPTS["Tracking Speed Disruption Script"].falloffDeltaBonus / 100,
+};
+const DISRUPTION_SCRIPT_CATALOG: readonly DisruptionScriptSpec[] = [OPTIMAL_RANGE_SCRIPT, TRACKING_SPEED_SCRIPT];
 
 class TestStackingPenalty implements StackingPenalty {
   // Mirrors the sim StackingPenaltyImpl so fitting tests can assert expected
@@ -590,13 +604,14 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
     expect(result!.ewar.webs).toEqual([
       { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 },
     ]);
+    expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
     expect(result!.ewar.disruptors).toEqual([
       {
         moduleName: "Tracking Disruptor II",
         optimal: 48000,
         falloff: 24000,
         disruption: 0.1719,
-        defaultScript: "optimalRange",
+        defaultScript: OPTIMAL_RANGE_SCRIPT,
         overloadStrengthBonusPercent: 20,
       },
     ]);
@@ -633,7 +648,9 @@ Balmer Series Compact Tracking Disruptor I, Tracking Speed Disruption Script`,
     expect(result).toBeDefined();
     expect(result!.ewar.webs.length).toBe(2);
     expect(result!.ewar.disruptors.length).toBe(2);
-    expect(result!.ewar.disruptors[1].defaultScript).toBe("trackingSpeed");
+    expect(result!.ewar.disruptors[0].defaultScript).toBeUndefined();
+    expect(result!.ewar.disruptors[1].defaultScript).toEqual(TRACKING_SPEED_SCRIPT);
+    expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
   });
 
   test("tracking disruptor without a charge defaults to none", () => {
@@ -653,10 +670,11 @@ Tracking Disruptor II`,
         optimal: 48000,
         falloff: 24000,
         disruption: 0.1719,
-        defaultScript: "none",
+        defaultScript: undefined,
         overloadStrengthBonusPercent: 20,
       },
     ]);
+    expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
   });
 
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {

@@ -56,10 +56,15 @@ describe("buildDisruptionScriptStats", () => {
     }))).toEqual({
       trackingDeltaBonus: -100,
       rangeDeltaBonus: 100,
+      falloffDeltaBonus: 100,
     });
   });
 
   test("defaults missing deltas to zero", () => {
-    expect(buildDisruptionScriptStats(values({}))).toEqual({ trackingDeltaBonus: 0, rangeDeltaBonus: 0 });
+    expect(buildDisruptionScriptStats(values({}))).toEqual({
+      trackingDeltaBonus: 0,
+      rangeDeltaBonus: 0,
+      falloffDeltaBonus: 0,
+    });
   });
 });

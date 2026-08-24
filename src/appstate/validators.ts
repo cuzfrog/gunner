@@ -1,4 +1,4 @@
-import type { AutopilotMode, DisruptionScript, SigResolutionClass } from "../sim";
+import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation, UserSettings } from "./userSettings";
@@ -15,10 +15,6 @@ export function isAutopilotMode(value: unknown): value is AutopilotMode {
   return value === "orbit" || value === "keepAtRange" || value === "midships";
 }
 
-export function isDisruptionScript(value: unknown): value is DisruptionScript {
-  return value === "none" || value === "optimalRange" || value === "trackingSpeed";
-}
-
 export function isOptionalEwarActivation(value: unknown): value is StoredEwarActivation | undefined {
   if (value === undefined) return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -29,7 +25,7 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
     for (const item of s.disruptors) {
       if (!item || typeof item !== "object" || Array.isArray(item)) return false;
       const d = item as Record<string, unknown>;
-      if (typeof d.active !== "boolean" || !isDisruptionScript(d.script)) return false;
+      if (typeof d.active !== "boolean" || typeof d.script !== "string" || d.script.length === 0) return false;
     }
   }
   return true;
@@ -67,8 +63,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 {
-  return value === 5 || value === 6;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 {
+  return value === 5 || value === 6 || value === 7;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {

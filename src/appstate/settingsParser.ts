@@ -42,6 +42,7 @@ export class SettingsParser {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!this.isUserSettings(parsed)) return null;
+      this.migrateEwarActivation(parsed as Record<string, unknown>);
       parsed.version = USER_SETTINGS_VERSION;
       if (parsed.attackerAmmo === undefined) {
         parsed.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
@@ -86,6 +87,7 @@ export class SettingsParser {
   profileFromUnknown(value: unknown): ProfileSettings | null {
     if (!this.isProfileSettings(value)) return null;
     const withVersion = { ...value, version: USER_SETTINGS_VERSION } as Record<string, unknown>;
+    this.migrateEwarActivation(withVersion);
     if (withVersion.attackerAmmo === undefined) {
       withVersion.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
@@ -146,6 +148,25 @@ export class SettingsParser {
   }
   private isOptionalPropulsionSelection(value: unknown): value is PropulsionSelection | undefined {
     return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;
+  }
+
+  private migrateEwarActivation(value: Record<string, unknown>): void {
+    this.migrateSideEwarActivation(value.attackerEwarActivation);
+    this.migrateSideEwarActivation(value.targetEwarActivation);
+  }
+
+  private migrateSideEwarActivation(saved: unknown): void {
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
+    const s = saved as Record<string, unknown>;
+    if (s.disruptors !== undefined && Array.isArray(s.disruptors)) {
+      s.disruptors = s.disruptors.map((item) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+        const d = { ...(item as Record<string, unknown>) };
+        if (d.script === "optimalRange") d.script = "Optimal Range Disruption Script";
+        if (d.script === "trackingSpeed") d.script = "Tracking Speed Disruption Script";
+        return d;
+      });
+    }
   }
 }
 

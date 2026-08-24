@@ -1,17 +1,16 @@
-import { type DisruptionScript, type EwarLoadout, type EwarProjection } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarLoadout, type EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { formatMultiplier } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../sidePanel";
 import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
 
-const SCRIPT_VALUES: readonly DisruptionScript[] = ["none", "optimalRange", "trackingSpeed"] as const;
-
 interface MutableEwarActivation {
   webs: { active: boolean }[];
-  disruptors: { active: boolean; script: DisruptionScript }[];
+  disruptors: { active: boolean; script: DisruptionScriptSpec | undefined }[];
 }
 
 interface EwarState {
@@ -77,7 +76,7 @@ export class EwarControllerImpl implements EwarController {
     if (!state || (state.loadout.webs.length === 0 && state.loadout.disruptors.length === 0)) return undefined;
     return {
       webs: state.activation.webs.map((w) => w.active),
-      disruptors: state.activation.disruptors.map((d) => ({ active: d.active, script: d.script })),
+      disruptors: state.activation.disruptors.map((d) => ({ active: d.active, script: d.script?.name ?? "none" })),
     };
   }
 
@@ -215,10 +214,14 @@ export class EwarControllerImpl implements EwarController {
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
     return {
       webs: loadout.webs.map((_, i) => ({ active: saved?.webs?.[i] ?? true })),
-      disruptors: loadout.disruptors.map((disruptor, i) => ({
-        active: saved?.disruptors?.[i]?.active ?? true,
-        script: saved?.disruptors?.[i]?.script ?? disruptor.defaultScript,
-      })),
+      disruptors: loadout.disruptors.map((disruptor, i) => {
+        const savedScript = saved?.disruptors?.[i]?.script;
+        const script = savedScript ? loadout.scripts.find((s) => s.name === savedScript) : undefined;
+        return {
+          active: saved?.disruptors?.[i]?.active ?? true,
+          script: script ?? disruptor.defaultScript,
+        };
+      }),
     };
   }
 
@@ -270,7 +273,7 @@ export class EwarControllerImpl implements EwarController {
     return button;
   }
 
-  private createScriptGear(side: Side, index: number, script: DisruptionScript, active: boolean): HTMLButtonElement {
+  private createScriptGear(side: Side, index: number, script: DisruptionScriptSpec | undefined, active: boolean): HTMLButtonElement {
     const gear = document.createElement("button");
     gear.type = "button";
     gear.className = "ewar-script-gear";
@@ -308,29 +311,57 @@ export class EwarControllerImpl implements EwarController {
     label.textContent = this.fittingImport.itemName(disruptor.moduleName, this.i18n.current());
     popup.setAttribute("aria-labelledby", label.id);
     popup.appendChild(label);
-    for (const value of SCRIPT_VALUES) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "ewar-script-option";
-      button.setAttribute("role", "menuitem");
-      button.setAttribute("data-value", value);
-      if (value === current) button.setAttribute("aria-current", "true");
-      button.textContent = this.i18n.t(scriptI18nKey(value));
-      button.title = this.i18n.t(scriptHintI18nKey(value));
-      button.addEventListener("click", () => this.onScriptSelected(side, index, value));
+
+    const noneButton = this.createScriptOptionButton("none", this.i18n.t("ewar.script.none"), this.i18n.t("ewar.script.none.hint"), undefined, current === undefined);
+    noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
+    popup.appendChild(noneButton);
+
+    for (const script of state.loadout.scripts) {
+      const name = this.fittingImport.itemName(script.name, this.i18n.current());
+      const button = this.createScriptOptionButton(script.name, name, scriptStatSuffix(script), this.imageCatalog.itemIconUrl(script.name), current?.name === script.name);
+      button.addEventListener("click", () => this.onScriptSelected(side, index, script.name));
       popup.appendChild(button);
     }
   }
 
+  private createScriptOptionButton(
+    value: string,
+    text: string,
+    title: string,
+    iconUrl: string | undefined,
+    selected: boolean,
+  ): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ewar-script-option";
+    button.setAttribute("role", "menuitem");
+    button.setAttribute("data-value", value);
+    if (selected) button.setAttribute("aria-current", "true");
+    button.title = title;
+    if (iconUrl !== undefined) {
+      const img = document.createElement("img");
+      img.src = iconUrl;
+      img.alt = "";
+      button.appendChild(img);
+    }
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = text;
+    nameSpan.title = text;
+    button.appendChild(nameSpan);
+    return button;
+  }
+
   private onScriptSelected(side: Side, index: number, value: string): void {
-    const script = toDisruptionScript(value);
-    if (script === undefined) return;
+    const state = this.states.get(side);
+    if (!state) return;
+    const script = value === "none" ? undefined : state.loadout.scripts.find((s) => s.name === value);
+    if (value !== "none" && script === undefined) return;
     this.onScriptInput(side, index, script);
     this.scriptPopups[side].close();
     this.scriptPopups[side].focusTrigger();
   }
 
-  private onScriptInput(side: Side, index: number, script: DisruptionScript): void {
+  private onScriptInput(side: Side, index: number, script: DisruptionScriptSpec | undefined): void {
     const state = this.states.get(side);
     if (!state) return;
     state.activation.disruptors[index].script = script;
@@ -344,8 +375,8 @@ export class EwarControllerImpl implements EwarController {
     return gearState?.index === index ? gearState.gear : undefined;
   }
 
-  private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScript): void {
-    const title = this.i18n.t(scriptI18nKey(script));
+  private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
+    const title = script ? this.fittingImport.itemName(script.name, this.i18n.current()) : this.i18n.t("ewar.script.none");
     gear.setAttribute("title", title);
     gear.setAttribute("aria-label", title);
   }
@@ -376,16 +407,7 @@ export class EwarControllerImpl implements EwarController {
   }
 }
 
-function toDisruptionScript(value: string): DisruptionScript | undefined {
-  return SCRIPT_VALUES.find((v) => v === value);
-}
-
-function scriptI18nKey(script: DisruptionScript): "ewar.script.none" | "ewar.script.optimal" | "ewar.script.tracking" {
-  return script === "none" ? "ewar.script.none" : script === "optimalRange" ? "ewar.script.optimal" : "ewar.script.tracking";
-}
-
-function scriptHintI18nKey(
-  script: DisruptionScript,
-): "ewar.script.none.hint" | "ewar.script.optimal.hint" | "ewar.script.tracking.hint" {
-  return script === "none" ? "ewar.script.none.hint" : script === "optimalRange" ? "ewar.script.optimal.hint" : "ewar.script.tracking.hint";
+function scriptStatSuffix(script: DisruptionScriptSpec): string {
+  const parts = [`optimal x${formatMultiplier(script.optimalMultiplier)}`, `falloff x${formatMultiplier(script.falloffMultiplier)}`, `track x${formatMultiplier(script.trackingMultiplier)}`];
+  return parts.join(" · ");
 }

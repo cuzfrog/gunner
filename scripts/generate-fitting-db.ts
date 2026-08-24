@@ -363,6 +363,7 @@ export interface TrackingDisruptorStats {
 export interface DisruptionScriptStats {
   readonly trackingDeltaBonus: number;
   readonly rangeDeltaBonus: number;
+  readonly falloffDeltaBonus: number;
 }
 
 function optionalNumber(value: number | undefined): number | undefined {
@@ -459,6 +460,7 @@ export function buildDisruptionScriptStats(values: Map<string, number>): Disrupt
   return {
     trackingDeltaBonus: values.get("trackingSpeedBonusBonus") ?? 0,
     rangeDeltaBonus: values.get("maxRangeBonusBonus") ?? 0,
+    falloffDeltaBonus: values.get("falloffBonusBonus") ?? 0,
   };
 }
 
@@ -703,6 +705,7 @@ export interface TrackingDisruptorStats {
 export interface DisruptionScriptStats {
   readonly trackingDeltaBonus: number;
   readonly rangeDeltaBonus: number;
+  readonly falloffDeltaBonus: number;
 }
 
 `;

@@ -43,7 +43,7 @@ describe("profileTextParser", () => {
   });
 
   test("rejects prototype-polluting sigRes values", () => {
-    const text = `# gunner v1\nversion=6\ntracking=0.32\nsigRes=toString\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
+    const text = `# gunner v1\nversion=7\ntracking=0.32\nsigRes=toString\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
     expect(parser.parse(text)).toBeUndefined();
   });
 
@@ -61,17 +61,17 @@ describe("profileTextParser", () => {
   });
 
   test("rejects an empty fitting block", () => {
-    const text = `# gunner v1\nversion=6\nattacker.fitting:\n---`;
+    const text = `# gunner v1\nversion=7\nattacker.fitting:\n---`;
     expect(parser.parse(text)).toBeUndefined();
   });
 
   test("reads a global ammo line", () => {
-    const text = `# gunner v1\nversion=6\nammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
+    const text = `# gunner v1\nversion=7\nammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
   });
 
   test("ignores an ewar activation line with an invalid disruptor script", () => {
-    const text = `${serializer.serialize(MINIMAL_PROFILE)}\nattacker.ewarActivation={"webs":[true],"disruptors":[{"active":true,"script":"range"}]}`;
+    const text = `${serializer.serialize(MINIMAL_PROFILE)}\nattacker.ewarActivation={"webs":[true],"disruptors":[{"active":true,"script":""}]}`;
     expect(parser.parse(text)).toEqual(MINIMAL_PROFILE);
   });
 
@@ -81,7 +81,7 @@ describe("profileTextParser", () => {
   });
 
   test("still accepts a legacy attacker.ammo line", () => {
-    const text = `# gunner v1\nversion=6\nattacker.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
+    const text = `# gunner v1\nversion=7\nattacker.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nattacker.speed=0\nattacker.mode=keepAtRange\nattacker.range=5000\nattacker.mass=1200000\nattacker.inertia=3\ninitialDistance=5000\ntarget.speed=1000\ntarget.mode=orbit\ntarget.range=5000\ntarget.mass=10000000\ntarget.inertia=0.45\ntarget.sig=40\nsimSpeed=4`;
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, attackerAmmo: "Hail S" });
   });
 });

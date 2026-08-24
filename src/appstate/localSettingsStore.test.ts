@@ -268,7 +268,7 @@ describe("LocalSettingsStore", () => {
   test("saveProfile rejects a profile with an invalid ewar activation script", () => {
     const storage = fakeStorage();
     const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
-    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, script: "range" }] } };
+    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, script: 123 }] } };
     store.saveProfile("brawler", bad as ProfileSettings);
     expect(store.listProfiles()).toEqual([]);
   });
@@ -519,7 +519,7 @@ describe("LocalSettingsStore", () => {
     const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(6);
+    expect(loaded!.version).toBe(7);
     expect(loaded!.attackerFittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.attackerMass).toBe(DEFAULT_SETTINGS.attackerMass);
   });
@@ -529,7 +529,7 @@ describe("LocalSettingsStore", () => {
     const store = new LocalSettingsStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(6);
+    expect(loaded!.version).toBe(7);
     expect(loaded!.attackerFittedHull).toBeUndefined();
   });
 

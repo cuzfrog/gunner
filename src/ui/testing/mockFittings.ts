@@ -123,7 +123,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   propulsion: undefined,
   turret: TURRET,
   cargoCharges: [],
-  ewar: { webs: [], disruptors: [] },
+  ewar: { webs: [], disruptors: [], scripts: [] },
 };
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
 

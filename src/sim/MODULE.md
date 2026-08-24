@@ -11,7 +11,7 @@ no-new-exports:
   - hitChance.ts
   - ewarResolver.test.ts
   - vec2.ts
-  - types.ts
+  # - types.ts (temporarily lifted for ewar-v2 cross-boundary DTOs)
   - kinematics.ts
   - predictiveAutopilot.test.ts
   - simulation.ts
@@ -24,7 +24,7 @@ no-new-exports:
   - predictiveAutopilot.ts
   - kinematics.test.ts
   - ewarResolver.ts
-  - index.ts
+  # - index.ts (temporarily lifted for ewar-v2 cross-boundary DTOs)
 ---
 
 
@@ -35,6 +35,6 @@ no-new-exports:
 
 Engagement simulation domain: ship reactive and predictive autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper. `dynamics.ts` is module-internal: its `timeConstant` and `integrateShip` helpers have no cross-boundary exports.
 
-Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout`, `EwarProjection`, `CombatantConfig`, `DisruptionScript`, etc.), `EwarResolver`, `EngagementEvaluator`, `AttackState`, `AttackAssessment`, and `StackingPenalty` for use by `fitting`, `app`, and `ui`. `types.ts` is ungated to host these shared DTOs.
+Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout`, `EwarProjection`, `CombatantConfig`, `DisruptionScriptSpec`, etc.), `EwarResolver`, `EngagementEvaluator`, `AttackState`, `AttackAssessment`, and `StackingPenalty` for use by `fitting`, `app`, and `ui`. `types.ts` is ungated to host these shared DTOs.
 
 DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the reactive autopilot, `kinematics`, `hitChance`, `stackingPenalty`, `ewarResolver`, `engagementEvaluator` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.

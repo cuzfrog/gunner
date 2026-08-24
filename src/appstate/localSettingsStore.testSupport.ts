@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   targetOverload: true,
   targetSig: 40,
   attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "none" }] },
-  targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
+  targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] },
   attackerAmmo: "Hail S",
   simSpeed: 4,
   language: "en",
@@ -135,7 +135,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     moduleName: "200mm AutoCannon I",
   },
   cargoCharges: [],
-  ewar: { webs: [], disruptors: [] },
+  ewar: { webs: [], disruptors: [], scripts: [] },
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();

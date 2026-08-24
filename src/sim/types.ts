@@ -65,7 +65,12 @@ export interface HitChanceBreakdown {
   readonly rangeTerm: number;
 }
 
-export type DisruptionScript = "none" | "optimalRange" | "trackingSpeed";
+export interface DisruptionScriptSpec {
+  readonly name: string;
+  readonly trackingMultiplier: number;
+  readonly optimalMultiplier: number;
+  readonly falloffMultiplier: number;
+}
 
 export interface StasisWebSpec {
   readonly moduleName: string;
@@ -79,16 +84,17 @@ export interface TrackingDisruptorSpec {
   readonly optimal: number;
   readonly falloff: number;
   readonly disruption: number;
-  readonly defaultScript: DisruptionScript;
+  readonly defaultScript: DisruptionScriptSpec | undefined;
   readonly overloadStrengthBonusPercent: number;
 }
 
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly disruptors: readonly TrackingDisruptorSpec[];
+  readonly scripts: readonly DisruptionScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [], scripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -96,7 +102,7 @@ export interface WebActivation {
 
 export interface DisruptorActivation {
   readonly active: boolean;
-  readonly script: DisruptionScript;
+  readonly script: DisruptionScriptSpec | undefined;
 }
 
 export interface EwarActivation {
