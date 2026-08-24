@@ -46,7 +46,6 @@ const controlsCradleKeys = {
   shareController: "shareController",
   rangeOverlayController: "rangeOverlayController",
   confirmController: "confirmController",
-  eventRouter: "eventRouter",
   profileEquality: "profileEquality",
   profileChangeTracker: "profileChangeTracker",
   controls: "controls",
@@ -89,7 +88,6 @@ describe("registerControlsModule", () => {
     expect(cradle.hasRegistration("createFittingPreviewManager")).toBe(false);
     expect(cradle.hasRegistration("createFittingPopupController")).toBe(false);
     expect(cradle.hasRegistration("createSessionCodec")).toBe(false);
-    expect(cradle.hasRegistration("createEventRouter")).toBe(false);
     expect(cradle.hasRegistration("createHullDatalist")).toBe(false);
     expect(cradle.hasRegistration("createHintRotator")).toBe(false);
     expect(cradle.hasRegistration("createPreferencesController")).toBe(false);

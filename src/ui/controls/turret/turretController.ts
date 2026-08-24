@@ -1,6 +1,7 @@
 import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { HullTier, ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { ProfileParamOverrides } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { isHtmlButtonElement, num } from "../controlsDom";
@@ -73,6 +74,10 @@ export class TurretControllerImpl implements TurretController {
       sigResButtons: new SigResButtons({ sigResOptions: this.els.sigResOptions }),
       turretOverrides: this.turretOverrides,
     });
+    this.els.tracking.addEventListener("input", () => this.onTrackingInput());
+    this.els.sigRes.addEventListener("change", () => this.onSigResChange());
+    this.els.optimal.addEventListener("input", () => this.onTurretSpecInput("optimal"));
+    this.els.falloff.addEventListener("input", () => this.onTurretSpecInput("falloff"));
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
@@ -139,6 +144,30 @@ export class TurretControllerImpl implements TurretController {
 
   currentSigResClass(): SigResolutionClass {
     return this.inputSet.currentSigResValue();
+  }
+
+  private currentSigResolution(): number {
+    return SIG_RESOLUTIONS[this.currentSigResClass()];
+  }
+
+  private onTrackingInput(): void {
+    const value = num(this.els.tracking);
+    this.els.tracking.value = String(this.trackingInput.setDisplayValue(value, this.currentSigResolution()));
+    this.turretOverrides.set({ tracking: this.trackingInput.rad });
+    this.events.emitDisplayInvalidated();
+  }
+
+  private onSigResChange(): void {
+    const sigRes = this.currentSigResClass();
+    this.inputSet.setSigRes(sigRes);
+    this.turretOverrides.set({ sigRes });
+    this.events.emitDisplayInvalidated();
+  }
+
+  private onTurretSpecInput(key: "optimal" | "falloff"): void {
+    const spec = this.currentTurretSpec();
+    this.turretOverrides.set({ [key]: spec[key] } as Partial<ProfileParamOverrides>);
+    this.events.emitDisplayInvalidated();
   }
 
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {

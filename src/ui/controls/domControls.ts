@@ -8,6 +8,7 @@ import {
 } from "../../sim";
 import type { UserSettings } from "../../appstate";
 import type { Els } from "./elementsContract";
+import { isEventTargetWithClosest } from "./controlsDom";
 import { AGGRESSIVITY_MIN } from "./controlsFormat";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
@@ -15,7 +16,7 @@ import type { EffectiveReadout } from "./effectiveReadout";
 import type { RangeOverlayHost } from "./rangeOverlay";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
-import type { EventRouter, HullDatalist, SessionCodec } from "./session";
+import type { HullDatalist, SessionCodec } from "./session";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
@@ -53,7 +54,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   previewManager: FittingPreviewManager;
   attackerFittingPopup: FittingPopupController;
   targetFittingPopup: FittingPopupController;
-  eventRouter: EventRouter;
 }
 
 export class DomControls implements Controls, DomControlsHost, RangeOverlayHost {
@@ -80,7 +80,6 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   private currentDistanceValue: number;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
-  private readonly eventRouter: EventRouter;
   private callbacks?: ControlsCallbacks;
   private playing = false;
 
@@ -108,7 +107,6 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.currentDistanceValue = this.sessionCodec.getInitialDistance();
     this.attackerFittingPopup = all.attackerFittingPopup;
     this.targetFittingPopup = all.targetFittingPopup;
-    this.eventRouter = all.eventRouter;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
@@ -129,6 +127,8 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.els.reset.addEventListener("click", () => this.onReset());
     this.els.simSpeed.addEventListener("change", () => this.onSpeedChange(this.preferencesController.getSpeed()));
     this.els.initialDistance.addEventListener("input", () => this.onConfigChange());
+    document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
+    document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
   }
 
   isPlaying(): boolean { return this.playing; }
@@ -235,4 +235,19 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
+
+  private onDocumentPointerDown(event: PointerEvent): void {
+    const previewOpen = this.previewManager.openSide();
+    if (!this.popupGroup.hasOpen() && !previewOpen) return;
+    const target = event.target;
+    if (!isEventTargetWithClosest(target)) return;
+    this.popupGroup.onPointerDown(target);
+    this.previewManager.handlePointerDown(target);
+  }
+
+  private onDocumentKeyDown(event: KeyboardEvent): void {
+    if (event.key !== "Escape") return;
+    if (this.previewManager.openSide()) this.previewManager.handleEscape();
+    this.popupGroup.onKeyDown(event);
+  }
 }

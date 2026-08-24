@@ -1,6 +1,5 @@
 import { asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../cradle";
-import { EventRouter } from "./eventRouter";
 import { HullDatalistImpl } from "./hullDatalist";
 import { SessionCodecImpl } from "./sessionCodec";
 
@@ -24,22 +23,6 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       fittingImport: proxy.fittingImport,
-    })).singleton(),
-    eventRouter: asFunction(({ els, preferencesController, profileController, importController, shareController, attackerSide, targetSide, turretController, trackingInput, popupGroup, previewManager, attackerFittingPopup, targetFittingPopup, ewarController }) => new EventRouter({
-      els,
-      preferences: preferencesController,
-      profile: profileController,
-      import: importController,
-      share: shareController,
-      attackerSide,
-      targetSide,
-      turret: turretController,
-      trackingInput,
-      popupGroup,
-      previewManager,
-      attackerFittingPopup,
-      targetFittingPopup,
-      ewarController,
     })).singleton(),
   });
 }

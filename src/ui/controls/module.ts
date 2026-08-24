@@ -118,7 +118,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       previewManager: proxy.previewManager,
       attackerFittingPopup: proxy.attackerFittingPopup,
       targetFittingPopup: proxy.targetFittingPopup,
-      eventRouter: proxy.eventRouter,
     })).singleton(),
   });
   wire(cradle);
@@ -128,7 +127,12 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
   const sides = combatantSidesOf(c.attackerSide, c.targetSide);
   const fittingPopups = { attacker: c.attackerFittingPopup, target: c.targetFittingPopup } as const;
-  const host = { persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) };
+  const host = {
+  persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
+  onConfigChange: () => c.controls.onConfigChange(),
+  onDisplayChange: () => c.controls.onDisplayChange(),
+  updateManeuverAggressivityEnabled: (enabled: boolean) => c.preferencesController.updateManeuverAggressivityEnabled(enabled),
+};
   forEachSide(sides, (combatant) =>
     wireCombatantSide(combatant, {
       fittingPopup: fittingPopups[combatant.side],
@@ -151,7 +155,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.profileController.setOnNewProfile(() => c.controls.onNewProfile());
   c.profileController.setSnapshotSource(() => profileSettingsOf(c.sessionCodec.capture()));
   c.sessionCodec.setSessionControl(c.controls);
-  c.eventRouter.setHost(c.controls);
   c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
   forEachSide(sides, (combatant) => combatant.panel.sections.stats.updateAlignTime());

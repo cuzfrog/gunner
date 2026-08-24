@@ -125,6 +125,9 @@ export interface SideImporter {
 
 export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
+  onConfigChange(): void;
+  onDisplayChange(): void;
+  updateManeuverAggressivityEnabled(enabled: boolean): void;
 }
 
 export interface SidePanelDeps {

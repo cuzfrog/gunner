@@ -6,7 +6,7 @@ import type { ImageCatalog } from "../icons";
 import type { SavedFittings, ClipboardProvider, SettingsStore, UserSettings } from "../../appstate";
 import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
-import type { EventRouterHost, SessionControl } from "./session";
+import type { SessionControl } from "./session";
 
 export interface DomControlsDeps {
   hitChance: HitChance; i18n: I18n; settingsStore: SettingsStore; ships: Ships; fittingImport: FittingImport;
@@ -21,7 +21,13 @@ interface ProfileEvents {
   persistConfigChange(notify?: boolean): void;
 }
 
-export interface DomControlsHost extends EventRouterHost, SessionControl, ProfileEvents {
+export interface DomControlsHost extends SessionControl, ProfileEvents {
   wireControls(): void;
   currentDistance(): number;
+  onPlayPause(): void;
+  onReset(): void;
+  onNewProfile(): void;
+  onSpeedChange(speed: number): void;
+  onConfigChange(): void;
+  onDisplayChange(): void;
 }

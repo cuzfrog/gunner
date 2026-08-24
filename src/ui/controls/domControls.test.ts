@@ -110,14 +110,23 @@ describe("DomControls", () => {
     expect(callbacks.onDisplayChange).toHaveBeenCalled();
   });
 
-  test("global pointerdown and Escape handling", () => {
-    const { document } = buildDomControls();
+  test("global pointerdown routes to popupGroup and previewManager", () => {
+    const { document, cradle } = buildDomControls();
+    const popupGroup = vi.spyOn(cradle.cradle.popupGroup, "onPointerDown");
+    const previewManager = vi.spyOn(cradle.cradle.previewManager, "handlePointerDown");
     const fake = getFake(document, "target-hull");
     const pointer = { type: "pointerdown", target: fake as unknown as HTMLElement } as unknown as PointerEvent;
     (document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(pointer as unknown as Event);
+    expect(popupGroup).toHaveBeenCalledWith(fake);
+    expect(previewManager).toHaveBeenCalledWith(fake);
+  });
+
+  test("global Escape routes to popupGroup", () => {
+    const { document, cradle } = buildDomControls();
+    const popupGroup = vi.spyOn(cradle.cradle.popupGroup, "onKeyDown");
     const escape = { type: "keydown", key: "Escape" } as unknown as KeyboardEvent;
     (document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(escape as unknown as Event);
-    expect(document).toBeDefined();
+    expect(popupGroup).toHaveBeenCalledWith(escape);
   });
 
   test("restoreStartup round-trips stored settings through SessionCodec", () => {

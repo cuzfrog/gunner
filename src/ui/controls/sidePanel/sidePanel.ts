@@ -37,6 +37,9 @@ import type { ISidePanelSections } from "./sidePanelSections";
 
 const NOOP_HOST: SidePanelHost = {
   persistConfigChange() {},
+  onConfigChange() {},
+  onDisplayChange() {},
+  updateManeuverAggressivityEnabled() {},
 };
 
 export class SidePanelImpl implements SidePanel {
@@ -79,6 +82,12 @@ export class SidePanelImpl implements SidePanel {
     const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
     this.sections = { hull, stats, skill, propulsion, paste };
+    this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
+    this.els.mass.addEventListener("input", () => this.onShipInput("mass"));
+    this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
+    this.els.mode.addEventListener("input", () => this.onModeInput());
+    this.els.range.addEventListener("input", () => this.host.onConfigChange());
+    if (this.els.targetSig) this.els.targetSig.addEventListener("input", () => this.onTargetSigInput());
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
@@ -108,6 +117,28 @@ export class SidePanelImpl implements SidePanel {
   getPastePopup(): Popup { return this.sections.paste.popup; }
   getPropulsionVariantPopup(): Popup { return this.sections.propulsion.popup; }
   setHost(host: SidePanelHost): void { this.hostValue = host; }
+
+  private onShipInput(key: "speed" | "mass" | "inertia"): void {
+    const value = num(this.els[key]);
+    const overrideKey = `${this.side}${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof ProfileParamOverrides;
+    this.recordOverride(overrideKey, value);
+    if (key === "mass") {
+      this.sections.stats.updateSpeedFromMass();
+      this.sections.stats.updateAlignTime();
+    }
+    if (key === "inertia") this.sections.stats.updateAlignTime();
+    this.host.onConfigChange();
+  }
+
+  private onModeInput(): void {
+    this.host.updateManeuverAggressivityEnabled(this.els.mode.value === "midships");
+    this.host.onConfigChange();
+  }
+
+  private onTargetSigInput(): void {
+    this.recordOverride("targetSig", this.capture().sig ?? 1);
+    this.host.onDisplayChange();
+  }
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
   setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }

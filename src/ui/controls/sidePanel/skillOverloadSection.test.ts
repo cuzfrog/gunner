@@ -41,7 +41,12 @@ function buildSkillSection() {
     } as unknown as ISidePanelSections["paste"],
   } as unknown as ISidePanelSections);
 
-  const host = { persistConfigChange: vi.fn() };
+  const host = {
+    persistConfigChange: vi.fn(),
+    onConfigChange: vi.fn(),
+    onDisplayChange: vi.fn(),
+    updateManeuverAggressivityEnabled: vi.fn(),
+  };
   const panel = vi.mocked<SidePanel>({
     side: "attacker",
     host,

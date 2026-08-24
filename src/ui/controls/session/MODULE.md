@@ -1,14 +1,11 @@
 ---
 no-new-exports:
-  - eventRouter.ts
   - hullDatalist.ts
   - sessionCodec.ts
   - sessionControl.ts
   - sessionCodec.test.ts
   - module.ts
-  - eventRouter.test.ts
   - index.ts
-  - inputHandlers.ts
   - startupDefaults.ts
   - module.test.ts
 ---
@@ -18,8 +15,6 @@ no-new-exports:
 
 # session
 
-Session state, URL encoding, event routing, and hull datalist.
+Session state, URL encoding, and hull datalist.
 
-The public surface is the abstraction types: `SessionCodec`, `SessionControl`, `EventRouter`, `EventRouterHost`, and `HullDatalist`.
-
-`EventRouter` dispatches input events to the `turret`, `popup`, `sidePanel`, `hints`, and `import` sub-modules, so the sub-module may depend on their public indexes.
+The public surface is the abstraction types: `SessionCodec`, `SessionControl`, and `HullDatalist`.

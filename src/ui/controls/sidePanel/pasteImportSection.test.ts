@@ -29,6 +29,9 @@ function buildPasteSection() {
 
   const host = vi.mocked<SidePanel["host"]>({
     persistConfigChange: vi.fn(),
+    onConfigChange: vi.fn(),
+    onDisplayChange: vi.fn(),
+    updateManeuverAggressivityEnabled: vi.fn(),
   });
   const importer = {
     autoLoadFittingTextFor: vi.fn(),
