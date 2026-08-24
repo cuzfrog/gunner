@@ -1,5 +1,5 @@
 ---
-sealed:
+no-new-exports:
   - chargeCatalog.test.ts
   - chargeCatalog.ts
   - cradle.ts
