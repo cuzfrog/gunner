@@ -73,6 +73,11 @@ export class LocalSettingsStore implements SettingsStore {
     this.storage.setItem(SELECTED_PROFILE_KEY, name);
   }
 
+  clearSelectedProfile(): void {
+    this.storage.removeItem(SELECTED_PROFILE_KEY);
+    this.storage.removeItem(MIGRATED_SELECTED_PROFILE_KEY);
+  }
+
   encodeUrl(settings: ProfileSettings): string {
     const url = new URL(this.location.href);
     url.searchParams.set(URL_PARAM, encodeBase64(stripDisplayPreferences(settings)));

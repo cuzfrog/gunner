@@ -25,6 +25,7 @@ import type { StatConditions } from "../../ships";
 import type { SigResolutionClass } from "../../sim";
 import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { DomControls } from "./domControls";
+import type { ConfirmController } from "./confirmController";
 import type { ControlsCradle } from "./cradle";
 import { createControlsEls } from "./elements";
 import { registerControlsModule } from "./module";
@@ -153,6 +154,9 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const cradle = buildControlsCradle(document, options);
   setControlDefaults(document);
   registerControlsModule(cradle);
+  cradle.register({
+    confirmController: asValue(vi.mocked<ConfirmController>({ confirm: vi.fn(() => Promise.resolve(true)) })),
+  });
   const controls = cradle.cradle.controls;
   if (!(controls instanceof DomControls)) throw new Error("controls did not resolve to DomControls");
   return {

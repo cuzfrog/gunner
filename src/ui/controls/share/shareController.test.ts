@@ -66,6 +66,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     loadProfile: vi.fn(),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(() => "http://localhost/?c=shared"),
     loadPreferences: vi.fn(),
     savePreferences: vi.fn(),
@@ -77,6 +78,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     restore: vi.fn(),
     fromProfile: vi.fn(),
     restoreStartup: vi.fn(),
+    resetToDefaults: vi.fn(),
     setSessionControl: vi.fn(),
     ...overrides.sessionCodec,
   });

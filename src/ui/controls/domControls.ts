@@ -147,6 +147,11 @@ export class DomControls implements Controls, DomControlsHost {
     this.callbacks?.onReset();
   }
 
+  onNewProfile(): void {
+    this.sessionCodec.resetToDefaults();
+    this.callbacks?.onReset();
+  }
+
   onProfileTextLoaded(settings: UserSettings): void {
     this.sessionCodec.restore(settings);
     this.profileController.showStatus("status.profileImported");

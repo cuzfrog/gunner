@@ -38,6 +38,7 @@ const controlsCradleKeys = {
   importController: "importController",
   ewarController: "ewarController",
   shareController: "shareController",
+  confirmController: "confirmController",
   eventRouter: "eventRouter",
   controls: "controls",
 } as const satisfies { [K in keyof ControlsCradle]: K };

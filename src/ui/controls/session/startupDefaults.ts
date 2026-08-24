@@ -29,7 +29,7 @@ export function applyStartupDefaults(context: StartupContext): void {
   context.sessionControl?.setPlaying(false);
   context.attackerSide.sections.propulsion.renderPropulsionOptions();
   context.targetSide.sections.propulsion.renderPropulsionOptions();
-  context.profileController.refresh();
+  context.profileController.markLoaded("");
 }
 
 function applyDefaultSkillAndOverload({ attackerSide, targetSide }: StartupContext): void {

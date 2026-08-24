@@ -59,11 +59,12 @@ function makeShareController(): ShareController {
 }
 
 describe("EventRouter", () => {
-  test("play, reset and speed input route to the host callbacks", () => {
+  test("play, reset, new and speed input route to the host callbacks", () => {
     const els = makeEls();
     const host = {
       onPlayPause: vi.fn(),
       onReset: vi.fn(),
+      onNewProfile: vi.fn(),
       onSpeedChange: vi.fn(),
       onConfigChange: vi.fn(),
       onDisplayChange: vi.fn(),
@@ -96,6 +97,9 @@ describe("EventRouter", () => {
 
     getFake(globalThis.document, "reset").trigger("click");
     expect(host.onReset).toHaveBeenCalled();
+
+    getFake(globalThis.document, "profile-new").trigger("click");
+    expect(host.onNewProfile).toHaveBeenCalled();
 
     getFake(globalThis.document, "sim-speed").value = "2";
     getFake(globalThis.document, "sim-speed").trigger("change");

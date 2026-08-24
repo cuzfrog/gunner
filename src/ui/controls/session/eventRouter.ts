@@ -14,6 +14,7 @@ import { applyDisplayInput, applyShipInput } from "./inputHandlers";
 export interface EventRouterHost {
   onPlayPause(): void;
   onReset(): void;
+  onNewProfile(): void;
   onSpeedChange(speed: number): void;
   onConfigChange(): void;
   onDisplayChange(): void;
@@ -84,9 +85,10 @@ export class EventRouter {
     this.els.langEn.addEventListener("click", () => this.preferences.setLanguage("en"));
     this.els.langZh.addEventListener("click", () => this.preferences.setLanguage("zh"));
     this.els.langJa.addEventListener("click", () => this.preferences.setLanguage("ja"));
-    this.els.profileSave.addEventListener("click", () => this.profile.saveProfile());
-    this.els.profileSelect.addEventListener("change", () => this.profile.loadProfile());
-    this.els.profileDelete.addEventListener("click", () => this.profile.deleteProfile());
+    this.els.profileSave.addEventListener("click", () => void this.profile.saveProfile());
+    this.els.profileSelect.addEventListener("change", () => void this.profile.loadProfile());
+    this.els.profileDelete.addEventListener("click", () => void this.profile.deleteProfile());
+    this.els.profileNew.addEventListener("click", () => this.host?.onNewProfile());
     this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.shareController.popup));
     this.els.shareCopyUrl.addEventListener("click", () => void this.shareController.onCopyUrlClicked());
     this.els.shareCopyText.addEventListener("click", () => void this.shareController.onCopyTextClicked());

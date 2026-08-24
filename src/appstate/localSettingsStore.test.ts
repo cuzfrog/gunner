@@ -109,6 +109,16 @@ describe("LocalSettingsStore", () => {
     expect(() => store.selectProfile("")).toThrow("selected profile name cannot be empty");
   });
 
+  test("clearSelectedProfile removes the selected profile keys", () => {
+    const storage = fakeStorage();
+    const store = new LocalSettingsStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    store.selectProfile("brawler");
+    store.clearSelectedProfile();
+    expect(storage.getItem("gunner-selected-profile-v6")).toBeNull();
+    expect(storage.getItem("gunner-selected-profile-v5")).toBeNull();
+    expect(store.loadStartupState().selectedProfileName).toBeNull();
+  });
+
   test("save and load round-trips settings through the URL", () => {
     const storage = fakeStorage();
     const location = fakeLocation("http://localhost/");

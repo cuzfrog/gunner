@@ -14,6 +14,7 @@ import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
 import type { EwarController } from "./ewar";
 import type { ImportController } from "./import";
+import type { ConfirmController } from "./confirmController";
 import type { FittingPopupController, FittingPreview, FittingPreviewManager, PopupGroup } from "./popup";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
@@ -59,6 +60,7 @@ export interface ControlsCradle {
   readonly sessionCodec: SessionCodec;
   readonly importController: ImportController;
   readonly shareController: ShareController;
+  readonly confirmController: ConfirmController;
   readonly eventRouter: EventRouter;
   readonly controls: Controls & DomControlsHost;
 }

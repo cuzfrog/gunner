@@ -7,6 +7,7 @@ export class FakeElement {
   title = "";
   src = "";
   tagName = "";
+  id = "";
   disabled = false;
   isConnected = true;
   children: FakeElement[] = [];
@@ -39,7 +40,12 @@ export class FakeElement {
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
   appendChild(child: unknown): void { this.children.push(child as FakeElement); }
-  closest(): FakeElement | null { return null; }
+  contains(target: unknown): boolean { return target === this || this.children.includes(target as FakeElement); }
+  closest(selector?: string): FakeElement | null {
+    if (!selector) return null;
+    const ids = selector.split(",").map((s) => s.trim()).filter((s) => s.startsWith("#")).map((s) => s.slice(1));
+    return ids.includes(this.id) ? this : null;
+  }
   querySelector(selector: string): FakeElement | null {
     if (selector.startsWith('[aria-selected="true"]')) {
       return this.children.find((c) => c.getAttribute("aria-selected") === "true") ?? null;

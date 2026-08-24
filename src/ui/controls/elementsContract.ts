@@ -98,6 +98,11 @@ export interface Els {
   readonly profileSave: HTMLButtonElement;
   readonly profileSelect: HTMLSelectElement;
   readonly profileDelete: HTMLButtonElement;
+  readonly profileNew: HTMLButtonElement;
+  readonly confirmPopup: HTMLElement;
+  readonly confirmMessage: HTMLElement;
+  readonly confirmOk: HTMLButtonElement;
+  readonly confirmCancel: HTMLButtonElement;
   readonly shareLink: HTMLButtonElement;
   readonly sharePopup: HTMLElement;
   readonly shareCopyUrl: HTMLButtonElement;

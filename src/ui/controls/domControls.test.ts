@@ -139,6 +139,7 @@ describe("DomControls", () => {
     controls.setCallbacks(callbacks);
     getFake(document, "profile-name").value = "brawler";
     getFake(document, "profile-save").trigger("click");
+    await Promise.resolve();
     expect(saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
     const saved = saveProfile.mock.calls[0][1];
     loadProfile.mockReturnValue(saved);
@@ -146,6 +147,7 @@ describe("DomControls", () => {
     option.value = "brawler";
     getFake(document, "profile-select").value = "brawler";
     getFake(document, "profile-select").trigger("change");
+    await Promise.resolve();
     expect(loadProfile).toHaveBeenCalledWith("brawler");
     expect(callbacks.onReset).toHaveBeenCalled();
     getFake(document, "share-link").trigger("click");

@@ -62,6 +62,7 @@ function mockSettingsStore(): SettingsStore {
     loadProfile: vi.fn(),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(),
     loadPreferences: vi.fn(),
     savePreferences: vi.fn(),

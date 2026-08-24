@@ -2,6 +2,7 @@ import { asClass, asFunction, type AwilixContainer } from "awilix";
 import { SIG_RESOLUTIONS } from "../../sim";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
+import { ConfirmControllerImpl } from "./confirmController";
 import { profileSettingsOf } from "./controlsFormat";
 import { createControlsEls } from "./elements";
 import { collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
@@ -42,12 +43,18 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       events: uiEvents,
     })).singleton(),
-    profileController: asFunction(({ els, settingsStore, timer, i18n, uiEvents }: ControlsCradle) => new ProfileControllerImpl({
+    confirmController: asFunction(({ els, popupGroup, i18n }: ControlsCradle) => new ConfirmControllerImpl({
+      popupGroup,
+      i18n,
+      els: { confirmPopup: els.confirmPopup, confirmMessage: els.confirmMessage, confirmOk: els.confirmOk, confirmCancel: els.confirmCancel },
+    })).singleton(),
+    profileController: asFunction(({ els, settingsStore, timer, i18n, uiEvents, confirmController }: ControlsCradle) => new ProfileControllerImpl({
       els: collectProfileEls(els),
       settingsStore,
       timer,
       i18n,
       events: uiEvents,
+      confirmController,
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       hitChance: proxy.hitChance,

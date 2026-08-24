@@ -13,6 +13,7 @@ export function mockSettingsStore(): SettingsStore {
     loadProfile: vi.fn(() => null),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(() => ""),
     loadPreferences: vi.fn(() => ({ language: "en" as const, trackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 })),
     savePreferences: vi.fn(),

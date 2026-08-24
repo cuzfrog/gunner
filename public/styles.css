@@ -1167,6 +1167,7 @@ canvas {
 }
 
 .profile-bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1223,6 +1224,16 @@ canvas {
   border-color: var(--warn-yellow);
   color: var(--warn-yellow);
   box-shadow: 0 0 8px var(--warn-yellow-25);
+}
+
+.profile-select.dirty {
+  border-color: var(--warn-yellow-65);
+  color: var(--warn-yellow-85);
+  box-shadow: 0 0 6px var(--warn-yellow-12);
+}
+
+.profile-select.dirty::after {
+  content: " •";
 }
 
 .share-status {
@@ -2123,5 +2134,36 @@ canvas {
 .share-popup {
   right: auto;
   left: 0;
+}
+
+.confirm-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  z-index: var(--z-popup);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 240px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  padding: 12px;
+}
+
+.confirm-message {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirm-buttons button {
+  min-width: 80px;
 }
 

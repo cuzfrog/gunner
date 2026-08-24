@@ -1,0 +1,84 @@
+import type { I18n } from "../i18n";
+import type { Popup, PopupGroup } from "./popup";
+
+export interface ConfirmEls {
+  readonly confirmPopup: HTMLElement;
+  readonly confirmMessage: HTMLElement;
+  readonly confirmOk: HTMLButtonElement;
+  readonly confirmCancel: HTMLButtonElement;
+}
+
+export interface ConfirmController {
+  confirm(key: string): Promise<boolean>;
+}
+
+interface ConfirmControllerDeps {
+  readonly popupGroup: PopupGroup;
+  readonly i18n: I18n;
+  readonly els: ConfirmEls;
+}
+
+export class ConfirmControllerImpl implements ConfirmController {
+  private readonly popupGroup: PopupGroup;
+  private readonly i18n: I18n;
+  private readonly els: ConfirmEls;
+  private readonly popupValue: Popup;
+  private open = false;
+  private currentResolve?: (value: boolean) => void;
+  private currentPromise?: Promise<boolean>;
+
+  constructor(deps: ConfirmControllerDeps) {
+    this.popupGroup = deps.popupGroup;
+    this.i18n = deps.i18n;
+    this.els = deps.els;
+    this.popupValue = {
+      isOpen: () => this.open,
+      open: () => this.openPopup(),
+      close: () => this.closePopup(false),
+      focusTrigger: () => this.els.confirmOk.focus(),
+      contains: (target) => this.containsTarget(target),
+    };
+    this.els.confirmOk.addEventListener("click", () => this.closePopup(true));
+    this.els.confirmCancel.addEventListener("click", () => this.closePopup(false));
+    this.popupGroup.register(this.popupValue);
+  }
+
+  get popup(): Popup { return this.popupValue; }
+
+  confirm(key: string): Promise<boolean> {
+    if (this.open && this.currentPromise) {
+      this.els.confirmMessage.textContent = this.i18n.t(key);
+      return this.currentPromise;
+    }
+    this.els.confirmMessage.textContent = this.i18n.t(key);
+    this.els.confirmOk.textContent = this.i18n.t("button.confirm");
+    this.els.confirmCancel.textContent = this.i18n.t("button.cancel");
+    this.popupGroup.open(this.popupValue);
+    let resolve: (value: boolean) => void;
+    const promise = new Promise<boolean>((r) => { resolve = r; });
+    this.currentResolve = resolve!;
+    this.currentPromise = promise;
+    return promise;
+  }
+
+  private openPopup(): void {
+    this.els.confirmPopup.hidden = false;
+    this.open = true;
+  }
+
+  private closePopup(confirmed: boolean): void {
+    if (!this.open) return;
+    this.els.confirmPopup.hidden = true;
+    this.open = false;
+    this.currentResolve?.(confirmed);
+    this.currentResolve = undefined;
+    this.currentPromise = undefined;
+  }
+
+  private containsTarget(target: EventTarget): boolean {
+    if (!(target instanceof Element)) return false;
+    const popup = this.els.confirmPopup;
+    if (popup.contains(target as Node)) return true;
+    return target === this.els.confirmOk || target === this.els.confirmCancel;
+  }
+}

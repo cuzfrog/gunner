@@ -23,6 +23,7 @@ export interface SessionCodec {
   restore(settings: UserSettings, selectedName?: string): void;
   fromProfile(profile: ProfileSettings): UserSettings;
   restoreStartup(startup: StartupState): void;
+  resetToDefaults(): void;
   setSessionControl(sessionControl: SessionControl): void;
 }
 
@@ -183,12 +184,21 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController.restore(side, loadout, activation);
   }
 
+  resetToDefaults(): void {
+    this.settingsStore.clearSelectedProfile();
+    this.applyDefaultStartup();
+  }
+
   restoreStartup(startup: StartupState): void {
     if (startup.settings) {
       this.restore(startup.settings, startup.selectedProfileName ?? "");
       return;
     }
     if (this.profileController.restoreFromStartup(startup)) return;
+    this.applyDefaultStartup();
+  }
+
+  private applyDefaultStartup(): void {
     const preferences = this.settingsStore.loadPreferences();
     this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
