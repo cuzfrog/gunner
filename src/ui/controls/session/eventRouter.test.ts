@@ -59,55 +59,6 @@ function makeShareController(): ShareController {
 }
 
 describe("EventRouter", () => {
-  test("play, reset, new and speed input route to the host callbacks", () => {
-    const els = makeEls();
-    const host = {
-      onPlayPause: vi.fn(),
-      onReset: vi.fn(),
-      onNewProfile: vi.fn(),
-      onSpeedChange: vi.fn(),
-      onConfigChange: vi.fn(),
-      onDisplayChange: vi.fn(),
-    } as unknown as EventRouterHost;
-    const preferences = {
-      getSpeed: vi.fn(() => Number(els.simSpeed.value)),
-      trackingInput: { rad: 0.32 },
-    } as unknown as PreferencesController;
-    const popupGroup = makePopupGroup();
-    const profile = { toggleNewProfilePopup: vi.fn() } as unknown as ProfileController;
-    const router = new EventRouter({
-      els,
-      preferences,
-      profile,
-      import: {} as ImportController,
-      share: makeShareController(),
-      attackerSide: {} as SidePanel,
-      targetSide: {} as SidePanel,
-      turret: {} as TurretController,
-      trackingInput: fakeTrackingInput(),
-      popupGroup,
-      previewManager: {} as FittingPreviewManager,
-      attackerFittingPopup: makeFittingPopup(),
-      targetFittingPopup: makeFittingPopup(),
-      ewarController: makeEwarController(),
-    });
-    router.setHost(host);
-
-    getFake(globalThis.document, "play").trigger("click");
-    expect(host.onPlayPause).toHaveBeenCalled();
-
-    getFake(globalThis.document, "reset").trigger("click");
-    expect(host.onReset).toHaveBeenCalled();
-
-    getFake(globalThis.document, "profile-new").trigger("click");
-    expect(profile.toggleNewProfilePopup).toHaveBeenCalled();
-
-    getFake(globalThis.document, "sim-speed").value = "2";
-    getFake(globalThis.document, "sim-speed").trigger("change");
-    expect(preferences.getSpeed).toHaveBeenCalled();
-    expect(host.onSpeedChange).toHaveBeenCalledWith(2);
-  });
-
   test("Escape routes to popupGroup", () => {
     const els = makeEls();
     const popupGroup = makePopupGroup();
@@ -242,38 +193,6 @@ describe("EventRouter", () => {
     expect(targetSide.recordOverride).toHaveBeenCalledWith("targetMass", 1_100_000);
 
     expect(host.onConfigChange).toHaveBeenCalled();
-  });
-
-  test("share link toggles the popup and copy buttons call the share controller", () => {
-    const els = makeEls();
-    const popupGroup = makePopupGroup();
-    const shareController = makeShareController();
-    const router = new EventRouter({
-      els,
-      preferences: {} as PreferencesController,
-      profile: {} as ProfileController,
-      import: {} as ImportController,
-      share: shareController,
-      attackerSide: {} as SidePanel,
-      targetSide: {} as SidePanel,
-      turret: {} as TurretController,
-      trackingInput: fakeTrackingInput(),
-      popupGroup,
-      previewManager: {} as FittingPreviewManager,
-      attackerFittingPopup: makeFittingPopup(),
-      targetFittingPopup: makeFittingPopup(),
-      ewarController: makeEwarController(),
-    });
-    router.setHost({} as EventRouterHost);
-
-    getFake(globalThis.document, "share-link").trigger("click");
-    expect(popupGroup.toggle).toHaveBeenCalledWith(shareController.popup);
-
-    getFake(globalThis.document, "share-copy-url").trigger("click");
-    expect(shareController.onCopyUrlClicked).toHaveBeenCalled();
-
-    getFake(globalThis.document, "share-copy-text").trigger("click");
-    expect(shareController.onCopyTextClicked).toHaveBeenCalled();
   });
 
   test("ewar triggers toggle the ewar popups", () => {

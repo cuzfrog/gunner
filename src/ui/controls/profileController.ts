@@ -104,6 +104,10 @@ export class ProfileControllerImpl implements ProfileController {
       void this.onConfirmNewProfile();
     });
     this.events.onLanguageChanged(() => this.refresh(this.selectedNameValue));
+    this.els.profileSave.addEventListener("click", () => void this.saveProfile());
+    this.els.profileSelectTrigger.addEventListener("click", () => this.toggleProfileSelector());
+    this.els.profileDelete.addEventListener("click", () => void this.deleteProfile());
+    this.els.profileNew.addEventListener("click", () => this.toggleNewProfilePopup());
   }
 
   setOnProfileLoaded(onProfileLoaded: (name: string) => void): void {

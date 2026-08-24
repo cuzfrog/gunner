@@ -111,6 +111,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.eventRouter = all.eventRouter;
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
+    this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
   }
 
   wireControls(): void {
@@ -124,6 +125,10 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.hullDatalist.populate();
     this.attackerSide.sections.skill.renderSkillOptions();
     this.targetSide.sections.skill.renderSkillOptions();
+    this.els.play.addEventListener("click", () => this.onPlayPause());
+    this.els.reset.addEventListener("click", () => this.onReset());
+    this.els.simSpeed.addEventListener("change", () => this.onSpeedChange(this.preferencesController.getSpeed()));
+    this.els.initialDistance.addEventListener("input", () => this.onConfigChange());
   }
 
   isPlaying(): boolean { return this.playing; }

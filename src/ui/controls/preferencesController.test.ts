@@ -12,6 +12,7 @@ class FakeElement {
   textContent = "";
   classList = { toggle: vi.fn() };
   private attributes: Record<string, string | null> = {};
+  private handlers: Record<string, Array<(event?: unknown) => void>> = {};
   style: Record<string, string> & { setProperty(name: string, value: string): void } = Object.assign(Object.create(null), {
     setProperty(this: Record<string, string>, name: string, value: string) {
       this[name] = value;
@@ -25,6 +26,10 @@ class FakeElement {
   setAttribute(name: string, value: string): void {
     this.attributes[name] = value;
   }
+
+  addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
+  dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
+  trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
 }
 
 function fakeEls(): PreferencesEls {

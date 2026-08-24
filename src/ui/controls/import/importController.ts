@@ -70,6 +70,9 @@ export class ImportControllerImpl implements ImportController {
       preferences: deps.preferences,
       profileTextCodec: deps.profileTextCodec,
     });
+    this.els.importProfile.addEventListener("click", () => void this.importProfileClicked());
+    this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
+    this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
     this.popupValue = {
       isOpen: () => this.importSidePopupOpen,
       open: () => this.openImportSidePopup(),

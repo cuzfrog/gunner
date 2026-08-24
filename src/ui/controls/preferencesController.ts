@@ -69,6 +69,13 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.events = deps.events;
     this.itemNames = deps.itemNames;
     this.rangeOverlayController = deps.rangeOverlayController;
+    this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
+    this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
+    this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
+    this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
+    this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
+    this.els.maneuverAggressivitySlider.addEventListener("input", () => this.onManeuverAggressivityChange());
+    this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
   }
 
   getSpeed(): number {
@@ -113,6 +120,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.tracking.value = String(this.trackingInput.setUnit(unit, this.sigResolution()));
     this.updateUnitToggle();
     this.savePreferences();
+    this.events.emitDisplayInvalidated();
   }
 
   updateTrackingFromInput(): void {
@@ -127,6 +135,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   onGridBrightnessChange(): void {
     this.updateGridBrightnessDisplay();
     this.savePreferences();
+    this.events.emitDisplayInvalidated();
   }
 
   updateGridBrightnessDisplay(value?: number): void {
@@ -146,6 +155,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
     this.updateManeuverAggressivityDisplay(value);
     this.savePreferences();
+    this.events.emitConfigInvalidated(true);
   }
 
   updateManeuverAggressivityDisplay(value?: number): void {
@@ -168,6 +178,10 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   getManeuverAggressivity(): number {
     return parseManeuverAggressivity(this.els.maneuverAggressivity);
+  }
+
+  private onTrackingUnitClick(unit: TrackingUnit): void {
+    this.setTrackingUnit(unit);
   }
 
   private applyLanguage(language: Language): void {

@@ -77,27 +77,9 @@ export class EventRouter {
   private bind(): void {
     const host = this.host;
     if (!host) return;
-    this.els.play.addEventListener("click", () => host.onPlayPause());
-    this.els.reset.addEventListener("click", () => host.onReset());
-    this.els.simSpeed.addEventListener("change", () => host.onSpeedChange(this.preferences.getSpeed()));
-    this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
-    this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
-    this.els.langEn.addEventListener("click", () => this.preferences.setLanguage("en"));
-    this.els.langZh.addEventListener("click", () => this.preferences.setLanguage("zh"));
-    this.els.langJa.addEventListener("click", () => this.preferences.setLanguage("ja"));
-    this.els.profileSave.addEventListener("click", () => void this.profile.saveProfile());
-    this.els.profileSelectTrigger.addEventListener("click", () => this.profile.toggleProfileSelector());
-    this.els.profileDelete.addEventListener("click", () => void this.profile.deleteProfile());
-    this.els.profileNew.addEventListener("click", () => this.profile.toggleNewProfilePopup());
-    this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.shareController.popup));
-    this.els.shareCopyUrl.addEventListener("click", () => void this.shareController.onCopyUrlClicked());
-    this.els.shareCopyText.addEventListener("click", () => void this.shareController.onCopyTextClicked());
-    this.els.importProfile.addEventListener("click", () => void this.importController.importProfileClicked());
-    this.els.importSideAttacker.addEventListener("click", () => void this.importController.onImportSideClick("attacker"));
-    this.els.importSideTarget.addEventListener("click", () => void this.importController.onImportSideClick("target"));
 
-    this.els.attackerImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("attacker"));
-    this.els.targetImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("target"));
+
+
 
     this.els.attackerPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.attackerSide.sections.paste.onPastePopupPaste(event));
     this.els.targetPastePopup.addEventListener("paste", (event: ClipboardEvent) => this.targetSide.sections.paste.onPastePopupPaste(event));
@@ -165,25 +147,10 @@ export class EventRouter {
       });
     }
 
-    this.els.maneuverAggressivitySlider.addEventListener("input", () => {
-      this.preferences.onManeuverAggressivityChange();
-      host.onConfigChange();
-    });
-    this.els.gridBrightnessSlider.addEventListener("input", () => {
-      this.preferences.onGridBrightnessChange();
-      host.onDisplayChange();
-    });
+
 
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
-  }
-
-  private onTrackingUnitClick(unit: "rad" | "score"): void {
-    const host = this.host;
-    if (!host) return;
-    this.preferences.setTrackingUnit(unit);
-    this.profile.updateActionBarState();
-    host.onDisplayChange();
   }
 
   private onDocumentPointerDown(event: PointerEvent): void {
