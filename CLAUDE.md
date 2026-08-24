@@ -59,7 +59,7 @@
 - Use OOP + DI. Avoid helper functions, helpers are bad, they are where code is coupled out of class hierarchy. helper functions are functions that are outside the abstraction hierarchy, containing domain logic, serving the only purpose of code reuse. ("utility/support" functions are not helpers, because they are purely technical without complex domain logic.)
 - A function's parameters should be data it consumes, parameters should not be its dependencies. A higher-order function should only be used for pure transformation; orchestration with side effects should be a regular function. Context and config types are exempted from this rule.
 - A responsibility should belong to an earlier performer. E.g. if type `Config` can parse the configuration into ready-to-use types, it shouldn't pass raw strings to its clients. A producer's return type is the one its consumer can use directly — no further parsing, validation, or normalization.
-- Class logic should be extracted in private pure functions (at the file bottom) as much as possible. For complex logic, you can export the private function using `export {fun as _fun}` for unit testing. But do not export or share private functions.
+- Class logic should be extracted into private pure functions (at the file bottom) as much as possible. For complex logic, you can export the private function using `export {fun as _fun}` for unit testing. But do not export or share private functions.
 - A feature cannot ship by deferring an NFR(non-functional requirement); the NFR must be met in the same change. Do not be scared of change scopes, divide and conquer. Maintain good code architecture, follow context rules even if changes are big.
 - No cyclical dependencies.
 
