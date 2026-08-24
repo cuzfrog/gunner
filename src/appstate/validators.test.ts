@@ -1,4 +1,4 @@
-import { isOptionalEwarActivation, isOptionalHiddenRangeOverlays } from "./validators";
+import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalHiddenRangeOverlays } from "./validators";
 
 describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
@@ -53,5 +53,31 @@ describe("isOptionalHiddenRangeOverlays", () => {
 
   test("rejects a non-array", () => {
     expect(isOptionalHiddenRangeOverlays({ web: true })).toBe(false);
+  });
+});
+
+describe("isOptionalBoosterActivations", () => {
+  test("accepts a valid array of active and scripted booster entries", () => {
+    expect(isOptionalBoosterActivations([{ active: true, script: "Optimal Range Script" }, { active: false, script: "none" }])).toBe(true);
+  });
+
+  test("accepts undefined", () => {
+    expect(isOptionalBoosterActivations(undefined)).toBe(true);
+  });
+
+  test("accepts an empty array", () => {
+    expect(isOptionalBoosterActivations([])).toBe(true);
+  });
+
+  test("rejects a non-array", () => {
+    expect(isOptionalBoosterActivations({ active: true, script: "none" })).toBe(false);
+  });
+
+  test("rejects an entry missing the active flag", () => {
+    expect(isOptionalBoosterActivations([{ script: "none" }])).toBe(false);
+  });
+
+  test("rejects a non-string script", () => {
+    expect(isOptionalBoosterActivations([{ active: true, script: 123 }])).toBe(false);
   });
 });

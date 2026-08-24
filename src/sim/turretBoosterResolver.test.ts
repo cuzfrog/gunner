@@ -95,4 +95,30 @@ describe("TurretBoosterResolverImpl", () => {
     const result = resolver().boostedTurret(baseTurret, projection);
     expect(result.tracking).toBeCloseTo(baseTurret.tracking * penalty.apply([1.1, 1.1]), 10);
   });
+
+  test("two unscripted computers match inline stacking calculations", () => {
+    const penalty = new StackingPenaltyImpl();
+    const tc2 = spec({ tracking: 15, optimal: 7.5, falloff: 15 });
+    const faction = spec({ tracking: 12, optimal: 6, falloff: 12 });
+    const projection = {
+      loadout: { computers: [tc2, faction], scripts: [] },
+      activation: { computers: [{ active: true, script: undefined }, { active: true, script: undefined }] },
+    };
+    const result = resolver().boostedTurret(baseTurret, projection);
+    expect(result.tracking).toBeCloseTo(baseTurret.tracking * penalty.apply([1.15, 1.12]), 10);
+    expect(result.optimal).toBeCloseTo(baseTurret.optimal * penalty.apply([1.075, 1.06]), 10);
+    expect(result.falloff).toBeCloseTo(baseTurret.falloff * penalty.apply([1.15, 1.12]), 10);
+  });
+
+  test("scripted tracking computer matches inline stacking calculations", () => {
+    const penalty = new StackingPenaltyImpl();
+    const projection = {
+      loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
+      activation: { computers: [{ active: true, script: optimalRangeScript }] },
+    };
+    const result = resolver().boostedTurret(baseTurret, projection);
+    expect(result.tracking).toBeCloseTo(baseTurret.tracking, 10);
+    expect(result.optimal).toBeCloseTo(baseTurret.optimal * penalty.apply([1 + 0.05 * 2]), 10);
+    expect(result.falloff).toBeCloseTo(baseTurret.falloff * (1 + 0.1 * 2), 10);
+  });
 });

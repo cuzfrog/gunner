@@ -125,4 +125,19 @@ target.sig=40`;
     expect(parsed?.attackerEwarActivation).toBeUndefined();
     expect(parsed?.targetEwarActivation).toBeUndefined();
   });
+
+  test("round-trips grappler and booster activations with script and none sentinel", () => {
+    const profile: ProfileSettings = {
+      ...MINIMAL_PROFILE,
+      attackerEwarActivation: {
+        webs: [],
+        grapplers: [{ active: true, overloaded: true }],
+        disruptors: [],
+        scramblers: [],
+      },
+      attackerBoosterActivation: [{ active: false, script: "Optimal Range Script" }, { active: true, script: "none" }],
+      targetBoosterActivation: [{ active: true, script: "none" }],
+    };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
 });

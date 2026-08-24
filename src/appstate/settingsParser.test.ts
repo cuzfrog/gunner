@@ -79,6 +79,67 @@ describe("SettingsParser", () => {
     expect(parsed!.targetEwarActivation).toEqual(DEFAULT_SETTINGS.targetEwarActivation);
   });
 
+  test("parseUserSettings round-trips v10 grappler and booster activations", () => {
+    const v10 = {
+      ...DEFAULT_SETTINGS,
+      attackerEwarActivation: {
+        webs: [{ active: true, overloaded: false }],
+        grapplers: [{ active: true, overloaded: true }],
+        disruptors: [{ active: false, overloaded: false, script: "none" }],
+        scramblers: [],
+      },
+      targetEwarActivation: {
+        webs: [],
+        grapplers: [{ active: false, overloaded: true }],
+        disruptors: [],
+        scramblers: [],
+      },
+      attackerBoosterActivation: [{ active: true, script: "Optimal Range Script" }, { active: false, script: "none" }],
+      targetBoosterActivation: [{ active: true, script: "Tracking Speed Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v10));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation?.grapplers).toEqual([{ active: true, overloaded: true }]);
+    expect(parsed!.targetEwarActivation?.grapplers).toEqual([{ active: false, overloaded: true }]);
+    expect(parsed!.attackerBoosterActivation).toEqual(v10.attackerBoosterActivation);
+    expect(parsed!.targetBoosterActivation).toEqual(v10.targetBoosterActivation);
+  });
+
+  test("parseUserSettings leaves absent ewar and booster activation fields undefined", () => {
+    const { attackerEwarActivation: _, targetEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
+    const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerEwarActivation).toBeUndefined();
+    expect(parsed!.targetEwarActivation).toBeUndefined();
+    expect(parsed!.attackerBoosterActivation).toBeUndefined();
+    expect(parsed!.targetBoosterActivation).toBeUndefined();
+  });
+
+  test("parseUserSettings migrates legacy boolean and empty-script booster entries", () => {
+    const v9 = {
+      ...DEFAULT_SETTINGS,
+      version: 9,
+      attackerBoosterActivation: [true, false, { active: true, script: "" }],
+      targetBoosterActivation: [{ active: false, script: "Optimal Range Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v9));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.attackerBoosterActivation).toEqual([
+      { active: true, script: "none" },
+      { active: false, script: "none" },
+      { active: true, script: "none" },
+    ]);
+    expect(parsed!.targetBoosterActivation).toEqual([{ active: false, script: "Optimal Range Script" }]);
+  });
+
+  test("parseUserSettings rejects malformed booster activations like it does for ewar", () => {
+    const bad = {
+      ...DEFAULT_SETTINGS,
+      attackerBoosterActivation: [{ active: true, script: 123 }],
+    };
+    expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
+  });
+
   test("parseUserSettings migrates v6 enum disruptor scripts to item names and adds per-module overload", () => {
     const v6 = {
       ...DEFAULT_SETTINGS,

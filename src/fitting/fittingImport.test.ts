@@ -170,7 +170,7 @@ const db: FittingDb = {
     "Medium Trimark Armor Pump II": { agilityDrawbackPercent: 10 },
     "Medium Core Defense Field Extender I": { sigDrawbackPercent: 10 },
     "Tracking Enhancer II": { turretTrackingPercent: 9.5, turretOptimalPercent: 10, turretFalloffPercent: 20 },
-    "Tracking Computer II": { turretTrackingPercent: 15, turretOptimalPercent: 7.5, turretFalloffPercent: 15 },
+    "Caldari Navy Tracking Enhancer": { turretTrackingPercent: 12, turretOptimalPercent: 7.5, turretFalloffPercent: 15 },
     "Medium Energy Metastasis Adjuster II": { turretTrackingPercent: 20 },
   },
   turrets: {
@@ -510,35 +510,22 @@ Medium Energy Metastasis Adjuster II`,
     expect(result!.turret!.falloff).toBeCloseTo(5_000, 6);
   });
 
-  test("tracking enhancer, tracking computer and rig share one stacking chain per attribute", () => {
+  test("two tracking enhancers and a rig share one stacking chain per attribute", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
     const result = importer.importFitting(
       `[Harbinger, Tracking]
 Heavy Pulse Laser II, Conflagration M
 Tracking Enhancer II
-Tracking Computer II
+Caldari Navy Tracking Enhancer
 Medium Energy Metastasis Adjuster II`,
       conditions,
     );
-    const trackingBonus = stackingPenalty.apply([1.2, 1.15, 1.095]);
+    const trackingBonus = stackingPenalty.apply([1.2, 1.12, 1.095]);
     const optimalBonus = stackingPenalty.apply([1.075, 1.1]);
     const falloffBonus = stackingPenalty.apply([1.15, 1.2]);
     expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * trackingBonus * 125) / 40_000, 3);
     expect(result!.turret!.optimal).toBeCloseTo(12_600 * 0.5 * optimalBonus, 6);
     expect(result!.turret!.falloff).toBeCloseTo(5_000 * falloffBonus, 6);
-  });
-
-  test("tracking speed script doubles tracking and zeros range bonuses from a tracking computer", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNames });
-    const result = importer.importFitting(
-      `[Harbinger, Scripted]
-Heavy Pulse Laser II, Conflagration M
-Tracking Computer II, Tracking Speed Script`,
-      conditions,
-    );
-    expect(result!.turret!.tracking).toBeCloseTo((26 * 0.7 * 1.3 * 125) / 40_000, 6);
-    expect(result!.turret!.optimal).toBeCloseTo(12_600 * 0.5, 6);
-    expect(result!.turret!.falloff).toBeCloseTo(5_000, 6);
   });
 
   test("offline turret line is skipped and a later online turret is resolved", () => {
