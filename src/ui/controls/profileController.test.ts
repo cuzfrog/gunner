@@ -168,10 +168,11 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   };
+  const profileNames = new Set(options.list ?? Object.keys(options.profiles ?? {}));
   const settingsStore: SettingsStore = {
     loadStartupState: vi.fn(),
-    listProfiles: vi.fn(() => options.list ?? Object.keys(options.profiles ?? {})),
-    saveProfile: vi.fn(),
+    listProfiles: vi.fn(() => Array.from(profileNames)),
+    saveProfile: vi.fn((name: string) => { profileNames.add(name); }),
     loadProfile: vi.fn((name) => options.profiles?.[name] ?? null),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
@@ -357,27 +358,32 @@ describe("ProfileController", () => {
     expect(onLoaded).toHaveBeenLastCalledWith("brawler");
   });
 
-  test("updateDirtyState enables save only for a selected profile that differs from baseline", () => {
+  test("updateActionBarState drives save and delete from selection and dirty state", () => {
     const { controller, els, snapshotSource } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
 
-    controller.updateDirtyState();
+    controller.updateActionBarState();
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    expect(els.profileDelete.disabled).toBe(true);
 
     controller.markLoaded("brawler");
     vi.mocked(els.profileSave.classList.toggle).mockClear();
-    controller.updateDirtyState();
+    controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
+    expect(els.profileDelete.disabled).toBe(false);
 
     snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
-    controller.updateDirtyState();
+    controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
     expect(els.profileSave.disabled).toBe(false);
 
-    controller.markLoaded();
-    controller.updateDirtyState();
+    controller.refresh();
+    snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 7777 });
+    controller.updateActionBarState();
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
+    expect(els.profileDelete.disabled).toBe(true);
   });
 
   test("toggle opens the new-profile popup, empties it and focuses the input", () => {
@@ -405,14 +411,53 @@ describe("ProfileController", () => {
   test("confirm with a name clears ship state and saves the cleared snapshot under the name", async () => {
     const { controller, els, settingsStore, onNewProfile } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleNewProfilePopup();
-    els.newProfileName.value = "brawler";
+    els.newProfileName.value = "kappa";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
     (els.newProfileConfirm as unknown as FakeElement).trigger("click");
     await Promise.resolve();
     expect(onNewProfile).toHaveBeenCalledTimes(1);
-    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
-    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
-    expect(controller.selectedName()).toBe("brawler");
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kappa", expect.any(Object));
+    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("kappa");
+    expect(controller.selectedName()).toBe("kappa");
     expect(els.shareStatus.textContent).toBe("status.profileSaved");
+  });
+
+  test("new-profile confirm is disabled for empty, whitespace or duplicate names and enabled for a fresh name", () => {
+    const { controller, els } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.toggleNewProfilePopup();
+
+    expect(els.newProfileConfirm.disabled).toBe(true);
+
+    els.newProfileName.value = "kappa";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    expect(els.newProfileConfirm.disabled).toBe(false);
+
+    els.newProfileName.value = "brawler";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    expect(els.newProfileConfirm.disabled).toBe(true);
+
+    els.newProfileName.value = "   ";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    expect(els.newProfileConfirm.disabled).toBe(true);
+  });
+
+  test("Enter in the name input confirms when valid and does nothing when disabled", async () => {
+    const { controller, els, settingsStore } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.toggleNewProfilePopup();
+
+    els.newProfileName.value = "brawler";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    (els.newProfileName as unknown as FakeElement).trigger("keydown", { key: "Enter", preventDefault: vi.fn() });
+    await Promise.resolve();
+    expect(settingsStore.saveProfile).not.toHaveBeenCalled();
+    expect(els.newProfilePopup.hidden).toBe(false);
+
+    els.newProfileName.value = "kappa";
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    (els.newProfileName as unknown as FakeElement).trigger("keydown", { key: "Enter", preventDefault: vi.fn() });
+    await Promise.resolve();
+    expect(settingsStore.saveProfile).toHaveBeenCalledWith("kappa", expect.any(Object));
+    expect(els.newProfilePopup.hidden).toBe(true);
   });
 
   test("cancel closes the new profile popup without action", async () => {
@@ -466,5 +511,5 @@ describe("ProfileController", () => {
 
 function snapshotSourceDiffers(controller: ProfileControllerImpl): void {
   controller.setSnapshotSource(() => ({ ...BASE_PROFILE, optimal: 9999 }));
-  controller.updateDirtyState();
+  controller.updateActionBarState();
 }

@@ -182,7 +182,7 @@ export class EventRouter {
     const host = this.host;
     if (!host) return;
     this.preferences.setTrackingUnit(unit);
-    this.profile.updateDirtyState();
+    this.profile.updateActionBarState();
     host.onDisplayChange();
   }
 

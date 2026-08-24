@@ -107,7 +107,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     setOnProfileLoaded: vi.fn(),
     setOnNewProfile: vi.fn(),
     markLoaded: vi.fn(),
-    updateDirtyState: vi.fn(),
+    updateActionBarState: vi.fn(),
     toggleProfileSelector: vi.fn(),
     toggleNewProfilePopup: vi.fn(),
     saveProfile: vi.fn(),

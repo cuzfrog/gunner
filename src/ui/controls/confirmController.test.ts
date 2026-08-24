@@ -84,7 +84,7 @@ describe("ConfirmController", () => {
   test("confirm resolves false on outside click", async () => {
     const { controller, popupGroup } = build(globalThis.document);
     const promise = controller.confirm("confirm.deleteProfile");
-    const outside = getFake(globalThis.document, "profile-name");
+    const outside = getFake(globalThis.document, "tracking");
     popupGroup.onPointerDown(outside as unknown as EventTarget);
     await expect(promise).resolves.toBe(false);
   });
@@ -108,7 +108,7 @@ describe("ConfirmController", () => {
 
   test("popup does not contain an outside target", () => {
     const { controller } = build(globalThis.document);
-    const outside = getFake(globalThis.document, "profile-name") as unknown as EventTarget;
+    const outside = getFake(globalThis.document, "tracking") as unknown as EventTarget;
     expect(controller.popup.contains(outside)).toBe(false);
   });
 

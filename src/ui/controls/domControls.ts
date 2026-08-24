@@ -124,7 +124,7 @@ export class DomControls implements Controls, DomControlsHost {
 
   private onConfigInvalidated(persist: boolean): void {
     this.preferencesController.savePreferences();
-    if (persist) this.profileController.updateDirtyState();
+    if (persist) this.profileController.updateActionBarState();
     this.callbacks?.onConfigChange();
   }
 
@@ -136,7 +136,7 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private notifyDisplayChange(): void {
-    this.profileController.updateDirtyState();
+    this.profileController.updateActionBarState();
     this.callbacks?.onDisplayChange();
   }
 
@@ -163,7 +163,7 @@ export class DomControls implements Controls, DomControlsHost {
 
   persistConfigChange(notify = true): void {
     this.preferencesController.savePreferences();
-    this.profileController.updateDirtyState();
+    this.profileController.updateActionBarState();
     if (notify) this.callbacks?.onConfigChange();
   }
 
