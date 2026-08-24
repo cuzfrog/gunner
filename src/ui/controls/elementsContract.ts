@@ -97,6 +97,7 @@ export interface Els {
   readonly profileName: HTMLInputElement;
   readonly profileSave: HTMLButtonElement;
   readonly profileSelect: HTMLSelectElement;
+  readonly profileDirtyMarker: HTMLElement;
   readonly profileDelete: HTMLButtonElement;
   readonly profileNew: HTMLButtonElement;
   readonly confirmPopup: HTMLElement;

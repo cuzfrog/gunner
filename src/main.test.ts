@@ -246,6 +246,7 @@ const TAG_BY_ID: Record<string, string> = {
   "confirm-ok": "BUTTON",
   "confirm-popup": "DIV",
   "profile-delete": "BUTTON",
+  "profile-dirty-marker": "SPAN",
   "profile-name": "INPUT",
   "profile-new": "BUTTON",
   "profile-save": "BUTTON",

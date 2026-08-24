@@ -149,6 +149,7 @@ export class DomControls implements Controls, DomControlsHost {
 
   onNewProfile(): void {
     this.sessionCodec.resetToDefaults();
+    this.profileController.showStatus("status.newProfile");
     this.callbacks?.onReset();
   }
 

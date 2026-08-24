@@ -43,12 +43,18 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       events: uiEvents,
     })).singleton(),
-    confirmController: asFunction(({ els, popupGroup, i18n }: ControlsCradle) => new ConfirmControllerImpl({
-      popupGroup,
-      i18n,
-      els: { confirmPopup: els.confirmPopup, confirmMessage: els.confirmMessage, confirmOk: els.confirmOk, confirmCancel: els.confirmCancel },
-    })).singleton(),
-    profileController: asFunction(({ els, settingsStore, timer, i18n, uiEvents, confirmController }: ControlsCradle) => new ProfileControllerImpl({
+    confirmController: asFunction(({ els, popupGroup, i18n }: ControlsCradle) => {
+      const confirmEls = {
+        confirmPopup: els.confirmPopup,
+        confirmMessage: els.confirmMessage,
+        confirmOk: els.confirmOk,
+        confirmCancel: els.confirmCancel,
+      };
+      return new ConfirmControllerImpl({ popupGroup, i18n, els: confirmEls });
+    }).singleton(),
+    profileController: asFunction(({
+      els, settingsStore, timer, i18n, uiEvents, confirmController,
+    }: ControlsCradle) => new ProfileControllerImpl({
       els: collectProfileEls(els),
       settingsStore,
       timer,

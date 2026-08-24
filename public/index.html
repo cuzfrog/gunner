@@ -48,11 +48,14 @@
       <select id="profile-select" class="profile-select">
         <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
+      <span id="profile-dirty-marker" class="profile-dirty-marker" aria-hidden="true" hidden>•</span>
       <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
       <button type="button" id="profile-new" class="icon-button"
               data-i18n-title="button.newProfile" data-i18n-aria-label="button.newProfile"
               title="New profile" aria-label="New profile">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
       <div class="profile-share-field">
         <button type="button" id="share-link" class="icon-button"

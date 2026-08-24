@@ -1232,8 +1232,10 @@ canvas {
   box-shadow: 0 0 6px var(--warn-yellow-12);
 }
 
-.profile-select.dirty::after {
-  content: " •";
+.profile-dirty-marker {
+  color: var(--warn-yellow-85);
+  font-size: 12px;
+  line-height: 1;
 }
 
 .share-status {

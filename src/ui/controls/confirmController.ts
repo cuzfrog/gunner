@@ -26,6 +26,7 @@ export class ConfirmControllerImpl implements ConfirmController {
   private open = false;
   private currentResolve?: (value: boolean) => void;
   private currentPromise?: Promise<boolean>;
+  private returnFocus?: HTMLElement;
 
   constructor(deps: ConfirmControllerDeps) {
     this.popupGroup = deps.popupGroup;
@@ -35,7 +36,7 @@ export class ConfirmControllerImpl implements ConfirmController {
       isOpen: () => this.open,
       open: () => this.openPopup(),
       close: () => this.closePopup(false),
-      focusTrigger: () => this.els.confirmOk.focus(),
+      focusTrigger: () => { this.returnFocus?.focus(); },
       contains: (target) => this.containsTarget(target),
     };
     this.els.confirmOk.addEventListener("click", () => this.closePopup(true));
@@ -50,6 +51,8 @@ export class ConfirmControllerImpl implements ConfirmController {
       this.els.confirmMessage.textContent = this.i18n.t(key);
       return this.currentPromise;
     }
+    const active = this.els.confirmOk.ownerDocument?.activeElement;
+    this.returnFocus = typeof HTMLElement !== "undefined" && active instanceof HTMLElement ? active : undefined;
     this.els.confirmMessage.textContent = this.i18n.t(key);
     this.els.confirmOk.textContent = this.i18n.t("button.confirm");
     this.els.confirmCancel.textContent = this.i18n.t("button.cancel");
@@ -64,6 +67,7 @@ export class ConfirmControllerImpl implements ConfirmController {
   private openPopup(): void {
     this.els.confirmPopup.hidden = false;
     this.open = true;
+    this.els.confirmOk.focus();
   }
 
   private closePopup(confirmed: boolean): void {
@@ -78,7 +82,7 @@ export class ConfirmControllerImpl implements ConfirmController {
   private containsTarget(target: EventTarget): boolean {
     if (!(target instanceof Element)) return false;
     const popup = this.els.confirmPopup;
-    if (popup.contains(target as Node)) return true;
+    if (popup.contains(target)) return true;
     return target === this.els.confirmOk || target === this.els.confirmCancel;
   }
 }

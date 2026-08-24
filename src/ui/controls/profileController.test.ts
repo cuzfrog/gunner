@@ -71,6 +71,7 @@ function fakeProfileEls(): ProfileEls {
     profileName: new FakeElement() as unknown as HTMLInputElement,
     profileSave: new FakeElement() as unknown as HTMLButtonElement,
     profileSelect: new FakeElement() as unknown as HTMLSelectElement,
+    profileDirtyMarker: new FakeElement() as unknown as HTMLElement,
     profileDelete: new FakeElement() as unknown as HTMLButtonElement,
     shareStatus: new FakeElement() as unknown as HTMLElement,
   };
@@ -135,6 +136,18 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
 }
 
 describe("ProfileController", () => {
+  test("markLoaded clears the name input and sets the baseline", () => {
+    const { controller, els } = build({
+      profiles: { brawler: BASE_PROFILE },
+      list: ["brawler"],
+    });
+    els.profileName.value = "typed";
+    controller.markLoaded("brawler");
+    expect(els.profileName.value).toBe("");
+    expect(els.profileDirtyMarker.hidden).toBe(true);
+    expect(els.profileSelect.value).toBe("brawler");
+  });
+
   test("save uses the name input when present, otherwise the selected profile", async () => {
     const { controller, els, settingsStore } = build();
     await controller.saveProfile();
@@ -289,6 +302,7 @@ describe("ProfileController", () => {
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
     expect(els.profileSelect.classList.toggle).toHaveBeenLastCalledWith("dirty", true);
+    expect(els.profileDirtyMarker.hidden).toBe(false);
     expect(els.profileSave.disabled).toBe(false);
 
     els.profileName.value = "";
@@ -298,6 +312,7 @@ describe("ProfileController", () => {
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
     expect(els.profileSelect.classList.toggle).toHaveBeenLastCalledWith("dirty", false);
+    expect(els.profileDirtyMarker.hidden).toBe(true);
     expect(els.profileSave.disabled).toBe(true);
 
     els.profileName.value = "brawler";

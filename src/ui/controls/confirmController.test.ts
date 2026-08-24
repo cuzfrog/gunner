@@ -24,7 +24,17 @@ class StubPopupGroup implements PopupGroup {
   });
 }
 
-function build(document: Document): { controller: ConfirmController & { popup: { contains: (target: EventTarget) => boolean } }; els: ConfirmEls; popupGroup: StubPopupGroup } {
+interface TestConfirmController extends ConfirmController {
+  popup: { contains: (target: EventTarget) => boolean };
+}
+
+interface BuildResult {
+  controller: TestConfirmController;
+  els: ConfirmEls;
+  popupGroup: StubPopupGroup;
+}
+
+function build(document: Document): BuildResult {
   const popupGroup = new StubPopupGroup();
   const i18n: I18n = {
     current: vi.fn((): Language => "en"),
@@ -39,7 +49,7 @@ function build(document: Document): { controller: ConfirmController & { popup: {
     confirmCancel: getFake(document, "confirm-cancel") as unknown as HTMLButtonElement,
   };
   const controller = new ConfirmControllerImpl({ popupGroup, i18n, els });
-  return { controller: controller as ConfirmController & { popup: { contains: (target: EventTarget) => boolean } }, els, popupGroup };
+  return { controller: controller as unknown as TestConfirmController, els, popupGroup };
 }
 
 beforeEach(() => {
