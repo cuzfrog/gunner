@@ -44,11 +44,19 @@
 
     <section class="profile-bar">
       <input type="text" id="profile-name" placeholder="Profile name" class="profile-name-input" data-i18n-placeholder="label.profileName" maxlength="32">
-      <button type="button" id="profile-save" data-i18n="button.save">Save</button>
+      <button type="button" id="profile-save" class="icon-button"
+              data-i18n-title="button.save" data-i18n-aria-label="button.save"
+              title="Save profile" aria-label="Save">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#save"></use></svg>
+      </button>
       <select id="profile-select" class="profile-select">
         <option value="" data-i18n="select.profile">Select profile...</option>
       </select>
-      <button type="button" id="profile-delete" data-i18n="button.delete">Delete</button>
+      <button type="button" id="profile-delete" class="icon-button"
+              data-i18n-title="button.delete" data-i18n-aria-label="button.delete"
+              title="Delete profile" aria-label="Delete">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#delete"></use></svg>
+      </button>
       <button type="button" id="profile-new" class="icon-button"
               data-i18n-title="button.newProfile" data-i18n-aria-label="button.newProfile"
               title="New profile" aria-label="New profile">
