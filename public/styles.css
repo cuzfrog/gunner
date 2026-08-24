@@ -2201,16 +2201,18 @@ canvas {
   z-index: var(--z-popup);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 200px;
+  gap: 12px;
+  min-width: 240px;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   box-shadow: 0 4px 16px var(--shadow-color);
-  padding: 8px;
+  padding: 12px;
 }
 
 .new-profile-name {
+  box-sizing: border-box;
+  width: 100%;
   padding: 0 8px;
   background-color: var(--bg-panel);
   border: 1px solid var(--border-dim);
@@ -2219,7 +2221,6 @@ canvas {
   font-size: 13px;
   border-radius: 2px;
   min-height: 28px;
-  width: 180px;
 }
 
 .confirm-popup {
