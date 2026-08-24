@@ -6,7 +6,7 @@ import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
-import type { Side } from "../sidePanel";
+import type { Side } from "..";
 import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 

@@ -3,7 +3,7 @@ import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../.
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { fakeDocument, getFake, FakeElement, mockFittingImport, mockShips, RIFTER } from "../testSupport";
-import type { Popup, PopupGroup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
 import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";

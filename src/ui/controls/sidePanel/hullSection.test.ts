@@ -3,7 +3,7 @@ import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import { HullSection, type HullSectionEls } from "./hullSection";
-import type { Popup } from "./popup";
+import type { Popup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 

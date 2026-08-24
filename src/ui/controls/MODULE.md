@@ -38,7 +38,7 @@ no-new-exports:
   - session/sessionCodec.ts
   - sidePanel/elements.ts
   - sidePanel/hullSection.ts
-  - sidePanel/popup.ts
+  - side.ts
   - sidePanel/pasteImportSection.ts
   - sidePanel/propulsionSection.ts
   - sidePanel/propulsionVariantSection.ts
@@ -104,7 +104,7 @@ no-new-exports:
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, and `rangeOverlay`. `DomControls` exposes the `Controls` facade and implements `SessionControl` for `SessionCodec`. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, and the initial distance source. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, and `EffectiveReadouts` (used by `Controls.update`); `index.ts` re-exports these cross-boundary types.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, and `rangeOverlay`. `DomControls` exposes the `Controls` facade and implements `SessionControl` for `SessionCodec`. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, and the initial distance source. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, `EffectiveReadouts` (used by `Controls.update`), and `Side`; `index.ts` re-exports these cross-boundary types.
 
 Each sub-module owns its DOM element collection through a private `collectXxxEls` function in its `module.ts` and registers its implementation through the same file. The broad `createControlsEls()` map remains a root-level value; sub-modules derive a narrow local `XxxEls` type and extract the fields they need. Cross-feature notifications travel through the shared `UiEvents` bus: `importController` emits `fittingImported`, `configInvalidated`, and `profileTextLoaded`; `ewarController` and `boosterController` listen for `fittingImported`; `profileController` emits `profileLoaded` and `newProfile`; `DomControls` subscribes to these channels and to `configInvalidated`/`displayInvalidated`.
 

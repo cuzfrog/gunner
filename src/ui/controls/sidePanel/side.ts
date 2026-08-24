@@ -1,1 +1,1 @@
-export type Side = "attacker" | "target";
+export type { Side } from "../side";

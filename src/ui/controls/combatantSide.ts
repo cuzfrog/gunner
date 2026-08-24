@@ -1,5 +1,6 @@
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
-import type { Side, SidePanel, SidePanelHost } from "./sidePanel";
+import type { Side } from "./side";
+import type { SidePanel, SidePanelHost } from "./sidePanel";
 
 type SideImporter = Parameters<SidePanel["setImporter"]>[0];
 

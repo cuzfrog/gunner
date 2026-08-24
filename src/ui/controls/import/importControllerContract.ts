@@ -3,7 +3,8 @@ import type { ClipboardProvider, SavedFittings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "..";
+import type { SidePanel } from "../sidePanel";
 
 export interface ImportEls {
   readonly importProfile: HTMLButtonElement;

@@ -13,7 +13,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
-import type { Popup, PopupGroup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
 import type { SidePanelElements } from "./elements";
 import { HullSection } from "./hullSection";
 import { PasteImportSection } from "./pasteImportSection";

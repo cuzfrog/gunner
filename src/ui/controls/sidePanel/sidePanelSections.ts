@@ -12,7 +12,7 @@ import type {
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
-import type { Popup } from "./popup";
+import type { Popup } from "../popup";
 
 export interface IHullSection {
   onHullInput(): void;

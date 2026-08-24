@@ -2,7 +2,7 @@ import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
-import type { Popup, PopupGroup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISkillOverloadSection } from "./sidePanelSections";
 

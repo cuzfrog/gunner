@@ -30,7 +30,8 @@ import type { ControlsCradle } from "./cradle";
 import { createControlsEls } from "./elements";
 import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
-import { registerSidePanelModule, type Side, type SidePanel, type SidePanelHost } from "./sidePanel";
+import type { Side } from "./side";
+import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 
 export { createControlsEls } from "./elements";

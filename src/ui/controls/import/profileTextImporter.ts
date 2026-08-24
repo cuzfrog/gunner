@@ -1,7 +1,7 @@
 import { type ProfileTextCodec, type ProfileSettings, type UserSettings } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { PreferencesController } from "../preferencesController";
-import type { Side } from "../sidePanel";
+import type { Side } from "..";
 import type { AttackerTurret } from "./attackerTurret";
 
 interface ProfileTextImporterDeps {

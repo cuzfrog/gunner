@@ -1,7 +1,7 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
-import type { Side } from "../sidePanel";
+import type { Side } from "..";
 import { DomFittingPreview } from "./fittingPreview";
 import { FittingPopupControllerImpl } from "./fittingPopupController";
 import { FittingPreviewManagerImpl } from "./fittingPreviewManager";

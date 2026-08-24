@@ -4,7 +4,7 @@ import { registerShipsModule } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import type { ProfileParamOverrides } from "../../../appstate";
-import type { Popup } from "./popup";
+import type { Popup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 import { StatsSection, type StatsSectionEls } from "./statsSection";

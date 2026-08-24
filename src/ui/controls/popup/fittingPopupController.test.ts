@@ -7,7 +7,7 @@ import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "../testSupport";
-import type { Side } from "../sidePanel";
+import type { Side } from "..";
 import type { FittingPopupHost } from "./fittingPopupHost";
 
 const SAVED_RIFTER: SavedFitting = {

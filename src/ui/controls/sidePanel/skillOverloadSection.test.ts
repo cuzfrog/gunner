@@ -1,6 +1,6 @@
 import type { I18n, Language } from "../../i18n";
 import { fakeDocument, getFake, FakeElement } from "../testSupport";
-import type { Popup, PopupGroup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 import { SkillOverloadSection, type SkillOverloadSectionEls } from "./skillOverloadSection";

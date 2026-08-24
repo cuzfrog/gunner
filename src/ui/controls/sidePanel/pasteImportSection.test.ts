@@ -1,7 +1,7 @@
 import type { I18n, Language } from "../../i18n";
 import type { Timer } from "../../timer";
 import { fakeDocument, getFake, FakeElement, mockTimer } from "../testSupport";
-import type { Popup } from "./popup";
+import type { Popup } from "../popup";
 import { PasteImportSection, type PasteImportSectionEls } from "./pasteImportSection";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";

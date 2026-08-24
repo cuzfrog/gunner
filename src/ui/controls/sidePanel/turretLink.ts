@@ -1,5 +1,5 @@
 import type { ShipProfile, StatConditions } from "../../../ships";
-import type { PopupGroup } from "./popup";
+import type { PopupGroup } from "../popup";
 import type { TurretController } from "../turret";
 import type { Side } from "./side";
 

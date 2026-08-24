@@ -1,6 +1,7 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "..";
+import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 
 interface EftSideImporterDeps {

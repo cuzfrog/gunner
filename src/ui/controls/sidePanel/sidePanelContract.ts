@@ -4,7 +4,7 @@ import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting, UserSettings } from "../../../appstate";
-import type { Popup, PopupGroup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
 import type { Side } from "./side";
