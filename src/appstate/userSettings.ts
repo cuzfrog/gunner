@@ -97,6 +97,7 @@ export interface DisplayPreferences {
   readonly trackingUnit: TrackingUnit;
   readonly simSpeed: number;
   readonly gridBrightness: number;
+  readonly hiddenRangeOverlays?: readonly string[];
 }
 
 export interface StartupState {

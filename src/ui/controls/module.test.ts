@@ -43,6 +43,7 @@ const controlsCradleKeys = {
   ewarController: "ewarController",
   boosterController: "boosterController",
   shareController: "shareController",
+  rangeOverlayController: "rangeOverlayController",
   confirmController: "confirmController",
   eventRouter: "eventRouter",
   profileEquality: "profileEquality",

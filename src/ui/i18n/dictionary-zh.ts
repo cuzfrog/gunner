@@ -24,6 +24,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.ewar.grappler": { zh: "重型停滞缠绕牵引器" },
   "label.ewar.disruptor": { zh: "炮台干扰器" },
   "label.ewar.scrambler": { zh: "跃迁扰频器" },
+  "label.rangeOverlays": { zh: "电子战距离覆盖" },
   "title.ewar.empty": { zh: "未装配电子战模块" },
   "ewar.script.none": { zh: "无" },
   "ewar.script.none.hint": { zh: "影响跟踪、最佳射程和衰减" },

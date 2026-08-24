@@ -24,6 +24,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.ewar.grappler": { ja: "スタシスグラップラー" },
   "label.ewar.disruptor": { ja: "ガンディスラプター" },
   "label.ewar.scrambler": { ja: "ワープスクランブラー" },
+  "label.rangeOverlays": { ja: "EWARレンジオーバーレイ" },
   "title.ewar.empty": { ja: "電子戦モジュール未装備" },
   "ewar.script.none": { ja: "なし" },
   "ewar.script.none.hint": { ja: "追跡、最適射程、フォールオフに影響" },

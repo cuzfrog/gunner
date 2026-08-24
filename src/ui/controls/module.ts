@@ -23,6 +23,7 @@ import { registerSidePanelModule, type Side } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerEwarModule } from "./ewar";
 import { registerBoosterModule } from "./booster";
+import { registerRangeOverlayModule } from "./rangeOverlay";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   registerHintsModule(cradle);
@@ -30,6 +31,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
   registerBoosterModule(cradle);
+  registerRangeOverlayModule(cradle);
   registerPopupModule(cradle);
   registerImportModule(cradle);
   registerShareModule(cradle);
@@ -39,7 +41,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
     trackingInput: asClass(TrackingInputImpl).singleton(),
     sigResChoice: asFunction(({ els }: ControlsCradle) => new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"])).singleton(),
     engagementReadout: asFunction(({ els }: ControlsCradle) => new EngagementReadoutImpl(collectReadoutEls(els))).singleton(),
-    preferencesController: asFunction(({ els, i18n, itemNames, settingsStore, trackingInput, turretController, uiEvents }: ControlsCradle) => new PreferencesControllerImpl({
+    preferencesController: asFunction(({ els, i18n, itemNames, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController }: ControlsCradle) => new PreferencesControllerImpl({
       els: collectPreferencesEls(els),
       i18n,
       itemNames,
@@ -47,6 +49,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       trackingInput,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
       events: uiEvents,
+      rangeOverlayController,
     })).singleton(),
     confirmController: asFunction(({ els, popupGroup, i18n }: ControlsCradle) => {
       const confirmEls = {
@@ -102,6 +105,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       shareController: proxy.shareController,
+      rangeOverlayController: proxy.rangeOverlayController,
       previewManager: proxy.previewManager,
       attackerFittingPopup: proxy.attackerFittingPopup,
       targetFittingPopup: proxy.targetFittingPopup,
@@ -123,6 +127,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.targetSide.setFittingPopup(c.targetFittingPopup);
   c.ewarController.setHost(c.controls);
   c.boosterController.setHost(c.controls);
+  c.rangeOverlayController.setHost(c.controls);
   c.attackerSide.setFittingPreview(c.previewManager);
   c.targetSide.setFittingPreview(c.previewManager);
   c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings, c.presetFittings));

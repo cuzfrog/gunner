@@ -1,4 +1,4 @@
-import { isOptionalEwarActivation } from "./validators";
+import { isOptionalEwarActivation, isOptionalHiddenRangeOverlays } from "./validators";
 
 describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
@@ -35,5 +35,23 @@ describe("isOptionalEwarActivation", () => {
 
   test("rejects a disruptor row missing the active flag", () => {
     expect(isOptionalEwarActivation({ disruptors: [{ script: "none" }] })).toBe(false);
+  });
+});
+
+describe("isOptionalHiddenRangeOverlays", () => {
+  test("accepts undefined", () => {
+    expect(isOptionalHiddenRangeOverlays(undefined)).toBe(true);
+  });
+
+  test("accepts a valid list of hidden overlay kinds", () => {
+    expect(isOptionalHiddenRangeOverlays(["web", "grappler", "scrambler", "disruptor"])).toBe(true);
+  });
+
+  test("rejects an unknown kind", () => {
+    expect(isOptionalHiddenRangeOverlays(["web", " ECM "])).toBe(false);
+  });
+
+  test("rejects a non-array", () => {
+    expect(isOptionalHiddenRangeOverlays({ web: true })).toBe(false);
   });
 });

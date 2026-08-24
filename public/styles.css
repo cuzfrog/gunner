@@ -9,6 +9,10 @@
   --danger-red: #d81f27;
   --optimal-green: #9cc954;
   --warn-yellow: #fce447;
+  --overlay-web: #c957d6;
+  --overlay-grappler: #d4a04a;
+  --overlay-scrambler: #e65c5c;
+  --overlay-disruptor: #5c8be6;
   --text-primary: #e8eef0;
   --text-secondary: #9fb3b8;
   --text-dim: #5d7078;
@@ -1003,6 +1007,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 canvas {
@@ -1012,6 +1017,69 @@ canvas {
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
+}
+
+#range-overlay-legend {
+  position: absolute;
+  bottom: 60px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+#range-overlay-legend[hidden] {
+  display: none;
+}
+
+.range-overlay-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  min-height: 22px;
+}
+
+.range-overlay-chip[aria-pressed="true"] {
+  background: var(--bg-inset);
+  border-color: currentColor;
+}
+
+.range-overlay-chip:hover {
+  border-color: var(--accent-teal);
+}
+
+.range-overlay-chip:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 1px;
+}
+
+.range-overlay-chip.range-overlay-web {
+  color: var(--overlay-web);
+}
+
+.range-overlay-chip.range-overlay-grappler {
+  color: var(--overlay-grappler);
+}
+
+.range-overlay-chip.range-overlay-scrambler {
+  color: var(--overlay-scrambler);
+}
+
+.range-overlay-chip.range-overlay-disruptor {
+  color: var(--overlay-disruptor);
 }
 
 .controls {

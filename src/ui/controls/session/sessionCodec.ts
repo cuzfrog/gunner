@@ -81,7 +81,7 @@ export class SessionCodecImpl implements SessionCodec {
     const attacker = this.attackerSide.capture();
     const target = this.targetSide.capture();
     const turret = this.turretController.capture();
-    const preferences = this.preferencesController.capture();
+    const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
       version: USER_SETTINGS_VERSION,
       tracking: this.trackingInput.rad,
@@ -146,10 +146,11 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   fromProfile(profile: ProfileSettings): UserSettings {
+    const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
       ...profile,
       attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1),
-      ...this.preferencesController.capture(),
+      ...preferences,
     };
   }
 

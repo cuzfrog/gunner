@@ -2,9 +2,18 @@ import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, ty
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
 
+export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor";
+
+export interface RangeOverlay {
+  readonly side: "attacker" | "target";
+  readonly kind: RangeOverlayKind;
+  readonly radius: number;
+  readonly falloffRadius?: number;
+}
+
 export interface Renderer {
   setGridBrightness(brightness: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
 }
 
 const COLORS = {
@@ -18,7 +27,18 @@ const COLORS = {
   scrim: withAlpha(PALETTE.bgDeep, 0.7),
   optimalRing: PALETTE.optimalGreen,
   falloffRing: PALETTE.accentOrange,
+  overlayWeb: PALETTE.overlayWeb,
+  overlayGrappler: PALETTE.overlayGrappler,
+  overlayScrambler: PALETTE.overlayScrambler,
+  overlayDisruptor: PALETTE.overlayDisruptor,
 } as const;
+
+const OVERLAY_COLORS: { readonly [K in RangeOverlayKind]: string } = {
+  web: COLORS.overlayWeb,
+  grappler: COLORS.overlayGrappler,
+  scrambler: COLORS.overlayScrambler,
+  disruptor: COLORS.overlayDisruptor,
+};
 
 const GRID_MAX_ALPHA = 0.4;
 const DEFAULT_GRID_BRIGHTNESS = 0.5;
@@ -57,12 +77,13 @@ export class CanvasRenderer implements Renderer {
     this.gridBrightness = Math.max(0, Math.min(1, brightness));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
     this.syncBufferSize();
     this.updateCamera(snapshot, turret);
     this.clear();
     this.drawGrid();
     this.drawRangeRings(snapshot.attacker.position, turret);
+    this.drawRangeOverlays(snapshot, overlays);
     this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
     this.drawWorldVector(snapshot.attacker.position, snapshot.attacker.velocity, COLORS.attacker);
     this.drawWorldVector(snapshot.target.position, snapshot.target.velocity, COLORS.target);
@@ -144,23 +165,34 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawRangeRings(center: Vec2, turret: TurretSpec): void {
-    const c = this.worldToScreen(center);
-    const drawRing = (radius: number, color: string, dash?: number[]) => {
-      if (radius <= 0) return;
-      const rPx = radius * this.camera.scale;
-      this.ctx.strokeStyle = color;
-      this.ctx.lineWidth = 1.5;
-      this.ctx.setLineDash(dash ?? []);
-      this.ctx.beginPath();
-      this.ctx.arc(c.x, c.y, rPx, 0, Math.PI * 2);
-      this.ctx.stroke();
-      this.ctx.setLineDash([]);
-    };
-
-    drawRing(turret.optimal, COLORS.optimalRing, [8, 6]);
+    this.drawRingAt(center, turret.optimal, COLORS.optimalRing, [8, 6]);
     if (turret.falloff > 0) {
-      drawRing(turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);
+      this.drawRingAt(center, turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);
     }
+  }
+
+  private drawRangeOverlays(snapshot: SimSnapshot, overlays: readonly RangeOverlay[]): void {
+    for (const overlay of overlays) {
+      const center = overlay.side === "attacker" ? snapshot.attacker.position : snapshot.target.position;
+      const color = OVERLAY_COLORS[overlay.kind];
+      this.drawRingAt(center, overlay.radius, color);
+      if (overlay.falloffRadius && overlay.falloffRadius > 0) {
+        this.drawRingAt(center, overlay.radius + overlay.falloffRadius, color, [4, 6]);
+      }
+    }
+  }
+
+  private drawRingAt(center: Vec2, radius: number, color: string, dash?: number[]): void {
+    if (radius <= 0) return;
+    const c = this.worldToScreen(center);
+    const rPx = radius * this.camera.scale;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1.5;
+    this.ctx.setLineDash(dash ?? []);
+    this.ctx.beginPath();
+    this.ctx.arc(c.x, c.y, rPx, 0, Math.PI * 2);
+    this.ctx.stroke();
+    this.ctx.setLineDash([]);
   }
 
   private drawLineOfSight(a: Vec2, b: Vec2, distance: number): void {

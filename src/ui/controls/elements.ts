@@ -154,5 +154,6 @@ export function createControlsEls(): Els {
     resTrackPen: el("res-track-pen"),
     resRangePen: el("res-range-pen"),
     resHit: el("res-hit"),
+    rangeOverlayLegend: el("range-overlay-legend"),
   };
 }

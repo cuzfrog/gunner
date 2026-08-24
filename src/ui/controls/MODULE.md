@@ -74,7 +74,6 @@ no-new-exports:
   - ewar/ewarController.ts
   - ewar/ewarController.test.ts
   - ewar/ewarControllerContract.ts
-  - ewar/index.ts
   - ewar/module.ts
   - ewar/MODULE.md
   - booster/MODULE.md

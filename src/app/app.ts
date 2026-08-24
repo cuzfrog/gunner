@@ -73,7 +73,8 @@ export class AppImpl implements App {
     const effectiveTurret = attacker ? attacker.effectiveTurret : turret;
     const hit = attacker ? attacker.hit : this.hitChance.compute(frame, turret, sig);
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
-    this.renderer.draw(snapshot, frame, hit, effectiveTurret);
+    const overlays = this.controls.getOverlays();
+    this.renderer.draw(snapshot, frame, hit, effectiveTurret, overlays);
     this.controls.update(frame, hit);
   }
 }

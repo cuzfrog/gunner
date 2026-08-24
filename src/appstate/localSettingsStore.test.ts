@@ -579,6 +579,20 @@ describe("LocalSettingsStore", () => {
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
+  test("savePreferences and loadPreferences round-trip hidden range overlays", () => {
+    const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"] };
+    store.savePreferences(preferences);
+    expect(store.loadPreferences()).toEqual(preferences);
+  });
+
+  test("loadPreferences falls back for invalid hidden range overlays", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ ...DEFAULT_PREFERENCES, hiddenRangeOverlays: ["web", "invalid"] }));
+    const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
+  });
+
   test("loadStartupState migrates a v5 payload with fitted hull summaries", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5, attackerFittedHull: FITTED_HULL_SUMMARY };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });

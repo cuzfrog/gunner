@@ -23,6 +23,9 @@ import type { EwarController } from "./ewar";
 import type { BoosterController } from "./booster";
 import type { ImportController } from "./import";
 import type { ShareController } from "./share";
+import type { EwarProjection } from "../../sim";
+import type { RangeOverlay } from "../renderer";
+import type { RangeOverlayController, RangeOverlayHost } from "./rangeOverlay";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 
@@ -43,13 +46,14 @@ interface DomControlsAllDeps extends DomControlsDeps {
   ewarController: EwarController;
   boosterController: BoosterController;
   shareController: ShareController;
+  rangeOverlayController: RangeOverlayController;
   previewManager: FittingPreviewManager;
   attackerFittingPopup: FittingPopupController;
   targetFittingPopup: FittingPopupController;
   eventRouter: EventRouter;
 }
 
-export class DomControls implements Controls, DomControlsHost {
+export class DomControls implements Controls, DomControlsHost, RangeOverlayHost {
   private readonly deps: DomControlsDeps;
   private readonly els: Els;
   private readonly popupGroup: PopupGroup;
@@ -67,7 +71,9 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly shareController: ShareController;
+  private readonly rangeOverlayController: RangeOverlayController;
   private readonly previewManager: FittingPreviewManager;
+  private currentDistanceValue: number;
   private readonly attackerFittingPopup: FittingPopupController;
   private readonly targetFittingPopup: FittingPopupController;
   private readonly eventRouter: EventRouter;
@@ -92,7 +98,9 @@ export class DomControls implements Controls, DomControlsHost {
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
     this.shareController = all.shareController;
+    this.rangeOverlayController = all.rangeOverlayController;
     this.previewManager = all.previewManager;
+    this.currentDistanceValue = this.sessionCodec.getInitialDistance();
     this.attackerFittingPopup = all.attackerFittingPopup;
     this.targetFittingPopup = all.targetFittingPopup;
     this.eventRouter = all.eventRouter;
@@ -123,9 +131,11 @@ export class DomControls implements Controls, DomControlsHost {
     this.targetSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
     this.boosterController.updateSummaries();
+    this.rangeOverlayController.render();
     this.persistConfigChange();
   }
-  currentDistance(): number { return this.sessionCodec.getInitialDistance(); }
+  currentDistance(): number { return this.currentDistanceValue; }
+  projection(side: "attacker" | "target"): EwarProjection | undefined { return this.ewarController.projection(side); }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
@@ -141,6 +151,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.deps.i18n.translateDocument();
     this.ewarController.render();
     this.boosterController.render();
+    this.rangeOverlayController.render();
     this.setPlaying(this.playing);
     this.notifyDisplayChange();
   }
@@ -202,8 +213,11 @@ export class DomControls implements Controls, DomControlsHost {
   }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
+  getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   update(frame: EngagementFrame, hit: HitChanceBreakdown): void {
+    this.currentDistanceValue = frame.distance;
     this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
+    this.rangeOverlayController.update();
   }
   setPlaying(playing: boolean): void {
     this.playing = playing;

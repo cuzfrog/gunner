@@ -24,6 +24,7 @@ import type { EventRouter, HullDatalist, SessionCodec } from "./session";
 import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { RangeOverlayController, RangeOverlayHost } from "./rangeOverlay";
 import type { ProfileChangeTracker } from "./profileChangeTracker";
 import type { ProfileEquality } from "../../appstate";
 
@@ -66,9 +67,10 @@ export interface ControlsCradle {
   readonly sessionCodec: SessionCodec;
   readonly importController: ImportController;
   readonly shareController: ShareController;
+  readonly rangeOverlayController: RangeOverlayController;
+  readonly controls: Controls & DomControlsHost & RangeOverlayHost;
   readonly confirmController: ConfirmController;
   readonly eventRouter: EventRouter;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
-  readonly controls: Controls & DomControlsHost;
 }

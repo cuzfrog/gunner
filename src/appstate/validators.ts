@@ -170,7 +170,13 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   return true;
 }
 
+export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly string[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((item) => item === "web" || item === "grappler" || item === "scrambler" || item === "disruptor");
+}
+
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = value as Record<string, unknown>;
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }

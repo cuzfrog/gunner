@@ -5,6 +5,7 @@ import type { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../appstate";
 import type { FittingCradle } from "../../fitting";
 import type { UiEvents } from "../events";
+import type { RangeOverlayController } from "./rangeOverlay";
 
 export interface PreferencesEls {
   readonly tracking: HTMLInputElement;
@@ -48,6 +49,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly sigResolution: () => number;
   private readonly events: UiEvents;
   private readonly itemNames: FittingCradle["itemNames"];
+  private readonly rangeOverlayController: RangeOverlayController;
 
   constructor(deps: {
     els: PreferencesEls;
@@ -57,6 +59,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     sigResolution: () => number;
     events: UiEvents;
     itemNames: FittingCradle["itemNames"];
+    rangeOverlayController: RangeOverlayController;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
@@ -65,6 +68,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.sigResolution = deps.sigResolution;
     this.events = deps.events;
     this.itemNames = deps.itemNames;
+    this.rangeOverlayController = deps.rangeOverlayController;
   }
 
   getSpeed(): number {
@@ -101,6 +105,7 @@ export class PreferencesControllerImpl implements PreferencesController {
       trackingUnit: this.trackingInput.unit,
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
+      hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
     };
   }
 
@@ -175,6 +180,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.tracking.value = String(this.trackingInput.setUnit(preferences.trackingUnit, this.sigResolution()));
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
+    this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
     this.updateUnitToggle();
     if (preferences.language !== "en") {
       this.loadPackAndRefresh(preferences.language);

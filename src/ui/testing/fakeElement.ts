@@ -11,6 +11,7 @@ export class FakeElement {
   disabled = false;
   isConnected = true;
   children: FakeElement[] = [];
+  parent: FakeElement | null = null;
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: vi.fn(() => false) };
   style: Record<string, string | number> & { setProperty(this: Record<string, string | number>, name: string, value: string): void } = Object.assign(Object.create(null), { setProperty(this: Record<string, string | number>, name: string, value: string) { this[name] = value; } });
   offsetParent: FakeElement | null = null;
@@ -29,7 +30,10 @@ export class FakeElement {
   get innerHTML(): string { return this._innerHTML; }
   set innerHTML(value: string) {
     this._innerHTML = value;
-    for (const child of this.children) child.isConnected = false;
+    for (const child of this.children) {
+      child.parent = null;
+      child.isConnected = false;
+    }
     this.children = [];
   }
 
@@ -41,7 +45,17 @@ export class FakeElement {
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
-  appendChild(child: unknown): void { this.children.push(child as FakeElement); }
+  appendChild(child: unknown): void {
+    const fake = child as FakeElement;
+    fake.parent = this;
+    this.children.push(fake);
+  }
+  remove(): void {
+    if (!this.parent) return;
+    this.parent.children = this.parent.children.filter((c) => c !== this);
+    this.parent = null;
+    this.isConnected = false;
+  }
   contains(target: unknown): boolean { return target === this || this.children.includes(target as FakeElement); }
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;

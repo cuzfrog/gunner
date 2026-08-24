@@ -3,6 +3,7 @@ import type { UiEvents } from "../events";
 import { mockTrackingInput } from "./testSupport";
 import type { DisplayPreferences, SettingsStore } from "../../appstate";
 import type { FittingCradle } from "../../fitting";
+import type { RangeOverlayController } from "./rangeOverlay";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {
@@ -70,6 +71,21 @@ function mockSettingsStore(): SettingsStore {
   };
 }
 
+function mockRangeOverlayController(): RangeOverlayController {
+  return {
+    setHost: vi.fn(),
+    descriptors: vi.fn(() => []),
+    overlays: vi.fn(() => []),
+    toggle: vi.fn(),
+    isVisible: vi.fn(() => true),
+    describe: vi.fn(() => ""),
+    hiddenKinds: vi.fn(() => []),
+    restoreHidden: vi.fn(),
+    render: vi.fn(),
+    update: vi.fn(),
+  };
+}
+
 function build() {
   const els = fakeEls();
   const i18n = mockI18n();
@@ -91,6 +107,7 @@ function build() {
     offDisplayInvalidated: vi.fn(),
     emitDisplayInvalidated: vi.fn(),
   };
+  const rangeOverlayController = mockRangeOverlayController();
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
@@ -99,8 +116,9 @@ function build() {
     trackingInput: mockTrackingInput(),
     sigResolution: () => 40,
     events,
+    rangeOverlayController,
   });
-  return { controller, els, i18n, itemNames, settingsStore, events };
+  return { controller, els, i18n, itemNames, settingsStore, events, rangeOverlayController };
 }
 
 describe("PreferencesController", () => {
@@ -244,7 +262,20 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5 });
+    expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [] });
+  });
+
+  test("restore applies hidden range overlay state", () => {
+    const { controller, rangeOverlayController } = build();
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"] };
+    controller.restore(preferences);
+    expect(rangeOverlayController.restoreHidden).toHaveBeenCalledWith(["web"]);
+  });
+
+  test("capture includes hidden range overlay kinds", () => {
+    const { controller, rangeOverlayController } = build();
+    vi.mocked(rangeOverlayController.hiddenKinds).mockReturnValue(["grappler"]);
+    expect(controller.capture().hiddenRangeOverlays).toEqual(["grappler"]);
   });
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {

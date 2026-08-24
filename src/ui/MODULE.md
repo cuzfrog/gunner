@@ -1,11 +1,9 @@
 ---
 no-new-exports:
-  - index.ts
   - loop.ts
   - module.ts
   - palette.ts
   - palette.test.ts
-  - renderer.ts
   - renderer.test.ts
   - timer.ts
   - timer.test.ts

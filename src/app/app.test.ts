@@ -8,6 +8,7 @@ const controls = vi.mocked<Controls>({
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
+  getOverlays: vi.fn(() => []),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
@@ -88,7 +89,7 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
     expect(controls.update).toHaveBeenCalledWith(frame, hit);
   });
 
@@ -97,7 +98,7 @@ describe("AppImpl", () => {
     app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
     app.start();
     expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, 40);
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
     expect(controls.update).toHaveBeenCalledWith(frame, hit);
   });
 

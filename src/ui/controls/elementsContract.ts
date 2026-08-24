@@ -142,4 +142,5 @@ export interface Els {
   readonly resTrackPen: HTMLElement;
   readonly resRangePen: HTMLElement;
   readonly resHit: HTMLElement;
+  readonly rangeOverlayLegend: HTMLElement;
 }
