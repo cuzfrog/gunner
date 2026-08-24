@@ -9,10 +9,13 @@ describe("registerSessionModule", () => {
 
     const hullDatalist = cradle.cradle.hullDatalist;
     const sessionCodec = cradle.cradle.sessionCodec;
+    const simConfigSource = cradle.cradle.simConfigSource;
 
     expect(hullDatalist).toBeDefined();
     expect(sessionCodec).toBeDefined();
+    expect(simConfigSource).toBeDefined();
     expect(cradle.cradle.hullDatalist).toBe(hullDatalist);
     expect(cradle.cradle.sessionCodec).toBe(sessionCodec);
+    expect(cradle.cradle.simConfigSource).toBe(simConfigSource);
   });
 });

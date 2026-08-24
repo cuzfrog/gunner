@@ -1,27 +1,14 @@
-import type { Ships } from "../../ships";
-import type { HitChance } from "../../sim";
-import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
+import type { SettingsStore, UserSettings } from "../../appstate";
 import type { I18n } from "../i18n";
-import type { ImageCatalog } from "../icons";
-import type { SavedFittings, ClipboardProvider, SettingsStore, UserSettings } from "../../appstate";
-import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
-import type { SessionControl } from "./session";
 
 export interface DomControlsDeps {
-  hitChance: HitChance; i18n: I18n; settingsStore: SettingsStore; ships: Ships; fittingImport: FittingImport;
-  gunFamilies: GunFamilies; presetFittings: PresetFittings; savedFittings: SavedFittings; clipboard: ClipboardProvider;
-  timer: Timer; chargeCatalog: ChargeCatalog; imageCatalog: ImageCatalog; events: UiEvents;
+  i18n: I18n;
+  settingsStore: SettingsStore;
+  events: UiEvents;
 }
 
-interface ProfileEvents {
-  onProfileLoaded(name: string): void;
-  onProfileTextLoaded(settings: UserSettings): void;
-  captureSettings(): UserSettings;
-  persistConfigChange(notify?: boolean): void;
-}
-
-export interface DomControlsHost extends SessionControl, ProfileEvents {
+export interface DomControlsHost {
   wireControls(): void;
   currentDistance(): number;
   onPlayPause(): void;
@@ -30,4 +17,8 @@ export interface DomControlsHost extends SessionControl, ProfileEvents {
   onSpeedChange(speed: number): void;
   onConfigChange(): void;
   onDisplayChange(): void;
+  persistConfigChange(notify?: boolean): void;
+  captureSettings(): UserSettings;
+  onProfileLoaded(name: string): void;
+  onProfileTextLoaded(settings: UserSettings): void;
 }

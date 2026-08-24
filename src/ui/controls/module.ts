@@ -71,31 +71,20 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
     profileChangeTracker: asFunction(({ profileEquality }: ControlsCradle) =>
       new ProfileChangeTrackerImpl({ equality: profileEquality })
     ).singleton(),
-    profileController: asFunction(({
-      els, settingsStore, timer, i18n, uiEvents, confirmController, popupGroup, profileChangeTracker,
-    }: ControlsCradle) => new ProfileControllerImpl({
-      els: collectProfileEls(els),
-      settingsStore,
-      timer,
-      i18n,
-      events: uiEvents,
-      confirmController,
-      popupGroup,
-      changeTracker: profileChangeTracker,
+    profileController: asFunction((proxy: ControlsCradle) => new ProfileControllerImpl({
+      els: collectProfileEls(proxy.els),
+      settingsStore: proxy.settingsStore,
+      timer: proxy.timer,
+      i18n: proxy.i18n,
+      events: proxy.uiEvents,
+      confirmController: proxy.confirmController,
+      popupGroup: proxy.popupGroup,
+      changeTracker: proxy.profileChangeTracker,
+      snapshotSource: () => profileSettingsOf(proxy.sessionCodec.capture()),
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
-      hitChance: proxy.hitChance,
       i18n: proxy.i18n,
       settingsStore: proxy.settingsStore,
-      ships: proxy.ships,
-      fittingImport: proxy.fittingImport,
-      gunFamilies: proxy.gunFamilies,
-      presetFittings: proxy.presetFittings,
-      savedFittings: proxy.savedFittings,
-      clipboard: proxy.clipboard,
-      timer: proxy.timer,
-      chargeCatalog: proxy.chargeCatalog,
-      imageCatalog: proxy.imageCatalog,
       events: proxy.uiEvents,
       els: proxy.els,
       popupGroup: proxy.popupGroup,
@@ -105,7 +94,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       profileController: proxy.profileController,
       engagementReadout: proxy.engagementReadout,
       effectiveReadout: proxy.effectiveReadout,
-      sigResChoice: proxy.sigResChoice,
       attackerSide: proxy.attackerSide,
       targetSide: proxy.targetSide,
       turretController: proxy.turretController,
@@ -116,6 +104,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       shareController: proxy.shareController,
       rangeOverlayController: proxy.rangeOverlayController,
       previewManager: proxy.previewManager,
+      simConfigSource: proxy.simConfigSource,
     })).singleton(),
   });
   wire(cradle);
@@ -151,7 +140,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.importController.setOnProfileTextLoaded((settings) => c.controls.onProfileTextLoaded(settings));
   c.profileController.setOnProfileLoaded((name) => c.controls.onProfileLoaded(name));
   c.profileController.setOnNewProfile(() => c.controls.onNewProfile());
-  c.profileController.setSnapshotSource(() => profileSettingsOf(c.sessionCodec.capture()));
   c.sessionCodec.setSessionControl(c.controls);
   c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());

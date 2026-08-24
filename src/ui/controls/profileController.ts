@@ -25,7 +25,6 @@ export interface ProfileController {
   selectedName(): string;
   restoreFromStartup(startup: StartupState): boolean;
   refresh(selected?: string): void;
-  setSnapshotSource(source: () => ProfileSettings): void;
   setOnProfileLoaded(onProfileLoaded: (name: string) => void): void;
   setOnNewProfile(onNewProfile: () => void): void;
   markLoaded(selected?: string): void;
@@ -47,6 +46,7 @@ interface ProfileControllerDeps {
   readonly confirmController: ConfirmController;
   readonly popupGroup: PopupGroup;
   readonly changeTracker: ProfileChangeTracker;
+  readonly snapshotSource: () => ProfileSettings;
 }
 
 export class ProfileControllerImpl implements ProfileController {
@@ -58,11 +58,11 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly confirmController: ConfirmController;
   private readonly popupGroup: PopupGroup;
   private readonly changeTracker: ProfileChangeTracker;
+  private readonly snapshotSource: () => ProfileSettings;
   private readonly selectorPopupValue: Popup;
   private readonly newProfilePopupValue: Popup;
   private onProfileLoaded?: (name: string) => void;
   private onNewProfile?: () => void;
-  private snapshotSource: (() => ProfileSettings) | undefined;
   private shareStatusTimeout?: TimeoutId;
   private lastAppliedSelection = "";
   private selectedNameValue = "";
@@ -79,6 +79,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.confirmController = deps.confirmController;
     this.popupGroup = deps.popupGroup;
     this.changeTracker = deps.changeTracker;
+    this.snapshotSource = deps.snapshotSource;
     this.selectorPopupValue = {
       isOpen: () => this.selectorOpen,
       open: () => this.openProfileSelector(),
@@ -154,13 +155,9 @@ export class ProfileControllerImpl implements ProfileController {
     this.els.profileSelectLabel.textContent = this.selectedNameValue || this.i18n.t("select.profile");
   }
 
-  setSnapshotSource(source: () => ProfileSettings): void {
-    this.snapshotSource = source;
-  }
-
   markLoaded(selected?: string): void {
     this.els.newProfileName.value = "";
-    this.changeTracker.setBaseline(this.snapshotSource?.());
+    this.changeTracker.setBaseline(this.snapshotSource());
     this.refresh(selected ?? this.selectedNameValue);
     this.lastAppliedSelection = this.selectedNameValue;
     this.updateActionBarState();
@@ -187,7 +184,7 @@ export class ProfileControllerImpl implements ProfileController {
   async saveProfile(): Promise<void> {
     const selected = this.selectedNameValue;
     if (!selected) return;
-    const profile = this.snapshotSource?.();
+    const profile = this.snapshotSource();
     if (!profile) return;
     this.settingsStore.saveProfile(selected, profile);
     this.settingsStore.selectProfile(selected);
@@ -242,7 +239,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.closeNewProfilePopup();
     this.onNewProfile?.();
     if (!this.isNewProfileNameValid(name)) return;
-    const profile = this.snapshotSource?.();
+    const profile = this.snapshotSource();
     if (!profile) return;
     this.settingsStore.saveProfile(name, profile);
     this.settingsStore.selectProfile(name);
@@ -298,7 +295,7 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   private isDirty(): boolean {
-    return this.changeTracker.hasUnsavedChanges(this.snapshotSource?.());
+    return this.changeTracker.hasUnsavedChanges(this.snapshotSource());
   }
 
   private canSave(selected: string, dirty: boolean): boolean {

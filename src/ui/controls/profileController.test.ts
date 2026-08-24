@@ -199,9 +199,8 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const popupGroup = new StubPopupGroup();
   const changeTracker = new StubProfileChangeTracker();
   const controller = new ProfileControllerImpl({
-    els, settingsStore, timer, i18n, events, confirmController, popupGroup, changeTracker,
+    els, settingsStore, timer, i18n, events, confirmController, popupGroup, changeTracker, snapshotSource,
   });
-  controller.setSnapshotSource(snapshotSource);
   controller.setOnProfileLoaded(onLoaded);
   controller.setOnNewProfile(onNewProfile);
   return { controller, els, settingsStore, timer, snapshotSource, onLoaded, onNewProfile, events, confirmController, popupGroup, changeTracker };

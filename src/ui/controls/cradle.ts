@@ -21,7 +21,7 @@ import type { FittingPopupController, FittingPreview, FittingPreviewManager, Pop
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { ShareController } from "./share";
-import type { HullDatalist, SessionCodec } from "./session";
+import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "./session";
 import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
@@ -67,10 +67,11 @@ export interface ControlsCradle {
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
   readonly sessionCodec: SessionCodec;
+  readonly simConfigSource: SimConfigSource;
   readonly importController: ImportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
-  readonly controls: Controls & DomControlsHost & RangeOverlayHost;
+  readonly controls: Controls & DomControlsHost & RangeOverlayHost & SessionControl;
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;

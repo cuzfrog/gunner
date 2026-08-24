@@ -1,5 +1,4 @@
 import {
-  type CombatantConfig,
   type EngagementFrame,
   type EwarProjection,
   type HitChanceBreakdown,
@@ -9,18 +8,16 @@ import {
 import type { UserSettings } from "../../appstate";
 import type { Els } from "./elementsContract";
 import { isEventTargetWithClosest } from "./controlsDom";
-import { AGGRESSIVITY_MIN } from "./controlsFormat";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { RangeOverlayHost } from "./rangeOverlay";
 import type { FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
-import type { HullDatalist, SessionCodec } from "./session";
+import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "./session";
 import type { PreferencesController } from "./preferencesController";
 import type { ProfileController } from "./profileController";
 import type { EngagementReadout } from "./engagementReadout";
-import type { ChoiceGroup } from "./choiceGroup";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turret";
 import type { EwarController } from "./ewar";
@@ -41,7 +38,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   profileController: ProfileController;
   engagementReadout: EngagementReadout;
   effectiveReadout: EffectiveReadout;
-  sigResChoice: ChoiceGroup;
   attackerSide: SidePanel;
   targetSide: SidePanel;
   turretController: TurretController;
@@ -52,9 +48,10 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
   previewManager: FittingPreviewManager;
+  simConfigSource: SimConfigSource;
 }
 
-export class DomControls implements Controls, DomControlsHost, RangeOverlayHost {
+export class DomControls implements Controls, DomControlsHost, RangeOverlayHost, SessionControl {
   private readonly deps: DomControlsDeps;
   private readonly els: Els;
   private readonly popupGroup: PopupGroup;
@@ -64,7 +61,6 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   private readonly profileController: ProfileController;
   private readonly engagementReadout: EngagementReadout;
   private readonly effectiveReadout: EffectiveReadout;
-  private readonly sigResChoice: ChoiceGroup;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly turretController: TurretController;
@@ -75,6 +71,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
   private readonly shareController: ShareController;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly previewManager: FittingPreviewManager;
+  private readonly simConfigSource: SimConfigSource;
   private currentDistanceValue: number;
 
   private callbacks?: ControlsCallbacks;
@@ -90,7 +87,6 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.profileController = all.profileController;
     this.engagementReadout = all.engagementReadout;
     this.effectiveReadout = all.effectiveReadout;
-    this.sigResChoice = all.sigResChoice;
     this.attackerSide = all.attackerSide;
     this.targetSide = all.targetSide;
     this.turretController = all.turretController;
@@ -101,6 +97,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.shareController = all.shareController;
     this.rangeOverlayController = all.rangeOverlayController;
     this.previewManager = all.previewManager;
+    this.simConfigSource = all.simConfigSource;
     this.currentDistanceValue = this.sessionCodec.getInitialDistance();
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
@@ -191,27 +188,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
 
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
   getTargetSig(): number { return this.targetSide.capture().sig ?? 1; }
-  getConfig(): SimConfig {
-    const initialDistance = this.sessionCodec.getInitialDistance();
-    const aggressivity = this.preferencesController.getManeuverAggressivity();
-    const attackerState = this.attackerSide.capture();
-    const targetState = this.targetSide.capture();
-    const attacker: CombatantConfig = {
-      id: "attacker", maxSpeed: attackerState.speed, baseMaxSpeed: attackerState.baseMaxSpeed ?? attackerState.speed, mass: attackerState.mass,
-      inertiaModifier: attackerState.inertia, mode: attackerState.mode,
-      desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
-      ewar: this.ewarController.projection("attacker"),
-      boosts: this.boosterController.projection("attacker"),
-    };
-    const target: CombatantConfig = {
-      id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed, mass: targetState.mass,
-      inertiaModifier: targetState.inertia, mode: targetState.mode,
-      desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
-      ewar: this.ewarController.projection("target"),
-      boosts: this.boosterController.projection("target"),
-    };
-    return { attacker, target, initialDistance };
-  }
+  getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }

@@ -5,9 +5,9 @@ no-new-exports:
   - sessionControl.ts
   - sessionCodec.test.ts
   - module.ts
-  - index.ts
   - startupDefaults.ts
   - module.test.ts
+  - simConfigSource.ts
 ---
 
 
@@ -17,4 +17,4 @@ no-new-exports:
 
 Session state, URL encoding, and hull datalist.
 
-The public surface is the abstraction types: `SessionCodec`, `SessionControl`, and `HullDatalist`.
+The public surface is the abstraction types: `SessionCodec`, `SessionControl`, `HullDatalist`, and `SimConfigSource`.

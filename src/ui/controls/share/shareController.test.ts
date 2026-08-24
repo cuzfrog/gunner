@@ -103,7 +103,6 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     selectedName: vi.fn(),
     restoreFromStartup: vi.fn(),
     refresh: vi.fn(),
-    setSnapshotSource: vi.fn(),
     setOnProfileLoaded: vi.fn(),
     setOnNewProfile: vi.fn(),
     markLoaded: vi.fn(),

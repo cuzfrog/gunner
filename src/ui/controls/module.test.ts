@@ -40,6 +40,7 @@ const controlsCradleKeys = {
   attackerFittingPopup: "attackerFittingPopup",
   targetFittingPopup: "targetFittingPopup",
   sessionCodec: "sessionCodec",
+  simConfigSource: "simConfigSource",
   importController: "importController",
   ewarController: "ewarController",
   boosterController: "boosterController",
