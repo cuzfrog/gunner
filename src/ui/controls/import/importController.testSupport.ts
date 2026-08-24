@@ -7,6 +7,7 @@ import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
+import { UiEventsImpl } from "../../events";
 
 class FakePopupGroup implements PopupGroup {
   register(): void {}
@@ -147,8 +148,11 @@ export function buildImportController(document: Document) {
   const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })) };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
+  const events = new UiEventsImpl();
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
+  events.onConfigInvalidated(onConfigPersisted);
+  events.onProfileTextLoaded(onProfileTextLoaded);
   const popupGroup: PopupGroup = new FakePopupGroup();
   const controller = new ImportControllerImpl({
     clipboard,
@@ -167,11 +171,10 @@ export function buildImportController(document: Document) {
     preferences: preferences as unknown as PreferencesController,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
+    events,
   });
-  controller.setOnConfigPersisted(onConfigPersisted);
-  controller.setOnProfileTextLoaded(onProfileTextLoaded);
   return {
     controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret, preferences,
-    profileController, onConfigPersisted, onProfileTextLoaded,
+    profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

@@ -9,4 +9,4 @@ no-new-exports:
 
 # rangeOverlay
 
-Canvas range overlay legend and controller. `RangeOverlayController` computes EWAR projection radii and provides the per-kind visibility toggle UI. The public surface is `RangeOverlayController`; `registerRangeOverlayModule` is exported for DI registration.
+Canvas range overlay legend and controller. `RangeOverlayController` computes EWAR projection radii and provides the per-kind visibility toggle UI. The public surface is `RangeOverlayController`; `registerRangeOverlayModule` is exported for DI registration. The module owns its DOM collection through a private `collectRangeOverlayEls`.

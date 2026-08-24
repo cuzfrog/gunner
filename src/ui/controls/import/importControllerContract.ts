@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../appstate";
+import type { ClipboardProvider, SavedFittings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
@@ -19,7 +19,4 @@ export interface ImportController {
   importProfileClicked(): Promise<void>;
   onImportSideClick(side: Side): Promise<void>;
   importEftFitting(side: Side, text: string, persist?: boolean): ImportedFitting | undefined;
-  setOnConfigPersisted(onConfigPersisted: () => void): void;
-  setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void;
-  setOnFittingImported(onFittingImported: ((side: Side, imported: ImportedFitting) => void) | undefined): void;
 }

@@ -25,8 +25,6 @@ export interface ProfileController {
   selectedName(): string;
   restoreFromStartup(startup: StartupState): boolean;
   refresh(selected?: string): void;
-  setOnProfileLoaded(onProfileLoaded: (name: string) => void): void;
-  setOnNewProfile(onNewProfile: () => void): void;
   markLoaded(selected?: string): void;
   updateActionBarState(): void;
   toggleProfileSelector(): void;
@@ -61,8 +59,6 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly snapshotSource: () => ProfileSettings;
   private readonly selectorPopupValue: Popup;
   private readonly newProfilePopupValue: Popup;
-  private onProfileLoaded?: (name: string) => void;
-  private onNewProfile?: () => void;
   private shareStatusTimeout?: TimeoutId;
   private lastAppliedSelection = "";
   private selectedNameValue = "";
@@ -111,14 +107,6 @@ export class ProfileControllerImpl implements ProfileController {
     this.els.profileNew.addEventListener("click", () => this.toggleNewProfilePopup());
   }
 
-  setOnProfileLoaded(onProfileLoaded: (name: string) => void): void {
-    this.onProfileLoaded = onProfileLoaded;
-  }
-
-  setOnNewProfile(onNewProfile: () => void): void {
-    this.onNewProfile = onNewProfile;
-  }
-
   selectedName(): string {
     return this.selectedNameValue;
   }
@@ -128,7 +116,7 @@ export class ProfileControllerImpl implements ProfileController {
     const profile = selected ? this.settingsStore.loadProfile(selected) : null;
     if (selected && profile) {
       this.settingsStore.selectProfile(selected);
-      this.onProfileLoaded?.(selected);
+      this.events.emitProfileLoaded(selected);
       return true;
     }
     if (selected) this.settingsStore.clearSelectedProfile();
@@ -209,7 +197,7 @@ export class ProfileControllerImpl implements ProfileController {
       return;
     }
     this.settingsStore.selectProfile(name);
-    this.onProfileLoaded?.(name);
+    this.events.emitProfileLoaded(name);
     this.lastAppliedSelection = name;
     this.refresh(name);
     this.closeProfileSelector();
@@ -237,7 +225,7 @@ export class ProfileControllerImpl implements ProfileController {
   private async onConfirmNewProfile(): Promise<void> {
     const name = this.els.newProfileName.value.trim();
     this.closeNewProfilePopup();
-    this.onNewProfile?.();
+    this.events.emitNewProfile();
     if (!this.isNewProfileNameValid(name)) return;
     const profile = this.snapshotSource();
     if (!profile) return;

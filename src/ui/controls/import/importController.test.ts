@@ -58,11 +58,11 @@ describe("ImportController", () => {
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 
-  test("importFromText invokes the onFittingImported callback with the imported fitting", async () => {
-    const { controller, fittingImport } = buildImportController(globalThis.document);
+  test("importFromText emits fittingImported with the imported fitting", async () => {
+    const { controller, fittingImport, events } = buildImportController(globalThis.document);
     const onFittingImported = vi.fn();
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
-    controller.setOnFittingImported(onFittingImported);
+    events.onFittingImported(onFittingImported);
     await controller.importFromText("attacker", text);
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(onFittingImported).toHaveBeenCalledWith("attacker", IMPORTED_RIFTER);

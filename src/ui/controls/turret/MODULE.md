@@ -22,4 +22,4 @@ no-new-exports:
 
 Turret input, state resolution, ammo rendering, and signature-resolution UI.
 
-The public surface is `TurretController`.
+The public surface is `TurretController`. The module owns its DOM collection through a private `collectTurretEls`.

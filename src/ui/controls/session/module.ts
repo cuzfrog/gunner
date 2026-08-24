@@ -1,14 +1,20 @@
 import { asFunction, type AwilixContainer } from "awilix";
+import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
 import { HullDatalistImpl } from "./hullDatalist";
 import { SessionCodecImpl } from "./sessionCodec";
 import { SimConfigSourceImpl } from "./simConfigSource";
 
+type ControlsElements = ReturnType<typeof createControlsEls>;
+type SessionCodecEls = ConstructorParameters<typeof SessionCodecImpl>[0]["els"];
+
 export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    hullDatalist: asFunction(({ els, presetFittings, uiEvents }) => new HullDatalistImpl(els, presetFittings, uiEvents)).singleton(),
+    hullDatalist: asFunction(({ els, presetFittings, uiEvents }) =>
+      new HullDatalistImpl(els.hullOptions, presetFittings, uiEvents)
+    ).singleton(),
     sessionCodec: asFunction((proxy) => new SessionCodecImpl({
-      els: proxy.els,
+      els: collectSessionCodecEls(proxy.els),
       attackerSide: proxy.attackerSide,
       targetSide: proxy.targetSide,
       turret: proxy.turretController,
@@ -34,4 +40,25 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       distanceSource: proxy.sessionCodec,
     })).singleton(),
   });
+}
+
+function collectSessionCodecEls(all: ControlsElements): SessionCodecEls {
+  return {
+    sigRes: all.sigRes,
+    optimal: all.optimal,
+    falloff: all.falloff,
+    attackerSpeed: all.attackerSpeed,
+    attackerMass: all.attackerMass,
+    attackerInertia: all.attackerInertia,
+    attackerMode: all.attackerMode,
+    attackerRange: all.attackerRange,
+    maneuverAggressivity: all.maneuverAggressivity,
+    initialDistance: all.initialDistance,
+    targetSpeed: all.targetSpeed,
+    targetMass: all.targetMass,
+    targetInertia: all.targetInertia,
+    targetMode: all.targetMode,
+    targetRange: all.targetRange,
+    targetSig: all.targetSig,
+  };
 }

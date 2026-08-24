@@ -1,6 +1,7 @@
 import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings, type UserSettings } from "../../../appstate";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
+import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
@@ -26,12 +27,10 @@ export class ImportControllerImpl implements ImportController {
   private readonly turret: AttackerTurret;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
+  private readonly events: UiEvents;
   private readonly popupValue: Popup;
   private pendingImportText?: string;
   private importSidePopupOpen = false;
-  private onConfigPersisted?: () => void;
-  private onProfileTextLoaded?: (settings: UserSettings) => void;
-  private onFittingImported?: (side: Side, imported: ImportedFitting) => void;
 
   constructor(deps: {
     clipboard: ClipboardProvider;
@@ -45,6 +44,7 @@ export class ImportControllerImpl implements ImportController {
     preferences: PreferencesController;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
+    events: UiEvents;
   }) {
     this.clipboard = deps.clipboard;
     this.fittingImport = deps.fittingImport;
@@ -57,12 +57,12 @@ export class ImportControllerImpl implements ImportController {
     this.preferences = deps.preferences;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
+    this.events = deps.events;
     this.eftSideImporter = new EftSideImporter({
       attackerSide: deps.attackerSide,
       targetSide: deps.targetSide,
       turret: deps.turret,
       fittingImport: deps.fittingImport,
-      onConfigPersisted: () => this.persistConfigChange(),
     });
     this.profileTextImporter = new ProfileTextImporter({
       fittingImport: deps.fittingImport,
@@ -83,14 +83,6 @@ export class ImportControllerImpl implements ImportController {
   }
 
   get popup(): Popup { return this.popupValue; }
-
-  setOnConfigPersisted(onConfigPersisted: () => void): void { this.onConfigPersisted = onConfigPersisted; }
-  setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void { this.onProfileTextLoaded = onProfileTextLoaded; }
-  setOnFittingImported(onFittingImported: ((side: Side, imported: ImportedFitting) => void) | undefined): void { this.onFittingImported = onFittingImported; }
-
-  private persistConfigChange(): void {
-    this.onConfigPersisted?.();
-  }
 
   private panel(side: Side): SidePanel {
     return side === "attacker" ? this.attackerSide : this.targetSide;
@@ -158,7 +150,7 @@ export class ImportControllerImpl implements ImportController {
         this.profileController.showStatus("status.importInvalid");
         return;
       }
-      this.onProfileTextLoaded?.(settings);
+      this.events.emitProfileTextLoaded(settings);
       return;
     }
     if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
@@ -178,7 +170,9 @@ export class ImportControllerImpl implements ImportController {
 
   importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
     const imported = this.eftSideImporter.importEftFitting(side, text, persist);
-    if (imported) this.onFittingImported?.(side, imported);
+    if (!imported) return undefined;
+    this.events.emitFittingImported(side, imported);
+    if (persist) this.events.emitConfigInvalidated(true);
     return imported;
   }
 

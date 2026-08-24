@@ -8,7 +8,6 @@ interface EftSideImporterDeps {
   readonly targetSide: SidePanel;
   readonly turret: AttackerTurret;
   readonly fittingImport: FittingImport;
-  readonly onConfigPersisted: () => void;
 }
 
 export class EftSideImporter {
@@ -16,14 +15,12 @@ export class EftSideImporter {
   private readonly targetSide: SidePanel;
   private readonly turret: AttackerTurret;
   private readonly fittingImport: FittingImport;
-  private readonly onConfigPersisted: () => void;
 
   constructor(deps: EftSideImporterDeps) {
     this.attackerSide = deps.attackerSide;
     this.targetSide = deps.targetSide;
     this.turret = deps.turret;
     this.fittingImport = deps.fittingImport;
-    this.onConfigPersisted = deps.onConfigPersisted;
   }
 
   private panel(side: Side): SidePanel {
@@ -46,7 +43,6 @@ export class EftSideImporter {
     if (side === "attacker") this.turret.applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
-      this.onConfigPersisted();
     }
     panel.sections.paste.showImportHint("status.fittingImported");
     return imported;

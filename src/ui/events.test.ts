@@ -1,3 +1,5 @@
+import type { ImportedFitting } from "../fitting";
+import type { UserSettings } from "../appstate";
 import { UiEventsImpl } from "./events";
 
 describe("UiEvents", () => {
@@ -80,5 +82,47 @@ describe("UiEvents", () => {
     events.emitConfigInvalidated(true);
     expect(language).toHaveBeenCalledTimes(1);
     expect(config).toHaveBeenCalledWith(true);
+  });
+
+  test("emitFittingImported passes side and imported fitting", () => {
+    const events = new UiEventsImpl();
+    const listener = vi.fn();
+    const imported = {} as unknown as ImportedFitting;
+    events.onFittingImported(listener);
+    events.emitFittingImported("attacker", imported);
+    expect(listener).toHaveBeenCalledWith("attacker", imported);
+  });
+
+  test("offFittingImported removes a listener", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onFittingImported(a);
+    events.onFittingImported(b);
+    events.offFittingImported(a);
+    events.emitFittingImported("target", {} as unknown as ImportedFitting);
+    expect(a).not.toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
+  test("emitProfileLoaded and emitNewProfile emit to their listeners", () => {
+    const events = new UiEventsImpl();
+    const profileLoaded = vi.fn();
+    const newProfile = vi.fn();
+    events.onProfileLoaded(profileLoaded);
+    events.onNewProfile(newProfile);
+    events.emitProfileLoaded("brawler");
+    events.emitNewProfile();
+    expect(profileLoaded).toHaveBeenCalledWith("brawler");
+    expect(newProfile).toHaveBeenCalled();
+  });
+
+  test("emitProfileTextLoaded passes settings", () => {
+    const events = new UiEventsImpl();
+    const listener = vi.fn();
+    const settings = {} as unknown as UserSettings;
+    events.onProfileTextLoaded(listener);
+    events.emitProfileTextLoaded(settings);
+    expect(listener).toHaveBeenCalledWith(settings);
   });
 });

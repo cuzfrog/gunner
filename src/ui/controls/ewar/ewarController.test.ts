@@ -4,10 +4,10 @@ import type { StoredEwarActivation } from "../../../appstate";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { collectEwarEls } from "../elementCollectors";
 import { createControlsEls } from "../elements";
 import type { Popup, PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
+import { UiEventsImpl } from "../../events";
 import { EwarControllerImpl } from "./ewarController";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
@@ -81,7 +81,7 @@ function buildEwarController(language: Language = "en") {
     droneIconUrl: vi.fn(),
   });
   const popupGroup = new FakePopupGroup();
-  const els = collectEwarEls(createControlsEls());
+  const els = createControlsEls();
   getFake(document, "attacker-ewar-popup").hidden = true;
   getFake(document, "target-ewar-popup").hidden = true;
   const host = { onConfigChange: vi.fn(), currentDistance: vi.fn(() => 5000) };
@@ -93,9 +93,10 @@ function buildEwarController(language: Language = "en") {
     disruptorDescription: vi.fn(() => "disruptor-title"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
   });
-  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber });
+  const events = new UiEventsImpl();
+  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events });
   controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, ewarEffectDescriber };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, ewarEffectDescriber, events };
 }
 
 function webSection(popup: FakeElement): FakeElement | undefined {

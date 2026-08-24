@@ -6,10 +6,10 @@ import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
+import type { createControlsEls } from "./elements";
 import type { Controls } from "./controlsContract";
 import type { ChoiceGroup } from "./choiceGroup";
 import type { DomControlsHost } from "./domControlsContract";
-import type { Els } from "./elementsContract";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
@@ -29,6 +29,8 @@ import type { RangeOverlayController, RangeOverlayHost } from "./rangeOverlay";
 import type { ProfileChangeTracker } from "./profileChangeTracker";
 import type { ProfileEquality } from "../../appstate";
 
+type ControlsElements = ReturnType<typeof createControlsEls>;
+
 export interface ControlsCradle {
   readonly hitChance: HitChance;
   readonly i18n: I18n;
@@ -46,7 +48,7 @@ export interface ControlsCradle {
   readonly uiEvents: UiEvents;
   readonly turretOverrides: TurretOverrides;
   readonly popupGroup: PopupGroup;
-  readonly els: Els;
+  readonly els: ControlsElements;
   readonly trackingInput: TrackingInput;
   readonly sigResChoice: ChoiceGroup;
   readonly engagementReadout: EngagementReadout;

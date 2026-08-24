@@ -1,5 +1,7 @@
-import type { Els } from "../elementsContract";
+import type { createControlsEls } from "../elements";
 import type { Side } from "./side";
+
+type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export interface SidePanelElements {
   readonly hull: HTMLInputElement;
@@ -29,7 +31,7 @@ export interface SidePanelElements {
   readonly propulsionVariants: HTMLElement;
 }
 
-export function collectSideEls(els: Els, side: Side): SidePanelElements {
+export function collectSideEls(els: ControlsElements, side: Side): SidePanelElements {
   if (side === "attacker") {
     return {
       hull: els.attackerHull,

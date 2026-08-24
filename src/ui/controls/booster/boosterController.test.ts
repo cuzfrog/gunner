@@ -3,10 +3,10 @@ import { EMPTY_BOOST_LOADOUT } from "../../../sim";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { collectBoosterEls } from "../elementCollectors";
 import { createControlsEls } from "../elements";
 import type { PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
+import { UiEventsImpl } from "../../events";
 import { BoosterControllerImpl } from "./boosterController";
 
 const TRACKING_SCRIPT: TurretScriptSpec = { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
@@ -46,15 +46,16 @@ function buildBoosterController() {
     onPointerDown: vi.fn(),
     onKeyDown: vi.fn(),
   });
-  const els = collectBoosterEls(createControlsEls());
+  const els = createControlsEls();
   getFake(document, "attacker-booster-popup").hidden = true;
   getFake(document, "target-booster-popup").hidden = true;
   const host = { onConfigChange: vi.fn() };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
-  const controller = new BoosterControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n });
+  const events = new UiEventsImpl();
+  const controller = new BoosterControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, events });
   controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, events };
 }
 
 describe("BoosterController", () => {

@@ -9,7 +9,6 @@ import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
 import { applyStartupDefaults } from "./startupDefaults";
 import type { ChoiceGroup } from "../choiceGroup";
-import type { Els } from "../elementsContract";
 import type { HintRotator } from "../hints";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
@@ -28,8 +27,27 @@ export interface SessionCodec {
   setSessionControl(sessionControl: SessionControl): void;
 }
 
+interface SessionCodecEls {
+  readonly sigRes: HTMLSelectElement;
+  readonly optimal: HTMLInputElement;
+  readonly falloff: HTMLInputElement;
+  readonly attackerSpeed: HTMLInputElement;
+  readonly attackerMass: HTMLInputElement;
+  readonly attackerInertia: HTMLInputElement;
+  readonly attackerMode: HTMLSelectElement;
+  readonly attackerRange: HTMLInputElement;
+  readonly maneuverAggressivity: HTMLInputElement;
+  readonly initialDistance: HTMLInputElement;
+  readonly targetSpeed: HTMLInputElement;
+  readonly targetMass: HTMLInputElement;
+  readonly targetInertia: HTMLInputElement;
+  readonly targetMode: HTMLSelectElement;
+  readonly targetRange: HTMLInputElement;
+  readonly targetSig: HTMLInputElement;
+}
+
 export class SessionCodecImpl implements SessionCodec {
-  private readonly els: Els;
+  private readonly els: SessionCodecEls;
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly turretController: TurretController;
@@ -49,7 +67,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly pristineSettings: UserSettings;
 
   constructor(deps: {
-    els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
+    els: SessionCodecEls; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
     sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore;
     trackingInput: TrackingInput; ewarController: EwarController; boosterController: BoosterController; fittingImport: FittingImport;
@@ -224,7 +242,6 @@ export class SessionCodecImpl implements SessionCodec {
     applyStartupDefaults({
       attackerSide: this.attackerSide,
       targetSide: this.targetSide,
-      els: this.els,
       preferencesController: this.preferencesController,
       profileController: this.profileController,
       sessionControl: this.sessionControl,

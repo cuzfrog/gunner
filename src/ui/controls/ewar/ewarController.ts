@@ -3,6 +3,7 @@ import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../sidePanel";
@@ -28,6 +29,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly ewarEffectDescriber: EwarEffectDescriber;
+  private readonly events: UiEvents;
   private readonly states = new Map<Side, EwarState>();
   private readonly popups: Record<Side, Popup>;
   private readonly scriptPopups: Record<Side, Popup>;
@@ -35,13 +37,14 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private host?: EwarHost;
 
-  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber }) {
+  constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.imageCatalog = deps.imageCatalog;
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
+    this.events = deps.events;
     this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
     this.popups = { attacker: this.buildPopup("attacker"), target: this.buildPopup("target") };
     this.popupGroup.register(this.scriptPopups.attacker);
@@ -50,6 +53,7 @@ export class EwarControllerImpl implements EwarController {
     this.popupGroup.register(this.popups.target);
     this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
     this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
+    this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
     this.render();
   }
 
@@ -63,7 +67,6 @@ export class EwarControllerImpl implements EwarController {
     } else {
       this.states.set(side, { loadout, activation: this.clampActivation(loadout) });
     }
-    this.host?.onConfigChange();
     this.renderSide(side);
   }
 

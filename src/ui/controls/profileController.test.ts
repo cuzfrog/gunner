@@ -193,6 +193,8 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const onLoaded = vi.fn();
   const onNewProfile = vi.fn();
   const events = new UiEventsImpl();
+  events.onProfileLoaded(onLoaded);
+  events.onNewProfile(onNewProfile);
   const confirmController: ConfirmController = {
     confirm: vi.fn((key: string) => Promise.resolve(options.confirm ? options.confirm(key) : true)),
   };
@@ -201,8 +203,6 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const controller = new ProfileControllerImpl({
     els, settingsStore, timer, i18n, events, confirmController, popupGroup, changeTracker, snapshotSource,
   });
-  controller.setOnProfileLoaded(onLoaded);
-  controller.setOnNewProfile(onNewProfile);
   return { controller, els, settingsStore, timer, snapshotSource, onLoaded, onNewProfile, events, confirmController, popupGroup, changeTracker };
 }
 

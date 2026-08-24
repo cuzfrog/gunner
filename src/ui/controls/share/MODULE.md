@@ -11,4 +11,4 @@ no-new-exports:
 
 Profile sharing: copy as URL or as text.
 
-The public surface is `ShareController`.
+The public surface is `ShareController`. The module owns its DOM collection through a private `collectShareEls`.

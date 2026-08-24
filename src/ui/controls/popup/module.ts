@@ -1,11 +1,14 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
+import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
-import { collectFittingPopupEls } from "../elementCollectors";
 import type { Side } from "../sidePanel";
 import { DomFittingPreview } from "./fittingPreview";
 import { FittingPopupControllerImpl } from "./fittingPopupController";
 import { FittingPreviewManagerImpl } from "./fittingPreviewManager";
 import { PopupGroupImpl } from "./popupGroup";
+import type { FittingPopupEls } from "./fittingPopupEls";
+
+type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerPopupModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
@@ -52,5 +55,32 @@ function popupDeps<T extends ControlsCradle>(proxy: T, side: Side) {
     applyFitting: (text: string) => proxy.importController.importEftFitting(side, text, true),
     previews: proxy.previewManager,
     events: proxy.uiEvents,
+  };
+}
+
+function collectFittingPopupEls(els: ControlsElements, side: Side): FittingPopupEls {
+  if (side === "attacker") {
+    return {
+      trigger: els.attackerFittingTrigger,
+      eye: els.attackerFittingEye,
+      popup: els.attackerFittingPopup,
+      savedList: els.attackerFittingSavedList,
+      presetList: els.attackerFittingPresetList,
+      savedLabel: els.attackerFittingSavedLabel,
+      presetLabel: els.attackerFittingPresetLabel,
+      empty: els.attackerFittingEmpty,
+      shipImage: els.attackerShipImage,
+    };
+  }
+  return {
+    trigger: els.targetFittingTrigger,
+    eye: els.targetFittingEye,
+    popup: els.targetFittingPopup,
+    savedList: els.targetFittingSavedList,
+    presetList: els.targetFittingPresetList,
+    savedLabel: els.targetFittingSavedLabel,
+    presetLabel: els.targetFittingPresetLabel,
+    empty: els.targetFittingEmpty,
+    shipImage: els.targetShipImage,
   };
 }

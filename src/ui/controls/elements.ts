@@ -8,8 +8,7 @@ import {
   isHtmlTextAreaElement,
 } from "./controlsDom";
 
-import type { Els } from "./elementsContract";
-export function createControlsEls(): Els {
+export function createControlsEls() {
   return {
     tracking: elOf("tracking", isHtmlInputElement),
     trackingUnitRad: elOf("tracking-unit-rad", isHtmlButtonElement),

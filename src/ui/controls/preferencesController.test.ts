@@ -107,10 +107,22 @@ function build() {
     emitLanguageChanged: vi.fn(),
     onConfigInvalidated: vi.fn(),
     offConfigInvalidated: vi.fn(),
-    emitConfigInvalidated: vi.fn((_: boolean) => {}),
+    emitConfigInvalidated: vi.fn((_persist: boolean) => {}),
     onDisplayInvalidated: vi.fn(),
     offDisplayInvalidated: vi.fn(),
     emitDisplayInvalidated: vi.fn(),
+    onFittingImported: vi.fn(),
+    offFittingImported: vi.fn(),
+    emitFittingImported: vi.fn(),
+    onProfileLoaded: vi.fn(),
+    offProfileLoaded: vi.fn(),
+    emitProfileLoaded: vi.fn(),
+    onNewProfile: vi.fn(),
+    offNewProfile: vi.fn(),
+    emitNewProfile: vi.fn(),
+    onProfileTextLoaded: vi.fn(),
+    offProfileTextLoaded: vi.fn(),
+    emitProfileTextLoaded: vi.fn(),
   };
   const rangeOverlayController = mockRangeOverlayController();
   const controller = new PreferencesControllerImpl({

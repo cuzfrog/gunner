@@ -32,4 +32,4 @@ no-new-exports:
 
 Side-by-side ship fitting and stat inputs for the attacker and target.
 
-The `SidePanel` interface is the public abstraction. `SidePanelDeps`, `SidePanelHost`, `SidePanelState`, and `SidePanelElements` are shared DTOs exposed as types. Implementation classes remain internal and are wired through `module.ts` via DI. Generic `Popup` and `PopupGroup` abstractions also live here because the popup sub-module depends on side-panel types.
+The `SidePanel` interface is the public abstraction. `SidePanelDeps`, `SidePanelHost`, `SidePanelState`, and `SidePanelElements` are shared DTOs exposed as types. Implementation classes remain internal and are wired through `module.ts` via DI. `SidePanel/popup.ts` re-exports `Popup` and `PopupGroup` from the `popup` module; the generic popup abstractions now live in `popup`.

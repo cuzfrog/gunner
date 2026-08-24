@@ -6,7 +6,6 @@ import {
   type TurretSpec,
 } from "../../sim";
 import type { UserSettings } from "../../appstate";
-import type { Els } from "./elementsContract";
 import { isEventTargetWithClosest } from "./controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
@@ -29,8 +28,15 @@ import type { RangeOverlayController } from "./rangeOverlay";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 
+interface DomControlsEls {
+  play: HTMLButtonElement;
+  reset: HTMLButtonElement;
+  simSpeed: HTMLSelectElement;
+  initialDistance: HTMLInputElement;
+}
+
 interface DomControlsAllDeps extends DomControlsDeps {
-  els: Els;
+  els: DomControlsEls;
   popupGroup: PopupGroup;
   hintRotator: HintRotator;
   hullDatalist: HullDatalist;
@@ -53,7 +59,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
 
 export class DomControls implements Controls, DomControlsHost, RangeOverlayHost, SessionControl {
   private readonly deps: DomControlsDeps;
-  private readonly els: Els;
+  private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
   private readonly hintRotator: HintRotator;
   private readonly hullDatalist: HullDatalist;
@@ -102,6 +108,9 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost,
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
+    this.deps.events.onProfileLoaded((name) => this.onProfileLoaded(name));
+    this.deps.events.onNewProfile(() => this.onNewProfile());
+    this.deps.events.onProfileTextLoaded((settings) => this.onProfileTextLoaded(settings));
   }
 
   wireControls(): void {

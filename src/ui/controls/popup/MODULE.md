@@ -21,4 +21,4 @@ no-new-exports:
 
 Popup groups, fitting popups, and fitting previews.
 
-The public surface is `Popup`, `PopupGroup`, `FittingPopupController`, and `FittingPreviewManager`.
+`Popup` and `PopupGroup` abstractions live here and are the generic popup surface. The `sidePanel/popup.ts` file re-exports them so existing `sidePanel` consumers keep their import paths. The public surface is `Popup`, `PopupGroup`, `FittingPopupController`, and `FittingPreviewManager`.
