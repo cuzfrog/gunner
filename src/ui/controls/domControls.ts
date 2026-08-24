@@ -111,8 +111,6 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost 
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretController.popup);
-    this.popupGroup.register(this.boosterController.popup("attacker"));
-    this.popupGroup.register(this.boosterController.popup("target"));
     this.hullDatalist.populate();
     this.attackerSide.sections.skill.renderSkillOptions();
     this.targetSide.sections.skill.renderSkillOptions();

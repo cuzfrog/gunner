@@ -100,10 +100,6 @@ export class EwarControllerImpl implements EwarController {
     };
   }
 
-  popup(side: Side): Popup {
-    return this.popups[side];
-  }
-
   render(): void {
     this.renderSide("attacker");
     this.renderSide("target");
@@ -112,6 +108,10 @@ export class EwarControllerImpl implements EwarController {
   updateSummaries(): void {
     this.updateSummary("attacker");
     this.updateSummary("target");
+  }
+
+  popup(side: Side): Popup {
+    return this.popups[side];
   }
 
   private buildPopup(side: Side): Popup {
@@ -169,6 +169,7 @@ export class EwarControllerImpl implements EwarController {
       trigger.disabled = true;
       trigger.title = this.i18n.t("title.ewar.empty");
       summary.innerHTML = "";
+      this.popups[side].close();
       return;
     }
     trigger.disabled = false;
@@ -186,6 +187,7 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.scramblers.length > 0) {
       this.renderSection(popup, "label.ewar.scrambler", (section) => this.renderScramblers(side, state, section));
     }
+    this.popups[side].close();
   }
 
   private renderSection(

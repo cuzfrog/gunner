@@ -86,9 +86,6 @@ export class BoosterControllerImpl implements BoosterController {
     }));
   }
 
-  popup(side: Side): Popup {
-    return this.popups[side];
-  }
 
   render(): void {
     this.renderSide("attacker");
