@@ -94,11 +94,14 @@ export interface Els {
   readonly targetRange: HTMLInputElement;
   readonly targetSig: HTMLInputElement;
   readonly simSpeed: HTMLSelectElement;
-  readonly profileName: HTMLInputElement;
   readonly profileSave: HTMLButtonElement;
   readonly profileSelect: HTMLSelectElement;
   readonly profileDelete: HTMLButtonElement;
   readonly profileNew: HTMLButtonElement;
+  readonly newProfilePopup: HTMLElement;
+  readonly newProfileName: HTMLInputElement;
+  readonly newProfileConfirm: HTMLButtonElement;
+  readonly newProfileCancel: HTMLButtonElement;
   readonly confirmPopup: HTMLElement;
   readonly confirmMessage: HTMLElement;
   readonly confirmOk: HTMLButtonElement;

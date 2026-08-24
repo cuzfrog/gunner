@@ -27,10 +27,14 @@ export function collectPreferencesEls(els: Els): PreferencesEls {
 
 export function collectProfileEls(els: Els): ProfileEls {
   return {
-    profileName: els.profileName,
     profileSave: els.profileSave,
     profileSelect: els.profileSelect,
     profileDelete: els.profileDelete,
+    profileNew: els.profileNew,
+    newProfilePopup: els.newProfilePopup,
+    newProfileName: els.newProfileName,
+    newProfileConfirm: els.newProfileConfirm,
+    newProfileCancel: els.newProfileCancel,
     shareStatus: els.shareStatus,
   };
 }

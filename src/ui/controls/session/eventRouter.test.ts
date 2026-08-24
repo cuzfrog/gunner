@@ -74,10 +74,11 @@ describe("EventRouter", () => {
       trackingInput: { rad: 0.32 },
     } as unknown as PreferencesController;
     const popupGroup = makePopupGroup();
+    const profile = { toggleNewProfilePopup: vi.fn() } as unknown as ProfileController;
     const router = new EventRouter({
       els,
       preferences,
-      profile: {} as ProfileController,
+      profile,
       import: {} as ImportController,
       share: makeShareController(),
       attackerSide: {} as SidePanel,
@@ -99,7 +100,7 @@ describe("EventRouter", () => {
     expect(host.onReset).toHaveBeenCalled();
 
     getFake(globalThis.document, "profile-new").trigger("click");
-    expect(host.onNewProfile).toHaveBeenCalled();
+    expect(profile.toggleNewProfilePopup).toHaveBeenCalled();
 
     getFake(globalThis.document, "sim-speed").value = "2";
     getFake(globalThis.document, "sim-speed").trigger("change");

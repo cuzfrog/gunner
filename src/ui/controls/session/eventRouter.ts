@@ -88,14 +88,13 @@ export class EventRouter {
     this.els.profileSave.addEventListener("click", () => void this.profile.saveProfile());
     this.els.profileSelect.addEventListener("change", () => void this.profile.loadProfile());
     this.els.profileDelete.addEventListener("click", () => void this.profile.deleteProfile());
-    this.els.profileNew.addEventListener("click", () => this.host?.onNewProfile());
+    this.els.profileNew.addEventListener("click", () => this.profile.toggleNewProfilePopup());
     this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.shareController.popup));
     this.els.shareCopyUrl.addEventListener("click", () => void this.shareController.onCopyUrlClicked());
     this.els.shareCopyText.addEventListener("click", () => void this.shareController.onCopyTextClicked());
     this.els.importProfile.addEventListener("click", () => void this.importController.importProfileClicked());
     this.els.importSideAttacker.addEventListener("click", () => void this.importController.onImportSideClick("attacker"));
     this.els.importSideTarget.addEventListener("click", () => void this.importController.onImportSideClick("target"));
-    this.els.profileName.addEventListener("input", () => this.profile.updateDirtyState());
 
     this.els.attackerImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("attacker"));
     this.els.targetImportFitting.addEventListener("click", () => void this.importController.importFromClipboard("target"));

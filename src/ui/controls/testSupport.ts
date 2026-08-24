@@ -88,7 +88,6 @@ function setControlDefaults(document: Document): void {
     "maneuver-aggressivity-slider": "0.5",
     "grid-brightness-slider": "0.2",
     "sim-speed": "4",
-    "profile-name": "",
   };
   for (const [id, value] of Object.entries(defaults)) {
     const el = getFake(document, id);

@@ -53,7 +53,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       return new ConfirmControllerImpl({ popupGroup, i18n, els: confirmEls });
     }).singleton(),
     profileController: asFunction(({
-      els, settingsStore, timer, i18n, uiEvents, confirmController,
+      els, settingsStore, timer, i18n, uiEvents, confirmController, popupGroup,
     }: ControlsCradle) => new ProfileControllerImpl({
       els: collectProfileEls(els),
       settingsStore,
@@ -61,6 +61,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       i18n,
       events: uiEvents,
       confirmController,
+      popupGroup,
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       hitChance: proxy.hitChance,
@@ -123,6 +124,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   });
   c.importController.setOnProfileTextLoaded((settings) => c.controls.onProfileTextLoaded(settings));
   c.profileController.setOnProfileLoaded((name) => c.controls.onProfileLoaded(name));
+  c.profileController.setOnNewProfile(() => c.controls.onNewProfile());
   c.profileController.setSnapshotSource(() => profileSettingsOf(c.sessionCodec.capture()));
   c.sessionCodec.setSessionControl(c.controls);
   c.eventRouter.setHost(c.controls);

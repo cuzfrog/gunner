@@ -2,14 +2,19 @@ import { setText } from "./controlsDom";
 import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { ConfirmController } from "./confirmController";
 import type { I18n } from "../i18n";
+import type { Popup, PopupGroup } from "./popup";
 import type { TimeoutId, Timer } from "../timer";
 import type { UiEvents } from "../events";
 
 export interface ProfileEls {
-  readonly profileName: HTMLInputElement;
   readonly profileSave: HTMLButtonElement;
   readonly profileSelect: HTMLSelectElement;
   readonly profileDelete: HTMLButtonElement;
+  readonly profileNew: HTMLButtonElement;
+  readonly newProfilePopup: HTMLElement;
+  readonly newProfileName: HTMLInputElement;
+  readonly newProfileConfirm: HTMLButtonElement;
+  readonly newProfileCancel: HTMLButtonElement;
   readonly shareStatus: HTMLElement;
 }
 
@@ -19,8 +24,10 @@ export interface ProfileController {
   refresh(selected?: string): void;
   setSnapshotSource(source: () => ProfileSettings): void;
   setOnProfileLoaded(onProfileLoaded: (name: string) => void): void;
+  setOnNewProfile(onNewProfile: () => void): void;
   markLoaded(selected?: string): void;
   updateDirtyState(): void;
+  toggleNewProfilePopup(): void;
   saveProfile(): Promise<void>;
   loadProfile(): Promise<void>;
   deleteProfile(): Promise<void>;
@@ -34,6 +41,7 @@ interface ProfileControllerDeps {
   readonly i18n: I18n;
   readonly events: UiEvents;
   readonly confirmController: ConfirmController;
+  readonly popupGroup: PopupGroup;
 }
 
 export class ProfileControllerImpl implements ProfileController {
@@ -43,11 +51,15 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly confirmController: ConfirmController;
+  private readonly popupGroup: PopupGroup;
+  private readonly newProfilePopupValue: Popup;
   private onProfileLoaded?: (name: string) => void;
+  private onNewProfile?: () => void;
   private snapshotSource: (() => ProfileSettings) | undefined;
   private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
   private lastAppliedSelection = "";
+  private newProfileOpen = false;
 
   constructor(deps: ProfileControllerDeps) {
     this.els = deps.els;
@@ -56,11 +68,26 @@ export class ProfileControllerImpl implements ProfileController {
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.confirmController = deps.confirmController;
+    this.popupGroup = deps.popupGroup;
+    this.newProfilePopupValue = {
+      isOpen: () => this.newProfileOpen,
+      open: () => this.openNewProfilePopup(),
+      close: () => this.closeNewProfilePopup(),
+      focusTrigger: () => this.els.profileNew.focus(),
+      contains: (target) => this.containsNewProfile(target),
+    };
+    this.popupGroup.register(this.newProfilePopupValue);
+    this.els.newProfileConfirm.addEventListener("click", () => void this.onConfirmNewProfile());
+    this.els.newProfileCancel.addEventListener("click", () => this.closeNewProfilePopup());
     this.events.onLanguageChanged(() => this.refresh(this.selectedName()));
   }
 
   setOnProfileLoaded(onProfileLoaded: (name: string) => void): void {
     this.onProfileLoaded = onProfileLoaded;
+  }
+
+  setOnNewProfile(onNewProfile: () => void): void {
+    this.onNewProfile = onNewProfile;
   }
 
   selectedName(): string {
@@ -101,7 +128,7 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   markLoaded(selected?: string): void {
-    this.els.profileName.value = "";
+    this.els.newProfileName.value = "";
     this.selectedProfile = this.snapshotSource?.() ?? null;
     this.refresh(selected ?? this.selectedName());
     this.lastAppliedSelection = this.els.profileSelect.value;
@@ -109,30 +136,27 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   updateDirtyState(): void {
-    const selected = this.els.profileSelect.value;
-    const name = this.els.profileName.value.trim();
     const dirty = this.isDirty();
+    const saved = this.els.profileSelect.value.length > 0 && dirty;
     this.els.profileSave.classList.toggle("unsaved", dirty);
-    this.els.profileSave.disabled = !this.isSaveEnabled(name, selected, dirty);
+    this.els.profileSave.disabled = !saved;
+  }
+
+  toggleNewProfilePopup(): void {
+    if (this.newProfileOpen) this.closeNewProfilePopup();
+    else this.popupGroup.open(this.newProfilePopupValue);
   }
 
   async saveProfile(): Promise<void> {
     const selected = this.els.profileSelect.value;
-    const name = this.els.profileName.value.trim();
-    const profileName = name || selected;
-    if (!profileName) return;
+    if (!selected) return;
     const profile = this.snapshotSource?.();
     if (!profile) return;
-    const existing = this.settingsStore.loadProfile(profileName);
-    if (existing && profileName !== this.lastAppliedSelection) {
-      if (!(await this.confirmController.confirm("confirm.overwriteProfile"))) return;
-    }
-    this.settingsStore.saveProfile(profileName, profile);
-    this.settingsStore.selectProfile(profileName);
-    this.els.profileName.value = "";
+    this.settingsStore.saveProfile(selected, profile);
+    this.settingsStore.selectProfile(selected);
     this.selectedProfile = profile;
-    this.refresh(profileName);
-    this.lastAppliedSelection = profileName;
+    this.refresh(selected);
+    this.lastAppliedSelection = selected;
     this.updateDirtyState();
     this.showStatus("status.profileSaved");
   }
@@ -173,22 +197,43 @@ export class ProfileControllerImpl implements ProfileController {
     this.shareStatusTimeout = this.timer.setTimeout(() => setText(this.els.shareStatus, ""), 2000);
   }
 
-  private isSaveEnabled(name: string, selected: string, dirty: boolean): boolean {
-    const hasTarget = name.length > 0 || selected.length > 0;
-    return hasTarget && (dirty || (name.length > 0 && name !== selected));
+  private async onConfirmNewProfile(): Promise<void> {
+    const name = this.els.newProfileName.value.trim();
+    this.closeNewProfilePopup();
+    this.onNewProfile?.();
+    if (!name) return;
+    const profile = this.snapshotSource?.();
+    if (!profile) return;
+    this.settingsStore.saveProfile(name, profile);
+    this.settingsStore.selectProfile(name);
+    this.selectedProfile = profile;
+    this.refresh(name);
+    this.lastAppliedSelection = name;
+    this.updateDirtyState();
+    this.showStatus("status.profileSaved");
+  }
+
+  private openNewProfilePopup(): void {
+    this.els.newProfileName.value = "";
+    this.els.newProfilePopup.hidden = false;
+    this.newProfileOpen = true;
+    this.els.newProfileName.focus();
+  }
+
+  private closeNewProfilePopup(): void {
+    if (!this.newProfileOpen && this.els.newProfilePopup.hidden) return;
+    this.els.newProfilePopup.hidden = true;
+    this.newProfileOpen = false;
+  }
+
+  private containsNewProfile(target: EventTarget): boolean {
+    if (!(target instanceof Element)) return false;
+    return this.els.newProfilePopup.contains(target) || target === this.els.profileNew;
   }
 
   private isDirty(): boolean {
-    const name = this.els.profileName.value.trim();
-    const selected = this.els.profileSelect.value;
-    let saved: ProfileSettings | null = null;
-    if (name && name !== selected) {
-      saved = this.settingsStore.loadProfile(name);
-    } else {
-      saved = this.selectedProfile;
-    }
     const current = this.snapshotSource?.() ?? null;
     if (!current) return false;
-    return saved ? !profilesEqual(saved, current) : name.length > 0;
+    return this.selectedProfile ? !profilesEqual(this.selectedProfile, current) : false;
   }
 }

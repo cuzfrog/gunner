@@ -137,8 +137,9 @@ describe("DomControls", () => {
     const { document, controls, clipboard } = buildDomControls({ settingsStore: { saveProfile, loadProfile } });
     const callbacks = mockCallbacks();
     controls.setCallbacks(callbacks);
-    getFake(document, "profile-name").value = "brawler";
-    getFake(document, "profile-save").trigger("click");
+    getFake(document, "profile-new").trigger("click");
+    getFake(document, "new-profile-name").value = "brawler";
+    getFake(document, "new-profile-confirm").trigger("click");
     await Promise.resolve();
     expect(saveProfile).toHaveBeenCalledWith("brawler", expect.any(Object));
     const saved = saveProfile.mock.calls[0][1];

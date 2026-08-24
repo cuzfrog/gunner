@@ -1178,7 +1178,6 @@ canvas {
   border-radius: 0;
 }
 
-.profile-name-input,
 .profile-select {
   padding: 0 8px;
   background-color: var(--bg-panel);
@@ -1188,10 +1187,6 @@ canvas {
   font-size: 13px;
   border-radius: 2px;
   min-height: 30px;
-}
-
-.profile-name-input {
-  width: 180px;
 }
 
 .profile-select {
@@ -2126,8 +2121,37 @@ canvas {
   left: 0;
 }
 
-.profile-select-field {
+.profile-select-field,
+.profile-new-field {
   position: relative;
+}
+
+.new-profile-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: var(--z-popup);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  padding: 8px;
+}
+
+.new-profile-name {
+  padding: 0 8px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 13px;
+  border-radius: 2px;
+  min-height: 28px;
+  width: 180px;
 }
 
 .confirm-popup {

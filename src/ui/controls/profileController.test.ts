@@ -1,6 +1,7 @@
 import type { I18n, Language } from "../i18n";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { ConfirmController } from "./confirmController";
+import type { Popup, PopupGroup } from "./popup";
 import type { Timer } from "../timer";
 import { UiEventsImpl } from "../events";
 import { ProfileControllerImpl, type ProfileController, type ProfileEls } from "./profileController";
@@ -30,11 +31,14 @@ class FakeElement {
   value = "";
   textContent = "";
   disabled = false;
+  hidden = false;
   tagName = "";
+  focus = vi.fn();
   private _innerHTML = "";
   children: FakeElement[] = [];
   classList = { toggle: vi.fn() };
   private attributes: Record<string, string | null> = {};
+  private handlers: Record<string, Array<(event?: unknown) => void>> = {};
 
   get innerHTML(): string {
     return this._innerHTML;
@@ -56,6 +60,19 @@ class FakeElement {
   appendChild(child: unknown): void {
     this.children.push(child as FakeElement);
   }
+
+  contains(target: unknown): boolean {
+    return target === this || this.children.includes(target as FakeElement);
+  }
+
+  addEventListener(event: string, handler: (event?: unknown) => void): void {
+    this.handlers[event] ??= [];
+    this.handlers[event].push(handler);
+  }
+
+  trigger(event: string, data?: unknown): void {
+    this.handlers[event]?.forEach((h) => h(data));
+  }
 }
 
 class FakeDocument {
@@ -66,12 +83,44 @@ class FakeDocument {
   }
 }
 
+class StubPopupGroup implements PopupGroup {
+  private readonly popups: Popup[] = [];
+  register = vi.fn((popup: Popup) => { this.popups.push(popup); });
+  open = vi.fn((popup: Popup) => {
+    for (const p of this.popups) if (p !== popup && p.isOpen()) p.close();
+    if (!popup.isOpen()) popup.open();
+  });
+  toggle = vi.fn();
+  close = vi.fn();
+  closeAll = vi.fn();
+  hasOpen = vi.fn(() => this.popups.some((p) => p.isOpen()));
+  onPointerDown = vi.fn((target: EventTarget | null) => {
+    if (!target) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  });
+  onKeyDown = vi.fn((event: { readonly key: string }) => {
+    if (event.key !== "Escape") return;
+    for (const p of this.popups) if (p.isOpen()) { p.close(); p.focusTrigger(); }
+  });
+}
+
 function fakeProfileEls(): ProfileEls {
+  const newProfilePopup = new FakeElement() as unknown as HTMLElement;
+  const newProfileName = new FakeElement() as unknown as HTMLInputElement;
+  const newProfileConfirm = new FakeElement() as unknown as HTMLButtonElement;
+  const newProfileCancel = new FakeElement() as unknown as HTMLButtonElement;
+  newProfilePopup.appendChild(newProfileName);
+  newProfilePopup.appendChild(newProfileConfirm);
+  newProfilePopup.appendChild(newProfileCancel);
   return {
-    profileName: new FakeElement() as unknown as HTMLInputElement,
     profileSave: new FakeElement() as unknown as HTMLButtonElement,
     profileSelect: new FakeElement() as unknown as HTMLSelectElement,
     profileDelete: new FakeElement() as unknown as HTMLButtonElement,
+    profileNew: new FakeElement() as unknown as HTMLButtonElement,
+    newProfilePopup,
+    newProfileName,
+    newProfileConfirm,
+    newProfileCancel,
     shareStatus: new FakeElement() as unknown as HTMLElement,
   };
 }
@@ -102,6 +151,7 @@ function createNoOpTimer(): Timer & { fireLast: () => void } {
 
 function build(options: { profiles?: Record<string, ProfileSettings>; list?: string[]; confirm?: (key: string) => boolean } = {}) {
   globalThis.document = new FakeDocument() as unknown as Document;
+  globalThis.Element = FakeElement as unknown as typeof Element;
   const els = fakeProfileEls();
   const i18n: I18n = {
     current: vi.fn((): Language => "en"),
@@ -124,29 +174,32 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
   const timer = createNoOpTimer();
   const snapshotSource = vi.fn(() => ({ ...BASE_PROFILE }));
   const onLoaded = vi.fn();
+  const onNewProfile = vi.fn();
   const events = new UiEventsImpl();
   const confirmController: ConfirmController = {
     confirm: vi.fn((key: string) => Promise.resolve(options.confirm ? options.confirm(key) : true)),
   };
-  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, events, confirmController });
+  const popupGroup = new StubPopupGroup();
+  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, events, confirmController, popupGroup });
   controller.setSnapshotSource(snapshotSource);
   controller.setOnProfileLoaded(onLoaded);
-  return { controller, els, settingsStore, timer, snapshotSource, onLoaded, events, confirmController };
+  controller.setOnNewProfile(onNewProfile);
+  return { controller, els, settingsStore, timer, snapshotSource, onLoaded, onNewProfile, events, confirmController, popupGroup };
 }
 
 describe("ProfileController", () => {
-  test("markLoaded clears the name input and sets the baseline", () => {
+  test("markLoaded clears the new-profile name popup and sets the baseline", () => {
     const { controller, els } = build({
       profiles: { brawler: BASE_PROFILE },
       list: ["brawler"],
     });
-    els.profileName.value = "typed";
+    els.newProfileName.value = "typed";
     controller.markLoaded("brawler");
-    expect(els.profileName.value).toBe("");
+    expect(els.newProfileName.value).toBe("");
     expect(els.profileSelect.value).toBe("brawler");
   });
 
-  test("save uses the name input when present, otherwise the selected profile", async () => {
+  test("save writes to the selected profile only", async () => {
     const { controller, els, settingsStore } = build();
     await controller.saveProfile();
     expect(settingsStore.saveProfile).not.toHaveBeenCalled();
@@ -155,48 +208,91 @@ describe("ProfileController", () => {
     await controller.saveProfile();
     expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
     expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
-
-    els.profileName.value = "kiter";
-    await controller.saveProfile();
-    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kiter", expect.any(Object));
-    expect(els.profileName.value).toBe("");
   });
 
-  test("save confirms overwrite when saving onto an existing different profile", async () => {
-    const { controller, els, settingsStore, confirmController } = build({
-      profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
-      list: ["brawler", "kiter"],
-    });
-    vi.mocked(confirmController.confirm).mockResolvedValue(false);
+  test("save never asks to overwrite", async () => {
+    const { controller, els, settingsStore, confirmController } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     els.profileSelect.value = "brawler";
-    controller.markLoaded("brawler");
-    els.profileName.value = "kiter";
-    await controller.saveProfile();
-    expect(confirmController.confirm).toHaveBeenCalledWith("confirm.overwriteProfile");
-    expect(settingsStore.saveProfile).not.toHaveBeenCalled();
-
-    vi.mocked(confirmController.confirm).mockResolvedValue(true);
-    await controller.saveProfile();
-    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kiter", expect.any(Object));
-  });
-
-  test("save does not confirm when overwriting the currently loaded profile", async () => {
-    const { controller, els, settingsStore, confirmController } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
-    els.profileSelect.value = "brawler";
-    controller.markLoaded("brawler");
-    snapshotSourceDiffers(controller);
     await controller.saveProfile();
     expect(confirmController.confirm).not.toHaveBeenCalled();
     expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
   });
 
-  test("load invokes onLoaded for a selected profile and does nothing when empty", async () => {
-    const { controller, els, settingsStore, onLoaded } = build({
+  test("toggle opens the new-profile popup, empties it and focuses the input", () => {
+    const { controller, els, popupGroup } = build();
+    controller.toggleNewProfilePopup();
+    expect(els.newProfilePopup.hidden).toBe(false);
+    expect(els.newProfileName.focus).toHaveBeenCalled();
+
+    controller.toggleNewProfilePopup();
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(popupGroup.open).toHaveBeenCalled();
+  });
+
+  test("confirm with an empty name clears ship state and saves nothing", async () => {
+    const { controller, els, settingsStore, onNewProfile } = build();
+    controller.toggleNewProfilePopup();
+    els.newProfileName.value = "   ";
+    (els.newProfileConfirm as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(onNewProfile).toHaveBeenCalledTimes(1);
+    expect(settingsStore.saveProfile).not.toHaveBeenCalled();
+    expect(els.newProfilePopup.hidden).toBe(true);
+  });
+
+  test("confirm with a name clears ship state and saves the cleared snapshot under the name", async () => {
+    const { controller, els, settingsStore, onNewProfile } = build({
       profiles: { brawler: BASE_PROFILE },
+      list: ["brawler"],
     });
+    controller.toggleNewProfilePopup();
+    els.newProfileName.value = "brawler";
+    (els.newProfileConfirm as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(onNewProfile).toHaveBeenCalledTimes(1);
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
+    expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("brawler");
+    expect(els.profileSelect.value).toBe("brawler");
+    expect(els.shareStatus.textContent).toBe("status.profileSaved");
+  });
+
+  test("cancel closes the popup without action", async () => {
+    const { controller, els, settingsStore, onNewProfile } = build();
+    controller.toggleNewProfilePopup();
+    els.newProfileName.value = "brawler";
+    (els.newProfileCancel as unknown as FakeElement).trigger("click");
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(onNewProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveProfile).not.toHaveBeenCalled();
+  });
+
+  test("outside pointer-down and Escape close the popup without action", () => {
+    const { controller, els, popupGroup, onNewProfile } = build();
+    controller.toggleNewProfilePopup();
+    popupGroup.onPointerDown(els.shareStatus as unknown as EventTarget);
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(els.profileNew.focus).toHaveBeenCalledTimes(0);
+    expect(onNewProfile).not.toHaveBeenCalled();
+
+    controller.toggleNewProfilePopup();
+    popupGroup.onKeyDown({ key: "Escape" });
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(els.profileNew.focus).toHaveBeenCalled();
+  });
+
+  test("popup contains the new button and popup contents but not unrelated targets", () => {
+    const { controller, els, popupGroup } = build();
+    controller.toggleNewProfilePopup();
+    popupGroup.onPointerDown(els.newProfileName as unknown as EventTarget);
+    expect(els.newProfilePopup.hidden).toBe(false);
+    popupGroup.onPointerDown(els.profileNew as unknown as EventTarget);
+    expect(els.newProfilePopup.hidden).toBe(false);
+    popupGroup.onPointerDown(els.shareStatus as unknown as EventTarget);
+    expect(els.newProfilePopup.hidden).toBe(true);
+  });
+
+  test("load invokes onLoaded for a selected profile and does nothing when empty", async () => {
+    const { controller, els, settingsStore, onLoaded } = build({ profiles: { brawler: BASE_PROFILE } });
     await controller.loadProfile();
     expect(settingsStore.selectProfile).not.toHaveBeenCalled();
     expect(onLoaded).not.toHaveBeenCalled();
@@ -233,10 +329,7 @@ describe("ProfileController", () => {
   });
 
   test("delete removes the selected profile and clears the selection", async () => {
-    const { controller, els, settingsStore } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
+    const { controller, els, settingsStore } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     els.profileSelect.value = "brawler";
     await controller.deleteProfile();
     expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
@@ -244,10 +337,7 @@ describe("ProfileController", () => {
   });
 
   test("delete confirms before removing", async () => {
-    const { controller, els, settingsStore, confirmController } = build({
-      profiles: { brawler: BASE_PROFILE },
-      list: ["brawler"],
-    });
+    const { controller, els, settingsStore, confirmController } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     els.profileSelect.value = "brawler";
     vi.mocked(confirmController.confirm).mockResolvedValue(false);
     await controller.deleteProfile();
@@ -260,9 +350,7 @@ describe("ProfileController", () => {
   });
 
   test("restoreFromStartup loads the selected profile and reports missing selections", () => {
-    const { controller, settingsStore, onLoaded } = build({
-      profiles: { brawler: BASE_PROFILE },
-    });
+    const { controller, settingsStore, onLoaded } = build({ profiles: { brawler: BASE_PROFILE } });
 
     expect(controller.restoreFromStartup({ settings: null, selectedProfileName: null })).toBe(false);
     expect(controller.restoreFromStartup({ settings: null, selectedProfileName: "missing" })).toBe(false);
@@ -274,10 +362,7 @@ describe("ProfileController", () => {
   });
 
   test("selectedName and refresh reflect stored profiles", () => {
-    const { controller, els } = build({
-      profiles: { brawler: BASE_PROFILE, kiter: BASE_PROFILE },
-      list: ["brawler", "kiter"],
-    });
+    const { controller, els } = build({ profiles: { brawler: BASE_PROFILE, kiter: BASE_PROFILE }, list: ["brawler", "kiter"] });
 
     els.profileSelect.value = "brawler";
     expect(controller.selectedName()).toBe("brawler");
@@ -291,51 +376,28 @@ describe("ProfileController", () => {
     expect(els.profileSelect.value).toBe("");
   });
 
-  test("updateDirtyState distinguishes new, equal, changed, and existing-different profiles", () => {
-    const { controller, els, snapshotSource } = build({
-      profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
-      list: ["brawler", "kiter"],
-    });
-    els.profileName.value = "new";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-    expect(els.profileSave.disabled).toBe(false);
+  test("updateDirtyState enables save only for a selected profile that differs from baseline", () => {
+    const { controller, els, snapshotSource } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
 
-    els.profileName.value = "";
-    controller.markLoaded();
+    controller.updateDirtyState();
+    expect(els.profileSave.disabled).toBe(true);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+
+    els.profileSelect.value = "brawler";
+    controller.markLoaded("brawler");
     vi.mocked(els.profileSave.classList.toggle).mockClear();
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
 
-    els.profileName.value = "brawler";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
-    expect(els.profileSave.disabled).toBe(false);
-
-    els.profileName.value = "kiter";
-    controller.updateDirtyState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-    expect(els.profileSave.disabled).toBe(false);
-
-    els.profileName.value = "";
     snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
     controller.updateDirtyState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
-    expect(els.profileSave.disabled).toBe(true);
-  });
-
-  test("updateDirtyState enables save for typed names even when matching the current state", () => {
-    const { controller, els } = build({
-      profiles: { kiter: BASE_PROFILE, brawler: BASE_PROFILE },
-      list: ["kiter", "brawler"],
-    });
-    els.profileSelect.value = "kiter";
-    controller.markLoaded("kiter");
-    els.profileName.value = "brawler";
-    controller.updateDirtyState();
     expect(els.profileSave.disabled).toBe(false);
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+
+    els.profileSelect.value = "";
+    controller.updateDirtyState();
+    expect(els.profileSave.disabled).toBe(true);
   });
 
   test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {
@@ -349,10 +411,7 @@ describe("ProfileController", () => {
   });
 
   test("save, load and delete trigger status feedback", async () => {
-    const { controller, els, settingsStore } = build({
-      profiles: { brawler: BASE_PROFILE, kiter: BASE_PROFILE },
-      list: ["brawler", "kiter"],
-    });
+    const { controller, els, settingsStore } = build({ profiles: { brawler: BASE_PROFILE, kiter: BASE_PROFILE }, list: ["brawler", "kiter"] });
 
     els.profileSelect.value = "brawler";
     await controller.loadProfile();
