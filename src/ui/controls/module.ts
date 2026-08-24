@@ -4,6 +4,7 @@ import type { PresetFittings } from "../../fitting";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { ConfirmControllerImpl } from "./confirmController";
+import { combatantSidesOf, forEachSide, wireCombatantSide } from "./combatantSide";
 import { profileSettingsOf } from "./controlsFormat";
 import { createControlsEls } from "./elements";
 import { collectEffectiveReadoutEls, collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
@@ -125,21 +126,21 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
 
 function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  c.attackerSide.setHost({
-    persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
-  });
-  c.targetSide.setHost({
-    persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
-  });
-  c.attackerSide.setFittingPopup(c.attackerFittingPopup);
-  c.targetSide.setFittingPopup(c.targetFittingPopup);
+  const sides = combatantSidesOf(c.attackerSide, c.targetSide);
+  const fittingPopups = { attacker: c.attackerFittingPopup, target: c.targetFittingPopup } as const;
+  const host = { persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) };
+  forEachSide(sides, (combatant) =>
+    wireCombatantSide(combatant, {
+      fittingPopup: fittingPopups[combatant.side],
+      fittingPreview: c.previewManager,
+      popupGroup: c.popupGroup,
+      host,
+      importer: sideImporterFor(combatant.side, c.importController, c.savedFittings, c.presetFittings),
+    })
+  );
   c.ewarController.setHost(c.controls);
   c.boosterController.setHost(c.controls);
   c.rangeOverlayController.setHost(c.controls);
-  c.attackerSide.setFittingPreview(c.previewManager);
-  c.targetSide.setFittingPreview(c.previewManager);
-  c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings, c.presetFittings));
-  c.targetSide.setImporter(sideImporterFor("target", c.importController, c.savedFittings, c.presetFittings));
   c.importController.setOnConfigPersisted(() => c.controls.persistConfigChange(true));
   c.importController.setOnFittingImported((side, imported) => {
     c.ewarController.setLoadout(side, imported.ewar);
@@ -153,8 +154,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.eventRouter.setHost(c.controls);
   c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
-  c.attackerSide.sections.stats.updateAlignTime();
-  c.targetSide.sections.stats.updateAlignTime();
+  forEachSide(sides, (combatant) => combatant.panel.sections.stats.updateAlignTime());
 }
 
 function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings, presetFittings: PresetFittings) {

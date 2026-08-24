@@ -1,6 +1,8 @@
 ---
 no-new-exports:
   - choiceGroup.ts
+  - combatantSide.ts
+  - combatantSide.test.ts
   - controlsDom.ts
   - domControls.ts
   - domControlsContract.ts
