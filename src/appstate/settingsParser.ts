@@ -42,17 +42,20 @@ export class SettingsParser {
   parseUserSettings(raw: string): UserSettings | null {
     try {
       const parsed: unknown = JSON.parse(raw);
-      if (!this.isUserSettings(parsed)) return null;
-      this.migrateEwarActivation(parsed as Record<string, unknown>);
-      parsed.version = USER_SETTINGS_VERSION;
-      if (parsed.attackerAmmo === undefined) {
-        parsed.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+      const record = parsed as Record<string, unknown>;
+      this.migrateBoosterActivation(record);
+      this.migrateEwarActivation(record);
+      if (!this.isUserSettings(record)) return null;
+      record.version = USER_SETTINGS_VERSION;
+      if (record.attackerAmmo === undefined) {
+        record.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
       }
-      parsed.language ??= DEFAULT_PREFERENCES.language;
-      parsed.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
-      parsed.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
-      parsed.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
-      return parsed as UserSettings;
+      record.language ??= DEFAULT_PREFERENCES.language;
+      record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
+      record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
+      record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
+      return record as UserSettings;
     } catch {
       return null;
     }
@@ -86,13 +89,16 @@ export class SettingsParser {
   }
 
   profileFromUnknown(value: unknown): ProfileSettings | null {
-    if (!this.isProfileSettings(value)) return null;
-    const withVersion = { ...value, version: USER_SETTINGS_VERSION } as Record<string, unknown>;
-    this.migrateEwarActivation(withVersion);
-    if (withVersion.attackerAmmo === undefined) {
-      withVersion.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+    const record = { ...value } as Record<string, unknown>;
+    this.migrateBoosterActivation(record);
+    this.migrateEwarActivation(record);
+    if (!this.isProfileSettings(record)) return null;
+    record.version = USER_SETTINGS_VERSION;
+    if (record.attackerAmmo === undefined) {
+      record.attackerAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
-    return stripDisplayPreferences(withVersion as ProfileSettings);
+    return stripDisplayPreferences(record as ProfileSettings);
   }
 
   private isProfileSettings(value: unknown): value is ProfileSettings {
@@ -151,6 +157,26 @@ export class SettingsParser {
   }
   private isOptionalPropulsionSelection(value: unknown): value is PropulsionSelection | undefined {
     return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;
+  }
+
+  private migrateBoosterActivation(value: Record<string, unknown>): void {
+    this.migrateSideBoosterActivation(value, "attackerBoosterActivation");
+    this.migrateSideBoosterActivation(value, "targetBoosterActivation");
+  }
+
+  private migrateSideBoosterActivation(value: Record<string, unknown>, key: string): void {
+    const saved = value[key];
+    if (!Array.isArray(saved)) return;
+    value[key] = saved.map((item) => this.migrateBoosterEntry(item));
+  }
+
+  private migrateBoosterEntry(item: unknown): unknown {
+    if (typeof item === "boolean") return { active: item, script: "none" };
+    if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+    const record = { ...(item as Record<string, unknown>) };
+    if (typeof record.active !== "boolean") return item;
+    if (record.script === "") record.script = "none";
+    return record;
   }
 
   private migrateEwarActivation(value: Record<string, unknown>): void {

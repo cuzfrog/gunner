@@ -50,7 +50,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("Optimal Range Script doubles optimal and falloff bonuses, removes tracking", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
-      activation: { computers: [{ active: true, script: undefined }] },
+      activation: { computers: [{ active: true, script: optimalRangeScript }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       tracking: baseTurret.tracking,
@@ -63,13 +63,26 @@ describe("TurretBoosterResolverImpl", () => {
   test("Tracking Speed Script doubles tracking bonus, removes range", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, trackingSpeedScript)], scripts: [trackingSpeedScript] },
-      activation: { computers: [{ active: true, script: undefined }] },
+      activation: { computers: [{ active: true, script: trackingSpeedScript }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       tracking: baseTurret.tracking * (1 + 0.1 * 2),
       sigResolution: 40,
       optimal: baseTurret.optimal,
       falloff: baseTurret.falloff,
+    });
+  });
+
+  test("selecting no script falls back to base bonuses", () => {
+    const projection = {
+      loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
+      activation: { computers: [{ active: true, script: undefined }] },
+    };
+    expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
+      tracking: baseTurret.tracking * 1.1,
+      sigResolution: 40,
+      optimal: baseTurret.optimal * 1.05,
+      falloff: baseTurret.falloff * 1.1,
     });
   });
 

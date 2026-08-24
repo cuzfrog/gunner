@@ -137,11 +137,6 @@ export interface BoostLoadout {
 
 export const EMPTY_BOOST_LOADOUT: BoostLoadout = { computers: [], scripts: [] };
 
-export interface ScramblerActivation {
-  readonly active: boolean;
-  readonly overloaded: boolean;
-}
-
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly grapplers: readonly StasisGrapplerSpec[];

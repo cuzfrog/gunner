@@ -25,7 +25,6 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
 
 export function isOptionalBoosterActivation(value: unknown): value is StoredBoosterActivation | undefined {
   if (value === undefined) return true;
-  if (typeof value === "boolean") return true;
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const item = value as Record<string, unknown>;
   return typeof item.active === "boolean" && typeof item.script === "string";

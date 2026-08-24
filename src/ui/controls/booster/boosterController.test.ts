@@ -1,5 +1,6 @@
 import type { BoostLoadout, TurretScriptSpec } from "../../../sim";
 import { EMPTY_BOOST_LOADOUT } from "../../../sim";
+import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { collectBoosterEls } from "../elementCollectors";
@@ -25,7 +26,7 @@ function buildBoosterController() {
   globalThis.Element = FakeElement as unknown as typeof Element;
   globalThis.HTMLButtonElement = FakeElement as unknown as typeof HTMLButtonElement;
   const i18n = vi.mocked<I18n>({
-    current: vi.fn(() => "en"),
+    current: vi.fn((): Language => "en"),
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),

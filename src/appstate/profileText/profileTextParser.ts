@@ -165,7 +165,14 @@ function parseBoosterActivation(raw: string): readonly StoredBoosterActivation[]
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return undefined;
-    const result = parsed.map((item) => (typeof item === "boolean" ? { active: item, script: "" } : item));
+    const result = parsed.map((item) => {
+      if (typeof item === "boolean") return { active: item, script: "none" };
+      if (!item || typeof item !== "object" || Array.isArray(item)) return { active: false, script: "none" };
+      const record = item as Record<string, unknown>;
+      const active = typeof record.active === "boolean" ? record.active : false;
+      const script = typeof record.script === "string" && record.script !== "" ? record.script : "none";
+      return { active, script };
+    });
     return isOptionalBoosterActivations(result) ? result : undefined;
   } catch {
     return undefined;

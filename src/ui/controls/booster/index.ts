@@ -1,3 +1,2 @@
-export type { BoosterEls, BoosterHost, BoosterController } from "./boosterControllerContract";
-export { BoosterControllerImpl } from "./boosterController";
+export type { BoosterEls, BoosterController } from "./boosterControllerContract";
 export { registerBoosterModule } from "./module";

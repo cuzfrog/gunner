@@ -207,8 +207,7 @@ export class BoosterControllerImpl implements BoosterController {
       const spec = projection.loadout.computers[i];
       const activation = projection.activation?.computers[i];
       if (!activation || !activation.active) continue;
-      const script = activation.script ?? spec.defaultScript;
-      const multiplier = script?.[multiplierKey] ?? 1;
+      const multiplier = activation.script?.[multiplierKey] ?? 1;
       total += spec[bonusKey] * multiplier;
     }
     return total;
@@ -237,7 +236,7 @@ export class BoosterControllerImpl implements BoosterController {
       const savedActivation = saved?.[i];
       const savedScriptName = savedActivation?.script;
       let script: TurretScriptSpec | undefined;
-      if (savedScriptName === "none") {
+      if (savedScriptName === "none" || savedScriptName === "") {
         script = undefined;
       } else if (savedScriptName !== undefined) {
         script = loadout.scripts.find((s) => s.name === savedScriptName) ?? spec.defaultScript;
@@ -303,8 +302,9 @@ export class BoosterControllerImpl implements BoosterController {
 
   private updateGearTitle(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
     const name = script?.name ?? this.i18n.t("ewar.script.none");
-    gear.title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
-    gear.setAttribute("aria-label", this.i18n.t("ewar.script.none").replace("{script}", name));
+    const title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
+    gear.title = title;
+    gear.setAttribute("aria-label", title);
   }
 
   private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
@@ -327,7 +327,8 @@ export class BoosterControllerImpl implements BoosterController {
   private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "ewar-script-option" + (selected ? " ewar-script-option-selected" : "");
+    button.className = "ewar-script-option";
+    if (selected) button.setAttribute("aria-current", "true");
     button.setAttribute("role", "menuitem");
     button.textContent = script ? `${script.name} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
     button.addEventListener("click", () => this.setScript(side, index, script, gear));

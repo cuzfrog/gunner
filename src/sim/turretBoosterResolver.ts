@@ -21,9 +21,9 @@ export class TurretBoosterResolverImpl implements TurretBoosterResolver {
     for (let i = 0; i < projection.loadout.computers.length; i++) {
       const spec = projection.loadout.computers[i];
       const activation = projection.activation?.computers[i];
-      if (activation && !activation.active) continue;
+      if (!activation || !activation.active) continue;
 
-      const script = activation?.script ?? spec.defaultScript;
+      const script = activation.script;
       if (script !== undefined) {
         const trackingPercent = spec.trackingBonusPercent * script.trackingMultiplier;
         const optimalPercent = spec.optimalBonusPercent * script.optimalMultiplier;
