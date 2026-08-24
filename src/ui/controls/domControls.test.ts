@@ -161,6 +161,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     const attackerEwar: EwarLoadout = {
       webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
+      grapplers: [],
       disruptors: [],
       scramblers: [],
       scripts: [],
@@ -169,7 +170,7 @@ describe("DomControls", () => {
     const config = controls.getConfig();
     expect(config.attacker.ewar?.loadout.webs).toHaveLength(1);
     expect(config.attacker.ewar).not.toHaveProperty("overloaded");
-    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [], scramblers: [] });
+    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] });
     expect(config.target.ewar).toBeUndefined();
   });
 
@@ -177,6 +178,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     const targetEwar: EwarLoadout = {
       webs: [],
+      grapplers: [],
       disruptors: [{
         moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2,
         defaultScript: undefined, overloadStrengthBonusPercent: 0,
@@ -223,7 +225,7 @@ describe("DomControls", () => {
     targetSide.profile = RIFTER;
     targetSide.sections.propulsion.setPropulsionActive("mwd-5mn");
     targetSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("target", { webs: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
+    cradle.cradle.ewarController.setLoadout("target", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
 
     const config = controls.getConfig();
     expect(config.target.maxSpeed).toBe(1800);

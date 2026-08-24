@@ -19,7 +19,10 @@ const attacker: ShipState = {
   aggressivity: 1,
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
-  ewar: { loadout: { webs: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [], disruptors: [], scramblers: [] } },
+  ewar: {
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+  },
 };
 
 const target: ShipState = {
@@ -57,7 +60,7 @@ function makeEvaluator(): {
 } {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
-  const ewarResolver = vi.mocked<EwarResolver>({ webSpeedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret), propulsionSuppressed: vi.fn(() => false) });
+  const ewarResolver = vi.mocked<EwarResolver>({ speedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret), propulsionSuppressed: vi.fn(() => false) });
   const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver });
   return { kinematics, hitChance, ewarResolver, evaluator };
 }

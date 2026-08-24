@@ -5,7 +5,7 @@ import { PredictiveAutopilot } from "../../src/sim/predictiveAutopilot";
 import { SimulationImpl } from "../../src/sim/simulation";
 import type { ShipConfig, SimConfig } from "../../src/sim/types";
 
-const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
 
 describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
   test("predictive steering reduces mean angular velocity versus the reactive baseline", () => {

@@ -21,6 +21,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.overload": { ja: "オーバーヒート" },
   "label.modules": { ja: "モジュール" },
   "label.ewar.web": { ja: "スタシスウェブ" },
+  "label.ewar.grappler": { ja: "スタシスグラップラー" },
   "label.ewar.disruptor": { ja: "ガンディスラプター" },
   "label.ewar.scrambler": { ja: "ワープスクランブラー" },
   "title.ewar.empty": { ja: "電子戦モジュール未装備" },

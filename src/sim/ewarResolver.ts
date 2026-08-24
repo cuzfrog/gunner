@@ -1,8 +1,8 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type { EwarProjection, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
+import type { EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
-  webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number;
+  speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
   disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec;
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
 }
@@ -14,7 +14,7 @@ export class EwarResolverImpl implements EwarResolver {
     this.stacking = stackingPenalty;
   }
 
-  webSpeedMultiplier(projection: EwarProjection | undefined, distance: number): number {
+  speedMultiplier(projection: EwarProjection | undefined, distance: number): number {
     if (!projection) return 1;
     const multipliers: number[] = [];
     for (let i = 0; i < projection.loadout.webs.length; i++) {
@@ -24,6 +24,15 @@ export class EwarResolverImpl implements EwarResolver {
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
       if (range >= distance) multipliers.push(1 - spec.speedFactor);
+    }
+    for (let i = 0; i < projection.loadout.grapplers.length; i++) {
+      const spec = projection.loadout.grapplers[i];
+      const activation = projection.activation?.grapplers[i];
+      if (activation && !activation.active) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
+      const optimal = spec.optimal * overloadBonus;
+      const effectiveness = this.falloffEffectiveness(distance, optimal, spec.falloff);
+      if (effectiveness > 0) multipliers.push(1 - spec.speedFactor * effectiveness);
     }
     return this.stacking.apply(multipliers);
   }
@@ -75,9 +84,13 @@ export class EwarResolverImpl implements EwarResolver {
   }
 
   private disruptorEffectiveness(distance: number, spec: TrackingDisruptorSpec): number {
-    if (distance <= spec.optimal) return 1;
-    if (spec.falloff === 0) return 0;
-    const ratio = (distance - spec.optimal) / spec.falloff;
+    return this.falloffEffectiveness(distance, spec.optimal, spec.falloff);
+  }
+
+  private falloffEffectiveness(distance: number, optimal: number, falloff: number): number {
+    if (distance <= optimal) return 1;
+    if (falloff === 0) return 0;
+    const ratio = (distance - optimal) / falloff;
     return 0.5 ** (ratio * ratio);
   }
 }

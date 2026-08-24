@@ -584,7 +584,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(8);
+    expect(loaded!.version).toBe(9);
     expect(loaded!.attackerFittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.attackerMass).toBe(DEFAULT_SETTINGS.attackerMass);
   });
@@ -594,7 +594,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(8);
+    expect(loaded!.version).toBe(9);
     expect(loaded!.attackerFittedHull).toBeUndefined();
   });
 

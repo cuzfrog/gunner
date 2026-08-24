@@ -1,4 +1,4 @@
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -11,6 +11,7 @@ import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
 interface MutableEwarActivation {
   webs: { active: boolean; overloaded: boolean }[];
+  grapplers: { active: boolean; overloaded: boolean }[];
   disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
   scramblers: { active: boolean; overloaded: boolean }[];
 }
@@ -87,6 +88,7 @@ export class EwarControllerImpl implements EwarController {
       : undefined;
     return {
       webs: state.activation.webs.map((w) => ({ active: w.active, overloaded: w.overloaded })),
+      grapplers: state.activation.grapplers.map((g) => ({ active: g.active, overloaded: g.overloaded })),
       disruptors: state.activation.disruptors.map((d) => ({
         active: d.active,
         overloaded: d.overloaded,
@@ -173,6 +175,9 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.webs.length > 0) {
       this.renderSection(popup, "label.ewar.web", (section) => this.renderWebs(side, state, section));
     }
+    if (state.loadout.grapplers.length > 0) {
+      this.renderSection(popup, "label.ewar.grappler", (section) => this.renderGrapplers(side, state, section));
+    }
     if (state.loadout.disruptors.length > 0) {
       this.renderSection(popup, "label.ewar.disruptor", (section) => this.renderDisruptors(side, state, section));
     }
@@ -183,7 +188,7 @@ export class EwarControllerImpl implements EwarController {
 
   private renderSection(
     popup: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.disruptor" | "label.ewar.scrambler",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
     renderRows: (section: HTMLElement) => void,
   ): void {
     const section = document.createElement("div");
@@ -210,6 +215,10 @@ export class EwarControllerImpl implements EwarController {
     const webActive = state.activation.webs.filter((w) => w.active).length;
     const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webDescription(projection, distance) : "";
     if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal, webTitle);
+    const grapplerTotal = state.loadout.grapplers.length;
+    const grapplerActive = state.activation.grapplers.filter((g) => g.active).length;
+    const grapplerTitle = grapplerTotal > 0 ? this.ewarEffectDescriber.grapplerDescription(projection, distance) : "";
+    if (grapplerTotal > 0) this.appendSummaryItem(summary, state.loadout.grapplers[0].moduleName, grapplerActive, grapplerTotal, grapplerTitle);
     const disruptorTotal = state.loadout.disruptors.length;
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
     const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorDescription(projection, distance) : "";
@@ -238,7 +247,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -247,6 +256,12 @@ export class EwarControllerImpl implements EwarController {
         const savedWeb = saved?.webs?.[i];
         const active = typeof savedWeb === "boolean" ? savedWeb : savedWeb?.active ?? true;
         const overloaded = typeof savedWeb === "boolean" ? false : savedWeb?.overloaded ?? false;
+        return { active, overloaded };
+      }),
+      grapplers: loadout.grapplers.map((_, i) => {
+        const savedGrappler = saved?.grapplers?.[i];
+        const active = typeof savedGrappler === "boolean" ? savedGrappler : savedGrappler?.active ?? true;
+        const overloaded = typeof savedGrappler === "boolean" ? false : savedGrappler?.overloaded ?? false;
         return { active, overloaded };
       }),
       disruptors: loadout.disruptors.map((disruptor, i) => {
@@ -285,6 +300,22 @@ export class EwarControllerImpl implements EwarController {
       const button = this.createModuleButton(active, web.moduleName);
       const overloadButton = this.createOverloadButton(active, overloaded, i, web.moduleName, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
+      row.appendChild(button);
+      row.appendChild(overloadButton);
+      section.appendChild(row);
+    }
+  }
+
+  private renderGrapplers(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.grapplers.length; i++) {
+      const grappler: StasisGrapplerSpec = state.loadout.grapplers[i];
+      const activation = state.activation.grapplers[i];
+      const row = document.createElement("div");
+      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      const button = this.createModuleButton(activation.active, grappler.moduleName);
+      const onToggle = () => this.toggleGrapplerOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler.moduleName, onToggle);
+      button.addEventListener("click", () => this.toggleGrappler(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
       section.appendChild(row);
@@ -567,6 +598,33 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     const overloaded = !state.activation.scramblers[index].overloaded;
     state.activation.scramblers[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+    button.classList.toggle("active", overloaded);
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleGrappler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.grapplers[index].active;
+    state.activation.grapplers[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.host?.onConfigChange();
+  }
+
+  private toggleGrapplerOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.grapplers[index].overloaded;
+    state.activation.grapplers[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);

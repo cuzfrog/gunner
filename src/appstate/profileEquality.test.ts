@@ -22,7 +22,7 @@ const baseEwarActivation: StoredEwarActivation = {
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
-    version: 8,
+    version: 9,
     tracking: 0.32,
     sigRes: "S",
     optimal: 5000,

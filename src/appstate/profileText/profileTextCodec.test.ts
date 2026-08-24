@@ -103,7 +103,7 @@ describe("profileTextCodec", () => {
 
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=8
+version=9
 tracking=0.32
 sigRes=S
 optimal=5000

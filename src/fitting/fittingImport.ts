@@ -16,6 +16,7 @@ import {
   type EwarLoadout,
   type SigResolutionClass,
   type StackingPenalty,
+  type StasisGrapplerSpec,
   type StasisWebSpec,
   type TrackingDisruptorSpec,
   type WarpScramblerSpec,
@@ -28,6 +29,7 @@ import type {
   DisruptionScriptStats,
   FittingModuleStats,
   HullBonus,
+  StasisGrapplerStats,
   StasisWebStats,
   TrackingDisruptorStats,
   TurretScriptStats,
@@ -74,6 +76,7 @@ export interface FittingDb {
   readonly charges: Readonly<Record<string, ChargeStats>>;
   readonly scripts: Readonly<Record<string, TurretScriptStats>>;
   readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
+  readonly stasisGrapplers: Readonly<Record<string, StasisGrapplerStats>>;
   readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
   readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
   readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
@@ -405,6 +408,7 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
   }));
   const scriptByName = new Map(scripts.map((s) => [s.name, s]));
   const webs: StasisWebSpec[] = [];
+  const grapplers: StasisGrapplerSpec[] = [];
   const disruptors: TrackingDisruptorSpec[] = [];
   const scramblers: WarpScramblerSpec[] = [];
 
@@ -418,6 +422,18 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
         maxRange: webStats.maxRange,
         speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000,
         overloadRangeBonusPercent: webStats.overloadRangeBonusPercent,
+      });
+      continue;
+    }
+
+    const grapplerStats = db.stasisGrapplers[line.name];
+    if (grapplerStats) {
+      grapplers.push({
+        moduleName: line.name,
+        optimal: grapplerStats.optimal,
+        falloff: grapplerStats.falloff,
+        speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000,
+        overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent,
       });
       continue;
     }
@@ -447,8 +463,8 @@ function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
     }
   }
 
-  if (webs.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], disruptors: [], scramblers: [], scripts: [] };
-  return { webs, disruptors, scramblers, scripts };
+  if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
+  return { webs, grapplers, disruptors, scramblers, scripts };
 }
 
 function collectTurretPercents(

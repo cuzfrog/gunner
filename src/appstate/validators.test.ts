@@ -4,6 +4,7 @@ describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
     expect(isOptionalEwarActivation({
       webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
+      grapplers: [{ active: true, overloaded: false }],
       disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
     })).toBe(true);
   });

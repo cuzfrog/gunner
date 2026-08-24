@@ -145,7 +145,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     itemNames: asValue(vi.mocked<FittingCradle["itemNames"]>({ ...mockItemNames(), ...options.itemNames })),
     imageCatalog: asValue(mockImageCatalog()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
-      webSpeedMultiplier: vi.fn(() => 1),
+      speedMultiplier: vi.fn(() => 1),
       disruptedTurret: vi.fn((turret) => turret),
       propulsionSuppressed: vi.fn(() => false),
     })),

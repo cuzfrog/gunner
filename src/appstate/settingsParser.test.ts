@@ -32,13 +32,15 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5, 6 and 7 and stamps 8", () => {
+  test("parseUserSettings accepts version 5, 6, 7 and 8 and stamps 9", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(8);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(8);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(8);
+    const v8 = { ...DEFAULT_SETTINGS, version: 8 };
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(9);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(9);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(9);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(9);
   });
 
   test("parseUserSettings defaults missing attackerAmmo", () => {

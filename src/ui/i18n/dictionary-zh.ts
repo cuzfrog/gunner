@@ -21,6 +21,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.overload": { zh: "超载" },
   "label.modules": { zh: "模块" },
   "label.ewar.web": { zh: "停滞缠绕网" },
+  "label.ewar.grappler": { zh: "重型停滞缠绕牵引器" },
   "label.ewar.disruptor": { zh: "炮台干扰器" },
   "label.ewar.scrambler": { zh: "跃迁扰频器" },
   "title.ewar.empty": { zh: "未装配电子战模块" },

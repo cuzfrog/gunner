@@ -1,4 +1,4 @@
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS } from "./fittingDb";
 
 describe("fittingDb", () => {
   test("includes known plates with accurate flat mass and no item mass fallback", () => {
@@ -182,5 +182,16 @@ describe("fittingDb", () => {
     });
     expect(WARP_SCRAMBLERS["Warp Disruptor II"]).toBeUndefined();
     expect(FITTING_MODULES["Warp Disruptor II"]).toBeUndefined();
+  });
+
+  test("includes heavy stasis grapplers with optimal, falloff and overload bonus", () => {
+    expect(STASIS_GRAPPLERS["Heavy Stasis Grappler I"]).toEqual({
+      optimal: 1000,
+      falloff: 8000,
+      speedFactorPercent: -80,
+      overloadOptimalBonusPercent: 300,
+    });
+    expect(FITTING_MODULES["Heavy Stasis Grappler I"]).toEqual({ stasisGrappler: STASIS_GRAPPLERS["Heavy Stasis Grappler I"] });
+    expect(STASIS_WEBS["Heavy Stasis Grappler I"]).toBeUndefined();
   });
 });

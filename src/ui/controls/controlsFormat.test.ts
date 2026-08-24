@@ -24,7 +24,7 @@ import {
 
 function baseUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
-    version: 8,
+    version: 9,
     tracking: 0.32,
     trackingUnit: "rad",
     sigRes: "S",

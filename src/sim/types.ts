@@ -91,6 +91,14 @@ export interface StasisWebSpec {
   readonly overloadRangeBonusPercent: number;
 }
 
+export interface StasisGrapplerSpec {
+  readonly moduleName: string;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly speedFactor: number;
+  readonly overloadOptimalBonusPercent: number;
+}
+
 export interface TrackingDisruptorSpec {
   readonly moduleName: string;
   readonly optimal: number;
@@ -113,14 +121,20 @@ export interface ScramblerActivation {
 
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
+  readonly grapplers: readonly StasisGrapplerSpec[];
   readonly disruptors: readonly TrackingDisruptorSpec[];
   readonly scramblers: readonly WarpScramblerSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], disruptors: [], scramblers: [], scripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
 
 export interface WebActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
+export interface GrapplerActivation {
   readonly active: boolean;
   readonly overloaded: boolean;
 }
@@ -138,6 +152,7 @@ export interface ScramblerActivation {
 
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
+  readonly grapplers: readonly GrapplerActivation[];
   readonly disruptors: readonly DisruptorActivation[];
   readonly scramblers: readonly ScramblerActivation[];
 }

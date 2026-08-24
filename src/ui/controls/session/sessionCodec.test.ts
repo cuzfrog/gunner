@@ -243,12 +243,13 @@ describe("SessionCodec", () => {
     const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     vi.mocked(ewarController.capture).mockReturnValue({
       webs: [{ active: true, overloaded: false }],
+      grapplers: [],
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
-      ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], disruptors: [], scripts: [] },
+      ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], grapplers: [], disruptors: [], scripts: [] },
       weapon: undefined,
       defense: undefined,
       modules: [],
@@ -271,6 +272,7 @@ describe("SessionCodec", () => {
     const settings = codec.capture();
     expect(settings.attackerEwarActivation).toEqual({
       webs: [{ active: true, overloaded: false }],
+      grapplers: [],
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
 

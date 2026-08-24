@@ -243,6 +243,7 @@ const EWAR_SCRIPT_GROUPS = new Set([909]);
 
 const WARP_SCRAMBLER_GROUP = 52;
 const STASIS_WEB_GROUP = 65;
+const STASIS_GRAPPLER_GROUP = 1672;
 const WEAPON_DISRUPTOR_GROUP = 291;
 
 const TURRET_GROUPS = new Set([53, 55, 74]);
@@ -334,6 +335,7 @@ interface FittingModuleStats {
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
   readonly stasisWeb?: StasisWebStats;
+  readonly stasisGrappler?: StasisGrapplerStats;
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
 }
@@ -362,6 +364,13 @@ export interface StasisWebStats {
   readonly maxRange: number;
   readonly speedFactorPercent: number;
   readonly overloadRangeBonusPercent: number;
+}
+
+export interface StasisGrapplerStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly speedFactorPercent: number;
+  readonly overloadOptimalBonusPercent: number;
 }
 
 export interface TrackingDisruptorStats {
@@ -461,6 +470,18 @@ export function buildStasisWebStats(values: Map<string, number>): StasisWebStats
   };
 }
 
+export function buildStasisGrapplerStats(values: Map<string, number>): StasisGrapplerStats | undefined {
+  const speedFactor = values.get("speedFactor");
+  const maxRange = values.get("maxRange");
+  if (speedFactor === undefined || maxRange === undefined) return undefined;
+  return {
+    optimal: maxRange,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    speedFactorPercent: speedFactor,
+    overloadOptimalBonusPercent: values.get("overloadRangeBonus") ?? 0,
+  };
+}
+
 export function buildTrackingDisruptorStats(values: Map<string, number>): TrackingDisruptorStats | undefined {
   const disruptionPercent = values.get("trackingSpeedBonus");
   if (disruptionPercent === undefined) return undefined;
@@ -544,6 +565,7 @@ async function main() {
   const charges: Record<string, ChargeStats> = {};
   const scripts: Record<string, TurretScriptStats> = {};
   const stasisWebs: Record<string, StasisWebStats> = {};
+  const stasisGrapplers: Record<string, StasisGrapplerStats> = {};
   const trackingDisruptors: Record<string, TrackingDisruptorStats> = {};
   const warpScramblers: Record<string, WarpScramblerStats> = {};
   const disruptionScripts: Record<string, DisruptionScriptStats> = {};
@@ -632,6 +654,16 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === STASIS_GRAPPLER_GROUP) {
+      const stats = buildStasisGrapplerStats(values);
+      if (stats) {
+        stasisGrapplers[enName] = stats;
+        fittingModules[enName] = { stasisGrappler: stats };
+        addItemName(itemNames, enName, type);
+      }
+      continue;
+    }
+
     if (type.groupID === WEAPON_DISRUPTOR_GROUP) {
       const stats = buildTrackingDisruptorStats(values);
       if (stats) {
@@ -697,6 +729,7 @@ export interface FittingModuleStats {
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
   readonly stasisWeb?: StasisWebStats;
+  readonly stasisGrappler?: StasisGrapplerStats;
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
 }
@@ -736,6 +769,13 @@ export interface StasisWebStats {
   readonly overloadRangeBonusPercent: number;
 }
 
+export interface StasisGrapplerStats {
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly speedFactorPercent: number;
+  readonly overloadOptimalBonusPercent: number;
+}
+
 export interface TrackingDisruptorStats {
   readonly optimal: number;
   readonly falloff: number;
@@ -759,6 +799,8 @@ export interface WarpScramblerStats {
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${JSON.stringify(scripts)};
 
 export const STASIS_WEBS: Readonly<Record<string, StasisWebStats>> = ${JSON.stringify(stasisWebs)};
+
+export const STASIS_GRAPPLERS: Readonly<Record<string, StasisGrapplerStats>> = ${JSON.stringify(stasisGrapplers)};
 
 export const TRACKING_DISRUPTORS: Readonly<Record<string, TrackingDisruptorStats>> = ${JSON.stringify(trackingDisruptors)};
 
@@ -792,6 +834,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     charges,
     scripts,
     stasisWebs,
+    stasisGrapplers,
     trackingDisruptors,
     warpScramblers,
     disruptionScripts,
@@ -808,6 +851,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     `${Object.keys(charges).length} charges`,
     `${Object.keys(scripts).length} turret scripts`,
     `${Object.keys(stasisWebs).length} stasis webs`,
+    `${Object.keys(stasisGrapplers).length} stasis grapplers`,
     `${Object.keys(trackingDisruptors).length} tracking disruptors`,
     `${Object.keys(warpScramblers).length} warp scramblers`,
     `${Object.keys(disruptionScripts).length} disruption scripts`,
@@ -847,6 +891,7 @@ function collectDbTableNames(
   charges: Record<string, ChargeStats>,
   scripts: Record<string, TurretScriptStats>,
   stasisWebs: Record<string, StasisWebStats>,
+  stasisGrapplers: Record<string, StasisGrapplerStats>,
   trackingDisruptors: Record<string, TrackingDisruptorStats>,
   warpScramblers: Record<string, WarpScramblerStats>,
   disruptionScripts: Record<string, DisruptionScriptStats>,
@@ -858,6 +903,7 @@ function collectDbTableNames(
     ...Object.keys(charges),
     ...Object.keys(scripts),
     ...Object.keys(stasisWebs),
+    ...Object.keys(stasisGrapplers),
     ...Object.keys(trackingDisruptors),
     ...Object.keys(warpScramblers),
     ...Object.keys(disruptionScripts),

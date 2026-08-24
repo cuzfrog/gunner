@@ -4,6 +4,7 @@ import type { I18n } from "../../i18n";
 
 export interface EwarEffectDescriber {
   webDescription(projection: EwarProjection, distance: number): string;
+  grapplerDescription(projection: EwarProjection, distance: number): string;
   disruptorDescription(projection: EwarProjection, distance: number): string;
   scramblerDescription(projection: EwarProjection, distance: number): string;
 }
@@ -19,7 +20,17 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   }
 
   webDescription(projection: EwarProjection, distance: number): string {
-    const multiplier = this.resolver.webSpeedMultiplier(projection, distance);
+    return this.speedDescription(projection, distance);
+  }
+
+  // Grapplers share the same speed-multiplier path as webs; the combined
+  // webs-plus-grapplers reduction is reported with the same wording.
+  grapplerDescription(projection: EwarProjection, distance: number): string {
+    return this.speedDescription(projection, distance);
+  }
+
+  private speedDescription(projection: EwarProjection, distance: number): string {
+    const multiplier = this.resolver.speedMultiplier(projection, distance);
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
     return `${this.i18n.t("ewar.hover.web")} ${Math.round((1 - multiplier) * 100)}%`;
   }

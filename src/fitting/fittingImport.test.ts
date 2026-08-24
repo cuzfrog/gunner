@@ -12,6 +12,7 @@ import {
   FITTING_MODULES,
   HULL_BONUSES,
   SCRIPTS,
+  STASIS_GRAPPLERS,
   STASIS_WEBS,
   TRACKING_DISRUPTORS,
   TURRETS,
@@ -184,6 +185,7 @@ const db: FittingDb = {
     "Optimal Range Script": { trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
   },
   stasisWebs: {},
+  stasisGrapplers: {},
   trackingDisruptors: {},
   warpScramblers: {},
   disruptionScripts: {},
@@ -218,6 +220,7 @@ const fullFittingDb: FittingDb = {
   charges: CHARGES,
   scripts: SCRIPTS,
   stasisWebs: STASIS_WEBS,
+  stasisGrapplers: STASIS_GRAPPLERS,
   trackingDisruptors: TRACKING_DISRUPTORS,
   warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
@@ -636,6 +639,7 @@ Stasis Webifier II/OFFLINE`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.webs).toEqual([]);
+    expect(result!.ewar.grapplers).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
     expect(result!.ewar.scramblers).toEqual([]);
   });
@@ -700,7 +704,27 @@ Warp Disruptor II`,
       { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 },
     ]);
     expect(result!.ewar.webs).toEqual([]);
+    expect(result!.ewar.grapplers).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
+  });
+
+  test("resolves heavy stasis grapplers with falloff and optimal overload", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    ships.fittingOptions.mockReturnValueOnce(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNames });
+    const result = importer.importFitting(
+      `[Rifter, Grappler]
+200mm AutoCannon I, Hail S
+Heavy Stasis Grappler I`,
+      conditions,
+    );
+    expect(result).toBeDefined();
+    expect(result!.ewar.grapplers).toEqual([
+      { moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 },
+    ]);
+    expect(result!.ewar.webs).toEqual([]);
+    expect(result!.ewar.disruptors).toEqual([]);
+    expect(result!.ewar.scramblers).toEqual([]);
   });
 
   test("resolves a warp scrambler with a charge line", () => {
@@ -801,7 +825,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

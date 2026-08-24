@@ -168,6 +168,9 @@ export class SettingsParser {
     if (s.webs !== undefined && Array.isArray(s.webs)) {
       s.webs = s.webs.map((item) => this.migrateToggleEntry(item, defaultOverload));
     }
+    if (s.grapplers !== undefined && Array.isArray(s.grapplers)) {
+      s.grapplers = s.grapplers.map((item) => this.migrateToggleEntry(item, defaultOverload));
+    }
     if (s.disruptors !== undefined && Array.isArray(s.disruptors)) {
       s.disruptors = s.disruptors.map((item) => {
         if (!item || typeof item !== "object" || Array.isArray(item)) return item;

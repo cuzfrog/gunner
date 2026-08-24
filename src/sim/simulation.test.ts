@@ -9,17 +9,19 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
 
 const scram: EwarProjection = {
   loadout: {
     webs: [],
+    grapplers: [],
     disruptors: [],
     scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
     scripts: [],
   },
   activation: {
     webs: [],
+    grapplers: [],
     disruptors: [],
     scramblers: [{ active: true, overloaded: false }],
   },
@@ -134,7 +136,7 @@ describe("SimulationImpl", () => {
 
   test("applies an active opponent web to reduce the ship's effective max speed", () => {
     const resolver: EwarResolver = {
-      webSpeedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
+      speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
       disruptedTurret: (turret) => turret,
       propulsionSuppressed: () => false,
     };
@@ -168,11 +170,12 @@ describe("SimulationImpl", () => {
     const web: EwarProjection = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        grapplers: [],
         disruptors: [],
         scramblers: [],
         scripts: [],
       },
-      activation: { webs: [{ active: true, overloaded: false }], disruptors: [], scramblers: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
     };
     const resolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });
     const attackerSteering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };

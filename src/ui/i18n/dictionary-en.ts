@@ -21,6 +21,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.overload": { en: "Overload" },
   "label.modules": { en: "Modules" },
   "label.ewar.web": { en: "Stasis Webifiers" },
+  "label.ewar.grappler": { en: "Stasis Grapplers" },
   "label.ewar.disruptor": { en: "Gun Disruptors" },
   "label.ewar.scrambler": { en: "Warp Scramblers" },
   "title.ewar.empty": { en: "No e-war modules fitted" },

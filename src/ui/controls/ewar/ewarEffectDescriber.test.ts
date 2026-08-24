@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
 
 const resolver = vi.mocked<EwarResolver>({
-  webSpeedMultiplier: vi.fn(),
+  speedMultiplier: vi.fn(),
   disruptedTurret: vi.fn(),
   propulsionSuppressed: vi.fn(),
 });
@@ -30,7 +30,7 @@ const projection = {} as EwarProjection;
 const distance = 5000;
 
 beforeEach(() => {
-  resolver.webSpeedMultiplier.mockReturnValue(1);
+  resolver.speedMultiplier.mockReturnValue(1);
   resolver.disruptedTurret.mockReturnValue({ tracking: 1, sigResolution: 1, optimal: 1, falloff: 1 });
   resolver.propulsionSuppressed.mockReturnValue(false);
   i18n.t.mockImplementation((key) => LABELS[key] ?? key);
@@ -38,14 +38,25 @@ beforeEach(() => {
 
 describe("EwarEffectDescriber", () => {
   test("webDescription reports percentage reduction when multiplier is below 1", () => {
-    resolver.webSpeedMultiplier.mockReturnValue(0.63);
+    resolver.speedMultiplier.mockReturnValue(0.63);
     expect(describer.webDescription(projection, distance)).toBe("Reduce speed by 37%");
-    expect(resolver.webSpeedMultiplier).toHaveBeenCalledWith(projection, distance);
+    expect(resolver.speedMultiplier).toHaveBeenCalledWith(projection, distance);
   });
 
   test("webDescription reports out-of-range text when multiplier is 1", () => {
-    resolver.webSpeedMultiplier.mockReturnValue(1);
+    resolver.speedMultiplier.mockReturnValue(1);
     expect(describer.webDescription(projection, distance)).toBe("No effect at this range");
+  });
+
+  test("grapplerDescription reports percentage reduction when multiplier is below 1", () => {
+    resolver.speedMultiplier.mockReturnValue(0.63);
+    expect(describer.grapplerDescription(projection, distance)).toBe("Reduce speed by 37%");
+    expect(resolver.speedMultiplier).toHaveBeenCalledWith(projection, distance);
+  });
+
+  test("grapplerDescription reports out-of-range text when multiplier is 1", () => {
+    resolver.speedMultiplier.mockReturnValue(1);
+    expect(describer.grapplerDescription(projection, distance)).toBe("No effect at this range");
   });
 
   test("disruptorDescription composes per-channel percentages for a disrupted unit turret", () => {

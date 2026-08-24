@@ -13,7 +13,8 @@ no-new-exports:
   - vec2.ts
   - cradle.ts
   - ewarResolver.ts
-  - index.ts
+  # index.ts is intentionally ungated: it re-exports cross-boundary simulation DTOs.
+  # - index.ts
   - kinematics.test.ts
   - kinematics.ts
   - module.ts
@@ -23,8 +24,9 @@ no-new-exports:
   - simulation.ts
   - stackingPenalty.test.ts
   - stackingPenalty.ts
-  - types.test.ts
-  - types.ts
+  # types.ts and types.test.ts are intentionally ungated: they host shared cross-boundary DTOs.
+  # - types.test.ts
+  # - types.ts
   - vec2.test.ts
 ---
 

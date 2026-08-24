@@ -109,10 +109,12 @@ function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarAc
     const parsed = JSON.parse(value);
     if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
       const migratedWebs = parsed.webs?.map((item) => migrateToggleableActivation(item, sideOverload));
+      const migratedGrapplers = parsed.grapplers?.map((item) => migrateToggleableActivation(item, sideOverload));
       const migratedDisruptors = parsed.disruptors?.map((item) => migrateDisruptorActivation(item, sideOverload));
       const migratedScramblers = parsed.scramblers?.map((item) => migrateToggleableActivation(item, sideOverload));
       const result: StoredEwarActivation = {
         ...(migratedWebs !== undefined ? { webs: migratedWebs } : {}),
+        ...(migratedGrapplers !== undefined ? { grapplers: migratedGrapplers } : {}),
         ...(migratedDisruptors !== undefined ? { disruptors: migratedDisruptors } : {}),
         ...(migratedScramblers !== undefined ? { scramblers: migratedScramblers } : {}),
       };

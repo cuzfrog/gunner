@@ -4,7 +4,7 @@ import type { EwarResolver } from "./ewarResolver";
 import { SimulationImpl } from "./simulation";
 import type { SimConfig } from "./types";
 
-const ewarResolver: EwarResolver = { webSpeedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
 
 const simConfig: SimConfig = {
   attacker: { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
