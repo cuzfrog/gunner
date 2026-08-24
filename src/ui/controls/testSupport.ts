@@ -30,7 +30,7 @@ import type { ControlsCradle } from "./cradle";
 import { createControlsEls } from "./elements";
 import { registerControlsModule } from "./module";
 import type { Popup, PopupGroup } from "./popup";
-import { registerSidePanelModule, type Side, type SidePanel } from "./sidePanel";
+import { registerSidePanelModule, type Side, type SidePanel, type SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 
 export { createControlsEls } from "./elements";
@@ -280,5 +280,12 @@ export function buildSidePanel(
     importFromText: vi.fn(() => Promise.resolve()),
     importFromClipboard: vi.fn(() => Promise.resolve()),
   });
-  return { document, panel, turret, turretOverrides };
+  const host = vi.mocked<SidePanelHost>({
+    persistConfigChange: vi.fn(),
+    onConfigChange: vi.fn(),
+    onDisplayChange: vi.fn(),
+    updateManeuverAggressivityEnabled: vi.fn(),
+  });
+  panel.setHost(host);
+  return { document, panel, turret, turretOverrides, host };
 }

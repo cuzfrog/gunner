@@ -276,6 +276,42 @@ describe("TurretController", () => {
     expect(buttonFor(document, "L").disabled).toBe(false);
     expect(buttonFor(document, "XL").disabled).toBe(true);
   });
+
+  test("tracking input updates the tracking override and emits displayInvalidated", () => {
+    const { document, turretOverrides, events } = buildTurret();
+    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+    getFake(document, "tracking").value = "0.5";
+    getFake(document, "tracking").trigger("input");
+    expect(turretOverrides.get().tracking).toBe(0.5);
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("sigRes input updates the sigRes override and emits displayInvalidated", () => {
+    const { document, turretOverrides, events } = buildTurret();
+    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+    getFake(document, "sigRes").value = "M";
+    getFake(document, "sigRes").trigger("input");
+    expect(turretOverrides.get().sigRes).toBe("M");
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("optimal input updates the optimal override and emits displayInvalidated", () => {
+    const { document, turretOverrides, events } = buildTurret();
+    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+    getFake(document, "optimal").value = "12345";
+    getFake(document, "optimal").trigger("input");
+    expect(turretOverrides.get().optimal).toBe(12345);
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("falloff input updates the falloff override and emits displayInvalidated", () => {
+    const { document, turretOverrides, events } = buildTurret();
+    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+    getFake(document, "falloff").value = "54321";
+    getFake(document, "falloff").trigger("input");
+    expect(turretOverrides.get().falloff).toBe(54321);
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
 });
 
 function buttonFor(document: Document, value: string) {

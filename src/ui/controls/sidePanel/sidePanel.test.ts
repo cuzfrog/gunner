@@ -193,4 +193,53 @@ describe("SidePanel", () => {
     // overload refollows the propulsion/ewar rule: with no ship or propulsion it stays disabled
     expect(getFake(document, "attacker-overload").disabled).toBe(true);
   });
+
+  test("attacker speed input records override and calls host onConfigChange", () => {
+    const { document, host, turretOverrides } = buildSidePanel("attacker");
+    getFake(document, "attacker-speed").value = "450";
+    getFake(document, "attacker-speed").trigger("input");
+    expect(host.onConfigChange).toHaveBeenCalled();
+    expect(turretOverrides.get().attackerSpeed).toBe(450);
+  });
+
+  test("attacker mass input records override and calls host onConfigChange", () => {
+    const { document, host, turretOverrides } = buildSidePanel("attacker");
+    getFake(document, "attacker-mass").value = "1200000";
+    getFake(document, "attacker-mass").trigger("input");
+    expect(host.onConfigChange).toHaveBeenCalled();
+    expect(turretOverrides.get().attackerMass).toBe(1_200_000);
+  });
+
+  test("attacker inertia input records override and calls host onConfigChange", () => {
+    const { document, host, turretOverrides } = buildSidePanel("attacker");
+    getFake(document, "attacker-inertia").value = "2.5";
+    getFake(document, "attacker-inertia").trigger("input");
+    expect(host.onConfigChange).toHaveBeenCalled();
+    expect(turretOverrides.get().attackerInertia).toBe(2.5);
+  });
+
+  test("attacker mode input calls host updateManeuverAggressivityEnabled and onConfigChange", () => {
+    const { document, host } = buildSidePanel("attacker");
+    getFake(document, "attacker-mode").value = "midships";
+    getFake(document, "attacker-mode").trigger("input");
+    expect(host.updateManeuverAggressivityEnabled).toHaveBeenCalledWith(true);
+    expect(host.onConfigChange).toHaveBeenCalled();
+  });
+
+  test("attacker range input calls host onConfigChange", () => {
+    const { document, host } = buildSidePanel("attacker");
+    getFake(document, "attacker-range").value = "8000";
+    getFake(document, "attacker-range").trigger("input");
+    expect(host.onConfigChange).toHaveBeenCalled();
+  });
+
+  test("target signature input records override and calls host onDisplayChange", () => {
+    const { document, panel, host, turretOverrides } = buildSidePanel("target");
+    getFake(document, "target-sig").value = "120";
+    getFake(document, "target-sig").trigger("input");
+    expect(host.onDisplayChange).toHaveBeenCalled();
+    expect(turretOverrides.get().targetSig).toBeUndefined();
+    expect(panel.isOverridden("targetSig")).toBe(true);
+    expect(panel.capture().sig).toBe(120);
+  });
 });

@@ -102,12 +102,32 @@ describe("DomControls", () => {
     getFake(document, "sim-speed").value = "2";
     getFake(document, "sim-speed").trigger("change");
     expect(callbacks.onSpeedChange).toHaveBeenCalledWith(2);
+
     getFake(document, "attacker-speed").value = "400";
     getFake(document, "attacker-speed").trigger("input");
-    expect(callbacks.onConfigChange).toHaveBeenCalled();
+    expect(callbacks.onConfigChange).toHaveBeenCalledTimes(1);
+    getFake(document, "attacker-mass").value = "1200000";
+    getFake(document, "attacker-mass").trigger("input");
+    expect(callbacks.onConfigChange).toHaveBeenCalledTimes(2);
+    getFake(document, "attacker-inertia").value = "2.5";
+    getFake(document, "attacker-inertia").trigger("input");
+    expect(callbacks.onConfigChange).toHaveBeenCalledTimes(3);
+    getFake(document, "attacker-mode").value = "midships";
+    getFake(document, "attacker-mode").trigger("input");
+    expect(callbacks.onConfigChange).toHaveBeenCalledTimes(4);
+
     getFake(document, "tracking").value = "0.5";
     getFake(document, "tracking").trigger("input");
-    expect(callbacks.onDisplayChange).toHaveBeenCalled();
+    expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(1);
+    getFake(document, "target-sig").value = "80";
+    getFake(document, "target-sig").trigger("input");
+    expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(2);
+    getFake(document, "optimal").value = "12345";
+    getFake(document, "optimal").trigger("input");
+    expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(3);
+    getFake(document, "falloff").value = "54321";
+    getFake(document, "falloff").trigger("input");
+    expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(4);
   });
 
   test("global pointerdown routes to popupGroup and previewManager", () => {
