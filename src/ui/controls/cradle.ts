@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingCradle, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { HitChance } from "../../sim";
 import type { Ships } from "../../ships";
 import type { I18n } from "../i18n";
@@ -27,6 +27,7 @@ import type { TurretController, TurretOverrides } from "./turret";
 export interface ControlsCradle {
   readonly hitChance: HitChance;
   readonly i18n: I18n;
+  readonly itemNames: FittingCradle["itemNames"];
   readonly settingsStore: SettingsStore;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;

@@ -3,6 +3,7 @@ import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggress
 import type { I18n, Language } from "../i18n";
 import type { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../appstate";
+import type { FittingCradle } from "../../fitting";
 import type { UiEvents } from "../events";
 
 export interface PreferencesEls {
@@ -46,6 +47,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly settingsStore: SettingsStore;
   private readonly sigResolution: () => number;
   private readonly events: UiEvents;
+  private readonly itemNames: FittingCradle["itemNames"];
 
   constructor(deps: {
     els: PreferencesEls;
@@ -54,6 +56,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     trackingInput: TrackingInput;
     sigResolution: () => number;
     events: UiEvents;
+    itemNames: FittingCradle["itemNames"];
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
@@ -61,6 +64,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.trackingInput = deps.trackingInput;
     this.sigResolution = deps.sigResolution;
     this.events = deps.events;
+    this.itemNames = deps.itemNames;
   }
 
   getSpeed(): number {
@@ -75,8 +79,10 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   setLanguage(language: Language): void {
     this.applyLanguage(language);
-    this.savePreferences();
-    this.events.emitLanguageChanged();
+    void this.itemNames.ensureLanguage(language).then(() => {
+      this.savePreferences();
+      this.events.emitLanguageChanged();
+    });
   }
 
   applyPreferences(preferences: DisplayPreferences): void {
@@ -172,6 +178,11 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.updateUnitToggle();
+    if (preferences.language !== "en") {
+      void this.itemNames.ensureLanguage(preferences.language).then(() => {
+        this.events.emitLanguageChanged();
+      });
+    }
   }
 
   private updateUnitToggle(): void {

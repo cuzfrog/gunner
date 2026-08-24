@@ -2,6 +2,7 @@ import { FITTING_MODULES, TURRETS, CHARGES, SCRIPTS, STASIS_WEBS, TRACKING_DISRU
 import { ITEM_NAMES_EN } from "./item-names-en";
 import { ITEM_NAMES_JA } from "./item-names-ja";
 import { ITEM_NAMES_ZH } from "./item-names-zh";
+import type { ShipNameLanguage } from "../ships";
 import { ItemNamesImpl } from "./itemNames";
 
 describe("ITEM_NAMES", () => {
@@ -46,6 +47,11 @@ describe("ITEM_NAMES", () => {
 
 describe("ItemNamesImpl", () => {
   const itemNames = new ItemNamesImpl();
+
+  beforeAll(async () => {
+    await itemNames.ensureLanguage("zh");
+    await itemNames.ensureLanguage("ja");
+  });
 
   test("displayName returns the localized name for known entries", () => {
     const turret = "Heavy Pulse Laser II";
@@ -103,5 +109,71 @@ describe("ItemNamesImpl", () => {
 
   test("item names cover modules that are not in the fitting stats db", () => {
     expect(itemNames.displayName("J5b Enduring Warp Scrambler", "ja")).not.toBe("J5b Enduring Warp Scrambler");
+  });
+});
+
+describe("ItemNamesImpl lazy loading", () => {
+  function buildLoader(expected: ShipNameLanguage, pack: readonly string[]) {
+    let calls = 0;
+    return {
+      loader: async (language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+        calls++;
+        if (language === expected) return { names: pack };
+        return { names: [] };
+      },
+      getCallCount: () => calls,
+    };
+  }
+
+  test("ensureLanguage loads a language pack and enables translation", async () => {
+    const firstEn = ITEM_NAMES_EN[0];
+    const { loader, getCallCount } = buildLoader("zh", ITEM_NAMES_ZH);
+    const itemNames = new ItemNamesImpl(loader);
+    expect(itemNames.displayName(firstEn, "zh")).toBe(firstEn);
+    await itemNames.ensureLanguage("zh");
+    expect(itemNames.displayName(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
+    expect(getCallCount()).toBe(1);
+  });
+
+  test("ensureLanguage is idempotent and shares in-flight loads", async () => {
+    const firstEn = ITEM_NAMES_EN[0];
+    let calls = 0;
+    const loader = async (language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+      calls++;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      if (language === "zh") return { names: ITEM_NAMES_ZH };
+      return { names: [] };
+    };
+    const itemNames = new ItemNamesImpl(loader);
+    const a = itemNames.ensureLanguage("zh");
+    const b = itemNames.ensureLanguage("zh");
+    await Promise.all([a, b]);
+    expect(calls).toBe(1);
+    expect(itemNames.displayName(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
+  });
+
+  test("ensureLanguage resolves immediately for English", async () => {
+    let calls = 0;
+    const loader = async (_language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> => {
+      calls++;
+      return { names: [] };
+    };
+    const itemNames = new ItemNamesImpl(loader);
+    await itemNames.ensureLanguage("en");
+    expect(calls).toBe(0);
+  });
+
+  test("ensureLanguage does not reject for an unknown language", async () => {
+    const itemNames = new ItemNamesImpl();
+    await expect(itemNames.ensureLanguage("fr" as ShipNameLanguage)).resolves.toBeUndefined();
+  });
+
+  test("canonicalName maps localized names after the pack loads", async () => {
+    const firstEn = ITEM_NAMES_EN[0];
+    const { loader } = buildLoader("zh", ITEM_NAMES_ZH);
+    const itemNames = new ItemNamesImpl(loader);
+    await itemNames.ensureLanguage("zh");
+    const zh = itemNames.displayName(firstEn, "zh");
+    expect(itemNames.canonicalName(zh)).toBe(firstEn);
   });
 });

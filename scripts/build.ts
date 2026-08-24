@@ -22,7 +22,8 @@ const result = await Bun.build({
   outdir: DISTRIBUTION_DIRECTORY,
   target: "browser",
   minify: true,
-  naming: { entry: ENTRY_NAMING_PATTERN },
+  splitting: true,
+  naming: { entry: ENTRY_NAMING_PATTERN, chunk: "[name]-[hash].[ext]" },
 });
 
 if (!result.success) {

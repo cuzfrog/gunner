@@ -2,6 +2,7 @@ import type { I18n } from "../i18n";
 import type { UiEvents } from "../events";
 import { mockTrackingInput } from "./testSupport";
 import type { DisplayPreferences, SettingsStore } from "../../appstate";
+import type { FittingCradle } from "../../fitting";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {
@@ -73,6 +74,12 @@ function build() {
   const els = fakeEls();
   const i18n = mockI18n();
   const settingsStore = vi.mocked<SettingsStore>(mockSettingsStore());
+  const ensureLanguage = vi.fn(() => Promise.resolve());
+  const itemNames: FittingCradle["itemNames"] = {
+    displayName: (name) => name,
+    canonicalName: (name) => name,
+    ensureLanguage,
+  };
   const events: UiEvents = {
     onLanguageChanged: vi.fn(),
     offLanguageChanged: vi.fn(),
@@ -87,21 +94,24 @@ function build() {
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
+    itemNames,
     settingsStore,
     trackingInput: mockTrackingInput(),
     sigResolution: () => 40,
     events,
   });
-  return { controller, els, i18n, settingsStore, events };
+  return { controller, els, i18n, itemNames, settingsStore, events };
 }
 
 describe("PreferencesController", () => {
-  test("setLanguage persists language, updates toggles, and emits language changed", () => {
-    const { controller, els, i18n, settingsStore, events } = build();
+  test("setLanguage persists language, updates toggles, and emits language changed", async () => {
+    const { controller, els, i18n, itemNames, settingsStore, events } = build();
     controller.setLanguage("zh");
     expect(i18n.setLanguage).toHaveBeenCalledWith("zh");
     expect(els.langZh.classList.toggle).toHaveBeenCalledWith("active", true);
     expect(els.langEn.classList.toggle).toHaveBeenCalledWith("active", false);
+    expect(itemNames.ensureLanguage).toHaveBeenCalledWith("zh");
+    await Promise.resolve();
     expect(settingsStore.savePreferences).toHaveBeenCalled();
     expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
@@ -191,8 +201,8 @@ describe("PreferencesController", () => {
     expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5 });
   });
 
-  test("restore applies display preferences to the DOM", () => {
-    const { controller, els, i18n, events } = build();
+  test("restore applies display preferences to the DOM and loads the language pack", async () => {
+    const { controller, els, i18n, itemNames, events } = build();
     const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8 };
     controller.trackingInput.setRadValue(0.32, 40);
     controller.restore(preferences);
@@ -201,7 +211,9 @@ describe("PreferencesController", () => {
     expect(els.simSpeed.value).toBe("3");
     expect(els.gridBrightnessValue.textContent).toBe("80%");
     expect(els.gridBrightnessSlider.value).toBe("0.8");
-    expect(events.emitLanguageChanged).not.toHaveBeenCalled();
+    expect(itemNames.ensureLanguage).toHaveBeenCalledWith("ja");
+    await Promise.resolve();
+    expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
 
   test("getSpeed reads the simulation speed select", () => {

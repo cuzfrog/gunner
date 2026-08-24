@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingCradle, FittingImport, PresetFittings } from "../../fitting";
 import type { Ships } from "../../ships";
 import type { HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
@@ -107,6 +107,15 @@ interface BuildDomControlsOptions {
   fittingImport?: Partial<FittingImport>;
   presetFittings?: Partial<PresetFittings>;
   savedFittings?: Partial<SavedFittings>;
+  itemNames?: Partial<FittingCradle["itemNames"]>;
+}
+
+function mockItemNames(): FittingCradle["itemNames"] {
+  return {
+    displayName: (name) => name,
+    canonicalName: (name) => name,
+    ensureLanguage: () => Promise.resolve(),
+  };
 }
 
 function mockI18n(): I18n {
@@ -133,6 +142,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
   cradle.register({
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
+    itemNames: asValue(vi.mocked<FittingCradle["itemNames"]>({ ...mockItemNames(), ...options.itemNames })),
     imageCatalog: asValue(mockImageCatalog()),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),

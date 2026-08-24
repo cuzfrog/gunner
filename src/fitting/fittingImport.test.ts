@@ -64,6 +64,10 @@ class TestItemNames implements ItemNames {
   canonicalName(name: string): string {
     return name.replace(" (zh)", "").replace(" (ja)", "");
   }
+
+  ensureLanguage(_language: ShipNameLanguage): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 const itemNames = new ItemNamesImpl();
@@ -896,6 +900,10 @@ Hobgoblin II x5
 });
 
 describe("FittingImportImpl localization", () => {
+  beforeAll(async () => {
+    await itemNames.ensureLanguage("zh");
+    await itemNames.ensureLanguage("ja");
+  });
   const RIFTER_BRAWLER_ZH = `[裂谷级, Brawler]
 200mm自动加农炮 I, 冰雹 S
 200mm自动加农炮 I, 冰雹 S

@@ -1,4 +1,4 @@
-import { asClass, asValue, type AwilixContainer } from "awilix";
+import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl, type FittingDb } from "./fittingImport";
 import {
@@ -34,7 +34,7 @@ export function registerFittingModule<T extends FittingCradle>(cradle: AwilixCon
     chargeCatalog: asClass(ChargeCatalogImpl).singleton(),
     fittingImport: asClass(FittingImportImpl).singleton(),
     gunFamilies: asClass(GunFamiliesImpl).singleton(),
-    itemNames: asClass(ItemNamesImpl).singleton(),
+    itemNames: asFunction(() => new ItemNamesImpl()).singleton(),
     presetFittings: asClass(PresetFittingsImpl).singleton(),
   });
 }

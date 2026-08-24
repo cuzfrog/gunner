@@ -1,6 +1,4 @@
 import { ITEM_NAMES_EN } from "./item-names-en";
-import { ITEM_NAMES_JA } from "./item-names-ja";
-import { ITEM_NAMES_ZH } from "./item-names-zh";
 import type { ShipNameLanguage } from "../ships";
 
 // The SDE localized names for a handful of distinct items are identical.
@@ -22,19 +20,33 @@ const CANONICAL_OVERRIDES: Readonly<Record<ShipNameLanguage, Readonly<Record<str
   },
 };
 
+interface ItemNameEntry {
+  zh: string;
+  ja: string;
+}
+
+type ItemNameLoader = (language: ShipNameLanguage) => Promise<{ readonly names: readonly string[] }>;
+
 export interface ItemNames {
   displayName(name: string, language: ShipNameLanguage): string;
   canonicalName(name: string): string;
+  ensureLanguage(language: ShipNameLanguage): Promise<void>;
 }
 
 export class ItemNamesImpl implements ItemNames {
-  private readonly forward: ReadonlyMap<string, { readonly zh: string; readonly ja: string }>;
-  private readonly reverse: ReadonlyMap<string, string>;
+  private readonly forward: Map<string, ItemNameEntry>;
+  private readonly reverse: Map<string, string>;
+  private readonly loader: ItemNameLoader;
+  private readonly loaded: Set<ShipNameLanguage> = new Set(["en"]);
+  private readonly inFlight: Map<ShipNameLanguage, Promise<void>> = new Map();
 
-  constructor() {
-    const resolved = resolveLocalizations();
-    this.forward = resolved.forward;
-    this.reverse = resolved.reverse;
+  constructor(loader: ItemNameLoader = productionLoader) {
+    this.loader = loader;
+    this.forward = new Map<string, ItemNameEntry>();
+    this.reverse = new Map<string, string>();
+    for (const name of ITEM_NAMES_EN) {
+      this.forward.set(name, { zh: name, ja: name });
+    }
   }
 
   displayName(name: string, language: ShipNameLanguage): string {
@@ -48,51 +60,51 @@ export class ItemNamesImpl implements ItemNames {
   canonicalName(name: string): string {
     return this.reverse.get(name) ?? name;
   }
+
+  async ensureLanguage(language: ShipNameLanguage): Promise<void> {
+    if (language === "en" || this.loaded.has(language)) return;
+    const existing = this.inFlight.get(language);
+    if (existing) return existing;
+    const promise = this.loadAndApply(language);
+    this.inFlight.set(language, promise);
+    await promise;
+  }
+
+  private async loadAndApply(language: ShipNameLanguage): Promise<void> {
+    const pack = await this.loader(language);
+    const names = pack.names;
+    const groups = groupByValue(ITEM_NAMES_EN, names);
+    const display = new Map<string, string>();
+    for (const [localized, candidates] of groups) {
+      const winner = canonicalForGroup(candidates, localized, language);
+      display.set(winner, localized);
+    }
+    for (let i = 0; i < ITEM_NAMES_EN.length; i++) {
+      const en = ITEM_NAMES_EN[i];
+      const use = display.get(en) ?? en;
+      const entry = this.forward.get(en);
+      if (entry) {
+        if (language === "zh") entry.zh = use;
+        else if (language === "ja") entry.ja = use;
+      }
+      if (use !== en) this.reverse.set(use, en);
+    }
+    this.loaded.add(language);
+    this.inFlight.delete(language);
+  }
 }
 
-interface ResolvedItemNames {
-  forward: ReadonlyMap<string, { readonly zh: string; readonly ja: string }>;
-  reverse: ReadonlyMap<string, string>;
-}
-
-function resolveLocalizations(): ResolvedItemNames {
-  const en = ITEM_NAMES_EN;
-  const zh = ITEM_NAMES_ZH;
-  const ja = ITEM_NAMES_JA;
-
-  const zhGroups = groupByValue(en, zh);
-  const jaGroups = groupByValue(en, ja);
-
-  const zhDisplay = new Map<string, string>();
-  for (const [localized, candidates] of zhGroups) {
-    const winner = canonicalForGroup(candidates, localized, "zh");
-    zhDisplay.set(winner, localized);
-  }
-
-  const jaDisplay = new Map<string, string>();
-  for (const [localized, candidates] of jaGroups) {
-    const winner = canonicalForGroup(candidates, localized, "ja");
-    jaDisplay.set(winner, localized);
-  }
-
-  const forward = new Map<string, { zh: string; ja: string }>();
-  const reverse = new Map<string, string>();
-  for (let i = 0; i < en.length; i++) {
-    const name = en[i];
-    const useZh = zhDisplay.get(name) ?? name;
-    const useJa = jaDisplay.get(name) ?? name;
-    forward.set(name, { zh: useZh, ja: useJa });
-    if (useZh !== name) reverse.set(useZh, name);
-    if (useJa !== name) reverse.set(useJa, name);
-  }
-
-  return { forward, reverse };
+function productionLoader(language: ShipNameLanguage): Promise<{ readonly names: readonly string[] }> {
+  if (language === "zh") return import("./item-names-zh").then((m) => ({ names: m.ITEM_NAMES_ZH }));
+  if (language === "ja") return import("./item-names-ja").then((m) => ({ names: m.ITEM_NAMES_JA }));
+  return Promise.resolve({ names: [] });
 }
 
 function groupByValue(en: readonly string[], localized: readonly string[]): Map<string, string[]> {
   const groups = new Map<string, string[]>();
   for (let i = 0; i < en.length; i++) {
     const key = localized[i];
+    if (key === undefined) continue;
     const list = groups.get(key) ?? [];
     list.push(en[i]);
     groups.set(key, list);
