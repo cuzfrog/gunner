@@ -4,7 +4,8 @@ import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../sidePanel";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 interface FittingPopupRendererDeps {
   readonly side: Side;
@@ -13,7 +14,7 @@ interface FittingPopupRendererDeps {
   readonly fittingImport: FittingImport;
   readonly i18n: I18n;
   readonly els: FittingPopupEls;
-  readonly panel: SidePanel;
+  readonly panel: FittingPopupHost;
   readonly previews: FittingPreviewManager;
 }
 
@@ -29,7 +30,7 @@ export class FittingPopupRenderer {
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly els: FittingPopupEls;
-  private readonly panel: SidePanel;
+  private readonly panel: FittingPopupHost;
   private readonly previews: FittingPreviewManager;
 
   constructor(deps: FittingPopupRendererDeps) {

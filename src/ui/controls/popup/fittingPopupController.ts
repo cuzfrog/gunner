@@ -8,7 +8,8 @@ import { fittingAreaSelector } from "../controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FittingPopupRenderer } from "./fittingPopupRenderer";
 import type { FittingPopupEls } from "./fittingPopupEls";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../sidePanel";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 export type { FittingPopupEls } from "./fittingPopupEls";
 
@@ -21,7 +22,7 @@ interface FittingPopupControllerDeps {
   imageCatalog: ImageCatalog;
   i18n: I18n;
   els: FittingPopupEls;
-  panel: SidePanel;
+  panel: FittingPopupHost;
   applyFitting: (text: string) => ImportedFitting | undefined;
   previews: FittingPreviewManager;
   events: UiEvents;

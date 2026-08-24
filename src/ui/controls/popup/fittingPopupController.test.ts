@@ -7,7 +7,8 @@ import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "../testSupport";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../sidePanel";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 const SAVED_RIFTER: SavedFitting = {
   id: "Rifter::Brawler",
@@ -44,16 +45,16 @@ function makePopupGroup(): PopupGroup {
   };
 }
 
-function createController(options: { panel?: Partial<SidePanel>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
+function createController(options: { panel?: Partial<FittingPopupHost>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
 
-  const panel = vi.mocked<SidePanel>({
+  const panel = vi.mocked<FittingPopupHost>({
     profile: options.panel?.profile ?? RIFTER,
     fittingText: options.panel?.fittingText,
-    skillConditions: options.panel?.skillConditions ?? vi.fn((): ReturnType<SidePanel["skillConditions"]> => ({ skillLevel: 5, overloaded: false })),
-  } as unknown as SidePanel);
+    skillConditions: options.panel?.skillConditions ?? vi.fn((): ReturnType<FittingPopupHost["skillConditions"]> => ({ skillLevel: 5, overloaded: false })),
+  } as unknown as FittingPopupHost);
 
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => [SAVED_RIFTER]),

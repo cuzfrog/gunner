@@ -5,7 +5,7 @@ import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { Side } from "../sidePanel";
-import type { SidePanel } from "../sidePanel";
+import type { FittingPopupHost } from "./fittingPopupHost";
 import type { UiEvents } from "../../events";
 
 export interface FittingPreviewManager {
@@ -23,8 +23,8 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
+  private readonly attackerSide: FittingPopupHost;
+  private readonly targetSide: FittingPopupHost;
   private readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
   private readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   private readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
@@ -38,8 +38,8 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     fittingImport: FittingImport;
     imageCatalog: ImageCatalog;
     i18n: I18n;
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
+    attackerSide: FittingPopupHost;
+    targetSide: FittingPopupHost;
     previewsBySide: Readonly<Record<Side, FittingPreview>>;
     shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
@@ -122,16 +122,16 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     return this.previewsBySide[side];
   }
 
-  private sidePanel(side: Side): SidePanel {
+  private hostFor(side: Side): FittingPopupHost {
     return side === "attacker" ? this.attackerSide : this.targetSide;
   }
 
   private profileOf(side: Side): ShipProfile | undefined {
-    return this.sidePanel(side).profile;
+    return this.hostFor(side).profile;
   }
 
   private fittingTextOf(side: Side): string | undefined {
-    return this.sidePanel(side).fittingText;
+    return this.hostFor(side).fittingText;
   }
 
   private show(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement, inMenu: boolean): void {

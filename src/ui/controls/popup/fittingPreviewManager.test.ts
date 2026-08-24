@@ -7,7 +7,8 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittingImport } from "../../../fitting";
 import type { ShipProfile } from "../../../ships";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../sidePanel";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 const PREVIEW_SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -53,8 +54,9 @@ function createManager(options: {
   const attackerSide = {
     profile: RIFTER,
     get fittingText() { return options.fittingTextOf ? options.fittingTextOf("attacker") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
-  } as unknown as SidePanel;
-  const targetSide = { profile: undefined, fittingText: undefined } as unknown as SidePanel;
+    skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }),
+  } as unknown as FittingPopupHost;
+  const targetSide = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) } as unknown as FittingPopupHost;
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,
