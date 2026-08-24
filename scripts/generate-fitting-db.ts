@@ -845,9 +845,19 @@ async function writeI18nFiles(itemNames: Record<string, { readonly zh: string; r
   const ja = en.map((name) => itemNames[name].ja);
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
   const overrideType = "{ readonly [key: string]: string }";
-  await writeFile(I18N_EN_FILE, `${header}export const ITEM_NAMES_EN: readonly string[] = ${JSON.stringify(en)};\n`);
-  await writeFile(I18N_ZH_FILE, `${header}export const ITEM_NAMES_ZH: readonly string[] = ${JSON.stringify(zh)};\nexport const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${JSON.stringify(CANONICAL_OVERRIDES.zh)};\n`);
-  await writeFile(I18N_JA_FILE, `${header}export const ITEM_NAMES_JA: readonly string[] = ${JSON.stringify(ja)};\nexport const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${JSON.stringify(CANONICAL_OVERRIDES.ja)};\n`);
+  const enNames = JSON.stringify(en);
+  const zhNames = JSON.stringify(zh);
+  const jaNames = JSON.stringify(ja);
+  const zhOverrides = JSON.stringify(CANONICAL_OVERRIDES.zh);
+  const jaOverrides = JSON.stringify(CANONICAL_OVERRIDES.ja);
+  const enContent = `${header}export const ITEM_NAMES_EN: readonly string[] = ${enNames};\n`;
+  const zhArray = `${header}export const ITEM_NAMES_ZH: readonly string[] = ${zhNames};\n`;
+  const zhOverrideContent = `export const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${zhOverrides};\n`;
+  const jaArray = `${header}export const ITEM_NAMES_JA: readonly string[] = ${jaNames};\n`;
+  const jaOverrideContent = `export const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${jaOverrides};\n`;
+  await writeFile(I18N_EN_FILE, enContent);
+  await writeFile(I18N_ZH_FILE, zhArray + zhOverrideContent);
+  await writeFile(I18N_JA_FILE, jaArray + jaOverrideContent);
 }
 
 export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };

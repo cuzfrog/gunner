@@ -96,15 +96,21 @@ describe("ItemNamesImpl", () => {
   test("canonicalName resolves ambiguous Japanese names to the most specific variant", () => {
     expect(itemNames.canonicalName("ドミネーション炭化鉛弾XL")).toBe("Domination Carbonized Lead XL");
     expect(itemNames.canonicalName("デュアルアフォーカルパルスレーザーI")).toBe("Dual Afocal Pulse Laser I");
-    expect(itemNames.canonicalName("大型エクスプローシブ・アーマーレインフォーサーII")).toBe("Large Explosive Armor Reinforcer II");
-    expect(itemNames.canonicalName("大型キネティック・アーマーレインフォーサーI")).toBe("Large Kinetic Armor Reinforcer I");
+    expect(
+      itemNames.canonicalName("大型エクスプローシブ・アーマーレインフォーサーII"),
+    ).toBe("Large Explosive Armor Reinforcer II");
+    expect(itemNames.canonicalName("大型キネティック・アーマーレインフォーサーI")).toBe(
+      "Large Kinetic Armor Reinforcer I",
+    );
     expect(itemNames.canonicalName("中型重力子スマートボムII")).toBe("Medium Graviton Smartbomb II");
     expect(itemNames.canonicalName("共和国海軍仕様炭化鉛弾S")).toBe("Republic Fleet Carbonized Lead S");
     expect(itemNames.canonicalName("トゥルーサンシャEMコーティング")).toBe("True Sansha EM Coating");
   });
 
   test("canonicalName resolves ambiguous Chinese names to the most specific variant", () => {
-    expect(itemNames.canonicalName("莱塞勒氏改良型爆炸装甲增强器")).toBe("Raysere's Modified Explosive Armor Hardener");
+    expect(itemNames.canonicalName("莱塞勒氏改良型爆炸装甲增强器")).toBe(
+      "Raysere's Modified Explosive Armor Hardener",
+    );
   });
 
   test("item names cover modules that are not in the fitting stats db", () => {
@@ -163,9 +169,10 @@ describe("ItemNamesImpl lazy loading", () => {
     expect(calls).toBe(0);
   });
 
-  test("ensureLanguage does not reject for an unknown language", async () => {
-    const itemNames = new ItemNamesImpl();
-    await expect(itemNames.ensureLanguage("fr" as ShipNameLanguage)).resolves.toBeUndefined();
+  test("ensureLanguage does not reject when the pack is empty", async () => {
+    const loader = async (_language: ShipNameLanguage) => ({ names: [], overrides: {} });
+    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
+    await expect(itemNames.ensureLanguage("zh")).resolves.toBeUndefined();
   });
 
   test("canonicalName maps localized names after the pack loads", async () => {

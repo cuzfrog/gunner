@@ -78,11 +78,20 @@ interface ItemNameEntry {
   ja: string;
 }
 
-type ItemNameLoader = (language: ShipNameLanguage) => Promise<{ readonly names: readonly string[]; readonly overrides: Readonly<Record<string, string>> }>;
+interface ItemNamePack {
+  readonly names: readonly string[];
+  readonly overrides: Readonly<Record<string, string>>;
+}
 
-function productionItemNameLoader(language: ShipNameLanguage): Promise<{ readonly names: readonly string[]; readonly overrides: Readonly<Record<string, string>> }> {
-  if (language === "zh") return import("./item-names-zh").then((m) => ({ names: m.ITEM_NAMES_ZH, overrides: m.ITEM_NAMES_ZH_OVERRIDES }));
-  if (language === "ja") return import("./item-names-ja").then((m) => ({ names: m.ITEM_NAMES_JA, overrides: m.ITEM_NAMES_JA_OVERRIDES }));
+type ItemNameLoader = (language: ShipNameLanguage) => Promise<ItemNamePack>;
+
+function productionItemNameLoader(language: ShipNameLanguage): Promise<ItemNamePack> {
+  if (language === "zh") {
+    return import("./item-names-zh").then((m) => ({ names: m.ITEM_NAMES_ZH, overrides: m.ITEM_NAMES_ZH_OVERRIDES }));
+  }
+  if (language === "ja") {
+    return import("./item-names-ja").then((m) => ({ names: m.ITEM_NAMES_JA, overrides: m.ITEM_NAMES_JA_OVERRIDES }));
+  }
   return Promise.resolve({ names: [], overrides: {} });
 }
 
