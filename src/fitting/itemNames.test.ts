@@ -1,16 +1,18 @@
 import { FITTING_MODULES, TURRETS, CHARGES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, DISRUPTION_SCRIPTS, DRONES } from "./fittingDb";
-import { ITEM_NAMES } from "./item-names-i18n";
+import { ITEM_NAMES_EN } from "./item-names-en";
+import { ITEM_NAMES_JA } from "./item-names-ja";
+import { ITEM_NAMES_ZH } from "./item-names-zh";
 import { ItemNamesImpl } from "./itemNames";
 
 describe("ITEM_NAMES", () => {
   test("all three arrays have the same length", () => {
-    expect(ITEM_NAMES.en.length).toBe(ITEM_NAMES.zh.length);
-    expect(ITEM_NAMES.en.length).toBe(ITEM_NAMES.ja.length);
+    expect(ITEM_NAMES_EN.length).toBe(ITEM_NAMES_ZH.length);
+    expect(ITEM_NAMES_EN.length).toBe(ITEM_NAMES_JA.length);
   });
 
   test("en array is sorted", () => {
-    const sorted = [...ITEM_NAMES.en].sort((a, b) => a.localeCompare(b));
-    expect(ITEM_NAMES.en).toEqual(sorted);
+    const sorted = [...ITEM_NAMES_EN].sort((a, b) => a.localeCompare(b));
+    expect(ITEM_NAMES_EN).toEqual(sorted);
   });
 
   test("fitting db names are present and there are no duplicates", () => {
@@ -24,20 +26,20 @@ describe("ITEM_NAMES", () => {
       ...Object.keys(DISRUPTION_SCRIPTS),
       ...Object.keys(DRONES),
     ]);
-    const actual = new Set(ITEM_NAMES.en);
+    const actual = new Set(ITEM_NAMES_EN);
     for (const name of expected) {
       expect(actual.has(name)).toBe(true);
     }
-    expect(ITEM_NAMES.en.length).toBe(actual.size);
+    expect(ITEM_NAMES_EN.length).toBe(actual.size);
   });
 
   test("zh and ja values fall back to the english name when missing", () => {
-    for (let i = 0; i < ITEM_NAMES.en.length; i++) {
-      const en = ITEM_NAMES.en[i];
-      expect(ITEM_NAMES.zh[i]?.length).toBeGreaterThan(0);
-      expect(ITEM_NAMES.ja[i]?.length).toBeGreaterThan(0);
-      if (ITEM_NAMES.zh[i] === en) expect(en).toBe(ITEM_NAMES.zh[i]);
-      if (ITEM_NAMES.ja[i] === en) expect(en).toBe(ITEM_NAMES.ja[i]);
+    for (let i = 0; i < ITEM_NAMES_EN.length; i++) {
+      const en = ITEM_NAMES_EN[i];
+      expect(ITEM_NAMES_ZH[i]?.length).toBeGreaterThan(0);
+      expect(ITEM_NAMES_JA[i]?.length).toBeGreaterThan(0);
+      if (ITEM_NAMES_ZH[i] === en) expect(en).toBe(ITEM_NAMES_ZH[i]);
+      if (ITEM_NAMES_JA[i] === en) expect(en).toBe(ITEM_NAMES_JA[i]);
     }
   });
 });
@@ -68,7 +70,7 @@ describe("ItemNamesImpl", () => {
   });
 
   test("canonical round-trips every name in the table", () => {
-    for (const en of ITEM_NAMES.en) {
+    for (const en of ITEM_NAMES_EN) {
       expect(itemNames.canonicalName(itemNames.displayName(en, "zh"))).toBe(en);
       expect(itemNames.canonicalName(itemNames.displayName(en, "ja"))).toBe(en);
     }
@@ -76,7 +78,7 @@ describe("ItemNamesImpl", () => {
 
   test("canonicalName is deterministic for duplicate Japanese names", () => {
     const seen = new Map<string, string>();
-    for (const en of ITEM_NAMES.en) {
+    for (const en of ITEM_NAMES_EN) {
       const ja = itemNames.displayName(en, "ja");
       const canon = itemNames.canonicalName(ja);
       const existing = seen.get(ja);
@@ -92,11 +94,7 @@ describe("ItemNamesImpl", () => {
     expect(itemNames.canonicalName("大型キネティック・アーマーレインフォーサーI")).toBe("Large Kinetic Armor Reinforcer I");
     expect(itemNames.canonicalName("中型重力子スマートボムII")).toBe("Medium Graviton Smartbomb II");
     expect(itemNames.canonicalName("共和国海軍仕様炭化鉛弾S")).toBe("Republic Fleet Carbonized Lead S");
-    expect(itemNames.canonicalName("スタンドアップ大型ミサイル航行プロセッサII")).toBe("Standup L-Set Missile Flight Processor II");
-    expect(itemNames.canonicalName("スタンドアップ中型標準小型艦製造資源効率I")).toBe("Standup M-Set Basic Small Ship Manufacturing Material Efficiency I");
-    expect(itemNames.canonicalName("スタンドアップ中型ME研究加速器I")).toBe("Standup M-Set ME Research Accelerator I");
     expect(itemNames.canonicalName("トゥルーサンシャEMコーティング")).toBe("True Sansha EM Coating");
-    expect(itemNames.canonicalName("アップウェルM3R-Oアウトポストリグ")).toBe("Upwell M3R-O Outpost Rig");
   });
 
   test("canonicalName resolves ambiguous Chinese names to the most specific variant", () => {

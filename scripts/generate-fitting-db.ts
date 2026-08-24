@@ -4,8 +4,16 @@ import { join } from "node:path";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingDb.ts");
-const I18N_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-i18n.ts");
+const I18N_EN_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-en.ts");
+const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-zh.ts");
+const I18N_JA_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-ja.ts");
 const NAME_TO_ID_FILE = join(import.meta.dir, "..", "data", "ship-modules", "nameToId.json");
+
+const MODULE_CATEGORY_ID = 7;
+const CHARGE_CATEGORY_ID = 8;
+const DRONE_CATEGORY_ID = 18;
+const SUBSYSTEM_CATEGORY_ID = 32;
+const FITTABLE_CATEGORY_IDS = new Set([MODULE_CATEGORY_ID, CHARGE_CATEGORY_ID, DRONE_CATEGORY_ID, SUBSYSTEM_CATEGORY_ID]);
 
 interface SdeType {
   typeID: number;
@@ -247,7 +255,6 @@ const CHARGE_GROUPS = new Set([
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
-const DRONE_CATEGORY_ID = 18;
 
 async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
   const files = (await readdir(SDE_DIR))
@@ -738,13 +745,16 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
 
   await addItemNamesFromIconCatalog(itemNames, nameToType);
 
+  const dbTableNames = collectDbTableNames(fittingModules, turrets, charges, scripts, stasisWebs, trackingDisruptors, disruptionScripts, drones);
+  const filteredItemNames = filterItemNames(itemNames, nameToType, groups, dbTableNames);
+
   await mkdir(import.meta.dir, { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
-  await writeI18nFile(itemNames, date);
+  await writeI18nFiles(filteredItemNames, date);
   console.log(
     `Wrote ${Object.keys(fittingModules).length} modules, ${Object.keys(turrets).length} turrets, ${Object.keys(charges).length} charges, ${Object.keys(scripts).length} turret scripts, ${Object.keys(stasisWebs).length} stasis webs, ${Object.keys(trackingDisruptors).length} tracking disruptors, ${Object.keys(disruptionScripts).length} disruption scripts, ${Object.keys(hullBonuses).length} hull bonus sets, ${Object.keys(sortedDrones).length} drones to ${OUT_FILE}`,
   );
-  console.log(`Wrote ${Object.keys(itemNames).length} item names to ${I18N_FILE}`);
+  console.log(`Wrote ${Object.keys(filteredItemNames).length} item names to ${I18N_EN_FILE}, ${I18N_ZH_FILE}, ${I18N_JA_FILE}`);
 }
 
 function addItemName(
@@ -770,14 +780,61 @@ async function addItemNamesFromIconCatalog(
   }
 }
 
-async function writeI18nFile(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {
+function collectDbTableNames(
+  fittingModules: Record<string, FittingModuleStats>,
+  turrets: Record<string, TurretStats>,
+  charges: Record<string, ChargeStats>,
+  scripts: Record<string, TurretScriptStats>,
+  stasisWebs: Record<string, StasisWebStats>,
+  trackingDisruptors: Record<string, TrackingDisruptorStats>,
+  disruptionScripts: Record<string, DisruptionScriptStats>,
+  drones: Record<string, true>,
+): Set<string> {
+  return new Set([
+    ...Object.keys(fittingModules),
+    ...Object.keys(turrets),
+    ...Object.keys(charges),
+    ...Object.keys(scripts),
+    ...Object.keys(stasisWebs),
+    ...Object.keys(trackingDisruptors),
+    ...Object.keys(disruptionScripts),
+    ...Object.keys(drones),
+  ]);
+}
+
+function isFittableItem(type: SdeType | undefined, groups: Record<string, SdeGroup>): boolean {
+  if (!type?.published) return false;
+  const group = groups[String(type.groupID)];
+  if (!group) return false;
+  return FITTABLE_CATEGORY_IDS.has(group.categoryID);
+}
+
+function filterItemNames(
+  itemNames: Record<string, { readonly zh: string; readonly ja: string }>,
+  nameToType: ReadonlyMap<string, SdeType>,
+  groups: Record<string, SdeGroup>,
+  dbTableNames: ReadonlySet<string>,
+): Record<string, { readonly zh: string; readonly ja: string }> {
+  const filtered: Record<string, { readonly zh: string; readonly ja: string }> = {};
+  for (const [name, localizations] of Object.entries(itemNames)) {
+    if (dbTableNames.has(name) || isFittableItem(nameToType.get(name), groups)) {
+      filtered[name] = localizations;
+    }
+  }
+  return filtered;
+}
+
+async function writeI18nFiles(itemNames: Record<string, { readonly zh: string; readonly ja: string }>, date: string): Promise<void> {
   const en = Object.keys(itemNames).sort((a, b) => a.localeCompare(b));
   const zh = en.map((name) => itemNames[name].zh);
   const ja = en.map((name) => itemNames[name].ja);
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
-  const content = `${header}export const ITEM_NAMES: Readonly<{ en: readonly string[]; zh: readonly string[]; ja: readonly string[] }> = { "en": ${JSON.stringify(en)}, "zh": ${JSON.stringify(zh)}, "ja": ${JSON.stringify(ja)} };\n`;
-  await writeFile(I18N_FILE, content);
+  await writeFile(I18N_EN_FILE, `${header}export const ITEM_NAMES_EN: readonly string[] = ${JSON.stringify(en)};\n`);
+  await writeFile(I18N_ZH_FILE, `${header}export const ITEM_NAMES_ZH: readonly string[] = ${JSON.stringify(zh)};\n`);
+  await writeFile(I18N_JA_FILE, `${header}export const ITEM_NAMES_JA: readonly string[] = ${JSON.stringify(ja)};\n`);
 }
+
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };
 
 main().catch((error) => {
   console.error(error);

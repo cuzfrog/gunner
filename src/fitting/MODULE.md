@@ -13,8 +13,10 @@ no-new-exports:
   - gunFamilies.test.ts
   - gunFamilies.ts
   - index.ts
-  - item-names-i18n.ts
+  - item-names-en.ts
+  - item-names-ja.ts
   - itemNames.test.ts
+  - item-names-zh.ts
   - itemNames.ts
   - module.ts
   - moduleSlots.ts

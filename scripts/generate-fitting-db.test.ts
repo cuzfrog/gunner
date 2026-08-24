@@ -1,4 +1,4 @@
-import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingDisruptorStats, _filterItemNames } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -44,6 +44,49 @@ describe("buildTrackingDisruptorStats", () => {
       disruptionPercent: -17.19,
       overloadStrengthBonusPercent: 20,
     });
+  });
+});
+
+describe("_filterItemNames", () => {
+  function makeType(overrides: { published: number; groupID: number; typeName?: string; typeID?: number }) {
+    return {
+      typeID: overrides.typeID ?? 1,
+      "typeName_en-us": overrides.typeName ?? "Name",
+      groupID: overrides.groupID,
+      published: overrides.published,
+    };
+  }
+
+  test("includes published fittable category items", () => {
+    const itemNames = { "A": { zh: "a", ja: "a" } };
+    const nameToType = new Map([["A", makeType({ published: 1, groupID: 1 })]]);
+    const groups = { "1": { groupID: 1, categoryID: 7 } };
+    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
+    expect(Object.keys(result)).toContain("A");
+  });
+
+  test("excludes published structure modules", () => {
+    const itemNames = { "Structure X": { zh: "x", ja: "x" } };
+    const nameToType = new Map([["Structure X", makeType({ published: 1, groupID: 2, typeName: "Structure X" })]]);
+    const groups = { "2": { groupID: 2, categoryID: 66 } };
+    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
+    expect(Object.keys(result)).not.toContain("Structure X");
+  });
+
+  test("excludes unpublished modules", () => {
+    const itemNames = { "Unpublished Y": { zh: "y", ja: "y" } };
+    const nameToType = new Map([["Unpublished Y", makeType({ published: 0, groupID: 1, typeName: "Unpublished Y" })]]);
+    const groups = { "1": { groupID: 1, categoryID: 7 } };
+    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
+    expect(Object.keys(result)).not.toContain("Unpublished Y");
+  });
+
+  test("includes names that are keys of emitted fittingDb tables", () => {
+    const itemNames = { "Table Key": { zh: "table", ja: "table" } };
+    const nameToType = new Map([["Table Key", makeType({ published: 0, groupID: 1, typeName: "Table Key" })]]);
+    const groups = { "1": { groupID: 1, categoryID: 7 } };
+    const result = _filterItemNames(itemNames, nameToType, groups, new Set(["Table Key"]));
+    expect(Object.keys(result)).toContain("Table Key");
   });
 });
 

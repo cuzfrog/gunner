@@ -1,4 +1,6 @@
-import { ITEM_NAMES } from "./item-names-i18n";
+import { ITEM_NAMES_EN } from "./item-names-en";
+import { ITEM_NAMES_JA } from "./item-names-ja";
+import { ITEM_NAMES_ZH } from "./item-names-zh";
 import type { ShipNameLanguage } from "../ships";
 
 // The SDE localized names for a handful of distinct items are identical.
@@ -16,11 +18,7 @@ const CANONICAL_OVERRIDES: Readonly<Record<ShipNameLanguage, Readonly<Record<str
     "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
     "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
     "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
-    "スタンドアップ大型ミサイル航行プロセッサII": "Standup L-Set Missile Flight Processor II",
-    "スタンドアップ中型標準小型艦製造資源効率I": "Standup M-Set Basic Small Ship Manufacturing Material Efficiency I",
-    "スタンドアップ中型ME研究加速器I": "Standup M-Set ME Research Accelerator I",
     "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
-    "アップウェルM3R-Oアウトポストリグ": "Upwell M3R-O Outpost Rig",
   },
 };
 
@@ -58,9 +56,9 @@ interface ResolvedItemNames {
 }
 
 function resolveLocalizations(): ResolvedItemNames {
-  const en = ITEM_NAMES.en;
-  const zh = ITEM_NAMES.zh;
-  const ja = ITEM_NAMES.ja;
+  const en = ITEM_NAMES_EN;
+  const zh = ITEM_NAMES_ZH;
+  const ja = ITEM_NAMES_JA;
 
   const zhGroups = groupByValue(en, zh);
   const jaGroups = groupByValue(en, ja);
