@@ -1,6 +1,7 @@
 import {
   type CombatantConfig,
   type EngagementFrame,
+  type EwarProjection,
   type HitChanceBreakdown,
   type SimConfig,
   type TurretSpec,
@@ -10,6 +11,7 @@ import type { Els } from "./elementsContract";
 import { AGGRESSIVITY_MIN } from "./controlsFormat";
 import type { Controls, ControlsCallbacks } from "./controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
+import type { RangeOverlayHost } from "./rangeOverlay";
 import type { FittingPopupController, FittingPreviewManager, PopupGroup } from "./popup";
 import type { HintRotator } from "./hints";
 import type { EventRouter, HullDatalist, SessionCodec } from "./session";
@@ -23,9 +25,8 @@ import type { EwarController } from "./ewar";
 import type { BoosterController } from "./booster";
 import type { ImportController } from "./import";
 import type { ShareController } from "./share";
-import type { EwarProjection } from "../../sim";
 import type { RangeOverlay } from "../renderer";
-import type { RangeOverlayController, RangeOverlayHost } from "./rangeOverlay";
+import type { RangeOverlayController } from "./rangeOverlay";
 
 export type { Controls, ControlsCallbacks } from "./controlsContract";
 

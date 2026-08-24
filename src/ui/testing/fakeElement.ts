@@ -46,9 +46,9 @@ export class FakeElement {
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
   appendChild(child: unknown): void {
-    const fake = child as FakeElement;
-    fake.parent = this;
-    this.children.push(fake);
+    if (!(child instanceof FakeElement)) return;
+    child.parent = this;
+    this.children.push(child);
   }
   remove(): void {
     if (!this.parent) return;
@@ -56,7 +56,10 @@ export class FakeElement {
     this.parent = null;
     this.isConnected = false;
   }
-  contains(target: unknown): boolean { return target === this || this.children.includes(target as FakeElement); }
+  contains(target: unknown): boolean {
+    if (!(target instanceof FakeElement)) return false;
+    return target === this || this.children.includes(target);
+  }
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;
     const ids = selector.split(",").map((s) => s.trim()).filter((s) => s.startsWith("#")).map((s) => s.slice(1));

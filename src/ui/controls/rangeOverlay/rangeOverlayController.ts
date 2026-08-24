@@ -82,8 +82,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   restoreHidden(kinds?: readonly string[]): void {
-    this.hiddenSet.clear();
     if (kinds) {
+      this.hiddenSet.clear();
       for (const kind of kinds) {
         if (isRangeOverlayKind(kind)) this.hiddenSet.add(kind);
       }
@@ -109,6 +109,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         this.chips.set(kind, chip);
         this.els.legend.appendChild(chip);
       }
+      chip.textContent = this.i18n.t(`label.ewar.${kind}`);
       chip.setAttribute("aria-pressed", String(this.isVisible(kind)));
     }
     for (const [kind, chip] of this.chips) {
@@ -178,10 +179,10 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private disruptorOverlay(side: "attacker" | "target", projection: EwarProjection): RangeOverlay | undefined {
-    return this.falloffOverlay(side, "disruptor", projection, projection.loadout.disruptors, (spec, activation) => {
-      const scale = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-      return { optimal: spec.optimal * scale, falloff: spec.falloff };
-    });
+    return this.falloffOverlay(side, "disruptor", projection, projection.loadout.disruptors, (spec) => ({
+      optimal: spec.optimal,
+      falloff: spec.falloff,
+    }));
   }
 
   private falloffOverlay<T extends StasisGrapplerSpec | TrackingDisruptorSpec>(

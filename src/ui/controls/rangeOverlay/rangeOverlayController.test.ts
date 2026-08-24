@@ -29,7 +29,7 @@ function buildController(now: () => number = () => 0): {
     translateDocument: vi.fn(),
   });
   const currentDistance = vi.fn(() => 5000);
-  const projections = { attacker: undefined as EwarProjection | undefined, target: undefined as EwarProjection | undefined };
+  const projections: Record<"attacker" | "target", EwarProjection | undefined> = { attacker: undefined, target: undefined };
   const host = {
     currentDistance,
     projection: (side: "attacker" | "target") => projections[side],
@@ -146,11 +146,11 @@ describe("RangeOverlayController", () => {
     expect(controller.overlays()[0]?.radius).toBe(10800);
   });
 
-  test("disruptor overlay uses scaled optimal and base falloff", () => {
+  test("disruptor overlay uses base optimal and falloff", () => {
     const { controller, host } = buildController();
     host.projection = () => projectionWithDisruptor(true, true);
     const overlays = controller.overlays();
-    expect(overlays[0]?.radius).toBe(12000);
+    expect(overlays[0]?.radius).toBe(10000);
     expect(overlays[0]?.falloffRadius).toBe(30000);
   });
 
