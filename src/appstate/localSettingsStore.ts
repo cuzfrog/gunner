@@ -3,9 +3,10 @@ import type { ClipboardProvider, LocationProvider, StorageProvider } from "./pro
 import type { SettingsStore } from "./settingsStore";
 import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
 import type { Language } from "./language";
+import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
-import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
+import { isLanguage, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
 
 const PROFILES_KEY = "gunner-profiles-v6";
 const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
@@ -17,22 +18,26 @@ export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
   private readonly parser: SettingsParser;
+  private readonly equality: ProfileEquality;
   private readonly navigatorLanguage: string;
 
   constructor({
     storage,
     location,
     parser,
+    profileEquality,
     navigatorLanguage = "",
   }: {
     storage: StorageProvider;
     location: LocationProvider;
     parser: SettingsParser;
+    profileEquality: ProfileEquality;
     navigatorLanguage?: string;
   }) {
     this.storage = storage;
     this.location = location;
     this.parser = parser;
+    this.equality = profileEquality;
     this.navigatorLanguage = navigatorLanguage;
   }
 
@@ -131,7 +136,7 @@ export class LocalSettingsStore implements SettingsStore {
     if (!name) return null;
     const profile = this.loadProfile(name);
     if (!profile) return null;
-    return profilesEqual(profile, stripDisplayPreferences(urlSettings)) ? name : null;
+    return this.equality.equal(profile, stripDisplayPreferences(urlSettings)) ? name : null;
   }
 
   private readSelectedProfileName(): string | null {

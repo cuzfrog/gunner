@@ -23,6 +23,8 @@ import type { EventRouter, HullDatalist, SessionCodec } from "./session";
 import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { ProfileChangeTracker } from "./profileChangeTracker";
+import type { ProfileEquality } from "../../appstate";
 
 export interface ControlsCradle {
   readonly hitChance: HitChance;
@@ -64,5 +66,7 @@ export interface ControlsCradle {
   readonly shareController: ShareController;
   readonly confirmController: ConfirmController;
   readonly eventRouter: EventRouter;
+  readonly profileEquality: ProfileEquality;
+  readonly profileChangeTracker: ProfileChangeTracker;
   readonly controls: Controls & DomControlsHost;
 }

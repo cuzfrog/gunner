@@ -12,6 +12,7 @@ import { ChoiceGroupImpl } from "./choiceGroup";
 import { EngagementReadoutImpl } from "./engagementReadout";
 import { PreferencesControllerImpl } from "./preferencesController";
 import { ProfileControllerImpl } from "./profileController";
+import { ProfileChangeTrackerImpl } from "./profileChangeTracker";
 import { TrackingInputImpl } from "./trackingInput";
 import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
@@ -54,8 +55,11 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       };
       return new ConfirmControllerImpl({ popupGroup, i18n, els: confirmEls });
     }).singleton(),
+    profileChangeTracker: asFunction(({ profileEquality }: ControlsCradle) =>
+      new ProfileChangeTrackerImpl({ equality: profileEquality })
+    ).singleton(),
     profileController: asFunction(({
-      els, settingsStore, timer, i18n, uiEvents, confirmController, popupGroup,
+      els, settingsStore, timer, i18n, uiEvents, confirmController, popupGroup, profileChangeTracker,
     }: ControlsCradle) => new ProfileControllerImpl({
       els: collectProfileEls(els),
       settingsStore,
@@ -64,6 +68,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       events: uiEvents,
       confirmController,
       popupGroup,
+      changeTracker: profileChangeTracker,
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       hitChance: proxy.hitChance,

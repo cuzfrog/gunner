@@ -160,7 +160,3 @@ export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings
   const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
-
-export function profilesEqual(a: ProfileSettings, b: ProfileSettings): boolean {
-  return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort());
-}

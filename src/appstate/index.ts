@@ -1,5 +1,5 @@
 export { USER_SETTINGS_VERSION, PROPULSION_NONE } from "./userSettings";
-export { profilesEqual } from "./validators";
+export type { ProfileEquality } from "./profileEquality";
 export type {
   DisplayPreferences,
   FittedHullSummary,

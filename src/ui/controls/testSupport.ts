@@ -4,7 +4,7 @@ import type { Ships } from "../../ships";
 import type { EwarResolver, HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
-import type { ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
+import type { ProfileEquality, ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
 import { UiEventsImpl, type UiEvents } from "../events";
 import {
   FakeElement,
@@ -160,6 +160,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     clipboard: asValue(mockClipboard()),
     timer: asValue(mockTimer()),
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
+    profileEquality: asValue<ProfileEquality>({ equal: () => true }),
   });
   return cradle;
 }

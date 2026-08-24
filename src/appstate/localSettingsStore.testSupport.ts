@@ -2,6 +2,7 @@ import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipP
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
+import type { ProfileEquality } from "./profileEquality";
 import {
   USER_SETTINGS_VERSION,
   type DisplayPreferences,
@@ -199,4 +200,24 @@ export function resetMocks(): void {
 }
 export function makeParser(): SettingsParser {
   return new SettingsParser({ ships, fittingImport, chargeCatalog });
+}
+
+export function fakeEquality(equal = true): ProfileEquality {
+  return { equal: () => equal };
+}
+
+export function makeStore(options: {
+  storage?: StorageProvider;
+  location?: LocationProvider;
+  parser?: SettingsParser;
+  equality?: ProfileEquality;
+  navigatorLanguage?: string;
+} = {}): LocalSettingsStore {
+  return new LocalSettingsStore({
+    parser: options.parser ?? makeParser(),
+    storage: options.storage ?? fakeStorage(),
+    location: options.location ?? fakeLocation("http://localhost/"),
+    profileEquality: options.equality ?? fakeEquality(true),
+    navigatorLanguage: options.navigatorLanguage,
+  });
 }

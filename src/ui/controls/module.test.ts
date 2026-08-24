@@ -44,6 +44,8 @@ const controlsCradleKeys = {
   shareController: "shareController",
   confirmController: "confirmController",
   eventRouter: "eventRouter",
+  profileEquality: "profileEquality",
+  profileChangeTracker: "profileChangeTracker",
   controls: "controls",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 

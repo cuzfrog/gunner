@@ -1,6 +1,7 @@
 import { setText } from "./controlsDom";
-import { profilesEqual, type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
+import { type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
 import type { ConfirmController } from "./confirmController";
+import type { ProfileChangeTracker } from "./profileChangeTracker";
 import type { I18n } from "../i18n";
 import type { Popup, PopupGroup } from "./popup";
 import type { TimeoutId, Timer } from "../timer";
@@ -45,6 +46,7 @@ interface ProfileControllerDeps {
   readonly events: UiEvents;
   readonly confirmController: ConfirmController;
   readonly popupGroup: PopupGroup;
+  readonly changeTracker: ProfileChangeTracker;
 }
 
 export class ProfileControllerImpl implements ProfileController {
@@ -55,12 +57,12 @@ export class ProfileControllerImpl implements ProfileController {
   private readonly events: UiEvents;
   private readonly confirmController: ConfirmController;
   private readonly popupGroup: PopupGroup;
+  private readonly changeTracker: ProfileChangeTracker;
   private readonly selectorPopupValue: Popup;
   private readonly newProfilePopupValue: Popup;
   private onProfileLoaded?: (name: string) => void;
   private onNewProfile?: () => void;
   private snapshotSource: (() => ProfileSettings) | undefined;
-  private selectedProfile: ProfileSettings | null = null;
   private shareStatusTimeout?: TimeoutId;
   private lastAppliedSelection = "";
   private selectedNameValue = "";
@@ -76,6 +78,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.events = deps.events;
     this.confirmController = deps.confirmController;
     this.popupGroup = deps.popupGroup;
+    this.changeTracker = deps.changeTracker;
     this.selectorPopupValue = {
       isOpen: () => this.selectorOpen,
       open: () => this.openProfileSelector(),
@@ -153,7 +156,7 @@ export class ProfileControllerImpl implements ProfileController {
 
   markLoaded(selected?: string): void {
     this.els.newProfileName.value = "";
-    this.selectedProfile = this.snapshotSource?.() ?? null;
+    this.changeTracker.setBaseline(this.snapshotSource?.());
     this.refresh(selected ?? this.selectedNameValue);
     this.lastAppliedSelection = this.selectedNameValue;
     this.updateActionBarState();
@@ -184,7 +187,7 @@ export class ProfileControllerImpl implements ProfileController {
     if (!profile) return;
     this.settingsStore.saveProfile(selected, profile);
     this.settingsStore.selectProfile(selected);
-    this.selectedProfile = profile;
+    this.changeTracker.setBaseline(profile);
     this.refresh(selected);
     this.lastAppliedSelection = selected;
     this.updateActionBarState();
@@ -217,7 +220,7 @@ export class ProfileControllerImpl implements ProfileController {
     if (!name) return;
     if (!(await this.confirmController.confirm("confirm.deleteProfile"))) return;
     this.settingsStore.deleteProfile(name);
-    this.selectedProfile = null;
+    this.changeTracker.clearBaseline();
     this.lastAppliedSelection = "";
     this.refresh();
     this.updateActionBarState();
@@ -239,7 +242,7 @@ export class ProfileControllerImpl implements ProfileController {
     if (!profile) return;
     this.settingsStore.saveProfile(name, profile);
     this.settingsStore.selectProfile(name);
-    this.selectedProfile = profile;
+    this.changeTracker.setBaseline(profile);
     this.refresh(name);
     this.lastAppliedSelection = name;
     this.updateActionBarState();
@@ -291,9 +294,7 @@ export class ProfileControllerImpl implements ProfileController {
   }
 
   private isDirty(): boolean {
-    const current = this.snapshotSource?.() ?? null;
-    if (!current) return false;
-    return this.selectedProfile ? !profilesEqual(this.selectedProfile, current) : false;
+    return this.changeTracker.hasUnsavedChanges(this.snapshotSource?.());
   }
 
   private canSave(selected: string, dirty: boolean): boolean {

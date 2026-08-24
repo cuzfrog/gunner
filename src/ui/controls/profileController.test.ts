@@ -5,6 +5,7 @@ import type { Popup, PopupGroup } from "./popup";
 import type { Timer } from "../timer";
 import { UiEventsImpl } from "../events";
 import { ProfileControllerImpl, type ProfileController, type ProfileEls } from "./profileController";
+import type { ProfileChangeTracker } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {
   version: USER_SETTINGS_VERSION,
@@ -110,6 +111,12 @@ class StubPopupGroup implements PopupGroup {
   });
 }
 
+class StubProfileChangeTracker implements ProfileChangeTracker {
+  setBaseline = vi.fn();
+  clearBaseline = vi.fn();
+  hasUnsavedChanges = vi.fn(() => false);
+}
+
 function fakeProfileEls(): ProfileEls {
   const profilePopup = new FakeElement() as unknown as HTMLElement;
   const newProfilePopup = new FakeElement() as unknown as HTMLElement;
@@ -190,11 +197,14 @@ function build(options: { profiles?: Record<string, ProfileSettings>; list?: str
     confirm: vi.fn((key: string) => Promise.resolve(options.confirm ? options.confirm(key) : true)),
   };
   const popupGroup = new StubPopupGroup();
-  const controller = new ProfileControllerImpl({ els, settingsStore, timer, i18n, events, confirmController, popupGroup });
+  const changeTracker = new StubProfileChangeTracker();
+  const controller = new ProfileControllerImpl({
+    els, settingsStore, timer, i18n, events, confirmController, popupGroup, changeTracker,
+  });
   controller.setSnapshotSource(snapshotSource);
   controller.setOnProfileLoaded(onLoaded);
   controller.setOnNewProfile(onNewProfile);
-  return { controller, els, settingsStore, timer, snapshotSource, onLoaded, onNewProfile, events, confirmController, popupGroup };
+  return { controller, els, settingsStore, timer, snapshotSource, onLoaded, onNewProfile, events, confirmController, popupGroup, changeTracker };
 }
 
 function menuLabels(els: ProfileEls): string[] {
@@ -203,12 +213,13 @@ function menuLabels(els: ProfileEls): string[] {
 
 describe("ProfileController", () => {
   test("markLoaded clears the new-profile name popup and sets the baseline", () => {
-    const { controller, els } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     els.newProfileName.value = "typed";
     controller.markLoaded("brawler");
     expect(els.newProfileName.value).toBe("");
     expect(controller.selectedName()).toBe("brawler");
     expect(els.profileSelectLabel.textContent).toBe("brawler");
+    expect(changeTracker.setBaseline).toHaveBeenCalledWith(expect.any(Object));
   });
 
   test("save writes to the selected profile only", async () => {
@@ -301,7 +312,7 @@ describe("ProfileController", () => {
   });
 
   test("load confirms discarding unsaved changes and reverts the selection", async () => {
-    const { controller, els, settingsStore, onLoaded, confirmController } = build({
+    const { controller, els, settingsStore, onLoaded, confirmController, changeTracker } = build({
       profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
       list: ["brawler", "kiter"],
     });
@@ -309,7 +320,7 @@ describe("ProfileController", () => {
     controller.markLoaded("brawler");
     expect(confirmController.confirm).not.toHaveBeenCalled();
 
-    snapshotSourceDiffers(controller);
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     vi.mocked(confirmController.confirm).mockResolvedValue(false);
     await controller.loadProfile("kiter");
     expect(confirmController.confirm).toHaveBeenLastCalledWith("confirm.discardChanges");
@@ -359,7 +370,7 @@ describe("ProfileController", () => {
   });
 
   test("updateActionBarState drives save and delete from selection and dirty state", () => {
-    const { controller, els, snapshotSource } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
 
     controller.updateActionBarState();
     expect(els.profileSave.disabled).toBe(true);
@@ -373,13 +384,13 @@ describe("ProfileController", () => {
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileDelete.disabled).toBe(false);
 
-    snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 9999 });
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
     expect(els.profileSave.disabled).toBe(false);
 
     controller.refresh();
-    snapshotSource.mockReturnValue({ ...BASE_PROFILE, optimal: 7777 });
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
     controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
@@ -508,8 +519,3 @@ describe("ProfileController", () => {
     expect(els.shareStatus.textContent).toBe("status.profileDeleted");
   });
 });
-
-function snapshotSourceDiffers(controller: ProfileControllerImpl): void {
-  controller.setSnapshotSource(() => ({ ...BASE_PROFILE, optimal: 9999 }));
-  controller.updateActionBarState();
-}
