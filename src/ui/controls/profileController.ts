@@ -116,7 +116,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.els.profileSave.classList.toggle("unsaved", dirty);
     this.els.profileSelect.classList.toggle("dirty", dirty);
     this.els.profileDirtyMarker.hidden = !dirty;
-    this.els.profileSave.disabled = !(name.length > 0 || selected.length > 0) || (!dirty && !(name.length > 0 && name !== selected));
+    this.els.profileSave.disabled = !this.isSaveEnabled(name, selected, dirty);
   }
 
   async saveProfile(): Promise<void> {
@@ -174,6 +174,11 @@ export class ProfileControllerImpl implements ProfileController {
     setText(this.els.shareStatus, this.i18n.t(key));
     if (this.shareStatusTimeout) this.timer.clearTimeout(this.shareStatusTimeout);
     this.shareStatusTimeout = this.timer.setTimeout(() => setText(this.els.shareStatus, ""), 2000);
+  }
+
+  private isSaveEnabled(name: string, selected: string, dirty: boolean): boolean {
+    const hasTarget = name.length > 0 || selected.length > 0;
+    return hasTarget && (dirty || (name.length > 0 && name !== selected));
   }
 
   private isDirty(): boolean {
