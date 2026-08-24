@@ -13,6 +13,7 @@ import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { EwarController } from "../ewar";
+import type { BoosterController } from "../booster";
 
 function fakeEls() {
   globalThis.document = fakeDocument() as unknown as Document;
@@ -64,7 +65,21 @@ function mockEwarController(): EwarController {
     capture: vi.fn(),
     popup: vi.fn(),
     render: vi.fn(),
+    updateSummaries: vi.fn(),
   } as unknown as EwarController;
+}
+
+function mockBoosterController(): BoosterController {
+  return {
+    setHost: vi.fn(),
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(),
+    capture: vi.fn(),
+    popup: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  } as unknown as BoosterController;
 }
 
 function mockFittingImport(): FittingImport {
@@ -110,6 +125,7 @@ describe("SessionCodec", () => {
       settingsStore: {} as SettingsStore,
       trackingInput: fakeTrackingInput(),
       ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
     codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
@@ -216,6 +232,7 @@ describe("SessionCodec", () => {
       sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);
@@ -249,7 +266,8 @@ describe("SessionCodec", () => {
     vi.mocked(fittingImport.importFitting).mockReturnValue({
       profile: {} as unknown,
       fittingName: "Brawler",
-      ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], grapplers: [], disruptors: [], scripts: [] },
+      ewar: { webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      boosts: { computers: [], scripts: [] },
       weapon: undefined,
       defense: undefined,
       modules: [],
@@ -266,6 +284,7 @@ describe("SessionCodec", () => {
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
       settingsStore, trackingInput: fakeTrackingInput(),
       ewarController,
+      boosterController: mockBoosterController(),
       fittingImport,
     });
 
@@ -312,6 +331,7 @@ describe("SessionCodec", () => {
       sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);
@@ -367,6 +387,7 @@ describe("SessionCodec", () => {
       sigResChoice, hintRotator, settingsStore,
       trackingInput,
       ewarController,
+      boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
     codec.setSessionControl(sessionControl);

@@ -1,4 +1,4 @@
-import type { DisruptionScriptSpec } from "../../sim";
+import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import { PALETTE } from "../palette";
@@ -18,6 +18,7 @@ import {
   profileSettingsOf,
   propulsionOptionLabel,
   scriptStatSuffix,
+  boosterScriptStatSuffix,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
@@ -166,6 +167,18 @@ describe("script stat suffix", () => {
       falloffMultiplier: 2,
     };
     expect(scriptStatSuffix(script)).toBe("optimal x2 · falloff x2 · track x0");
+  });
+});
+
+describe("booster script stat suffix", () => {
+  test("formats all three turret multipliers", () => {
+    const script: TurretScriptSpec = {
+      name: "Optimal Range Script",
+      trackingMultiplier: 0,
+      optimalMultiplier: 2,
+      falloffMultiplier: 2,
+    };
+    expect(boosterScriptStatSuffix(script)).toBe("track x0 · optimal x2 · falloff x2");
   });
 });
 

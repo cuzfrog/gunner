@@ -41,6 +41,7 @@ const controlsCradleKeys = {
   sessionCodec: "sessionCodec",
   importController: "importController",
   ewarController: "ewarController",
+  boosterController: "boosterController",
   shareController: "shareController",
   confirmController: "confirmController",
   eventRouter: "eventRouter",

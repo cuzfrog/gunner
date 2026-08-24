@@ -47,6 +47,10 @@ export interface Els {
   readonly attackerEwarTrigger: HTMLButtonElement;
   readonly attackerEwarPopup: HTMLElement;
   readonly attackerEwarSummary: HTMLElement;
+  readonly attackerBoosterField: HTMLElement;
+  readonly attackerBoosterTrigger: HTMLButtonElement;
+  readonly attackerBoosterPopup: HTMLElement;
+  readonly attackerBoosterSummary: HTMLElement;
   readonly attackerSpeed: HTMLInputElement;
   readonly attackerMass: HTMLInputElement;
   readonly attackerInertia: HTMLInputElement;
@@ -88,6 +92,10 @@ export interface Els {
   readonly targetEwarTrigger: HTMLButtonElement;
   readonly targetEwarPopup: HTMLElement;
   readonly targetEwarSummary: HTMLElement;
+  readonly targetBoosterField: HTMLElement;
+  readonly targetBoosterTrigger: HTMLButtonElement;
+  readonly targetBoosterPopup: HTMLElement;
+  readonly targetBoosterSummary: HTMLElement;
   readonly targetSpeed: HTMLInputElement;
   readonly targetMass: HTMLInputElement;
   readonly targetInertia: HTMLInputElement;

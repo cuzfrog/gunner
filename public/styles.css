@@ -1774,7 +1774,8 @@ canvas {
   padding: 6px;
 }
 
-.ewar-group {
+.ewar-group,
+.booster-group {
   position: relative;
   margin-bottom: 6px;
 }
@@ -1813,7 +1814,8 @@ canvas {
   border-color: var(--accent-teal);
 }
 
-.ewar-trigger .ewar-label {
+.ewar-trigger .ewar-label,
+.ewar-trigger .booster-label {
   display: block;
   flex: 1 1 auto;
   min-width: 0;

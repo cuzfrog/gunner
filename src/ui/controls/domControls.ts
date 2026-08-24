@@ -20,6 +20,7 @@ import type { ChoiceGroup } from "./choiceGroup";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController } from "./turret";
 import type { EwarController } from "./ewar";
+import type { BoosterController } from "./booster";
 import type { ImportController } from "./import";
 import type { ShareController } from "./share";
 
@@ -40,6 +41,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   sessionCodec: SessionCodec;
   importController: ImportController;
   ewarController: EwarController;
+  boosterController: BoosterController;
   shareController: ShareController;
   previewManager: FittingPreviewManager;
   attackerFittingPopup: FittingPopupController;
@@ -63,6 +65,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly sessionCodec: SessionCodec;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
+  private readonly boosterController: BoosterController;
   private readonly shareController: ShareController;
   private readonly previewManager: FittingPreviewManager;
   private readonly attackerFittingPopup: FittingPopupController;
@@ -87,6 +90,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.sessionCodec = all.sessionCodec;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
+    this.boosterController = all.boosterController;
     this.shareController = all.shareController;
     this.previewManager = all.previewManager;
     this.attackerFittingPopup = all.attackerFittingPopup;
@@ -102,6 +106,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretController.popup);
+    this.popupGroup.register(this.boosterController.popup("attacker"));
+    this.popupGroup.register(this.boosterController.popup("target"));
     this.hullDatalist.populate();
     this.attackerSide.sections.skill.renderSkillOptions();
     this.targetSide.sections.skill.renderSkillOptions();
@@ -116,6 +122,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
+    this.boosterController.updateSummaries();
     this.persistConfigChange();
   }
   currentDistance(): number { return this.sessionCodec.getInitialDistance(); }
@@ -133,6 +140,7 @@ export class DomControls implements Controls, DomControlsHost {
   private onLanguageChanged(): void {
     this.deps.i18n.translateDocument();
     this.ewarController.render();
+    this.boosterController.render();
     this.setPlaying(this.playing);
     this.notifyDisplayChange();
   }
@@ -181,12 +189,14 @@ export class DomControls implements Controls, DomControlsHost {
       inertiaModifier: attackerState.inertia, mode: attackerState.mode,
       desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
       ewar: this.ewarController.projection("attacker"),
+      boosts: this.boosterController.projection("attacker"),
     };
     const target: CombatantConfig = {
       id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed, mass: targetState.mass,
       inertiaModifier: targetState.inertia, mode: targetState.mode,
       desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
       ewar: this.ewarController.projection("target"),
+      boosts: this.boosterController.projection("target"),
     };
     return { attacker, target, initialDistance };
   }

@@ -12,6 +12,7 @@ import type { DomControlsHost } from "./domControlsContract";
 import type { Els } from "./elementsContract";
 import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
+import type { BoosterController } from "./booster";
 import type { EwarController } from "./ewar";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirmController";
@@ -61,6 +62,7 @@ export interface ControlsCradle {
   readonly attackerFittingPopup: FittingPopupController;
   readonly targetFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
+  readonly boosterController: BoosterController;
   readonly sessionCodec: SessionCodec;
   readonly importController: ImportController;
   readonly shareController: ShareController;

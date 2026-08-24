@@ -1,8 +1,9 @@
 import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
-import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type StoredEwarActivation, type UserSettings } from "../../../appstate";
+import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState, type StoredBoosterActivation, type StoredEwarActivation, type UserSettings } from "../../../appstate";
 import type { EwarController } from "../ewar";
+import type { BoosterController } from "../booster";
 import { num } from "../controlsDom";
 import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
@@ -43,6 +44,7 @@ export class SessionCodecImpl implements SessionCodec {
   private sessionControl?: SessionControl;
   private readonly trackingInput: TrackingInput;
   private readonly ewarController: EwarController;
+  private readonly boosterController: BoosterController;
   private readonly fittingImport: FittingImport;
   private readonly pristineSettings: UserSettings;
 
@@ -50,7 +52,7 @@ export class SessionCodecImpl implements SessionCodec {
     els: Els; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
     sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore;
-    trackingInput: TrackingInput; ewarController: EwarController; fittingImport: FittingImport;
+    trackingInput: TrackingInput; ewarController: EwarController; boosterController: BoosterController; fittingImport: FittingImport;
   }) {
     this.els = deps.els;
     this.attackerSide = deps.attackerSide;
@@ -66,6 +68,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.settingsStore = deps.settingsStore;
     this.trackingInput = deps.trackingInput;
     this.ewarController = deps.ewarController;
+    this.boosterController = deps.boosterController;
     this.fittingImport = deps.fittingImport;
     this.pristineSettings = this.capture();
   }
@@ -116,6 +119,8 @@ export class SessionCodecImpl implements SessionCodec {
       attackerAmmo: turret.ammo,
       attackerEwarActivation: this.ewarController.capture("attacker"),
       targetEwarActivation: this.ewarController.capture("target"),
+      attackerBoosterActivation: this.boosterController.capture("attacker"),
+      targetBoosterActivation: this.boosterController.capture("target"),
     };
   }
 
@@ -158,6 +163,12 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController.restore(side, loadout, activation);
   }
 
+  private restoreBooster(side: "attacker" | "target", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined): void {
+    const panel = side === "attacker" ? this.attackerSide : this.targetSide;
+    const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
+    this.boosterController.restore(side, loadout, activation);
+  }
+
   resetToDefaults(): void {
     this.settingsStore.clearSelectedProfile();
     this.applyShipState(this.pristineSettings);
@@ -192,6 +203,8 @@ export class SessionCodecImpl implements SessionCodec {
     });
     this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
     this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
+    this.restoreBooster("attacker", settings.attackerFitting, settings.attackerBoosterActivation);
+    this.restoreBooster("target", settings.targetFitting, settings.targetBoosterActivation);
   }
 
   restoreStartup(startup: StartupState): void {
