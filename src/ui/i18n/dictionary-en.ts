@@ -9,6 +9,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.trackingSpeed": { en: "Tracking speed" },
   "label.trackingScore": { en: "Score" },
   "label.turretSigResolution": { en: "Turret sig. resolution" },
+  "turret.notFittable": { en: "This turret class cannot be fitted on the selected hull" },
   "label.optimalRange": { en: "Optimal range" },
   "label.falloffRange": { en: "Falloff range" },
   "section.attackerShip": { en: "Attacker ship" },

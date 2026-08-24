@@ -1,6 +1,7 @@
 import { buildTurret } from "./testSupport";
-import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, TURRET } from "../testSupport";
+import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
+import type { ShipProfile } from "../../../ships";
 
 describe("TurretController", () => {
   test("initial state disables the trigger and hides the summary icon", () => {
@@ -196,4 +197,85 @@ describe("TurretController", () => {
     events.emitLanguageChanged();
     expect(render).toHaveBeenCalled();
   });
+
+  test("setHullProfile with no profile disables every sig-res button and option", () => {
+    const { document, controller } = buildTurret({ ships: { turretSizeOptions: vi.fn(() => [] as const) } });
+    controller.setHullProfile(undefined);
+    const buttons = Array.from(getFake(document, "sig-res-options").children);
+    for (const button of buttons) {
+      expect(button.disabled).toBe(true);
+      expect(button.title).toBe("turret.notFittable");
+    }
+    for (const option of getFake(document, "sigRes").options) {
+      expect(option.disabled).toBe(true);
+    }
+  });
+
+  test("setHullProfile enables only the turret classes that fit the hull", () => {
+    const { document, controller } = buildTurret({
+      ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
+    });
+    controller.setHullProfile(RIFTER);
+    expect(buttonFor(document, "S").disabled).toBe(false);
+    expect(buttonFor(document, "M").disabled).toBe(false);
+    expect(buttonFor(document, "L").disabled).toBe(true);
+    expect(buttonFor(document, "XL").disabled).toBe(true);
+    expect(buttonFor(document, "L").title).toBe("turret.notFittable");
+    expect(optionFor(document, "S").disabled).toBe(false);
+    expect(optionFor(document, "XL").disabled).toBe(true);
+  });
+
+  test("setHullProfile clamps an invalid current class to the fitted turret's class when it fits", () => {
+    const { document, controller } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+      ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
+    });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    getFake(document, "sigRes").value = "L";
+    controller.setHullProfile(RIFTER);
+    expect(getFake(document, "sigRes").value).toBe("S");
+    expect(buttonFor(document, "S").getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("setHullProfile clamps an invalid current class to the highest allowed class when no turret is fitted", () => {
+    const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
+    getFake(document, "sigRes").value = "XL";
+    const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
+    controller.setHullProfile(mediumProfile);
+    expect(getFake(document, "sigRes").value).toBe("L");
+    expect(buttonFor(document, "L").getAttribute("aria-pressed")).toBe("true");
+    expect(buttonFor(document, "XL").disabled).toBe(true);
+  });
+
+  test("setHullProfile re-enables larger classes when a bigger hull is selected", () => {
+    const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
+    const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
+    controller.setHullProfile(RIFTER);
+    expect(buttonFor(document, "L").disabled).toBe(true);
+    controller.setHullProfile(mediumProfile);
+    expect(buttonFor(document, "L").disabled).toBe(false);
+    expect(buttonFor(document, "XL").disabled).toBe(true);
+  });
 });
+
+function buttonFor(document: Document, value: string) {
+  const group = getFake(document, "sig-res-options");
+  for (const child of group.children) {
+    if (child.getAttribute("data-value") === value) return child;
+  }
+  throw new Error(`Missing sig-res button: ${value}`);
+}
+
+function optionFor(document: Document, value: string) {
+  const select = getFake(document, "sigRes");
+  for (const option of select.options) {
+    if (option.value === value) return option;
+  }
+  throw new Error(`Missing sig-res option: ${value}`);
+}
+
+function mockTurretSizeOptions() {
+  return vi.fn((profile: ShipProfile) => (profile.name === "Caracal"
+    ? ["small", "medium", "large"] as const
+    : ["small", "medium"] as const));
+}

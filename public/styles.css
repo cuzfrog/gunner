@@ -1926,34 +1926,88 @@ canvas {
   font-size: 12px;
 }
 
-.ewar-script-choice {
+.ewar-script-gear {
+  flex: 0 0 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
   display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.ewar-script-choice button {
-  padding: 2px 6px;
+  align-items: center;
+  justify-content: center;
   background: var(--bg-inset);
   border: 1px solid var(--border-dim);
-  border-radius: 2px;
   color: var(--text-secondary);
-  font: inherit;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  border-radius: 2px;
   cursor: pointer;
 }
 
-.ewar-script-choice button[aria-pressed="true"] {
-  background: var(--accent-teal-35);
-  border-color: var(--accent-teal);
-  color: var(--text-primary);
+.ewar-script-gear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.ewar-row-inactive .ewar-script-choice {
-  opacity: 0.4;
-  pointer-events: none;
+.ewar-script-gear:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.ewar-script-gear[aria-expanded="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.ewar-script-popup {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: calc(var(--z-popup) + 1);
+  min-width: 140px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  padding: 6px;
+}
+
+.ewar-script-popup-label {
+  padding: 4px 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 4px;
+}
+
+.ewar-script-option {
+  display: block;
+  width: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ewar-script-option:hover,
+.ewar-script-option:focus-visible {
+  background: var(--bg-inset);
+  border-color: var(--border-dim);
+}
+
+.ewar-script-option[aria-current="true"] {
+  background: var(--accent-teal-12);
+  border-color: var(--accent-teal-35);
+  color: var(--accent-teal);
+}
+
+.ewar-row-inactive .ewar-script-gear {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .footer {

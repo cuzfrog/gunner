@@ -42,6 +42,7 @@ export interface SidePanel {
   clearOverrides(): void;
   clearTurret(): void;
   restoreTurret(): void;
+  setTurretProfile(profile: ShipProfile | undefined): void;
   stateFrom(settings: UserSettings): SidePanelState;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
@@ -113,7 +114,7 @@ export interface FittingPreviewControl {
 }
 
 export interface SideImporter {
-  mostRecentFittingFor(hullName: string): SavedFitting | undefined;
+  autoLoadFittingTextFor(hullName: string): string | undefined;
   importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
   importFromText(text: string): Promise<void>;
   importFromClipboard(): Promise<void>;

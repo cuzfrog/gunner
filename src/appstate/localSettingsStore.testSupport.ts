@@ -180,6 +180,7 @@ export function makeShips() {
     fittingOptions: vi.fn(),
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(),
+    turretSizeOptions: vi.fn(),
     fittedStats: vi.fn(),
     maxSpeedForFittedMass: vi.fn(),
     alignTime: vi.fn(),

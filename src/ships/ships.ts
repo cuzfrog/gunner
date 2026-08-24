@@ -8,11 +8,17 @@ import { fittingOptions as computeFittingOptions } from "./fitting";
 import { SHIP_PROFILES } from "./profiles";
 import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
 import { factionDisplayName, findShipProfileByName, hullTypeDisplayName, shipDisplayName, type ShipNameLanguage } from "./shipNames";
-import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
+import { hullTierOf } from "./tiers";
+import type {
+  FittedHull, HullTier, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions,
+} from "./types";
 
 export type { ShipNameLanguage } from "./shipNames";
 export type { ShipStats } from "./effectiveStats";
-export type { FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
+export type {
+  FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel,
+  StatConditions,
+} from "./types";
 
 export interface HullView {
   readonly name: string;
@@ -28,8 +34,11 @@ export interface Ships {
   fittingOptions(profile: ShipProfile): readonly PropulsionModule[];
   allFittingOptions(): readonly PropulsionModule[];
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined;
+  turretSizeOptions(profile: ShipProfile): readonly HullTier[];
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions): ShipStats;
-  maxSpeedForFittedMass(profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions): number;
+  maxSpeedForFittedMass(
+    profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions,
+  ): number;
   alignTime(mass: number, inertiaModifier: number): number;
 }
 
@@ -67,15 +76,30 @@ export class ShipsImpl implements Ships {
     return computeFittingOptions(profile).find((module) => module.id === id);
   }
 
+  turretSizeOptions(profile: ShipProfile): readonly HullTier[] {
+    return turretSizeOptionsFor(profile);
+  }
+
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions): ShipStats {
     return computeFittedStats(profile, fitted, module, conditions);
   }
 
-  maxSpeedForFittedMass(profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions): number {
+  maxSpeedForFittedMass(
+    profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions,
+  ): number {
     return computeMaxSpeedForFittedMass(profile, fitted, mass, module, conditions);
   }
 
   alignTime(mass: number, inertiaModifier: number): number {
     return computeAlignTime(mass, inertiaModifier);
   }
+}
+
+const HULL_TIER_ORDER: readonly HullTier[] = ["small", "medium", "large", "capital"] as const;
+
+function turretSizeOptionsFor(profile: ShipProfile): readonly HullTier[] {
+  const hullTier = hullTierOf(profile.hullType);
+  if (!hullTier) return [];
+  const hullRank = HULL_TIER_ORDER.indexOf(hullTier);
+  return HULL_TIER_ORDER.filter((tier, rank) => rank <= hullRank || (rank === hullRank + 1 && tier !== "capital"));
 }

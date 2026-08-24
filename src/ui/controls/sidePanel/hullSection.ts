@@ -68,8 +68,8 @@ export class HullSection implements IHullSection {
 
     let imported: ImportedFitting | undefined;
     if (isGenuineChange && autoSelect) {
-      const recent = this.panel.importer.mostRecentFittingFor(profile.name);
-      if (recent) imported = this.panel.importer.importEftFitting(recent.text, false);
+      const text = this.panel.importer.autoLoadFittingTextFor(profile.name);
+      if (text) imported = this.panel.importer.importEftFitting(text, false);
     }
 
     if (persist) {
@@ -85,6 +85,7 @@ export class HullSection implements IHullSection {
     this.setHullValidation(false);
     this.panel.setFittingTriggerEnabled(true);
     this.panel.setConfigInputsEnabled(true);
+    this.panel.setTurretProfile(profile);
     this.panel.renderFittingPopupIfOpen();
     this.panel.sections.propulsion.renderPropulsionOptions(propulsionId ?? "");
     if (updateStats) {
@@ -118,6 +119,7 @@ export class HullSection implements IHullSection {
     if (resetInput) this.els.hull.value = "";
     this.panel.setFittingTriggerEnabled(false);
     this.panel.setConfigInputsEnabled(false);
+    this.panel.setTurretProfile(undefined);
     this.panel.closeFittingPopupIfOpen();
     this.updateHullHint();
     this.panel.sections.propulsion.renderPropulsionOptions();

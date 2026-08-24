@@ -3,7 +3,7 @@ import { fittingOptions } from "./fitting";
 import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { PROPULSION_MODULES } from "./propulsion";
 import { SHIP_PROFILES } from "./profiles";
-import type { FittedHull, PropulsionId, ShipProfile } from "./types";
+import type { FittedHull, HullTier, PropulsionId, ShipProfile } from "./types";
 
 const rifter = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
 const ab1 = fittingOptions(rifter).find((m) => m.id === "ab-1mn")!;
@@ -85,6 +85,19 @@ describe("ShipsImpl", () => {
     const speed = ships.maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false });
     expect(speed).toBeCloseTo(stats.maxSpeed, 6);
     expect(speed).toBeCloseTo(maxSpeedForFittedMass(rifter, fitted, stats.mass, mwd5, { skillLevel: 0, overloaded: false }), 6);
+  });
+
+  test("turretSizeOptions follows the fittable-class rule", () => {
+    const small = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
+    const medium = SHIP_PROFILES.find((p) => p.name === "Caracal")!;
+    const large = SHIP_PROFILES.find((p) => p.name === "Scorpion")!;
+    const capital = SHIP_PROFILES.find((p) => p.name === "Avatar")!;
+    const shuttle = SHIP_PROFILES.find((p) => p.name === "Caldari Shuttle")!;
+    expect(ships.turretSizeOptions(small)).toEqual<readonly HullTier[]>(["small", "medium"]);
+    expect(ships.turretSizeOptions(medium)).toEqual<readonly HullTier[]>(["small", "medium", "large"]);
+    expect(ships.turretSizeOptions(large)).toEqual<readonly HullTier[]>(["small", "medium", "large"]);
+    expect(ships.turretSizeOptions(capital)).toEqual<readonly HullTier[]>(["small", "medium", "large", "capital"]);
+    expect(ships.turretSizeOptions(shuttle)).toEqual<readonly HullTier[]>([]);
   });
 
   test("alignTime returns ln(4) * mass * inertiaModifier * 1e-6", () => {

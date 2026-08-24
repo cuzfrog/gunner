@@ -31,7 +31,7 @@ function buildPasteSection() {
     persistConfigChange: vi.fn(),
   });
   const importer = {
-    mostRecentFittingFor: vi.fn(),
+    autoLoadFittingTextFor: vi.fn(),
     importEftFitting: vi.fn(),
     importFromText: vi.fn(() => Promise.resolve()),
     importFromClipboard: vi.fn(() => Promise.resolve()),

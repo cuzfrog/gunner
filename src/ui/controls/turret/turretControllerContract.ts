@@ -1,4 +1,4 @@
-import type { StatConditions } from "../../../ships";
+import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting } from "../../../fitting";
 import type { SigResolutionClass, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
@@ -20,6 +20,7 @@ export interface TurretControllerDeps {
   readonly fittingImport: FittingImport;
   readonly resolver: TurretStateResolver;
   readonly turretOverrides: TurretOverrides;
+  readonly ships: Ships;
   readonly events: UiEvents;
 }
 
@@ -36,5 +37,6 @@ export interface TurretController {
   isAmmoPopupOpen(): boolean;
   openAmmoPopup(): void;
   closeAmmoPopup(): void;
+  setHullProfile(profile: ShipProfile | undefined): void;
   render(): void;
 }

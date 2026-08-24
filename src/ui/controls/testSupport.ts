@@ -202,6 +202,7 @@ class StubTurretController implements TurretController {
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();
+  setHullProfile = vi.fn();
   render = vi.fn();
 }
 
@@ -257,7 +258,7 @@ export function buildSidePanel(
 
   const panel = side === "attacker" ? cradle.cradle.attackerSide : cradle.cradle.targetSide;
   panel.setImporter({
-    mostRecentFittingFor: vi.fn(),
+    autoLoadFittingTextFor: vi.fn(),
     importEftFitting: vi.fn(),
     importFromText: vi.fn(() => Promise.resolve()),
     importFromClipboard: vi.fn(() => Promise.resolve()),

@@ -1,5 +1,6 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
 import { SIG_RESOLUTIONS } from "../../sim";
+import type { PresetFittings } from "../../fitting";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { ConfirmControllerImpl } from "./confirmController";
@@ -116,8 +117,8 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.ewarController.setHost(c.controls);
   c.attackerSide.setFittingPreview(c.previewManager);
   c.targetSide.setFittingPreview(c.previewManager);
-  c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings));
-  c.targetSide.setImporter(sideImporterFor("target", c.importController, c.savedFittings));
+  c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings, c.presetFittings));
+  c.targetSide.setImporter(sideImporterFor("target", c.importController, c.savedFittings, c.presetFittings));
   c.importController.setOnConfigPersisted(() => c.controls.persistConfigChange(true));
   c.importController.setOnFittingImported((side, imported) => {
     c.ewarController.setLoadout(side, imported.ewar);
@@ -134,11 +135,16 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   c.targetSide.sections.stats.updateAlignTime();
 }
 
-function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings) {
+function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings, presetFittings: PresetFittings) {
   return {
-    mostRecentFittingFor: (hullName: string) => savedFittings.mostRecentFor(hullName),
+    autoLoadFittingTextFor: (hullName: string) => savedFittings.mostRecentFor(hullName)?.text ?? firstPresetText(presetFittings, hullName),
     importEftFitting: (text: string, persist: boolean) => importer.importEftFitting(side, text, persist),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
   };
+}
+
+function firstPresetText(presetFittings: PresetFittings, hull: string): string | undefined {
+  const fit = presetFittings.fittingsFor(hull)[0];
+  return fit ? presetFittings.eftText(hull, fit) : undefined;
 }

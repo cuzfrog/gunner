@@ -1,12 +1,16 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
+import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
 import type { TurretEls } from "./turretEls";
-import { addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockTrackingInput } from "../testSupport";
+import {
+  addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockShips,
+  mockTrackingInput,
+} from "../testSupport";
 
 export function collectTurretEls(document: Document): TurretEls {
   const get = (id: string) => getFake(document, id) as unknown as HTMLElement;
@@ -43,6 +47,7 @@ export function buildTurret(
     imageCatalog?: Partial<ImageCatalog>;
     chargeCatalog?: Partial<ChargeCatalog>;
     fittingImport?: Partial<FittingImport>;
+    ships?: Partial<Ships>;
   } = {},
 ) {
   const document = fakeDocument();
@@ -51,6 +56,7 @@ export function buildTurret(
   const els = collectTurretEls(document);
   setTurretInputs(document);
   addSigResButtons(document);
+  addSigResOptions(document);
   const trackingInput = mockTrackingInput();
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
@@ -65,6 +71,7 @@ export function buildTurret(
     ...options.imageCatalog,
   });
   const gunFamilies = mockGunFamilies();
+  const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
   const chargeCatalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
@@ -92,6 +99,7 @@ export function buildTurret(
     fittingImport,
     resolver,
     turretOverrides,
+    ships,
     events,
   });
   return {
@@ -106,4 +114,14 @@ export function buildTurret(
     turretOverrides,
     events,
   };
+}
+
+function addSigResOptions(document: Document): void {
+  const select = getFake(document, "sigRes");
+  for (const value of ["S", "M", "L", "XL"]) {
+    const option = new FakeElement();
+    option.tagName = "OPTION";
+    option.value = value;
+    select.appendChild(option);
+  }
 }

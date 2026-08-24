@@ -1,4 +1,4 @@
-import { SIG_RESOLUTIONS } from "../../../sim";
+import { SIG_RESOLUTIONS, type SigResolutionClass } from "../../../sim";
 import type { ImportedTurret } from "../../../fitting";
 import { isSigResolutionClass } from "../../../appstate";
 import type { SigResButtons } from "./sigResButtons";
@@ -37,6 +37,12 @@ export class TurretInputSet {
     if (overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
     if (overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
     this.els.tracking.value = String(this.trackingInput.displayValue(sigResolution));
+  }
+
+  setSigRes(value: SigResolutionClass): void {
+    this.els.sigRes.value = value;
+    this.sigResButtons.set(value);
+    this.els.tracking.value = String(this.trackingInput.displayValue(SIG_RESOLUTIONS[value]));
   }
 
   currentSigResValue(): "S" | "M" | "L" | "XL" {

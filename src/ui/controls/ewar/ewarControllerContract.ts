@@ -3,9 +3,11 @@ import type { EwarLoadout, EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 
 export interface EwarEls {
+  readonly attackerEwarField: HTMLElement;
   readonly attackerEwarTrigger: HTMLButtonElement;
   readonly attackerEwarPopup: HTMLElement;
   readonly attackerEwarSummary: HTMLElement;
+  readonly targetEwarField: HTMLElement;
   readonly targetEwarTrigger: HTMLButtonElement;
   readonly targetEwarPopup: HTMLElement;
   readonly targetEwarSummary: HTMLElement;

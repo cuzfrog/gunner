@@ -200,5 +200,9 @@ export class SidePanelImpl implements SidePanel {
     this.turretLink.restore(this.fittingText, this.skillConditions());
   }
 
+  setTurretProfile(profile: ShipProfile | undefined): void {
+    this.turretLink.setHullProfile(profile);
+  }
+
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
 }

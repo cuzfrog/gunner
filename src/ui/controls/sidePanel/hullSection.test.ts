@@ -46,7 +46,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     persistConfigChange: vi.fn(),
   });
   const importer = {
-    mostRecentFittingFor: vi.fn(),
+    autoLoadFittingTextFor: vi.fn(),
     importEftFitting: vi.fn(),
     importFromText: vi.fn(() => Promise.resolve()),
     importFromClipboard: vi.fn(() => Promise.resolve()),
@@ -124,6 +124,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     clearOverrides: vi.fn(),
     clearTurret: vi.fn(),
     restoreTurret: vi.fn(),
+    setTurretProfile: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
@@ -167,18 +168,32 @@ describe("HullSection", () => {
     expect(getFake(document, "attacker-ship-image").hidden).toBe(true);
   });
 
-  test("applyHull enables the ship configuration controls", () => {
+  test("applyHull enables the ship configuration controls and forwards the hull profile to the turret", () => {
     const { panel, section } = buildHullSection();
     section.applyHull(RIFTER);
     expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(true);
+    expect(panel.setTurretProfile).toHaveBeenCalledWith(RIFTER);
   });
 
-  test("clearHull disables the ship configuration controls", () => {
+  test("applyProfile auto-loads the most recent fitting text and falls back to the first preset", () => {
+    const { panel, section, host } = buildHullSection();
+    const importer = panel.importer;
+    importer.autoLoadFittingTextFor = vi.fn((hull: string) => (hull === "Rifter" ? "[Rifter, Recent]" : undefined));
+    section.applyProfile(RIFTER, true, true);
+    expect(importer.autoLoadFittingTextFor).toHaveBeenCalledWith("Rifter");
+    expect(importer.importEftFitting).toHaveBeenCalledWith("[Rifter, Recent]", false);
+    expect(panel.lastCommittedHull).toBe("Rifter");
+    expect(host.persistConfigChange).toHaveBeenCalled();
+  });
+
+  test("clearHull disables the ship configuration controls and clears the turret profile", () => {
     const { panel, section } = buildHullSection();
     section.applyHull(RIFTER);
     panel.setConfigInputsEnabled.mockClear();
+    panel.setTurretProfile.mockClear();
     section.clearHull(true, false);
     expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(false);
+    expect(panel.setTurretProfile).toHaveBeenCalledWith(undefined);
   });
 
   test("updateHullHint renders the hull type and faction", () => {

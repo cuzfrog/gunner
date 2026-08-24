@@ -72,7 +72,7 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     persistConfigChange: vi.fn(),
   });
   const importer = {
-    mostRecentFittingFor: vi.fn(),
+    autoLoadFittingTextFor: vi.fn(),
     importEftFitting: vi.fn(),
     importFromText: vi.fn(() => Promise.resolve()),
     importFromClipboard: vi.fn(() => Promise.resolve()),

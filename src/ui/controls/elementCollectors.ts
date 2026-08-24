@@ -83,9 +83,11 @@ export function collectReadoutEls(els: Els): ReadoutEls {
 
 export function collectEwarEls(els: Els): EwarEls {
   return {
+    attackerEwarField: els.attackerEwarField,
     attackerEwarTrigger: els.attackerEwarTrigger,
     attackerEwarPopup: els.attackerEwarPopup,
     attackerEwarSummary: els.attackerEwarSummary,
+    targetEwarField: els.targetEwarField,
     targetEwarTrigger: els.targetEwarTrigger,
     targetEwarPopup: els.targetEwarPopup,
     targetEwarSummary: els.targetEwarSummary,

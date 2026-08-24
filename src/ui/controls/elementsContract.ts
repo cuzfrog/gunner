@@ -43,6 +43,7 @@ export interface Els {
   readonly attackerSkillPopup: HTMLElement;
   readonly attackerOverload: HTMLInputElement;
   readonly attackerOverloadButton: HTMLButtonElement;
+  readonly attackerEwarField: HTMLElement;
   readonly attackerEwarTrigger: HTMLButtonElement;
   readonly attackerEwarPopup: HTMLElement;
   readonly attackerEwarSummary: HTMLElement;
@@ -83,6 +84,7 @@ export interface Els {
   readonly targetSkillPopup: HTMLElement;
   readonly targetOverload: HTMLInputElement;
   readonly targetOverloadButton: HTMLButtonElement;
+  readonly targetEwarField: HTMLElement;
   readonly targetEwarTrigger: HTMLButtonElement;
   readonly targetEwarPopup: HTMLElement;
   readonly targetEwarSummary: HTMLElement;

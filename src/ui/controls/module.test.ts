@@ -1,6 +1,8 @@
 import { buildDomControls } from "./testSupport";
 import { DomControls } from "./domControls";
 import type { ControlsCradle } from "./cradle";
+import type { SavedFitting } from "../../appstate";
+import { mockPresetFittings, mockSavedFittings } from "../testing";
 
 const controlsCradleKeys = {
   hitChance: "hitChance",
@@ -52,6 +54,24 @@ describe("registerControlsModule", () => {
     for (const key of allKeys) {
       expect(cradle.cradle[key]).toBeDefined();
     }
+  });
+
+  test("wiring gives each side an importer that auto-loads recent text and falls back to the first preset", () => {
+    const recentRifter: SavedFitting = { id: "r", hull: "Rifter", name: "Recent", text: "[Rifter, Recent]", savedAt: 0 };
+    const savedFittings = {
+      ...mockSavedFittings(),
+      mostRecentFor: vi.fn((hull: string) => (hull === "Rifter" ? recentRifter : undefined)),
+    };
+    const presetFittings = {
+      ...mockPresetFittings(),
+      fittingsFor: vi.fn((hull: string) => (hull === "Thrasher" ? [{ name: "Brawny", body: "" }] : [])),
+      eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]`),
+    };
+    const { cradle } = buildDomControls({ savedFittings, presetFittings });
+    const importer = cradle.cradle.attackerSide.importer;
+    expect(importer.autoLoadFittingTextFor("Rifter")).toBe("[Rifter, Recent]");
+    expect(importer.autoLoadFittingTextFor("Thrasher")).toBe("[Thrasher, Brawny]");
+    expect(importer.autoLoadFittingTextFor("Unknown")).toBeUndefined();
   });
 
   test("does not register old Create* factory keys", () => {

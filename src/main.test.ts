@@ -42,6 +42,7 @@ class FakeElement {
   style: Record<string, string> = {};
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
   children: FakeElement[] = [];
+  get options(): FakeElement[] { return this.children; }
   private readonly handlers: Record<string, Array<() => void>> = {};
   private readonly attributes: Record<string, string | null> = {};
 

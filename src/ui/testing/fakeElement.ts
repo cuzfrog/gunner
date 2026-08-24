@@ -34,6 +34,7 @@ export class FakeElement {
   }
 
   get firstElementChild(): FakeElement | null { return this.children[0] ?? null; }
+  get options(): FakeElement[] { return this.children; }
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
   setAttribute(name: string, value: string): void { this.attributes[name] = value; }
   removeAttribute(name: string): void { delete this.attributes[name]; }
