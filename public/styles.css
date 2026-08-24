@@ -2126,10 +2126,14 @@ canvas {
   left: 0;
 }
 
+.profile-select-field {
+  position: relative;
+}
+
 .confirm-popup {
   position: absolute;
   top: calc(100% + 4px);
-  right: 8px;
+  left: 0;
   z-index: var(--z-popup);
   display: flex;
   flex-direction: column;
