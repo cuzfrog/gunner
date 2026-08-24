@@ -1,7 +1,5 @@
 import type { EngagementEvaluator, HitChance, Kinematics, Simulation } from "../sim";
-import type { Controls, Loop, Renderer } from "../ui";
-
-type EffectiveReadouts = Parameters<Controls["update"]>[2];
+import type { Controls, EffectiveReadouts, Loop, Renderer } from "../ui";
 
 export interface App {
   start(): void;
@@ -73,6 +71,7 @@ export class AppImpl implements App {
     });
     const attacker = assessment.attacker;
     const effectiveTurret = attacker ? attacker.effectiveTurret : turret;
+    const boostedTurret = attacker ? attacker.boostedTurret : turret;
     const hit = attacker ? attacker.hit : this.hitChance.compute(frame, turret, sig);
     const effectiveReadouts: EffectiveReadouts = {
       attackerSpeed: snapshot.attacker.maxSpeed,
@@ -80,6 +79,9 @@ export class AppImpl implements App {
       tracking: effectiveTurret.tracking,
       optimal: effectiveTurret.optimal,
       falloff: effectiveTurret.falloff,
+      boostedTracking: boostedTurret.tracking,
+      boostedOptimal: boostedTurret.optimal,
+      boostedFalloff: boostedTurret.falloff,
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     const overlays = this.controls.getOverlays();

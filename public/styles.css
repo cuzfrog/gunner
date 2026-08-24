@@ -1561,6 +1561,10 @@ canvas {
   padding-right: 32px;
 }
 
+.panel .input-with-unit:has(.effective-value) input {
+  padding-right: 72px;
+}
+
 .panel .input-suffix {
   position: absolute;
   right: 8px;

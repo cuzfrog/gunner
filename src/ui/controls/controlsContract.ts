@@ -15,6 +15,9 @@ export interface EffectiveReadouts {
   readonly tracking: number;
   readonly optimal: number;
   readonly falloff: number;
+  readonly boostedTracking: number;
+  readonly boostedOptimal: number;
+  readonly boostedFalloff: number;
 }
 
 export interface Controls {

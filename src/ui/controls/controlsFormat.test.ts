@@ -94,6 +94,12 @@ describe("formatting", () => {
     expect(formatDistance(1234.4, t)).toBe("1,234 m");
     expect(formatDistance(12345, t)).toBe("12.3 km");
   });
+
+  test("switches to kilometers once rounded value reaches the threshold", () => {
+    const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km" }[key] ?? key);
+    expect(formatDistance(9999.4, t)).toBe("9,999 m");
+    expect(formatDistance(9999.6, t)).toBe("10.0 km");
+  });
 });
 
 describe("profile settings", () => {

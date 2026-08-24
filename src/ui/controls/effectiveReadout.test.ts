@@ -8,7 +8,6 @@ import { _formatSpeed, _isAffected, _readNumber } from "./effectiveReadout";
 interface FakeReadout {
   textContent: string | null;
   title: string;
-  style: { color: string };
   classList: { add(className: string): void; remove(className: string): void; };
 }
 
@@ -17,12 +16,7 @@ interface FakeInput { value: string; }
 function fakeInput(value: string): FakeInput { return { value }; }
 
 function fakeReadout(): FakeReadout {
-  return {
-    textContent: null,
-    title: "",
-    style: { color: "" },
-    classList: { add: vi.fn(), remove: vi.fn() },
-  };
+  return { textContent: null, title: "", classList: { add: vi.fn(), remove: vi.fn() } };
 }
 
 function fakeEls(): EffectiveReadoutEls {
@@ -63,7 +57,7 @@ describe("EffectiveReadoutImpl", () => {
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.attackerSpeedReadout.textContent).toBe("400 m/s");
     expect(els.targetSpeedReadout.textContent).toBe("250 m/s");
     expect(els.trackingReadout.textContent).toBe("0.32 rad/s");
@@ -77,7 +71,7 @@ describe("EffectiveReadoutImpl", () => {
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ attackerSpeed: 400, targetSpeed: 125, tracking: 0.32, optimal: 6000, falloff: 3000 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 125, tracking: 0.32, optimal: 6000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.targetSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
     expect(els.targetSpeedReadout.title).toBe("Affected");
     expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("affected");
@@ -90,7 +84,7 @@ describe("EffectiveReadoutImpl", () => {
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "score");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 5000, falloff: 3000 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.trackingReadout.textContent).toBe("160 Score");
     expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("affected");
   });
@@ -100,9 +94,32 @@ describe("EffectiveReadoutImpl", () => {
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 15000, falloff: 12000 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 15000, falloff: 12000, boostedTracking: 0.32, boostedOptimal: 15000, boostedFalloff: 12000 });
     expect(els.optimalReadout.textContent).toBe("15.0 km");
     expect(els.falloffReadout.textContent).toBe("12.0 km");
+  });
+
+  test("does not mark turret values affected when only friendly boosts change the effective value", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.64, optimal: 7500, falloff: 4500, boostedTracking: 0.64, boostedOptimal: 7500, boostedFalloff: 4500 });
+    expect(els.trackingReadout.textContent).toBe("0.64 rad/s");
+    expect(els.optimalReadout.textContent).toBe("7,500 m");
+    expect(els.trackingReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.optimalReadout.classList.add).not.toHaveBeenCalled();
+  });
+
+  test("marks turret values affected when effective differs from the boosted baseline", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("affected");
+    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("affected");
+    expect(els.falloffReadout.classList.add).toHaveBeenCalledWith("affected");
   });
 });
 

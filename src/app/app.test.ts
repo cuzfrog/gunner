@@ -65,7 +65,7 @@ describe("AppImpl", () => {
   let app: AppImpl;
 
   beforeEach(() => {
-    const assessment: AttackAssessment = { effectiveTurret: turret, hit };
+    const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
     simulation.snapshot.mockReturnValue(snapshot);
     kinematics.computeEngagement.mockReturnValue(frame);
     engagementEvaluator.evaluate.mockReturnValue({ attacker: assessment });
@@ -90,19 +90,20 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
   });
 
-  test("renderFrame passes effective attribute values from the snapshot and effective turret", () => {
-    const boostedTurret = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
+  test("renderFrame passes effective attribute values and boosted baselines from snapshot and assessment", () => {
+    const effectiveTurret = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
+    const boostedTurret = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
     const boostedAttacker = { ...ship, maxSpeed: 250 };
     const boostedTarget = { ...ship, id: "target" as const, maxSpeed: 120 };
     const boostedSnapshot = { ...snapshot, attacker: boostedAttacker, target: boostedTarget };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
-    engagementEvaluator.evaluate.mockReturnValue({ attacker: { effectiveTurret: boostedTurret, hit } });
+    engagementEvaluator.evaluate.mockReturnValue({ attacker: { boostedTurret, effectiveTurret, hit } });
     app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
     app.start();
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 250, targetSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 250, targetSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000, boostedTracking: 0.45, boostedOptimal: 5800, boostedFalloff: 3800 });
   });
 
   test("falls back to hitChance and the base turret when engagement evaluator returns no attacker assessment", () => {
@@ -111,7 +112,7 @@ describe("AppImpl", () => {
     app.start();
     expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, 40);
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
   });
 
   test("tick steps the simulation and renders", () => {

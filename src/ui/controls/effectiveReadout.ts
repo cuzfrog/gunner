@@ -1,4 +1,3 @@
-import { PALETTE } from "../palette";
 import type { I18n } from "../i18n";
 import type { TrackingInput } from "./trackingInput";
 import { formatDistance, formatNumber, formatWithCommas } from "./controlsFormat";
@@ -10,7 +9,6 @@ interface ReadoutLike {
   textContent: string | null;
   classList: { add(className: string): void; remove(className: string): void; };
   title: string;
-  style: { color: string; };
 }
 
 export interface EffectiveReadoutEls {
@@ -50,11 +48,11 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     const tracking = this.trackingInput.unit === "score"
       ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
       : `${formatNumber(trackingDisplay, 4)} rad/s`;
-    this.write(this.els.trackingReadout, tracking, isTrackingAffected(values.tracking, this.trackingInput.rad), t);
+    this.write(this.els.trackingReadout, tracking, isTrackingAffected(values.tracking, values.boostedTracking), t);
     this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedAffected(values.attackerSpeed, readNumber(this.els.attackerSpeed)), t);
     this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedAffected(values.targetSpeed, readNumber(this.els.targetSpeed)), t);
-    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeAffected(values.optimal, readNumber(this.els.optimal)), t);
-    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeAffected(values.falloff, readNumber(this.els.falloff)), t);
+    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeAffected(values.optimal, values.boostedOptimal), t);
+    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeAffected(values.falloff, values.boostedFalloff), t);
   }
 
   private write(readout: ReadoutLike, text: string, affected: boolean, t: (key: string) => string): void {
@@ -62,11 +60,9 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     if (affected) {
       readout.classList.add("affected");
       readout.title = t("readout.effectiveAffected");
-      readout.style.color = PALETTE.dangerRed;
     } else {
       readout.classList.remove("affected");
       readout.title = "";
-      readout.style.color = "";
     }
   }
 }

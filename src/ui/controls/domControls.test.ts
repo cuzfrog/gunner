@@ -254,11 +254,16 @@ describe("DomControls", () => {
       radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
     };
     const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-    const effective = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000 };
+    const effective = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
     controls.update(frame, hit, effective);
     expect(getFake(document, "effective-attacker-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-target-speed").textContent).toBe("150 m/s");
+    expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
+    expect(getFake(document, "effective-optimal").textContent).toBe("1,000 unit.meter");
+    expect(getFake(document, "effective-falloff").textContent).toBe("3,000 unit.meter");
     expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("affected");
     expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("affected");
+    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("affected");
+    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("affected");
   });
 });
