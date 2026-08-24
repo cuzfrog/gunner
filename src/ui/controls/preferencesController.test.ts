@@ -116,6 +116,52 @@ describe("PreferencesController", () => {
     expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
 
+  test("setLanguage loads the language pack and emits exactly once after it resolves", async () => {
+    const { controller, itemNames, events } = build();
+    let resolve: () => void;
+    const promise = new Promise<void>((res) => {
+      resolve = res;
+    });
+    itemNames.ensureLanguage = vi.fn(() => promise);
+    controller.setLanguage("zh");
+    expect(itemNames.ensureLanguage).toHaveBeenCalledWith("zh");
+    expect(events.emitLanguageChanged).not.toHaveBeenCalled();
+    resolve!();
+    await Promise.resolve();
+    expect(events.emitLanguageChanged).toHaveBeenCalledTimes(1);
+  });
+
+  test("setLanguage emits exactly once when the language pack rejects", async () => {
+    const { controller, itemNames, events } = build();
+    let reject: (reason?: unknown) => void;
+    const promise = new Promise<void>((_, rej) => {
+      reject = rej;
+    });
+    itemNames.ensureLanguage = vi.fn(() => promise);
+    controller.setLanguage("ja");
+    expect(itemNames.ensureLanguage).toHaveBeenCalledWith("ja");
+    reject!(new Error("load failed"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(events.emitLanguageChanged).toHaveBeenCalledTimes(1);
+  });
+
+  test("setLanguage calls ensureLanguage for English", async () => {
+    const { controller, itemNames, events } = build();
+    controller.setLanguage("en");
+    expect(itemNames.ensureLanguage).toHaveBeenCalledWith("en");
+    await Promise.resolve();
+    expect(events.emitLanguageChanged).toHaveBeenCalled();
+  });
+
+  test("restore does not load the language pack for English", async () => {
+    const { controller, itemNames, events } = build();
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5 };
+    controller.restore(preferences);
+    expect(itemNames.ensureLanguage).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(events.emitLanguageChanged).not.toHaveBeenCalled();
+  });
+
   test("setTrackingUnit converts the displayed tracking value and updates toggles", () => {
     const { controller, els } = build();
     controller.trackingInput.setRadValue(0.32, 40);

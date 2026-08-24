@@ -80,10 +80,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   setLanguage(language: Language): void {
     this.applyLanguage(language);
     this.savePreferences();
-    void this.itemNames
-      .ensureLanguage(language)
-      .then(() => this.events.emitLanguageChanged())
-      .catch(() => this.events.emitLanguageChanged());
+    this.loadPackAndRefresh(language);
   }
 
   applyPreferences(preferences: DisplayPreferences): void {
@@ -180,11 +177,15 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.updateUnitToggle();
     if (preferences.language !== "en") {
-      void this.itemNames
-        .ensureLanguage(preferences.language)
-        .then(() => this.events.emitLanguageChanged())
-        .catch(() => this.events.emitLanguageChanged());
+      this.loadPackAndRefresh(preferences.language);
     }
+  }
+
+  private loadPackAndRefresh(language: Language): void {
+    void this.itemNames
+      .ensureLanguage(language)
+      .then(() => this.events.emitLanguageChanged())
+      .catch(() => this.events.emitLanguageChanged());
   }
 
   private updateUnitToggle(): void {
