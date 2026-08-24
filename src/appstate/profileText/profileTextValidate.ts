@@ -1,4 +1,4 @@
-import type { AutopilotMode, SigResolutionClass } from "../../sim";
+import { isAutopilotMode, isSigResolutionClass, type AutopilotMode, type SigResolutionClass } from "../../sim";
 import {
   USER_SETTINGS_VERSION,
   type FittedHullSummary,
@@ -6,11 +6,9 @@ import {
   type ProfileSettings,
 } from "../userSettings";
 import {
-  isAutopilotMode,
   isNonNegative,
   isOptionalFittedHullSummary,
   isPositive,
-  isSigResolutionClass,
   isSkillLevel,
 } from "../validators";
 import type { ScalarField, ScalarValue } from "./profileTextFields";

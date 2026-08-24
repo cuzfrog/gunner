@@ -1,8 +1,7 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
-import type { AutopilotMode } from "../../../sim";
+import { isAutopilotMode, type AutopilotMode } from "../../../sim";
 import {
-  isAutopilotMode,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type PropulsionSelection,

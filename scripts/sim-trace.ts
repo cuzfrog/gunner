@@ -1,5 +1,6 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import {
+  isAutopilotMode,
   ReactiveAutopilot,
   registerSimModule,
   Vec2,
@@ -187,12 +188,10 @@ function parseAttackerSteering(raw: string): "predictive" | "reactive" {
   return raw;
 }
 
-function isAutopilotMode(raw: string): raw is AutopilotMode {
-  return AUTOPILOT_MODES.some((mode) => mode === raw);
-}
-
 function parseMode(raw: string): AutopilotMode {
-  if (!isAutopilotMode(raw)) throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
+  if (!isAutopilotMode(raw) || !AUTOPILOT_MODES.includes(raw)) {
+    throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
+  }
   return raw;
 }
 

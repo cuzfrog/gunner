@@ -29,7 +29,7 @@ export type {
   WarpScramblerSpec,
   WebActivation,
 } from "./types";
-export { EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";
+export { EMPTY_EWAR_LOADOUT, isAutopilotMode, isSigResolutionClass, SIG_RESOLUTIONS } from "./types";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";
 export { registerSimModule } from "./module";

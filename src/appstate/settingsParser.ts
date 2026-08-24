@@ -1,3 +1,4 @@
+import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { Ships } from "../ships";
 import { PROPULSION_NONE, USER_SETTINGS_VERSION, type ProfileSettings, type PropulsionSelection, type UserSettings } from "./userSettings";
@@ -5,7 +6,6 @@ import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
 import {
-  isAutopilotMode,
   isLanguage,
   isNonNegative,
   isOptionalBoolean,
@@ -19,7 +19,6 @@ import {
   isOptionalSkillLevel,
   isPositive,
   isSettingsVersion,
-  isSigResolutionClass,
   stripDisplayPreferences,
 } from "./validators";
 

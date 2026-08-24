@@ -1,18 +1,10 @@
-import type { AutopilotMode, SigResolutionClass } from "../sim";
+import { isAutopilotMode, isSigResolutionClass, type AutopilotMode, type SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredEwarActivation, UserSettings } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
-}
-
-export function isSigResolutionClass(value: unknown): value is SigResolutionClass {
-  return value === "S" || value === "M" || value === "L" || value === "XL";
-}
-
-export function isAutopilotMode(value: unknown): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange" || value === "midships";
 }
 
 export function isOptionalEwarActivation(value: unknown): value is StoredEwarActivation | undefined {

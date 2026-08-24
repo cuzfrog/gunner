@@ -1,6 +1,5 @@
-import { SIG_RESOLUTIONS, type SigResolutionClass } from "../../../sim";
+import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass } from "../../../sim";
 import type { ImportedTurret } from "../../../fitting";
-import { isSigResolutionClass } from "../../../appstate";
 import type { SigResButtons } from "./sigResButtons";
 import type { TrackingInput } from "../trackingInput";
 import type { TurretEls } from "./turretEls";

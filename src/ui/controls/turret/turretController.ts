@@ -1,7 +1,6 @@
-import { SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
+import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { HullTier, ShipProfile, Ships, StatConditions } from "../../../ships";
-import { isSigResolutionClass } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { isHtmlButtonElement, num } from "../controlsDom";
