@@ -1,5 +1,5 @@
 @layer layout {
-/* Page reflow map. Breakpoints: 1100px, 900px, 480px. */
+/* Page reflow map. Breakpoints: 1100px, 900px, 480px. Wide centering at 901px. */
 @media (max-width: 1100px) {
   .app-main {
     grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
@@ -40,5 +40,24 @@
   .app-footer { grid-template-columns: 1fr; }
 
   .combatant-portrait { bottom: 152px; }
+}
+
+@media (min-width: 901px) {
+  .control-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .control-bar-playback {
+    margin-right: 0;
+    justify-self: start;
+  }
+
+  .control-bar-speed {
+    margin-left: 0;
+    justify-self: end;
+  }
 }
 }

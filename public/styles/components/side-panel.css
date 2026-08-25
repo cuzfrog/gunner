@@ -1,0 +1,39 @@
+@layer components {
+.side-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.side-panel-heading {
+  margin: 0 0 10px;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 6px;
+}
+
+.side-panel-attacker .side-panel-heading {
+  color: var(--accent-teal);
+  border-bottom-color: var(--accent-teal-40);
+}
+
+.side-panel-attacker { border-left: 2px solid var(--accent-teal); }
+
+.side-panel-target .side-panel-heading {
+  color: var(--accent-orange);
+  border-bottom-color: var(--accent-orange-40);
+}
+
+.side-panel-target { border-left: 2px solid var(--accent-orange); }
+
+.side-panel > .form-field { margin-bottom: 6px; }
+
+.side-panel-divider {
+  border: 0;
+  border-top: 1px solid var(--border-dim);
+  margin: 8px 0;
+}
+}
