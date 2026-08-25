@@ -1,5 +1,15 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type { AppliedEwarEffect, EwarEffectFamily, EwarProjection, TrackingDisruptorSpec, TurretSpec } from "./types";
+import type {
+  AppliedEwarEffect,
+  DisruptionBreakdown,
+  EwarEffectFamily,
+  EwarProjection,
+  SpeedBreakdown,
+  SpeedEffectAttribution,
+  StatEffectAttribution,
+  TrackingDisruptorSpec,
+  TurretSpec,
+} from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -9,6 +19,8 @@ export interface EwarResolver {
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean;
   appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[];
+  speedBreakdown?(projection: EwarProjection | undefined, distance: number): SpeedBreakdown;
+  disruptionBreakdown?(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown;
 }
 
 const MIN_APPLIED_EFFECTIVENESS = 0.01;
@@ -104,6 +116,51 @@ export class EwarResolverImpl implements EwarResolver {
     return effects;
   }
 
+  speedBreakdown(projection: EwarProjection | undefined, distance: number): SpeedBreakdown {
+    const webCandidates: SpeedEffectAttribution[] = [];
+    const grapplerCandidates: SpeedEffectAttribution[] = [];
+    if (projection) {
+      for (let i = 0; i < projection.loadout.webs.length; i++) {
+        const spec = projection.loadout.webs[i];
+        const activation = projection.activation?.webs[i];
+        if (activation && !activation.active) continue;
+        const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+        const range = spec.maxRange * overloadBonus;
+        if (range >= distance) webCandidates.push({ family: "web", moduleName: spec.moduleName, multiplier: 1 - spec.speedFactor });
+      }
+      for (let i = 0; i < projection.loadout.grapplers.length; i++) {
+        const spec = projection.loadout.grapplers[i];
+        const activation = projection.activation?.grapplers[i];
+        if (activation && !activation.active) continue;
+        const overloadBonus = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
+        const optimal = spec.optimal * overloadBonus;
+        const effectiveness = this.falloffEffectiveness(distance, optimal, spec.falloff);
+        if (effectiveness > 0) {
+          grapplerCandidates.push({ family: "grappler", moduleName: spec.moduleName, multiplier: 1 - spec.speedFactor * effectiveness });
+        }
+      }
+    }
+    const effects: SpeedEffectAttribution[] = [];
+    const web = this.representativeSpeedEffect(webCandidates);
+    if (web !== undefined) effects.push(web);
+    const grappler = this.representativeSpeedEffect(grapplerCandidates);
+    if (grappler !== undefined) effects.push(grappler);
+    return { effects, propulsionSuppressed: this.propulsionSuppressed(projection, distance) };
+  }
+
+  disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown {
+    return this.disruptorModifiers(projection, distance, false);
+  }
+
+  private representativeSpeedEffect(candidates: readonly SpeedEffectAttribution[]): SpeedEffectAttribution | undefined {
+    if (candidates.length === 0) return undefined;
+    let best = candidates[0];
+    for (let i = 1; i < candidates.length; i++) {
+      if (candidates[i].multiplier < best.multiplier) best = candidates[i];
+    }
+    return best;
+  }
+
   private speedMultipliers(projection: EwarProjection | undefined, distance: number, ignoreRange: boolean): number[] {
     if (!projection) return [];
     const multipliers: number[] = [];
@@ -135,10 +192,10 @@ export class EwarResolverImpl implements EwarResolver {
     projection: EwarProjection | undefined,
     distance: number,
     ignoreRange: boolean,
-  ): { tracking: number[]; optimal: number[]; falloff: number[] } {
-    const tracking: number[] = [];
-    const optimal: number[] = [];
-    const falloff: number[] = [];
+  ): DisruptionBreakdown {
+    const tracking: StatEffectAttribution[] = [];
+    const optimal: StatEffectAttribution[] = [];
+    const falloff: StatEffectAttribution[] = [];
     if (!projection) return { tracking, optimal, falloff };
 
     for (let i = 0; i < projection.loadout.disruptors.length; i++) {
@@ -149,27 +206,26 @@ export class EwarResolverImpl implements EwarResolver {
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const strength = spec.disruption * overloadBonus;
       const effectiveness = ignoreRange ? 1 : this.disruptorEffectiveness(distance, spec);
+      if (effectiveness <= 0) continue;
       const script = activation?.script ?? spec.defaultScript;
+      const scriptName = script?.name;
       const trackingEffect = strength * (script?.trackingMultiplier ?? 1);
       const optimalEffect = strength * (script?.optimalMultiplier ?? 1);
       const falloffEffect = strength * (script?.falloffMultiplier ?? 1);
 
-      if (trackingEffect > 0) tracking.push(1 - trackingEffect * effectiveness);
-      if (optimalEffect > 0) optimal.push(1 - optimalEffect * effectiveness);
-      if (falloffEffect > 0) falloff.push(1 - falloffEffect * effectiveness);
+      if (trackingEffect > 0) tracking.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - trackingEffect * effectiveness });
+      if (optimalEffect > 0) optimal.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - optimalEffect * effectiveness });
+      if (falloffEffect > 0) falloff.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - falloffEffect * effectiveness });
     }
 
     return { tracking, optimal, falloff };
   }
 
-  private applyDisruptorModifiers(
-    turret: TurretSpec,
-    modifiers: { tracking: number[]; optimal: number[]; falloff: number[] },
-  ): TurretSpec {
+  private applyDisruptorModifiers(turret: TurretSpec, modifiers: DisruptionBreakdown): TurretSpec {
     return {
-      tracking: turret.tracking * this.stacking.apply(modifiers.tracking),
-      optimal: turret.optimal * this.stacking.apply(modifiers.optimal),
-      falloff: turret.falloff * this.stacking.apply(modifiers.falloff),
+      tracking: turret.tracking * this.stacking.apply(modifiers.tracking.map((entry) => entry.multiplier)),
+      optimal: turret.optimal * this.stacking.apply(modifiers.optimal.map((entry) => entry.multiplier)),
+      falloff: turret.falloff * this.stacking.apply(modifiers.falloff.map((entry) => entry.multiplier)),
       sigResolution: turret.sigResolution,
     };
   }

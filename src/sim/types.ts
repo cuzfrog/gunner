@@ -191,6 +191,29 @@ export interface AppliedEwarEffect {
   readonly moduleName: string;
 }
 
+export interface SpeedEffectAttribution {
+  readonly family: EwarEffectFamily;
+  readonly moduleName: string;
+  readonly multiplier: number; // 0..1 factor applied to speed by this module alone
+}
+
+export interface SpeedBreakdown {
+  readonly effects: readonly SpeedEffectAttribution[];
+  readonly propulsionSuppressed: boolean;
+}
+
+export interface StatEffectAttribution {
+  readonly moduleName: string;
+  readonly scriptName: string | undefined;
+  readonly multiplier: number; // factor applied to this stat by this module alone
+}
+
+export interface DisruptionBreakdown {
+  readonly tracking: readonly StatEffectAttribution[];
+  readonly optimal: readonly StatEffectAttribution[];
+  readonly falloff: readonly StatEffectAttribution[];
+}
+
 export interface BoosterActivation {
   readonly active: boolean;
   readonly script: TurretScriptSpec | undefined;

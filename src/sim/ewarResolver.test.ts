@@ -3,8 +3,10 @@ import { EwarResolverImpl } from "./ewarResolver";
 import {
   EMPTY_EWAR_LOADOUT,
   type AppliedEwarEffect,
+  type DisruptionBreakdown,
   type DisruptionScriptSpec,
   type EwarProjection,
+  type SpeedBreakdown,
   type StasisGrapplerSpec,
   type StasisWebSpec,
   type TrackingDisruptorSpec,
@@ -50,9 +52,9 @@ function grapplerProjection(specs: readonly StasisGrapplerSpec[], overloaded = f
   return { loadout, activation };
 }
 
-function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false): EwarProjection {
+function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false, script?: DisruptionScriptSpec): EwarProjection {
   const loadout = { webs: [], grapplers: [], disruptors: specs, scramblers: [], scripts: [] };
-  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script: undefined })), scramblers: [] };
+  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script })), scramblers: [] };
   return { loadout, activation };
 }
 
@@ -505,6 +507,189 @@ describe("EwarResolverImpl", () => {
         { family: "scrambler", moduleName: "Warp Scrambler II" },
         { family: "disruptor", moduleName: "Tracking Disruptor II" },
       ]);
+    });
+  });
+
+  describe("speedBreakdown", () => {
+    const GRAPPLER: StasisGrapplerSpec = {
+      moduleName: "Heavy Stasis Grappler I",
+      optimal: 1000,
+      falloff: 8000,
+      speedFactor: 0.8,
+      overloadOptimalBonusPercent: 300,
+    };
+
+    test("no projection returns empty effects and no suppression", () => {
+      expect(resolver.speedBreakdown(undefined, 5000)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("web at and within max range and not beyond", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection = webProjection([web]);
+      expect(resolver.speedBreakdown(projection, 10000)).toEqual({
+        effects: [{ family: "web", moduleName: "Stasis Webifier II", multiplier: 0.4 }],
+        propulsionSuppressed: false,
+      });
+      expect(resolver.speedBreakdown(projection, 10001)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("inactive web is skipped", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection: EwarProjection = {
+        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
+      };
+      expect(resolver.speedBreakdown(projection, 5000)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("overloaded web extends range before boundary check", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection = webProjection([web], true);
+      expect(resolver.speedBreakdown(projection, 13000)).toEqual({
+        effects: [{ family: "web", moduleName: "Stasis Webifier II", multiplier: 0.4 }],
+        propulsionSuppressed: false,
+      });
+      expect(resolver.speedBreakdown(projection, 13001)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("two applying webs pick the strongest representative regardless of loadout order", () => {
+      const weak: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 };
+      const strong: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 15 };
+      expect(resolver.speedBreakdown(webProjection([weak, strong]), 5000).effects).toEqual([
+        { family: "web", moduleName: "Stasis Webifier II", multiplier: 0.4 },
+      ]);
+      expect(resolver.speedBreakdown(webProjection([strong, weak]), 5000).effects).toEqual([
+        { family: "web", moduleName: "Stasis Webifier II", multiplier: 0.4 },
+      ]);
+    });
+
+    test("equal-strength webs tie-break by loadout order", () => {
+      const first: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 15 };
+      const second: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 15 };
+      expect(resolver.speedBreakdown(webProjection([first, second]), 5000).effects).toEqual([
+        { family: "web", moduleName: "Stasis Webifier I", multiplier: 0.4 },
+      ]);
+    });
+
+    test("grappler multiplier follows the speedMultipliers formula and is present while falloff effectiveness is positive", () => {
+      const projection = grapplerProjection([GRAPPLER]);
+      const atOptimal = resolver.speedBreakdown(projection, 500);
+      expect(atOptimal.effects).toHaveLength(1);
+      expect(atOptimal.effects[0].family).toBe("grappler");
+      expect(atOptimal.effects[0].moduleName).toBe("Heavy Stasis Grappler I");
+      expect(atOptimal.effects[0].multiplier).toBeCloseTo(0.2, 10);
+      const atOptimalPlusFalloff = resolver.speedBreakdown(projection, 9000);
+      expect(atOptimalPlusFalloff.effects[0].multiplier).toBeCloseTo(0.6, 10);
+    });
+
+    test("grappler with zero falloff is absent beyond optimal", () => {
+      const grappler: StasisGrapplerSpec = {
+        moduleName: "Grappler",
+        optimal: 1000,
+        falloff: 0,
+        speedFactor: 0.8,
+        overloadOptimalBonusPercent: 0,
+      };
+      const projection = grapplerProjection([grappler]);
+      const atOptimal = resolver.speedBreakdown(projection, 1000);
+      expect(atOptimal.effects).toHaveLength(1);
+      expect(atOptimal.effects[0].family).toBe("grappler");
+      expect(atOptimal.effects[0].moduleName).toBe("Grappler");
+      expect(atOptimal.effects[0].multiplier).toBeCloseTo(0.2, 10);
+      expect(resolver.speedBreakdown(projection, 1001)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("inactive grappler is skipped", () => {
+      const projection: EwarProjection = {
+        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] },
+        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [] },
+      };
+      expect(resolver.speedBreakdown(projection, 500)).toEqual({ effects: [], propulsionSuppressed: false });
+    });
+
+    test("propulsionSuppressed mirrors the existing method", () => {
+      const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+      expect(resolver.speedBreakdown(scramblerProjection([scrambler]), 9000).propulsionSuppressed).toBe(true);
+      expect(resolver.speedBreakdown(scramblerProjection([scrambler], false, false), 5000).propulsionSuppressed).toBe(false);
+      expect(resolver.speedBreakdown(undefined, 5000).propulsionSuppressed).toBe(false);
+    });
+
+    test("speed effects are emitted in web, grappler order", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 50000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] };
+      const activation = {
+        webs: [{ active: true, overloaded: false }],
+        grapplers: [{ active: true, overloaded: false }],
+        disruptors: [],
+        scramblers: [],
+      };
+      const projection: EwarProjection = { loadout, activation };
+      const effects = resolver.speedBreakdown(projection, 500).effects;
+      expect(effects[0].family).toBe("web");
+      expect(effects[1].family).toBe("grappler");
+    });
+  });
+
+  describe("disruptionBreakdown", () => {
+    test("no projection returns empty arrays", () => {
+      expect(resolver.disruptionBreakdown(undefined, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
+    });
+
+    test("unscripted disruptor produces one entry per stat with undefined scriptName", () => {
+      const projection = disruptorProjection([TD]);
+      const breakdown = resolver.disruptionBreakdown(projection, 10000);
+      expect(breakdown.tracking).toHaveLength(1);
+      expect(breakdown.optimal).toHaveLength(1);
+      expect(breakdown.falloff).toHaveLength(1);
+      for (const stat of ["tracking", "optimal", "falloff"] as const) {
+        const entry = breakdown[stat][0];
+        expect(entry.moduleName).toBe("Tracking Disruptor II");
+        expect(entry.scriptName).toBeUndefined();
+        expect(entry.multiplier).toBeCloseTo(0.8281, 10);
+      }
+    });
+
+    test("default optimal script affects only optimal and falloff", () => {
+      const projection = disruptorProjection([{ ...TD, defaultScript: OPTIMAL_SCRIPT }]);
+      const breakdown = resolver.disruptionBreakdown(projection, 10000);
+      expect(breakdown.tracking).toHaveLength(0);
+      expect(breakdown.optimal).toHaveLength(1);
+      expect(breakdown.falloff).toHaveLength(1);
+      expect(breakdown.optimal[0].scriptName).toBe("Optimal Range Disruption Script");
+      expect(breakdown.optimal[0].multiplier).toBeCloseTo(0.6562, 10);
+      expect(breakdown.falloff[0].multiplier).toBeCloseTo(0.6562, 10);
+    });
+
+    test("explicit tracking script overrides default and affects only tracking", () => {
+      const projection = disruptorProjection([{ ...TD, defaultScript: OPTIMAL_SCRIPT }], false, TRACKING_SCRIPT);
+      const breakdown = resolver.disruptionBreakdown(projection, 10000);
+      expect(breakdown.tracking).toHaveLength(1);
+      expect(breakdown.optimal).toHaveLength(0);
+      expect(breakdown.falloff).toHaveLength(0);
+      expect(breakdown.tracking[0].scriptName).toBe("Tracking Speed Disruption Script");
+      expect(breakdown.tracking[0].multiplier).toBeCloseTo(0.6562, 10);
+    });
+
+    test("overload scales the disruptor multiplier", () => {
+      const projection = disruptorProjection([TD], true);
+      const breakdown = resolver.disruptionBreakdown(projection, 10000);
+      expect(breakdown.tracking[0].multiplier).toBeCloseTo(1 - 0.1719 * 1.2, 10);
+    });
+
+    test("inactive disruptor is skipped", () => {
+      const projection: EwarProjection = {
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], scripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: [] },
+      };
+      expect(resolver.disruptionBreakdown(projection, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
+    });
+
+    test("entries preserve moduleName and scriptName and are returned in loadout order", () => {
+      const first: TrackingDisruptorSpec = { ...TD, moduleName: "Tracking Disruptor I" };
+      const second: TrackingDisruptorSpec = { ...TD, moduleName: "Tracking Disruptor II" };
+      const projection = disruptorProjection([first, second]);
+      const breakdown = resolver.disruptionBreakdown(projection, 10000);
+      expect(breakdown.tracking.map((entry) => entry.moduleName)).toEqual(["Tracking Disruptor I", "Tracking Disruptor II"]);
     });
   });
 });
