@@ -62,10 +62,10 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     if (previous && previous.text === text && previous.negative === negative && previous.title === title) return;
     readout.textContent = text;
     if (negative) {
-      readout.classList.add("negative");
+      readout.classList.add("is-negative");
       readout.title = title;
     } else {
-      readout.classList.remove("negative");
+      readout.classList.remove("is-negative");
       readout.title = "";
     }
     this.lastByReadout.set(readout, { text, negative, title });

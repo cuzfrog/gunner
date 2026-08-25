@@ -182,8 +182,8 @@ describe("PreferencesController", () => {
     const { controller, els, i18n, itemNameCatalog, settingsStore, events } = build();
     controller.setLanguage("zh");
     expect(i18n.setLanguage).toHaveBeenCalledWith("zh");
-    expect(els.langZh.classList.toggle).toHaveBeenCalledWith("active", true);
-    expect(els.langEn.classList.toggle).toHaveBeenCalledWith("active", false);
+    expect(els.langZh.getAttribute("aria-pressed")).toBe("true");
+    expect(els.langEn.getAttribute("aria-pressed")).toBe("false");
     expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("zh");
     await Promise.resolve();
     expect(settingsStore.savePreferences).toHaveBeenCalled();
@@ -241,8 +241,8 @@ describe("PreferencesController", () => {
     controller.trackingInput.setRadValue(0.32, 40);
     controller.setTrackingUnit("score");
     expect(els.tracking.value).toBe("320");
-    expect(els.trackingUnitScore.classList.toggle).toHaveBeenCalledWith("active", true);
-    expect(els.trackingUnitRad.classList.toggle).toHaveBeenCalledWith("active", false);
+    expect(els.trackingUnitScore.getAttribute("aria-pressed")).toBe("true");
+    expect(els.trackingUnitRad.getAttribute("aria-pressed")).toBe("false");
   });
 
   test("setTrackingUnit saves preferences and keeps the canonical rad value", () => {

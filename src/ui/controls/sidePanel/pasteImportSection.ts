@@ -46,7 +46,7 @@ export class PasteImportSection implements IPasteImportSection {
   showImportHint(key: string, isError = false): void {
     this.clearImportHintTimeout();
     const element = this.els.fittingName;
-    element.classList.toggle("error", isError);
+    element.classList.toggle("is-error", isError);
     element.innerHTML = `<span class="hull-fitting-name-value truncate">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
     this.importHintTimeout = this.timer.setTimeout(() => {
@@ -58,7 +58,7 @@ export class PasteImportSection implements IPasteImportSection {
   clearImportHint(): void {
     this.clearImportHintTimeout();
     const element = this.els.fittingName;
-    element.classList.toggle("error", false);
+    element.classList.toggle("is-error", false);
     element.innerHTML = "";
     element.hidden = true;
   }

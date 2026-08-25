@@ -73,7 +73,7 @@ export class FittingPopupRenderer {
       const item = this.createFittingItem(fitting.name, fitting.text, currentKey, onFittingClick);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
-        item.classList.toggle("invalid", true);
+        item.classList.toggle("is-invalid", true);
         const invalidText = this.i18n.t("fitting.invalid");
         item.title = invalidText;
         item.disabled = true;

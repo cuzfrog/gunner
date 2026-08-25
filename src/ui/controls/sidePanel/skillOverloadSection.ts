@@ -46,7 +46,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   setOverloadDisabled(): void {
     const disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined;
     const active = !disabled && this.els.overload.checked;
-    this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));
     this.els.overload.disabled = disabled;
     this.els.overloadButton.disabled = disabled;
@@ -55,7 +54,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
 
   setOverloadActive(active: boolean): void {
     this.els.overload.checked = active;
-    this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));
   }
 
@@ -91,7 +89,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     const value = String(level);
     for (const button of group.children) {
       const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
     const summary = skillOptionLabel(this.i18n, level);

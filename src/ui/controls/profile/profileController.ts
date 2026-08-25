@@ -154,7 +154,7 @@ export class ProfileControllerImpl implements ProfileController {
   updateActionBarState(): void {
     const dirty = this.isDirty();
     const canSave = this.canSave(this.selectedNameValue, dirty);
-    this.els.profileSave.classList.toggle("unsaved", canSave);
+    this.els.profileSave.classList.toggle("is-unsaved", canSave);
     this.els.profileSave.disabled = !canSave;
     this.els.profileDelete.disabled = this.selectedNameValue.length === 0;
   }

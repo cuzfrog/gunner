@@ -151,7 +151,6 @@ export class PropulsionSection implements IPropulsionSection {
     select.value = propulsionId;
     for (const button of group.children) {
       const active = button.getAttribute("data-value") === propulsionId;
-      button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
   }

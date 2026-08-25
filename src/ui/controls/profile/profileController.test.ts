@@ -380,25 +380,25 @@ describe("ProfileController", () => {
 
     controller.updateActionBarState();
     expect(els.profileSave.disabled).toBe(true);
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
     expect(els.profileDelete.disabled).toBe(true);
 
     controller.markLoaded("brawler");
     vi.mocked(els.profileSave.classList.toggle).mockClear();
     controller.updateActionBarState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileDelete.disabled).toBe(false);
 
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     controller.updateActionBarState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", true);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", true);
     expect(els.profileSave.disabled).toBe(false);
 
     controller.refresh();
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
     controller.updateActionBarState();
-    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("unsaved", false);
+    expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileDelete.disabled).toBe(true);
   });

@@ -17,7 +17,6 @@ export class ChoiceGroupImpl implements ChoiceGroup {
   set(value: string): void {
     for (const button of Array.from(this.group.children)) {
       const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
   }

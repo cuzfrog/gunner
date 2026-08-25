@@ -16,7 +16,6 @@ export class SigResButtons {
     for (const button of Array.from(this.els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
       const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
   }

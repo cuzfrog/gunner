@@ -250,19 +250,14 @@ export class PreferencesControllerImpl implements PreferencesController {
   private updateUnitToggle(): void {
     const radActive = this.trackingInput.unit === "rad";
     const scoreActive = this.trackingInput.unit === "score";
-    this.els.trackingUnitRad.classList.toggle("active", radActive);
     this.els.trackingUnitRad.setAttribute("aria-pressed", String(radActive));
-    this.els.trackingUnitScore.classList.toggle("active", scoreActive);
     this.els.trackingUnitScore.setAttribute("aria-pressed", String(scoreActive));
   }
 
   private updateLanguageToggle(): void {
     const current = this.i18n.current();
-    this.els.langEn.classList.toggle("active", current === "en");
     this.els.langEn.setAttribute("aria-pressed", String(current === "en"));
-    this.els.langZh.classList.toggle("active", current === "zh");
     this.els.langZh.setAttribute("aria-pressed", String(current === "zh"));
-    this.els.langJa.classList.toggle("active", current === "ja");
     this.els.langJa.setAttribute("aria-pressed", String(current === "ja"));
   }
 

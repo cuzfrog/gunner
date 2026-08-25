@@ -412,7 +412,7 @@ export class EwarControllerImpl implements EwarController {
       '<use href="icons.svg#overload"></use></svg>'
     );
     button.disabled = !active;
-    button.classList.toggle("active", overloaded);
+
     button.addEventListener("click", onToggle);
     return button;
   }
@@ -544,7 +544,7 @@ export class EwarControllerImpl implements EwarController {
     const overloaded = !state.activation.webs[index].overloaded;
     state.activation.webs[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    button.classList.toggle("active", overloaded);
+
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);
   }
@@ -571,7 +571,7 @@ export class EwarControllerImpl implements EwarController {
     const overloaded = !state.activation.disruptors[index].overloaded;
     state.activation.disruptors[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    button.classList.toggle("active", overloaded);
+
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);
   }
@@ -598,7 +598,7 @@ export class EwarControllerImpl implements EwarController {
     const overloaded = !state.activation.scramblers[index].overloaded;
     state.activation.scramblers[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    button.classList.toggle("active", overloaded);
+
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);
   }
@@ -625,7 +625,7 @@ export class EwarControllerImpl implements EwarController {
     const overloaded = !state.activation.grapplers[index].overloaded;
     state.activation.grapplers[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
-    button.classList.toggle("active", overloaded);
+
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);
   }

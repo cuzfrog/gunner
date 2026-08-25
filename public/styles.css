@@ -295,7 +295,7 @@ body {
   white-space: nowrap;
 }
 
-.app-lang-toggle button.active {
+.app-lang-toggle [aria-pressed="true"] {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
 }
@@ -617,8 +617,8 @@ body {
   font-weight: 500;
 }
 
-.hull-label-row .hull-fitting-name.error,
-.hull-label-row .hull-fitting-name.error .hull-fitting-name-value {
+.hull-label-row .hull-fitting-name.is-error,
+.hull-label-row .hull-fitting-name.is-error .hull-fitting-name-value {
   color: var(--danger-red);
 }
 
@@ -678,7 +678,7 @@ body {
 }
 
 .fitting-item:disabled,
-.fitting-item.invalid {
+.fitting-item.is-invalid {
   color: var(--text-dim);
   cursor: default;
 }
@@ -1166,7 +1166,7 @@ canvas {
   text-transform: uppercase;
 }
 
-.tracking-unit-toggle button.active {
+.tracking-unit-toggle [aria-pressed="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
@@ -1208,13 +1208,13 @@ canvas {
   min-height: 30px;
 }
 
-.profile-bar button.unsaved {
+.profile-bar button.is-unsaved {
   border-color: var(--warn-yellow-65);
   color: var(--warn-yellow-85);
   box-shadow: 0 0 6px var(--warn-yellow-12);
 }
 
-.profile-bar button.unsaved:hover {
+.profile-bar button.is-unsaved:hover {
   border-color: var(--warn-yellow);
   color: var(--warn-yellow);
   box-shadow: 0 0 8px var(--warn-yellow-25);
@@ -1483,7 +1483,7 @@ canvas {
   white-space: nowrap;
 }
 
-.side-panel .effective-value.negative {
+.side-panel .effective-value.is-negative {
   color: var(--danger-red);
 }
 
@@ -1551,9 +1551,9 @@ canvas {
   text-align: center;
 }
 
-.sigres-selector button.active .sigres-class,
+.sigres-selector [aria-pressed="true"] .sigres-class,
 .sigres-selector button:hover:not(:disabled) .sigres-class,
-.sigres-selector button.active .sigres-value,
+.sigres-selector [aria-pressed="true"] .sigres-value,
 .sigres-selector button:hover:not(:disabled) .sigres-value {
   color: inherit;
 }
@@ -1574,17 +1574,17 @@ canvas {
   text-transform: uppercase;
 }
 
-.segmented-control button.active {
+.segmented-control [aria-pressed="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
 
-.skill-tuner button.active {
+.skill-tuner [aria-pressed="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
 
-.overload-button.active {
+.overload-button[aria-pressed="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);
@@ -1830,7 +1830,7 @@ canvas {
   cursor: not-allowed;
 }
 
-.ewar-overload-button.active:not(:disabled) {
+.ewar-overload-button[aria-pressed="true"]:not(:disabled) {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   background: var(--accent-orange-12);

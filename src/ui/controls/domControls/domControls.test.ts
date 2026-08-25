@@ -315,10 +315,10 @@ describe("DomControls", () => {
     expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
     expect(getFake(document, "effective-optimal").textContent).toBe("1,000 unit.meter");
     expect(getFake(document, "effective-falloff").textContent).toBe("3,000 unit.meter");
-    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("negative");
-    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("negative");
-    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("negative");
-    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("negative");
+    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("sessionRestored preserves playing state and resets the simulation", () => {
