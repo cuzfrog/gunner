@@ -12,8 +12,6 @@ import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
 import { normalizeLegacySettings, type LegacyUserSettings } from "./settingsCompat";
-
-type UserSettingsWire = UserSettings & Partial<LegacyUserSettings>;
 import type { SettingGuards } from "./settingGuards";
 import type { CombatantSettings, ShipBCombatantSettings, UserSettings as InternalUserSettings } from "./combatantSettings";
 import {
@@ -33,6 +31,8 @@ import {
   isSettingsVersion,
   stripDisplayPreferences,
 } from "./validators";
+
+type UserSettingsWire = UserSettings & Partial<LegacyUserSettings>;
 
 const DEFAULT_TURRET_CHARGE_SIZE = 1;
 

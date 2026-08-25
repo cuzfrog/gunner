@@ -111,6 +111,37 @@ simSpeed=4`;
     expect(parser.parse(text)).toEqual(MINIMAL_PROFILE);
   });
 
+  test("normalizes legacy override dot keys to shipA and shipB", () => {
+    const text = `# gunner v1
+version=10
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+initialDistance=5000
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+override.attacker.speed=150
+override.target.sig=80
+override.target.tracking=0.1
+simSpeed=4`;
+    const parsed = parser.parse(text);
+    expect(parsed).toEqual({
+      ...MINIMAL_PROFILE,
+      shipAOverrides: { shipASpeed: 150 },
+      shipBOverrides: { shipBSig: 80, tracking: 0.1 },
+    });
+  });
+
   test("ewar activation can appear before the side overload field", () => {
     const base = `# gunner v1
 version=10

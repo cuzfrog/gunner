@@ -263,6 +263,20 @@ describe("SettingsParser", () => {
     expect("targetSpeed" in parsed!).toBe(false);
   });
 
+  test("parseUserSettings normalizes legacy overrides to shipA and shipB", () => {
+    const legacy = {
+      ...DEFAULT_SETTINGS,
+      attackerOverrides: { attackerSpeed: 123, targetMass: 456, tracking: 0.1 },
+      targetOverrides: { targetSig: 78, sigRes: "M" },
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(legacy));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAOverrides).toEqual({ shipASpeed: 123, shipBMass: 456, tracking: 0.1 });
+    expect(parsed!.shipBOverrides).toEqual({ shipBSig: 78, sigRes: "M" });
+    expect("attackerOverrides" in parsed!).toBe(false);
+    expect("targetOverrides" in parsed!).toBe(false);
+  });
+
   test("parseUserSettings rejects an invalid disruptor script", () => {
     const bad = {
       ...DEFAULT_SETTINGS,
@@ -335,6 +349,48 @@ describe("SettingsParser", () => {
     expect(decoded!.shipBSpeed).toBe(800);
     expect(decoded!.shipBSig).toBe(125);
     expect(decoded!.shipAAmmo).toBe("Hail S");
+  });
+
+  test("decodeUrlSettings normalizes legacy overrides to shipA and shipB", () => {
+    const legacy = {
+      version: 9,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 3000,
+      falloff: 2000,
+      attackerSpeed: 500,
+      attackerMode: "orbit",
+      attackerRange: 3000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      targetSpeed: 800,
+      targetMode: "keepAtRange",
+      targetRange: 3000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSig: 125,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      initialDistance: 3000,
+      attackerAmmo: "Hail S",
+      simSpeed: 2,
+      language: "en",
+      gridBrightness: 0.5,
+      autoZoom: true,
+      zoomFactor: 1,
+      attackerOverrides: { attackerSpeed: 100, targetMass: 200 },
+      targetOverrides: { targetSig: 50, optimal: 2500 },
+    };
+    const parser = makeParser();
+    const decoded = parser.decodeUrlSettings(urlFor(legacy).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.shipAOverrides).toEqual({ shipASpeed: 100, shipBMass: 200 });
+    expect(decoded!.shipBOverrides).toEqual({ shipBSig: 50, optimal: 2500 });
+    expect("attackerOverrides" in decoded!).toBe(false);
+    expect("targetOverrides" in decoded!).toBe(false);
   });
 
   test("decodeUrlSettings rejects settings with an invalid propulsion id", () => {

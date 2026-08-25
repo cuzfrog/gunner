@@ -22,6 +22,7 @@ export interface LegacyUserSettings {
   attackerEwarActivation?: StoredEwarActivation;
   attackerBoosterActivation?: readonly StoredBoosterActivation[];
   attackerAmmo?: string;
+  attackerOverrides?: Record<string, unknown>;
   targetSpeed?: number;
   targetMode?: AutopilotMode;
   targetRange?: number;
@@ -36,9 +37,12 @@ export interface LegacyUserSettings {
   targetFittedHull?: FittedHullSummary;
   targetEwarActivation?: StoredEwarActivation;
   targetBoosterActivation?: readonly StoredBoosterActivation[];
+  targetOverrides?: Record<string, unknown>;
 }
 
 export function normalizeLegacySettings(record: Record<string, unknown>): void {
+  normalizeLegacyOverrides(record, "attackerOverrides", "shipAOverrides");
+  normalizeLegacyOverrides(record, "targetOverrides", "shipBOverrides");
   const entries = Object.entries(record);
   for (const [oldKey, value] of entries) {
     if (oldKey === "version" || oldKey === "language" || oldKey === "trackingUnit" || oldKey === "simSpeed") continue;
@@ -50,9 +54,25 @@ export function normalizeLegacySettings(record: Record<string, unknown>): void {
   }
 }
 
+function normalizeLegacyOverrides(record: Record<string, unknown>, oldKey: string, newKey: string): void {
+  const overrides = record[oldKey];
+  if (overrides === undefined) return;
+  if (!overrides || typeof overrides !== "object" || Array.isArray(overrides)) {
+    delete record[oldKey];
+    return;
+  }
+  if (!(newKey in record)) {
+    const normalized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(overrides as Record<string, unknown>)) {
+      const newInnerKey = newKeyFor(key);
+      normalized[newInnerKey ?? key] = value;
+    }
+    record[newKey] = normalized;
+  }
+  delete record[oldKey];
+}
+
 function newKeyFor(oldKey: string): string | undefined {
-  if (oldKey === `${SHIP_A_LEGACY_PREFIX}Ammo`) return `${SHIP_A_PREFIX}Ammo`;
-  if (oldKey === `${SHIP_B_LEGACY_PREFIX}Sig`) return `${SHIP_B_PREFIX}Sig`;
   if (oldKey.startsWith(SHIP_A_LEGACY_PREFIX)) {
     return `${SHIP_A_PREFIX}${oldKey.slice(SHIP_A_LEGACY_PREFIX.length)}`;
   }
