@@ -46,7 +46,7 @@
       <div class="profile-select-field">
         <button type="button" id="profile-select-trigger" class="profile-select-trigger"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="profile-popup">
-          <span id="profile-select-label">Select profile...</span>
+          <span class="profile-select-label" id="profile-select-label">Select profile...</span>
           <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
         </button>
         <div id="profile-popup" class="profile-popup" hidden role="menu"></div>
@@ -151,7 +151,7 @@
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
           <span class="tracking-label-row">
-            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="field-label tracking-label-text" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
               <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
@@ -380,7 +380,7 @@
       </section>
 
       <section class="canvas-section">
-        <div id="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays" hidden></div>
+        <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays" hidden></div>
         <div id="attacker-portrait" class="combatant-portrait attacker-portrait" hidden>
           <img class="portrait-image" alt="">
           <div class="portrait-effects"></div>
