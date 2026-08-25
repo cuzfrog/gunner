@@ -45,7 +45,7 @@ function buildSkillSection() {
     persistConfigChange: vi.fn(),
     onConfigChange: vi.fn(),
     onDisplayChange: vi.fn(),
-    updateManeuverAggressivityEnabled: vi.fn(),
+    setManeuverAggressivityEnabled: vi.fn(),
   };
   const panel = vi.mocked<SidePanel>({
     side: "attacker",

@@ -220,11 +220,25 @@ describe("SidePanel", () => {
     expect(turretOverrides.get().attackerInertia).toBe(2.5);
   });
 
-  test("attacker mode input calls host updateManeuverAggressivityEnabled and onConfigChange", () => {
+  test("attacker mode input calls host setManeuverAggressivityEnabled and onConfigChange", () => {
     const { document, host } = buildSidePanel("attacker");
+    getFake(document, "attacker-mode").value = "maneuver";
+    getFake(document, "attacker-mode").trigger("input");
+    expect(host.setManeuverAggressivityEnabled).toHaveBeenCalledWith(true);
+    expect(host.onConfigChange).toHaveBeenCalled();
+
+    host.setManeuverAggressivityEnabled.mockClear();
     getFake(document, "attacker-mode").value = "midships";
     getFake(document, "attacker-mode").trigger("input");
-    expect(host.updateManeuverAggressivityEnabled).toHaveBeenCalledWith(true);
+    expect(host.setManeuverAggressivityEnabled).toHaveBeenCalledWith(false);
+    expect(host.onConfigChange).toHaveBeenCalled();
+  });
+
+  test("target mode input does not affect aggressivity slider", () => {
+    const { document, host } = buildSidePanel("target");
+    getFake(document, "target-mode").value = "maneuver";
+    getFake(document, "target-mode").trigger("input");
+    expect(host.setManeuverAggressivityEnabled).not.toHaveBeenCalled();
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 

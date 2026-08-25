@@ -39,7 +39,7 @@ const NOOP_HOST: SidePanelHost = {
   persistConfigChange() {},
   onConfigChange() {},
   onDisplayChange() {},
-  updateManeuverAggressivityEnabled() {},
+  setManeuverAggressivityEnabled() {},
 };
 
 export class SidePanelImpl implements SidePanel {
@@ -132,7 +132,7 @@ export class SidePanelImpl implements SidePanel {
 
   private onModeInput(): void {
     if (this.side === "attacker") {
-      this.host.updateManeuverAggressivityEnabled(this.els.mode.value === "midships");
+      this.host.setManeuverAggressivityEnabled(this.els.mode.value === "maneuver");
     }
     this.host.onConfigChange();
   }

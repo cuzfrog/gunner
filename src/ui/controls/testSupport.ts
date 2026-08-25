@@ -313,7 +313,7 @@ export function buildSidePanel(
     persistConfigChange: vi.fn(),
     onConfigChange: vi.fn(),
     onDisplayChange: vi.fn(),
-    updateManeuverAggressivityEnabled: vi.fn(),
+    setManeuverAggressivityEnabled: vi.fn(),
   });
   panel.setHost(host);
   return { document, panel, turret, turretOverrides, host };

@@ -174,7 +174,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
     this.preferencesController.updateManeuverAggressivityDisplay();
-    this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
+    this.preferencesController.setManeuverAggressivityEnabled(this.els.attackerMode.value === "maneuver");
     this.attackerSide.sections.stats.updateAlignTime();
     this.targetSide.sections.stats.updateAlignTime();
     this.hintRotator.refresh();

@@ -62,7 +62,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
     persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
     onConfigChange: () => c.controls.onConfigChange(),
     onDisplayChange: () => c.controls.onDisplayChange(),
-    updateManeuverAggressivityEnabled: (enabled: boolean) => c.preferencesController.updateManeuverAggressivityEnabled(enabled),
+    setManeuverAggressivityEnabled: (enabled: boolean) => c.preferencesController.setManeuverAggressivityEnabled(enabled),
   };
   forEachSide(sides, (combatant) =>
     wireCombatantSide(combatant, {

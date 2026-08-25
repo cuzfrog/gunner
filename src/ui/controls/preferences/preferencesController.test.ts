@@ -290,11 +290,11 @@ describe("PreferencesController", () => {
     expect(els.maneuverAggressivitySlider.style).toHaveProperty("--fill", "25%");
   });
 
-  test("updateManeuverAggressivityEnabled disables the slider in midships mode", () => {
+  test("setManeuverAggressivityEnabled toggles the slider enabled state", () => {
     const { controller, els } = build();
-    controller.updateManeuverAggressivityEnabled(true);
+    controller.setManeuverAggressivityEnabled(false);
     expect(els.maneuverAggressivitySlider.disabled).toBe(true);
-    controller.updateManeuverAggressivityEnabled(false);
+    controller.setManeuverAggressivityEnabled(true);
     expect(els.maneuverAggressivitySlider.disabled).toBe(false);
   });
 

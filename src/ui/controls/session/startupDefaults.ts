@@ -14,7 +14,7 @@ export function applyStartupDefaults(context: StartupContext): void {
   context.attackerSide.sections.skill.setOverloadDisabled();
   context.targetSide.sections.skill.setOverloadDisabled();
   context.preferencesController.updateManeuverAggressivityDisplay();
-  context.preferencesController.updateManeuverAggressivityEnabled(context.attackerSide.capture().mode === "midships");
+  context.preferencesController.setManeuverAggressivityEnabled(context.attackerSide.capture().mode === "maneuver");
   context.attackerSide.sections.propulsion.renderPropulsionOptions();
   context.targetSide.sections.propulsion.renderPropulsionOptions();
   context.profileController.markLoaded("");

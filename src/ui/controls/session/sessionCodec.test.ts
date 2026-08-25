@@ -142,7 +142,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const turret = {
       capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })),
@@ -246,7 +246,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
     const turret: TurretController = {
@@ -311,7 +311,7 @@ describe("SessionCodec", () => {
       modules: [],
     } as unknown as ImportedFitting);
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
-    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), updateManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
+    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), setManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const settingsStore = {} as SettingsStore;
@@ -356,7 +356,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn() } as unknown as ProfileController;
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
@@ -411,7 +411,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn(), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
@@ -470,7 +470,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -517,7 +517,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -562,7 +562,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -611,7 +611,7 @@ describe("SessionCodec", () => {
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
       updateManeuverAggressivityDisplay: vi.fn(),
-      updateManeuverAggressivityEnabled: vi.fn(),
+      setManeuverAggressivityEnabled: vi.fn(),
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;

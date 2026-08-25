@@ -111,7 +111,7 @@ export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
   onConfigChange(): void;
   onDisplayChange(): void;
-  updateManeuverAggressivityEnabled(enabled: boolean): void;
+  setManeuverAggressivityEnabled(enabled: boolean): void;
 }
 
 export interface SidePanelDeps {

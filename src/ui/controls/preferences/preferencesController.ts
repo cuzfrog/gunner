@@ -44,7 +44,7 @@ export interface PreferencesController {
   updateGridBrightnessDisplay(value?: number): void;
   onManeuverAggressivityChange(): void;
   updateManeuverAggressivityDisplay(value?: number): void;
-  updateManeuverAggressivityEnabled(isMidships: boolean): void;
+  setManeuverAggressivityEnabled(enabled: boolean): void;
   getManeuverAggressivity(): number;
   onZoomChange(): void;
   onAutoZoomChange(): void;
@@ -192,7 +192,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${pos * 100}%`);
   }
 
-  updateManeuverAggressivityEnabled(isMidships: boolean): void { this.els.maneuverAggressivitySlider.disabled = isMidships; }
+  setManeuverAggressivityEnabled(enabled: boolean): void { this.els.maneuverAggressivitySlider.disabled = !enabled; }
 
   getManeuverAggressivity(): number { return parseManeuverAggressivity(this.els.maneuverAggressivity); }
 
