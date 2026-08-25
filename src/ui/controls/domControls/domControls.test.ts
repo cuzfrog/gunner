@@ -304,6 +304,7 @@ describe("DomControls", () => {
     cradle.cradle.uiEvents.emitSessionRestored();
     expect(getFake(document, "play").textContent).toBe("button.pause");
     expect(callbacks.onReset).toHaveBeenCalled();
+    expect(callbacks.onConfigChange).not.toHaveBeenCalled();
   });
 
   test("sessionReset pauses and resets the simulation", () => {
@@ -314,6 +315,7 @@ describe("DomControls", () => {
     cradle.cradle.uiEvents.emitSessionReset();
     expect(getFake(document, "play").textContent).toBe("button.play");
     expect(callbacks.onReset).toHaveBeenCalled();
+    expect(callbacks.onConfigChange).not.toHaveBeenCalled();
   });
 
   test("startupDefaultsApplied pauses the simulation", () => {
