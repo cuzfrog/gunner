@@ -25,6 +25,7 @@ describe("SidePanel", () => {
     getFake(document, "ship-a-inertia").value = "2.5";
     getFake(document, "ship-a-range").value = "8000";
     getFake(document, "ship-a-mode").value = "keepAtRange";
+    getFake(document, "ship-a-sig").value = "36";
     getFake(document, "ship-a-skills").value = "3";
     getFake(document, "ship-a-overload").checked = true;
     const state = panel.capture();
@@ -35,7 +36,7 @@ describe("SidePanel", () => {
     expect(state.mode).toBe("keepAtRange");
     expect(state.skillLevel).toBe(3);
     expect(state.overload).toBe(true);
-    expect(state.sig).toBeUndefined();
+    expect(state.sig).toBe(36);
   });
 
   test("capture for shipB side includes shipB signature", () => {

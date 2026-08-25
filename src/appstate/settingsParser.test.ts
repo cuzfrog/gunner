@@ -541,4 +541,31 @@ describe("SettingsParser", () => {
     const restored = parser.parseProfiles(JSON.stringify(profiles));
     expect(restored).toEqual(profiles);
   });
+
+  test("parseUserSettings defaults missing per-side aggressivity to 1", () => {
+    const missing = { ...DEFAULT_SETTINGS };
+    delete (missing as { shipAAggressivity?: number }).shipAAggressivity;
+    delete (missing as { shipBAggressivity?: number }).shipBAggressivity;
+    const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAAggressivity).toBe(1);
+    expect(parsed!.shipBAggressivity).toBe(1);
+  });
+
+  test("parseUserSettings clamps aggressivity to the configured range", () => {
+    const clamped = { ...DEFAULT_SETTINGS, shipAAggressivity: 0.001, shipBAggressivity: 500 };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(clamped));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAAggressivity).toBe(0.01);
+    expect(parsed!.shipBAggressivity).toBe(100);
+  });
+
+  test("parseUserSettings migrates legacy maneuverAggressivity to shipA aggressivity", () => {
+    const legacy = { ...DEFAULT_SETTINGS, maneuverAggressivity: 3.5 };
+    delete (legacy as { shipAAggressivity?: number }).shipAAggressivity;
+    const parsed = makeParser().parseUserSettings(JSON.stringify(legacy));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAAggressivity).toBe(3.5);
+    expect("maneuverAggressivity" in parsed!).toBe(false);
+  });
 });

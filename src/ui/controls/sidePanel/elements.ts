@@ -17,7 +17,7 @@ export interface SidePanelElements {
   readonly aggressivity: HTMLInputElement;
   readonly aggressivitySlider: HTMLInputElement;
   readonly aggressivityValue: HTMLElement;
-  readonly shipBSig?: HTMLInputElement;
+  readonly shipSig: HTMLInputElement;
   readonly skills: HTMLSelectElement;
   readonly skillOptions: HTMLElement;
   readonly skillSummary: HTMLElement;
@@ -50,6 +50,7 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
       aggressivity: els.shipAAggressivity,
       aggressivitySlider: els.shipAAggressivitySlider,
       aggressivityValue: els.shipAAggressivityValue,
+      shipSig: els.shipASig,
       skills: els.shipASkills,
       skillOptions: els.shipASkillOptions,
       skillSummary: els.shipASkillSummary,
@@ -80,7 +81,7 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     aggressivity: els.shipBAggressivity,
     aggressivitySlider: els.shipBAggressivitySlider,
     aggressivityValue: els.shipBAggressivityValue,
-    shipBSig: els.shipBSig,
+    shipSig: els.shipBSig,
     skills: els.shipBSkills,
     skillOptions: els.shipBSkillOptions,
     skillSummary: els.shipBSkillSummary,

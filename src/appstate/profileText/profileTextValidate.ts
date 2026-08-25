@@ -46,7 +46,7 @@ export function parseOverrideValue(
   if (key === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (key === "shipBSig") return isPositive(num) ? num : undefined;
+  if (key === "shipASig" || key === "shipBSig") return isPositive(num) ? num : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 

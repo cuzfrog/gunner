@@ -8,11 +8,12 @@ import {
   type PropulsionSelection,
   type UserSettings,
 } from "./userSettings";
+import { clampManeuverAggressivity } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
 import { normalizeLegacySettings, type LegacyUserSettings } from "./settingsCompat";
-import { toCombatantSettings, type CombatantSettings, type UserSettings as InternalUserSettings } from "./combatantSettings";
+import { toCombatantSettings, type CombatantSettings, type InternalUserSettings } from "./combatantSettings";
 import type { SettingGuards } from "./settingGuards";
 import {
   isLanguage,
@@ -36,8 +37,6 @@ import {
 type UserSettingsWire = UserSettings & Partial<LegacyUserSettings>;
 
 const DEFAULT_TURRET_CHARGE_SIZE = 1;
-const AGGRESSIVITY_MIN = 0.01;
-const AGGRESSIVITY_MAX = 100;
 const AGGRESSIVITY_DEFAULT = 1;
 
 export class SettingsParser {
@@ -171,7 +170,7 @@ export class SettingsParser {
       isOptionalFittedHullSummary(s[`${p}FittedHull`]) &&
       isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
       isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
-      (side === "shipA" ? isOptionalPositive(s.shipASig) : isPositive(s.shipBSig))
+      (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
     );
   }
 
@@ -193,10 +192,10 @@ export class SettingsParser {
 
   private normalizeAndDefaultAggressivity(record: Record<string, unknown>): void {
     if (record.shipAAggressivity === undefined && isFiniteNumber(record.maneuverAggressivity)) {
-      record.shipAAggressivity = clampAggressivity(record.maneuverAggressivity);
+      record.shipAAggressivity = clampManeuverAggressivity(record.maneuverAggressivity);
     }
-    record.shipAAggressivity = clampAggressivity(isFiniteNumber(record.shipAAggressivity) ? record.shipAAggressivity : AGGRESSIVITY_DEFAULT);
-    record.shipBAggressivity = clampAggressivity(isFiniteNumber(record.shipBAggressivity) ? record.shipBAggressivity : AGGRESSIVITY_DEFAULT);
+    record.shipAAggressivity = clampManeuverAggressivity(isFiniteNumber(record.shipAAggressivity) ? record.shipAAggressivity : AGGRESSIVITY_DEFAULT);
+    record.shipBAggressivity = clampManeuverAggressivity(isFiniteNumber(record.shipBAggressivity) ? record.shipBAggressivity : AGGRESSIVITY_DEFAULT);
     delete record.maneuverAggressivity;
   }
 
@@ -273,11 +272,6 @@ function isInternalUserSettings(value: UserSettingsWire | ProfileSettingsWire | 
   return "shipA" in value;
 }
 
-function clampAggressivity(value: number): number {
-  if (!isFiniteNumber(value)) return AGGRESSIVITY_DEFAULT;
-  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
-}
-
 function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
   const gridBrightness = wire.gridBrightness ?? DEFAULT_PREFERENCES.gridBrightness;
   const autoZoom = wire.autoZoom ?? true;
@@ -322,13 +316,14 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     sigRes: internal.sigRes,
     optimal: internal.optimal,
     falloff: internal.falloff,
+    initialDistance: internal.initialDistance,
+    shipAAmmo: internal.shipAAmmo,
     shipASpeed: internal.shipA.speed,
     shipAMode: internal.shipA.mode,
     shipARange: internal.shipA.range,
     shipAAggressivity: internal.shipA.aggressivity,
     shipAMass: internal.shipA.mass,
     shipAInertia: internal.shipA.inertia,
-    initialDistance: internal.initialDistance,
     shipBSpeed: internal.shipB.speed,
     shipBMode: internal.shipB.mode,
     shipBRange: internal.shipB.range,
@@ -336,7 +331,6 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     shipBMass: internal.shipB.mass,
     shipBInertia: internal.shipB.inertia,
     shipBSig: internal.shipB.sig ?? 1,
-    shipAAmmo: internal.shipAAmmo,
   };
   setOptionalShipFields(wire, internal.shipA, "shipA");
   setOptionalShipFields(wire, internal.shipB, "shipB");
@@ -354,5 +348,5 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.fittedHull !== undefined) wire[`${p}FittedHull` as const] = combatant.fittedHull;
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
-  if (combatant.sig !== undefined) wire[side === "shipA" ? "shipASig" : "shipBSig"] = combatant.sig;
+  if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
 }

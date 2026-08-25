@@ -12,7 +12,7 @@ export interface StatsSectionEls {
   readonly mass: HTMLInputElement;
   readonly inertia: HTMLInputElement;
   readonly alignTime: HTMLElement;
-  readonly shipBSig?: HTMLInputElement;
+  readonly shipSig: HTMLInputElement;
 }
 
 export class StatsSection implements IStatsSection {
@@ -37,10 +37,11 @@ export class StatsSection implements IStatsSection {
     const massKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipAMass" : "shipBMass";
     const inertiaKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipAInertia" : "shipBInertia";
     const speedKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASpeed" : "shipBSpeed";
+    const sigKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASig" : "shipBSig";
     let mass = num(this.els.mass);
 
     const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
-    if (updateMass || updateInertia || (this.panel.side === "shipB" && updateSig)) {
+    if (updateMass || updateInertia || updateSig) {
       const stats = this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, conditions, speedOverride);
       if (fitted) {
         this.panel.fittedHull = { ...fitted, baseMaxSpeed: stats.baseMaxSpeed };
@@ -52,8 +53,8 @@ export class StatsSection implements IStatsSection {
       if (updateInertia && !this.isOverridden(inertiaKey)) {
         this.els.inertia.value = formatNumber(stats.inertiaModifier, 6);
       }
-      if (this.panel.side === "shipB" && updateSig && this.els.shipBSig !== undefined && !this.isOverridden("shipBSig")) {
-        this.els.shipBSig.value = String(Math.max(1, stats.sigRadius));
+      if (updateSig && !this.isOverridden(sigKey)) {
+        this.els.shipSig.value = String(Math.max(1, stats.sigRadius));
       }
     }
 

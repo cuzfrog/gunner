@@ -86,7 +86,7 @@ export class SidePanelImpl implements SidePanel {
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
     this.els.mass.addEventListener("input", () => this.onShipInput("mass"));
     this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
-    if (this.els.shipBSig) this.els.shipBSig.addEventListener("input", () => this.onShipBSigInput());
+    this.els.shipSig.addEventListener("input", () => this.onShipSigInput());
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
@@ -129,8 +129,9 @@ export class SidePanelImpl implements SidePanel {
     this.host.onConfigChange();
   }
 
-  private onShipBSigInput(): void {
-    this.recordOverride("shipBSig", this.capture().sig ?? 1);
+  private onShipSigInput(): void {
+    const sigKey = this.side === "shipA" ? "shipASig" : "shipBSig";
+    this.recordOverride(sigKey, this.capture().sig ?? 1);
     this.host.onDisplayChange();
   }
 
@@ -142,8 +143,8 @@ export class SidePanelImpl implements SidePanel {
     els.speed.disabled = !enabled;
     els.mass.disabled = !enabled;
     els.inertia.disabled = !enabled;
+    this.els.shipSig.disabled = !enabled;
     this.sections.nav.setEnabled(enabled);
-    if (els.shipBSig !== undefined) els.shipBSig.disabled = !enabled;
     els.skills.disabled = !enabled;
     this.setButtonDisabled(els.skillTrigger, enabled);
     els.overload.disabled = !enabled;
@@ -153,7 +154,7 @@ export class SidePanelImpl implements SidePanel {
   }
 
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
-  stateFrom(combatant: CombatantSettings): SidePanelState { return stateSliceOf(combatant, this.side); }
+  stateFrom(combatant: CombatantSettings): SidePanelState { return stateSliceOf(combatant); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
@@ -173,7 +174,7 @@ export class SidePanelImpl implements SidePanel {
       fitting: this.fittingText,
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
-      sig: this.side === "shipB" && this.els.shipBSig !== undefined ? Math.max(num(this.els.shipBSig), 1) : undefined,
+      sig: Math.max(num(this.els.shipSig), 1),
     };
   }
 
@@ -189,7 +190,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadActive(state.overload ?? true);
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
-    if (this.els.shipBSig !== undefined && state.sig !== undefined) this.els.shipBSig.value = String(state.sig);
+    if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);
     this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: false });
     this.sections.stats.updateAlignTime();
   }

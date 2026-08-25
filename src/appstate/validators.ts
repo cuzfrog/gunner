@@ -113,6 +113,7 @@ const PROFILE_PARAM_OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
   "shipAMass",
   "shipAInertia",
   "shipASpeed",
+  "shipASig",
   "shipBMass",
   "shipBInertia",
   "shipBSig",
@@ -131,7 +132,7 @@ export function isOptionalProfileParamOverrides(value: unknown, guards: SettingG
     if (!PROFILE_PARAM_OVERRIDE_KEYS.includes(key as keyof ProfileParamOverrides)) return false;
     if (key === "sigRes") {
       if (!(s[key] === undefined || guards.isSigResolutionClass(s[key]))) return false;
-    } else if (key === "shipBSig") {
+    } else if (key === "shipASig" || key === "shipBSig") {
       if (!(s[key] === undefined || isPositive(s[key]))) return false;
     } else {
       if (!(s[key] === undefined || isNonNegative(s[key]))) return false;

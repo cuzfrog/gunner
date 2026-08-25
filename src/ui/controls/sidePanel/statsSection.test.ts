@@ -45,6 +45,7 @@ function buildStatsSection(ships: Ships = shipsWithStats()) {
     mass: getFake(document, "ship-a-mass") as unknown as HTMLInputElement,
     inertia: getFake(document, "ship-a-inertia") as unknown as HTMLInputElement,
     alignTime: getFake(document, "ship-a-align-time") as unknown as HTMLElement,
+    shipSig: getFake(document, "ship-a-sig") as unknown as HTMLInputElement,
   };
 
   const skillConditions: StatConditions = { skillLevel: 5, overloaded: true };

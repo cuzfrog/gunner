@@ -86,6 +86,7 @@ export class FittingBasis {
       result.shipAMass = mass;
       result.shipAInertia = override.shipAInertia ?? stats.inertiaModifier;
       result.shipASpeed = speed;
+      result.shipASig = override.shipASig ?? stats.sigRadius;
     } else {
       result.shipBHull = imported.profile.name;
       result.shipBPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;

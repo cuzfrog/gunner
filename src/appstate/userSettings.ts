@@ -35,6 +35,7 @@ export type ProfileParamOverrides = Pick<
   | "shipAMass"
   | "shipAInertia"
   | "shipASpeed"
+  | "shipASig"
   | "shipBMass"
   | "shipBInertia"
   | "shipBSig"

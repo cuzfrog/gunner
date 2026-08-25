@@ -70,7 +70,7 @@ export interface SidePanelState {
   readonly sig?: number;
 }
 
-export function stateSliceOf(combatant: CombatantSettings, side: Side): SidePanelState {
+export function stateSliceOf(combatant: CombatantSettings): SidePanelState {
   return {
     speed: combatant.speed,
     baseMaxSpeed: combatant.fittedHull?.baseMaxSpeed ?? combatant.speed,

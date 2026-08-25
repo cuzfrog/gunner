@@ -93,6 +93,7 @@ function setControlDefaults(document: Document): void {
     "ship-a-range": "5000",
     "ship-a-mode": "orbit",
     "ship-a-aggressivity": "1",
+    "ship-a-sig": "40",
     "ship-a-aggressivity-slider": "0.5",
     "ship-a-skills": "5",
     "ship-b-speed": "300",

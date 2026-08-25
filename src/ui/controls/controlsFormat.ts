@@ -1,10 +1,10 @@
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN } from "../../sim";
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
-export const AGGRESSIVITY_MIN = 0.01;
-export const AGGRESSIVITY_MAX = 100;
+export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN };
 export const DEFAULT_GRID_BRIGHTNESS = 0.5;
 export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
 

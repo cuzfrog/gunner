@@ -7,6 +7,14 @@ export function isSigResolutionClass(value: unknown): value is SigResolutionClas
   return value === "S" || value === "M" || value === "L" || value === "XL";
 }
 
+export const AGGRESSIVITY_MIN = 0.01;
+export const AGGRESSIVITY_MAX = 100;
+
+export function clampManeuverAggressivity(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
+}
+
 export type AutopilotMode = "orbit" | "keepAtRange" | "midships" | "maneuver";
 
 export function isAutopilotMode(value: unknown): value is AutopilotMode {

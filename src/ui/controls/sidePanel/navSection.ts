@@ -29,6 +29,7 @@ export class NavSection implements INavSection {
   constructor({ panel, els }: { panel: SidePanel; els: NavSectionEls }) {
     this.panel = panel;
     this.els = els;
+    this.els.aggressivitySlider.disabled = this.els.mode.value !== "maneuver";
     this.els.mode.addEventListener("input", () => this.onModeInput());
     this.els.range.addEventListener("input", () => this.panel.host.onConfigChange());
     this.els.aggressivitySlider.addEventListener("input", () => this.onSliderInput());

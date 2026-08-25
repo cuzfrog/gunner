@@ -32,7 +32,7 @@ export interface CombatantSettings {
   readonly sig?: number;
 }
 
-export interface UserSettings {
+export interface InternalUserSettings {
   readonly version: typeof USER_SETTINGS_VERSION;
   readonly language: Language;
   readonly simSpeed: number;
@@ -52,6 +52,9 @@ export interface UserSettings {
 }
 
 export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
+  const overrides = sideValue(side, settings.shipAOverrides, settings.shipBOverrides);
+  const sigKey = side === "shipA" ? "shipASig" : "shipBSig";
+  const sig = sideValue(side, settings.shipASig, settings.shipBSig) ?? (overrides?.[sigKey] as number | undefined);
   return {
     speed: sideValue(side, settings.shipASpeed, settings.shipBSpeed),
     mode: sideValue(side, settings.shipAMode, settings.shipBMode),
@@ -64,11 +67,11 @@ export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | 
     hull: sideValue(side, settings.shipAHull, settings.shipBHull),
     propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
     fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),
-    overrides: sideValue(side, settings.shipAOverrides, settings.shipBOverrides),
+    overrides,
     fittedHull: sideValue(side, settings.shipAFittedHull, settings.shipBFittedHull),
     ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
     boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
-    sig: sideValue(side, settings.shipASig, settings.shipBSig),
+    sig,
   };
 }
 

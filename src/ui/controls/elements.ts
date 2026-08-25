@@ -69,6 +69,7 @@ export function createControlsEls() {
     shipASpeed: elOf("ship-a-speed", isHtmlInputElement),
     shipAMass: elOf("ship-a-mass", isHtmlInputElement),
     shipAInertia: elOf("ship-a-inertia", isHtmlInputElement),
+    shipASig: elOf("ship-a-sig", isHtmlInputElement),
     shipAAlignTime: el("ship-a-align-time"),
     shipAMode: elOf("ship-a-mode", isHtmlSelectElement),
     shipARange: elOf("ship-a-range", isHtmlInputElement),

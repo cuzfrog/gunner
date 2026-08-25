@@ -1,5 +1,6 @@
 import { Vec2 } from "./vec2";
 import { timeConstant } from "./dynamics";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN } from "./types";
 import type { ShipState } from "./types";
 
 export interface Autopilot {
@@ -75,9 +76,6 @@ function keepAtRange(ship: ShipState, other: ShipState, d: number, toOtherHat: V
 function clampSpeed(value: number, maxSpeed: number): number {
   return Math.max(-maxSpeed, Math.min(maxSpeed, value));
 }
-
-const AGGRESSIVITY_MIN = 0.01;
-const AGGRESSIVITY_MAX = 100;
 
 function dampingGain(ship: ShipState, gain: number): number {
   const zeta = zetaFromAggressivity(ship.aggressivity);

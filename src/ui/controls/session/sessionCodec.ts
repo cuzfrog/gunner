@@ -111,6 +111,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipAAggressivity: shipA.aggressivity,
       shipAMass: shipA.mass,
       shipAInertia: shipA.inertia,
+      shipASig: shipA.sig ?? 1,
       shipASkillLevel: shipA.skillLevel,
       shipAOverload: shipA.overload,
       shipAHull: shipA.hull,

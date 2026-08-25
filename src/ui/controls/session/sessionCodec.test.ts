@@ -49,8 +49,7 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): Return
     overrides: side === "shipA" ? {} : settings.shipBOverrides ?? {},
     fittedHull,
   };
-  if (side === "shipB") return { ...base, sig: settings.shipBSig };
-  return base;
+  return { ...base, sig: side === "shipA" ? (settings.shipASig ?? 1) : settings.shipBSig };
 }
 
 function sidePanelStateWithDefaults(state: Partial<SidePanelState>): SidePanelState {
@@ -149,6 +148,7 @@ function makeProfile(): ProfileSettings {
     shipBInertia: 3,
     shipBSkillLevel: 5,
     shipBOverload: true,
+    shipASig: 40,
     shipBSig: 36,
     shipAAmmo: "Hail S",
   };
@@ -339,7 +339,7 @@ describe("SessionCodec", () => {
       modules: [],
     } as unknown as ImportedFitting);
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
-    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), setManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
+    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn() } as unknown as PreferencesController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const settingsStore = {} as SettingsStore;
