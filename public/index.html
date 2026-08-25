@@ -382,11 +382,11 @@
       <section class="canvas-frame surface-panel">
         <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays" hidden></div>
         <div id="attacker-portrait" class="combatant-portrait combatant-portrait-attacker" hidden>
-          <img class="portrait-image" alt="">
+          <img class="portrait-image portrait-image-attacker" alt="">
           <div class="portrait-effects"></div>
         </div>
         <div id="target-portrait" class="combatant-portrait combatant-portrait-target" hidden>
-          <img class="portrait-image" alt="">
+          <img class="portrait-image portrait-image-target" alt="">
           <div class="portrait-effects"></div>
         </div>
         <canvas id="scene" class="sim-canvas" width="800" height="600"></canvas>
@@ -428,7 +428,7 @@
 
         <div id="canvas-settings-popup" class="control-bar-canvas-settings-popup popup" hidden role="dialog"
              data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
-          <div class="control-bar-field control-bar-grid-brightness">
+          <div class="control-bar-field">
             <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
             <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
                    style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
