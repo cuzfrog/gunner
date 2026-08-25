@@ -21,7 +21,14 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly attackerState: SideState = { lastKey: "", lastName: "" };
   private readonly targetState: SideState = { lastKey: "", lastName: "" };
 
-  constructor(deps: { els: PortraitsEls; imageCatalog: ImageCatalog; ewarController: EwarController; ewarResolver: EwarResolver; combatantProfiles: CombatantProfiles; events: UiEvents }) {
+  constructor(deps: {
+    els: PortraitsEls;
+    imageCatalog: ImageCatalog;
+    ewarController: EwarController;
+    ewarResolver: EwarResolver;
+    combatantProfiles: CombatantProfiles;
+    events: UiEvents;
+  }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
     this.ewarController = deps.ewarController;
@@ -74,5 +81,5 @@ function sideStateFor(side: Side, attackerState: SideState, targetState: SideSta
 }
 
 function buildDiffKey(name: string, effects: readonly AppliedEwarEffect[]): string {
-  return `${name}|${effects.map((e) => e.family).join(",")}`;
+  return `${name}|${effects.map((e) => `${e.family}:${e.moduleName}`).join(",")}`;
 }

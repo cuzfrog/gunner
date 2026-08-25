@@ -144,6 +144,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.ewarController.updateSummaries();
     this.boosterController.updateSummaries();
     this.rangeOverlayController.render();
+    this.portraitsController.update();
     this.preferencesController.savePreferences();
     if (persist) this.profileController.updateActionBarState();
     this.updatePlayEnabled();
@@ -176,18 +177,21 @@ export class DomControls implements Controls, DomControlsHost {
   private onSessionRestored(): void {
     this.setPlaying(this.playing);
     this.updatePlayEnabled();
+    this.portraitsController.update();
     this.callbacks?.onReset();
   }
 
   private onSessionReset(): void {
     this.setPlaying(false);
     this.updatePlayEnabled();
+    this.portraitsController.update();
     this.callbacks?.onReset();
   }
 
   private onStartupDefaultsApplied(): void {
     this.setPlaying(false);
     this.updatePlayEnabled();
+    this.portraitsController.update();
   }
 
   persistConfigChange(notify = true): void {

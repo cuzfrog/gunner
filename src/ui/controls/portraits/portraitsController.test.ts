@@ -1,14 +1,18 @@
 import { fakeDocument, getFake } from "../../testing";
 import { UiEventsImpl } from "../../events";
-import type { EwarProjection } from "../../../sim";
+import type { EwarProjection, EwarResolver } from "../../../sim";
 import type { EwarController } from "../ewar";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsController, PortraitsEls, CombatantProfiles } from "./portraitsControllerContract";
 
-const ATTACKER_PROFILE: ShipProfile = { name: "Rifter", faction: "Minmatar", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36 };
-const TARGET_PROFILE: ShipProfile = { name: "Merlin", faction: "Caldari", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36 };
+const ATTACKER_PROFILE: ShipProfile = {
+  name: "Rifter", faction: "Minmatar", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36,
+};
+const TARGET_PROFILE: ShipProfile = {
+  name: "Merlin", faction: "Caldari", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36,
+};
 
 function createFakePortraitEls(document: Document): PortraitsEls {
   const attackerRoot = getFake(document, "attacker-portrait");
@@ -30,8 +34,8 @@ function createFakePortraitEls(document: Document): PortraitsEls {
     target: targetRoot as unknown as HTMLElement,
     attackerImage: attackerImage as unknown as HTMLImageElement,
     targetImage: targetImage as unknown as HTMLImageElement,
-    attackerEffects: attackerEffects as unknown as HTMLElement,
-    targetEffects: targetEffects as unknown as HTMLElement,
+    attackerEffects,
+    targetEffects,
   };
 }
 
@@ -50,7 +54,7 @@ function buildController() {
     render: vi.fn(),
     updateSummaries: vi.fn(),
   });
-  const ewarResolver = vi.mocked<import("../../../sim").EwarResolver>({
+  const ewarResolver = vi.mocked<EwarResolver>({
     speedMultiplier: vi.fn(() => 1),
     speedMultiplierIgnoringRange: vi.fn(() => 1),
     disruptedTurret: vi.fn((turret) => turret),
@@ -97,7 +101,16 @@ describe("PortraitsController", () => {
   test("target projection web at current distance shows icon under attacker portrait", () => {
     const { controller, els, profiles, projections, ewarResolver } = buildController();
     profiles.attacker = ATTACKER_PROFILE;
-    projections.target = { loadout: { webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }], grapplers: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] } };
+    projections.target = {
+      loadout: {
+        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
+        grapplers: [], disruptors: [], scramblers: [], scripts: [],
+      },
+      activation: {
+        webs: [{ active: true, overloaded: false }],
+        grapplers: [], disruptors: [], scramblers: [],
+      },
+    };
     ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
     controller.update();
     expect(els.attackerEffects.children.length).toBe(1);
@@ -109,7 +122,17 @@ describe("PortraitsController", () => {
   test("attacker projection scrambler at current distance shows icon under target portrait", () => {
     const { controller, els, profiles, projections, ewarResolver, imageCatalog } = buildController();
     profiles.target = TARGET_PROFILE;
-    projections.attacker = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }], scripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }] } };
+    projections.attacker = {
+      loadout: {
+        webs: [], grapplers: [], disruptors: [],
+        scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
+        scripts: [],
+      },
+      activation: {
+        webs: [], grapplers: [], disruptors: [],
+        scramblers: [{ active: true, overloaded: false }],
+      },
+    };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === "Warp Scrambler II" ? "images/icons/5678@1x.png" : undefined));
     ewarResolver.appliedEffects.mockImplementation((projection) => {
       if (projection === projections.attacker) return [{ family: "scrambler", moduleName: "Warp Scrambler II" }];
@@ -142,7 +165,10 @@ describe("PortraitsController", () => {
     const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
     profiles.attacker = ATTACKER_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === "Stasis Webifier II" ? undefined : "images/icons/2@1x.png"));
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }, { family: "scrambler", moduleName: "Warp Scrambler II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([
+      { family: "web", moduleName: "Stasis Webifier II" },
+      { family: "scrambler", moduleName: "Warp Scrambler II" },
+    ]);
     controller.update();
     expect(els.attackerEffects.children.length).toBe(1);
     expect((els.attackerEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/2@1x.png");
@@ -172,6 +198,22 @@ describe("PortraitsController", () => {
     expect(createElementSpy.mock.calls.filter(([tag]) => tag === "img").length).toBe(imageCount);
   });
 
+  test("same family with a different representative module rewrites the icon", () => {
+    const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
+    profiles.attacker = ATTACKER_PROFILE;
+    imageCatalog.itemIconUrl.mockImplementation((name) =>
+      name === "Stasis Webifier II" ? "images/icons/1234@1x.png" : "images/icons/fallback@1x.png"
+    );
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    controller.update();
+    expect(els.attackerEffects.children.length).toBe(1);
+    expect((els.attackerEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/1234@1x.png");
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Shadow Serpentis Stasis Webifier" }]);
+    controller.update();
+    expect(els.attackerEffects.children.length).toBe(1);
+    expect((els.attackerEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/fallback@1x.png");
+  });
+
   test("name unchanged but families changed rebuilds effects without rewriting image src", () => {
     const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
     profiles.attacker = ATTACKER_PROFILE;
@@ -181,7 +223,10 @@ describe("PortraitsController", () => {
     expect(els.attackerImage.src).toBe("images/ships/Rifter.webp");
     expect(els.attackerEffects.children.length).toBe(1);
     imageCatalog.shipImageUrl.mockClear();
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }, { family: "scrambler", moduleName: "Warp Scrambler II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([
+      { family: "web", moduleName: "Stasis Webifier II" },
+      { family: "scrambler", moduleName: "Warp Scrambler II" },
+    ]);
     controller.update();
     expect(imageCatalog.shipImageUrl).not.toHaveBeenCalled();
     expect(els.attackerImage.src).toBe("images/ships/Rifter.webp");

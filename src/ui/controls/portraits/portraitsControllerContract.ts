@@ -10,8 +10,8 @@ export interface PortraitsEls {
   readonly target: HTMLElement;
   readonly attackerImage: HTMLImageElement;
   readonly targetImage: HTMLImageElement;
-  readonly attackerEffects: HTMLElement;
-  readonly targetEffects: HTMLElement;
+  readonly attackerEffects: Element;
+  readonly targetEffects: Element;
 }
 
 export interface PortraitsController {
