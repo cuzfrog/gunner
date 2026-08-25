@@ -115,7 +115,7 @@ export class FittingPopupRenderer {
       button.setAttribute("aria-current", "true");
     }
     const span = document.createElement("span");
-    span.className = "fitting-item-name";
+    span.className = "fitting-item-name truncate";
     span.textContent = name;
     span.title = name;
     button.appendChild(span);
@@ -132,7 +132,7 @@ export class FittingPopupRenderer {
     if (onDelete) {
       const del = document.createElement("button");
       del.type = "button";
-      del.className = "fitting-delete";
+      del.className = "fitting-delete icon-button";
       del.setAttribute("title", this.i18n.t("button.deleteFitting"));
       del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
       del.innerHTML = DELETE_ICON_SVG;
@@ -145,7 +145,7 @@ export class FittingPopupRenderer {
   private createFittingItemEye(text: string): HTMLButtonElement {
     const eye = document.createElement("button");
     eye.type = "button";
-    eye.className = "fitting-item-eye";
+    eye.className = "fitting-item-eye icon-button";
     eye.setAttribute("aria-pressed", "false");
     eye.setAttribute("title", this.i18n.t("button.fittingDetails"));
     eye.setAttribute("aria-label", this.i18n.t("button.fittingDetails"));

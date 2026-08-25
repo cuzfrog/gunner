@@ -179,6 +179,7 @@ export class PropulsionSection implements IPropulsionSection {
   private createPropulsionButton(container: HTMLElement, module: PropulsionModule, onClick: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "btn truncate";
     button.setAttribute("data-value", module.id);
     button.setAttribute("aria-pressed", "false");
     const text = propulsionOptionLabel(module);

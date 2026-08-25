@@ -116,13 +116,13 @@ function disruptorSection(popup: FakeElement): FakeElement | undefined {
 }
 
 function overloadFor(row: FakeElement): FakeElement {
-  const button = row.children.find((child) => child.className === "ewar-overload-button");
+  const button = row.children.find((child) => child.className.split(" ").includes("ewar-overload-button"));
   if (!button) throw new Error("Missing overload button");
   return button;
 }
 
 function gearFor(row: FakeElement): FakeElement {
-  const gear = row.children.find((child) => child.className === "ewar-script-gear");
+  const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"));
   if (!gear) throw new Error("Missing script gear");
   return gear;
 }
@@ -162,7 +162,7 @@ describe("EwarController", () => {
     expect(webSummary.children[0].tagName).toBe("IMG");
     expect(webSummary.children[0].src).toBe("icons/Stasis_Webifier_II.png");
     expect(webSummary.children[0].hidden).toBe(false);
-    expect(webSummary.children[1].className).toBe("ewar-summary-count");
+    expect(webSummary.children[1].className).toBe("ewar-summary-count mono");
     expect(webSummary.children[1].textContent).toBe("1/1");
 
     const disruptorSummary = summary.children[1];
@@ -202,7 +202,7 @@ describe("EwarController", () => {
 
     const firstGear = gearFor(firstDisruptorRow);
     expect(firstGear.tagName).toBe("BUTTON");
-    expect(firstGear.className).toBe("ewar-script-gear");
+    expect(firstGear.className).toBe("ewar-script-gear btn icon-button");
     expect(firstGear.getAttribute("aria-haspopup")).toBe("menu");
     expect(firstGear.getAttribute("aria-expanded")).toBe("false");
     expect(firstGear.getAttribute("aria-controls")).toBe("attacker-ewar-script-popup");
@@ -601,8 +601,8 @@ describe("EwarController", () => {
     const popup = getFake(document, "attacker-ewar-popup");
     const webRows = webSection(popup)!.children.slice(1);
     const disruptorRows = disruptorSection(popup)!.children.slice(1);
-    for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button");
-    for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button");
+    for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
+    for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
   });
 
   test("clicking an overload button toggles its aria-pressed and capture output", () => {

@@ -109,7 +109,7 @@ export class PropulsionVariantSection {
   ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "fitting-item";
+    button.className = "fitting-item btn";
     button.setAttribute("role", "menuitem");
     if (currentName === name) button.setAttribute("aria-current", "true");
     if (iconUrl) {
@@ -120,7 +120,7 @@ export class PropulsionVariantSection {
       button.appendChild(icon);
     }
     const span = document.createElement("span");
-    span.className = "fitting-item-name";
+    span.className = "fitting-item-name truncate";
     span.textContent = displayName;
     span.title = displayName;
     button.appendChild(span);

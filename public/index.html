@@ -26,13 +26,13 @@
       <div class="header-left">
         <h1>Gunner</h1>
         <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.15.0</span>
+        <span class="version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.15.0</span>
       </div>
       <div class="header-right">
         <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
-          <button type="button" id="lang-en" data-lang="en" class="active" data-i18n="lang.en">English</button>
-          <button type="button" id="lang-zh" data-lang="zh" data-i18n="lang.zh">中文</button>
-          <button type="button" id="lang-ja" data-lang="ja" data-i18n="lang.ja">日本語</button>
+          <button type="button" id="lang-en" data-lang="en" class="btn active" data-i18n="lang.en">English</button>
+          <button type="button" id="lang-zh" data-lang="zh" class="btn" data-i18n="lang.zh">中文</button>
+          <button type="button" id="lang-ja" data-lang="ja" class="btn" data-i18n="lang.ja">日本語</button>
         </nav>
         <a class="github-link" href="https://github.com/cuzfrog/gunner" target="_blank" rel="noopener noreferrer"
            data-i18n-aria-label="label.github" data-i18n-title="label.github"
@@ -44,105 +44,105 @@
 
     <section class="profile-bar">
       <div class="profile-select-field">
-        <button type="button" id="profile-select-trigger" class="profile-select-trigger"
+        <button type="button" id="profile-select-trigger" class="btn btn-panel profile-select-trigger mono"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="profile-popup">
-          <span class="profile-select-label" id="profile-select-label">Select profile...</span>
+          <span class="profile-select-label truncate" id="profile-select-label">Select profile...</span>
           <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
         </button>
-        <div id="profile-popup" class="profile-popup" hidden role="menu"></div>
-        <div class="confirm-popup" id="confirm-popup" hidden role="dialog" aria-modal="true">
+        <div id="profile-popup" class="profile-popup popup popup-below popup-left popup-scroll" hidden role="menu"></div>
+        <div class="confirm-popup popup popup-below popup-left" id="confirm-popup" hidden role="dialog" aria-modal="true">
           <span id="confirm-message" class="confirm-message" aria-live="polite"></span>
           <div class="confirm-buttons">
-            <button type="button" id="confirm-ok" data-i18n="button.confirm">Confirm</button>
-            <button type="button" id="confirm-cancel" data-i18n="button.cancel">Cancel</button>
+            <button type="button" id="confirm-ok" class="btn" data-i18n="button.confirm">Confirm</button>
+            <button type="button" id="confirm-cancel" class="btn" data-i18n="button.cancel">Cancel</button>
           </div>
         </div>
       </div>
-      <button type="button" id="profile-save" class="icon-button"
+      <button type="button" id="profile-save" class="btn btn-panel icon-button"
               data-i18n-title="button.save" data-i18n-aria-label="button.save"
               title="Save profile" aria-label="Save">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#save"></use></svg>
       </button>
-      <button type="button" id="profile-delete" class="icon-button"
+      <button type="button" id="profile-delete" class="btn btn-panel icon-button"
               data-i18n-title="button.delete" data-i18n-aria-label="button.delete"
               title="Delete profile" aria-label="Delete">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#trash"></use></svg>
       </button>
       <div class="profile-new-field">
-        <button type="button" id="profile-new" class="icon-button"
+        <button type="button" id="profile-new" class="btn btn-panel icon-button"
                 data-i18n-title="button.newProfile" data-i18n-aria-label="button.newProfile"
                 title="New profile" aria-label="New profile">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
             <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <div class="new-profile-popup" id="new-profile-popup" hidden role="dialog" aria-modal="true">
-          <input type="text" id="new-profile-name" class="new-profile-name" placeholder="Profile name"
+        <div class="new-profile-popup popup popup-below popup-left" id="new-profile-popup" hidden role="dialog" aria-modal="true">
+          <input type="text" id="new-profile-name" class="new-profile-name mono" placeholder="Profile name"
                  data-i18n-placeholder="label.profileName" maxlength="32">
           <div class="confirm-buttons">
-            <button type="button" id="new-profile-confirm" data-i18n="button.confirm">Confirm</button>
-            <button type="button" id="new-profile-cancel" data-i18n="button.cancel">Cancel</button>
+            <button type="button" id="new-profile-confirm" class="btn" data-i18n="button.confirm">Confirm</button>
+            <button type="button" id="new-profile-cancel" class="btn" data-i18n="button.cancel">Cancel</button>
           </div>
         </div>
       </div>
       <div class="profile-share-field">
-        <button type="button" id="share-link" class="icon-button"
+        <button type="button" id="share-link" class="btn btn-panel icon-button"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="share-popup"
                 data-i18n-title="title.shareProfile" data-i18n-aria-label="button.copyProfile"
                 title="Share current profile" aria-label="Copy">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#copy"></use></svg>
         </button>
-        <div class="import-side-popup share-popup" id="share-popup" hidden role="menu"
+        <div class="import-side-popup share-popup popup popup-below popup-left" id="share-popup" hidden role="menu"
              data-i18n-aria-label="menu.share" aria-label="Copy profile as">
           <button type="button" id="share-copy-url" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
           <button type="button" id="share-copy-text" role="menuitem" data-i18n="menu.copyAsText">Copy as Text</button>
         </div>
       </div>
       <div class="profile-import-field">
-        <button type="button" id="import-profile" class="icon-button"
+        <button type="button" id="import-profile" class="btn btn-panel icon-button"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"
                 data-i18n-title="title.importProfile" data-i18n-aria-label="button.importProfile"
                 title="Import profile or fitting from clipboard" aria-label="Import">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
         </button>
-        <div class="import-side-popup" id="import-side-popup" hidden role="menu"
+        <div class="import-side-popup popup popup-below popup-right" id="import-side-popup" hidden role="menu"
              data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
           <button type="button" id="import-side-attacker" role="menuitem" data-i18n="section.attackerTurret">Attacker</button>
           <button type="button" id="import-side-target" role="menuitem" data-i18n="section.targetShip">Target</button>
         </div>
       </div>
       <span id="share-status" class="share-status" aria-live="polite"></span>
-      <span id="slide-hints" class="slide-hints" aria-live="polite">You can import a ship fitting from clipboard.</span>
+      <span id="slide-hints" class="slide-hints truncate" aria-live="polite">You can import a ship fitting from clipboard.</span>
     </section>
 
     <section class="results">
       <div class="result-card">
         <span class="label" data-i18n="result.distance">Distance</span>
-        <span class="value" id="res-distance">0 m</span>
+        <span class="value mono" id="res-distance">0 m</span>
       </div>
       <div class="result-card">
         <span class="label" data-i18n="result.transversal">Transversal</span>
-        <span class="value" id="res-transversal">0 m/s</span>
+        <span class="value mono" id="res-transversal">0 m/s</span>
       </div>
       <div class="result-card">
         <span class="label" data-i18n="result.angular">Angular</span>
-        <span class="value" id="res-angular">0 rad/s</span>
+        <span class="value mono" id="res-angular">0 rad/s</span>
       </div>
       <div class="result-card">
         <span class="label" data-i18n="result.radial">Radial</span>
-        <span class="value" id="res-radial">0 m/s</span>
+        <span class="value mono" id="res-radial">0 m/s</span>
       </div>
       <div class="result-card">
         <span class="label" data-i18n="result.trackingPenalty">Tracking penalty</span>
-        <span class="value" id="res-track-pen">0%</span>
+        <span class="value mono" id="res-track-pen">0%</span>
       </div>
       <div class="result-card">
         <span class="label" data-i18n="result.rangePenalty">Range penalty</span>
-        <span class="value" id="res-range-pen">0%</span>
+        <span class="value mono" id="res-range-pen">0%</span>
       </div>
       <div class="result-card hit-chance">
         <span class="label" data-i18n="result.hitChance">Hit chance</span>
-        <span class="value" id="res-hit">0%</span>
+        <span class="value mono" id="res-hit">0%</span>
       </div>
     </section>
 
@@ -153,17 +153,17 @@
           <span class="tracking-label-row">
             <span class="field-label tracking-label-text" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
-              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="active">rad/s</button>
-              <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
+              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="btn active">rad/s</button>
+              <button type="button" id="tracking-unit-score" data-tracking-unit="score" class="btn" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
           <span class="input-with-unit has-effective">
             <input type="number" id="tracking" value="0.32" step="any" min="0">
-            <span class="effective-value" id="effective-tracking"></span>
+            <span class="effective-value mono" id="effective-tracking"></span>
           </span>
         </label>
         <div class="field-group sigres-group">
-          <span class="field-label" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+          <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
 
           <select id="sigRes" hidden>
             <option value="S" selected>S (40 m)</option>
@@ -175,50 +175,50 @@
           <div class="segmented-control choice-selector sigres-selector"
                id="sig-res-options" role="group"
                data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
-            <button type="button" data-value="S"  class="active" aria-pressed="true"  title="S (40 m)">
-              <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value">(40 m)</span>
+            <button type="button" data-value="S"  class="btn active" aria-pressed="true"  title="S (40 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value mono">(40 m)</span>
             </button>
-            <button type="button" data-value="M"  aria-pressed="false" title="M (125 m)">
-              <img class="sigres-icon" alt="" hidden><span class="sigres-class">M</span><span class="sigres-value">(125 m)</span>
+            <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">M</span><span class="sigres-value mono">(125 m)</span>
             </button>
-            <button type="button" data-value="L"  aria-pressed="false" title="L (400 m)">
-              <img class="sigres-icon" alt="" hidden><span class="sigres-class">L</span><span class="sigres-value">(400 m)</span>
+            <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">L</span><span class="sigres-value mono">(400 m)</span>
             </button>
-            <button type="button" data-value="XL" aria-pressed="false" title="XL (2000 m)">
-              <img class="sigres-icon" alt="" hidden><span class="sigres-class">XL</span><span class="sigres-value">(2000 m)</span>
+            <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">XL</span><span class="sigres-value mono">(2000 m)</span>
             </button>
           </div>
         </div>
         <div class="field-row">
           <label>
-            <span class="field-label" data-i18n="label.optimalRange">Optimal range</span>
+            <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit has-effective">
               <input type="number" id="optimal" value="5000" step="any" min="0">
-              <span class="effective-value" id="effective-optimal"></span>
+              <span class="effective-value mono" id="effective-optimal"></span>
             </span>
           </label>
           <label>
-            <span class="field-label" data-i18n="label.falloffRange">Falloff range</span>
+            <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit has-effective">
               <input type="number" id="falloff" value="5000" step="any" min="0">
-              <span class="effective-value" id="effective-falloff"></span>
+              <span class="effective-value mono" id="effective-falloff"></span>
             </span>
           </label>
         </div>
 
         <div class="field-group ammo-group" id="attacker-ammo-field">
-          <button type="button" id="attacker-ammo-trigger" class="ammo-trigger"
+          <button type="button" id="attacker-ammo-trigger" class="ammo-trigger trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
                   data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
                   title="Select ammunition" aria-label="Select ammunition">
-            <span class="ammo-label" data-i18n="label.ammo">Ammo</span>
+            <span class="ammo-label truncate" data-i18n="label.ammo">Ammo</span>
             <span class="ammo-summary-row">
               <img id="attacker-ammo-summary-icon" class="ammo-summary-icon" alt="" hidden>
-              <span class="ammo-summary-value" id="attacker-ammo-summary"></span>
+              <span class="ammo-summary-value mono truncate" id="attacker-ammo-summary"></span>
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
           </button>
-          <div class="ammo-popup" id="attacker-ammo-popup" hidden>
+          <div class="ammo-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-ammo-popup" hidden>
             <span class="fitting-group-label" id="attacker-ammo-cargo-label" data-i18n="ammo.cargoGroup">In cargo</span>
             <ul class="ammo-list" id="attacker-ammo-cargo-list" role="listbox"></ul>
             <button type="button" class="ammo-expand" id="attacker-ammo-expand" data-i18n="ammo.showAll">Show all</button>
@@ -233,19 +233,19 @@
 
         <div class="hull-field">
           <div class="hull-label-row">
-            <span class="field-label" data-i18n="label.hull">Ship</span>
-            <button type="button" id="attacker-import-fitting" class="import-fitting-button"
+            <span class="field-label truncate" data-i18n="label.hull">Ship</span>
+            <button type="button" id="attacker-import-fitting" class="icon-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-            <button type="button" id="attacker-fitting-eye" class="fitting-eye"
+            <button type="button" id="attacker-fitting-eye" class="fitting-eye icon-button"
                     aria-pressed="false" disabled
                     data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
                     title="Show fitting details" aria-label="Show fitting details">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
             </button>
             <span class="fitting-name" id="attacker-fitting-name" hidden></span>
-            <div class="paste-popup" id="attacker-paste-popup" hidden>
+            <div class="paste-popup popup popup-below popup-left" id="attacker-paste-popup" hidden>
               <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
@@ -255,13 +255,13 @@
             <input type="text" id="attacker-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-            <button type="button" id="attacker-fitting-trigger" class="fitting-trigger"
+            <button type="button" id="attacker-fitting-trigger" class="icon-button"
                     aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-fitting-popup"
                     data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
                     title="Select fitting" aria-label="Select fitting" disabled>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
             </button>
-            <div class="fitting-popup" id="attacker-fitting-popup" hidden role="menu"
+            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-fitting-popup" hidden role="menu"
                  data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
               <span class="fitting-group-label" id="attacker-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="attacker-fitting-saved-list"></ul>
@@ -269,72 +269,72 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="attacker-fitting-preset-list"></ul>
               <p class="fitting-empty" id="attacker-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
-            <div class="fitting-preview" id="attacker-fitting-preview" hidden aria-hidden="true"></div>
+            <div class="fitting-preview popup popup-scroll" id="attacker-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </div>
 
         <div class="field-group ewar-group" id="attacker-ewar-field">
-          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger"
+          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
                   aria-describedby="attacker-ewar-summary" disabled>
-            <span class="ewar-label" data-i18n="label.modules">Modules</span>
+            <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
             <span class="ewar-summary-row" id="attacker-ewar-summary"></span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-group booster-group" id="attacker-booster-field">
           <button type="button" id="attacker-booster-trigger" class="ewar-trigger booster-trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-booster-popup"
                   aria-describedby="attacker-booster-summary" disabled>
-            <span class="booster-label" data-i18n="label.booster.computer">Tracking Computers</span>
+            <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
             <span class="ewar-summary-row" id="attacker-booster-summary"></span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup" id="attacker-booster-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-booster-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-group propulsion-group">
-          <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
+          <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
             <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
-            <button type="button" id="attacker-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-propulsion-variants" disabled>
+            <button type="button" id="attacker-propulsion-gear" class="propulsion-gear btn icon-button" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-propulsion-variants" disabled>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
             </button>
-            <div class="fitting-popup propulsion-variants-popup" id="attacker-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+            <div class="fitting-popup propulsion-variants-popup popup popup-below popup-right" id="attacker-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
           </div>
-          <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
+          <button type="button" id="attacker-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit has-effective">
             <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
-            <span class="effective-value" id="effective-attacker-speed"></span>
+            <span class="effective-value mono" id="effective-attacker-speed"></span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
 
         <div class="field-row">
           <label>
-            <span class="field-label" data-i18n="label.mass">Mass</span>
+            <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
-              <span class="input-suffix" aria-hidden="true">kg</span>
+              <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-inertia" value="3" step="any" min="0">
-              <span class="input-suffix" id="attacker-align-time" aria-hidden="true">5.0s</span>
+              <span class="input-suffix mono" id="attacker-align-time" aria-hidden="true">5.0s</span>
             </span>
           </label>
         </div>
         <div class="field-row">
           <div class="field-group mode-group">
-            <span class="field-label" data-i18n="label.mode">Mode</span>
+            <span class="field-label truncate" data-i18n="label.mode">Mode</span>
             <select id="attacker-mode" class="mode-select"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
@@ -343,37 +343,37 @@
             </select>
           </div>
           <label>
-            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="attacker-range" value="5000" step="any" min="0">
-              <span class="input-suffix" aria-hidden="true">m</span>
+              <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
         <div class="slider-field maneuver-field">
           <span class="slider-label-row">
-            <span class="field-label" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
+            <span class="field-label truncate" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
             <button type="button" class="info-hint"
                     data-i18n-title="hint.maneuverAggressivity"
                     data-i18n-aria-label="hint.maneuverAggressivity"
                     title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
                     aria-label="About maneuver aggressivity">?</button>
-            <output class="slider-value" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
+            <output class="slider-value mono" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
           </span>
           <input type="hidden" id="maneuver-aggressivity" value="1">
           <input type="range" id="maneuver-aggressivity-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
         </div>
         <div class="field-group skill-section skill-select" id="attacker-skill-field">
-          <button type="button" class="skill-trigger" id="attacker-skill-trigger"
+          <button type="button" class="skill-trigger trigger" id="attacker-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-skill-popup">
-            <span class="skill-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
-              <span class="skill-summary-value" id="attacker-skill-summary">Level 5</span>
+              <span class="skill-summary-value mono truncate" id="attacker-skill-summary">Level 5</span>
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
           </button>
           <select id="attacker-skills" hidden></select>
-          <div class="skill-popup" id="attacker-skill-popup" hidden>
+          <div class="skill-popup popup popup-above popup-left popup-right" id="attacker-skill-popup" hidden>
             <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
           </div>
         </div>
@@ -393,8 +393,8 @@
 
         <div class="controls">
           <div class="playback-controls">
-            <button id="play" class="primary">Start</button>
-            <button id="reset" data-i18n="button.reset">Reset</button>
+            <button id="play" class="btn btn-primary-text">Start</button>
+            <button id="reset" class="btn" data-i18n="button.reset">Reset</button>
             <button type="button" id="canvas-settings-trigger" class="icon-button"
                     aria-haspopup="true" aria-expanded="false" aria-controls="canvas-settings-popup"
                     data-i18n-title="label.canvasSettings" data-i18n-aria-label="label.canvasSettings">
@@ -406,7 +406,7 @@
             <label for="zoom-slider" data-i18n="label.zoom">Zoom</label>
             <input type="range" id="zoom-slider" min="0.25" max="4" step="0.05" value="1"
                    style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
-            <output class="slider-value" id="zoom-value" for="zoom-slider">1.00x</output>
+            <output class="slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
             <label class="auto-zoom-option">
               <input type="checkbox" id="auto-zoom" checked>
               <span data-i18n="label.autoZoom">Auto-zoom</span>
@@ -426,13 +426,13 @@
           </div>
         </div>
 
-        <div id="canvas-settings-popup" class="canvas-settings-popup" hidden role="dialog"
+        <div id="canvas-settings-popup" class="canvas-settings-popup popup" hidden role="dialog"
              data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
           <div class="control-field grid-brightness-control">
             <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
             <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
                    style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
-            <output class="slider-value" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
+            <output class="slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
           </div>
         </div>
       </section>
@@ -441,19 +441,19 @@
         <h2 data-i18n="section.targetShip">Target</h2>
         <div class="hull-field">
           <div class="hull-label-row">
-            <span class="field-label" data-i18n="label.hull">Ship</span>
-            <button type="button" id="target-import-fitting" class="import-fitting-button"
+            <span class="field-label truncate" data-i18n="label.hull">Ship</span>
+            <button type="button" id="target-import-fitting" class="icon-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
             </button>
-            <button type="button" id="target-fitting-eye" class="fitting-eye"
+            <button type="button" id="target-fitting-eye" class="fitting-eye icon-button"
                     aria-pressed="false" disabled
                     data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
                     title="Show fitting details" aria-label="Show fitting details">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
             </button>
             <span class="fitting-name" id="target-fitting-name" hidden></span>
-            <div class="paste-popup" id="target-paste-popup" hidden>
+            <div class="paste-popup popup popup-below popup-left" id="target-paste-popup" hidden>
               <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
@@ -463,13 +463,13 @@
             <input type="text" id="target-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-            <button type="button" id="target-fitting-trigger" class="fitting-trigger"
+            <button type="button" id="target-fitting-trigger" class="icon-button"
                     aria-haspopup="menu" aria-expanded="false" aria-controls="target-fitting-popup"
                     data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
                     title="Select fitting" aria-label="Select fitting" disabled>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
             </button>
-            <div class="fitting-popup" id="target-fitting-popup" hidden role="menu"
+            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="target-fitting-popup" hidden role="menu"
                  data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
               <span class="fitting-group-label" id="target-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="target-fitting-saved-list"></ul>
@@ -477,38 +477,38 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="target-fitting-preset-list"></ul>
               <p class="fitting-empty" id="target-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
             </div>
-            <div class="fitting-preview" id="target-fitting-preview" hidden aria-hidden="true"></div>
+            <div class="fitting-preview popup popup-scroll" id="target-fitting-preview" hidden aria-hidden="true"></div>
           </div>
           <span class="hull-hint" id="target-hull-hint"></span>
         </div>
 
         <div class="field-group ewar-group" id="target-ewar-field">
-          <button type="button" id="target-ewar-trigger" class="ewar-trigger"
+          <button type="button" id="target-ewar-trigger" class="ewar-trigger trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
                   aria-describedby="target-ewar-summary" disabled>
-            <span class="ewar-label" data-i18n="label.modules">Modules</span>
+            <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
             <span class="ewar-summary-row" id="target-ewar-summary"></span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-group booster-group" id="target-booster-field">
           <button type="button" id="target-booster-trigger" class="ewar-trigger booster-trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-booster-popup"
                   aria-describedby="target-booster-summary" disabled>
-            <span class="booster-label" data-i18n="label.booster.computer">Tracking Computers</span>
+            <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
             <span class="ewar-summary-row" id="target-booster-summary"></span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup" id="target-booster-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-booster-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
         <div class="field-row">
           <div class="field-group">
             <span class="field-label-row">
               <label for="initial-distance">
-                <span class="field-label" data-i18n="label.initialDistance">Initial distance</span>
+                <span class="field-label truncate" data-i18n="label.initialDistance">Initial distance</span>
               </label>
               <button type="button" class="info-hint"
                       data-i18n-title="hint.initialDistance"
@@ -518,56 +518,56 @@
             </span>
             <span class="input-with-unit">
               <input type="number" id="initial-distance" value="20000" step="any" min="1">
-              <span class="input-suffix" aria-hidden="true">m</span>
+              <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </div>
           <label>
-            <span class="field-label" data-i18n="label.signatureRadius">Signature radius</span>
+            <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
               <input type="number" id="target-sig" value="40" step="any" min="1">
-              <span class="input-suffix" aria-hidden="true">m</span>
+              <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
         <div class="field-group propulsion-group">
-          <span class="field-label" data-i18n="label.maxSpeed">Max speed</span>
+          <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
           <select id="target-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
             <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
-            <button type="button" id="target-propulsion-gear" class="propulsion-gear" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="target-propulsion-variants" disabled>
+            <button type="button" id="target-propulsion-gear" class="propulsion-gear btn icon-button" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="target-propulsion-variants" disabled>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
             </button>
-            <div class="fitting-popup propulsion-variants-popup" id="target-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
+            <div class="fitting-popup propulsion-variants-popup popup popup-below popup-right" id="target-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
           </div>
-          <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
+          <button type="button" id="target-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit has-effective">
             <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
-            <span class="effective-value" id="effective-target-speed"></span>
+            <span class="effective-value mono" id="effective-target-speed"></span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
         </div>
 
         <div class="field-row">
           <label>
-            <span class="field-label" data-i18n="label.mass">Mass</span>
+            <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" id="target-mass" value="10000000" step="any" min="0">
-              <span class="input-suffix" aria-hidden="true">kg</span>
+              <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
-            <span class="field-label" data-i18n="label.inertiaModifier">Inertia modifier</span>
+            <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" id="target-inertia" value="0.45" step="any" min="0">
-              <span class="input-suffix" id="target-align-time" aria-hidden="true">6.2s</span>
+              <span class="input-suffix mono" id="target-align-time" aria-hidden="true">6.2s</span>
             </span>
           </label>
         </div>
         <div class="field-row">
           <div class="field-group mode-group">
-            <span class="field-label" data-i18n="label.mode">Mode</span>
+            <span class="field-label truncate" data-i18n="label.mode">Mode</span>
             <select id="target-mode" class="mode-select"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
@@ -576,24 +576,24 @@
             </select>
           </div>
           <label>
-            <span class="field-label" data-i18n="label.desiredRange">Desired range</span>
+            <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" id="target-range" value="5000" step="any" min="0">
-              <span class="input-suffix" aria-hidden="true">m</span>
+              <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
         <div class="field-group skill-section skill-select" id="target-skill-field">
-          <button type="button" class="skill-trigger" id="target-skill-trigger"
+          <button type="button" class="skill-trigger trigger" id="target-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="target-skill-popup">
-            <span class="skill-label" data-i18n="label.skillLevel">Pilot skills</span>
+            <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
-              <span class="skill-summary-value" id="target-skill-summary">Level 5</span>
+              <span class="skill-summary-value mono truncate" id="target-skill-summary">Level 5</span>
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
           </button>
           <select id="target-skills" hidden></select>
-          <div class="skill-popup" id="target-skill-popup" hidden>
+          <div class="skill-popup popup popup-above popup-left popup-right" id="target-skill-popup" hidden>
             <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
           </div>
         </div>

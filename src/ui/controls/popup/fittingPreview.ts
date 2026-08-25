@@ -68,12 +68,12 @@ function renderHeader(
   titles.className = "preview-titles";
 
   const hull = document.createElement("span");
-  hull.className = "preview-hull";
+  hull.className = "preview-hull truncate";
   hull.textContent = summary.hullName;
   titles.appendChild(hull);
 
   const fitting = document.createElement("span");
-  fitting.className = "preview-fitting";
+  fitting.className = "preview-fitting truncate";
   fitting.textContent = summary.fittingName;
   titles.appendChild(fitting);
 
@@ -81,7 +81,7 @@ function renderHeader(
 
   const close = document.createElement("button");
   close.type = "button";
-  close.className = "preview-close";
+  close.className = "preview-close icon-button";
   close.setAttribute("title", i18n.t("button.close"));
   close.setAttribute("aria-label", i18n.t("button.close"));
   close.innerHTML = CLOSE_ICON_SVG;
@@ -134,7 +134,7 @@ function renderRow(
   main.className = "preview-row-main";
 
   const name = document.createElement("span");
-  name.className = "preview-name";
+  name.className = "preview-name truncate";
   name.textContent = fittingImport.itemName(row.name, i18n.current());
   name.title = row.empty ? row.name : fittingImport.itemName(row.name, i18n.current());
   main.appendChild(name);
@@ -157,7 +157,7 @@ function renderRow(
 
   if (row.quantity !== undefined) {
     const quantity = document.createElement("span");
-    quantity.className = "preview-quantity";
+    quantity.className = "preview-quantity mono";
     quantity.textContent = `x${row.quantity}`;
     rowEl.appendChild(quantity);
   }

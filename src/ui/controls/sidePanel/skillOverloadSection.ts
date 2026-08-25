@@ -150,6 +150,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private createSkillButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "btn";
     button.setAttribute("data-value", value);
     button.setAttribute("aria-pressed", "false");
     button.textContent = text;

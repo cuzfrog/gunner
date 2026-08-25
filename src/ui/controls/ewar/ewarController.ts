@@ -128,7 +128,7 @@ export class EwarControllerImpl implements EwarController {
     const field = side === "attacker" ? this.els.attackerEwarField : this.els.targetEwarField;
     const popup = document.createElement("div");
     popup.id = `${side}-ewar-script-popup`;
-    popup.className = "ewar-script-popup";
+    popup.className = "ewar-script-popup popup";
     popup.setAttribute("role", "menu");
     popup.hidden = true;
     field.appendChild(popup);
@@ -236,7 +236,7 @@ export class EwarControllerImpl implements EwarController {
     img.hidden = iconUrl === undefined;
     item.appendChild(img);
     const count = document.createElement("span");
-    count.className = "ewar-summary-count";
+    count.className = "ewar-summary-count mono";
     count.textContent = `${active}/${total}`;
     item.appendChild(count);
     item.setAttribute("title", title);
@@ -367,6 +367,7 @@ export class EwarControllerImpl implements EwarController {
     img.hidden = iconUrl === undefined;
     button.appendChild(img);
     const nameSpan = document.createElement("span");
+    nameSpan.className = "truncate";
     nameSpan.textContent = displayName;
     nameSpan.title = displayName;
     button.appendChild(nameSpan);
@@ -376,7 +377,7 @@ export class EwarControllerImpl implements EwarController {
   private createScriptGear(side: Side, index: number, script: DisruptionScriptSpec | undefined, active: boolean): HTMLButtonElement {
     const gear = document.createElement("button");
     gear.type = "button";
-    gear.className = "ewar-script-gear";
+    gear.className = "ewar-script-gear btn icon-button";
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-haspopup", "menu");
     gear.setAttribute("aria-expanded", "false");
@@ -400,7 +401,7 @@ export class EwarControllerImpl implements EwarController {
   ): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "ewar-overload-button";
+    button.className = "ewar-overload-button btn icon-button";
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
     const label = `${this.i18n.t("label.overload")} ${this.fittingImport.itemName(moduleName, this.i18n.current())}`;
@@ -484,6 +485,7 @@ export class EwarControllerImpl implements EwarController {
       button.appendChild(img);
     }
     const nameSpan = document.createElement("span");
+    nameSpan.className = "truncate";
     nameSpan.textContent = text;
     nameSpan.title = text;
     button.appendChild(nameSpan);

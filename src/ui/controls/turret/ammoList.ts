@@ -106,7 +106,7 @@ export class AmmoList {
       const item = this.createItem(entry.name, entry.name === state.ammo, this.i18n.t("button.selectAmmo"));
       if (entry.quantity !== undefined) {
         const quantity = document.createElement("span");
-        quantity.className = "ammo-item-quantity";
+        quantity.className = "ammo-item-quantity mono";
         quantity.textContent = `x${entry.quantity}`;
         item.appendChild(quantity);
       }
@@ -153,7 +153,7 @@ export class AmmoList {
   private createItem(name: string, selected: boolean, title: string): HTMLButtonElement {
     const item = document.createElement("button");
     item.type = "button";
-    item.className = "ammo-item";
+    item.className = "ammo-item btn";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(selected));
     item.title = title;
@@ -167,7 +167,7 @@ export class AmmoList {
     }
     const displayName = this.fittingImport.itemName(name, this.i18n.current());
     const label = document.createElement("span");
-    label.className = "ammo-item-name";
+    label.className = "ammo-item-name truncate";
     label.textContent = displayName;
     label.title = displayName;
     item.appendChild(label);
