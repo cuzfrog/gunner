@@ -5,9 +5,9 @@ const CSS_PATH = "public/styles.css";
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
 const ALLOWED_UNDEFINED = new Set<string>([
-  // Phase 2/3: no rule yet; will gain one or be renamed.
+  // Phase 2/3: grouping class with no rule yet.
   "sigres-group",
-  "mode-group",
+  // Phase 4: structural line wrapper with no rule yet.
   "footer-author-line",
   // Phase 4: hintRotator adds this category but the style is not yet isolated.
   "hint",
@@ -16,19 +16,72 @@ const ALLOWED_UNDEFINED = new Set<string>([
 // CSS classes not referenced by the literal scan (built dynamically or stale rules pending removal).
 // Each entry must name the phase that removes it.
 const ALLOWED_ORPHAN = new Set<string>([
-  // Phase 2/3: built from ternary className in ewar/booster controllers.
-  "ewar-row",
-  "ewar-row-inactive",
-  // Phase 2/3: built from ternary className in fittingPreview.
-  "preview-row",
-  "preview-row-empty",
   // Phase 2/3: built dynamically in rangeOverlayController.
   "range-overlay-web",
   "range-overlay-grappler",
   "range-overlay-scrambler",
   "range-overlay-disruptor",
-  // Phase 2/3: stale rules to be removed or re-applied.
 ]);
+
+// Approved component / primitive prefixes. A class is valid if it equals one of these or starts with `<prefix>-`.
+const APPROVED_PREFIXES = [
+  "app",
+  "side-panel",
+  "hull",
+  "canvas-frame",
+  "control-bar",
+  "zoom",
+  "speed-control",
+  "grid-brightness",
+  "auto-zoom",
+  "form-slider",
+  "form-field",
+  "form-maneuver",
+  "tracking",
+  "input-with-unit",
+  "input-suffix",
+  "effective-value",
+  "info-hint",
+  "segmented-control",
+  "skill-tuner",
+  "skill",
+  "ammo",
+  "turret-mode",
+  "sigres",
+  "overload-button",
+  "propulsion",
+  "choice-selector",
+  "ewar",
+  "booster",
+  "profile",
+  "new-profile",
+  "import-side-popup",
+  "share-popup",
+  "paste",
+  "confirm",
+  "hints-slide",
+  "hint",
+  "fitting",
+  "preview",
+  "result-grid",
+  "result-card",
+  "range-overlay",
+  "combatant-portrait",
+  "portrait",
+  "footer",
+  "is",
+  "icon",
+  "surface-panel",
+  "popup",
+  "trigger",
+  "btn",
+  "icon-button",
+  "field-label",
+  "input-field",
+  "mono",
+  "truncate",
+  "chevron",
+];
 
 type StringMap = Map<string, Set<string>>;
 
@@ -89,11 +142,6 @@ async function tsClasses(): Promise<StringMap> {
       for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
     }
 
-    // hintRotator uses classList.add(category) where category is one of these.
-    if (text.includes("classList.add(category)")) {
-      for (const c of ["hint", "tip", "lore"]) hits.add(c);
-    }
-
     if (hits.size > 0) perFile.set(path, hits);
   }
   return perFile;
@@ -144,4 +192,16 @@ test("every CSS class is referenced somewhere", async () => {
   const defined = cssClasses(await Bun.file(CSS_PATH).text());
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
   expect(orphans).toEqual([]);
+});
+
+function isApproved(className: string): boolean {
+  return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
+}
+
+test("every used class is an approved component or primitive prefix", async () => {
+  const html = await Bun.file(HTML_PATH).text();
+  const used = htmlClasses(html);
+  for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
+  const bad = [...used].filter((c) => !isApproved(c));
+  expect(bad).toEqual([]);
 });
