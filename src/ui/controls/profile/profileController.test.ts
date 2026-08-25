@@ -9,10 +9,14 @@ import type { ProfileChangeTracker } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {
   version: USER_SETTINGS_VERSION,
-  tracking: 0.32,
-  sigRes: "S",
-  optimal: 5000,
-  falloff: 5000,
+  shipATracking: 0.32,
+  shipASigRes: "S",
+  shipAOptimal: 5000,
+  shipAFalloff: 5000,
+  shipBTracking: 0.32,
+  shipBSigRes: "S",
+  shipBOptimal: 5000,
+  shipBFalloff: 5000,
   shipASpeed: 0,
   shipAMode: "keepAtRange",
   shipARange: 5000,
@@ -312,7 +316,7 @@ describe("ProfileController", () => {
 
   test("load confirms discarding unsaved changes and reverts the selection", async () => {
     const { controller, els, settingsStore, onLoaded, confirmController, changeTracker } = build({
-      profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, optimal: 9999 } },
+      profiles: { brawler: BASE_PROFILE, kiter: { ...BASE_PROFILE, shipAOptimal: 9999 } },
       list: ["brawler", "kiter"],
     });
     await controller.loadProfile("brawler");

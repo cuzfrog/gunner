@@ -106,11 +106,9 @@ export class SettingsParser {
     this.normalizeAndDefaultAggressivity(record);
     this.migrateBoosterActivation(record);
     this.migrateEwarActivation(record);
+    this.applyUserDefaults(record);
     if (!this.isProfileSettings(record)) return null;
     record.version = USER_SETTINGS_VERSION;
-    if (record.shipAAmmo === undefined) {
-      record.shipAAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
-    }
     return stripDisplayPreferences(record as ProfileSettingsWire);
   }
 
@@ -126,12 +124,17 @@ export class SettingsParser {
     const s = value as Record<string, unknown>;
     return (
       isSettingsVersion(s.version) &&
-      isNonNegative(s.tracking) &&
-      this.guards.isSigResolutionClass(s.sigRes) &&
-      isNonNegative(s.optimal) &&
-      isNonNegative(s.falloff) &&
+      isNonNegative(s.shipATracking) &&
+      this.guards.isSigResolutionClass(s.shipASigRes) &&
+      isNonNegative(s.shipAOptimal) &&
+      isNonNegative(s.shipAFalloff) &&
+      isNonNegative(s.shipBTracking) &&
+      this.guards.isSigResolutionClass(s.shipBSigRes) &&
+      isNonNegative(s.shipBOptimal) &&
+      isNonNegative(s.shipBFalloff) &&
       isPositive(s.initialDistance) &&
       isOptionalNonEmptyString(s.shipAAmmo) &&
+      isOptionalNonEmptyString(s.shipBAmmo) &&
       this.isSideCombatantValid(s, "shipA") &&
       this.isSideCombatantValid(s, "shipB")
     );
@@ -148,7 +151,9 @@ export class SettingsParser {
       (s.autoZoom === undefined || typeof s.autoZoom === "boolean") &&
       (s.zoomFactor === undefined || isPositive(s.zoomFactor)) &&
       typeof s.shipAAmmo === "string" &&
-      s.shipAAmmo.length > 0
+      s.shipAAmmo.length > 0 &&
+      typeof s.shipBAmmo === "string" &&
+      s.shipBAmmo.length > 0
     );
   }
 
@@ -182,6 +187,17 @@ export class SettingsParser {
     if (record.shipAAmmo === undefined) {
       record.shipAAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
+    if (record.shipBAmmo === undefined) {
+      record.shipBAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+    }
+    record.shipATracking ??= 0;
+    record.shipASigRes ??= "S";
+    record.shipAOptimal ??= 0;
+    record.shipAFalloff ??= 0;
+    record.shipBTracking ??= 0;
+    record.shipBSigRes ??= "S";
+    record.shipBOptimal ??= 0;
+    record.shipBFalloff ??= 0;
     record.language ??= DEFAULT_PREFERENCES.language;
     record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
@@ -294,12 +310,7 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
     },
     shipA: toCombatantSettings(wire, "shipA"),
     shipB: toCombatantSettings(wire, "shipB"),
-    tracking: wire.tracking,
-    sigRes: wire.sigRes,
-    optimal: wire.optimal,
-    falloff: wire.falloff,
     initialDistance: wire.initialDistance,
-    shipAAmmo: wire.shipAAmmo,
   };
 }
 
@@ -312,12 +323,17 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     gridBrightness: internal.gridBrightness,
     autoZoom: internal.display.autoZoom,
     zoomFactor: internal.display.zoomFactor,
-    tracking: internal.tracking,
-    sigRes: internal.sigRes,
-    optimal: internal.optimal,
-    falloff: internal.falloff,
     initialDistance: internal.initialDistance,
-    shipAAmmo: internal.shipAAmmo,
+    shipAAmmo: internal.shipA.ammo,
+    shipBAmmo: internal.shipB.ammo,
+    shipATracking: internal.shipA.tracking,
+    shipASigRes: internal.shipA.sigRes,
+    shipAOptimal: internal.shipA.optimal,
+    shipAFalloff: internal.shipA.falloff,
+    shipBTracking: internal.shipB.tracking,
+    shipBSigRes: internal.shipB.sigRes,
+    shipBOptimal: internal.shipB.optimal,
+    shipBFalloff: internal.shipB.falloff,
     shipASpeed: internal.shipA.speed,
     shipAMode: internal.shipA.mode,
     shipARange: internal.shipA.range,

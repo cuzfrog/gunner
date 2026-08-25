@@ -9,7 +9,6 @@ import type { Timer } from "../timer";
 import type { UiEvents } from "../events";
 import type { createControlsEls } from "./elements";
 import type { Controls } from "./controlsContract";
-import type { ChoiceGroup } from "./choiceGroup";
 import type { DomControlsHost } from "./domControls";
 import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
@@ -24,11 +23,11 @@ import type { ProfileController, ProfileChangeTracker } from "./profile";
 import type { ShareController } from "./share";
 import type { HullDatalist, SessionCodec, SimConfigSource } from "./session";
 import type { SidePanel } from "./sidePanel";
-import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { ProfileEquality } from "../../appstate";
+import type { Side } from "./side";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -48,11 +47,11 @@ export interface ControlsCradle {
   readonly chargeCatalog: ChargeCatalog;
   readonly imageCatalog: ImageCatalog;
   readonly uiEvents: UiEvents;
-  readonly turretOverrides: TurretOverrides;
+  readonly shipATurretOverrides: TurretOverrides;
+  readonly shipBTurretOverrides: TurretOverrides;
+  readonly turretOverridesBySide: Record<Side, TurretOverrides>;
   readonly popupGroup: PopupGroup;
   readonly els: ControlsElements;
-  readonly trackingInput: TrackingInput;
-  readonly sigResChoice: ChoiceGroup;
   readonly engagementReadout: EngagementReadout;
   readonly effectiveReadout: EffectiveReadout;
   readonly hullDatalist: HullDatalist;
@@ -60,7 +59,9 @@ export interface ControlsCradle {
   readonly preferencesController: PreferencesController;
   readonly profileController: ProfileController;
   readonly profileTextCodec: ProfileTextCodec;
-  readonly turretController: TurretController;
+  readonly shipATurretController: TurretController;
+  readonly shipBTurretController: TurretController;
+  readonly turretControllers: Record<Side, TurretController>;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
   readonly shipAFittingPreview: FittingPreview;

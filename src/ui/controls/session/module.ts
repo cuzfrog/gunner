@@ -17,17 +17,15 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       els: collectSessionCodecEls(proxy.els),
       shipASide: proxy.shipASide,
       shipBSide: proxy.shipBSide,
-      turret: proxy.turretController,
-      turretOverrides: proxy.turretOverrides,
+      turretControllers: proxy.turretControllers,
+      turretOverridesBySide: proxy.turretOverridesBySide,
       preferences: proxy.preferencesController,
       profileController: proxy.profileController,
       i18n: proxy.i18n,
       chargeCatalog: proxy.chargeCatalog,
-      sigResChoice: proxy.sigResChoice,
       hintRotator: proxy.hintRotator,
       settingsStore: proxy.settingsStore,
       events: proxy.uiEvents,
-      trackingInput: proxy.trackingInput,
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       fittingImport: proxy.fittingImport,
@@ -43,10 +41,5 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
 }
 
 function collectSessionCodecEls(all: ControlsElements): SessionCodecEls {
-  return {
-    sigRes: all.sigRes,
-    optimal: all.optimal,
-    falloff: all.falloff,
-    initialDistance: all.initialDistance,
-  };
+  return { initialDistance: all.initialDistance };
 }

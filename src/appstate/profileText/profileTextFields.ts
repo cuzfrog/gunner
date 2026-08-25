@@ -6,11 +6,6 @@ export type ScalarValue = string | number | boolean | FittedHullSummary | Stored
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
-  "tracking",
-  "sigRes",
-  "optimal",
-  "falloff",
-  "shipAAmmo",
   "initialDistance",
 ] as const;
 
@@ -29,6 +24,11 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipAFittedHull",
   "shipAEwarActivation",
   "shipABoosterActivation",
+  "shipATracking",
+  "shipASigRes",
+  "shipAOptimal",
+  "shipAFalloff",
+  "shipAAmmo",
 ] as const;
 
 export const SHIP_B_FIELDS: readonly ScalarField[] = [
@@ -46,6 +46,11 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBFittedHull",
   "shipBEwarActivation",
   "shipBBoosterActivation",
+  "shipBTracking",
+  "shipBSigRes",
+  "shipBOptimal",
+  "shipBFalloff",
+  "shipBAmmo",
 ] as const;
 
 export const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...SHIP_A_FIELDS, ...SHIP_B_FIELDS] as const;
@@ -74,6 +79,11 @@ function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
     map.set(dotKeyForField(field), field);
   }
   map.set("shipA.ammo", "shipAAmmo");
+  map.set("shipB.ammo", "shipBAmmo");
+  map.set("tracking", "shipATracking");
+  map.set("sigRes", "shipASigRes");
+  map.set("optimal", "shipAOptimal");
+  map.set("falloff", "shipAFalloff");
   return map;
 }
 
@@ -90,6 +100,7 @@ function buildOverrideDotKeyToFullMap(): ReadonlyMap<string, keyof ProfileParamO
 
 export function dotKeyForField(field: ScalarField): string {
   if (field === "shipAAmmo") return "ammo";
+  if (field === "shipBAmmo") return "shipB.ammo";
   if (field.startsWith("shipA")) return `shipA.${lowerFirst(field.slice("shipA".length))}`;
   if (field.startsWith("shipB")) return `shipB.${lowerFirst(field.slice("shipB".length))}`;
   return field;

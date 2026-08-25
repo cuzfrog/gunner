@@ -24,15 +24,15 @@ export function registerEwarModule<T extends ControlsCradle>(cradle: AwilixConta
 
 function collectEwarEls(els: ControlsElements): EwarEls {
   return {
-    shipAEwarField: els.shipAEwarField,
-    shipAEwarTrigger: els.shipAEwarTrigger,
-    shipAEwarPopup: els.shipAEwarPopup,
-    shipAEwarSection: els.shipAEwarSection,
-    shipAEwarSummary: els.shipAEwarSummary,
-    shipBEwarField: els.shipBEwarField,
-    shipBEwarTrigger: els.shipBEwarTrigger,
-    shipBEwarPopup: els.shipBEwarPopup,
-    shipBEwarSection: els.shipBEwarSection,
-    shipBEwarSummary: els.shipBEwarSummary,
+    shipAEwarField: els.shipA.ewarField,
+    shipAEwarTrigger: els.shipA.ewarTrigger,
+    shipAEwarPopup: els.shipA.ewarPopup,
+    shipAEwarSection: els.shipA.ewarSection,
+    shipAEwarSummary: els.shipA.ewarSummary,
+    shipBEwarField: els.shipB.ewarField,
+    shipBEwarTrigger: els.shipB.ewarTrigger,
+    shipBEwarPopup: els.shipB.ewarPopup,
+    shipBEwarSection: els.shipB.ewarSection,
+    shipBEwarSummary: els.shipB.ewarSummary,
   };
 }

@@ -15,6 +15,7 @@ import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
 import type { EngagementReadout } from "../engagementReadout";
 import type { SidePanel } from "../sidePanel";
+import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
@@ -44,7 +45,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   effectiveReadout: EffectiveReadout;
   shipASide: SidePanel;
   shipBSide: SidePanel;
-  turretController: TurretController;
+  turretControllers: Record<Side, TurretController>;
   importController: ImportController;
   ewarController: EwarController;
   boosterController: BoosterController;
@@ -69,7 +70,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly effectiveReadout: EffectiveReadout;
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
-  private readonly turretController: TurretController;
+  private readonly turretControllers: Record<Side, TurretController>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
@@ -98,7 +99,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.effectiveReadout = all.effectiveReadout;
     this.shipASide = all.shipASide;
     this.shipBSide = all.shipBSide;
-    this.turretController = all.turretController;
+    this.turretControllers = all.turretControllers;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
@@ -121,7 +122,8 @@ export class DomControls implements Controls, DomControlsHost {
   wireControls(): void {
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.shareController.popup);
-    this.popupGroup.register(this.turretController.popup);
+    this.popupGroup.register(this.turretControllers.shipA.popup);
+    this.popupGroup.register(this.turretControllers.shipB.popup);
     this.popupGroup.register(this.preferencesController.popup);
     this.hullDatalist.populate();
     this.shipASide.sections.skill.renderSkillOptions();
@@ -201,7 +203,7 @@ export class DomControls implements Controls, DomControlsHost {
     if (notify) this.callbacks?.onConfigChange();
   }
 
-  getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
+  getTurret(): TurretSpec { return this.turretControllers.shipA.currentTurretSpec(); }
   getShipBSig(): number { return this.shipBSide.capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
@@ -209,7 +211,7 @@ export class DomControls implements Controls, DomControlsHost {
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
-  hasShipAGuns(): boolean { return this.turretController.turret() !== undefined; }
+  hasShipAGuns(): boolean { return this.turretControllers.shipA.turret() !== undefined; }
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);

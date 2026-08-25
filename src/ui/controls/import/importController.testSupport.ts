@@ -68,10 +68,14 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
         version: 10,
-        tracking: 0.32,
-        sigRes: "S",
-        optimal: 5000,
-        falloff: 5000,
+        shipATracking: 0.32,
+        shipASigRes: "S",
+        shipAOptimal: 5000,
+        shipAFalloff: 5000,
+        shipBTracking: 0.32,
+        shipBSigRes: "S",
+        shipBOptimal: 5000,
+        shipBFalloff: 5000,
         shipASpeed: 1000,
         shipAMode: "keepAtRange",
         shipARange: 5000,
@@ -143,7 +147,9 @@ export function buildImportController(document: Document) {
     record: vi.fn(),
     remove: vi.fn(),
   });
-  const turret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
+  const shipATurret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
+  const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
+  const turrets = { shipA: shipATurret, shipB: shipBTurret };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -165,13 +171,13 @@ export function buildImportController(document: Document) {
     },
     shipASide: shipAPanel as unknown as SidePanel,
     shipBSide: shipBPanel as unknown as SidePanel,
-    turret,
+    turrets,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turret,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

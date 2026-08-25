@@ -30,30 +30,37 @@ export interface FittedHullSummary {
   readonly baseMaxSpeed?: number;
 }
 
-export type ProfileParamOverrides = Pick<
-  UserSettings,
-  | "shipAMass"
-  | "shipAInertia"
-  | "shipASpeed"
-  | "shipASig"
-  | "shipBMass"
-  | "shipBInertia"
-  | "shipBSig"
-  | "shipBSpeed"
-  | "tracking"
-  | "sigRes"
-  | "optimal"
-  | "falloff"
->;
+export interface ProfileParamOverrides {
+  shipAMass?: number;
+  shipAInertia?: number;
+  shipASpeed?: number;
+  shipASig?: number;
+  shipBMass?: number;
+  shipBInertia?: number;
+  shipBSig?: number;
+  shipBSpeed?: number;
+  tracking?: number;
+  sigRes?: SigResolutionClass;
+  optimal?: number;
+  falloff?: number;
+}
 
 
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
-  tracking: number;
   trackingUnit: TrackingUnit;
-  sigRes: SigResolutionClass;
-  optimal: number;
-  falloff: number;
+  shipATracking: number;
+  shipASigRes: SigResolutionClass;
+  shipAOptimal: number;
+  shipAFalloff: number;
+  shipBTracking: number;
+  shipBSigRes: SigResolutionClass;
+  shipBOptimal: number;
+  shipBFalloff: number;
+  tracking?: number;
+  sigRes?: SigResolutionClass;
+  optimal?: number;
+  falloff?: number;
   shipASpeed: number;
   shipAMode: AutopilotMode;
   shipARange: number;
@@ -91,12 +98,28 @@ export interface UserSettings {
   shipABoosterActivation?: readonly StoredBoosterActivation[];
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
   shipAAmmo: string;
+  shipBAmmo: string;
   simSpeed: number;
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "autoZoom" | "zoomFactor" | "shipAAmmo"> & {
+export type ProfileSettings = Omit<
+  UserSettings,
+  | "language"
+  | "trackingUnit"
+  | "simSpeed"
+  | "gridBrightness"
+  | "autoZoom"
+  | "zoomFactor"
+  | "tracking"
+  | "sigRes"
+  | "optimal"
+  | "falloff"
+  | "shipAAmmo"
+  | "shipBAmmo"
+> & {
   shipAAmmo?: string;
+  shipBAmmo?: string;
 };
 
 export interface DisplayPreferences {

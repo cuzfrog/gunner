@@ -9,6 +9,7 @@ import type { Popup, PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { EwarControllerImpl } from "./ewarController";
+import type { EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
@@ -85,12 +86,24 @@ function buildEwarController(
   });
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();
-  const shipAPopup = els.shipAEwarPopup;
-  const shipBPopup = els.shipBEwarPopup;
-  shipAPopup.appendChild(els.shipAEwarSection);
-  shipAPopup.appendChild(els.shipABoosterSection);
-  shipBPopup.appendChild(els.shipBEwarSection);
-  shipBPopup.appendChild(els.shipBBoosterSection);
+  const ewarEls: EwarEls = {
+    shipAEwarField: els.shipA.ewarField,
+    shipAEwarTrigger: els.shipA.ewarTrigger,
+    shipAEwarPopup: els.shipA.ewarPopup,
+    shipAEwarSection: els.shipA.ewarSection,
+    shipAEwarSummary: els.shipA.ewarSummary,
+    shipBEwarField: els.shipB.ewarField,
+    shipBEwarTrigger: els.shipB.ewarTrigger,
+    shipBEwarPopup: els.shipB.ewarPopup,
+    shipBEwarSection: els.shipB.ewarSection,
+    shipBEwarSummary: els.shipB.ewarSummary,
+  };
+  const shipAPopup = ewarEls.shipAEwarPopup;
+  const shipBPopup = ewarEls.shipBEwarPopup;
+  shipAPopup.appendChild(els.shipA.ewarSection);
+  shipAPopup.appendChild(els.shipA.boosterSection);
+  shipBPopup.appendChild(els.shipB.ewarSection);
+  shipBPopup.appendChild(els.shipB.boosterSection);
   shipAPopup.hidden = true;
   shipBPopup.hidden = true;
   if (beforeConstruct) beforeConstruct(document, els);
@@ -108,7 +121,7 @@ function buildEwarController(
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events });
+  const controller = new EwarControllerImpl({ els: ewarEls, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events });
   events.emitDistanceChanged(5000);
   return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated };
 }

@@ -643,10 +643,10 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.shipAMass).toBe(2_000_000);
     expect(loaded!.shipAInertia).toBe(2);
     expect(loaded!.shipASpeed).toBe(4_649.72);
-    expect(loaded!.tracking).toBe(0.315);
-    expect(loaded!.sigRes).toBe("S");
-    expect(loaded!.optimal).toBe(600);
-    expect(loaded!.falloff).toBe(3000);
+    expect(loaded!.shipATracking).toBe(0.315);
+    expect(loaded!.shipASigRes).toBe("S");
+    expect(loaded!.shipAOptimal).toBe(600);
+    expect(loaded!.shipAFalloff).toBe(3000);
   });
 
   test("loadStartupState preserves an exact propulsion variant from the fitted hull summary", () => {
@@ -698,10 +698,10 @@ describe("LocalSettingsStore", () => {
     expect(loaded).not.toBeNull();
     expect(loaded!.shipAMass).toBe(1_500_000);
     expect(loaded!.shipASpeed).toBe(4_649.72);
-    expect(loaded!.tracking).toBe(0.315);
-    expect(loaded!.sigRes).toBe("S");
-    expect(loaded!.optimal).toBe(600);
-    expect(loaded!.falloff).toBe(3000);
+    expect(loaded!.shipATracking).toBe(0.315);
+    expect(loaded!.shipASigRes).toBe("S");
+    expect(loaded!.shipAOptimal).toBe(600);
+    expect(loaded!.shipAFalloff).toBe(3000);
     expect(loaded!.shipAFittedHull!.propulsionId).toBe("mwd-5mn");
   });
 
@@ -767,9 +767,9 @@ describe("LocalSettingsStore", () => {
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.shipAAmmo).toBe("Republic Fleet EMP S");
-    expect(loaded!.tracking).toBe(0.42);
-    expect(loaded!.optimal).toBe(1200);
-    expect(loaded!.falloff).toBe(3000);
+    expect(loaded!.shipATracking).toBe(0.42);
+    expect(loaded!.shipAOptimal).toBe(1200);
+    expect(loaded!.shipAFalloff).toBe(3000);
   });
 
   test("golden URL round-trip preserves URL_SETTINGS", () => {
@@ -798,6 +798,9 @@ describe("LocalSettingsStore", () => {
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.shipAAmmo).toBe("Hail S");
-    expect(loaded!.optimal).toBe(600);
+    expect(loaded!.shipAOptimal).toBe(600);
+    expect(loaded!.shipATracking).toBe(0.315);
+    expect(loaded!.shipASigRes).toBe("S");
+    expect(loaded!.shipAFalloff).toBe(3000);
   });
 });

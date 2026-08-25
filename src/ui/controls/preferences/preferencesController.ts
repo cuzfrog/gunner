@@ -1,15 +1,14 @@
 import { num, setText } from "../controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import type { I18n, Language } from "../../i18n";
-import type { TrackingInput } from "../trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../../appstate";
 import type { ItemNameCatalog } from "../../../gamedata/itemNames";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
+import type { TurretController } from "../turret";
 
 export interface PreferencesEls {
-  readonly tracking: HTMLInputElement;
   readonly trackingUnitRad: HTMLButtonElement;
   readonly trackingUnitScore: HTMLButtonElement;
   readonly langEn: HTMLButtonElement;
@@ -48,11 +47,11 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 
 export class PreferencesControllerImpl implements PreferencesController {
-  readonly trackingInput: TrackingInput;
   private readonly els: PreferencesEls;
   private readonly i18n: I18n;
   private readonly settingsStore: SettingsStore;
-  private readonly sigResolution: () => number;
+  private readonly shipATurretController: TurretController;
+  private readonly shipBTurretController: TurretController;
   private readonly events: UiEvents;
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly rangeOverlayController: RangeOverlayController;
@@ -64,8 +63,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     els: PreferencesEls;
     i18n: I18n;
     settingsStore: SettingsStore;
-    trackingInput: TrackingInput;
-    sigResolution: () => number;
+    shipATurretController: TurretController;
+    shipBTurretController: TurretController;
     events: UiEvents;
     itemNameCatalog: ItemNameCatalog;
     rangeOverlayController: RangeOverlayController;
@@ -74,8 +73,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.settingsStore = deps.settingsStore;
-    this.trackingInput = deps.trackingInput;
-    this.sigResolution = deps.sigResolution;
+    this.shipATurretController = deps.shipATurretController;
+    this.shipBTurretController = deps.shipBTurretController;
     this.events = deps.events;
     this.itemNameCatalog = deps.itemNameCatalog;
     this.rangeOverlayController = deps.rangeOverlayController;
@@ -132,7 +131,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   capture(): DisplayPreferences {
     return {
       language: this.i18n.current(),
-      trackingUnit: this.trackingInput.unit,
+      trackingUnit: this.shipATurretController.trackingUnit(),
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
       hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
@@ -142,7 +141,8 @@ export class PreferencesControllerImpl implements PreferencesController {
   }
 
   setTrackingUnit(unit: TrackingUnit): void {
-    this.els.tracking.value = String(this.trackingInput.setUnit(unit, this.sigResolution()));
+    this.shipATurretController.setTrackingUnit(unit);
+    this.shipBTurretController.setTrackingUnit(unit);
     this.updateUnitToggle();
     this.savePreferences();
     this.events.emitDisplayInvalidated();
@@ -196,7 +196,8 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   private applyDisplayPreferences(preferences: DisplayPreferences): void {
     this.applyLanguage(preferences.language);
-    this.els.tracking.value = String(this.trackingInput.setUnit(preferences.trackingUnit, this.sigResolution()));
+    this.shipATurretController.setTrackingUnit(preferences.trackingUnit);
+    this.shipBTurretController.setTrackingUnit(preferences.trackingUnit);
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
@@ -215,10 +216,9 @@ export class PreferencesControllerImpl implements PreferencesController {
   }
 
   private updateUnitToggle(): void {
-    const radActive = this.trackingInput.unit === "rad";
-    const scoreActive = this.trackingInput.unit === "score";
-    this.els.trackingUnitRad.setAttribute("aria-pressed", String(radActive));
-    this.els.trackingUnitScore.setAttribute("aria-pressed", String(scoreActive));
+    const unit = this.shipATurretController.trackingUnit();
+    this.els.trackingUnitRad.setAttribute("aria-pressed", String(unit === "rad"));
+    this.els.trackingUnitScore.setAttribute("aria-pressed", String(unit === "score"));
   }
 
   private updateLanguageToggle(): void {

@@ -9,12 +9,11 @@ export interface PanelTurretLink {
   setHullProfile(profile: ShipProfile | undefined): void;
 }
 
-export function createPanelTurretLink(side: Side, turret: TurretController, popupGroup: PopupGroup): PanelTurretLink {
-  if (side === "shipA") return new ShipAPanelTurretLink(turret, popupGroup);
-  return new NoopPanelTurretLink();
+export function createPanelTurretLink(side: Side, turretControllers: Record<Side, TurretController>, popupGroup: PopupGroup): PanelTurretLink {
+  return new PanelTurretLinkImpl(turretControllers[side], popupGroup);
 }
 
-class ShipAPanelTurretLink implements PanelTurretLink {
+class PanelTurretLinkImpl implements PanelTurretLink {
   constructor(private readonly turret: TurretController, private readonly popupGroup: PopupGroup) {}
 
   clear(): void {
@@ -29,10 +28,4 @@ class ShipAPanelTurretLink implements PanelTurretLink {
   setHullProfile(profile: ShipProfile | undefined): void {
     this.turret.setHullProfile(profile);
   }
-}
-
-class NoopPanelTurretLink implements PanelTurretLink {
-  clear(): void {}
-  restore(_fittingText: string | undefined, _conditions: StatConditions): void {}
-  setHullProfile(_profile: ShipProfile | undefined): void {}
 }

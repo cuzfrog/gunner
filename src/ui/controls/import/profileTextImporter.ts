@@ -5,18 +5,18 @@ import type { ShipATurret } from "./shipATurret";
 
 interface ProfileTextImporterDeps {
   readonly fittingImport: FittingImport;
-  readonly turret: ShipATurret;
+  readonly turrets: Record<Side, ShipATurret>;
   readonly profileTextCodec: ProfileTextCodec;
 }
 
 export class ProfileTextImporter {
   private readonly fittingImport: FittingImport;
-  private readonly turret: ShipATurret;
+  private readonly turrets: Record<Side, ShipATurret>;
   private readonly profileTextCodec: ProfileTextCodec;
 
   constructor(deps: ProfileTextImporterDeps) {
     this.fittingImport = deps.fittingImport;
-    this.turret = deps.turret;
+    this.turrets = deps.turrets;
     this.profileTextCodec = deps.profileTextCodec;
   }
 
@@ -27,8 +27,9 @@ export class ProfileTextImporter {
   profileFromText(text: string): ProfileSettings | undefined {
     const parsed = this.profileTextCodec.parse(text.trimStart());
     if (!parsed) return undefined;
-    const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, shipAAmmo: ammo };
+    const shipAAmmo = this.resolveProfileAmmo(parsed, "shipA");
+    const shipBAmmo = this.resolveProfileAmmo(parsed, "shipB");
+    return { ...parsed, shipAAmmo, shipBAmmo };
   }
 
   fittingFromProfileText(side: Side, text: string): string | undefined {
@@ -37,15 +38,21 @@ export class ProfileTextImporter {
     return side === "shipA" ? parsed.shipAFitting : parsed.shipBFitting;
   }
 
-  private resolveProfileAmmo(parsed: ProfileSettings): string {
-    if (parsed.shipAAmmo) return parsed.shipAAmmo;
-    if (parsed.shipAFitting) {
-      const imported = this.fittingImport.importFitting(parsed.shipAFitting, {
-        skillLevel: parsed.shipASkillLevel ?? 5,
-        overloaded: parsed.shipAOverload ?? true,
+  private resolveProfileAmmo(parsed: ProfileSettings, side: Side): string {
+    const ammoKey = side === "shipA" ? "shipAAmmo" : "shipBAmmo";
+    const existing = parsed[ammoKey];
+    if (existing) return existing;
+    const fittingKey = side === "shipA" ? "shipAFitting" : "shipBFitting";
+    const fitting = parsed[fittingKey];
+    if (fitting) {
+      const skillLevelKey = side === "shipA" ? "shipASkillLevel" : "shipBSkillLevel";
+      const overloadKey = side === "shipA" ? "shipAOverload" : "shipBOverload";
+      const imported = this.fittingImport.importFitting(fitting, {
+        skillLevel: parsed[skillLevelKey] ?? 5,
+        overloaded: parsed[overloadKey] ?? true,
       });
       if (imported?.turret) return imported.turret.charge;
     }
-    return this.turret.ammo();
+    return this.turrets[side].ammo();
   }
 }

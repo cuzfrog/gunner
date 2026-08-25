@@ -1,5 +1,4 @@
 import { asFunction, type AwilixContainer } from "awilix";
-import { SIG_RESOLUTIONS } from "../../../sim";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
 import { PreferencesControllerImpl } from "./preferencesController";
@@ -10,7 +9,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerPreferencesModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     preferencesController: asFunction(({
-      els, i18n, itemNameCatalog, popupGroup, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController,
+      els, i18n, itemNameCatalog, popupGroup, settingsStore, shipATurretController, shipBTurretController, uiEvents, rangeOverlayController,
     }: ControlsCradle) =>
       new PreferencesControllerImpl({
         els: collectPreferencesEls(els),
@@ -18,8 +17,8 @@ export function registerPreferencesModule<T extends ControlsCradle>(cradle: Awil
         itemNameCatalog,
         popupGroup,
         settingsStore,
-        trackingInput,
-        sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
+        shipATurretController,
+        shipBTurretController,
         events: uiEvents,
         rangeOverlayController,
       })
@@ -29,7 +28,6 @@ export function registerPreferencesModule<T extends ControlsCradle>(cradle: Awil
 
 function collectPreferencesEls(els: ControlsElements): PreferencesEls {
   return {
-    tracking: els.tracking,
     trackingUnitRad: els.trackingUnitRad,
     trackingUnitScore: els.trackingUnitScore,
     langEn: els.langEn,

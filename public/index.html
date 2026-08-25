@@ -158,14 +158,14 @@
             </span>
           </span>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" class="input-field" id="tracking" value="0.32" step="any" min="0">
+            <input type="number" class="input-field" id="ship-a-tracking" value="0.32" step="any" min="0">
             <span class="effective-value mono" id="effective-tracking"></span>
           </span>
         </label>
         <div class="form-field-group">
           <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
 
-          <select class="input-field" id="sigRes" hidden>
+          <select class="input-field" id="ship-a-sigRes" hidden>
             <option value="S" selected>S (40 m)</option>
             <option value="M">M (125 m)</option>
             <option value="L">L (400 m)</option>
@@ -173,7 +173,7 @@
           </select>
 
           <div class="segmented-control choice-selector sigres-selector"
-               id="sig-res-options" role="group"
+               id="ship-a-sig-res-options" role="group"
                data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
             <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
               <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value mono">(40 m)</span>
@@ -193,14 +193,14 @@
           <label class="form-field">
             <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit input-with-unit-has-effective">
-              <input type="number" class="input-field" id="optimal" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="ship-a-optimal" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-optimal"></span>
             </span>
           </label>
           <label class="form-field">
             <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit input-with-unit-has-effective">
-              <input type="number" class="input-field" id="falloff" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="ship-a-falloff" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-falloff"></span>
             </span>
           </label>
@@ -445,6 +445,82 @@
 
       <section class="side-panel side-panel-ship-b surface-panel">
         <h2 class="side-panel-heading" data-i18n="label.shipB">Ship B</h2>
+        <label class="form-field">
+          <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+          <span class="input-with-unit input-with-unit-has-effective">
+            <input type="number" class="input-field" id="ship-b-tracking" value="0.32" step="any" min="0">
+            <span class="effective-value mono" id="effective-ship-b-tracking"></span>
+          </span>
+        </label>
+        <div class="form-field-group">
+          <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+
+          <select class="input-field" id="ship-b-sigRes" hidden>
+            <option value="S" selected>S (40 m)</option>
+            <option value="M">M (125 m)</option>
+            <option value="L">L (400 m)</option>
+            <option value="XL">XL (2000 m)</option>
+          </select>
+
+          <div class="segmented-control choice-selector sigres-selector"
+               id="ship-b-sig-res-options" role="group"
+               data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+            <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value mono">(40 m)</span>
+            </button>
+            <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">M</span><span class="sigres-value mono">(125 m)</span>
+            </button>
+            <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">L</span><span class="sigres-value mono">(400 m)</span>
+            </button>
+            <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
+              <img class="sigres-icon" alt="" hidden><span class="sigres-class">XL</span><span class="sigres-value mono">(2000 m)</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-field-row">
+          <label class="form-field">
+            <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
+            <span class="input-with-unit input-with-unit-has-effective">
+              <input type="number" class="input-field" id="ship-b-optimal" value="5000" step="any" min="0">
+              <span class="effective-value mono" id="effective-ship-b-optimal"></span>
+            </span>
+          </label>
+          <label class="form-field">
+            <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
+            <span class="input-with-unit input-with-unit-has-effective">
+              <input type="number" class="input-field" id="ship-b-falloff" value="5000" step="any" min="0">
+              <span class="effective-value mono" id="effective-ship-b-falloff"></span>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-field-group ammo-group" id="ship-b-ammo-field">
+          <button type="button" id="ship-b-ammo-trigger" class="trigger"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="ship-b-ammo-popup"
+                  data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+                  title="Select ammunition" aria-label="Select ammunition">
+            <span class="ammo-label truncate" data-i18n="label.ammo">Ammo</span>
+            <span class="ammo-summary-row">
+              <img id="ship-b-ammo-summary-icon" class="ammo-summary-icon" alt="" hidden>
+              <span class="ammo-summary-value mono truncate" id="ship-b-ammo-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </span>
+          </button>
+          <div class="ammo-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-ammo-popup" hidden>
+            <span class="fitting-group-label" id="ship-b-ammo-cargo-label" data-i18n="ammo.cargoGroup">In cargo</span>
+            <ul class="ammo-list" id="ship-b-ammo-cargo-list" role="listbox"></ul>
+            <button type="button" class="ammo-expand" id="ship-b-ammo-expand" data-i18n="ammo.showAll">Show all</button>
+            <div id="ship-b-ammo-all-section" hidden>
+              <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
+              <ul class="ammo-list" id="ship-b-ammo-all-list" role="listbox"></ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="side-panel-divider">
+
         <div class="hull-field">
           <div class="hull-label-row">
             <span class="field-label truncate" data-i18n="label.hull">Ship</span>

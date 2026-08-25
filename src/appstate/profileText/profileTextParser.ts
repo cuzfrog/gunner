@@ -112,6 +112,15 @@ export class ProfileTextParser {
       if (activation !== undefined) raw = { ...raw, shipBEwarActivation: activation };
     }
 
+    raw.shipATracking ??= 0;
+    raw.shipASigRes ??= "S";
+    raw.shipAOptimal ??= 0;
+    raw.shipAFalloff ??= 0;
+    raw.shipBTracking ??= 0;
+    raw.shipBSigRes ??= "S";
+    raw.shipBOptimal ??= 0;
+    raw.shipBFalloff ??= 0;
+
     return profileSettingsFromRaw(raw);
   }
 }

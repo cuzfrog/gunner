@@ -83,11 +83,11 @@ describe("SidePanel", () => {
     expect(turretOverrides.get().shipAMass).toBe(1000);
   });
 
-  test("shipB record lands locally and does not affect the turret store", () => {
+  test("shipB record lands in the shipB turret overrides store", () => {
     const { panel, turretOverrides } = buildSidePanel("shipB");
     panel.recordOverride("shipBMass", 2000);
     expect(panel.isOverridden("shipBMass")).toBe(true);
-    expect(turretOverrides.get().shipBMass).toBeUndefined();
+    expect(turretOverrides.get().shipBMass).toBe(2000);
   });
 
   test("shipB restore round-trips overrides", () => {
@@ -108,7 +108,7 @@ describe("SidePanel", () => {
     panel.profile = RIFTER;
     panel.recordOverride("shipASpeed", 500);
     const state = panel.capture();
-    expect(state.overrides).toEqual({});
+    expect(state.overrides).toEqual({ shipASpeed: 500 });
     expect(state.hull).toBe("Rifter");
     panel.restore(state);
     expect(turretOverrides.get().shipASpeed).toBe(500);
@@ -251,12 +251,12 @@ describe("SidePanel", () => {
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 
-  test("shipB signature input records override and calls host onDisplayChange", () => {
+  test("shipB signature input records override in the shipB turret store and calls host onDisplayChange", () => {
     const { document, panel, host, turretOverrides } = buildSidePanel("shipB");
     getFake(document, "ship-b-sig").value = "120";
     getFake(document, "ship-b-sig").trigger("input");
     expect(host.onDisplayChange).toHaveBeenCalled();
-    expect(turretOverrides.get().shipBSig).toBeUndefined();
+    expect(turretOverrides.get().shipBSig).toBe(120);
     expect(panel.isOverridden("shipBSig")).toBe(true);
     expect(panel.capture().sig).toBe(120);
   });

@@ -15,16 +15,14 @@ import {
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import { num } from "../controlsDom";
-import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
+import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import { applyStartupDefaults } from "./startupDefaults";
-import type { ChoiceGroup } from "../choiceGroup";
 import type { HintRotator } from "../hints";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
+import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
-import type { TurretController } from "../turret";
-import type { TurretOverrides } from "../turret";
-import type { TrackingInput } from "../trackingInput";
+import type { TurretController, TurretOverrides } from "../turret";
 
 export interface SessionCodec {
   capture(): UserSettings;
@@ -37,9 +35,6 @@ export interface SessionCodec {
 }
 
 interface SessionCodecEls {
-  readonly sigRes: HTMLSelectElement;
-  readonly optimal: HTMLInputElement;
-  readonly falloff: HTMLInputElement;
   readonly initialDistance: HTMLInputElement;
 }
 
@@ -47,42 +42,49 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly els: SessionCodecEls;
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
-  private readonly turretController: TurretController;
-  private readonly turretOverrides: TurretOverrides;
+  private readonly turretControllers: Record<Side, TurretController>;
+  private readonly turretOverridesBySide: Record<Side, TurretOverrides>;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly i18n: I18n;
   private readonly chargeCatalog: ChargeCatalog;
-  private readonly sigResChoice: ChoiceGroup;
   private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
   private readonly events: UiEvents;
-  private readonly trackingInput: TrackingInput;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly fittingImport: FittingImport;
   private readonly pristineSettings: UserSettings;
 
   constructor(deps: {
-    els: SessionCodecEls; shipASide: SidePanel; shipBSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
-    preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
-    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; events: UiEvents;
-    trackingInput: TrackingInput; ewarController: EwarController; boosterController: BoosterController; fittingImport: FittingImport;
+    els: SessionCodecEls;
+    shipASide: SidePanel;
+    shipBSide: SidePanel;
+    turretControllers: Record<Side, TurretController>;
+    turretOverridesBySide: Record<Side, TurretOverrides>;
+    preferences: PreferencesController;
+    profileController: ProfileController;
+    i18n: I18n;
+    chargeCatalog: ChargeCatalog;
+    hintRotator: HintRotator;
+    settingsStore: SettingsStore;
+    events: UiEvents;
+    ewarController: EwarController;
+    boosterController: BoosterController;
+    fittingImport: FittingImport;
   }) {
     this.els = deps.els;
     this.shipASide = deps.shipASide;
     this.shipBSide = deps.shipBSide;
-    this.turretController = deps.turret;
-    this.turretOverrides = deps.turretOverrides;
+    this.turretControllers = deps.turretControllers;
+    this.turretOverridesBySide = deps.turretOverridesBySide;
     this.preferencesController = deps.preferences;
     this.profileController = deps.profileController;
     this.i18n = deps.i18n;
     this.chargeCatalog = deps.chargeCatalog;
-    this.sigResChoice = deps.sigResChoice;
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
     this.events = deps.events;
-    this.trackingInput = deps.trackingInput;
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.fittingImport = deps.fittingImport;
@@ -96,15 +98,20 @@ export class SessionCodecImpl implements SessionCodec {
   capture(): UserSettings {
     const shipA = this.shipASide.capture();
     const shipB = this.shipBSide.capture();
-    const turret = this.turretController.capture();
+    const shipATurret = this.turretControllers.shipA.capture();
+    const shipBTurret = this.turretControllers.shipB.capture();
     const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
       version: USER_SETTINGS_VERSION,
-      tracking: this.trackingInput.rad,
       ...preferences,
-      sigRes: turret.sigRes,
-      optimal: turret.optimal,
-      falloff: turret.falloff,
+      shipATracking: shipATurret.tracking,
+      shipASigRes: shipATurret.sigRes,
+      shipAOptimal: shipATurret.optimal,
+      shipAFalloff: shipATurret.falloff,
+      shipBTracking: shipBTurret.tracking,
+      shipBSigRes: shipBTurret.sigRes,
+      shipBOptimal: shipBTurret.optimal,
+      shipBFalloff: shipBTurret.falloff,
       shipASpeed: shipA.speed,
       shipAMode: shipA.mode,
       shipARange: shipA.range,
@@ -117,7 +124,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipAHull: shipA.hull,
       shipAPropulsion: shipA.propulsion,
       shipAFitting: shipA.fitting,
-      shipAOverrides: this.turretOverrides.get(),
+      shipAOverrides: shipA.overrides,
       shipAFittedHull: shipA.fittedHull,
       initialDistance: this.getInitialDistance(),
       shipBSpeed: shipB.speed,
@@ -134,7 +141,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBFitting: shipB.fitting,
       shipBOverrides: shipB.overrides,
       shipBFittedHull: shipB.fittedHull,
-      shipAAmmo: turret.ammo,
+      shipAAmmo: shipATurret.ammo,
+      shipBAmmo: shipBTurret.ammo,
       shipAEwarActivation: this.ewarController.capture("shipA"),
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
@@ -175,7 +183,16 @@ export class SessionCodecImpl implements SessionCodec {
     const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
       ...profile,
+      shipATracking: profile.shipATracking ?? 0,
+      shipASigRes: profile.shipASigRes ?? "S",
+      shipAOptimal: profile.shipAOptimal ?? 0,
+      shipAFalloff: profile.shipAFalloff ?? 0,
+      shipBTracking: profile.shipBTracking ?? 0,
+      shipBSigRes: profile.shipBSigRes ?? "S",
+      shipBOptimal: profile.shipBOptimal ?? 0,
+      shipBFalloff: profile.shipBFalloff ?? 0,
       shipAAmmo: profile.shipAAmmo ?? this.chargeCatalog.usualForChargeSize(1),
+      shipBAmmo: profile.shipBAmmo ?? this.chargeCatalog.usualForChargeSize(1),
       ...preferences,
     };
   }
@@ -184,15 +201,13 @@ export class SessionCodecImpl implements SessionCodec {
     return Math.max(num(this.els.initialDistance), 1);
   }
 
-  private restoreEwar(side: "shipA" | "shipB", fitting: string | undefined, activation: StoredEwarActivation | undefined): void {
+  private restoreEwar(side: Side, fitting: string | undefined, activation: StoredEwarActivation | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.ewar : undefined;
     this.ewarController.restore(side, loadout, activation);
   }
 
-  private restoreBooster(
-    side: "shipA" | "shipB", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined,
-  ): void {
+  private restoreBooster(side: Side, fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined): void {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
     this.boosterController.restore(side, loadout, activation);
@@ -205,18 +220,28 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   private applyShipState(settings: UserSettings): void {
-    const sigResolution = SIG_RESOLUTIONS[settings.sigRes];
-    this.els.sigRes.value = settings.sigRes;
-    this.sigResChoice.set(settings.sigRes);
-    this.trackingInput.setRadValue(settings.tracking, sigResolution);
-    this.els.optimal.value = String(settings.optimal);
-    this.els.falloff.value = String(settings.falloff);
     this.els.initialDistance.value = String(settings.initialDistance);
     this.shipASide.restore(this.shipASide.stateFrom(toCombatantSettings(settings, "shipA")));
     this.shipBSide.restore(this.shipBSide.stateFrom(toCombatantSettings(settings, "shipB")));
-    this.turretOverrides.set(settings.shipAOverrides ?? {});
-    this.turretController.restore({
-      fitting: settings.shipAFitting, conditions: this.shipASide.skillConditions(), ammo: settings.shipAAmmo,
+    this.turretOverridesBySide.shipA.set(settings.shipAOverrides ?? {});
+    this.turretOverridesBySide.shipB.set(settings.shipBOverrides ?? {});
+    this.turretControllers.shipA.restore({
+      fitting: settings.shipAFitting,
+      conditions: this.shipASide.skillConditions(),
+      ammo: settings.shipAAmmo,
+      tracking: settings.shipATracking,
+      sigRes: settings.shipASigRes,
+      optimal: settings.shipAOptimal,
+      falloff: settings.shipAFalloff,
+    });
+    this.turretControllers.shipB.restore({
+      fitting: settings.shipBFitting,
+      conditions: this.shipBSide.skillConditions(),
+      ammo: settings.shipBAmmo,
+      tracking: settings.shipBTracking,
+      sigRes: settings.shipBSigRes,
+      optimal: settings.shipBOptimal,
+      falloff: settings.shipBFalloff,
     });
     this.restoreEwar("shipA", settings.shipAFitting, settings.shipAEwarActivation);
     this.restoreEwar("shipB", settings.shipBFitting, settings.shipBEwarActivation);

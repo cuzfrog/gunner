@@ -10,12 +10,11 @@ export interface PanelOverrides {
   set(overrides: Partial<ProfileParamOverrides>): void;
 }
 
-export function createPanelOverrides(side: Side, turretOverrides: TurretOverrides): PanelOverrides {
-  if (side === "shipA") return new ShipAPanelOverrides(turretOverrides);
-  return new ShipBPanelOverrides();
+export function createPanelOverrides(side: Side, turretOverridesBySide: Record<Side, TurretOverrides>): PanelOverrides {
+  return new SidePanelOverrides(turretOverridesBySide[side]);
 }
 
-class ShipAPanelOverrides implements PanelOverrides {
+class SidePanelOverrides implements PanelOverrides {
   constructor(private readonly turretOverrides: TurretOverrides) {}
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
@@ -31,35 +30,10 @@ class ShipAPanelOverrides implements PanelOverrides {
   }
 
   get(): Partial<ProfileParamOverrides> {
-    return {};
-  }
-
-  set(_overrides: Partial<ProfileParamOverrides>): void {
-    // ShipA side panel state never owns the turret override store;
-    // the store is restored separately by the session codec.
-  }
-}
-
-class ShipBPanelOverrides implements PanelOverrides {
-  private overrides: Partial<ProfileParamOverrides> = {};
-
-  isOverridden(key: keyof ProfileParamOverrides): boolean {
-    return this.overrides[key] !== undefined;
-  }
-
-  record<K extends keyof ProfileParamOverrides>(key: K, value: ProfileParamOverrides[K]): void {
-    this.overrides = { ...this.overrides, [key]: value };
-  }
-
-  clear(): void {
-    this.overrides = {};
-  }
-
-  get(): Partial<ProfileParamOverrides> {
-    return { ...this.overrides };
+    return this.turretOverrides.get();
   }
 
   set(overrides: Partial<ProfileParamOverrides>): void {
-    this.overrides = { ...overrides };
+    this.turretOverrides.set(overrides);
   }
 }

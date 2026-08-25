@@ -1,16 +1,16 @@
 import { FakeElement } from "./fakeElement";
 
-const SELECT_IDS = new Set(["sigRes", "ship-a-mode", "ship-b-mode", "ship-a-skills", "ship-b-skills", "ship-a-propulsion", "ship-b-propulsion", "sim-speed"]);
+const SELECT_IDS = new Set(["ship-a-sigRes", "ship-b-sigRes", "ship-a-mode", "ship-b-mode", "ship-a-skills", "ship-b-skills", "ship-a-propulsion", "ship-b-propulsion", "sim-speed"]);
 const TEXTAREA_IDS = new Set(["ship-a-paste-input", "ship-b-paste-input"]);
-const IMAGE_IDS = new Set(["ship-a-ship-image", "ship-b-ship-image", "ship-a-ammo-summary-icon"]);
-const BUTTON_IDS = new Set(["play", "reset", "canvas-settings-trigger", "profile-save", "profile-select-trigger", "profile-delete", "profile-new", "new-profile-confirm", "new-profile-cancel", "share-link", "share-copy-url", "share-copy-text", "import-profile", "import-side-ship-a", "import-side-ship-b", "ship-a-import-fitting", "ship-b-import-fitting", "ship-a-fitting-trigger", "ship-a-fitting-eye", "ship-b-fitting-trigger", "ship-b-fitting-eye", "ship-a-ammo-trigger", "ship-a-ammo-expand", "ship-a-propulsion-gear", "ship-b-propulsion-gear", "ship-a-skill-trigger", "ship-b-skill-trigger", "ship-a-overload-button", "ship-b-overload-button", "ship-a-ewar-trigger", "ship-b-ewar-trigger", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja", "confirm-ok", "confirm-cancel"]);
+const IMAGE_IDS = new Set(["ship-a-ship-image", "ship-b-ship-image", "ship-a-ammo-summary-icon", "ship-b-ammo-summary-icon"]);
+const BUTTON_IDS = new Set(["play", "reset", "canvas-settings-trigger", "profile-save", "profile-select-trigger", "profile-delete", "profile-new", "new-profile-confirm", "new-profile-cancel", "share-link", "share-copy-url", "share-copy-text", "import-profile", "import-side-ship-a", "import-side-ship-b", "ship-a-import-fitting", "ship-b-import-fitting", "ship-a-fitting-trigger", "ship-a-fitting-eye", "ship-b-fitting-trigger", "ship-b-fitting-eye", "ship-a-ammo-trigger", "ship-a-ammo-expand", "ship-b-ammo-trigger", "ship-b-ammo-expand", "ship-a-propulsion-gear", "ship-b-propulsion-gear", "ship-a-skill-trigger", "ship-b-skill-trigger", "ship-a-overload-button", "ship-b-overload-button", "ship-a-ewar-trigger", "ship-b-ewar-trigger", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja", "confirm-ok", "confirm-cancel"]);
 
 function tagForId(id: string): string {
   if (SELECT_IDS.has(id)) return "SELECT";
   if (TEXTAREA_IDS.has(id)) return "TEXTAREA";
   if (IMAGE_IDS.has(id)) return "IMG";
   if (BUTTON_IDS.has(id)) return "BUTTON";
-  if (id.endsWith("-input") || id === "tracking" || id === "optimal" || id === "falloff" || id === "ship-a-hull" || id === "ship-b-hull" || id === "ship-a-speed" || id === "ship-a-mass" || id === "ship-a-inertia" || id === "ship-a-range" || id === "ship-a-aggressivity" || id === "ship-a-aggressivity-slider" || id === "ship-a-sig" || id === "ship-b-speed" || id === "ship-b-mass" || id === "ship-b-inertia" || id === "ship-b-range" || id === "ship-b-aggressivity" || id === "ship-b-aggressivity-slider" || id === "ship-b-sig" || id === "initial-distance" || id === "grid-brightness-slider" || id === "zoom-slider" || id === "auto-zoom" || id === "new-profile-name" || id === "ship-a-overload" || id === "ship-b-overload") return "INPUT";
+  if (id.endsWith("-input") || id === "ship-a-tracking" || id === "ship-b-tracking" || id === "ship-a-optimal" || id === "ship-b-optimal" || id === "ship-a-falloff" || id === "ship-b-falloff" || id === "ship-a-hull" || id === "ship-b-hull" || id === "ship-a-speed" || id === "ship-a-mass" || id === "ship-a-inertia" || id === "ship-a-range" || id === "ship-a-aggressivity" || id === "ship-a-aggressivity-slider" || id === "ship-a-sig" || id === "ship-b-speed" || id === "ship-b-mass" || id === "ship-b-inertia" || id === "ship-b-range" || id === "ship-b-aggressivity" || id === "ship-b-aggressivity-slider" || id === "ship-b-sig" || id === "initial-distance" || id === "grid-brightness-slider" || id === "zoom-slider" || id === "auto-zoom" || id === "new-profile-name" || id === "ship-a-overload" || id === "ship-b-overload") return "INPUT";
   return "DIV";
 }
 

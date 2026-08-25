@@ -56,14 +56,16 @@ export function fakeTrackingInput(rad = 0.32, currentUnit: TrackingUnit = "rad")
 }
 
 export function addSigResButtons(document: Document): void {
-  const group = getFake(document, "sig-res-options");
-  for (const value of ["S", "M", "L", "XL"]) {
-    const button = new FakeElement();
-    button.tagName = "BUTTON";
-    button.setAttribute("data-value", value);
-    button.setAttribute("aria-pressed", String(value === "S"));
-    button.title = `Original ${value}`;
-    group.appendChild(button);
+  for (const id of ["ship-a-sig-res-options", "ship-b-sig-res-options"]) {
+    const group = getFake(document, id);
+    for (const value of ["S", "M", "L", "XL"]) {
+      const button = new FakeElement();
+      button.tagName = "BUTTON";
+      button.setAttribute("data-value", value);
+      button.setAttribute("aria-pressed", String(value === "S"));
+      button.title = `Original ${value}`;
+      group.appendChild(button);
+    }
   }
 }
 
@@ -83,10 +85,14 @@ function addPortraitChildren(document: Document): void {
 
 function setControlDefaults(document: Document): void {
   const defaults: Record<string, string> = {
-    sigRes: "S",
-    tracking: "0.32",
-    optimal: "1000",
-    falloff: "3000",
+    "ship-a-sigRes": "S",
+    "ship-a-tracking": "0.32",
+    "ship-a-optimal": "1000",
+    "ship-a-falloff": "3000",
+    "ship-b-sigRes": "S",
+    "ship-b-tracking": "0.32",
+    "ship-b-optimal": "5000",
+    "ship-b-falloff": "5000",
     "ship-a-speed": "300",
     "ship-a-mass": "1000000",
     "ship-a-inertia": "3",
@@ -237,22 +243,30 @@ class StubPopup implements Popup {
 }
 
 class StubTurretController implements TurretController {
+  readonly side: Side;
   popup: Popup = new StubPopup();
   turret = vi.fn(() => undefined);
   ammo = vi.fn(() => "Hail S");
   applyImported = vi.fn();
-  restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string }): void;
-  restore(fittingText?: string, conditions?: StatConditions, ammo?: string): void;
-  restore(_arg1?: unknown, _conditions?: StatConditions, _ammo?: string): void {}
+  restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string; tracking?: number; sigRes?: SigResolutionClass; optimal?: number; falloff?: number }): void;
+  restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
+  restore(..._args: unknown[]): void {}
   clear = vi.fn();
   currentTurretSpec = vi.fn(() => ({ tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000 }));
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
-  capture = vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
+  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();
   setHullProfile = vi.fn();
   render = vi.fn();
+  private currentUnit: TrackingUnit = "rad";
+  setTrackingUnit = vi.fn((unit: TrackingUnit) => { this.currentUnit = unit; });
+  trackingUnit = vi.fn((): TrackingUnit => this.currentUnit);
+
+  constructor(side: Side) {
+    this.side = side;
+  }
 }
 
 export function buildSidePanel(
@@ -287,8 +301,10 @@ export function buildSidePanel(
     onKeyDown: vi.fn(),
   });
   const events: UiEvents = new UiEventsImpl();
-  const turretOverrides: TurretOverrides = new StubTurretOverrides();
-  const turret: TurretController = new StubTurretController();
+  const shipATurretOverrides: TurretOverrides = new StubTurretOverrides();
+  const shipBTurretOverrides: TurretOverrides = new StubTurretOverrides();
+  const shipATurretController: TurretController = new StubTurretController("shipA");
+  const shipBTurretController: TurretController = new StubTurretController("shipB");
 
   const cradle = createContainer<ControlsCradle>({ injectionMode: InjectionMode.PROXY });
   cradle.register({
@@ -300,8 +316,12 @@ export function buildSidePanel(
     popupGroup: asValue(popupGroup),
     ships: asValue(ships),
     fittingImport: asValue(fittingImport),
-    turretController: asValue(turret),
-    turretOverrides: asValue(turretOverrides),
+    shipATurretController: asValue(shipATurretController),
+    shipBTurretController: asValue(shipBTurretController),
+    turretControllers: asValue({ shipA: shipATurretController, shipB: shipBTurretController }),
+    shipATurretOverrides: asValue(shipATurretOverrides),
+    shipBTurretOverrides: asValue(shipBTurretOverrides),
+    turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),
   });
   registerSidePanelModule(cradle);
 
@@ -318,5 +338,7 @@ export function buildSidePanel(
     onDisplayChange: vi.fn(),
   });
   panel.setHost(host);
+  const turret = side === "shipA" ? shipATurretController : shipBTurretController;
+  const turretOverrides = side === "shipA" ? shipATurretOverrides : shipBTurretOverrides;
   return { document, panel, turret, turretOverrides, host };
 }

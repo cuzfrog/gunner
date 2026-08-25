@@ -25,7 +25,7 @@ function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps
     imageCatalog: proxy.imageCatalog,
     timer: proxy.timer,
     events: proxy.uiEvents,
-    overrides: createPanelOverrides(side, proxy.turretOverrides),
-    turretLink: createPanelTurretLink(side, proxy.turretController, proxy.popupGroup),
+    overrides: createPanelOverrides(side, proxy.turretOverridesBySide),
+    turretLink: createPanelTurretLink(side, proxy.turretControllers, proxy.popupGroup),
   };
 }

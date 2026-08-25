@@ -26,10 +26,12 @@ export function parseScalarValue(field: ScalarField, value: string, guards: Sett
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
   }
-  if (field === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
+  if (field === "shipASigRes" || field === "shipBSigRes") {
+    return guards.isSigResolutionClass(value) ? value : undefined;
+  }
   if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
   if (field === "shipAHull" || field === "shipAPropulsion" || field === "shipBHull" || field === "shipBPropulsion") return value;
-  if (field === "shipAAmmo") return value;
+  if (field === "shipAAmmo" || field === "shipBAmmo") return value;
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
@@ -52,11 +54,15 @@ export function parseOverrideValue(
 }
 
 export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings | undefined {
+  const shipATracking = raw.shipATracking;
+  const shipASigRes = raw.shipASigRes;
+  const shipAOptimal = raw.shipAOptimal;
+  const shipAFalloff = raw.shipAFalloff;
+  const shipBTracking = raw.shipBTracking;
+  const shipBSigRes = raw.shipBSigRes;
+  const shipBOptimal = raw.shipBOptimal;
+  const shipBFalloff = raw.shipBFalloff;
   const version = raw.version;
-  const tracking = raw.tracking;
-  const sigRes = raw.sigRes;
-  const optimal = raw.optimal;
-  const falloff = raw.falloff;
   const shipASpeed = raw.shipASpeed;
   const shipAMode = raw.shipAMode;
   const shipARange = raw.shipARange;
@@ -72,10 +78,14 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
 
   if (
     version === undefined ||
-    tracking === undefined ||
-    sigRes === undefined ||
-    optimal === undefined ||
-    falloff === undefined ||
+    shipATracking === undefined ||
+    shipASigRes === undefined ||
+    shipAOptimal === undefined ||
+    shipAFalloff === undefined ||
+    shipBTracking === undefined ||
+    shipBSigRes === undefined ||
+    shipBOptimal === undefined ||
+    shipBFalloff === undefined ||
     shipASpeed === undefined ||
     shipAMode === undefined ||
     shipARange === undefined ||
@@ -97,10 +107,14 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
 
   return {
     version,
-    tracking,
-    sigRes,
-    optimal,
-    falloff,
+    shipATracking,
+    shipASigRes,
+    shipAOptimal,
+    shipAFalloff,
+    shipBTracking,
+    shipBSigRes,
+    shipBOptimal,
+    shipBFalloff,
     shipASpeed,
     shipAMode,
     shipARange,
@@ -115,6 +129,21 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     shipBMass,
     shipBInertia,
     shipBSig,
+    ...definedOptionalFields(raw),
+  };
+}
+
+export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
+  try {
+    const parsed = JSON.parse(value);
+    return isOptionalFittedHullSummary(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {
     shipASig: raw.shipASig,
     shipASkillLevel: raw.shipASkillLevel,
     shipAOverload: raw.shipAOverload,
@@ -126,6 +155,7 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     shipAEwarActivation: raw.shipAEwarActivation,
     shipABoosterActivation: raw.shipABoosterActivation,
     shipAAmmo: raw.shipAAmmo,
+    shipBAmmo: raw.shipBAmmo,
     shipBSkillLevel: raw.shipBSkillLevel,
     shipBOverload: raw.shipBOverload,
     shipBHull: raw.shipBHull,
@@ -136,13 +166,9 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     shipBEwarActivation: raw.shipBEwarActivation,
     shipBBoosterActivation: raw.shipBBoosterActivation,
   };
-}
-
-export function parseFittedHullSummary(value: string): FittedHullSummary | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    return isOptionalFittedHullSummary(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) result[key] = value;
   }
+  return result;
 }

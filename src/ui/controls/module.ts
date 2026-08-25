@@ -4,8 +4,6 @@ import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { combatantSidesOf, forEachSide, wireCombatantSide } from "./combatantSide";
 import { createControlsEls } from "./elements";
-import { ChoiceGroupImpl } from "./choiceGroup";
-import { TrackingInputImpl } from "./trackingInput";
 import { registerConfirmModule } from "./confirm";
 import { registerDomControlsModule } from "./domControls";
 import { registerEffectiveReadoutModule } from "./effectiveReadout";
@@ -31,8 +29,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   }
   cradle.register({
     els: asFunction(createControlsEls).singleton(),
-    trackingInput: asClass(TrackingInputImpl).singleton(),
-    sigResChoice: asFunction(({ els }: ControlsCradle) => new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"])).singleton(),
   });
   registerHintsModule(cradle);
   registerTurretModule(cradle);

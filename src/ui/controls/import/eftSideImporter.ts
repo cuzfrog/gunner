@@ -7,20 +7,20 @@ import type { ShipATurret } from "./shipATurret";
 interface EftSideImporterDeps {
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
-  readonly turret: ShipATurret;
+  readonly turrets: Record<Side, ShipATurret>;
   readonly fittingImport: FittingImport;
 }
 
 export class EftSideImporter {
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
-  private readonly turret: ShipATurret;
+  private readonly turrets: Record<Side, ShipATurret>;
   private readonly fittingImport: FittingImport;
 
   constructor(deps: EftSideImporterDeps) {
     this.shipASide = deps.shipASide;
     this.shipBSide = deps.shipBSide;
-    this.turret = deps.turret;
+    this.turrets = deps.turrets;
     this.fittingImport = deps.fittingImport;
   }
 
@@ -42,7 +42,7 @@ export class EftSideImporter {
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
-    if (side === "shipA") this.turret.applyImported(imported);
+    this.turrets[side].applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
     }

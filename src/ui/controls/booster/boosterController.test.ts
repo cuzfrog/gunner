@@ -48,13 +48,13 @@ function buildBoosterController() {
     onKeyDown: vi.fn(),
   });
   const els = createControlsEls();
-  getFake(document, "ship-a-ewar-popup").appendChild(els.shipABoosterSection as unknown as FakeElement);
-  getFake(document, "ship-b-ewar-popup").appendChild(els.shipBBoosterSection as unknown as FakeElement);
+  getFake(document, "ship-a-ewar-popup").appendChild(els.shipA.boosterSection as unknown as FakeElement);
+  getFake(document, "ship-b-ewar-popup").appendChild(els.shipB.boosterSection as unknown as FakeElement);
   getFake(document, "ship-a-booster-section").hidden = true;
   getFake(document, "ship-b-booster-section").hidden = true;
   const boosterEls: BoosterEls = {
-    sections: { shipA: els.shipABoosterSection, shipB: els.shipBBoosterSection },
-    summaries: { shipA: els.shipABoosterSummary, shipB: els.shipBBoosterSummary },
+    sections: { shipA: els.shipA.boosterSection, shipB: els.shipB.boosterSection },
+    summaries: { shipA: els.shipA.boosterSummary, shipB: els.shipB.boosterSummary },
   };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));

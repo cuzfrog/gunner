@@ -1,3 +1,4 @@
+import type { Side } from "./side";
 import {
   el,
   elOf,
@@ -8,148 +9,150 @@ import {
   isHtmlTextAreaElement,
 } from "./controlsDom";
 
-export function createControlsEls() {
+interface GlobalControlsEls {
+  readonly trackingLabelText: HTMLElement;
+  readonly trackingUnitRad: HTMLButtonElement;
+  readonly trackingUnitScore: HTMLButtonElement;
+  readonly hullOptions: HTMLElement;
+  readonly play: HTMLButtonElement;
+  readonly reset: HTMLButtonElement;
+  readonly simSpeed: HTMLSelectElement;
+  readonly initialDistance: HTMLInputElement;
+  readonly gridBrightnessSlider: HTMLInputElement;
+  readonly gridBrightnessValue: HTMLElement;
+  readonly canvasSettingsTrigger: HTMLButtonElement;
+  readonly canvasSettingsPopup: HTMLElement;
+  readonly zoomSlider: HTMLInputElement;
+  readonly zoomValue: HTMLElement;
+  readonly autoZoomCheckbox: HTMLInputElement;
+  readonly langEn: HTMLButtonElement;
+  readonly langZh: HTMLButtonElement;
+  readonly langJa: HTMLButtonElement;
+  readonly profileSave: HTMLButtonElement;
+  readonly profileDelete: HTMLButtonElement;
+  readonly profileSelectTrigger: HTMLButtonElement;
+  readonly profileSelectLabel: HTMLElement;
+  readonly profilePopup: HTMLElement;
+  readonly profileNew: HTMLButtonElement;
+  readonly newProfilePopup: HTMLElement;
+  readonly newProfileName: HTMLInputElement;
+  readonly newProfileConfirm: HTMLButtonElement;
+  readonly newProfileCancel: HTMLButtonElement;
+  readonly shareLink: HTMLButtonElement;
+  readonly sharePopup: HTMLElement;
+  readonly shareCopyUrl: HTMLButtonElement;
+  readonly shareCopyText: HTMLButtonElement;
+  readonly shareStatus: HTMLElement;
+  readonly importProfile: HTMLButtonElement;
+  readonly importSidePopup: HTMLElement;
+  readonly importSideShipA: HTMLButtonElement;
+  readonly importSideShipB: HTMLButtonElement;
+  readonly confirmPopup: HTMLElement;
+  readonly confirmMessage: HTMLElement;
+  readonly confirmOk: HTMLButtonElement;
+  readonly confirmCancel: HTMLButtonElement;
+  readonly resDistance: HTMLElement;
+  readonly resTransversal: HTMLElement;
+  readonly resAngular: HTMLElement;
+  readonly resRadial: HTMLElement;
+  readonly resTrackPen: HTMLElement;
+  readonly resRangePen: HTMLElement;
+  readonly resHit: HTMLElement;
+  readonly rangeOverlayLegend: HTMLElement;
+  readonly slideHints: HTMLElement;
+}
+
+interface CombatantEls {
+  readonly tracking: HTMLInputElement;
+  readonly sigRes: HTMLSelectElement;
+  readonly sigResOptions: HTMLElement;
+  readonly optimal: HTMLInputElement;
+  readonly falloff: HTMLInputElement;
+  readonly effectiveTracking: HTMLElement;
+  readonly effectiveOptimal: HTMLElement;
+  readonly effectiveFalloff: HTMLElement;
+  readonly effectiveSpeed: HTMLElement;
+  readonly ammoField: HTMLElement;
+  readonly ammoTrigger: HTMLButtonElement;
+  readonly ammoSummary: HTMLElement;
+  readonly ammoSummaryIcon: HTMLImageElement;
+  readonly ammoPopup: HTMLElement;
+  readonly ammoCargoLabel: HTMLElement;
+  readonly ammoCargoList: HTMLElement;
+  readonly ammoExpand: HTMLButtonElement;
+  readonly ammoAllSection: HTMLElement;
+  readonly ammoAllList: HTMLElement;
+  readonly hull: HTMLInputElement;
+  readonly shipImage: HTMLImageElement;
+  readonly fittingName: HTMLElement;
+  readonly hullHint: HTMLElement;
+  readonly fittingTrigger: HTMLButtonElement;
+  readonly fittingEye: HTMLButtonElement;
+  readonly fittingPopup: HTMLElement;
+  readonly fittingPreview: HTMLElement;
+  readonly fittingSavedLabel: HTMLElement;
+  readonly fittingSavedList: HTMLElement;
+  readonly fittingPresetLabel: HTMLElement;
+  readonly fittingPresetList: HTMLElement;
+  readonly fittingEmpty: HTMLElement;
+  readonly importFitting: HTMLButtonElement;
+  readonly pastePopup: HTMLElement;
+  readonly pasteInput: HTMLTextAreaElement;
+  readonly propulsion: HTMLSelectElement;
+  readonly propulsionOptions: HTMLElement;
+  readonly propulsionGear: HTMLButtonElement;
+  readonly propulsionVariants: HTMLElement;
+  readonly skills: HTMLSelectElement;
+  readonly skillOptions: HTMLElement;
+  readonly skillSummary: HTMLElement;
+  readonly skillTrigger: HTMLButtonElement;
+  readonly skillPopup: HTMLElement;
+  readonly overload: HTMLInputElement;
+  readonly overloadButton: HTMLButtonElement;
+  readonly ewarField: HTMLElement;
+  readonly ewarTrigger: HTMLButtonElement;
+  readonly ewarPopup: HTMLElement;
+  readonly ewarSection: HTMLElement;
+  readonly ewarSummaryRow: HTMLElement;
+  readonly ewarSummary: HTMLElement;
+  readonly boosterSection: HTMLElement;
+  readonly boosterSummary: HTMLElement;
+  readonly speed: HTMLInputElement;
+  readonly mass: HTMLInputElement;
+  readonly inertia: HTMLInputElement;
+  readonly alignTime: HTMLElement;
+  readonly mode: HTMLSelectElement;
+  readonly range: HTMLInputElement;
+  readonly aggressivity: HTMLInputElement;
+  readonly aggressivitySlider: HTMLInputElement;
+  readonly aggressivityValue: HTMLElement;
+  readonly shipSig: HTMLInputElement;
+  readonly portrait: HTMLElement;
+}
+
+interface ControlsElements extends GlobalControlsEls {
+  readonly shipA: CombatantEls;
+  readonly shipB: CombatantEls;
+}
+
+export function createControlsEls(): ControlsElements {
   return {
-    tracking: elOf("tracking", isHtmlInputElement),
+    ...createGlobalControlsEls(),
+    shipA: createCombatantEls("shipA"),
+    shipB: createCombatantEls("shipB"),
+  };
+}
+
+function createGlobalControlsEls(): GlobalControlsEls {
+  return {
+    trackingLabelText: el("tracking-label-text"),
     trackingUnitRad: elOf("tracking-unit-rad", isHtmlButtonElement),
     trackingUnitScore: elOf("tracking-unit-score", isHtmlButtonElement),
-    sigRes: elOf("sigRes", isHtmlSelectElement),
-    sigResOptions: el("sig-res-options"),
-    optimal: elOf("optimal", isHtmlInputElement),
-    falloff: elOf("falloff", isHtmlInputElement),
-    trackingReadout: el("effective-tracking"),
-    optimalReadout: el("effective-optimal"),
-    falloffReadout: el("effective-falloff"),
-    shipASpeedReadout: el("effective-ship-a-speed"),
-    shipBSpeedReadout: el("effective-ship-b-speed"),
-    shipAAmmoTrigger: elOf("ship-a-ammo-trigger", isHtmlButtonElement),
-    shipAAmmoSummary: el("ship-a-ammo-summary"),
-    shipAAmmoSummaryIcon: elOf("ship-a-ammo-summary-icon", isHtmlImageElement),
-    shipAAmmoPopup: el("ship-a-ammo-popup"),
-    shipAAmmoCargoLabel: el("ship-a-ammo-cargo-label"),
-    shipAAmmoCargoList: el("ship-a-ammo-cargo-list"),
-    shipAAmmoExpand: elOf("ship-a-ammo-expand", isHtmlButtonElement),
-    shipAAmmoAllSection: el("ship-a-ammo-all-section"),
-    shipAAmmoAllList: el("ship-a-ammo-all-list"),
     hullOptions: el("hull-options"),
-    shipAHull: elOf("ship-a-hull", isHtmlInputElement),
-    shipAShipImage: elOf("ship-a-ship-image", isHtmlImageElement),
-    shipAFittingTrigger: elOf("ship-a-fitting-trigger", isHtmlButtonElement),
-    shipAFittingEye: elOf("ship-a-fitting-eye", isHtmlButtonElement),
-    shipAFittingPopup: el("ship-a-fitting-popup"),
-    shipAFittingPreview: el("ship-a-fitting-preview"),
-    shipAFittingSavedLabel: el("ship-a-fitting-saved-label"),
-    shipAFittingSavedList: el("ship-a-fitting-saved-list"),
-    shipAFittingPresetLabel: el("ship-a-fitting-preset-label"),
-    shipAFittingPresetList: el("ship-a-fitting-preset-list"),
-    shipAFittingEmpty: el("ship-a-fitting-empty"),
-    shipAHullHint: el("ship-a-hull-hint"),
-    shipAFittingName: el("ship-a-fitting-name"),
-    shipAImportFitting: elOf("ship-a-import-fitting", isHtmlButtonElement),
-    shipAPastePopup: el("ship-a-paste-popup"),
-    shipAPasteInput: elOf("ship-a-paste-input", isHtmlTextAreaElement),
-    shipAPropulsion: elOf("ship-a-propulsion", isHtmlSelectElement),
-    shipAPropulsionOptions: el("ship-a-propulsion-options"),
-    shipAPropulsionGear: elOf("ship-a-propulsion-gear", isHtmlButtonElement),
-    shipAPropulsionVariants: el("ship-a-propulsion-variants"),
-    shipASkills: elOf("ship-a-skills", isHtmlSelectElement),
-    shipASkillOptions: el("ship-a-skill-options"),
-    shipASkillSummary: el("ship-a-skill-summary"),
-    shipASkillTrigger: elOf("ship-a-skill-trigger", isHtmlButtonElement),
-    shipASkillPopup: el("ship-a-skill-popup"),
-    shipAOverload: elOf("ship-a-overload", isHtmlInputElement),
-    shipAOverloadButton: elOf("ship-a-overload-button", isHtmlButtonElement),
-    shipAEwarField: el("ship-a-ewar-field"),
-    shipAEwarTrigger: elOf("ship-a-ewar-trigger", isHtmlButtonElement),
-    shipAEwarPopup: el("ship-a-ewar-popup"),
-    shipAEwarSection: el("ship-a-ewar-section"),
-    shipAEwarSummary: el("ship-a-ewar-summary"),
-    shipABoosterSection: el("ship-a-booster-section"),
-    shipABoosterSummary: el("ship-a-booster-summary"),
-    shipASpeed: elOf("ship-a-speed", isHtmlInputElement),
-    shipAMass: elOf("ship-a-mass", isHtmlInputElement),
-    shipAInertia: elOf("ship-a-inertia", isHtmlInputElement),
-    shipASig: elOf("ship-a-sig", isHtmlInputElement),
-    shipAAlignTime: el("ship-a-align-time"),
-    shipAMode: elOf("ship-a-mode", isHtmlSelectElement),
-    shipARange: elOf("ship-a-range", isHtmlInputElement),
-    shipAAggressivity: elOf("ship-a-aggressivity", isHtmlInputElement),
-    shipAAggressivitySlider: elOf("ship-a-aggressivity-slider", isHtmlInputElement),
-    shipAAggressivityValue: el("ship-a-aggressivity-value"),
-    initialDistance: elOf("initial-distance", isHtmlInputElement),
-    shipBHull: elOf("ship-b-hull", isHtmlInputElement),
-    shipBShipImage: elOf("ship-b-ship-image", isHtmlImageElement),
-    shipBFittingTrigger: elOf("ship-b-fitting-trigger", isHtmlButtonElement),
-    shipBFittingEye: elOf("ship-b-fitting-eye", isHtmlButtonElement),
-    shipBFittingPopup: el("ship-b-fitting-popup"),
-    shipBFittingPreview: el("ship-b-fitting-preview"),
-    shipBFittingSavedLabel: el("ship-b-fitting-saved-label"),
-    shipBFittingSavedList: el("ship-b-fitting-saved-list"),
-    shipBFittingPresetLabel: el("ship-b-fitting-preset-label"),
-    shipBFittingPresetList: el("ship-b-fitting-preset-list"),
-    shipBFittingEmpty: el("ship-b-fitting-empty"),
-    shipBHullHint: el("ship-b-hull-hint"),
-    shipBFittingName: el("ship-b-fitting-name"),
-    shipBImportFitting: elOf("ship-b-import-fitting", isHtmlButtonElement),
-    shipBPastePopup: el("ship-b-paste-popup"),
-    shipBPasteInput: elOf("ship-b-paste-input", isHtmlTextAreaElement),
-    shipBPropulsion: elOf("ship-b-propulsion", isHtmlSelectElement),
-    shipBPropulsionOptions: el("ship-b-propulsion-options"),
-    shipBPropulsionGear: elOf("ship-b-propulsion-gear", isHtmlButtonElement),
-    shipBPropulsionVariants: el("ship-b-propulsion-variants"),
-    shipBSkills: elOf("ship-b-skills", isHtmlSelectElement),
-    shipBSkillOptions: el("ship-b-skill-options"),
-    shipBSkillSummary: el("ship-b-skill-summary"),
-    shipBSkillTrigger: elOf("ship-b-skill-trigger", isHtmlButtonElement),
-    shipBSkillPopup: el("ship-b-skill-popup"),
-    shipBOverload: elOf("ship-b-overload", isHtmlInputElement),
-    shipBOverloadButton: elOf("ship-b-overload-button", isHtmlButtonElement),
-    shipBEwarField: el("ship-b-ewar-field"),
-    shipBEwarTrigger: elOf("ship-b-ewar-trigger", isHtmlButtonElement),
-    shipBEwarPopup: el("ship-b-ewar-popup"),
-    shipBEwarSection: el("ship-b-ewar-section"),
-    shipBEwarSummary: el("ship-b-ewar-summary"),
-    shipBBoosterSection: el("ship-b-booster-section"),
-    shipBBoosterSummary: el("ship-b-booster-summary"),
-    shipBSpeed: elOf("ship-b-speed", isHtmlInputElement),
-    shipBMass: elOf("ship-b-mass", isHtmlInputElement),
-    shipBInertia: elOf("ship-b-inertia", isHtmlInputElement),
-    shipBAlignTime: el("ship-b-align-time"),
-    shipBMode: elOf("ship-b-mode", isHtmlSelectElement),
-    shipBRange: elOf("ship-b-range", isHtmlInputElement),
-    shipBAggressivity: elOf("ship-b-aggressivity", isHtmlInputElement),
-    shipBAggressivitySlider: elOf("ship-b-aggressivity-slider", isHtmlInputElement),
-    shipBAggressivityValue: el("ship-b-aggressivity-value"),
-    shipBSig: elOf("ship-b-sig", isHtmlInputElement),
-    simSpeed: elOf("sim-speed", isHtmlSelectElement),
-    profileSave: elOf("profile-save", isHtmlButtonElement),
-    profileSelectTrigger: elOf("profile-select-trigger", isHtmlButtonElement),
-    profileSelectLabel: el("profile-select-label"),
-    profilePopup: el("profile-popup"),
-    profileDelete: elOf("profile-delete", isHtmlButtonElement),
-    profileNew: elOf("profile-new", isHtmlButtonElement),
-    newProfilePopup: el("new-profile-popup"),
-    newProfileName: elOf("new-profile-name", isHtmlInputElement),
-    newProfileConfirm: elOf("new-profile-confirm", isHtmlButtonElement),
-    newProfileCancel: elOf("new-profile-cancel", isHtmlButtonElement),
-    confirmPopup: el("confirm-popup"),
-    confirmMessage: el("confirm-message"),
-    confirmOk: elOf("confirm-ok", isHtmlButtonElement),
-    confirmCancel: elOf("confirm-cancel", isHtmlButtonElement),
-    shareLink: elOf("share-link", isHtmlButtonElement),
-    sharePopup: el("share-popup"),
-    shareCopyUrl: elOf("share-copy-url", isHtmlButtonElement),
-    shareCopyText: elOf("share-copy-text", isHtmlButtonElement),
-    importProfile: elOf("import-profile", isHtmlButtonElement),
-    importSidePopup: el("import-side-popup"),
-    importSideShipA: elOf("import-side-ship-a", isHtmlButtonElement),
-    importSideShipB: elOf("import-side-ship-b", isHtmlButtonElement),
-    shareStatus: el("share-status"),
-    langEn: elOf("lang-en", isHtmlButtonElement),
-    langZh: elOf("lang-zh", isHtmlButtonElement),
-    langJa: elOf("lang-ja", isHtmlButtonElement),
     play: elOf("play", isHtmlButtonElement),
     reset: elOf("reset", isHtmlButtonElement),
+    simSpeed: elOf("sim-speed", isHtmlSelectElement),
+    initialDistance: elOf("initial-distance", isHtmlInputElement),
     gridBrightnessSlider: elOf("grid-brightness-slider", isHtmlInputElement),
     gridBrightnessValue: el("grid-brightness-value"),
     canvasSettingsTrigger: elOf("canvas-settings-trigger", isHtmlButtonElement),
@@ -157,7 +160,32 @@ export function createControlsEls() {
     zoomSlider: elOf("zoom-slider", isHtmlInputElement),
     zoomValue: el("zoom-value"),
     autoZoomCheckbox: elOf("auto-zoom", isHtmlInputElement),
-    slideHints: el("slide-hints"),
+    langEn: elOf("lang-en", isHtmlButtonElement),
+    langZh: elOf("lang-zh", isHtmlButtonElement),
+    langJa: elOf("lang-ja", isHtmlButtonElement),
+    profileSave: elOf("profile-save", isHtmlButtonElement),
+    profileDelete: elOf("profile-delete", isHtmlButtonElement),
+    profileSelectTrigger: elOf("profile-select-trigger", isHtmlButtonElement),
+    profileSelectLabel: el("profile-select-label"),
+    profilePopup: el("profile-popup"),
+    profileNew: elOf("profile-new", isHtmlButtonElement),
+    newProfilePopup: el("new-profile-popup"),
+    newProfileName: elOf("new-profile-name", isHtmlInputElement),
+    newProfileConfirm: elOf("new-profile-confirm", isHtmlButtonElement),
+    newProfileCancel: elOf("new-profile-cancel", isHtmlButtonElement),
+    shareLink: elOf("share-link", isHtmlButtonElement),
+    sharePopup: el("share-popup"),
+    shareCopyUrl: elOf("share-copy-url", isHtmlButtonElement),
+    shareCopyText: elOf("share-copy-text", isHtmlButtonElement),
+    shareStatus: el("share-status"),
+    importProfile: elOf("import-profile", isHtmlButtonElement),
+    importSidePopup: el("import-side-popup"),
+    importSideShipA: elOf("import-side-ship-a", isHtmlButtonElement),
+    importSideShipB: elOf("import-side-ship-b", isHtmlButtonElement),
+    confirmPopup: el("confirm-popup"),
+    confirmMessage: el("confirm-message"),
+    confirmOk: elOf("confirm-ok", isHtmlButtonElement),
+    confirmCancel: elOf("confirm-cancel", isHtmlButtonElement),
     resDistance: el("res-distance"),
     resTransversal: el("res-transversal"),
     resAngular: el("res-angular"),
@@ -166,7 +194,80 @@ export function createControlsEls() {
     resRangePen: el("res-range-pen"),
     resHit: el("res-hit"),
     rangeOverlayLegend: el("range-overlay-legend"),
-    shipAPortrait: el("ship-a-portrait"),
-    shipBPortrait: el("ship-b-portrait"),
+    slideHints: el("slide-hints"),
+  };
+}
+
+function createCombatantEls(side: Side): CombatantEls {
+  const id = side === "shipA" ? "ship-a" : "ship-b";
+  const effectiveTrackingId = side === "shipA" ? "tracking" : "ship-b-tracking";
+  const effectiveOptimalId = side === "shipA" ? "optimal" : "ship-b-optimal";
+  const effectiveFalloffId = side === "shipA" ? "falloff" : "ship-b-falloff";
+  return {
+    tracking: elOf(`${id}-tracking`, isHtmlInputElement),
+    sigRes: elOf(`${id}-sigRes`, isHtmlSelectElement),
+    sigResOptions: el(`${id}-sig-res-options`),
+    optimal: elOf(`${id}-optimal`, isHtmlInputElement),
+    falloff: elOf(`${id}-falloff`, isHtmlInputElement),
+    effectiveTracking: el(`effective-${effectiveTrackingId}`),
+    effectiveOptimal: el(`effective-${effectiveOptimalId}`),
+    effectiveFalloff: el(`effective-${effectiveFalloffId}`),
+    effectiveSpeed: el(`effective-${id}-speed`),
+    ammoField: el(`${id}-ammo-field`),
+    ammoTrigger: elOf(`${id}-ammo-trigger`, isHtmlButtonElement),
+    ammoSummary: el(`${id}-ammo-summary`),
+    ammoSummaryIcon: elOf(`${id}-ammo-summary-icon`, isHtmlImageElement),
+    ammoPopup: el(`${id}-ammo-popup`),
+    ammoCargoLabel: el(`${id}-ammo-cargo-label`),
+    ammoCargoList: el(`${id}-ammo-cargo-list`),
+    ammoExpand: elOf(`${id}-ammo-expand`, isHtmlButtonElement),
+    ammoAllSection: el(`${id}-ammo-all-section`),
+    ammoAllList: el(`${id}-ammo-all-list`),
+    hull: elOf(`${id}-hull`, isHtmlInputElement),
+    shipImage: elOf(`${id}-ship-image`, isHtmlImageElement),
+    fittingName: el(`${id}-fitting-name`),
+    hullHint: el(`${id}-hull-hint`),
+    fittingTrigger: elOf(`${id}-fitting-trigger`, isHtmlButtonElement),
+    fittingEye: elOf(`${id}-fitting-eye`, isHtmlButtonElement),
+    fittingPopup: el(`${id}-fitting-popup`),
+    fittingPreview: el(`${id}-fitting-preview`),
+    fittingSavedLabel: el(`${id}-fitting-saved-label`),
+    fittingSavedList: el(`${id}-fitting-saved-list`),
+    fittingPresetLabel: el(`${id}-fitting-preset-label`),
+    fittingPresetList: el(`${id}-fitting-preset-list`),
+    fittingEmpty: el(`${id}-fitting-empty`),
+    importFitting: elOf(`${id}-import-fitting`, isHtmlButtonElement),
+    pastePopup: el(`${id}-paste-popup`),
+    pasteInput: elOf(`${id}-paste-input`, isHtmlTextAreaElement),
+    propulsion: elOf(`${id}-propulsion`, isHtmlSelectElement),
+    propulsionOptions: el(`${id}-propulsion-options`),
+    propulsionGear: elOf(`${id}-propulsion-gear`, isHtmlButtonElement),
+    propulsionVariants: el(`${id}-propulsion-variants`),
+    skills: elOf(`${id}-skills`, isHtmlSelectElement),
+    skillOptions: el(`${id}-skill-options`),
+    skillSummary: el(`${id}-skill-summary`),
+    skillTrigger: elOf(`${id}-skill-trigger`, isHtmlButtonElement),
+    skillPopup: el(`${id}-skill-popup`),
+    overload: elOf(`${id}-overload`, isHtmlInputElement),
+    overloadButton: elOf(`${id}-overload-button`, isHtmlButtonElement),
+    ewarField: el(`${id}-ewar-field`),
+    ewarTrigger: elOf(`${id}-ewar-trigger`, isHtmlButtonElement),
+    ewarPopup: el(`${id}-ewar-popup`),
+    ewarSection: el(`${id}-ewar-section`),
+    ewarSummaryRow: el(`${id}-ewar-summary-row`),
+    ewarSummary: el(`${id}-ewar-summary`),
+    boosterSection: el(`${id}-booster-section`),
+    boosterSummary: el(`${id}-booster-summary`),
+    speed: elOf(`${id}-speed`, isHtmlInputElement),
+    mass: elOf(`${id}-mass`, isHtmlInputElement),
+    inertia: elOf(`${id}-inertia`, isHtmlInputElement),
+    alignTime: el(`${id}-align-time`),
+    mode: elOf(`${id}-mode`, isHtmlSelectElement),
+    range: elOf(`${id}-range`, isHtmlInputElement),
+    aggressivity: elOf(`${id}-aggressivity`, isHtmlInputElement),
+    aggressivitySlider: elOf(`${id}-aggressivity-slider`, isHtmlInputElement),
+    aggressivityValue: el(`${id}-aggressivity-value`),
+    shipSig: elOf(`${id}-sig`, isHtmlInputElement),
+    portrait: el(`${id}-portrait`),
   };
 }

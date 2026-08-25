@@ -480,9 +480,9 @@ describe("SettingsParser", () => {
     const decoded = makeParser().decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
     expect(decoded!.shipAAmmo).toBe("Republic Fleet EMP S");
-    expect(decoded!.tracking).toBe(0.42);
-    expect(decoded!.optimal).toBe(1200);
-    expect(decoded!.falloff).toBe(3000);
+    expect(decoded!.shipATracking).toBe(0.42);
+    expect(decoded!.shipAOptimal).toBe(1200);
+    expect(decoded!.shipAFalloff).toBe(3000);
   });
 
   test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when shipASpeed is overridden", () => {

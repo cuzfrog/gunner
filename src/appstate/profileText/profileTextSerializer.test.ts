@@ -11,6 +11,12 @@ describe("profileTextSerializer", () => {
     expect(text).not.toContain("shipA.ammo=");
   });
 
+  test("emits the shipB ammo line as a side key", () => {
+    const profile = { ...MINIMAL_PROFILE, shipBAmmo: "Republic Fleet EMP S" };
+    const text = serializer.serialize(profile);
+    expect(text).toContain("shipB.ammo=Republic Fleet EMP S");
+  });
+
   test("emits only shipA and shipB dot keys and no attacker or target keys", () => {
     const text = serializer.serialize(MINIMAL_PROFILE);
     expect(text).toContain("shipA.speed=");

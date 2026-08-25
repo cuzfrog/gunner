@@ -12,10 +12,10 @@ describe("TurretController", () => {
     expect(getFake(document, "ship-a-ammo-all-section").hidden).toBe(true);
     expect(controller.ammo()).toBe("Hail S");
     expect(controller.turret()).toBeUndefined();
-    expect(getFake(document, "tracking").disabled).toBe(true);
-    expect(getFake(document, "sigRes").disabled).toBe(true);
-    expect(getFake(document, "optimal").disabled).toBe(true);
-    expect(getFake(document, "falloff").disabled).toBe(true);
+    expect(getFake(document, "ship-a-tracking").disabled).toBe(true);
+    expect(getFake(document, "ship-a-sigRes").disabled).toBe(true);
+    expect(getFake(document, "ship-a-optimal").disabled).toBe(true);
+    expect(getFake(document, "ship-a-falloff").disabled).toBe(true);
   });
 
   test("applyImported with a turret sets inputs, renders lists and sig-res icons", () => {
@@ -30,18 +30,18 @@ describe("TurretController", () => {
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(false);
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Hail S");
     expect(getFake(document, "ship-a-ammo-summary-icon").src).toBe("images/icons/Hail_S.png");
-    expect(getFake(document, "tracking").value).toBe("0.315");
-    expect(getFake(document, "sigRes").value).toBe("S");
-    expect(getFake(document, "optimal").value).toBe("600");
-    expect(getFake(document, "falloff").value).toBe("3000");
+    expect(getFake(document, "ship-a-tracking").value).toBe("0.315");
+    expect(getFake(document, "ship-a-sigRes").value).toBe("S");
+    expect(getFake(document, "ship-a-optimal").value).toBe("600");
+    expect(getFake(document, "ship-a-falloff").value).toBe("3000");
     expect(getFake(document, "ship-a-ammo-cargo-list").children.length).toBe(2);
     expect(getFake(document, "ship-a-ammo-all-list").children.length).toBe(2);
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
-    expect(getFake(document, "sig-res-options").children[0].title).toContain("Original S");
-    expect(getFake(document, "tracking").disabled).toBe(false);
-    expect(getFake(document, "sigRes").disabled).toBe(false);
-    expect(getFake(document, "optimal").disabled).toBe(false);
-    expect(getFake(document, "falloff").disabled).toBe(false);
+    expect(getFake(document, "ship-a-sig-res-options").children[0].title).toContain("Original S");
+    expect(getFake(document, "ship-a-tracking").disabled).toBe(false);
+    expect(getFake(document, "ship-a-sigRes").disabled).toBe(false);
+    expect(getFake(document, "ship-a-optimal").disabled).toBe(false);
+    expect(getFake(document, "ship-a-falloff").disabled).toBe(false);
   });
 
   test("applyImported without a turret leaves the trigger and inputs disabled", () => {
@@ -49,10 +49,10 @@ describe("TurretController", () => {
     controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined });
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(true);
     expect(controller.ammo()).toBe("Hail S");
-    expect(getFake(document, "tracking").disabled).toBe(true);
-    expect(getFake(document, "sigRes").disabled).toBe(true);
-    expect(getFake(document, "optimal").disabled).toBe(true);
-    expect(getFake(document, "falloff").disabled).toBe(true);
+    expect(getFake(document, "ship-a-tracking").disabled).toBe(true);
+    expect(getFake(document, "ship-a-sigRes").disabled).toBe(true);
+    expect(getFake(document, "ship-a-optimal").disabled).toBe(true);
+    expect(getFake(document, "ship-a-falloff").disabled).toBe(true);
   });
 
   test("restore imports the fitting and applies the stored ammo", () => {
@@ -134,7 +134,7 @@ describe("TurretController", () => {
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
     turretOverrides.set({ shipAMass: 1234 });
-    getFake(document, "optimal").value = "12345";
+    getFake(document, "ship-a-optimal").value = "12345";
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.openAmmoPopup();
     getFake(document, "ship-a-ammo-all-list").children[1].trigger("click");
@@ -144,9 +144,9 @@ describe("TurretController", () => {
     expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ charge: "Hail S" }), "Republic Fleet EMP S");
     expect(turretOverrides.get()).toEqual({ shipAMass: 1234 });
     expect(emitConfigInvalidated).toHaveBeenCalledWith(false);
-    expect(getFake(document, "tracking").value).toBe("0.42");
-    expect(getFake(document, "optimal").value).toBe("1200");
-    expect(getFake(document, "falloff").value).toBe("3000");
+    expect(getFake(document, "ship-a-tracking").value).toBe("0.42");
+    expect(getFake(document, "ship-a-optimal").value).toBe("1200");
+    expect(getFake(document, "ship-a-falloff").value).toBe("3000");
   });
 
   test("icon URL fallback hides the icon", () => {
@@ -159,7 +159,7 @@ describe("TurretController", () => {
     const icon = getFake(document, "ship-a-ammo-summary-icon");
     expect(icon.hidden).toBe(true);
     expect(icon.src).toBe("");
-    for (const button of getFake(document, "sig-res-options").children) {
+    for (const button of getFake(document, "ship-a-sig-res-options").children) {
       expect(button.children[0].hidden).toBe(true);
     }
   });
@@ -169,7 +169,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
     });
-    const button = getFake(document, "sig-res-options").children[0];
+    const button = getFake(document, "ship-a-sig-res-options").children[0];
     const original = button.title;
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
 
@@ -193,9 +193,9 @@ describe("TurretController", () => {
   test("capture returns the current turret inputs and ammo", () => {
     const { document, controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
-    getFake(document, "optimal").value = "5000";
-    getFake(document, "falloff").value = "4000";
-    getFake(document, "sigRes").value = "M";
+    getFake(document, "ship-a-optimal").value = "5000";
+    getFake(document, "ship-a-falloff").value = "4000";
+    getFake(document, "ship-a-sigRes").value = "M";
     const captured = controller.capture();
     expect(captured.sigRes).toBe("M");
     expect(captured.optimal).toBe(5000);
@@ -233,15 +233,15 @@ describe("TurretController", () => {
   test("setHullProfile with no profile disables every sig-res button and option", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: vi.fn(() => [] as const) } });
     controller.setHullProfile(undefined);
-    const buttons = Array.from(getFake(document, "sig-res-options").children);
+    const buttons = Array.from(getFake(document, "ship-a-sig-res-options").children);
     for (const button of buttons) {
       expect(button.disabled).toBe(true);
       expect(button.title).not.toBe("turret.notFittable");
     }
-    for (const option of getFake(document, "sigRes").options) {
+    for (const option of getFake(document, "ship-a-sigRes").options) {
       expect(option.disabled).toBe(true);
     }
-    expect(getFake(document, "tracking").disabled).toBe(true);
+    expect(getFake(document, "ship-a-tracking").disabled).toBe(true);
     expect(getFake(document, "ship-a-ammo-trigger").disabled).toBe(true);
   });
 
@@ -258,7 +258,7 @@ describe("TurretController", () => {
     expect(buttonFor(document, "L").title).toBe("turret.notFittable");
     expect(optionFor(document, "S").disabled).toBe(false);
     expect(optionFor(document, "XL").disabled).toBe(true);
-    expect(getFake(document, "tracking").disabled).toBe(false);
+    expect(getFake(document, "ship-a-tracking").disabled).toBe(false);
   });
 
   test("setHullProfile clamps an invalid current class to the fitted turret's class when it fits", () => {
@@ -267,18 +267,18 @@ describe("TurretController", () => {
       ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
-    getFake(document, "sigRes").value = "L";
+    getFake(document, "ship-a-sigRes").value = "L";
     controller.setHullProfile(RIFTER);
-    expect(getFake(document, "sigRes").value).toBe("S");
+    expect(getFake(document, "ship-a-sigRes").value).toBe("S");
     expect(buttonFor(document, "S").getAttribute("aria-pressed")).toBe("true");
   });
 
   test("setHullProfile clamps an invalid current class to the highest allowed class when no turret is fitted", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
-    getFake(document, "sigRes").value = "XL";
+    getFake(document, "ship-a-sigRes").value = "XL";
     const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
     controller.setHullProfile(mediumProfile);
-    expect(getFake(document, "sigRes").value).toBe("L");
+    expect(getFake(document, "ship-a-sigRes").value).toBe("L");
     expect(buttonFor(document, "L").getAttribute("aria-pressed")).toBe("true");
     expect(buttonFor(document, "XL").disabled).toBe(true);
   });
@@ -297,8 +297,8 @@ describe("TurretController", () => {
   test("tracking input updates the tracking override and emits displayInvalidated", () => {
     const { document, turretOverrides, events } = buildTurret();
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    getFake(document, "tracking").value = "0.5";
-    getFake(document, "tracking").trigger("input");
+    getFake(document, "ship-a-tracking").value = "0.5";
+    getFake(document, "ship-a-tracking").trigger("input");
     expect(turretOverrides.get().tracking).toBe(0.5);
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
@@ -306,8 +306,8 @@ describe("TurretController", () => {
   test("sigRes input updates the sigRes override and emits displayInvalidated", () => {
     const { document, turretOverrides, events } = buildTurret();
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    getFake(document, "sigRes").value = "M";
-    getFake(document, "sigRes").trigger("input");
+    getFake(document, "ship-a-sigRes").value = "M";
+    getFake(document, "ship-a-sigRes").trigger("input");
     expect(turretOverrides.get().sigRes).toBe("M");
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
@@ -315,8 +315,8 @@ describe("TurretController", () => {
   test("optimal input updates the optimal override and emits displayInvalidated", () => {
     const { document, turretOverrides, events } = buildTurret();
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    getFake(document, "optimal").value = "12345";
-    getFake(document, "optimal").trigger("input");
+    getFake(document, "ship-a-optimal").value = "12345";
+    getFake(document, "ship-a-optimal").trigger("input");
     expect(turretOverrides.get().optimal).toBe(12345);
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
@@ -324,15 +324,15 @@ describe("TurretController", () => {
   test("falloff input updates the falloff override and emits displayInvalidated", () => {
     const { document, turretOverrides, events } = buildTurret();
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    getFake(document, "falloff").value = "54321";
-    getFake(document, "falloff").trigger("input");
+    getFake(document, "ship-a-falloff").value = "54321";
+    getFake(document, "ship-a-falloff").trigger("input");
     expect(turretOverrides.get().falloff).toBe(54321);
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
 });
 
 function buttonFor(document: Document, value: string) {
-  const group = getFake(document, "sig-res-options");
+  const group = getFake(document, "ship-a-sig-res-options");
   for (const child of group.children) {
     if (child.getAttribute("data-value") === value) return child;
   }
@@ -340,7 +340,7 @@ function buttonFor(document: Document, value: string) {
 }
 
 function optionFor(document: Document, value: string) {
-  const select = getFake(document, "sigRes");
+  const select = getFake(document, "ship-a-sigRes");
   for (const option of select.options) {
     if (option.value === value) return option;
   }

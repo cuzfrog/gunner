@@ -1,10 +1,15 @@
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import { mockTrackingInput } from "../testSupport";
+import type { TrackingUnit } from "../../../appstate";
 import type { DisplayPreferences, SettingsStore } from "../../../appstate";
 import type { ItemNameCatalog } from "../../../gamedata/itemNames";
+import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
+import type { Side } from "../side";
+import type { TurretController } from "../turret";
+import type { TrackingInput } from "../trackingInput";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {
@@ -39,7 +44,6 @@ class FakeElement {
 
 function fakeEls(): PreferencesEls {
   return {
-    tracking: new FakeElement() as unknown as HTMLInputElement,
     trackingUnitRad: new FakeElement() as unknown as HTMLButtonElement,
     trackingUnitScore: new FakeElement() as unknown as HTMLButtonElement,
     langEn: new FakeElement() as unknown as HTMLButtonElement,
@@ -110,6 +114,43 @@ function mockPopupGroup(): PopupGroup {
   };
 }
 
+function mockPopup(): Popup {
+  return { isOpen: vi.fn(), open: vi.fn(), close: vi.fn(), focusTrigger: vi.fn(), contains: vi.fn() };
+}
+
+class FakeTurretController implements TurretController {
+  readonly side: Side;
+  readonly popup: Popup;
+  private readonly trackingInput: TrackingInput;
+  turret = vi.fn(() => undefined as import("../../../fitting").ImportedTurret | undefined);
+  ammo = vi.fn(() => "Hail S");
+  applyImported = vi.fn();
+  restore(_arg1?: unknown, _arg2?: unknown, _arg3?: unknown, _arg4?: unknown): void {}
+  clear = vi.fn();
+  currentTurretSpec = vi.fn((): import("../../../sim").TurretSpec => ({
+    tracking: this.trackingInput.rad,
+    sigResolution: 40,
+    optimal: 1000,
+    falloff: 3000,
+  }));
+  currentSigResClass = vi.fn((): import("../../../sim").SigResolutionClass => "S");
+  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
+  isAmmoPopupOpen = vi.fn();
+  openAmmoPopup = vi.fn();
+  closeAmmoPopup = vi.fn();
+  setTrackingUnit: (unit: TrackingUnit) => void;
+  trackingUnit(): TrackingUnit { return this.trackingInput.unit; }
+  setHullProfile = vi.fn();
+  render = vi.fn();
+
+  constructor(side: Side, trackingInput: TrackingInput = mockTrackingInput()) {
+    this.side = side;
+    this.popup = mockPopup();
+    this.trackingInput = trackingInput;
+    this.setTrackingUnit = vi.fn((unit: TrackingUnit) => { this.trackingInput.setUnit(unit, 40); });
+  }
+}
+
 function build() {
   const els = fakeEls();
   const i18n = mockI18n();
@@ -160,18 +201,20 @@ function build() {
   };
   const rangeOverlayController = mockRangeOverlayController();
   const popupGroup = mockPopupGroup();
+  const shipATurretController = new FakeTurretController("shipA");
+  const shipBTurretController = new FakeTurretController("shipB");
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
     itemNameCatalog,
     popupGroup,
     settingsStore,
-    trackingInput: mockTrackingInput(),
-    sigResolution: () => 40,
+    shipATurretController,
+    shipBTurretController,
     events,
     rangeOverlayController,
   });
-  return { controller, els, i18n, itemNameCatalog, popupGroup, settingsStore, events, rangeOverlayController };
+  return { controller, els, i18n, itemNameCatalog, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController };
 }
 
 describe("PreferencesController", () => {
@@ -233,23 +276,22 @@ describe("PreferencesController", () => {
     expect(events.emitLanguageChanged).not.toHaveBeenCalled();
   });
 
-  test("setTrackingUnit converts the displayed tracking value and updates toggles", () => {
-    const { controller, els } = build();
-    controller.trackingInput.setRadValue(0.32, 40);
+  test("setTrackingUnit delegates to both turret controllers and updates toggles", () => {
+    const { controller, els, shipATurretController, shipBTurretController } = build();
     controller.setTrackingUnit("score");
-    expect(els.tracking.value).toBe("320");
+    expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");
+    expect(shipBTurretController.setTrackingUnit).toHaveBeenCalledWith("score");
     expect(els.trackingUnitScore.getAttribute("aria-pressed")).toBe("true");
     expect(els.trackingUnitRad.getAttribute("aria-pressed")).toBe("false");
   });
 
-  test("setTrackingUnit saves preferences and keeps the canonical rad value", () => {
-    const { controller, settingsStore } = build();
-    controller.trackingInput.setRadValue(0.32, 40);
+  test("setTrackingUnit saves preferences", () => {
+    const { controller, settingsStore, shipATurretController } = build();
     controller.setTrackingUnit("score");
     const calls = settingsStore.savePreferences.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.trackingUnit).toBe("score");
-    expect(controller.trackingInput.rad).toBeCloseTo(0.32);
+    expect(shipATurretController.trackingUnit()).toBe("score");
   });
 
   test("getGridBrightness clamps values to [0, 1]", () => {
@@ -298,12 +340,12 @@ describe("PreferencesController", () => {
   });
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
-    const { controller, els, i18n, itemNameCatalog, events } = build();
+    const { controller, els, i18n, itemNameCatalog, events, shipATurretController } = build();
     const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
-    controller.trackingInput.setRadValue(0.32, 40);
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
-    expect(els.tracking.value).toBe("320");
+    expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");
+    expect(els.trackingUnitScore.getAttribute("aria-pressed")).toBe("true");
     expect(els.simSpeed.value).toBe("3");
     expect(els.gridBrightnessValue.textContent).toBe("80%");
     expect(els.gridBrightnessSlider.value).toBe("0.8");

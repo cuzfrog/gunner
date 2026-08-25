@@ -32,19 +32,19 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
 }
 
 function collectPortraitsEls(els: ControlsElements): PortraitsEls {
-  const shipAImage = els.shipAPortrait.querySelector(".portrait-image");
+  const shipAImage = els.shipA.portrait.querySelector(".portrait-image");
   if (!shipAImage || !isHtmlImageElement(shipAImage)) {
     throw new Error("Missing .portrait-image in #ship-a-portrait");
   }
-  const shipBImage = els.shipBPortrait.querySelector(".portrait-image");
+  const shipBImage = els.shipB.portrait.querySelector(".portrait-image");
   if (!shipBImage || !isHtmlImageElement(shipBImage)) throw new Error("Missing .portrait-image in #ship-b-portrait");
-  const shipAEffects = els.shipAPortrait.querySelector<HTMLElement>(".portrait-effects");
+  const shipAEffects = els.shipA.portrait.querySelector<HTMLElement>(".portrait-effects");
   if (!shipAEffects) throw new Error("Missing .portrait-effects in #ship-a-portrait");
-  const shipBEffects = els.shipBPortrait.querySelector<HTMLElement>(".portrait-effects");
+  const shipBEffects = els.shipB.portrait.querySelector<HTMLElement>(".portrait-effects");
   if (!shipBEffects) throw new Error("Missing .portrait-effects in #ship-b-portrait");
   return {
-    shipA: els.shipAPortrait,
-    shipB: els.shipBPortrait,
+    shipA: els.shipA.portrait,
+    shipB: els.shipB.portrait,
     shipAImage,
     shipBImage,
     shipAEffects,

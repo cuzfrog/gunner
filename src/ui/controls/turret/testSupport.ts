@@ -6,6 +6,7 @@ import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
+import type { Side } from "../side";
 import type { TurretEls } from "./turretEls";
 import {
   addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockShips,
@@ -13,51 +14,60 @@ import {
 } from "../testSupport";
 import type { PopupGroup } from "../popup";
 
-export function collectTurretEls(document: Document): TurretEls {
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
+}
+
+export function collectTurretEls(document: Document, side: Side): TurretEls {
   const get = (id: string) => getFake(document, id) as unknown as HTMLElement;
+  const id = sideId(side);
   return {
-    tracking: get("tracking") as HTMLInputElement,
-    sigRes: get("sigRes") as HTMLSelectElement,
-    sigResOptions: get("sig-res-options"),
-    optimal: get("optimal") as HTMLInputElement,
-    falloff: get("falloff") as HTMLInputElement,
-    shipAAmmoTrigger: get("ship-a-ammo-trigger") as HTMLButtonElement,
-    shipAAmmoSummary: get("ship-a-ammo-summary"),
-    shipAAmmoSummaryIcon: get("ship-a-ammo-summary-icon") as HTMLImageElement,
-    shipAAmmoPopup: get("ship-a-ammo-popup"),
-    shipAAmmoCargoLabel: get("ship-a-ammo-cargo-label"),
-    shipAAmmoCargoList: get("ship-a-ammo-cargo-list"),
-    shipAAmmoExpand: get("ship-a-ammo-expand") as HTMLButtonElement,
-    shipAAmmoAllSection: get("ship-a-ammo-all-section"),
-    shipAAmmoAllList: get("ship-a-ammo-all-list"),
+    tracking: get(`${id}-tracking`) as HTMLInputElement,
+    sigRes: get(`${id}-sigRes`) as HTMLSelectElement,
+    sigResOptions: get(`${id}-sig-res-options`),
+    optimal: get(`${id}-optimal`) as HTMLInputElement,
+    falloff: get(`${id}-falloff`) as HTMLInputElement,
+    ammoField: get(`${id}-ammo-field`),
+    ammoTrigger: get(`${id}-ammo-trigger`) as HTMLButtonElement,
+    ammoSummary: get(`${id}-ammo-summary`),
+    ammoSummaryIcon: get(`${id}-ammo-summary-icon`) as HTMLImageElement,
+    ammoPopup: get(`${id}-ammo-popup`),
+    ammoCargoLabel: get(`${id}-ammo-cargo-label`),
+    ammoCargoList: get(`${id}-ammo-cargo-list`),
+    ammoExpand: get(`${id}-ammo-expand`) as HTMLButtonElement,
+    ammoAllSection: get(`${id}-ammo-all-section`),
+    ammoAllList: get(`${id}-ammo-all-list`),
   };
 }
 
-export function setTurretInputs(document: Document): void {
-  getFake(document, "tracking").value = "0.42";
-  getFake(document, "sigRes").value = "S";
-  getFake(document, "optimal").value = "5000";
-  getFake(document, "falloff").value = "5000";
-  getFake(document, "ship-a-ammo-all-section").hidden = true;
-  getFake(document, "ship-a-ammo-trigger").setAttribute("aria-expanded", "false");
-  getFake(document, "ship-a-ammo-popup").hidden = true;
+export function setTurretInputs(document: Document, side: Side): void {
+  const id = sideId(side);
+  getFake(document, `${id}-tracking`).value = "0.42";
+  getFake(document, `${id}-sigRes`).value = "S";
+  getFake(document, `${id}-optimal`).value = "5000";
+  getFake(document, `${id}-falloff`).value = "5000";
+  getFake(document, `${id}-ammo-all-section`).hidden = true;
+  getFake(document, `${id}-ammo-trigger`).setAttribute("aria-expanded", "false");
+  getFake(document, `${id}-ammo-popup`).hidden = true;
 }
 
 export function buildTurret(
   options: {
+    side?: Side;
     imageCatalog?: Partial<ImageCatalog>;
     chargeCatalog?: Partial<ChargeCatalog>;
     fittingImport?: Partial<FittingImport>;
     ships?: Partial<Ships>;
   } = {},
 ) {
+  const side = options.side ?? "shipA";
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
-  const els = collectTurretEls(document);
-  setTurretInputs(document);
+  const els = collectTurretEls(document, side);
+  setTurretInputs(document, side);
   addSigResButtons(document);
-  addSigResOptions(document);
+  addSigResOptions(document, side);
   const trackingInput = mockTrackingInput();
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
@@ -105,6 +115,7 @@ export function buildTurret(
     onKeyDown: vi.fn(),
   });
   const controller = new TurretControllerImpl({
+    side,
     els,
     chargeCatalog,
     gunFamilies,
@@ -133,8 +144,8 @@ export function buildTurret(
   };
 }
 
-function addSigResOptions(document: Document): void {
-  const select = getFake(document, "sigRes");
+function addSigResOptions(document: Document, side: Side): void {
+  const select = getFake(document, `${sideId(side)}-sigRes`);
   for (const value of ["S", "M", "L", "XL"]) {
     const option = new FakeElement();
     option.tagName = "OPTION";

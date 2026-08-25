@@ -3,10 +3,14 @@ import { ProfileChangeTrackerImpl } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {
   version: USER_SETTINGS_VERSION,
-  tracking: 0.32,
-  sigRes: "S",
-  optimal: 5000,
-  falloff: 5000,
+  shipATracking: 0.32,
+  shipASigRes: "S",
+  shipAOptimal: 5000,
+  shipAFalloff: 5000,
+  shipBTracking: 0.32,
+  shipBSigRes: "S",
+  shipBOptimal: 5000,
+  shipBFalloff: 5000,
   shipASpeed: 0,
   shipAMode: "keepAtRange",
   shipARange: 5000,
@@ -41,28 +45,28 @@ describe("ProfileChangeTracker", () => {
   test("hasUnsavedChanges is true when baseline is set and equality reports unequal", () => {
     const tracker = new ProfileChangeTrackerImpl({ equality: fakeEquality(false) });
     tracker.setBaseline(BASE_PROFILE);
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(true);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(true);
   });
 
   test("hasUnsavedChanges is false when equality reports equal", () => {
     const tracker = new ProfileChangeTrackerImpl({ equality: fakeEquality(true) });
     tracker.setBaseline(BASE_PROFILE);
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(false);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(false);
   });
 
   test("setBaseline(undefined) clears the baseline", () => {
     const tracker = new ProfileChangeTrackerImpl({ equality: fakeEquality(false) });
     tracker.setBaseline(BASE_PROFILE);
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(true);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(true);
     tracker.setBaseline(undefined);
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(false);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(false);
   });
 
   test("clearBaseline clears the baseline", () => {
     const tracker = new ProfileChangeTrackerImpl({ equality: fakeEquality(false) });
     tracker.setBaseline(BASE_PROFILE);
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(true);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(true);
     tracker.clearBaseline();
-    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, optimal: 9999 })).toBe(false);
+    expect(tracker.hasUnsavedChanges({ ...BASE_PROFILE, shipAOptimal: 9999 })).toBe(false);
   });
 });

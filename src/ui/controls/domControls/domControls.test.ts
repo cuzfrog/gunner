@@ -36,11 +36,15 @@ function mockCallbacks() {
 function baseSettings(): UserSettings {
   return {
     version: USER_SETTINGS_VERSION,
-    tracking: 0.32,
     trackingUnit: "rad",
-    sigRes: "S",
-    optimal: 1000,
-    falloff: 3000,
+    shipATracking: 0.32,
+    shipASigRes: "S",
+    shipAOptimal: 1000,
+    shipAFalloff: 3000,
+    shipBTracking: 0.32,
+    shipBSigRes: "S",
+    shipBOptimal: 5000,
+    shipBFalloff: 5000,
     shipASpeed: 400,
     shipAMode: "orbit",
     shipARange: 5000,
@@ -73,6 +77,7 @@ function baseSettings(): UserSettings {
     shipAFittedHull: undefined,
     shipBFittedHull: undefined,
     shipAAmmo: "Hail S",
+    shipBAmmo: "Hail S",
     simSpeed: 2,
     language: "en",
   };
@@ -113,7 +118,7 @@ describe("DomControls", () => {
   test("hasShipAGuns reflects whether the shipA has a fitted turret", () => {
     const { controls, cradle } = buildDomControls();
     expect(controls.hasShipAGuns()).toBe(false);
-    cradle.cradle.turretController.applyImported(IMPORTED_RIFTER);
+    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER);
     expect(controls.hasShipAGuns()).toBe(true);
   });
 
@@ -142,17 +147,17 @@ describe("DomControls", () => {
     getFake(document, "ship-a-mode").trigger("input");
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(4);
 
-    getFake(document, "tracking").value = "0.5";
-    getFake(document, "tracking").trigger("input");
+    getFake(document, "ship-a-tracking").value = "0.5";
+    getFake(document, "ship-a-tracking").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(1);
     getFake(document, "ship-b-sig").value = "80";
     getFake(document, "ship-b-sig").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(2);
-    getFake(document, "optimal").value = "12345";
-    getFake(document, "optimal").trigger("input");
+    getFake(document, "ship-a-optimal").value = "12345";
+    getFake(document, "ship-a-optimal").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(3);
-    getFake(document, "falloff").value = "54321";
-    getFake(document, "falloff").trigger("input");
+    getFake(document, "ship-a-falloff").value = "54321";
+    getFake(document, "ship-a-falloff").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(4);
   });
 

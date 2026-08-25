@@ -23,7 +23,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly shipBSide: SidePanel;
   private readonly profileController: ProfileController;
   private readonly profileTextCodec: ProfileTextCodec;
-  private readonly turret: ShipATurret;
+  private readonly turrets: Record<Side, ShipATurret>;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly events: UiEvents;
@@ -39,7 +39,7 @@ export class ImportControllerImpl implements ImportController {
     els: ImportEls;
     shipASide: SidePanel;
     shipBSide: SidePanel;
-    turret: ShipATurret;
+    turrets: Record<Side, ShipATurret>;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
@@ -51,19 +51,19 @@ export class ImportControllerImpl implements ImportController {
     this.els = deps.els;
     this.shipASide = deps.shipASide;
     this.shipBSide = deps.shipBSide;
-    this.turret = deps.turret;
+    this.turrets = deps.turrets;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
     this.eftSideImporter = new EftSideImporter({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      turret: deps.turret,
+      turrets: deps.turrets,
       fittingImport: deps.fittingImport,
     });
     this.profileTextImporter = new ProfileTextImporter({
       fittingImport: deps.fittingImport,
-      turret: deps.turret,
+      turrets: deps.turrets,
       profileTextCodec: deps.profileTextCodec,
     });
     this.els.importProfile.addEventListener("click", () => void this.importProfileClicked());

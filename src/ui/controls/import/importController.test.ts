@@ -13,16 +13,28 @@ afterEach(() => {
 
 describe("ImportController", () => {
   test("importFromClipboard reads a valid EFT fitting and applies it to the side", async () => {
-    const { controller, clipboard, fittingImport, shipAPanel, turret, onConfigPersisted, savedFittings } =
+    const { controller, clipboard, fittingImport, shipAPanel, turrets, onConfigPersisted, savedFittings } =
       buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     clipboard.readText.mockResolvedValue(text);
     await controller.importFromClipboard("shipA");
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(shipAPanel.fittingText).toBe(text);
-    expect(turret.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
+    expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+  });
+
+  test("importFromClipboard applies a valid EFT fitting to shipB", async () => {
+    const { controller, clipboard, fittingImport, shipBPanel, turrets, savedFittings } = buildImportController(globalThis.document);
+    const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+    clipboard.readText.mockResolvedValue(text);
+    fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
+    await controller.importFromClipboard("shipB");
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(shipBPanel.fittingText).toBe(text);
+    expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 

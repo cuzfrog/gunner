@@ -30,6 +30,11 @@ export interface CombatantSettings {
   readonly ewarActivation?: StoredEwarActivation;
   readonly boosterActivation?: readonly StoredBoosterActivation[];
   readonly sig?: number;
+  readonly tracking: number;
+  readonly sigRes: SigResolutionClass;
+  readonly optimal: number;
+  readonly falloff: number;
+  readonly ammo: string;
 }
 
 export interface InternalUserSettings {
@@ -43,12 +48,7 @@ export interface InternalUserSettings {
   readonly display: DisplayPreferences;
   readonly shipA: CombatantSettings;
   readonly shipB: CombatantSettings;
-  readonly tracking: number;
-  readonly sigRes: SigResolutionClass;
-  readonly optimal: number;
-  readonly falloff: number;
   readonly initialDistance: number;
-  readonly shipAAmmo: string;
 }
 
 export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
@@ -72,6 +72,11 @@ export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | 
     ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
     boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
     sig,
+    tracking: sideValue(side, settings.shipATracking, settings.shipBTracking) ?? settings.tracking ?? 0,
+    sigRes: sideValue(side, settings.shipASigRes, settings.shipBSigRes) ?? settings.sigRes ?? "S",
+    optimal: sideValue(side, settings.shipAOptimal, settings.shipBOptimal) ?? settings.optimal ?? 0,
+    falloff: sideValue(side, settings.shipAFalloff, settings.shipBFalloff) ?? settings.falloff ?? 0,
+    ammo: sideValue(side, settings.shipAAmmo, settings.shipBAmmo),
   };
 }
 

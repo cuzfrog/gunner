@@ -1,5 +1,5 @@
 import type { I18n } from "../../i18n";
-import type { TrackingInput } from "../trackingInput";
+import type { TrackingUnit } from "../../../appstate";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts } from "../controlsContract";
 import type { SpeedBreakdown, SpeedEffectAttribution, StatEffectAttribution } from "../../../sim";
@@ -10,6 +10,11 @@ interface ReadoutLike {
   textContent: string | null;
   classList: { add(className: string): void; remove(className: string): void; };
   title: string;
+}
+
+interface TrackingDisplay {
+  readonly unit: TrackingUnit;
+  displayFor(rad: number, sigResolution: number): number;
 }
 
 export interface EffectiveReadoutEls {
@@ -32,11 +37,11 @@ export interface EffectiveReadout {
 export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly els: EffectiveReadoutEls;
   private readonly i18n: I18n;
-  private readonly trackingInput: TrackingInput;
+  private readonly trackingInput: TrackingDisplay;
   private readonly sigResolution: () => number;
   private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; title: string }>();
 
-  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingInput; sigResolution: () => number }) {
+  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingDisplay; sigResolution: () => number }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.trackingInput = deps.trackingInput;

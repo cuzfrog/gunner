@@ -88,6 +88,11 @@ describe("profileTextParser", () => {
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: "Hail S" });
   });
 
+  test("reads a shipB ammo line", () => {
+    const text = `# gunner v1\nversion=10\nshipB.ammo=Republic Fleet EMP S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40\nsimSpeed=4`;
+    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipBAmmo: "Republic Fleet EMP S" });
+  });
+
   test("normalizes legacy attacker and target dot keys to shipA and shipB", () => {
     const text = `# gunner v1
 version=10

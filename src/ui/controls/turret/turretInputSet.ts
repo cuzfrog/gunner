@@ -26,15 +26,17 @@ export class TurretInputSet {
   }
 
   set(turret: ImportedTurret): void {
-    const sigResolution = SIG_RESOLUTIONS[turret.sigResolutionClass];
     const overrides = this.turretOverrides.get();
-    if (overrides.tracking === undefined) this.trackingInput.setRadValue(turret.tracking, sigResolution);
-    if (overrides.sigRes === undefined) {
-      this.els.sigRes.value = turret.sigResolutionClass;
-      this.sigResButtons.set(turret.sigResolutionClass);
-    }
-    if (overrides.optimal === undefined) this.els.optimal.value = String(Math.round(turret.optimal));
-    if (overrides.falloff === undefined) this.els.falloff.value = String(Math.round(turret.falloff));
+    const sigRes = overrides.sigRes ?? turret.sigResolutionClass;
+    const sigResolution = SIG_RESOLUTIONS[sigRes];
+    if (overrides.tracking !== undefined) this.trackingInput.setRadValue(overrides.tracking, sigResolution);
+    else this.trackingInput.setRadValue(turret.tracking, sigResolution);
+    this.els.sigRes.value = sigRes;
+    this.sigResButtons.set(sigRes);
+    if (overrides.optimal !== undefined) this.els.optimal.value = String(Math.round(overrides.optimal));
+    else this.els.optimal.value = String(Math.round(turret.optimal));
+    if (overrides.falloff !== undefined) this.els.falloff.value = String(Math.round(overrides.falloff));
+    else this.els.falloff.value = String(Math.round(turret.falloff));
     this.els.tracking.value = String(this.trackingInput.displayValue(sigResolution));
   }
 

@@ -22,8 +22,8 @@ export function registerPopupModule<T extends ControlsCradle>(cradle: AwilixCont
       shipASide: proxy.shipASide,
       shipBSide: proxy.shipBSide,
       previewsBySide: { shipA: proxy.shipAFittingPreview, shipB: proxy.shipBFittingPreview },
-      shipImageBySide: { shipA: proxy.els.shipAShipImage, shipB: proxy.els.shipBShipImage },
-      eyeBySide: { shipA: proxy.els.shipAFittingEye, shipB: proxy.els.shipBFittingEye },
+      shipImageBySide: { shipA: proxy.els.shipA.shipImage, shipB: proxy.els.shipB.shipImage },
+      eyeBySide: { shipA: proxy.els.shipA.fittingEye, shipB: proxy.els.shipB.fittingEye },
       events: proxy.uiEvents,
     })).singleton(),
     shipAFittingPopup: asFunction((proxy) => new FittingPopupControllerImpl(popupDeps(proxy, "shipA"))).singleton(),
@@ -33,7 +33,7 @@ export function registerPopupModule<T extends ControlsCradle>(cradle: AwilixCont
 
 function previewDeps<T extends ControlsCradle>(proxy: T, side: Side) {
   return {
-    container: side === "shipA" ? proxy.els.shipAFittingPreview : proxy.els.shipBFittingPreview,
+    container: proxy.els[side].fittingPreview,
     i18n: proxy.i18n,
     imageCatalog: proxy.imageCatalog,
     fittingImport: proxy.fittingImport,
@@ -59,28 +59,16 @@ function popupDeps<T extends ControlsCradle>(proxy: T, side: Side) {
 }
 
 function collectFittingPopupEls(els: ControlsElements, side: Side): FittingPopupEls {
-  if (side === "shipA") {
-    return {
-      trigger: els.shipAFittingTrigger,
-      eye: els.shipAFittingEye,
-      popup: els.shipAFittingPopup,
-      savedList: els.shipAFittingSavedList,
-      presetList: els.shipAFittingPresetList,
-      savedLabel: els.shipAFittingSavedLabel,
-      presetLabel: els.shipAFittingPresetLabel,
-      empty: els.shipAFittingEmpty,
-      shipImage: els.shipAShipImage,
-    };
-  }
+  const combatant = els[side];
   return {
-    trigger: els.shipBFittingTrigger,
-    eye: els.shipBFittingEye,
-    popup: els.shipBFittingPopup,
-    savedList: els.shipBFittingSavedList,
-    presetList: els.shipBFittingPresetList,
-    savedLabel: els.shipBFittingSavedLabel,
-    presetLabel: els.shipBFittingPresetLabel,
-    empty: els.shipBFittingEmpty,
-    shipImage: els.shipBShipImage,
+    trigger: combatant.fittingTrigger,
+    eye: combatant.fittingEye,
+    popup: combatant.fittingPopup,
+    savedList: combatant.fittingSavedList,
+    presetList: combatant.fittingPresetList,
+    savedLabel: combatant.fittingSavedLabel,
+    presetLabel: combatant.fittingPresetLabel,
+    empty: combatant.fittingEmpty,
+    shipImage: combatant.shipImage,
   };
 }

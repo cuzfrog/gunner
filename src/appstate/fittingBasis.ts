@@ -96,16 +96,24 @@ export class FittingBasis {
       result.shipBSpeed = speed;
       result.shipBSig = override.shipBSig ?? stats.sigRadius;
     }
-    if (side === "shipA" && imported.turret) {
+    if (imported.turret) {
       const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
-      const storedAmmo = settings.shipAAmmo;
+      const storedAmmo = side === "shipA" ? settings.shipAAmmo : settings.shipBAmmo;
       const valid = options.some((c) => c.name === storedAmmo);
       const turret = valid ? this.chargeCatalog.withCharge(imported.turret, storedAmmo) : imported.turret;
-      result.tracking = override.tracking ?? turret.tracking;
-      result.sigRes = override.sigRes ?? turret.sigResolutionClass;
-      result.optimal = override.optimal ?? turret.optimal;
-      result.falloff = override.falloff ?? turret.falloff;
-      result.shipAAmmo = turret.charge;
+      if (side === "shipA") {
+        result.shipATracking = override.tracking ?? turret.tracking;
+        result.shipASigRes = override.sigRes ?? turret.sigResolutionClass;
+        result.shipAOptimal = override.optimal ?? turret.optimal;
+        result.shipAFalloff = override.falloff ?? turret.falloff;
+        result.shipAAmmo = turret.charge;
+      } else {
+        result.shipBTracking = override.tracking ?? turret.tracking;
+        result.shipBSigRes = override.sigRes ?? turret.sigResolutionClass;
+        result.shipBOptimal = override.optimal ?? turret.optimal;
+        result.shipBFalloff = override.falloff ?? turret.falloff;
+        result.shipBAmmo = turret.charge;
+      }
     }
     return result;
   }

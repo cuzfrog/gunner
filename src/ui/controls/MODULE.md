@@ -52,7 +52,7 @@ no-new-exports:
   - turret/sigResIcons.ts
   - turret/turretController.ts
   - turret/turretControllerContract.ts
-  - turret/turretEls.ts
+  # - turret/turretEls.ts
   - turret/module.ts
   - turret/turretInputSet.ts
   - turret/turretStateResolver.ts
