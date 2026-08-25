@@ -84,7 +84,6 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     fromProfile: vi.fn(),
     restoreStartup: vi.fn(),
     resetToDefaults: vi.fn(),
-    setSessionControl: vi.fn(),
     ...overrides.sessionCodec,
   });
   const clipboard = vi.mocked<ClipboardProvider>({

@@ -9,7 +9,6 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
   cradle.register({
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       i18n: proxy.i18n,
-      settingsStore: proxy.settingsStore,
       events: proxy.uiEvents,
       els: collectDomControlsEls(proxy.els),
       popupGroup: proxy.popupGroup,
@@ -22,7 +21,6 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       attackerSide: proxy.attackerSide,
       targetSide: proxy.targetSide,
       turretController: proxy.turretController,
-      sessionCodec: proxy.sessionCodec,
       importController: proxy.importController,
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,

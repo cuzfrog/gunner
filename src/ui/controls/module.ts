@@ -68,7 +68,6 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
       importer: sideImporterFor(combatant.side, c.importController, c.savedFittings, c.presetFittings),
     })
   );
-  c.sessionCodec.setSessionControl(c.controls);
   c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
   forEachSide(sides, (combatant) => combatant.panel.sections.stats.updateAlignTime());

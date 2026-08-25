@@ -23,6 +23,15 @@ export interface UiEvents {
   onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   emitProfileTextLoaded(settings: ProfileSettings): void;
+  onSessionRestored(listener: () => void): void;
+  offSessionRestored(listener: () => void): void;
+  emitSessionRestored(): void;
+  onSessionReset(listener: () => void): void;
+  offSessionReset(listener: () => void): void;
+  emitSessionReset(): void;
+  onStartupDefaultsApplied(listener: () => void): void;
+  offStartupDefaultsApplied(listener: () => void): void;
+  emitStartupDefaultsApplied(): void;
   onDistanceChanged(listener: (distance: number) => void): void;
   offDistanceChanged(listener: (distance: number) => void): void;
   emitDistanceChanged(distance: number): void;
@@ -36,6 +45,9 @@ export class UiEventsImpl implements UiEvents {
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
   private readonly profileTextLoaded = new Set<(settings: ProfileSettings) => void>();
+  private readonly sessionRestored = new Set<() => void>();
+  private readonly sessionReset = new Set<() => void>();
+  private readonly startupDefaultsApplied = new Set<() => void>();
   private readonly distanceChanged = new Set<(distance: number) => void>();
 
   onLanguageChanged(listener: () => void): void { this.languageChanged.add(listener); }
@@ -73,6 +85,18 @@ export class UiEventsImpl implements UiEvents {
   emitProfileTextLoaded(settings: ProfileSettings): void {
     for (const listener of Array.from(this.profileTextLoaded)) listener(settings);
   }
+
+  onSessionRestored(listener: () => void): void { this.sessionRestored.add(listener); }
+  offSessionRestored(listener: () => void): void { this.sessionRestored.delete(listener); }
+  emitSessionRestored(): void { this.emit(this.sessionRestored); }
+
+  onSessionReset(listener: () => void): void { this.sessionReset.add(listener); }
+  offSessionReset(listener: () => void): void { this.sessionReset.delete(listener); }
+  emitSessionReset(): void { this.emit(this.sessionReset); }
+
+  onStartupDefaultsApplied(listener: () => void): void { this.startupDefaultsApplied.add(listener); }
+  offStartupDefaultsApplied(listener: () => void): void { this.startupDefaultsApplied.delete(listener); }
+  emitStartupDefaultsApplied(): void { this.emit(this.startupDefaultsApplied); }
 
   onDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.add(listener); }
   offDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.delete(listener); }

@@ -1,6 +1,7 @@
 import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
+import type { UiEvents } from "../../events";
 import {
   USER_SETTINGS_VERSION,
   toCombatantSettings,
@@ -14,7 +15,6 @@ import {
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import { num } from "../controlsDom";
-import type { SessionControl } from "./sessionControl";
 import { DEFAULT_GRID_BRIGHTNESS, formatNumber } from "../controlsFormat";
 import { applyStartupDefaults } from "./startupDefaults";
 import type { ChoiceGroup } from "../choiceGroup";
@@ -34,7 +34,6 @@ export interface SessionCodec {
   fromProfile(profile: ProfileSettings): UserSettings;
   restoreStartup(startup: StartupState): void;
   resetToDefaults(): void;
-  setSessionControl(sessionControl: SessionControl): void;
 }
 
 interface SessionCodecEls {
@@ -69,7 +68,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly sigResChoice: ChoiceGroup;
   private readonly hintRotator: HintRotator;
   private readonly settingsStore: SettingsStore;
-  private sessionControl?: SessionControl;
+  private readonly events: UiEvents;
   private readonly trackingInput: TrackingInput;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
@@ -79,7 +78,7 @@ export class SessionCodecImpl implements SessionCodec {
   constructor(deps: {
     els: SessionCodecEls; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
-    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore;
+    sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; events: UiEvents;
     trackingInput: TrackingInput; ewarController: EwarController; boosterController: BoosterController; fittingImport: FittingImport;
   }) {
     this.els = deps.els;
@@ -94,15 +93,15 @@ export class SessionCodecImpl implements SessionCodec {
     this.sigResChoice = deps.sigResChoice;
     this.hintRotator = deps.hintRotator;
     this.settingsStore = deps.settingsStore;
+    this.events = deps.events;
     this.trackingInput = deps.trackingInput;
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.fittingImport = deps.fittingImport;
     this.pristineSettings = this.capture();
-  }
-
-  setSessionControl(sessionControl: SessionControl): void {
-    this.sessionControl = sessionControl;
+    this.events.onProfileLoaded((name) => this.onProfileLoaded(name));
+    this.events.onNewProfile(() => this.onNewProfile());
+    this.events.onProfileTextLoaded((settings) => this.onProfileTextLoaded(settings));
   }
 
   capture(): UserSettings {
@@ -168,7 +167,6 @@ export class SessionCodecImpl implements SessionCodec {
     this.i18n.translateDocument();
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
-    if (this.sessionControl) this.sessionControl.setPlaying(this.sessionControl.isPlaying());
     this.preferencesController.updateManeuverAggressivityDisplay();
     this.preferencesController.updateManeuverAggressivityEnabled(this.els.attackerMode.value === "midships");
     this.attackerSide.sections.stats.updateAlignTime();
@@ -176,6 +174,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.hintRotator.refresh();
     this.profileController.markLoaded(selectedName);
     this.preferencesController.savePreferences();
+    this.events.emitSessionRestored();
   }
 
   fromProfile(profile: ProfileSettings): UserSettings {
@@ -259,7 +258,24 @@ export class SessionCodecImpl implements SessionCodec {
       targetSide: this.targetSide,
       preferencesController: this.preferencesController,
       profileController: this.profileController,
-      sessionControl: this.sessionControl,
     });
+    this.events.emitStartupDefaultsApplied();
+  }
+
+  private onProfileLoaded(name: string): void {
+    const profile = this.settingsStore.loadProfile(name);
+    if (!profile) return;
+    this.restore(this.fromProfile(profile), name);
+  }
+
+  private onProfileTextLoaded(settings: ProfileSettings): void {
+    this.restore(this.fromProfile(settings));
+    this.profileController.showStatus("status.profileImported");
+  }
+
+  private onNewProfile(): void {
+    this.resetToDefaults();
+    this.profileController.showStatus("status.newProfile");
+    this.events.emitSessionReset();
   }
 }

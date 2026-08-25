@@ -9,6 +9,7 @@ import type { ChargeCatalog } from "../../../fitting";
 import { type AutopilotMode, SIG_RESOLUTIONS } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
 import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput } from "../testSupport";
+import { UiEventsImpl } from "../../events";
 import type { I18n } from "../../i18n";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { HintRotator } from "../hints";
@@ -121,18 +122,19 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides({ attackerMass: 1_400_000 });
     els.maneuverAggressivity.value = "1";
     els.initialDistance.value = "5000";
+    const events = new UiEventsImpl();
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
       settingsStore: {} as SettingsStore,
+      events,
       trackingInput: fakeTrackingInput(),
       ewarController: mockEwarController(),
       boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
-    codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
 
     const settings = codec.capture();
 
@@ -227,19 +229,20 @@ describe("SessionCodec", () => {
         const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
-    const setPlaying = vi.fn();
-    const sessionControl = { isPlaying: () => true, setPlaying };
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
+      events,
       trackingInput,
       ewarController: mockEwarController(),
       boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
-    codec.setSessionControl(sessionControl);
 
     codec.restoreStartup({ settings, selectedProfileName: null });
 
@@ -252,7 +255,7 @@ describe("SessionCodec", () => {
     expect(preferences.savePreferences).toHaveBeenCalled();
     expect(i18n.translateDocument).toHaveBeenCalled();
     expect(hintRotator.refresh).toHaveBeenCalled();
-    expect(setPlaying).toHaveBeenCalledWith(true);
+    expect(onSessionRestored).toHaveBeenCalled();
     expect(turretOverrides.set).toHaveBeenCalledWith({});
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });
@@ -282,12 +285,17 @@ describe("SessionCodec", () => {
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const settingsStore = {} as SettingsStore;
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides: mockTurretOverrides(),
       preferences, profileController, i18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
-      settingsStore, trackingInput: fakeTrackingInput(),
+      settingsStore,
+      events,
+      trackingInput: fakeTrackingInput(),
       ewarController,
       boosterController: mockBoosterController(),
       fittingImport,
@@ -300,10 +308,10 @@ describe("SessionCodec", () => {
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
 
-    codec.setSessionControl({ isPlaying: () => false, setPlaying: vi.fn() });
     codec.restore(settings);
     expect(ewarController.restore).toHaveBeenCalledWith("attacker", expect.any(Object), settings.attackerEwarActivation);
     expect(ewarController.restore).toHaveBeenCalledWith("target", undefined, settings.targetEwarActivation);
+    expect(onSessionRestored).toHaveBeenCalled();
   });
 
   test("corrupt startup data falls back to defaults", () => {
@@ -327,19 +335,20 @@ describe("SessionCodec", () => {
         const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
-    const setPlaying = vi.fn();
-    const sessionControl = { isPlaying: () => false, setPlaying };
+    const events = new UiEventsImpl();
+    const onStartupDefaultsApplied = vi.fn();
+    events.onStartupDefaultsApplied(onStartupDefaultsApplied);
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
+      events,
       trackingInput,
       ewarController: mockEwarController(),
       boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
-    codec.setSessionControl(sessionControl);
 
     codec.restoreStartup({ settings: null, selectedProfileName: null });
 
@@ -354,7 +363,7 @@ describe("SessionCodec", () => {
     expect(target.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
     expect(target.sections.skill.setOverloadDisabled).toHaveBeenCalled();
     expect(target.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
-    expect(setPlaying).toHaveBeenCalledWith(false);
+    expect(onStartupDefaultsApplied).toHaveBeenCalled();
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });
 
@@ -382,20 +391,21 @@ describe("SessionCodec", () => {
         const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
-    const setPlaying = vi.fn();
-    const sessionControl = { isPlaying: () => false, setPlaying };
+    const events = new UiEventsImpl();
+    const onStartupDefaultsApplied = vi.fn();
+    events.onStartupDefaultsApplied(onStartupDefaultsApplied);
     const ewarController = mockEwarController();
 
     const codec = new SessionCodecImpl({
       els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
+      events,
       trackingInput,
       ewarController,
       boosterController: mockBoosterController(),
       fittingImport: mockFittingImport(),
     });
-    codec.setSessionControl(sessionControl);
 
     codec.resetToDefaults();
 
@@ -411,5 +421,6 @@ describe("SessionCodec", () => {
     expect(trackingInput.rad).toBe(0.32);
     expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
+    expect(onStartupDefaultsApplied).toHaveBeenCalled();
   });
 });

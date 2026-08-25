@@ -1,10 +1,8 @@
-import type { ProfileSettings, SettingsStore } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 
 export interface DomControlsDeps {
   i18n: I18n;
-  settingsStore: SettingsStore;
   events: UiEvents;
 }
 
@@ -13,11 +11,8 @@ export interface DomControlsHost {
   currentDistance(): number;
   onPlayPause(): void;
   onReset(): void;
-  onNewProfile(): void;
   onSpeedChange(speed: number): void;
   onConfigChange(persist?: boolean): void;
   onDisplayChange(): void;
   persistConfigChange(notify?: boolean): void;
-  onProfileLoaded(name: string): void;
-  onProfileTextLoaded(settings: ProfileSettings): void;
 }

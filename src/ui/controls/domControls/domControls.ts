@@ -4,14 +4,13 @@ import {
   type SimConfig,
   type TurretSpec,
 } from "../../../sim";
-import type { ProfileSettings } from "../../../appstate";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
 import type { HintRotator } from "../hints";
-import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "../session";
+import type { HullDatalist, SimConfigSource } from "../session";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
 import type { EngagementReadout } from "../engagementReadout";
@@ -45,7 +44,6 @@ interface DomControlsAllDeps extends DomControlsDeps {
   attackerSide: SidePanel;
   targetSide: SidePanel;
   turretController: TurretController;
-  sessionCodec: SessionCodec;
   importController: ImportController;
   ewarController: EwarController;
   boosterController: BoosterController;
@@ -55,7 +53,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   simConfigSource: SimConfigSource;
 }
 
-export class DomControls implements Controls, DomControlsHost, SessionControl {
+export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -68,7 +66,6 @@ export class DomControls implements Controls, DomControlsHost, SessionControl {
   private readonly attackerSide: SidePanel;
   private readonly targetSide: SidePanel;
   private readonly turretController: TurretController;
-  private readonly sessionCodec: SessionCodec;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
@@ -94,7 +91,6 @@ export class DomControls implements Controls, DomControlsHost, SessionControl {
     this.attackerSide = all.attackerSide;
     this.targetSide = all.targetSide;
     this.turretController = all.turretController;
-    this.sessionCodec = all.sessionCodec;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
@@ -107,9 +103,9 @@ export class DomControls implements Controls, DomControlsHost, SessionControl {
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
-    this.deps.events.onProfileLoaded((name) => this.onProfileLoaded(name));
-    this.deps.events.onNewProfile(() => this.onNewProfile());
-    this.deps.events.onProfileTextLoaded((settings) => this.onProfileTextLoaded(settings));
+    this.deps.events.onSessionRestored(() => this.onSessionRestored());
+    this.deps.events.onSessionReset(() => this.onSessionReset());
+    this.deps.events.onStartupDefaultsApplied(() => this.onStartupDefaultsApplied());
   }
 
   wireControls(): void {
@@ -126,8 +122,6 @@ export class DomControls implements Controls, DomControlsHost, SessionControl {
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
   }
-
-  isPlaying(): boolean { return this.playing; }
 
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
   onReset(): void { this.callbacks?.onReset(); }
@@ -166,23 +160,20 @@ export class DomControls implements Controls, DomControlsHost, SessionControl {
     this.callbacks?.onDisplayChange();
   }
 
-  onProfileLoaded(name: string): void {
-    const profile = this.deps.settingsStore.loadProfile(name);
-    if (!profile) return;
-    this.sessionCodec.restore(this.sessionCodec.fromProfile(profile), name);
+  private onSessionRestored(): void {
+    this.onConfigChange(false);
+    this.setPlaying(this.playing);
     this.callbacks?.onReset();
   }
 
-  onNewProfile(): void {
-    this.sessionCodec.resetToDefaults();
-    this.profileController.showStatus("status.newProfile");
+  private onSessionReset(): void {
+    this.onConfigChange(false);
+    this.setPlaying(false);
     this.callbacks?.onReset();
   }
 
-  onProfileTextLoaded(settings: ProfileSettings): void {
-    this.sessionCodec.restore(this.sessionCodec.fromProfile(settings));
-    this.profileController.showStatus("status.profileImported");
-    this.callbacks?.onReset();
+  private onStartupDefaultsApplied(): void {
+    this.setPlaying(false);
   }
 
   persistConfigChange(notify = true): void {

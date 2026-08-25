@@ -124,6 +124,87 @@ describe("UiEvents", () => {
     expect(listener).toHaveBeenCalledWith(DEFAULT_SETTINGS);
   });
 
+  test("emitSessionRestored calls all registered listeners", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onSessionRestored(a);
+    events.onSessionRestored(b);
+    events.emitSessionRestored();
+    expect(a).toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
+  test("offSessionRestored removes a listener without affecting others", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onSessionRestored(a);
+    events.onSessionRestored(b);
+    events.offSessionRestored(a);
+    events.emitSessionRestored();
+    expect(a).not.toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
+  test("emitSessionReset calls all registered listeners", () => {
+    const events = new UiEventsImpl();
+    const listener = vi.fn();
+    events.onSessionReset(listener);
+    events.emitSessionReset();
+    expect(listener).toHaveBeenCalled();
+  });
+
+  test("offSessionReset removes a listener", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onSessionReset(a);
+    events.onSessionReset(b);
+    events.offSessionReset(a);
+    events.emitSessionReset();
+    expect(a).not.toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
+  test("emitStartupDefaultsApplied calls all registered listeners", () => {
+    const events = new UiEventsImpl();
+    const listener = vi.fn();
+    events.onStartupDefaultsApplied(listener);
+    events.emitStartupDefaultsApplied();
+    expect(listener).toHaveBeenCalled();
+  });
+
+  test("offStartupDefaultsApplied removes a listener", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onStartupDefaultsApplied(a);
+    events.onStartupDefaultsApplied(b);
+    events.offStartupDefaultsApplied(a);
+    events.emitStartupDefaultsApplied();
+    expect(a).not.toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
+  test("listeners for different session event types are independent", () => {
+    const events = new UiEventsImpl();
+    const restored = vi.fn();
+    const reset = vi.fn();
+    const defaultsApplied = vi.fn();
+    events.onSessionRestored(restored);
+    events.onSessionReset(reset);
+    events.onStartupDefaultsApplied(defaultsApplied);
+    events.emitSessionRestored();
+    expect(restored).toHaveBeenCalled();
+    expect(reset).not.toHaveBeenCalled();
+    expect(defaultsApplied).not.toHaveBeenCalled();
+    events.emitSessionReset();
+    expect(reset).toHaveBeenCalled();
+    events.emitStartupDefaultsApplied();
+    expect(defaultsApplied).toHaveBeenCalled();
+  });
+
   test("emitDistanceChanged passes the distance to listeners", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();
