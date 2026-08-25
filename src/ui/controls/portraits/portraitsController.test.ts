@@ -184,6 +184,24 @@ describe("PortraitsController", () => {
     expect(els.attacker.hidden).toBe(true);
   });
 
+  test("re-adding the same profile after removal shows the portrait and effects again", () => {
+    const { controller, els, profiles, ewarResolver } = buildController();
+    profiles.attacker = ATTACKER_PROFILE;
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    controller.update();
+    expect(els.attacker.hidden).toBe(false);
+    expect(els.attackerImage.src).toBe("images/ships/Rifter.webp");
+    expect(els.attackerEffects.children.length).toBe(1);
+    profiles.attacker = undefined;
+    controller.update();
+    expect(els.attacker.hidden).toBe(true);
+    profiles.attacker = ATTACKER_PROFILE;
+    controller.update();
+    expect(els.attacker.hidden).toBe(false);
+    expect(els.attackerImage.src).toBe("images/ships/Rifter.webp");
+    expect(els.attackerEffects.children.length).toBe(1);
+  });
+
   test("distance changes that do not change the applied set do not create new img elements", () => {
     const { controller, els, profiles, ewarResolver, events, createElementSpy } = buildController();
     profiles.attacker = ATTACKER_PROFILE;

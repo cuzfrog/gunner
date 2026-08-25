@@ -52,6 +52,8 @@ export class PortraitsControllerImpl implements PortraitsController {
     const profile = this.combatantProfiles.profile(side);
     if (profile === undefined) {
       root.hidden = true;
+      state.lastKey = "";
+      state.lastName = "";
       return;
     }
     const enemySide: Side = side === "attacker" ? "target" : "attacker";
@@ -70,6 +72,7 @@ export class PortraitsControllerImpl implements PortraitsController {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleName);
       if (iconUrl === undefined) continue;
       const img = document.createElement("img");
+      img.alt = "";
       img.src = iconUrl;
       effects.appendChild(img);
     }
