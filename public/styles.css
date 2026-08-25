@@ -9,10 +9,10 @@
   --danger-red: #d81f27;
   --optimal-green: #9cc954;
   --warn-yellow: #fce447;
-  --overlay-web: #c957d6;
-  --overlay-grappler: #d4a04a;
-  --overlay-scrambler: #e65c5c;
-  --overlay-disruptor: #5c8be6;
+  --overlay-web: #4a9fe2;
+  --overlay-grappler: #2b6cb5;
+  --overlay-scrambler: #8bb8e8;
+  --overlay-disruptor: #1e3f7a;
   --text-primary: #e8eef0;
   --text-secondary: #9fb3b8;
   --text-dim: #5d7078;
@@ -1022,7 +1022,7 @@ canvas {
 #range-overlay-legend {
   position: absolute;
   bottom: 60px;
-  left: 12px;
+  right: 12px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;

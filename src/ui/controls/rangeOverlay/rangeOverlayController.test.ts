@@ -112,6 +112,7 @@ describe("RangeOverlayController", () => {
   test("overlays returns visible descriptors for both sides", () => {
     const { controller, ewarController } = buildController();
     setProjections(ewarController, projectionWithWeb(), projectionWithDisruptor());
+    controller.restoreHidden([]);
     const overlays = controller.overlays();
     expect(overlays).toHaveLength(2);
     expect(overlays[0]).toEqual({ side: "attacker", kind: "web", radius: 10000 });
@@ -121,6 +122,7 @@ describe("RangeOverlayController", () => {
   test("toggle hides a visible kind and excludes it from overlays", () => {
     const { controller, ewarController, emitDisplayInvalidated } = buildController();
     setProjections(ewarController, projectionWithWeb(), undefined);
+    controller.restoreHidden([]);
     expect(controller.isVisible("web")).toBe(true);
     controller.toggle("web");
     expect(controller.isVisible("web")).toBe(false);
@@ -131,7 +133,7 @@ describe("RangeOverlayController", () => {
   test("toggle shows a previously hidden kind", () => {
     const { controller, ewarController } = buildController();
     setAllProjections(ewarController, projectionWithWeb());
-    controller.toggle("web");
+    expect(controller.isVisible("web")).toBe(false);
     controller.toggle("web");
     expect(controller.isVisible("web")).toBe(true);
     expect(controller.overlays().length).toBe(2);
@@ -140,6 +142,7 @@ describe("RangeOverlayController", () => {
   test("web range is scaled by overload range bonus", () => {
     const { controller, ewarController } = buildController();
     setAllProjections(ewarController, projectionWithWeb(true, true));
+    controller.restoreHidden([]);
     expect(controller.overlays()[0]?.radius).toBe(11500);
   });
 
@@ -152,6 +155,7 @@ describe("RangeOverlayController", () => {
   test("grappler overlay uses scaled optimal and base falloff", () => {
     const { controller, ewarController } = buildController();
     setAllProjections(ewarController, projectionWithGrappler(true, true));
+    controller.restoreHidden([]);
     const overlays = controller.overlays();
     expect(overlays[0]?.radius).toBe(4000);
     expect(overlays[0]?.falloffRadius).toBe(8000);
@@ -160,12 +164,14 @@ describe("RangeOverlayController", () => {
   test("scrambler range is scaled by overload range bonus", () => {
     const { controller, ewarController } = buildController();
     setAllProjections(ewarController, projectionWithScrambler(true, true));
+    controller.restoreHidden([]);
     expect(controller.overlays()[0]?.radius).toBe(10800);
   });
 
   test("disruptor overlay uses base optimal and falloff", () => {
     const { controller, ewarController } = buildController();
     setAllProjections(ewarController, projectionWithDisruptor(true, true));
+    controller.restoreHidden([]);
     const overlays = controller.overlays();
     expect(overlays[0]?.radius).toBe(10000);
     expect(overlays[0]?.falloffRadius).toBe(30000);
@@ -216,6 +222,38 @@ describe("RangeOverlayController", () => {
     const { controller } = buildController();
     controller.restoreHidden(["web", "unknown"]);
     expect(controller.hiddenKinds()).toEqual(["web"]);
+  });
+
+  test("all kinds are hidden by default and produce no overlays", () => {
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
+    for (const kind of ["web", "grappler", "scrambler", "disruptor"] as const) {
+      expect(controller.isVisible(kind)).toBe(false);
+    }
+    expect(controller.overlays()).toEqual([]);
+  });
+
+  test("restoreHidden with an empty array shows all kinds", () => {
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithDisruptor());
+    controller.restoreHidden([]);
+    expect(controller.isVisible("disruptor")).toBe(true);
+    expect(controller.overlays().length).toBeGreaterThan(0);
+  });
+
+  test("restoreHidden shows only the unlisted kinds", () => {
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
+    controller.restoreHidden(["web"]);
+    expect(controller.isVisible("web")).toBe(false);
+    expect(controller.isVisible("grappler")).toBe(true);
+    expect(controller.isVisible("scrambler")).toBe(true);
+    expect(controller.isVisible("disruptor")).toBe(true);
+    controller.restoreHidden(["grappler", "scrambler", "disruptor"]);
+    expect(controller.isVisible("web")).toBe(true);
+    expect(controller.isVisible("grappler")).toBe(false);
+    expect(controller.isVisible("scrambler")).toBe(false);
+    expect(controller.isVisible("disruptor")).toBe(false);
   });
 
   test("legend is hidden when the last ewar module is removed", () => {

@@ -16,7 +16,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private readonly ewarController: EwarController;
   private readonly events: UiEvents;
   private distance = 0;
-  private readonly hiddenSet = new Set<RangeOverlayKind>();
+  private readonly hiddenSet = new Set<RangeOverlayKind>(ALL_KINDS);
   private readonly chips = new Map<RangeOverlayKind, HTMLButtonElement>();
   private lastTitleRefresh = 0;
   private lastDescriptors: readonly RangeOverlayKind[] = [];

@@ -175,9 +175,9 @@ export class CanvasRenderer implements Renderer {
     for (const overlay of overlays) {
       const center = overlay.side === "attacker" ? snapshot.attacker.position : snapshot.target.position;
       const color = OVERLAY_COLORS[overlay.kind];
-      this.drawRingAt(center, overlay.radius, color);
+      this.drawRingAt(center, overlay.radius, color, [2, 6]);
       if (overlay.falloffRadius && overlay.falloffRadius > 0) {
-        this.drawRingAt(center, overlay.radius + overlay.falloffRadius, color, [4, 6]);
+        this.drawRingAt(center, overlay.radius + overlay.falloffRadius, color, [2, 6]);
       }
     }
   }
