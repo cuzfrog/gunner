@@ -9,7 +9,7 @@
 - Do not reference doc in the code. Code should be agnostic of any external doc.
 - No emojis in commits, issues, PR comments, or code
 - Do not use newline to break sentences, no newline in the same paragraph. Let IDE wrap text.
-- Follow @doc/UI_STYLE_GUIDE.md and @doc/CSS_GUIDE.md whenever style/ui is touched.
+- Follow @doc/UI_STYLE_GUIDE.md and @doc/CSS_RULES.md whenever style/ui is touched.
 - Refer to @doc/EFT_FORMAT.md when dealing with ship fittings.
 
 ## Conversation style

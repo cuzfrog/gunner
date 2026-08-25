@@ -1,6 +1,6 @@
 # CSS Rules
 
-Rules for writing and changing DOM styling in Gunner. Derived from jareware/css-architecture, adapted to this repo: plain CSS (native nesting allowed, no preprocessor), a single stylesheet `public/styles.css`, markup in `public/index.html` and TS-built DOM in `src/ui/controls/`.
+Rules for writing and changing DOM styling in Gunner. Derived from jareware/css-architecture, adapted to this repo: plain CSS (native nesting allowed, no preprocessor), stylesheets split under `public/styles/` and concatenated at build time, markup in `public/index.html` and TS-built DOM in `src/ui/controls/`.
 
 Goals: component-oriented, sandboxed (local by default, global only by exception), convenient, safe.
 
@@ -19,9 +19,9 @@ CSS has one global namespace. Every class name must start with its owning compon
 
 Just by reading a class in DevTools you must know which source owns it. A class with no obvious owner is a bug.
 
-## 3. One component, its styles stay in its section
+## 3. One component, its styles stay in its file
 
-All rules for a component live under one comment banner in `public/styles.css`, ordered to match DOM order in `index.html`. Do not scatter a component's rules across the file, and do not sneak another component's styles into a section. If something deserves its own name (`ammo-item` inside the ammo popup), it is part of the `ammo` component's namespace, styled in its section.
+All rules for a component live in one file `public/styles/components/<component>.css`; shared base classes live in `public/styles/primitives.css`. File order matches DOM order in `index.html`. Do not scatter a component's rules across files, and do not sneak another component's styles into a file. If something deserves its own name (`ammo-item` inside the ammo popup), it is part of the `ammo` component's namespace, styled in that component's file.
 
 ## 4. States: ARIA first, then `is-` classes
 
@@ -63,6 +63,10 @@ The only sanctioned inline styles are: the slider `--fill` custom property (set 
 
 Keep selectors short: one or two classes, plus at most one state. Never use `!important` except the sanctioned `[hidden] { display: none !important }` utility. Never fight specificity with more specificity; if two rules compete, they violate sections 4-7 — fix the ownership instead.
 
+## 11. Responsive: page concern first
+
+Viewport breakpoints (1100px, 900px, 480px) belong to the page: their rules live in `public/styles/layout.css`, keeping the whole reflow map readable in one place. A rule describing how a component behaves when it itself runs out of room (hide its own label, floor its own slider width) belongs in that component's file instead — keyed off its container rather than the viewport where possible. Before adding any responsive rule, first attempt elimination with intrinsically adaptive CSS: flex wrapping and shrinking, grid `auto-fit`/`minmax()`, `clamp()`. Accept a responsive rule only when no fluid equivalent exists.
+
 ## Violations to watch for (agent checklist)
 
 - `#id` selector or new bare element selector
@@ -71,4 +75,6 @@ Keep selectors short: one or two classes, plus at most one state. Never use `!im
 - Grouped selector list spanning multiple components
 - Hex/rgba literal outside `:root`
 - New inline style outside the sanctioned exceptions
-- Rule placed outside its component's section
+- Rule placed outside its component's file
+- Viewport media query outside `styles/layout.css` (component-owned constrained behavior excepted)
+- A responsive rule with an existing fluid equivalent

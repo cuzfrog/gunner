@@ -143,7 +143,8 @@ Keep JS-side styling minimal and token-aligned:
 ## Layout & responsive
 
 - Page: `.container` max-width 1400px centered. Main layout is a 3-column grid (attacker panel / canvas / target panel).
-- Breakpoints: `1100px` (narrower columns), `900px` (single column, results become horizontal scroller), `480px` (single-column field rows and controls, footer stacks).
+- Breakpoints: `1100px` (narrower columns), `900px` (single column, results become horizontal scroller), `480px` (footer stacks and portrait offset).
+- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax`, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 480px rules only style the page-level footer and canvas overlays.
 - Footer: 5-column info grid collapsing progressively across breakpoints.
 
 ## Checklist for new UI work
