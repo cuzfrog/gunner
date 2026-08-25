@@ -2,6 +2,7 @@ import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts } from "../controlsContract";
+import type { SpeedBreakdown, SpeedEffectAttribution, StatEffectAttribution } from "../../../sim";
 
 interface InputLike { readonly value: string; }
 
@@ -49,15 +50,37 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     const tracking = this.trackingInput.unit === "score"
       ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
       : `${formatNumber(trackingDisplay, 4)} rad/s`;
-    this.write(this.els.trackingReadout, tracking, isTrackingNegative(values.tracking, values.boostedTracking), t);
-    this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedNegative(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)), t);
-    this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedNegative(values.targetSpeed, tryReadNumber(this.els.targetSpeed)), t);
-    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeNegative(values.optimal, values.boostedOptimal), t);
-    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeNegative(values.falloff, values.boostedFalloff), t);
+    this.write(this.els.trackingReadout, tracking, isTrackingNegative(values.tracking, values.boostedTracking), (t) =>
+      values.trackingBreakdown === undefined
+        ? t("readout.effectiveAffected")
+        : buildStatTitle(values.trackingBreakdown.tracking, "label.trackingSpeed", t)
+    );
+    this.write(
+      this.els.attackerSpeedReadout,
+      formatSpeed(values.attackerSpeed),
+      isSpeedNegative(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)),
+      (t) => buildSpeedTitle(values.attackerSpeedBreakdown, t)
+    );
+    this.write(
+      this.els.targetSpeedReadout,
+      formatSpeed(values.targetSpeed),
+      isSpeedNegative(values.targetSpeed, tryReadNumber(this.els.targetSpeed)),
+      (t) => buildSpeedTitle(values.targetSpeedBreakdown, t)
+    );
+    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeNegative(values.optimal, values.boostedOptimal), (t) =>
+      values.optimalBreakdown === undefined
+        ? t("readout.effectiveAffected")
+        : buildStatTitle(values.optimalBreakdown.optimal, "label.optimalRange", t)
+    );
+    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeNegative(values.falloff, values.boostedFalloff), (t) =>
+      values.falloffBreakdown === undefined
+        ? t("readout.effectiveAffected")
+        : buildStatTitle(values.falloffBreakdown.falloff, "label.falloffRange", t)
+    );
   }
 
-  private write(readout: ReadoutLike, text: string, negative: boolean, t: (key: string) => string): void {
-    const title = negative ? t("readout.effectiveAffected") : "";
+  private write(readout: ReadoutLike, text: string, negative: boolean, buildTitle: (t: (key: string) => string) => string): void {
+    const title = negative ? buildTitle((key) => this.i18n.t(key)) : "";
     const previous = this.lastByReadout.get(readout);
     if (previous && previous.text === text && previous.negative === negative && previous.title === title) return;
     readout.textContent = text;
@@ -103,6 +126,31 @@ function isRangeNegative(effective: number, raw: number): boolean {
 function isNegative(effective: number, baseline: number, epsilon: { readonly absolute: number; readonly relative: number }): boolean {
   const threshold = Math.max(epsilon.absolute, Math.abs(effective) * epsilon.relative);
   return effective < baseline - threshold;
+}
+
+function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, t: (key: string) => string): string {
+  if (breakdown === undefined) return t("readout.effectiveAffected");
+  const entries: string[] = [];
+  for (const effect of breakdown.effects) {
+    if (effect.family === "scrambler") {
+      if (breakdown.propulsionSuppressed) entries.push(`${effect.moduleName} ${t("readout.stoppedMwd")}`);
+      continue;
+    }
+    entries.push(`${effect.moduleName} -${percentOf(effect.multiplier)}%`);
+  }
+  return entries.join("; ");
+}
+
+function buildStatTitle(entries: readonly StatEffectAttribution[], statKey: string, t: (key: string) => string): string {
+  if (entries.length === 0) return "";
+  return entries.map((entry) => {
+    const prefix = entry.scriptName === undefined ? entry.moduleName : `${entry.moduleName} (${entry.scriptName})`;
+    return `${prefix} -${percentOf(entry.multiplier)}% ${t(statKey)}`;
+  }).join("; ");
+}
+
+function percentOf(multiplier: number): number {
+  return Math.round((1 - multiplier) * 100);
 }
 
 export { formatSpeed as _formatSpeed, isNegative as _isAffected, tryReadNumber as _readNumber };

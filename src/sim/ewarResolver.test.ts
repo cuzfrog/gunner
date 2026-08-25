@@ -628,6 +628,33 @@ describe("EwarResolverImpl", () => {
       expect(effects[0].family).toBe("web");
       expect(effects[1].family).toBe("grappler");
     });
+
+    test("active in-range scrambler is emitted as the last speed effect", () => {
+      const web: StasisWebSpec = {
+        moduleName: "Stasis Webifier II",
+        maxRange: 50000,
+        speedFactor: 0.6,
+        overloadRangeBonusPercent: 30,
+      };
+      const scrambler: WarpScramblerSpec = {
+        moduleName: "Warp Scrambler II",
+        maxRange: 9000,
+        overloadRangeBonusPercent: 20,
+      };
+      const loadout = { webs: [web], grapplers: [], disruptors: [], scramblers: [scrambler], scripts: [] };
+      const activation = {
+        webs: [{ active: true, overloaded: false }],
+        grapplers: [],
+        disruptors: [],
+        scramblers: [{ active: true, overloaded: false }],
+      };
+      const projection: EwarProjection = { loadout, activation };
+      const breakdown = resolver.speedBreakdown(projection, 5000);
+      expect(breakdown.propulsionSuppressed).toBe(true);
+      expect(breakdown.effects).toHaveLength(2);
+      expect(breakdown.effects[0].family).toBe("web");
+      expect(breakdown.effects[1]).toEqual({ family: "scrambler", moduleName: "Warp Scrambler II", multiplier: 1 });
+    });
   });
 
   describe("disruptionBreakdown", () => {

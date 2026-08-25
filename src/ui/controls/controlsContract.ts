@@ -1,4 +1,4 @@
-import type { EngagementFrame, HitChanceBreakdown, ShipConfig, SimConfig, TurretSpec } from "../../sim";
+import type { DisruptionBreakdown, EngagementFrame, HitChanceBreakdown, ShipConfig, SimConfig, SpeedBreakdown, TurretSpec } from "../../sim";
 import type { RangeOverlay } from "../renderer";
 
 export interface ControlsCallbacks {
@@ -18,6 +18,11 @@ export interface EffectiveReadouts {
   readonly boostedTracking: number;
   readonly boostedOptimal: number;
   readonly boostedFalloff: number;
+  readonly attackerSpeedBreakdown?: SpeedBreakdown;
+  readonly targetSpeedBreakdown?: SpeedBreakdown;
+  readonly trackingBreakdown?: DisruptionBreakdown;
+  readonly optimalBreakdown?: DisruptionBreakdown;
+  readonly falloffBreakdown?: DisruptionBreakdown;
 }
 
 export interface Controls {

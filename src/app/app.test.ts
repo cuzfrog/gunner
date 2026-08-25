@@ -1,15 +1,18 @@
 import {
   Vec2,
   type AttackAssessment,
+  type DisruptionBreakdown,
   type EngagementFrame,
   type EngagementFrameComposer,
   type EngagementView,
+  type EwarResolver,
   type HitChanceBreakdown,
   type ShipConfig,
   type ShipState,
   type SimConfig,
   type Simulation,
   type SimSnapshot,
+  type SpeedBreakdown,
   type TurretSpec,
 } from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
@@ -41,6 +44,20 @@ const loop = vi.mocked<Loop>({
   setSpeed: vi.fn(),
   reset: vi.fn(),
 });
+const ewarResolver = vi.mocked<Required<EwarResolver>>({
+  speedMultiplier: vi.fn(() => 1),
+  speedMultiplierIgnoringRange: vi.fn(() => 1),
+  disruptedTurret: vi.fn((turret) => turret),
+  disruptedTurretIgnoringRange: vi.fn((turret) => turret),
+  propulsionSuppressed: vi.fn(() => false),
+  propulsionSuppressedIgnoringRange: vi.fn(() => false),
+  appliedEffects: vi.fn(() => []),
+  speedBreakdown: vi.fn(),
+  disruptionBreakdown: vi.fn(),
+});
+
+const emptySpeedBreakdown: SpeedBreakdown = { effects: [], propulsionSuppressed: false };
+const emptyDisruptionBreakdown: DisruptionBreakdown = { tracking: [], optimal: [], falloff: [] };
 
 const ship: ShipState = {
   id: "attacker",
@@ -91,7 +108,9 @@ describe("AppImpl", () => {
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
+    ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
+    ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -107,7 +126,12 @@ describe("AppImpl", () => {
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turret, targetSigRadius: 40 });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
+      attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
+      attackerSpeedBreakdown: emptySpeedBreakdown, targetSpeedBreakdown: emptySpeedBreakdown,
+      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    });
   });
 
   test("renderFrame passes effective attribute values and boosted baselines from view", () => {
@@ -124,19 +148,29 @@ describe("AppImpl", () => {
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, hit, effectiveTurret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 250, targetSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000, boostedTracking: 0.45, boostedOptimal: 5800, boostedFalloff: 3800 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
+      attackerSpeed: 250, targetSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000,
+      boostedTracking: 0.45, boostedOptimal: 5800, boostedFalloff: 3800,
+      attackerSpeedBreakdown: emptySpeedBreakdown, targetSpeedBreakdown: emptySpeedBreakdown,
+      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    });
   });
 
   test("falls back to the view's effective turret when the composer returns no assessment", () => {
     const view: EngagementView = { frame, assessment: undefined, effectiveTurret: turret, hit };
     engagementFrameComposer.compose.mockReturnValue(view);
-    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
+      attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
+      attackerSpeedBreakdown: emptySpeedBreakdown, targetSpeedBreakdown: emptySpeedBreakdown,
+      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    });
   });
 
   test("tick steps the simulation and renders", () => {
@@ -185,5 +219,33 @@ describe("AppImpl", () => {
     app.start();
     callbacks().onSpeedChange(4);
     expect(loop.setSpeed).toHaveBeenCalledWith(4);
+  });
+
+  test("passes ewar breakdowns from the resolver into effective readouts", () => {
+    const attackerSpeed: SpeedBreakdown = {
+      effects: [{ family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 }],
+      propulsionSuppressed: false,
+    };
+    const targetSpeed: SpeedBreakdown = {
+      effects: [{ family: "scrambler" as const, moduleName: "Warp Scrambler II", multiplier: 1 }],
+      propulsionSuppressed: true,
+    };
+    const disruption: DisruptionBreakdown = {
+      tracking: [{ moduleName: "Tracking Disruptor II", scriptName: undefined, multiplier: 0.8281 }],
+      optimal: [],
+      falloff: [],
+    };
+    ewarResolver.speedBreakdown.mockReturnValueOnce(attackerSpeed).mockReturnValueOnce(targetSpeed);
+    ewarResolver.disruptionBreakdown.mockReturnValue(disruption);
+    app.start();
+    expect(ewarResolver.speedBreakdown).toHaveBeenCalledWith(undefined, 5000);
+    expect(ewarResolver.speedBreakdown).toHaveBeenCalledWith(undefined, 5000);
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenCalledWith(undefined, 5000);
+    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
+      attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
+      attackerSpeedBreakdown: attackerSpeed, targetSpeedBreakdown: targetSpeed,
+      trackingBreakdown: disruption, optimalBreakdown: disruption, falloffBreakdown: disruption,
+    });
   });
 });

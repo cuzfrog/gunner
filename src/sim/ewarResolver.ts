@@ -49,16 +49,20 @@ export class EwarResolverImpl implements EwarResolver {
   }
 
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean {
-    if (!projection) return false;
+    return this.scramblerAttribution(projection, distance) !== undefined;
+  }
+
+  private scramblerAttribution(projection: EwarProjection | undefined, distance: number): { readonly moduleName: string } | undefined {
+    if (!projection) return undefined;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const spec = projection.loadout.scramblers[i];
       const activation = projection.activation?.scramblers[i];
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
-      if (range >= distance) return true;
+      if (range >= distance) return { moduleName: spec.moduleName };
     }
-    return false;
+    return undefined;
   }
 
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean {
@@ -145,7 +149,10 @@ export class EwarResolverImpl implements EwarResolver {
     if (web !== undefined) effects.push(web);
     const grappler = this.representativeSpeedEffect(grapplerCandidates);
     if (grappler !== undefined) effects.push(grappler);
-    return { effects, propulsionSuppressed: this.propulsionSuppressed(projection, distance) };
+    const scrambler = this.scramblerAttribution(projection, distance);
+    const propulsionSuppressed = scrambler !== undefined;
+    if (scrambler !== undefined) effects.push({ family: "scrambler", moduleName: scrambler.moduleName, multiplier: 1 });
+    return { effects, propulsionSuppressed };
   }
 
   disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown {

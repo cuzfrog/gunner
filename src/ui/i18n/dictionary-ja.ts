@@ -145,6 +145,7 @@ export const JA: LanguageSlice<"ja"> = {
   "readout.hitChance": { ja: "命中確率：" },
   "readout.none": { ja: "なし" },
   "readout.effectiveAffected": { ja: "敵モジュールの影響を受けています" },
+  "readout.stoppedMwd": { ja: "MWD停止" },
   "footer.about.heading": { ja: "Gunner について" },
   "footer.about.text": {
     ja: "このツールは、艦船戦闘のダイナミクスを理解し、戦闘での自信を高めるために作りました。" +

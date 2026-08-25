@@ -1,4 +1,4 @@
-import type { EngagementFrameComposer, Simulation } from "../sim";
+import type { EngagementFrameComposer, EwarResolver, Simulation } from "../sim";
 import type { Controls, EffectiveReadouts, Loop, Renderer } from "../ui";
 
 export interface App {
@@ -10,6 +10,7 @@ export class AppImpl implements App {
   private readonly controls: Controls;
   private readonly simulation: Simulation;
   private readonly engagementFrameComposer: EngagementFrameComposer;
+  private readonly ewarResolver: EwarResolver;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
 
@@ -17,12 +18,14 @@ export class AppImpl implements App {
     controls: Controls;
     simulation: Simulation;
     engagementFrameComposer: EngagementFrameComposer;
+    ewarResolver: EwarResolver;
     renderer: Renderer;
     loop: Loop;
   }) {
     this.controls = deps.controls;
     this.simulation = deps.simulation;
     this.engagementFrameComposer = deps.engagementFrameComposer;
+    this.ewarResolver = deps.ewarResolver;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
   }
@@ -61,6 +64,10 @@ export class AppImpl implements App {
     const targetSigRadius = this.controls.getTargetSig();
     const view = this.engagementFrameComposer.compose(snapshot, { turret, targetSigRadius });
     const boostedTurret = view.assessment?.boostedTurret ?? view.effectiveTurret;
+    const distance = view.frame.distance;
+    const attackerSpeedBreakdown = this.ewarResolver.speedBreakdown?.(snapshot.attacker.ewar, distance);
+    const targetSpeedBreakdown = this.ewarResolver.speedBreakdown?.(snapshot.target.ewar, distance);
+    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown?.(snapshot.target.ewar, distance);
     const effectiveReadouts: EffectiveReadouts = {
       attackerSpeed: snapshot.attacker.maxSpeed,
       targetSpeed: snapshot.target.maxSpeed,
@@ -70,6 +77,11 @@ export class AppImpl implements App {
       boostedTracking: boostedTurret.tracking,
       boostedOptimal: boostedTurret.optimal,
       boostedFalloff: boostedTurret.falloff,
+      attackerSpeedBreakdown,
+      targetSpeedBreakdown,
+      trackingBreakdown: disruptionBreakdown,
+      optimalBreakdown: disruptionBreakdown,
+      falloffBreakdown: disruptionBreakdown,
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setRangeRingsEnabled(this.controls.hasAttackerGuns());

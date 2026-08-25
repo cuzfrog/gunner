@@ -145,6 +145,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "readout.hitChance": { zh: "命中率：" },
   "readout.none": { zh: "无" },
   "readout.effectiveAffected": { zh: "受敌方模块影响" },
+  "readout.stoppedMwd": { zh: "停止MWD" },
   "footer.about.heading": { zh: "关于 Gunner" },
   "footer.about.text": {
     zh: "我写这个工具是为了帮助自己理解舰船战斗的动态，并在战斗中建立信心。" +

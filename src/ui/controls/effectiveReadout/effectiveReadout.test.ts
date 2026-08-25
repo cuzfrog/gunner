@@ -60,12 +60,30 @@ function fakeTrackingInput(rad = 0.32, unit: TrackingUnit = "rad"): TrackingInpu
 }
 
 function fakeI18n(): I18n {
-  const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km", "label.trackingScore": "Score", "readout.effectiveAffected": "Affected" }[key] ?? key);
+  const t = (key: string): string => ({
+    "unit.meter": "m",
+    "unit.kilometer": "km",
+    "label.trackingScore": "Score",
+    "label.trackingSpeed": "Tracking speed",
+    "label.optimalRange": "Optimal range",
+    "label.falloffRange": "Falloff range",
+    "readout.effectiveAffected": "Affected",
+    "readout.stoppedMwd": "stopped MWD",
+  }[key] ?? key);
   return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
 }
 
 function fakeI18nWithEmptyAffected(): I18n {
-  const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km", "label.trackingScore": "Score", "readout.effectiveAffected": "" }[key] ?? key);
+  const t = (key: string): string => ({
+    "unit.meter": "m",
+    "unit.kilometer": "km",
+    "label.trackingScore": "Score",
+    "label.trackingSpeed": "Tracking speed",
+    "label.optimalRange": "Optimal range",
+    "label.falloffRange": "Falloff range",
+    "readout.effectiveAffected": "",
+    "readout.stoppedMwd": "stopped MWD",
+  }[key] ?? key);
   return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
 }
 
@@ -149,6 +167,74 @@ describe("EffectiveReadoutImpl", () => {
     expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("is-negative");
     expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
     expect(els.falloffReadout.classList.add).toHaveBeenCalledWith("is-negative");
+  });
+});
+
+describe("EffectiveReadoutImpl hover tooltips", () => {
+  test("builds a speed tooltip with web and scrambler attribution", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const attackerSpeedBreakdown = {
+      effects: [
+        { family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 },
+        { family: "scrambler" as const, moduleName: "Warp Scrambler II", multiplier: 1 },
+      ],
+      propulsionSuppressed: true,
+    };
+    readout.update({
+      attackerSpeed: 225, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
+      attackerSpeedBreakdown,
+    });
+    expect(els.attackerSpeedReadout.title).toBe("Stasis Webifier II -55%; Warp Scrambler II stopped MWD");
+  });
+
+  test("uses the generic attribution title when a speed breakdown is undefined", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({
+      attackerSpeed: 225, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
+    });
+    expect(els.attackerSpeedReadout.title).toBe("Affected");
+  });
+
+  test("leaves the speed tooltip empty when the breakdown has no effects", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const attackerSpeedBreakdown = { effects: [] as const, propulsionSuppressed: false };
+    readout.update({
+      attackerSpeed: 225, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
+      attackerSpeedBreakdown,
+    });
+    expect(els.attackerSpeedReadout.title).toBe("");
+  });
+
+  test("builds stat tooltips including script names for disruptors", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const disruptionBreakdown = {
+      tracking: [{ moduleName: "Tracking Disruptor II", scriptName: "Tracking Speed Disruption Script", multiplier: 0.6562 }],
+      optimal: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
+      falloff: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
+    };
+    readout.update({
+      attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 4000, falloff: 2500,
+      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
+      trackingBreakdown: disruptionBreakdown, optimalBreakdown: disruptionBreakdown, falloffBreakdown: disruptionBreakdown,
+    });
+    expect(els.trackingReadout.title).toBe("Tracking Disruptor II (Tracking Speed Disruption Script) -34% Tracking speed");
+    expect(els.optimalReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Optimal range");
+    expect(els.falloffReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Falloff range");
   });
 });
 

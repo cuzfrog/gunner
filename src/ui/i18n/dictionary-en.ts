@@ -145,6 +145,7 @@ export const EN: LanguageSlice<"en"> = {
   "readout.hitChance": { en: "Hit chance: " },
   "readout.none": { en: "none" },
   "readout.effectiveAffected": { en: "Affected by enemy modules" },
+  "readout.stoppedMwd": { en: "stopped MWD" },
   "footer.about.heading": { en: "About Gunner" },
   "footer.about.text": {
     en: "I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. " +
