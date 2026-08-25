@@ -1492,9 +1492,13 @@ canvas {
   margin-bottom: 4px;
 }
 
+.field-label-row > label,
+.field-label-row .field-label {
+  margin-bottom: 0;
+}
+
 .field-label-row .field-label {
   display: inline;
-  margin-bottom: 0;
 }
 
 .panel .slider-value {

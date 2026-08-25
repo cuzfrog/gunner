@@ -10,7 +10,7 @@
     "max-nesting-depth": 2,
     "selector-max-compound-selectors": 3,
     "no-descending-specificity": null,
-    "selector-class-pattern": "^--.*$|^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "selector-class-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
     "color-function-alias-notation": null,
     "color-function-notation": null,
     "alpha-value-notation": null,
