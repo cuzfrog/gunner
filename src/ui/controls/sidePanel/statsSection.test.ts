@@ -93,6 +93,7 @@ describe("StatsSection", () => {
     expect(getFake(document, "ship-a-mass").value).toBe("1000000");
     expect(getFake(document, "ship-a-inertia").value).toBe("2");
     expect(getFake(document, "ship-a-speed").value).toBe("450");
+    expect(getFake(document, "ship-a-sig").value).toBe("30");
   });
 
   test("updateShipStats respects mass override", () => {

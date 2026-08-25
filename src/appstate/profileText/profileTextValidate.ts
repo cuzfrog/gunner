@@ -5,6 +5,7 @@ import {
   type ProfileSettings,
   type StoredBoosterActivation,
 } from "../userSettings";
+import { clampManeuverAggressivity } from "../../sim";
 import {
   isNonNegative,
   isOptionalBoosterActivations,
@@ -33,7 +34,7 @@ export function parseScalarValue(field: ScalarField, value: string, guards: Sett
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
   if (field === "initialDistance" || field === "shipBSig" || field === "shipASig") return isPositive(num) ? num : undefined;
-  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? Math.max(0.01, Math.min(100, num)) : undefined;
+  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? clampManeuverAggressivity(num) : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 

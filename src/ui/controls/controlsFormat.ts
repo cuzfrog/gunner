@@ -1,5 +1,4 @@
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN } from "../../sim";
-import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";

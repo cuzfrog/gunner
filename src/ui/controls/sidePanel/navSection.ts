@@ -1,5 +1,4 @@
-import type { AutopilotMode } from "../../../sim";
-import { isAutopilotMode } from "../../../sim";
+import { isAutopilotMode, type AutopilotMode } from "../../../sim";
 import { num, setText } from "../controlsDom";
 import {
   aggressivityFromPosition,

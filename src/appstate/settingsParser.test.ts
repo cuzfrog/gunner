@@ -422,6 +422,7 @@ describe("SettingsParser", () => {
     });
     expect(decoded!.shipAMass).toBe(1_500_000);
     expect(decoded!.shipASpeed).toBe(4_649.72);
+    expect(decoded!.shipASig).toBe(RIFTER_MWD_STATS.sigRadius);
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {

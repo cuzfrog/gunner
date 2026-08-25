@@ -53,8 +53,8 @@ export interface InternalUserSettings {
 
 export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
   const overrides = sideValue(side, settings.shipAOverrides, settings.shipBOverrides);
-  const sigKey = side === "shipA" ? "shipASig" : "shipBSig";
-  const sig = sideValue(side, settings.shipASig, settings.shipBSig) ?? (overrides?.[sigKey] as number | undefined);
+  const sigKey: keyof ProfileParamOverrides = side === "shipA" ? "shipASig" : "shipBSig";
+  const sig = sideValue(side, settings.shipASig, settings.shipBSig) ?? overrides?.[sigKey];
   return {
     speed: sideValue(side, settings.shipASpeed, settings.shipBSpeed),
     mode: sideValue(side, settings.shipAMode, settings.shipBMode),

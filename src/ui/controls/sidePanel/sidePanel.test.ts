@@ -151,6 +151,7 @@ describe("SidePanel", () => {
     expect(getFake(document, "ship-a-inertia").disabled).toBe(true);
     expect(getFake(document, "ship-a-mode").disabled).toBe(true);
     expect(getFake(document, "ship-a-range").disabled).toBe(true);
+    expect(getFake(document, "ship-a-sig").disabled).toBe(true);
     expect(getFake(document, "ship-a-skills").disabled).toBe(true);
     expect(getFake(document, "ship-a-skill-trigger").disabled).toBe(true);
     expect(getFake(document, "ship-a-skill-trigger").getAttribute("aria-disabled")).toBe("true");
@@ -191,6 +192,7 @@ describe("SidePanel", () => {
     expect(getFake(document, "ship-a-inertia").disabled).toBe(false);
     expect(getFake(document, "ship-a-mode").disabled).toBe(false);
     expect(getFake(document, "ship-a-range").disabled).toBe(false);
+    expect(getFake(document, "ship-a-sig").disabled).toBe(false);
     expect(getFake(document, "ship-a-skills").disabled).toBe(false);
     expect(getFake(document, "ship-a-skill-trigger").disabled).toBe(false);
     // overload refollows the propulsion/ewar rule: with no ship or propulsion it stays disabled
@@ -257,5 +259,13 @@ describe("SidePanel", () => {
     expect(turretOverrides.get().shipBSig).toBeUndefined();
     expect(panel.isOverridden("shipBSig")).toBe(true);
     expect(panel.capture().sig).toBe(120);
+  });
+
+  test("shipA signature input records override in turret store and calls host onDisplayChange", () => {
+    const { document, host, turretOverrides } = buildSidePanel("shipA");
+    getFake(document, "ship-a-sig").value = "80";
+    getFake(document, "ship-a-sig").trigger("input");
+    expect(host.onDisplayChange).toHaveBeenCalled();
+    expect(turretOverrides.get().shipASig).toBe(80);
   });
 });
