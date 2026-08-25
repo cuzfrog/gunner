@@ -223,6 +223,14 @@ select {
   text-overflow: ellipsis;
 }
 
+/* ---- surface ---- */
+.surface-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  padding: 12px;
+}
+
 body {
   margin: 0;
   background: var(--bg-deep);
@@ -324,13 +332,6 @@ body {
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
   gap: 14px;
   align-items: stretch;
-}
-
-.surface-panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-dim);
-  border-radius: 2px;
-  padding: 12px;
 }
 
 .side-panel {
