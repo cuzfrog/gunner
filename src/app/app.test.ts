@@ -22,13 +22,14 @@ const controls = vi.mocked<Controls>({
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
   getOverlays: vi.fn(() => []),
+  hasAttackerGuns: vi.fn(),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
-const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setRangeRingsEnabled: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),

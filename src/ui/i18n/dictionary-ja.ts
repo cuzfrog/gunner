@@ -10,6 +10,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.trackingScore": { ja: "スコア" },
   "label.turretSigResolution": { ja: "タレット信号半径" },
   "turret.notFittable": { ja: "選択した船体にはこのタレットクラスを装着できません" },
+  "turret.noGuns": { ja: "砲台未装備" },
   "label.optimalRange": { ja: "最適射程" },
   "label.falloffRange": { ja: "フォールオフ射程" },
   "section.attackerShip": { ja: "攻撃艦船" },

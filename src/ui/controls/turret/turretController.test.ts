@@ -4,7 +4,7 @@ import { TurretControllerImpl } from "./turretController";
 import type { ShipProfile } from "../../../ships";
 
 describe("TurretController", () => {
-  test("initial state disables the trigger and hides the summary icon", () => {
+  test("initial state disables the trigger, inputs, and hides the summary icon", () => {
     const { document, controller } = buildTurret();
     expect(getFake(document, "attacker-ammo-trigger").disabled).toBe(true);
     expect(getFake(document, "attacker-ammo-summary").textContent).toBe("—");
@@ -12,6 +12,10 @@ describe("TurretController", () => {
     expect(getFake(document, "attacker-ammo-all-section").hidden).toBe(true);
     expect(controller.ammo()).toBe("Hail S");
     expect(controller.turret()).toBeUndefined();
+    expect(getFake(document, "tracking").disabled).toBe(true);
+    expect(getFake(document, "sigRes").disabled).toBe(true);
+    expect(getFake(document, "optimal").disabled).toBe(true);
+    expect(getFake(document, "falloff").disabled).toBe(true);
   });
 
   test("applyImported with a turret sets inputs, renders lists and sig-res icons", () => {
@@ -34,13 +38,21 @@ describe("TurretController", () => {
     expect(getFake(document, "attacker-ammo-all-list").children.length).toBe(2);
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
     expect(getFake(document, "sig-res-options").children[0].title).toContain("Original S");
+    expect(getFake(document, "tracking").disabled).toBe(false);
+    expect(getFake(document, "sigRes").disabled).toBe(false);
+    expect(getFake(document, "optimal").disabled).toBe(false);
+    expect(getFake(document, "falloff").disabled).toBe(false);
   });
 
-  test("applyImported without a turret leaves the trigger disabled", () => {
+  test("applyImported without a turret leaves the trigger and inputs disabled", () => {
     const { document, controller } = buildTurret({ fittingImport: {} });
     controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined });
     expect(getFake(document, "attacker-ammo-trigger").disabled).toBe(true);
     expect(controller.ammo()).toBe("Hail S");
+    expect(getFake(document, "tracking").disabled).toBe(true);
+    expect(getFake(document, "sigRes").disabled).toBe(true);
+    expect(getFake(document, "optimal").disabled).toBe(true);
+    expect(getFake(document, "falloff").disabled).toBe(true);
   });
 
   test("restore imports the fitting and applies the stored ammo", () => {
@@ -224,17 +236,20 @@ describe("TurretController", () => {
     const buttons = Array.from(getFake(document, "sig-res-options").children);
     for (const button of buttons) {
       expect(button.disabled).toBe(true);
-      expect(button.title).toBe("turret.notFittable");
+      expect(button.title).not.toBe("turret.notFittable");
     }
     for (const option of getFake(document, "sigRes").options) {
       expect(option.disabled).toBe(true);
     }
+    expect(getFake(document, "tracking").disabled).toBe(true);
+    expect(getFake(document, "attacker-ammo-trigger").disabled).toBe(true);
   });
 
   test("setHullProfile enables only the turret classes that fit the hull", () => {
     const { document, controller } = buildTurret({
       ships: { turretSizeOptions: vi.fn(() => ["small", "medium"] as const) },
     });
+    controller.applyImported(IMPORTED_RIFTER);
     controller.setHullProfile(RIFTER);
     expect(buttonFor(document, "S").disabled).toBe(false);
     expect(buttonFor(document, "M").disabled).toBe(false);
@@ -243,6 +258,7 @@ describe("TurretController", () => {
     expect(buttonFor(document, "L").title).toBe("turret.notFittable");
     expect(optionFor(document, "S").disabled).toBe(false);
     expect(optionFor(document, "XL").disabled).toBe(true);
+    expect(getFake(document, "tracking").disabled).toBe(false);
   });
 
   test("setHullProfile clamps an invalid current class to the fitted turret's class when it fits", () => {
@@ -270,6 +286,7 @@ describe("TurretController", () => {
   test("setHullProfile re-enables larger classes when a bigger hull is selected", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
     const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
+    controller.applyImported(IMPORTED_RIFTER);
     controller.setHullProfile(RIFTER);
     expect(buttonFor(document, "L").disabled).toBe(true);
     controller.setHullProfile(mediumProfile);

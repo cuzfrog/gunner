@@ -211,6 +211,7 @@ class StubPopup implements Popup {
 
 class StubTurretController implements TurretController {
   popup: Popup = new StubPopup();
+  turret = vi.fn(() => undefined);
   ammo = vi.fn(() => "Hail S");
   applyImported = vi.fn();
   restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string }): void;

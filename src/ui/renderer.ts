@@ -13,6 +13,7 @@ export interface RangeOverlay {
 
 export interface Renderer {
   setGridBrightness(brightness: number): void;
+  setRangeRingsEnabled(enabled: boolean): void;
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
 }
 
@@ -63,6 +64,7 @@ export class CanvasRenderer implements Renderer {
   private readonly i18n: I18n;
   private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
+  private rangeRingsEnabled = true;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
@@ -75,6 +77,10 @@ export class CanvasRenderer implements Renderer {
   setGridBrightness(brightness: number): void {
     if (!Number.isFinite(brightness)) return;
     this.gridBrightness = Math.max(0, Math.min(1, brightness));
+  }
+
+  setRangeRingsEnabled(enabled: boolean): void {
+    this.rangeRingsEnabled = enabled;
   }
 
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
@@ -165,6 +171,7 @@ export class CanvasRenderer implements Renderer {
   }
 
   private drawRangeRings(center: Vec2, turret: TurretSpec): void {
+    if (!this.rangeRingsEnabled) return;
     this.drawRingAt(center, turret.optimal, COLORS.optimalRing, [8, 6]);
     if (turret.falloff > 0) {
       this.drawRingAt(center, turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);

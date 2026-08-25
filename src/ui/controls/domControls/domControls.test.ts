@@ -92,6 +92,28 @@ describe("DomControls", () => {
     expect(getFake(document, "play").textContent).toBe("button.pause");
   });
 
+  test("play button is disabled while a side is empty and re-enables when both have hulls", () => {
+    const { document, controls, cradle } = buildDomControls();
+    controls.wireControls();
+    expect(getFake(document, "play").disabled).toBe(true);
+    cradle.cradle.attackerSide.profile = RIFTER;
+    controls.onConfigChange(false);
+    expect(getFake(document, "play").disabled).toBe(true);
+    cradle.cradle.targetSide.profile = RIFTER;
+    controls.onConfigChange(false);
+    expect(getFake(document, "play").disabled).toBe(false);
+    cradle.cradle.attackerSide.profile = undefined;
+    controls.onConfigChange(false);
+    expect(getFake(document, "play").disabled).toBe(true);
+  });
+
+  test("hasAttackerGuns reflects whether the attacker has a fitted turret", () => {
+    const { controls, cradle } = buildDomControls();
+    expect(controls.hasAttackerGuns()).toBe(false);
+    cradle.cradle.turretController.applyImported(IMPORTED_RIFTER);
+    expect(controls.hasAttackerGuns()).toBe(true);
+  });
+
   test("callback routing", () => {
     const { document, controls } = buildDomControls();
     const callbacks = mockCallbacks();

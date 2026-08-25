@@ -27,6 +27,7 @@ export interface Controls {
   getSpeed(): number;
   getGridBrightness(): number;
   getOverlays(): readonly RangeOverlay[];
+  hasAttackerGuns(): boolean;
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;

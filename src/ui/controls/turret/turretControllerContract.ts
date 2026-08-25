@@ -1,5 +1,5 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
-import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting } from "../../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { SigResolutionClass, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -28,6 +28,7 @@ export interface TurretControllerDeps {
 
 export interface TurretController {
   readonly popup: Popup;
+  turret(): ImportedTurret | undefined;
   ammo(): string;
   applyImported(imported: ImportedFitting): void;
   restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string }): void;

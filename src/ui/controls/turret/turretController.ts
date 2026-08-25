@@ -202,6 +202,10 @@ export class TurretControllerImpl implements TurretController {
   }
 
   render(): void {
+    const hasGuns = this.attackerTurret !== undefined;
+    this.inputSet.setEnabled(hasGuns);
+    this.els.attackerAmmoTrigger.disabled = !hasGuns;
+    this.els.attackerAmmoTrigger.title = hasGuns ? "" : this.i18n.t("turret.noGuns");
     this.ammoList.render({
       turret: this.attackerTurret, ammo: this.attackerAmmo,
       cargo: this.attackerCargoCharges, allExpanded: this.attackerAmmoAllExpanded,
@@ -259,16 +263,17 @@ export class TurretControllerImpl implements TurretController {
   private renderSigResState(): void {
     const notFittable = this.i18n.t("turret.notFittable");
     const allowed = new Set(this.allowedSigResClasses);
+    const hasGuns = this.attackerTurret !== undefined;
     for (const button of Array.from(this.els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
       const value = button.getAttribute("data-value") ?? "";
       if (!isSigResolutionClass(value)) continue;
-      button.disabled = !allowed.has(value);
-      if (button.disabled) button.title = notFittable;
+      button.disabled = !hasGuns || !allowed.has(value);
+      if (hasGuns && button.disabled) button.title = notFittable;
     }
     for (const option of Array.from(this.els.sigRes.options)) {
       if (!isSigResolutionClass(option.value)) continue;
-      option.disabled = !allowed.has(option.value);
+      option.disabled = !hasGuns || !allowed.has(option.value);
     }
   }
 

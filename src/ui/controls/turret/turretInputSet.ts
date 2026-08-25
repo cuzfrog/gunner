@@ -44,6 +44,13 @@ export class TurretInputSet {
     this.els.tracking.value = String(this.trackingInput.displayValue(SIG_RESOLUTIONS[value]));
   }
 
+  setEnabled(enabled: boolean): void {
+    this.els.tracking.disabled = !enabled;
+    this.els.sigRes.disabled = !enabled;
+    this.els.optimal.disabled = !enabled;
+    this.els.falloff.disabled = !enabled;
+  }
+
   currentSigResValue(): "S" | "M" | "L" | "XL" {
     const value = this.els.sigRes.value;
     if (!isSigResolutionClass(value)) throw new Error(`Invalid sigRes value: ${value}`);

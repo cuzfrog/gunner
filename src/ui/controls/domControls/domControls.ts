@@ -127,6 +127,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.els.initialDistance.addEventListener("input", () => this.onConfigChange());
     document.addEventListener("pointerdown", (event: PointerEvent) => this.onDocumentPointerDown(event));
     document.addEventListener("keydown", (event: KeyboardEvent) => this.onDocumentKeyDown(event));
+    this.updatePlayEnabled();
   }
 
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
@@ -140,6 +141,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.rangeOverlayController.render();
     this.preferencesController.savePreferences();
     if (persist) this.profileController.updateActionBarState();
+    this.updatePlayEnabled();
     this.callbacks?.onConfigChange();
   }
   currentDistance(): number { return this.currentDistanceValue; }
@@ -168,21 +170,25 @@ export class DomControls implements Controls, DomControlsHost {
 
   private onSessionRestored(): void {
     this.setPlaying(this.playing);
+    this.updatePlayEnabled();
     this.callbacks?.onReset();
   }
 
   private onSessionReset(): void {
     this.setPlaying(false);
+    this.updatePlayEnabled();
     this.callbacks?.onReset();
   }
 
   private onStartupDefaultsApplied(): void {
     this.setPlaying(false);
+    this.updatePlayEnabled();
   }
 
   persistConfigChange(notify = true): void {
     this.preferencesController.savePreferences();
     this.profileController.updateActionBarState();
+    this.updatePlayEnabled();
     if (notify) this.callbacks?.onConfigChange();
   }
 
@@ -192,6 +198,7 @@ export class DomControls implements Controls, DomControlsHost {
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
+  hasAttackerGuns(): boolean { return this.turretController.turret() !== undefined; }
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
@@ -236,5 +243,9 @@ export class DomControls implements Controls, DomControlsHost {
     if (event.key !== "Escape") return;
     if (this.previewManager.openSide()) this.previewManager.handleEscape();
     this.popupGroup.onKeyDown(event);
+  }
+
+  private updatePlayEnabled(): void {
+    this.els.play.disabled = this.attackerSide.profile === undefined || this.targetSide.profile === undefined;
   }
 }
