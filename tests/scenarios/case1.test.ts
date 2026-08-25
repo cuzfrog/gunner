@@ -18,6 +18,7 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
       desiredRange: 10_000,
       aggressivity: 1,
     };
+    const attackerPredictive: ShipConfig = { ...attackerConfig, mode: "maneuver" };
     const targetConfig: ShipConfig = {
       id: "target",
       maxSpeed: 1500,
@@ -28,13 +29,14 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
       aggressivity: 0.01,
       orbitDirection: "cw",
     };
-    const simConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
+    const baselineConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
+    const predictiveConfig: SimConfig = { attacker: attackerPredictive, target: targetConfig, initialDistance: 14_000 };
 
     const reactive = new ReactiveAutopilot();
     const kinematicsForSim = new KinematicsImpl();
-    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, ewarResolver, simConfig });
+    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, ewarResolver, simConfig: baselineConfig });
     const predictive = new PredictiveAutopilot({ reactiveSteering: new ReactiveAutopilot(), kinematics: kinematicsForSim });
-    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), ewarResolver, simConfig });
+    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), ewarResolver, simConfig: predictiveConfig });
 
     const dt = 0.25;
     const steps = Math.round(120 / dt);

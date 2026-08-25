@@ -14,7 +14,7 @@ describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
       maxSpeed: 1400,
       mass: 997_000,
       inertiaModifier: 3.6,
-      mode: "keepAtRange",
+      mode: "maneuver",
       desiredRange: 2_000,
       aggressivity: 0.2,
       orbitDirection: "cw",
