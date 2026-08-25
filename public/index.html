@@ -21,20 +21,20 @@
   }
 </script>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="header-left">
-        <h1>Gunner</h1>
-        <span class="subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.15.0</span>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="app-header-left">
+        <h1 class="app-title">Gunner</h1>
+        <span class="app-subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
+        <span class="app-version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.15.0</span>
       </div>
-      <div class="header-right">
-        <nav class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
+      <div class="app-header-right">
+        <nav class="app-lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
           <button type="button" id="lang-en" data-lang="en" class="btn active" data-i18n="lang.en">English</button>
           <button type="button" id="lang-zh" data-lang="zh" class="btn" data-i18n="lang.zh">中文</button>
           <button type="button" id="lang-ja" data-lang="ja" class="btn" data-i18n="lang.ja">日本語</button>
         </nav>
-        <a class="github-link" href="https://github.com/cuzfrog/gunner" target="_blank" rel="noopener noreferrer"
+        <a class="app-github-link" href="https://github.com/cuzfrog/gunner" target="_blank" rel="noopener noreferrer"
            data-i18n-aria-label="label.github" data-i18n-title="label.github"
            aria-label="GitHub repository" title="GitHub repository">
           <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#github"></use></svg>
@@ -146,7 +146,7 @@
       </div>
     </section>
 
-    <main class="main">
+    <main class="app-main">
       <section class="panel attacker-panel">
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
@@ -600,51 +600,51 @@
       </section>
     </main>
 
-    <footer class="footer">
-      <div class="footer-about">
+    <footer class="app-footer">
+      <div class="app-footer-about">
         <h3 data-i18n="footer.about.heading">About Gunner</h3>
         <p data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
       </div>
 
-      <div class="footer-mechanism" data-accent="teal">
+      <div class="app-footer-mechanism" data-accent="teal">
         <h3 data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
         <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
-        <a class="footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
+        <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.kinematics.link">Velocity</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>
         </a>
       </div>
 
-      <div class="footer-mechanism" data-accent="blue">
+      <div class="app-footer-mechanism" data-accent="blue">
         <h3 data-i18n="footer.mech.speed.heading">Speed</h3>
         <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
-        <a class="footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
+        <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.speed.link">Propulsion</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>
         </a>
       </div>
 
-      <div class="footer-mechanism" data-accent="orange">
+      <div class="app-footer-mechanism" data-accent="orange">
         <h3 data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
         <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
-        <a class="footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
+        <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.hitChance.link">Turret mechanics</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>
         </a>
       </div>
 
       <div class="footer-author">
-        <div class="author-emblems">
-          <img src="author-portrait.jpg" alt="Keos Cuzi" class="author-portrait" width="36" height="36">
-          <img src="corporation-emblem.png" alt="Ascendance Rising" class="corporation-emblem" width="36" height="36">
+        <div class="footer-author-emblems">
+          <img src="author-portrait.jpg" alt="Keos Cuzi" class="footer-author-portrait" width="36" height="36">
+          <img src="corporation-emblem.png" alt="Ascendance Rising" class="footer-corporation-emblem" width="36" height="36">
         </div>
         <span class="footer-author-line">
-          <span class="author-label" data-i18n="label.author">Author:</span>
-          <span class="author-name">Keos Cuzi</span>
+          <span class="footer-author-label" data-i18n="label.author">Author:</span>
+          <span class="footer-author-name">Keos Cuzi</span>
         </span>
         <span class="footer-author-line">
-          <span class="corp-label" data-i18n="label.corp">Corp:</span>
-          <span class="corp-name">Ascendance Rising</span>
+          <span class="footer-corp-label" data-i18n="label.corp">Corp:</span>
+          <span class="footer-corp-name">Ascendance Rising</span>
         </span>
       </div>
     </footer>

@@ -48,7 +48,7 @@ select {
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-:where(.panel, .controls, .profile-bar, .lang-toggle) :focus-visible {
+:where(.panel, .controls, .profile-bar, .app-lang-toggle) :focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: -1px;
 }
@@ -231,13 +231,13 @@ body {
   font-size: 14px;
 }
 
-.container {
+.app-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 12px;
 }
 
-.header {
+.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -248,14 +248,14 @@ body {
   padding-bottom: 8px;
 }
 
-.header-left {
+.app-header-left {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 10px;
 }
 
-.version-text {
+.app-version-text {
   font-size: 10px;
   line-height: 1;
   color: var(--text-dim);
@@ -263,14 +263,14 @@ body {
   white-space: nowrap;
 }
 
-.header-right {
+.app-header-right {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.header h1 {
+.app-title {
   margin: 0;
   font-family: "Chakra Petch", sans-serif;
   font-size: 20px;
@@ -279,47 +279,47 @@ body {
   letter-spacing: 0.1em;
 }
 
-.header .subtitle {
+.app-subtitle {
   color: var(--text-secondary);
   font-size: 12px;
 }
 
-.lang-toggle {
+.app-lang-toggle {
   display: flex;
   gap: 4px;
 }
 
-.lang-toggle button {
+.app-lang-toggle button {
   padding: 4px 10px;
   font-size: 12px;
   white-space: nowrap;
 }
 
-.lang-toggle button.active {
+.app-lang-toggle button.active {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
 }
 
-.github-link {
+.app-github-link {
   display: inline-flex;
   align-items: center;
   color: var(--text-secondary);
 }
 
-.github-link:hover {
+.app-github-link:hover {
   color: var(--accent-teal);
 }
 
-.github-link:focus-visible {
+.app-github-link:focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: 2px;
 }
 
-.github-link svg {
+.app-github-link svg {
   display: block;
 }
 
-.main {
+.app-main {
   display: grid;
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
   gap: 14px;
@@ -1252,7 +1252,7 @@ canvas {
   opacity: 0;
 }
 
-.author-portrait {
+.footer-author-portrait {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1261,7 +1261,7 @@ canvas {
   flex: none;
 }
 
-.author-name {
+.footer-author-name {
   font-family: "Chakra Petch", sans-serif;
   letter-spacing: 0.05em;
 }
@@ -1905,7 +1905,7 @@ canvas {
   cursor: not-allowed;
 }
 
-.footer {
+.app-footer {
   display: grid;
   grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
   gap: 24px;
@@ -1917,7 +1917,7 @@ canvas {
   color: var(--text-dim);
 }
 
-.footer h3 {
+.app-footer h3 {
   margin: 0 0 6px;
   font-family: "Chakra Petch", sans-serif;
   font-size: 10px;
@@ -1926,20 +1926,20 @@ canvas {
   letter-spacing: 0.08em;
 }
 
-.footer-about p {
+.app-footer-about p {
   margin: 0;
   max-width: 40ch;
 }
 
-.footer-mechanism p {
+.app-footer-mechanism p {
   margin: 0 0 4px;
 }
 
-.footer-mechanism[data-accent="teal"] h3 { color: var(--accent-teal); }
-.footer-mechanism[data-accent="blue"] h3 { color: var(--accent-blue); }
-.footer-mechanism[data-accent="orange"] h3 { color: var(--accent-orange); }
+.app-footer-mechanism[data-accent="teal"] h3 { color: var(--accent-teal); }
+.app-footer-mechanism[data-accent="blue"] h3 { color: var(--accent-blue); }
+.app-footer-mechanism[data-accent="orange"] h3 { color: var(--accent-orange); }
 
-.footer-ref {
+.app-footer-ref {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -1948,14 +1948,14 @@ canvas {
   border-bottom: 1px solid transparent;
 }
 
-.footer-mechanism[data-accent="blue"] .footer-ref { color: var(--accent-blue); }
-.footer-mechanism[data-accent="orange"] .footer-ref { color: var(--accent-orange); }
+.app-footer-mechanism[data-accent="blue"] .app-footer-ref { color: var(--accent-blue); }
+.app-footer-mechanism[data-accent="orange"] .app-footer-ref { color: var(--accent-orange); }
 
-.footer-ref:hover {
+.app-footer-ref:hover {
   border-bottom-color: currentColor;
 }
 
-.footer-ref .icon-ext {
+.app-footer-ref .icon-ext {
   flex: none;
   opacity: 0.7;
 }
@@ -1970,44 +1970,44 @@ canvas {
   white-space: nowrap;
 }
 
-.author-emblems {
+.footer-author-emblems {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.corporation-emblem {
+.footer-corporation-emblem {
   width: 36px;
   height: 36px;
   object-fit: contain;
   flex: none;
 }
 
-.footer-author .author-label,
-.footer-author .corp-label {
+.footer-author .footer-author-label,
+.footer-author .footer-corp-label {
   color: var(--text-dim);
 }
 
-.footer-author .author-name,
-.footer-author .corp-name {
+.footer-author .footer-author-name,
+.footer-author .footer-corp-name {
   font-family: "Chakra Petch", sans-serif;
   letter-spacing: 0.05em;
 }
 
 @media (max-width: 1100px) {
-  .main {
+  .app-main {
     grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
     gap: 12px;
   }
 
-  .footer {
+  .app-footer {
     grid-template-columns: 1fr 1fr;
     gap: 14px 24px;
   }
 }
 
 @media (max-width: 900px) {
-  .main {
+  .app-main {
     grid-template-columns: 1fr;
   }
 
@@ -2060,7 +2060,7 @@ canvas {
 
   .zoom-control label[for="zoom-slider"] { display: none; }
 
-  .footer {
+  .app-footer {
     grid-template-columns: 1fr;
   }
 }
