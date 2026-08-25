@@ -3,7 +3,7 @@ import type { TrackingInput } from "../trackingInput";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts } from "../controlsContract";
 
-interface InputLike { value: string; }
+interface InputLike { readonly value: string; }
 
 interface ReadoutLike {
   textContent: string | null;
@@ -33,6 +33,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly i18n: I18n;
   private readonly trackingInput: TrackingInput;
   private readonly sigResolution: () => number;
+  private readonly lastByReadout = new Map<ReadoutLike, { text: string; affected: boolean; title: string }>();
 
   constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingInput; sigResolution: () => number }) {
     this.els = deps.els;
@@ -55,12 +56,10 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeAffected(values.falloff, values.boostedFalloff), t);
   }
 
-  private readonly lastByReadout = new Map<ReadoutLike, { text: string; affected: boolean; title: string }>();
-
   private write(readout: ReadoutLike, text: string, affected: boolean, t: (key: string) => string): void {
     const title = affected ? t("readout.effectiveAffected") : "";
     const previous = this.lastByReadout.get(readout);
-    if (previous && previous.text === text && previous.title === title) return;
+    if (previous && previous.text === text && previous.affected === affected && previous.title === title) return;
     readout.textContent = text;
     if (affected) {
       readout.classList.add("affected");

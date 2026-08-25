@@ -1,7 +1,7 @@
 import type { TrackingUnit } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
-import type { EffectiveReadoutEls, EffectiveReadout } from "./effectiveReadout";
+import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected, _readNumber } from "./effectiveReadout";
 
@@ -13,13 +13,26 @@ interface FakeReadout {
 
 interface FakeInput { value: string; }
 
+interface FakeEls {
+  attackerSpeed: FakeInput;
+  targetSpeed: FakeInput;
+  tracking: FakeInput;
+  optimal: FakeInput;
+  falloff: FakeInput;
+  attackerSpeedReadout: FakeReadout;
+  targetSpeedReadout: FakeReadout;
+  trackingReadout: FakeReadout;
+  optimalReadout: FakeReadout;
+  falloffReadout: FakeReadout;
+}
+
 function fakeInput(value: string): FakeInput { return { value }; }
 
 function fakeReadout(): FakeReadout {
   return { textContent: null, title: "", classList: { add: vi.fn(), remove: vi.fn() } };
 }
 
-function fakeEls(): EffectiveReadoutEls {
+function fakeEls(): FakeEls {
   return {
     attackerSpeed: fakeInput("400"),
     targetSpeed: fakeInput("250"),
@@ -48,6 +61,11 @@ function fakeTrackingInput(rad = 0.32, unit: TrackingUnit = "rad"): TrackingInpu
 
 function fakeI18n(): I18n {
   const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km", "label.trackingScore": "Score", "readout.effectiveAffected": "Affected" }[key] ?? key);
+  return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
+}
+
+function fakeI18nWithEmptyAffected(): I18n {
+  const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km", "label.trackingScore": "Score", "readout.effectiveAffected": "" }[key] ?? key);
   return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
 }
 
@@ -196,5 +214,19 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.attackerSpeedReadout.classList.add).not.toHaveBeenCalled();
     expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("affected");
+  });
+
+  test("re-writes affected class when affected state changes and the affected title is empty", () => {
+    const els = fakeEls();
+    els.attackerSpeed.value = "99.5";
+    const i18n = fakeI18nWithEmptyAffected();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 99.5, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    readout.update({ attackerSpeed: 100.4, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.textContent).toBe("100 m/s");
+    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
   });
 });
