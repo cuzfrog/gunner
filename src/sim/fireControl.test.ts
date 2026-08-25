@@ -71,6 +71,8 @@ function makeEvaluator(): {
     disruptedTurretIgnoringRange: vi.fn(() => effectiveTurret),
     propulsionSuppressed: vi.fn(() => false),
     propulsionSuppressedIgnoringRange: vi.fn(() => false),
+    speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
+    disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver, turretBoosterResolver });

@@ -65,9 +65,9 @@ export class AppImpl implements App {
     const view = this.engagementFrameComposer.compose(snapshot, { turret, targetSigRadius });
     const boostedTurret = view.assessment?.boostedTurret ?? view.effectiveTurret;
     const distance = view.frame.distance;
-    const attackerSpeedBreakdown = this.ewarResolver.speedBreakdown?.(snapshot.target.ewar, distance);
-    const targetSpeedBreakdown = this.ewarResolver.speedBreakdown?.(snapshot.attacker.ewar, distance);
-    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown?.(snapshot.target.ewar, distance);
+    const attackerSpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.target.ewar, distance);
+    const targetSpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.attacker.ewar, distance);
+    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(snapshot.target.ewar, distance);
     const effectiveReadouts: EffectiveReadouts = {
       attackerSpeed: snapshot.attacker.maxSpeed,
       targetSpeed: snapshot.target.maxSpeed,

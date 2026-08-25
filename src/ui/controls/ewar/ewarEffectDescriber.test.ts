@@ -11,6 +11,8 @@ const resolver = vi.mocked<EwarResolver>({
   propulsionSuppressed: vi.fn(),
   propulsionSuppressedIgnoringRange: vi.fn(),
   appliedEffects: vi.fn(),
+  speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
+  disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
 });
 
 const LABELS: Record<string, string> = {

@@ -19,8 +19,8 @@ export interface EwarResolver {
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean;
   appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[];
-  speedBreakdown?(projection: EwarProjection | undefined, distance: number): SpeedBreakdown;
-  disruptionBreakdown?(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown;
+  speedBreakdown(projection: EwarProjection | undefined, distance: number): SpeedBreakdown;
+  disruptionBreakdown(projection: EwarProjection | undefined, distance: number): DisruptionBreakdown;
 }
 
 const MIN_APPLIED_EFFECTIVENESS = 0.01;

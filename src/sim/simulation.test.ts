@@ -9,7 +9,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [] };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }) };
 
 const scram: EwarProjection = {
   loadout: {
@@ -147,6 +147,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -165,6 +167,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const attackerWeb: EwarProjection = {
@@ -193,6 +197,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = {
@@ -214,6 +220,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = { ...simConfig("orbit"), initialDistance: 5001 };
@@ -328,6 +336,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -349,6 +359,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {
@@ -370,6 +382,8 @@ describe("SimulationImpl", () => {
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
       appliedEffects: () => [],
+      speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+      disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config: SimConfig = {

@@ -12,6 +12,8 @@ const ewarResolver: EwarResolver = {
   propulsionSuppressed: () => false,
   propulsionSuppressedIgnoringRange: () => false,
   appliedEffects: () => [],
+  speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
+  disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
 };
 
 const simConfig: SimConfig = {

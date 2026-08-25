@@ -1674,7 +1674,7 @@ select.input-field:disabled {
 
 .combatant-portrait {
   position: absolute;
-  bottom: 56px;
+  bottom: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1903,4 +1903,6 @@ select.input-field:disabled {
   .control-bar-zoom .field-label { display: none; }
 
   .app-footer { grid-template-columns: 1fr; }
+
+  .combatant-portrait { bottom: 140px; }
 }

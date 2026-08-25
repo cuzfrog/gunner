@@ -63,6 +63,8 @@ function buildController() {
     propulsionSuppressed: vi.fn(() => false),
     propulsionSuppressedIgnoringRange: vi.fn(() => false),
     appliedEffects: vi.fn(() => []),
+    speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
+    disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((name) => `images/ships/${name.replaceAll(" ", "_")}.webp`),

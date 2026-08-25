@@ -174,6 +174,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       propulsionSuppressed: vi.fn(() => false),
       propulsionSuppressedIgnoringRange: vi.fn(() => false),
       appliedEffects: vi.fn(() => []),
+      speedBreakdown: vi.fn(() => ({ effects: [], propulsionSuppressed: false })),
+      disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),
