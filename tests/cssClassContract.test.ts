@@ -223,6 +223,15 @@ test("every CSS file starts with an @layer wrapper", async () => {
   }
 });
 
+test("viewport @media queries are confined to layout.css", async () => {
+  const glob = new Bun.Glob(CSS_GLOB);
+  for await (const path of glob.scan({ cwd: "." })) {
+    if (path === "public/styles/layout.css") continue;
+    const text = await Bun.file(path).text();
+    expect(text.includes("@media")).toBe(false);
+  }
+});
+
 test("every used class is an approved component or primitive prefix", async () => {
   const html = await Bun.file(HTML_PATH).text();
   const used = htmlClasses(html);
