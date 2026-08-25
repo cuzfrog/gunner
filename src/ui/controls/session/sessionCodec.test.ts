@@ -136,7 +136,7 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
@@ -204,6 +204,8 @@ describe("SessionCodec", () => {
       attackerRange: 8000,
       maneuverAggressivity: 1.5,
       gridBrightness: 0.75,
+      autoZoom: true,
+      zoomFactor: 1,
       attackerMass: 1_100_000,
       attackerInertia: 2.5,
       attackerSkillLevel: 4,
@@ -238,7 +240,7 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
@@ -279,7 +281,7 @@ describe("SessionCodec", () => {
     expect(target.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "target"));
     expect(target.restore).toHaveBeenCalledWith(panelStateFrom(settings, "target"));
     expect(turret.restore).toHaveBeenCalledWith({ fitting: settings.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: settings.attackerAmmo });
-    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.75 });
+    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
     expect(preferences.savePreferences).toHaveBeenCalled();
     expect(i18n.translateDocument).toHaveBeenCalled();
     expect(hintRotator.refresh).toHaveBeenCalled();
@@ -309,7 +311,7 @@ describe("SessionCodec", () => {
       modules: [],
     } as unknown as ImportedFitting);
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
-    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), updateManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
+    const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), getManeuverAggressivity: vi.fn(() => 1), restore: vi.fn(), applyPreferences: vi.fn(), savePreferences: vi.fn(), updateManeuverAggressivityDisplay: vi.fn(), updateManeuverAggressivityEnabled: vi.fn() } as unknown as PreferencesController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const settingsStore = {} as SettingsStore;
@@ -349,7 +351,7 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
@@ -359,7 +361,7 @@ describe("SessionCodec", () => {
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn() } as unknown as ProfileController;
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
-    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn() } as unknown as SettingsStore;
+    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn() } as unknown as SettingsStore;
         const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
@@ -382,7 +384,7 @@ describe("SessionCodec", () => {
 
     expect(profileController.restoreFromStartup).toHaveBeenCalled();
     expect(settingsStore.loadPreferences).toHaveBeenCalled();
-    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
+    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
     expect(attacker.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
     expect(attacker.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
     expect(attacker.sections.skill.setOverloadDisabled).toHaveBeenCalled();
@@ -404,7 +406,7 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
@@ -415,7 +417,7 @@ describe("SessionCodec", () => {
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn(), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const clearSelectedProfile = vi.fn();
-    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
+    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
         const i18n = { translateDocument: vi.fn() } as unknown as I18n;
     const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
     const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
@@ -447,7 +449,7 @@ describe("SessionCodec", () => {
     expect(els.optimal.value).toBe("1000");
     expect(els.falloff.value).toBe("3000");
     expect(trackingInput.rad).toBe(0.32);
-    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
+    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
   });
@@ -462,7 +464,7 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
     const preferences = {
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
@@ -509,7 +511,7 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
     const preferences = {
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       restore: vi.fn(),
       applyPreferences: vi.fn(),
@@ -555,7 +557,7 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
     const preferences = {
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
@@ -604,7 +606,7 @@ describe("SessionCodec", () => {
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
     const preferences = {
-      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
       getManeuverAggressivity: vi.fn(() => 1),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),

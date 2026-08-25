@@ -213,7 +213,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   updateZoomDisplay(value?: number): void {
     const slider = this.els.zoomSlider;
     const output = this.els.zoomValue;
-    const current = value ?? this.getZoomFactor();
+    const current = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value ?? this.getZoomFactor()));
     slider.value = String(current);
     setText(output, `${current.toFixed(2)}x`);
     const fill = ((current - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100;
@@ -286,6 +286,6 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   private containsCanvasSettings(target: EventTarget): boolean {
     if (!(target instanceof Element)) return false;
-    return this.els.canvasSettingsPopup.contains(target) || target === this.els.canvasSettingsTrigger;
+    return this.els.canvasSettingsPopup.contains(target) || this.els.canvasSettingsTrigger.contains(target);
   }
 }

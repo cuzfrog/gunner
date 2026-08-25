@@ -163,6 +163,8 @@ export class SettingsParser {
       (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
       isPositive(s.simSpeed) &&
       isFiniteNumber(s.gridBrightness) &&
+      (s.autoZoom === undefined || typeof s.autoZoom === "boolean") &&
+      (s.zoomFactor === undefined || isPositive(s.zoomFactor)) &&
       typeof s.attackerAmmo === "string" &&
       s.attackerAmmo.length > 0
     );
@@ -180,6 +182,8 @@ export class SettingsParser {
     record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
+    record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
+    record.zoomFactor ??= DEFAULT_PREFERENCES.zoomFactor;
   }
 
   private migrateBoosterActivation(value: Record<string, unknown>): void {

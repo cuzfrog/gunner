@@ -153,7 +153,10 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   captureProfile(): ProfileSettings {
-    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...profile } = this.capture();
+    const {
+      language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____,
+      autoZoom: _____, zoomFactor: ______, ...profile
+    } = this.capture();
     return profile;
   }
 
@@ -164,6 +167,8 @@ export class SessionCodecImpl implements SessionCodec {
       trackingUnit: settings.trackingUnit,
       simSpeed: settings.simSpeed,
       gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
+      autoZoom: settings.autoZoom ?? true,
+      zoomFactor: settings.zoomFactor ?? 1,
     });
     this.i18n.translateDocument();
     this.attackerSide.sections.skill.setOverloadDisabled();
@@ -197,7 +202,9 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController.restore(side, loadout, activation);
   }
 
-  private restoreBooster(side: "attacker" | "target", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined): void {
+  private restoreBooster(
+    side: "attacker" | "target", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined,
+  ): void {
     const panel = side === "attacker" ? this.attackerSide : this.targetSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
     this.boosterController.restore(side, loadout, activation);
