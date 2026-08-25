@@ -1,5 +1,6 @@
-import { writeFile } from "node:fs/promises";
-import type { ShipProfile } from "../src/ships/types";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import type { ShipProfile } from "../src/ships";
 
 interface RawProfile {
   readonly name: string;
@@ -95,11 +96,14 @@ async function main(): Promise<void> {
     profiles.push(parseProfile(raw[i], i));
   }
 
+  await mkdir(dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, buildSource(profiles));
   console.log(`Generated ${OUTPUT_PATH} with ${profiles.length} profiles.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

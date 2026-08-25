@@ -1,4 +1,4 @@
-import { TURRETS } from "./fittingDb";
+import { TURRETS } from "../gamedata/fittingDb";
 import { GunFamiliesImpl, type GunFamily } from "./gunFamilies";
 
 const gunFamilies = new GunFamiliesImpl();

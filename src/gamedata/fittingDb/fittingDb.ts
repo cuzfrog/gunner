@@ -1,7 +1,7 @@
 // Generated from EVE Online SDE via Pyfa staticdata (2026-08-25). Do not edit by hand.
 /* eslint-disable */
 
-import type { HullTier } from "../ships";
+import type { HullTier } from "../../ships";
 
 
 export interface FittingPropulsionStats {

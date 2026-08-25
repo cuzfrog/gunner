@@ -1,12 +1,12 @@
 import { homedir } from "node:os";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
-const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingDb.ts");
-const I18N_EN_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-en.ts");
-const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-zh.ts");
-const I18N_JA_FILE = join(import.meta.dir, "..", "src", "fitting", "item-names-ja.ts");
+const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "fittingDb.ts");
+const I18N_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-en.ts");
+const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-zh.ts");
+const I18N_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-ja.ts");
 const NAME_TO_ID_FILE = join(import.meta.dir, "..", "data", "ship-modules", "nameToId.json");
 
 const MODULE_CATEGORY_ID = 7;
@@ -732,7 +732,7 @@ async function main() {
   const header =
     `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
     `/* eslint-disable */\n\n` +
-    `import type { HullTier } from "../ships";\n\n`;
+    `import type { HullTier } from "../../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
   readonly sizeTier: HullTier;
@@ -878,7 +878,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
   );
   const filteredItemNames = filterItemNames(itemNames, nameToType, groups, dbTableNames);
 
-  await mkdir(import.meta.dir, { recursive: true });
+  await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
   await writeI18nFiles(filteredItemNames, date);
   const counts = [
@@ -1013,14 +1013,19 @@ async function writeI18nFiles(
   const zhOverrideContent = `export const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${zhOverrides};\n`;
   const jaArray = `${header}export const ITEM_NAMES_JA: readonly string[] = ${jaNames};\n`;
   const jaOverrideContent = `export const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${jaOverrides};\n`;
+  await mkdir(dirname(enFile), { recursive: true });
   await writeFile(enFile, enContent);
+  await mkdir(dirname(zhFile), { recursive: true });
   await writeFile(zhFile, zhArray + zhOverrideContent);
+  await mkdir(dirname(jaFile), { recursive: true });
   await writeFile(jaFile, jaArray + jaOverrideContent);
 }
 
 export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

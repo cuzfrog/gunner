@@ -1,10 +1,10 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 
 const FITTINGS_DIR = join(import.meta.dir, "..", "data", "ship-fittings");
-const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingPresets.ts");
+const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "presets", "fittingPresets.ts");
 
 // Header form is whatever data/ship-fittings carries: `[Hull, Name]`, `[Display Name]`, or a future variant.
 // The hull always comes from the directory name, never the header.
@@ -67,6 +67,7 @@ async function main() {
 \n`;
   const content = `${header}${typeDefinitions}export const PRESET_FITTINGS: Readonly<Record<string, readonly PresetFitting[]>> = ${JSON.stringify(presetFittings, null, 1)};\n`;
 
+  await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, content);
   console.log(`Wrote ${fitCount} fits for ${Object.keys(presetFittings).length} hulls to ${OUT_FILE} (${content.length} bytes)`);
   if (skipped.length > 0) {
@@ -75,7 +76,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

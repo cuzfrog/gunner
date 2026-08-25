@@ -24,8 +24,10 @@ import {
   type TurretScriptSpec,
   type WarpScramblerSpec,
 } from "../sim";
+import type { FittingDb } from "../gamedata/fittingDb";
 import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
-import type { ItemNames } from "./itemNames";
+import type { ItemNameCatalog } from "../gamedata/itemNames";
+import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
   ChargeStats,
@@ -39,9 +41,10 @@ import type {
   TurretScriptStats,
   TurretStats,
   WarpScramblerStats,
-} from "./fittingDb";
+} from "../gamedata/fittingDb";
 
 
+export type { FittingDb } from "../gamedata/fittingDb";
 export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
 
 export interface FittingRow {
@@ -75,21 +78,6 @@ export interface ImportedFitting {
   readonly boosts: BoostLoadout;
 }
 
-export interface FittingDb {
-  readonly modules: Readonly<Record<string, FittingModuleStats>>;
-  readonly turrets: Readonly<Record<string, TurretStats>>;
-  readonly charges: Readonly<Record<string, ChargeStats>>;
-  readonly scripts: Readonly<Record<string, TurretScriptStats>>;
-  readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
-  readonly stasisGrapplers: Readonly<Record<string, StasisGrapplerStats>>;
-  readonly trackingComputers: Readonly<Record<string, TrackingComputerStats>>;
-  readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
-  readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
-  readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
-  readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
-  readonly drones: Readonly<Record<string, true>>;
-}
-
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
   propulsionVariantNames(module: PropulsionModule): readonly string[];
@@ -105,26 +93,30 @@ export class FittingImportImpl implements FittingImport {
   private readonly db: FittingDb;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly stacking: StackingPenalty;
-  private readonly itemNames: ItemNames;
+  private readonly itemNameCatalog: ItemNameCatalog;
+  private readonly moduleSlotCatalog: ModuleSlotCatalog;
 
   constructor({
     ships,
     fittingDb,
     chargeCatalog,
     stackingPenalty,
-    itemNames,
+    itemNameCatalog,
+    moduleSlotCatalog,
   }: {
     ships: Ships;
     fittingDb: FittingDb;
     chargeCatalog: ChargeCatalog;
     stackingPenalty: StackingPenalty;
-    itemNames: ItemNames;
+    itemNameCatalog: ItemNameCatalog;
+    moduleSlotCatalog: ModuleSlotCatalog;
   }) {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
     this.stacking = stackingPenalty;
-    this.itemNames = itemNames;
+    this.itemNameCatalog = itemNameCatalog;
+    this.moduleSlotCatalog = moduleSlotCatalog;
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly string[] {
@@ -197,18 +189,18 @@ export class FittingImportImpl implements FittingImport {
   }
 
   itemName(name: string, language: ShipNameLanguage): string {
-    return this.itemNames.displayName(name, language);
+    return this.itemNameCatalog.name(name, language);
   }
 
   canonicalName(name: string): string {
-    return this.itemNames.canonicalName(name);
+    return this.itemNameCatalog.canonicalName(name);
   }
 
   private parseAndCanonicalize(text: string): EftDocument | undefined {
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, this.moduleSlotCatalog);
     if (!parsed) return undefined;
-    const normalized = normalizeEftDocument(parsed, (name) => this.itemNames.canonicalName(name));
-    return parseEft(serializeEftDocument(normalized));
+    const normalized = normalizeEftDocument(parsed, (name) => this.itemNameCatalog.canonicalName(name));
+    return parseEft(serializeEftDocument(normalized), this.moduleSlotCatalog);
   }
 
   private canonicalHullName(hullName: string): string {

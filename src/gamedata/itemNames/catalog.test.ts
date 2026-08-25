@@ -1,9 +1,9 @@
-import { FITTING_MODULES, TURRETS, CHARGES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, DISRUPTION_SCRIPTS, DRONES } from "./fittingDb";
+import { FITTING_MODULES, TURRETS, CHARGES, SCRIPTS, STASIS_WEBS, TRACKING_DISRUPTORS, DISRUPTION_SCRIPTS, DRONES } from "../fittingDb";
 import { ITEM_NAMES_EN } from "./item-names-en";
 import { ITEM_NAMES_JA } from "./item-names-ja";
 import { ITEM_NAMES_ZH } from "./item-names-zh";
-import type { ShipNameLanguage } from "../ships";
-import { ItemNamesImpl } from "./itemNames";
+import type { ShipNameLanguage } from "../../ships";
+import { StaticItemNameCatalog, type ItemNameCatalog } from "./catalog";
 
 describe("ITEM_NAMES", () => {
   test("all three arrays have the same length", () => {
@@ -45,8 +45,8 @@ describe("ITEM_NAMES", () => {
   });
 });
 
-describe("ItemNamesImpl", () => {
-  const itemNames = new ItemNamesImpl();
+describe("StaticItemNameCatalog", () => {
+  const itemNames = new StaticItemNameCatalog();
 
   beforeAll(async () => {
     await itemNames.ensureLanguage("zh");
@@ -55,20 +55,20 @@ describe("ItemNamesImpl", () => {
 
   test("displayName returns the localized name for known entries", () => {
     const turret = "Heavy Pulse Laser II";
-    expect(itemNames.displayName(turret, "en")).toBe(turret);
-    expect(itemNames.displayName(turret, "zh")).toBe("重型脉冲激光器 II");
-    expect(itemNames.displayName(turret, "ja")).toBe("大型パルスレーザーII");
+    expect(itemNames.name(turret, "en")).toBe(turret);
+    expect(itemNames.name(turret, "zh")).toBe("重型脉冲激光器 II");
+    expect(itemNames.name(turret, "ja")).toBe("大型パルスレーザーII");
   });
 
   test("displayName falls back to the input for unknown names", () => {
-    expect(itemNames.displayName("Unknown Module", "zh")).toBe("Unknown Module");
+    expect(itemNames.name("Unknown Module", "zh")).toBe("Unknown Module");
   });
 
   test("canonicalName maps localized names back to english", () => {
     const turret = "Heavy Pulse Laser II";
     expect(itemNames.canonicalName(turret)).toBe(turret);
-    expect(itemNames.canonicalName(itemNames.displayName(turret, "zh"))).toBe(turret);
-    expect(itemNames.canonicalName(itemNames.displayName(turret, "ja"))).toBe(turret);
+    expect(itemNames.canonicalName(itemNames.name(turret, "zh"))).toBe(turret);
+    expect(itemNames.canonicalName(itemNames.name(turret, "ja"))).toBe(turret);
   });
 
   test("canonicalName returns the input for an unknown localized name", () => {
@@ -77,15 +77,15 @@ describe("ItemNamesImpl", () => {
 
   test("canonical round-trips every name in the table", () => {
     for (const en of ITEM_NAMES_EN) {
-      expect(itemNames.canonicalName(itemNames.displayName(en, "zh"))).toBe(en);
-      expect(itemNames.canonicalName(itemNames.displayName(en, "ja"))).toBe(en);
+      expect(itemNames.canonicalName(itemNames.name(en, "zh"))).toBe(en);
+      expect(itemNames.canonicalName(itemNames.name(en, "ja"))).toBe(en);
     }
   });
 
   test("canonicalName is deterministic for duplicate Japanese names", () => {
     const seen = new Map<string, string>();
     for (const en of ITEM_NAMES_EN) {
-      const ja = itemNames.displayName(en, "ja");
+      const ja = itemNames.name(en, "ja");
       const canon = itemNames.canonicalName(ja);
       const existing = seen.get(ja);
       if (existing !== undefined) expect(canon).toBe(existing);
@@ -114,11 +114,11 @@ describe("ItemNamesImpl", () => {
   });
 
   test("item names cover modules that are not in the fitting stats db", () => {
-    expect(itemNames.displayName("J5b Enduring Warp Scrambler", "ja")).not.toBe("J5b Enduring Warp Scrambler");
+    expect(itemNames.name("J5b Enduring Warp Scrambler", "ja")).not.toBe("J5b Enduring Warp Scrambler");
   });
 });
 
-describe("ItemNamesImpl lazy loading", () => {
+describe("StaticItemNameCatalog lazy loading", () => {
   function buildLoader(expected: ShipNameLanguage, pack: readonly string[], overrides: Record<string, string> = {}) {
     let calls = 0;
     return {
@@ -134,10 +134,10 @@ describe("ItemNamesImpl lazy loading", () => {
   test("ensureLanguage loads a language pack and enables translation", async () => {
     const firstEn = ITEM_NAMES_EN[0];
     const { loader, getCallCount } = buildLoader("zh", ITEM_NAMES_ZH);
-    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
-    expect(itemNames.displayName(firstEn, "zh")).toBe(firstEn);
+    const itemNames = new StaticItemNameCatalog({ itemNameLoader: loader });
+    expect(itemNames.name(firstEn, "zh")).toBe(firstEn);
     await itemNames.ensureLanguage("zh");
-    expect(itemNames.displayName(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
+    expect(itemNames.name(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
     expect(getCallCount()).toBe(1);
   });
 
@@ -150,12 +150,12 @@ describe("ItemNamesImpl lazy loading", () => {
       if (language === "zh") return { names: ITEM_NAMES_ZH, overrides: {} };
       return { names: [], overrides: {} };
     };
-    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
+    const itemNames = new StaticItemNameCatalog({ itemNameLoader: loader });
     const a = itemNames.ensureLanguage("zh");
     const b = itemNames.ensureLanguage("zh");
     await Promise.all([a, b]);
     expect(calls).toBe(1);
-    expect(itemNames.displayName(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
+    expect(itemNames.name(firstEn, "zh")).toBe(ITEM_NAMES_ZH[0]);
   });
 
   test("ensureLanguage resolves immediately for English", async () => {
@@ -164,23 +164,23 @@ describe("ItemNamesImpl lazy loading", () => {
       calls++;
       return { names: [], overrides: {} };
     };
-    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
+    const itemNames = new StaticItemNameCatalog({ itemNameLoader: loader });
     await itemNames.ensureLanguage("en");
     expect(calls).toBe(0);
   });
 
   test("ensureLanguage does not reject when the pack is empty", async () => {
     const loader = async (_language: ShipNameLanguage) => ({ names: [], overrides: {} });
-    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
+    const itemNames = new StaticItemNameCatalog({ itemNameLoader: loader });
     await expect(itemNames.ensureLanguage("zh")).resolves.toBeUndefined();
   });
 
   test("canonicalName maps localized names after the pack loads", async () => {
     const firstEn = ITEM_NAMES_EN[0];
     const { loader } = buildLoader("zh", ITEM_NAMES_ZH);
-    const itemNames = new ItemNamesImpl({ itemNameLoader: loader });
+    const itemNames = new StaticItemNameCatalog({ itemNameLoader: loader });
     await itemNames.ensureLanguage("zh");
-    const zh = itemNames.displayName(firstEn, "zh");
+    const zh = itemNames.name(firstEn, "zh");
     expect(itemNames.canonicalName(zh)).toBe(firstEn);
   });
 });

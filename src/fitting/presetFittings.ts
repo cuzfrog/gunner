@@ -1,4 +1,4 @@
-import { PRESET_FITTINGS, type PresetFitting } from "./fittingPresets";
+import type { PresetFitting, PresetFitTexts } from "../gamedata/presets";
 
 export type { PresetFitting };
 
@@ -9,12 +9,18 @@ export interface PresetFittings {
 }
 
 export class PresetFittingsImpl implements PresetFittings {
+  private readonly presetFitTexts: PresetFitTexts;
+
+  constructor({ presetFitTexts }: { presetFitTexts: PresetFitTexts }) {
+    this.presetFitTexts = presetFitTexts;
+  }
+
   listHulls(): readonly string[] {
-    return Object.keys(PRESET_FITTINGS).sort();
+    return this.presetFitTexts.hulls();
   }
 
   fittingsFor(hull: string): readonly PresetFitting[] {
-    return PRESET_FITTINGS[hull] ?? [];
+    return this.presetFitTexts.fittingsFor(hull);
   }
 
   eftText(hull: string, fit: PresetFitting): string {

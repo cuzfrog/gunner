@@ -1,5 +1,6 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, FittingCradle, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
+import type { ItemNameCatalog } from "../../gamedata/itemNames";
 import type { Ships } from "../../ships";
 import type { EwarResolver, HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
@@ -109,12 +110,12 @@ interface BuildDomControlsOptions {
   fittingImport?: Partial<FittingImport>;
   presetFittings?: Partial<PresetFittings>;
   savedFittings?: Partial<SavedFittings>;
-  itemNames?: Partial<FittingCradle["itemNames"]>;
+  itemNameCatalog?: Partial<ItemNameCatalog>;
 }
 
-function mockItemNames(): FittingCradle["itemNames"] {
+function mockItemNames(): ItemNameCatalog {
   return {
-    displayName: (name) => name,
+    name: (name) => name,
     canonicalName: (name) => name,
     ensureLanguage: () => Promise.resolve(),
   };
@@ -144,7 +145,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
   cradle.register({
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
-    itemNames: asValue(vi.mocked<FittingCradle["itemNames"]>({ ...mockItemNames(), ...options.itemNames })),
+    itemNameCatalog: asValue(vi.mocked<ItemNameCatalog>({ ...mockItemNames(), ...options.itemNameCatalog })),
     imageCatalog: asValue(mockImageCatalog()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
       speedMultiplier: vi.fn(() => 1),

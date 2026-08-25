@@ -9,8 +9,8 @@ import {
   type ImportedTurret,
 } from "./chargeCatalog";
 import { GunFamiliesImpl } from "./gunFamilies";
-import { CHARGES as FittingDbCharges } from "./fittingDb";
-import type { ChargeStats } from "./fittingDb";
+import { CHARGES as FittingDbCharges, FITTING_DB } from "../gamedata/fittingDb";
+import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 
 const TEST_CHARGES: Readonly<Record<string, ChargeStats>> = {
   "Caldari Navy Antimatter Charge S": { trackingMultiplier: 0.75, rangeMultiplier: 0.4 },
@@ -28,7 +28,8 @@ const TEST_CHARGES: Readonly<Record<string, ChargeStats>> = {
 const gunFamilies = new GunFamiliesImpl();
 
 function buildCatalog(charges = TEST_CHARGES): ChargeCatalogImpl {
-  return new ChargeCatalogImpl({ fittingDb: { charges }, gunFamilies });
+  const fittingDb: FittingDb = { ...FITTING_DB, charges };
+  return new ChargeCatalogImpl({ fittingDb, gunFamilies });
 }
 
 function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {

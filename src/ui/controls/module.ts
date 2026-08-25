@@ -56,10 +56,10 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       trackingInput,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
     })).singleton(),
-    preferencesController: asFunction(({ els, i18n, itemNames, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController }: ControlsCradle) => new PreferencesControllerImpl({
+    preferencesController: asFunction(({ els, i18n, itemNameCatalog, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController }: ControlsCradle) => new PreferencesControllerImpl({
       els: collectPreferencesEls(els),
       i18n,
-      itemNames,
+      itemNameCatalog,
       settingsStore,
       trackingInput,
       sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],

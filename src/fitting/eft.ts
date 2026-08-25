@@ -1,4 +1,4 @@
-import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
+import { MODULE_SLOT_CATALOG, type ModuleSlot, type ModuleSlotCatalog } from "../gamedata/moduleSlots";
 
 export type BankKind = "low" | "mid" | "high" | "rig" | "subsystem" | "service";
 
@@ -47,7 +47,7 @@ const BANK_BY_NORMAL_NAME: Readonly<Record<string, BankKind>> = {
   service: "service",
 };
 
-export function parseEft(text: string): EftDocument | undefined {
+export function parseEft(text: string, slotCatalog: ModuleSlotCatalog = MODULE_SLOT_CATALOG): EftDocument | undefined {
   const groups = trimmedLineGroups(text);
   if (groups.length === 0) return undefined;
 
@@ -91,7 +91,7 @@ export function parseEft(text: string): EftDocument | undefined {
         bankLines[line.bank].push({ kind: "empty", label: line.label });
         continue;
       }
-      const target = moduleTarget(line.module, intended);
+      const target = moduleTarget(line.module, intended, slotCatalog);
       if (target === undefined) continue;
       bankLines[target].push(eftLineFromModule(line.module));
     }
@@ -238,8 +238,8 @@ function parseModuleLine(line: string): EftModule | undefined {
   return { name, charge: charge && charge.length > 0 ? charge : undefined, offline: match[3] !== undefined };
 }
 
-function moduleTarget(module: EftModule, intended: BankKind | undefined): BankKind | undefined {
-  const slot: ModuleSlot | undefined = MODULE_SLOTS[module.name];
+function moduleTarget(module: EftModule, intended: BankKind | undefined, catalog: ModuleSlotCatalog): BankKind | undefined {
+  const slot: ModuleSlot | undefined = catalog.slotOf(module.name);
   if (slot !== undefined) return slot;
   return intended;
 }
@@ -254,9 +254,6 @@ function assignModuleBanks(blocks: Block[]): (BankKind | undefined)[] {
     if (anchor) anchors.push({ index: i, bank: anchor });
   }
 
-  // An anchored block itself belongs to its anchor bank unless a known
-  // module's slot contradicts it and the per-line MODULE_SLOTS lookup
-  // overrides the block assignment.
   for (const i of moduleBlockIndices) {
     if (blocks[i].anchor) intended[i] = blocks[i].anchor;
   }

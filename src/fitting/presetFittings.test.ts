@@ -1,12 +1,13 @@
 import { parseEft } from "./eft";
-import { type PresetFitting } from "./fittingPresets";
+import { type PresetFitting } from "../gamedata/presets";
 import { PresetFittingsImpl, type PresetFittings } from "./presetFittings";
+import { StaticPresetFitTexts } from "../gamedata/presets";
 
 describe("PresetFittings", () => {
   let presets: PresetFittings;
 
   beforeEach(() => {
-    presets = new PresetFittingsImpl();
+    presets = new PresetFittingsImpl({ presetFitTexts: new StaticPresetFitTexts() });
   });
 
   test("listHulls returns sorted hull names and is non-empty", () => {

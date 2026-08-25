@@ -1,5 +1,6 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingCradle, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
+import type { ItemNameCatalog } from "../../gamedata/itemNames";
 import type { HitChance } from "../../sim";
 import type { Ships } from "../../ships";
 import type { I18n } from "../i18n";
@@ -34,7 +35,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export interface ControlsCradle {
   readonly hitChance: HitChance;
   readonly i18n: I18n;
-  readonly itemNames: FittingCradle["itemNames"];
+  readonly itemNameCatalog: ItemNameCatalog;
   readonly settingsStore: SettingsStore;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;

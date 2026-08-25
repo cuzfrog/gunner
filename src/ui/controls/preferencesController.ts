@@ -3,7 +3,7 @@ import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggress
 import type { I18n, Language } from "../i18n";
 import type { TrackingInput } from "./trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../appstate";
-import type { FittingCradle } from "../../fitting";
+import type { ItemNameCatalog } from "../../gamedata/itemNames";
 import type { UiEvents } from "../events";
 import type { RangeOverlayController } from "./rangeOverlay";
 
@@ -46,7 +46,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly settingsStore: SettingsStore;
   private readonly sigResolution: () => number;
   private readonly events: UiEvents;
-  private readonly itemNames: FittingCradle["itemNames"];
+  private readonly itemNameCatalog: ItemNameCatalog;
   private readonly rangeOverlayController: RangeOverlayController;
 
   constructor(deps: {
@@ -56,7 +56,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     trackingInput: TrackingInput;
     sigResolution: () => number;
     events: UiEvents;
-    itemNames: FittingCradle["itemNames"];
+    itemNameCatalog: ItemNameCatalog;
     rangeOverlayController: RangeOverlayController;
   }) {
     this.els = deps.els;
@@ -65,7 +65,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.trackingInput = deps.trackingInput;
     this.sigResolution = deps.sigResolution;
     this.events = deps.events;
-    this.itemNames = deps.itemNames;
+    this.itemNameCatalog = deps.itemNameCatalog;
     this.rangeOverlayController = deps.rangeOverlayController;
     this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
     this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
@@ -191,7 +191,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   }
 
   private loadPackAndRefresh(language: Language): void {
-    void this.itemNames
+    void this.itemNameCatalog
       .ensureLanguage(language)
       .then(() => this.events.emitLanguageChanged())
       .catch(() => this.events.emitLanguageChanged());

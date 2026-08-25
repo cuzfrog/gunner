@@ -419,7 +419,7 @@ describe("main", () => {
 
     const langZh = globalThis.document.getElementById("lang-zh") as unknown as FakeElement;
     langZh.trigger("click");
-    await container.cradle.itemNames.ensureLanguage("zh");
+    await container.cradle.itemNameCatalog.ensureLanguage("zh");
 
     expect(ctx.fillText.mock.calls.some((call) => String(call[0]).includes("距离"))).toBe(true);
   });

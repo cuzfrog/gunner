@@ -1,13 +1,25 @@
 import { ITEM_NAMES_EN } from "./item-names-en";
-import type { ShipNameLanguage } from "../ships";
+import type { ShipNameLanguage } from "../../ships";
 
-export interface ItemNames {
-  displayName(name: string, language: ShipNameLanguage): string;
+export interface ItemNameCatalog {
+  name(id: string, language: ShipNameLanguage): string;
   canonicalName(name: string): string;
   ensureLanguage(language: ShipNameLanguage): Promise<void>;
 }
 
-export class ItemNamesImpl implements ItemNames {
+interface ItemNameEntry {
+  zh: string;
+  ja: string;
+}
+
+interface ItemNamePack {
+  readonly names: readonly string[];
+  readonly overrides: Readonly<Record<string, string>>;
+}
+
+type ItemNameLoader = (language: ShipNameLanguage) => Promise<ItemNamePack>;
+
+export class StaticItemNameCatalog implements ItemNameCatalog {
   private readonly forward: Map<string, ItemNameEntry>;
   private readonly reverse: Map<string, string>;
   private readonly itemNameLoader: ItemNameLoader;
@@ -23,12 +35,12 @@ export class ItemNamesImpl implements ItemNames {
     }
   }
 
-  displayName(name: string, language: ShipNameLanguage): string {
-    const entry = this.forward.get(name);
-    if (!entry) return name;
+  name(id: string, language: ShipNameLanguage): string {
+    const entry = this.forward.get(id);
+    if (!entry) return id;
     if (language === "zh") return entry.zh;
     if (language === "ja") return entry.ja;
-    return name;
+    return id;
   }
 
   canonicalName(name: string): string {
@@ -72,18 +84,6 @@ export class ItemNamesImpl implements ItemNames {
     this.inFlight.delete(language);
   }
 }
-
-interface ItemNameEntry {
-  zh: string;
-  ja: string;
-}
-
-interface ItemNamePack {
-  readonly names: readonly string[];
-  readonly overrides: Readonly<Record<string, string>>;
-}
-
-type ItemNameLoader = (language: ShipNameLanguage) => Promise<ItemNamePack>;
 
 function productionItemNameLoader(language: ShipNameLanguage): Promise<ItemNamePack> {
   if (language === "zh") {

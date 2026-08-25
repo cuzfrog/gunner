@@ -1,6 +1,6 @@
 import type { SigResolutionClass } from "../sim";
+import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
-import type { ChargeStats } from "./fittingDb";
 
 export interface ImportedTurretBase {
   readonly tracking: number;
@@ -41,9 +41,10 @@ export interface ChargeCatalog {
 }
 
 interface ChargeCatalogDeps {
-  readonly fittingDb: { readonly charges: Readonly<Record<string, ChargeStats>> };
+  readonly fittingDb: FittingDb;
   readonly gunFamilies: GunFamilies;
 }
+
 
 export class ChargeCatalogImpl implements ChargeCatalog {
   private readonly charges: Readonly<Record<string, ChargeStats>>;

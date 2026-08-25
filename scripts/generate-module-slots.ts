@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import * as process from "node:process";
-import { FITTING_MODULES, TURRETS } from "../src/fitting/fittingDb";
+import { FITTING_MODULES, TURRETS } from "../src/gamedata/fittingDb";
 
-const OUTPUT_PATH = "src/fitting/moduleSlots.ts";
+const OUTPUT_PATH = "src/gamedata/moduleSlots/moduleSlots.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
 
 export type ModuleSlot = "high" | "mid" | "low" | "rig";
@@ -102,6 +103,7 @@ function main(): void {
   const raw: unknown = JSON.parse(readFileSync(NAME_TO_ID_PATH, "utf8"));
   const nameToId = decodeNameToId(raw);
   const content = generateModuleSlotsContent(nameToId, Object.keys(FITTING_MODULES), Object.keys(TURRETS), GROUP_SLOTS);
+  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);
 }
