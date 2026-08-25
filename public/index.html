@@ -147,7 +147,7 @@
     </section>
 
     <main class="app-main">
-      <section class="panel attacker-panel">
+      <section class="side-panel side-panel-attacker surface-panel">
         <h2 data-i18n="section.attackerTurret">Attacker</h2>
         <label>
           <span class="tracking-label-row">
@@ -229,7 +229,7 @@
           </div>
         </div>
 
-        <hr class="panel-divider">
+        <hr class="side-panel-divider">
 
         <div class="hull-field">
           <div class="hull-label-row">
@@ -244,14 +244,14 @@
                     title="Show fitting details" aria-label="Show fitting details">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
             </button>
-            <span class="fitting-name" id="attacker-fitting-name" hidden></span>
+            <span class="hull-fitting-name" id="attacker-fitting-name" hidden></span>
             <div class="paste-popup popup popup-below popup-left" id="attacker-paste-popup" hidden>
               <textarea id="attacker-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
           <div class="hull-input-row">
-            <img id="attacker-ship-image" class="ship-image" alt="" hidden>
+            <img id="attacker-ship-image" class="hull-ship-image" alt="" hidden>
             <input type="text" id="attacker-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
@@ -379,7 +379,7 @@
         </div>
       </section>
 
-      <section class="canvas-section">
+      <section class="canvas-frame surface-panel">
         <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays" hidden></div>
         <div id="attacker-portrait" class="combatant-portrait attacker-portrait" hidden>
           <img class="portrait-image" alt="">
@@ -437,7 +437,7 @@
         </div>
       </section>
 
-      <section class="panel target-panel">
+      <section class="side-panel side-panel-target surface-panel">
         <h2 data-i18n="section.targetShip">Target</h2>
         <div class="hull-field">
           <div class="hull-label-row">
@@ -452,14 +452,14 @@
                     title="Show fitting details" aria-label="Show fitting details">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
             </button>
-            <span class="fitting-name" id="target-fitting-name" hidden></span>
+            <span class="hull-fitting-name" id="target-fitting-name" hidden></span>
             <div class="paste-popup popup popup-below popup-left" id="target-paste-popup" hidden>
               <textarea id="target-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
           </div>
           <div class="hull-input-row">
-            <img id="target-ship-image" class="ship-image" alt="" hidden>
+            <img id="target-ship-image" class="hull-ship-image" alt="" hidden>
             <input type="text" id="target-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">

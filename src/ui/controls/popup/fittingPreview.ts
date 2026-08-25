@@ -58,7 +58,7 @@ function renderHeader(
   header.className = "preview-header";
 
   const image = document.createElement("img");
-  image.className = "ship-image";
+  image.className = "hull-ship-image";
   image.alt = "";
   if (shipImageUrl) image.src = shipImageUrl;
   else image.hidden = true;
