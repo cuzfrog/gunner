@@ -295,4 +295,31 @@ describe("DomControls", () => {
     expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("affected");
     expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("affected");
   });
+
+  test("sessionRestored preserves playing state and resets the simulation", () => {
+    const { document, controls, cradle } = buildDomControls();
+    const callbacks = mockCallbacks();
+    controls.setCallbacks(callbacks);
+    controls.setPlaying(true);
+    cradle.cradle.uiEvents.emitSessionRestored();
+    expect(getFake(document, "play").textContent).toBe("button.pause");
+    expect(callbacks.onReset).toHaveBeenCalled();
+  });
+
+  test("sessionReset pauses and resets the simulation", () => {
+    const { document, controls, cradle } = buildDomControls();
+    const callbacks = mockCallbacks();
+    controls.setCallbacks(callbacks);
+    controls.setPlaying(true);
+    cradle.cradle.uiEvents.emitSessionReset();
+    expect(getFake(document, "play").textContent).toBe("button.play");
+    expect(callbacks.onReset).toHaveBeenCalled();
+  });
+
+  test("startupDefaultsApplied pauses the simulation", () => {
+    const { document, controls, cradle } = buildDomControls();
+    controls.setPlaying(true);
+    cradle.cradle.uiEvents.emitStartupDefaultsApplied();
+    expect(getFake(document, "play").textContent).toBe("button.play");
+  });
 });

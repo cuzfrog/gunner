@@ -1,6 +1,7 @@
 import {
   USER_SETTINGS_VERSION,
   toCombatantSettings,
+  type ProfileSettings,
   type SettingsStore,
   type StartupState,
   type UserSettings,
@@ -98,6 +99,33 @@ function mockTurretOverrides(overrides: Record<string, unknown> = {}): TurretOve
     set: vi.fn((patch) => { store.overrides = { ...store.overrides, ...patch }; }),
     clear: vi.fn(() => { store.overrides = {}; }),
   } as unknown as TurretOverrides;
+}
+
+function makeProfile(): ProfileSettings {
+  return {
+    version: USER_SETTINGS_VERSION,
+    tracking: 0.32,
+    sigRes: "S",
+    optimal: 1000,
+    falloff: 3000,
+    attackerSpeed: 300,
+    attackerMode: "orbit",
+    attackerRange: 5000,
+    attackerMass: 1_000_000,
+    attackerInertia: 3,
+    attackerSkillLevel: 5,
+    attackerOverload: true,
+    initialDistance: 5000,
+    targetSpeed: 300,
+    targetMode: "orbit",
+    targetRange: 5000,
+    targetMass: 1_000_000,
+    targetInertia: 3,
+    targetSkillLevel: 5,
+    targetOverload: true,
+    targetSig: 36,
+    attackerAmmo: "Hail S",
+  };
 }
 
 describe("SessionCodec", () => {
@@ -421,6 +449,150 @@ describe("SessionCodec", () => {
     expect(trackingInput.rad).toBe(0.32);
     expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 });
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
+    expect(onStartupDefaultsApplied).toHaveBeenCalled();
+  });
+
+  test("profileLoaded event restores the named profile and emits sessionRestored", () => {
+    const els = fakeEls();
+    const profile = makeProfile();
+    const loadProfile = vi.fn(() => profile);
+    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides();
+    const trackingInput = fakeTrackingInput();
+    const preferences = {
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
+      restore: vi.fn(),
+      applyPreferences: vi.fn(),
+      savePreferences: vi.fn(),
+      updateManeuverAggressivityDisplay: vi.fn(),
+      updateManeuverAggressivityEnabled: vi.fn(),
+    } as unknown as PreferencesController;
+    const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
+    const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
+    const settingsStore = { loadProfile } as unknown as SettingsStore;
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
+    els.maneuverAggressivity.value = "1";
+    els.initialDistance.value = "5000";
+
+    const codec = new SessionCodecImpl({
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
+      sigResChoice, hintRotator, settingsStore,
+      events,
+      trackingInput,
+      ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
+      fittingImport: mockFittingImport(),
+    });
+
+    events.emitProfileLoaded("brawler");
+
+    expect(loadProfile).toHaveBeenCalledWith("brawler");
+    expect(profileController.markLoaded).toHaveBeenCalledWith("brawler");
+    expect(onSessionRestored).toHaveBeenCalled();
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
+  });
+
+  test("profileTextLoaded event restores the shared profile and emits sessionRestored", () => {
+    const els = fakeEls();
+    const profile = makeProfile();
+    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides();
+    const trackingInput = fakeTrackingInput();
+    const preferences = {
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
+      restore: vi.fn(),
+      applyPreferences: vi.fn(),
+      savePreferences: vi.fn(),
+      updateManeuverAggressivityDisplay: vi.fn(),
+      updateManeuverAggressivityEnabled: vi.fn(),
+    } as unknown as PreferencesController;
+    const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
+    const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
+    const settingsStore = {} as unknown as SettingsStore;
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
+    els.maneuverAggressivity.value = "1";
+    els.initialDistance.value = "5000";
+
+    const codec = new SessionCodecImpl({
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
+      sigResChoice, hintRotator, settingsStore,
+      events,
+      trackingInput,
+      ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
+      fittingImport: mockFittingImport(),
+    });
+
+    events.emitProfileTextLoaded(profile);
+
+    expect(profileController.showStatus).toHaveBeenCalledWith("status.profileImported");
+    expect(onSessionRestored).toHaveBeenCalled();
+    expect(profileController.markLoaded).toHaveBeenCalledWith("");
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
+  });
+
+  test("newProfile event resets to defaults and emits sessionReset", () => {
+    const els = fakeEls();
+    const attacker = mockSidePanel("attacker", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const target = mockSidePanel("target", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
+    const turretOverrides = mockTurretOverrides();
+    const trackingInput = fakeTrackingInput();
+    const preferences = {
+      capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })),
+      getManeuverAggressivity: vi.fn(() => 1),
+      applyPreferences: vi.fn(),
+      savePreferences: vi.fn(),
+      updateManeuverAggressivityDisplay: vi.fn(),
+      updateManeuverAggressivityEnabled: vi.fn(),
+    } as unknown as PreferencesController;
+    const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const sigResChoice = { set: vi.fn() } as unknown as ChoiceGroup;
+    const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
+    const clearSelectedProfile = vi.fn();
+    const loadPreferences = vi.fn(() => ({ language: "en" as const, trackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 }));
+    const settingsStore = { loadPreferences, clearSelectedProfile } as unknown as SettingsStore;
+    const events = new UiEventsImpl();
+    const onSessionReset = vi.fn();
+    const onStartupDefaultsApplied = vi.fn();
+    events.onSessionReset(onSessionReset);
+    events.onStartupDefaultsApplied(onStartupDefaultsApplied);
+    els.maneuverAggressivity.value = "1";
+    els.initialDistance.value = "5000";
+
+    const codec = new SessionCodecImpl({
+      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
+      sigResChoice, hintRotator, settingsStore,
+      events,
+      trackingInput,
+      ewarController: mockEwarController(),
+      boosterController: mockBoosterController(),
+      fittingImport: mockFittingImport(),
+    });
+
+    events.emitNewProfile();
+
+    expect(clearSelectedProfile).toHaveBeenCalled();
+    expect(profileController.showStatus).toHaveBeenCalledWith("status.newProfile");
+    expect(onSessionReset).toHaveBeenCalled();
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
   });
 });

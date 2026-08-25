@@ -161,13 +161,11 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private onSessionRestored(): void {
-    this.onConfigChange(false);
     this.setPlaying(this.playing);
     this.callbacks?.onReset();
   }
 
   private onSessionReset(): void {
-    this.onConfigChange(false);
     this.setPlaying(false);
     this.callbacks?.onReset();
   }
