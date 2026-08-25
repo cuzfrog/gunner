@@ -1,7 +1,7 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsStore } from "../../appstate";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings } from "../../fitting";
 import type { ItemNameCatalog } from "../../gamedata/itemNames";
-import type { HitChance } from "../../sim";
+import type { EwarResolver, HitChance } from "../../sim";
 import type { Ships } from "../../ships";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
@@ -27,6 +27,7 @@ import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { RangeOverlayController } from "./rangeOverlay";
+import type { PortraitsController } from "./portraits";
 import type { ProfileEquality } from "../../appstate";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
@@ -69,6 +70,8 @@ export interface ControlsCradle {
   readonly targetFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
+  readonly portraitsController: PortraitsController;
+  readonly ewarResolver: EwarResolver;
   readonly sessionCodec: SessionCodec;
   readonly simConfigSource: SimConfigSource;
   readonly importController: ImportController;

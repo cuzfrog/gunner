@@ -27,6 +27,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
       boosterController: proxy.boosterController,
       shareController: proxy.shareController,
       rangeOverlayController: proxy.rangeOverlayController,
+      portraitsController: proxy.portraitsController,
       previewManager: proxy.previewManager,
       simConfigSource: proxy.simConfigSource,
     })).singleton(),

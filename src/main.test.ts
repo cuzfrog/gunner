@@ -39,6 +39,7 @@ class FakeElement {
   placeholder = "";
   src = "";
   tagName = "";
+  className = "";
   style: Record<string, string> = {};
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
   children: FakeElement[] = [];
@@ -75,6 +76,14 @@ class FakeElement {
 
   closest(): FakeElement | null {
     return null;
+  }
+
+  querySelector(selector: string): FakeElement | null {
+    if (selector.startsWith(".")) {
+      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
+    }
+    return this.children[0] ?? null;
   }
 
   contains(target: FakeElement): boolean {
@@ -340,6 +349,16 @@ function fakeDocument(): Document {
       if (!elements.has(id)) {
         const el = id === "scene" ? new FakeCanvas() : new FakeElement();
         if (id in DEFAULT_VALUES) el.value = DEFAULT_VALUES[id];
+        if (id === "attacker-portrait" || id === "target-portrait") {
+          const img = new FakeElement();
+          img.tagName = "IMG";
+          img.className = "portrait-image";
+          el.appendChild(img);
+          const effects = new FakeElement();
+          effects.tagName = "DIV";
+          effects.className = "portrait-effects";
+          el.appendChild(effects);
+        }
         elements.set(id, el);
       }
       elements.get(id)!.tagName = TAG_BY_ID[id] ?? "DIV";

@@ -97,6 +97,12 @@ no-new-exports:
   - rangeOverlay/rangeOverlayControllerContract.ts
   - rangeOverlay/index.ts
   - rangeOverlay/module.ts
+  - portraits/MODULE.md
+  - portraits/portraitsController.ts
+  - portraits/portraitsController.test.ts
+  - portraits/portraitsControllerContract.ts
+  - portraits/module.ts
+  - portraits/index.ts
   - confirm/confirmController.test.ts
   - confirm/confirmController.ts
   - confirm/index.ts
@@ -116,10 +122,10 @@ no-new-exports:
 
 DOM form controls, input orchestration, and popups for the gunner UI.
 
-The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `rangeOverlay`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, and `profile`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, and the initial distance source. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, `EffectiveReadouts` (used by `Controls.update`), and `Side`; `index.ts` re-exports these cross-boundary types.
+The module is organized into sub-modules: `session`, `turret`, `popup`, `import`, `share`, `hints`, `sidePanel`, `ewar`, `booster`, `rangeOverlay`, `portraits`, `confirm`, `domControls`, `effectiveReadout`, `engagementReadout`, `preferences`, and `profile`. `DomControls` exposes the `Controls` facade. `EffectiveReadout` updates per-frame effective attribute suffixes for speed, tracking, optimal and falloff. `SimConfigSource` lives in `session` and owns `getConfig()` assembly from the two side panels, preferences, EWAR, boosters, and the initial distance source. The public surface is `Controls`, `ControlsCallbacks`, `ControlsCradle`, `registerControlsModule`, `EffectiveReadouts` (used by `Controls.update`), and `Side`; `index.ts` re-exports these cross-boundary types.
 
 Each sub-module owns its DOM element collection through a private `collectXxxEls` function in its `module.ts` and registers its implementation through the same file. The broad `createControlsEls()` map remains a root-level value; sub-modules derive a narrow local `XxxEls` type and extract the fields they need. Cross-feature notifications travel through the shared `UiEvents` bus: `importController` emits `fittingImported`, `configInvalidated`, and `profileTextLoaded`; `ewarController` and `boosterController` listen for `fittingImported`; `profileController` emits `profileLoaded` and `newProfile`. `DomControls` listens to `sessionRestored`, `sessionReset`, `startupDefaultsApplied`, `configInvalidated` and `displayInvalidated` on `UiEvents`; `SessionCodec` is the source of `sessionRestored`/`sessionReset`/`startupDefaultsApplied` after it processes profile load, text import and reset events.
 
-`module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `rangeOverlay` → `popup` → `import` → `share` → `confirm` → `engagementReadout` → `effectiveReadout` → `preferences` → `profile` → `session` → `domControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
+`module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `rangeOverlay` → `portraits` → `popup` → `import` → `share` → `confirm` → `engagementReadout` → `effectiveReadout` → `preferences` → `profile` → `session` → `domControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
 
 `SidePanel.setFittingPopup`, `setFittingPreview`, and `setImporter` remain setter-based because the fitting popup, preview manager, and import controller all depend on the side panels, so passing them through the constructor would create a dependency cycle. `ProfileController.snapshotSource` is supplied through the constructor as a deferred closure over `sessionCodec.capture()`, removing the previous `setSnapshotSource` back-edge. The deleted `elementsContract.ts` and `elementCollectors.ts` are no longer part of the module surface.

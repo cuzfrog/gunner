@@ -22,6 +22,7 @@ import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
 import type { RangeOverlayController } from "../rangeOverlay";
+import type { PortraitsController } from "../portraits";
 
 export type { Controls, ControlsCallbacks } from "../controlsContract";
 
@@ -49,6 +50,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   boosterController: BoosterController;
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
+  portraitsController: PortraitsController;
   previewManager: FittingPreviewManager;
   simConfigSource: SimConfigSource;
 }
@@ -73,6 +75,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly boosterController: BoosterController;
   private readonly shareController: ShareController;
   private readonly rangeOverlayController: RangeOverlayController;
+  private readonly portraitsController: PortraitsController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
   private readonly now: () => number;
@@ -101,6 +104,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.boosterController = all.boosterController;
     this.shareController = all.shareController;
     this.rangeOverlayController = all.rangeOverlayController;
+    this.portraitsController = all.portraitsController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
     this.now = all.now;
@@ -208,6 +212,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.cachedReadouts = { frame, hit, effective };
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
+    this.portraitsController.update();
   }
   setPlaying(playing: boolean): void {
     if (!playing && this.playing && this.cachedReadouts) {

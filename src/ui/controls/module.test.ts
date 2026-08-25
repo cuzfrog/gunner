@@ -45,6 +45,8 @@ const controlsCradleKeys = {
   importController: "importController",
   ewarController: "ewarController",
   boosterController: "boosterController",
+  portraitsController: "portraitsController",
+  ewarResolver: "ewarResolver",
   shareController: "shareController",
   rangeOverlayController: "rangeOverlayController",
   confirmController: "confirmController",

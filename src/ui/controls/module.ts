@@ -23,6 +23,7 @@ import { registerTurretModule } from "./turret";
 import { registerEwarModule } from "./ewar";
 import { registerBoosterModule } from "./booster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
+import { registerPortraitsModule } from "./portraits";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   if (!cradle.hasRegistration("now")) {
@@ -39,6 +40,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerEwarModule(cradle);
   registerBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
+  registerPortraitsModule(cradle);
   registerPopupModule(cradle);
   registerImportModule(cradle);
   registerShareModule(cradle);

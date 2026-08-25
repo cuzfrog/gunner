@@ -67,6 +67,20 @@ export function addSigResButtons(document: Document): void {
   }
 }
 
+function addPortraitChildren(document: Document): void {
+  for (const id of ["attacker-portrait", "target-portrait"]) {
+    const root = getFake(document, id);
+    const image = new FakeElement();
+    image.tagName = "IMG";
+    image.className = "portrait-image";
+    root.appendChild(image);
+    const effects = new FakeElement();
+    effects.tagName = "DIV";
+    effects.className = "portrait-effects";
+    root.appendChild(effects);
+  }
+}
+
 function setControlDefaults(document: Document): void {
   const defaults: Record<string, string> = {
     sigRes: "S",
@@ -181,6 +195,7 @@ export function buildDomControls(options: BuildDomControlsOptions = {}) {
   const document = fakeDocument();
   const cradle = buildControlsCradle(document, options);
   setControlDefaults(document);
+  addPortraitChildren(document);
   registerControlsModule(cradle);
   cradle.register({
     confirmController: asValue(vi.mocked<ConfirmController>({ confirm: vi.fn(() => Promise.resolve(true)) })),

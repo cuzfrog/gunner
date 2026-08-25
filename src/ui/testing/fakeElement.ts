@@ -69,6 +69,10 @@ export class FakeElement {
     if (selector.startsWith('[aria-selected="true"]')) {
       return this.children.find((c) => c.getAttribute("aria-selected") === "true") ?? null;
     }
+    if (selector.startsWith(".")) {
+      const className = selector.slice(1).split(/[.:\s>+~\[]/)[0];
+      return this.children.find((c) => c.className.split(" ").includes(className)) ?? null;
+    }
     return this.children[0] ?? null;
   }
 }

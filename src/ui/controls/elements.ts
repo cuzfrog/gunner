@@ -164,5 +164,7 @@ export function createControlsEls() {
     resRangePen: el("res-range-pen"),
     resHit: el("res-hit"),
     rangeOverlayLegend: el("range-overlay-legend"),
+    attackerPortrait: el("attacker-portrait"),
+    targetPortrait: el("target-portrait"),
   };
 }
