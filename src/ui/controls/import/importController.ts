@@ -3,7 +3,7 @@ import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";

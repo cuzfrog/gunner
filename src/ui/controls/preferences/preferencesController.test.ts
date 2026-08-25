@@ -1,9 +1,9 @@
-import type { I18n } from "../i18n";
-import type { UiEvents } from "../events";
-import { mockTrackingInput } from "./testSupport";
-import type { DisplayPreferences, SettingsStore } from "../../appstate";
-import type { ItemNameCatalog } from "../../gamedata/itemNames";
-import type { RangeOverlayController } from "./rangeOverlay";
+import type { I18n } from "../../i18n";
+import type { UiEvents } from "../../events";
+import { mockTrackingInput } from "../testSupport";
+import type { DisplayPreferences, SettingsStore } from "../../../appstate";
+import type { ItemNameCatalog } from "../../../gamedata/itemNames";
+import type { RangeOverlayController } from "../rangeOverlay";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {

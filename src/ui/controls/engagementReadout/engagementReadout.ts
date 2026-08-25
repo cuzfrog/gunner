@@ -1,6 +1,6 @@
-import type { EngagementFrame, HitChanceBreakdown } from "../../sim";
-import { setText } from "./controlsDom";
-import { formatDistance, formatWithCommas, hitChanceColor } from "./controlsFormat";
+import type { EngagementFrame, HitChanceBreakdown } from "../../../sim";
+import { setText } from "../controlsDom";
+import { formatDistance, formatWithCommas, hitChanceColor } from "../controlsFormat";
 
 export interface ReadoutEls {
   readonly resDistance: HTMLElement;

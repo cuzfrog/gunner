@@ -2,7 +2,7 @@ import type { CombatantConfig, SimConfig } from "../../../sim";
 import { AGGRESSIVITY_MIN } from "../controlsFormat";
 import type { BoosterController } from "../booster";
 import type { EwarController } from "../ewar";
-import type { PreferencesController } from "../preferencesController";
+import type { PreferencesController } from "../preferences";
 import type { SidePanelState } from "../sidePanel";
 
 export interface SimConfigSource {

@@ -1,7 +1,7 @@
 import { type ClipboardProvider, type ProfileTextCodec, USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
 import { FakeElement, fakeDocument, getFake } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { SessionCodec } from "../session";
 import { ShareControllerImpl } from "./shareController";
 

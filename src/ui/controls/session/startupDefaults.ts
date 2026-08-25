@@ -1,5 +1,5 @@
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
+import type { PreferencesController } from "../preferences";
+import type { ProfileController } from "../profile";
 import type { SidePanel } from "../sidePanel";
 import type { SessionControl } from "./sessionControl";
 

@@ -1,4 +1,4 @@
-import { USER_SETTINGS_VERSION, type ProfileEquality, type ProfileSettings } from "../../appstate";
+import { USER_SETTINGS_VERSION, type ProfileEquality, type ProfileSettings } from "../../../appstate";
 import { ProfileChangeTrackerImpl } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {

@@ -12,8 +12,8 @@ import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput } from 
 import type { I18n } from "../../i18n";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { HintRotator } from "../hints";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
+import type { PreferencesController } from "../preferences";
+import type { ProfileController } from "../profile";
 import type { SidePanel } from "../sidePanel";
 import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";

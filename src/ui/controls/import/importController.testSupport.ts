@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";

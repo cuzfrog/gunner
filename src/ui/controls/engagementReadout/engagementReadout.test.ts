@@ -1,4 +1,4 @@
-import { Vec2, type ShipState } from "../../sim";
+import { Vec2, type ShipState } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeReadoutEls(): ReadoutEls {

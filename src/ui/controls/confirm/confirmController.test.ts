@@ -1,6 +1,6 @@
-import { fakeDocument, getFake, FakeElement } from "../testing";
-import type { I18n, Language } from "../i18n";
-import type { Popup, PopupGroup } from "./popup";
+import { fakeDocument, getFake, FakeElement } from "../../testing";
+import type { I18n, Language } from "../../i18n";
+import type { Popup, PopupGroup } from "../popup";
 import { ConfirmControllerImpl, type ConfirmController, type ConfirmEls } from "./confirmController";
 
 class StubPopupGroup implements PopupGroup {

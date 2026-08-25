@@ -1,7 +1,7 @@
-import type { I18n } from "../i18n";
-import type { TrackingInput } from "./trackingInput";
-import { formatDistance, formatNumber, formatWithCommas } from "./controlsFormat";
-import type { EffectiveReadouts } from "./controlsContract";
+import type { I18n } from "../../i18n";
+import type { TrackingInput } from "../trackingInput";
+import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
+import type { EffectiveReadouts } from "../controlsContract";
 
 interface InputLike { readonly value: string; }
 

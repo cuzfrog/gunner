@@ -4,29 +4,29 @@ import {
   type HitChanceBreakdown,
   type SimConfig,
   type TurretSpec,
-} from "../../sim";
-import type { ProfileSettings } from "../../appstate";
-import { isEventTargetWithClosest } from "./controlsDom";
-import type { Controls, ControlsCallbacks, EffectiveReadouts } from "./controlsContract";
+} from "../../../sim";
+import type { ProfileSettings } from "../../../appstate";
+import { isEventTargetWithClosest } from "../controlsDom";
+import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
-import type { EffectiveReadout } from "./effectiveReadout";
-import type { RangeOverlayHost } from "./rangeOverlay";
-import type { FittingPreviewManager, PopupGroup } from "./popup";
-import type { HintRotator } from "./hints";
-import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "./session";
-import type { PreferencesController } from "./preferencesController";
-import type { ProfileController } from "./profileController";
-import type { EngagementReadout } from "./engagementReadout";
-import type { SidePanel } from "./sidePanel";
-import type { TurretController } from "./turret";
-import type { EwarController } from "./ewar";
-import type { BoosterController } from "./booster";
-import type { ImportController } from "./import";
-import type { ShareController } from "./share";
-import type { RangeOverlay } from "../renderer";
-import type { RangeOverlayController } from "./rangeOverlay";
+import type { EffectiveReadout } from "../effectiveReadout";
+import type { RangeOverlayHost } from "../rangeOverlay";
+import type { FittingPreviewManager, PopupGroup } from "../popup";
+import type { HintRotator } from "../hints";
+import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "../session";
+import type { PreferencesController } from "../preferences";
+import type { ProfileController } from "../profile";
+import type { EngagementReadout } from "../engagementReadout";
+import type { SidePanel } from "../sidePanel";
+import type { TurretController } from "../turret";
+import type { EwarController } from "../ewar";
+import type { BoosterController } from "../booster";
+import type { ImportController } from "../import";
+import type { ShareController } from "../share";
+import type { RangeOverlay } from "../../renderer";
+import type { RangeOverlayController } from "../rangeOverlay";
 
-export type { Controls, ControlsCallbacks } from "./controlsContract";
+export type { Controls, ControlsCallbacks } from "../controlsContract";
 
 interface DomControlsEls {
   play: HTMLButtonElement;

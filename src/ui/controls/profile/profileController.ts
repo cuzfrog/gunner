@@ -1,11 +1,11 @@
-import { setText } from "./controlsDom";
-import { type ProfileSettings, type SettingsStore, type StartupState } from "../../appstate";
-import type { ConfirmController } from "./confirmController";
+import { setText } from "../controlsDom";
+import { type ProfileSettings, type SettingsStore, type StartupState } from "../../../appstate";
+import type { ConfirmController } from "../confirm";
 import type { ProfileChangeTracker } from "./profileChangeTracker";
-import type { I18n } from "../i18n";
-import type { Popup, PopupGroup } from "./popup";
-import type { TimeoutId, Timer } from "../timer";
-import type { UiEvents } from "../events";
+import type { I18n } from "../../i18n";
+import type { Popup, PopupGroup } from "../popup";
+import type { TimeoutId, Timer } from "../../timer";
+import type { UiEvents } from "../../events";
 
 export interface ProfileEls {
   readonly profileSave: HTMLButtonElement;

@@ -1,6 +1,6 @@
 import { type ClipboardProvider, type ProfileTextCodec, type SettingsStore } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { SessionCodec } from "../session";
 import type { ShareController, ShareEls } from "./shareControllerContract";
 

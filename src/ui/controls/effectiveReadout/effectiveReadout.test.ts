@@ -1,6 +1,6 @@
-import type { TrackingUnit } from "../../appstate";
-import type { I18n } from "../i18n";
-import type { TrackingInput } from "./trackingInput";
+import type { TrackingUnit } from "../../../appstate";
+import type { I18n } from "../../i18n";
+import type { TrackingInput } from "../trackingInput";
 import type { EffectiveReadoutEls, EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected, _readNumber } from "./effectiveReadout";

@@ -26,7 +26,7 @@ import type { StatConditions } from "../../ships";
 import type { SigResolutionClass } from "../../sim";
 import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { DomControls } from "./domControls";
-import type { ConfirmController } from "./confirmController";
+import type { ConfirmController } from "./confirm";
 import type { ControlsCradle } from "./cradle";
 import { createControlsEls } from "./elements";
 import { registerControlsModule } from "./module";

@@ -1,5 +1,5 @@
-import type { I18n } from "../i18n";
-import type { Popup, PopupGroup } from "./popup";
+import type { I18n } from "../../i18n";
+import type { Popup, PopupGroup } from "../popup";
 
 export interface ConfirmEls {
   readonly confirmPopup: HTMLElement;

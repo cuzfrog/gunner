@@ -3,11 +3,11 @@ no-new-exports:
   - choiceGroup.ts
   - combatantSide.ts
   - controlsDom.ts
-  - domControls.ts
-  - domControlsContract.ts
-  - effectiveReadout.ts
+  - domControls/domControls.ts
+  - domControls/domControlsContract.ts
+  - effectiveReadout/effectiveReadout.ts
   - elements.ts
-  - engagementReadout.ts
+  - engagementReadout/engagementReadout.ts
   - hints/hintRotator.ts
   - hints/module.ts
   - import/attackerTurret.ts
@@ -31,8 +31,8 @@ no-new-exports:
   - popup/fittingPreviewManager.ts
   - popup/module.ts
   - popup/popupGroup.ts
-  - preferencesController.ts
-  - profileController.ts
+  - preferences/preferencesController.ts
+  - profile/profileController.ts
   - session/hullDatalist.ts
   - session/module.ts
   - session/sessionCodec.ts
@@ -59,17 +59,26 @@ no-new-exports:
   - turret/testSupport.ts
   - choiceGroup.test.ts
   - trackingInput.ts
-  - preferencesController.test.ts
+  - preferences/index.ts
+  - preferences/module.ts
+  - preferences/preferencesController.test.ts
   - testSupport.ts
   - controlsFormat.test.ts
-  - effectiveReadout.test.ts
-  - engagementReadout.test.ts
+  - effectiveReadout/effectiveReadout.test.ts
+  - effectiveReadout/index.ts
+  - effectiveReadout/module.ts
+  - engagementReadout/engagementReadout.test.ts
+  - engagementReadout/index.ts
+  - engagementReadout/module.ts
   - trackingInput.test.ts
-  - domControls.test.ts
+  - domControls/domControls.test.ts
+  - domControls/domControlsContract.ts
+  - domControls/index.ts
+  - domControls/module.ts
   - cradle.ts
   # index.ts re-exports cross-boundary controls DTOs and is intentionally open for additions.
   # - index.ts
-  - profileController.test.ts
+  - profile/profileController.test.ts
   - module.test.ts
   - ewar/ewarController.ts
   - ewar/ewarController.test.ts
@@ -88,10 +97,14 @@ no-new-exports:
   - rangeOverlay/rangeOverlayControllerContract.ts
   - rangeOverlay/index.ts
   - rangeOverlay/module.ts
-  - confirmController.test.ts
-  - confirmController.ts
-  - profileChangeTracker.test.ts
-  - profileChangeTracker.ts
+  - confirm/confirmController.test.ts
+  - confirm/confirmController.ts
+  - confirm/index.ts
+  - confirm/module.ts
+  - profile/index.ts
+  - profile/module.ts
+  - profile/profileChangeTracker.test.ts
+  - profile/profileChangeTracker.ts
 ---
 
 
@@ -107,6 +120,6 @@ The module is organized into sub-modules: `session`, `turret`, `popup`, `import`
 
 Each sub-module owns its DOM element collection through a private `collectXxxEls` function in its `module.ts` and registers its implementation through the same file. The broad `createControlsEls()` map remains a root-level value; sub-modules derive a narrow local `XxxEls` type and extract the fields they need. Cross-feature notifications travel through the shared `UiEvents` bus: `importController` emits `fittingImported`, `configInvalidated`, and `profileTextLoaded`; `ewarController` and `boosterController` listen for `fittingImported`; `profileController` emits `profileLoaded` and `newProfile`; `DomControls` subscribes to these channels and to `configInvalidated`/`displayInvalidated`.
 
-`module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `rangeOverlay` → `popup` → `import` → `share` → `session` → root readouts, preferences, profile, confirmations, and `DomControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
+`module.ts` composes the full graph declaratively in the DI container. Registration order is acyclic and driven by feature registration: `hints` → `turret` → `sidePanel` → `ewar` → `booster` → `rangeOverlay` → `popup` → `import` → `share` → `confirm` → `engagementReadout` → `effectiveReadout` → `preferences` → `profile` → `session` → `domControls` → `combatantSide.wireCombatantSide` binds `SidePanel.setFittingPopup`, `SidePanel.setFittingPreview`, `SidePanel.setImporter`, and the `SidePanelHost`.
 
 `SidePanel.setFittingPopup`, `setFittingPreview`, and `setImporter` remain setter-based because the fitting popup, preview manager, and import controller all depend on the side panels, so passing them through the constructor would create a dependency cycle. `ProfileController.snapshotSource` is supplied through the constructor as a deferred closure over `sessionCodec.capture()`, removing the previous `setSnapshotSource` back-edge. The deleted `elementsContract.ts` and `elementCollectors.ts` are no longer part of the module surface.

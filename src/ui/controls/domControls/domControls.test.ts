@@ -1,8 +1,8 @@
-import type { UserSettings, SavedFittings, SavedFitting } from "../../appstate";
-import type { FittingImport } from "../../fitting";
-import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown } from "../../sim";
-import type { Ships } from "../../ships";
-import { USER_SETTINGS_VERSION } from "../../appstate";
+import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
+import type { FittingImport } from "../../../fitting";
+import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown } from "../../../sim";
+import type { Ships } from "../../../ships";
+import { USER_SETTINGS_VERSION } from "../../../appstate";
 import {
   buildDomControls,
   getFake,
@@ -12,7 +12,7 @@ import {
   RIFTER,
   IMPORTED_RIFTER,
   FakeElement,
-} from "./testSupport";
+} from "../testSupport";
 
 const SAVED_RIFTER: SavedFitting = {
   id: "Rifter::Brawler",

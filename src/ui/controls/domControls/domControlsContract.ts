@@ -1,6 +1,6 @@
-import type { ProfileSettings, SettingsStore } from "../../appstate";
-import type { I18n } from "../i18n";
-import type { UiEvents } from "../events";
+import type { ProfileSettings, SettingsStore } from "../../../appstate";
+import type { I18n } from "../../i18n";
+import type { UiEvents } from "../../events";
 
 export interface DomControlsDeps {
   i18n: I18n;

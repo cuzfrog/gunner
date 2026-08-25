@@ -1,8 +1,8 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { ClipboardProvider, SavedFittings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
+import type { PreferencesController } from "../preferences";
+import type { ProfileController } from "../profile";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 
