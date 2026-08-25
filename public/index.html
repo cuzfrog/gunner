@@ -157,12 +157,12 @@
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" class="btn" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
-          <span class="input-with-unit has-effective">
+          <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" id="tracking" value="0.32" step="any" min="0">
             <span class="effective-value mono" id="effective-tracking"></span>
           </span>
         </label>
-        <div class="field-group sigres-group">
+        <div class="form-field-group sigres-group">
           <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
 
           <select id="sigRes" hidden>
@@ -189,24 +189,24 @@
             </button>
           </div>
         </div>
-        <div class="field-row">
+        <div class="form-field-row">
           <label>
             <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
-            <span class="input-with-unit has-effective">
+            <span class="input-with-unit input-with-unit-has-effective">
               <input type="number" id="optimal" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-optimal"></span>
             </span>
           </label>
           <label>
             <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
-            <span class="input-with-unit has-effective">
+            <span class="input-with-unit input-with-unit-has-effective">
               <input type="number" id="falloff" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-falloff"></span>
             </span>
           </label>
         </div>
 
-        <div class="field-group ammo-group" id="attacker-ammo-field">
+        <div class="form-field-group ammo-group" id="attacker-ammo-field">
           <button type="button" id="attacker-ammo-trigger" class="ammo-trigger trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
                   data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
@@ -274,7 +274,7 @@
           <span class="hull-hint" id="attacker-hull-hint"></span>
         </div>
 
-        <div class="field-group ewar-group" id="attacker-ewar-field">
+        <div class="form-field-group ewar-group" id="attacker-ewar-field">
           <button type="button" id="attacker-ewar-trigger" class="ewar-trigger trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
                   aria-describedby="attacker-ewar-summary" disabled>
@@ -285,7 +285,7 @@
           <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
-        <div class="field-group booster-group" id="attacker-booster-field">
+        <div class="form-field-group booster-group" id="attacker-booster-field">
           <button type="button" id="attacker-booster-trigger" class="ewar-trigger booster-trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-booster-popup"
                   aria-describedby="attacker-booster-summary" disabled>
@@ -296,7 +296,7 @@
           <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-booster-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
-        <div class="field-group propulsion-group">
+        <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
           <select id="attacker-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
@@ -309,14 +309,14 @@
           <button type="button" id="attacker-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
-          <span class="input-with-unit has-effective">
+          <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-attacker-speed"></span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
 
-        <div class="field-row">
+        <div class="form-field-row">
           <label>
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
@@ -332,8 +332,8 @@
             </span>
           </label>
         </div>
-        <div class="field-row">
-          <div class="field-group mode-group">
+        <div class="form-field-row">
+          <div class="form-field-group">
             <span class="field-label truncate" data-i18n="label.mode">Mode</span>
             <select id="attacker-mode" class="mode-select"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
@@ -350,20 +350,20 @@
             </span>
           </label>
         </div>
-        <div class="slider-field maneuver-field">
-          <span class="slider-label-row">
+        <div class="form-slider-field form-maneuver-field">
+          <span class="form-slider-label-row">
             <span class="field-label truncate" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
             <button type="button" class="info-hint"
                     data-i18n-title="hint.maneuverAggressivity"
                     data-i18n-aria-label="hint.maneuverAggressivity"
                     title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
                     aria-label="About maneuver aggressivity">?</button>
-            <output class="slider-value mono" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
+            <output class="form-slider-value mono" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
           </span>
           <input type="hidden" id="maneuver-aggressivity" value="1">
           <input type="range" id="maneuver-aggressivity-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
         </div>
-        <div class="field-group skill-section skill-select" id="attacker-skill-field">
+        <div class="form-field-group skill-section skill-select" id="attacker-skill-field">
           <button type="button" class="skill-trigger trigger" id="attacker-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-skill-popup">
             <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
@@ -391,8 +391,8 @@
         </div>
         <canvas id="scene" width="800" height="600"></canvas>
 
-        <div class="controls">
-          <div class="playback-controls">
+        <div class="control-bar">
+          <div class="control-bar-playback">
             <button id="play" class="btn btn-primary-text">Start</button>
             <button id="reset" class="btn" data-i18n="button.reset">Reset</button>
             <button type="button" id="canvas-settings-trigger" class="icon-button"
@@ -402,18 +402,18 @@
             </button>
           </div>
 
-          <div class="control-field zoom-control">
+          <div class="control-bar-field control-bar-zoom">
             <label for="zoom-slider" data-i18n="label.zoom">Zoom</label>
             <input type="range" id="zoom-slider" min="0.25" max="4" step="0.05" value="1"
                    style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
-            <output class="slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
-            <label class="auto-zoom-option">
+            <output class="form-slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
+            <label class="zoom-auto-option">
               <input type="checkbox" id="auto-zoom" checked>
               <span data-i18n="label.autoZoom">Auto-zoom</span>
             </label>
           </div>
 
-          <div class="control-field speed-control">
+          <div class="control-bar-field control-bar-speed">
             <label for="sim-speed" data-i18n="label.simulationSpeed">Speed</label>
             <select id="sim-speed">
               <option value="0.25">0.25x</option>
@@ -426,13 +426,13 @@
           </div>
         </div>
 
-        <div id="canvas-settings-popup" class="canvas-settings-popup popup" hidden role="dialog"
+        <div id="canvas-settings-popup" class="control-bar-canvas-settings-popup popup" hidden role="dialog"
              data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
-          <div class="control-field grid-brightness-control">
+          <div class="control-bar-field control-bar-grid-brightness">
             <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
             <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
                    style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
-            <output class="slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
+            <output class="form-slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
           </div>
         </div>
       </section>
@@ -482,7 +482,7 @@
           <span class="hull-hint" id="target-hull-hint"></span>
         </div>
 
-        <div class="field-group ewar-group" id="target-ewar-field">
+        <div class="form-field-group ewar-group" id="target-ewar-field">
           <button type="button" id="target-ewar-trigger" class="ewar-trigger trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
                   aria-describedby="target-ewar-summary" disabled>
@@ -493,7 +493,7 @@
           <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
-        <div class="field-group booster-group" id="target-booster-field">
+        <div class="form-field-group booster-group" id="target-booster-field">
           <button type="button" id="target-booster-trigger" class="ewar-trigger booster-trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-booster-popup"
                   aria-describedby="target-booster-summary" disabled>
@@ -504,9 +504,9 @@
           <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-booster-popup" hidden role="dialog" aria-modal="false"></div>
         </div>
 
-        <div class="field-row">
-          <div class="field-group">
-            <span class="field-label-row">
+        <div class="form-field-row">
+          <div class="form-field-group">
+            <span class="form-field-label-row">
               <label for="initial-distance">
                 <span class="field-label truncate" data-i18n="label.initialDistance">Initial distance</span>
               </label>
@@ -529,7 +529,7 @@
             </span>
           </label>
         </div>
-        <div class="field-group propulsion-group">
+        <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
           <select id="target-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
@@ -542,14 +542,14 @@
           <button type="button" id="target-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
-          <span class="input-with-unit has-effective">
+          <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-target-speed"></span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
         </div>
 
-        <div class="field-row">
+        <div class="form-field-row">
           <label>
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
@@ -565,8 +565,8 @@
             </span>
           </label>
         </div>
-        <div class="field-row">
-          <div class="field-group mode-group">
+        <div class="form-field-row">
+          <div class="form-field-group">
             <span class="field-label truncate" data-i18n="label.mode">Mode</span>
             <select id="target-mode" class="mode-select"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
@@ -583,7 +583,7 @@
             </span>
           </label>
         </div>
-        <div class="field-group skill-section skill-select" id="target-skill-field">
+        <div class="form-field-group skill-section skill-select" id="target-skill-field">
           <button type="button" class="skill-trigger trigger" id="target-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="target-skill-popup">
             <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
