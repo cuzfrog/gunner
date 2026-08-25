@@ -35,6 +35,7 @@ export const JA: LanguageSlice<"ja"> = {
   "ewar.hover.falloff": { ja: "フォールオフ" },
   "ewar.hover.scrambler": { ja: "MWDを無効化" },
   "ewar.hover.outOfRange": { ja: "この距離では効果なし" },
+  "ewar.hint.range": { ja: "射程 {0}" },
   "label.booster.computer": { ja: "トラッキングコンピュータ" },
   "title.booster.empty": { ja: "トラッキングコンピュータ未装備" },
   "booster.script.none": { ja: "なし" },

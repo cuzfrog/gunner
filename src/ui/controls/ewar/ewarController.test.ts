@@ -88,9 +88,13 @@ function buildEwarController(language: Language = "en") {
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
+    webHint: vi.fn(() => "web-hint"),
     grapplerDescription: vi.fn(() => "grappler-title"),
+    grapplerHint: vi.fn(() => "grappler-hint"),
     disruptorDescription: vi.fn(() => "disruptor-title"),
+    disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
+    scramblerHint: vi.fn(() => "scrambler-hint"),
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
@@ -229,8 +233,8 @@ describe("EwarController", () => {
     const popup = getFake(document, "attacker-ewar-popup");
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].children[1].textContent).toBe("1/1");
-    expect(summary.children[0].getAttribute("title")).toBe("grappler-title");
-    expect(ewarEffectDescriber.grapplerDescription).toHaveBeenCalled();
+    expect(summary.children[0].getAttribute("title")).toBe("grappler-hint");
+    expect(ewarEffectDescriber.grapplerHint).toHaveBeenCalled();
 
     const grapplers = grapplerSection(popup)!;
     expect(grapplers.children[0].textContent).toBe("label.ewar.grappler");
@@ -257,14 +261,14 @@ describe("EwarController", () => {
     const popup = getFake(document, "attacker-ewar-popup");
     expect(trigger.disabled).toBe(false);
     expect(summary.children.length).toBe(1);
-    expect(summary.children[0].getAttribute("title")).toBe("scrambler-title");
+    expect(summary.children[0].getAttribute("title")).toBe("scrambler-hint");
     expect(popup.children.length).toBe(1);
     expect(popup.children[0].children[0].textContent).toBe("label.ewar.scrambler");
     expect(controller.projection("attacker")).toEqual({
       loadout,
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }] },
     });
-    expect(ewarEffectDescriber.scramblerDescription).toHaveBeenCalled();
+    expect(ewarEffectDescriber.scramblerHint).toHaveBeenCalled();
   });
 
   test("toggling a web flips state, updates its section summary, and does not close popup", () => {
@@ -697,10 +701,10 @@ describe("EwarController", () => {
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
     const summary = getFake(document, "attacker-ewar-summary");
-    expect(summary.children[0].getAttribute("title")).toBe("web-title");
-    expect(summary.children[1].getAttribute("title")).toBe("disruptor-title");
-    expect(ewarEffectDescriber.webDescription).toHaveBeenCalled();
-    expect(ewarEffectDescriber.disruptorDescription).toHaveBeenCalled();
+    expect(summary.children[0].getAttribute("title")).toBe("web-hint");
+    expect(summary.children[1].getAttribute("title")).toBe("disruptor-hint");
+    expect(ewarEffectDescriber.webHint).toHaveBeenCalled();
+    expect(ewarEffectDescriber.disruptorHint).toHaveBeenCalled();
   });
 
   test("toggling a module refreshes the summary title", () => {
@@ -709,20 +713,19 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    ewarEffectDescriber.webDescription.mockReturnValue("web-active");
+    ewarEffectDescriber.webHint.mockReturnValue("web-active");
     const section = webSection(popup)!;
     section.children[1].children[0].trigger("click");
     expect(getFake(document, "attacker-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
   });
 
-  test("updateSummaries refreshes both sides and uses the current distance", () => {
-    const { controller, events, ewarEffectDescriber } = buildEwarController();
+  test("updateSummaries refreshes both sides", () => {
+    const { controller, ewarEffectDescriber } = buildEwarController();
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
     controller.setLoadout("target", { webs: [WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    events.emitDistanceChanged(12_000);
-    ewarEffectDescriber.webDescription.mockClear();
+    ewarEffectDescriber.webHint.mockClear();
 
     controller.updateSummaries();
-    expect(ewarEffectDescriber.webDescription).toHaveBeenCalledTimes(2);
+    expect(ewarEffectDescriber.webHint).toHaveBeenCalledTimes(2);
   });
 });

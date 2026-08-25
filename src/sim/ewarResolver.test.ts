@@ -28,6 +28,15 @@ const TRACKING_SCRIPT: DisruptionScriptSpec = {
   name: "Tracking Speed Disruption Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0,
 };
 
+const TD: TrackingDisruptorSpec = {
+  moduleName: "Tracking Disruptor II",
+  optimal: 48000,
+  falloff: 24000,
+  disruption: 0.1719,
+  defaultScript: undefined,
+  overloadStrengthBonusPercent: 20,
+};
+
 function webProjection(specs: readonly StasisWebSpec[], overloaded = false): EwarProjection {
   const loadout = { webs: specs, grapplers: [], disruptors: [], scramblers: [], scripts: [] };
   const activation = { webs: specs.map(() => ({ active: true, overloaded })), grapplers: [], disruptors: [], scramblers: [] };
@@ -152,7 +161,7 @@ describe("EwarResolverImpl", () => {
   });
 
   describe("disruptedTurret", () => {
-    const td: TrackingDisruptorSpec = {
+    const TD: TrackingDisruptorSpec = {
       moduleName: "Tracking Disruptor II",
       optimal: 48000,
       falloff: 24000,
@@ -162,7 +171,7 @@ describe("EwarResolverImpl", () => {
     };
 
     test("unscripted TD reduces all three attributes at 10 km", () => {
-      const projection = disruptorProjection([td]);
+      const projection = disruptorProjection([TD]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const factor = 1 - 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking * factor, 10);
@@ -172,7 +181,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("optimal-range script doubles range penalty and leaves tracking", () => {
-      const projection = disruptorProjection([{ ...td, defaultScript: OPTIMAL_SCRIPT }]);
+      const projection = disruptorProjection([{ ...TD, defaultScript: OPTIMAL_SCRIPT }]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking, 10);
@@ -182,7 +191,7 @@ describe("EwarResolverImpl", () => {
 
     test("disruptor without activation defaults to its spec script", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [{ ...td, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], scripts: [] },
+        loadout: { webs: [], grapplers: [], disruptors: [{ ...TD, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], scripts: [] },
       };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
@@ -191,7 +200,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("tracking-speed script doubles tracking penalty and leaves range", () => {
-      const projection = disruptorProjection([{ ...td, defaultScript: TRACKING_SCRIPT }]);
+      const projection = disruptorProjection([{ ...TD, defaultScript: TRACKING_SCRIPT }]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const trackingFactor = 1 - 2 * 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking * trackingFactor, 10);
@@ -200,7 +209,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("TD distance curve halves effect at optimal + falloff and drops beyond", () => {
-      const unscripted = disruptorProjection([td]);
+      const unscripted = disruptorProjection([TD]);
       const atOptimal = resolver.disruptedTurret(defaultTurret, unscripted, 48000);
       const atOptimalPlusFalloff = resolver.disruptedTurret(defaultTurret, unscripted, 72000);
       const far = resolver.disruptedTurret(defaultTurret, unscripted, 200000);
@@ -212,8 +221,8 @@ describe("EwarResolverImpl", () => {
     });
 
     test("two TDs on the same attribute stack-penalize strongest-first", () => {
-      const weak = { ...td, disruption: 0.15 };
-      const strong = { ...td, disruption: 0.1719 };
+      const weak = { ...TD, disruption: 0.15 };
+      const strong = { ...TD, disruption: 0.1719 };
       const projection = disruptorProjection([weak, strong]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const factor1 = 1 - 0.1719;
@@ -224,15 +233,15 @@ describe("EwarResolverImpl", () => {
     });
 
     test("overload raises disruption strength by 20%", () => {
-      const projection = disruptorProjection([td], true);
+      const projection = disruptorProjection([TD], true);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const factor = 1 - 0.1719 * 1.2;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking * factor, 10);
     });
 
     test("overloading one disruptor applies the strength bonus only to that module", () => {
-      const base: TrackingDisruptorSpec = { ...td, disruption: 0.15 };
-      const heated: TrackingDisruptorSpec = td;
+      const base: TrackingDisruptorSpec = { ...TD, disruption: 0.15 };
+      const heated: TrackingDisruptorSpec = TD;
       const loadout = { webs: [], grapplers: [], disruptors: [base, heated], scramblers: [], scripts: [] };
       const activation = { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: [] };
       const projection: EwarProjection = { loadout, activation };
@@ -246,7 +255,7 @@ describe("EwarResolverImpl", () => {
 
     test("falloff channel is driven by the script falloff multiplier", () => {
       const falloffScript: DisruptionScriptSpec = { name: "Falloff Script", trackingMultiplier: 0, optimalMultiplier: 0, falloffMultiplier: 2 };
-      const projection = disruptorProjection([{ ...td, defaultScript: falloffScript }]);
+      const projection = disruptorProjection([{ ...TD, defaultScript: falloffScript }]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const falloffFactor = 1 - 2 * 0.1719;
       expect(turret.tracking).toBeCloseTo(defaultTurret.tracking, 10);
@@ -255,7 +264,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("no script applies the base disruption to all three attributes", () => {
-      const unscripted: TrackingDisruptorSpec = { ...td, defaultScript: undefined };
+      const unscripted: TrackingDisruptorSpec = { ...TD, defaultScript: undefined };
       const projection = disruptorProjection([unscripted]);
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const factor = 1 - 0.1719;
@@ -273,6 +282,71 @@ describe("EwarResolverImpl", () => {
     test("undefined projection leaves turret untouched", () => {
       const turret = resolver.disruptedTurret(defaultTurret, undefined, 10000);
       expect(turret).toEqual(defaultTurret);
+    });
+  });
+
+  describe("speedMultiplierIgnoringRange", () => {
+    test("matches the in-range speed multiplier for a single web", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 };
+      const projection = webProjection([web]);
+      expect(resolver.speedMultiplierIgnoringRange(projection)).toBeCloseTo(resolver.speedMultiplier(projection, 0), 10);
+    });
+
+    test("stacks multiple webs the same way as at point-blank range", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 };
+      const projection = webProjection([web, web]);
+      expect(resolver.speedMultiplierIgnoringRange(projection)).toBeCloseTo(resolver.speedMultiplier(projection, 0), 10);
+    });
+
+    test("skips inactive modules", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] } };
+      expect(resolver.speedMultiplierIgnoringRange(projection)).toBe(1);
+    });
+
+    test("overloaded web applies the same speed penalty at point-blank", () => {
+      const web: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
+      const projection = webProjection([web], true);
+      expect(resolver.speedMultiplierIgnoringRange(projection)).toBeCloseTo(resolver.speedMultiplier(projection, 0), 10);
+    });
+  });
+
+  describe("disruptedTurretIgnoringRange", () => {
+    test("matches the point-blank disruption for a single TD", () => {
+      const projection = disruptorProjection([TD]);
+      expect(resolver.disruptedTurretIgnoringRange(defaultTurret, projection)).toEqual(resolver.disruptedTurret(defaultTurret, projection, 0));
+    });
+
+    test("stacks multiple disruptors like at point-blank range", () => {
+      const projection = disruptorProjection([TD, TD]);
+      expect(resolver.disruptedTurretIgnoringRange(defaultTurret, projection)).toEqual(resolver.disruptedTurret(defaultTurret, projection, 0));
+    });
+
+    test("skips inactive disruptors", () => {
+      const projection: EwarProjection = {
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], scripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: [] },
+      };
+      expect(resolver.disruptedTurretIgnoringRange(defaultTurret, projection)).toEqual(defaultTurret);
+    });
+
+    test("overloaded disruptor applies a stronger tracking penalty", () => {
+      const projection = disruptorProjection([TD], true);
+      const turret = resolver.disruptedTurretIgnoringRange(defaultTurret, projection);
+      const expected = defaultTurret.tracking * (1 - 0.1719 * 1.2);
+      expect(turret.tracking).toBeCloseTo(expected, 10);
+    });
+  });
+
+  describe("propulsionSuppressedIgnoringRange", () => {
+    test("returns true when any scrambler is active", () => {
+      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }]);
+      expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(true);
+    });
+
+    test("returns false when all scramblers are inactive", () => {
+      const projection = scramblerProjection([{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }], false, false);
+      expect(resolver.propulsionSuppressedIgnoringRange(projection)).toBe(false);
     });
   });
 

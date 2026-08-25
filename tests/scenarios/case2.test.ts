@@ -5,7 +5,7 @@ import { PredictiveAutopilot } from "../../src/sim/predictiveAutopilot";
 import { SimulationImpl } from "../../src/sim/simulation";
 import type { ShipConfig, SimConfig } from "../../src/sim/types";
 
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false };
 
 describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
   test("predictive attacker reaches and holds within 15% of 2km", () => {

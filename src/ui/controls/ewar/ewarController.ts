@@ -35,7 +35,6 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
-  private distance = 0;
 
   constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
@@ -54,7 +53,6 @@ export class EwarControllerImpl implements EwarController {
     this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
     this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
-    this.events.onDistanceChanged((d) => { this.distance = d; });
     this.render();
   }
 
@@ -210,21 +208,20 @@ export class EwarControllerImpl implements EwarController {
       return;
     }
     const projection: EwarProjection = { loadout: state.loadout, activation: state.activation };
-    const distance = this.distance;
     const webTotal = state.loadout.webs.length;
     const webActive = state.activation.webs.filter((w) => w.active).length;
-    const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webDescription(projection, distance) : "";
+    const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webHint(projection) : "";
     if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal, webTitle);
     const grapplerTotal = state.loadout.grapplers.length;
     const grapplerActive = state.activation.grapplers.filter((g) => g.active).length;
-    const grapplerTitle = grapplerTotal > 0 ? this.ewarEffectDescriber.grapplerDescription(projection, distance) : "";
+    const grapplerTitle = grapplerTotal > 0 ? this.ewarEffectDescriber.grapplerHint(projection) : "";
     if (grapplerTotal > 0) this.appendSummaryItem(summary, state.loadout.grapplers[0].moduleName, grapplerActive, grapplerTotal, grapplerTitle);
     const disruptorTotal = state.loadout.disruptors.length;
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
-    const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorDescription(projection, distance) : "";
+    const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorHint(projection) : "";
     if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal, disruptorTitle);
     const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
-    const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerDescription(projection, distance) : "";
+    const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
     if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleName, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
   }
 

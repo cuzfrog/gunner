@@ -35,6 +35,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "ewar.hover.falloff": { zh: "衰减距离" },
   "ewar.hover.scrambler": { zh: "关闭微曲" },
   "ewar.hover.outOfRange": { zh: "在此距离无效果" },
+  "ewar.hint.range": { zh: "射程 {0}" },
   "label.booster.computer": { zh: "跟踪计算机" },
   "title.booster.empty": { zh: "未装配跟踪计算机" },
   "booster.script.none": { zh: "无" },

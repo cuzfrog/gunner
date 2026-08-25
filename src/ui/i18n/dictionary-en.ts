@@ -35,6 +35,7 @@ export const EN: LanguageSlice<"en"> = {
   "ewar.hover.falloff": { en: "Falloff" },
   "ewar.hover.scrambler": { en: "Disables MWD" },
   "ewar.hover.outOfRange": { en: "No effect at this range" },
+  "ewar.hint.range": { en: "range {0}" },
   "label.booster.computer": { en: "Tracking Computers" },
   "title.booster.empty": { en: "No tracking computers fitted" },
   "booster.script.none": { en: "None" },

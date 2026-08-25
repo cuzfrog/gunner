@@ -41,9 +41,13 @@ function buildController(now: () => number = () => 0): {
   });
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
+    webHint: vi.fn(() => "web-hint"),
     grapplerDescription: vi.fn(() => "grappler-title"),
+    grapplerHint: vi.fn(() => "grappler-hint"),
     disruptorDescription: vi.fn(() => "disruptor-title"),
+    disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
+    scramblerHint: vi.fn(() => "scrambler-hint"),
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");

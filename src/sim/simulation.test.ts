@@ -9,7 +9,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, disruptedTurret: (turret) => turret, propulsionSuppressed: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false };
 
 const scram: EwarProjection = {
   loadout: {
@@ -137,8 +137,11 @@ describe("SimulationImpl", () => {
   test("applies an active opponent web to reduce the ship's effective max speed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
+      speedMultiplierIgnoringRange: () => 1,
       disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
+      propulsionSuppressedIgnoringRange: () => false,
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -151,8 +154,11 @@ describe("SimulationImpl", () => {
   test("snapshot exposes the target's effective max speed under an in-range web", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => projection?.loadout.webs.length ? (distance <= 5000 ? 0.4 : 1) : 1,
+      speedMultiplierIgnoringRange: () => 1,
       disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
+      propulsionSuppressedIgnoringRange: () => false,
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const attackerWeb: EwarProjection = {
@@ -175,8 +181,11 @@ describe("SimulationImpl", () => {
   test("snapshot swaps to base max speed while propulsion is suppressed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1,
       disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = {
@@ -192,8 +201,11 @@ describe("SimulationImpl", () => {
   test("snapshot leaves max speed unchanged when the projection is out of range", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
+      speedMultiplierIgnoringRange: () => 1,
       disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
+      propulsionSuppressedIgnoringRange: () => false,
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = { ...simConfig("orbit"), initialDistance: 5001 };

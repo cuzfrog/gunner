@@ -151,8 +151,11 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     imageCatalog: asValue(mockImageCatalog()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
       speedMultiplier: vi.fn(() => 1),
+      speedMultiplierIgnoringRange: vi.fn(() => 1),
       disruptedTurret: vi.fn((turret) => turret),
+      disruptedTurretIgnoringRange: vi.fn((turret) => turret),
       propulsionSuppressed: vi.fn(() => false),
+      propulsionSuppressedIgnoringRange: vi.fn(() => false),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),

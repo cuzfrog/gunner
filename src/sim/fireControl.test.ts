@@ -63,7 +63,14 @@ function makeEvaluator(): {
 } {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
-  const ewarResolver = vi.mocked<EwarResolver>({ speedMultiplier: vi.fn(() => 1), disruptedTurret: vi.fn(() => effectiveTurret), propulsionSuppressed: vi.fn(() => false) });
+  const ewarResolver = vi.mocked<EwarResolver>({
+    speedMultiplier: vi.fn(() => 1),
+    speedMultiplierIgnoringRange: vi.fn(() => 1),
+    disruptedTurret: vi.fn(() => effectiveTurret),
+    disruptedTurretIgnoringRange: vi.fn(() => effectiveTurret),
+    propulsionSuppressed: vi.fn(() => false),
+    propulsionSuppressedIgnoringRange: vi.fn(() => false),
+  });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
   const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver, turretBoosterResolver });
   return { kinematics, hitChance, ewarResolver, turretBoosterResolver, evaluator };
