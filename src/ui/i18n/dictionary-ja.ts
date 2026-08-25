@@ -50,6 +50,7 @@ export const JA: LanguageSlice<"ja"> = {
   "mode.orbit": { ja: "周回" },
   "mode.keepAtRange": { ja: "距離を保つ" },
   "mode.midships": { ja: "正舵" },
+  "mode.maneuver": { ja: "機動" },
   "label.desiredRange": { ja: "希望射程" },
   "label.maneuverAggressivity": { ja: "機動の積極さ" },
   "hint.maneuverAggressivity": { ja: "設定距離への接近時の反応的ブレーキを制御します。" +

@@ -50,6 +50,7 @@ export const EN: LanguageSlice<"en"> = {
   "mode.orbit": { en: "Orbit" },
   "mode.keepAtRange": { en: "Keep at range" },
   "mode.midships": { en: "Midships" },
+  "mode.maneuver": { en: "Maneuver" },
   "label.desiredRange": { en: "Desired range" },
   "label.maneuverAggressivity": { en: "Maneuver aggressivity" },
   "hint.maneuverAggressivity": {

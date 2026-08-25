@@ -81,6 +81,15 @@ describe("I18nImpl", () => {
     expect(i18n.t("mode.midships")).toBe("正舵");
   });
 
+  test("translates the maneuver mode label in every language", () => {
+    const i18n = new I18nImpl();
+    expect(i18n.t("mode.maneuver")).toBe("Maneuver");
+    i18n.setLanguage("zh");
+    expect(i18n.t("mode.maneuver")).toBe("机动");
+    i18n.setLanguage("ja");
+    expect(i18n.t("mode.maneuver")).toBe("機動");
+  });
+
   test("returns the key when it is not in the dictionary", () => {
     const i18n = new I18nImpl();
     expect(i18n.t("unknown.key")).toBe("unknown.key");

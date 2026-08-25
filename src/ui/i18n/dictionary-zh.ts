@@ -50,6 +50,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "mode.orbit": { zh: "环绕" },
   "mode.keepAtRange": { zh: "保持距离" },
   "mode.midships": { zh: "正舵" },
+  "mode.maneuver": { zh: "机动" },
   "label.desiredRange": { zh: "期望距离" },
   "label.maneuverAggressivity": { zh: "机动激进程度" },
   "hint.maneuverAggressivity": {
