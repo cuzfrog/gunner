@@ -106,8 +106,8 @@ export class HintRotatorImpl implements HintRotator {
   }
 
   private setCategory(category: "hint" | "tip" | "lore"): void {
-    this.element.classList.remove("hint", "tip", "lore");
-    this.element.classList.add(category);
+    this.element.classList.remove("hint", "hints-slide-is-tip", "hints-slide-is-lore");
+    this.element.classList.add(categoryClass(category));
   }
 
   private slideText(index: number): string {
@@ -151,4 +151,10 @@ export class HintRotatorImpl implements HintRotator {
     void this.element.offsetHeight;
     this.element.style.transition = "";
   }
+}
+
+function categoryClass(category: "hint" | "tip" | "lore"): string {
+  if (category === "tip") return "hints-slide-is-tip";
+  if (category === "lore") return "hints-slide-is-lore";
+  return "hint";
 }

@@ -90,16 +90,16 @@ describe("HintRotator", () => {
     const rotator = createRotator(element, timer);
     const tip = "If you like this tool, may consider tip me in the game, thank you!";
     const expected = [
-      { text: tip, category: "tip" },
-      { text: `hint.prefix ${LORES[0].text.en}`, category: "lore" },
-      { text: `hint.prefix ${LORES[1].text.en}`, category: "lore" },
-      { text: `hint.prefix ${HINT_CANDIDATES[1].text.en}`, category: "hint" },
+      { text: tip, cls: "hints-slide-is-tip" },
+      { text: `hint.prefix ${LORES[0].text.en}`, cls: "hints-slide-is-lore" },
+      { text: `hint.prefix ${LORES[1].text.en}`, cls: "hints-slide-is-lore" },
+      { text: `hint.prefix ${HINT_CANDIDATES[1].text.en}`, cls: "hint" },
     ];
-    for (const { text, category } of expected) {
+    for (const { text, cls } of expected) {
       rotator.showNext();
       timer.runTimeout();
       expect(element.textContent).toBe(text);
-      expect(element.classList.add).toHaveBeenLastCalledWith(category);
+      expect(element.classList.add).toHaveBeenLastCalledWith(cls);
     }
   });
 
@@ -120,11 +120,11 @@ describe("HintRotator", () => {
         expect(element.classList.add).toHaveBeenLastCalledWith("hint");
       } else if (slot === 1) {
         expect(element.textContent).toBe(tip);
-        expect(element.classList.add).toHaveBeenLastCalledWith("tip");
+        expect(element.classList.add).toHaveBeenLastCalledWith("hints-slide-is-tip");
       } else {
         const lore = LORES[(Math.floor(i / 4) * 2 + (slot - 2)) % LORES.length];
         expect(element.textContent).toBe(`hint.prefix ${lore.text.en}`);
-        expect(element.classList.add).toHaveBeenLastCalledWith("lore");
+        expect(element.classList.add).toHaveBeenLastCalledWith("hints-slide-is-lore");
       }
     }
   });
@@ -155,7 +155,7 @@ describe("HintRotator", () => {
     rotator.showNext();
     expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", true);
     timer.runTimeout();
-    expect(element.classList.remove).toHaveBeenCalledWith("hint", "tip", "lore");
+    expect(element.classList.remove).toHaveBeenCalledWith("hint", "hints-slide-is-tip", "hints-slide-is-lore");
     expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", false);
     expect(element.style.transition).toBe("");
     expect(element.style.transform).toBe("");
