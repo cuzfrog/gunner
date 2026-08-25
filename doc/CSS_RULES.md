@@ -6,7 +6,7 @@ Goals: component-oriented, sandboxed (local by default, global only by exception
 
 ## 1. Classes only
 
-Never target IDs (e.g. `#legend`) in selectors; there is no case where an ID beats a class. Never target bare elements (`canvas`, `.footer h3`) except the global reset (`body`, `[hidden]`, `*`) and pseudo-elements of already-namespaced selectors. If you need to reach an element, give it a class.
+Never target IDs (e.g. `#legend`) in selectors; there is no case where an ID beats a class. Never target bare elements (`canvas`, `.footer h3`) except the global reset (`body`, `[hidden]`, `*`), the Layer 1 focus policy for `a, button, input, select`, and pseudo-elements of already-namespaced selectors. If you need to reach an element, give it a class.
 
 Exception: `label[for=...]` associations and `input[type="range"]` pseudo-elements are fine when scoped under a namespaced class.
 
@@ -39,7 +39,17 @@ Do not rely on child internals: `.ammo-popup span` also hits markup added inside
 
 Repeated surfaces (popups, icon buttons, disclosure triggers, field labels) become shared base classes applied in markup next to the component class: `class="popup ammo-popup"`, `class="icon-button fitting-eye"`. Base classes carry the shared chrome; component classes carry specifics. Never bind shared styles through grouped selector lists like `.a button, .b button, .c button {}` — every new control would have to join every list.
 
-Current base classes: `popup` (floating surface incl. scrollbar), `icon-button`, `trigger` (full-width disclosure row), `field-label`, `mono-value` (Share Tech Mono readout).
+Current base classes:
+
+- `popup` (and `popup-below`, `popup-above`, `popup-left`, `popup-right`, `popup-scroll`)
+- `trigger`
+- `btn` (and `btn-panel`, `btn-primary-text`)
+- `icon-button`
+- `input-field`
+- `field-label`
+- `mono`
+- `truncate`
+- `chevron`
 
 ## 8. Tokens only
 
@@ -47,7 +57,7 @@ All colors, z-index layers, shadows and fonts come from `:root` custom propertie
 
 ## 9. Inline styles are exceptions
 
-The only sanctioned inline styles are: the slider `--fill` custom property (set from JS), and measured positioning (px offsets computed at runtime). Animations, transforms, opacity, transitions belong in the stylesheet as `is-` state classes. If you write `el.style.<prop> = ...` for anything else, move it to CSS.
+The only sanctioned inline styles are: the slider `--fill` custom property (set from JS), and measured `left`/`top` positioning for the fitting preview popup. Animations, transforms, opacity, transitions belong in the stylesheet as `is-` state classes. If you write `el.style.<prop> = ...` for anything else, move it to CSS.
 
 ## 10. Specificity discipline
 

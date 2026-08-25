@@ -77,7 +77,7 @@
           </svg>
         </button>
         <div class="new-profile-popup popup popup-below popup-left" id="new-profile-popup" hidden role="dialog" aria-modal="true">
-          <input type="text" id="new-profile-name" class="new-profile-name mono" placeholder="Profile name"
+          <input type="text" id="new-profile-name" class="new-profile-name input-field mono" placeholder="Profile name"
                  data-i18n-placeholder="label.profileName" maxlength="32">
           <div class="confirm-buttons">
             <button type="button" id="new-profile-confirm" class="btn" data-i18n="button.confirm">Confirm</button>
@@ -158,14 +158,14 @@
             </span>
           </span>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" id="tracking" value="0.32" step="any" min="0">
+            <input type="number" class="input-field" id="tracking" value="0.32" step="any" min="0">
             <span class="effective-value mono" id="effective-tracking"></span>
           </span>
         </label>
-        <div class="form-field-group sigres-group">
+        <div class="form-field-group">
           <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
 
-          <select id="sigRes" hidden>
+          <select class="input-field" id="sigRes" hidden>
             <option value="S" selected>S (40 m)</option>
             <option value="M">M (125 m)</option>
             <option value="L">L (400 m)</option>
@@ -193,21 +193,21 @@
           <label>
             <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit input-with-unit-has-effective">
-              <input type="number" id="optimal" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="optimal" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-optimal"></span>
             </span>
           </label>
           <label>
             <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit input-with-unit-has-effective">
-              <input type="number" id="falloff" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="falloff" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-falloff"></span>
             </span>
           </label>
         </div>
 
         <div class="form-field-group ammo-group" id="attacker-ammo-field">
-          <button type="button" id="attacker-ammo-trigger" class="ammo-trigger trigger"
+          <button type="button" id="attacker-ammo-trigger" class="trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-ammo-popup"
                   data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
                   title="Select ammunition" aria-label="Select ammunition">
@@ -252,7 +252,7 @@
           </div>
           <div class="hull-input-row">
             <img id="attacker-ship-image" class="hull-ship-image" alt="" hidden>
-            <input type="text" id="attacker-hull" list="hull-options"
+            <input type="text" class="input-field" id="attacker-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
             <button type="button" id="attacker-fitting-trigger" class="icon-button"
@@ -275,7 +275,7 @@
         </div>
 
         <div class="form-field-group ewar-group" id="attacker-ewar-field">
-          <button type="button" id="attacker-ewar-trigger" class="ewar-trigger trigger"
+          <button type="button" id="attacker-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
                   aria-describedby="attacker-ewar-summary" disabled>
             <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
@@ -286,7 +286,7 @@
         </div>
 
         <div class="form-field-group booster-group" id="attacker-booster-field">
-          <button type="button" id="attacker-booster-trigger" class="ewar-trigger booster-trigger"
+          <button type="button" id="attacker-booster-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-booster-popup"
                   aria-describedby="attacker-booster-summary" disabled>
             <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
@@ -298,7 +298,7 @@
 
         <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
-          <select id="attacker-propulsion" hidden disabled></select>
+          <select class="input-field" id="attacker-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
             <div class="segmented-control propulsion-selector" id="attacker-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
             <button type="button" id="attacker-propulsion-gear" class="propulsion-gear btn icon-button" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="attacker-propulsion-variants" disabled>
@@ -310,7 +310,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <input type="number" class="input-field" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-attacker-speed"></span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
@@ -320,14 +320,14 @@
           <label>
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
-              <input type="number" id="attacker-mass" value="1200000" step="any" min="0">
+              <input type="number" class="input-field" id="attacker-mass" value="1200000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
             <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
-              <input type="number" id="attacker-inertia" value="3" step="any" min="0">
+              <input type="number" class="input-field" id="attacker-inertia" value="3" step="any" min="0">
               <span class="input-suffix mono" id="attacker-align-time" aria-hidden="true">5.0s</span>
             </span>
           </label>
@@ -335,7 +335,7 @@
         <div class="form-field-row">
           <div class="form-field-group">
             <span class="field-label truncate" data-i18n="label.mode">Mode</span>
-            <select id="attacker-mode" class="turret-mode-select"
+            <select id="attacker-mode" class="turret-mode-select input-field"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="keepAtRange" selected data-i18n="mode.keepAtRange">Keep at range</option>
               <option value="orbit" data-i18n="mode.orbit">Orbit</option>
@@ -345,7 +345,7 @@
           <label>
             <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
-              <input type="number" id="attacker-range" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="attacker-range" value="5000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
@@ -364,7 +364,7 @@
           <input type="range" id="maneuver-aggressivity-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
         </div>
         <div class="form-field-group skill-section skill-select" id="attacker-skill-field">
-          <button type="button" class="skill-trigger trigger" id="attacker-skill-trigger"
+          <button type="button" class="trigger" id="attacker-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="attacker-skill-popup">
             <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
@@ -372,7 +372,7 @@
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
           </button>
-          <select id="attacker-skills" hidden></select>
+          <select class="input-field" id="attacker-skills" hidden></select>
           <div class="skill-popup popup popup-above popup-left popup-right" id="attacker-skill-popup" hidden>
             <div class="skill-tuner" id="attacker-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
           </div>
@@ -389,7 +389,7 @@
           <img class="portrait-image" alt="">
           <div class="portrait-effects"></div>
         </div>
-        <canvas id="scene" width="800" height="600"></canvas>
+        <canvas id="scene" class="sim-canvas" width="800" height="600"></canvas>
 
         <div class="control-bar">
           <div class="control-bar-playback">
@@ -415,7 +415,7 @@
 
           <div class="control-bar-field control-bar-speed">
             <label for="sim-speed" data-i18n="label.simulationSpeed">Speed</label>
-            <select id="sim-speed">
+            <select class="input-field" id="sim-speed">
               <option value="0.25">0.25x</option>
               <option value="0.5">0.5x</option>
               <option value="1">1x</option>
@@ -460,7 +460,7 @@
           </div>
           <div class="hull-input-row">
             <img id="target-ship-image" class="hull-ship-image" alt="" hidden>
-            <input type="text" id="target-hull" list="hull-options"
+            <input type="text" class="input-field" id="target-hull" list="hull-options"
                    autocomplete="off" autocapitalize="off" spellcheck="false"
                    data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
             <button type="button" id="target-fitting-trigger" class="icon-button"
@@ -483,7 +483,7 @@
         </div>
 
         <div class="form-field-group ewar-group" id="target-ewar-field">
-          <button type="button" id="target-ewar-trigger" class="ewar-trigger trigger"
+          <button type="button" id="target-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
                   aria-describedby="target-ewar-summary" disabled>
             <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
@@ -494,7 +494,7 @@
         </div>
 
         <div class="form-field-group booster-group" id="target-booster-field">
-          <button type="button" id="target-booster-trigger" class="ewar-trigger booster-trigger"
+          <button type="button" id="target-booster-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-booster-popup"
                   aria-describedby="target-booster-summary" disabled>
             <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
@@ -517,21 +517,21 @@
                       aria-label="About initial distance">?</button>
             </span>
             <span class="input-with-unit">
-              <input type="number" id="initial-distance" value="20000" step="any" min="1">
+              <input type="number" class="input-field" id="initial-distance" value="20000" step="any" min="1">
               <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </div>
           <label>
             <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
-              <input type="number" id="target-sig" value="40" step="any" min="1">
+              <input type="number" class="input-field" id="target-sig" value="40" step="any" min="1">
               <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
         <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
-          <select id="target-propulsion" hidden disabled></select>
+          <select class="input-field" id="target-propulsion" hidden disabled></select>
           <div class="propulsion-selector-wrapper">
             <div class="segmented-control propulsion-selector" id="target-propulsion-options" role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
             <button type="button" id="target-propulsion-gear" class="propulsion-gear btn icon-button" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls="target-propulsion-variants" disabled>
@@ -543,7 +543,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <input type="number" class="input-field" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-target-speed"></span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
@@ -553,14 +553,14 @@
           <label>
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
-              <input type="number" id="target-mass" value="10000000" step="any" min="0">
+              <input type="number" class="input-field" id="target-mass" value="10000000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
           <label>
             <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
-              <input type="number" id="target-inertia" value="0.45" step="any" min="0">
+              <input type="number" class="input-field" id="target-inertia" value="0.45" step="any" min="0">
               <span class="input-suffix mono" id="target-align-time" aria-hidden="true">6.2s</span>
             </span>
           </label>
@@ -568,7 +568,7 @@
         <div class="form-field-row">
           <div class="form-field-group">
             <span class="field-label truncate" data-i18n="label.mode">Mode</span>
-            <select id="target-mode" class="turret-mode-select"
+            <select id="target-mode" class="turret-mode-select input-field"
                     data-i18n-aria-label="label.mode" aria-label="Mode">
               <option value="orbit" selected data-i18n="mode.orbit">Orbit</option>
               <option value="keepAtRange" data-i18n="mode.keepAtRange">Keep at range</option>
@@ -578,13 +578,13 @@
           <label>
             <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
-              <input type="number" id="target-range" value="5000" step="any" min="0">
+              <input type="number" class="input-field" id="target-range" value="5000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
         <div class="form-field-group skill-section skill-select" id="target-skill-field">
-          <button type="button" class="skill-trigger trigger" id="target-skill-trigger"
+          <button type="button" class="trigger" id="target-skill-trigger"
                   aria-haspopup="true" aria-expanded="false" aria-controls="target-skill-popup">
             <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
             <span class="skill-summary-row">
@@ -592,7 +592,7 @@
               <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
             </span>
           </button>
-          <select id="target-skills" hidden></select>
+          <select class="input-field" id="target-skills" hidden></select>
           <div class="skill-popup popup popup-above popup-left popup-right" id="target-skill-popup" hidden>
             <div class="skill-tuner" id="target-skill-options" role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
           </div>
@@ -602,12 +602,12 @@
 
     <footer class="app-footer">
       <div class="app-footer-about">
-        <h3 data-i18n="footer.about.heading">About Gunner</h3>
+        <h3 class="footer-heading" data-i18n="footer.about.heading">About Gunner</h3>
         <p data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
       </div>
 
       <div class="app-footer-mechanism" data-accent="teal">
-        <h3 data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
+        <h3 class="footer-heading" data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
         <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.kinematics.link">Velocity</span>
@@ -616,7 +616,7 @@
       </div>
 
       <div class="app-footer-mechanism" data-accent="blue">
-        <h3 data-i18n="footer.mech.speed.heading">Speed</h3>
+        <h3 class="footer-heading" data-i18n="footer.mech.speed.heading">Speed</h3>
         <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.speed.link">Propulsion</span>
@@ -625,7 +625,7 @@
       </div>
 
       <div class="app-footer-mechanism" data-accent="orange">
-        <h3 data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
+        <h3 class="footer-heading" data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
         <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.hitChance.link">Turret mechanics</span>

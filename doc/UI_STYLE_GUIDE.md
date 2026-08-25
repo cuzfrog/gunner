@@ -4,9 +4,11 @@ This guide defines the visual language of Gunner's web UI. Follow it when adding
 
 Sources of truth:
 
-- `public/styles.css` — all DOM styling (single stylesheet, no inline styles except the slider `--fill` custom property)
+- `public/styles.css` — all DOM styling (single stylesheet)
 - `public/index.html` — markup structure and class naming
+- `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
+- Layer 2 of `public/styles.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `mono`, `popup`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 
@@ -103,7 +105,7 @@ State rules: hover swaps border/text to teal unless the control uses an orange a
 
 ### Inputs
 
-Panel inputs/selects: full width, inset bg, mono font 14px, centered text via `text-align-last` where appropriate. Number inputs hide spinners; unit suffixes use `.input-with-unit` + `.input-suffix` (absolute-positioned teal mono text). Selects replace native arrow with `--dropdown-arrow` SVG data-uri; disabled selects swap to `--dropdown-arrow-disabled`.
+All text, number, and select controls use the `.input-field` primitive: full width, inset bg, mono font 14px, centered text for selects via `text-align-last` where appropriate. Number inputs hide spinners; unit suffixes use `.input-with-unit` + `.input-suffix` (absolute-positioned teal mono text). Selects replace native arrow with `--dropdown-arrow` SVG data-uri; disabled selects swap to `--dropdown-arrow-disabled`.
 
 Validation: `.hull-invalid` / `.error` classes apply `--danger-red`.
 
@@ -119,11 +121,11 @@ Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, 
 
 ### Result cards
 
-`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.hit-chance`) gets a teal border, larger value, and JS-driven semantic color.
+`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.result-card-hit-chance`) gets a teal border, larger value, and hit-chance color classes (`is-optimal`, `is-good`, `is-caution`, `is-warn`, `is-danger`) driven by `hitChanceClass`.
 
 ## Interaction & accessibility conventions
 
-- Focus: always visible, never removed. Inner controls use `outline: 1px solid var(--accent-teal); outline-offset: -1px`; standalone links/outer triggers use `outline-offset: 2px`. New interactive elements must be added to the matching `:focus-visible` selector group.
+- Focus: always visible, never removed. Layer 1 defines a single `:where(...)` focus policy that gives every interactive element an `outline: 1px solid var(--accent-teal)`. Per-component rules only adjust `outline-offset` (`-1px` for inputs and inset controls, `2px` for buttons, triggers, links, and icon buttons).
 - ARIA: popups follow the trigger pattern (`aria-haspopup`, `aria-expanded`, `aria-controls`); selection uses `aria-selected` / `aria-current="true"` (styled with the teal left-border treatment); toggles use `aria-pressed`.
 - All user-facing strings go through i18n (`data-i18n*` attributes), including `title` and `aria-label`.
 - Icons are inline `<svg><use href="icons.svg#...">` sprites with `fill="currentColor"` so they inherit text color; `display: block` inside buttons.
@@ -132,8 +134,11 @@ Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, 
 
 Keep JS-side styling minimal and token-aligned:
 
-- Class toggling only (`active`, `unsaved`, `invalid`, `error`, `hidden`) — all visual states live in CSS.
-- Allowed exceptions: setting the `--fill` custom property on sliders, hit-chance semantic color, and canvas drawing colors from the `COLORS` const which must mirror the CSS tokens above.
+- Class toggling only (`active`, `unsaved`, `invalid`, `error`, `hidden`, and `is-*` state classes) — all visual states live in CSS.
+- Allowed inline-style exceptions:
+  - Setting `--fill` on `input[type="range"]` sliders.
+  - Measured `left`/`top` positioning for the fitting preview popup.
+- Canvas drawing colors come from `src/ui/renderer.ts` `COLORS`, which must mirror the CSS tokens above.
 
 ## Layout & responsive
 

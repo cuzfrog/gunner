@@ -47,6 +47,14 @@ export function hitChanceColor(chance: number): string {
   return PALETTE.dangerRed;
 }
 
+export function hitChanceClass(chance: number): string {
+  if (chance >= 0.9) return "is-optimal";
+  if (chance >= 0.5) return "is-good";
+  if (chance >= 0.25) return "is-caution";
+  if (chance >= 0.05) return "is-warn";
+  return "is-danger";
+}
+
 export function propulsionOptionLabel(module: PropulsionModule): string {
   return module.id.replace(/^.*-/, "").toUpperCase();
 }

@@ -2,8 +2,23 @@ import { Vec2, type ShipState } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeReadoutEls(): ReadoutEls {
-  const make = (): HTMLElement =>
-    ({ textContent: "", style: { color: "" } } as unknown as HTMLElement);
+  const make = (): HTMLElement => {
+    const classes: string[] = [];
+    return {
+      textContent: "",
+      style: { color: "" },
+      classList: {
+        add: (...names: string[]): number => classes.push(...names),
+        remove: (...names: string[]): void => {
+          for (const n of names) {
+            const i = classes.indexOf(n);
+            if (i >= 0) classes.splice(i, 1);
+          }
+        },
+        contains: (name: string): boolean => classes.includes(name),
+      },
+    } as unknown as HTMLElement;
+  };
   return {
     resDistance: make(),
     resTransversal: make(),
@@ -99,12 +114,12 @@ describe("EngagementReadout", () => {
     const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0.95, trackingTerm: 0, rangeTerm: 0 }, T);
-    expect(els.resHit.style.color).toBe("#9cc954");
+    expect(els.resHit.classList.contains("is-optimal")).toBe(true);
 
     readout.update(frame, { chance: 0.3, trackingTerm: 0, rangeTerm: 0 }, T);
-    expect(els.resHit.style.color).toBe("#fce447");
+    expect(els.resHit.classList.contains("is-caution")).toBe(true);
 
     readout.update(frame, { chance: 0.04, trackingTerm: 0, rangeTerm: 0 }, T);
-    expect(els.resHit.style.color).toBe("#d81f27");
+    expect(els.resHit.classList.contains("is-danger")).toBe(true);
   });
 });

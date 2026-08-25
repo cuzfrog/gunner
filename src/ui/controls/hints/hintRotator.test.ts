@@ -69,7 +69,7 @@ describe("HintRotator", () => {
     const timer = new ManualTimer();
     createRotator(element, timer);
     expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
-    expect(element.classList.add).toHaveBeenCalledWith("hint");
+    expect(element.classList.add).toHaveBeenCalledWith("hints-slide-is-hint");
   });
 
   test("refresh updates text when language changes", () => {
@@ -93,13 +93,16 @@ describe("HintRotator", () => {
       { text: tip, cls: "hints-slide-is-tip" },
       { text: `hint.prefix ${LORES[0].text.en}`, cls: "hints-slide-is-lore" },
       { text: `hint.prefix ${LORES[1].text.en}`, cls: "hints-slide-is-lore" },
-      { text: `hint.prefix ${HINT_CANDIDATES[1].text.en}`, cls: "hint" },
+      { text: `hint.prefix ${HINT_CANDIDATES[1].text.en}`, cls: "hints-slide-is-hint" },
     ];
     for (const { text, cls } of expected) {
       rotator.showNext();
+      expect(element.classList.remove).toHaveBeenLastCalledWith("is-active-hint");
+      expect(element.classList.add).toHaveBeenLastCalledWith("is-exiting");
       timer.runTimeout();
       expect(element.textContent).toBe(text);
-      expect(element.classList.add).toHaveBeenLastCalledWith(cls);
+      expect(element.classList.add).toHaveBeenCalledWith(cls);
+      expect(element.classList.add).toHaveBeenLastCalledWith("is-active-hint");
     }
   });
 
@@ -113,19 +116,21 @@ describe("HintRotator", () => {
     for (let i = 1; i < total; i++) {
       const slot = i % 4;
       rotator.showNext();
+      expect(element.classList.add).toHaveBeenLastCalledWith("is-exiting");
       timer.runTimeout();
       if (slot === 0) {
         hintIndex = (hintIndex + 1) % HINT_CANDIDATES.length;
         expect(element.textContent).toBe(`hint.prefix ${HINT_CANDIDATES[hintIndex].text.en}`);
-        expect(element.classList.add).toHaveBeenLastCalledWith("hint");
+        expect(element.classList.add).toHaveBeenCalledWith("hints-slide-is-hint");
       } else if (slot === 1) {
         expect(element.textContent).toBe(tip);
-        expect(element.classList.add).toHaveBeenLastCalledWith("hints-slide-is-tip");
+        expect(element.classList.add).toHaveBeenCalledWith("hints-slide-is-tip");
       } else {
         const lore = LORES[(Math.floor(i / 4) * 2 + (slot - 2)) % LORES.length];
         expect(element.textContent).toBe(`hint.prefix ${lore.text.en}`);
-        expect(element.classList.add).toHaveBeenLastCalledWith("hints-slide-is-lore");
+        expect(element.classList.add).toHaveBeenCalledWith("hints-slide-is-lore");
       }
+      expect(element.classList.add).toHaveBeenLastCalledWith("is-active-hint");
     }
   });
 
@@ -148,18 +153,19 @@ describe("HintRotator", () => {
     expect(element.textContent).toBe("hint.prefix You can import a ship fitting from clipboard.");
   });
 
-  test("showNext applies and removes exit class and snaps below before sliding in", () => {
+  test("showNext applies and removes state classes in sequence", () => {
     const element = new FakeElement() as unknown as HTMLElement;
     const timer = new ManualTimer();
     const rotator = createRotator(element, timer);
     rotator.showNext();
-    expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", true);
+    expect(element.classList.remove).toHaveBeenCalledWith("is-active-hint");
+    expect(element.classList.add).toHaveBeenLastCalledWith("is-exiting");
     timer.runTimeout();
-    expect(element.classList.remove).toHaveBeenCalledWith("hint", "hints-slide-is-tip", "hints-slide-is-lore");
-    expect(element.classList.toggle).toHaveBeenCalledWith("hint-exit", false);
-    expect(element.style.transition).toBe("");
-    expect(element.style.transform).toBe("");
-    expect(element.style.opacity).toBe("");
+    expect(element.classList.remove).toHaveBeenCalledWith("hints-slide-is-hint", "hints-slide-is-tip", "hints-slide-is-lore");
+    expect(element.classList.add).toHaveBeenCalledWith("is-entering");
+    expect(element.classList.remove).toHaveBeenCalledWith("is-exiting");
+    expect(element.classList.remove).toHaveBeenLastCalledWith("is-entering");
+    expect(element.classList.add).toHaveBeenLastCalledWith("is-active-hint");
   });
 
   test("refresh updates tip text when current slide is a tip", () => {

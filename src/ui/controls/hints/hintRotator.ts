@@ -53,12 +53,15 @@ export class HintRotatorImpl implements HintRotator {
     const nextIndex = (this.currentIndex + 1) % total;
     this.currentIndex = nextIndex;
     this.isAnimating = true;
-    this.element.classList.toggle("hint-exit", true);
+    this.element.classList.remove("is-active-hint");
+    this.element.classList.add("is-exiting");
     this.timer.setTimeout(() => {
+      this.element.classList.remove("is-exiting");
+      this.element.classList.add("is-entering");
       this.renderSlide(nextIndex);
-      this.snapBelow();
-      this.element.style.transform = "";
-      this.element.style.opacity = "";
+      void this.element.offsetHeight;
+      this.element.classList.remove("is-entering");
+      this.element.classList.add("is-active-hint");
       this.isAnimating = false;
     }, 300);
   }
@@ -86,6 +89,7 @@ export class HintRotatorImpl implements HintRotator {
     }
     this.currentIndex = 0;
     this.renderSlide(0);
+    this.element.classList.add("is-active-hint");
   }
 
   private renderSlide(index: number): void {
@@ -106,7 +110,7 @@ export class HintRotatorImpl implements HintRotator {
   }
 
   private setCategory(category: "hint" | "tip" | "lore"): void {
-    this.element.classList.remove("hint", "hints-slide-is-tip", "hints-slide-is-lore");
+    this.element.classList.remove("hints-slide-is-hint", "hints-slide-is-tip", "hints-slide-is-lore");
     this.element.classList.add(categoryClass(category));
   }
 
@@ -143,18 +147,10 @@ export class HintRotatorImpl implements HintRotator {
     return groups * 4;
   }
 
-  private snapBelow(): void {
-    this.element.style.transition = "none";
-    this.element.classList.toggle("hint-exit", false);
-    this.element.style.transform = "translateY(100%)";
-    this.element.style.opacity = "0";
-    void this.element.offsetHeight;
-    this.element.style.transition = "";
-  }
 }
 
 function categoryClass(category: "hint" | "tip" | "lore"): string {
   if (category === "tip") return "hints-slide-is-tip";
   if (category === "lore") return "hints-slide-is-lore";
-  return "hint";
+  return "hints-slide-is-hint";
 }

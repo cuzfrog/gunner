@@ -1,6 +1,6 @@
 import type { EngagementFrame, HitChanceBreakdown } from "../../../sim";
 import { setText } from "../controlsDom";
-import { formatDistance, formatWithCommas, hitChanceColor } from "../controlsFormat";
+import { formatDistance, formatWithCommas, hitChanceClass } from "../controlsFormat";
 
 export interface ReadoutEls {
   readonly resDistance: HTMLElement;
@@ -34,6 +34,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(this.els.resTrackPen, `${formatWithCommas(trackPenalty, 1)}%`);
     setText(this.els.resRangePen, `${formatWithCommas(rangePenalty, 1)}%`);
     setText(this.els.resHit, `${formatWithCommas(hit.chance * 100, 1)}%`);
-    this.els.resHit.style.color = hitChanceColor(hit.chance);
+    this.els.resHit.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger");
+    this.els.resHit.classList.add(hitChanceClass(hit.chance));
   }
 }

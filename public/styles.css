@@ -419,16 +419,7 @@ body {
   cursor: not-allowed;
 }
 
-.side-panel .hull-hint {
-  display: block;
-  margin-top: 3px;
-  font-size: 10px;
-  color: var(--text-dim);
-}
 
-.side-panel .hull-hint:empty {
-  display: none;
-}
 
 .side-panel .hull-label-row {
   display: flex;
@@ -736,30 +727,8 @@ body {
   letter-spacing: 0.05em;
 }
 
-.side-panel .ammo-trigger .ammo-label {
-  display: block;
-  flex: 0 0 auto;
-  text-align: left;
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
-.side-panel .skill-trigger .skill-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-}
 
-.side-panel .ammo-trigger .ammo-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1 1 auto;
-  min-width: 0;
-}
 
 .skill-summary-row .skill-summary-value {
   font-size: 11px;
@@ -876,11 +845,6 @@ body {
   opacity: 0;
 }
 
-.paste-popup .paste-hint {
-  font-size: 11px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
 
 .canvas-frame {
   display: flex;
@@ -1245,10 +1209,6 @@ canvas {
   color: var(--accent-orange);
 }
 
-.hints-slide.hint-exit {
-  transform: translateY(-100%);
-  opacity: 0;
-}
 
 .footer-author-portrait {
   width: 36px;
@@ -1339,26 +1299,7 @@ canvas {
   text-align: right;
 }
 
-.info-hint {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--border-dim);
-  border-radius: 50%;
-  color: var(--text-dim);
-  font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
-  cursor: help;
-}
 
-.info-hint:hover {
-  color: var(--accent-teal);
-  border-color: var(--accent-teal);
-}
 
 :is(.side-panel, .control-bar) input[type="range"] {
   -webkit-appearance: none;
@@ -1718,57 +1659,12 @@ canvas {
   margin-bottom: 6px;
 }
 
-.ewar-trigger .ewar-label {
-  display: block;
-  flex: 1 1 auto;
-  text-align: left;
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
-.booster-trigger .booster-label {
-  display: block;
-  flex: 1 1 auto;
-  text-align: left;
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
-.ewar-trigger .ewar-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
 
-.ewar-trigger .ewar-summary-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
 
-.ewar-trigger .ewar-summary-icon {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
 
-.ewar-trigger .ewar-summary-icon[hidden] {
-  display: none;
-}
 
-.ewar-trigger .ewar-summary-count {
-  font-size: 11px;
-  color: var(--accent-teal);
-  text-transform: uppercase;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
 
 .ewar-popup { width: 100%; }
 
@@ -2180,3 +2076,171 @@ canvas {
   min-width: 80px;
 }
 
+
+
+/* ==== Layer 0/1 additions for current work ==== */
+
+.sim-canvas {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--bg-deep);
+}
+
+.footer-heading {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 0 0 6px;
+}
+
+.footer-author-line {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 5px 8px;
+  background-color: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  color: var(--text-primary);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 14px;
+  border-radius: 2px;
+  min-height: 28px;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+select.input-field {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: var(--dropdown-arrow);
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.input-field:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+}
+
+.input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+select.input-field:disabled {
+  color: var(--text-dim);
+  border-color: var(--accent-teal-12);
+  background-image: var(--dropdown-arrow-disabled);
+}
+
+.input-field.hull-invalid {
+  border-color: var(--danger-red);
+}
+
+.input-field[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input-field[type="number"]::-webkit-outer-spin-button,
+.input-field[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.hints-slide.is-entering {
+  transition: none;
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.hints-slide.is-active-hint {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.hints-slide.is-exiting {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.hints-slide.hints-slide-is-hint {
+  color: var(--accent-blue);
+}
+
+.result-card-value.is-optimal { color: var(--optimal-green); }
+.result-card-value.is-good { color: var(--accent-teal); }
+.result-card-value.is-caution { color: var(--warn-yellow); }
+.result-card-value.is-warn { color: var(--accent-orange); }
+.result-card-value.is-danger { color: var(--danger-red); }
+
+.ammo-label,
+.ewar-label,
+.booster-label {
+  display: block;
+  flex: 1 1 auto;
+  text-align: left;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hull-hint {
+  display: block;
+  font-size: 10px;
+  color: var(--text-dim);
+  min-height: 14px;
+}
+
+.paste-hint {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.info-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.ewar-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.ewar-summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ewar-summary-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ewar-summary-count {
+  font-size: 11px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  white-space: nowrap;
+}

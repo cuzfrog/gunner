@@ -4,19 +4,12 @@ const CSS_PATH = "public/styles.css";
 
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
-const ALLOWED_UNDEFINED = new Set<string>([
-  // Phase 2/3: grouping class with no rule yet.
-  "sigres-group",
-  // Phase 4: structural line wrapper with no rule yet.
-  "footer-author-line",
-  // Phase 4: hintRotator adds this category but the style is not yet isolated.
-  "hint",
-]);
+const ALLOWED_UNDEFINED = new Set<string>([]);
 
 // CSS classes not referenced by the literal scan (built dynamically or stale rules pending removal).
 // Each entry must name the phase that removes it.
 const ALLOWED_ORPHAN = new Set<string>([
-  // Phase 2/3: built dynamically in rangeOverlayController.
+  // Phase 4: generated at runtime by rangeOverlayController for each overlay kind.
   "range-overlay-web",
   "range-overlay-grappler",
   "range-overlay-scrambler",
@@ -68,6 +61,7 @@ const APPROVED_PREFIXES = [
   "range-overlay",
   "combatant-portrait",
   "portrait",
+  "sim-canvas",
   "footer",
   "is",
   "icon",
