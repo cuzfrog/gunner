@@ -19,6 +19,7 @@ export interface CombatantSettings {
   readonly range: number;
   readonly mass: number;
   readonly inertia: number;
+  readonly aggressivity: number;
   readonly skillLevel?: SkillLevel;
   readonly overload?: boolean;
   readonly hull?: string;
@@ -31,8 +32,6 @@ export interface CombatantSettings {
   readonly sig?: number;
 }
 
-export type ShipBCombatantSettings = CombatantSettings & { readonly sig: number };
-
 export interface UserSettings {
   readonly version: typeof USER_SETTINGS_VERSION;
   readonly language: Language;
@@ -42,9 +41,8 @@ export interface UserSettings {
   readonly autoZoom: boolean;
   readonly zoomFactor: number;
   readonly display: DisplayPreferences;
-  readonly maneuverAggressivity?: number;
   readonly shipA: CombatantSettings;
-  readonly shipB: ShipBCombatantSettings;
+  readonly shipB: CombatantSettings;
   readonly tracking: number;
   readonly sigRes: SigResolutionClass;
   readonly optimal: number;
@@ -54,39 +52,26 @@ export interface UserSettings {
 }
 
 export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
-  if (side === "shipA") {
-    return {
-      speed: settings.shipASpeed,
-      mode: settings.shipAMode,
-      range: settings.shipARange,
-      mass: settings.shipAMass,
-      inertia: settings.shipAInertia,
-      skillLevel: settings.shipASkillLevel,
-      overload: settings.shipAOverload,
-      hull: settings.shipAHull,
-      propulsion: settings.shipAPropulsion,
-      fitting: settings.shipAFitting,
-      overrides: settings.shipAOverrides,
-      fittedHull: settings.shipAFittedHull,
-      ewarActivation: settings.shipAEwarActivation,
-      boosterActivation: settings.shipABoosterActivation,
-    };
-  }
   return {
-    speed: settings.shipBSpeed,
-    mode: settings.shipBMode,
-    range: settings.shipBRange,
-    mass: settings.shipBMass,
-    inertia: settings.shipBInertia,
-    skillLevel: settings.shipBSkillLevel,
-    overload: settings.shipBOverload,
-    hull: settings.shipBHull,
-    propulsion: settings.shipBPropulsion,
-    fitting: settings.shipBFitting,
-    overrides: settings.shipBOverrides,
-    fittedHull: settings.shipBFittedHull,
-    ewarActivation: settings.shipBEwarActivation,
-    boosterActivation: settings.shipBBoosterActivation,
-    sig: settings.shipBSig,
+    speed: sideValue(side, settings.shipASpeed, settings.shipBSpeed),
+    mode: sideValue(side, settings.shipAMode, settings.shipBMode),
+    range: sideValue(side, settings.shipARange, settings.shipBRange),
+    mass: sideValue(side, settings.shipAMass, settings.shipBMass),
+    inertia: sideValue(side, settings.shipAInertia, settings.shipBInertia),
+    aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
+    skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
+    overload: sideValue(side, settings.shipAOverload, settings.shipBOverload),
+    hull: sideValue(side, settings.shipAHull, settings.shipBHull),
+    propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
+    fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),
+    overrides: sideValue(side, settings.shipAOverrides, settings.shipBOverrides),
+    fittedHull: sideValue(side, settings.shipAFittedHull, settings.shipBFittedHull),
+    ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
+    boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
+    sig: sideValue(side, settings.shipASig, settings.shipBSig),
   };
+}
+
+function sideValue<T>(side: "shipA" | "shipB", shipAValue: T, shipBValue: T): T {
+  return side === "shipA" ? shipAValue : shipBValue;
 }

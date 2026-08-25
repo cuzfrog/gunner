@@ -12,13 +12,13 @@ export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "falloff",
   "shipAAmmo",
   "initialDistance",
-  "maneuverAggressivity",
 ] as const;
 
 export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipASpeed",
   "shipAMode",
   "shipARange",
+  "shipAAggressivity",
   "shipAMass",
   "shipAInertia",
   "shipASkillLevel",
@@ -34,6 +34,7 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBSpeed",
   "shipBMode",
   "shipBRange",
+  "shipBAggressivity",
   "shipBMass",
   "shipBInertia",
   "shipBSig",

@@ -1,5 +1,5 @@
 import { num, setText } from "../controlsDom";
-import { DEFAULT_GRID_BRIGHTNESS, aggressivityFromPosition, parseManeuverAggressivity, positionFromAggressivity } from "../controlsFormat";
+import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import type { I18n, Language } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../../appstate";
@@ -17,9 +17,6 @@ export interface PreferencesEls {
   readonly langJa: HTMLButtonElement;
   readonly gridBrightnessSlider: HTMLInputElement;
   readonly gridBrightnessValue: HTMLElement;
-  readonly maneuverAggressivity: HTMLInputElement;
-  readonly maneuverAggressivitySlider: HTMLInputElement;
-  readonly maneuverAggressivityValue: HTMLElement;
   readonly simSpeed: HTMLSelectElement;
   readonly canvasSettingsTrigger: HTMLButtonElement;
   readonly canvasSettingsPopup: HTMLElement;
@@ -42,10 +39,6 @@ export interface PreferencesController {
   setTrackingUnit(unit: TrackingUnit): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
-  onManeuverAggressivityChange(): void;
-  updateManeuverAggressivityDisplay(value?: number): void;
-  setManeuverAggressivityEnabled(enabled: boolean): void;
-  getManeuverAggressivity(): number;
   onZoomChange(): void;
   onAutoZoomChange(): void;
   updateZoomDisplay(value?: number): void;
@@ -100,7 +93,6 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
     this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
     this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
-    this.els.maneuverAggressivitySlider.addEventListener("input", () => this.onManeuverAggressivityChange());
     this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
     this.els.canvasSettingsTrigger.addEventListener("click", () => this.toggleCanvasSettings());
     this.els.zoomSlider.addEventListener("input", () => this.onZoomChange());
@@ -170,31 +162,6 @@ export class PreferencesControllerImpl implements PreferencesController {
     setText(output, `${Math.round(current * 100)}%`);
     if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${current * 100}%`);
   }
-
-  onManeuverAggressivityChange(): void {
-    const slider = this.els.maneuverAggressivitySlider;
-    const pos = Number.parseFloat(slider.value);
-    const value = Math.round(aggressivityFromPosition(pos) * 100) / 100;
-    this.updateManeuverAggressivityDisplay(value);
-    this.savePreferences();
-    this.events.emitConfigInvalidated(true);
-  }
-
-  updateManeuverAggressivityDisplay(value?: number): void {
-    const input = this.els.maneuverAggressivity;
-    const slider = this.els.maneuverAggressivitySlider;
-    const output = this.els.maneuverAggressivityValue;
-    const current = value ?? this.getManeuverAggressivity();
-    input.value = String(current);
-    setText(output, current.toFixed(2));
-    const pos = positionFromAggressivity(current);
-    slider.value = String(pos);
-    if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${pos * 100}%`);
-  }
-
-  setManeuverAggressivityEnabled(enabled: boolean): void { this.els.maneuverAggressivitySlider.disabled = !enabled; }
-
-  getManeuverAggressivity(): number { return parseManeuverAggressivity(this.els.maneuverAggressivity); }
 
   onZoomChange(): void {
     this.updateZoomDisplay();

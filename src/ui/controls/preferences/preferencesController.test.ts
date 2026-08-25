@@ -47,9 +47,6 @@ function fakeEls(): PreferencesEls {
     langJa: new FakeElement() as unknown as HTMLButtonElement,
     gridBrightnessSlider: new FakeElement() as unknown as HTMLInputElement,
     gridBrightnessValue: new FakeElement() as unknown as HTMLElement,
-    maneuverAggressivity: new FakeElement() as unknown as HTMLInputElement,
-    maneuverAggressivitySlider: new FakeElement() as unknown as HTMLInputElement,
-    maneuverAggressivityValue: new FakeElement() as unknown as HTMLElement,
     simSpeed: new FakeElement() as unknown as HTMLSelectElement,
     canvasSettingsTrigger: new FakeElement() as unknown as HTMLButtonElement,
     canvasSettingsPopup: new FakeElement() as unknown as HTMLElement,
@@ -278,24 +275,6 @@ describe("PreferencesController", () => {
     const calls = settingsStore.savePreferences.mock.calls;
     const [saved] = calls[calls.length - 1];
     expect(saved.gridBrightness).toBe(0.63);
-  });
-
-  test("onManeuverAggressivityChange round-trips between slider position and value", () => {
-    const { controller, els } = build();
-    els.maneuverAggressivitySlider.value = "0.25";
-    controller.onManeuverAggressivityChange();
-    expect(els.maneuverAggressivity.value).toBe("0.1");
-    expect(els.maneuverAggressivityValue.textContent).toBe("0.10");
-    expect(els.maneuverAggressivitySlider.value).toBe("0.25");
-    expect(els.maneuverAggressivitySlider.style).toHaveProperty("--fill", "25%");
-  });
-
-  test("setManeuverAggressivityEnabled toggles the slider enabled state", () => {
-    const { controller, els } = build();
-    controller.setManeuverAggressivityEnabled(false);
-    expect(els.maneuverAggressivitySlider.disabled).toBe(true);
-    controller.setManeuverAggressivityEnabled(true);
-    expect(els.maneuverAggressivitySlider.disabled).toBe(false);
   });
 
   test("capture returns current display preferences", () => {

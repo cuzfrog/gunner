@@ -12,8 +12,8 @@ import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
 import { normalizeLegacySettings, type LegacyUserSettings } from "./settingsCompat";
+import { toCombatantSettings, type CombatantSettings, type UserSettings as InternalUserSettings } from "./combatantSettings";
 import type { SettingGuards } from "./settingGuards";
-import type { CombatantSettings, ShipBCombatantSettings, UserSettings as InternalUserSettings } from "./combatantSettings";
 import {
   isLanguage,
   isNonNegative,
@@ -25,6 +25,7 @@ import {
   isOptionalFittingText,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
+  isOptionalPositive,
   isOptionalProfileParamOverrides,
   isOptionalSkillLevel,
   isPositive,
@@ -35,6 +36,9 @@ import {
 type UserSettingsWire = UserSettings & Partial<LegacyUserSettings>;
 
 const DEFAULT_TURRET_CHARGE_SIZE = 1;
+const AGGRESSIVITY_MIN = 0.01;
+const AGGRESSIVITY_MAX = 100;
+const AGGRESSIVITY_DEFAULT = 1;
 
 export class SettingsParser {
   private readonly ships: Ships;
@@ -57,6 +61,7 @@ export class SettingsParser {
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
       const record = parsed as Record<string, unknown>;
       normalizeLegacySettings(record);
+      this.normalizeAndDefaultAggressivity(record);
       this.migrateBoosterActivation(record);
       this.migrateEwarActivation(record);
       this.applyUserDefaults(record);
@@ -99,6 +104,7 @@ export class SettingsParser {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const record = { ...value } as Record<string, unknown>;
     normalizeLegacySettings(record);
+    this.normalizeAndDefaultAggressivity(record);
     this.migrateBoosterActivation(record);
     this.migrateEwarActivation(record);
     if (!this.isProfileSettings(record)) return null;
@@ -116,7 +122,7 @@ export class SettingsParser {
     return JSON.stringify(settings);
   }
 
-  private isProfileSettings(value: unknown): value is ProfileSettingsWire {
+  private isProfileSettings(value: unknown): value is UserSettingsWire {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     const s = value as Record<string, unknown>;
     return (
@@ -125,44 +131,16 @@ export class SettingsParser {
       this.guards.isSigResolutionClass(s.sigRes) &&
       isNonNegative(s.optimal) &&
       isNonNegative(s.falloff) &&
-      isNonNegative(s.shipASpeed) &&
-      this.guards.isAutopilotMode(s.shipAMode) &&
-      isNonNegative(s.shipARange) &&
-      isOptionalNonNegative(s.maneuverAggressivity) &&
-      isNonNegative(s.shipAMass) &&
-      isNonNegative(s.shipAInertia) &&
-      isOptionalSkillLevel(s.shipASkillLevel) &&
-      isOptionalBoolean(s.shipAOverload) &&
       isPositive(s.initialDistance) &&
-      isNonNegative(s.shipBSpeed) &&
-      this.guards.isAutopilotMode(s.shipBMode) &&
-      isNonNegative(s.shipBRange) &&
-      isNonNegative(s.shipBMass) &&
-      isNonNegative(s.shipBInertia) &&
-      isOptionalSkillLevel(s.shipBSkillLevel) &&
-      isOptionalBoolean(s.shipBOverload) &&
-      isPositive(s.shipBSig) &&
-      isOptionalNonEmptyString(s.shipAHull) &&
-      this.isOptionalPropulsionSelection(s.shipAPropulsion) &&
-      isOptionalNonEmptyString(s.shipBHull) &&
-      this.isOptionalPropulsionSelection(s.shipBPropulsion) &&
-      isOptionalFittedHullSummary(s.shipAFittedHull) &&
-      isOptionalFittedHullSummary(s.shipBFittedHull) &&
-      isOptionalFittingText(s.shipAFitting) &&
-      isOptionalFittingText(s.shipBFitting) &&
-      isOptionalProfileParamOverrides(s.shipAOverrides, this.guards) &&
-      isOptionalProfileParamOverrides(s.shipBOverrides, this.guards) &&
-      isOptionalEwarActivation(s.shipAEwarActivation) &&
-      isOptionalEwarActivation(s.shipBEwarActivation) &&
-      isOptionalBoosterActivations(s.shipABoosterActivation) &&
-      isOptionalBoosterActivations(s.shipBBoosterActivation) &&
-      isOptionalNonEmptyString(s.shipAAmmo)
+      isOptionalNonEmptyString(s.shipAAmmo) &&
+      this.isSideCombatantValid(s, "shipA") &&
+      this.isSideCombatantValid(s, "shipB")
     );
   }
 
   private isUserSettings(value: unknown): value is UserSettingsWire {
     if (!this.isProfileSettings(value)) return false;
-    const s = value as Record<string, unknown>;
+    const s = value as unknown as Record<string, unknown>;
     return (
       isLanguage(s.language) &&
       (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
@@ -172,6 +150,28 @@ export class SettingsParser {
       (s.zoomFactor === undefined || isPositive(s.zoomFactor)) &&
       typeof s.shipAAmmo === "string" &&
       s.shipAAmmo.length > 0
+    );
+  }
+
+  private isSideCombatantValid(s: Record<string, unknown>, side: "shipA" | "shipB"): boolean {
+    const p = side;
+    return (
+      isNonNegative(s[`${p}Speed`]) &&
+      this.guards.isAutopilotMode(s[`${p}Mode`]) &&
+      isNonNegative(s[`${p}Range`]) &&
+      isNonNegative(s[`${p}Mass`]) &&
+      isNonNegative(s[`${p}Inertia`]) &&
+      isOptionalNonNegative(s[`${p}Aggressivity`]) &&
+      isOptionalSkillLevel(s[`${p}SkillLevel`]) &&
+      isOptionalBoolean(s[`${p}Overload`]) &&
+      isOptionalNonEmptyString(s[`${p}Hull`]) &&
+      this.isOptionalPropulsionSelection(s[`${p}Propulsion`]) &&
+      isOptionalFittingText(s[`${p}Fitting`]) &&
+      isOptionalProfileParamOverrides(s[`${p}Overrides`], this.guards) &&
+      isOptionalFittedHullSummary(s[`${p}FittedHull`]) &&
+      isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
+      isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
+      (side === "shipA" ? isOptionalPositive(s.shipASig) : isPositive(s.shipBSig))
     );
   }
 
@@ -189,6 +189,15 @@ export class SettingsParser {
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
     record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
     record.zoomFactor ??= DEFAULT_PREFERENCES.zoomFactor;
+  }
+
+  private normalizeAndDefaultAggressivity(record: Record<string, unknown>): void {
+    if (record.shipAAggressivity === undefined && isFiniteNumber(record.maneuverAggressivity)) {
+      record.shipAAggressivity = clampAggressivity(record.maneuverAggressivity);
+    }
+    record.shipAAggressivity = clampAggressivity(isFiniteNumber(record.shipAAggressivity) ? record.shipAAggressivity : AGGRESSIVITY_DEFAULT);
+    record.shipBAggressivity = clampAggressivity(isFiniteNumber(record.shipBAggressivity) ? record.shipBAggressivity : AGGRESSIVITY_DEFAULT);
+    delete record.maneuverAggressivity;
   }
 
   private migrateBoosterActivation(value: Record<string, unknown>): void {
@@ -264,6 +273,11 @@ function isInternalUserSettings(value: UserSettingsWire | ProfileSettingsWire | 
   return "shipA" in value;
 }
 
+function clampAggressivity(value: number): number {
+  if (!isFiniteNumber(value)) return AGGRESSIVITY_DEFAULT;
+  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
+}
+
 function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
   const gridBrightness = wire.gridBrightness ?? DEFAULT_PREFERENCES.gridBrightness;
   const autoZoom = wire.autoZoom ?? true;
@@ -284,40 +298,8 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
       autoZoom,
       zoomFactor,
     },
-    maneuverAggressivity: wire.maneuverAggressivity,
-    shipA: {
-      speed: wire.shipASpeed,
-      mode: wire.shipAMode,
-      range: wire.shipARange,
-      mass: wire.shipAMass,
-      inertia: wire.shipAInertia,
-      skillLevel: wire.shipASkillLevel,
-      overload: wire.shipAOverload,
-      hull: wire.shipAHull,
-      propulsion: wire.shipAPropulsion,
-      fitting: wire.shipAFitting,
-      overrides: wire.shipAOverrides,
-      fittedHull: wire.shipAFittedHull,
-      ewarActivation: wire.shipAEwarActivation,
-      boosterActivation: wire.shipABoosterActivation,
-    },
-    shipB: {
-      speed: wire.shipBSpeed,
-      mode: wire.shipBMode,
-      range: wire.shipBRange,
-      mass: wire.shipBMass,
-      inertia: wire.shipBInertia,
-      skillLevel: wire.shipBSkillLevel,
-      overload: wire.shipBOverload,
-      hull: wire.shipBHull,
-      propulsion: wire.shipBPropulsion,
-      fitting: wire.shipBFitting,
-      overrides: wire.shipBOverrides,
-      fittedHull: wire.shipBFittedHull,
-      ewarActivation: wire.shipBEwarActivation,
-      boosterActivation: wire.shipBBoosterActivation,
-      sig: wire.shipBSig,
-    },
+    shipA: toCombatantSettings(wire, "shipA"),
+    shipB: toCombatantSettings(wire, "shipB"),
     tracking: wire.tracking,
     sigRes: wire.sigRes,
     optimal: wire.optimal,
@@ -343,43 +325,34 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     shipASpeed: internal.shipA.speed,
     shipAMode: internal.shipA.mode,
     shipARange: internal.shipA.range,
+    shipAAggressivity: internal.shipA.aggressivity,
     shipAMass: internal.shipA.mass,
     shipAInertia: internal.shipA.inertia,
     initialDistance: internal.initialDistance,
     shipBSpeed: internal.shipB.speed,
     shipBMode: internal.shipB.mode,
     shipBRange: internal.shipB.range,
+    shipBAggressivity: internal.shipB.aggressivity,
     shipBMass: internal.shipB.mass,
     shipBInertia: internal.shipB.inertia,
-    shipBSig: internal.shipB.sig,
+    shipBSig: internal.shipB.sig ?? 1,
     shipAAmmo: internal.shipAAmmo,
   };
-  if (internal.maneuverAggressivity !== undefined) wire.maneuverAggressivity = internal.maneuverAggressivity;
-  setOptionalShipAFields(wire, internal.shipA);
-  setOptionalShipBFields(wire, internal.shipB);
+  setOptionalShipFields(wire, internal.shipA, "shipA");
+  setOptionalShipFields(wire, internal.shipB, "shipB");
   return wire;
 }
 
-function setOptionalShipAFields(wire: UserSettingsWire, combatant: CombatantSettings): void {
-  if (combatant.skillLevel !== undefined) wire.shipASkillLevel = combatant.skillLevel;
-  if (combatant.overload !== undefined) wire.shipAOverload = combatant.overload;
-  if (combatant.hull !== undefined) wire.shipAHull = combatant.hull;
-  if (combatant.propulsion !== undefined) wire.shipAPropulsion = combatant.propulsion;
-  if (combatant.fitting !== undefined) wire.shipAFitting = combatant.fitting;
-  if (combatant.overrides !== undefined) wire.shipAOverrides = combatant.overrides;
-  if (combatant.fittedHull !== undefined) wire.shipAFittedHull = combatant.fittedHull;
-  if (combatant.ewarActivation !== undefined) wire.shipAEwarActivation = combatant.ewarActivation;
-  if (combatant.boosterActivation !== undefined) wire.shipABoosterActivation = combatant.boosterActivation;
-}
-
-function setOptionalShipBFields(wire: UserSettingsWire, combatant: CombatantSettings): void {
-  if (combatant.skillLevel !== undefined) wire.shipBSkillLevel = combatant.skillLevel;
-  if (combatant.overload !== undefined) wire.shipBOverload = combatant.overload;
-  if (combatant.hull !== undefined) wire.shipBHull = combatant.hull;
-  if (combatant.propulsion !== undefined) wire.shipBPropulsion = combatant.propulsion;
-  if (combatant.fitting !== undefined) wire.shipBFitting = combatant.fitting;
-  if (combatant.overrides !== undefined) wire.shipBOverrides = combatant.overrides;
-  if (combatant.fittedHull !== undefined) wire.shipBFittedHull = combatant.fittedHull;
-  if (combatant.ewarActivation !== undefined) wire.shipBEwarActivation = combatant.ewarActivation;
-  if (combatant.boosterActivation !== undefined) wire.shipBBoosterActivation = combatant.boosterActivation;
+function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSettings, side: "shipA" | "shipB"): void {
+  const p = side;
+  if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
+  if (combatant.overload !== undefined) wire[`${p}Overload` as const] = combatant.overload;
+  if (combatant.hull !== undefined) wire[`${p}Hull` as const] = combatant.hull;
+  if (combatant.propulsion !== undefined) wire[`${p}Propulsion` as const] = combatant.propulsion;
+  if (combatant.fitting !== undefined) wire[`${p}Fitting` as const] = combatant.fitting;
+  if (combatant.overrides !== undefined) wire[`${p}Overrides` as const] = combatant.overrides;
+  if (combatant.fittedHull !== undefined) wire[`${p}FittedHull` as const] = combatant.fittedHull;
+  if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
+  if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
+  if (combatant.sig !== undefined) wire[side === "shipA" ? "shipASig" : "shipBSig"] = combatant.sig;
 }

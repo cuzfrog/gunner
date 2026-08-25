@@ -23,6 +23,7 @@ export interface LegacyUserSettings {
   attackerBoosterActivation?: readonly StoredBoosterActivation[];
   attackerAmmo?: string;
   attackerOverrides?: Record<string, unknown>;
+  maneuverAggressivity?: number;
   targetSpeed?: number;
   targetMode?: AutopilotMode;
   targetRange?: number;

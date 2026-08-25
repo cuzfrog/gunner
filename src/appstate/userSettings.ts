@@ -45,6 +45,7 @@ export type ProfileParamOverrides = Pick<
   | "falloff"
 >;
 
+
 export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
   tracking: number;
@@ -55,7 +56,8 @@ export interface UserSettings {
   shipASpeed: number;
   shipAMode: AutopilotMode;
   shipARange: number;
-  maneuverAggressivity?: number;
+  shipAAggressivity?: number;
+  shipBAggressivity?: number;
   gridBrightness?: number;
   autoZoom?: boolean;
   zoomFactor?: number;
@@ -69,6 +71,7 @@ export interface UserSettings {
   shipBRange: number;
   shipBMass: number;
   shipBInertia: number;
+  shipASig?: number;
   shipBSig: number;
   shipBSkillLevel?: SkillLevel;
   shipBOverload?: boolean;

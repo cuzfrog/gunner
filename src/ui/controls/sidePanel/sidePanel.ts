@@ -1,6 +1,6 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { FittingImport } from "../../../fitting";
-import { isAutopilotMode, type AutopilotMode } from "../../../sim";
+import type { AutopilotMode } from "../../../sim";
 import {
   type CombatantSettings,
   type FittedHullSummary,
@@ -16,6 +16,7 @@ import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanelElements } from "./elements";
 import { HullSection } from "./hullSection";
+import { NavSection } from "./navSection";
 import { PasteImportSection } from "./pasteImportSection";
 import { PropulsionSection } from "./propulsionSection";
 import { SkillOverloadSection } from "./skillOverloadSection";
@@ -39,7 +40,6 @@ const NOOP_HOST: SidePanelHost = {
   persistConfigChange() {},
   onConfigChange() {},
   onDisplayChange() {},
-  setManeuverAggressivityEnabled() {},
 };
 
 export class SidePanelImpl implements SidePanel {
@@ -77,16 +77,15 @@ export class SidePanelImpl implements SidePanel {
     this.overrides = overrides;
     this.turretLink = turretLink;
     const hull = new HullSection({ panel: this, els, ships, i18n, imageCatalog });
+    const nav = new NavSection({ panel: this, els });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
     const skill = new SkillOverloadSection({ panel: this, els, i18n, popupGroup });
     const propulsion = new PropulsionSection({ panel: this, els, ships, fittingImport, imageCatalog, i18n, popupGroup });
     const paste = new PasteImportSection({ panel: this, els, i18n, timer });
-    this.sections = { hull, stats, skill, propulsion, paste };
+    this.sections = { hull, nav, stats, skill, propulsion, paste };
     this.els.speed.addEventListener("input", () => this.onShipInput("speed"));
     this.els.mass.addEventListener("input", () => this.onShipInput("mass"));
     this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
-    this.els.mode.addEventListener("input", () => this.onModeInput());
-    this.els.range.addEventListener("input", () => this.host.onConfigChange());
     if (this.els.shipBSig) this.els.shipBSig.addEventListener("input", () => this.onShipBSigInput());
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
@@ -130,17 +129,11 @@ export class SidePanelImpl implements SidePanel {
     this.host.onConfigChange();
   }
 
-  private onModeInput(): void {
-    if (this.side === "shipA") {
-      this.host.setManeuverAggressivityEnabled(this.els.mode.value === "maneuver");
-    }
-    this.host.onConfigChange();
-  }
-
   private onShipBSigInput(): void {
     this.recordOverride("shipBSig", this.capture().sig ?? 1);
     this.host.onDisplayChange();
   }
+
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
   setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }
@@ -149,8 +142,7 @@ export class SidePanelImpl implements SidePanel {
     els.speed.disabled = !enabled;
     els.mass.disabled = !enabled;
     els.inertia.disabled = !enabled;
-    els.mode.disabled = !enabled;
-    els.range.disabled = !enabled;
+    this.sections.nav.setEnabled(enabled);
     if (els.shipBSig !== undefined) els.shipBSig.disabled = !enabled;
     els.skills.disabled = !enabled;
     this.setButtonDisabled(els.skillTrigger, enabled);
@@ -159,6 +151,7 @@ export class SidePanelImpl implements SidePanel {
     for (const child of els.skillOptions.children) (child as HTMLButtonElement).disabled = !enabled;
     if (enabled) this.sections.skill.setOverloadDisabled();
   }
+
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
   stateFrom(combatant: CombatantSettings): SidePanelState { return stateSliceOf(combatant, this.side); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
@@ -166,13 +159,13 @@ export class SidePanelImpl implements SidePanel {
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
 
   capture(): SidePanelState {
+    const nav = this.sections.nav.capture();
     return {
       speed: num(this.els.speed),
       baseMaxSpeed: this.sections.stats.currentBaseMaxSpeed(),
       mass: num(this.els.mass),
       inertia: num(this.els.inertia),
-      mode: this.currentMode(),
-      range: num(this.els.range),
+      ...nav,
       skillLevel: this.sections.skill.currentSkillLevel(),
       overload: this.els.overload.checked,
       hull: this.profile?.name,
@@ -190,8 +183,7 @@ export class SidePanelImpl implements SidePanel {
     this.els.speed.value = formatNumber(state.speed);
     this.els.mass.value = String(state.mass);
     this.els.inertia.value = formatNumber(state.inertia, 6);
-    this.els.mode.value = state.mode;
-    this.els.range.value = String(state.range);
+    this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity });
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
     this.sections.skill.setOverloadActive(state.overload ?? true);
@@ -205,12 +197,6 @@ export class SidePanelImpl implements SidePanel {
   private setButtonDisabled(button: HTMLButtonElement, enabled: boolean): void {
     button.disabled = !enabled;
     button.setAttribute("aria-disabled", String(!enabled));
-  }
-
-  private currentMode(): AutopilotMode {
-    const value = this.els.mode.value;
-    if (!isAutopilotMode(value)) throw new Error(`Invalid autopilot mode: ${value}`);
-    return value;
   }
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {

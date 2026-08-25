@@ -14,6 +14,9 @@ export interface SidePanelElements {
   readonly alignTime: HTMLElement;
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
+  readonly aggressivity: HTMLInputElement;
+  readonly aggressivitySlider: HTMLInputElement;
+  readonly aggressivityValue: HTMLElement;
   readonly shipBSig?: HTMLInputElement;
   readonly skills: HTMLSelectElement;
   readonly skillOptions: HTMLElement;
@@ -44,6 +47,9 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
       alignTime: els.shipAAlignTime,
       mode: els.shipAMode,
       range: els.shipARange,
+      aggressivity: els.shipAAggressivity,
+      aggressivitySlider: els.shipAAggressivitySlider,
+      aggressivityValue: els.shipAAggressivityValue,
       skills: els.shipASkills,
       skillOptions: els.shipASkillOptions,
       skillSummary: els.shipASkillSummary,
@@ -71,6 +77,9 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     alignTime: els.shipBAlignTime,
     mode: els.shipBMode,
     range: els.shipBRange,
+    aggressivity: els.shipBAggressivity,
+    aggressivitySlider: els.shipBAggressivitySlider,
+    aggressivityValue: els.shipBAggressivityValue,
     shipBSig: els.shipBSig,
     skills: els.shipBSkills,
     skillOptions: els.shipBSkillOptions,

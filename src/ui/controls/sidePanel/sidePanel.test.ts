@@ -220,25 +220,24 @@ describe("SidePanel", () => {
     expect(turretOverrides.get().shipAInertia).toBe(2.5);
   });
 
-  test("shipA mode input calls host setManeuverAggressivityEnabled and onConfigChange", () => {
+  test("shipA mode input toggles its own aggressivity slider and calls host onConfigChange", () => {
     const { document, host } = buildSidePanel("shipA");
     getFake(document, "ship-a-mode").value = "maneuver";
     getFake(document, "ship-a-mode").trigger("input");
-    expect(host.setManeuverAggressivityEnabled).toHaveBeenCalledWith(true);
+    expect(getFake(document, "ship-a-aggressivity-slider").disabled).toBe(false);
     expect(host.onConfigChange).toHaveBeenCalled();
 
-    host.setManeuverAggressivityEnabled.mockClear();
     getFake(document, "ship-a-mode").value = "midships";
     getFake(document, "ship-a-mode").trigger("input");
-    expect(host.setManeuverAggressivityEnabled).toHaveBeenCalledWith(false);
+    expect(getFake(document, "ship-a-aggressivity-slider").disabled).toBe(true);
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 
-  test("shipB mode input does not affect aggressivity slider", () => {
+  test("shipB mode input toggles its own aggressivity slider and calls host onConfigChange", () => {
     const { document, host } = buildSidePanel("shipB");
     getFake(document, "ship-b-mode").value = "maneuver";
     getFake(document, "ship-b-mode").trigger("input");
-    expect(host.setManeuverAggressivityEnabled).not.toHaveBeenCalled();
+    expect(getFake(document, "ship-b-aggressivity-slider").disabled).toBe(false);
     expect(host.onConfigChange).toHaveBeenCalled();
   });
 

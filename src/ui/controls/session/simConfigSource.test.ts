@@ -13,6 +13,7 @@ function baseShipAState(): SidePanelState {
     inertia: 3,
     mode: "orbit",
     range: 5000,
+    aggressivity: 1.5,
     skillLevel: 5,
     overload: true,
     hull: undefined,
@@ -32,6 +33,7 @@ function baseShipBState(): SidePanelState {
     inertia: 3,
     mode: "orbit",
     range: 6000,
+    aggressivity: 1,
     skillLevel: 5,
     overload: true,
     hull: undefined,
@@ -85,18 +87,16 @@ function build() {
   });
   const shipASide = { capture: vi.fn(() => shipAState) };
   const shipBSide = { capture: vi.fn(() => shipBState) };
-  const preferencesController = { getManeuverAggressivity: vi.fn(() => 1.5) };
   const distanceSource = { getInitialDistance: vi.fn(() => 6000) };
-  return { shipASide, shipBSide, preferencesController, ewarController, boosterController, distanceSource, ewar, boost };
+  return { shipASide, shipBSide, ewarController, boosterController, distanceSource, ewar, boost };
 }
 
 describe("SimConfigSourceImpl", () => {
-  test("getConfig assembles shipA and shipB from side state, preferences, ewar, boosters and distance", () => {
+  test("getConfig assembles shipA and shipB from side state, ewar, boosters and distance", () => {
     const deps = build();
     const source = new SimConfigSourceImpl({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      preferencesController: deps.preferencesController,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
       distanceSource: deps.distanceSource,
@@ -115,13 +115,12 @@ describe("SimConfigSourceImpl", () => {
     expect(config.shipB.id).toBe("shipB");
     expect(config.shipB.maxSpeed).toBe(250);
     expect(config.shipB.baseMaxSpeed).toBe(250);
-    expect(config.shipB.aggressivity).toBe(0.01);
+    expect(config.shipB.aggressivity).toBe(1);
     expect(config.shipB.ewar).toBeUndefined();
     expect(config.shipB.boosts).toBeUndefined();
     expect(config.initialDistance).toBe(6000);
     expect(deps.shipASide.capture).toHaveBeenCalled();
     expect(deps.shipBSide.capture).toHaveBeenCalled();
-    expect(deps.preferencesController.getManeuverAggressivity).toHaveBeenCalled();
     expect(deps.distanceSource.getInitialDistance).toHaveBeenCalled();
   });
 
@@ -131,7 +130,6 @@ describe("SimConfigSourceImpl", () => {
     const source = new SimConfigSourceImpl({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      preferencesController: deps.preferencesController,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
       distanceSource: deps.distanceSource,
@@ -146,7 +144,6 @@ describe("SimConfigSourceImpl", () => {
     const source = new SimConfigSourceImpl({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      preferencesController: deps.preferencesController,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
       distanceSource: deps.distanceSource,
@@ -161,7 +158,6 @@ describe("SimConfigSourceImpl", () => {
     const source = new SimConfigSourceImpl({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      preferencesController: deps.preferencesController,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
       distanceSource: deps.distanceSource,
@@ -175,7 +171,6 @@ describe("SimConfigSourceImpl", () => {
     const source = new SimConfigSourceImpl({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
-      preferencesController: deps.preferencesController,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
       distanceSource: deps.distanceSource,

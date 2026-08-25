@@ -35,7 +35,6 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
     simConfigSource: asFunction((proxy) => new SimConfigSourceImpl({
       shipASide: proxy.shipASide,
       shipBSide: proxy.shipBSide,
-      preferencesController: proxy.preferencesController,
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       distanceSource: proxy.sessionCodec,
@@ -48,18 +47,6 @@ function collectSessionCodecEls(all: ControlsElements): SessionCodecEls {
     sigRes: all.sigRes,
     optimal: all.optimal,
     falloff: all.falloff,
-    shipASpeed: all.shipASpeed,
-    shipAMass: all.shipAMass,
-    shipAInertia: all.shipAInertia,
-    shipAMode: all.shipAMode,
-    shipARange: all.shipARange,
-    maneuverAggressivity: all.maneuverAggressivity,
     initialDistance: all.initialDistance,
-    shipBSpeed: all.shipBSpeed,
-    shipBMass: all.shipBMass,
-    shipBInertia: all.shipBInertia,
-    shipBMode: all.shipBMode,
-    shipBRange: all.shipBRange,
-    shipBSig: all.shipBSig,
   };
 }

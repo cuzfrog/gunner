@@ -13,7 +13,7 @@ export type {
   TrackingUnit,
   UserSettings,
 } from "./userSettings";
-export type { CombatantSettings, ShipBCombatantSettings } from "./combatantSettings";
+export type { CombatantSettings } from "./combatantSettings";
 export { toCombatantSettings } from "./combatantSettings";
 export type { Language } from "./language";
 export type { SettingGuards } from "./settingGuards";

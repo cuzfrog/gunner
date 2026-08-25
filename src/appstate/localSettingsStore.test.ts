@@ -419,19 +419,20 @@ describe("LocalSettingsStore", () => {
     expect(store.loadStartupState().settings).toEqual({ ...partial, gridBrightness: DEFAULT_PREFERENCES.gridBrightness });
   });
 
-  test("loadStartupState round-trips a non-default maneuverAggressivity", () => {
-    const settings: UserSettings = { ...DEFAULT_SETTINGS, maneuverAggressivity: 2.5 };
+  test("loadStartupState round-trips non-default per-side aggressivity", () => {
+    const settings: UserSettings = { ...DEFAULT_SETTINGS, shipAAggressivity: 2.5, shipBAggressivity: 2.5 };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     expect(store.loadStartupState().settings).toEqual(settings);
   });
 
-  test("loadStartupState accepts settings without maneuverAggressivity", () => {
+  test("loadStartupState defaults missing per-side aggressivity to 1", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
-    delete partial.maneuverAggressivity;
+    delete partial.shipAAggressivity;
+    delete partial.shipBAggressivity;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
-    expect(store.loadStartupState().settings).toEqual(partial);
+    expect(store.loadStartupState().settings).toEqual({ ...partial, shipAAggressivity: 1, shipBAggressivity: 1 });
   });
 
   test("loadStartupState rejects an out-of-range skill level", () => {

@@ -89,6 +89,10 @@ export function isOptionalNonNegative(value: unknown): value is number | undefin
   return value === undefined || (isFiniteNumber(value) && value >= 0);
 }
 
+export function isOptionalPositive(value: unknown): value is number | undefined {
+  return value === undefined || (isFiniteNumber(value) && value > 0);
+}
+
 export function isOptionalUnitInterval(value: unknown): value is number | undefined {
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }

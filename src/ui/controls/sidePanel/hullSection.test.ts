@@ -46,7 +46,6 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     persistConfigChange: vi.fn(),
     onConfigChange: vi.fn(),
     onDisplayChange: vi.fn(),
-    setManeuverAggressivityEnabled: vi.fn(),
   });
   const importer = {
     autoLoadFittingTextFor: vi.fn(),

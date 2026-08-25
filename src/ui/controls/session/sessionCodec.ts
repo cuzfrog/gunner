@@ -40,19 +40,7 @@ interface SessionCodecEls {
   readonly sigRes: HTMLSelectElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
-  readonly shipASpeed: HTMLInputElement;
-  readonly shipAMass: HTMLInputElement;
-  readonly shipAInertia: HTMLInputElement;
-  readonly shipAMode: HTMLSelectElement;
-  readonly shipARange: HTMLInputElement;
-  readonly maneuverAggressivity: HTMLInputElement;
   readonly initialDistance: HTMLInputElement;
-  readonly shipBSpeed: HTMLInputElement;
-  readonly shipBMass: HTMLInputElement;
-  readonly shipBInertia: HTMLInputElement;
-  readonly shipBMode: HTMLSelectElement;
-  readonly shipBRange: HTMLInputElement;
-  readonly shipBSig: HTMLInputElement;
 }
 
 export class SessionCodecImpl implements SessionCodec {
@@ -120,7 +108,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipASpeed: shipA.speed,
       shipAMode: shipA.mode,
       shipARange: shipA.range,
-      maneuverAggressivity: this.preferencesController.getManeuverAggressivity(),
+      shipAAggressivity: shipA.aggressivity,
       shipAMass: shipA.mass,
       shipAInertia: shipA.inertia,
       shipASkillLevel: shipA.skillLevel,
@@ -134,6 +122,7 @@ export class SessionCodecImpl implements SessionCodec {
       shipBSpeed: shipB.speed,
       shipBMode: shipB.mode,
       shipBRange: shipB.range,
+      shipBAggressivity: shipB.aggressivity,
       shipBMass: shipB.mass,
       shipBInertia: shipB.inertia,
       shipBSkillLevel: shipB.skillLevel,
@@ -173,8 +162,6 @@ export class SessionCodecImpl implements SessionCodec {
     this.i18n.translateDocument();
     this.shipASide.sections.skill.setOverloadDisabled();
     this.shipBSide.sections.skill.setOverloadDisabled();
-    this.preferencesController.updateManeuverAggressivityDisplay();
-    this.preferencesController.setManeuverAggressivityEnabled(this.els.shipAMode.value === "maneuver");
     this.shipASide.sections.stats.updateAlignTime();
     this.shipBSide.sections.stats.updateAlignTime();
     this.hintRotator.refresh();
@@ -223,19 +210,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.trackingInput.setRadValue(settings.tracking, sigResolution);
     this.els.optimal.value = String(settings.optimal);
     this.els.falloff.value = String(settings.falloff);
-    this.els.shipASpeed.value = formatNumber(settings.shipASpeed);
-    this.els.shipAMass.value = String(settings.shipAMass);
-    this.els.shipAInertia.value = formatNumber(settings.shipAInertia, 6);
-    this.els.shipAMode.value = settings.shipAMode;
-    this.els.shipARange.value = String(settings.shipARange);
-    this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
     this.els.initialDistance.value = String(settings.initialDistance);
-    this.els.shipBSpeed.value = formatNumber(settings.shipBSpeed);
-    this.els.shipBMass.value = String(settings.shipBMass);
-    this.els.shipBInertia.value = formatNumber(settings.shipBInertia, 6);
-    this.els.shipBMode.value = settings.shipBMode;
-    this.els.shipBRange.value = String(settings.shipBRange);
-    this.els.shipBSig.value = String(settings.shipBSig);
     this.shipASide.restore(this.shipASide.stateFrom(toCombatantSettings(settings, "shipA")));
     this.shipBSide.restore(this.shipBSide.stateFrom(toCombatantSettings(settings, "shipB")));
     this.turretOverrides.set(settings.shipAOverrides ?? {});
@@ -264,7 +239,6 @@ export class SessionCodecImpl implements SessionCodec {
     applyStartupDefaults({
       shipASide: this.shipASide,
       shipBSide: this.shipBSide,
-      preferencesController: this.preferencesController,
       profileController: this.profileController,
     });
     this.events.emitStartupDefaultsApplied();

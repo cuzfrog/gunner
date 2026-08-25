@@ -59,6 +59,7 @@ export interface SidePanelState {
   readonly inertia: number;
   readonly mode: AutopilotMode;
   readonly range: number;
+  readonly aggressivity: number;
   readonly skillLevel: SkillLevel | undefined;
   readonly overload: boolean;
   readonly hull: string | undefined;
@@ -70,23 +71,23 @@ export interface SidePanelState {
 }
 
 export function stateSliceOf(combatant: CombatantSettings, side: Side): SidePanelState {
-  const base: Omit<SidePanelState, "sig"> = {
+  return {
     speed: combatant.speed,
     baseMaxSpeed: combatant.fittedHull?.baseMaxSpeed ?? combatant.speed,
     mass: combatant.mass,
     inertia: combatant.inertia,
     mode: combatant.mode,
     range: combatant.range,
+    aggressivity: combatant.aggressivity,
     skillLevel: combatant.skillLevel,
     overload: combatant.overload ?? true,
     hull: combatant.hull,
     propulsion: combatant.propulsion,
     fitting: combatant.fitting,
-    overrides: side === "shipA" ? {} : (combatant.overrides ?? {}),
+    overrides: combatant.overrides ?? {},
     fittedHull: combatant.fittedHull,
+    sig: combatant.sig,
   };
-  if (side === "shipA") return base;
-  return { ...base, sig: combatant.sig ?? 1 };
 }
 
 export interface FittingPopupControl {
@@ -111,7 +112,6 @@ export interface SidePanelHost {
   persistConfigChange(notify?: boolean): void;
   onConfigChange(): void;
   onDisplayChange(): void;
-  setManeuverAggressivityEnabled(enabled: boolean): void;
 }
 
 export interface SidePanelDeps {

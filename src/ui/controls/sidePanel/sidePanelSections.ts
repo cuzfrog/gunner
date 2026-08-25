@@ -13,6 +13,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
 import type { Popup } from "../popup";
+import type { INavSection } from "./navSection";
 
 export interface IHullSection {
   onHullInput(): void;
@@ -84,6 +85,7 @@ export interface IPasteImportSection {
 
 export interface ISidePanelSections {
   readonly hull: IHullSection;
+  readonly nav: INavSection;
   readonly stats: IStatsSection;
   readonly skill: ISkillOverloadSection;
   readonly propulsion: IPropulsionSection;

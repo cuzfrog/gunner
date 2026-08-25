@@ -10,7 +10,7 @@ function tagForId(id: string): string {
   if (TEXTAREA_IDS.has(id)) return "TEXTAREA";
   if (IMAGE_IDS.has(id)) return "IMG";
   if (BUTTON_IDS.has(id)) return "BUTTON";
-  if (id.endsWith("-input") || id === "tracking" || id === "optimal" || id === "falloff" || id === "ship-a-hull" || id === "ship-b-hull" || id === "ship-a-speed" || id === "ship-a-mass" || id === "ship-a-inertia" || id === "ship-a-range" || id === "ship-b-speed" || id === "ship-b-mass" || id === "ship-b-inertia" || id === "ship-b-range" || id === "ship-b-sig" || id === "initial-distance" || id === "maneuver-aggressivity" || id === "maneuver-aggressivity-slider" || id === "grid-brightness-slider" || id === "zoom-slider" || id === "auto-zoom" || id === "new-profile-name" || id === "ship-a-overload" || id === "ship-b-overload") return "INPUT";
+  if (id.endsWith("-input") || id === "tracking" || id === "optimal" || id === "falloff" || id === "ship-a-hull" || id === "ship-b-hull" || id === "ship-a-speed" || id === "ship-a-mass" || id === "ship-a-inertia" || id === "ship-a-range" || id === "ship-a-aggressivity" || id === "ship-a-aggressivity-slider" || id === "ship-b-speed" || id === "ship-b-mass" || id === "ship-b-inertia" || id === "ship-b-range" || id === "ship-b-aggressivity" || id === "ship-b-aggressivity-slider" || id === "ship-b-sig" || id === "initial-distance" || id === "grid-brightness-slider" || id === "zoom-slider" || id === "auto-zoom" || id === "new-profile-name" || id === "ship-a-overload" || id === "ship-b-overload") return "INPUT";
   return "DIV";
 }
 

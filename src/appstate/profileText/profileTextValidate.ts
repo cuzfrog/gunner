@@ -32,8 +32,8 @@ export function parseScalarValue(field: ScalarField, value: string, guards: Sett
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (field === "initialDistance" || field === "shipBSig") return isPositive(num) ? num : undefined;
-  if (field === "maneuverAggressivity") return isNonNegative(num) ? num : undefined;
+  if (field === "initialDistance" || field === "shipBSig" || field === "shipASig") return isPositive(num) ? num : undefined;
+  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? Math.max(0.01, Math.min(100, num)) : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 
@@ -91,6 +91,9 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     return undefined;
   }
 
+  const shipAAggressivity = raw.shipAAggressivity ?? 1;
+  const shipBAggressivity = raw.shipBAggressivity ?? 1;
+
   return {
     version,
     tracking,
@@ -100,15 +103,18 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     shipASpeed,
     shipAMode,
     shipARange,
+    shipAAggressivity,
     shipAMass,
     shipAInertia,
     initialDistance,
     shipBSpeed,
     shipBMode,
     shipBRange,
+    shipBAggressivity,
     shipBMass,
     shipBInertia,
     shipBSig,
+    shipASig: raw.shipASig,
     shipASkillLevel: raw.shipASkillLevel,
     shipAOverload: raw.shipAOverload,
     shipAHull: raw.shipAHull,
@@ -128,7 +134,6 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     shipBFittedHull: raw.shipBFittedHull,
     shipBEwarActivation: raw.shipBEwarActivation,
     shipBBoosterActivation: raw.shipBBoosterActivation,
-    maneuverAggressivity: raw.maneuverAggressivity,
   };
 }
 

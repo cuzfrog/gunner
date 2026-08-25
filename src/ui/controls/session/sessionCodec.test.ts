@@ -16,7 +16,7 @@ import type { ChoiceGroup } from "../choiceGroup";
 import type { HintRotator } from "../hints";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, SidePanelState } from "../sidePanel";
 import type { TurretController, TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
@@ -31,28 +31,52 @@ function fakeEls() {
 
 function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): ReturnType<SidePanel["stateFrom"]> {
   const mode: AutopilotMode = side === "shipA" ? settings.shipAMode : settings.shipBMode;
+  const speed = side === "shipA" ? settings.shipASpeed : settings.shipBSpeed;
+  const fittedHull = side === "shipA" ? settings.shipAFittedHull : settings.shipBFittedHull;
   const base = {
-    speed: side === "shipA" ? settings.shipASpeed : settings.shipBSpeed,
+    speed,
+    baseMaxSpeed: fittedHull?.baseMaxSpeed ?? speed,
     mass: side === "shipA" ? settings.shipAMass : settings.shipBMass,
     inertia: side === "shipA" ? settings.shipAInertia : settings.shipBInertia,
     mode,
     range: side === "shipA" ? settings.shipARange : settings.shipBRange,
+    aggressivity: (side === "shipA" ? settings.shipAAggressivity : settings.shipBAggressivity) ?? 1,
     skillLevel: side === "shipA" ? settings.shipASkillLevel : settings.shipBSkillLevel,
     overload: side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true,
     hull: side === "shipA" ? settings.shipAHull : settings.shipBHull,
     propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
     fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
     overrides: side === "shipA" ? {} : settings.shipBOverrides ?? {},
-    fittedHull: side === "shipA" ? settings.shipAFittedHull : settings.shipBFittedHull,
+    fittedHull,
   };
   if (side === "shipB") return { ...base, sig: settings.shipBSig };
   return base;
 }
 
-function mockSidePanel(side: "shipA" | "shipB", captured: ReturnType<SidePanel["capture"]>): SidePanel {
+function sidePanelStateWithDefaults(state: Partial<SidePanelState>): SidePanelState {
   return {
-    capture: vi.fn(() => captured),
-    stateFrom: vi.fn(() => captured),
+    speed: 0,
+    mass: 0,
+    inertia: 0,
+    mode: "orbit",
+    range: 0,
+    aggressivity: 1,
+    skillLevel: 5,
+    overload: true,
+    hull: undefined,
+    propulsion: undefined,
+    fitting: undefined,
+    overrides: {},
+    fittedHull: undefined,
+    ...state,
+  };
+}
+
+function mockSidePanel(side: "shipA" | "shipB", captured: Partial<SidePanelState>): SidePanel {
+  const full = sidePanelStateWithDefaults(captured);
+  return {
+    capture: vi.fn(() => full),
+    stateFrom: vi.fn(() => full),
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
     sections: {
@@ -111,6 +135,8 @@ function makeProfile(): ProfileSettings {
     shipASpeed: 300,
     shipAMode: "orbit",
     shipARange: 5000,
+    shipAAggressivity: 1,
+    shipBAggressivity: 1,
     shipAMass: 1_000_000,
     shipAInertia: 3,
     shipASkillLevel: 5,
@@ -137,18 +163,18 @@ describe("SessionCodec", () => {
     const preferences = {
       trackingInput,
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const turret = {
       capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })),
     } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides({ shipAMass: 1_400_000 });
-    els.maneuverAggressivity.value = "1";
+
     els.initialDistance.value = "5000";
     const events = new UiEventsImpl();
 
@@ -182,7 +208,8 @@ describe("SessionCodec", () => {
     expect(settings.shipBInertia).toBe(3);
     expect(settings.shipBSig).toBe(36);
     expect(settings.initialDistance).toBe(5000);
-    expect(settings.maneuverAggressivity).toBe(1);
+    expect(settings.shipAAggressivity).toBe(1);
+    expect(settings.shipBAggressivity).toBe(1);
     expect(settings.simSpeed).toBe(4);
     expect(settings.language).toBe("en");
     expect(settings.shipAAmmo).toBe("Hail S");
@@ -202,7 +229,8 @@ describe("SessionCodec", () => {
       shipASpeed: 450,
       shipAMode: "keepAtRange",
       shipARange: 8000,
-      maneuverAggressivity: 1.5,
+      shipAAggressivity: 1.5,
+      shipBAggressivity: 1,
       gridBrightness: 0.75,
       autoZoom: true,
       zoomFactor: 1,
@@ -241,12 +269,12 @@ describe("SessionCodec", () => {
     const preferences = {
       trackingInput,
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
     const turret: TurretController = {
@@ -352,11 +380,11 @@ describe("SessionCodec", () => {
     const preferences = {
       trackingInput,
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn() } as unknown as ProfileController;
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
@@ -399,19 +427,19 @@ describe("SessionCodec", () => {
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
     const els = fakeEls();
-    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
-    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
+    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
     const shipA = mockSidePanel("shipA", pristineShipA);
     const shipB = mockSidePanel("shipB", pristineShipB);
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn() } as unknown as ProfileController;
     const turret = { capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn(), currentTurretSpec: vi.fn(() => ({ tracking: 0.32, sigResolution: SIG_RESOLUTIONS.S, optimal: 1000, falloff: 3000 })) } as unknown as TurretController;
@@ -465,12 +493,12 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -480,7 +508,7 @@ describe("SessionCodec", () => {
     const events = new UiEventsImpl();
     const onSessionRestored = vi.fn();
     events.onSessionRestored(onSessionRestored);
-    els.maneuverAggressivity.value = "1";
+
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
@@ -512,12 +540,12 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       restore: vi.fn(),
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -527,7 +555,7 @@ describe("SessionCodec", () => {
     const events = new UiEventsImpl();
     const onSessionRestored = vi.fn();
     events.onSessionRestored(onSessionRestored);
-    els.maneuverAggressivity.value = "1";
+
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
@@ -558,11 +586,11 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -576,7 +604,7 @@ describe("SessionCodec", () => {
     const onStartupDefaultsApplied = vi.fn();
     events.onSessionReset(onSessionReset);
     events.onStartupDefaultsApplied(onStartupDefaultsApplied);
-    els.maneuverAggressivity.value = "1";
+
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
@@ -607,11 +635,11 @@ describe("SessionCodec", () => {
     const trackingInput = fakeTrackingInput();
     const preferences = {
       capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
-      getManeuverAggressivity: vi.fn(() => 1),
+
       applyPreferences: vi.fn(),
       savePreferences: vi.fn(),
-      updateManeuverAggressivityDisplay: vi.fn(),
-      setManeuverAggressivityEnabled: vi.fn(),
+
+
     } as unknown as PreferencesController;
     const profileController = { markLoaded: vi.fn(), showStatus: vi.fn() } as unknown as ProfileController;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -625,7 +653,7 @@ describe("SessionCodec", () => {
     const onStartupDefaultsApplied = vi.fn();
     events.onSessionReset(onSessionReset);
     events.onStartupDefaultsApplied(onStartupDefaultsApplied);
-    els.maneuverAggressivity.value = "1";
+
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({

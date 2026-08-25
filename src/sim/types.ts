@@ -31,6 +31,7 @@ export interface ShipConfig {
   readonly mode: AutopilotMode;
   readonly desiredRange: number;
   readonly aggressivity: number;
+  readonly sig?: number;
   readonly orbitDirection?: OrbitDirection;
 }
 
