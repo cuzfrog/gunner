@@ -53,6 +53,8 @@ interface DomControlsAllDeps extends DomControlsDeps {
   simConfigSource: SimConfigSource;
 }
 
+const READOUT_INTERVAL_MS = 50;
+
 export class DomControls implements Controls, DomControlsHost {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
@@ -73,7 +75,10 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly previewManager: FittingPreviewManager;
   private readonly simConfigSource: SimConfigSource;
+  private readonly now: () => number;
   private currentDistanceValue: number;
+  private lastReadoutApplyMs = -Infinity;
+  private cachedReadouts?: { frame: EngagementFrame; hit: HitChanceBreakdown; effective: EffectiveReadouts };
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -98,6 +103,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.rangeOverlayController = all.rangeOverlayController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
+    this.now = all.now;
     this.currentDistanceValue = num(this.els.initialDistance);
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
@@ -189,15 +195,33 @@ export class DomControls implements Controls, DomControlsHost {
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
-    this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
-    this.effectiveReadout.update(effective);
+    this.cachedReadouts = { frame, hit, effective };
+    this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
   }
   setPlaying(playing: boolean): void {
+    if (!playing && this.playing && this.cachedReadouts) {
+      this.applyReadouts(this.cachedReadouts.frame, this.cachedReadouts.hit, this.cachedReadouts.effective);
+      this.lastReadoutApplyMs = this.now();
+    }
     this.playing = playing;
     this.els.play.textContent = this.deps.i18n.t(playing ? "button.pause" : "button.play");
+    if (playing) this.lastReadoutApplyMs = this.now() - READOUT_INTERVAL_MS;
   }
   setCallbacks(callbacks: ControlsCallbacks): void { this.callbacks = callbacks; }
+
+  private applyReadoutsIfReady(): void {
+    const now = this.now();
+    if (this.playing && now - this.lastReadoutApplyMs < READOUT_INTERVAL_MS) return;
+    if (!this.cachedReadouts) return;
+    this.applyReadouts(this.cachedReadouts.frame, this.cachedReadouts.hit, this.cachedReadouts.effective);
+    this.lastReadoutApplyMs = now;
+  }
+
+  private applyReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
+    this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
+    this.effectiveReadout.update(effective);
+  }
 
   private onDocumentPointerDown(event: PointerEvent): void {
     const previewOpen = this.previewManager.openSide();

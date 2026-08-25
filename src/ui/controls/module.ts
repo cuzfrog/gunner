@@ -1,4 +1,4 @@
-import { asClass, asFunction, type AwilixContainer } from "awilix";
+import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
 import type { PresetFittings } from "../../fitting";
 import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
@@ -25,6 +25,9 @@ import { registerBoosterModule } from "./booster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
+  if (!cradle.hasRegistration("now")) {
+    cradle.register({ now: asValue(() => Date.now()) });
+  }
   cradle.register({
     els: asFunction(createControlsEls).singleton(),
     trackingInput: asClass(TrackingInputImpl).singleton(),

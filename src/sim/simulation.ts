@@ -44,8 +44,8 @@ export class SimulationImpl implements Simulation {
     const frame = this.computeFrame();
     return {
       time: this.time,
-      attacker: this.attacker,
-      target: this.target,
+      attacker: frame.attacker,
+      target: frame.target,
       commands: frame.commands,
     };
   }

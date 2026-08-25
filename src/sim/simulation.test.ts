@@ -148,6 +148,60 @@ describe("SimulationImpl", () => {
     expect(snapshot.target.velocity.x).toBeCloseTo(40, 6);
   });
 
+  test("snapshot exposes the target's effective max speed under an in-range web", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: (projection, distance) => projection?.loadout.webs.length ? (distance <= 5000 ? 0.4 : 1) : 1,
+      disruptedTurret: (turret) => turret,
+      propulsionSuppressed: () => false,
+    };
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const attackerWeb: EwarProjection = {
+      loadout: {
+        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        grapplers: [],
+        disruptors: [],
+        scramblers: [],
+        scripts: [],
+      },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
+    };
+    const config = { ...simConfig("orbit"), attacker: { ...shipConfig("attacker", "midships"), ewar: attackerWeb } };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    const snapshot = sim.snapshot();
+    expect(snapshot.target.maxSpeed).toBeCloseTo(40, 6);
+    expect(snapshot.attacker.maxSpeed).toBe(100);
+  });
+
+  test("snapshot swaps to base max speed while propulsion is suppressed", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      disruptedTurret: (turret) => turret,
+      propulsionSuppressed: () => true,
+    };
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const config = {
+      attacker: shipConfig("attacker", "midships"),
+      target: { ...shipConfig("target", "midships"), baseMaxSpeed: 200, maxSpeed: 1000 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    const snapshot = sim.snapshot();
+    expect(snapshot.target.maxSpeed).toBe(200);
+  });
+
+  test("snapshot leaves max speed unchanged when the projection is out of range", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
+      disruptedTurret: (turret) => turret,
+      propulsionSuppressed: () => false,
+    };
+    const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
+    const config = { ...simConfig("orbit"), initialDistance: 5001 };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    const snapshot = sim.snapshot();
+    expect(snapshot.target.maxSpeed).toBe(100);
+  });
+
   test("keeps trajectories unchanged when no ewar is projected", () => {
     const steering = new ReactiveAutopilot();
     const noEwarResolver = new EwarResolverImpl({ stackingPenalty: new StackingPenaltyImpl() });

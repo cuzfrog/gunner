@@ -111,6 +111,7 @@ interface BuildDomControlsOptions {
   presetFittings?: Partial<PresetFittings>;
   savedFittings?: Partial<SavedFittings>;
   itemNameCatalog?: Partial<ItemNameCatalog>;
+  now?: () => number;
 }
 
 function mockItemNames(): ItemNameCatalog {
@@ -144,6 +145,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   const cradle = createContainer<ControlsCradle>({ injectionMode: InjectionMode.PROXY });
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
   cradle.register({
+    now: asValue(options.now ?? (() => Date.now())),
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
     itemNameCatalog: asValue(vi.mocked<ItemNameCatalog>({ ...mockItemNames(), ...options.itemNameCatalog })),
     imageCatalog: asValue(mockImageCatalog()),

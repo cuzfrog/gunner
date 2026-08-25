@@ -2,6 +2,7 @@ import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstat
 import type { FittingImport } from "../../../fitting";
 import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown } from "../../../sim";
 import type { Ships } from "../../../ships";
+import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
 import {
   buildDomControls,
@@ -323,5 +324,70 @@ describe("DomControls", () => {
     controls.setPlaying(true);
     cradle.cradle.uiEvents.emitStartupDefaultsApplied();
     expect(getFake(document, "play").textContent).toBe("button.play");
+  });
+
+  function readoutFixtures() {
+    const attackerState = {
+      id: "attacker" as const,
+      position: new Vec2(0, 0),
+      velocity: new Vec2(0, 0),
+      maxSpeed: 0,
+      mass: 1,
+      inertiaModifier: 1,
+      mode: "orbit" as const,
+      desiredRange: 0,
+      aggressivity: 1,
+    };
+    const targetState = { ...attackerState, id: "target" as const };
+    const frame: EngagementFrame = {
+      time: 0, attacker: attackerState, target: targetState,
+      relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
+      radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
+    };
+    const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+    const effective: EffectiveReadouts = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
+    return { frame, hit, effective };
+  }
+
+  test("readouts update immediately when not playing", () => {
+    const { controls, cradle } = buildDomControls({ now: () => 0 });
+    const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
+    const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
+    const { frame, hit, effective } = readoutFixtures();
+    controls.update(frame, hit, effective);
+    controls.update(frame, hit, effective);
+    expect(engagementUpdate).toHaveBeenCalledTimes(2);
+    expect(effectiveUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  test("readouts throttle while playing and resume after 50 ms", () => {
+    let fakeNow = 0;
+    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
+    const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
+    const { frame, hit, effective } = readoutFixtures();
+    controls.setPlaying(true);
+    controls.update(frame, hit, effective);
+    fakeNow = 10;
+    controls.update(frame, hit, effective);
+    fakeNow = 60;
+    controls.update(frame, hit, effective);
+    expect(engagementUpdate).toHaveBeenCalledTimes(2);
+    expect(effectiveUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  test("pause flushes the latest cached readouts even when the last tick was skipped", () => {
+    let fakeNow = 0;
+    const { controls, cradle } = buildDomControls({ now: () => fakeNow });
+    const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
+    const { frame, hit, effective } = readoutFixtures();
+    const effective2 = { ...effective, targetSpeed: 50 };
+    controls.setPlaying(true);
+    controls.update(frame, hit, effective);
+    fakeNow = 10;
+    controls.update(frame, hit, effective2);
+    controls.setPlaying(false);
+    expect(effectiveUpdate).toHaveBeenLastCalledWith(effective2);
+    expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
 });

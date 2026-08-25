@@ -3,7 +3,7 @@ import type { TrackingInput } from "../trackingInput";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts } from "../controlsContract";
 
-interface InputLike { readonly value: string; }
+interface InputLike { value: string; }
 
 interface ReadoutLike {
   textContent: string | null;
@@ -49,21 +49,27 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
       ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
       : `${formatNumber(trackingDisplay, 4)} rad/s`;
     this.write(this.els.trackingReadout, tracking, isTrackingAffected(values.tracking, values.boostedTracking), t);
-    this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedAffected(values.attackerSpeed, readNumber(this.els.attackerSpeed)), t);
-    this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedAffected(values.targetSpeed, readNumber(this.els.targetSpeed)), t);
+    this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedAffected(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)), t);
+    this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedAffected(values.targetSpeed, tryReadNumber(this.els.targetSpeed)), t);
     this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeAffected(values.optimal, values.boostedOptimal), t);
     this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeAffected(values.falloff, values.boostedFalloff), t);
   }
 
+  private readonly lastByReadout = new Map<ReadoutLike, { text: string; affected: boolean; title: string }>();
+
   private write(readout: ReadoutLike, text: string, affected: boolean, t: (key: string) => string): void {
+    const title = affected ? t("readout.effectiveAffected") : "";
+    const previous = this.lastByReadout.get(readout);
+    if (previous && previous.text === text && previous.title === title) return;
     readout.textContent = text;
     if (affected) {
       readout.classList.add("affected");
-      readout.title = t("readout.effectiveAffected");
+      readout.title = title;
     } else {
       readout.classList.remove("affected");
       readout.title = "";
     }
+    this.lastByReadout.set(readout, { text, affected, title });
   }
 }
 
@@ -71,16 +77,19 @@ const SPEED_EPSILON = { absolute: 0.5, relative: 0.005 } as const;
 const TRACKING_EPSILON = { absolute: 0.0001, relative: 0.005 } as const;
 const RANGE_EPSILON = { absolute: 0.5, relative: 0.005 } as const;
 
-function readNumber(input: InputLike): number {
+function tryReadNumber(input: InputLike): number | undefined {
   const n = Number.parseFloat(input.value);
-  return Number.isNaN(n) ? 0 : Math.max(0, n);
+  if (Number.isNaN(n)) return undefined;
+  if (n < 0) return undefined;
+  return n;
 }
 
 function formatSpeed(value: number): string {
   return `${formatWithCommas(value, 0)} m/s`;
 }
 
-function isSpeedAffected(effective: number, raw: number): boolean {
+function isSpeedAffected(effective: number, raw: number | undefined): boolean {
+  if (raw === undefined) return false;
   return isAffected(effective, raw, SPEED_EPSILON);
 }
 
@@ -98,4 +107,4 @@ function isAffected(effective: number, raw: number, epsilon: { readonly absolute
   return diff > threshold;
 }
 
-export { formatSpeed as _formatSpeed, isAffected as _isAffected, readNumber as _readNumber };
+export { formatSpeed as _formatSpeed, isAffected as _isAffected, tryReadNumber as _readNumber };

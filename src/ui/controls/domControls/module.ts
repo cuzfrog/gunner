@@ -10,6 +10,7 @@ export function registerDomControlsModule<T extends ControlsCradle>(cradle: Awil
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       i18n: proxy.i18n,
       events: proxy.uiEvents,
+      now: proxy.now,
       els: collectDomControlsEls(proxy.els),
       popupGroup: proxy.popupGroup,
       hintRotator: proxy.hintRotator,

@@ -43,6 +43,7 @@ export interface ControlsCradle {
   readonly savedFittings: SavedFittings;
   readonly clipboard: ClipboardProvider;
   readonly timer: Timer;
+  readonly now: () => number;
   readonly chargeCatalog: ChargeCatalog;
   readonly imageCatalog: ImageCatalog;
   readonly uiEvents: UiEvents;

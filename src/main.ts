@@ -25,6 +25,7 @@ function main(): void {
       readText: readClipboardText,
       writeText: (text: string) => window.navigator.clipboard.writeText(text),
     }),
+    now: asValue(() => performance.now()),
   });
   registerGameDataModule(container);
   registerShipsModule(container);

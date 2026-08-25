@@ -16,6 +16,7 @@ const controlsCradleKeys = {
   savedFittings: "savedFittings",
   clipboard: "clipboard",
   timer: "timer",
+  now: "now",
   chargeCatalog: "chargeCatalog",
   imageCatalog: "imageCatalog",
   uiEvents: "uiEvents",

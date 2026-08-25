@@ -144,9 +144,57 @@ describe("_isAffected", () => {
 });
 
 describe("_readNumber", () => {
-  test("parses the input value and clamps at zero", () => {
+  test("parses a finite non-negative input value", () => {
     expect(_readNumber({ value: "123.4" })).toBe(123.4);
-    expect(_readNumber({ value: "abc" })).toBe(0);
-    expect(_readNumber({ value: "-5" })).toBe(0);
+    expect(_readNumber({ value: "0" })).toBe(0);
+  });
+
+  test("returns undefined for non-numeric, empty or negative input", () => {
+    expect(_readNumber({ value: "abc" })).toBeUndefined();
+    expect(_readNumber({ value: "" })).toBeUndefined();
+    expect(_readNumber({ value: "-5" })).toBeUndefined();
+  });
+});
+
+describe("EffectiveReadoutImpl redundant write skipping", () => {
+  test("skips DOM writes when text and affected state are unchanged", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const values = { attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 };
+    readout.update(values);
+    const addCount = (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length;
+    const removeCount = (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length;
+    (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    readout.update(values);
+    expect((els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+    expect((els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+    expect(addCount + removeCount).toBe(1);
+  });
+
+  test("re-writes DOM when affected state changes even with the same text", () => {
+    const els = fakeEls();
+    els.attackerSpeed.value = "200";
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 200, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
+  });
+
+  test("does not mark speed as affected when the raw input is not a valid non-negative number", () => {
+    const els = fakeEls();
+    els.attackerSpeed.value = "abc";
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("affected");
   });
 });
