@@ -43,20 +43,12 @@
   display: none !important;
 }
 
-.btn,
-.trigger {
+button,
+select {
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-button:focus-visible,
-a:focus-visible {
-  outline: 1px solid var(--accent-teal);
-  outline-offset: 2px;
-}
-
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
+:where(.panel, .controls, .profile-bar, .lang-toggle) :focus-visible {
   outline: 1px solid var(--accent-teal);
   outline-offset: -1px;
 }
@@ -125,6 +117,11 @@ textarea:focus-visible {
   cursor: default;
 }
 
+.trigger:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
 .trigger .chevron,
 .profile-select-trigger .chevron {
   color: var(--accent-teal);
@@ -162,6 +159,11 @@ textarea:focus-visible {
 
 .icon-button[aria-pressed="true"] { color: var(--accent-teal); }
 
+.icon-button:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
 /* ---- btn ---- */
 .btn {
   background: var(--bg-inset);
@@ -172,10 +174,16 @@ textarea:focus-visible {
   border-radius: 2px;
 }
 
-.btn:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
 .btn:focus-visible {
   border-color: var(--accent-teal);
   color: var(--accent-teal);
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -300,6 +308,11 @@ body {
 
 .github-link:hover {
   color: var(--accent-teal);
+}
+
+.github-link:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: 2px;
 }
 
 .github-link svg {
@@ -599,11 +612,6 @@ body {
   letter-spacing: 0;
 }
 
-.hull-label-row .fitting-name-label {
-  flex: none;
-  color: var(--text-dim);
-}
-
 .hull-label-row .fitting-name-value {
   flex: 1 1 0;
   color: var(--text-primary);
@@ -611,7 +619,6 @@ body {
 }
 
 .hull-label-row .fitting-name.error,
-.hull-label-row .fitting-name.error .fitting-name-label,
 .hull-label-row .fitting-name.error .fitting-name-value {
   color: var(--danger-red);
 }
@@ -685,9 +692,18 @@ body {
 
 .fitting-item-name { flex: 1; }
 
+.fitting-delete {
+  width: 24px;
+  height: 24px;
+}
+
 .fitting-delete:hover { color: var(--danger-red); }
 
-.fitting-item-eye { opacity: 0; }
+.fitting-item-eye {
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+}
 
 .fitting-entry:hover .fitting-item-eye,
 .fitting-entry:focus-within .fitting-item-eye,
@@ -808,6 +824,7 @@ body {
   background: transparent;
   border: none;
   color: var(--text-primary);
+  font-family: "Saira", sans-serif;
   font-size: 12px;
   text-align: left;
   cursor: pointer;
@@ -837,16 +854,6 @@ body {
   flex: none;
   color: var(--text-dim);
   font-size: 10px;
-}
-
-.ammo-empty {
-  margin: 0;
-  padding: 8px;
-  font-size: 11px;
-  color: var(--text-dim);
-  text-align: center;
-  text-transform: none;
-  letter-spacing: 0;
 }
 
 .paste-popup {
@@ -1586,18 +1593,9 @@ canvas {
   box-shadow: 0 0 8px var(--accent-orange-35);
 }
 
-.segmented-control.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.segmented-control.disabled,
 .segmented-control button:disabled {
+  opacity: 0.5;
   pointer-events: none;
-}
-
-.segmented-control button:disabled {
-  opacity: 0.5;
 }
 
 .overload-button:disabled {
@@ -2127,6 +2125,11 @@ canvas {
 
 .profile-menu-item:hover {
   background: var(--bg-inset);
+}
+
+.profile-menu-item:focus-visible {
+  outline: 1px solid var(--accent-teal);
+  outline-offset: -1px;
 }
 
 .profile-menu-item[aria-current="true"] {

@@ -8,7 +8,6 @@ const ALLOWED_UNDEFINED = new Set<string>([
   // Phase 2/3: no rule yet; will gain one or be renamed.
   "sigres-group",
   "mode-group",
-  "booster-trigger",
   "footer-author-line",
   // Phase 4: hintRotator adds this category but the style is not yet isolated.
   "hint",
@@ -29,11 +28,6 @@ const ALLOWED_ORPHAN = new Set<string>([
   "range-overlay-scrambler",
   "range-overlay-disruptor",
   // Phase 2/3: stale rules to be removed or re-applied.
-  "ammo-stat-suffix",
-  "ammo-empty",
-  "fitting-name-label",
-  // Phase 3: .disabled state class will become .is-disabled.
-  "disabled",
 ]);
 
 type StringMap = Map<string, Set<string>>;
