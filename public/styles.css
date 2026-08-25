@@ -1062,6 +1062,7 @@ canvas {
   bottom: 48px;
   left: 12px;
   min-width: 200px;
+  padding: 8px;
 }
 
 .canvas-settings-popup[hidden] {
