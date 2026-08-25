@@ -172,6 +172,7 @@ export function makeFittingImport() {
 export function makeChargeCatalog(): ChargeCatalog {
   const catalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
+    usualForTurret: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
     chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret) => turret),

@@ -373,7 +373,17 @@ function resolveTurret(
     falloff: falloffScore,
   };
 
-  const selectedCharge = chargeName && db.charges[chargeName] ? chargeName : chargeCatalog.usualForChargeSize(turret.chargeSize);
+  const turretForChargeSelection: ImportedTurret = {
+    tracking: base.tracking,
+    sigResolutionClass: sigResClass,
+    optimal: base.optimal,
+    falloff: base.falloff,
+    chargeSize: turret.chargeSize,
+    charge: "",
+    base,
+    moduleName: moduleName ?? "Unknown Turret",
+  };
+  const selectedCharge = chargeName && db.charges[chargeName] ? chargeName : chargeCatalog.usualForTurret(turretForChargeSelection);
   const charge = db.charges[selectedCharge] ?? {};
 
   return {

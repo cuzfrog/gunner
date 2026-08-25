@@ -559,6 +559,17 @@ Medium Energy Metastasis Adjuster II`,
     expect(result!.turret!.tracking).toBe((315 * 40) / 40_000);
   });
 
+  test("autocannon without a charge picks a projectile charge, not a hybrid charge", () => {
+    ships.findHull.mockReturnValueOnce(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Merlin, Autocannon]\n200mm AutoCannon I`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.charge).toBe("Republic Fleet EMP S");
+  });
+
   test("skill-scaled hull velocity and agility bonuses apply", () => {
     ships.findHull.mockReturnValueOnce(bonusProfile);
     const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, stackingPenalty, itemNameCatalog, moduleSlotCatalog });

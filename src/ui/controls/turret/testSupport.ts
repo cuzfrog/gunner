@@ -75,6 +75,7 @@ export function buildTurret(
   const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
   const chargeCatalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => "Hail S"),
+    usualForTurret: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
     chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret) => turret),

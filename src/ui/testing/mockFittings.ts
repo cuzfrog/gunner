@@ -51,6 +51,7 @@ export function mockFittingImport(): FittingImport {
 export function mockChargeCatalog(): ChargeCatalog {
   return {
     usualForChargeSize: vi.fn(() => "Hail S"),
+    usualForTurret: vi.fn(() => "Hail S"),
     chargesForSize: vi.fn(() => []),
     chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret) => turret),

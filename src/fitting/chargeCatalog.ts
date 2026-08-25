@@ -35,6 +35,7 @@ export type ChargeFamily = "projectile" | "hybrid" | "laser";
 
 export interface ChargeCatalog {
   usualForChargeSize(chargeSize: number): string;
+  usualForTurret(turret: ImportedTurret): string;
   chargesForSize(chargeSize: number): readonly ChargeOption[];
   chargesForTurret(turret: ImportedTurret): readonly ChargeOption[];
   withCharge(turret: ImportedTurret, charge: string): ImportedTurret;
@@ -59,6 +60,13 @@ export class ChargeCatalogImpl implements ChargeCatalog {
     return _usualForChargeSize(this.charges, chargeSize);
   }
 
+  usualForTurret(turret: ImportedTurret): string {
+    const family = _turretChargeFamily(turret.moduleName, this.gunFamilies);
+    if (family === undefined) return _usualFromOptions(this.chargesForSize(turret.chargeSize));
+    const inFamily = this.chargesForTurret(turret);
+    return _usualFromOptions(inFamily.length > 0 ? inFamily : this.chargesForSize(turret.chargeSize));
+  }
+
   chargesForSize(chargeSize: number): readonly ChargeOption[] {
     return _chargesForSize(this.charges, chargeSize);
   }
@@ -73,6 +81,8 @@ export class ChargeCatalogImpl implements ChargeCatalog {
   withCharge(turret: ImportedTurret, charge: string): ImportedTurret {
     const stats = this.charges[charge];
     if (!stats) return turret;
+    const family = _turretChargeFamily(turret.moduleName, this.gunFamilies);
+    if (family !== undefined && _chargeFamilyOf(charge) !== family) return turret;
     return {
       ...turret,
       charge,
@@ -141,9 +151,13 @@ function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): Char
 function _usualForChargeSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): string {
   let all = _chargesForSize(charges, chargeSize);
   if (all.length === 0) all = _allChargeOptions(charges);
-  if (all.length === 0) throw new Error("Charge catalog is empty");
-  const navy = all.filter((c) => _isNavyCharge(c.name));
-  const chosen = navy.length > 0 ? navy : all;
+  return _usualFromOptions(all);
+}
+
+function _usualFromOptions(options: readonly ChargeOption[]): string {
+  if (options.length === 0) throw new Error("Charge catalog is empty");
+  const navy = options.filter((c) => _isNavyCharge(c.name));
+  const chosen = navy.length > 0 ? navy : options;
   return chosen[0].name;
 }
 

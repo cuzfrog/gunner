@@ -157,6 +157,31 @@ describe("ChargeCatalogImpl", () => {
     expect(laserS.map((c) => c.name)).toEqual(["Imperial Navy Multifrequency S"]);
   });
 
+  test("usualForTurret prefers a navy charge from the turret's own family", () => {
+    const catalog = buildCatalog();
+    const autocannon = turret({ moduleName: "200mm AutoCannon I", chargeSize: 1, charge: "Hail S" });
+    expect(catalog.usualForTurret(autocannon)).toBe("Republic Fleet EMP S");
+
+    const railgun = turret({ moduleName: "150mm Railgun I", chargeSize: 1, charge: "Titanium Sabot S" });
+    expect(catalog.usualForTurret(railgun)).toBe("Caldari Navy Antimatter Charge S");
+
+    const pulse = turret({ moduleName: "Gatling Pulse Laser I", chargeSize: 1, charge: "Hail S" });
+    expect(catalog.usualForTurret(pulse)).toBe("Imperial Navy Multifrequency S");
+  });
+
+  test("usualForTurret falls back to size-based usual for an unrecognized turret", () => {
+    const catalog = buildCatalog();
+    const unknown = turret({ moduleName: "Unknown Turret I", chargeSize: 1, charge: "Hail S" });
+    expect(catalog.usualForTurret(unknown)).toBe("Caldari Navy Antimatter Charge S");
+  });
+
+  test("withCharge keeps the turret unchanged when the charge belongs to another family", () => {
+    const catalog = buildCatalog();
+    const autocannon = turret({ moduleName: "200mm AutoCannon I", chargeSize: 1, charge: "Hail S" });
+    const unchanged = catalog.withCharge(autocannon, "Caldari Navy Antimatter Charge S");
+    expect(unchanged).toBe(autocannon);
+  });
+
   test("chargesForTurret preserves all charges for turrets without a known family", () => {
     const catalog = buildCatalog();
     const unknown = turret({ moduleName: "Unknown Turret I", chargeSize: 1, charge: "Hail S" });
