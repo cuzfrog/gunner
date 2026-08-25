@@ -172,6 +172,28 @@ describe("FittingPopupController", () => {
     expect(item.getAttribute("aria-current")).toBe("true");
   });
 
+  test("canonical matching marks a saved item whose stored text normalizes to the current fitting", () => {
+    const canonicalText = "[Rifter, Brawler]\n200mm AutoCannon I, Hail S";
+    const rawText = "[rifter, brawler]\n200mm autocannon I, Hail S";
+    const { controller, els, fittingImport, savedFittings } = createController({ panel: { fittingText: canonicalText } });
+    fittingImport.canonicalEftText.mockImplementation((text) => (text === rawText || text === canonicalText ? canonicalText : undefined));
+    savedFittings.listForHull.mockReturnValue([{ ...SAVED_RIFTER, text: rawText }]);
+    controller.popup.open();
+    const item = els.savedList.children[0].children[0] as unknown as FakeElement;
+    expect(item.getAttribute("aria-current")).toBe("true");
+  });
+
+  test("no item is marked when the current fitting canonical form matches nothing", () => {
+    const otherText = "[Rifter, Kiter]\n150mm Light AutoCannon I, EMP S";
+    const { controller, els, fittingImport } = createController({ panel: { fittingText: otherText } });
+    fittingImport.canonicalEftText.mockImplementation((text) => (text === otherText ? otherText : SAVED_RIFTER.text));
+    controller.popup.open();
+    const savedItem = els.savedList.children[0].children[0] as unknown as FakeElement;
+    const presetItem = els.presetList.children[0].children[0] as unknown as FakeElement;
+    expect(savedItem.getAttribute("aria-current")).toBeNull();
+    expect(presetItem.getAttribute("aria-current")).toBeNull();
+  });
+
   test("clicking a fitting applies it, closes the popup, and refreshes the ship preview", () => {
     const { controller, els, applyFitting, previews } = createController();
     vi.mocked(previews.openSide).mockReturnValue("attacker");

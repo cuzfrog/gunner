@@ -56,6 +56,7 @@ export class FittingPopupRenderer {
     savedList.innerHTML = "";
     presetList.innerHTML = "";
     const currentText = panel.fittingText;
+    const currentKey = currentText !== undefined ? this.fittingImport.canonicalEftText(currentText) ?? currentText : undefined;
 
     if (!panel.profile) {
       savedLabel.hidden = true;
@@ -69,7 +70,7 @@ export class FittingPopupRenderer {
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
       const onFittingClick = () => actions.onItemClick(fitting.text);
-      const item = this.createFittingItem(fitting.name, fitting.text, currentText, onFittingClick);
+      const item = this.createFittingItem(fitting.name, fitting.text, currentKey, onFittingClick);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
         item.classList.toggle("invalid", true);
@@ -87,7 +88,7 @@ export class FittingPopupRenderer {
     for (const fit of presets) {
       const text = this.presetFittings.eftText(panel.profile.name, fit);
       const onFittingClick = () => actions.onItemClick(text);
-      const item = this.createFittingItem(fit.name, text, currentText, onFittingClick);
+      const item = this.createFittingItem(fit.name, text, currentKey, onFittingClick);
       presetList.appendChild(this.createFittingEntry(text, item, undefined));
     }
 
@@ -105,12 +106,14 @@ export class FittingPopupRenderer {
     return undefined;
   }
 
-  private createFittingItem(name: string, text: string, currentText: string | undefined, onClick: () => void): HTMLButtonElement {
+  private createFittingItem(name: string, text: string, currentKey: string | undefined, onClick: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
     button.setAttribute("role", "menuitem");
-    if (currentText === text) button.setAttribute("aria-current", "true");
+    if (currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey)) {
+      button.setAttribute("aria-current", "true");
+    }
     const span = document.createElement("span");
     span.className = "fitting-item-name";
     span.textContent = name;
