@@ -33,7 +33,7 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   computeVelocity(ship: ShipState, other: ShipState, time: number): Vec2 {
-    if (ship.mode === "midships") {
+    if (ship.mode !== "maneuver") {
       return this.reactiveSteering.computeVelocity(ship, other, time);
     }
     const configChanged = this.lastShipConfig === null || this.lastOtherConfig === null ||
