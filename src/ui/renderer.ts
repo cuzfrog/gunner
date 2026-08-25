@@ -14,6 +14,7 @@ export interface RangeOverlay {
 export interface Renderer {
   setGridBrightness(brightness: number): void;
   setRangeRingsEnabled(enabled: boolean): void;
+  setManualZoom(autoZoom: boolean, factor: number): void;
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
 }
 
@@ -65,6 +66,8 @@ export class CanvasRenderer implements Renderer {
   private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
   private rangeRingsEnabled = true;
+  private autoZoom = true;
+  private zoomFactor = 1;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
@@ -81,6 +84,11 @@ export class CanvasRenderer implements Renderer {
 
   setRangeRingsEnabled(enabled: boolean): void {
     this.rangeRingsEnabled = enabled;
+  }
+
+  setManualZoom(autoZoom: boolean, factor: number): void {
+    this.autoZoom = autoZoom;
+    if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
   draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
@@ -116,11 +124,12 @@ export class CanvasRenderer implements Renderer {
     const closeScale = minDim / (2 * closeRadius);
 
     const fitScale = distance > 0 ? (minDim - 2 * ZOOM_OUT_MARGIN_PX) / distance : farScale;
-    const cameraScale = Math.min(
+    const autoScale = Math.min(
       Math.max(closeScale, farScale / MAX_ZOOM_FACTOR, Math.min(farScale, fitScale)),
       farScale * MAX_ZOOM_FACTOR
     );
-    this.camera = { center, scale: cameraScale };
+    const zoom = this.autoZoom ? 1 : this.zoomFactor;
+    this.camera = { center, scale: autoScale * zoom };
   }
 
   private worldToScreen(p: Vec2): Vec2 {

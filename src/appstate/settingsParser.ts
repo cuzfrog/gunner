@@ -257,17 +257,23 @@ function isInternalUserSettings(value: UserSettingsWire | ProfileSettingsWire | 
 
 function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
   const gridBrightness = wire.gridBrightness ?? DEFAULT_PREFERENCES.gridBrightness;
+  const autoZoom = wire.autoZoom ?? true;
+  const zoomFactor = wire.zoomFactor ?? 1;
   return {
     version: wire.version,
     language: wire.language,
     simSpeed: wire.simSpeed,
     trackingUnit: wire.trackingUnit,
     gridBrightness,
+    autoZoom,
+    zoomFactor,
     display: {
       language: wire.language,
       trackingUnit: wire.trackingUnit,
       simSpeed: wire.simSpeed,
       gridBrightness,
+      autoZoom,
+      zoomFactor,
     },
     maneuverAggressivity: wire.maneuverAggressivity,
     attacker: {
@@ -319,6 +325,8 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     trackingUnit: internal.trackingUnit,
     simSpeed: internal.simSpeed,
     gridBrightness: internal.gridBrightness,
+    autoZoom: internal.display.autoZoom,
+    zoomFactor: internal.display.zoomFactor,
     tracking: internal.tracking,
     sigRes: internal.sigRes,
     optimal: internal.optimal,

@@ -177,6 +177,6 @@ export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly
 }
 
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, ...rest } = value as Record<string, unknown>;
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, autoZoom: ______, zoomFactor: _______, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }

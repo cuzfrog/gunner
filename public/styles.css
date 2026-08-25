@@ -1101,14 +1101,65 @@ canvas {
   justify-self: start;
 }
 
-.grid-brightness-control {
+.zoom-control {
   grid-column: 2;
   justify-self: center;
+}
+
+.zoom-control input[type="range"] {
+  width: 96px;
+  flex: none;
+}
+
+.zoom-control .slider-value {
+  min-width: 5ch;
+  margin-left: 0;
+  color: var(--accent-teal);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  line-height: 1;
+  text-align: right;
+}
+
+.auto-zoom-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.auto-zoom-option input[type="checkbox"] {
+  margin: 0;
 }
 
 .speed-control {
   grid-column: 3;
   justify-self: end;
+}
+
+.canvas-settings-popup {
+  position: absolute;
+  bottom: 48px;
+  left: 12px;
+  z-index: var(--z-popup);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  padding: 8px;
+  min-width: 200px;
+}
+
+.canvas-settings-popup[hidden] {
+  display: none;
+}
+
+.canvas-settings-popup .grid-brightness-control {
+  grid-column: auto;
+  justify-self: start;
 }
 
 .control-field {
@@ -1567,11 +1618,12 @@ canvas {
   padding-right: 32px;
 }
 
-.panel .input-with-unit:has(.effective-value) input {
+.panel .input-with-unit.has-effective input {
   padding-right: 72px;
 }
 
-.panel .input-suffix {
+.panel .input-suffix,
+.panel .effective-value {
   position: absolute;
   right: 8px;
   top: 50%;
@@ -1580,27 +1632,12 @@ canvas {
   font-size: 12px;
   color: var(--accent-teal);
   pointer-events: none;
-}
-
-.panel .effective-value {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: "Share Tech Mono", monospace;
-  font-size: 12px;
-  color: var(--text-dim);
-  pointer-events: none;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-.panel .effective-value.affected {
+.panel .effective-value.negative {
   color: var(--danger-red);
-}
-
-.panel .input-with-unit:has(.effective-value) > .input-suffix {
-  display: none;
 }
 
 .panel input[type="number"] {
@@ -2286,17 +2323,17 @@ canvas {
   }
 
   .playback-controls,
-  .grid-brightness-control,
+  .zoom-control,
   .speed-control {
     grid-column: 1;
     justify-self: start;
   }
 
-  .grid-brightness-control input[type="range"] {
+  .zoom-control input[type="range"] {
     width: 72px;
   }
 
-  .grid-brightness-control label { display: none; }
+  .zoom-control label[for="zoom-slider"] { display: none; }
 
   .footer {
     grid-template-columns: 1fr;

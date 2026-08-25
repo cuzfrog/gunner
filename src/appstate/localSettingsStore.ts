@@ -6,7 +6,7 @@ import type { Language } from "./language";
 import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
-import { isLanguage, isOptionalHiddenRangeOverlays, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
+import { isFiniteNumber, isLanguage, isOptionalHiddenRangeOverlays, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
 
 const PROFILES_KEY = "gunner-profiles-v6";
 const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
@@ -118,6 +118,8 @@ export class LocalSettingsStore implements SettingsStore {
             ? s.gridBrightness
             : DEFAULT_PREFERENCES.gridBrightness,
         hiddenRangeOverlays: isOptionalHiddenRangeOverlays(s.hiddenRangeOverlays) ? s.hiddenRangeOverlays : undefined,
+        autoZoom: typeof s.autoZoom === "boolean" ? s.autoZoom : DEFAULT_PREFERENCES.autoZoom,
+        zoomFactor: isFiniteNumber(s.zoomFactor) ? Math.max(0.25, Math.min(4, s.zoomFactor)) : DEFAULT_PREFERENCES.zoomFactor,
       };
     } catch {
       return { ...DEFAULT_PREFERENCES };

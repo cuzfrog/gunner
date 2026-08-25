@@ -21,6 +21,8 @@ const controls = vi.mocked<Controls>({
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
+  getAutoZoom: vi.fn(),
+  getZoomFactor: vi.fn(),
   getOverlays: vi.fn(() => []),
   hasAttackerGuns: vi.fn(),
   update: vi.fn(),
@@ -29,7 +31,7 @@ const controls = vi.mocked<Controls>({
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
-const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setRangeRingsEnabled: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setRangeRingsEnabled: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),

@@ -90,6 +90,7 @@ function setControlDefaults(document: Document): void {
     "maneuver-aggressivity": "1",
     "maneuver-aggressivity-slider": "0.5",
     "grid-brightness-slider": "0.2",
+    "zoom-slider": "1",
     "sim-speed": "4",
   };
   for (const [id, value] of Object.entries(defaults)) {
@@ -98,6 +99,8 @@ function setControlDefaults(document: Document): void {
   }
   getFake(document, "attacker-overload").checked = true;
   getFake(document, "target-overload").checked = true;
+  getFake(document, "auto-zoom").checked = true;
+  getFake(document, "canvas-settings-popup").hidden = true;
   addSigResButtons(document);
 }
 

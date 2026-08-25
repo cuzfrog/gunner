@@ -30,6 +30,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   attackerRange: 5000,
   maneuverAggressivity: 1,
   gridBrightness: 0.5,
+  autoZoom: true,
+  zoomFactor: 1,
   attackerMass: 1_200_000,
   attackerInertia: 3,
   attackerSkillLevel: 5,
@@ -68,7 +70,7 @@ export const URL_SETTINGS: UserSettings = {
   language: "ja",
 };
 export function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
+  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...rest } = settings;
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);

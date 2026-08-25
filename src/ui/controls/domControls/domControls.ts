@@ -118,6 +118,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.importController.popup);
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretController.popup);
+    this.popupGroup.register(this.preferencesController.popup);
     this.hullDatalist.populate();
     this.attackerSide.sections.skill.renderSkillOptions();
     this.targetSide.sections.skill.renderSkillOptions();
@@ -197,6 +198,8 @@ export class DomControls implements Controls, DomControlsHost {
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
+  getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
+  getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   hasAttackerGuns(): boolean { return this.turretController.turret() !== undefined; }
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {

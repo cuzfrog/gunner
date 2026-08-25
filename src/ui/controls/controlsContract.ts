@@ -26,6 +26,8 @@ export interface Controls {
   getConfig(): SimConfig;
   getSpeed(): number;
   getGridBrightness(): number;
+  getAutoZoom(): boolean;
+  getZoomFactor(): number;
   getOverlays(): readonly RangeOverlay[];
   hasAttackerGuns(): boolean;
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void;

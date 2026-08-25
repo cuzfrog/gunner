@@ -3,12 +3,15 @@ import type { UiEvents } from "../../events";
 import { mockTrackingInput } from "../testSupport";
 import type { DisplayPreferences, SettingsStore } from "../../../appstate";
 import type { ItemNameCatalog } from "../../../gamedata/itemNames";
+import type { PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
 import { PreferencesControllerImpl, type PreferencesController, type PreferencesEls } from "./preferencesController";
 
 class FakeElement {
   value = "";
   disabled = false;
+  hidden = true;
+  checked = true;
   textContent = "";
   classList = { toggle: vi.fn() };
   private attributes: Record<string, string | null> = {};
@@ -26,6 +29,8 @@ class FakeElement {
   setAttribute(name: string, value: string): void {
     this.attributes[name] = value;
   }
+
+  contains(target: EventTarget): boolean { return false; }
 
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
@@ -46,6 +51,11 @@ function fakeEls(): PreferencesEls {
     maneuverAggressivitySlider: new FakeElement() as unknown as HTMLInputElement,
     maneuverAggressivityValue: new FakeElement() as unknown as HTMLElement,
     simSpeed: new FakeElement() as unknown as HTMLSelectElement,
+    canvasSettingsTrigger: new FakeElement() as unknown as HTMLButtonElement,
+    canvasSettingsPopup: new FakeElement() as unknown as HTMLElement,
+    zoomSlider: new FakeElement() as unknown as HTMLInputElement,
+    zoomValue: new FakeElement() as unknown as HTMLElement,
+    autoZoomCheckbox: new FakeElement() as unknown as HTMLInputElement,
   };
 }
 
@@ -87,6 +97,19 @@ function mockRangeOverlayController(): RangeOverlayController {
     restoreHidden: vi.fn(),
     render: vi.fn(),
     update: vi.fn(),
+  };
+}
+
+function mockPopupGroup(): PopupGroup {
+  return {
+    register: vi.fn(),
+    open: vi.fn(),
+    toggle: vi.fn(),
+    close: vi.fn(),
+    closeAll: vi.fn(),
+    hasOpen: vi.fn(),
+    onPointerDown: vi.fn(),
+    onKeyDown: vi.fn(),
   };
 }
 
@@ -139,17 +162,19 @@ function build() {
     emitDistanceChanged: vi.fn(),
   };
   const rangeOverlayController = mockRangeOverlayController();
+  const popupGroup = mockPopupGroup();
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
     itemNameCatalog,
+    popupGroup,
     settingsStore,
     trackingInput: mockTrackingInput(),
     sigResolution: () => 40,
     events,
     rangeOverlayController,
   });
-  return { controller, els, i18n, itemNameCatalog, settingsStore, events, rangeOverlayController };
+  return { controller, els, i18n, itemNameCatalog, popupGroup, settingsStore, events, rangeOverlayController };
 }
 
 describe("PreferencesController", () => {
@@ -204,7 +229,7 @@ describe("PreferencesController", () => {
 
   test("restore does not load the language pack for English", async () => {
     const { controller, itemNameCatalog, events } = build();
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5 };
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(itemNameCatalog.ensureLanguage).not.toHaveBeenCalled();
     await Promise.resolve();
@@ -277,12 +302,12 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [] });
+    expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
   });
 
   test("restore applies hidden range overlay state", () => {
     const { controller, rangeOverlayController } = build();
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"] };
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(rangeOverlayController.restoreHidden).toHaveBeenCalledWith(["web"]);
   });
@@ -295,7 +320,7 @@ describe("PreferencesController", () => {
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
     const { controller, els, i18n, itemNameCatalog, events } = build();
-    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8 };
+    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     controller.trackingInput.setRadValue(0.32, 40);
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
@@ -312,5 +337,56 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.simSpeed.value = "8";
     expect(controller.getSpeed()).toBe(8);
+  });
+
+  test("getZoomFactor clamps the slider value to [0.25, 4]", () => {
+    const { controller, els } = build();
+    els.zoomSlider.value = "0.1";
+    expect(controller.getZoomFactor()).toBe(0.25);
+    els.zoomSlider.value = "5";
+    expect(controller.getZoomFactor()).toBe(4);
+    els.zoomSlider.value = "1.5";
+    expect(controller.getZoomFactor()).toBe(1.5);
+  });
+
+  test("onZoomChange updates the output and persists the zoom factor", () => {
+    const { controller, els, settingsStore, events } = build();
+    els.zoomSlider.value = "2";
+    controller.onZoomChange();
+    expect(els.zoomValue.textContent).toBe("2.00x");
+    expect(parseFloat((els.zoomSlider as unknown as FakeElement).style["--fill"])).toBeCloseTo((2 - 0.25) / (4 - 0.25) * 100, 5);
+    expect(settingsStore.savePreferences).toHaveBeenCalled();
+    expect(events.emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("onAutoZoomChange disables the zoom slider and persists the checkbox state", () => {
+    const { controller, els, settingsStore, events } = build();
+    els.autoZoomCheckbox.checked = true;
+    controller.onAutoZoomChange();
+    expect(els.zoomSlider.disabled).toBe(true);
+    expect(settingsStore.savePreferences).toHaveBeenCalled();
+    expect(events.emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("unchecking auto-zoom enables the zoom slider", () => {
+    const { controller, els } = build();
+    els.autoZoomCheckbox.checked = false;
+    controller.onAutoZoomChange();
+    expect(els.zoomSlider.disabled).toBe(false);
+  });
+
+  test("capture and restore round-trip zoom preferences", () => {
+    const { controller, els } = build();
+    els.autoZoomCheckbox.checked = false;
+    els.zoomSlider.value = "1.75";
+    const captured = controller.capture();
+    expect(captured.autoZoom).toBe(false);
+    expect(captured.zoomFactor).toBe(1.75);
+    const next = build();
+    next.controller.restore(captured);
+    expect(next.els.autoZoomCheckbox.checked).toBe(false);
+    expect(next.els.zoomSlider.disabled).toBe(false);
+    expect(next.els.zoomValue.textContent).toBe("1.75x");
+    expect(next.els.zoomSlider.value).toBe("1.75");
   });
 });

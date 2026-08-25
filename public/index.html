@@ -157,7 +157,7 @@
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
-          <span class="input-with-unit">
+          <span class="input-with-unit has-effective">
             <input type="number" id="tracking" value="0.32" step="any" min="0">
             <span class="effective-value" id="effective-tracking"></span>
           </span>
@@ -192,18 +192,16 @@
         <div class="field-row">
           <label>
             <span class="field-label" data-i18n="label.optimalRange">Optimal range</span>
-            <span class="input-with-unit">
+            <span class="input-with-unit has-effective">
               <input type="number" id="optimal" value="5000" step="any" min="0">
               <span class="effective-value" id="effective-optimal"></span>
-              <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
           <label>
             <span class="field-label" data-i18n="label.falloffRange">Falloff range</span>
-            <span class="input-with-unit">
+            <span class="input-with-unit has-effective">
               <input type="number" id="falloff" value="5000" step="any" min="0">
               <span class="effective-value" id="effective-falloff"></span>
-              <span class="input-suffix" aria-hidden="true">m</span>
             </span>
           </label>
         </div>
@@ -311,10 +309,9 @@
           <button type="button" id="attacker-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
-          <span class="input-with-unit">
+          <span class="input-with-unit has-effective">
             <input type="number" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value" id="effective-attacker-speed"></span>
-            <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="attacker-overload" hidden checked>
         </div>
@@ -390,13 +387,22 @@
           <div class="playback-controls">
             <button id="play" class="primary">Start</button>
             <button id="reset" data-i18n="button.reset">Reset</button>
+            <button type="button" id="canvas-settings-trigger" class="icon-button"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="canvas-settings-popup"
+                    data-i18n-title="label.canvasSettings" data-i18n-aria-label="label.canvasSettings">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
           </div>
 
-          <div class="control-field grid-brightness-control">
-            <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
-            <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
-                   style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
-            <output class="slider-value" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
+          <div class="control-field zoom-control">
+            <label for="zoom-slider" data-i18n="label.zoom">Zoom</label>
+            <input type="range" id="zoom-slider" min="0.25" max="4" step="0.05" value="1"
+                   style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
+            <output class="slider-value" id="zoom-value" for="zoom-slider">1.00x</output>
+            <label class="auto-zoom-option">
+              <input type="checkbox" id="auto-zoom" checked>
+              <span data-i18n="label.autoZoom">Auto-zoom</span>
+            </label>
           </div>
 
           <div class="control-field speed-control">
@@ -409,6 +415,16 @@
               <option value="4" selected>4x</option>
               <option value="8">8x</option>
             </select>
+          </div>
+        </div>
+
+        <div id="canvas-settings-popup" class="canvas-settings-popup" hidden role="dialog"
+             data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
+          <div class="control-field grid-brightness-control">
+            <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
+            <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
+                   style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
+            <output class="slider-value" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
           </div>
         </div>
       </section>
@@ -518,10 +534,9 @@
           <button type="button" id="target-overload-button" class="overload-button" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
-          <span class="input-with-unit">
+          <span class="input-with-unit has-effective">
             <input type="number" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value" id="effective-target-speed"></span>
-            <span class="input-suffix" aria-hidden="true">m/s</span>
           </span>
           <input type="checkbox" id="target-overload" hidden checked>
         </div>

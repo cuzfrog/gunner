@@ -56,6 +56,8 @@ export interface UserSettings {
   attackerRange: number;
   maneuverAggressivity?: number;
   gridBrightness?: number;
+  autoZoom?: boolean;
+  zoomFactor?: number;
   attackerMass: number;
   attackerInertia: number;
   attackerSkillLevel?: SkillLevel;
@@ -88,7 +90,7 @@ export interface UserSettings {
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "attackerAmmo"> & {
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "autoZoom" | "zoomFactor" | "attackerAmmo"> & {
   attackerAmmo?: string;
 };
 
@@ -98,6 +100,8 @@ export interface DisplayPreferences {
   readonly simSpeed: number;
   readonly gridBrightness: number;
   readonly hiddenRangeOverlays?: readonly string[];
+  readonly autoZoom?: boolean;
+  readonly zoomFactor?: number;
 }
 
 export interface StartupState {

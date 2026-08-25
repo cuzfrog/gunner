@@ -39,6 +39,8 @@ export interface UserSettings {
   readonly simSpeed: number;
   readonly trackingUnit: TrackingUnit;
   readonly gridBrightness: number;
+  readonly autoZoom: boolean;
+  readonly zoomFactor: number;
   readonly display: DisplayPreferences;
   readonly maneuverAggressivity?: number;
   readonly attacker: CombatantSettings;

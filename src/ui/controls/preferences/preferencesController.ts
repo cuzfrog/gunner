@@ -5,6 +5,7 @@ import type { TrackingInput } from "../trackingInput";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../../appstate";
 import type { ItemNameCatalog } from "../../../gamedata/itemNames";
 import type { UiEvents } from "../../events";
+import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
 
 export interface PreferencesEls {
@@ -20,11 +21,19 @@ export interface PreferencesEls {
   readonly maneuverAggressivitySlider: HTMLInputElement;
   readonly maneuverAggressivityValue: HTMLElement;
   readonly simSpeed: HTMLSelectElement;
+  readonly canvasSettingsTrigger: HTMLButtonElement;
+  readonly canvasSettingsPopup: HTMLElement;
+  readonly zoomSlider: HTMLInputElement;
+  readonly zoomValue: HTMLElement;
+  readonly autoZoomCheckbox: HTMLInputElement;
 }
 
 export interface PreferencesController {
+  readonly popup: Popup;
   getSpeed(): number;
   getGridBrightness(): number;
+  getAutoZoom(): boolean;
+  getZoomFactor(): number;
   setLanguage(language: Language): void;
   applyPreferences(preferences: DisplayPreferences): void;
   restore(preferences: DisplayPreferences): void;
@@ -37,7 +46,13 @@ export interface PreferencesController {
   updateManeuverAggressivityDisplay(value?: number): void;
   updateManeuverAggressivityEnabled(isMidships: boolean): void;
   getManeuverAggressivity(): number;
+  onZoomChange(): void;
+  onAutoZoomChange(): void;
+  updateZoomDisplay(value?: number): void;
 }
+
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 4;
 
 export class PreferencesControllerImpl implements PreferencesController {
   readonly trackingInput: TrackingInput;
@@ -48,6 +63,9 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly events: UiEvents;
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly rangeOverlayController: RangeOverlayController;
+  private readonly popupGroup: PopupGroup;
+  private readonly canvasSettingsPopupValue: Popup;
+  private canvasSettingsOpen = false;
 
   constructor(deps: {
     els: PreferencesEls;
@@ -58,6 +76,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     events: UiEvents;
     itemNameCatalog: ItemNameCatalog;
     rangeOverlayController: RangeOverlayController;
+    popupGroup: PopupGroup;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
@@ -67,6 +86,15 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.events = deps.events;
     this.itemNameCatalog = deps.itemNameCatalog;
     this.rangeOverlayController = deps.rangeOverlayController;
+    this.popupGroup = deps.popupGroup;
+    this.canvasSettingsPopupValue = {
+      isOpen: () => this.canvasSettingsOpen,
+      open: () => this.openCanvasSettings(),
+      close: () => this.closeCanvasSettings(),
+      focusTrigger: () => this.els.canvasSettingsTrigger.focus(),
+      contains: (target) => this.containsCanvasSettings(target),
+    };
+    this.popupGroup.register(this.canvasSettingsPopupValue);
     this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
     this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
     this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
@@ -74,16 +102,27 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
     this.els.maneuverAggressivitySlider.addEventListener("input", () => this.onManeuverAggressivityChange());
     this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
+    this.els.canvasSettingsTrigger.addEventListener("click", () => this.toggleCanvasSettings());
+    this.els.zoomSlider.addEventListener("input", () => this.onZoomChange());
+    this.els.autoZoomCheckbox.addEventListener("change", () => this.onAutoZoomChange());
   }
 
-  getSpeed(): number {
-    return num(this.els.simSpeed);
-  }
+  get popup(): Popup { return this.canvasSettingsPopupValue; }
+
+  getSpeed(): number { return num(this.els.simSpeed); }
 
   getGridBrightness(): number {
     const value = Number.parseFloat(this.els.gridBrightnessSlider.value);
     if (!Number.isFinite(value)) return DEFAULT_GRID_BRIGHTNESS;
     return Math.max(0, Math.min(1, value));
+  }
+
+  getAutoZoom(): boolean { return this.els.autoZoomCheckbox.checked; }
+
+  getZoomFactor(): number {
+    const value = Number.parseFloat(this.els.zoomSlider.value);
+    if (!Number.isFinite(value)) return 1;
+    return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value));
   }
 
   setLanguage(language: Language): void {
@@ -92,17 +131,11 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.loadPackAndRefresh(language);
   }
 
-  applyPreferences(preferences: DisplayPreferences): void {
-    this.applyDisplayPreferences(preferences);
-  }
+  applyPreferences(preferences: DisplayPreferences): void { this.applyDisplayPreferences(preferences); }
 
-  restore(preferences: DisplayPreferences): void {
-    this.applyDisplayPreferences(preferences);
-  }
+  restore(preferences: DisplayPreferences): void { this.applyDisplayPreferences(preferences); }
 
-  savePreferences(): void {
-    this.settingsStore.savePreferences(this.capture());
-  }
+  savePreferences(): void { this.settingsStore.savePreferences(this.capture()); }
 
   capture(): DisplayPreferences {
     return {
@@ -111,6 +144,8 @@ export class PreferencesControllerImpl implements PreferencesController {
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
       hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
+      autoZoom: this.getAutoZoom(),
+      zoomFactor: this.getZoomFactor(),
     };
   }
 
@@ -133,9 +168,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     const current = value ?? this.getGridBrightness();
     slider.value = String(current);
     setText(output, `${Math.round(current * 100)}%`);
-    if ("setProperty" in slider.style) {
-      slider.style.setProperty("--fill", `${current * 100}%`);
-    }
+    if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${current * 100}%`);
   }
 
   onManeuverAggressivityChange(): void {
@@ -156,22 +189,38 @@ export class PreferencesControllerImpl implements PreferencesController {
     setText(output, current.toFixed(2));
     const pos = positionFromAggressivity(current);
     slider.value = String(pos);
-    if ("setProperty" in slider.style) {
-      slider.style.setProperty("--fill", `${pos * 100}%`);
-    }
+    if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${pos * 100}%`);
   }
 
-  updateManeuverAggressivityEnabled(isMidships: boolean): void {
-    this.els.maneuverAggressivitySlider.disabled = isMidships;
+  updateManeuverAggressivityEnabled(isMidships: boolean): void { this.els.maneuverAggressivitySlider.disabled = isMidships; }
+
+  getManeuverAggressivity(): number { return parseManeuverAggressivity(this.els.maneuverAggressivity); }
+
+  onZoomChange(): void {
+    this.updateZoomDisplay();
+    this.savePreferences();
+    this.events.emitDisplayInvalidated();
   }
 
-  getManeuverAggressivity(): number {
-    return parseManeuverAggressivity(this.els.maneuverAggressivity);
+  onAutoZoomChange(): void {
+    const autoZoom = this.getAutoZoom();
+    this.els.zoomSlider.disabled = autoZoom;
+    this.updateZoomDisplay();
+    this.savePreferences();
+    this.events.emitDisplayInvalidated();
   }
 
-  private onTrackingUnitClick(unit: TrackingUnit): void {
-    this.setTrackingUnit(unit);
+  updateZoomDisplay(value?: number): void {
+    const slider = this.els.zoomSlider;
+    const output = this.els.zoomValue;
+    const current = value ?? this.getZoomFactor();
+    slider.value = String(current);
+    setText(output, `${current.toFixed(2)}x`);
+    const fill = ((current - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100;
+    if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${fill}%`);
   }
+
+  private onTrackingUnitClick(unit: TrackingUnit): void { this.setTrackingUnit(unit); }
 
   private applyLanguage(language: Language): void {
     this.i18n.setLanguage(language);
@@ -185,9 +234,10 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
     this.updateUnitToggle();
-    if (preferences.language !== "en") {
-      this.loadPackAndRefresh(preferences.language);
-    }
+    this.els.autoZoomCheckbox.checked = preferences.autoZoom ?? true;
+    this.els.zoomSlider.disabled = preferences.autoZoom ?? true;
+    this.updateZoomDisplay(preferences.zoomFactor);
+    if (preferences.language !== "en") this.loadPackAndRefresh(preferences.language);
   }
 
   private loadPackAndRefresh(language: Language): void {
@@ -214,5 +264,28 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.langZh.setAttribute("aria-pressed", String(current === "zh"));
     this.els.langJa.classList.toggle("active", current === "ja");
     this.els.langJa.setAttribute("aria-pressed", String(current === "ja"));
+  }
+
+  private toggleCanvasSettings(): void {
+    if (this.canvasSettingsOpen) this.closeCanvasSettings();
+    else this.popupGroup.open(this.canvasSettingsPopupValue);
+  }
+
+  private openCanvasSettings(): void {
+    this.els.canvasSettingsPopup.hidden = false;
+    this.canvasSettingsOpen = true;
+    this.els.canvasSettingsTrigger.setAttribute("aria-expanded", "true");
+  }
+
+  private closeCanvasSettings(): void {
+    if (!this.canvasSettingsOpen && this.els.canvasSettingsPopup.hidden) return;
+    this.els.canvasSettingsPopup.hidden = true;
+    this.canvasSettingsOpen = false;
+    this.els.canvasSettingsTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  private containsCanvasSettings(target: EventTarget): boolean {
+    if (!(target instanceof Element)) return false;
+    return this.els.canvasSettingsPopup.contains(target) || target === this.els.canvasSettingsTrigger;
   }
 }

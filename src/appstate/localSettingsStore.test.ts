@@ -560,7 +560,7 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.8 };
+    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
@@ -581,7 +581,7 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip hidden range overlays", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"] };
+    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });

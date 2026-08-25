@@ -33,7 +33,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly i18n: I18n;
   private readonly trackingInput: TrackingInput;
   private readonly sigResolution: () => number;
-  private readonly lastByReadout = new Map<ReadoutLike, { text: string; affected: boolean; title: string }>();
+  private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; title: string }>();
 
   constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingInput; sigResolution: () => number }) {
     this.els = deps.els;
@@ -49,26 +49,26 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     const tracking = this.trackingInput.unit === "score"
       ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
       : `${formatNumber(trackingDisplay, 4)} rad/s`;
-    this.write(this.els.trackingReadout, tracking, isTrackingAffected(values.tracking, values.boostedTracking), t);
-    this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedAffected(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)), t);
-    this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedAffected(values.targetSpeed, tryReadNumber(this.els.targetSpeed)), t);
-    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeAffected(values.optimal, values.boostedOptimal), t);
-    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeAffected(values.falloff, values.boostedFalloff), t);
+    this.write(this.els.trackingReadout, tracking, isTrackingNegative(values.tracking, values.boostedTracking), t);
+    this.write(this.els.attackerSpeedReadout, formatSpeed(values.attackerSpeed), isSpeedNegative(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)), t);
+    this.write(this.els.targetSpeedReadout, formatSpeed(values.targetSpeed), isSpeedNegative(values.targetSpeed, tryReadNumber(this.els.targetSpeed)), t);
+    this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeNegative(values.optimal, values.boostedOptimal), t);
+    this.write(this.els.falloffReadout, formatDistance(values.falloff, t), isRangeNegative(values.falloff, values.boostedFalloff), t);
   }
 
-  private write(readout: ReadoutLike, text: string, affected: boolean, t: (key: string) => string): void {
-    const title = affected ? t("readout.effectiveAffected") : "";
+  private write(readout: ReadoutLike, text: string, negative: boolean, t: (key: string) => string): void {
+    const title = negative ? t("readout.effectiveAffected") : "";
     const previous = this.lastByReadout.get(readout);
-    if (previous && previous.text === text && previous.affected === affected && previous.title === title) return;
+    if (previous && previous.text === text && previous.negative === negative && previous.title === title) return;
     readout.textContent = text;
-    if (affected) {
-      readout.classList.add("affected");
+    if (negative) {
+      readout.classList.add("negative");
       readout.title = title;
     } else {
-      readout.classList.remove("affected");
+      readout.classList.remove("negative");
       readout.title = "";
     }
-    this.lastByReadout.set(readout, { text, affected, title });
+    this.lastByReadout.set(readout, { text, negative, title });
   }
 }
 
@@ -87,23 +87,22 @@ function formatSpeed(value: number): string {
   return `${formatWithCommas(value, 0)} m/s`;
 }
 
-function isSpeedAffected(effective: number, raw: number | undefined): boolean {
+function isSpeedNegative(effective: number, raw: number | undefined): boolean {
   if (raw === undefined) return false;
-  return isAffected(effective, raw, SPEED_EPSILON);
+  return isNegative(effective, raw, SPEED_EPSILON);
 }
 
-function isTrackingAffected(effective: number, raw: number): boolean {
-  return isAffected(effective, raw, TRACKING_EPSILON);
+function isTrackingNegative(effective: number, raw: number): boolean {
+  return isNegative(effective, raw, TRACKING_EPSILON);
 }
 
-function isRangeAffected(effective: number, raw: number): boolean {
-  return isAffected(effective, raw, RANGE_EPSILON);
+function isRangeNegative(effective: number, raw: number): boolean {
+  return isNegative(effective, raw, RANGE_EPSILON);
 }
 
-function isAffected(effective: number, raw: number, epsilon: { readonly absolute: number; readonly relative: number }): boolean {
-  const diff = Math.abs(effective - raw);
+function isNegative(effective: number, baseline: number, epsilon: { readonly absolute: number; readonly relative: number }): boolean {
   const threshold = Math.max(epsilon.absolute, Math.abs(effective) * epsilon.relative);
-  return diff > threshold;
+  return effective < baseline - threshold;
 }
 
-export { formatSpeed as _formatSpeed, isAffected as _isAffected, tryReadNumber as _readNumber };
+export { formatSpeed as _formatSpeed, isNegative as _isAffected, tryReadNumber as _readNumber };

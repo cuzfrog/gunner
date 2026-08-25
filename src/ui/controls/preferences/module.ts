@@ -10,12 +10,13 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerPreferencesModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     preferencesController: asFunction(({
-      els, i18n, itemNameCatalog, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController,
+      els, i18n, itemNameCatalog, popupGroup, settingsStore, trackingInput, turretController, uiEvents, rangeOverlayController,
     }: ControlsCradle) =>
       new PreferencesControllerImpl({
         els: collectPreferencesEls(els),
         i18n,
         itemNameCatalog,
+        popupGroup,
         settingsStore,
         trackingInput,
         sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
@@ -40,5 +41,10 @@ function collectPreferencesEls(els: ControlsElements): PreferencesEls {
     maneuverAggressivitySlider: els.maneuverAggressivitySlider,
     maneuverAggressivityValue: els.maneuverAggressivityValue,
     simSpeed: els.simSpeed,
+    canvasSettingsTrigger: els.canvasSettingsTrigger,
+    canvasSettingsPopup: els.canvasSettingsPopup,
+    zoomSlider: els.zoomSlider,
+    zoomValue: els.zoomValue,
+    autoZoomCheckbox: els.autoZoomCheckbox,
   };
 }

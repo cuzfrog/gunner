@@ -63,7 +63,7 @@ describe("SettingsParser", () => {
   });
 
   test("parseUserSettings defaults missing display preferences", () => {
-    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...missingPrefs } = DEFAULT_SETTINGS;
+    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...missingPrefs } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missingPrefs));
     expect(parsed).not.toBeNull();
     expect(parsed!.language).toBe("en");
@@ -286,7 +286,7 @@ describe("SettingsParser", () => {
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {
-    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...missingPrefs } = DEFAULT_SETTINGS;
+    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...missingPrefs } = DEFAULT_SETTINGS;
     const decoded = makeParser().decodeUrlSettings(urlFor(missingPrefs).split("c=")[1]);
     expect(decoded).not.toBeNull();
     expect(decoded!.language).toBe("en");

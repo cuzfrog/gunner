@@ -3,7 +3,7 @@ import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
-import { _formatSpeed, _isAffected, _readNumber } from "./effectiveReadout";
+import { _formatSpeed, _isAffected as _isNegative, _readNumber } from "./effectiveReadout";
 
 interface FakeReadout {
   textContent: string | null;
@@ -70,7 +70,7 @@ function fakeI18nWithEmptyAffected(): I18n {
 }
 
 describe("EffectiveReadoutImpl", () => {
-  test("formats and displays all effective values without affected state when equal to raw inputs", () => {
+  test("formats and displays all effective values without negative state when equal to raw inputs", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
@@ -81,20 +81,31 @@ describe("EffectiveReadoutImpl", () => {
     expect(els.trackingReadout.textContent).toBe("0.32 rad/s");
     expect(els.optimalReadout.textContent).toBe("5,000 m");
     expect(els.falloffReadout.textContent).toBe("3,000 m");
-    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("affected");
+    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("negative");
   });
 
-  test("marks target speed and optimal as affected when effective values differ from raw inputs", () => {
+  test("marks target speed and optimal as negative when effective values are below their baselines", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ attackerSpeed: 400, targetSpeed: 125, tracking: 0.32, optimal: 6000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.targetSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
+    readout.update({ attackerSpeed: 400, targetSpeed: 125, tracking: 0.32, optimal: 4000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.targetSpeedReadout.classList.add).toHaveBeenCalledWith("negative");
     expect(els.targetSpeedReadout.title).toBe("Affected");
-    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("affected");
-    expect(els.optimalReadout.textContent).toBe("6,000 m");
-    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("affected");
+    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("negative");
+    expect(els.optimalReadout.textContent).toBe("4,000 m");
+    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("negative");
+  });
+
+  test("does not mark speed as negative when the effective value exceeds the raw input", () => {
+    const els = fakeEls();
+    els.attackerSpeed.value = "1000";
+    const i18n = fakeI18n();
+    const trackingInput = fakeTrackingInput(0.32, "rad");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    readout.update({ attackerSpeed: 1500, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.attackerSpeedReadout.textContent).toBe("1,500 m/s");
   });
 
   test("renders tracking in score unit when tracking input is in score mode", () => {
@@ -104,7 +115,7 @@ describe("EffectiveReadoutImpl", () => {
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
     readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.trackingReadout.textContent).toBe("160 Score");
-    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("affected");
+    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("negative");
   });
 
   test("uses kilometer formatting for long distances", () => {
@@ -117,7 +128,7 @@ describe("EffectiveReadoutImpl", () => {
     expect(els.falloffReadout.textContent).toBe("12.0 km");
   });
 
-  test("does not mark turret values affected when only friendly boosts change the effective value", () => {
+  test("does not mark turret values negative when only friendly boosts change the effective value", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
@@ -129,15 +140,15 @@ describe("EffectiveReadoutImpl", () => {
     expect(els.optimalReadout.classList.add).not.toHaveBeenCalled();
   });
 
-  test("marks turret values affected when effective differs from the boosted baseline", () => {
+  test("marks turret values negative when effective is below the boosted baseline", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
     readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("affected");
-    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("affected");
-    expect(els.falloffReadout.classList.add).toHaveBeenCalledWith("affected");
+    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("negative");
+    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("negative");
+    expect(els.falloffReadout.classList.add).toHaveBeenCalledWith("negative");
   });
 });
 
@@ -148,16 +159,16 @@ describe("_formatSpeed", () => {
   });
 });
 
-describe("_isAffected", () => {
-  test("detects differences above the relative threshold", () => {
-    expect(_isAffected(100, 99.5, { absolute: 0.5, relative: 0.005 })).toBe(false);
-    expect(_isAffected(100, 99, { absolute: 0.5, relative: 0.005 })).toBe(true);
+describe("_isNegative", () => {
+  test("detects values below the baseline by more than the relative threshold", () => {
+    expect(_isNegative(100, 99.5, { absolute: 0.5, relative: 0.005 })).toBe(false);
+    expect(_isNegative(99, 100, { absolute: 0.5, relative: 0.005 })).toBe(true);
   });
 
   test("respects the absolute floor for small values", () => {
-    expect(_isAffected(0.32, 0.32, { absolute: 0.0001, relative: 0.005 })).toBe(false);
-    expect(_isAffected(0.32, 0.3198, { absolute: 0.0001, relative: 0.005 })).toBe(false);
-    expect(_isAffected(0.32, 0.318, { absolute: 0.0001, relative: 0.005 })).toBe(true);
+    expect(_isNegative(0.32, 0.32, { absolute: 0.0001, relative: 0.005 })).toBe(false);
+    expect(_isNegative(0.32, 0.3198, { absolute: 0.0001, relative: 0.005 })).toBe(false);
+    expect(_isNegative(0.318, 0.32, { absolute: 0.0001, relative: 0.005 })).toBe(true);
   });
 });
 
@@ -175,7 +186,7 @@ describe("_readNumber", () => {
 });
 
 describe("EffectiveReadoutImpl redundant write skipping", () => {
-  test("skips DOM writes when text and affected state are unchanged", () => {
+  test("skips DOM writes when text and negative state are unchanged", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
@@ -192,7 +203,7 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     expect(addCount + removeCount).toBe(1);
   });
 
-  test("re-writes DOM when affected state changes even with the same text", () => {
+  test("re-writes DOM when negative state changes even with the same text", () => {
     const els = fakeEls();
     els.attackerSpeed.value = "200";
     const i18n = fakeI18n();
@@ -201,11 +212,11 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     readout.update({ attackerSpeed: 200, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
     (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
-    readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
+    readout.update({ attackerSpeed: 100, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("negative");
   });
 
-  test("does not mark speed as affected when the raw input is not a valid non-negative number", () => {
+  test("does not mark speed as negative when the raw input is not a valid non-negative number", () => {
     const els = fakeEls();
     els.attackerSpeed.value = "abc";
     const i18n = fakeI18n();
@@ -213,10 +224,10 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
     readout.update({ attackerSpeed: 400, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     expect(els.attackerSpeedReadout.classList.add).not.toHaveBeenCalled();
-    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("affected");
+    expect(els.attackerSpeedReadout.classList.remove).toHaveBeenCalledWith("negative");
   });
 
-  test("re-writes affected class when affected state changes and the affected title is empty", () => {
+  test("re-writes negative class when negative state changes and the affected title is empty", () => {
     const els = fakeEls();
     els.attackerSpeed.value = "99.5";
     const i18n = fakeI18nWithEmptyAffected();
@@ -225,8 +236,8 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     readout.update({ attackerSpeed: 99.5, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
     (els.attackerSpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
     (els.attackerSpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
-    readout.update({ attackerSpeed: 100.4, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.attackerSpeedReadout.textContent).toBe("100 m/s");
-    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("affected");
+    readout.update({ attackerSpeed: 98.4, targetSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
+    expect(els.attackerSpeedReadout.textContent).toBe("98 m/s");
+    expect(els.attackerSpeedReadout.classList.add).toHaveBeenCalledWith("negative");
   });
 });

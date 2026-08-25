@@ -73,6 +73,7 @@ export class AppImpl implements App {
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setRangeRingsEnabled(this.controls.hasAttackerGuns());
+    this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
     this.renderer.draw(snapshot, view.frame, view.hit, view.effectiveTurret, this.controls.getOverlays());
     this.controls.update(view.frame, view.hit, effectiveReadouts);
   }

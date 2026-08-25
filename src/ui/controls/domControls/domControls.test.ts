@@ -46,6 +46,8 @@ function baseSettings(): UserSettings {
     attackerRange: 5000,
     maneuverAggressivity: 1,
     gridBrightness: 0.5,
+    autoZoom: true,
+    zoomFactor: 1,
     attackerMass: 1_000_000,
     attackerInertia: 3,
     attackerSkillLevel: 5,
@@ -313,10 +315,10 @@ describe("DomControls", () => {
     expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
     expect(getFake(document, "effective-optimal").textContent).toBe("1,000 unit.meter");
     expect(getFake(document, "effective-falloff").textContent).toBe("3,000 unit.meter");
-    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("affected");
-    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("affected");
-    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("affected");
-    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("affected");
+    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("negative");
+    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("negative");
+    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("negative");
+    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("negative");
   });
 
   test("sessionRestored preserves playing state and resets the simulation", () => {
