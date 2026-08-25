@@ -36,6 +36,11 @@ import {
 } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
+const SHIP_INPUT_OVERRIDE_KEYS: Record<Side, Record<"speed" | "mass" | "inertia", keyof ProfileParamOverrides>> = {
+  shipA: { speed: "shipASpeed", mass: "shipAMass", inertia: "shipAInertia" },
+  shipB: { speed: "shipBSpeed", mass: "shipBMass", inertia: "shipBInertia" },
+} as const;
+
 const NOOP_HOST: SidePanelHost = {
   persistConfigChange() {},
   onConfigChange() {},
@@ -119,7 +124,7 @@ export class SidePanelImpl implements SidePanel {
 
   private onShipInput(key: "speed" | "mass" | "inertia"): void {
     const value = num(this.els[key]);
-    const overrideKey = `${this.side}${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof ProfileParamOverrides;
+    const overrideKey = SHIP_INPUT_OVERRIDE_KEYS[this.side][key];
     this.recordOverride(overrideKey, value);
     if (key === "mass") {
       this.sections.stats.updateSpeedFromMass();

@@ -1,7 +1,6 @@
 import { Vec2 } from "./vec2";
 import { timeConstant } from "./dynamics";
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN } from "./types";
-import type { ShipState } from "./types";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, clampManeuverAggressivity, type ShipState } from "./types";
 
 export interface Autopilot {
   computeVelocity(ship: ShipState, other: ShipState, time: number): Vec2;
@@ -85,7 +84,7 @@ function dampingGain(ship: ShipState, gain: number): number {
 }
 
 function zetaFromAggressivity(aggressivity: number): number {
-  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, aggressivity));
+  const clamped = clampManeuverAggressivity(aggressivity);
   const span = Math.log10(AGGRESSIVITY_MAX) - Math.log10(AGGRESSIVITY_MIN);
   return Math.max(0, Math.min(1, (Math.log10(AGGRESSIVITY_MAX) - Math.log10(clamped)) / span));
 }
