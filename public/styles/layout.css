@@ -39,6 +39,6 @@
 @media (max-width: 480px) {
   .app-footer { grid-template-columns: 1fr; }
 
-  .combatant-portrait { bottom: 140px; }
+  .combatant-portrait { bottom: 152px; }
 }
 }

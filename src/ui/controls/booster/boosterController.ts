@@ -27,7 +27,6 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly states = new Map<Side, BoosterState>();
-  private readonly popups: Record<Side, Popup>;
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
@@ -40,13 +39,8 @@ export class BoosterControllerImpl implements BoosterController {
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
-    this.popups = { attacker: this.buildPopup("attacker"), target: this.buildPopup("target") };
     this.popupGroup.register(this.scriptPopups.attacker);
     this.popupGroup.register(this.scriptPopups.target);
-    this.popupGroup.register(this.popups.attacker);
-    this.popupGroup.register(this.popups.target);
-    this.els.attackerBoosterTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
-    this.els.targetBoosterTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
     this.render();
   }
@@ -84,7 +78,6 @@ export class BoosterControllerImpl implements BoosterController {
     }));
   }
 
-
   render(): void {
     this.renderSide("attacker");
     this.renderSide("target");
@@ -95,30 +88,14 @@ export class BoosterControllerImpl implements BoosterController {
     this.updateSummary("target");
   }
 
-  private buildPopup(side: Side): Popup {
-    const trigger = side === "attacker" ? this.els.attackerBoosterTrigger : this.els.targetBoosterTrigger;
-    const popup = side === "attacker" ? this.els.attackerBoosterPopup : this.els.targetBoosterPopup;
-    return {
-      isOpen: () => !popup.hidden,
-      open: () => { popup.hidden = false; trigger.setAttribute("aria-expanded", "true"); },
-      close: () => {
-        this.scriptPopups[side].close();
-        popup.hidden = true;
-        trigger.setAttribute("aria-expanded", "false");
-      },
-      focusTrigger: () => trigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${side}-booster-field`) !== null,
-    };
-  }
-
   private buildScriptPopup(side: Side): Popup {
-    const field = side === "attacker" ? this.els.attackerBoosterField : this.els.targetBoosterField;
+    const section = this.els.sections[side];
     const popup = document.createElement("div");
     popup.id = `${side}-booster-script-popup`;
     popup.className = "ewar-script-popup popup";
     popup.setAttribute("role", "menu");
     popup.hidden = true;
-    field.appendChild(popup);
+    section.appendChild(popup);
     this.scriptPopupEls.set(side, popup);
     return {
       isOpen: () => !popup.hidden,
@@ -129,48 +106,34 @@ export class BoosterControllerImpl implements BoosterController {
         if (gear) gear.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${side}-booster-field`) !== null,
+      contains: (target) => target instanceof Element && target.closest(`#${side}-ewar-popup`) !== null,
     };
   }
 
   private renderSide(side: Side): void {
-    const trigger = side === "attacker" ? this.els.attackerBoosterTrigger : this.els.targetBoosterTrigger;
-    const popup = side === "attacker" ? this.els.attackerBoosterPopup : this.els.targetBoosterPopup;
-    const summary = side === "attacker" ? this.els.attackerBoosterSummary : this.els.targetBoosterSummary;
+    const section = this.els.sections[side];
+    const summary = this.els.summaries[side];
     const state = this.states.get(side);
-    const label = this.i18n.t("label.booster.computer");
-    const labelSpan = trigger.querySelector?.(".booster-label");
-    if (labelSpan) labelSpan.textContent = label;
-    trigger.setAttribute("aria-label", label);
-    popup.setAttribute("aria-label", label);
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
-    popup.innerHTML = "";
+    section.innerHTML = "";
+    section.appendChild(this.scriptPopupEls.get(side)!);
     if (!state || state.loadout.computers.length === 0) {
-      trigger.disabled = true;
-      trigger.title = this.i18n.t("title.booster.empty");
+      section.hidden = true;
       summary.innerHTML = "";
       return;
     }
-    trigger.disabled = false;
-    trigger.title = "";
+    section.hidden = false;
     this.updateSummary(side);
-    this.renderSection(popup, "label.booster.computer", (section) => this.renderComputers(side, state, section));
-  }
-
-  private renderSection(popup: HTMLElement, labelKey: "label.booster.computer", renderRows: (section: HTMLElement) => void): void {
-    const section = document.createElement("div");
-    section.className = "preview-section";
     const label = document.createElement("div");
     label.className = "preview-section-label";
-    label.textContent = this.i18n.t(labelKey);
+    label.textContent = this.i18n.t("label.booster.computer");
     section.appendChild(label);
-    renderRows(section);
-    popup.appendChild(section);
+    this.renderComputers(side, state, section);
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "attacker" ? this.els.attackerBoosterSummary : this.els.targetBoosterSummary;
+    const summary = this.els.summaries[side];
     const state = this.states.get(side);
     summary.innerHTML = "";
     if (!state || state.loadout.computers.length === 0) {
@@ -301,7 +264,7 @@ export class BoosterControllerImpl implements BoosterController {
   private updateGearTitle(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
     const name = script?.name ?? this.i18n.t("ewar.script.none");
     const title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
-    gear.title = title;
+    gear.setAttribute("title", title);
     gear.setAttribute("aria-label", title);
   }
 

@@ -149,6 +149,7 @@ export class EwarControllerImpl implements EwarController {
   private renderSide(side: Side): void {
     const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
     const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
+    const section = side === "attacker" ? this.els.attackerEwarSection : this.els.targetEwarSection;
     const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
@@ -158,7 +159,7 @@ export class EwarControllerImpl implements EwarController {
     popup.setAttribute("aria-label", modulesLabel);
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
-    popup.innerHTML = "";
+    section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       trigger.disabled = true;
       trigger.title = this.i18n.t("title.ewar.empty");
@@ -169,34 +170,38 @@ export class EwarControllerImpl implements EwarController {
     trigger.disabled = false;
     trigger.title = "";
     this.updateSummary(side);
+    const heading = document.createElement("div");
+    heading.className = "preview-section-label";
+    heading.textContent = modulesLabel;
+    section.appendChild(heading);
     if (state.loadout.webs.length > 0) {
-      this.renderSection(popup, "label.ewar.web", (section) => this.renderWebs(side, state, section));
+      this.renderSection(section, "label.ewar.web", (container) => this.renderWebs(side, state, container));
     }
     if (state.loadout.grapplers.length > 0) {
-      this.renderSection(popup, "label.ewar.grappler", (section) => this.renderGrapplers(side, state, section));
+      this.renderSection(section, "label.ewar.grappler", (container) => this.renderGrapplers(side, state, container));
     }
     if (state.loadout.disruptors.length > 0) {
-      this.renderSection(popup, "label.ewar.disruptor", (section) => this.renderDisruptors(side, state, section));
+      this.renderSection(section, "label.ewar.disruptor", (container) => this.renderDisruptors(side, state, container));
     }
     if (state.loadout.scramblers.length > 0) {
-      this.renderSection(popup, "label.ewar.scrambler", (section) => this.renderScramblers(side, state, section));
+      this.renderSection(section, "label.ewar.scrambler", (container) => this.renderScramblers(side, state, container));
     }
     this.popups[side].close();
   }
 
   private renderSection(
-    popup: HTMLElement,
+    parent: HTMLElement,
     labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
-    renderRows: (section: HTMLElement) => void,
+    renderRows: (container: HTMLElement) => void,
   ): void {
-    const section = document.createElement("div");
-    section.className = "preview-section";
+    const container = document.createElement("div");
+    container.className = "preview-section";
     const label = document.createElement("div");
     label.className = "preview-section-label";
     label.textContent = this.i18n.t(labelKey);
-    section.appendChild(label);
-    renderRows(section);
-    popup.appendChild(section);
+    container.appendChild(label);
+    renderRows(container);
+    parent.appendChild(container);
   }
 
   private updateSummary(side: Side): void {

@@ -256,8 +256,7 @@
 
 .skill-label,
 .ammo-label,
-.ewar-label,
-.booster-label {
+.ewar-label {
   display: block;
   flex: 1 1 auto;
   text-align: left;
@@ -766,8 +765,7 @@
 
 .overload-button-icon { display: block; }
 
-.ewar-group,
-.booster-group {
+.ewar-group {
   position: relative;
   margin-bottom: 6px;
 }

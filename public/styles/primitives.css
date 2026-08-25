@@ -209,11 +209,16 @@ select.input-field:disabled {
   transform: translateY(-50%);
   font-size: 12px;
   color: var(--accent-teal);
-  pointer-events: none;
   white-space: nowrap;
 }
 
-.effective-value.is-negative { color: var(--danger-red); }
+.input-suffix { pointer-events: none; }
+.effective-value { pointer-events: auto; }
+
+.effective-value.is-negative {
+  color: var(--danger-red);
+  cursor: help;
+}
 
 /* ---- mono ---- */
 .mono {

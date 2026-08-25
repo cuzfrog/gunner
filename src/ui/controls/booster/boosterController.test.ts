@@ -8,6 +8,7 @@ import type { PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { BoosterControllerImpl } from "./boosterController";
+import type { BoosterEls } from "./boosterControllerContract";
 
 const TRACKING_SCRIPT: TurretScriptSpec = { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
 const OPTIMAL_SCRIPT: TurretScriptSpec = { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
@@ -47,43 +48,60 @@ function buildBoosterController() {
     onKeyDown: vi.fn(),
   });
   const els = createControlsEls();
-  getFake(document, "attacker-booster-popup").hidden = true;
-  getFake(document, "target-booster-popup").hidden = true;
+  getFake(document, "attacker-ewar-popup").appendChild(els.attackerBoosterSection as unknown as FakeElement);
+  getFake(document, "target-ewar-popup").appendChild(els.targetBoosterSection as unknown as FakeElement);
+  getFake(document, "attacker-booster-section").hidden = true;
+  getFake(document, "target-booster-section").hidden = true;
+  const boosterEls: BoosterEls = {
+    sections: { attacker: els.attackerBoosterSection, target: els.targetBoosterSection },
+    summaries: { attacker: els.attackerBoosterSummary, target: els.targetBoosterSummary },
+  };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const controller = new BoosterControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, events });
-  return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
+  const controller = new BoosterControllerImpl({ els: boosterEls, popupGroup, imageCatalog, fittingImport, i18n, events });
+  return { document, controller, els, boosterEls, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
+}
+
+function scriptPopupFor(section: FakeElement): FakeElement | undefined {
+  return section.children.find((child) => child.id === "attacker-booster-script-popup");
+}
+
+function firstRow(section: FakeElement): FakeElement | undefined {
+  return section.children.find((child) => child.className.split(" ").includes("ewar-row"));
 }
 
 describe("BoosterController", () => {
-  test("setLoadout renders active row and enables trigger", () => {
-    const { controller, els } = buildBoosterController();
+  test("setLoadout renders active row and shows section", () => {
+    const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("attacker", LOADOUT);
-    expect(els.attackerBoosterTrigger.disabled).toBe(false);
-    const popup = els.attackerBoosterPopup as unknown as FakeElement;
-    const rows = popup.children[0]?.children.slice(1);
+    const section = boosterEls.sections.attacker as unknown as FakeElement;
+    expect(section.hidden).toBe(false);
+    expect(section.children[0]?.id).toBe("attacker-booster-script-popup");
+    expect(section.children[1]?.textContent).toBe("label.booster.computer");
+    const rows = section.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     expect(rows).toHaveLength(2);
-    expect(rows?.[0]?.children[0]?.getAttribute("aria-pressed")).toBe("true");
+    expect(rows[0]?.children[0]?.getAttribute("aria-pressed")).toBe("true");
   });
 
-  test("setLoadout with empty loadout disables trigger", () => {
-    const { controller, els } = buildBoosterController();
+  test("setLoadout with empty loadout hides section and clears summary", () => {
+    const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("attacker", EMPTY_BOOST_LOADOUT);
-    expect(els.attackerBoosterTrigger.disabled).toBe(true);
-    expect(els.attackerBoosterSummary.innerHTML).toBe("");
+    const section = boosterEls.sections.attacker as unknown as FakeElement;
+    expect(section.hidden).toBe(true);
+    expect(boosterEls.summaries.attacker.innerHTML).toBe("");
   });
 
   test("toggleComputer deactivates a row and updates summary", () => {
-    const { controller, els } = buildBoosterController();
+    const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("attacker", LOADOUT);
-    const popup = els.attackerBoosterPopup as unknown as FakeElement;
-    const firstRow = popup.children[0]?.children[1];
-    const button = firstRow?.children[0] as FakeElement;
+    const section = boosterEls.sections.attacker as unknown as FakeElement;
+    const firstRow = section.children.find((child) => child.className.split(" ").includes("ewar-row"))!;
+    const button = firstRow.children[0] as FakeElement;
     button.trigger("click");
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(firstRow?.className).toBe("ewar-row ewar-row-inactive");
+    expect(firstRow.className).toBe("ewar-row ewar-row-inactive");
   });
 
   test("capture and restore round-trip activations and selected scripts", () => {
@@ -107,5 +125,32 @@ describe("BoosterController", () => {
     const { controller } = buildBoosterController();
     controller.setLoadout("attacker", EMPTY_BOOST_LOADOUT);
     expect(controller.projection("attacker")).toBeUndefined();
+  });
+
+  test("script popup is appended to the booster section and containment uses the ewar popup", () => {
+    const { controller, boosterEls, popupGroup } = buildBoosterController();
+    controller.setLoadout("attacker", LOADOUT);
+    const section = boosterEls.sections.attacker as unknown as FakeElement;
+    const popup = scriptPopupFor(section);
+    expect(popup).toBeDefined();
+    expect(popup?.parent).toBe(section);
+    const ewarPopup = getFake(document, "attacker-ewar-popup");
+    expect(section.parent).toBe(ewarPopup);
+    expect(popupGroup.register).toHaveBeenCalled();
+  });
+
+  test("selecting a script persists and updates the gear title", () => {
+    const { controller, boosterEls } = buildBoosterController();
+    controller.setLoadout("attacker", LOADOUT);
+    const section = boosterEls.sections.attacker as unknown as FakeElement;
+    const row = firstRow(section)!;
+    const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
+    gear.trigger("click");
+    const popup = scriptPopupFor(section)!;
+    const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
+    expect(optimalOption).toBeDefined();
+    optimalOption!.trigger("click");
+    expect(controller.capture("attacker")?.[0]?.script).toBe(OPTIMAL_SCRIPT.name);
+    expect(gear.getAttribute("title")).toContain(OPTIMAL_SCRIPT.name);
   });
 });

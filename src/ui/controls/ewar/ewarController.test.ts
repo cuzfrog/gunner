@@ -64,7 +64,10 @@ class FakePopupGroup implements PopupGroup {
   onKeyDown(_event: { readonly key: string }): void {}
 }
 
-function buildEwarController(language: Language = "en") {
+function buildEwarController(
+  language: Language = "en",
+  beforeConstruct?: (document: Document, els: ReturnType<typeof createControlsEls>) => void,
+) {
   const document = fakeDocument();
   globalThis.document = document;
   globalThis.Element = FakeElement as unknown as typeof Element;
@@ -82,8 +85,15 @@ function buildEwarController(language: Language = "en") {
   });
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();
-  getFake(document, "attacker-ewar-popup").hidden = true;
-  getFake(document, "target-ewar-popup").hidden = true;
+  const attackerPopup = els.attackerEwarPopup;
+  const targetPopup = els.targetEwarPopup;
+  attackerPopup.appendChild(els.attackerEwarSection);
+  attackerPopup.appendChild(els.attackerBoosterSection);
+  targetPopup.appendChild(els.targetEwarSection);
+  targetPopup.appendChild(els.targetBoosterSection);
+  attackerPopup.hidden = true;
+  targetPopup.hidden = true;
+  if (beforeConstruct) beforeConstruct(document, els);
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
@@ -103,16 +113,24 @@ function buildEwarController(language: Language = "en") {
   return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated };
 }
 
-function webSection(popup: FakeElement): FakeElement | undefined {
-  return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.web");
+function ewarSection(document: Document, side: "attacker" | "target"): FakeElement {
+  return getFake(document, `${side}-ewar-section`);
 }
 
-function grapplerSection(popup: FakeElement): FakeElement | undefined {
-  return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.grappler");
+function webSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.web");
 }
 
-function disruptorSection(popup: FakeElement): FakeElement | undefined {
-  return popup.children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
+function grapplerSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.grappler");
+}
+
+function disruptorSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
+}
+
+function scramblerSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+  return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.scrambler");
 }
 
 function overloadFor(row: FakeElement): FakeElement {
@@ -172,8 +190,8 @@ describe("EwarController", () => {
     expect(disruptorSummary.children[0].hidden).toBe(false);
     expect(disruptorSummary.children[1].textContent).toBe("2/2");
 
-    expect(popup.children.length).toBe(2);
-    const webs = webSection(popup)!;
+    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(2);
+    const webs = webSection(document, "attacker")!;
     expect(webs.className).toBe("preview-section");
     expect(webs.children[0].className).toBe("preview-section-label");
     expect(webs.children[0].textContent).toBe("label.ewar.web");
@@ -189,7 +207,7 @@ describe("EwarController", () => {
     expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
     expect(webButton.children[1].title).toBe(WEB2.moduleName);
 
-    const disruptors = disruptorSection(popup)!;
+    const disruptors = disruptorSection(document, "attacker")!;
     expect(disruptors.className).toBe("preview-section");
     expect(disruptors.children[0].textContent).toBe("label.ewar.disruptor");
     expect(disruptors.children.length).toBe(3);
@@ -221,7 +239,7 @@ describe("EwarController", () => {
     expect(targetTrigger.disabled).toBe(true);
     expect(targetTrigger.title).toBe("title.ewar.empty");
     expect(getFake(document, "target-ewar-summary").children.length).toBe(0);
-    expect(getFake(document, "target-ewar-popup").children.length).toBe(0);
+    expect(ewarSection(document, "target").children.length).toBe(0);
   });
 
   test("grappler-only loadout renders a section, summary, and toggles overload", () => {
@@ -230,13 +248,12 @@ describe("EwarController", () => {
     controller.setLoadout("attacker", loadout);
 
     const summary = getFake(document, "attacker-ewar-summary");
-    const popup = getFake(document, "attacker-ewar-popup");
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].children[1].textContent).toBe("1/1");
     expect(summary.children[0].getAttribute("title")).toBe("grappler-hint");
     expect(ewarEffectDescriber.grapplerHint).toHaveBeenCalled();
 
-    const grapplers = grapplerSection(popup)!;
+    const grapplers = grapplerSection(document, "attacker")!;
     expect(grapplers.children[0].textContent).toBe("label.ewar.grappler");
     expect(grapplers.children.length).toBe(2);
     const row = grapplers.children[1];
@@ -258,12 +275,11 @@ describe("EwarController", () => {
 
     const trigger = getFake(document, "attacker-ewar-trigger");
     const summary = getFake(document, "attacker-ewar-summary");
-    const popup = getFake(document, "attacker-ewar-popup");
     expect(trigger.disabled).toBe(false);
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].getAttribute("title")).toBe("scrambler-hint");
-    expect(popup.children.length).toBe(1);
-    expect(popup.children[0].children[0].textContent).toBe("label.ewar.scrambler");
+    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(scramblerSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.scrambler");
     expect(controller.projection("attacker")).toEqual({
       loadout,
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }] },
@@ -279,7 +295,7 @@ describe("EwarController", () => {
     popup.hidden = false;
     const summary = getFake(document, "attacker-ewar-summary");
 
-    const section = webSection(popup)!;
+    const section = webSection(document, "attacker")!;
     const firstRow = section.children[1];
     const firstToggle = firstRow.children[0];
     const firstOverload = overloadFor(firstRow);
@@ -312,7 +328,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(popup)!;
+    const section = disruptorSection(document, "target")!;
     const row = section.children[1];
     const gear = gearFor(row);
     const overload = overloadFor(row);
@@ -335,24 +351,25 @@ describe("EwarController", () => {
     const { controller, document } = buildEwarController();
     const trigger = getFake(document, "attacker-ewar-trigger");
     const popup = getFake(document, "attacker-ewar-popup");
+    const ewar = ewarSection(document, "attacker");
 
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
     expect(trigger.getAttribute("aria-label")).toBe("label.modules");
     expect(popup.getAttribute("aria-label")).toBe("label.modules");
-    expect(popup.children.length).toBe(1);
-    expect(popup.children[0].children[0].textContent).toBe("label.ewar.web");
+    expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(webSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.web");
 
     controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    expect(popup.children.length).toBe(1);
-    expect(popup.children[0].children[0].textContent).toBe("label.ewar.disruptor");
+    expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(disruptorSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.disruptor");
 
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    expect(popup.children.length).toBe(2);
-    expect(popup.children[0].children[0].textContent).toBe("label.ewar.web");
-    expect(popup.children[1].children[0].textContent).toBe("label.ewar.disruptor");
+    expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(2);
+    expect(webSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.web");
+    expect(disruptorSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.disruptor");
 
     controller.setLoadout("attacker", EMPTY_EWAR_LOADOUT);
-    expect(popup.children.length).toBe(0);
+    expect(ewar.children.length).toBe(0);
   });
 
   test("TD script choice persists per row and survives capture/restore round-trip", () => {
@@ -363,7 +380,7 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
 
-    const section = disruptorSection(popup)!;
+    const section = disruptorSection(document, "target")!;
     const firstRow = section.children[1];
     const firstGear = gearFor(firstRow);
     firstGear.trigger("click");
@@ -394,7 +411,7 @@ describe("EwarController", () => {
     const restored = controller.capture("target");
     expect(restored).toEqual(captured);
 
-    const restoredSection = disruptorSection(popup)!;
+    const restoredSection = disruptorSection(document, "target")!;
     expect(gearFor(restoredSection.children[1]).getAttribute("title")).toBe("Optimal Range Disruption Script");
     expect(gearFor(restoredSection.children[2]).getAttribute("title")).toBe("Tracking Speed Disruption Script");
   });
@@ -452,9 +469,9 @@ describe("EwarController", () => {
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
 
-    const webSec = webSection(popup)!;
+    const webSec = webSection(document, "target")!;
     webSec.children[2].children[0].trigger("click");
-    const disruptorSec = disruptorSection(popup)!;
+    const disruptorSec = disruptorSection(document, "target")!;
     disruptorSec.children[2].children[0].trigger("click");
     const firstGear = gearFor(disruptorSec.children[1]);
     firstGear.trigger("click");
@@ -494,7 +511,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(popup)!;
+    const section = disruptorSection(document, "attacker")!;
     const row = section.children[1];
     const gear = gearFor(row);
     gear.trigger("click");
@@ -522,8 +539,7 @@ describe("EwarController", () => {
   test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
     const { controller, document, fittingImport, imageCatalog } = buildEwarController("zh");
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    const popup = getFake(document, "attacker-ewar-popup");
-    const webSectionEl = webSection(popup)!;
+    const webSectionEl = webSection(document, "attacker")!;
     const webButton = webSectionEl.children[1].children[0];
     const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
@@ -556,7 +572,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(popup)!;
+    const section = disruptorSection(document, "attacker")!;
     const gear = gearFor(section.children[1]);
     gear.trigger("click");
 
@@ -566,7 +582,7 @@ describe("EwarController", () => {
     expect(gear.getAttribute("title")).toBe("ewar.script.none");
 
     controller.restore("attacker", loadout, controller.capture("attacker"));
-    expect(gearFor(disruptorSection(popup)!.children[1]).getAttribute("title")).toBe("ewar.script.none");
+    expect(gearFor(disruptorSection(document, "attacker")!.children[1]).getAttribute("title")).toBe("ewar.script.none");
     expect(controller.capture("attacker")?.disruptors?.[0]?.script).toBe("none");
   });
 
@@ -576,7 +592,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(popup)!;
+    const section = disruptorSection(document, "attacker")!;
     gearFor(section.children[1]).trigger("click");
 
     const scriptPopup = scriptPopupFor(document, "attacker");
@@ -598,9 +614,8 @@ describe("EwarController", () => {
     const { controller, document } = buildEwarController();
     controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
-    const webRows = webSection(popup)!.children.slice(1);
-    const disruptorRows = disruptorSection(popup)!.children.slice(1);
+    const webRows = webSection(document, "attacker")!.children.slice(1);
+    const disruptorRows = disruptorSection(document, "attacker")!.children.slice(1);
     for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
     for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
   });
@@ -611,9 +626,9 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(popup)!.children[1];
+    const webRow = webSection(document, "attacker")!.children[1];
     const webOverload = overloadFor(webRow);
-    const disruptorRow = disruptorSection(popup)!.children[1];
+    const disruptorRow = disruptorSection(document, "attacker")!.children[1];
     const disruptorOverload = overloadFor(disruptorRow);
 
     expect(webOverload.getAttribute("aria-pressed")).toBe("false");
@@ -635,7 +650,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "target-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(popup)!.children[1];
+    const webRow = webSection(document, "target")!.children[1];
     const webOverload = overloadFor(webRow);
     webOverload.trigger("click");
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
@@ -650,7 +665,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(popup)!.children[1];
+    const webRow = webSection(document, "attacker")!.children[1];
     const webOverload = overloadFor(webRow);
     webOverload.trigger("click");
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
@@ -672,12 +687,12 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(popup)!.children[1];
+    const webRow = webSection(document, "attacker")!.children[1];
     const webOverload = overloadFor(webRow);
     expect(webOverload.getAttribute("aria-label")).toBe(`label.overload ${WEB.moduleName}`);
     expect(webOverload.title).toBe(`label.overload ${WEB.moduleName}`);
 
-    const disruptorRow = disruptorSection(popup)!.children[1];
+    const disruptorRow = disruptorSection(document, "attacker")!.children[1];
     const disruptorOverload = overloadFor(disruptorRow);
     expect(disruptorOverload.getAttribute("aria-label")).toBe(`label.overload ${DISRUPTOR2.moduleName}`);
   });
@@ -688,7 +703,7 @@ describe("EwarController", () => {
 
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(popup)!.children[1];
+    const webRow = webSection(document, "attacker")!.children[1];
     expect(webRow.className).toBe("ewar-row");
     webRow.children[0].trigger("click");
     expect(webRow.className).toBe("ewar-row ewar-row-inactive");
@@ -714,7 +729,7 @@ describe("EwarController", () => {
     const popup = getFake(document, "attacker-ewar-popup");
     popup.hidden = false;
     ewarEffectDescriber.webHint.mockReturnValue("web-active");
-    const section = webSection(popup)!;
+    const section = webSection(document, "attacker")!;
     section.children[1].children[0].trigger("click");
     expect(getFake(document, "attacker-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
   });
@@ -727,5 +742,24 @@ describe("EwarController", () => {
 
     controller.updateSummaries();
     expect(ewarEffectDescriber.webHint).toHaveBeenCalledTimes(2);
+  });
+
+  test("renderSide clears only the ewar section and leaves the booster section untouched", () => {
+    const sentinelHolder: { el?: FakeElement } = {};
+    const { controller, document } = buildEwarController("en", (document) => {
+      sentinelHolder.el = document.createElement("div") as unknown as FakeElement;
+      sentinelHolder.el.textContent = "booster sentinel";
+      getFake(document, "attacker-booster-section").appendChild(sentinelHolder.el);
+    });
+
+    expect(getFake(document, "attacker-booster-section").children.length).toBe(1);
+    expect(getFake(document, "attacker-booster-section").children[0]).toBe(sentinelHolder.el!);
+
+    const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS };
+    controller.setLoadout("attacker", loadout);
+
+    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(getFake(document, "attacker-booster-section").children.length).toBe(1);
+    expect(getFake(document, "attacker-booster-section").children[0]).toBe(sentinelHolder.el!);
   });
 });

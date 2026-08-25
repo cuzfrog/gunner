@@ -1,15 +1,10 @@
 import type { BoostLoadout, TurretBoostProjection } from "../../../sim";
 import type { StoredBoosterActivation } from "../../../appstate";
+import type { Side } from "../side";
 
 export interface BoosterEls {
-  readonly attackerBoosterField: HTMLElement;
-  readonly attackerBoosterTrigger: HTMLButtonElement;
-  readonly attackerBoosterPopup: HTMLElement;
-  readonly attackerBoosterSummary: HTMLElement;
-  readonly targetBoosterField: HTMLElement;
-  readonly targetBoosterTrigger: HTMLButtonElement;
-  readonly targetBoosterPopup: HTMLElement;
-  readonly targetBoosterSummary: HTMLElement;
+  readonly sections: Record<Side, HTMLElement>;
+  readonly summaries: Record<Side, HTMLElement>;
 }
 
 export interface BoosterController {

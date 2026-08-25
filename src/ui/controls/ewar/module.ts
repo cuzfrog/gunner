@@ -27,10 +27,12 @@ function collectEwarEls(els: ControlsElements): EwarEls {
     attackerEwarField: els.attackerEwarField,
     attackerEwarTrigger: els.attackerEwarTrigger,
     attackerEwarPopup: els.attackerEwarPopup,
+    attackerEwarSection: els.attackerEwarSection,
     attackerEwarSummary: els.attackerEwarSummary,
     targetEwarField: els.targetEwarField,
     targetEwarTrigger: els.targetEwarTrigger,
     targetEwarPopup: els.targetEwarPopup,
+    targetEwarSection: els.targetEwarSection,
     targetEwarSummary: els.targetEwarSummary,
   };
 }

@@ -21,13 +21,13 @@ export function registerBoosterModule<T extends ControlsCradle>(cradle: AwilixCo
 
 function collectBoosterEls(els: ControlsElements): BoosterEls {
   return {
-    attackerBoosterField: els.attackerBoosterField,
-    attackerBoosterTrigger: els.attackerBoosterTrigger,
-    attackerBoosterPopup: els.attackerBoosterPopup,
-    attackerBoosterSummary: els.attackerBoosterSummary,
-    targetBoosterField: els.targetBoosterField,
-    targetBoosterTrigger: els.targetBoosterTrigger,
-    targetBoosterPopup: els.targetBoosterPopup,
-    targetBoosterSummary: els.targetBoosterSummary,
+    sections: {
+      attacker: els.attackerBoosterSection,
+      target: els.targetBoosterSection,
+    },
+    summaries: {
+      attacker: els.attackerBoosterSummary,
+      target: els.targetBoosterSummary,
+    },
   };
 }

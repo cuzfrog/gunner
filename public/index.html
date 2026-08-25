@@ -277,23 +277,18 @@
         <div class="form-field-group ewar-group" id="attacker-ewar-field">
           <button type="button" id="attacker-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-ewar-popup"
-                  aria-describedby="attacker-ewar-summary" disabled>
+                  aria-describedby="attacker-ewar-summary-row" disabled>
             <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
-            <span class="ewar-summary-row" id="attacker-ewar-summary"></span>
+            <span class="ewar-summary-row" id="attacker-ewar-summary-row">
+              <span id="attacker-ewar-summary"></span>
+              <span id="attacker-booster-summary"></span>
+            </span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false"></div>
-        </div>
-
-        <div class="form-field-group booster-group" id="attacker-booster-field">
-          <button type="button" id="attacker-booster-trigger" class="trigger"
-                  aria-haspopup="dialog" aria-expanded="false" aria-controls="attacker-booster-popup"
-                  aria-describedby="attacker-booster-summary" disabled>
-            <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
-            <span class="ewar-summary-row" id="attacker-booster-summary"></span>
-            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
-          </button>
-          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-booster-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="attacker-ewar-popup" hidden role="dialog" aria-modal="false">
+            <div class="preview-section" id="attacker-ewar-section"></div>
+            <div class="preview-section" id="attacker-booster-section" hidden></div>
+          </div>
         </div>
 
         <div class="form-field-group propulsion-group">
@@ -485,23 +480,18 @@
         <div class="form-field-group ewar-group" id="target-ewar-field">
           <button type="button" id="target-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="target-ewar-popup"
-                  aria-describedby="target-ewar-summary" disabled>
+                  aria-describedby="target-ewar-summary-row" disabled>
             <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
-            <span class="ewar-summary-row" id="target-ewar-summary"></span>
+            <span class="ewar-summary-row" id="target-ewar-summary-row">
+              <span id="target-ewar-summary"></span>
+              <span id="target-booster-summary"></span>
+            </span>
             <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
           </button>
-          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-ewar-popup" hidden role="dialog" aria-modal="false"></div>
-        </div>
-
-        <div class="form-field-group booster-group" id="target-booster-field">
-          <button type="button" id="target-booster-trigger" class="trigger"
-                  aria-haspopup="dialog" aria-expanded="false" aria-controls="target-booster-popup"
-                  aria-describedby="target-booster-summary" disabled>
-            <span class="booster-label truncate" data-i18n="label.booster.computer">Tracking Computers</span>
-            <span class="ewar-summary-row" id="target-booster-summary"></span>
-            <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
-          </button>
-          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-booster-popup" hidden role="dialog" aria-modal="false"></div>
+          <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id="target-ewar-popup" hidden role="dialog" aria-modal="false">
+            <div class="preview-section" id="target-ewar-section"></div>
+            <div class="preview-section" id="target-booster-section" hidden></div>
+          </div>
         </div>
 
         <div class="form-field-row">

@@ -5,10 +5,12 @@ export interface EwarEls {
   readonly attackerEwarField: HTMLElement;
   readonly attackerEwarTrigger: HTMLButtonElement;
   readonly attackerEwarPopup: HTMLElement;
+  readonly attackerEwarSection: HTMLElement;
   readonly attackerEwarSummary: HTMLElement;
   readonly targetEwarField: HTMLElement;
   readonly targetEwarTrigger: HTMLButtonElement;
   readonly targetEwarPopup: HTMLElement;
+  readonly targetEwarSection: HTMLElement;
   readonly targetEwarSummary: HTMLElement;
 }
 

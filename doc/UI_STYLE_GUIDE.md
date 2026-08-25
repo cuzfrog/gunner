@@ -74,6 +74,7 @@ Label treatment pattern: uppercase + letter-spacing `0.05em` (labels) / `0.08em`
 - Popup shadow: `0 4px 16px rgba(0,0,0,.45)`; upward-opening popups flip to `0 -4px 16px ...`.
 - Z-index: popups overlay at `z-index: 30`; nothing else elevates.
 - Panel padding `12px`; grid gaps `8px` (inner fields) / `10px` (results) / `14px` (main columns).
+- Canvas overlays inset by `--canvas-overlay-inset` (24px): positions the range legend and combatant portraits inside the canvas frame.
 
 ### Control heights
 
@@ -107,7 +108,7 @@ State rules: hover swaps border/text to teal unless the control uses an orange a
 
 All text, number, and select controls use the `.input-field` primitive: full width, inset bg, mono font 14px, centered text for selects via `text-align-last` where appropriate. Number inputs hide spinners; unit suffixes use `.input-with-unit` + `.input-suffix` (absolute-positioned teal mono text). Selects replace native arrow with `--dropdown-arrow` SVG data-uri; disabled selects swap to `--dropdown-arrow-disabled`.
 
-Validation: `.hull-invalid` / `.error` classes apply `--danger-red`.
+Validation: `.hull-invalid` / `.error` classes apply `--danger-red`. The `.effective-value` suffix is interactive: it receives pointer events and negative values get `cursor: help` so their hint tooltip is reachable; `.input-suffix` stays inert.
 
 ### Popups
 
@@ -122,6 +123,10 @@ Custom-styled `.form-slider` (range inputs): 4px track filled via `linear-gradie
 ### Result cards
 
 `.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.result-card-hit-chance`) gets a teal border, larger value, and hit-chance color classes (`is-optimal`, `is-good`, `is-caution`, `is-warn`, `is-danger`) driven by `hitChanceClass`.
+
+### Canvas overlays
+
+`.range-overlay-legend` sits top-right inside the canvas frame at the overlay inset. `.combatant-portrait` anchors a side portrait at the same inset, `88px` above the canvas bottom (`152px` at ≤480px to clear the wrapped control bar). `.portrait-effects` is an absolutely positioned popover centered below the portrait (`top: calc(100% + 6px)`); effect icons are `.portrait-effect-icon` images that opt back into pointer events with a help cursor.
 
 ## Interaction & accessibility conventions
 
