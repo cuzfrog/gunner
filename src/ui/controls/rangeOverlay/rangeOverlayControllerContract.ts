@@ -5,14 +5,7 @@ export interface RangeOverlayEls {
   readonly legend: HTMLElement;
 }
 
-export interface RangeOverlayHost {
-  currentDistance(): number;
-  projection(side: "attacker" | "target"): EwarProjection | undefined;
-  onDisplayChange(): void;
-}
-
 export interface RangeOverlayController {
-  setHost(host: RangeOverlayHost): void;
   descriptors(): readonly RangeOverlayKind[];
   overlays(): readonly RangeOverlay[];
   toggle(kind: RangeOverlayKind): void;

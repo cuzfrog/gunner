@@ -49,13 +49,12 @@ function buildBoosterController() {
   const els = createControlsEls();
   getFake(document, "attacker-booster-popup").hidden = true;
   getFake(document, "target-booster-popup").hidden = true;
-  const host = { onConfigChange: vi.fn() };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
   const events = new UiEventsImpl();
+  const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const controller = new BoosterControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, events });
-  controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, events };
+  return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
 }
 
 describe("BoosterController", () => {

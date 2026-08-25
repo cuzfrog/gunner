@@ -12,13 +12,7 @@ export interface EwarEls {
   readonly targetEwarSummary: HTMLElement;
 }
 
-export interface EwarHost {
-  onConfigChange(): void;
-  currentDistance(): number;
-}
-
 export interface EwarController {
-  setHost(host: EwarHost): void;
   setLoadout(side: "attacker" | "target", loadout: EwarLoadout): void;
   restore(side: "attacker" | "target", loadout: EwarLoadout | undefined, saved?: StoredEwarActivation): void;
   projection(side: "attacker" | "target"): EwarProjection | undefined;

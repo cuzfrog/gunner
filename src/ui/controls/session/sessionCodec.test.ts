@@ -64,7 +64,6 @@ function mockSidePanel(side: "attacker" | "target", captured: ReturnType<SidePan
 
 function mockEwarController(): EwarController {
   return {
-    setHost: vi.fn(),
     setLoadout: vi.fn(),
     restore: vi.fn(),
     projection: vi.fn(),
@@ -77,7 +76,6 @@ function mockEwarController(): EwarController {
 
 function mockBoosterController(): BoosterController {
   return {
-    setHost: vi.fn(),
     setLoadout: vi.fn(),
     restore: vi.fn(),
     projection: vi.fn(),

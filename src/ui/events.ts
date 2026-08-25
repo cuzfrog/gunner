@@ -23,6 +23,9 @@ export interface UiEvents {
   onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   emitProfileTextLoaded(settings: ProfileSettings): void;
+  onDistanceChanged(listener: (distance: number) => void): void;
+  offDistanceChanged(listener: (distance: number) => void): void;
+  emitDistanceChanged(distance: number): void;
 }
 
 export class UiEventsImpl implements UiEvents {
@@ -33,6 +36,7 @@ export class UiEventsImpl implements UiEvents {
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
   private readonly profileTextLoaded = new Set<(settings: ProfileSettings) => void>();
+  private readonly distanceChanged = new Set<(distance: number) => void>();
 
   onLanguageChanged(listener: () => void): void { this.languageChanged.add(listener); }
   offLanguageChanged(listener: () => void): void { this.languageChanged.delete(listener); }
@@ -68,6 +72,12 @@ export class UiEventsImpl implements UiEvents {
   offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void { this.profileTextLoaded.delete(listener); }
   emitProfileTextLoaded(settings: ProfileSettings): void {
     for (const listener of Array.from(this.profileTextLoaded)) listener(settings);
+  }
+
+  onDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.add(listener); }
+  offDistanceChanged(listener: (distance: number) => void): void { this.distanceChanged.delete(listener); }
+  emitDistanceChanged(distance: number): void {
+    for (const listener of Array.from(this.distanceChanged)) listener(distance);
   }
 
   private emit(listeners: ReadonlySet<() => void>): void {

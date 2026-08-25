@@ -15,7 +15,7 @@ export interface DomControlsHost {
   onReset(): void;
   onNewProfile(): void;
   onSpeedChange(speed: number): void;
-  onConfigChange(): void;
+  onConfigChange(persist?: boolean): void;
   onDisplayChange(): void;
   persistConfigChange(notify?: boolean): void;
   onProfileLoaded(name: string): void;

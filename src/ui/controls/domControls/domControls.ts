@@ -1,16 +1,14 @@
 import {
   type EngagementFrame,
-  type EwarProjection,
   type HitChanceBreakdown,
   type SimConfig,
   type TurretSpec,
 } from "../../../sim";
 import type { ProfileSettings } from "../../../appstate";
-import { isEventTargetWithClosest } from "../controlsDom";
+import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
 import type { EffectiveReadout } from "../effectiveReadout";
-import type { RangeOverlayHost } from "../rangeOverlay";
 import type { FittingPreviewManager, PopupGroup } from "../popup";
 import type { HintRotator } from "../hints";
 import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from "../session";
@@ -57,7 +55,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   simConfigSource: SimConfigSource;
 }
 
-export class DomControls implements Controls, DomControlsHost, RangeOverlayHost, SessionControl {
+export class DomControls implements Controls, DomControlsHost, SessionControl {
   private readonly deps: DomControlsDeps;
   private readonly els: DomControlsEls;
   private readonly popupGroup: PopupGroup;
@@ -104,7 +102,8 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost,
     this.rangeOverlayController = all.rangeOverlayController;
     this.previewManager = all.previewManager;
     this.simConfigSource = all.simConfigSource;
-    this.currentDistanceValue = this.sessionCodec.getInitialDistance();
+    this.currentDistanceValue = num(this.els.initialDistance);
+    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
     this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
@@ -133,25 +132,24 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost,
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
-  onConfigChange(): void {
+  onConfigChange(persist = true): void {
     this.attackerSide.sections.skill.setOverloadDisabled();
     this.targetSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
     this.boosterController.updateSummaries();
     this.rangeOverlayController.render();
-    this.persistConfigChange();
+    this.preferencesController.savePreferences();
+    if (persist) this.profileController.updateActionBarState();
+    this.callbacks?.onConfigChange();
   }
   currentDistance(): number { return this.currentDistanceValue; }
-  projection(side: "attacker" | "target"): EwarProjection | undefined { return this.ewarController.projection(side); }
   onDisplayChange(): void {
     this.preferencesController.savePreferences();
     this.notifyDisplayChange();
   }
 
   private onConfigInvalidated(persist: boolean): void {
-    this.preferencesController.savePreferences();
-    if (persist) this.profileController.updateActionBarState();
-    this.callbacks?.onConfigChange();
+    this.onConfigChange(persist);
   }
 
   private onLanguageChanged(): void {
@@ -201,6 +199,7 @@ export class DomControls implements Controls, DomControlsHost, RangeOverlayHost,
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
+    this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
     this.effectiveReadout.update(effective);
     this.rangeOverlayController.update();

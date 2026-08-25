@@ -12,12 +12,7 @@ export interface BoosterEls {
   readonly targetBoosterSummary: HTMLElement;
 }
 
-export interface BoosterHost {
-  onConfigChange(): void;
-}
-
 export interface BoosterController {
-  setHost(host: BoosterHost): void;
   setLoadout(side: "attacker" | "target", loadout: BoostLoadout): void;
   restore(side: "attacker" | "target", loadout: BoostLoadout | undefined, saved?: readonly StoredBoosterActivation[]): void;
   projection(side: "attacker" | "target"): TurretBoostProjection | undefined;

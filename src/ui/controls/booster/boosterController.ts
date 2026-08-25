@@ -7,7 +7,7 @@ import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import type { BoosterController, BoosterEls, BoosterHost } from "./boosterControllerContract";
+import type { BoosterController, BoosterEls } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {
   active: boolean;
@@ -31,7 +31,6 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
-  private host?: BoosterHost;
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -50,10 +49,6 @@ export class BoosterControllerImpl implements BoosterController {
     this.els.targetBoosterTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
     this.render();
-  }
-
-  setHost(host: BoosterHost): void {
-    this.host = host;
   }
 
   setLoadout(side: Side, loadout: BoostLoadout): void {
@@ -344,7 +339,7 @@ export class BoosterControllerImpl implements BoosterController {
     this.updateGearTitle(gear, script);
     this.scriptPopups[side].close();
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleComputer(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -355,6 +350,6 @@ export class BoosterControllerImpl implements BoosterController {
     button.setAttribute("aria-pressed", String(activation.active));
     row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
     this.renderSide(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 }

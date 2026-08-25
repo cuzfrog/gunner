@@ -59,7 +59,6 @@ function build() {
   const ewar = ewarProjection();
   const boost = boostProjection();
   const ewarController = vi.mocked<EwarController>({
-    setHost: vi.fn(),
     setLoadout: vi.fn(),
     restore: vi.fn(),
     projection: vi.fn((side: "attacker" | "target") => (side === "attacker" ? ewar : undefined)),
@@ -68,7 +67,6 @@ function build() {
     updateSummaries: vi.fn(),
   });
   const boosterController = vi.mocked<BoosterController>({
-    setHost: vi.fn(),
     setLoadout: vi.fn(),
     restore: vi.fn(),
     projection: vi.fn((side: "attacker" | "target") => (side === "attacker" ? boost : undefined)),

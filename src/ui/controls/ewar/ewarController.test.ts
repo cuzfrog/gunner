@@ -84,7 +84,6 @@ function buildEwarController(language: Language = "en") {
   const els = createControlsEls();
   getFake(document, "attacker-ewar-popup").hidden = true;
   getFake(document, "target-ewar-popup").hidden = true;
-  const host = { onConfigChange: vi.fn(), currentDistance: vi.fn(() => 5000) };
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
@@ -94,9 +93,10 @@ function buildEwarController(language: Language = "en") {
     scramblerDescription: vi.fn(() => "scrambler-title"),
   });
   const events = new UiEventsImpl();
+  const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const controller = new EwarControllerImpl({ els, popupGroup, imageCatalog, fittingImport, i18n, ewarEffectDescriber, events });
-  controller.setHost(host);
-  return { document, controller, els, i18n, imageCatalog, popupGroup, host, fittingImport, ewarEffectDescriber, events };
+  events.emitDistanceChanged(5000);
+  return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated };
 }
 
 function webSection(popup: FakeElement): FakeElement | undefined {
@@ -268,7 +268,7 @@ describe("EwarController", () => {
   });
 
   test("toggling a web flips state, updates its section summary, and does not close popup", () => {
-    const { controller, document, host } = buildEwarController();
+    const { controller, document, emitConfigInvalidated } = buildEwarController();
     controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
     const popup = getFake(document, "attacker-ewar-popup");
@@ -291,7 +291,7 @@ describe("EwarController", () => {
       { active: false, overloaded: false },
       { active: true, overloaded: false },
     ]);
-    expect(host.onConfigChange).toHaveBeenCalled();
+    expect(emitConfigInvalidated).toHaveBeenCalledWith(true);
 
     firstToggle.trigger("click");
     expect(summary.children[0].children[1].textContent).toBe("2/2");
@@ -485,7 +485,7 @@ describe("EwarController", () => {
   });
 
   test("script popup opens from gear, highlights current option, and closes on selection", () => {
-    const { controller, document, host } = buildEwarController();
+    const { controller, document, emitConfigInvalidated } = buildEwarController();
     controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
     const popup = getFake(document, "attacker-ewar-popup");
@@ -507,7 +507,7 @@ describe("EwarController", () => {
     expect(gear.getAttribute("aria-expanded")).toBe("false");
     expect(gear.getAttribute("title")).toBe("Tracking Speed Disruption Script");
     expect(gear.getAttribute("aria-label")).toBe("Tracking Speed Disruption Script");
-    expect(host.onConfigChange).toHaveBeenCalled();
+    expect(emitConfigInvalidated).toHaveBeenCalledWith(true);
     expect(controller.capture("attacker")).toEqual({
       webs: [],
       grapplers: [],
@@ -715,15 +715,14 @@ describe("EwarController", () => {
     expect(getFake(document, "attacker-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
   });
 
-  test("updateSummaries refreshes both sides and reads the host current distance", () => {
-    const { controller, host, ewarEffectDescriber } = buildEwarController();
+  test("updateSummaries refreshes both sides and uses the current distance", () => {
+    const { controller, events, ewarEffectDescriber } = buildEwarController();
     controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
     controller.setLoadout("target", { webs: [WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    host.currentDistance.mockReturnValue(12_000);
+    events.emitDistanceChanged(12_000);
     ewarEffectDescriber.webDescription.mockClear();
 
     controller.updateSummaries();
-    expect(host.currentDistance).toHaveBeenCalled();
     expect(ewarEffectDescriber.webDescription).toHaveBeenCalledTimes(2);
   });
 });

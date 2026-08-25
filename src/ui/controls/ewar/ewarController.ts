@@ -7,7 +7,7 @@ import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import type { EwarController, EwarEls, EwarHost } from "./ewarControllerContract";
+import type { EwarController, EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
 interface MutableEwarActivation {
@@ -35,7 +35,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
-  private host?: EwarHost;
+  private distance = 0;
 
   constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
@@ -54,11 +54,8 @@ export class EwarControllerImpl implements EwarController {
     this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
     this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
+    this.events.onDistanceChanged((d) => { this.distance = d; });
     this.render();
-  }
-
-  setHost(host: EwarHost): void {
-    this.host = host;
   }
 
   setLoadout(side: Side, loadout: EwarLoadout): void {
@@ -213,7 +210,7 @@ export class EwarControllerImpl implements EwarController {
       return;
     }
     const projection: EwarProjection = { loadout: state.loadout, activation: state.activation };
-    const distance = this.host?.currentDistance() ?? 0;
+    const distance = this.distance;
     const webTotal = state.loadout.webs.length;
     const webActive = state.activation.webs.filter((w) => w.active).length;
     const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webDescription(projection, distance) : "";
@@ -512,7 +509,7 @@ export class EwarControllerImpl implements EwarController {
     state.activation.disruptors[index].script = script;
     const gear = this.findGearFor(side, index);
     if (gear) this.updateGearTitle(gear, script);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private findGearFor(side: Side, index: number): HTMLButtonElement | undefined {
@@ -539,7 +536,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleWebOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -550,7 +547,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleDisruptor(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -566,7 +563,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleDisruptorOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -577,7 +574,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleScrambler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -593,7 +590,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleScramblerOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -604,7 +601,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleGrappler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -620,7 +617,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 
   private toggleGrapplerOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -631,7 +628,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
     button.classList.toggle("active", overloaded);
     this.updateSummary(side);
-    this.host?.onConfigChange();
+    this.events.emitConfigInvalidated(true);
   }
 }
 

@@ -78,7 +78,6 @@ function mockSettingsStore(): SettingsStore {
 
 function mockRangeOverlayController(): RangeOverlayController {
   return {
-    setHost: vi.fn(),
     descriptors: vi.fn(() => []),
     overlays: vi.fn(() => []),
     toggle: vi.fn(),
@@ -123,6 +122,9 @@ function build() {
     onProfileTextLoaded: vi.fn(),
     offProfileTextLoaded: vi.fn(),
     emitProfileTextLoaded: vi.fn(),
+    onDistanceChanged: vi.fn(),
+    offDistanceChanged: vi.fn(),
+    emitDistanceChanged: vi.fn(),
   };
   const rangeOverlayController = mockRangeOverlayController();
   const controller = new PreferencesControllerImpl({

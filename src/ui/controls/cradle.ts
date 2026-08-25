@@ -26,7 +26,7 @@ import type { HullDatalist, SessionCodec, SessionControl, SimConfigSource } from
 import type { SidePanel } from "./sidePanel";
 import type { TrackingInput } from "./trackingInput";
 import type { TurretController, TurretOverrides } from "./turret";
-import type { RangeOverlayController, RangeOverlayHost } from "./rangeOverlay";
+import type { RangeOverlayController } from "./rangeOverlay";
 import type { ProfileEquality } from "../../appstate";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
@@ -73,7 +73,7 @@ export interface ControlsCradle {
   readonly importController: ImportController;
   readonly shareController: ShareController;
   readonly rangeOverlayController: RangeOverlayController;
-  readonly controls: Controls & DomControlsHost & RangeOverlayHost & SessionControl;
+  readonly controls: Controls & DomControlsHost & SessionControl;
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;

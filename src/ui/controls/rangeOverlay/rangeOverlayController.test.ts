@@ -1,9 +1,10 @@
 import { fakeDocument, getFake } from "../../testing";
 import type { EwarProjection } from "../../../sim";
 import type { I18n, Language } from "../../i18n";
-import type { EwarEffectDescriber } from "../ewar";
+import { UiEventsImpl } from "../../events";
+import type { EwarController, EwarEffectDescriber } from "../ewar";
 import { RangeOverlayControllerImpl } from "./rangeOverlayController";
-import type { RangeOverlayController, RangeOverlayEls, RangeOverlayHost } from "./rangeOverlayControllerContract";
+import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 
 const WEB = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2 = { moduleName: "Stasis Webifier II", maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
@@ -13,9 +14,10 @@ const DISRUPTOR = { moduleName: "Tracking Disruptor I", optimal: 10000, falloff:
 
 function buildController(now: () => number = () => 0): {
   controller: RangeOverlayController;
-  host: RangeOverlayHost;
+  ewarController: EwarController;
+  events: UiEventsImpl;
+  emitDisplayInvalidated: ReturnType<typeof vi.spyOn>;
   ewarEffectDescriber: EwarEffectDescriber;
-  currentDistance: () => number;
   legend: HTMLElement;
 } {
   const document = fakeDocument();
@@ -28,27 +30,33 @@ function buildController(now: () => number = () => 0): {
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
-  const currentDistance = vi.fn(() => 5000);
   const projections: Record<"attacker" | "target", EwarProjection | undefined> = { attacker: undefined, target: undefined };
-  const host = {
-    currentDistance,
-    projection: (side: "attacker" | "target") => projections[side],
-    onDisplayChange: vi.fn(),
-  };
+  const ewarController = vi.mocked<EwarController>({
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn((side: "attacker" | "target") => projections[side]),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  });
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
     grapplerDescription: vi.fn(() => "grappler-title"),
     disruptorDescription: vi.fn(() => "disruptor-title"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
   });
+  const events = new UiEventsImpl();
+  const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
   const controller = new RangeOverlayControllerImpl({
     els,
     i18n,
     ewarEffectDescriber,
+    ewarController,
+    events,
     now,
   });
-  controller.setHost(host);
-  return { controller, host, ewarEffectDescriber, currentDistance, legend };
+  events.emitDistanceChanged(5000);
+  return { controller, ewarController, events, emitDisplayInvalidated, ewarEffectDescriber, legend };
 }
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {
@@ -79,10 +87,19 @@ function projectionWithDisruptor(active = true, overloaded = false): EwarProject
   };
 }
 
+function setProjections(ewarController: EwarController, attacker?: EwarProjection, target?: EwarProjection): void {
+  const projections: Record<"attacker" | "target", EwarProjection | undefined> = { attacker, target };
+  vi.mocked(ewarController.projection).mockImplementation((side) => projections[side]);
+}
+
+function setAllProjections(ewarController: EwarController, projection: EwarProjection | undefined): void {
+  vi.mocked(ewarController.projection).mockImplementation(() => projection);
+}
+
 describe("RangeOverlayController", () => {
   test("descriptors returns the union of kinds present on either side", () => {
-    const { controller, host } = buildController();
-    host.projection = (side) => (side === "attacker" ? projectionWithWeb() : projectionWithScrambler());
+    const { controller, ewarController } = buildController();
+    setProjections(ewarController, projectionWithWeb(), projectionWithScrambler());
     expect(controller.descriptors()).toEqual(["web", "scrambler"]);
   });
 
@@ -93,8 +110,8 @@ describe("RangeOverlayController", () => {
   });
 
   test("overlays returns visible descriptors for both sides", () => {
-    const { controller, host } = buildController();
-    host.projection = (side) => (side === "attacker" ? projectionWithWeb() : projectionWithDisruptor());
+    const { controller, ewarController } = buildController();
+    setProjections(ewarController, projectionWithWeb(), projectionWithDisruptor());
     const overlays = controller.overlays();
     expect(overlays).toHaveLength(2);
     expect(overlays[0]).toEqual({ side: "attacker", kind: "web", radius: 10000 });
@@ -102,18 +119,18 @@ describe("RangeOverlayController", () => {
   });
 
   test("toggle hides a visible kind and excludes it from overlays", () => {
-    const { controller, host } = buildController();
-    host.projection = (side) => (side === "attacker" ? projectionWithWeb() : undefined);
+    const { controller, ewarController, emitDisplayInvalidated } = buildController();
+    setProjections(ewarController, projectionWithWeb(), undefined);
     expect(controller.isVisible("web")).toBe(true);
     controller.toggle("web");
     expect(controller.isVisible("web")).toBe(false);
     expect(controller.overlays()).toEqual([]);
-    expect(host.onDisplayChange).toHaveBeenCalled();
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
 
   test("toggle shows a previously hidden kind", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
     controller.toggle("web");
     controller.toggle("web");
     expect(controller.isVisible("web")).toBe(true);
@@ -121,51 +138,50 @@ describe("RangeOverlayController", () => {
   });
 
   test("web range is scaled by overload range bonus", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithWeb(true, true);
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb(true, true));
     expect(controller.overlays()[0]?.radius).toBe(11500);
   });
 
   test("inactive modules do not produce overlays", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithWeb(false, false);
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb(false, false));
     expect(controller.overlays()).toEqual([]);
   });
 
   test("grappler overlay uses scaled optimal and base falloff", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithGrappler(true, true);
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithGrappler(true, true));
     const overlays = controller.overlays();
     expect(overlays[0]?.radius).toBe(4000);
     expect(overlays[0]?.falloffRadius).toBe(8000);
   });
 
   test("scrambler range is scaled by overload range bonus", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithScrambler(true, true);
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithScrambler(true, true));
     expect(controller.overlays()[0]?.radius).toBe(10800);
   });
 
   test("disruptor overlay uses base optimal and falloff", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithDisruptor(true, true);
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithDisruptor(true, true));
     const overlays = controller.overlays();
     expect(overlays[0]?.radius).toBe(10000);
     expect(overlays[0]?.falloffRadius).toBe(30000);
   });
 
   test("describe delegates to the effect describer with the current distance", () => {
-    const { controller, host, ewarEffectDescriber, currentDistance } = buildController();
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController, ewarEffectDescriber } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
     expect(controller.describe("web")).toBe("web-title");
     expect(ewarEffectDescriber.webDescription).toHaveBeenCalled();
-    expect(currentDistance).toHaveBeenCalled();
   });
 
   test("title refresh is throttled and not run every update", () => {
     let time = 0;
-    const { controller, host, ewarEffectDescriber } = buildController(() => time);
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController, ewarEffectDescriber } = buildController(() => time);
+    setAllProjections(ewarController, projectionWithWeb());
     controller.update();
     expect(ewarEffectDescriber.webDescription).toHaveBeenCalledTimes(1);
     time += 100;
@@ -178,19 +194,19 @@ describe("RangeOverlayController", () => {
 
   test("update rebuilds the legend when the descriptor set changes", () => {
     let time = 0;
-    const { controller, host, legend } = buildController(() => time);
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController, legend } = buildController(() => time);
+    setAllProjections(ewarController, projectionWithWeb());
     controller.update();
     expect(legend.children.length).toBe(1);
-    host.projection = () => projectionWithScrambler();
+    setAllProjections(ewarController, projectionWithScrambler());
     controller.update();
     expect(legend.children.length).toBe(1);
     expect(legend.children[0].textContent).toBe("label.ewar.scrambler");
   });
 
   test("hidden kinds can be restored and read back", () => {
-    const { controller, host } = buildController();
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
     controller.restoreHidden(["web"]);
     expect(controller.isVisible("web")).toBe(false);
     expect(controller.hiddenKinds()).toEqual(["web"]);
@@ -203,11 +219,11 @@ describe("RangeOverlayController", () => {
   });
 
   test("legend is hidden when the last ewar module is removed", () => {
-    const { controller, host, legend } = buildController();
-    host.projection = () => projectionWithWeb();
+    const { controller, ewarController, legend } = buildController();
+    setAllProjections(ewarController, projectionWithWeb());
     controller.update();
     expect(legend.hidden).toBe(false);
-    host.projection = () => undefined;
+    setAllProjections(ewarController, undefined);
     controller.update();
     expect(legend.hidden).toBe(true);
   });

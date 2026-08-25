@@ -1,8 +1,9 @@
 import type { EwarActivation, EwarLoadout, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { RangeOverlay, RangeOverlayKind } from "../../renderer";
-import type { EwarEffectDescriber } from "../ewar";
-import type { RangeOverlayController, RangeOverlayEls, RangeOverlayHost } from "./rangeOverlayControllerContract";
+import type { EwarController, EwarEffectDescriber } from "../ewar";
+import type { UiEvents } from "../../events";
+import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 
 const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor"];
 const TITLE_REFRESH_INTERVAL_MS = 250;
@@ -12,27 +13,28 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private readonly i18n: I18n;
   private readonly ewarEffectDescriber: EwarEffectDescriber;
   private readonly now: () => number;
-  private host?: RangeOverlayHost;
+  private readonly ewarController: EwarController;
+  private readonly events: UiEvents;
+  private distance = 0;
   private readonly hiddenSet = new Set<RangeOverlayKind>();
   private readonly chips = new Map<RangeOverlayKind, HTMLButtonElement>();
   private lastTitleRefresh = 0;
   private lastDescriptors: readonly RangeOverlayKind[] = [];
 
-  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; now: () => number }) {
+  constructor(deps: { els: RangeOverlayEls; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; ewarController: EwarController; events: UiEvents; now: () => number }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
+    this.ewarController = deps.ewarController;
+    this.events = deps.events;
     this.now = deps.now;
-  }
-
-  setHost(host: RangeOverlayHost): void {
-    this.host = host;
+    this.events.onDistanceChanged((d) => { this.distance = d; });
     this.render();
   }
 
   descriptors(): readonly RangeOverlayKind[] {
-    const attacker = this.host?.projection("attacker");
-    const target = this.host?.projection("target");
+    const attacker = this.ewarController.projection("attacker");
+    const target = this.ewarController.projection("target");
     const out: RangeOverlayKind[] = [];
     for (const kind of ALL_KINDS) {
       if (hasKind(attacker, kind) || hasKind(target, kind)) out.push(kind);
@@ -43,7 +45,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   overlays(): readonly RangeOverlay[] {
     const out: RangeOverlay[] = [];
     for (const side of ["attacker", "target"] as const) {
-      const projection = this.host?.projection(side);
+      const projection = this.ewarController.projection(side);
       if (!projection) continue;
       for (const kind of this.descriptors()) {
         if (!this.isVisible(kind)) continue;
@@ -58,7 +60,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     if (this.hiddenSet.has(kind)) this.hiddenSet.delete(kind);
     else this.hiddenSet.add(kind);
     this.updateChipState(kind);
-    this.host?.onDisplayChange();
+    this.events.emitDisplayInvalidated();
   }
 
   isVisible(kind: RangeOverlayKind): boolean {
@@ -68,7 +70,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   describe(kind: RangeOverlayKind): string {
     const projection = this.mergedProjection();
     if (!projection) return "";
-    const distance = this.host?.currentDistance() ?? 0;
+    const distance = this.distance;
     switch (kind) {
       case "web": return this.ewarEffectDescriber.webDescription(projection, distance);
       case "grappler": return this.ewarEffectDescriber.grapplerDescription(projection, distance);
@@ -88,7 +90,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         if (isRangeOverlayKind(kind)) this.hiddenSet.add(kind);
       }
     }
-    if (this.host) this.render();
+    this.render();
   }
 
   render(): void {
@@ -235,8 +237,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private mergedProjection(): EwarProjection | undefined {
-    const attacker = this.host?.projection("attacker");
-    const target = this.host?.projection("target");
+    const attacker = this.ewarController.projection("attacker");
+    const target = this.ewarController.projection("target");
     if (!attacker && !target) return undefined;
     const loadout: EwarLoadout = {
       webs: [...(attacker?.loadout.webs ?? []), ...(target?.loadout.webs ?? [])],
