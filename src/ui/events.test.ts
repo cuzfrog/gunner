@@ -116,6 +116,18 @@ describe("UiEvents", () => {
     expect(newProfile).toHaveBeenCalled();
   });
 
+  test("emitProfileDeleted calls its listeners", () => {
+    const events = new UiEventsImpl();
+    const a = vi.fn();
+    const b = vi.fn();
+    events.onProfileDeleted(a);
+    events.onProfileDeleted(b);
+    events.offProfileDeleted(a);
+    events.emitProfileDeleted();
+    expect(a).not.toHaveBeenCalled();
+    expect(b).toHaveBeenCalled();
+  });
+
   test("emitProfileTextLoaded passes settings", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();

@@ -1291,9 +1291,15 @@ canvas {
   min-height: 30px;
 }
 
-.profile-bar button:hover {
+.profile-bar button:hover:not(:disabled) {
   border-color: var(--accent-teal);
   color: var(--text-primary);
+}
+
+.profile-bar button:disabled {
+  border-color: var(--border-dim);
+  color: var(--text-dim);
+  cursor: default;
 }
 
 .profile-bar button.unsaved {
@@ -2367,6 +2373,7 @@ canvas {
   font-family: "Saira", sans-serif;
   font-size: 13px;
   text-align: left;
+  text-transform: none;
   cursor: pointer;
   border-radius: 2px;
 }

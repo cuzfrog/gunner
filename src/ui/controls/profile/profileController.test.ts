@@ -334,13 +334,20 @@ describe("ProfileController", () => {
     expect(controller.selectedName()).toBe("kiter");
   });
 
-  test("delete removes the selected profile and clears the selection", async () => {
-    const { controller, els, settingsStore } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+  test("delete removes the selected profile and emits profileDeleted", async () => {
+    const { controller, els, settingsStore, events, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    const onProfileDeleted = vi.fn();
+    const refresh = vi.spyOn(controller, "refresh");
+    events.onProfileDeleted(onProfileDeleted);
     controller.markLoaded("brawler");
+    vi.mocked(changeTracker.clearBaseline).mockClear();
+    refresh.mockClear();
     await controller.deleteProfile();
     expect(settingsStore.deleteProfile).toHaveBeenCalledWith("brawler");
-    expect(controller.selectedName()).toBe("");
-    expect(els.profileSelectLabel.textContent).toBe("select.profile");
+    expect(onProfileDeleted).toHaveBeenCalled();
+    expect(changeTracker.clearBaseline).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
+    expect(els.shareStatus.textContent).toBe("status.profileDeleted");
   });
 
   test("delete confirms before removing", async () => {

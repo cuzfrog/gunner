@@ -101,6 +101,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.pristineSettings = this.capture();
     this.events.onProfileLoaded((name) => this.onProfileLoaded(name));
     this.events.onNewProfile(() => this.onNewProfile());
+    this.events.onProfileDeleted(() => this.onProfileDeleted());
     this.events.onProfileTextLoaded((settings) => this.onProfileTextLoaded(settings));
   }
 
@@ -276,6 +277,11 @@ export class SessionCodecImpl implements SessionCodec {
   private onNewProfile(): void {
     this.resetToDefaults();
     this.profileController.showStatus("status.newProfile");
+    this.events.emitSessionReset();
+  }
+
+  private onProfileDeleted(): void {
+    this.resetToDefaults();
     this.events.emitSessionReset();
   }
 }

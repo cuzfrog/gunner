@@ -209,10 +209,7 @@ export class ProfileControllerImpl implements ProfileController {
     if (!name) return;
     if (!(await this.confirmController.confirm("confirm.deleteProfile"))) return;
     this.settingsStore.deleteProfile(name);
-    this.changeTracker.clearBaseline();
-    this.lastAppliedSelection = "";
-    this.refresh();
-    this.updateActionBarState();
+    this.events.emitProfileDeleted();
     this.showStatus("status.profileDeleted");
   }
 

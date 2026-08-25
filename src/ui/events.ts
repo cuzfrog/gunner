@@ -20,6 +20,9 @@ export interface UiEvents {
   onNewProfile(listener: () => void): void;
   offNewProfile(listener: () => void): void;
   emitNewProfile(): void;
+  onProfileDeleted(listener: () => void): void;
+  offProfileDeleted(listener: () => void): void;
+  emitProfileDeleted(): void;
   onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void;
   emitProfileTextLoaded(settings: ProfileSettings): void;
@@ -44,6 +47,7 @@ export class UiEventsImpl implements UiEvents {
   private readonly fittingImported = new Set<(side: "attacker" | "target", imported: ImportedFitting) => void>();
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
+  private readonly profileDeleted = new Set<() => void>();
   private readonly profileTextLoaded = new Set<(settings: ProfileSettings) => void>();
   private readonly sessionRestored = new Set<() => void>();
   private readonly sessionReset = new Set<() => void>();
@@ -79,6 +83,10 @@ export class UiEventsImpl implements UiEvents {
   onNewProfile(listener: () => void): void { this.newProfile.add(listener); }
   offNewProfile(listener: () => void): void { this.newProfile.delete(listener); }
   emitNewProfile(): void { this.emit(this.newProfile); }
+
+  onProfileDeleted(listener: () => void): void { this.profileDeleted.add(listener); }
+  offProfileDeleted(listener: () => void): void { this.profileDeleted.delete(listener); }
+  emitProfileDeleted(): void { this.emit(this.profileDeleted); }
 
   onProfileTextLoaded(listener: (settings: ProfileSettings) => void): void { this.profileTextLoaded.add(listener); }
   offProfileTextLoaded(listener: (settings: ProfileSettings) => void): void { this.profileTextLoaded.delete(listener); }
