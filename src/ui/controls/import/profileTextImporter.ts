@@ -1,6 +1,6 @@
 import { type ProfileTextCodec, type ProfileSettings } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { AttackerTurret } from "./attackerTurret";
 
 interface ProfileTextImporterDeps {

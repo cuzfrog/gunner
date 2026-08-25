@@ -2,7 +2,7 @@ import { asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../cradle";
 import { collectSideEls } from "./elements";
 import { SidePanelImpl } from "./sidePanel";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanelDeps } from "./sidePanelContract";
 import { createPanelOverrides } from "./overrides";
 import { createPanelTurretLink } from "./turretLink";

@@ -3,7 +3,7 @@ import type { I18n } from "../../i18n";
 import type { FittedHullSummary, ProfileParamOverrides } from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IStatsSection } from "./sidePanelSections";
 

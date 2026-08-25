@@ -5,7 +5,7 @@ import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { Popup } from "../popup";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";
 

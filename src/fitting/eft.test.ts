@@ -1,3 +1,4 @@
+import { MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
 import { moduleLines, parseEft, type EftDocument } from "./eft";
 
 function bankLines(document: EftDocument, bank: string) {
@@ -7,26 +8,26 @@ function bankLines(document: EftDocument, bank: string) {
 
 describe("parseEft", () => {
   test("returns undefined when there is no header", () => {
-    expect(parseEft("\n\nSome Module\n")).toBeUndefined();
-    expect(parseEft("")).toBeUndefined();
-    expect(parseEft("   \n  \n")).toBeUndefined();
+    expect(parseEft("\n\nSome Module\n", MODULE_SLOT_CATALOG)).toBeUndefined();
+    expect(parseEft("", MODULE_SLOT_CATALOG)).toBeUndefined();
+    expect(parseEft("   \n  \n", MODULE_SLOT_CATALOG)).toBeUndefined();
   });
 
   test("parses a header into hull and fitting names", () => {
-    const parsed = parseEft("[Rifter, Test Fit]");
+    const parsed = parseEft("[Rifter, Test Fit]", MODULE_SLOT_CATALOG);
     expect(parsed).toBeDefined();
     expect(parsed!.hullName).toBe("Rifter");
     expect(parsed!.fittingName).toBe("Test Fit");
   });
 
   test("trims whitespace around the header and fitting name", () => {
-    const parsed = parseEft("[  Rifter  ,  My Test Fit  ]");
+    const parsed = parseEft("[  Rifter  ,  My Test Fit  ]", MODULE_SLOT_CATALOG);
     expect(parsed!.hullName).toBe("Rifter");
     expect(parsed!.fittingName).toBe("My Test Fit");
   });
 
   test("ignores leading blank lines before the header", () => {
-    const parsed = parseEft("\n\n\n[Rifter, Fit]");
+    const parsed = parseEft("\n\n\n[Rifter, Fit]", MODULE_SLOT_CATALOG);
     expect(parsed).toBeDefined();
     expect(parsed!.hullName).toBe("Rifter");
   });
@@ -35,7 +36,7 @@ describe("parseEft", () => {
     const text = `[Rifter, Glued]
 1MN Afterburner I
 200mm AutoCannon I`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([
       { name: "1MN Afterburner I", offline: false },
       { name: "200mm AutoCannon I", offline: false },
@@ -47,7 +48,7 @@ describe("parseEft", () => {
 Damage Control II /OFFLINE
 200mm AutoCannon I, EMP S /offline
 Nanofiber Internal Structure II /Offline`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([
       { name: "Damage Control II", offline: true },
       { name: "Nanofiber Internal Structure II", offline: true },
@@ -63,7 +64,7 @@ Nanofiber Internal Structure II /Offline`;
 
 [empty high slot]
 200mm AutoCannon I`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(parsed!.banks.length).toBe(2);
     expect(bankLines(parsed!, "low")).toEqual([
       { kind: "empty", label: "[empty low slot]" },
@@ -81,7 +82,7 @@ Nanofiber Internal Structure II /Offline`;
 200mm AutoCannon I
 400mm Steel Plates II
 Small Trimark Armor Pump I`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(parsed!.banks.map((b) => b.bank)).toEqual(["low", "mid", "high", "rig"]);
     expect(bankLines(parsed!, "mid")).toEqual([
       { kind: "module", name: "1MN Afterburner I", offline: false },
@@ -99,7 +100,7 @@ Unknown Mid Module A
 Unknown High Module A
 
 Unknown Rig Module A`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(parsed!.banks.map((b) => b.bank)).toEqual(["low", "mid", "high", "rig"]);
     expect(bankLines(parsed!, "low").length).toBe(2);
     expect(bankLines(parsed!, "mid").length).toBe(1);
@@ -117,7 +118,7 @@ Unknown Rig Module A`;
 
 [Empty Low slot]
 400mm Steel Plates II`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(bankLines(parsed!, "high").length).toBe(1);
     expect(bankLines(parsed!, "low").length).toBe(2);
     expect(bankLines(parsed!, "mid")).toEqual([
@@ -130,7 +131,7 @@ Unknown Rig Module A`;
     const text = `[Rifter, Anchored Unknown]
 [Empty High slot]
 Dread Guristas Capacitor Power Relay`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(bankLines(parsed!, "high")).toEqual([
       { kind: "empty", label: "[Empty High slot]" },
       { kind: "module", name: "Dread Guristas Capacitor Power Relay", offline: false },
@@ -142,7 +143,7 @@ Dread Guristas Capacitor Power Relay`;
 [Empty Low slot]
 200mm AutoCannon I
 400mm Steel Plates II`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(bankLines(parsed!, "low")).toEqual([
       { kind: "empty", label: "[Empty Low slot]" },
       { kind: "module", name: "400mm Steel Plates II", offline: false },
@@ -157,7 +158,7 @@ Dread Guristas Capacitor Power Relay`;
 200mm AutoCannon I
 EMP S x1000
 Nanite Repair Paste x50`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([{ name: "200mm AutoCannon I", offline: false }]);
     expect(parsed!.cargo).toEqual([
       { name: "EMP S", quantity: 1000 },
@@ -173,7 +174,7 @@ Hobgoblin I x3
 
 EMP S x1000
 Republic Fleet EMP S x500`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([{ name: "1MN Afterburner I", offline: false }]);
     expect(parsed!.drones).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
     expect(parsed!.cargo).toEqual([
@@ -191,7 +192,7 @@ Hobgoblin I x3
 
 
 EMP S x1000`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([{ name: "200mm AutoCannon I", offline: false }]);
     expect(parsed!.drones).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
     expect(parsed!.cargo).toEqual([{ name: "EMP S", quantity: 1000 }]);
@@ -202,7 +203,7 @@ EMP S x1000`;
 1MN Afterburner I
 weird [line]
 200mm AutoCannon I`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([
       { name: "1MN Afterburner I", offline: false },
       { name: "200mm AutoCannon I", offline: false },
@@ -215,7 +216,7 @@ weird [line]
 1MN Afterburner I
 400mm Steel Plates II
 Small Trimark Armor Pump I`;
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     expect(moduleLines(parsed!)).toEqual([
       { name: "400mm Steel Plates II", offline: false },
       { name: "1MN Afterburner I", offline: false },

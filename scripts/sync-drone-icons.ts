@@ -4,6 +4,7 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import * as process from "node:process";
+import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { moduleLines, parseEft } from "../src/fitting/eft";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
@@ -46,7 +47,7 @@ async function main(): Promise<void> {
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".txt")) continue;
     const text = await readFile(join(entry.parentPath, entry.name), "utf8");
-    const parsed = parseEft(text);
+    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
     if (!parsed) continue;
     for (const item of [...parsed.drones, ...parsed.cargo]) {
       if (item.name in typeByName) usedDrones.add(item.name);

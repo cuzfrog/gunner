@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, PropulsionSelection } from "../../../appstate";
 import { setText } from "../controlsDom";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IHullSection } from "./sidePanelSections";
 

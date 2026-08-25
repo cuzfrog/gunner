@@ -4,6 +4,7 @@
 // content with same name → append .N suffix.
 import * as fsp from "node:fs/promises";
 
+import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { parseEft } from "../src/fitting/eft";
 import { renameFittingText, summarizeFitting } from "./fittingSummary";
 
@@ -42,7 +43,7 @@ async function main(): Promise<void> {
 
   for (const fittingPath of files) {
     const raw = await fsp.readFile(fittingPath, "utf-8");
-    const parsed = parseEft(raw);
+    const parsed = parseEft(raw, MODULE_SLOT_CATALOG);
     const summary = summarizeFitting(raw);
     if (!parsed || !summary) {
       failed++;

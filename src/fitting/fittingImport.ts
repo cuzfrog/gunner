@@ -24,12 +24,13 @@ import {
   type TurretScriptSpec,
   type WarpScramblerSpec,
 } from "../sim";
-import type { FittingDb } from "../gamedata/fittingDb";
 import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
+
 import type { ItemNameCatalog } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
+  FittingDb,
   ChargeStats,
   DisruptionScriptStats,
   FittingModuleStats,
@@ -42,7 +43,6 @@ import type {
   TurretStats,
   WarpScramblerStats,
 } from "../gamedata/fittingDb";
-
 
 export type { FittingDb } from "../gamedata/fittingDb";
 export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";

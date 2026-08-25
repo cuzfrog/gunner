@@ -1,5 +1,5 @@
 import type { createControlsEls } from "../elements";
-import type { Side } from "./side";
+import type { Side } from "../side";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 

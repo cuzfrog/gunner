@@ -980,7 +980,7 @@ Hobgoblin II x5
   });
 
   test("fixture modules are all present in the generated slot map", () => {
-    const parsed = parseEft(RIFTER_BRAWLER);
+    const parsed = parseEft(RIFTER_BRAWLER, MODULE_SLOT_CATALOG);
     for (const line of moduleLines(parsed!)) {
       expect(MODULE_SLOTS[line.name]).toBeDefined();
     }

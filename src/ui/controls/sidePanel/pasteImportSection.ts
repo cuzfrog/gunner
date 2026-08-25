@@ -2,7 +2,7 @@ import type { I18n } from "../../i18n";
 import type { TimeoutId, Timer } from "../../timer";
 import { escapeHtml } from "../controlsFormat";
 import type { Popup } from "../popup";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPasteImportSection } from "./sidePanelSections";
 

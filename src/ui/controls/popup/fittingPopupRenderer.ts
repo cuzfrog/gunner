@@ -4,7 +4,7 @@ import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { FittingPopupHost } from "./fittingPopupHost";
 
 interface FittingPopupRendererDeps {

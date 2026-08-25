@@ -6,7 +6,7 @@ import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { BoosterController, BoosterEls, BoosterHost } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {

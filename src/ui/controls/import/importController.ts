@@ -4,7 +4,7 @@ import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profileController";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 import type { AttackerTurret } from "./attackerTurret";
 import { EftSideImporter } from "./eftSideImporter";

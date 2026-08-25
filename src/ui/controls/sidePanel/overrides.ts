@@ -1,6 +1,6 @@
 import type { ProfileParamOverrides } from "../../../appstate";
 import type { TurretOverrides } from "../turret";
-import type { Side } from "./side";
+import type { Side } from "../side";
 
 export interface PanelOverrides {
   isOverridden(key: keyof ProfileParamOverrides): boolean;

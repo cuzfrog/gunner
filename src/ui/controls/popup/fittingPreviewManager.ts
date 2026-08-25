@@ -4,7 +4,7 @@ import { fittingAreaSelector, isEventTargetWithClosest } from "../controlsDom";
 import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { FittingPopupHost } from "./fittingPopupHost";
 import type { UiEvents } from "../../events";
 

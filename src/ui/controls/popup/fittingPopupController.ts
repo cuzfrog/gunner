@@ -8,7 +8,7 @@ import { fittingAreaSelector } from "../controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FittingPopupRenderer } from "./fittingPopupRenderer";
 import type { FittingPopupEls } from "./fittingPopupEls";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { FittingPopupHost } from "./fittingPopupHost";
 
 export type { FittingPopupEls } from "./fittingPopupEls";

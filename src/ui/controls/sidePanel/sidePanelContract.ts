@@ -7,7 +7,7 @@ import type { CombatantSettings, FittedHullSummary, ProfileParamOverrides, Propu
 import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { ISidePanelSections } from "./sidePanelSections";
 import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";

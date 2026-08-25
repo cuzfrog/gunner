@@ -20,7 +20,7 @@ import { PasteImportSection } from "./pasteImportSection";
 import { PropulsionSection } from "./propulsionSection";
 import { SkillOverloadSection } from "./skillOverloadSection";
 import { StatsSection } from "./statsSection";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
 import {

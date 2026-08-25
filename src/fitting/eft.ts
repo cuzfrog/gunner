@@ -1,4 +1,4 @@
-import { MODULE_SLOT_CATALOG, type ModuleSlot, type ModuleSlotCatalog } from "../gamedata/moduleSlots";
+import type { ModuleSlot, ModuleSlotCatalog } from "../gamedata/moduleSlots";
 
 export type BankKind = "low" | "mid" | "high" | "rig" | "subsystem" | "service";
 
@@ -47,7 +47,7 @@ const BANK_BY_NORMAL_NAME: Readonly<Record<string, BankKind>> = {
   service: "service",
 };
 
-export function parseEft(text: string, slotCatalog: ModuleSlotCatalog = MODULE_SLOT_CATALOG): EftDocument | undefined {
+export function parseEft(text: string, slotCatalog: ModuleSlotCatalog): EftDocument | undefined {
   const groups = trimmedLineGroups(text);
   if (groups.length === 0) return undefined;
 

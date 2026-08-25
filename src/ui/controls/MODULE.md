@@ -42,7 +42,6 @@ no-new-exports:
   - sidePanel/pasteImportSection.ts
   - sidePanel/propulsionSection.ts
   - sidePanel/propulsionVariantSection.ts
-  - sidePanel/side.ts
   - sidePanel/sidePanel.ts
   - sidePanel/module.ts
   - sidePanel/sidePanelSections.ts

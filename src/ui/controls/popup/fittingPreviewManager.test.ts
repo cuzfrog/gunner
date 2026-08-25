@@ -7,7 +7,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittingImport } from "../../../fitting";
 import type { ShipProfile } from "../../../ships";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { FittingPopupHost } from "./fittingPopupHost";
 
 const PREVIEW_SUMMARY: FittingSummary = {

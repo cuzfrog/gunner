@@ -3,7 +3,7 @@ import type { ClipboardProvider, SavedFittings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
 import type { PreferencesController } from "../preferencesController";
 import type { ProfileController } from "../profileController";
-import type { Side } from "..";
+import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 
 export interface ImportEls {
