@@ -1,6 +1,5 @@
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
-import { PALETTE } from "../palette";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
@@ -37,14 +36,6 @@ export function formatDistance(m: number, t: (key: string) => string): string {
 
 export function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
-}
-
-export function hitChanceColor(chance: number): string {
-  if (chance >= 0.9) return PALETTE.optimalGreen;
-  if (chance >= 0.5) return PALETTE.accentTeal;
-  if (chance >= 0.25) return PALETTE.warnYellow;
-  if (chance >= 0.05) return PALETTE.accentOrange;
-  return PALETTE.dangerRed;
 }
 
 export function hitChanceClass(chance: number): string {

@@ -37,7 +37,7 @@
         <a class="app-github-link" href="https://github.com/cuzfrog/gunner" target="_blank" rel="noopener noreferrer"
            data-i18n-aria-label="label.github" data-i18n-title="label.github"
            aria-label="GitHub repository" title="GitHub repository">
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#github"></use></svg>
+          <svg class="app-github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#github"></use></svg>
         </a>
       </div>
     </header>
@@ -148,10 +148,10 @@
 
     <main class="app-main">
       <section class="side-panel side-panel-attacker surface-panel">
-        <h2 data-i18n="section.attackerTurret">Attacker</h2>
-        <label>
+        <h2 class="side-panel-heading" data-i18n="section.attackerTurret">Attacker</h2>
+        <label class="form-field">
           <span class="tracking-label-row">
-            <span class="field-label tracking-label-text" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
               <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
               <button type="button" id="tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
@@ -190,14 +190,14 @@
           </div>
         </div>
         <div class="form-field-row">
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
             <span class="input-with-unit input-with-unit-has-effective">
               <input type="number" class="input-field" id="optimal" value="5000" step="any" min="0">
               <span class="effective-value mono" id="effective-optimal"></span>
             </span>
           </label>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
             <span class="input-with-unit input-with-unit-has-effective">
               <input type="number" class="input-field" id="falloff" value="5000" step="any" min="0">
@@ -307,7 +307,7 @@
             <div class="fitting-popup propulsion-variants-popup popup popup-below popup-right" id="attacker-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
           </div>
           <button type="button" id="attacker-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
+            <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" class="input-field" id="attacker-speed" value="0" step="any" min="0" aria-describedby="attacker-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
@@ -317,14 +317,14 @@
         </div>
 
         <div class="form-field-row">
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="attacker-mass" value="1200000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="attacker-inertia" value="3" step="any" min="0">
@@ -342,7 +342,7 @@
               <option value="midships" data-i18n="mode.midships">Midships</option>
             </select>
           </div>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="attacker-range" value="5000" step="any" min="0">
@@ -361,7 +361,7 @@
             <output class="form-slider-value mono" id="maneuver-aggressivity-value" for="maneuver-aggressivity-slider">1.00</output>
           </span>
           <input type="hidden" id="maneuver-aggressivity" value="1">
-          <input type="range" id="maneuver-aggressivity-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
+          <input type="range" id="maneuver-aggressivity-slider" class="form-slider" min="0" max="1" step="0.001" value="0.5" style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
         </div>
         <div class="form-field-group skill-section skill-select" id="attacker-skill-field">
           <button type="button" class="trigger" id="attacker-skill-trigger"
@@ -403,18 +403,18 @@
           </div>
 
           <div class="control-bar-field control-bar-zoom">
-            <label for="zoom-slider" data-i18n="label.zoom">Zoom</label>
-            <input type="range" id="zoom-slider" min="0.25" max="4" step="0.05" value="1"
+            <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
+            <input type="range" id="zoom-slider" class="form-slider" min="0.25" max="4" step="0.05" value="1"
                    style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
             <output class="form-slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
             <label class="zoom-auto-option">
-              <input type="checkbox" id="auto-zoom" checked>
+              <input type="checkbox" id="auto-zoom" class="zoom-auto-checkbox" checked>
               <span data-i18n="label.autoZoom">Auto-zoom</span>
             </label>
           </div>
 
           <div class="control-bar-field control-bar-speed">
-            <label for="sim-speed" data-i18n="label.simulationSpeed">Speed</label>
+            <label for="sim-speed" class="field-label" data-i18n="label.simulationSpeed">Speed</label>
             <select class="input-field" id="sim-speed">
               <option value="0.25">0.25x</option>
               <option value="0.5">0.5x</option>
@@ -429,8 +429,8 @@
         <div id="canvas-settings-popup" class="control-bar-canvas-settings-popup popup" hidden role="dialog"
              data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
           <div class="control-bar-field">
-            <label for="grid-brightness-slider" data-i18n="label.gridBrightness">Grid brightness</label>
-            <input type="range" id="grid-brightness-slider" min="0" max="1" step="0.01" value="0.5"
+            <label for="grid-brightness-slider" class="field-label" data-i18n="label.gridBrightness">Grid brightness</label>
+            <input type="range" id="grid-brightness-slider" class="form-slider" min="0" max="1" step="0.01" value="0.5"
                    style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
             <output class="form-slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
           </div>
@@ -438,7 +438,7 @@
       </section>
 
       <section class="side-panel side-panel-target surface-panel">
-        <h2 data-i18n="section.targetShip">Target</h2>
+        <h2 class="side-panel-heading" data-i18n="section.targetShip">Target</h2>
         <div class="hull-field">
           <div class="hull-label-row">
             <span class="field-label truncate" data-i18n="label.hull">Ship</span>
@@ -521,7 +521,7 @@
               <span class="input-suffix mono" aria-hidden="true">m</span>
             </span>
           </div>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="target-sig" value="40" step="any" min="1">
@@ -540,7 +540,7 @@
             <div class="fitting-popup propulsion-variants-popup popup popup-below popup-right" id="target-propulsion-variants" role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
           </div>
           <button type="button" id="target-overload-button" class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
+            <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" class="input-field" id="target-speed" value="1000" step="any" min="0" aria-describedby="target-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
@@ -550,14 +550,14 @@
         </div>
 
         <div class="form-field-row">
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.mass">Mass</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="target-mass" value="10000000" step="any" min="0">
               <span class="input-suffix mono" aria-hidden="true">kg</span>
             </span>
           </label>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.inertiaModifier">Inertia modifier</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="target-inertia" value="0.45" step="any" min="0">
@@ -575,7 +575,7 @@
               <option value="midships" data-i18n="mode.midships">Midships</option>
             </select>
           </div>
-          <label>
+          <label class="form-field">
             <span class="field-label truncate" data-i18n="label.desiredRange">Desired range</span>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="target-range" value="5000" step="any" min="0">
@@ -601,14 +601,14 @@
     </main>
 
     <footer class="app-footer">
-      <div class="app-footer-about">
+      <div>
         <h3 class="footer-heading" data-i18n="footer.about.heading">About Gunner</h3>
-        <p data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
+        <p class="footer-text" data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
       </div>
 
       <div class="app-footer-mechanism" data-accent="teal">
         <h3 class="footer-heading" data-i18n="footer.mech.kinematics.heading">Kinematics</h3>
-        <p data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
+        <p class="footer-text" data-i18n="footer.mech.kinematics.text">Ships move with mass and inertia. Transversal, radial, and angular velocity describe target motion. Acceleration is exponential.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Velocity" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.kinematics.link">Velocity</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>
@@ -617,7 +617,7 @@
 
       <div class="app-footer-mechanism" data-accent="blue">
         <h3 class="footer-heading" data-i18n="footer.mech.speed.heading">Speed</h3>
-        <p data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
+        <p class="footer-text" data-i18n="footer.mech.speed.text">Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Propulsion_equipment" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.speed.link">Propulsion</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>
@@ -626,7 +626,7 @@
 
       <div class="app-footer-mechanism" data-accent="orange">
         <h3 class="footer-heading" data-i18n="footer.mech.hitChance.heading">Hit chance</h3>
-        <p data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
+        <p class="footer-text" data-i18n="footer.mech.hitChance.text">Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff.</p>
         <a class="app-footer-ref" href="https://wiki.eveuniversity.org/Turret_mechanics" target="_blank" rel="noopener noreferrer">
           <span data-i18n="footer.mech.hitChance.link">Turret mechanics</span>
           <svg class="icon-ext" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#external"></use></svg>

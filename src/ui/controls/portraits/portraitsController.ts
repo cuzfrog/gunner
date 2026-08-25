@@ -72,6 +72,7 @@ export class PortraitsControllerImpl implements PortraitsController {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleName);
       if (iconUrl === undefined) continue;
       const img = document.createElement("img");
+      img.className = "portrait-effect-icon";
       img.alt = "";
       img.src = iconUrl;
       effects.appendChild(img);

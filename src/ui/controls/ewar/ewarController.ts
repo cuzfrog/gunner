@@ -362,12 +362,13 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-label", displayName);
     const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
     const img = document.createElement("img");
+    img.className = "ewar-module-icon";
     if (iconUrl !== undefined) img.src = iconUrl;
     img.alt = "";
     img.hidden = iconUrl === undefined;
     button.appendChild(img);
     const nameSpan = document.createElement("span");
-    nameSpan.className = "truncate";
+    nameSpan.className = "ewar-module-name truncate";
     nameSpan.textContent = displayName;
     nameSpan.title = displayName;
     button.appendChild(nameSpan);
@@ -408,7 +409,7 @@ export class EwarControllerImpl implements EwarController {
     button.title = label;
     button.setAttribute("aria-label", label);
     button.innerHTML = (
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
+      '<svg class="overload-button-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
       '<use href="icons.svg#overload"></use></svg>'
     );
     button.disabled = !active;
@@ -480,12 +481,13 @@ export class EwarControllerImpl implements EwarController {
     button.title = title;
     if (iconUrl !== undefined) {
       const img = document.createElement("img");
+      img.className = "ewar-script-icon";
       img.src = iconUrl;
       img.alt = "";
       button.appendChild(img);
     }
     const nameSpan = document.createElement("span");
-    nameSpan.className = "truncate";
+    nameSpan.className = "ewar-script-name truncate";
     nameSpan.textContent = text;
     nameSpan.title = text;
     button.appendChild(nameSpan);

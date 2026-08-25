@@ -47,7 +47,7 @@ Semantic color mapping (used consistently across CSS and canvas):
 
 - Attacker = teal, Target = orange.
 - Good/optimal = green, caution = yellow, warning = orange, danger = red.
-- Hit-chance color scale (see `hitChanceColor` in `controls.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red.
+- Hit-chance color scale (see `hitChanceClass` in `controlsFormat.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red.
 
 ### Alpha variants of accents
 
@@ -117,7 +117,7 @@ List entries: transparent-bg buttons, hover fills `var(--bg-inset)`, selected en
 
 ### Sliders
 
-Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) ...)`; JS sets `--fill` percentage (see `controls.ts`). Thumb: 12x16px panel-colored box with teal border and subtle teal glow. Firefox uses `::-moz-range-progress`. Hover moves thumb border to blue. Disabled: dim track/thumb, no glow.
+Custom-styled `.form-slider` (range inputs): 4px track filled via `linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) ...)`; JS sets `--fill` percentage (see `preferencesController.ts`). Thumb: 12x16px panel-colored box with teal border and subtle teal glow. Firefox uses `::-moz-range-progress`. Hover moves thumb border to blue. Disabled: dim track/thumb, no glow.
 
 ### Result cards
 
@@ -134,9 +134,9 @@ Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, 
 
 Keep JS-side styling minimal and token-aligned:
 
-- Class toggling only (`active`, `unsaved`, `invalid`, `error`, `hidden`, and `is-*` state classes) — all visual states live in CSS.
+- Class toggling only (`hidden` and `is-*` state classes) — all visual states live in CSS.
 - Allowed inline-style exceptions:
-  - Setting `--fill` on `input[type="range"]` sliders.
+  - Setting `--fill` on `.form-slider` sliders.
   - Measured `left`/`top` positioning for the fitting preview popup.
 - Canvas drawing colors come from `src/ui/renderer.ts` `COLORS`, which must mirror the CSS tokens above.
 

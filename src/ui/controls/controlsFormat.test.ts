@@ -1,7 +1,6 @@
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionId, PropulsionModule } from "../../ships";
-import { PALETTE } from "../palette";
 import type { I18n } from "../i18n";
 import {
   AGGRESSIVITY_MAX,
@@ -13,7 +12,6 @@ import {
   formatMultiplier,
   formatNumber,
   formatWithCommas,
-  hitChanceColor,
   positionFromAggressivity,
   propulsionOptionLabel,
   scriptStatSuffix,
@@ -70,16 +68,6 @@ describe("formatting", () => {
     const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km" }[key] ?? key);
     expect(formatDistance(9999.4, t)).toBe("9,999 m");
     expect(formatDistance(9999.6, t)).toBe("10.0 km");
-  });
-});
-
-describe("hit chance color", () => {
-  test("maps thresholds to the palette", () => {
-    expect(hitChanceColor(0.95)).toBe(PALETTE.optimalGreen);
-    expect(hitChanceColor(0.75)).toBe(PALETTE.accentTeal);
-    expect(hitChanceColor(0.3)).toBe(PALETTE.warnYellow);
-    expect(hitChanceColor(0.1)).toBe(PALETTE.accentOrange);
-    expect(hitChanceColor(0)).toBe(PALETTE.dangerRed);
   });
 });
 
