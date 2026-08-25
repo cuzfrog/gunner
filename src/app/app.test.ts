@@ -5,6 +5,7 @@ import {
   type EngagementFrame,
   type EngagementFrameComposer,
   type EngagementView,
+  type EwarProjection,
   type EwarResolver,
   type HitChanceBreakdown,
   type ShipConfig,
@@ -222,6 +223,17 @@ describe("AppImpl", () => {
   });
 
   test("passes ewar breakdowns from the resolver into effective readouts", () => {
+    const attackerEwar: EwarProjection = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    };
+    const targetEwar: EwarProjection = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    };
+    const attackerShip: ShipState = { ...ship, ewar: attackerEwar };
+    const targetShip: ShipState = { ...ship, id: "target", ewar: targetEwar };
+    simulation.snapshot.mockReturnValue({ ...snapshot, attacker: attackerShip, target: targetShip });
     const attackerSpeed: SpeedBreakdown = {
       effects: [{ family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 }],
       propulsionSuppressed: false,
@@ -238,9 +250,9 @@ describe("AppImpl", () => {
     ewarResolver.speedBreakdown.mockReturnValueOnce(attackerSpeed).mockReturnValueOnce(targetSpeed);
     ewarResolver.disruptionBreakdown.mockReturnValue(disruption);
     app.start();
-    expect(ewarResolver.speedBreakdown).toHaveBeenCalledWith(undefined, 5000);
-    expect(ewarResolver.speedBreakdown).toHaveBeenCalledWith(undefined, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenCalledWith(undefined, 5000);
+    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(1, targetEwar, 5000);
+    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(2, attackerEwar, 5000);
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenCalledWith(targetEwar, 5000);
     expect(controls.update).toHaveBeenCalledWith(frame, hit, {
       attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
       boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
