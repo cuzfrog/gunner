@@ -3,6 +3,7 @@ import { ReactiveAutopilot } from "./autopilot";
 import type { Autopilot } from "./autopilot";
 import { EwarResolverImpl } from "./ewarResolver";
 import { EngagementEvaluatorImpl } from "./fireControl";
+import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
@@ -25,5 +26,6 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     attackerSteering: asClass(PredictiveAutopilot).singleton(),
     simulation: asClass(SimulationImpl).singleton(),
     engagementEvaluator: asClass(EngagementEvaluatorImpl).singleton(),
+    engagementFrameComposer: asClass(EngagementFrameComposerImpl).singleton(),
   });
 }

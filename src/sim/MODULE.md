@@ -13,6 +13,8 @@ no-new-exports:
   - vec2.ts
   - cradle.ts
   - ewarResolver.ts
+  - engagementFrameComposer.test.ts
+  - engagementFrameComposer.ts
   # index.ts is intentionally ungated: it re-exports cross-boundary simulation DTOs.
   # - index.ts
   - kinematics.test.ts
@@ -39,6 +41,6 @@ no-new-exports:
 
 Engagement simulation domain: ship reactive and predictive autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper. `dynamics.ts` is module-internal: its `timeConstant` and `integrateShip` helpers have no cross-boundary exports.
 
-Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout`, `EwarProjection`, `CombatantConfig`, `DisruptionScriptSpec`, etc.), `EwarResolver`, `EngagementEvaluator`, `AttackState`, `AttackAssessment`, and `StackingPenalty` for use by `fitting`, `app`, and `ui`. `types.ts` is ungated to host these shared DTOs.
+Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout`, `EwarProjection`, `CombatantConfig`, `DisruptionScriptSpec`, etc.), `EwarResolver`, `EngagementEvaluator`, `EngagementFrameComposer`, `AttackState`, `AttackAssessment`, `EngagementInput`, `EngagementView`, and `StackingPenalty` for use by `fitting`, `app`, and `ui`. `types.ts` is ungated to host these shared DTOs.
 
-DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the reactive autopilot, `kinematics`, `hitChance`, `stackingPenalty`, `ewarResolver`, `engagementEvaluator` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.
+DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the reactive autopilot, `kinematics`, `hitChance`, `stackingPenalty`, `ewarResolver`, `engagementEvaluator`, `engagementFrameComposer` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.

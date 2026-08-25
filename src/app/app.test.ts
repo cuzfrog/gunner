@@ -1,4 +1,17 @@
-import { Vec2, type AttackAssessment, type EngagementEvaluator, type EngagementFrame, type HitChance, type HitChanceBreakdown, type Kinematics, type ShipConfig, type ShipState, type SimConfig, type Simulation, type SimSnapshot, type TurretSpec } from "../sim";
+import {
+  Vec2,
+  type AttackAssessment,
+  type EngagementFrame,
+  type EngagementFrameComposer,
+  type EngagementView,
+  type HitChanceBreakdown,
+  type ShipConfig,
+  type ShipState,
+  type SimConfig,
+  type Simulation,
+  type SimSnapshot,
+  type TurretSpec,
+} from "../sim";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
@@ -14,9 +27,7 @@ const controls = vi.mocked<Controls>({
   setCallbacks: vi.fn(),
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
-const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn() });
-const hitChance = vi.mocked<HitChance>({ compute: vi.fn(), findBestDistance: vi.fn() });
-const engagementEvaluator = vi.mocked<EngagementEvaluator>({ evaluate: vi.fn() });
+const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
 const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
@@ -61,21 +72,23 @@ const config: SimConfig = {
   initialDistance: 5000,
 };
 
+function baseView(): EngagementView {
+  const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
+  return { frame, assessment, effectiveTurret: turret, hit };
+}
+
 describe("AppImpl", () => {
   let app: AppImpl;
 
   beforeEach(() => {
-    const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
     simulation.snapshot.mockReturnValue(snapshot);
-    kinematics.computeEngagement.mockReturnValue(frame);
-    engagementEvaluator.evaluate.mockReturnValue({ attacker: assessment });
-    hitChance.compute.mockReturnValue(hit);
+    engagementFrameComposer.compose.mockReturnValue(baseView());
     controls.getTurret.mockReturnValue(turret);
     controls.getTargetSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
-    app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -89,28 +102,36 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turret, targetSigRadius: 40 });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
     expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
   });
 
-  test("renderFrame passes effective attribute values and boosted baselines from snapshot and assessment", () => {
-    const effectiveTurret = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
-    const boostedTurret = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
+  test("renderFrame passes effective attribute values and boosted baselines from view", () => {
+    const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
+    const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
     const boostedAttacker = { ...ship, maxSpeed: 250 };
     const boostedTarget = { ...ship, id: "target" as const, maxSpeed: 120 };
     const boostedSnapshot = { ...snapshot, attacker: boostedAttacker, target: boostedTarget };
+    const view: EngagementView = {
+      frame,
+      assessment: { boostedTurret, effectiveTurret, hit },
+      effectiveTurret,
+      hit,
+    };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
-    engagementEvaluator.evaluate.mockReturnValue({ attacker: { boostedTurret, effectiveTurret, hit } });
-    app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
+    engagementFrameComposer.compose.mockReturnValue(view);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
     app.start();
+    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, hit, effectiveTurret, []);
     expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 250, targetSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000, boostedTracking: 0.45, boostedOptimal: 5800, boostedFalloff: 3800 });
   });
 
-  test("falls back to hitChance and the base turret when engagement evaluator returns no attacker assessment", () => {
-    engagementEvaluator.evaluate.mockReturnValue({});
-    app = new AppImpl({ controls, simulation, kinematics, hitChance, engagementEvaluator, renderer, loop });
+  test("falls back to the view's effective turret when the composer returns no assessment", () => {
+    const view: EngagementView = { frame, assessment: undefined, effectiveTurret: turret, hit };
+    engagementFrameComposer.compose.mockReturnValue(view);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, renderer, loop });
     app.start();
-    expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, 40);
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
     expect(controls.update).toHaveBeenCalledWith(frame, hit, { attackerSpeed: 0, targetSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000 });
   });
@@ -119,6 +140,7 @@ describe("AppImpl", () => {
     app.start();
     app.tick(0.1);
     expect(simulation.step).toHaveBeenCalledWith(0.1);
+    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(2);
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
 

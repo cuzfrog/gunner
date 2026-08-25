@@ -5,6 +5,7 @@ export type { Kinematics } from "./kinematics";
 export type { Simulation } from "./simulation";
 export type { EwarResolver } from "./ewarResolver";
 export type { TurretBoosterResolver } from "./turretBoosterResolver";
+export type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
