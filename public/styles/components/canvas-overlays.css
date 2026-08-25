@@ -1,4 +1,4 @@
-/* ---- canvas overlays ---- */
+@layer components {
 .canvas-frame {
   display: flex;
   flex-direction: column;
@@ -60,16 +60,13 @@
 
 .portrait-effects[hidden] { display: none; }
 
-.portrait-effects img {
-  pointer-events: auto;
-  cursor: help;
-}
-
 .portrait-effect-icon {
   width: 16px;
   height: 16px;
   background: var(--bg-panel);
   border-radius: 2px;
+  pointer-events: auto;
+  cursor: help;
 }
 
 .range-overlay-chip {
@@ -97,8 +94,14 @@
 
 .range-overlay-chip:hover { border-color: var(--accent-teal); }
 
+.range-overlay-chip:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 1px;
+}
+
 .range-overlay-chip.range-overlay-web { color: var(--overlay-web); }
 .range-overlay-chip.range-overlay-grappler { color: var(--overlay-grappler); }
 .range-overlay-chip.range-overlay-scrambler { color: var(--overlay-scrambler); }
 .range-overlay-chip.range-overlay-disruptor { color: var(--overlay-disruptor); }
 
+}

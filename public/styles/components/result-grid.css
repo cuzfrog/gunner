@@ -1,4 +1,4 @@
-/* ---- result grid ---- */
+@layer components {
 .result-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -45,3 +45,4 @@
 .result-card-value.is-warn { color: var(--accent-orange); }
 .result-card-value.is-danger { color: var(--danger-red); }
 
+}

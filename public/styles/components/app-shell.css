@@ -1,6 +1,4 @@
-/* ==== LAYER 3: components ==== */
-
-/* ---- app shell ---- */
+@layer components {
 .app-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -74,6 +72,8 @@
 
 .app-github-link:hover { color: var(--accent-teal); }
 
+.app-github-link:focus-visible { outline-offset: 2px; }
+
 .app-github-icon { display: block; }
 
 .app-main {
@@ -82,3 +82,4 @@
   gap: 14px;
 }
 
+}

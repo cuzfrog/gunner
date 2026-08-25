@@ -1,4 +1,4 @@
-/* ==== LAYER 4: responsive ==== */
+@layer layout {
 @media (max-width: 1100px) {
   .app-main {
     grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(260px, 280px);
@@ -58,4 +58,5 @@
   .app-footer { grid-template-columns: 1fr; }
 
   .combatant-portrait { bottom: 140px; }
+}
 }

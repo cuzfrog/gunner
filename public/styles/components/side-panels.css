@@ -1,4 +1,4 @@
-/* ---- side panels ---- */
+@layer components {
 .side-panel {
   display: flex;
   flex-direction: column;
@@ -945,3 +945,4 @@
   cursor: pointer;
 }
 
+}

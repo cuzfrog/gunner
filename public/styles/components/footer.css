@@ -1,4 +1,4 @@
-/* ---- footer ---- */
+@layer components {
 .app-footer {
   display: grid;
   grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
@@ -96,3 +96,4 @@
   gap: 4px;
 }
 
+}

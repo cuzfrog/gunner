@@ -1,5 +1,6 @@
-/* ==== LAYER 0: tokens ==== */
+@layer tokens, base, primitives, components, layout;
 
+@layer tokens {
 /* stylelint-disable color-no-hex, function-disallowed-list */
 :root {
   --bg-deep: #05080c;
@@ -37,3 +38,4 @@
 }
 /* stylelint-enable color-no-hex, function-disallowed-list */
 
+}

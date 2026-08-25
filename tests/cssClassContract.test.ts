@@ -215,6 +215,14 @@ function isApproved(className: string): boolean {
   return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
 }
 
+test("every CSS file starts with an @layer wrapper", async () => {
+  const glob = new Bun.Glob(CSS_GLOB);
+  for await (const path of glob.scan({ cwd: "." })) {
+    const text = await Bun.file(path).text();
+    expect(text.trimStart().startsWith("@layer")).toBe(true);
+  }
+});
+
 test("every used class is an approved component or primitive prefix", async () => {
   const html = await Bun.file(HTML_PATH).text();
   const used = htmlClasses(html);

@@ -1,4 +1,4 @@
-/* ---- control bar ---- */
+@layer components {
 .control-bar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -74,3 +74,4 @@
 
 .zoom-auto-option .zoom-auto-checkbox { margin: 0; }
 
+}

@@ -1,5 +1,4 @@
-/* ==== LAYER 2: primitives ==== */
-
+@layer primitives {
 /* ---- popup ---- */
 .popup {
   position: absolute;
@@ -238,3 +237,4 @@ select.input-field:disabled {
   text-overflow: ellipsis;
 }
 
+}
