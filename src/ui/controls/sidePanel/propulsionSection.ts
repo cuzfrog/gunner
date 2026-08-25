@@ -128,11 +128,12 @@ export class PropulsionSection implements IPropulsionSection {
           fitted: fitted?.fitted ?? this.nakedFitted(profile),
           propulsionId,
           propulsionName,
+          propulsionKind: module.kind,
           propulsion,
         };
       }
     } else if (fitted) {
-      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsion: undefined } : undefined;
+      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsionKind: undefined, propulsion: undefined } : undefined;
     }
     if (updated) {
       this.panel.fittedHull = updated;

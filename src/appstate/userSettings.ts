@@ -1,5 +1,5 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
-import type { FittedHull, PropulsionId, PropulsionStats, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 
 export const USER_SETTINGS_VERSION = 10 as const;
@@ -24,6 +24,7 @@ export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
   readonly propulsionName?: string;
+  readonly propulsionKind?: PropulsionKind;
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats;
   readonly baseMaxSpeed?: number;

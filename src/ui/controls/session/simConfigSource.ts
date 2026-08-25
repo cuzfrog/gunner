@@ -41,14 +41,16 @@ export class SimConfigSourceImpl implements SimConfigSource {
     const attackerState = this.attackerSide.capture();
     const targetState = this.targetSide.capture();
     const attacker: CombatantConfig = {
-      id: "attacker", maxSpeed: attackerState.speed, baseMaxSpeed: attackerState.baseMaxSpeed ?? attackerState.speed, mass: attackerState.mass,
+      id: "attacker", maxSpeed: attackerState.speed, baseMaxSpeed: attackerState.baseMaxSpeed ?? attackerState.speed,
+      suppressedMaxSpeed: suppressedMaxSpeed(attackerState), mass: attackerState.mass,
       inertiaModifier: attackerState.inertia, mode: attackerState.mode,
       desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
       ewar: this.ewarController.projection("attacker"),
       boosts: this.boosterController.projection("attacker"),
     };
     const target: CombatantConfig = {
-      id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed, mass: targetState.mass,
+      id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed,
+      suppressedMaxSpeed: suppressedMaxSpeed(targetState), mass: targetState.mass,
       inertiaModifier: targetState.inertia, mode: targetState.mode,
       desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
       ewar: this.ewarController.projection("target"),
@@ -56,4 +58,11 @@ export class SimConfigSourceImpl implements SimConfigSource {
     };
     return { attacker, target, initialDistance };
   }
+}
+
+function suppressedMaxSpeed(state: SidePanelState): number | undefined {
+  const kind = state.fittedHull?.propulsionKind;
+  if (kind === undefined) return undefined;
+  if (kind === "microwarpdrive") return state.baseMaxSpeed ?? state.speed;
+  return state.speed;
 }

@@ -22,6 +22,10 @@ export interface ShipConfig {
   // Older saved profiles and URLs may not have the field; `DomControls` and state
   // restoration use `maxSpeed` as a fallback so they still simulate identically.
   readonly baseMaxSpeed?: number;
+  // Max speed while warp-scrambled: the producer strips boosts only from modules
+  // a scrambler actually shuts down (MWD). Absent = legacy fallback
+  // (baseMaxSpeed ?? maxSpeed).
+  readonly suppressedMaxSpeed?: number;
   readonly mass: number;
   readonly inertiaModifier: number;
   readonly mode: AutopilotMode;

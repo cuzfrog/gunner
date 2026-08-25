@@ -77,7 +77,7 @@ function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipS
   const multiplier = resolver.speedMultiplier(opponent.ewar, distance);
   const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance);
   if (multiplier === 1 && !suppressed) return ship;
-  const baseSpeed = suppressed ? (ship.baseMaxSpeed ?? ship.maxSpeed) : ship.maxSpeed;
+  const baseSpeed = suppressed ? ship.suppressedMaxSpeed ?? ship.baseMaxSpeed ?? ship.maxSpeed : ship.maxSpeed;
   return { ...ship, maxSpeed: baseSpeed * multiplier };
 }
 

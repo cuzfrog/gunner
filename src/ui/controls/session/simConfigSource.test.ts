@@ -1,4 +1,5 @@
 import type { EwarProjection, TurretBoostProjection } from "../../../sim";
+import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
@@ -51,6 +52,14 @@ function ewarProjection(): EwarProjection {
 
 function boostProjection(): TurretBoostProjection {
   return { loadout: { computers: [], scripts: [] }, activation: { computers: [] } };
+}
+
+function fittedHull(propulsionKind: "afterburner" | "microwarpdrive" | undefined): FittedHullSummary {
+  return {
+    fittingName: "Brawler",
+    fitted: { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 },
+    propulsionKind,
+  };
 }
 
 function build() {
@@ -129,5 +138,50 @@ describe("SimConfigSourceImpl", () => {
     });
     const config = source.getConfig();
     expect(config.attacker.baseMaxSpeed).toBe(400);
+  });
+
+  test("getConfig sets suppressedMaxSpeed to speed for an afterburner fitted hull", () => {
+    const deps = build();
+    deps.attackerSide.capture = vi.fn(() => ({ ...baseAttackerState(), fittedHull: fittedHull("afterburner") }));
+    const source = new SimConfigSourceImpl({
+      attackerSide: deps.attackerSide,
+      targetSide: deps.targetSide,
+      preferencesController: deps.preferencesController,
+      ewarController: deps.ewarController,
+      boosterController: deps.boosterController,
+      distanceSource: deps.distanceSource,
+    });
+    const config = source.getConfig();
+    expect(config.attacker.suppressedMaxSpeed).toBe(400);
+  });
+
+  test("getConfig sets suppressedMaxSpeed to baseMaxSpeed for a microwarpdrive fitted hull", () => {
+    const deps = build();
+    deps.attackerSide.capture = vi.fn(() => ({ ...baseAttackerState(), fittedHull: fittedHull("microwarpdrive") }));
+    const source = new SimConfigSourceImpl({
+      attackerSide: deps.attackerSide,
+      targetSide: deps.targetSide,
+      preferencesController: deps.preferencesController,
+      ewarController: deps.ewarController,
+      boosterController: deps.boosterController,
+      distanceSource: deps.distanceSource,
+    });
+    const config = source.getConfig();
+    expect(config.attacker.suppressedMaxSpeed).toBe(300);
+  });
+
+  test("getConfig leaves suppressedMaxSpeed undefined when fittedHull is missing", () => {
+    const deps = build();
+    const source = new SimConfigSourceImpl({
+      attackerSide: deps.attackerSide,
+      targetSide: deps.targetSide,
+      preferencesController: deps.preferencesController,
+      ewarController: deps.ewarController,
+      boosterController: deps.boosterController,
+      distanceSource: deps.distanceSource,
+    });
+    const config = source.getConfig();
+    expect(config.attacker.suppressedMaxSpeed).toBeUndefined();
+    expect(config.target.suppressedMaxSpeed).toBeUndefined();
   });
 });

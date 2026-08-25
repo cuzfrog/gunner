@@ -634,6 +634,7 @@ describe("LocalSettingsStore", () => {
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
       propulsionName: RIFTER_MODULE.label,
+      propulsionKind: "microwarpdrive",
       fitted: RIFTER_FITTED,
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,

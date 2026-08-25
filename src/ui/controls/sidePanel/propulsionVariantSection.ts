@@ -69,6 +69,7 @@ export class PropulsionVariantSection {
       fitted: fitted?.fitted ?? this.panel.sections.propulsion.nakedFitted(profile),
       propulsionId,
       propulsionName: name,
+      propulsionKind: this.panel.sections.propulsion.currentPropulsionModule()?.kind,
       propulsion,
     };
     this.panel.fittedHull = updated;

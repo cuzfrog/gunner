@@ -85,6 +85,7 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
   propulsionId: "ab-1mn",
   propulsionName: "1MN Afterburner I",
+  propulsionKind: "afterburner",
   fitted: FITTED_HULL,
   propulsion: FITTED_PROPULSION,
   baseMaxSpeed: 456.25,

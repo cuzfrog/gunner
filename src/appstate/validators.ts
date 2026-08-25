@@ -1,4 +1,4 @@
-import type { FittedHull, PropulsionStats, SkillLevel } from "../ships";
+import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import type { Language } from "./language";
 import type { SettingGuards } from "./settingGuards";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings } from "./userSettings";
@@ -166,6 +166,7 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   if (!isOptionalPropulsionStats(s.propulsion)) return false;
   if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
   if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
+  if (s.propulsionKind !== undefined && !isPropulsionKind(s.propulsionKind)) return false;
   if (s.baseMaxSpeed !== undefined && !isNonNegative(s.baseMaxSpeed)) return false;
   return true;
 }
@@ -179,4 +180,8 @@ export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
   const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, autoZoom: ______, zoomFactor: _______, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
+}
+
+function isPropulsionKind(value: unknown): value is PropulsionKind {
+  return value === "afterburner" || value === "microwarpdrive";
 }

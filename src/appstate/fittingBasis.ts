@@ -69,6 +69,7 @@ export class FittingBasis {
       fittingName: imported.fittingName,
       propulsionId: fittedPropulsionId,
       propulsionName: fittedPropulsionName,
+      propulsionKind: fittedPropulsionId !== undefined ? this.ships.fittingOption(profile, fittedPropulsionId)?.kind : undefined,
       fitted: imported.fitted,
       propulsion: fittedPropulsion,
       baseMaxSpeed: stats.baseMaxSpeed,

@@ -277,6 +277,7 @@ describe("SettingsParser", () => {
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
       propulsionName: RIFTER_MODULE.label,
+      propulsionKind: "microwarpdrive",
       fitted: IMPORTED_RIFTER.fitted,
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,

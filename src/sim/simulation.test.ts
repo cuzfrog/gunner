@@ -36,8 +36,12 @@ function shipConfig(
   mass = INSTANT_MASS,
   inertiaModifier = INSTANT_INERTIA,
   baseMaxSpeed = 100,
+  suppressedMaxSpeed?: number,
 ): ShipConfig {
-  return { id, maxSpeed: 100, baseMaxSpeed, mass, inertiaModifier, mode, desiredRange: 5000, aggressivity: 1 };
+  return {
+    id, maxSpeed: 100, baseMaxSpeed, mass, inertiaModifier, mode, desiredRange: 5000, aggressivity: 1,
+    ...(suppressedMaxSpeed !== undefined ? { suppressedMaxSpeed } : {}),
+  };
 }
 
 function simConfig(attackerMode: ShipConfig["mode"], mass = INSTANT_MASS, inertiaModifier = INSTANT_INERTIA): SimConfig {
@@ -313,6 +317,69 @@ describe("SimulationImpl", () => {
     const sim = new SimulationImpl({ attackerSteering, targetSteering, ewarResolver: resolver, simConfig: config });
     sim.step(1);
     expect(sim.snapshot().target.velocity.x).toBeCloseTo(1200, 6);
+  });
+
+  test("an active scrambler keeps an afterburner-boosted speed using suppressedMaxSpeed", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1,
+      disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      attacker: shipConfig("attacker", "midships"),
+      target: { ...shipConfig("target", "midships", 1, 1e-6, 200, 1800), maxSpeed: 1800 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().target.velocity.x).toBeCloseTo(1800, 6);
+  });
+
+  test("an active scrambler drops a microwarpdrive-boosted speed to suppressedMaxSpeed", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1,
+      disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      attacker: shipConfig("attacker", "midships"),
+      target: { ...shipConfig("target", "midships", 1, 1e-6, 200, 200), maxSpeed: 1800 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().target.velocity.x).toBeCloseTo(200, 6);
+  });
+
+  test("an active scrambler falls back to baseMaxSpeed when suppressedMaxSpeed is absent", () => {
+    const resolver: EwarResolver = {
+      speedMultiplier: () => 1,
+      speedMultiplierIgnoringRange: () => 1,
+      disruptedTurret: (turret) => turret,
+      disruptedTurretIgnoringRange: (turret) => turret,
+      propulsionSuppressed: () => true,
+      propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
+    };
+    const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
+    const config: SimConfig = {
+      attacker: shipConfig("attacker", "midships"),
+      target: { ...shipConfig("target", "midships", 1, 1e-6, 200), maxSpeed: 1800 },
+      initialDistance: 5000,
+    };
+    const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver: resolver, simConfig: config });
+    sim.step(1);
+    expect(sim.snapshot().target.velocity.x).toBeCloseTo(200, 6);
   });
 
   test("computes attacker command before target command and passes the current time", () => {

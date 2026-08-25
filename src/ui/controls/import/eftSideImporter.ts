@@ -41,7 +41,7 @@ export class EftSideImporter {
     panel.fittingText = this.fittingImport.canonicalEftText(text) ?? text;
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
-    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(imported));
+    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
     if (side === "attacker") this.turret.applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
@@ -50,11 +50,13 @@ export class EftSideImporter {
     return imported;
   }
 
-  private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
+  private fittedHullSummary(side: Side, imported: ImportedFitting): FittedHullSummary {
+    const propulsionId = imported.propulsion?.propulsionId;
     return {
       fittingName: imported.fittingName,
-      propulsionId: imported.propulsion?.propulsionId,
+      propulsionId,
       propulsionName: imported.propulsion?.propulsionName,
+      propulsionKind: propulsionId !== undefined ? this.panel(side).ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
       fitted: imported.fitted,
       propulsion: imported.propulsion,
     };
