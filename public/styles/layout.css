@@ -1,6 +1,6 @@
 @layer layout {
 /* Page reflow map. Breakpoints: 1100px, 900px, 480px.
-   The 480px overrides for .form-field-row and the zoom slider/label
+   The 480px overrides for .form-field-row and the zoom label
    are candidates for elimination in Phase 4 fluid rewrites. */
 @media (max-width: 1100px) {
   .app-main {
@@ -40,8 +40,6 @@
 
 @media (max-width: 480px) {
   .form-field-row { grid-template-columns: 1fr; }
-
-  .control-bar-zoom .form-slider { width: 72px; }
 
   .control-bar-zoom .field-label { display: none; }
 

@@ -45,7 +45,7 @@
 
 .control-bar-field > .form-slider {
   width: 96px;
-  flex: none;
+  min-width: 64px;
 }
 
 .control-bar-canvas-settings-popup {
