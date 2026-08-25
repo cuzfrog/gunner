@@ -401,7 +401,7 @@ body {
   padding: 5px 24px;
 }
 
-.side-panel select.mode-select {
+.side-panel select.turret-mode-select {
   text-align: left;
   text-align-last: left;
   padding: 5px 24px 5px 8px;
