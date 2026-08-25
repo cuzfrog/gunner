@@ -1,0 +1,98 @@
+/* ---- footer ---- */
+.app-footer {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
+  gap: 24px;
+  margin-top: 14px;
+  padding: 12px 4px 2px;
+  border-top: 1px solid var(--border-dim);
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.footer-text {
+  margin: 0;
+  max-width: 40ch;
+}
+
+.app-footer-mechanism .footer-text { margin: 0 0 4px; }
+
+.app-footer-mechanism[data-accent="teal"] .footer-heading { color: var(--accent-teal); }
+.app-footer-mechanism[data-accent="blue"] .footer-heading { color: var(--accent-blue); }
+.app-footer-mechanism[data-accent="orange"] .footer-heading { color: var(--accent-orange); }
+
+.app-footer-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--accent-teal);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.app-footer-mechanism[data-accent="blue"] > .app-footer-ref { color: var(--accent-blue); }
+.app-footer-mechanism[data-accent="orange"] > .app-footer-ref { color: var(--accent-orange); }
+
+.app-footer-ref:hover { border-bottom-color: currentColor; }
+
+.icon-ext {
+  flex: none;
+  opacity: 0.7;
+}
+
+.footer-heading {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 0 0 6px;
+}
+
+.footer-author {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.footer-author-emblems {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-author-portrait {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-dim);
+  flex: none;
+}
+
+.footer-corporation-emblem {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex: none;
+}
+
+.footer-author-label,
+.footer-corp-label { color: var(--text-dim); }
+
+.footer-author-name,
+.footer-corp-name {
+  font-family: "Chakra Petch", sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.footer-author-line {
+  display: inline-flex;
+  gap: 4px;
+}
+

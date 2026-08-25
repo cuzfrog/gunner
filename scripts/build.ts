@@ -10,6 +10,20 @@ const SHIP_IMAGES_SOURCE = "data/ship-images";
 const ICONS_SOURCE_DIRECTORY = "data/ship-modules/icons";
 const STYLES_FILE_NAME = "styles.css";
 const INDEX_FILE_NAME = "index.html";
+
+const STYLES_MANIFEST = [
+  "styles/tokens.css",
+  "styles/base.css",
+  "styles/primitives.css",
+  "styles/components/app-shell.css",
+  "styles/components/profile-bar.css",
+  "styles/components/result-grid.css",
+  "styles/components/control-bar.css",
+  "styles/components/side-panels.css",
+  "styles/components/canvas-overlays.css",
+  "styles/components/footer.css",
+  "styles/layout.css",
+] as const;
 const HASH_LENGTH = 8;
 const STYLES_LINK_PATTERN = /href=["']styles\.css["']/;
 const SCRIPT_SRC_PATTERN = /src=["']\.\/main\.js["']/;
@@ -42,6 +56,7 @@ const mainJsName = basename(jsEntry.path);
 mkdirSync(DISTRIBUTION_DIRECTORY, { recursive: true });
 
 for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
+  if (entry.name === "styles") continue;
   const src = join(PUBLIC_DIRECTORY, entry.name);
   const dst = join(DISTRIBUTION_DIRECTORY, entry.name);
   cpSync(src, dst, { force: true, recursive: true });
@@ -63,7 +78,9 @@ for (const iconId of new Set([...Object.values(ITEM_ICON_IDS), ...Object.values(
   cpSync(src, join(iconsDist, `${iconId}@1x.png`));
 }
 
-const stylesHash = hashFile(join(PUBLIC_DIRECTORY, STYLES_FILE_NAME));
+const stylesContent = STYLES_MANIFEST.map((path) => readFileSync(join(PUBLIC_DIRECTORY, path))).join("");
+writeFileSync(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME), stylesContent);
+const stylesHash = hashFile(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME));
 const hashedStylesName = `styles-${stylesHash}.css`;
 renameSync(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME), join(DISTRIBUTION_DIRECTORY, hashedStylesName));
 

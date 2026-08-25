@@ -28,6 +28,9 @@ describe("build", () => {
     expect(indexHtml).toMatch(STYLES_LINK_PATTERN);
     expect(indexHtml).toMatch(SCRIPT_SRC_PATTERN);
 
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "styles"))).toBe(false);
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "styles.css"))).toBe(false);
+
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "favicon.svg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "author-portrait.jpg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "corporation-emblem.png"))).toBe(true);

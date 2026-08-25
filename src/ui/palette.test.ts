@@ -7,8 +7,8 @@ function camelToKebab(value: string): string {
 }
 
 describe("PALETTE", () => {
-  test("mirrors the :root tokens in public/styles.css", async () => {
-    const css = await readFile(join(import.meta.dir, "..", "..", "public", "styles.css"), "utf-8");
+  test("mirrors the :root tokens in public/styles/tokens.css", async () => {
+    const css = await readFile(join(import.meta.dir, "..", "..", "public", "styles", "tokens.css"), "utf-8");
     const rootBlock = css.match(/:root\s*\{([^}]+)\}/s)?.[1] ?? "";
     const vars: Record<string, string> = {};
     for (const match of rootBlock.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)) {

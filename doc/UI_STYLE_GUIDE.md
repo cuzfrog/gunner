@@ -4,11 +4,11 @@ This guide defines the visual language of Gunner's web UI. Follow it when adding
 
 Sources of truth:
 
-- `public/styles.css` — all DOM styling (single stylesheet)
+- `public/styles/**/*.css` — all DOM styling, concatenated at build time into a hashed `dist/styles-*.css`
 - `public/index.html` — markup structure and class naming
 - `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
-- Layer 2 of `public/styles.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `mono`, `popup`, `trigger`, `truncate`, `chevron`
+- `public/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `mono`, `popup`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 

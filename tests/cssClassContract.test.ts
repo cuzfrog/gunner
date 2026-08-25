@@ -1,6 +1,6 @@
 const HTML_PATH = "public/index.html";
 const TS_GLOB = "src/ui/**/*.ts";
-const CSS_PATH = "public/styles.css";
+const CSS_GLOB = "public/styles/**/*.css";
 
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
@@ -141,40 +141,63 @@ async function tsClasses(): Promise<StringMap> {
   return perFile;
 }
 
+async function cssText(): Promise<string> {
+  const glob = new Bun.Glob(CSS_GLOB);
+  const paths: string[] = [];
+  for await (const path of glob.scan({ cwd: "." })) {
+    paths.push(path);
+  }
+  paths.sort();
+  const parts: string[] = [];
+  for (const path of paths) {
+    parts.push(await Bun.file(path).text());
+  }
+  return parts.join("");
+}
+
 function cssClasses(cssText: string): Set<string> {
   const found = new Set<string>();
   const noComments = cssText.replace(/\/\*[\s\S]*?\*\//g, "");
-  let lastClose = -1;
-  for (let i = 0; i < noComments.length; i++) {
-    if (noComments[i] === "{") {
-      const selector = noComments.slice(lastClose + 1, i).trim();
-      if (selector && !selector.startsWith("@")) {
-        for (const token of selector.split(/[\s,>+~]+/)) {
-          const parts = token.split(".");
-          for (let j = 1; j < parts.length; j++) {
-            const name = parts[j].match(/^[a-zA-Z_-][a-zA-Z0-9_-]*/);
-            if (name) found.add(name[0]);
+  parseBlock(noComments);
+  return found;
+
+  function parseBlock(block: string): void {
+    let lastClose = -1;
+    for (let i = 0; i < block.length; i++) {
+      if (block[i] === "{") {
+        const selector = block.slice(lastClose + 1, i).trim();
+        const isAtRule = selector.startsWith("@");
+        const blockStart = i;
+        let depth = 1;
+        i++;
+        while (i < block.length && depth > 0) {
+          if (block[i] === "{") depth++;
+          else if (block[i] === "}") depth--;
+          i++;
+        }
+        const inner = block.slice(blockStart + 1, i - 1);
+        if (isAtRule) {
+          parseBlock(inner);
+        } else if (selector) {
+          for (const token of selector.split(/[\s,>+~]+/)) {
+            const parts = token.split(".");
+            for (let j = 1; j < parts.length; j++) {
+              const name = parts[j].match(/^[a-zA-Z_-][a-zA-Z0-9_-]*/);
+              if (name) found.add(name[0]);
+            }
           }
         }
+        lastClose = i - 1;
       }
-      let depth = 1;
-      i++;
-      while (i < noComments.length && depth > 0) {
-        if (noComments[i] === "{") depth++;
-        else if (noComments[i] === "}") depth--;
-        i++;
-      }
-      lastClose = i - 1;
     }
   }
-  return found;
 }
 
 test("every used class has a CSS definition", async () => {
   const html = await Bun.file(HTML_PATH).text();
   const used = htmlClasses(html);
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
-  const defined = cssClasses(await Bun.file(CSS_PATH).text());
+  const defined = cssClasses(await cssText());
   const missing = [...used].filter((c) => !defined.has(c) && !ALLOWED_UNDEFINED.has(c));
   expect(missing).toEqual([]);
 });
@@ -183,7 +206,7 @@ test("every CSS class is referenced somewhere", async () => {
   const html = await Bun.file(HTML_PATH).text();
   const used = htmlClasses(html);
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
-  const defined = cssClasses(await Bun.file(CSS_PATH).text());
+  const defined = cssClasses(await cssText());
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
   expect(orphans).toEqual([]);
 });

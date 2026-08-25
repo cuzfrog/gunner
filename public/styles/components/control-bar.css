@@ -1,0 +1,76 @@
+/* ---- control bar ---- */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-bar-playback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  grid-column: 1;
+  justify-self: start;
+}
+
+.control-bar-playback > .btn {
+  padding: 8px 14px;
+  min-height: 32px;
+}
+
+.control-bar-zoom {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.control-bar-field .form-slider-value {
+  min-width: 3ch;
+  margin-left: 0;
+}
+
+.control-bar-zoom .form-slider-value { min-width: 5ch; }
+
+.control-bar-speed {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.control-bar-field {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+
+.control-bar-field > .input-field {
+  min-width: 82px;
+  padding: 8px 24px 8px 8px;
+  text-align: left;
+  text-align-last: left;
+}
+
+.control-bar-field > .form-slider {
+  width: 96px;
+  flex: none;
+}
+
+.control-bar-canvas-settings-popup {
+  bottom: 48px;
+  left: 12px;
+  min-width: 200px;
+  padding: 8px;
+}
+
+.zoom-auto-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.zoom-auto-option .zoom-auto-checkbox { margin: 0; }
+
