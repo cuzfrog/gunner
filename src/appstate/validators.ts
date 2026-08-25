@@ -129,7 +129,7 @@ export function isOptionalProfileParamOverrides(value: unknown, guards: SettingG
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
   for (const key of Object.keys(s)) {
-    if (!PROFILE_PARAM_OVERRIDE_KEYS.includes(key as keyof ProfileParamOverrides)) return false;
+    if (!PROFILE_PARAM_OVERRIDE_KEYS.some((k) => k === key)) return false;
     if (key === "sigRes") {
       if (!(s[key] === undefined || guards.isSigResolutionClass(s[key]))) return false;
     } else if (key === "shipASig" || key === "shipBSig") {
