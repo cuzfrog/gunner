@@ -34,6 +34,11 @@ export function fakeDocument(): Document {
       el.tagName = tag.toUpperCase();
       return el as unknown as HTMLElement;
     },
+    createDocumentFragment: () => {
+      const fragment = new FakeElement();
+      fragment.tagName = "DOCUMENT_FRAGMENT";
+      return fragment as unknown as DocumentFragment;
+    },
     addEventListener: (event: string, handler: (event?: unknown) => void) => { (docHandlers[event] ??= []).push(handler); },
     removeEventListener: (event: string, handler: (event?: unknown) => void) => { const hs = docHandlers[event]; if (hs) docHandlers[event] = hs.filter((h) => h !== handler); },
     dispatchEvent: (event: Event) => { docHandlers[event.type]?.forEach((h) => h(event)); },

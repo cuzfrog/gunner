@@ -16,6 +16,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       ewarController,
       ewarResolver,
       uiEvents,
+      i18n,
       attackerSide,
       targetSide,
     }) => new PortraitsControllerImpl({
@@ -25,6 +26,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       ewarResolver,
       combatantProfiles: { profile: (side: Side) => (side === "attacker" ? attackerSide.profile : targetSide.profile) },
       events: uiEvents,
+      i18n,
     })).singleton(),
   });
 }
@@ -36,9 +38,9 @@ function collectPortraitsEls(els: ControlsElements): PortraitsEls {
   }
   const targetImage = els.targetPortrait.querySelector(".portrait-image");
   if (!targetImage || !isHtmlImageElement(targetImage)) throw new Error("Missing .portrait-image in #target-portrait");
-  const attackerEffects = els.attackerPortrait.querySelector(".portrait-effects");
+  const attackerEffects = els.attackerPortrait.querySelector<HTMLElement>(".portrait-effects");
   if (!attackerEffects) throw new Error("Missing .portrait-effects in #attacker-portrait");
-  const targetEffects = els.targetPortrait.querySelector(".portrait-effects");
+  const targetEffects = els.targetPortrait.querySelector<HTMLElement>(".portrait-effects");
   if (!targetEffects) throw new Error("Missing .portrait-effects in #target-portrait");
   return {
     attacker: els.attackerPortrait,

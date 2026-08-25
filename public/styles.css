@@ -1701,7 +1701,13 @@ select.input-field:disabled {
 .portrait-effects {
   display: flex;
   gap: 4px;
-  min-height: 20px;
+}
+
+.portrait-effects[hidden] { display: none; }
+
+.portrait-effects img {
+  pointer-events: auto;
+  cursor: help;
 }
 
 .portrait-effect-icon {

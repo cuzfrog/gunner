@@ -1,5 +1,6 @@
 import type { AppliedEwarEffect, EwarResolver } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
+import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import type { EwarController } from "../ewar";
 import type { Side } from "../side";
@@ -17,6 +18,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly ewarResolver: EwarResolver;
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
+  private readonly i18n: I18n;
   private distance = 0;
   private readonly attackerState: SideState = { lastKey: "", lastName: "" };
   private readonly targetState: SideState = { lastKey: "", lastName: "" };
@@ -28,6 +30,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     ewarResolver: EwarResolver;
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
+    i18n: I18n;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
@@ -35,6 +38,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.ewarResolver = deps.ewarResolver;
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
+    this.i18n = deps.i18n;
     this.events.onDistanceChanged((d) => { this.distance = d; });
     this.update();
   }
@@ -52,6 +56,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     const profile = this.combatantProfiles.profile(side);
     if (profile === undefined) {
       root.hidden = true;
+      effects.hidden = true;
       state.lastKey = "";
       state.lastName = "";
       return;
@@ -68,6 +73,7 @@ export class PortraitsControllerImpl implements PortraitsController {
       image.src = this.imageCatalog.shipImageUrl(profile.name);
     }
     effects.innerHTML = "";
+    const icons = document.createDocumentFragment();
     for (const effect of applied) {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleName);
       if (iconUrl === undefined) continue;
@@ -75,8 +81,11 @@ export class PortraitsControllerImpl implements PortraitsController {
       img.className = "portrait-effect-icon";
       img.alt = "";
       img.src = iconUrl;
-      effects.appendChild(img);
+      img.title = buildEffectTitle(effect, this.i18n);
+      icons.appendChild(img);
     }
+    effects.appendChild(icons);
+    if (effects.hidden !== (effects.childElementCount === 0)) effects.hidden = effects.childElementCount === 0;
   }
 }
 
@@ -86,4 +95,8 @@ function sideStateFor(side: Side, attackerState: SideState, targetState: SideSta
 
 function buildDiffKey(name: string, effects: readonly AppliedEwarEffect[]): string {
   return `${name}|${effects.map((e) => `${e.family}:${e.moduleName}`).join(",")}`;
+}
+
+function buildEffectTitle(effect: AppliedEwarEffect, i18n: I18n): string {
+  return `${i18n.t(`label.ewar.${effect.family}`)}: ${effect.moduleName}`;
 }

@@ -38,6 +38,7 @@ export class FakeElement {
   }
 
   get firstElementChild(): FakeElement | null { return this.children[0] ?? null; }
+  get childElementCount(): number { return this.children.length; }
   get options(): FakeElement[] { return this.children; }
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
   setAttribute(name: string, value: string): void { this.attributes[name] = value; }
@@ -47,6 +48,14 @@ export class FakeElement {
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
   appendChild(child: unknown): void {
     if (!(child instanceof FakeElement)) return;
+    if (child.tagName === "DOCUMENT_FRAGMENT") {
+      for (const fragmentChild of child.children) {
+        fragmentChild.parent = this;
+        this.children.push(fragmentChild);
+      }
+      child.children = [];
+      return;
+    }
     child.parent = this;
     this.children.push(child);
   }
