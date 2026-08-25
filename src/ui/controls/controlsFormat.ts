@@ -3,7 +3,6 @@ import type { ChargeOption } from "../../fitting";
 import { PALETTE } from "../palette";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
-import type { ProfileSettings, UserSettings } from "../../appstate";
 
 export const AGGRESSIVITY_MIN = 0.01;
 export const AGGRESSIVITY_MAX = 100;
@@ -90,11 +89,6 @@ export function boosterScriptStatSuffix(script: TurretScriptSpec): string {
 
 export function formatMultiplier(value: number): string {
   return String(Number(value.toFixed(2)));
-}
-
-export function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
-  return rest;
 }
 
 export function escapeHtml(value: string): string {

@@ -3,7 +3,6 @@ import type { ChargeOption } from "../../fitting";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import { PALETTE } from "../palette";
 import type { I18n } from "../i18n";
-import type { UserSettings } from "../../appstate";
 import {
   AGGRESSIVITY_MAX,
   AGGRESSIVITY_MIN,
@@ -16,40 +15,12 @@ import {
   formatWithCommas,
   hitChanceColor,
   positionFromAggressivity,
-  profileSettingsOf,
   propulsionOptionLabel,
   scriptStatSuffix,
   boosterScriptStatSuffix,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
-
-function baseUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
-  return {
-    version: 10,
-    tracking: 0.32,
-    trackingUnit: "rad",
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: 1_000_000,
-    attackerInertia: 2,
-    initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 1_000_000,
-    targetInertia: 2,
-    targetSig: 40,
-    attackerAmmo: "Hail S",
-    simSpeed: 4,
-    language: "en",
-    ...overrides,
-  };
-}
 
 describe("aggressivity conversion", () => {
   test("round-trips the minimum value through position", () => {
@@ -100,20 +71,6 @@ describe("formatting", () => {
     expect(formatDistance(9999.4, t)).toBe("9,999 m");
     expect(formatDistance(9999.6, t)).toBe("10.0 km");
   });
-});
-
-describe("profile settings", () => {
-  test("strips display-only fields while keeping the rest", () => {
-    const settings = baseUserSettings({ attackerHull: "Rifter" });
-    const profile = profileSettingsOf(settings);
-    expect("language" in profile).toBe(false);
-    expect("trackingUnit" in profile).toBe(false);
-    expect("simSpeed" in profile).toBe(false);
-    expect("gridBrightness" in profile).toBe(false);
-    expect(profile.attackerHull).toBe("Rifter");
-    expect(profile.attackerAmmo).toBe("Hail S");
-  });
-
 });
 
 describe("hit chance color", () => {

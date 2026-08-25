@@ -1,5 +1,4 @@
 import { type ClipboardProvider, type ProfileTextCodec, type SettingsStore } from "../../../appstate";
-import { profileSettingsOf } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profileController";
 import type { SessionCodec } from "../session";
@@ -49,13 +48,12 @@ export class ShareControllerImpl implements ShareController {
   get popup(): Popup { return this.popupValue; }
 
   async onCopyUrlClicked(): Promise<void> {
-    const profile = profileSettingsOf(this.sessionCodec.capture());
-    const url = this.settingsStore.encodeUrl(profile);
+    const url = this.settingsStore.encodeUrl(this.sessionCodec.captureProfile());
     await this.writeAndClose(url);
   }
 
   async onCopyTextClicked(): Promise<void> {
-    const text = this.profileTextCodec.serialize(profileSettingsOf(this.sessionCodec.capture()));
+    const text = this.profileTextCodec.serialize(this.sessionCodec.captureProfile());
     await this.writeAndClose(text);
   }
 

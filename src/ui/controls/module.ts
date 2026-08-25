@@ -5,7 +5,6 @@ import type { SavedFittings } from "../../appstate";
 import type { ControlsCradle } from "./cradle";
 import { ConfirmControllerImpl } from "./confirmController";
 import { combatantSidesOf, forEachSide, wireCombatantSide } from "./combatantSide";
-import { profileSettingsOf } from "./controlsFormat";
 import { createControlsEls } from "./elements";
 import { DomControls } from "./domControls";
 import { ChoiceGroupImpl } from "./choiceGroup";
@@ -84,7 +83,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
       confirmController: proxy.confirmController,
       popupGroup: proxy.popupGroup,
       changeTracker: proxy.profileChangeTracker,
-      snapshotSource: () => profileSettingsOf(proxy.sessionCodec.capture()),
+      snapshotSource: () => proxy.sessionCodec.captureProfile(),
     })).singleton(),
     controls: asFunction((proxy: ControlsCradle) => new DomControls({
       i18n: proxy.i18n,

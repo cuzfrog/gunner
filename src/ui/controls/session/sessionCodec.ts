@@ -28,6 +28,7 @@ import type { TrackingInput } from "../trackingInput";
 
 export interface SessionCodec {
   capture(): UserSettings;
+  captureProfile(): ProfileSettings;
   getInitialDistance(): number;
   restore(settings: UserSettings, selectedName?: string): void;
   fromProfile(profile: ProfileSettings): UserSettings;
@@ -149,6 +150,11 @@ export class SessionCodecImpl implements SessionCodec {
       attackerBoosterActivation: this.boosterController.capture("attacker"),
       targetBoosterActivation: this.boosterController.capture("target"),
     };
+  }
+
+  captureProfile(): ProfileSettings {
+    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...profile } = this.capture();
+    return profile;
   }
 
   restore(settings: UserSettings, selectedName = ""): void {

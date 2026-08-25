@@ -75,6 +75,10 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
   });
   const sessionCodec = vi.mocked<SessionCodec>({
     capture: vi.fn(() => captured),
+    captureProfile: vi.fn((): ProfileSettings => {
+      const { language: _l, trackingUnit: _t, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
+      return profile;
+    }),
     getInitialDistance: vi.fn(),
     restore: vi.fn(),
     fromProfile: vi.fn(),
