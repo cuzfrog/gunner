@@ -13,59 +13,59 @@ afterEach(() => {
 
 describe("ImportController", () => {
   test("importFromClipboard reads a valid EFT fitting and applies it to the side", async () => {
-    const { controller, clipboard, fittingImport, attackerPanel, turret, onConfigPersisted, savedFittings } =
+    const { controller, clipboard, fittingImport, shipAPanel, turret, onConfigPersisted, savedFittings } =
       buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     clipboard.readText.mockResolvedValue(text);
-    await controller.importFromClipboard("attacker");
+    await controller.importFromClipboard("shipA");
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
-    expect(attackerPanel.fittingText).toBe(text);
+    expect(shipAPanel.fittingText).toBe(text);
     expect(turret.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
-    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
+    expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 
   test("importFromClipboard opens the paste popup when the clipboard is unavailable", async () => {
-    const { controller, clipboard, attackerPanel } = buildImportController(globalThis.document);
+    const { controller, clipboard, shipAPanel } = buildImportController(globalThis.document);
     clipboard.readText.mockRejectedValue(new ClipboardUnavailableError());
-    await controller.importFromClipboard("attacker");
-    expect(attackerPanel.pastePopup.open).toHaveBeenCalled();
-    expect(attackerPanel.sections.paste.showImportHint).not.toHaveBeenCalled();
+    await controller.importFromClipboard("shipA");
+    expect(shipAPanel.pastePopup.open).toHaveBeenCalled();
+    expect(shipAPanel.sections.paste.showImportHint).not.toHaveBeenCalled();
   });
 
   test("importFromClipboard shows a denied hint for a non-unavailable clipboard error", async () => {
-    const { controller, clipboard, attackerPanel } = buildImportController(globalThis.document);
+    const { controller, clipboard, shipAPanel } = buildImportController(globalThis.document);
     clipboard.readText.mockRejectedValue(new Error("denied"));
-    await controller.importFromClipboard("attacker");
-    expect(attackerPanel.pastePopup.open).not.toHaveBeenCalled();
-    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.clipboardDenied", true);
+    await controller.importFromClipboard("shipA");
+    expect(shipAPanel.pastePopup.open).not.toHaveBeenCalled();
+    expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.clipboardDenied", true);
   });
 
   test("importFromClipboard closes an already-open paste popup and returns", async () => {
-    const { controller, clipboard, attackerPanel } = buildImportController(globalThis.document);
-    attackerPanel.pastePopup.isOpen.mockReturnValue(true);
-    await controller.importFromClipboard("attacker");
-    expect(attackerPanel.pastePopup.close).toHaveBeenCalled();
+    const { controller, clipboard, shipAPanel } = buildImportController(globalThis.document);
+    shipAPanel.pastePopup.isOpen.mockReturnValue(true);
+    await controller.importFromClipboard("shipA");
+    expect(shipAPanel.pastePopup.close).toHaveBeenCalled();
     expect(clipboard.readText).not.toHaveBeenCalled();
   });
 
   test("importFromText with raw EFT applies and records the fitting", async () => {
-    const { controller, fittingImport, attackerPanel, savedFittings } = buildImportController(globalThis.document);
+    const { controller, fittingImport, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
-    await controller.importFromText("attacker", text);
+    await controller.importFromText("shipA", text);
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
-    expect(attackerPanel.fittingText).toBe(text);
-    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
+    expect(shipAPanel.fittingText).toBe(text);
+    expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 
   test("importEftFitting can suppress the imported hint for auto-load", () => {
-    const { controller, fittingImport, attackerPanel, savedFittings } = buildImportController(globalThis.document);
+    const { controller, fittingImport, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
-    controller.importEftFitting("attacker", text, { persist: false, showImportedHint: false });
+    controller.importEftFitting("shipA", text, { persist: false, showImportedHint: false });
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
-    expect(attackerPanel.sections.paste.showImportHint).not.toHaveBeenCalledWith("status.fittingImported");
+    expect(shipAPanel.sections.paste.showImportHint).not.toHaveBeenCalledWith("status.fittingImported");
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
 
@@ -74,37 +74,37 @@ describe("ImportController", () => {
     const onFittingImported = vi.fn();
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     events.onFittingImported(onFittingImported);
-    await controller.importFromText("attacker", text);
+    await controller.importFromText("shipA", text);
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
-    expect(onFittingImported).toHaveBeenCalledWith("attacker", IMPORTED_RIFTER);
+    expect(onFittingImported).toHaveBeenCalledWith("shipA", IMPORTED_RIFTER);
   });
 
   test("importFromText with an invalid fit shows an invalid hint and does not record", async () => {
-    const { controller, fittingImport, attackerPanel, savedFittings } = buildImportController(globalThis.document);
+    const { controller, fittingImport, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     fittingImport.importFitting.mockReturnValue(undefined);
-    await controller.importFromText("attacker", "garbage");
-    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
+    await controller.importFromText("shipA", "garbage");
+    expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
 
   test("importFromText with a gunner profile extracts the requested side's fitting", async () => {
-    const { controller, attackerPanel, targetPanel, savedFittings } = buildImportController(globalThis.document);
+    const { controller, shipAPanel, shipBPanel, savedFittings } = buildImportController(globalThis.document);
     const text = gunnerProfileText({
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
     });
-    await controller.importFromText("attacker", text);
-    expect(attackerPanel.fittingText).toContain("[Rifter, Brawler]");
-    expect(targetPanel.fittingText).toBeUndefined();
+    await controller.importFromText("shipA", text);
+    expect(shipAPanel.fittingText).toContain("[Rifter, Brawler]");
+    expect(shipBPanel.fittingText).toBeUndefined();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 
   test("importFromText with a gunner profile missing the requested fitting shows invalid", async () => {
-    const { controller, attackerPanel, savedFittings } = buildImportController(globalThis.document);
+    const { controller, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     const text = gunnerProfileText({
-      targetFitting: "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive",
+      shipBFitting: "[Thrasher, Sniper]\n5MN Y-T8 Compact Microwarpdrive",
     });
-    await controller.importFromText("attacker", text);
-    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
+    await controller.importFromText("shipA", text);
+    expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingInvalid", true);
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
 
@@ -113,7 +113,7 @@ describe("ImportController", () => {
     const text = gunnerProfileText();
     clipboard.readText.mockResolvedValue(text);
     await controller.importProfileClicked();
-    expect(onProfileTextLoaded).toHaveBeenCalledWith(expect.objectContaining({ attackerHull: "Rifter", targetHull: "Thrasher" }));
+    expect(onProfileTextLoaded).toHaveBeenCalledWith(expect.objectContaining({ shipAHull: "Rifter", shipBHull: "Thrasher" }));
   });
 
   test("importProfileClicked shows invalid status for non-gunner non-fitting text", async () => {
@@ -131,17 +131,17 @@ describe("ImportController", () => {
   });
 
   test("importProfileClicked opens the side popup for a valid EFT and imports the chosen side", async () => {
-    const { controller, clipboard, document, fittingImport, attackerPanel, savedFittings } =
+    const { controller, clipboard, document, fittingImport, shipAPanel, savedFittings } =
       buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     clipboard.readText.mockResolvedValue(text);
     fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
     await controller.importProfileClicked();
     expect(getFake(document, "import-side-popup").hidden).toBe(false);
-    expect(getFake(document, "import-side-attacker").focus).toHaveBeenCalled();
-    await controller.onImportSideClick("attacker");
+    expect(getFake(document, "import-side-ship-a").focus).toHaveBeenCalled();
+    await controller.onImportSideClick("shipA");
     expect(getFake(document, "import-side-popup").hidden).toBe(true);
-    expect(attackerPanel.fittingText).toBe(text);
+    expect(shipAPanel.fittingText).toBe(text);
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
 });

@@ -12,31 +12,31 @@ export interface Simulation {
 }
 
 export class SimulationImpl implements Simulation {
-  private readonly attackerSteering: Autopilot;
-  private readonly targetSteering: Autopilot;
+  private readonly shipASteering: Autopilot;
+  private readonly shipBSteering: Autopilot;
   private readonly ewarResolver: EwarResolver;
   private time: number;
-  private attacker: ShipState;
-  private target: ShipState;
+  private shipA: ShipState;
+  private shipB: ShipState;
 
-  constructor({ attackerSteering, targetSteering, ewarResolver, simConfig }: {
-    attackerSteering: Autopilot;
-    targetSteering: Autopilot;
+  constructor({ shipASteering, shipBSteering, ewarResolver, simConfig }: {
+    shipASteering: Autopilot;
+    shipBSteering: Autopilot;
     ewarResolver: EwarResolver;
     simConfig: SimConfig;
   }) {
-    this.attackerSteering = attackerSteering;
-    this.targetSteering = targetSteering;
+    this.shipASteering = shipASteering;
+    this.shipBSteering = shipBSteering;
     this.ewarResolver = ewarResolver;
     this.time = 0;
-    this.attacker = asState(simConfig.attacker, new Vec2(0, 0));
-    this.target = asState(simConfig.target, new Vec2(0, simConfig.initialDistance));
+    this.shipA = asState(simConfig.shipA, new Vec2(0, 0));
+    this.shipB = asState(simConfig.shipB, new Vec2(0, simConfig.initialDistance));
   }
 
   step(dt: number): void {
     const frame = this.computeFrame();
-    this.attacker = { ...this.attacker, ...integrateShip(frame.attacker, frame.commands.attacker, dt) };
-    this.target = { ...this.target, ...integrateShip(frame.target, frame.commands.target, dt) };
+    this.shipA = { ...this.shipA, ...integrateShip(frame.shipA, frame.commands.shipA, dt) };
+    this.shipB = { ...this.shipB, ...integrateShip(frame.shipB, frame.commands.shipB, dt) };
     this.time += dt;
   }
 
@@ -44,32 +44,32 @@ export class SimulationImpl implements Simulation {
     const frame = this.computeFrame();
     return {
       time: this.time,
-      attacker: frame.attacker,
-      target: frame.target,
+      shipA: frame.shipA,
+      shipB: frame.shipB,
       commands: frame.commands,
     };
   }
 
   reset(config: SimConfig): void {
     this.time = 0;
-    this.attacker = asState(config.attacker, new Vec2(0, 0));
-    this.target = asState(config.target, new Vec2(0, config.initialDistance));
+    this.shipA = asState(config.shipA, new Vec2(0, 0));
+    this.shipB = asState(config.shipB, new Vec2(0, config.initialDistance));
   }
 
   update(config: SimConfig): void {
-    this.attacker = withConfig(this.attacker, config.attacker);
-    this.target = withConfig(this.target, config.target);
+    this.shipA = withConfig(this.shipA, config.shipA);
+    this.shipB = withConfig(this.shipB, config.shipB);
   }
 
-  private computeFrame(): { attacker: ShipState; target: ShipState; commands: { attacker: Vec2; target: Vec2 } } {
-    const distance = this.target.position.sub(this.attacker.position).len();
-    const attacker = effectiveState(this.ewarResolver, this.attacker, this.target, distance);
-    const target = effectiveState(this.ewarResolver, this.target, this.attacker, distance);
+  private computeFrame(): { shipA: ShipState; shipB: ShipState; commands: { shipA: Vec2; shipB: Vec2 } } {
+    const distance = this.shipB.position.sub(this.shipA.position).len();
+    const shipA = effectiveState(this.ewarResolver, this.shipA, this.shipB, distance);
+    const shipB = effectiveState(this.ewarResolver, this.shipB, this.shipA, distance);
     const commands = {
-      attacker: this.attackerSteering.computeVelocity(attacker, target, this.time),
-      target: this.targetSteering.computeVelocity(target, attacker, this.time),
+      shipA: this.shipASteering.computeVelocity(shipA, shipB, this.time),
+      shipB: this.shipBSteering.computeVelocity(shipB, shipA, this.time),
     };
-    return { attacker, target, commands };
+    return { shipA, shipB, commands };
   }
 }
 

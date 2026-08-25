@@ -1,17 +1,17 @@
 import { type ProfileTextCodec, type ProfileSettings } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { Side } from "../side";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ShipATurret } from "./shipATurret";
 
 interface ProfileTextImporterDeps {
   readonly fittingImport: FittingImport;
-  readonly turret: AttackerTurret;
+  readonly turret: ShipATurret;
   readonly profileTextCodec: ProfileTextCodec;
 }
 
 export class ProfileTextImporter {
   private readonly fittingImport: FittingImport;
-  private readonly turret: AttackerTurret;
+  private readonly turret: ShipATurret;
   private readonly profileTextCodec: ProfileTextCodec;
 
   constructor(deps: ProfileTextImporterDeps) {
@@ -28,21 +28,21 @@ export class ProfileTextImporter {
     const parsed = this.profileTextCodec.parse(text.trimStart());
     if (!parsed) return undefined;
     const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo };
+    return { ...parsed, shipAAmmo: ammo };
   }
 
   fittingFromProfileText(side: Side, text: string): string | undefined {
     const parsed = this.profileTextCodec.parse(text.trimStart());
     if (!parsed) return undefined;
-    return side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
+    return side === "shipA" ? parsed.shipAFitting : parsed.shipBFitting;
   }
 
   private resolveProfileAmmo(parsed: ProfileSettings): string {
-    if (parsed.attackerAmmo) return parsed.attackerAmmo;
-    if (parsed.attackerFitting) {
-      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
-        skillLevel: parsed.attackerSkillLevel ?? 5,
-        overloaded: parsed.attackerOverload ?? true,
+    if (parsed.shipAAmmo) return parsed.shipAAmmo;
+    if (parsed.shipAFitting) {
+      const imported = this.fittingImport.importFitting(parsed.shipAFitting, {
+        skillLevel: parsed.shipASkillLevel ?? 5,
+        overloaded: parsed.shipAOverload ?? true,
       });
       if (imported?.turret) return imported.turret.charge;
     }

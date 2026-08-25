@@ -30,11 +30,11 @@ function buildController(now: () => number = () => 0): {
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
-  const projections: Record<"attacker" | "target", EwarProjection | undefined> = { attacker: undefined, target: undefined };
+  const projections: Record<"shipA" | "shipB", EwarProjection | undefined> = { shipA: undefined, shipB: undefined };
   const ewarController = vi.mocked<EwarController>({
     setLoadout: vi.fn(),
     restore: vi.fn(),
-    projection: vi.fn((side: "attacker" | "target") => projections[side]),
+    projection: vi.fn((side: "shipA" | "shipB") => projections[side]),
     capture: vi.fn(),
     render: vi.fn(),
     updateSummaries: vi.fn(),
@@ -91,8 +91,8 @@ function projectionWithDisruptor(active = true, overloaded = false): EwarProject
   };
 }
 
-function setProjections(ewarController: EwarController, attacker?: EwarProjection, target?: EwarProjection): void {
-  const projections: Record<"attacker" | "target", EwarProjection | undefined> = { attacker, target };
+function setProjections(ewarController: EwarController, shipA?: EwarProjection, shipB?: EwarProjection): void {
+  const projections: Record<"shipA" | "shipB", EwarProjection | undefined> = { shipA, shipB };
   vi.mocked(ewarController.projection).mockImplementation((side) => projections[side]);
 }
 
@@ -119,8 +119,8 @@ describe("RangeOverlayController", () => {
     controller.restoreHidden([]);
     const overlays = controller.overlays();
     expect(overlays).toHaveLength(2);
-    expect(overlays[0]).toEqual({ side: "attacker", kind: "web", radius: 10000 });
-    expect(overlays[1]).toEqual({ side: "target", kind: "disruptor", radius: 10000, falloffRadius: 30000 });
+    expect(overlays[0]).toEqual({ side: "shipA", kind: "web", radius: 10000 });
+    expect(overlays[1]).toEqual({ side: "shipB", kind: "disruptor", radius: 10000, falloffRadius: 30000 });
   });
 
   test("toggle hides a visible kind and excludes it from overlays", () => {

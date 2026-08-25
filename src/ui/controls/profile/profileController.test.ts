@@ -13,19 +13,19 @@ const BASE_PROFILE: ProfileSettings = {
   sigRes: "S",
   optimal: 5000,
   falloff: 5000,
-  attackerSpeed: 0,
-  attackerMode: "keepAtRange",
-  attackerRange: 5000,
-  attackerMass: 1_200_000,
-  attackerInertia: 3,
+  shipASpeed: 0,
+  shipAMode: "keepAtRange",
+  shipARange: 5000,
+  shipAMass: 1_200_000,
+  shipAInertia: 3,
   initialDistance: 5000,
-  targetSpeed: 1000,
-  targetMode: "orbit",
-  targetRange: 5000,
-  targetMass: 10_000_000,
-  targetInertia: 0.45,
-  targetSig: 40,
-  attackerAmmo: "Hail S",
+  shipBSpeed: 1000,
+  shipBMode: "orbit",
+  shipBRange: 5000,
+  shipBMass: 10_000_000,
+  shipBInertia: 0.45,
+  shipBSig: 40,
+  shipAAmmo: "Hail S",
 };
 
 class FakeElement {
@@ -68,8 +68,8 @@ class FakeElement {
     this.children.push(child as FakeElement);
   }
 
-  contains(target: unknown): boolean {
-    return target === this || this.children.includes(target as FakeElement);
+  contains(domTarget: unknown): boolean {
+    return domTarget === this || this.children.includes(domTarget as FakeElement);
   }
 
   addEventListener(event: string, handler: (event?: unknown) => void): void {
@@ -101,9 +101,9 @@ class StubPopupGroup implements PopupGroup {
   close = vi.fn();
   closeAll = vi.fn();
   hasOpen = vi.fn(() => this.popups.some((p) => p.isOpen()));
-  onPointerDown = vi.fn((target: EventTarget | null) => {
-    if (!target) return;
-    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  onPointerDown = vi.fn((domTarget: EventTarget | null) => {
+    if (!domTarget) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(domTarget)) p.close();
   });
   onKeyDown = vi.fn((event: { readonly key: string }) => {
     if (event.key !== "Escape") return;
@@ -290,7 +290,7 @@ describe("ProfileController", () => {
     expect(onLoaded).not.toHaveBeenCalled();
   });
 
-  test("selector menu and popup keep the trigger and menu items contained, not unrelated targets", () => {
+  test("selector menu and popup keep the trigger and menu items contained, not unrelated elements", () => {
     const { controller, els, popupGroup } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleProfileSelector();
     const item = els.profilePopup.children[0] as unknown as EventTarget;

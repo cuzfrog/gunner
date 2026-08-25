@@ -25,12 +25,12 @@ class StubPopup implements Popup {
     this.focusCalled = true;
   }
 
-  contains(target: EventTarget): boolean {
-    return this.containsResults.get(target) ?? false;
+  contains(domTarget: EventTarget): boolean {
+    return this.containsResults.get(domTarget) ?? false;
   }
 
-  setContains(target: EventTarget, result: boolean): void {
-    this.containsResults.set(target, result);
+  setContains(domTarget: EventTarget, result: boolean): void {
+    this.containsResults.set(domTarget, result);
   }
 }
 
@@ -161,18 +161,18 @@ describe("PopupGroup input handling", () => {
     const [a, b] = makePopups(2);
     a.openResult = true;
     b.openResult = true;
-    const target = new EventTarget();
-    a.setContains(target, true);
-    b.setContains(target, false);
+    const domTarget = new EventTarget();
+    a.setContains(domTarget, true);
+    b.setContains(domTarget, false);
     const group = new PopupGroupImpl();
     group.register(a);
     group.register(b);
-    group.onPointerDown(target);
+    group.onPointerDown(domTarget);
     expect(a.closeCalled).toBe(false);
     expect(b.closeCalled).toBe(true);
   });
 
-  test("onPointerDown ignores a null target", () => {
+  test("onPointerDown ignores a null shipB", () => {
     const [a] = makePopups(1);
     a.openResult = true;
     const group = new PopupGroupImpl();

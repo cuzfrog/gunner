@@ -82,10 +82,10 @@ export function stateSliceOf(combatant: CombatantSettings, side: Side): SidePane
     hull: combatant.hull,
     propulsion: combatant.propulsion,
     fitting: combatant.fitting,
-    overrides: side === "attacker" ? {} : (combatant.overrides ?? {}),
+    overrides: side === "shipA" ? {} : (combatant.overrides ?? {}),
     fittedHull: combatant.fittedHull,
   };
-  if (side === "attacker") return base;
+  if (side === "shipA") return base;
   return { ...base, sig: combatant.sig ?? 1 };
 }
 

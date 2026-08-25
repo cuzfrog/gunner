@@ -1,5 +1,5 @@
 import type { ProfileSettings } from "../userSettings";
-import { ATTACKER_FIELDS, GLOBAL_FIELDS, OVERRIDE_KEYS, TARGET_FIELDS, dotKeyForField, overrideDotKeyForFull, type ScalarValue, type Side } from "./profileTextFields";
+import { SHIP_A_FIELDS, GLOBAL_FIELDS, OVERRIDE_KEYS, SHIP_B_FIELDS, dotKeyForField, overrideDotKeyForFull, type ScalarValue, type Side } from "./profileTextFields";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
 
 export class ProfileTextSerializer {
@@ -10,14 +10,14 @@ export class ProfileTextSerializer {
       this.serializeScalar(lines, dotKeyForField(field), settings[field]);
     }
 
-    this.serializeSide(lines, "attacker", settings);
-    this.serializeSide(lines, "target", settings);
+    this.serializeSide(lines, "shipA", settings);
+    this.serializeSide(lines, "shipB", settings);
 
     return lines.join("\n");
   }
 
   private serializeSide(lines: string[], side: Side, settings: ProfileSettings): void {
-    const fitting = side === "attacker" ? settings.attackerFitting : settings.targetFitting;
+    const fitting = side === "shipA" ? settings.shipAFitting : settings.shipBFitting;
     if (fitting !== undefined) {
       if (fitting.split("\n").some((line) => stripCarriageReturn(line) === "---")) {
         throw new Error(`fitting text for ${side} contains block terminator`);
@@ -27,12 +27,12 @@ export class ProfileTextSerializer {
       lines.push("---");
     }
 
-    const fields = side === "attacker" ? ATTACKER_FIELDS : TARGET_FIELDS;
+    const fields = side === "shipA" ? SHIP_A_FIELDS : SHIP_B_FIELDS;
     for (const field of fields) {
       this.serializeScalar(lines, dotKeyForField(field), settings[field]);
     }
 
-    const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
+    const overrides = side === "shipA" ? settings.shipAOverrides : settings.shipBOverrides;
     if (overrides !== undefined) {
       for (const key of OVERRIDE_KEYS) {
         const dotKey = overrideDotKeyForFull(side, key);

@@ -9,8 +9,8 @@ import type { SidePanel } from "../sidePanel";
 export interface ImportEls {
   readonly importProfile: HTMLButtonElement;
   readonly importSidePopup: HTMLElement;
-  readonly importSideAttacker: HTMLButtonElement;
-  readonly importSideTarget: HTMLButtonElement;
+  readonly importSideShipA: HTMLButtonElement;
+  readonly importSideShipB: HTMLButtonElement;
 }
 
 export interface ImportController {

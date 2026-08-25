@@ -3,6 +3,7 @@ import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, S
 import type { SettingGuards } from "../settingGuards";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
+import { normalizeProfileTextDotKey } from "./profileTextCompat";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
 
@@ -24,12 +25,12 @@ export class ProfileTextParser {
     if (stripCarriageReturn(rawLines[firstLine]) !== PROFILE_TEXT_HEADER) return undefined;
 
     let raw: Partial<ProfileSettings> = {};
-    let attackerOverrides: Partial<ProfileParamOverrides> = {};
-    let targetOverrides: Partial<ProfileParamOverrides> = {};
-    let attackerEwarActivationRaw: string | undefined;
-    let targetEwarActivationRaw: string | undefined;
-    let attackerBoosterActivationRaw: string | undefined;
-    let targetBoosterActivationRaw: string | undefined;
+    let shipAOverrides: Partial<ProfileParamOverrides> = {};
+    let shipBOverrides: Partial<ProfileParamOverrides> = {};
+    let shipAEwarActivationRaw: string | undefined;
+    let shipBEwarActivationRaw: string | undefined;
+    let shipABoosterActivationRaw: string | undefined;
+    let shipBBoosterActivationRaw: string | undefined;
 
     let i = firstLine + 1;
     while (i < rawLines.length) {
@@ -39,49 +40,50 @@ export class ProfileTextParser {
       if (line === "---") return undefined;
 
       if (line.endsWith(".fitting:")) {
-        const side = sideFromFittingDotKey(line.slice(0, line.length - ".fitting:".length));
+        const dotKey = normalizeProfileTextDotKey(line.slice(0, line.length - ".fitting:".length));
+        const side = sideFromFittingDotKey(dotKey);
         if (side === undefined) return undefined;
         const { body, nextIndex } = readFittingBlock(rawLines, i);
         if (body === undefined) return undefined;
         if (body.split("\n").some((l) => stripCarriageReturn(l) === "---")) return undefined;
-        raw = side === "attacker" ? { ...raw, attackerFitting: body } : { ...raw, targetFitting: body };
+        raw = side === "shipA" ? { ...raw, shipAFitting: body } : { ...raw, shipBFitting: body };
         i = nextIndex;
         continue;
       }
 
       const eq = line.indexOf("=");
       if (eq < 0) return undefined;
-      const dotKey = line.slice(0, eq);
+      const dotKey = normalizeProfileTextDotKey(line.slice(0, eq));
       const value = line.slice(eq + 1);
 
       const override = OVERRIDE_DOT_KEY_TO_FULL.get(dotKey);
       if (override !== undefined) {
         const parsed = parseOverrideValue(override, value, this.guards);
         if (parsed === undefined) return undefined;
-        if (dotKey.startsWith("override.attacker.")) {
-          attackerOverrides = { ...attackerOverrides, [override]: parsed };
+        if (dotKey.startsWith("override.shipA.")) {
+          shipAOverrides = { ...shipAOverrides, [override]: parsed };
         } else {
-          targetOverrides = { ...targetOverrides, [override]: parsed };
+          shipBOverrides = { ...shipBOverrides, [override]: parsed };
         }
         continue;
       }
 
       const field = DOT_KEY_TO_FIELD.get(dotKey);
       if (field === undefined) continue;
-      if (field === "attackerEwarActivation") {
-        attackerEwarActivationRaw = value;
+      if (field === "shipAEwarActivation") {
+        shipAEwarActivationRaw = value;
         continue;
       }
-      if (field === "targetEwarActivation") {
-        targetEwarActivationRaw = value;
+      if (field === "shipBEwarActivation") {
+        shipBEwarActivationRaw = value;
         continue;
       }
-      if (field === "attackerBoosterActivation") {
-        attackerBoosterActivationRaw = value;
+      if (field === "shipABoosterActivation") {
+        shipABoosterActivationRaw = value;
         continue;
       }
-      if (field === "targetBoosterActivation") {
-        targetBoosterActivationRaw = value;
+      if (field === "shipBBoosterActivation") {
+        shipBBoosterActivationRaw = value;
         continue;
       }
       const parsed = parseScalarValue(field, value, this.guards);
@@ -89,25 +91,25 @@ export class ProfileTextParser {
       raw = { ...raw, [field]: parsed };
     }
 
-    if (Object.keys(attackerOverrides).length > 0) raw = { ...raw, attackerOverrides };
-    if (Object.keys(targetOverrides).length > 0) raw = { ...raw, targetOverrides };
+    if (Object.keys(shipAOverrides).length > 0) raw = { ...raw, shipAOverrides };
+    if (Object.keys(shipBOverrides).length > 0) raw = { ...raw, shipBOverrides };
 
-    if (attackerBoosterActivationRaw !== undefined) {
-      const activation = parseBoosterActivation(attackerBoosterActivationRaw);
-      if (activation !== undefined) raw = { ...raw, attackerBoosterActivation: activation };
+    if (shipABoosterActivationRaw !== undefined) {
+      const activation = parseBoosterActivation(shipABoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipABoosterActivation: activation };
     }
-    if (targetBoosterActivationRaw !== undefined) {
-      const activation = parseBoosterActivation(targetBoosterActivationRaw);
-      if (activation !== undefined) raw = { ...raw, targetBoosterActivation: activation };
+    if (shipBBoosterActivationRaw !== undefined) {
+      const activation = parseBoosterActivation(shipBBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipBBoosterActivation: activation };
     }
 
-    if (attackerEwarActivationRaw !== undefined) {
-      const activation = parseEwarActivation(attackerEwarActivationRaw, raw.attackerOverload !== false);
-      if (activation !== undefined) raw = { ...raw, attackerEwarActivation: activation };
+    if (shipAEwarActivationRaw !== undefined) {
+      const activation = parseEwarActivation(shipAEwarActivationRaw, raw.shipAOverload !== false);
+      if (activation !== undefined) raw = { ...raw, shipAEwarActivation: activation };
     }
-    if (targetEwarActivationRaw !== undefined) {
-      const activation = parseEwarActivation(targetEwarActivationRaw, raw.targetOverload !== false);
-      if (activation !== undefined) raw = { ...raw, targetEwarActivation: activation };
+    if (shipBEwarActivationRaw !== undefined) {
+      const activation = parseEwarActivation(shipBEwarActivationRaw, raw.shipBOverload !== false);
+      if (activation !== undefined) raw = { ...raw, shipBEwarActivation: activation };
     }
 
     return profileSettingsFromRaw(raw);

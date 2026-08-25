@@ -4,13 +4,13 @@ export interface TurretEls {
   readonly sigResOptions: HTMLElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
-  readonly attackerAmmoTrigger: HTMLButtonElement;
-  readonly attackerAmmoSummary: HTMLElement;
-  readonly attackerAmmoSummaryIcon: HTMLImageElement;
-  readonly attackerAmmoPopup: HTMLElement;
-  readonly attackerAmmoCargoLabel: HTMLElement;
-  readonly attackerAmmoCargoList: HTMLElement;
-  readonly attackerAmmoExpand: HTMLButtonElement;
-  readonly attackerAmmoAllSection: HTMLElement;
-  readonly attackerAmmoAllList: HTMLElement;
+  readonly shipAAmmoTrigger: HTMLButtonElement;
+  readonly shipAAmmoSummary: HTMLElement;
+  readonly shipAAmmoSummaryIcon: HTMLImageElement;
+  readonly shipAAmmoPopup: HTMLElement;
+  readonly shipAAmmoCargoLabel: HTMLElement;
+  readonly shipAAmmoCargoList: HTMLElement;
+  readonly shipAAmmoExpand: HTMLButtonElement;
+  readonly shipAAmmoAllSection: HTMLElement;
+  readonly shipAAmmoAllList: HTMLElement;
 }

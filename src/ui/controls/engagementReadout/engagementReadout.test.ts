@@ -34,7 +34,7 @@ const T = (key: string): string => ({ "unit.kilometer": "km", "unit.meter": "m" 
 
 function fakeShipState(): ShipState {
   return {
-    id: "attacker",
+    id: "shipA",
     maxSpeed: 0,
     mass: 0,
     inertiaModifier: 0,
@@ -51,7 +51,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 12345, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 12345, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0, trackingTerm: 0, rangeTerm: 0 }, T);
 
@@ -62,7 +62,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1234.4, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 1234.4, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0, trackingTerm: 0, rangeTerm: 0 }, T);
 
@@ -73,7 +73,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 1234.5, transversalVelocity: new Vec2(0, 0), transversalSpeed: 1234.5, angularVelocity: 0.1234 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 1234.5, transversalVelocity: new Vec2(0, 0), transversalSpeed: 1234.5, angularVelocity: 0.1234 };
 
     readout.update(frame, { chance: 0, trackingTerm: 0, rangeTerm: 0 }, T);
 
@@ -86,7 +86,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0.5, trackingTerm: 1, rangeTerm: 2 }, T);
 
@@ -99,7 +99,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0.5, trackingTerm: Number.NaN, rangeTerm: Number.POSITIVE_INFINITY }, T);
 
@@ -111,7 +111,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     const ship = fakeShipState();
-    const frame = { time: 0, attacker: ship, target: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
+    const frame = { time: 0, shipA: ship, shipB: ship, relPosition: new Vec2(0, 0), distance: 1000, relVelocity: new Vec2(0, 0), radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0 };
 
     readout.update(frame, { chance: 0.95, trackingTerm: 0, rangeTerm: 0 }, T);
     expect(els.resHit.classList.contains("is-optimal")).toBe(true);

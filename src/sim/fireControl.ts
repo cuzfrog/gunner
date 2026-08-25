@@ -6,7 +6,7 @@ import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, Turre
 
 export interface AttackState {
   readonly turret: TurretSpec;
-  readonly targetSigRadius: number;
+  readonly shipBSigRadius: number;
 }
 
 export interface AttackAssessment {
@@ -16,9 +16,9 @@ export interface AttackAssessment {
 }
 
 export interface EngagementEvaluator {
-  evaluate(snapshot: SimSnapshot, attacks: { readonly attacker?: AttackState; readonly target?: AttackState }): {
-    readonly attacker?: AttackAssessment;
-    readonly target?: AttackAssessment;
+  evaluate(snapshot: SimSnapshot, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): {
+    readonly shipA?: AttackAssessment;
+    readonly shipB?: AttackAssessment;
   };
 }
 
@@ -40,16 +40,16 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     this.boosters = turretBoosterResolver;
   }
 
-  evaluate(snapshot: SimSnapshot, attacks: { readonly attacker?: AttackState; readonly target?: AttackState }): {
-    readonly attacker?: AttackAssessment;
-    readonly target?: AttackAssessment;
+  evaluate(snapshot: SimSnapshot, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): {
+    readonly shipA?: AttackAssessment;
+    readonly shipB?: AttackAssessment;
   } {
-    const result: { attacker?: AttackAssessment; target?: AttackAssessment } = {};
-    if (attacks.attacker) {
-      result.attacker = this.assess(snapshot.attacker, snapshot.target, snapshot.time, attacks.attacker);
+    const result: { shipA?: AttackAssessment; shipB?: AttackAssessment } = {};
+    if (attacks.shipA) {
+      result.shipA = this.assess(snapshot.shipA, snapshot.shipB, snapshot.time, attacks.shipA);
     }
-    if (attacks.target) {
-      result.target = this.assess(snapshot.target, snapshot.attacker, snapshot.time, attacks.target);
+    if (attacks.shipB) {
+      result.shipB = this.assess(snapshot.shipB, snapshot.shipA, snapshot.time, attacks.shipB);
     }
     return result;
   }
@@ -58,7 +58,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     const frame = this.kinematics.computeEngagement(ship, opponent, time);
     const boosted = this.boosters.boostedTurret(attack.turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, attack.targetSigRadius);
+    const hit = this.hitChance.compute(frame, effectiveTurret, attack.shipBSigRadius);
     return { boostedTurret: boosted, effectiveTurret, hit };
   }
 }

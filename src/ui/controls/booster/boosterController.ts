@@ -38,9 +38,9 @@ export class BoosterControllerImpl implements BoosterController {
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.events = deps.events;
-    this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
-    this.popupGroup.register(this.scriptPopups.attacker);
-    this.popupGroup.register(this.scriptPopups.target);
+    this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
+    this.popupGroup.register(this.scriptPopups.shipA);
+    this.popupGroup.register(this.scriptPopups.shipB);
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
     this.render();
   }
@@ -79,19 +79,19 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   render(): void {
-    this.renderSide("attacker");
-    this.renderSide("target");
+    this.renderSide("shipA");
+    this.renderSide("shipB");
   }
 
   updateSummaries(): void {
-    this.updateSummary("attacker");
-    this.updateSummary("target");
+    this.updateSummary("shipA");
+    this.updateSummary("shipB");
   }
 
   private buildScriptPopup(side: Side): Popup {
     const section = this.els.sections[side];
     const popup = document.createElement("div");
-    popup.id = `${side}-booster-script-popup`;
+    popup.id = `${sideId(side)}-booster-script-popup`;
     popup.className = "ewar-script-popup popup";
     popup.setAttribute("role", "menu");
     popup.hidden = true;
@@ -106,7 +106,7 @@ export class BoosterControllerImpl implements BoosterController {
         if (gear) gear.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${side}-ewar-popup`) !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-popup`) !== null,
     };
   }
 
@@ -250,7 +250,7 @@ export class BoosterControllerImpl implements BoosterController {
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-haspopup", "menu");
     gear.setAttribute("aria-expanded", "false");
-    gear.setAttribute("aria-controls", `${side}-booster-script-popup`);
+    gear.setAttribute("aria-controls", `${sideId(side)}-booster-script-popup`);
     gear.innerHTML = (
       '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
       '<use href="icons.svg#gear"></use></svg>'
@@ -316,4 +316,8 @@ export class BoosterControllerImpl implements BoosterController {
     this.renderSide(side);
     this.events.emitConfigInvalidated(true);
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

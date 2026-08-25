@@ -81,14 +81,14 @@ export class ProfileControllerImpl implements ProfileController {
       open: () => this.openProfileSelector(),
       close: () => this.closeProfileSelector(),
       focusTrigger: () => this.els.profileSelectTrigger.focus(),
-      contains: (target) => this.containsProfileSelector(target),
+      contains: (domTarget) => this.containsProfileSelector(domTarget),
     };
     this.newProfilePopupValue = {
       isOpen: () => this.newProfileOpen,
       open: () => this.openNewProfilePopup(),
       close: () => this.closeNewProfilePopup(),
       focusTrigger: () => this.els.profileNew.focus(),
-      contains: (target) => this.containsNewProfile(target),
+      contains: (domTarget) => this.containsNewProfile(domTarget),
     };
     this.popupGroup.register(this.selectorPopupValue);
     this.popupGroup.register(this.newProfilePopupValue);
@@ -249,9 +249,9 @@ export class ProfileControllerImpl implements ProfileController {
     this.els.profileSelectTrigger.setAttribute("aria-expanded", "false");
   }
 
-  private containsProfileSelector(target: EventTarget): boolean {
-    if (!(target instanceof Element)) return false;
-    return this.els.profilePopup.contains(target) || target === this.els.profileSelectTrigger;
+  private containsProfileSelector(domTarget: EventTarget): boolean {
+    if (!(domTarget instanceof Element)) return false;
+    return this.els.profilePopup.contains(domTarget) || domTarget === this.els.profileSelectTrigger;
   }
 
   private focusSelectedProfileItem(): void {
@@ -274,9 +274,9 @@ export class ProfileControllerImpl implements ProfileController {
     this.newProfileOpen = false;
   }
 
-  private containsNewProfile(target: EventTarget): boolean {
-    if (!(target instanceof Element)) return false;
-    return this.els.newProfilePopup.contains(target) || target === this.els.profileNew;
+  private containsNewProfile(domTarget: EventTarget): boolean {
+    if (!(domTarget instanceof Element)) return false;
+    return this.els.newProfilePopup.contains(domTarget) || domTarget === this.els.profileNew;
   }
 
   private isDirty(): boolean {

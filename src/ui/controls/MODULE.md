@@ -10,7 +10,7 @@ no-new-exports:
   - engagementReadout/engagementReadout.ts
   - hints/hintRotator.ts
   - hints/module.ts
-  - import/attackerTurret.ts
+  - import/shipATurret.ts
   - import/eftSideImporter.ts
   - import/importController.testSupport.ts
   - import/importController.ts

@@ -62,10 +62,10 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
   globalThis.Element = FakeElement as unknown as typeof Element;
 
   const els: PropulsionSectionEls = {
-    propulsion: getFake(document, "attacker-propulsion") as unknown as HTMLSelectElement,
-    propulsionOptions: getFake(document, "attacker-propulsion-options") as unknown as HTMLElement,
-    propulsionGear: getFake(document, "attacker-propulsion-gear") as unknown as HTMLButtonElement,
-    propulsionVariants: getFake(document, "attacker-propulsion-variants") as unknown as HTMLElement,
+    propulsion: getFake(document, "ship-a-propulsion") as unknown as HTMLSelectElement,
+    propulsionOptions: getFake(document, "ship-a-propulsion-options") as unknown as HTMLElement,
+    propulsionGear: getFake(document, "ship-a-propulsion-gear") as unknown as HTMLButtonElement,
+    propulsionVariants: getFake(document, "ship-a-propulsion-variants") as unknown as HTMLElement,
   };
 
   const host = vi.mocked<SidePanel["host"]>({
@@ -101,7 +101,7 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
   } as unknown as ISidePanelSections);
 
   const panel = vi.mocked<SidePanel>({
-    side: "attacker",
+    side: "shipA",
     host,
     sections,
     profile: undefined,
@@ -145,14 +145,14 @@ describe("PropulsionSection", () => {
     const { document, panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
     section.renderPropulsionOptions();
-    expect(getFake(document, "attacker-propulsion").children.length).toBeGreaterThan(0);
-    expect(getFake(document, "attacker-propulsion-options").children.length).toBeGreaterThan(0);
+    expect(getFake(document, "ship-a-propulsion").children.length).toBeGreaterThan(0);
+    expect(getFake(document, "ship-a-propulsion-options").children.length).toBeGreaterThan(0);
   });
 
   test("onPropulsionChange fits a propulsion to the hull", () => {
     const { document, panel, section } = buildPropulsionSection();
     panel.profile = RIFTER;
-    getFake(document, "attacker-propulsion").value = AB_1MN;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
     section.onPropulsionChange();
     expect(panel.fittedHull?.propulsionId).toBe(AB_1MN);
     expect(panel.fittedHull?.propulsionName).toBe("1MN Afterburner I");
@@ -164,7 +164,7 @@ describe("PropulsionSection", () => {
     imageCatalog.itemIconUrl = vi.fn(() => "icon.png");
     section.renderPropulsionOptions();
     section.popup.open();
-    const variants = getFake(document, "attacker-propulsion-variants");
+    const variants = getFake(document, "ship-a-propulsion-variants");
     expect(variants.hidden).toBe(false);
     expect(variants.children.length).toBeGreaterThan(0);
     const button = variants.children[0];
@@ -180,7 +180,7 @@ describe("PropulsionSection", () => {
     section.renderPropulsionOptions();
     section.popup.open();
 
-    const variants = getFake(document, "attacker-propulsion-variants");
+    const variants = getFake(document, "ship-a-propulsion-variants");
     const button = variants.children[0] as unknown as HTMLElement;
     expect(button.getAttribute("data-value")).toBe("1MN Afterburner I");
     expect(button.getAttribute("title")).toBe("1MN加力燃烧器 I");

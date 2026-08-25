@@ -21,15 +21,15 @@ export function collectTurretEls(document: Document): TurretEls {
     sigResOptions: get("sig-res-options"),
     optimal: get("optimal") as HTMLInputElement,
     falloff: get("falloff") as HTMLInputElement,
-    attackerAmmoTrigger: get("attacker-ammo-trigger") as HTMLButtonElement,
-    attackerAmmoSummary: get("attacker-ammo-summary"),
-    attackerAmmoSummaryIcon: get("attacker-ammo-summary-icon") as HTMLImageElement,
-    attackerAmmoPopup: get("attacker-ammo-popup"),
-    attackerAmmoCargoLabel: get("attacker-ammo-cargo-label"),
-    attackerAmmoCargoList: get("attacker-ammo-cargo-list"),
-    attackerAmmoExpand: get("attacker-ammo-expand") as HTMLButtonElement,
-    attackerAmmoAllSection: get("attacker-ammo-all-section"),
-    attackerAmmoAllList: get("attacker-ammo-all-list"),
+    shipAAmmoTrigger: get("ship-a-ammo-trigger") as HTMLButtonElement,
+    shipAAmmoSummary: get("ship-a-ammo-summary"),
+    shipAAmmoSummaryIcon: get("ship-a-ammo-summary-icon") as HTMLImageElement,
+    shipAAmmoPopup: get("ship-a-ammo-popup"),
+    shipAAmmoCargoLabel: get("ship-a-ammo-cargo-label"),
+    shipAAmmoCargoList: get("ship-a-ammo-cargo-list"),
+    shipAAmmoExpand: get("ship-a-ammo-expand") as HTMLButtonElement,
+    shipAAmmoAllSection: get("ship-a-ammo-all-section"),
+    shipAAmmoAllList: get("ship-a-ammo-all-list"),
   };
 }
 
@@ -38,9 +38,9 @@ export function setTurretInputs(document: Document): void {
   getFake(document, "sigRes").value = "S";
   getFake(document, "optimal").value = "5000";
   getFake(document, "falloff").value = "5000";
-  getFake(document, "attacker-ammo-all-section").hidden = true;
-  getFake(document, "attacker-ammo-trigger").setAttribute("aria-expanded", "false");
-  getFake(document, "attacker-ammo-popup").hidden = true;
+  getFake(document, "ship-a-ammo-all-section").hidden = true;
+  getFake(document, "ship-a-ammo-trigger").setAttribute("aria-expanded", "false");
+  getFake(document, "ship-a-ammo-popup").hidden = true;
 }
 
 export function buildTurret(

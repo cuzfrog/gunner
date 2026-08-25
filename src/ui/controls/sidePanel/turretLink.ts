@@ -10,11 +10,11 @@ export interface PanelTurretLink {
 }
 
 export function createPanelTurretLink(side: Side, turret: TurretController, popupGroup: PopupGroup): PanelTurretLink {
-  if (side === "attacker") return new AttackerPanelTurretLink(turret, popupGroup);
+  if (side === "shipA") return new ShipAPanelTurretLink(turret, popupGroup);
   return new NoopPanelTurretLink();
 }
 
-class AttackerPanelTurretLink implements PanelTurretLink {
+class ShipAPanelTurretLink implements PanelTurretLink {
   constructor(private readonly turret: TurretController, private readonly popupGroup: PopupGroup) {}
 
   clear(): void {

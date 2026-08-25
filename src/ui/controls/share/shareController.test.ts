@@ -13,35 +13,35 @@ function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
     sigRes: "S",
     optimal: 5000,
     falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
+    shipASpeed: 1000,
+    shipAMode: "keepAtRange",
+    shipARange: 5000,
     maneuverAggressivity: 1,
     gridBrightness: 0.2,
-    attackerMass: 1_200_000,
-    attackerInertia: 3,
-    attackerSkillLevel: 5,
-    attackerOverload: true,
+    shipAMass: 1_200_000,
+    shipAInertia: 3,
+    shipASkillLevel: 5,
+    shipAOverload: true,
     initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 10_000_000,
-    targetInertia: 0.45,
-    targetSkillLevel: 5,
-    targetOverload: true,
-    targetSig: 40,
-    attackerHull: "Rifter",
-    attackerPropulsion: undefined,
-    targetHull: "Thrasher",
-    targetPropulsion: undefined,
-    attackerFitting: undefined,
-    attackerOverrides: {},
-    targetFitting: undefined,
-    targetOverrides: {},
-    attackerFittedHull: undefined,
-    targetFittedHull: undefined,
-    attackerAmmo: "Hail S",
+    shipBSpeed: 1000,
+    shipBMode: "orbit",
+    shipBRange: 5000,
+    shipBMass: 10_000_000,
+    shipBInertia: 0.45,
+    shipBSkillLevel: 5,
+    shipBOverload: true,
+    shipBSig: 40,
+    shipAHull: "Rifter",
+    shipAPropulsion: undefined,
+    shipBHull: "Thrasher",
+    shipBPropulsion: undefined,
+    shipAFitting: undefined,
+    shipAOverrides: {},
+    shipBFitting: undefined,
+    shipBOverrides: {},
+    shipAFittedHull: undefined,
+    shipBFittedHull: undefined,
+    shipAAmmo: "Hail S",
     simSpeed: 4,
     language: "en",
     ...overrides,
@@ -193,15 +193,15 @@ describe("ShareController", () => {
 
   test("popup contains the trigger and popup", () => {
     const { controller } = makeShareController(globalThis.document);
-    const target = getFake(globalThis.document, "share-popup");
-    target.closest = vi.fn(() => target) as unknown as typeof target.closest;
-    expect(controller.popup.contains(target as unknown as EventTarget)).toBe(true);
+    const domTarget = getFake(globalThis.document, "share-popup");
+    domTarget.closest = vi.fn(() => domTarget) as unknown as typeof domTarget.closest;
+    expect(controller.popup.contains(domTarget as unknown as EventTarget)).toBe(true);
   });
 
-  test("popup does not contain an outside target", () => {
+  test("popup does not contain an outside shipB", () => {
     const { controller } = makeShareController(globalThis.document);
-    const target = getFake(globalThis.document, "tracking");
-    expect(controller.popup.contains(target as unknown as EventTarget)).toBe(false);
+    const domTarget = getFake(globalThis.document, "tracking");
+    expect(controller.popup.contains(domTarget as unknown as EventTarget)).toBe(false);
   });
 });
 

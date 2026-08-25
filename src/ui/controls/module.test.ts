@@ -33,13 +33,13 @@ const controlsCradleKeys = {
   profileController: "profileController",
   profileTextCodec: "profileTextCodec",
   turretController: "turretController",
-  attackerSide: "attackerSide",
-  targetSide: "targetSide",
-  attackerFittingPreview: "attackerFittingPreview",
-  targetFittingPreview: "targetFittingPreview",
+  shipASide: "shipASide",
+  shipBSide: "shipBSide",
+  shipAFittingPreview: "shipAFittingPreview",
+  shipBFittingPreview: "shipBFittingPreview",
   previewManager: "previewManager",
-  attackerFittingPopup: "attackerFittingPopup",
-  targetFittingPopup: "targetFittingPopup",
+  shipAFittingPopup: "shipAFittingPopup",
+  shipBFittingPopup: "shipBFittingPopup",
   sessionCodec: "sessionCodec",
   simConfigSource: "simConfigSource",
   importController: "importController",
@@ -77,7 +77,7 @@ describe("registerControlsModule", () => {
       eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]`),
     };
     const { cradle } = buildDomControls({ savedFittings, presetFittings });
-    const importer = cradle.cradle.attackerSide.importer;
+    const importer = cradle.cradle.shipASide.importer;
     expect(importer.autoLoadFittingTextFor("Rifter")).toBe("[Rifter, Recent]");
     expect(importer.autoLoadFittingTextFor("Thrasher")).toBe("[Thrasher, Brawny]");
     expect(importer.autoLoadFittingTextFor("Unknown")).toBeUndefined();

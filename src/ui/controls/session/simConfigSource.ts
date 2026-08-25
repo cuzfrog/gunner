@@ -10,8 +10,8 @@ export interface SimConfigSource {
 }
 
 interface SimConfigSourceDeps {
-  readonly attackerSide: { capture(): SidePanelState };
-  readonly targetSide: { capture(): SidePanelState };
+  readonly shipASide: { capture(): SidePanelState };
+  readonly shipBSide: { capture(): SidePanelState };
   readonly preferencesController: { getManeuverAggressivity(): number };
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
@@ -19,16 +19,16 @@ interface SimConfigSourceDeps {
 }
 
 export class SimConfigSourceImpl implements SimConfigSource {
-  private readonly attackerSide: { capture(): SidePanelState };
-  private readonly targetSide: { capture(): SidePanelState };
+  private readonly shipASide: { capture(): SidePanelState };
+  private readonly shipBSide: { capture(): SidePanelState };
   private readonly preferencesController: { getManeuverAggressivity(): number };
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly distanceSource: { getInitialDistance(): number };
 
   constructor(deps: SimConfigSourceDeps) {
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.preferencesController = deps.preferencesController;
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
@@ -38,25 +38,25 @@ export class SimConfigSourceImpl implements SimConfigSource {
   getConfig(): SimConfig {
     const initialDistance = this.distanceSource.getInitialDistance();
     const aggressivity = this.preferencesController.getManeuverAggressivity();
-    const attackerState = this.attackerSide.capture();
-    const targetState = this.targetSide.capture();
-    const attacker: CombatantConfig = {
-      id: "attacker", maxSpeed: attackerState.speed, baseMaxSpeed: attackerState.baseMaxSpeed ?? attackerState.speed,
-      suppressedMaxSpeed: suppressedMaxSpeed(attackerState), mass: attackerState.mass,
-      inertiaModifier: attackerState.inertia, mode: attackerState.mode,
-      desiredRange: attackerState.range, aggressivity, orbitDirection: "cw",
-      ewar: this.ewarController.projection("attacker"),
-      boosts: this.boosterController.projection("attacker"),
+    const shipAState = this.shipASide.capture();
+    const shipBState = this.shipBSide.capture();
+    const shipA: CombatantConfig = {
+      id: "shipA", maxSpeed: shipAState.speed, baseMaxSpeed: shipAState.baseMaxSpeed ?? shipAState.speed,
+      suppressedMaxSpeed: suppressedMaxSpeed(shipAState), mass: shipAState.mass,
+      inertiaModifier: shipAState.inertia, mode: shipAState.mode,
+      desiredRange: shipAState.range, aggressivity, orbitDirection: "cw",
+      ewar: this.ewarController.projection("shipA"),
+      boosts: this.boosterController.projection("shipA"),
     };
-    const target: CombatantConfig = {
-      id: "target", maxSpeed: targetState.speed, baseMaxSpeed: targetState.baseMaxSpeed ?? targetState.speed,
-      suppressedMaxSpeed: suppressedMaxSpeed(targetState), mass: targetState.mass,
-      inertiaModifier: targetState.inertia, mode: targetState.mode,
-      desiredRange: targetState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
-      ewar: this.ewarController.projection("target"),
-      boosts: this.boosterController.projection("target"),
+    const shipB: CombatantConfig = {
+      id: "shipB", maxSpeed: shipBState.speed, baseMaxSpeed: shipBState.baseMaxSpeed ?? shipBState.speed,
+      suppressedMaxSpeed: suppressedMaxSpeed(shipBState), mass: shipBState.mass,
+      inertiaModifier: shipBState.inertia, mode: shipBState.mode,
+      desiredRange: shipBState.range, aggressivity: AGGRESSIVITY_MIN, orbitDirection: "cw",
+      ewar: this.ewarController.projection("shipB"),
+      boosts: this.boosterController.projection("shipB"),
     };
-    return { attacker, target, initialDistance };
+    return { shipA, shipB, initialDistance };
   }
 }
 

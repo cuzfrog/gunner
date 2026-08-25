@@ -11,8 +11,8 @@ const boostedTurret: TurretSpec = { tracking: 0.11, sigResolution: 40, optimal: 
 const effectiveTurret: TurretSpec = { tracking: 0.05, sigResolution: 40, optimal: 4000, falloff: 4000 };
 const hit: HitChanceBreakdown = { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 };
 
-const attacker: ShipState = {
-  id: "attacker",
+const shipA: ShipState = {
+  id: "shipA",
   maxSpeed: 1000,
   mass: 1_000_000,
   inertiaModifier: 1,
@@ -27,8 +27,8 @@ const attacker: ShipState = {
   },
 };
 
-const target: ShipState = {
-  id: "target",
+const shipB: ShipState = {
+  id: "shipB",
   maxSpeed: 1000,
   mass: 1_000_000,
   inertiaModifier: 1,
@@ -41,8 +41,8 @@ const target: ShipState = {
 
 const frame: EngagementFrame = {
   time: 1,
-  attacker,
-  target,
+  shipA,
+  shipB,
   relPosition: new Vec2(0, 6000),
   distance: 6000,
   relVelocity: new Vec2(0, 0),
@@ -52,7 +52,7 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const snapshot: SimSnapshot = { time: 1, attacker, target, commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) } };
+const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
 function makeEvaluator(): {
   kinematics: Kinematics;
@@ -80,23 +80,23 @@ function makeEvaluator(): {
 }
 
 describe("EngagementEvaluatorImpl", () => {
-  test("evaluates attacker attack using target ewar", () => {
+  test("evaluates shipA attack using shipB ewar", () => {
     const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { attacker: { turret, targetSigRadius: 40 } });
-    expect(result.attacker).toEqual({ boostedTurret, effectiveTurret, hit });
-    expect(result.target).toBeUndefined();
-    expect(kinematics.computeEngagement).toHaveBeenCalledWith(attacker, target, 1);
-    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, target.ewar, 6000);
+    const result = evaluator.evaluate(snapshot, { shipA: { turret, shipBSigRadius: 40 } });
+    expect(result.shipA).toEqual({ boostedTurret, effectiveTurret, hit });
+    expect(result.shipB).toBeUndefined();
+    expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
+    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipB.ewar, 6000);
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 40);
   });
 
-  test("evaluates target attack using attacker ewar", () => {
+  test("evaluates shipB attack using shipA ewar", () => {
     const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { target: { turret, targetSigRadius: 30 } });
-    expect(result.target).toEqual({ boostedTurret, effectiveTurret, hit });
-    expect(result.attacker).toBeUndefined();
-    expect(kinematics.computeEngagement).toHaveBeenCalledWith(target, attacker, 1);
-    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, attacker.ewar, 6000);
+    const result = evaluator.evaluate(snapshot, { shipB: { turret, shipBSigRadius: 30 } });
+    expect(result.shipB).toEqual({ boostedTurret, effectiveTurret, hit });
+    expect(result.shipA).toBeUndefined();
+    expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipB, shipA, 1);
+    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipA.ewar, 6000);
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 30);
   });
 
@@ -104,20 +104,20 @@ describe("EngagementEvaluatorImpl", () => {
     const { ewarResolver, turretBoosterResolver, evaluator } = makeEvaluator();
     const boosted: TurretSpec = { tracking: 0.12, sigResolution: 40, optimal: 5500, falloff: 5500 };
     vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
-    const attackerWithBoosts = { ...attacker, boosts: { loadout: { computers: [], scripts: [] } } };
-    const snapshotWithBoosts = { ...snapshot, attacker: attackerWithBoosts };
-    const result = evaluator.evaluate(snapshotWithBoosts, { attacker: { turret, targetSigRadius: 40 } });
-    expect(result.attacker?.boostedTurret).toEqual(boosted);
-    expect(result.attacker?.effectiveTurret).toEqual(effectiveTurret);
-    expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, attackerWithBoosts.boosts);
-    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boosted, target.ewar, 6000);
+    const shipAWithBoosts = { ...shipA, boosts: { loadout: { computers: [], scripts: [] } } };
+    const snapshotWithBoosts = { ...snapshot, shipA: shipAWithBoosts };
+    const result = evaluator.evaluate(snapshotWithBoosts, { shipA: { turret, shipBSigRadius: 40 } });
+    expect(result.shipA?.boostedTurret).toEqual(boosted);
+    expect(result.shipA?.effectiveTurret).toEqual(effectiveTurret);
+    expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, shipAWithBoosts.boosts);
+    expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boosted, shipB.ewar, 6000);
   });
 
   test("returns empty result when no attacks are requested", () => {
     const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
     const result = evaluator.evaluate(snapshot, {});
-    expect(result.attacker).toBeUndefined();
-    expect(result.target).toBeUndefined();
+    expect(result.shipA).toBeUndefined();
+    expect(result.shipB).toBeUndefined();
     expect(kinematics.computeEngagement).not.toHaveBeenCalled();
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
     expect(hitChance.compute).not.toHaveBeenCalled();
@@ -125,8 +125,8 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("uses effective turret for renderer and hit for readout", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { attacker: { turret, targetSigRadius: 40 } });
-    expect(result.attacker!.effectiveTurret).not.toEqual(turret);
-    expect(result.attacker!.hit).toEqual(hit);
+    const result = evaluator.evaluate(snapshot, { shipA: { turret, shipBSigRadius: 40 } });
+    expect(result.shipA!.effectiveTurret).not.toEqual(turret);
+    expect(result.shipA!.hit).toEqual(hit);
   });
 });

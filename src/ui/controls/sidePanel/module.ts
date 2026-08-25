@@ -9,8 +9,8 @@ import { createPanelTurretLink } from "./turretLink";
 
 export function registerSidePanelModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    attackerSide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "attacker"))).singleton(),
-    targetSide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "target"))).singleton(),
+    shipASide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "shipA"))).singleton(),
+    shipBSide: asFunction((proxy) => new SidePanelImpl(sideDeps(proxy, "shipB"))).singleton(),
   });
 }
 

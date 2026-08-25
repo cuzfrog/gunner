@@ -11,9 +11,9 @@ export interface UiEvents {
   onDisplayInvalidated(listener: () => void): void;
   offDisplayInvalidated(listener: () => void): void;
   emitDisplayInvalidated(): void;
-  onFittingImported(listener: (side: "attacker" | "target", imported: ImportedFitting) => void): void;
-  offFittingImported(listener: (side: "attacker" | "target", imported: ImportedFitting) => void): void;
-  emitFittingImported(side: "attacker" | "target", imported: ImportedFitting): void;
+  onFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void;
+  offFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void;
+  emitFittingImported(side: "shipA" | "shipB", imported: ImportedFitting): void;
   onProfileLoaded(listener: (name: string) => void): void;
   offProfileLoaded(listener: (name: string) => void): void;
   emitProfileLoaded(name: string): void;
@@ -44,7 +44,7 @@ export class UiEventsImpl implements UiEvents {
   private readonly languageChanged = new Set<() => void>();
   private readonly configInvalidated = new Set<(persist: boolean) => void>();
   private readonly displayInvalidated = new Set<() => void>();
-  private readonly fittingImported = new Set<(side: "attacker" | "target", imported: ImportedFitting) => void>();
+  private readonly fittingImported = new Set<(side: "shipA" | "shipB", imported: ImportedFitting) => void>();
   private readonly profileLoaded = new Set<(name: string) => void>();
   private readonly newProfile = new Set<() => void>();
   private readonly profileDeleted = new Set<() => void>();
@@ -66,13 +66,13 @@ export class UiEventsImpl implements UiEvents {
   offDisplayInvalidated(listener: () => void): void { this.displayInvalidated.delete(listener); }
   emitDisplayInvalidated(): void { this.emit(this.displayInvalidated); }
 
-  onFittingImported(listener: (side: "attacker" | "target", imported: ImportedFitting) => void): void {
+  onFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void {
     this.fittingImported.add(listener);
   }
-  offFittingImported(listener: (side: "attacker" | "target", imported: ImportedFitting) => void): void {
+  offFittingImported(listener: (side: "shipA" | "shipB", imported: ImportedFitting) => void): void {
     this.fittingImported.delete(listener);
   }
-  emitFittingImported(side: "attacker" | "target", imported: ImportedFitting): void {
+  emitFittingImported(side: "shipA" | "shipB", imported: ImportedFitting): void {
     for (const listener of Array.from(this.fittingImported)) listener(side, imported);
   }
 

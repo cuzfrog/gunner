@@ -5,21 +5,29 @@ const serializer = new ProfileTextSerializer();
 
 describe("profileTextSerializer", () => {
   test("emits the global ammo line as a global key", () => {
-    const profile = { ...MINIMAL_PROFILE, attackerAmmo: "Hail S" };
+    const profile = { ...MINIMAL_PROFILE, shipAAmmo: "Hail S" };
     const text = serializer.serialize(profile);
     expect(text).toContain("ammo=Hail S");
-    expect(text).not.toContain("attacker.ammo=");
+    expect(text).not.toContain("shipA.ammo=");
+  });
+
+  test("emits only shipA and shipB dot keys and no attacker or target keys", () => {
+    const text = serializer.serialize(MINIMAL_PROFILE);
+    expect(text).toContain("shipA.speed=");
+    expect(text).toContain("shipB.sig=");
+    expect(text).not.toContain("attacker.");
+    expect(text).not.toContain("target.");
   });
 
   test("rejects a fitting body containing the block terminator", () => {
     const fitting = `[Rifter, Brawler]\n---\n5MN Microwarpdrive`;
-    expect(() => serializer.serialize({ ...MINIMAL_PROFILE, attackerFitting: fitting })).toThrow();
+    expect(() => serializer.serialize({ ...MINIMAL_PROFILE, shipAFitting: fitting })).toThrow();
   });
 
   test("serializes overrides under side-scoped override keys", () => {
     const text = serializer.serialize(FULL_PROFILE);
-    expect(text).toContain("override.attacker.mass=2000000");
-    expect(text).toContain("override.attacker.tracking=0.12");
-    expect(text).toContain("override.target.mass=11000000");
+    expect(text).toContain("override.shipA.mass=2000000");
+    expect(text).toContain("override.shipA.tracking=0.12");
+    expect(text).toContain("override.shipB.mass=11000000");
   });
 });

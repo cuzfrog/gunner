@@ -29,27 +29,27 @@ function fakeEls() {
   return createControlsEls();
 }
 
-function panelStateFrom(settings: UserSettings, side: "attacker" | "target"): ReturnType<SidePanel["stateFrom"]> {
-  const mode: AutopilotMode = side === "attacker" ? settings.attackerMode : settings.targetMode;
+function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): ReturnType<SidePanel["stateFrom"]> {
+  const mode: AutopilotMode = side === "shipA" ? settings.shipAMode : settings.shipBMode;
   const base = {
-    speed: side === "attacker" ? settings.attackerSpeed : settings.targetSpeed,
-    mass: side === "attacker" ? settings.attackerMass : settings.targetMass,
-    inertia: side === "attacker" ? settings.attackerInertia : settings.targetInertia,
+    speed: side === "shipA" ? settings.shipASpeed : settings.shipBSpeed,
+    mass: side === "shipA" ? settings.shipAMass : settings.shipBMass,
+    inertia: side === "shipA" ? settings.shipAInertia : settings.shipBInertia,
     mode,
-    range: side === "attacker" ? settings.attackerRange : settings.targetRange,
-    skillLevel: side === "attacker" ? settings.attackerSkillLevel : settings.targetSkillLevel,
-    overload: side === "attacker" ? settings.attackerOverload ?? true : settings.targetOverload ?? true,
-    hull: side === "attacker" ? settings.attackerHull : settings.targetHull,
-    propulsion: side === "attacker" ? settings.attackerPropulsion : settings.targetPropulsion,
-    fitting: side === "attacker" ? settings.attackerFitting : settings.targetFitting,
-    overrides: side === "attacker" ? {} : settings.targetOverrides ?? {},
-    fittedHull: side === "attacker" ? settings.attackerFittedHull : settings.targetFittedHull,
+    range: side === "shipA" ? settings.shipARange : settings.shipBRange,
+    skillLevel: side === "shipA" ? settings.shipASkillLevel : settings.shipBSkillLevel,
+    overload: side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true,
+    hull: side === "shipA" ? settings.shipAHull : settings.shipBHull,
+    propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
+    fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
+    overrides: side === "shipA" ? {} : settings.shipBOverrides ?? {},
+    fittedHull: side === "shipA" ? settings.shipAFittedHull : settings.shipBFittedHull,
   };
-  if (side === "target") return { ...base, sig: settings.targetSig };
+  if (side === "shipB") return { ...base, sig: settings.shipBSig };
   return base;
 }
 
-function mockSidePanel(side: "attacker" | "target", captured: ReturnType<SidePanel["capture"]>): SidePanel {
+function mockSidePanel(side: "shipA" | "shipB", captured: ReturnType<SidePanel["capture"]>): SidePanel {
   return {
     capture: vi.fn(() => captured),
     stateFrom: vi.fn(() => captured),
@@ -108,31 +108,31 @@ function makeProfile(): ProfileSettings {
     sigRes: "S",
     optimal: 1000,
     falloff: 3000,
-    attackerSpeed: 300,
-    attackerMode: "orbit",
-    attackerRange: 5000,
-    attackerMass: 1_000_000,
-    attackerInertia: 3,
-    attackerSkillLevel: 5,
-    attackerOverload: true,
+    shipASpeed: 300,
+    shipAMode: "orbit",
+    shipARange: 5000,
+    shipAMass: 1_000_000,
+    shipAInertia: 3,
+    shipASkillLevel: 5,
+    shipAOverload: true,
     initialDistance: 5000,
-    targetSpeed: 300,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 1_000_000,
-    targetInertia: 3,
-    targetSkillLevel: 5,
-    targetOverload: true,
-    targetSig: 36,
-    attackerAmmo: "Hail S",
+    shipBSpeed: 300,
+    shipBMode: "orbit",
+    shipBRange: 5000,
+    shipBMass: 1_000_000,
+    shipBInertia: 3,
+    shipBSkillLevel: 5,
+    shipBOverload: true,
+    shipBSig: 36,
+    shipAAmmo: "Hail S",
   };
 }
 
 describe("SessionCodec", () => {
   test("capture returns a complete UserSettings from current controls", () => {
     const els = fakeEls();
-    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
@@ -147,13 +147,13 @@ describe("SessionCodec", () => {
     const turret = {
       capture: vi.fn(() => ({ sigRes: "S", optimal: 1000, falloff: 3000, ammo: "Hail S" })),
     } as unknown as TurretController;
-    const turretOverrides = mockTurretOverrides({ attackerMass: 1_400_000 });
+    const turretOverrides = mockTurretOverrides({ shipAMass: 1_400_000 });
     els.maneuverAggressivity.value = "1";
     els.initialDistance.value = "5000";
     const events = new UiEventsImpl();
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController: {} as ProfileController, i18n: {} as I18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
       settingsStore: {} as SettingsStore,
@@ -172,21 +172,21 @@ describe("SessionCodec", () => {
     expect(settings.sigRes).toBe("S");
     expect(settings.optimal).toBe(1000);
     expect(settings.falloff).toBe(3000);
-    expect(settings.attackerSpeed).toBe(300);
-    expect(settings.attackerMass).toBe(1_000_000);
-    expect(settings.attackerInertia).toBe(3);
-    expect(settings.attackerSkillLevel).toBe(5);
-    expect(settings.attackerOverload).toBe(true);
-    expect(settings.targetSpeed).toBe(300);
-    expect(settings.targetMass).toBe(1_000_000);
-    expect(settings.targetInertia).toBe(3);
-    expect(settings.targetSig).toBe(36);
+    expect(settings.shipASpeed).toBe(300);
+    expect(settings.shipAMass).toBe(1_000_000);
+    expect(settings.shipAInertia).toBe(3);
+    expect(settings.shipASkillLevel).toBe(5);
+    expect(settings.shipAOverload).toBe(true);
+    expect(settings.shipBSpeed).toBe(300);
+    expect(settings.shipBMass).toBe(1_000_000);
+    expect(settings.shipBInertia).toBe(3);
+    expect(settings.shipBSig).toBe(36);
     expect(settings.initialDistance).toBe(5000);
     expect(settings.maneuverAggressivity).toBe(1);
     expect(settings.simSpeed).toBe(4);
     expect(settings.language).toBe("en");
-    expect(settings.attackerAmmo).toBe("Hail S");
-    expect(settings.attackerOverrides).toEqual({ attackerMass: 1_400_000 });
+    expect(settings.shipAAmmo).toBe("Hail S");
+    expect(settings.shipAOverrides).toEqual({ shipAMass: 1_400_000 });
     expect(turretOverrides.get).toHaveBeenCalled();
   });
 
@@ -199,44 +199,44 @@ describe("SessionCodec", () => {
       sigRes: "M",
       optimal: 2000,
       falloff: 4000,
-      attackerSpeed: 450,
-      attackerMode: "keepAtRange",
-      attackerRange: 8000,
+      shipASpeed: 450,
+      shipAMode: "keepAtRange",
+      shipARange: 8000,
       maneuverAggressivity: 1.5,
       gridBrightness: 0.75,
       autoZoom: true,
       zoomFactor: 1,
-      attackerMass: 1_100_000,
-      attackerInertia: 2.5,
-      attackerSkillLevel: 4,
-      attackerOverload: false,
-      attackerHull: undefined,
-      attackerPropulsion: undefined,
-      attackerFitting: undefined,
-      attackerOverrides: {},
-      attackerFittedHull: undefined,
+      shipAMass: 1_100_000,
+      shipAInertia: 2.5,
+      shipASkillLevel: 4,
+      shipAOverload: false,
+      shipAHull: undefined,
+      shipAPropulsion: undefined,
+      shipAFitting: undefined,
+      shipAOverrides: {},
+      shipAFittedHull: undefined,
       initialDistance: 7000,
-      targetSpeed: 260,
-      targetMode: "orbit",
-      targetRange: 7000,
-      targetMass: 1_200_000,
-      targetInertia: 2.8,
-      targetSkillLevel: 3,
-      targetOverload: true,
-      targetSig: 50,
-      targetHull: undefined,
-      targetPropulsion: undefined,
-      targetFitting: undefined,
-      targetOverrides: {},
-      targetFittedHull: undefined,
-      attackerAmmo: "Hail S",
+      shipBSpeed: 260,
+      shipBMode: "orbit",
+      shipBRange: 7000,
+      shipBMass: 1_200_000,
+      shipBInertia: 2.8,
+      shipBSkillLevel: 3,
+      shipBOverload: true,
+      shipBSig: 50,
+      shipBHull: undefined,
+      shipBPropulsion: undefined,
+      shipBFitting: undefined,
+      shipBOverrides: {},
+      shipBFittedHull: undefined,
+      shipAAmmo: "Hail S",
       simSpeed: 2,
       language: "zh",
     };
-    const attacker = mockSidePanel("attacker", panelStateFrom(settings, "attacker"));
-    const target = mockSidePanel("target", panelStateFrom(settings, "target"));
-    attacker.stateFrom = vi.fn(() => panelStateFrom(settings, "attacker"));
-    target.stateFrom = vi.fn(() => panelStateFrom(settings, "target"));
+    const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
+    const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
+    shipA.stateFrom = vi.fn(() => panelStateFrom(settings, "shipA"));
+    shipB.stateFrom = vi.fn(() => panelStateFrom(settings, "shipB"));
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
@@ -264,7 +264,7 @@ describe("SessionCodec", () => {
     events.onSessionRestored(onSessionRestored);
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -276,11 +276,11 @@ describe("SessionCodec", () => {
 
     codec.restoreStartup({ settings, selectedProfileName: null });
 
-    expect(attacker.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "attacker"));
-    expect(attacker.restore).toHaveBeenCalledWith(panelStateFrom(settings, "attacker"));
-    expect(target.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "target"));
-    expect(target.restore).toHaveBeenCalledWith(panelStateFrom(settings, "target"));
-    expect(turret.restore).toHaveBeenCalledWith({ fitting: settings.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: settings.attackerAmmo });
+    expect(shipA.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "shipA"));
+    expect(shipA.restore).toHaveBeenCalledWith(panelStateFrom(settings, "shipA"));
+    expect(shipB.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "shipB"));
+    expect(shipB.restore).toHaveBeenCalledWith(panelStateFrom(settings, "shipB"));
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: settings.shipAFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: settings.shipAAmmo });
     expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
     expect(preferences.savePreferences).toHaveBeenCalled();
     expect(i18n.translateDocument).toHaveBeenCalled();
@@ -294,8 +294,8 @@ describe("SessionCodec", () => {
     const els = fakeEls();
     const ewarController = mockEwarController();
     const fittingImport = mockFittingImport();
-    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nStasis Webifier I", overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     vi.mocked(ewarController.capture).mockReturnValue({
       webs: [{ active: true, overloaded: false }],
       grapplers: [],
@@ -320,7 +320,7 @@ describe("SessionCodec", () => {
     events.onSessionRestored(onSessionRestored);
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides: mockTurretOverrides(),
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides: mockTurretOverrides(),
       preferences, profileController, i18n,
       chargeCatalog: {} as ChargeCatalog, sigResChoice: { set: vi.fn() } as unknown as ChoiceGroup, hintRotator: { refresh: vi.fn() } as unknown as HintRotator,
       settingsStore,
@@ -332,22 +332,22 @@ describe("SessionCodec", () => {
     });
 
     const settings = codec.capture();
-    expect(settings.attackerEwarActivation).toEqual({
+    expect(settings.shipAEwarActivation).toEqual({
       webs: [{ active: true, overloaded: false }],
       grapplers: [],
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
 
     codec.restore(settings);
-    expect(ewarController.restore).toHaveBeenCalledWith("attacker", expect.any(Object), settings.attackerEwarActivation);
-    expect(ewarController.restore).toHaveBeenCalledWith("target", undefined, settings.targetEwarActivation);
+    expect(ewarController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAEwarActivation);
+    expect(ewarController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBEwarActivation);
     expect(onSessionRestored).toHaveBeenCalled();
   });
 
   test("corrupt startup data falls back to defaults", () => {
     const els = fakeEls();
-    const attacker = mockSidePanel("attacker", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
@@ -370,7 +370,7 @@ describe("SessionCodec", () => {
     events.onStartupDefaultsApplied(onStartupDefaultsApplied);
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -385,24 +385,24 @@ describe("SessionCodec", () => {
     expect(profileController.restoreFromStartup).toHaveBeenCalled();
     expect(settingsStore.loadPreferences).toHaveBeenCalled();
     expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
-    expect(attacker.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
-    expect(attacker.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
-    expect(attacker.sections.skill.setOverloadDisabled).toHaveBeenCalled();
-    expect(attacker.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
-    expect(target.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
-    expect(target.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
-    expect(target.sections.skill.setOverloadDisabled).toHaveBeenCalled();
-    expect(target.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
+    expect(shipA.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
+    expect(shipA.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
+    expect(shipA.sections.skill.setOverloadDisabled).toHaveBeenCalled();
+    expect(shipA.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
+    expect(shipB.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
+    expect(shipB.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
+    expect(shipB.sections.skill.setOverloadDisabled).toHaveBeenCalled();
+    expect(shipB.sections.propulsion.renderPropulsionOptions).toHaveBeenCalled();
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
   });
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
     const els = fakeEls();
-    const pristineAttacker = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
-    const pristineTarget = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
-    const attacker = mockSidePanel("attacker", pristineAttacker);
-    const target = mockSidePanel("target", pristineTarget);
+    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
+    const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
+    const shipA = mockSidePanel("shipA", pristineShipA);
+    const shipB = mockSidePanel("shipB", pristineShipB);
     const trackingInput = fakeTrackingInput();
     const preferences = {
       trackingInput,
@@ -427,7 +427,7 @@ describe("SessionCodec", () => {
     const ewarController = mockEwarController();
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -440,11 +440,11 @@ describe("SessionCodec", () => {
     codec.resetToDefaults();
 
     expect(clearSelectedProfile).toHaveBeenCalled();
-    expect(attacker.restore).toHaveBeenCalledWith(pristineAttacker);
-    expect(target.restore).toHaveBeenCalledWith(pristineTarget);
+    expect(shipA.restore).toHaveBeenCalledWith(pristineShipA);
+    expect(shipB.restore).toHaveBeenCalledWith(pristineShipB);
     expect(turret.restore).toHaveBeenCalledWith({ fitting: undefined, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
-    expect(ewarController.restore).toHaveBeenCalledWith("attacker", undefined, undefined);
-    expect(ewarController.restore).toHaveBeenCalledWith("target", undefined, undefined);
+    expect(ewarController.restore).toHaveBeenCalledWith("shipA", undefined, undefined);
+    expect(ewarController.restore).toHaveBeenCalledWith("shipB", undefined, undefined);
     expect(els.sigRes.value).toBe("S");
     expect(els.optimal.value).toBe("1000");
     expect(els.falloff.value).toBe("3000");
@@ -458,8 +458,8 @@ describe("SessionCodec", () => {
     const els = fakeEls();
     const profile = makeProfile();
     const loadProfile = vi.fn(() => profile);
-    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
@@ -484,7 +484,7 @@ describe("SessionCodec", () => {
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -499,14 +499,14 @@ describe("SessionCodec", () => {
     expect(loadProfile).toHaveBeenCalledWith("brawler");
     expect(profileController.markLoaded).toHaveBeenCalledWith("brawler");
     expect(onSessionRestored).toHaveBeenCalled();
-    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.shipAFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
   });
 
   test("profileTextLoaded event restores the shared profile and emits sessionRestored", () => {
     const els = fakeEls();
     const profile = makeProfile();
-    const attacker = mockSidePanel("attacker", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
@@ -531,7 +531,7 @@ describe("SessionCodec", () => {
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -546,13 +546,13 @@ describe("SessionCodec", () => {
     expect(profileController.showStatus).toHaveBeenCalledWith("status.profileImported");
     expect(onSessionRestored).toHaveBeenCalled();
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
-    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.attackerFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
+    expect(turret.restore).toHaveBeenCalledWith({ fitting: profile.shipAFitting, conditions: { skillLevel: 5, overloaded: true }, ammo: "Hail S" });
   });
 
   test("newProfile event resets to defaults and emits sessionReset", () => {
     const els = fakeEls();
-    const attacker = mockSidePanel("attacker", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
@@ -580,7 +580,7 @@ describe("SessionCodec", () => {
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,
@@ -600,8 +600,8 @@ describe("SessionCodec", () => {
 
   test("profileDeleted event resets to defaults and emits sessionReset", () => {
     const els = fakeEls();
-    const attacker = mockSidePanel("attacker", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
-    const target = mockSidePanel("target", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
+    const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const turret = { capture: vi.fn(() => ({ sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" })), restore: vi.fn() } as unknown as TurretController;
     const turretOverrides = mockTurretOverrides();
     const trackingInput = fakeTrackingInput();
@@ -629,7 +629,7 @@ describe("SessionCodec", () => {
     els.initialDistance.value = "5000";
 
     const codec = new SessionCodecImpl({
-      els, attackerSide: attacker, targetSide: target, turret, turretOverrides,
+      els, shipASide: shipA, shipBSide: shipB, turret, turretOverrides,
       preferences, profileController, i18n, chargeCatalog: {} as ChargeCatalog,
       sigResChoice, hintRotator, settingsStore,
       events,

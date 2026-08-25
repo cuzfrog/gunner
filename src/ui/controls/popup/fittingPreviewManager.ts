@@ -15,7 +15,7 @@ export interface FittingPreviewManager {
   openSide(): Side | undefined;
   isMenuPreview(): boolean;
   refresh(): void;
-  handlePointerDown(target: EventTarget): void;
+  handlePointerDown(domTarget: EventTarget): void;
   handleEscape(): void;
 }
 
@@ -23,8 +23,8 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
-  private readonly attackerSide: FittingPopupHost;
-  private readonly targetSide: FittingPopupHost;
+  private readonly shipASide: FittingPopupHost;
+  private readonly shipBSide: FittingPopupHost;
   private readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
   private readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   private readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
@@ -38,8 +38,8 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     fittingImport: FittingImport;
     imageCatalog: ImageCatalog;
     i18n: I18n;
-    attackerSide: FittingPopupHost;
-    targetSide: FittingPopupHost;
+    shipASide: FittingPopupHost;
+    shipBSide: FittingPopupHost;
     previewsBySide: Readonly<Record<Side, FittingPreview>>;
     shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
@@ -48,8 +48,8 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     this.fittingImport = deps.fittingImport;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.previewsBySide = deps.previewsBySide;
     this.shipImageBySide = deps.shipImageBySide;
     this.eyeBySide = deps.eyeBySide;
@@ -104,10 +104,10 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     this.renderPreview(side, text, this.currentPreviewAnchor, eye);
   }
 
-  handlePointerDown(target: EventTarget): void {
+  handlePointerDown(domTarget: EventTarget): void {
     const side = this.openPreviewSide;
-    if (!side || !isEventTargetWithClosest(target)) return;
-    if (target.closest(fittingAreaSelector(side)) === null) this.hide(side);
+    if (!side || !isEventTargetWithClosest(domTarget)) return;
+    if (domTarget.closest(fittingAreaSelector(side)) === null) this.hide(side);
   }
 
   handleEscape(): void {
@@ -123,7 +123,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   }
 
   private hostFor(side: Side): FittingPopupHost {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
   private profileOf(side: Side): ShipProfile | undefined {

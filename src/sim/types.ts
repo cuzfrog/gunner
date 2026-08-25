@@ -16,7 +16,7 @@ export function isAutopilotMode(value: unknown): value is AutopilotMode {
 export type OrbitDirection = "cw" | "ccw";
 
 export interface ShipConfig {
-  readonly id: "attacker" | "target";
+  readonly id: "shipA" | "shipB";
   readonly maxSpeed: number;
   // New configurations should carry the naked-hull (propulsion-independent) speed.
   // Older saved profiles and URLs may not have the field; `DomControls` and state
@@ -42,18 +42,18 @@ export interface ShipState extends ShipConfig {
 }
 
 export interface SimConfig {
-  readonly attacker: CombatantConfig;
-  readonly target: CombatantConfig;
+  readonly shipA: CombatantConfig;
+  readonly shipB: CombatantConfig;
   readonly initialDistance: number;
 }
 
 export interface SimSnapshot {
   readonly time: number;
-  readonly attacker: ShipState;
-  readonly target: ShipState;
+  readonly shipA: ShipState;
+  readonly shipB: ShipState;
   // Autopilot velocity commands for the current states: what the dynamics
   // engine tracks, shown alongside the actual state for debugging.
-  readonly commands: { readonly attacker: Vec2; readonly target: Vec2 };
+  readonly commands: { readonly shipA: Vec2; readonly shipB: Vec2 };
 }
 
 export interface TurretSpec {
@@ -65,12 +65,12 @@ export interface TurretSpec {
 
 export interface EngagementFrame {
   readonly time: number;
-  readonly attacker: ShipState;
-  readonly target: ShipState;
-  readonly relPosition: Vec2; // target.pos - attacker.pos
+  readonly shipA: ShipState;
+  readonly shipB: ShipState;
+  readonly relPosition: Vec2; // shipB.pos - shipA.pos
   readonly distance: number; // m
-  readonly relVelocity: Vec2; // target.vel - attacker.vel
-  readonly radialVelocity: number; // m/s, positive = target moving away along LOS
+  readonly relVelocity: Vec2; // shipB.vel - shipA.vel
+  readonly radialVelocity: number; // m/s, positive = shipB moving away along LOS
   readonly transversalVelocity: Vec2; // m/s
   readonly transversalSpeed: number; // m/s
   readonly angularVelocity: number; // rad/s

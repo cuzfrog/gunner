@@ -92,7 +92,7 @@ export class PreferencesControllerImpl implements PreferencesController {
       open: () => this.openCanvasSettings(),
       close: () => this.closeCanvasSettings(),
       focusTrigger: () => this.els.canvasSettingsTrigger.focus(),
-      contains: (target) => this.containsCanvasSettings(target),
+      contains: (domTarget) => this.containsCanvasSettings(domTarget),
     };
     this.popupGroup.register(this.canvasSettingsPopupValue);
     this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
@@ -279,8 +279,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.canvasSettingsTrigger.setAttribute("aria-expanded", "false");
   }
 
-  private containsCanvasSettings(target: EventTarget): boolean {
-    if (!(target instanceof Element)) return false;
-    return this.els.canvasSettingsPopup.contains(target) || this.els.canvasSettingsTrigger.contains(target);
+  private containsCanvasSettings(domTarget: EventTarget): boolean {
+    if (!(domTarget instanceof Element)) return false;
+    return this.els.canvasSettingsPopup.contains(domTarget) || this.els.canvasSettingsTrigger.contains(domTarget);
   }
 }

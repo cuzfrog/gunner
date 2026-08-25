@@ -32,13 +32,13 @@ export interface FittedHullSummary {
 
 export type ProfileParamOverrides = Pick<
   UserSettings,
-  | "attackerMass"
-  | "attackerInertia"
-  | "attackerSpeed"
-  | "targetMass"
-  | "targetInertia"
-  | "targetSig"
-  | "targetSpeed"
+  | "shipAMass"
+  | "shipAInertia"
+  | "shipASpeed"
+  | "shipBMass"
+  | "shipBInertia"
+  | "shipBSig"
+  | "shipBSpeed"
   | "tracking"
   | "sigRes"
   | "optimal"
@@ -52,47 +52,47 @@ export interface UserSettings {
   sigRes: SigResolutionClass;
   optimal: number;
   falloff: number;
-  attackerSpeed: number;
-  attackerMode: AutopilotMode;
-  attackerRange: number;
+  shipASpeed: number;
+  shipAMode: AutopilotMode;
+  shipARange: number;
   maneuverAggressivity?: number;
   gridBrightness?: number;
   autoZoom?: boolean;
   zoomFactor?: number;
-  attackerMass: number;
-  attackerInertia: number;
-  attackerSkillLevel?: SkillLevel;
-  attackerOverload?: boolean;
+  shipAMass: number;
+  shipAInertia: number;
+  shipASkillLevel?: SkillLevel;
+  shipAOverload?: boolean;
   initialDistance: number;
-  targetSpeed: number;
-  targetMode: AutopilotMode;
-  targetRange: number;
-  targetMass: number;
-  targetInertia: number;
-  targetSig: number;
-  targetSkillLevel?: SkillLevel;
-  targetOverload?: boolean;
-  attackerHull?: string;
-  attackerPropulsion?: PropulsionSelection;
-  targetHull?: string;
-  targetPropulsion?: PropulsionSelection;
-  attackerFitting?: string;
-  attackerOverrides?: Partial<ProfileParamOverrides>;
-  targetFitting?: string;
-  targetOverrides?: Partial<ProfileParamOverrides>;
-  attackerFittedHull?: FittedHullSummary;
-  targetFittedHull?: FittedHullSummary;
-  attackerEwarActivation?: StoredEwarActivation;
-  targetEwarActivation?: StoredEwarActivation;
-  attackerBoosterActivation?: readonly StoredBoosterActivation[];
-  targetBoosterActivation?: readonly StoredBoosterActivation[];
-  attackerAmmo: string;
+  shipBSpeed: number;
+  shipBMode: AutopilotMode;
+  shipBRange: number;
+  shipBMass: number;
+  shipBInertia: number;
+  shipBSig: number;
+  shipBSkillLevel?: SkillLevel;
+  shipBOverload?: boolean;
+  shipAHull?: string;
+  shipAPropulsion?: PropulsionSelection;
+  shipBHull?: string;
+  shipBPropulsion?: PropulsionSelection;
+  shipAFitting?: string;
+  shipAOverrides?: Partial<ProfileParamOverrides>;
+  shipBFitting?: string;
+  shipBOverrides?: Partial<ProfileParamOverrides>;
+  shipAFittedHull?: FittedHullSummary;
+  shipBFittedHull?: FittedHullSummary;
+  shipAEwarActivation?: StoredEwarActivation;
+  shipBEwarActivation?: StoredEwarActivation;
+  shipABoosterActivation?: readonly StoredBoosterActivation[];
+  shipBBoosterActivation?: readonly StoredBoosterActivation[];
+  shipAAmmo: string;
   simSpeed: number;
   language: Language;
 }
 
-export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "autoZoom" | "zoomFactor" | "attackerAmmo"> & {
-  attackerAmmo?: string;
+export type ProfileSettings = Omit<UserSettings, "language" | "trackingUnit" | "simSpeed" | "gridBrightness" | "autoZoom" | "zoomFactor" | "shipAAmmo"> & {
+  shipAAmmo?: string;
 };
 
 export interface DisplayPreferences {

@@ -3,7 +3,7 @@ export interface Popup {
   open(): void;
   close(): void;
   focusTrigger(): void;
-  contains(target: EventTarget): boolean;
+  contains(domTarget: EventTarget): boolean;
 }
 
 export interface PopupGroup {
@@ -13,7 +13,7 @@ export interface PopupGroup {
   close(popup: Popup): void;
   closeAll(): void;
   hasOpen(): boolean;
-  onPointerDown(target: EventTarget | null): void;
+  onPointerDown(domTarget: EventTarget | null): void;
   onKeyDown(event: { readonly key: string }): void;
 }
 
@@ -48,9 +48,9 @@ export class PopupGroupImpl implements PopupGroup {
     return this.popups.some((p) => p.isOpen());
   }
 
-  onPointerDown(target: EventTarget | null): void {
-    if (!target) return;
-    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  onPointerDown(domTarget: EventTarget | null): void {
+    if (!domTarget) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(domTarget)) p.close();
   }
 
   onKeyDown(event: { readonly key: string }): void {

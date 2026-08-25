@@ -33,18 +33,18 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   descriptors(): readonly RangeOverlayKind[] {
-    const attacker = this.ewarController.projection("attacker");
-    const target = this.ewarController.projection("target");
+    const shipA = this.ewarController.projection("shipA");
+    const shipB = this.ewarController.projection("shipB");
     const out: RangeOverlayKind[] = [];
     for (const kind of ALL_KINDS) {
-      if (hasKind(attacker, kind) || hasKind(target, kind)) out.push(kind);
+      if (hasKind(shipA, kind) || hasKind(shipB, kind)) out.push(kind);
     }
     return out;
   }
 
   overlays(): readonly RangeOverlay[] {
     const out: RangeOverlay[] = [];
-    for (const side of ["attacker", "target"] as const) {
+    for (const side of ["shipA", "shipB"] as const) {
       const projection = this.ewarController.projection(side);
       if (!projection) continue;
       for (const kind of this.descriptors()) {
@@ -136,7 +136,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.refreshTitles();
   }
 
-  private overlayFor(side: "attacker" | "target", kind: RangeOverlayKind, projection: EwarProjection): RangeOverlay | undefined {
+  private overlayFor(side: "shipA" | "shipB", kind: RangeOverlayKind, projection: EwarProjection): RangeOverlay | undefined {
     switch (kind) {
       case "web": return this.webOverlay(side, projection);
       case "grappler": return this.grapplerOverlay(side, projection);
@@ -145,7 +145,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     }
   }
 
-  private webOverlay(side: "attacker" | "target", projection: EwarProjection): RangeOverlay | undefined {
+  private webOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
     let maxRange = 0;
     for (let i = 0; i < projection.loadout.webs.length; i++) {
       const activation = projection.activation?.webs[i];
@@ -159,7 +159,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     return { side, kind: "web", radius: maxRange };
   }
 
-  private scramblerOverlay(side: "attacker" | "target", projection: EwarProjection): RangeOverlay | undefined {
+  private scramblerOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
     let maxRange = 0;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const activation = projection.activation?.scramblers[i];
@@ -173,14 +173,14 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     return { side, kind: "scrambler", radius: maxRange };
   }
 
-  private grapplerOverlay(side: "attacker" | "target", projection: EwarProjection): RangeOverlay | undefined {
+  private grapplerOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
     return this.falloffOverlay(side, "grappler", projection, projection.loadout.grapplers, (spec, activation) => {
       const scale = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
       return { optimal: spec.optimal * scale, falloff: spec.falloff };
     });
   }
 
-  private disruptorOverlay(side: "attacker" | "target", projection: EwarProjection): RangeOverlay | undefined {
+  private disruptorOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
     return this.falloffOverlay(side, "disruptor", projection, projection.loadout.disruptors, (spec) => ({
       optimal: spec.optimal,
       falloff: spec.falloff,
@@ -188,7 +188,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private falloffOverlay<T extends StasisGrapplerSpec | TrackingDisruptorSpec>(
-    side: "attacker" | "target",
+    side: "shipA" | "shipB",
     kind: "grappler" | "disruptor",
     projection: EwarProjection,
     specs: readonly T[],
@@ -237,21 +237,21 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private mergedProjection(): EwarProjection | undefined {
-    const attacker = this.ewarController.projection("attacker");
-    const target = this.ewarController.projection("target");
-    if (!attacker && !target) return undefined;
+    const shipA = this.ewarController.projection("shipA");
+    const shipB = this.ewarController.projection("shipB");
+    if (!shipA && !shipB) return undefined;
     const loadout: EwarLoadout = {
-      webs: [...(attacker?.loadout.webs ?? []), ...(target?.loadout.webs ?? [])],
-      grapplers: [...(attacker?.loadout.grapplers ?? []), ...(target?.loadout.grapplers ?? [])],
-      disruptors: [...(attacker?.loadout.disruptors ?? []), ...(target?.loadout.disruptors ?? [])],
-      scramblers: [...(attacker?.loadout.scramblers ?? []), ...(target?.loadout.scramblers ?? [])],
-      scripts: [...(attacker?.loadout.scripts ?? []), ...(target?.loadout.scripts ?? [])],
+      webs: [...(shipA?.loadout.webs ?? []), ...(shipB?.loadout.webs ?? [])],
+      grapplers: [...(shipA?.loadout.grapplers ?? []), ...(shipB?.loadout.grapplers ?? [])],
+      disruptors: [...(shipA?.loadout.disruptors ?? []), ...(shipB?.loadout.disruptors ?? [])],
+      scramblers: [...(shipA?.loadout.scramblers ?? []), ...(shipB?.loadout.scramblers ?? [])],
+      scripts: [...(shipA?.loadout.scripts ?? []), ...(shipB?.loadout.scripts ?? [])],
     };
-    const activation: EwarActivation | undefined = (attacker?.activation || target?.activation) ? {
-      webs: [...(attacker?.activation?.webs ?? []), ...(target?.activation?.webs ?? [])],
-      grapplers: [...(attacker?.activation?.grapplers ?? []), ...(target?.activation?.grapplers ?? [])],
-      disruptors: [...(attacker?.activation?.disruptors ?? []), ...(target?.activation?.disruptors ?? [])],
-      scramblers: [...(attacker?.activation?.scramblers ?? []), ...(target?.activation?.scramblers ?? [])],
+    const activation: EwarActivation | undefined = (shipA?.activation || shipB?.activation) ? {
+      webs: [...(shipA?.activation?.webs ?? []), ...(shipB?.activation?.webs ?? [])],
+      grapplers: [...(shipA?.activation?.grapplers ?? []), ...(shipB?.activation?.grapplers ?? [])],
+      disruptors: [...(shipA?.activation?.disruptors ?? []), ...(shipB?.activation?.disruptors ?? [])],
+      scramblers: [...(shipA?.activation?.scramblers ?? []), ...(shipB?.activation?.scramblers ?? [])],
     } : undefined;
     return { loadout, activation };
   }

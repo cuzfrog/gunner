@@ -64,22 +64,22 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   private rolloutCost(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): number {
-    let attacker = ship;
-    let target = other;
+    let shipA = ship;
+    let shipB = other;
     let cost = 0;
     let elapsed = 0;
     let weight = 1;
     while (elapsed < horizon - HORIZON_EPSILON) {
       const dt = Math.min(elapsed < FINE_WINDOW ? FINE_STEP : COARSE_STEP, horizon - elapsed);
-      const targetCommand = this.reactiveSteering.computeVelocity(target, attacker, time + elapsed);
-      const attackerCommand = elapsed < REPLAN_INTERVAL
+      const shipBCommand = this.reactiveSteering.computeVelocity(shipB, shipA, time + elapsed);
+      const shipACommand = elapsed < REPLAN_INTERVAL
         ? command
-        : this.reactiveSteering.computeVelocity(attacker, target, time + elapsed);
-      attacker = move(attacker, attackerCommand, dt);
-      target = move(target, targetCommand, dt);
+        : this.reactiveSteering.computeVelocity(shipA, shipB, time + elapsed);
+      shipA = move(shipA, shipACommand, dt);
+      shipB = move(shipB, shipBCommand, dt);
       elapsed += dt;
       weight *= DISCOUNT_PER_SECOND ** dt;
-      const frame = this.kinematics.computeEngagement(attacker, target, time + elapsed);
+      const frame = this.kinematics.computeEngagement(shipA, shipB, time + elapsed);
       const rangeDeviation = (frame.distance - ship.desiredRange) / Math.max(ship.desiredRange, 1);
       const rangeCost = frame.angularVelocity * frame.angularVelocity +
         (REFERENCE_RANGE_WEIGHT / ship.aggressivity) * rangeDeviation * rangeDeviation;

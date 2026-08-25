@@ -20,8 +20,8 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly events: UiEvents;
   private readonly i18n: I18n;
   private distance = 0;
-  private readonly attackerState: SideState = { lastKey: "", lastName: "" };
-  private readonly targetState: SideState = { lastKey: "", lastName: "" };
+  private readonly shipAState: SideState = { lastKey: "", lastName: "" };
+  private readonly shipBState: SideState = { lastKey: "", lastName: "" };
 
   constructor(deps: {
     els: PortraitsEls;
@@ -44,15 +44,15 @@ export class PortraitsControllerImpl implements PortraitsController {
   }
 
   update(): void {
-    this.updateSide("attacker");
-    this.updateSide("target");
+    this.updateSide("shipA");
+    this.updateSide("shipB");
   }
 
   private updateSide(side: Side): void {
-    const state = sideStateFor(side, this.attackerState, this.targetState);
-    const root = side === "attacker" ? this.els.attacker : this.els.target;
-    const image = side === "attacker" ? this.els.attackerImage : this.els.targetImage;
-    const effects = side === "attacker" ? this.els.attackerEffects : this.els.targetEffects;
+    const state = sideStateFor(side, this.shipAState, this.shipBState);
+    const root = side === "shipA" ? this.els.shipA : this.els.shipB;
+    const image = side === "shipA" ? this.els.shipAImage : this.els.shipBImage;
+    const effects = side === "shipA" ? this.els.shipAEffects : this.els.shipBEffects;
     const profile = this.combatantProfiles.profile(side);
     if (profile === undefined) {
       root.hidden = true;
@@ -61,7 +61,7 @@ export class PortraitsControllerImpl implements PortraitsController {
       state.lastName = "";
       return;
     }
-    const enemySide: Side = side === "attacker" ? "target" : "attacker";
+    const enemySide: Side = side === "shipA" ? "shipB" : "shipA";
     const projection = this.ewarController.projection(enemySide);
     const applied = this.ewarResolver.appliedEffects(projection, this.distance);
     const key = buildDiffKey(profile.name, applied);
@@ -89,8 +89,8 @@ export class PortraitsControllerImpl implements PortraitsController {
   }
 }
 
-function sideStateFor(side: Side, attackerState: SideState, targetState: SideState): SideState {
-  return side === "attacker" ? attackerState : targetState;
+function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState): SideState {
+  return side === "shipA" ? shipAState : shipBState;
 }
 
 function buildDiffKey(name: string, effects: readonly AppliedEwarEffect[]): string {

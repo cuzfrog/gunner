@@ -5,7 +5,7 @@ import type { EngagementFrame, HitChanceBreakdown, SimSnapshot, TurretSpec } fro
 
 export interface EngagementInput {
   readonly turret: TurretSpec;
-  readonly targetSigRadius: number;
+  readonly shipBSigRadius: number;
 }
 
 export interface EngagementView {
@@ -35,12 +35,12 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
   }
 
   compose(snapshot: SimSnapshot, input: EngagementInput): EngagementView {
-    const frame = this.kinematics.computeEngagement(snapshot.attacker, snapshot.target, snapshot.time);
-    const attack: AttackState = { turret: input.turret, targetSigRadius: input.targetSigRadius };
-    const result = this.engagementEvaluator.evaluate(snapshot, { attacker: attack });
-    const assessment = result.attacker;
+    const frame = this.kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
+    const attack: AttackState = { turret: input.turret, shipBSigRadius: input.shipBSigRadius };
+    const result = this.engagementEvaluator.evaluate(snapshot, { shipA: attack });
+    const assessment = result.shipA;
     const effectiveTurret = assessment?.effectiveTurret ?? input.turret;
-    const hit = assessment?.hit ?? this.hitChance.compute(frame, input.turret, input.targetSigRadius);
+    const hit = assessment?.hit ?? this.hitChance.compute(frame, input.turret, input.shipBSigRadius);
     return { frame, assessment, effectiveTurret, hit };
   }
 }

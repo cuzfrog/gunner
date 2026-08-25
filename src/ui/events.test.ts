@@ -88,8 +88,8 @@ describe("UiEvents", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();
     events.onFittingImported(listener);
-    events.emitFittingImported("attacker", IMPORTED_RIFTER);
-    expect(listener).toHaveBeenCalledWith("attacker", IMPORTED_RIFTER);
+    events.emitFittingImported("shipA", IMPORTED_RIFTER);
+    expect(listener).toHaveBeenCalledWith("shipA", IMPORTED_RIFTER);
   });
 
   test("offFittingImported removes a listener", () => {
@@ -99,7 +99,7 @@ describe("UiEvents", () => {
     events.onFittingImported(a);
     events.onFittingImported(b);
     events.offFittingImported(a);
-    events.emitFittingImported("target", IMPORTED_RIFTER);
+    events.emitFittingImported("shipB", IMPORTED_RIFTER);
     expect(a).not.toHaveBeenCalled();
     expect(b).toHaveBeenCalled();
   });

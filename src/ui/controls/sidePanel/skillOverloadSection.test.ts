@@ -20,13 +20,13 @@ function buildSkillSection() {
   globalThis.Element = FakeElement as unknown as typeof Element;
 
   const els: SkillOverloadSectionEls = {
-    skills: getFake(document, "attacker-skills") as unknown as HTMLSelectElement,
-    skillOptions: getFake(document, "attacker-skill-options") as unknown as HTMLElement,
-    skillSummary: getFake(document, "attacker-skill-summary") as unknown as HTMLElement,
-    skillTrigger: getFake(document, "attacker-skill-trigger") as unknown as HTMLButtonElement,
-    skillPopup: getFake(document, "attacker-skill-popup") as unknown as HTMLElement,
-    overload: getFake(document, "attacker-overload") as unknown as HTMLInputElement,
-    overloadButton: getFake(document, "attacker-overload-button") as unknown as HTMLButtonElement,
+    skills: getFake(document, "ship-a-skills") as unknown as HTMLSelectElement,
+    skillOptions: getFake(document, "ship-a-skill-options") as unknown as HTMLElement,
+    skillSummary: getFake(document, "ship-a-skill-summary") as unknown as HTMLElement,
+    skillTrigger: getFake(document, "ship-a-skill-trigger") as unknown as HTMLButtonElement,
+    skillPopup: getFake(document, "ship-a-skill-popup") as unknown as HTMLElement,
+    overload: getFake(document, "ship-a-overload") as unknown as HTMLInputElement,
+    overloadButton: getFake(document, "ship-a-overload-button") as unknown as HTMLButtonElement,
   };
 
   const sections = vi.mocked<ISidePanelSections>({
@@ -48,7 +48,7 @@ function buildSkillSection() {
     setManeuverAggressivityEnabled: vi.fn(),
   };
   const panel = vi.mocked<SidePanel>({
-    side: "attacker",
+    side: "shipA",
     host,
     sections,
     profile: undefined,
@@ -76,50 +76,50 @@ describe("SkillOverloadSection", () => {
   test("setSkillLevel updates the skill select and summary", () => {
     const { document, section } = buildSkillSection();
     section.setSkillLevel(3);
-    expect(getFake(document, "attacker-skills").value).toBe("3");
-    expect(getFake(document, "attacker-skill-summary").textContent).not.toBe("");
+    expect(getFake(document, "ship-a-skills").value).toBe("3");
+    expect(getFake(document, "ship-a-skill-summary").textContent).not.toBe("");
   });
 
   test("skillConditions reflects the current inputs", () => {
     const { document, section } = buildSkillSection();
-    getFake(document, "attacker-skills").value = "2";
-    getFake(document, "attacker-overload").checked = true;
+    getFake(document, "ship-a-skills").value = "2";
+    getFake(document, "ship-a-overload").checked = true;
     expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true });
   });
 
   test("setOverloadActive toggles the overload input and button", () => {
     const { document, section } = buildSkillSection();
     section.setOverloadActive(true);
-    expect(getFake(document, "attacker-overload").checked).toBe(true);
-    expect(getFake(document, "attacker-overload-button").getAttribute("aria-pressed")).toBe("true");
+    expect(getFake(document, "ship-a-overload").checked).toBe(true);
+    expect(getFake(document, "ship-a-overload-button").getAttribute("aria-pressed")).toBe("true");
   });
 
   test("onOverloadButtonClick toggles the overload state", () => {
     const { document, section } = buildSkillSection();
-    getFake(document, "attacker-overload").checked = false;
+    getFake(document, "ship-a-overload").checked = false;
     section.onOverloadButtonClick();
-    expect(getFake(document, "attacker-overload").checked).toBe(true);
+    expect(getFake(document, "ship-a-overload").checked).toBe(true);
   });
 
   test("renderSkillOptions creates skill buttons for all levels", () => {
     const { document, section } = buildSkillSection();
     section.renderSkillOptions();
-    expect(getFake(document, "attacker-skills").children.length).toBe(6);
-    expect(getFake(document, "attacker-skill-options").children.length).toBe(6);
+    expect(getFake(document, "ship-a-skills").children.length).toBe(6);
+    expect(getFake(document, "ship-a-skill-options").children.length).toBe(6);
   });
 
   test("setOverloadDisabled disables the overload when no propulsion is selected", () => {
     const { document, section } = buildSkillSection();
     section.setOverloadDisabled();
-    expect(getFake(document, "attacker-overload").disabled).toBe(true);
-    expect(getFake(document, "attacker-overload-button").disabled).toBe(true);
+    expect(getFake(document, "ship-a-overload").disabled).toBe(true);
+    expect(getFake(document, "ship-a-overload-button").disabled).toBe(true);
   });
 
   test("setOverloadDisabled enables the overload when propulsion is selected", () => {
     const { document, section, panel } = buildSkillSection();
     panel.sections.propulsion.currentPropulsionId = vi.fn(() => "mwd-5mn" as const);
     section.setOverloadDisabled();
-    expect(getFake(document, "attacker-overload").disabled).toBe(false);
-    expect(getFake(document, "attacker-overload-button").disabled).toBe(false);
+    expect(getFake(document, "ship-a-overload").disabled).toBe(false);
+    expect(getFake(document, "ship-a-overload-button").disabled).toBe(false);
   });
 });

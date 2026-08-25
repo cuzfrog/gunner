@@ -9,8 +9,8 @@ const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIg
 
 describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
   test("predictive steering reduces mean angular velocity versus the reactive baseline", () => {
-    const attackerConfig: ShipConfig = {
-      id: "attacker",
+    const shipAConfig: ShipConfig = {
+      id: "shipA",
       maxSpeed: 1300,
       mass: 15_500_000,
       inertiaModifier: 0.57,
@@ -18,9 +18,9 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
       desiredRange: 10_000,
       aggressivity: 1,
     };
-    const attackerPredictive: ShipConfig = { ...attackerConfig, mode: "maneuver" };
-    const targetConfig: ShipConfig = {
-      id: "target",
+    const shipAPredictive: ShipConfig = { ...shipAConfig, mode: "maneuver" };
+    const shipBConfig: ShipConfig = {
+      id: "shipB",
       maxSpeed: 1500,
       mass: 1_600_000,
       inertiaModifier: 2.8,
@@ -29,14 +29,14 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
       aggressivity: 0.01,
       orbitDirection: "cw",
     };
-    const baselineConfig: SimConfig = { attacker: attackerConfig, target: targetConfig, initialDistance: 14_000 };
-    const predictiveConfig: SimConfig = { attacker: attackerPredictive, target: targetConfig, initialDistance: 14_000 };
+    const baselineConfig: SimConfig = { shipA: shipAConfig, shipB: shipBConfig, initialDistance: 14_000 };
+    const predictiveConfig: SimConfig = { shipA: shipAPredictive, shipB: shipBConfig, initialDistance: 14_000 };
 
     const reactive = new ReactiveAutopilot();
     const kinematicsForSim = new KinematicsImpl();
-    const baseline = new SimulationImpl({ attackerSteering: reactive, targetSteering: reactive, ewarResolver, simConfig: baselineConfig });
+    const baseline = new SimulationImpl({ shipASteering: reactive, shipBSteering: reactive, ewarResolver, simConfig: baselineConfig });
     const predictive = new PredictiveAutopilot({ reactiveSteering: new ReactiveAutopilot(), kinematics: kinematicsForSim });
-    const predictiveSim = new SimulationImpl({ attackerSteering: predictive, targetSteering: new ReactiveAutopilot(), ewarResolver, simConfig: predictiveConfig });
+    const predictiveSim = new SimulationImpl({ shipASteering: predictive, shipBSteering: new ReactiveAutopilot(), ewarResolver, simConfig: predictiveConfig });
 
     const dt = 0.25;
     const steps = Math.round(120 / dt);
@@ -47,8 +47,8 @@ describe("case1: Harbinger keepAtRange 10km vs Thrasher orbit 14km", () => {
       predictiveSim.step(dt);
       const baseSnap = baseline.snapshot();
       const predSnap = predictiveSim.snapshot();
-      const baseFrame = kinematicsForSim.computeEngagement(baseSnap.attacker, baseSnap.target, baseSnap.time);
-      const predFrame = kinematicsForSim.computeEngagement(predSnap.attacker, predSnap.target, predSnap.time);
+      const baseFrame = kinematicsForSim.computeEngagement(baseSnap.shipA, baseSnap.shipB, baseSnap.time);
+      const predFrame = kinematicsForSim.computeEngagement(predSnap.shipA, predSnap.shipB, predSnap.time);
       meanBaseline += baseFrame.angularVelocity;
       meanPredictive += predFrame.angularVelocity;
     }

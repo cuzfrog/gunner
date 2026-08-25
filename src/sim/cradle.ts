@@ -20,8 +20,8 @@ export interface SimCradle {
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly reactiveSteering: Autopilot;
-  readonly targetSteering: Autopilot;
-  readonly attackerSteering: Autopilot;
+  readonly shipBSteering: Autopilot;
+  readonly shipASteering: Autopilot;
   readonly simulation: Simulation;
   readonly engagementEvaluator: EngagementEvaluator;
   readonly engagementFrameComposer: EngagementFrameComposer;

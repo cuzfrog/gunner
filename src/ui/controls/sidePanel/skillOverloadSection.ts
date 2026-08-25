@@ -163,7 +163,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
       open: () => this.openSkillPopup(),
       close: () => this.closeSkillPopup(),
       focusTrigger: () => this.els.skillTrigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${this.panel.side}-skill-field`) !== null,
+      contains: (domTarget) => domTarget instanceof Element && domTarget.closest(`#${this.panel.side}-skill-field`) !== null,
     };
   }
 }

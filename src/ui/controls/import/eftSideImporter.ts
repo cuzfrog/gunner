@@ -2,30 +2,30 @@ import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { FittedHullSummary } from "../../../appstate";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ShipATurret } from "./shipATurret";
 
 interface EftSideImporterDeps {
-  readonly attackerSide: SidePanel;
-  readonly targetSide: SidePanel;
-  readonly turret: AttackerTurret;
+  readonly shipASide: SidePanel;
+  readonly shipBSide: SidePanel;
+  readonly turret: ShipATurret;
   readonly fittingImport: FittingImport;
 }
 
 export class EftSideImporter {
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
-  private readonly turret: AttackerTurret;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
+  private readonly turret: ShipATurret;
   private readonly fittingImport: FittingImport;
 
   constructor(deps: EftSideImporterDeps) {
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.turret = deps.turret;
     this.fittingImport = deps.fittingImport;
   }
 
   private panel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
   importEftFitting(side: Side, text: string, options: { readonly persist?: boolean; readonly showImportedHint?: boolean } = {}): ImportedFitting | undefined {
@@ -42,7 +42,7 @@ export class EftSideImporter {
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
-    if (side === "attacker") this.turret.applyImported(imported);
+    if (side === "shipA") this.turret.applyImported(imported);
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
     }

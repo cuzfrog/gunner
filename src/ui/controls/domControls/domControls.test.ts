@@ -41,54 +41,54 @@ function baseSettings(): UserSettings {
     sigRes: "S",
     optimal: 1000,
     falloff: 3000,
-    attackerSpeed: 400,
-    attackerMode: "orbit",
-    attackerRange: 5000,
+    shipASpeed: 400,
+    shipAMode: "orbit",
+    shipARange: 5000,
     maneuverAggressivity: 1,
     gridBrightness: 0.5,
     autoZoom: true,
     zoomFactor: 1,
-    attackerMass: 1_000_000,
-    attackerInertia: 3,
-    attackerSkillLevel: 5,
-    attackerOverload: true,
+    shipAMass: 1_000_000,
+    shipAInertia: 3,
+    shipASkillLevel: 5,
+    shipAOverload: true,
     initialDistance: 6000,
-    targetSpeed: 250,
-    targetMode: "orbit",
-    targetRange: 6000,
-    targetMass: 1_000_000,
-    targetInertia: 3,
-    targetSig: 40,
-    targetSkillLevel: 5,
-    targetOverload: true,
-    attackerHull: undefined,
-    attackerPropulsion: undefined,
-    targetHull: undefined,
-    targetPropulsion: undefined,
-    attackerFitting: undefined,
-    attackerOverrides: {},
-    targetFitting: undefined,
-    targetOverrides: {},
-    attackerFittedHull: undefined,
-    targetFittedHull: undefined,
-    attackerAmmo: "Hail S",
+    shipBSpeed: 250,
+    shipBMode: "orbit",
+    shipBRange: 6000,
+    shipBMass: 1_000_000,
+    shipBInertia: 3,
+    shipBSig: 40,
+    shipBSkillLevel: 5,
+    shipBOverload: true,
+    shipAHull: undefined,
+    shipAPropulsion: undefined,
+    shipBHull: undefined,
+    shipBPropulsion: undefined,
+    shipAFitting: undefined,
+    shipAOverrides: {},
+    shipBFitting: undefined,
+    shipBOverrides: {},
+    shipAFittedHull: undefined,
+    shipBFittedHull: undefined,
+    shipAAmmo: "Hail S",
     simSpeed: 2,
     language: "en",
   };
 }
 
 describe("DomControls", () => {
-  test("facade reads turret, target sig, speed, grid brightness and config", () => {
+  test("facade reads turret, shipB sig, speed, grid brightness and config", () => {
     const { document, controls } = buildDomControls();
     const turret = controls.getTurret();
     expect(turret.optimal).toBe(1000);
     expect(turret.falloff).toBe(3000);
-    expect(controls.getTargetSig()).toBe(36);
+    expect(controls.getShipBSig()).toBe(36);
     expect(controls.getSpeed()).toBe(4);
     expect(controls.getGridBrightness()).toBe(0.2);
     const config = controls.getConfig();
-    expect(config.attacker.maxSpeed).toBe(300);
-    expect(config.target.maxSpeed).toBe(300);
+    expect(config.shipA.maxSpeed).toBe(300);
+    expect(config.shipB.maxSpeed).toBe(300);
     expect(config.initialDistance).toBe(5000);
     controls.setPlaying(true);
     expect(getFake(document, "play").textContent).toBe("button.pause");
@@ -98,22 +98,22 @@ describe("DomControls", () => {
     const { document, controls, cradle } = buildDomControls();
     controls.wireControls();
     expect(getFake(document, "play").disabled).toBe(true);
-    cradle.cradle.attackerSide.profile = RIFTER;
+    cradle.cradle.shipASide.profile = RIFTER;
     controls.onConfigChange(false);
     expect(getFake(document, "play").disabled).toBe(true);
-    cradle.cradle.targetSide.profile = RIFTER;
+    cradle.cradle.shipBSide.profile = RIFTER;
     controls.onConfigChange(false);
     expect(getFake(document, "play").disabled).toBe(false);
-    cradle.cradle.attackerSide.profile = undefined;
+    cradle.cradle.shipASide.profile = undefined;
     controls.onConfigChange(false);
     expect(getFake(document, "play").disabled).toBe(true);
   });
 
-  test("hasAttackerGuns reflects whether the attacker has a fitted turret", () => {
+  test("hasShipAGuns reflects whether the shipA has a fitted turret", () => {
     const { controls, cradle } = buildDomControls();
-    expect(controls.hasAttackerGuns()).toBe(false);
+    expect(controls.hasShipAGuns()).toBe(false);
     cradle.cradle.turretController.applyImported(IMPORTED_RIFTER);
-    expect(controls.hasAttackerGuns()).toBe(true);
+    expect(controls.hasShipAGuns()).toBe(true);
   });
 
   test("callback routing", () => {
@@ -128,24 +128,24 @@ describe("DomControls", () => {
     getFake(document, "sim-speed").trigger("change");
     expect(callbacks.onSpeedChange).toHaveBeenCalledWith(2);
 
-    getFake(document, "attacker-speed").value = "400";
-    getFake(document, "attacker-speed").trigger("input");
+    getFake(document, "ship-a-speed").value = "400";
+    getFake(document, "ship-a-speed").trigger("input");
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(1);
-    getFake(document, "attacker-mass").value = "1200000";
-    getFake(document, "attacker-mass").trigger("input");
+    getFake(document, "ship-a-mass").value = "1200000";
+    getFake(document, "ship-a-mass").trigger("input");
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(2);
-    getFake(document, "attacker-inertia").value = "2.5";
-    getFake(document, "attacker-inertia").trigger("input");
+    getFake(document, "ship-a-inertia").value = "2.5";
+    getFake(document, "ship-a-inertia").trigger("input");
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(3);
-    getFake(document, "attacker-mode").value = "midships";
-    getFake(document, "attacker-mode").trigger("input");
+    getFake(document, "ship-a-mode").value = "midships";
+    getFake(document, "ship-a-mode").trigger("input");
     expect(callbacks.onConfigChange).toHaveBeenCalledTimes(4);
 
     getFake(document, "tracking").value = "0.5";
     getFake(document, "tracking").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(1);
-    getFake(document, "target-sig").value = "80";
-    getFake(document, "target-sig").trigger("input");
+    getFake(document, "ship-b-sig").value = "80";
+    getFake(document, "ship-b-sig").trigger("input");
     expect(callbacks.onDisplayChange).toHaveBeenCalledTimes(2);
     getFake(document, "optimal").value = "12345";
     getFake(document, "optimal").trigger("input");
@@ -159,8 +159,8 @@ describe("DomControls", () => {
     const { document, cradle } = buildDomControls();
     const popupGroup = vi.spyOn(cradle.cradle.popupGroup, "onPointerDown");
     const previewManager = vi.spyOn(cradle.cradle.previewManager, "handlePointerDown");
-    const fake = getFake(document, "target-hull");
-    const pointer = { type: "pointerdown", target: fake as unknown as HTMLElement } as unknown as PointerEvent;
+    const fake = getFake(document, "ship-b-hull");
+    const pointer = { type: "pointerdown", composedPath: () => [fake] } as unknown as PointerEvent;
     (document as unknown as { dispatchEvent(event: Event): void }).dispatchEvent(pointer as unknown as Event);
     expect(popupGroup).toHaveBeenCalledWith(fake);
     expect(previewManager).toHaveBeenCalledWith(fake);
@@ -179,8 +179,8 @@ describe("DomControls", () => {
     const loadStartupState = vi.fn(() => ({ settings, selectedProfileName: "brawler" }));
     const { controls } = buildDomControls({ settingsStore: { loadStartupState } });
     const config = controls.getConfig();
-    expect(config.attacker.maxSpeed).toBe(400);
-    expect(config.target.maxSpeed).toBe(250);
+    expect(config.shipA.maxSpeed).toBe(400);
+    expect(config.shipB.maxSpeed).toBe(250);
     expect(config.initialDistance).toBe(6000);
     expect(controls.getGridBrightness()).toBe(0.5);
   });
@@ -213,24 +213,24 @@ describe("DomControls", () => {
 
   test("getConfig includes per-side ewar projections with per-module activation and no global overload flag", () => {
     const { controls, cradle } = buildDomControls();
-    const attackerEwar: EwarLoadout = {
+    const shipAEwar: EwarLoadout = {
       webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
       grapplers: [],
       disruptors: [],
       scramblers: [],
       scripts: [],
     };
-    cradle.cradle.ewarController.setLoadout("attacker", attackerEwar);
+    cradle.cradle.ewarController.setLoadout("shipA", shipAEwar);
     const config = controls.getConfig();
-    expect(config.attacker.ewar?.loadout.webs).toHaveLength(1);
-    expect(config.attacker.ewar).not.toHaveProperty("overloaded");
-    expect(config.attacker.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] });
-    expect(config.target.ewar).toBeUndefined();
+    expect(config.shipA.ewar?.loadout.webs).toHaveLength(1);
+    expect(config.shipA.ewar).not.toHaveProperty("overloaded");
+    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] });
+    expect(config.shipB.ewar).toBeUndefined();
   });
 
-  test("getConfig includes ewar projection for the target side", () => {
+  test("getConfig includes ewar projection for the shipB side", () => {
     const { controls, cradle } = buildDomControls();
-    const targetEwar: EwarLoadout = {
+    const shipBEwar: EwarLoadout = {
       webs: [],
       grapplers: [],
       disruptors: [{
@@ -240,27 +240,27 @@ describe("DomControls", () => {
       scramblers: [],
       scripts: [],
     };
-    cradle.cradle.ewarController.setLoadout("target", targetEwar);
+    cradle.cradle.ewarController.setLoadout("shipB", shipBEwar);
     const config = controls.getConfig();
-    expect(config.target.ewar?.loadout.disruptors).toHaveLength(1);
-    expect(config.target.ewar).not.toHaveProperty("overloaded");
+    expect(config.shipB.ewar?.loadout.disruptors).toHaveLength(1);
+    expect(config.shipB.ewar).not.toHaveProperty("overloaded");
   });
 
-  test("target fitting popup applies fitting to the target side", () => {
+  test("shipB fitting popup applies fitting to the shipB side", () => {
     const savedFittings = vi.mocked<SavedFittings>({ ...mockSavedFittings(), listForHull: vi.fn(() => [SAVED_RIFTER]) });
     const fittingImport = vi.mocked<FittingImport>({ ...mockFittingImport(), importFitting: vi.fn(() => IMPORTED_RIFTER) });
     const ships = vi.mocked<Ships>({ ...mockShips(), findHull: vi.fn(() => RIFTER) });
     const { document, controls } = buildDomControls({ savedFittings, fittingImport, ships });
-    controls["attackerSide"].profile = RIFTER;
-    controls["targetSide"].profile = RIFTER;
-    getFake(document, "target-fitting-trigger").trigger("click");
-    const item = getFake(document, "target-fitting-saved-list").children[0].children[0] as unknown as FakeElement;
+    controls["shipASide"].profile = RIFTER;
+    controls["shipBSide"].profile = RIFTER;
+    getFake(document, "ship-b-fitting-trigger").trigger("click");
+    const item = getFake(document, "ship-b-fitting-saved-list").children[0].children[0] as unknown as FakeElement;
     item.trigger("click");
-    expect(controls["targetSide"].fittingText).toBe(SAVED_RIFTER.text);
-    expect(controls["attackerSide"].fittingText).toBeUndefined();
+    expect(controls["shipBSide"].fittingText).toBe(SAVED_RIFTER.text);
+    expect(controls["shipASide"].fittingText).toBeUndefined();
   });
 
-  test("getConfig uses a manually derived baseMaxSpeed for target and includes an active scrambler projection", () => {
+  test("getConfig uses a manually derived baseMaxSpeed for shipB and includes an active scrambler projection", () => {
     const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
     const mwd5 = {
       id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
@@ -275,23 +275,23 @@ describe("DomControls", () => {
       maxSpeedForFittedMass: vi.fn(() => 1800),
     });
     const { document, controls, cradle } = buildDomControls({ ships });
-    const targetSide = controls["targetSide"];
-    targetSide.profile = RIFTER;
-    targetSide.sections.propulsion.setPropulsionActive("mwd-5mn");
-    targetSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("target", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
+    const shipBSide = controls["shipBSide"];
+    shipBSide.profile = RIFTER;
+    shipBSide.sections.propulsion.setPropulsionActive("mwd-5mn");
+    shipBSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
+    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
 
     const config = controls.getConfig();
-    expect(config.target.maxSpeed).toBe(1800);
-    expect(config.target.baseMaxSpeed).toBe(300);
-    expect(config.target.ewar?.loadout.scramblers).toHaveLength(1);
-    expect(config.target.ewar?.activation?.scramblers).toEqual([{ active: true, overloaded: false }]);
+    expect(config.shipB.maxSpeed).toBe(1800);
+    expect(config.shipB.baseMaxSpeed).toBe(300);
+    expect(config.shipB.ewar?.loadout.scramblers).toHaveLength(1);
+    expect(config.shipB.ewar?.activation?.scramblers).toEqual([{ active: true, overloaded: false }]);
   });
 
   test("update displays effective attributes and highlights affected values", () => {
     const { document, controls } = buildDomControls();
-    const attackerState = {
-      id: "attacker" as const,
+    const shipAState = {
+      id: "shipA" as const,
       position: new Vec2(0, 0),
       velocity: new Vec2(0, 0),
       maxSpeed: 0,
@@ -301,22 +301,22 @@ describe("DomControls", () => {
       desiredRange: 0,
       aggressivity: 1,
     };
-    const targetState = { ...attackerState, id: "target" as const };
+    const shipBState = { ...shipAState, id: "shipB" as const };
     const frame: EngagementFrame = {
-      time: 0, attacker: attackerState, target: targetState,
+      time: 0, shipA: shipAState, shipB: shipBState,
       relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
       radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
     };
     const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-    const effective = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
+    const effective = { shipASpeed: 300, shipBSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
     controls.update(frame, hit, effective);
-    expect(getFake(document, "effective-attacker-speed").textContent).toBe("300 m/s");
-    expect(getFake(document, "effective-target-speed").textContent).toBe("150 m/s");
+    expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
+    expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
     expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
     expect(getFake(document, "effective-optimal").textContent).toBe("1,000 unit.meter");
     expect(getFake(document, "effective-falloff").textContent).toBe("3,000 unit.meter");
-    expect(getFake(document, "effective-target-speed").classList.add).toHaveBeenCalledWith("is-negative");
-    expect(getFake(document, "effective-attacker-speed").classList.remove).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-ship-b-speed").classList.add).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-ship-a-speed").classList.remove).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
   });
@@ -351,8 +351,8 @@ describe("DomControls", () => {
   });
 
   function readoutFixtures() {
-    const attackerState = {
-      id: "attacker" as const,
+    const shipAState = {
+      id: "shipA" as const,
       position: new Vec2(0, 0),
       velocity: new Vec2(0, 0),
       maxSpeed: 0,
@@ -362,14 +362,14 @@ describe("DomControls", () => {
       desiredRange: 0,
       aggressivity: 1,
     };
-    const targetState = { ...attackerState, id: "target" as const };
+    const shipBState = { ...shipAState, id: "shipB" as const };
     const frame: EngagementFrame = {
-      time: 0, attacker: attackerState, target: targetState,
+      time: 0, shipA: shipAState, shipB: shipBState,
       relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
       radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
     };
     const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-    const effective: EffectiveReadouts = { attackerSpeed: 300, targetSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
+    const effective: EffectiveReadouts = { shipASpeed: 300, shipBSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
     return { frame, hit, effective };
   }
 
@@ -405,7 +405,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls({ now: () => fakeNow });
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
     const { frame, hit, effective } = readoutFixtures();
-    const effective2 = { ...effective, targetSpeed: 50 };
+    const effective2 = { ...effective, shipBSpeed: 50 };
     controls.setPlaying(true);
     controls.update(frame, hit, effective);
     fakeNow = 10;

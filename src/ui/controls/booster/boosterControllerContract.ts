@@ -8,10 +8,10 @@ export interface BoosterEls {
 }
 
 export interface BoosterController {
-  setLoadout(side: "attacker" | "target", loadout: BoostLoadout): void;
-  restore(side: "attacker" | "target", loadout: BoostLoadout | undefined, saved?: readonly StoredBoosterActivation[]): void;
-  projection(side: "attacker" | "target"): TurretBoostProjection | undefined;
-  capture(side: "attacker" | "target"): readonly StoredBoosterActivation[] | undefined;
+  setLoadout(side: "shipA" | "shipB", loadout: BoostLoadout): void;
+  restore(side: "shipA" | "shipB", loadout: BoostLoadout | undefined, saved?: readonly StoredBoosterActivation[]): void;
+  projection(side: "shipA" | "shipB"): TurretBoostProjection | undefined;
+  capture(side: "shipA" | "shipB"): readonly StoredBoosterActivation[] | undefined;
   render(): void;
   updateSummaries(): void;
 }

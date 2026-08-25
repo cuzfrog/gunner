@@ -6,7 +6,7 @@ import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profile";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ShipATurret } from "./shipATurret";
 import { EftSideImporter } from "./eftSideImporter";
 import { ProfileTextImporter } from "./profileTextImporter";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -19,11 +19,11 @@ export class ImportControllerImpl implements ImportController {
   private readonly savedFittings: SavedFittings;
   private readonly popupGroup: PopupGroup;
   private readonly els: ImportEls;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
   private readonly profileController: ProfileController;
   private readonly profileTextCodec: ProfileTextCodec;
-  private readonly turret: AttackerTurret;
+  private readonly turret: ShipATurret;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly events: UiEvents;
@@ -37,9 +37,9 @@ export class ImportControllerImpl implements ImportController {
     savedFittings: SavedFittings;
     popupGroup: PopupGroup;
     els: ImportEls;
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
-    turret: AttackerTurret;
+    shipASide: SidePanel;
+    shipBSide: SidePanel;
+    turret: ShipATurret;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
@@ -49,15 +49,15 @@ export class ImportControllerImpl implements ImportController {
     this.savedFittings = deps.savedFittings;
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.turret = deps.turret;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
     this.eftSideImporter = new EftSideImporter({
-      attackerSide: deps.attackerSide,
-      targetSide: deps.targetSide,
+      shipASide: deps.shipASide,
+      shipBSide: deps.shipBSide,
       turret: deps.turret,
       fittingImport: deps.fittingImport,
     });
@@ -67,21 +67,21 @@ export class ImportControllerImpl implements ImportController {
       profileTextCodec: deps.profileTextCodec,
     });
     this.els.importProfile.addEventListener("click", () => void this.importProfileClicked());
-    this.els.importSideAttacker.addEventListener("click", () => void this.onImportSideClick("attacker"));
-    this.els.importSideTarget.addEventListener("click", () => void this.onImportSideClick("target"));
+    this.els.importSideShipA.addEventListener("click", () => void this.onImportSideClick("shipA"));
+    this.els.importSideShipB.addEventListener("click", () => void this.onImportSideClick("shipB"));
     this.popupValue = {
       isOpen: () => this.importSidePopupOpen,
       open: () => this.openImportSidePopup(),
       close: () => this.closeImportSidePopup(),
       focusTrigger: () => this.els.importProfile.focus(),
-      contains: (target) => target instanceof Element && target.closest("#import-side-popup, #import-profile") !== null,
+      contains: (domTarget) => domTarget instanceof Element && domTarget.closest("#import-side-popup, #import-profile") !== null,
     };
   }
 
   get popup(): Popup { return this.popupValue; }
 
   private panel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
   async importFromClipboard(side: Side): Promise<void> {
@@ -91,8 +91,8 @@ export class ImportControllerImpl implements ImportController {
       this.popupGroup.close(pastePopup);
       return;
     }
-    this.popupGroup.close(this.attackerSide.getPastePopup());
-    this.popupGroup.close(this.targetSide.getPastePopup());
+    this.popupGroup.close(this.shipASide.getPastePopup());
+    this.popupGroup.close(this.shipBSide.getPastePopup());
     let text: string;
     try {
       text = await this.clipboard.readText();
@@ -178,7 +178,7 @@ export class ImportControllerImpl implements ImportController {
     this.els.importSidePopup.hidden = false;
     this.els.importProfile.setAttribute("aria-expanded", "true");
     this.importSidePopupOpen = true;
-    this.els.importSideAttacker.focus();
+    this.els.importSideShipA.focus();
   }
 
   private closeImportSidePopup(): void {

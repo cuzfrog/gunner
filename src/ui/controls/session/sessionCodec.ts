@@ -40,25 +40,25 @@ interface SessionCodecEls {
   readonly sigRes: HTMLSelectElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
-  readonly attackerSpeed: HTMLInputElement;
-  readonly attackerMass: HTMLInputElement;
-  readonly attackerInertia: HTMLInputElement;
-  readonly attackerMode: HTMLSelectElement;
-  readonly attackerRange: HTMLInputElement;
+  readonly shipASpeed: HTMLInputElement;
+  readonly shipAMass: HTMLInputElement;
+  readonly shipAInertia: HTMLInputElement;
+  readonly shipAMode: HTMLSelectElement;
+  readonly shipARange: HTMLInputElement;
   readonly maneuverAggressivity: HTMLInputElement;
   readonly initialDistance: HTMLInputElement;
-  readonly targetSpeed: HTMLInputElement;
-  readonly targetMass: HTMLInputElement;
-  readonly targetInertia: HTMLInputElement;
-  readonly targetMode: HTMLSelectElement;
-  readonly targetRange: HTMLInputElement;
-  readonly targetSig: HTMLInputElement;
+  readonly shipBSpeed: HTMLInputElement;
+  readonly shipBMass: HTMLInputElement;
+  readonly shipBInertia: HTMLInputElement;
+  readonly shipBMode: HTMLSelectElement;
+  readonly shipBRange: HTMLInputElement;
+  readonly shipBSig: HTMLInputElement;
 }
 
 export class SessionCodecImpl implements SessionCodec {
   private readonly els: SessionCodecEls;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
   private readonly turretController: TurretController;
   private readonly turretOverrides: TurretOverrides;
   private readonly preferencesController: PreferencesController;
@@ -76,14 +76,14 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly pristineSettings: UserSettings;
 
   constructor(deps: {
-    els: SessionCodecEls; attackerSide: SidePanel; targetSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
+    els: SessionCodecEls; shipASide: SidePanel; shipBSide: SidePanel; turret: TurretController; turretOverrides: TurretOverrides;
     preferences: PreferencesController; profileController: ProfileController; i18n: I18n; chargeCatalog: ChargeCatalog;
     sigResChoice: ChoiceGroup; hintRotator: HintRotator; settingsStore: SettingsStore; events: UiEvents;
     trackingInput: TrackingInput; ewarController: EwarController; boosterController: BoosterController; fittingImport: FittingImport;
   }) {
     this.els = deps.els;
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.turretController = deps.turret;
     this.turretOverrides = deps.turretOverrides;
     this.preferencesController = deps.preferences;
@@ -106,8 +106,8 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   capture(): UserSettings {
-    const attacker = this.attackerSide.capture();
-    const target = this.targetSide.capture();
+    const shipA = this.shipASide.capture();
+    const shipB = this.shipBSide.capture();
     const turret = this.turretController.capture();
     const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
@@ -117,38 +117,38 @@ export class SessionCodecImpl implements SessionCodec {
       sigRes: turret.sigRes,
       optimal: turret.optimal,
       falloff: turret.falloff,
-      attackerSpeed: attacker.speed,
-      attackerMode: attacker.mode,
-      attackerRange: attacker.range,
+      shipASpeed: shipA.speed,
+      shipAMode: shipA.mode,
+      shipARange: shipA.range,
       maneuverAggressivity: this.preferencesController.getManeuverAggressivity(),
-      attackerMass: attacker.mass,
-      attackerInertia: attacker.inertia,
-      attackerSkillLevel: attacker.skillLevel,
-      attackerOverload: attacker.overload,
-      attackerHull: attacker.hull,
-      attackerPropulsion: attacker.propulsion,
-      attackerFitting: attacker.fitting,
-      attackerOverrides: this.turretOverrides.get(),
-      attackerFittedHull: attacker.fittedHull,
+      shipAMass: shipA.mass,
+      shipAInertia: shipA.inertia,
+      shipASkillLevel: shipA.skillLevel,
+      shipAOverload: shipA.overload,
+      shipAHull: shipA.hull,
+      shipAPropulsion: shipA.propulsion,
+      shipAFitting: shipA.fitting,
+      shipAOverrides: this.turretOverrides.get(),
+      shipAFittedHull: shipA.fittedHull,
       initialDistance: this.getInitialDistance(),
-      targetSpeed: target.speed,
-      targetMode: target.mode,
-      targetRange: target.range,
-      targetMass: target.mass,
-      targetInertia: target.inertia,
-      targetSkillLevel: target.skillLevel,
-      targetOverload: target.overload,
-      targetSig: target.sig ?? 1,
-      targetHull: target.hull,
-      targetPropulsion: target.propulsion,
-      targetFitting: target.fitting,
-      targetOverrides: target.overrides,
-      targetFittedHull: target.fittedHull,
-      attackerAmmo: turret.ammo,
-      attackerEwarActivation: this.ewarController.capture("attacker"),
-      targetEwarActivation: this.ewarController.capture("target"),
-      attackerBoosterActivation: this.boosterController.capture("attacker"),
-      targetBoosterActivation: this.boosterController.capture("target"),
+      shipBSpeed: shipB.speed,
+      shipBMode: shipB.mode,
+      shipBRange: shipB.range,
+      shipBMass: shipB.mass,
+      shipBInertia: shipB.inertia,
+      shipBSkillLevel: shipB.skillLevel,
+      shipBOverload: shipB.overload,
+      shipBSig: shipB.sig ?? 1,
+      shipBHull: shipB.hull,
+      shipBPropulsion: shipB.propulsion,
+      shipBFitting: shipB.fitting,
+      shipBOverrides: shipB.overrides,
+      shipBFittedHull: shipB.fittedHull,
+      shipAAmmo: turret.ammo,
+      shipAEwarActivation: this.ewarController.capture("shipA"),
+      shipBEwarActivation: this.ewarController.capture("shipB"),
+      shipABoosterActivation: this.boosterController.capture("shipA"),
+      shipBBoosterActivation: this.boosterController.capture("shipB"),
     };
   }
 
@@ -171,12 +171,12 @@ export class SessionCodecImpl implements SessionCodec {
       zoomFactor: settings.zoomFactor ?? 1,
     });
     this.i18n.translateDocument();
-    this.attackerSide.sections.skill.setOverloadDisabled();
-    this.targetSide.sections.skill.setOverloadDisabled();
+    this.shipASide.sections.skill.setOverloadDisabled();
+    this.shipBSide.sections.skill.setOverloadDisabled();
     this.preferencesController.updateManeuverAggressivityDisplay();
-    this.preferencesController.setManeuverAggressivityEnabled(this.els.attackerMode.value === "maneuver");
-    this.attackerSide.sections.stats.updateAlignTime();
-    this.targetSide.sections.stats.updateAlignTime();
+    this.preferencesController.setManeuverAggressivityEnabled(this.els.shipAMode.value === "maneuver");
+    this.shipASide.sections.stats.updateAlignTime();
+    this.shipBSide.sections.stats.updateAlignTime();
     this.hintRotator.refresh();
     this.profileController.markLoaded(selectedName);
     this.preferencesController.savePreferences();
@@ -187,7 +187,7 @@ export class SessionCodecImpl implements SessionCodec {
     const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
     return {
       ...profile,
-      attackerAmmo: profile.attackerAmmo ?? this.chargeCatalog.usualForChargeSize(1),
+      shipAAmmo: profile.shipAAmmo ?? this.chargeCatalog.usualForChargeSize(1),
       ...preferences,
     };
   }
@@ -196,16 +196,16 @@ export class SessionCodecImpl implements SessionCodec {
     return Math.max(num(this.els.initialDistance), 1);
   }
 
-  private restoreEwar(side: "attacker" | "target", fitting: string | undefined, activation: StoredEwarActivation | undefined): void {
-    const panel = side === "attacker" ? this.attackerSide : this.targetSide;
+  private restoreEwar(side: "shipA" | "shipB", fitting: string | undefined, activation: StoredEwarActivation | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.ewar : undefined;
     this.ewarController.restore(side, loadout, activation);
   }
 
   private restoreBooster(
-    side: "attacker" | "target", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined,
+    side: "shipA" | "shipB", fitting: string | undefined, activation: readonly StoredBoosterActivation[] | undefined,
   ): void {
-    const panel = side === "attacker" ? this.attackerSide : this.targetSide;
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
     this.boosterController.restore(side, loadout, activation);
   }
@@ -223,29 +223,29 @@ export class SessionCodecImpl implements SessionCodec {
     this.trackingInput.setRadValue(settings.tracking, sigResolution);
     this.els.optimal.value = String(settings.optimal);
     this.els.falloff.value = String(settings.falloff);
-    this.els.attackerSpeed.value = formatNumber(settings.attackerSpeed);
-    this.els.attackerMass.value = String(settings.attackerMass);
-    this.els.attackerInertia.value = formatNumber(settings.attackerInertia, 6);
-    this.els.attackerMode.value = settings.attackerMode;
-    this.els.attackerRange.value = String(settings.attackerRange);
+    this.els.shipASpeed.value = formatNumber(settings.shipASpeed);
+    this.els.shipAMass.value = String(settings.shipAMass);
+    this.els.shipAInertia.value = formatNumber(settings.shipAInertia, 6);
+    this.els.shipAMode.value = settings.shipAMode;
+    this.els.shipARange.value = String(settings.shipARange);
     this.els.maneuverAggressivity.value = String(settings.maneuverAggressivity ?? 1);
     this.els.initialDistance.value = String(settings.initialDistance);
-    this.els.targetSpeed.value = formatNumber(settings.targetSpeed);
-    this.els.targetMass.value = String(settings.targetMass);
-    this.els.targetInertia.value = formatNumber(settings.targetInertia, 6);
-    this.els.targetMode.value = settings.targetMode;
-    this.els.targetRange.value = String(settings.targetRange);
-    this.els.targetSig.value = String(settings.targetSig);
-    this.attackerSide.restore(this.attackerSide.stateFrom(toCombatantSettings(settings, "attacker")));
-    this.targetSide.restore(this.targetSide.stateFrom(toCombatantSettings(settings, "target")));
-    this.turretOverrides.set(settings.attackerOverrides ?? {});
+    this.els.shipBSpeed.value = formatNumber(settings.shipBSpeed);
+    this.els.shipBMass.value = String(settings.shipBMass);
+    this.els.shipBInertia.value = formatNumber(settings.shipBInertia, 6);
+    this.els.shipBMode.value = settings.shipBMode;
+    this.els.shipBRange.value = String(settings.shipBRange);
+    this.els.shipBSig.value = String(settings.shipBSig);
+    this.shipASide.restore(this.shipASide.stateFrom(toCombatantSettings(settings, "shipA")));
+    this.shipBSide.restore(this.shipBSide.stateFrom(toCombatantSettings(settings, "shipB")));
+    this.turretOverrides.set(settings.shipAOverrides ?? {});
     this.turretController.restore({
-      fitting: settings.attackerFitting, conditions: this.attackerSide.skillConditions(), ammo: settings.attackerAmmo,
+      fitting: settings.shipAFitting, conditions: this.shipASide.skillConditions(), ammo: settings.shipAAmmo,
     });
-    this.restoreEwar("attacker", settings.attackerFitting, settings.attackerEwarActivation);
-    this.restoreEwar("target", settings.targetFitting, settings.targetEwarActivation);
-    this.restoreBooster("attacker", settings.attackerFitting, settings.attackerBoosterActivation);
-    this.restoreBooster("target", settings.targetFitting, settings.targetBoosterActivation);
+    this.restoreEwar("shipA", settings.shipAFitting, settings.shipAEwarActivation);
+    this.restoreEwar("shipB", settings.shipBFitting, settings.shipBEwarActivation);
+    this.restoreBooster("shipA", settings.shipAFitting, settings.shipABoosterActivation);
+    this.restoreBooster("shipB", settings.shipBFitting, settings.shipBBoosterActivation);
   }
 
   restoreStartup(startup: StartupState): void {
@@ -262,8 +262,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.preferencesController.applyPreferences(preferences);
     this.i18n.translateDocument();
     applyStartupDefaults({
-      attackerSide: this.attackerSide,
-      targetSide: this.targetSide,
+      shipASide: this.shipASide,
+      shipBSide: this.shipBSide,
       preferencesController: this.preferencesController,
       profileController: this.profileController,
     });

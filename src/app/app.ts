@@ -61,30 +61,30 @@ export class AppImpl implements App {
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
     const turret = this.controls.getTurret();
-    const targetSigRadius = this.controls.getTargetSig();
-    const view = this.engagementFrameComposer.compose(snapshot, { turret, targetSigRadius });
+    const shipBSigRadius = this.controls.getShipBSig();
+    const view = this.engagementFrameComposer.compose(snapshot, { turret, shipBSigRadius });
     const boostedTurret = view.assessment?.boostedTurret ?? view.effectiveTurret;
     const distance = view.frame.distance;
-    const attackerSpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.target.ewar, distance);
-    const targetSpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.attacker.ewar, distance);
-    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(snapshot.target.ewar, distance);
+    const shipASpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.shipB.ewar, distance);
+    const shipBSpeedBreakdown = this.ewarResolver.speedBreakdown(snapshot.shipA.ewar, distance);
+    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(snapshot.shipB.ewar, distance);
     const effectiveReadouts: EffectiveReadouts = {
-      attackerSpeed: snapshot.attacker.maxSpeed,
-      targetSpeed: snapshot.target.maxSpeed,
+      shipASpeed: snapshot.shipA.maxSpeed,
+      shipBSpeed: snapshot.shipB.maxSpeed,
       tracking: view.effectiveTurret.tracking,
       optimal: view.effectiveTurret.optimal,
       falloff: view.effectiveTurret.falloff,
       boostedTracking: boostedTurret.tracking,
       boostedOptimal: boostedTurret.optimal,
       boostedFalloff: boostedTurret.falloff,
-      attackerSpeedBreakdown,
-      targetSpeedBreakdown,
+      shipASpeedBreakdown,
+      shipBSpeedBreakdown,
       trackingBreakdown: disruptionBreakdown,
       optimalBreakdown: disruptionBreakdown,
       falloffBreakdown: disruptionBreakdown,
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
-    this.renderer.setRangeRingsEnabled(this.controls.hasAttackerGuns());
+    this.renderer.setRangeRingsEnabled(this.controls.hasShipAGuns());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
     this.renderer.draw(snapshot, view.frame, view.hit, view.effectiveTurret, this.controls.getOverlays());
     this.controls.update(view.frame, view.hit, effectiveReadouts);

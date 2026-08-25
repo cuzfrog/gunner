@@ -10,8 +10,8 @@ interface CombatantSide {
 }
 
 interface CombatantSides {
-  readonly attacker: CombatantSide;
-  readonly target: CombatantSide;
+  readonly shipA: CombatantSide;
+  readonly shipB: CombatantSide;
 }
 
 interface CombatantSideWiringDeps {
@@ -22,13 +22,13 @@ interface CombatantSideWiringDeps {
   readonly importer: SideImporter;
 }
 
-export function combatantSidesOf(attacker: SidePanel, target: SidePanel): CombatantSides {
-  return { attacker: { side: "attacker", panel: attacker }, target: { side: "target", panel: target } };
+export function combatantSidesOf(shipA: SidePanel, shipB: SidePanel): CombatantSides {
+  return { shipA: { side: "shipA", panel: shipA }, shipB: { side: "shipB", panel: shipB } };
 }
 
 export function forEachSide(sides: CombatantSides, action: (combatant: CombatantSide) => void): void {
-  action(sides.attacker);
-  action(sides.target);
+  action(sides.shipA);
+  action(sides.shipB);
 }
 
 export function wireCombatantSide(combatant: CombatantSide, deps: CombatantSideWiringDeps): void {

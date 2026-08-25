@@ -96,19 +96,19 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
   } as unknown as FittingPreviewManager;
 
   const els: FittingPopupEls = {
-    trigger: getFake(document, "attacker-fitting-trigger") as unknown as HTMLButtonElement,
-    eye: getFake(document, "attacker-fitting-eye") as unknown as HTMLButtonElement,
-    popup: getFake(document, "attacker-fitting-popup") as unknown as HTMLElement,
-    savedList: getFake(document, "attacker-fitting-saved-list") as unknown as HTMLElement,
-    presetList: getFake(document, "attacker-fitting-preset-list") as unknown as HTMLElement,
-    savedLabel: getFake(document, "attacker-fitting-saved-label") as unknown as HTMLElement,
-    presetLabel: getFake(document, "attacker-fitting-preset-label") as unknown as HTMLElement,
-    empty: getFake(document, "attacker-fitting-empty") as unknown as HTMLElement,
-    shipImage: getFake(document, "attacker-ship-image") as unknown as HTMLImageElement,
+    trigger: getFake(document, "ship-a-fitting-trigger") as unknown as HTMLButtonElement,
+    eye: getFake(document, "ship-a-fitting-eye") as unknown as HTMLButtonElement,
+    popup: getFake(document, "ship-a-fitting-popup") as unknown as HTMLElement,
+    savedList: getFake(document, "ship-a-fitting-saved-list") as unknown as HTMLElement,
+    presetList: getFake(document, "ship-a-fitting-preset-list") as unknown as HTMLElement,
+    savedLabel: getFake(document, "ship-a-fitting-saved-label") as unknown as HTMLElement,
+    presetLabel: getFake(document, "ship-a-fitting-preset-label") as unknown as HTMLElement,
+    empty: getFake(document, "ship-a-fitting-empty") as unknown as HTMLElement,
+    shipImage: getFake(document, "ship-a-ship-image") as unknown as HTMLImageElement,
   };
 
   const controller = new FittingPopupControllerImpl({
-    side: "attacker" as Side,
+    side: "shipA" as Side,
     popupGroup,
     savedFittings,
     presetFittings,
@@ -196,7 +196,7 @@ describe("FittingPopupController", () => {
 
   test("clicking a fitting applies it, closes the popup, and refreshes the ship preview", () => {
     const { controller, els, applyFitting, previews } = createController();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(false);
     controller.popup.open();
     const item = els.savedList.children[0].children[0] as unknown as FakeElement;
@@ -209,7 +209,7 @@ describe("FittingPopupController", () => {
 
   test("clicking a fitting does not refresh a menu preview", () => {
     const { controller, els, applyFitting, previews } = createController();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(true);
     controller.popup.open();
     const item = els.savedList.children[0].children[0] as unknown as FakeElement;
@@ -229,10 +229,10 @@ describe("FittingPopupController", () => {
   test("closeIfOpen hides the popup and a menu-sourced preview", () => {
     const { controller, els, previews } = createController();
     controller.popup.open();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(true);
     controller.closeIfOpen();
     expect(els.popup.hidden).toBe(true);
-    expect(vi.mocked(previews.hide)).toHaveBeenCalledWith("attacker");
+    expect(vi.mocked(previews.hide)).toHaveBeenCalledWith("shipA");
   });
 });

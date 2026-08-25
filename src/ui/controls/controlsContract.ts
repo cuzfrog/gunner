@@ -10,16 +10,16 @@ export interface ControlsCallbacks {
 }
 
 export interface EffectiveReadouts {
-  readonly attackerSpeed: number;
-  readonly targetSpeed: number;
+  readonly shipASpeed: number;
+  readonly shipBSpeed: number;
   readonly tracking: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly boostedTracking: number;
   readonly boostedOptimal: number;
   readonly boostedFalloff: number;
-  readonly attackerSpeedBreakdown?: SpeedBreakdown;
-  readonly targetSpeedBreakdown?: SpeedBreakdown;
+  readonly shipASpeedBreakdown?: SpeedBreakdown;
+  readonly shipBSpeedBreakdown?: SpeedBreakdown;
   readonly trackingBreakdown?: DisruptionBreakdown;
   readonly optimalBreakdown?: DisruptionBreakdown;
   readonly falloffBreakdown?: DisruptionBreakdown;
@@ -27,14 +27,14 @@ export interface EffectiveReadouts {
 
 export interface Controls {
   getTurret(): TurretSpec;
-  getTargetSig(): number;
+  getShipBSig(): number;
   getConfig(): SimConfig;
   getSpeed(): number;
   getGridBrightness(): number;
   getAutoZoom(): boolean;
   getZoomFactor(): number;
   getOverlays(): readonly RangeOverlay[];
-  hasAttackerGuns(): boolean;
+  hasShipAGuns(): boolean;
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;

@@ -3,7 +3,7 @@ import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFitting
 import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ShipATurret } from "./shipATurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
 import { UiEventsImpl } from "../../events";
@@ -27,33 +27,33 @@ optimal=5000
 falloff=5000
 ammo=Hail S
 initialDistance=5000
-attacker.speed=1000
-attacker.mode=keepAtRange
-attacker.range=5000
-attacker.mass=1200000
-attacker.inertia=3
-attacker.hull=Rifter
-target.speed=1000
-target.mode=orbit
-target.range=5000
-target.mass=10000000
-target.inertia=0.45
-target.sig=40
-target.hull=Thrasher`;
+shipA.speed=1000
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+shipA.hull=Rifter
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+shipB.hull=Thrasher`;
 
-export function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
+export function gunnerProfileText(overrides: { shipAFitting?: string; shipBFitting?: string } = {}): string {
   let text = GUNNER_PROFILE_BODY;
-  if (overrides.attackerFitting !== undefined) {
-    text = `${text}\nattacker.fitting:\n${overrides.attackerFitting}\n---`;
+  if (overrides.shipAFitting !== undefined) {
+    text = `${text}\nshipA.fitting:\n${overrides.shipAFitting}\n---`;
   }
-  if (overrides.targetFitting !== undefined) {
-    text = `${text}\ntarget.fitting:\n${overrides.targetFitting}\n---`;
+  if (overrides.shipBFitting !== undefined) {
+    text = `${text}\nshipB.fitting:\n${overrides.shipBFitting}\n---`;
   }
   return text;
 }
 
 function makeMockProfileTextCodec(): ProfileTextCodec {
-  function extractFitting(text: string, side: "attacker" | "target"): string | undefined {
+  function extractFitting(text: string, side: "shipA" | "shipB"): string | undefined {
     const marker = `${side}.fitting:\n`;
     const startIdx = text.indexOf(marker);
     if (startIdx < 0) return undefined;
@@ -72,23 +72,23 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
         sigRes: "S",
         optimal: 5000,
         falloff: 5000,
-        attackerSpeed: 1000,
-        attackerMode: "keepAtRange",
-        attackerRange: 5000,
-        attackerMass: 1_200_000,
-        attackerInertia: 3,
+        shipASpeed: 1000,
+        shipAMode: "keepAtRange",
+        shipARange: 5000,
+        shipAMass: 1_200_000,
+        shipAInertia: 3,
         initialDistance: 5000,
-        targetSpeed: 1000,
-        targetMode: "orbit",
-        targetRange: 5000,
-        targetMass: 10_000_000,
-        targetInertia: 0.45,
-        targetSig: 40,
-        attackerAmmo: "Hail S",
-        attackerHull: "Rifter",
-        targetHull: "Thrasher",
-        attackerFitting: extractFitting(trimmed, "attacker"),
-        targetFitting: extractFitting(trimmed, "target"),
+        shipBSpeed: 1000,
+        shipBMode: "orbit",
+        shipBRange: 5000,
+        shipBMass: 10_000_000,
+        shipBInertia: 0.45,
+        shipBSig: 40,
+        shipAAmmo: "Hail S",
+        shipAHull: "Rifter",
+        shipBHull: "Thrasher",
+        shipAFitting: extractFitting(trimmed, "shipA"),
+        shipBFitting: extractFitting(trimmed, "shipB"),
       };
     },
     serialize: () => "",
@@ -125,8 +125,8 @@ export function buildImportController(document: Document) {
   globalThis.Element = FakeElement as unknown as typeof Element;
   getFake(document, "import-side-popup").hidden = true;
   getFake(document, "import-profile").setAttribute("aria-expanded", "false");
-  const attackerPanel = new FakeSidePanel();
-  const targetPanel = new FakeSidePanel();
+  const shipAPanel = new FakeSidePanel();
+  const shipBPanel = new FakeSidePanel();
   const clipboard = { readText: vi.fn(async () => ""), writeText: vi.fn(async (text: string) => {}) };
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : undefined)),
@@ -143,7 +143,7 @@ export function buildImportController(document: Document) {
     record: vi.fn(),
     remove: vi.fn(),
   });
-  const turret: AttackerTurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
+  const turret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -160,18 +160,18 @@ export function buildImportController(document: Document) {
     els: {
       importProfile: getFake(document, "import-profile") as unknown as HTMLButtonElement,
       importSidePopup: getFake(document, "import-side-popup") as unknown as HTMLElement,
-      importSideAttacker: getFake(document, "import-side-attacker") as unknown as HTMLButtonElement,
-      importSideTarget: getFake(document, "import-side-target") as unknown as HTMLButtonElement,
+      importSideShipA: getFake(document, "import-side-ship-a") as unknown as HTMLButtonElement,
+      importSideShipB: getFake(document, "import-side-ship-b") as unknown as HTMLButtonElement,
     },
-    attackerSide: attackerPanel as unknown as SidePanel,
-    targetSide: targetPanel as unknown as SidePanel,
+    shipASide: shipAPanel as unknown as SidePanel,
+    shipBSide: shipBPanel as unknown as SidePanel,
     turret,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turret,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

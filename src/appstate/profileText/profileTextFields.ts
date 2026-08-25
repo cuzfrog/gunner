@@ -1,7 +1,7 @@
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
 
-export type Side = "attacker" | "target";
-export type ScalarField = keyof Omit<ProfileSettings, "attackerFitting" | "targetFitting" | "attackerOverrides" | "targetOverrides">;
+export type Side = "shipA" | "shipB";
+export type ScalarField = keyof Omit<ProfileSettings, "shipAFitting" | "shipBFitting" | "shipAOverrides" | "shipBOverrides">;
 export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[];
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
@@ -10,52 +10,52 @@ export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "sigRes",
   "optimal",
   "falloff",
-  "attackerAmmo",
+  "shipAAmmo",
   "initialDistance",
   "maneuverAggressivity",
 ] as const;
 
-export const ATTACKER_FIELDS: readonly ScalarField[] = [
-  "attackerSpeed",
-  "attackerMode",
-  "attackerRange",
-  "attackerMass",
-  "attackerInertia",
-  "attackerSkillLevel",
-  "attackerOverload",
-  "attackerHull",
-  "attackerPropulsion",
-  "attackerFittedHull",
-  "attackerEwarActivation",
-  "attackerBoosterActivation",
+export const SHIP_A_FIELDS: readonly ScalarField[] = [
+  "shipASpeed",
+  "shipAMode",
+  "shipARange",
+  "shipAMass",
+  "shipAInertia",
+  "shipASkillLevel",
+  "shipAOverload",
+  "shipAHull",
+  "shipAPropulsion",
+  "shipAFittedHull",
+  "shipAEwarActivation",
+  "shipABoosterActivation",
 ] as const;
 
-export const TARGET_FIELDS: readonly ScalarField[] = [
-  "targetSpeed",
-  "targetMode",
-  "targetRange",
-  "targetMass",
-  "targetInertia",
-  "targetSig",
-  "targetSkillLevel",
-  "targetOverload",
-  "targetHull",
-  "targetPropulsion",
-  "targetFittedHull",
-  "targetEwarActivation",
-  "targetBoosterActivation",
+export const SHIP_B_FIELDS: readonly ScalarField[] = [
+  "shipBSpeed",
+  "shipBMode",
+  "shipBRange",
+  "shipBMass",
+  "shipBInertia",
+  "shipBSig",
+  "shipBSkillLevel",
+  "shipBOverload",
+  "shipBHull",
+  "shipBPropulsion",
+  "shipBFittedHull",
+  "shipBEwarActivation",
+  "shipBBoosterActivation",
 ] as const;
 
-export const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...ATTACKER_FIELDS, ...TARGET_FIELDS] as const;
+export const ALL_FIELDS: readonly ScalarField[] = [...GLOBAL_FIELDS, ...SHIP_A_FIELDS, ...SHIP_B_FIELDS] as const;
 
 export const OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
-  "attackerMass",
-  "attackerInertia",
-  "attackerSpeed",
-  "targetMass",
-  "targetInertia",
-  "targetSig",
-  "targetSpeed",
+  "shipAMass",
+  "shipAInertia",
+  "shipASpeed",
+  "shipBMass",
+  "shipBInertia",
+  "shipBSig",
+  "shipBSpeed",
   "tracking",
   "sigRes",
   "optimal",
@@ -70,31 +70,31 @@ function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
   for (const field of ALL_FIELDS) {
     map.set(dotKeyForField(field), field);
   }
-  map.set("attacker.ammo", "attackerAmmo");
+  map.set("shipA.ammo", "shipAAmmo");
   return map;
 }
 
 function buildOverrideDotKeyToFullMap(): ReadonlyMap<string, keyof ProfileParamOverrides> {
   const map = new Map<string, keyof ProfileParamOverrides>();
   for (const key of OVERRIDE_KEYS) {
-    const attackerDot = overrideDotKeyForFull("attacker", key);
-    if (attackerDot !== undefined) map.set(attackerDot, key);
-    const targetDot = overrideDotKeyForFull("target", key);
-    if (targetDot !== undefined) map.set(targetDot, key);
+    const shipADot = overrideDotKeyForFull("shipA", key);
+    if (shipADot !== undefined) map.set(shipADot, key);
+    const shipBDot = overrideDotKeyForFull("shipB", key);
+    if (shipBDot !== undefined) map.set(shipBDot, key);
   }
   return map;
 }
 
 export function dotKeyForField(field: ScalarField): string {
-  if (field === "attackerAmmo") return "ammo";
-  if (field.startsWith("attacker")) return `attacker.${lowerFirst(field.slice("attacker".length))}`;
-  if (field.startsWith("target")) return `target.${lowerFirst(field.slice("target".length))}`;
+  if (field === "shipAAmmo") return "ammo";
+  if (field.startsWith("shipA")) return `shipA.${lowerFirst(field.slice("shipA".length))}`;
+  if (field.startsWith("shipB")) return `shipB.${lowerFirst(field.slice("shipB".length))}`;
   return field;
 }
 
 export function sideFromFittingDotKey(dotKey: string): Side | undefined {
-  if (dotKey === "attacker") return "attacker";
-  if (dotKey === "target") return "target";
+  if (dotKey === "shipA") return "shipA";
+  if (dotKey === "shipB") return "shipB";
   return undefined;
 }
 
@@ -102,11 +102,11 @@ export function overrideDotKeyForFull(side: Side, full: keyof ProfileParamOverri
   if (full === "tracking" || full === "sigRes" || full === "optimal" || full === "falloff") {
     return `override.${side}.${full}`;
   }
-  if (side === "attacker" && full.startsWith("attacker")) {
-    return `override.attacker.${lowerFirst(full.slice("attacker".length))}`;
+  if (side === "shipA" && full.startsWith("shipA")) {
+    return `override.shipA.${lowerFirst(full.slice("shipA".length))}`;
   }
-  if (side === "target" && full.startsWith("target")) {
-    return `override.target.${lowerFirst(full.slice("target".length))}`;
+  if (side === "shipB" && full.startsWith("shipB")) {
+    return `override.shipB.${lowerFirst(full.slice("shipB".length))}`;
   }
   return undefined;
 }

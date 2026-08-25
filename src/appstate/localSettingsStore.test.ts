@@ -149,14 +149,14 @@ describe("LocalSettingsStore", () => {
       sigRes: "S",
       optimal: 5000,
       falloff: 5000,
-      attackerSpeed: 0,
-      attackerMode: "keepAtRange",
-      attackerRange: 5000,
+      shipASpeed: 0,
+      shipAMode: "keepAtRange",
+      shipARange: 5000,
       initialDistance: 5000,
-      targetSpeed: 1000,
-      targetMode: "orbit",
-      targetRange: 5000,
-      targetSig: 40,
+      shipBSpeed: 1000,
+      shipBMode: "orbit",
+      shipBRange: 5000,
+      shipBSig: 40,
       simSpeed: 4,
       language: "en",
     };
@@ -172,18 +172,18 @@ describe("LocalSettingsStore", () => {
       sigRes: "S",
       optimal: 5000,
       falloff: 5000,
-      attackerSpeed: 0,
-      attackerMode: "keepAtRange",
-      attackerRange: 5000,
-      attackerMass: 1_200_000,
-      attackerInertia: 3,
+      shipASpeed: 0,
+      shipAMode: "keepAtRange",
+      shipARange: 5000,
+      shipAMass: 1_200_000,
+      shipAInertia: 3,
       initialDistance: 5000,
-      targetSpeed: 1000,
-      targetMode: "orbit",
-      targetRange: 5000,
-      targetMass: 10_000_000,
-      targetInertia: 0.45,
-      targetSig: 40,
+      shipBSpeed: 1000,
+      shipBMode: "orbit",
+      shipBRange: 5000,
+      shipBMass: 10_000_000,
+      shipBInertia: 0.45,
+      shipBSig: 40,
       simSpeed: 4,
       language: "en",
     };
@@ -194,8 +194,8 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips fitted hull summaries", () => {
     const withFitted: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFittedHull: FITTED_HULL_SUMMARY,
-      targetFittedHull: FITTED_HULL_SUMMARY,
+      shipAFittedHull: FITTED_HULL_SUMMARY,
+      shipBFittedHull: FITTED_HULL_SUMMARY,
     };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withFitted)) });
     expect(store.loadStartupState().settings).toEqual(withFitted);
@@ -204,9 +204,9 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips hull and propulsion selections", () => {
     const withHull: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerHull: "Rifter",
-      attackerPropulsion: "mwd-5mn",
-      targetHull: "Caldari Shuttle",
+      shipAHull: "Rifter",
+      shipAPropulsion: "mwd-5mn",
+      shipBHull: "Caldari Shuttle",
     };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withHull)) });
     expect(store.loadStartupState().settings).toEqual(withHull);
@@ -215,13 +215,13 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState rejects an invalid propulsion id", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAPropulsion: "ab-5mn" })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
 
   test("loadStartupState round-trips a deselected propulsion", () => {
-    const withNone: UserSettings = { ...DEFAULT_SETTINGS, attackerHull: "Rifter", attackerPropulsion: "none" };
+    const withNone: UserSettings = { ...DEFAULT_SETTINGS, shipAHull: "Rifter", shipAPropulsion: "none" };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withNone)) });
     expect(store.loadStartupState().settings).toEqual(withNone);
   });
@@ -234,32 +234,32 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerPropulsion: "none",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAPropulsion: "none",
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerPropulsion).toBe("none");
-    expect(loaded!.attackerSpeed).toBe(456.25);
-    expect(loaded!.attackerMass).toBe(1_000_000);
-    expect(loaded!.attackerFittedHull!.propulsionId).toBe("mwd-5mn");
-    expect(loaded!.attackerFittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
+    expect(loaded!.shipAPropulsion).toBe("none");
+    expect(loaded!.shipASpeed).toBe(456.25);
+    expect(loaded!.shipAMass).toBe(1_000_000);
+    expect(loaded!.shipAFittedHull!.propulsionId).toBe("mwd-5mn");
+    expect(loaded!.shipAFittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
   });
 
   test("loadStartupState rejects an empty hull name", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerHull: "" })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAHull: "" })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
 
   test("saveProfile and loadProfile round-trip fitted hull summaries", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const profile = profileFrom({ ...DEFAULT_SETTINGS, attackerFittedHull: FITTED_HULL_SUMMARY, targetFittedHull: FITTED_HULL_SUMMARY });
+    const profile = profileFrom({ ...DEFAULT_SETTINGS, shipAFittedHull: FITTED_HULL_SUMMARY, shipBFittedHull: FITTED_HULL_SUMMARY });
     store.saveProfile("brawler", profile);
     expect(store.loadProfile("brawler")).toEqual(profile);
   });
@@ -281,14 +281,14 @@ describe("LocalSettingsStore", () => {
   test("saveProfile rejects a profile with an invalid ewar activation script", () => {
     const storage = fakeStorage();
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
-    const bad = { ...DEFAULT_PROFILE, attackerEwarActivation: { disruptors: [{ active: true, overloaded: true, script: "" }] } };
+    const bad = { ...DEFAULT_PROFILE, shipAEwarActivation: { disruptors: [{ active: true, overloaded: true, script: "" }] } };
     store.saveProfile("brawler", bad);
     expect(store.listProfiles()).toEqual([]);
   });
 
   test("loadProfile strips legacy profiles without ewar activation fields", () => {
     const storage = fakeStorage();
-    const { attackerEwarActivation: _, targetEwarActivation: __, ...legacy } = DEFAULT_PROFILE;
+    const { shipAEwarActivation: _, shipBEwarActivation: __, ...legacy } = DEFAULT_PROFILE;
     storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: legacy }));
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(legacy);
@@ -377,7 +377,7 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState rejects settings with invalid values", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetSig: -1 })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipBSig: -1 })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
@@ -386,7 +386,7 @@ describe("LocalSettingsStore", () => {
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, sigMultiplier: undefined } };
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAFittedHull: staleFitted })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
@@ -395,19 +395,19 @@ describe("LocalSettingsStore", () => {
     const staleFitted = { ...FITTED_HULL_SUMMARY, fitted: { ...FITTED_HULL, massMultiplier: undefined } };
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerFittedHull: staleFitted })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAFittedHull: staleFitted })),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerFittedHull!.fitted.massMultiplier).toBe(1);
+    expect(loaded!.shipAFittedHull!.fitted.massMultiplier).toBe(1);
   });
 
   test("loadStartupState accepts settings without skill and overload fields", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
-    delete partial.attackerSkillLevel;
-    delete partial.attackerOverload;
-    delete partial.targetSkillLevel;
-    delete partial.targetOverload;
+    delete partial.shipASkillLevel;
+    delete partial.shipAOverload;
+    delete partial.shipBSkillLevel;
+    delete partial.shipBOverload;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
     expect(store.loadStartupState().settings).toEqual(partial);
   });
@@ -437,7 +437,7 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState rejects an out-of-range skill level", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, attackerSkillLevel: 6 })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipASkillLevel: 6 })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
@@ -445,7 +445,7 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState rejects a non-boolean overload value", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, targetOverload: "yes" })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipBOverload: "yes" })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
@@ -453,10 +453,10 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips skill level 0 and unchecked overload", () => {
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerSkillLevel: 0,
-      attackerOverload: false,
-      targetSkillLevel: 0,
-      targetOverload: false,
+      shipASkillLevel: 0,
+      shipAOverload: false,
+      shipBSkillLevel: 0,
+      shipBOverload: false,
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
@@ -474,7 +474,7 @@ describe("LocalSettingsStore", () => {
 
   test("loadStartupState round-trips midships mode", () => {
     const settings: UserSettings = {
-      ...DEFAULT_SETTINGS, attackerMode: "midships", targetMode: "midships",
+      ...DEFAULT_SETTINGS, shipAMode: "midships", shipBMode: "midships",
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
@@ -594,13 +594,13 @@ describe("LocalSettingsStore", () => {
   });
 
   test("loadStartupState migrates a v5 payload with fitted hull summaries", () => {
-    const v5 = { ...DEFAULT_SETTINGS, version: 5, attackerFittedHull: FITTED_HULL_SUMMARY };
+    const v5 = { ...DEFAULT_SETTINGS, version: 5, shipAFittedHull: FITTED_HULL_SUMMARY };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(10);
-    expect(loaded!.attackerFittedHull).toEqual(FITTED_HULL_SUMMARY);
-    expect(loaded!.attackerMass).toBe(DEFAULT_SETTINGS.attackerMass);
+    expect(loaded!.shipAFittedHull).toEqual(FITTED_HULL_SUMMARY);
+    expect(loaded!.shipAMass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
 
   test("loadStartupState migrates a v5 payload without fitted hull summaries", () => {
@@ -609,7 +609,7 @@ describe("LocalSettingsStore", () => {
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(10);
-    expect(loaded!.attackerFittedHull).toBeUndefined();
+    expect(loaded!.shipAFittedHull).toBeUndefined();
   });
 
   test("loadStartupState round-trips v6 fitting basis with per-side overrides", () => {
@@ -620,17 +620,17 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerOverrides: { attackerMass: 2_000_000 },
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAOverrides: { shipAMass: 2_000_000 },
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerFitting).toBe(settings.attackerFitting);
-    expect(loaded!.attackerOverrides).toEqual({ attackerMass: 2_000_000 });
-    expect(loaded!.attackerFittedHull).toEqual({
+    expect(loaded!.shipAFitting).toBe(settings.shipAFitting);
+    expect(loaded!.shipAOverrides).toEqual({ shipAMass: 2_000_000 });
+    expect(loaded!.shipAFittedHull).toEqual({
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
       propulsionName: RIFTER_MODULE.label,
@@ -639,9 +639,9 @@ describe("LocalSettingsStore", () => {
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
     });
-    expect(loaded!.attackerMass).toBe(2_000_000);
-    expect(loaded!.attackerInertia).toBe(2);
-    expect(loaded!.attackerSpeed).toBe(4_649.72);
+    expect(loaded!.shipAMass).toBe(2_000_000);
+    expect(loaded!.shipAInertia).toBe(2);
+    expect(loaded!.shipASpeed).toBe(4_649.72);
     expect(loaded!.tracking).toBe(0.315);
     expect(loaded!.sigRes).toBe("S");
     expect(loaded!.optimal).toBe(600);
@@ -657,8 +657,8 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerFittedHull: {
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAFittedHull: {
         ...FITTED_HULL_SUMMARY,
         propulsionId: "mwd-5mn",
         propulsionName: "5MN Y-T8 Compact Microwarpdrive",
@@ -670,9 +670,9 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
-    expect(loaded!.attackerFittedHull?.propulsion).toEqual(COMPACT_MWD);
-    expect(loaded!.attackerSpeed).toBe(4_650);
+    expect(loaded!.shipAFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
+    expect(loaded!.shipAFittedHull?.propulsion).toEqual(COMPACT_MWD);
+    expect(loaded!.shipASpeed).toBe(4_650);
   });
 
   test("basis re-import on load overwrites stale parameter cache", () => {
@@ -683,10 +683,10 @@ describe("LocalSettingsStore", () => {
 
     const stale: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerFittedHull: FITTED_HULL_SUMMARY,
-      attackerMass: 9_999_999,
-      attackerSpeed: 111,
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAFittedHull: FITTED_HULL_SUMMARY,
+      shipAMass: 9_999_999,
+      shipASpeed: 111,
       tracking: 0.01,
       sigRes: "M",
       optimal: 10,
@@ -695,13 +695,13 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(stale)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerMass).toBe(1_500_000);
-    expect(loaded!.attackerSpeed).toBe(4_649.72);
+    expect(loaded!.shipAMass).toBe(1_500_000);
+    expect(loaded!.shipASpeed).toBe(4_649.72);
     expect(loaded!.tracking).toBe(0.315);
     expect(loaded!.sigRes).toBe("S");
     expect(loaded!.optimal).toBe(600);
     expect(loaded!.falloff).toBe(3000);
-    expect(loaded!.attackerFittedHull!.propulsionId).toBe("mwd-5mn");
+    expect(loaded!.shipAFittedHull!.propulsionId).toBe("mwd-5mn");
   });
 
   test("re-import on load recomputes speed using the overridden mass", () => {
@@ -712,34 +712,34 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerOverrides: { attackerMass: 2_000_000 },
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAOverrides: { shipAMass: 2_000_000 },
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerMass).toBe(2_000_000);
-    expect(loaded!.attackerSpeed).toBe(4_000);
+    expect(loaded!.shipAMass).toBe(2_000_000);
+    expect(loaded!.shipASpeed).toBe(4_000);
   });
 
-  test("loadStartupState normalizes a v6 payload missing attackerAmmo", () => {
+  test("loadStartupState normalizes a v6 payload missing shipAAmmo", () => {
     const missingAmmo: Record<string, unknown> = { ...DEFAULT_SETTINGS };
-    delete missingAmmo.attackerAmmo;
+    delete missingAmmo.shipAAmmo;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe("Hail S");
   });
 
-  test("loadProfile normalizes a profile missing attackerAmmo", () => {
+  test("loadProfile normalizes a profile missing shipAAmmo", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const { attackerAmmo: _, ...missingAmmo } = DEFAULT_PROFILE;
+    const { shipAAmmo: _, ...missingAmmo } = DEFAULT_PROFILE;
     store.saveProfile("brawler", missingAmmo as ProfileSettings);
     const loaded = store.loadProfile("brawler");
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe("Hail S");
   });
 
   test("basis re-import applies a stored charge that matches the turret size", () => {
@@ -757,15 +757,15 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerAmmo: "Republic Fleet EMP S",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAAmmo: "Republic Fleet EMP S",
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerAmmo).toBe("Republic Fleet EMP S");
+    expect(loaded!.shipAAmmo).toBe("Republic Fleet EMP S");
     expect(loaded!.tracking).toBe(0.42);
     expect(loaded!.optimal).toBe(1200);
     expect(loaded!.falloff).toBe(3000);
@@ -788,15 +788,15 @@ describe("LocalSettingsStore", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerAmmo: "Mjolnir Rocket",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAAmmo: "Mjolnir Rocket",
     };
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.attackerAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe("Hail S");
     expect(loaded!.optimal).toBe(600);
   });
 });

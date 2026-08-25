@@ -29,6 +29,6 @@ no-new-exports:
 
 # sidePanel
 
-Side-by-side ship fitting and stat inputs for the attacker and target.
+Side-by-side ship fitting and stat inputs for Ship A and Ship B.
 
 The `SidePanel` interface is the public abstraction. `SidePanelDeps`, `SidePanelHost`, `SidePanelState`, and `SidePanelElements` are shared DTOs exposed as types. Implementation classes remain internal and are wired through `module.ts` via DI. `Side` is re-exported from the root `controls/side.ts` shared type.

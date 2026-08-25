@@ -21,10 +21,10 @@ function buildPasteSection() {
   globalThis.Element = FakeElement as unknown as typeof Element;
 
   const els: PasteImportSectionEls = {
-    fittingName: getFake(document, "attacker-fitting-name") as unknown as HTMLElement,
-    pastePopup: getFake(document, "attacker-paste-popup") as unknown as HTMLElement,
-    pasteInput: getFake(document, "attacker-paste-input") as unknown as HTMLTextAreaElement,
-    importFitting: getFake(document, "attacker-import-fitting") as unknown as HTMLButtonElement,
+    fittingName: getFake(document, "ship-a-fitting-name") as unknown as HTMLElement,
+    pastePopup: getFake(document, "ship-a-paste-popup") as unknown as HTMLElement,
+    pasteInput: getFake(document, "ship-a-paste-input") as unknown as HTMLTextAreaElement,
+    importFitting: getFake(document, "ship-a-import-fitting") as unknown as HTMLButtonElement,
   };
 
   const host = vi.mocked<SidePanel["host"]>({
@@ -49,7 +49,7 @@ function buildPasteSection() {
   } as unknown as ISidePanelSections);
 
   const panel = vi.mocked<SidePanel>({
-    side: "attacker",
+    side: "shipA",
     host,
     sections,
     profile: undefined,
@@ -73,7 +73,7 @@ describe("PasteImportSection", () => {
   test("showImportHint renders a translated hint", () => {
     const { document, section } = buildPasteSection();
     section.showImportHint("status.fittingImported");
-    const name = getFake(document, "attacker-fitting-name");
+    const name = getFake(document, "ship-a-fitting-name");
     expect(name.hidden).toBe(false);
     expect(name.innerHTML).toContain("status.fittingImported");
   });
@@ -82,16 +82,16 @@ describe("PasteImportSection", () => {
     const { document, section } = buildPasteSection();
     section.showImportHint("status.fittingImported");
     section.clearImportHint();
-    expect(getFake(document, "attacker-fitting-name").hidden).toBe(true);
+    expect(getFake(document, "ship-a-fitting-name").hidden).toBe(true);
   });
 
   test("open and close paste popup toggles visibility", () => {
     const { document, section } = buildPasteSection();
     section.openPastePopup();
-    expect(getFake(document, "attacker-paste-popup").hidden).toBe(false);
+    expect(getFake(document, "ship-a-paste-popup").hidden).toBe(false);
     expect(section.isPastePopupOpen()).toBe(true);
     section.closePastePopup();
-    expect(getFake(document, "attacker-paste-popup").hidden).toBe(true);
+    expect(getFake(document, "ship-a-paste-popup").hidden).toBe(true);
     expect(section.isPastePopupOpen()).toBe(false);
   });
 });

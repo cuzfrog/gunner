@@ -14,9 +14,9 @@ class StubPopupGroup implements PopupGroup {
   close = vi.fn();
   closeAll = vi.fn();
   hasOpen = vi.fn(() => this.popups.some((p) => p.isOpen()));
-  onPointerDown = vi.fn((target: EventTarget | null) => {
-    if (!target) return;
-    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  onPointerDown = vi.fn((domTarget: EventTarget | null) => {
+    if (!domTarget) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(domTarget)) p.close();
   });
   onKeyDown = vi.fn((event: { readonly key: string }) => {
     if (event.key !== "Escape") return;
@@ -25,7 +25,7 @@ class StubPopupGroup implements PopupGroup {
 }
 
 interface TestConfirmController extends ConfirmController {
-  popup: { contains: (target: EventTarget) => boolean };
+  popup: { contains: (domTarget: EventTarget) => boolean };
 }
 
 interface BuildResult {
@@ -106,7 +106,7 @@ describe("ConfirmController", () => {
     expect(controller.popup.contains(popup)).toBe(true);
   });
 
-  test("popup does not contain an outside target", () => {
+  test("popup does not contain an outside shipB", () => {
     const { controller } = build(globalThis.document);
     const outside = getFake(globalThis.document, "tracking") as unknown as EventTarget;
     expect(controller.popup.contains(outside)).toBe(false);

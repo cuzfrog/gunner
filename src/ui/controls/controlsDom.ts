@@ -30,8 +30,8 @@ export function isHtmlTextAreaElement(el: Element): el is HTMLTextAreaElement {
   return el.tagName === "TEXTAREA";
 }
 
-export function isEventTargetWithClosest(target: EventTarget | null): target is Element {
-  return target instanceof Element;
+export function isEventTargetWithClosest(domTarget: EventTarget | null): domTarget is Element {
+  return domTarget instanceof Element;
 }
 
 export function num(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): number {
@@ -44,13 +44,18 @@ export function setText(el: HTMLElement, text: string): void {
   el.textContent = text;
 }
 
-export function fittingAreaSelector(side: "attacker" | "target"): string {
+export function fittingAreaSelector(side: "shipA" | "shipB"): string {
+  const id = sideId(side);
   return [
-    `#${side}-hull`,
-    `#${side}-ship-image`,
-    `#${side}-fitting-trigger`,
-    `#${side}-fitting-eye`,
-    `#${side}-fitting-popup`,
-    `#${side}-fitting-preview`,
+    `#${id}-hull`,
+    `#${id}-ship-image`,
+    `#${id}-fitting-trigger`,
+    `#${id}-fitting-eye`,
+    `#${id}-fitting-popup`,
+    `#${id}-fitting-preview`,
   ].join(", ");
+}
+
+function sideId(side: "shipA" | "shipB"): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

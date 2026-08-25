@@ -2,23 +2,23 @@ import type { EwarLoadout, EwarProjection } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 
 export interface EwarEls {
-  readonly attackerEwarField: HTMLElement;
-  readonly attackerEwarTrigger: HTMLButtonElement;
-  readonly attackerEwarPopup: HTMLElement;
-  readonly attackerEwarSection: HTMLElement;
-  readonly attackerEwarSummary: HTMLElement;
-  readonly targetEwarField: HTMLElement;
-  readonly targetEwarTrigger: HTMLButtonElement;
-  readonly targetEwarPopup: HTMLElement;
-  readonly targetEwarSection: HTMLElement;
-  readonly targetEwarSummary: HTMLElement;
+  readonly shipAEwarField: HTMLElement;
+  readonly shipAEwarTrigger: HTMLButtonElement;
+  readonly shipAEwarPopup: HTMLElement;
+  readonly shipAEwarSection: HTMLElement;
+  readonly shipAEwarSummary: HTMLElement;
+  readonly shipBEwarField: HTMLElement;
+  readonly shipBEwarTrigger: HTMLButtonElement;
+  readonly shipBEwarPopup: HTMLElement;
+  readonly shipBEwarSection: HTMLElement;
+  readonly shipBEwarSummary: HTMLElement;
 }
 
 export interface EwarController {
-  setLoadout(side: "attacker" | "target", loadout: EwarLoadout): void;
-  restore(side: "attacker" | "target", loadout: EwarLoadout | undefined, saved?: StoredEwarActivation): void;
-  projection(side: "attacker" | "target"): EwarProjection | undefined;
-  capture(side: "attacker" | "target"): StoredEwarActivation | undefined;
+  setLoadout(side: "shipA" | "shipB", loadout: EwarLoadout): void;
+  restore(side: "shipA" | "shipB", loadout: EwarLoadout | undefined, saved?: StoredEwarActivation): void;
+  projection(side: "shipA" | "shipB"): EwarProjection | undefined;
+  capture(side: "shipA" | "shipB"): StoredEwarActivation | undefined;
   render(): void;
   updateSummaries(): void;
 }

@@ -19,20 +19,20 @@ export function parseScalarValue(field: ScalarField, value: string, guards: Sett
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
-  if (field === "attackerOverload" || field === "targetOverload") return value === "true" ? true : value === "false" ? false : undefined;
-  if (field === "attackerMode" || field === "targetMode") return guards.isAutopilotMode(value) ? value : undefined;
-  if (field === "attackerSkillLevel" || field === "targetSkillLevel") {
+  if (field === "shipAOverload" || field === "shipBOverload") return value === "true" ? true : value === "false" ? false : undefined;
+  if (field === "shipAMode" || field === "shipBMode") return guards.isAutopilotMode(value) ? value : undefined;
+  if (field === "shipASkillLevel" || field === "shipBSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
   }
   if (field === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
-  if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
-  if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
-  if (field === "attackerAmmo") return value;
+  if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
+  if (field === "shipAHull" || field === "shipAPropulsion" || field === "shipBHull" || field === "shipBPropulsion") return value;
+  if (field === "shipAAmmo") return value;
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (field === "initialDistance" || field === "targetSig") return isPositive(num) ? num : undefined;
+  if (field === "initialDistance" || field === "shipBSig") return isPositive(num) ? num : undefined;
   if (field === "maneuverAggressivity") return isNonNegative(num) ? num : undefined;
   return isNonNegative(num) ? num : undefined;
 }
@@ -46,7 +46,7 @@ export function parseOverrideValue(
   if (key === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (key === "targetSig") return isPositive(num) ? num : undefined;
+  if (key === "shipBSig") return isPositive(num) ? num : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 
@@ -56,18 +56,18 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
   const sigRes = raw.sigRes;
   const optimal = raw.optimal;
   const falloff = raw.falloff;
-  const attackerSpeed = raw.attackerSpeed;
-  const attackerMode = raw.attackerMode;
-  const attackerRange = raw.attackerRange;
-  const attackerMass = raw.attackerMass;
-  const attackerInertia = raw.attackerInertia;
+  const shipASpeed = raw.shipASpeed;
+  const shipAMode = raw.shipAMode;
+  const shipARange = raw.shipARange;
+  const shipAMass = raw.shipAMass;
+  const shipAInertia = raw.shipAInertia;
   const initialDistance = raw.initialDistance;
-  const targetSpeed = raw.targetSpeed;
-  const targetMode = raw.targetMode;
-  const targetRange = raw.targetRange;
-  const targetMass = raw.targetMass;
-  const targetInertia = raw.targetInertia;
-  const targetSig = raw.targetSig;
+  const shipBSpeed = raw.shipBSpeed;
+  const shipBMode = raw.shipBMode;
+  const shipBRange = raw.shipBRange;
+  const shipBMass = raw.shipBMass;
+  const shipBInertia = raw.shipBInertia;
+  const shipBSig = raw.shipBSig;
 
   if (
     version === undefined ||
@@ -75,18 +75,18 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     sigRes === undefined ||
     optimal === undefined ||
     falloff === undefined ||
-    attackerSpeed === undefined ||
-    attackerMode === undefined ||
-    attackerRange === undefined ||
-    attackerMass === undefined ||
-    attackerInertia === undefined ||
+    shipASpeed === undefined ||
+    shipAMode === undefined ||
+    shipARange === undefined ||
+    shipAMass === undefined ||
+    shipAInertia === undefined ||
     initialDistance === undefined ||
-    targetSpeed === undefined ||
-    targetMode === undefined ||
-    targetRange === undefined ||
-    targetMass === undefined ||
-    targetInertia === undefined ||
-    targetSig === undefined
+    shipBSpeed === undefined ||
+    shipBMode === undefined ||
+    shipBRange === undefined ||
+    shipBMass === undefined ||
+    shipBInertia === undefined ||
+    shipBSig === undefined
   ) {
     return undefined;
   }
@@ -97,37 +97,37 @@ export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSe
     sigRes,
     optimal,
     falloff,
-    attackerSpeed,
-    attackerMode,
-    attackerRange,
-    attackerMass,
-    attackerInertia,
+    shipASpeed,
+    shipAMode,
+    shipARange,
+    shipAMass,
+    shipAInertia,
     initialDistance,
-    targetSpeed,
-    targetMode,
-    targetRange,
-    targetMass,
-    targetInertia,
-    targetSig,
-    attackerSkillLevel: raw.attackerSkillLevel,
-    attackerOverload: raw.attackerOverload,
-    attackerHull: raw.attackerHull,
-    attackerPropulsion: raw.attackerPropulsion,
-    attackerFitting: raw.attackerFitting,
-    attackerOverrides: raw.attackerOverrides,
-    attackerFittedHull: raw.attackerFittedHull,
-    attackerEwarActivation: raw.attackerEwarActivation,
-    attackerBoosterActivation: raw.attackerBoosterActivation,
-    attackerAmmo: raw.attackerAmmo,
-    targetSkillLevel: raw.targetSkillLevel,
-    targetOverload: raw.targetOverload,
-    targetHull: raw.targetHull,
-    targetPropulsion: raw.targetPropulsion,
-    targetFitting: raw.targetFitting,
-    targetOverrides: raw.targetOverrides,
-    targetFittedHull: raw.targetFittedHull,
-    targetEwarActivation: raw.targetEwarActivation,
-    targetBoosterActivation: raw.targetBoosterActivation,
+    shipBSpeed,
+    shipBMode,
+    shipBRange,
+    shipBMass,
+    shipBInertia,
+    shipBSig,
+    shipASkillLevel: raw.shipASkillLevel,
+    shipAOverload: raw.shipAOverload,
+    shipAHull: raw.shipAHull,
+    shipAPropulsion: raw.shipAPropulsion,
+    shipAFitting: raw.shipAFitting,
+    shipAOverrides: raw.shipAOverrides,
+    shipAFittedHull: raw.shipAFittedHull,
+    shipAEwarActivation: raw.shipAEwarActivation,
+    shipABoosterActivation: raw.shipABoosterActivation,
+    shipAAmmo: raw.shipAAmmo,
+    shipBSkillLevel: raw.shipBSkillLevel,
+    shipBOverload: raw.shipBOverload,
+    shipBHull: raw.shipBHull,
+    shipBPropulsion: raw.shipBPropulsion,
+    shipBFitting: raw.shipBFitting,
+    shipBOverrides: raw.shipBOverrides,
+    shipBFittedHull: raw.shipBFittedHull,
+    shipBEwarActivation: raw.shipBEwarActivation,
+    shipBBoosterActivation: raw.shipBBoosterActivation,
     maneuverAggressivity: raw.maneuverAggressivity,
   };
 }

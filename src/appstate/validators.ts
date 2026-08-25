@@ -106,13 +106,13 @@ export function isOptionalFittingText(value: unknown): value is string | undefin
 }
 
 const PROFILE_PARAM_OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
-  "attackerMass",
-  "attackerInertia",
-  "attackerSpeed",
-  "targetMass",
-  "targetInertia",
-  "targetSig",
-  "targetSpeed",
+  "shipAMass",
+  "shipAInertia",
+  "shipASpeed",
+  "shipBMass",
+  "shipBInertia",
+  "shipBSig",
+  "shipBSpeed",
   "tracking",
   "sigRes",
   "optimal",
@@ -127,7 +127,7 @@ export function isOptionalProfileParamOverrides(value: unknown, guards: SettingG
     if (!PROFILE_PARAM_OVERRIDE_KEYS.includes(key as keyof ProfileParamOverrides)) return false;
     if (key === "sigRes") {
       if (!(s[key] === undefined || guards.isSigResolutionClass(s[key]))) return false;
-    } else if (key === "targetSig") {
+    } else if (key === "shipBSig") {
       if (!(s[key] === undefined || isPositive(s[key]))) return false;
     } else {
       if (!(s[key] === undefined || isNonNegative(s[key]))) return false;

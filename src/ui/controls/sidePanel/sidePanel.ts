@@ -87,7 +87,7 @@ export class SidePanelImpl implements SidePanel {
     this.els.inertia.addEventListener("input", () => this.onShipInput("inertia"));
     this.els.mode.addEventListener("input", () => this.onModeInput());
     this.els.range.addEventListener("input", () => this.host.onConfigChange());
-    if (this.els.targetSig) this.els.targetSig.addEventListener("input", () => this.onTargetSigInput());
+    if (this.els.shipBSig) this.els.shipBSig.addEventListener("input", () => this.onShipBSigInput());
     popupGroup.register(skill.popup);
     popupGroup.register(paste.popup);
     popupGroup.register(propulsion.popup);
@@ -131,14 +131,14 @@ export class SidePanelImpl implements SidePanel {
   }
 
   private onModeInput(): void {
-    if (this.side === "attacker") {
+    if (this.side === "shipA") {
       this.host.setManeuverAggressivityEnabled(this.els.mode.value === "maneuver");
     }
     this.host.onConfigChange();
   }
 
-  private onTargetSigInput(): void {
-    this.recordOverride("targetSig", this.capture().sig ?? 1);
+  private onShipBSigInput(): void {
+    this.recordOverride("shipBSig", this.capture().sig ?? 1);
     this.host.onDisplayChange();
   }
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
@@ -151,7 +151,7 @@ export class SidePanelImpl implements SidePanel {
     els.inertia.disabled = !enabled;
     els.mode.disabled = !enabled;
     els.range.disabled = !enabled;
-    if (els.targetSig !== undefined) els.targetSig.disabled = !enabled;
+    if (els.shipBSig !== undefined) els.shipBSig.disabled = !enabled;
     els.skills.disabled = !enabled;
     this.setButtonDisabled(els.skillTrigger, enabled);
     els.overload.disabled = !enabled;
@@ -180,7 +180,7 @@ export class SidePanelImpl implements SidePanel {
       fitting: this.fittingText,
       overrides: this.overrides.get(),
       fittedHull: this.fittedHull,
-      sig: this.side === "target" && this.els.targetSig !== undefined ? Math.max(num(this.els.targetSig), 1) : undefined,
+      sig: this.side === "shipB" && this.els.shipBSig !== undefined ? Math.max(num(this.els.shipBSig), 1) : undefined,
     };
   }
 
@@ -197,7 +197,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.skill.setOverloadActive(state.overload ?? true);
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
-    if (this.els.targetSig !== undefined && state.sig !== undefined) this.els.targetSig.value = String(state.sig);
+    if (this.els.shipBSig !== undefined && state.sig !== undefined) this.els.shipBSig.value = String(state.sig);
     this.sections.stats.updateShipStats({ updateInertia: true, updateMass: false, updateSig: false });
     this.sections.stats.updateAlignTime();
   }

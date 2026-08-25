@@ -91,9 +91,9 @@ export function parseEft(text: string, slotCatalog: ModuleSlotCatalog): EftDocum
         bankLines[line.bank].push({ kind: "empty", label: line.label });
         continue;
       }
-      const target = moduleTarget(line.module, intended, slotCatalog);
-      if (target === undefined) continue;
-      bankLines[target].push(eftLineFromModule(line.module));
+      const bank = moduleBank(line.module, intended, slotCatalog);
+      if (bank === undefined) continue;
+      bankLines[bank].push(eftLineFromModule(line.module));
     }
 
     for (const item of block.quantities) cargo.push(item);
@@ -238,7 +238,7 @@ function parseModuleLine(line: string): EftModule | undefined {
   return { name, charge: charge && charge.length > 0 ? charge : undefined, offline: match[3] !== undefined };
 }
 
-function moduleTarget(module: EftModule, intended: BankKind | undefined, catalog: ModuleSlotCatalog): BankKind | undefined {
+function moduleBank(module: EftModule, intended: BankKind | undefined, catalog: ModuleSlotCatalog): BankKind | undefined {
   const slot: ModuleSlot | undefined = catalog.slotOf(module.name);
   if (slot !== undefined) return slot;
   return intended;

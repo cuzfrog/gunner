@@ -65,9 +65,9 @@ export class FakeElement {
     this.parent = null;
     this.isConnected = false;
   }
-  contains(target: unknown): boolean {
-    if (!(target instanceof FakeElement)) return false;
-    return target === this || this.children.includes(target);
+  contains(shipB: unknown): boolean {
+    if (!(shipB instanceof FakeElement)) return false;
+    return shipB === this || this.children.includes(shipB);
   }
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;

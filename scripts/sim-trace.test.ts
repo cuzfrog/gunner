@@ -10,24 +10,24 @@ type TestCradle = SimCradle & FittingCradle & ShipsCradle & GameDataCradle;
 describe("parseParams", () => {
   test("defaults to no ewar", () => {
     const params = parseParams([]);
-    expect(params.attackerEwarFile).toBeUndefined();
-    expect(params.targetEwarFile).toBeUndefined();
-    expect(params.attackerEwarOverload).toBe(false);
-    expect(params.targetEwarOverload).toBe(false);
+    expect(params.shipAEwarFile).toBeUndefined();
+    expect(params.shipBEwarFile).toBeUndefined();
+    expect(params.shipAEwarOverload).toBe(false);
+    expect(params.shipBEwarOverload).toBe(false);
     expect(params.config.initialDistance).toBe(5000);
   });
 
-  test("parses attacker and target ewar paths and overload flags", () => {
+  test("parses shipA and shipB ewar paths and overload flags", () => {
     const params = parseParams([
-      "--attacker-ewar", "data/ship-fittings/Curse/Kitetackle_Armor_Curse.txt",
-      "--attacker-ewar-overload", "true",
-      "--target-ewar", "data/ship-fittings/Curse/Ewar_Armor_Curse.txt",
-      "--target-ewar-overload", "false",
+      "--ship-a-ewar", "data/ship-fittings/Curse/Kitetackle_Armor_Curse.txt",
+      "--ship-a-ewar-overload", "true",
+      "--ship-b-ewar", "data/ship-fittings/Curse/Ewar_Armor_Curse.txt",
+      "--ship-b-ewar-overload", "false",
     ]);
-    expect(params.attackerEwarFile).toBe("data/ship-fittings/Curse/Kitetackle_Armor_Curse.txt");
-    expect(params.attackerEwarOverload).toBe(true);
-    expect(params.targetEwarFile).toBe("data/ship-fittings/Curse/Ewar_Armor_Curse.txt");
-    expect(params.targetEwarOverload).toBe(false);
+    expect(params.shipAEwarFile).toBe("data/ship-fittings/Curse/Kitetackle_Armor_Curse.txt");
+    expect(params.shipAEwarOverload).toBe(true);
+    expect(params.shipBEwarFile).toBe("data/ship-fittings/Curse/Ewar_Armor_Curse.txt");
+    expect(params.shipBEwarOverload).toBe(false);
   });
 
   test("rejects unknown flags", () => {
@@ -39,8 +39,8 @@ describe("parseParams", () => {
   });
 
   test("rejects non-boolean ewar overload", () => {
-    expect(() => parseParams(["--attacker-ewar-overload", "yes"])).toThrow(
-      '--attacker-ewar-overload expects "true" or "false", got "yes"',
+    expect(() => parseParams(["--ship-a-ewar-overload", "yes"])).toThrow(
+      '--ship-a-ewar-overload expects "true" or "false", got "yes"',
     );
   });
 });

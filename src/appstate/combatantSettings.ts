@@ -31,7 +31,7 @@ export interface CombatantSettings {
   readonly sig?: number;
 }
 
-export type TargetCombatantSettings = CombatantSettings & { readonly sig: number };
+export type ShipBCombatantSettings = CombatantSettings & { readonly sig: number };
 
 export interface UserSettings {
   readonly version: typeof USER_SETTINGS_VERSION;
@@ -43,50 +43,50 @@ export interface UserSettings {
   readonly zoomFactor: number;
   readonly display: DisplayPreferences;
   readonly maneuverAggressivity?: number;
-  readonly attacker: CombatantSettings;
-  readonly target: TargetCombatantSettings;
+  readonly shipA: CombatantSettings;
+  readonly shipB: ShipBCombatantSettings;
   readonly tracking: number;
   readonly sigRes: SigResolutionClass;
   readonly optimal: number;
   readonly falloff: number;
   readonly initialDistance: number;
-  readonly attackerAmmo: string;
+  readonly shipAAmmo: string;
 }
 
-export function toCombatantSettings(settings: UserSettingsWire, side: "attacker" | "target"): CombatantSettings {
-  if (side === "attacker") {
+export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
+  if (side === "shipA") {
     return {
-      speed: settings.attackerSpeed,
-      mode: settings.attackerMode,
-      range: settings.attackerRange,
-      mass: settings.attackerMass,
-      inertia: settings.attackerInertia,
-      skillLevel: settings.attackerSkillLevel,
-      overload: settings.attackerOverload,
-      hull: settings.attackerHull,
-      propulsion: settings.attackerPropulsion,
-      fitting: settings.attackerFitting,
-      overrides: settings.attackerOverrides,
-      fittedHull: settings.attackerFittedHull,
-      ewarActivation: settings.attackerEwarActivation,
-      boosterActivation: settings.attackerBoosterActivation,
+      speed: settings.shipASpeed,
+      mode: settings.shipAMode,
+      range: settings.shipARange,
+      mass: settings.shipAMass,
+      inertia: settings.shipAInertia,
+      skillLevel: settings.shipASkillLevel,
+      overload: settings.shipAOverload,
+      hull: settings.shipAHull,
+      propulsion: settings.shipAPropulsion,
+      fitting: settings.shipAFitting,
+      overrides: settings.shipAOverrides,
+      fittedHull: settings.shipAFittedHull,
+      ewarActivation: settings.shipAEwarActivation,
+      boosterActivation: settings.shipABoosterActivation,
     };
   }
   return {
-    speed: settings.targetSpeed,
-    mode: settings.targetMode,
-    range: settings.targetRange,
-    mass: settings.targetMass,
-    inertia: settings.targetInertia,
-    skillLevel: settings.targetSkillLevel,
-    overload: settings.targetOverload,
-    hull: settings.targetHull,
-    propulsion: settings.targetPropulsion,
-    fitting: settings.targetFitting,
-    overrides: settings.targetOverrides,
-    fittedHull: settings.targetFittedHull,
-    ewarActivation: settings.targetEwarActivation,
-    boosterActivation: settings.targetBoosterActivation,
-    sig: settings.targetSig,
+    speed: settings.shipBSpeed,
+    mode: settings.shipBMode,
+    range: settings.shipBRange,
+    mass: settings.shipBMass,
+    inertia: settings.shipBInertia,
+    skillLevel: settings.shipBSkillLevel,
+    overload: settings.shipBOverload,
+    hull: settings.shipBHull,
+    propulsion: settings.shipBPropulsion,
+    fitting: settings.shipBFitting,
+    overrides: settings.shipBOverrides,
+    fittedHull: settings.shipBFittedHull,
+    ewarActivation: settings.shipBEwarActivation,
+    boosterActivation: settings.shipBBoosterActivation,
+    sig: settings.shipBSig,
   };
 }

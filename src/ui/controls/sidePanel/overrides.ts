@@ -11,11 +11,11 @@ export interface PanelOverrides {
 }
 
 export function createPanelOverrides(side: Side, turretOverrides: TurretOverrides): PanelOverrides {
-  if (side === "attacker") return new AttackerPanelOverrides(turretOverrides);
-  return new TargetPanelOverrides();
+  if (side === "shipA") return new ShipAPanelOverrides(turretOverrides);
+  return new ShipBPanelOverrides();
 }
 
-class AttackerPanelOverrides implements PanelOverrides {
+class ShipAPanelOverrides implements PanelOverrides {
   constructor(private readonly turretOverrides: TurretOverrides) {}
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {
@@ -35,12 +35,12 @@ class AttackerPanelOverrides implements PanelOverrides {
   }
 
   set(_overrides: Partial<ProfileParamOverrides>): void {
-    // Attacker side panel state never owns the turret override store;
+    // ShipA side panel state never owns the turret override store;
     // the store is restored separately by the session codec.
   }
 }
 
-class TargetPanelOverrides implements PanelOverrides {
+class ShipBPanelOverrides implements PanelOverrides {
   private overrides: Partial<ProfileParamOverrides> = {};
 
   isOverridden(key: keyof ProfileParamOverrides): boolean {

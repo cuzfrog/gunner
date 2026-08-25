@@ -50,11 +50,11 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(10);
   });
 
-  test("parseUserSettings defaults missing attackerAmmo", () => {
-    const { attackerAmmo: _, ...missing } = DEFAULT_SETTINGS;
+  test("parseUserSettings defaults missing shipAAmmo", () => {
+    const { shipAAmmo: _, ...missing } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerAmmo).toBe("Hail S");
+    expect(parsed!.shipAAmmo).toBe("Hail S");
   });
 
   test("parseUserSettings rejects an invalid language", () => {
@@ -80,67 +80,67 @@ describe("SettingsParser", () => {
   test("parseUserSettings round-trips ewar activation", () => {
     const parsed = makeParser().parseUserSettings(JSON.stringify(DEFAULT_SETTINGS));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation).toEqual(DEFAULT_SETTINGS.attackerEwarActivation);
-    expect(parsed!.targetEwarActivation).toEqual(DEFAULT_SETTINGS.targetEwarActivation);
+    expect(parsed!.shipAEwarActivation).toEqual(DEFAULT_SETTINGS.shipAEwarActivation);
+    expect(parsed!.shipBEwarActivation).toEqual(DEFAULT_SETTINGS.shipBEwarActivation);
   });
 
   test("parseUserSettings round-trips v10 grappler and booster activations", () => {
     const v10 = {
       ...DEFAULT_SETTINGS,
-      attackerEwarActivation: {
+      shipAEwarActivation: {
         webs: [{ active: true, overloaded: false }],
         grapplers: [{ active: true, overloaded: true }],
         disruptors: [{ active: false, overloaded: false, script: "none" }],
         scramblers: [],
       },
-      targetEwarActivation: {
+      shipBEwarActivation: {
         webs: [],
         grapplers: [{ active: false, overloaded: true }],
         disruptors: [],
         scramblers: [],
       },
-      attackerBoosterActivation: [{ active: true, script: "Optimal Range Script" }, { active: false, script: "none" }],
-      targetBoosterActivation: [{ active: true, script: "Tracking Speed Script" }],
+      shipABoosterActivation: [{ active: true, script: "Optimal Range Script" }, { active: false, script: "none" }],
+      shipBBoosterActivation: [{ active: true, script: "Tracking Speed Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v10));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation?.grapplers).toEqual([{ active: true, overloaded: true }]);
-    expect(parsed!.targetEwarActivation?.grapplers).toEqual([{ active: false, overloaded: true }]);
-    expect(parsed!.attackerBoosterActivation).toEqual(v10.attackerBoosterActivation);
-    expect(parsed!.targetBoosterActivation).toEqual(v10.targetBoosterActivation);
+    expect(parsed!.shipAEwarActivation?.grapplers).toEqual([{ active: true, overloaded: true }]);
+    expect(parsed!.shipBEwarActivation?.grapplers).toEqual([{ active: false, overloaded: true }]);
+    expect(parsed!.shipABoosterActivation).toEqual(v10.shipABoosterActivation);
+    expect(parsed!.shipBBoosterActivation).toEqual(v10.shipBBoosterActivation);
   });
 
   test("parseUserSettings leaves absent ewar and booster activation fields undefined", () => {
-    const { attackerEwarActivation: _, targetEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
+    const { shipAEwarActivation: _, shipBEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation).toBeUndefined();
-    expect(parsed!.targetEwarActivation).toBeUndefined();
-    expect(parsed!.attackerBoosterActivation).toBeUndefined();
-    expect(parsed!.targetBoosterActivation).toBeUndefined();
+    expect(parsed!.shipAEwarActivation).toBeUndefined();
+    expect(parsed!.shipBEwarActivation).toBeUndefined();
+    expect(parsed!.shipABoosterActivation).toBeUndefined();
+    expect(parsed!.shipBBoosterActivation).toBeUndefined();
   });
 
   test("parseUserSettings migrates legacy boolean and empty-script booster entries", () => {
     const v9 = {
       ...DEFAULT_SETTINGS,
       version: 9,
-      attackerBoosterActivation: [true, false, { active: true, script: "" }],
-      targetBoosterActivation: [{ active: false, script: "Optimal Range Script" }],
+      shipABoosterActivation: [true, false, { active: true, script: "" }],
+      shipBBoosterActivation: [{ active: false, script: "Optimal Range Script" }],
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v9));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerBoosterActivation).toEqual([
+    expect(parsed!.shipABoosterActivation).toEqual([
       { active: true, script: "none" },
       { active: false, script: "none" },
       { active: true, script: "none" },
     ]);
-    expect(parsed!.targetBoosterActivation).toEqual([{ active: false, script: "Optimal Range Script" }]);
+    expect(parsed!.shipBBoosterActivation).toEqual([{ active: false, script: "Optimal Range Script" }]);
   });
 
   test("parseUserSettings rejects malformed booster activations like it does for ewar", () => {
     const bad = {
       ...DEFAULT_SETTINGS,
-      attackerBoosterActivation: [{ active: true, script: 123 }],
+      shipABoosterActivation: [{ active: true, script: 123 }],
     };
     expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
   });
@@ -149,32 +149,32 @@ describe("SettingsParser", () => {
     const v6 = {
       ...DEFAULT_SETTINGS,
       version: 6,
-      attackerEwarActivation: { webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] },
-      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
+      shipAEwarActivation: { webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] },
+      shipBEwarActivation: { webs: [false], disruptors: [{ active: true, script: "optimalRange" }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v6));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Tracking Speed Disruption Script" });
-    expect(parsed!.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: true });
-    expect(parsed!.targetEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
-    expect(parsed!.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
+    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Tracking Speed Disruption Script" });
+    expect(parsed!.shipAEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: true });
+    expect(parsed!.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+    expect(parsed!.shipBEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
   });
 
   test("parseUserSettings migrates v7 activations and inherits per-module overload from the side overload flag", () => {
     const v7 = {
       ...DEFAULT_SETTINGS,
       version: 7,
-      attackerOverload: false,
-      attackerEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "none" }] },
-      targetEwarActivation: { webs: [false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] },
+      shipAOverload: false,
+      shipAEwarActivation: { webs: [true, false], disruptors: [{ active: true, script: "none" }] },
+      shipBEwarActivation: { webs: [false], disruptors: [{ active: true, script: "Optimal Range Disruption Script" }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v7));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation).toEqual({
+    expect(parsed!.shipAEwarActivation).toEqual({
       webs: [{ active: true, overloaded: false }, { active: false, overloaded: false }],
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
-    expect(parsed!.targetEwarActivation).toEqual({
+    expect(parsed!.shipBEwarActivation).toEqual({
       webs: [{ active: false, overloaded: true }],
       disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
     });
@@ -184,17 +184,17 @@ describe("SettingsParser", () => {
     const v8 = {
       ...DEFAULT_SETTINGS,
       version: 8,
-      attackerOverload: false,
-      attackerEwarActivation: { scramblers: [true, { active: true }] },
-      targetEwarActivation: { scramblers: [false, { active: true, overloaded: true }] },
+      shipAOverload: false,
+      shipAEwarActivation: { scramblers: [true, { active: true }] },
+      shipBEwarActivation: { scramblers: [false, { active: true, overloaded: true }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v8));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation?.scramblers).toEqual([
+    expect(parsed!.shipAEwarActivation?.scramblers).toEqual([
       { active: true, overloaded: false },
       { active: true, overloaded: false },
     ]);
-    expect(parsed!.targetEwarActivation?.scramblers).toEqual([
+    expect(parsed!.shipBEwarActivation?.scramblers).toEqual([
       { active: false, overloaded: true },
       { active: true, overloaded: true },
     ]);
@@ -203,7 +203,7 @@ describe("SettingsParser", () => {
   test("parseUserSettings migration is idempotent for already-migrated ewar activations", () => {
     const input = {
       ...DEFAULT_SETTINGS,
-      attackerEwarActivation: { webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "none" }], scramblers: [] },
+      shipAEwarActivation: { webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "none" }], scramblers: [] },
     };
     const first = makeParser().parseUserSettings(JSON.stringify(input));
     expect(first).not.toBeNull();
@@ -214,27 +214,69 @@ describe("SettingsParser", () => {
   test("parseUserSettings leaves unknown disruptor script names unchanged", () => {
     const input = {
       ...DEFAULT_SETTINGS,
-      attackerEwarActivation: { disruptors: [{ active: true, script: "custom script" }] },
+      shipAEwarActivation: { disruptors: [{ active: true, script: "custom script" }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(input));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "custom script" });
+    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "custom script" });
+  });
+
+  test("parseUserSettings normalizes legacy attacker and target keys to shipA and shipB", () => {
+    const legacy = {
+      version: 9,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 3000,
+      falloff: 2000,
+      attackerSpeed: 500,
+      attackerMode: "orbit",
+      attackerRange: 3000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      targetSpeed: 800,
+      targetMode: "keepAtRange",
+      targetRange: 3000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSig: 125,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      initialDistance: 3000,
+      attackerAmmo: "Hail S",
+      simSpeed: 2,
+      language: "en",
+      gridBrightness: 0.5,
+      autoZoom: true,
+      zoomFactor: 1,
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(legacy));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipASpeed).toBe(500);
+    expect(parsed!.shipAMode).toBe("orbit");
+    expect(parsed!.shipBSpeed).toBe(800);
+    expect(parsed!.shipBSig).toBe(125);
+    expect(parsed!.shipAAmmo).toBe("Hail S");
+    expect("attackerSpeed" in parsed!).toBe(false);
+    expect("targetSpeed" in parsed!).toBe(false);
   });
 
   test("parseUserSettings rejects an invalid disruptor script", () => {
     const bad = {
       ...DEFAULT_SETTINGS,
-      attackerEwarActivation: { disruptors: [{ active: true, script: 123 }] },
+      shipAEwarActivation: { disruptors: [{ active: true, script: 123 }] },
     };
     expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
   });
 
   test("parseUserSettings accepts missing ewar activation fields", () => {
-    const { attackerEwarActivation: _, targetEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
+    const { shipAEwarActivation: _, shipBEwarActivation: __, ...missing } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
     expect(parsed).not.toBeNull();
-    expect(parsed!.attackerEwarActivation).toBeUndefined();
-    expect(parsed!.targetEwarActivation).toBeUndefined();
+    expect(parsed!.shipAEwarActivation).toBeUndefined();
+    expect(parsed!.shipBEwarActivation).toBeUndefined();
   });
 
   test("parseProfiles skips invalid profiles", () => {
@@ -248,16 +290,56 @@ describe("SettingsParser", () => {
     expect(profile).not.toBeNull();
     expect(profile).not.toHaveProperty("language");
     expect(profile).not.toHaveProperty("trackingUnit");
-    expect(profile!.attackerAmmo).toBe("Hail S");
+    expect(profile!.shipAAmmo).toBe("Hail S");
   });
 
   test("decodeUrlSettings rejects invalid base64", () => {
     expect(makeParser().decodeUrlSettings("INVALID")).toBeNull();
   });
 
+  test("decodeUrlSettings normalizes legacy attacker and target keys", () => {
+    const legacy = {
+      version: 9,
+      tracking: 0.5,
+      trackingUnit: "rad",
+      sigRes: "S",
+      optimal: 3000,
+      falloff: 2000,
+      attackerSpeed: 500,
+      attackerMode: "orbit",
+      attackerRange: 3000,
+      attackerMass: 1_200_000,
+      attackerInertia: 3,
+      attackerSkillLevel: 5,
+      attackerOverload: true,
+      targetSpeed: 800,
+      targetMode: "keepAtRange",
+      targetRange: 3000,
+      targetMass: 10_000_000,
+      targetInertia: 0.45,
+      targetSig: 125,
+      targetSkillLevel: 5,
+      targetOverload: true,
+      initialDistance: 3000,
+      attackerAmmo: "Hail S",
+      simSpeed: 2,
+      language: "en",
+      gridBrightness: 0.5,
+      autoZoom: true,
+      zoomFactor: 1,
+    };
+    const parser = makeParser();
+    const decoded = parser.decodeUrlSettings(urlFor(legacy).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.shipASpeed).toBe(500);
+    expect(decoded!.shipBSpeed).toBe(800);
+    expect(decoded!.shipBSig).toBe(125);
+    expect(decoded!.shipAAmmo).toBe("Hail S");
+  });
+
   test("decodeUrlSettings rejects settings with an invalid propulsion id", () => {
     const parser = makeParser();
-    expect(parser.decodeUrlSettings(urlFor({ ...DEFAULT_SETTINGS, attackerPropulsion: "ab-5mn" }).split("c=")[1])).toBeNull();
+    expect(parser.decodeUrlSettings(urlFor({ ...DEFAULT_SETTINGS, shipAPropulsion: "ab-5mn" }).split("c=")[1])).toBeNull();
   });
 
   test("decodeUrlSettings decodes URL settings and rebuilds the fitting basis", () => {
@@ -268,12 +350,12 @@ describe("SettingsParser", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
     };
     const parser = makeParser();
     const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    expect(decoded!.attackerFittedHull).toEqual({
+    expect(decoded!.shipAFittedHull).toEqual({
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
       propulsionName: RIFTER_MODULE.label,
@@ -282,8 +364,8 @@ describe("SettingsParser", () => {
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
     });
-    expect(decoded!.attackerMass).toBe(1_500_000);
-    expect(decoded!.attackerSpeed).toBe(4_649.72);
+    expect(decoded!.shipAMass).toBe(1_500_000);
+    expect(decoded!.shipASpeed).toBe(4_649.72);
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {
@@ -312,14 +394,14 @@ describe("SettingsParser", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerPropulsion: "none",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAPropulsion: "none",
     };
     const decoded = makeParser().decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    expect(decoded!.attackerPropulsion).toBe("none");
-    expect(decoded!.attackerSpeed).toBe(456.25);
-    expect(decoded!.attackerMass).toBe(1_000_000);
+    expect(decoded!.shipAPropulsion).toBe("none");
+    expect(decoded!.shipASpeed).toBe(456.25);
+    expect(decoded!.shipAMass).toBe(1_000_000);
   });
 
   test("decodeUrlSettings applies a stored charge that matches the turret size", () => {
@@ -335,18 +417,18 @@ describe("SettingsParser", () => {
 
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerAmmo: "Republic Fleet EMP S",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAAmmo: "Republic Fleet EMP S",
     };
     const decoded = makeParser().decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    expect(decoded!.attackerAmmo).toBe("Republic Fleet EMP S");
+    expect(decoded!.shipAAmmo).toBe("Republic Fleet EMP S");
     expect(decoded!.tracking).toBe(0.42);
     expect(decoded!.optimal).toBe(1200);
     expect(decoded!.falloff).toBe(3000);
   });
 
-  test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when attackerSpeed is overridden", () => {
+  test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when shipASpeed is overridden", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
@@ -355,18 +437,18 @@ describe("SettingsParser", () => {
     const override = 2000;
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
-      attackerOverrides: { attackerSpeed: override },
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAOverrides: { shipASpeed: override },
     };
     const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    expect(decoded!.attackerSpeed).toBe(override);
-    const conditions = { skillLevel: settings.attackerSkillLevel ?? 5, overloaded: settings.attackerOverload ?? true };
+    expect(decoded!.shipASpeed).toBe(override);
+    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true };
     const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions, override).baseMaxSpeed;
-    expect(decoded!.attackerFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
+    expect(decoded!.shipAFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });
 
-  test("decodeUrlSettings keeps baseMaxSpeed unscaled when attackerSpeed is not overridden", () => {
+  test("decodeUrlSettings keeps baseMaxSpeed unscaled when shipASpeed is not overridden", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
@@ -374,13 +456,13 @@ describe("SettingsParser", () => {
     const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
-      attackerFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
+      shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
     };
     const decoded = parser.decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    const conditions = { skillLevel: settings.attackerSkillLevel ?? 5, overloaded: settings.attackerOverload ?? true };
+    const conditions = { skillLevel: settings.shipASkillLevel ?? 5, overloaded: settings.shipAOverload ?? true };
     const expected = realShips.cradle.ships.fittedStats(RIFTER_PROFILE, IMPORTED_RIFTER.fitted, RIFTER_PROPULSION, conditions).baseMaxSpeed;
-    expect(decoded!.attackerFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
+    expect(decoded!.shipAFittedHull?.baseMaxSpeed).toBeCloseTo(expected, 6);
   });
 
   test("golden localStorage round-trip preserves DEFAULT_SETTINGS", () => {

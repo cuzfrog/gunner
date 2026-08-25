@@ -29,8 +29,8 @@ function createManager(options: {
   preview?: FittingPreview;
 } = {}) {
   const preview = options.preview ?? createPreview();
-  const attackerPreview = preview;
-  const targetPreview = createPreview();
+  const shipAPreview = preview;
+  const shipBPreview = createPreview();
   const shipImage = new FakeElement();
   const eye = new FakeElement();
   eye.tagName = "BUTTON";
@@ -51,22 +51,22 @@ function createManager(options: {
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
-  const attackerSide: FittingPopupHost = {
+  const shipASide: FittingPopupHost = {
     profile: RIFTER,
-    get fittingText() { return options.fittingTextOf ? options.fittingTextOf("attacker") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
+    get fittingText() { return options.fittingTextOf ? options.fittingTextOf("shipA") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
     skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }),
   };
-  const targetSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) };
+  const shipBSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) };
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,
       imageCatalog,
       i18n,
-      attackerSide,
-      targetSide,
-      previewsBySide: { attacker: attackerPreview, target: targetPreview } as const,
-      shipImageBySide: { attacker: shipImage as unknown as HTMLImageElement, target: shipImage as unknown as HTMLImageElement } as const,
-      eyeBySide: { attacker: eye as unknown as HTMLButtonElement, target: eye as unknown as HTMLButtonElement } as const,
+      shipASide,
+      shipBSide,
+      previewsBySide: { shipA: shipAPreview, shipB: shipBPreview } as const,
+      shipImageBySide: { shipA: shipImage as unknown as HTMLImageElement, shipB: shipImage as unknown as HTMLImageElement } as const,
+      eyeBySide: { shipA: eye as unknown as HTMLButtonElement, shipB: eye as unknown as HTMLButtonElement } as const,
       events,
     }),
     preview,
@@ -88,15 +88,15 @@ describe("FittingPreviewManager", () => {
 
   test("toggle shows the current fitting at the ship image and hides on second toggle", () => {
     const { manager, preview } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.show).toHaveBeenCalled();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.hide).toHaveBeenCalled();
   });
 
   test("toggle is a no-op when the side has no fitting text", () => {
     const { manager, preview } = createManager({ fittingTextOf: () => undefined });
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.show).not.toHaveBeenCalled();
   });
 
@@ -105,10 +105,10 @@ describe("FittingPreviewManager", () => {
     const anchor = new FakeElement();
     const eye = new FakeElement();
     eye.tagName = "BUTTON";
-    manager.showInMenu("attacker", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
+    manager.showInMenu("shipA", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
     expect(preview.show).toHaveBeenCalledWith(anchor, PREVIEW_SUMMARY, "images/ships/Rifter.webp", expect.any(Function));
     expect(eye.getAttribute("aria-pressed")).toBe("true");
-    manager.showInMenu("attacker", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
+    manager.showInMenu("shipA", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
     expect(eye.getAttribute("aria-pressed")).toBe("false");
   });
 
@@ -116,15 +116,15 @@ describe("FittingPreviewManager", () => {
     const { manager, eye } = createManager();
     const menuEye = new FakeElement();
     menuEye.tagName = "BUTTON";
-    manager.showInMenu("attacker", "eft", menuEye as unknown as HTMLElement, menuEye as unknown as HTMLButtonElement);
-    manager.toggle("attacker");
+    manager.showInMenu("shipA", "eft", menuEye as unknown as HTMLElement, menuEye as unknown as HTMLButtonElement);
+    manager.toggle("shipA");
     expect(menuEye.getAttribute("aria-pressed")).toBe("false");
     expect(eye.getAttribute("aria-pressed")).toBe("true");
   });
 
   test("pointerdown outside the fitting area hides the preview", () => {
     const { manager, preview } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     const outside = new FakeElement();
     manager.handlePointerDown(outside as unknown as EventTarget);
     expect(preview.hide).toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe("FittingPreviewManager", () => {
 
   test("pointerdown inside the fitting area keeps the preview", () => {
     const { manager, preview, shipImage } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     const inside = new FakeElement();
     inside.closest = () => shipImage;
     manager.handlePointerDown(inside as unknown as EventTarget);
@@ -141,7 +141,7 @@ describe("FittingPreviewManager", () => {
 
   test("Escape hides the preview and focuses the eye", () => {
     const { manager, preview, eye } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     manager.handleEscape();
     expect(preview.hide).toHaveBeenCalled();
     expect(eye.focus).toHaveBeenCalled();
@@ -149,14 +149,14 @@ describe("FittingPreviewManager", () => {
 
   test("refresh re-renders an open preview when the fitting text changes", () => {
     const { manager, preview } = createManager({ fittingTextOf: () => "first" });
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     manager.refresh();
     expect(preview.show).toHaveBeenCalledTimes(2);
   });
 
   test("refresh hides the preview when the anchor is no longer connected", () => {
     const { manager, preview, shipImage } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     shipImage.isConnected = false;
     manager.refresh();
     expect(preview.hide).toHaveBeenCalled();

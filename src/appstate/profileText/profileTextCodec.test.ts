@@ -30,12 +30,12 @@ describe("profileTextCodec", () => {
   });
 
   test("round-trips a profile with deselected propulsion modules", () => {
-    const profile: ProfileSettings = { ...MINIMAL_PROFILE, attackerPropulsion: "none", targetPropulsion: "none" };
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAPropulsion: "none", shipBPropulsion: "none" };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
   test("round-trips a profile with midships mode for both sides", () => {
-    const profile: ProfileSettings = { ...MINIMAL_PROFILE, attackerMode: "midships", targetMode: "midships" };
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAMode: "midships", shipBMode: "midships" };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
@@ -45,18 +45,18 @@ describe("profileTextCodec", () => {
 
 [Empty Low slot]
 [Empty Low slot]`;
-    const profile = { ...MINIMAL_PROFILE, attackerFitting: fitting };
-    expect(codec.parse(codec.serialize(profile))?.attackerFitting).toBe(fitting);
+    const profile = { ...MINIMAL_PROFILE, shipAFitting: fitting };
+    expect(codec.parse(codec.serialize(profile))?.shipAFitting).toBe(fitting);
   });
 
   test("round-trips a profile with ewar activations", () => {
     const profile: ProfileSettings = {
       ...MINIMAL_PROFILE,
-      attackerEwarActivation: {
+      shipAEwarActivation: {
         webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
         disruptors: [{ active: true, overloaded: true, script: "Tracking Speed Disruption Script" }],
       },
-      targetEwarActivation: {
+      shipBEwarActivation: {
         webs: [{ active: false, overloaded: false }],
         disruptors: [{ active: false, overloaded: true, script: "none" }],
       },
@@ -66,42 +66,42 @@ describe("profileTextCodec", () => {
 
   test("migrates legacy v6 enum disruptor scripts in profile text", () => {
     const base = codec.serialize(MINIMAL_PROFILE);
-    const attackerEwar = JSON.stringify({ webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] });
-    const targetEwar = JSON.stringify({ webs: [false], disruptors: [{ active: true, script: "optimalRange" }] });
-    const parsed = codec.parse(`${base}\nattacker.ewarActivation=${attackerEwar}\ntarget.ewarActivation=${targetEwar}`);
-    expect(parsed?.attackerEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
-    expect(parsed?.attackerEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
-    expect(parsed?.targetEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
-    expect(parsed?.targetEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
+    const shipAEwar = JSON.stringify({ webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] });
+    const shipBEwar = JSON.stringify({ webs: [false], disruptors: [{ active: true, script: "optimalRange" }] });
+    const parsed = codec.parse(`${base}\nshipA.ewarActivation=${shipAEwar}\nshipB.ewarActivation=${shipBEwar}`);
+    expect(parsed?.shipAEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
+    expect(parsed?.shipAEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
+    expect(parsed?.shipBEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    expect(parsed?.shipBEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
   });
 
   test("migrates v5 boolean web activation and inherits side overload from the profile", () => {
     const base = codec.serialize(MINIMAL_PROFILE);
-    const attackerEwar = JSON.stringify({ webs: [true] });
-    const targetEwar = JSON.stringify({ webs: [false] });
-    const parsed = codec.parse(`${base}\nattacker.overload=false\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=false\ntarget.ewarActivation=${targetEwar}`);
-    expect(parsed?.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
-    expect(parsed?.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: false });
+    const shipAEwar = JSON.stringify({ webs: [true] });
+    const shipBEwar = JSON.stringify({ webs: [false] });
+    const parsed = codec.parse(`${base}\nshipA.overload=false\nshipA.ewarActivation=${shipAEwar}\nshipB.overload=false\nshipB.ewarActivation=${shipBEwar}`);
+    expect(parsed?.shipAEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
+    expect(parsed?.shipBEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: false });
   });
 
   test("migrates missing per-module overload from explicit side overload", () => {
     const base = codec.serialize(MINIMAL_PROFILE);
-    const attackerEwar = JSON.stringify({ webs: [{ active: true }], disruptors: [{ active: true, script: "none" }] });
-    const targetEwar = JSON.stringify({ webs: [{ active: false }], disruptors: [{ active: true, script: "optimalRange" }] });
-    const parsed = codec.parse(`${base}\nattacker.overload=false\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=true\ntarget.ewarActivation=${targetEwar}`);
-    expect(parsed?.attackerEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
-    expect(parsed?.attackerEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: false, script: "none" });
-    expect(parsed?.targetEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
-    expect(parsed?.targetEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+    const shipAEwar = JSON.stringify({ webs: [{ active: true }], disruptors: [{ active: true, script: "none" }] });
+    const shipBEwar = JSON.stringify({ webs: [{ active: false }], disruptors: [{ active: true, script: "optimalRange" }] });
+    const parsed = codec.parse(`${base}\nshipA.overload=false\nshipA.ewarActivation=${shipAEwar}\nshipB.overload=true\nshipB.ewarActivation=${shipBEwar}`);
+    expect(parsed?.shipAEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
+    expect(parsed?.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: false, script: "none" });
+    expect(parsed?.shipBEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
+    expect(parsed?.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
   });
 
   test("migration is idempotent for already-migrated version 8 activation", () => {
     const base = codec.serialize(MINIMAL_PROFILE);
-    const attackerEwar = JSON.stringify({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
-    const targetEwar = JSON.stringify({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
-    const parsed = codec.parse(`${base}\nattacker.overload=true\nattacker.ewarActivation=${attackerEwar}\ntarget.overload=true\ntarget.ewarActivation=${targetEwar}`);
-    expect(parsed?.attackerEwarActivation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
-    expect(parsed?.targetEwarActivation).toEqual({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
+    const shipAEwar = JSON.stringify({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
+    const shipBEwar = JSON.stringify({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
+    const parsed = codec.parse(`${base}\nshipA.overload=true\nshipA.ewarActivation=${shipAEwar}\nshipB.overload=true\nshipB.ewarActivation=${shipBEwar}`);
+    expect(parsed?.shipAEwarActivation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
+    expect(parsed?.shipBEwarActivation).toEqual({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
   });
 
   test("a legacy profile without ewar activations parses with defaults", () => {
@@ -111,35 +111,35 @@ tracking=0.32
 sigRes=S
 optimal=5000
 falloff=5000
-attacker.speed=0
-attacker.mode=keepAtRange
-attacker.range=5000
-attacker.mass=1200000
-attacker.inertia=3
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
 initialDistance=5000
-target.speed=1000
-target.mode=orbit
-target.range=5000
-target.mass=10000000
-target.inertia=0.45
-target.sig=40`;
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40`;
     const parsed = codec.parse(text);
     expect(parsed).not.toBeUndefined();
-    expect(parsed?.attackerEwarActivation).toBeUndefined();
-    expect(parsed?.targetEwarActivation).toBeUndefined();
+    expect(parsed?.shipAEwarActivation).toBeUndefined();
+    expect(parsed?.shipBEwarActivation).toBeUndefined();
   });
 
   test("round-trips grappler and booster activations with script and none sentinel", () => {
     const profile: ProfileSettings = {
       ...MINIMAL_PROFILE,
-      attackerEwarActivation: {
+      shipAEwarActivation: {
         webs: [],
         grapplers: [{ active: true, overloaded: true }],
         disruptors: [],
         scramblers: [],
       },
-      attackerBoosterActivation: [{ active: false, script: "Optimal Range Script" }, { active: true, script: "none" }],
-      targetBoosterActivation: [{ active: true, script: "none" }],
+      shipABoosterActivation: [{ active: false, script: "Optimal Range Script" }, { active: true, script: "none" }],
+      shipBBoosterActivation: [{ active: true, script: "none" }],
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });

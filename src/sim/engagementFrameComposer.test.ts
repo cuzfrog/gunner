@@ -10,8 +10,8 @@ const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 
 const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 
-const attacker: ShipState = {
-  id: "attacker",
+const shipA: ShipState = {
+  id: "shipA",
   maxSpeed: 250,
   mass: 1_200_000,
   inertiaModifier: 3,
@@ -22,8 +22,8 @@ const attacker: ShipState = {
   velocity: new Vec2(0, 0),
 };
 
-const target: ShipState = {
-  id: "target",
+const shipB: ShipState = {
+  id: "shipB",
   maxSpeed: 120,
   mass: 1_200_000,
   inertiaModifier: 3,
@@ -36,8 +36,8 @@ const target: ShipState = {
 
 const frame: EngagementFrame = {
   time: 1,
-  attacker,
-  target,
+  shipA,
+  shipB,
   relPosition: new Vec2(0, 6000),
   distance: 6000,
   relVelocity: new Vec2(0, 0),
@@ -47,15 +47,15 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const snapshot: SimSnapshot = { time: 1, attacker, target, commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) } };
+const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
-const input = { turret, targetSigRadius: 40 };
+const input = { turret, shipBSigRadius: 40 };
 
 function makeComposer() {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
   const engagementEvaluator = vi.mocked<EngagementEvaluator>({
-    evaluate: vi.fn(() => ({ attacker: { boostedTurret, effectiveTurret, hit } })),
+    evaluate: vi.fn(() => ({ shipA: { boostedTurret, effectiveTurret, hit } })),
   });
   const composer = new EngagementFrameComposerImpl({ kinematics, hitChance, engagementEvaluator });
   return { kinematics, hitChance, engagementEvaluator, composer };
@@ -69,13 +69,13 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.assessment).toEqual({ boostedTurret, effectiveTurret, hit });
     expect(view.effectiveTurret).toBe(effectiveTurret);
     expect(view.hit).toBe(hit);
-    expect(kinematics.computeEngagement).toHaveBeenCalledWith(attacker, target, 1);
+    expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(snapshot, {
-      attacker: { turret: input.turret, targetSigRadius: input.targetSigRadius },
+      shipA: { turret: input.turret, shipBSigRadius: input.shipBSigRadius },
     });
   });
 
-  test("falls back to raw hitChance and the base turret when the evaluator returns no attacker assessment", () => {
+  test("falls back to raw hitChance and the base turret when the evaluator returns no shipA assessment", () => {
     const { hitChance, engagementEvaluator, composer } = makeComposer();
     const fallbackHit: HitChanceBreakdown = { chance: 0.5, trackingTerm: 0.25, rangeTerm: 0.5 };
     engagementEvaluator.evaluate.mockReturnValue({});
@@ -84,9 +84,9 @@ describe("EngagementFrameComposerImpl", () => {
     expect(view.assessment).toBeUndefined();
     expect(view.effectiveTurret).toEqual(turret);
     expect(view.hit).toBe(fallbackHit);
-    expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, input.targetSigRadius);
+    expect(hitChance.compute).toHaveBeenCalledWith(frame, turret, input.shipBSigRadius);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(snapshot, {
-      attacker: { turret: input.turret, targetSigRadius: input.targetSigRadius },
+      shipA: { turret: input.turret, shipBSigRadius: input.shipBSigRadius },
     });
   });
 });

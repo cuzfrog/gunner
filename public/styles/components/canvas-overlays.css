@@ -36,8 +36,8 @@
   pointer-events: none;
 }
 
-.combatant-portrait-attacker { left: var(--canvas-overlay-inset); }
-.combatant-portrait-target { right: var(--canvas-overlay-inset); }
+.combatant-portrait-ship-a { left: var(--canvas-overlay-inset); }
+.combatant-portrait-ship-b { right: var(--canvas-overlay-inset); }
 
 .portrait-image {
   width: 50px;
@@ -48,8 +48,8 @@
   border-radius: 2px;
 }
 
-.portrait-image-attacker { border-color: var(--accent-teal); }
-.portrait-image-target { border-color: var(--accent-orange); }
+.portrait-image-ship-a { border-color: var(--accent-teal); }
+.portrait-image-ship-b { border-color: var(--accent-orange); }
 
 .portrait-effects {
   position: absolute;

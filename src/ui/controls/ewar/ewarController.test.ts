@@ -59,7 +59,7 @@ class FakePopupGroup implements PopupGroup {
     return this.popups.some((p) => p.isOpen());
   }
 
-  onPointerDown(_target: EventTarget | null): void {}
+  onPointerDown(_domTarget: EventTarget | null): void {}
 
   onKeyDown(_event: { readonly key: string }): void {}
 }
@@ -85,14 +85,14 @@ function buildEwarController(
   });
   const popupGroup = new FakePopupGroup();
   const els = createControlsEls();
-  const attackerPopup = els.attackerEwarPopup;
-  const targetPopup = els.targetEwarPopup;
-  attackerPopup.appendChild(els.attackerEwarSection);
-  attackerPopup.appendChild(els.attackerBoosterSection);
-  targetPopup.appendChild(els.targetEwarSection);
-  targetPopup.appendChild(els.targetBoosterSection);
-  attackerPopup.hidden = true;
-  targetPopup.hidden = true;
+  const shipAPopup = els.shipAEwarPopup;
+  const shipBPopup = els.shipBEwarPopup;
+  shipAPopup.appendChild(els.shipAEwarSection);
+  shipAPopup.appendChild(els.shipABoosterSection);
+  shipBPopup.appendChild(els.shipBEwarSection);
+  shipBPopup.appendChild(els.shipBBoosterSection);
+  shipAPopup.hidden = true;
+  shipBPopup.hidden = true;
   if (beforeConstruct) beforeConstruct(document, els);
   const fittingImport = vi.mocked(mockFittingImport());
   fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
@@ -113,23 +113,23 @@ function buildEwarController(
   return { document, controller, els, i18n, imageCatalog, popupGroup, fittingImport, ewarEffectDescriber, events, emitConfigInvalidated };
 }
 
-function ewarSection(document: Document, side: "attacker" | "target"): FakeElement {
-  return getFake(document, `${side}-ewar-section`);
+function ewarSection(document: Document, side: "shipA" | "shipB"): FakeElement {
+  return getFake(document, `${side === "shipA" ? "ship-a" : "ship-b"}-ewar-section`);
 }
 
-function webSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+function webSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.web");
 }
 
-function grapplerSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+function grapplerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.grappler");
 }
 
-function disruptorSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+function disruptorSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.disruptor");
 }
 
-function scramblerSection(document: Document, side: "attacker" | "target"): FakeElement | undefined {
+function scramblerSection(document: Document, side: "shipA" | "shipB"): FakeElement | undefined {
   return ewarSection(document, side).children.find((section) => section.children[0]?.textContent === "label.ewar.scrambler");
 }
 
@@ -145,8 +145,8 @@ function gearFor(row: FakeElement): FakeElement {
   return gear;
 }
 
-function scriptPopupFor(document: Document, side: "attacker" | "target"): FakeElement {
-  const field = getFake(document, `${side}-ewar-field`);
+function scriptPopupFor(document: Document, side: "shipA" | "shipB"): FakeElement {
+  const field = getFake(document, `${side === "shipA" ? "ship-a" : "ship-b"}-ewar-field`);
   const popup = field.children[0];
   if (!popup) throw new Error(`Missing script popup for ${side}`);
   return popup;
@@ -164,11 +164,11 @@ describe("EwarController", () => {
   test("setLoadout renders sections, rows, and per-kind summary for mixed loadouts and disables trigger for empty loadouts", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [WEB2], disruptors: [DISRUPTOR, DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "attacker-ewar-trigger");
-    const summary = getFake(document, "attacker-ewar-summary");
-    const popup = getFake(document, "attacker-ewar-popup");
+    const trigger = getFake(document, "ship-a-ewar-trigger");
+    const summary = getFake(document, "ship-a-ewar-summary");
+    const popup = getFake(document, "ship-a-ewar-popup");
     expect(trigger.disabled).toBe(false);
     expect(trigger.getAttribute("aria-label")).toBe("label.modules");
     expect(trigger.title).toBe("");
@@ -190,8 +190,8 @@ describe("EwarController", () => {
     expect(disruptorSummary.children[0].hidden).toBe(false);
     expect(disruptorSummary.children[1].textContent).toBe("2/2");
 
-    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(2);
-    const webs = webSection(document, "attacker")!;
+    expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(2);
+    const webs = webSection(document, "shipA")!;
     expect(webs.className).toBe("preview-section");
     expect(webs.children[0].className).toBe("preview-section-label");
     expect(webs.children[0].textContent).toBe("label.ewar.web");
@@ -207,7 +207,7 @@ describe("EwarController", () => {
     expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
     expect(webButton.children[1].title).toBe(WEB2.moduleName);
 
-    const disruptors = disruptorSection(document, "attacker")!;
+    const disruptors = disruptorSection(document, "shipA")!;
     expect(disruptors.className).toBe("preview-section");
     expect(disruptors.children[0].textContent).toBe("label.ewar.disruptor");
     expect(disruptors.children.length).toBe(3);
@@ -223,7 +223,7 @@ describe("EwarController", () => {
     expect(firstGear.className).toBe("ewar-script-gear btn icon-button");
     expect(firstGear.getAttribute("aria-haspopup")).toBe("menu");
     expect(firstGear.getAttribute("aria-expanded")).toBe("false");
-    expect(firstGear.getAttribute("aria-controls")).toBe("attacker-ewar-script-popup");
+    expect(firstGear.getAttribute("aria-controls")).toBe("ship-a-ewar-script-popup");
     expect(firstGear.getAttribute("title")).toBe("ewar.script.none");
     expect(firstGear.getAttribute("aria-label")).toBe("ewar.script.none");
     expect(firstGear.disabled).toBe(false);
@@ -234,26 +234,26 @@ describe("EwarController", () => {
     expect(secondGear.getAttribute("aria-label")).toBe("Optimal Range Disruption Script");
     expect(secondGear.disabled).toBe(false);
 
-    controller.setLoadout("target", EMPTY_EWAR_LOADOUT);
-    const targetTrigger = getFake(document, "target-ewar-trigger");
-    expect(targetTrigger.disabled).toBe(true);
-    expect(targetTrigger.title).toBe("title.ewar.empty");
-    expect(getFake(document, "target-ewar-summary").children.length).toBe(0);
-    expect(ewarSection(document, "target").children.length).toBe(0);
+    controller.setLoadout("shipB", EMPTY_EWAR_LOADOUT);
+    const shipBTrigger = getFake(document, "ship-b-ewar-trigger");
+    expect(shipBTrigger.disabled).toBe(true);
+    expect(shipBTrigger.title).toBe("title.ewar.empty");
+    expect(getFake(document, "ship-b-ewar-summary").children.length).toBe(0);
+    expect(ewarSection(document, "shipB").children.length).toBe(0);
   });
 
   test("grappler-only loadout renders a section, summary, and toggles overload", () => {
     const { controller, document, ewarEffectDescriber } = buildEwarController();
     const loadout: EwarLoadout = { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    const summary = getFake(document, "attacker-ewar-summary");
+    const summary = getFake(document, "ship-a-ewar-summary");
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].children[1].textContent).toBe("1/1");
     expect(summary.children[0].getAttribute("title")).toBe("grappler-hint");
     expect(ewarEffectDescriber.grapplerHint).toHaveBeenCalled();
 
-    const grapplers = grapplerSection(document, "attacker")!;
+    const grapplers = grapplerSection(document, "shipA")!;
     expect(grapplers.children[0].textContent).toBe("label.ewar.grappler");
     expect(grapplers.children.length).toBe(2);
     const row = grapplers.children[1];
@@ -265,22 +265,22 @@ describe("EwarController", () => {
 
     overload.trigger("click");
     expect(overload.getAttribute("aria-pressed")).toBe("true");
-    expect(controller.projection("attacker")!.activation!.grapplers[0]!.overloaded).toBe(true);
+    expect(controller.projection("shipA")!.activation!.grapplers[0]!.overloaded).toBe(true);
   });
 
   test("scrambler-only loadout renders, summarizes, and projects", () => {
     const { controller, document, ewarEffectDescriber } = buildEwarController();
     const loadout: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "attacker-ewar-trigger");
-    const summary = getFake(document, "attacker-ewar-summary");
+    const trigger = getFake(document, "ship-a-ewar-trigger");
+    const summary = getFake(document, "ship-a-ewar-summary");
     expect(trigger.disabled).toBe(false);
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].getAttribute("title")).toBe("scrambler-hint");
-    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(1);
-    expect(scramblerSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.scrambler");
-    expect(controller.projection("attacker")).toEqual({
+    expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(scramblerSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.scrambler");
+    expect(controller.projection("shipA")).toEqual({
       loadout,
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: false }] },
     });
@@ -289,13 +289,13 @@ describe("EwarController", () => {
 
   test("toggling a web flips state, updates its section summary, and does not close popup", () => {
     const { controller, document, emitConfigInvalidated } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB, WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const summary = getFake(document, "attacker-ewar-summary");
+    const summary = getFake(document, "ship-a-ewar-summary");
 
-    const section = webSection(document, "attacker")!;
+    const section = webSection(document, "shipA")!;
     const firstRow = section.children[1];
     const firstToggle = firstRow.children[0];
     const firstOverload = overloadFor(firstRow);
@@ -307,7 +307,7 @@ describe("EwarController", () => {
     expect(firstToggle.getAttribute("aria-pressed")).toBe("false");
     expect(firstOverload.disabled).toBe(true);
     expect(section.children[2].children[0].getAttribute("aria-pressed")).toBe("true");
-    expect(controller.capture("attacker")?.webs).toEqual([
+    expect(controller.capture("shipA")?.webs).toEqual([
       { active: false, overloaded: false },
       { active: true, overloaded: false },
     ]);
@@ -316,7 +316,7 @@ describe("EwarController", () => {
     firstToggle.trigger("click");
     expect(summary.children[0].children[1].textContent).toBe("2/2");
     expect(firstOverload.disabled).toBe(false);
-    expect(controller.capture("attacker")?.webs).toEqual([
+    expect(controller.capture("shipA")?.webs).toEqual([
       { active: true, overloaded: false },
       { active: true, overloaded: false },
     ]);
@@ -324,11 +324,11 @@ describe("EwarController", () => {
 
   test("toggling a disruptor disables its overload button and script gear", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("target", { webs: [], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipB", { webs: [], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "target-ewar-popup");
+    const popup = getFake(document, "ship-b-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(document, "target")!;
+    const section = disruptorSection(document, "shipB")!;
     const row = section.children[1];
     const gear = gearFor(row);
     const overload = overloadFor(row);
@@ -349,55 +349,55 @@ describe("EwarController", () => {
 
   test("renders one, two, or zero sections based on loadout contents", () => {
     const { controller, document } = buildEwarController();
-    const trigger = getFake(document, "attacker-ewar-trigger");
-    const popup = getFake(document, "attacker-ewar-popup");
-    const ewar = ewarSection(document, "attacker");
+    const trigger = getFake(document, "ship-a-ewar-trigger");
+    const popup = getFake(document, "ship-a-ewar-popup");
+    const ewar = ewarSection(document, "shipA");
 
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
     expect(trigger.getAttribute("aria-label")).toBe("label.modules");
     expect(popup.getAttribute("aria-label")).toBe("label.modules");
     expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(1);
-    expect(webSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.web");
+    expect(webSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.web");
 
-    controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
     expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(1);
-    expect(disruptorSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.disruptor");
+    expect(disruptorSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.disruptor");
 
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
     expect(ewar.children.filter((c) => c.className === "preview-section").length).toBe(2);
-    expect(webSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.web");
-    expect(disruptorSection(document, "attacker")!.children[0].textContent).toBe("label.ewar.disruptor");
+    expect(webSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.web");
+    expect(disruptorSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.disruptor");
 
-    controller.setLoadout("attacker", EMPTY_EWAR_LOADOUT);
+    controller.setLoadout("shipA", EMPTY_EWAR_LOADOUT);
     expect(ewar.children.length).toBe(0);
   });
 
   test("TD script choice persists per row and survives capture/restore round-trip", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [], disruptors: [DISRUPTOR, { ...DISRUPTOR, moduleName: "Tracking Disruptor II" }], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("target", loadout);
+    controller.setLoadout("shipB", loadout);
 
-    const popup = getFake(document, "target-ewar-popup");
+    const popup = getFake(document, "ship-b-ewar-popup");
     popup.hidden = false;
 
-    const section = disruptorSection(document, "target")!;
+    const section = disruptorSection(document, "shipB")!;
     const firstRow = section.children[1];
     const firstGear = gearFor(firstRow);
     firstGear.trigger("click");
-    const firstScriptPopup = scriptPopupFor(document, "target");
+    const firstScriptPopup = scriptPopupFor(document, "shipB");
     expect(firstScriptPopup.hidden).toBe(false);
     scriptOptionFor(firstScriptPopup, "Optimal Range Disruption Script")!.trigger("click");
-    expect(controller.capture("target")?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    expect(controller.capture("shipB")?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
     expect(firstGear.getAttribute("title")).toBe("Optimal Range Disruption Script");
 
     const secondRow = section.children[2];
     const secondGear = gearFor(secondRow);
     secondGear.trigger("click");
-    const secondScriptPopup = scriptPopupFor(document, "target");
+    const secondScriptPopup = scriptPopupFor(document, "shipB");
     scriptOptionFor(secondScriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
-    expect(controller.capture("target")?.disruptors?.[1]?.script).toBe("Tracking Speed Disruption Script");
+    expect(controller.capture("shipB")?.disruptors?.[1]?.script).toBe("Tracking Speed Disruption Script");
 
-    const captured = controller.capture("target");
+    const captured = controller.capture("shipB");
     expect(captured).toEqual({
       webs: [],
       grapplers: [],
@@ -407,11 +407,11 @@ describe("EwarController", () => {
       ],
     });
 
-    controller.restore("target", loadout, captured);
-    const restored = controller.capture("target");
+    controller.restore("shipB", loadout, captured);
+    const restored = controller.capture("shipB");
     expect(restored).toEqual(captured);
 
-    const restoredSection = disruptorSection(document, "target")!;
+    const restoredSection = disruptorSection(document, "shipB")!;
     expect(gearFor(restoredSection.children[1]).getAttribute("title")).toBe("Optimal Range Disruption Script");
     expect(gearFor(restoredSection.children[2]).getAttribute("title")).toBe("Tracking Speed Disruption Script");
   });
@@ -433,11 +433,11 @@ describe("EwarController", () => {
         { active: true, overloaded: true, script: "Optimal Range Disruption Script" },
       ],
     };
-    controller.setLoadout("attacker", longLoadout);
+    controller.setLoadout("shipA", longLoadout);
     const shortLoadout: EwarLoadout = { webs: [WEB, WEB2], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.restore("attacker", shortLoadout, saved);
+    controller.restore("shipA", shortLoadout, saved);
 
-    expect(controller.capture("attacker")).toEqual({
+    expect(controller.capture("shipA")).toEqual({
       webs: [{ active: false, overloaded: true }, { active: true, overloaded: false }],
       grapplers: [],
       disruptors: [{ active: false, overloaded: true, script: "Tracking Speed Disruption Script" }],
@@ -446,39 +446,39 @@ describe("EwarController", () => {
 
   test("projection returns undefined for empty loadouts and carries per-module overload", () => {
     const { controller } = buildEwarController();
-    expect(controller.projection("attacker")).toBeUndefined();
-    expect(controller.projection("target")).toBeUndefined();
+    expect(controller.projection("shipA")).toBeUndefined();
+    expect(controller.projection("shipB")).toBeUndefined();
 
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
-    expect(controller.projection("attacker")).toEqual({
+    controller.setLoadout("shipA", loadout);
+    expect(controller.projection("shipA")).toEqual({
       loadout,
       activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
     });
 
-    controller.setLoadout("attacker", EMPTY_EWAR_LOADOUT);
-    expect(controller.projection("attacker")).toBeUndefined();
+    controller.setLoadout("shipA", EMPTY_EWAR_LOADOUT);
+    expect(controller.projection("shipA")).toBeUndefined();
   });
 
   test("capture returns StoredEwarActivation matching the current state", () => {
     const { controller, document } = buildEwarController();
     const d2 = { ...DISRUPTOR, moduleName: "Tracking Disruptor II" };
     const loadout: EwarLoadout = { webs: [WEB, WEB2], disruptors: [DISRUPTOR, d2], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("target", loadout);
+    controller.setLoadout("shipB", loadout);
 
-    const popup = getFake(document, "target-ewar-popup");
+    const popup = getFake(document, "ship-b-ewar-popup");
     popup.hidden = false;
 
-    const webSec = webSection(document, "target")!;
+    const webSec = webSection(document, "shipB")!;
     webSec.children[2].children[0].trigger("click");
-    const disruptorSec = disruptorSection(document, "target")!;
+    const disruptorSec = disruptorSection(document, "shipB")!;
     disruptorSec.children[2].children[0].trigger("click");
     const firstGear = gearFor(disruptorSec.children[1]);
     firstGear.trigger("click");
-    const scriptPopup = scriptPopupFor(document, "target");
+    const scriptPopup = scriptPopupFor(document, "shipB");
     scriptOptionFor(scriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
 
-    expect(controller.capture("target")).toEqual({
+    expect(controller.capture("shipB")).toEqual({
       webs: [{ active: true, overloaded: false }, { active: false, overloaded: false }],
       grapplers: [],
       disruptors: [
@@ -491,10 +491,10 @@ describe("EwarController", () => {
   test("popup controls visibility and trigger aria-expanded", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    const trigger = getFake(document, "attacker-ewar-trigger");
-    const popup = getFake(document, "attacker-ewar-popup");
+    const trigger = getFake(document, "ship-a-ewar-trigger");
+    const popup = getFake(document, "ship-a-ewar-popup");
     expect(popup.hidden).toBe(true);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     trigger.trigger("click");
@@ -507,16 +507,16 @@ describe("EwarController", () => {
 
   test("script popup opens from gear, highlights current option, and closes on selection", () => {
     const { controller, document, emitConfigInvalidated } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(document, "attacker")!;
+    const section = disruptorSection(document, "shipA")!;
     const row = section.children[1];
     const gear = gearFor(row);
     gear.trigger("click");
 
-    const scriptPopup = scriptPopupFor(document, "attacker");
+    const scriptPopup = scriptPopupFor(document, "shipA");
     expect(scriptPopup.hidden).toBe(false);
     expect(gear.getAttribute("aria-expanded")).toBe("true");
     expect(scriptPopup.children.length).toBe(4);
@@ -529,7 +529,7 @@ describe("EwarController", () => {
     expect(gear.getAttribute("title")).toBe("Tracking Speed Disruption Script");
     expect(gear.getAttribute("aria-label")).toBe("Tracking Speed Disruption Script");
     expect(emitConfigInvalidated).toHaveBeenCalledWith(true);
-    expect(controller.capture("attacker")).toEqual({
+    expect(controller.capture("shipA")).toEqual({
       webs: [],
       grapplers: [],
       disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }],
@@ -538,8 +538,8 @@ describe("EwarController", () => {
 
   test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
     const { controller, document, fittingImport, imageCatalog } = buildEwarController("zh");
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    const webSectionEl = webSection(document, "attacker")!;
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    const webSectionEl = webSection(document, "shipA")!;
     const webButton = webSectionEl.children[1].children[0];
     const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
@@ -556,9 +556,9 @@ describe("EwarController", () => {
     imageCatalog.itemIconUrl.mockImplementation((name) =>
       name === WEB.moduleName ? undefined : `icons/${name.replaceAll(" ", "_")}.png`
     );
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const summary = getFake(document, "attacker-ewar-summary");
+    const summary = getFake(document, "ship-a-ewar-summary");
     expect(summary.children[0].children[0].tagName).toBe("IMG");
     expect(summary.children[0].children[0].hidden).toBe(true);
     expect(summary.children[0].children[0].src).toBe("");
@@ -568,34 +568,34 @@ describe("EwarController", () => {
   test("selecting None persists over capture/restore round-trip", () => {
     const { controller, document } = buildEwarController();
     const loadout: EwarLoadout = { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(document, "attacker")!;
+    const section = disruptorSection(document, "shipA")!;
     const gear = gearFor(section.children[1]);
     gear.trigger("click");
 
-    const scriptPopup = scriptPopupFor(document, "attacker");
+    const scriptPopup = scriptPopupFor(document, "shipA");
     scriptOptionFor(scriptPopup, "none")!.trigger("click");
-    expect(controller.capture("attacker")?.disruptors?.[0]?.script).toBe("none");
+    expect(controller.capture("shipA")?.disruptors?.[0]?.script).toBe("none");
     expect(gear.getAttribute("title")).toBe("ewar.script.none");
 
-    controller.restore("attacker", loadout, controller.capture("attacker"));
-    expect(gearFor(disruptorSection(document, "attacker")!.children[1]).getAttribute("title")).toBe("ewar.script.none");
-    expect(controller.capture("attacker")?.disruptors?.[0]?.script).toBe("none");
+    controller.restore("shipA", loadout, controller.capture("shipA"));
+    expect(gearFor(disruptorSection(document, "shipA")!.children[1]).getAttribute("title")).toBe("ewar.script.none");
+    expect(controller.capture("shipA")?.disruptors?.[0]?.script).toBe("none");
   });
 
   test("script popup renders localized names, icons, and multiplier tooltips", () => {
     const { controller, document, imageCatalog, fittingImport } = buildEwarController("zh");
-    controller.setLoadout("attacker", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const section = disruptorSection(document, "attacker")!;
+    const section = disruptorSection(document, "shipA")!;
     gearFor(section.children[1]).trigger("click");
 
-    const scriptPopup = scriptPopupFor(document, "attacker");
+    const scriptPopup = scriptPopupFor(document, "shipA");
     const noneOption = scriptOptionFor(scriptPopup, "none")!;
     expect(noneOption.children.length).toBe(1);
     expect(noneOption.children[0].textContent).toBe("ewar.script.none");
@@ -612,23 +612,23 @@ describe("EwarController", () => {
 
   test("overload buttons are present per web and disruptor row", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB, WEB2], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB, WEB2], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const webRows = webSection(document, "attacker")!.children.slice(1);
-    const disruptorRows = disruptorSection(document, "attacker")!.children.slice(1);
+    const webRows = webSection(document, "shipA")!.children.slice(1);
+    const disruptorRows = disruptorSection(document, "shipA")!.children.slice(1);
     for (const row of webRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
     for (const row of disruptorRows) expect(overloadFor(row).className).toBe("ewar-overload-button btn icon-button");
   });
 
   test("clicking an overload button toggles its aria-pressed and capture output", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(document, "attacker")!.children[1];
+    const webRow = webSection(document, "shipA")!.children[1];
     const webOverload = overloadFor(webRow);
-    const disruptorRow = disruptorSection(document, "attacker")!.children[1];
+    const disruptorRow = disruptorSection(document, "shipA")!.children[1];
     const disruptorOverload = overloadFor(disruptorRow);
 
     expect(webOverload.getAttribute("aria-pressed")).toBe("false");
@@ -637,7 +637,7 @@ describe("EwarController", () => {
     disruptorOverload.trigger("click");
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
     expect(disruptorOverload.getAttribute("aria-pressed")).toBe("true");
-    expect(controller.capture("attacker")).toEqual({
+    expect(controller.capture("shipA")).toEqual({
       webs: [{ active: true, overloaded: true }],
       grapplers: [],
       disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
@@ -646,11 +646,11 @@ describe("EwarController", () => {
 
   test("overload button is disabled when its module is off", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("target", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipB", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "target-ewar-popup");
+    const popup = getFake(document, "ship-b-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(document, "target")!.children[1];
+    const webRow = webSection(document, "shipB")!.children[1];
     const webOverload = overloadFor(webRow);
     webOverload.trigger("click");
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
@@ -661,11 +661,11 @@ describe("EwarController", () => {
 
   test("overload state is preserved when its module is toggled off and back on", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(document, "attacker")!.children[1];
+    const webRow = webSection(document, "shipA")!.children[1];
     const webOverload = overloadFor(webRow);
     webOverload.trigger("click");
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
@@ -678,32 +678,32 @@ describe("EwarController", () => {
     expect(webRow.className).toBe("ewar-row");
     expect(webOverload.disabled).toBe(false);
     expect(webOverload.getAttribute("aria-pressed")).toBe("true");
-    expect(controller.capture("attacker")?.webs?.[0]).toEqual({ active: true, overloaded: true });
+    expect(controller.capture("shipA")?.webs?.[0]).toEqual({ active: true, overloaded: true });
   });
 
   test("overload button has an accessible label that includes the module name", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(document, "attacker")!.children[1];
+    const webRow = webSection(document, "shipA")!.children[1];
     const webOverload = overloadFor(webRow);
     expect(webOverload.getAttribute("aria-label")).toBe(`label.overload ${WEB.moduleName}`);
     expect(webOverload.title).toBe(`label.overload ${WEB.moduleName}`);
 
-    const disruptorRow = disruptorSection(document, "attacker")!.children[1];
+    const disruptorRow = disruptorSection(document, "shipA")!.children[1];
     const disruptorOverload = overloadFor(disruptorRow);
     expect(disruptorOverload.getAttribute("aria-label")).toBe(`label.overload ${DISRUPTOR2.moduleName}`);
   });
 
   test("web rows are marked inactive when their module is off", () => {
     const { controller, document } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
-    const webRow = webSection(document, "attacker")!.children[1];
+    const webRow = webSection(document, "shipA")!.children[1];
     expect(webRow.className).toBe("ewar-row");
     webRow.children[0].trigger("click");
     expect(webRow.className).toBe("ewar-row ewar-row-inactive");
@@ -713,9 +713,9 @@ describe("EwarController", () => {
 
   test("summary items receive title attributes from the effect describer", () => {
     const { controller, document, ewarEffectDescriber } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const summary = getFake(document, "attacker-ewar-summary");
+    const summary = getFake(document, "ship-a-ewar-summary");
     expect(summary.children[0].getAttribute("title")).toBe("web-hint");
     expect(summary.children[1].getAttribute("title")).toBe("disruptor-hint");
     expect(ewarEffectDescriber.webHint).toHaveBeenCalled();
@@ -724,20 +724,20 @@ describe("EwarController", () => {
 
   test("toggling a module refreshes the summary title", () => {
     const { controller, document, ewarEffectDescriber } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
-    const popup = getFake(document, "attacker-ewar-popup");
+    const popup = getFake(document, "ship-a-ewar-popup");
     popup.hidden = false;
     ewarEffectDescriber.webHint.mockReturnValue("web-active");
-    const section = webSection(document, "attacker")!;
+    const section = webSection(document, "shipA")!;
     section.children[1].children[0].trigger("click");
-    expect(getFake(document, "attacker-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
+    expect(getFake(document, "ship-a-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
   });
 
   test("updateSummaries refreshes both sides", () => {
     const { controller, ewarEffectDescriber } = buildEwarController();
-    controller.setLoadout("attacker", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
-    controller.setLoadout("target", { webs: [WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    controller.setLoadout("shipB", { webs: [WEB2], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS });
     ewarEffectDescriber.webHint.mockClear();
 
     controller.updateSummaries();
@@ -749,17 +749,17 @@ describe("EwarController", () => {
     const { controller, document } = buildEwarController("en", (document) => {
       sentinelHolder.el = document.createElement("div") as unknown as FakeElement;
       sentinelHolder.el.textContent = "booster sentinel";
-      getFake(document, "attacker-booster-section").appendChild(sentinelHolder.el);
+      getFake(document, "ship-a-booster-section").appendChild(sentinelHolder.el);
     });
 
-    expect(getFake(document, "attacker-booster-section").children.length).toBe(1);
-    expect(getFake(document, "attacker-booster-section").children[0]).toBe(sentinelHolder.el!);
+    expect(getFake(document, "ship-a-booster-section").children.length).toBe(1);
+    expect(getFake(document, "ship-a-booster-section").children[0]).toBe(sentinelHolder.el!);
 
     const loadout: EwarLoadout = { webs: [WEB], disruptors: [], grapplers: [], scramblers: [], scripts: SCRIPTS };
-    controller.setLoadout("attacker", loadout);
+    controller.setLoadout("shipA", loadout);
 
-    expect(ewarSection(document, "attacker").children.filter((c) => c.className === "preview-section").length).toBe(1);
-    expect(getFake(document, "attacker-booster-section").children.length).toBe(1);
-    expect(getFake(document, "attacker-booster-section").children[0]).toBe(sentinelHolder.el!);
+    expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(1);
+    expect(getFake(document, "ship-a-booster-section").children.length).toBe(1);
+    expect(getFake(document, "ship-a-booster-section").children[0]).toBe(sentinelHolder.el!);
   });
 });

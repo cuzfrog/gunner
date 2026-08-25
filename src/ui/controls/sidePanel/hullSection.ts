@@ -165,7 +165,7 @@ export class HullSection implements IHullSection {
     }
     const view = this.ships.hullView(this.panel.profile, this.i18n.current());
     let text = `${view.hullType} · ${view.faction}`;
-    if (this.panel.side === "target" && module?.kind === "microwarpdrive") text += ` (sig ×${1 + module.sigBloom})`;
+    if (this.panel.side === "shipB" && module?.kind === "microwarpdrive") text += ` (sig ×${1 + module.sigBloom})`;
     setText(this.els.hullHint, text);
   }
 

@@ -38,7 +38,7 @@ export class ShareControllerImpl implements ShareController {
       open: () => this.openSharePopup(),
       close: () => this.closeSharePopup(),
       focusTrigger: () => this.els.shareLink.focus(),
-      contains: (target) => target instanceof Element && target.closest("#share-popup, #share-link") !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest("#share-popup, #share-link") !== null,
     };
     this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.els.shareCopyUrl.addEventListener("click", () => void this.onCopyUrlClicked());

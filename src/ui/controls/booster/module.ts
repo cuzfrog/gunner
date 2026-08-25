@@ -22,12 +22,12 @@ export function registerBoosterModule<T extends ControlsCradle>(cradle: AwilixCo
 function collectBoosterEls(els: ControlsElements): BoosterEls {
   return {
     sections: {
-      attacker: els.attackerBoosterSection,
-      target: els.targetBoosterSection,
+      shipA: els.shipABoosterSection,
+      shipB: els.shipBBoosterSection,
     },
     summaries: {
-      attacker: els.attackerBoosterSummary,
-      target: els.targetBoosterSummary,
+      shipA: els.shipABoosterSummary,
+      shipB: els.shipBBoosterSummary,
     },
   };
 }

@@ -135,9 +135,9 @@ export class PropulsionVariantSection {
       open: () => this.openPropulsionVariantPopup(),
       close: () => this.closePropulsionVariantPopup(),
       focusTrigger: () => this.els.propulsionGear.focus(),
-      contains: (target) =>
-        target instanceof Element &&
-        target.closest(`#${this.panel.side}-propulsion-variants, #${this.panel.side}-propulsion-gear`) !== null,
+      contains: (domTarget) =>
+        domTarget instanceof Element &&
+        domTarget.closest(`#${this.panel.side}-propulsion-variants, #${this.panel.side}-propulsion-gear`) !== null,
     };
   }
 }

@@ -37,11 +37,11 @@ export class TurretControllerImpl implements TurretController {
   private readonly resolver: TurretControllerDeps["resolver"];
   private readonly ships: TurretControllerDeps["ships"];
   private readonly events: UiEvents;
-  private attackerTurret?: ImportedTurret;
+  private shipATurret?: ImportedTurret;
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
-  private attackerCargoCharges: readonly CargoCharge[] = [];
-  private attackerAmmo: string;
-  private attackerAmmoAllExpanded = false;
+  private shipACargoCharges: readonly CargoCharge[] = [];
+  private shipAAmmo: string;
+  private shipAAmmoAllExpanded = false;
   private ammoPopupOpen = false;
 
   constructor(deps: TurretControllerDeps) {
@@ -55,9 +55,9 @@ export class TurretControllerImpl implements TurretController {
     this.resolver = deps.resolver;
     this.ships = deps.ships;
     this.events = deps.events;
-    this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+    this.shipAAmmo = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
-    this.els.attackerAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    this.els.shipAAmmoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.ammoList = new AmmoList({
       els: this.ammoListEls(),
       chargeCatalog: this.chargeCatalog,
@@ -85,19 +85,19 @@ export class TurretControllerImpl implements TurretController {
   get popup(): Popup { return this.popupValue; }
 
   turret(): ImportedTurret | undefined {
-    return this.attackerTurret;
+    return this.shipATurret;
   }
 
   ammo(): string {
-    return this.attackerAmmo;
+    return this.shipAAmmo;
   }
 
   applyImported(imported: ImportedFitting): void {
-    this.attackerAmmoAllExpanded = false;
+    this.shipAAmmoAllExpanded = false;
     const { turret, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
-    this.attackerCargoCharges = cargoCharges;
-    this.attackerTurret = turret;
-    this.attackerAmmo = ammo;
+    this.shipACargoCharges = cargoCharges;
+    this.shipATurret = turret;
+    this.shipAAmmo = ammo;
     if (turret) {
       this.turretOverrides.clearTurret();
       this.inputSet.set(turret);
@@ -110,27 +110,27 @@ export class TurretControllerImpl implements TurretController {
   restore(arg1?: string | { fitting?: string; conditions?: StatConditions; ammo?: string }, arg2?: StatConditions, arg3?: string): void {
     const settings = typeof arg1 === "object" ? arg1 : { fitting: arg1, conditions: arg2, ammo: arg3 };
     const { fitting, conditions, ammo } = settings ?? {};
-    this.attackerAmmoAllExpanded = false;
-    if (ammo !== undefined) this.attackerAmmo = ammo;
+    this.shipAAmmoAllExpanded = false;
+    if (ammo !== undefined) this.shipAAmmo = ammo;
     if (!fitting || !conditions) {
-      this.attackerTurret = undefined;
-      this.attackerCargoCharges = [];
-      this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.shipATurret = undefined;
+      this.shipACargoCharges = [];
+      this.shipAAmmo = this.chargeCatalog.usualForChargeSize(1);
     } else {
-      const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(fitting, conditions, this.attackerAmmo);
-      this.attackerTurret = turret;
-      this.attackerCargoCharges = cargoCharges;
-      this.attackerAmmo = resolvedAmmo;
+      const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(fitting, conditions, this.shipAAmmo);
+      this.shipATurret = turret;
+      this.shipACargoCharges = cargoCharges;
+      this.shipAAmmo = resolvedAmmo;
       if (turret) this.inputSet.set(turret);
     }
     this.render();
   }
 
   clear(): void {
-    this.attackerTurret = undefined;
-    this.attackerCargoCharges = [];
-    this.attackerAmmo = this.chargeCatalog.usualForChargeSize(1);
-    this.attackerAmmoAllExpanded = false;
+    this.shipATurret = undefined;
+    this.shipACargoCharges = [];
+    this.shipAAmmo = this.chargeCatalog.usualForChargeSize(1);
+    this.shipAAmmoAllExpanded = false;
     this.render();
   }
 
@@ -173,7 +173,7 @@ export class TurretControllerImpl implements TurretController {
   capture(): { sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
     return {
       sigRes: this.inputSet.currentSigResValue(), optimal: num(this.els.optimal),
-      falloff: num(this.els.falloff), ammo: this.attackerAmmo,
+      falloff: num(this.els.falloff), ammo: this.shipAAmmo,
     };
   }
 
@@ -182,7 +182,7 @@ export class TurretControllerImpl implements TurretController {
   }
 
   openAmmoPopup(): void {
-    if (!this.attackerTurret) return;
+    if (!this.shipATurret) return;
     this.ammoPopupOpen = true;
     this.ammoList.setPopupOpen(true);
     this.render();
@@ -202,24 +202,24 @@ export class TurretControllerImpl implements TurretController {
   }
 
   render(): void {
-    const hasGuns = this.attackerTurret !== undefined;
+    const hasGuns = this.shipATurret !== undefined;
     this.inputSet.setEnabled(hasGuns);
-    this.els.attackerAmmoTrigger.disabled = !hasGuns;
-    this.els.attackerAmmoTrigger.title = hasGuns ? "" : this.i18n.t("turret.noGuns");
+    this.els.shipAAmmoTrigger.disabled = !hasGuns;
+    this.els.shipAAmmoTrigger.title = hasGuns ? "" : this.i18n.t("turret.noGuns");
     this.ammoList.render({
-      turret: this.attackerTurret, ammo: this.attackerAmmo,
-      cargo: this.attackerCargoCharges, allExpanded: this.attackerAmmoAllExpanded,
+      turret: this.shipATurret, ammo: this.shipAAmmo,
+      cargo: this.shipACargoCharges, allExpanded: this.shipAAmmoAllExpanded,
     });
-    this.sigResIcons.render({ sigResOptions: this.els.sigResOptions }, this.attackerTurret);
+    this.sigResIcons.render({ sigResOptions: this.els.sigResOptions }, this.shipATurret);
     this.renderSigResState();
   }
 
   private applyAmmo(name: string): boolean {
-    if (!this.attackerTurret) return false;
-    const updated = this.chargeCatalog.withCharge(this.attackerTurret, name);
-    if (updated === this.attackerTurret) return false;
-    this.attackerTurret = updated;
-    this.attackerAmmo = updated.charge;
+    if (!this.shipATurret) return false;
+    const updated = this.chargeCatalog.withCharge(this.shipATurret, name);
+    if (updated === this.shipATurret) return false;
+    this.shipATurret = updated;
+    this.shipAAmmo = updated.charge;
     this.turretOverrides.clearTurret();
     this.inputSet.set(updated);
     this.render();
@@ -234,7 +234,7 @@ export class TurretControllerImpl implements TurretController {
   }
 
   private onAmmoExpandClick(): void {
-    this.attackerAmmoAllExpanded = !this.attackerAmmoAllExpanded;
+    this.shipAAmmoAllExpanded = !this.shipAAmmoAllExpanded;
     this.render();
   }
 
@@ -243,8 +243,8 @@ export class TurretControllerImpl implements TurretController {
       isOpen: () => this.isAmmoPopupOpen(),
       open: () => this.openAmmoPopup(),
       close: () => this.closeAmmoPopup(),
-      focusTrigger: () => this.els.attackerAmmoTrigger.focus(),
-      contains: (target) => target instanceof Element && target.closest("#attacker-ammo-field") !== null,
+      focusTrigger: () => this.els.shipAAmmoTrigger.focus(),
+      contains: (shipB) => shipB instanceof Element && shipB.closest("#ship-a-ammo-field") !== null,
     };
   }
 
@@ -252,8 +252,8 @@ export class TurretControllerImpl implements TurretController {
     const current = this.inputSet.currentSigResValue();
     if (this.allowedSigResClasses.includes(current)) return;
     this.turretOverrides.set({ sigRes: undefined });
-    if (this.attackerTurret && this.allowedSigResClasses.includes(this.attackerTurret.sigResolutionClass)) {
-      this.inputSet.setSigRes(this.attackerTurret.sigResolutionClass);
+    if (this.shipATurret && this.allowedSigResClasses.includes(this.shipATurret.sigResolutionClass)) {
+      this.inputSet.setSigRes(this.shipATurret.sigResolutionClass);
       return;
     }
     const highest = this.allowedSigResClasses[this.allowedSigResClasses.length - 1];
@@ -263,7 +263,7 @@ export class TurretControllerImpl implements TurretController {
   private renderSigResState(): void {
     const notFittable = this.i18n.t("turret.notFittable");
     const allowed = new Set(this.allowedSigResClasses);
-    const hasGuns = this.attackerTurret !== undefined;
+    const hasGuns = this.shipATurret !== undefined;
     for (const button of Array.from(this.els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
       const value = button.getAttribute("data-value") ?? "";
@@ -279,15 +279,15 @@ export class TurretControllerImpl implements TurretController {
 
   private ammoListEls(): AmmoListEls {
     return {
-      attackerAmmoTrigger: this.els.attackerAmmoTrigger,
-      attackerAmmoSummary: this.els.attackerAmmoSummary,
-      attackerAmmoSummaryIcon: this.els.attackerAmmoSummaryIcon,
-      attackerAmmoPopup: this.els.attackerAmmoPopup,
-      attackerAmmoCargoLabel: this.els.attackerAmmoCargoLabel,
-      attackerAmmoCargoList: this.els.attackerAmmoCargoList,
-      attackerAmmoExpand: this.els.attackerAmmoExpand,
-      attackerAmmoAllSection: this.els.attackerAmmoAllSection,
-      attackerAmmoAllList: this.els.attackerAmmoAllList,
+      shipAAmmoTrigger: this.els.shipAAmmoTrigger,
+      shipAAmmoSummary: this.els.shipAAmmoSummary,
+      shipAAmmoSummaryIcon: this.els.shipAAmmoSummaryIcon,
+      shipAAmmoPopup: this.els.shipAAmmoPopup,
+      shipAAmmoCargoLabel: this.els.shipAAmmoCargoLabel,
+      shipAAmmoCargoList: this.els.shipAAmmoCargoList,
+      shipAAmmoExpand: this.els.shipAAmmoExpand,
+      shipAAmmoAllSection: this.els.shipAAmmoAllSection,
+      shipAAmmoAllList: this.els.shipAAmmoAllList,
     };
   }
 }

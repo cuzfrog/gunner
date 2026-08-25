@@ -22,13 +22,13 @@ export function registerEffectiveReadoutModule<T extends ControlsCradle>(cradle:
 
 function collectEffectiveReadoutEls(els: ControlsElements): EffectiveReadoutEls {
   return {
-    attackerSpeed: els.attackerSpeed,
-    targetSpeed: els.targetSpeed,
+    shipASpeed: els.shipASpeed,
+    shipBSpeed: els.shipBSpeed,
     tracking: els.tracking,
     optimal: els.optimal,
     falloff: els.falloff,
-    attackerSpeedReadout: els.attackerSpeedReadout,
-    targetSpeedReadout: els.targetSpeedReadout,
+    shipASpeedReadout: els.shipASpeedReadout,
+    shipBSpeedReadout: els.shipBSpeedReadout,
     trackingReadout: els.trackingReadout,
     optimalReadout: els.optimalReadout,
     falloffReadout: els.falloffReadout,

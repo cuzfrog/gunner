@@ -33,7 +33,7 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
     "setLineDash",
     "fillText",
   ];
-  const target: Record<string, unknown> = {
+  const shipB: Record<string, unknown> = {
     strokeStyles,
     arcs,
     dashes,
@@ -45,12 +45,12 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
     textBaseline: "",
   };
   for (const method of methods) {
-    target[method] = () => {};
+    shipB[method] = () => {};
   }
-  target.arc = (...args: number[]) => arcs.push(args);
-  target.setLineDash = (dash: number[]) => dashes.push(dash);
-  target.measureText = () => ({ width: 0 });
-  return new Proxy(target, {
+  shipB.arc = (...args: number[]) => arcs.push(args);
+  shipB.setLineDash = (dash: number[]) => dashes.push(dash);
+  shipB.measureText = () => ({ width: 0 });
+  return new Proxy(shipB, {
     get(o, p) {
       return o[p as string];
     },
@@ -74,7 +74,7 @@ function fakeCanvas(clientWidth = 0, clientHeight = 0): HTMLCanvasElement {
 }
 
 const ship: ShipState = {
-  id: "attacker",
+  id: "shipA",
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
   maxSpeed: 0,
@@ -87,15 +87,15 @@ const ship: ShipState = {
 
 const snapshot: SimSnapshot = {
   time: 0,
-  attacker: ship,
-  target: { ...ship, id: "target" },
-  commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) },
+  shipA: ship,
+  shipB: { ...ship, id: "shipB" },
+  commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
 };
 
 const frame: EngagementFrame = {
   time: 0,
-  attacker: ship,
-  target: ship,
+  shipA: ship,
+  shipB: ship,
   relPosition: new Vec2(0, 5000),
   distance: 5000,
   relVelocity: new Vec2(0, 0),
@@ -113,18 +113,18 @@ function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): strin
   return (canvas.getContext("2d") as unknown as { strokeStyles: string[] }).strokeStyles[0];
 }
 
-function shipAt(position: Vec2, id: ShipState["id"] = "target", desiredRange = 5000): ShipState {
+function shipAt(position: Vec2, id: ShipState["id"] = "shipB", desiredRange = 5000): ShipState {
   return { ...ship, id, position, desiredRange };
 }
 
-function cameraScaleFor(attacker: ShipState, target: ShipState, clientWidth = 1000, clientHeight = 1000): number {
+function cameraScaleFor(shipA: ShipState, shipB: ShipState, clientWidth = 1000, clientHeight = 1000): number {
   const canvas = fakeCanvas(clientWidth, clientHeight);
   const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
   const testSnapshot: SimSnapshot = {
     time: 0,
-    attacker,
-    target,
-    commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) },
+    shipA,
+    shipB,
+    commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
   };
   renderer.draw(testSnapshot, frame, hit, turret, []);
   return (renderer as unknown as { camera: { scale: number } }).camera.scale;
@@ -168,37 +168,37 @@ describe("CanvasRenderer", () => {
 
   describe("updateCamera", () => {
     test("caps zoom in at 3x farScale when ships are very close", () => {
-      const attacker = shipAt(new Vec2(0, 0), "attacker");
-      const target = shipAt(new Vec2(0, 10), "target");
-      const scale = cameraScaleFor(attacker, target);
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 10), "shipB");
+      const scale = cameraScaleFor(shipA, shipB);
       expect(scale).toBe(0.12);
     });
 
     test("uses farScale as baseline at the normal separation", () => {
-      const attacker = shipAt(new Vec2(0, 0), "attacker");
-      const target = shipAt(new Vec2(0, 3500), "target");
-      const scale = cameraScaleFor(attacker, target);
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 3500), "shipB");
+      const scale = cameraScaleFor(shipA, shipB);
       expect(scale).toBe(0.04);
     });
 
     test("stays at farScale while ships still fit inside the margin", () => {
-      const attacker = shipAt(new Vec2(0, 0), "attacker");
-      const target = shipAt(new Vec2(0, 10000), "target");
-      const scale = cameraScaleFor(attacker, target);
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 10000), "shipB");
+      const scale = cameraScaleFor(shipA, shipB);
       expect(scale).toBe(0.04);
     });
 
     test("zooms out below farScale when ships reach the canvas margin", () => {
-      const attacker = shipAt(new Vec2(0, 0), "attacker");
-      const target = shipAt(new Vec2(0, 30000), "target");
-      const scale = cameraScaleFor(attacker, target);
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 30000), "shipB");
+      const scale = cameraScaleFor(shipA, shipB);
       expect(scale).toBeCloseTo(0.028, 10);
     });
 
     test("caps zoom out at farScale / 3 when ships are very far apart", () => {
-      const attacker = shipAt(new Vec2(0, 0), "attacker");
-      const target = shipAt(new Vec2(0, 100000), "target");
-      const scale = cameraScaleFor(attacker, target);
+      const shipA = shipAt(new Vec2(0, 0), "shipA");
+      const shipB = shipAt(new Vec2(0, 100000), "shipB");
+      const scale = cameraScaleFor(shipA, shipB);
       expect(scale).toBeCloseTo(0.04 / 3, 10);
     });
   });
@@ -219,11 +219,11 @@ describe("CanvasRenderer", () => {
     test("draws one arc per overlay radius centered on the side's ship position", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-      const overlay: RangeOverlay = { side: "attacker", kind: "web", radius: 3000 };
+      const overlay: RangeOverlay = { side: "shipA", kind: "web", radius: 3000 };
       renderer.draw(snapshot, frame, hit, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const camera = cameraOf(renderer);
-      const expected = screenPosition(canvas, renderer, snapshot.attacker.position);
+      const expected = screenPosition(canvas, renderer, snapshot.shipA.position);
       const expectedRadius = overlay.radius * camera.scale;
       const arc = ctx.arcs.find((a) => Math.abs(a[0] - expected.x) < 0.5 && Math.abs(a[1] - expected.y) < 0.5 && Math.abs(a[2] - expectedRadius) < 0.5);
       expect(arc).toBeDefined();
@@ -232,7 +232,7 @@ describe("CanvasRenderer", () => {
     test("draws a dashed second arc when falloffRadius is present", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-      const overlay: RangeOverlay = { side: "attacker", kind: "grappler", radius: 1000, falloffRadius: 8000 };
+      const overlay: RangeOverlay = { side: "shipA", kind: "grappler", radius: 1000, falloffRadius: 8000 };
       renderer.draw(snapshot, frame, hit, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; dashes: number[][] };
       const camera = cameraOf(renderer);
@@ -255,22 +255,22 @@ describe("CanvasRenderer", () => {
     test("skips radii less than or equal to zero", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-      const bad: RangeOverlay = { side: "attacker", kind: "web", radius: 0 };
+      const bad: RangeOverlay = { side: "shipA", kind: "web", radius: 0 };
       renderer.draw(snapshot, frame, hit, turret, [bad]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       expect(ctx.arcs.every((a) => a[2] !== 0)).toBe(true);
     });
 
-    test("centers target overlays on the target ship position", () => {
+    test("centers shipB overlays on the shipB ship position", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-      const attackerPos = new Vec2(0, 0);
-      const targetPos = new Vec2(1000, 0);
-      const testSnapshot = { ...snapshot, attacker: { ...ship, position: attackerPos }, target: { ...ship, position: targetPos } };
-      const overlay: RangeOverlay = { side: "target", kind: "scrambler", radius: 3000 };
+      const shipAPos = new Vec2(0, 0);
+      const shipBPos = new Vec2(1000, 0);
+      const testSnapshot = { ...snapshot, shipA: { ...ship, position: shipAPos }, shipB: { ...ship, position: shipBPos } };
+      const overlay: RangeOverlay = { side: "shipB", kind: "scrambler", radius: 3000 };
       renderer.draw(testSnapshot, frame, hit, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
-      const expected = screenPosition(canvas, renderer, targetPos);
+      const expected = screenPosition(canvas, renderer, shipBPos);
       const expectedRadius = overlay.radius * cameraOf(renderer).scale;
       const arc = ctx.arcs.find((a) => Math.abs(a[0] - expected.x) < 0.5 && Math.abs(a[1] - expected.y) < 0.5 && Math.abs(a[2] - expectedRadius) < 0.5);
       expect(arc).toBeDefined();

@@ -13,21 +13,21 @@ export class FittingBasis {
     this.chargeCatalog = deps.chargeCatalog;
   }
 
-  rebuild(settings: UserSettings, side: "attacker" | "target"): Partial<UserSettings> {
-    const fittingKey = side === "attacker" ? "attackerFitting" : "targetFitting";
+  rebuild(settings: UserSettings, side: "shipA" | "shipB"): Partial<UserSettings> {
+    const fittingKey = side === "shipA" ? "shipAFitting" : "shipBFitting";
     const text = settings[fittingKey];
     if (!text) return {};
 
-    const skillLevel = side === "attacker" ? settings.attackerSkillLevel ?? 5 : settings.targetSkillLevel ?? 5;
-    const overloaded = side === "attacker" ? settings.attackerOverload ?? true : settings.targetOverload ?? true;
+    const skillLevel = side === "shipA" ? settings.shipASkillLevel ?? 5 : settings.shipBSkillLevel ?? 5;
+    const overloaded = side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true;
     const imported = this.fittingImport.importFitting(text, { skillLevel, overloaded });
     if (!imported) return {};
 
     const conditions = { skillLevel, overloaded };
     const profile = imported.profile;
-    const propulsionKey = side === "attacker" ? "attackerPropulsion" : "targetPropulsion";
+    const propulsionKey = side === "shipA" ? "shipAPropulsion" : "shipBPropulsion";
     const storedPropulsionId = settings[propulsionKey];
-    const storedFittedHull = side === "attacker" ? settings.attackerFittedHull : settings.targetFittedHull;
+    const storedFittedHull = side === "shipA" ? settings.shipAFittedHull : settings.shipBFittedHull;
     const importedPropulsion = imported.propulsion;
     const importedPropulsionId = importedPropulsion?.propulsionId;
     const explicitNone = storedPropulsionId === PROPULSION_NONE;
@@ -61,9 +61,9 @@ export class FittingBasis {
     const fittedPropulsion = explicitNone ? importedPropulsion : activePropulsion;
     const fittedPropulsionId = explicitNone ? importedPropulsionId : activePropulsionId;
     const fittedPropulsionName = explicitNone ? importedPropulsion?.propulsionName : activePropulsionName;
-    const overrides = side === "attacker" ? settings.attackerOverrides : settings.targetOverrides;
+    const overrides = side === "shipA" ? settings.shipAOverrides : settings.shipBOverrides;
     const override = overrides ?? {};
-    const speedOverride = side === "attacker" ? override.attackerSpeed : override.targetSpeed;
+    const speedOverride = side === "shipA" ? override.shipASpeed : override.shipBSpeed;
     const stats = this.ships.fittedStats(profile, imported.fitted, activePropulsion, conditions, speedOverride);
     const fittedHull: FittedHullSummary = {
       fittingName: imported.fittingName,
@@ -74,37 +74,37 @@ export class FittingBasis {
       propulsion: fittedPropulsion,
       baseMaxSpeed: stats.baseMaxSpeed,
     };
-    const massOverride = side === "attacker" ? override.attackerMass : override.targetMass;
+    const massOverride = side === "shipA" ? override.shipAMass : override.shipBMass;
     const mass = massOverride ?? stats.mass;
     const speed = speedOverride ?? this.ships.maxSpeedForFittedMass(profile, fittedHull.fitted, mass, activePropulsion, conditions);
 
     const result: Partial<UserSettings> = {};
-    if (side === "attacker") {
-      result.attackerHull = imported.profile.name;
-      result.attackerPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
-      result.attackerFittedHull = fittedHull;
-      result.attackerMass = mass;
-      result.attackerInertia = override.attackerInertia ?? stats.inertiaModifier;
-      result.attackerSpeed = speed;
+    if (side === "shipA") {
+      result.shipAHull = imported.profile.name;
+      result.shipAPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
+      result.shipAFittedHull = fittedHull;
+      result.shipAMass = mass;
+      result.shipAInertia = override.shipAInertia ?? stats.inertiaModifier;
+      result.shipASpeed = speed;
     } else {
-      result.targetHull = imported.profile.name;
-      result.targetPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
-      result.targetFittedHull = fittedHull;
-      result.targetMass = mass;
-      result.targetInertia = override.targetInertia ?? stats.inertiaModifier;
-      result.targetSpeed = speed;
-      result.targetSig = override.targetSig ?? stats.sigRadius;
+      result.shipBHull = imported.profile.name;
+      result.shipBPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
+      result.shipBFittedHull = fittedHull;
+      result.shipBMass = mass;
+      result.shipBInertia = override.shipBInertia ?? stats.inertiaModifier;
+      result.shipBSpeed = speed;
+      result.shipBSig = override.shipBSig ?? stats.sigRadius;
     }
-    if (side === "attacker" && imported.turret) {
+    if (side === "shipA" && imported.turret) {
       const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
-      const storedAmmo = settings.attackerAmmo;
+      const storedAmmo = settings.shipAAmmo;
       const valid = options.some((c) => c.name === storedAmmo);
       const turret = valid ? this.chargeCatalog.withCharge(imported.turret, storedAmmo) : imported.turret;
       result.tracking = override.tracking ?? turret.tracking;
       result.sigRes = override.sigRes ?? turret.sigResolutionClass;
       result.optimal = override.optimal ?? turret.optimal;
       result.falloff = override.falloff ?? turret.falloff;
-      result.attackerAmmo = turret.charge;
+      result.shipAAmmo = turret.charge;
     }
     return result;
   }

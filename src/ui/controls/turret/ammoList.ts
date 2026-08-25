@@ -5,15 +5,15 @@ import { chargeStatSuffix } from "../controlsFormat";
 import { isHtmlButtonElement, setText } from "../controlsDom";
 
 export interface AmmoListEls {
-  readonly attackerAmmoTrigger: HTMLButtonElement;
-  readonly attackerAmmoSummary: HTMLElement;
-  readonly attackerAmmoSummaryIcon: HTMLImageElement;
-  readonly attackerAmmoPopup: HTMLElement;
-  readonly attackerAmmoCargoLabel: HTMLElement;
-  readonly attackerAmmoCargoList: HTMLElement;
-  readonly attackerAmmoExpand: HTMLButtonElement;
-  readonly attackerAmmoAllSection: HTMLElement;
-  readonly attackerAmmoAllList: HTMLElement;
+  readonly shipAAmmoTrigger: HTMLButtonElement;
+  readonly shipAAmmoSummary: HTMLElement;
+  readonly shipAAmmoSummaryIcon: HTMLImageElement;
+  readonly shipAAmmoPopup: HTMLElement;
+  readonly shipAAmmoCargoLabel: HTMLElement;
+  readonly shipAAmmoCargoList: HTMLElement;
+  readonly shipAAmmoExpand: HTMLButtonElement;
+  readonly shipAAmmoAllSection: HTMLElement;
+  readonly shipAAmmoAllList: HTMLElement;
 }
 
 export interface AmmoListState {
@@ -48,26 +48,26 @@ export class AmmoList {
     this.i18n = deps.i18n;
     this.onSelect = deps.onSelect;
     this.onExpand = deps.onExpand;
-    this.els.attackerAmmoExpand.addEventListener("click", () => this.onExpand());
+    this.els.shipAAmmoExpand.addEventListener("click", () => this.onExpand());
   }
 
   setPopupOpen(open: boolean): void {
-    this.els.attackerAmmoPopup.hidden = !open;
-    this.els.attackerAmmoTrigger.setAttribute("aria-expanded", String(open));
+    this.els.shipAAmmoPopup.hidden = !open;
+    this.els.shipAAmmoTrigger.setAttribute("aria-expanded", String(open));
   }
 
   focusSelectedOrFirst(): void {
     const selected =
-      this.findButton(this.els.attackerAmmoCargoList, '[aria-selected="true"]') ??
-      this.findButton(this.els.attackerAmmoAllList, '[aria-selected="true"]') ??
-      this.els.attackerAmmoCargoList.firstElementChild;
+      this.findButton(this.els.shipAAmmoCargoList, '[aria-selected="true"]') ??
+      this.findButton(this.els.shipAAmmoAllList, '[aria-selected="true"]') ??
+      this.els.shipAAmmoCargoList.firstElementChild;
     if (selected && isHtmlButtonElement(selected)) selected.focus();
   }
 
   render(state: AmmoListState): void {
     const hasTurret = state.turret !== undefined;
-    this.els.attackerAmmoTrigger.disabled = !hasTurret;
-    setText(this.els.attackerAmmoSummary, hasTurret ? this.fittingImport.itemName(state.ammo, this.i18n.current()) : "—");
+    this.els.shipAAmmoTrigger.disabled = !hasTurret;
+    setText(this.els.shipAAmmoSummary, hasTurret ? this.fittingImport.itemName(state.ammo, this.i18n.current()) : "—");
     this.renderIcon(state.ammo, hasTurret);
     this.renderCargoList(state);
     this.renderAllList(state);
@@ -75,7 +75,7 @@ export class AmmoList {
   }
 
   private renderIcon(ammo: string, hasTurret: boolean): void {
-    const icon = this.els.attackerAmmoSummaryIcon;
+    const icon = this.els.shipAAmmoSummaryIcon;
     if (!hasTurret) {
       icon.hidden = true;
       return;
@@ -86,8 +86,8 @@ export class AmmoList {
   }
 
   private renderCargoList(state: AmmoListState): void {
-    const list = this.els.attackerAmmoCargoList;
-    const label = this.els.attackerAmmoCargoLabel;
+    const list = this.els.shipAAmmoCargoList;
+    const label = this.els.shipAAmmoCargoLabel;
     list.innerHTML = "";
     if (!state.turret) {
       list.hidden = true;
@@ -127,8 +127,8 @@ export class AmmoList {
   }
 
   private renderAllList(state: AmmoListState): void {
-    const list = this.els.attackerAmmoAllList;
-    const section = this.els.attackerAmmoAllSection;
+    const list = this.els.shipAAmmoAllList;
+    const section = this.els.shipAAmmoAllSection;
     list.innerHTML = "";
     if (!state.turret) {
       list.hidden = true;
@@ -176,8 +176,8 @@ export class AmmoList {
 
   private renderExpand(expanded: boolean): void {
     const key = expanded ? "ammo.hideAll" : "ammo.showAll";
-    this.els.attackerAmmoExpand.setAttribute("data-i18n", key);
-    setText(this.els.attackerAmmoExpand, this.i18n.t(key));
+    this.els.shipAAmmoExpand.setAttribute("data-i18n", key);
+    setText(this.els.shipAAmmoExpand, this.i18n.t(key));
   }
 
   private findButton(list: HTMLElement, selector: string): Element | null {

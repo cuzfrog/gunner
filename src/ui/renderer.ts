@@ -5,7 +5,7 @@ import { PALETTE, withAlpha } from "./palette";
 export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor";
 
 export interface RangeOverlay {
-  readonly side: "attacker" | "target";
+  readonly side: "shipA" | "shipB";
   readonly kind: RangeOverlayKind;
   readonly radius: number;
   readonly falloffRadius?: number;
@@ -20,8 +20,8 @@ export interface Renderer {
 
 const COLORS = {
   bg: PALETTE.bgDeep,
-  attacker: PALETTE.accentTeal,
-  target: PALETTE.accentOrange,
+  shipA: PALETTE.accentTeal,
+  shipB: PALETTE.accentOrange,
   command: PALETTE.textPrimary,
   transversal: PALETTE.warnYellow,
   los: withAlpha(PALETTE.accentTeal, 0.5),
@@ -96,28 +96,28 @@ export class CanvasRenderer implements Renderer {
     this.updateCamera(snapshot, turret);
     this.clear();
     this.drawGrid();
-    this.drawRangeRings(snapshot.attacker.position, turret);
+    this.drawRangeRings(snapshot.shipA.position, turret);
     this.drawRangeOverlays(snapshot, overlays);
-    this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
-    this.drawWorldVector(snapshot.attacker.position, snapshot.attacker.velocity, COLORS.attacker);
-    this.drawWorldVector(snapshot.target.position, snapshot.target.velocity, COLORS.target);
-    this.drawIntendedDirection(snapshot.attacker.position, snapshot.commands.attacker);
-    this.drawIntendedDirection(snapshot.target.position, snapshot.commands.target);
-    this.drawWorldVector(snapshot.target.position, frame.transversalVelocity, COLORS.transversal);
-    this.drawShip(snapshot.attacker, COLORS.attacker);
-    this.drawShip(snapshot.target, COLORS.target);
-    this.drawSpeedLabel(snapshot.attacker, COLORS.attacker, -20);
-    this.drawSpeedLabel(snapshot.target, COLORS.target, 20);
+    this.drawLineOfSight(snapshot.shipA.position, snapshot.shipB.position, frame.distance);
+    this.drawWorldVector(snapshot.shipA.position, snapshot.shipA.velocity, COLORS.shipA);
+    this.drawWorldVector(snapshot.shipB.position, snapshot.shipB.velocity, COLORS.shipB);
+    this.drawIntendedDirection(snapshot.shipA.position, snapshot.commands.shipA);
+    this.drawIntendedDirection(snapshot.shipB.position, snapshot.commands.shipB);
+    this.drawWorldVector(snapshot.shipB.position, frame.transversalVelocity, COLORS.transversal);
+    this.drawShip(snapshot.shipA, COLORS.shipA);
+    this.drawShip(snapshot.shipB, COLORS.shipB);
+    this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
+    this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
     this.drawReadouts(frame, hit, turret);
   }
 
   private updateCamera(snapshot: SimSnapshot, turret: TurretSpec): void {
-    const { attacker, target } = snapshot;
-    const center = attacker.position.add(target.position).scale(0.5);
-    const distance = attacker.position.dist(target.position);
+    const { shipA, shipB } = snapshot;
+    const center = shipA.position.add(shipB.position).scale(0.5);
+    const distance = shipA.position.dist(shipB.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
 
-    const farRadius = Math.max(turret.optimal + turret.falloff, attacker.desiredRange, target.desiredRange, 500);
+    const farRadius = Math.max(turret.optimal + turret.falloff, shipA.desiredRange, shipB.desiredRange, 500);
     const farScale = minDim / (2 * farRadius * FAR_MARGIN);
 
     const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
@@ -189,7 +189,7 @@ export class CanvasRenderer implements Renderer {
 
   private drawRangeOverlays(snapshot: SimSnapshot, overlays: readonly RangeOverlay[]): void {
     for (const overlay of overlays) {
-      const center = overlay.side === "attacker" ? snapshot.attacker.position : snapshot.target.position;
+      const center = overlay.side === "shipA" ? snapshot.shipA.position : snapshot.shipB.position;
       const color = OVERLAY_COLORS[overlay.kind];
       this.drawRingAt(center, overlay.radius, color, [2, 6]);
       if (overlay.falloffRadius && overlay.falloffRadius > 0) {

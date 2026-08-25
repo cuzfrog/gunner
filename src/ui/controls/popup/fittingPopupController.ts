@@ -66,7 +66,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
       open: () => this.openPopup(),
       close: () => this.closePopup(),
       focusTrigger: () => deps.els.trigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(fittingAreaSelector(this.side)) !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest(fittingAreaSelector(this.side)) !== null,
     };
     deps.els.trigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     deps.els.eye.addEventListener("click", () => this.previews.toggle(this.side));

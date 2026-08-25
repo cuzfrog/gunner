@@ -1,6 +1,6 @@
 ---
 no-new-exports:
-  - attackerTurret.ts
+  - shipATurret.ts
   - eftSideImporter.ts
   - importController.testSupport.ts
   - importController.ts

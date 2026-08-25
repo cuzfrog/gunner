@@ -44,14 +44,14 @@ export class EwarControllerImpl implements EwarController {
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
     this.events = deps.events;
-    this.scriptPopups = { attacker: this.buildScriptPopup("attacker"), target: this.buildScriptPopup("target") };
-    this.popups = { attacker: this.buildPopup("attacker"), target: this.buildPopup("target") };
-    this.popupGroup.register(this.scriptPopups.attacker);
-    this.popupGroup.register(this.scriptPopups.target);
-    this.popupGroup.register(this.popups.attacker);
-    this.popupGroup.register(this.popups.target);
-    this.els.attackerEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.attacker));
-    this.els.targetEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.target));
+    this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
+    this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
+    this.popupGroup.register(this.scriptPopups.shipA);
+    this.popupGroup.register(this.scriptPopups.shipB);
+    this.popupGroup.register(this.popups.shipA);
+    this.popupGroup.register(this.popups.shipB);
+    this.els.shipAEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipA));
+    this.els.shipBEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipB));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
     this.render();
   }
@@ -99,18 +99,18 @@ export class EwarControllerImpl implements EwarController {
   }
 
   render(): void {
-    this.renderSide("attacker");
-    this.renderSide("target");
+    this.renderSide("shipA");
+    this.renderSide("shipB");
   }
 
   updateSummaries(): void {
-    this.updateSummary("attacker");
-    this.updateSummary("target");
+    this.updateSummary("shipA");
+    this.updateSummary("shipB");
   }
 
   private buildPopup(side: Side): Popup {
-    const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
-    const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
+    const trigger = side === "shipA" ? this.els.shipAEwarTrigger : this.els.shipBEwarTrigger;
+    const popup = side === "shipA" ? this.els.shipAEwarPopup : this.els.shipBEwarPopup;
     return {
       isOpen: () => !popup.hidden,
       open: () => { popup.hidden = false; trigger.setAttribute("aria-expanded", "true"); },
@@ -120,14 +120,14 @@ export class EwarControllerImpl implements EwarController {
         trigger.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => trigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${side}-ewar-field`) !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-field`) !== null,
     };
   }
 
   private buildScriptPopup(side: Side): Popup {
-    const field = side === "attacker" ? this.els.attackerEwarField : this.els.targetEwarField;
+    const field = side === "shipA" ? this.els.shipAEwarField : this.els.shipBEwarField;
     const popup = document.createElement("div");
-    popup.id = `${side}-ewar-script-popup`;
+    popup.id = `${sideId(side)}-ewar-script-popup`;
     popup.className = "ewar-script-popup popup";
     popup.setAttribute("role", "menu");
     popup.hidden = true;
@@ -142,15 +142,15 @@ export class EwarControllerImpl implements EwarController {
         if (gear) gear.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${side}-ewar-field`) !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-field`) !== null,
     };
   }
 
   private renderSide(side: Side): void {
-    const trigger = side === "attacker" ? this.els.attackerEwarTrigger : this.els.targetEwarTrigger;
-    const popup = side === "attacker" ? this.els.attackerEwarPopup : this.els.targetEwarPopup;
-    const section = side === "attacker" ? this.els.attackerEwarSection : this.els.targetEwarSection;
-    const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
+    const trigger = side === "shipA" ? this.els.shipAEwarTrigger : this.els.shipBEwarTrigger;
+    const popup = side === "shipA" ? this.els.shipAEwarPopup : this.els.shipBEwarPopup;
+    const section = side === "shipA" ? this.els.shipAEwarSection : this.els.shipBEwarSection;
+    const summary = side === "shipA" ? this.els.shipAEwarSummary : this.els.shipBEwarSummary;
     const state = this.states.get(side);
     const modulesLabel = this.i18n.t("label.modules");
     const labelSpan = trigger.querySelector?.(".ewar-label");
@@ -205,7 +205,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private updateSummary(side: Side): void {
-    const summary = side === "attacker" ? this.els.attackerEwarSummary : this.els.targetEwarSummary;
+    const summary = side === "shipA" ? this.els.shipAEwarSummary : this.els.shipBEwarSummary;
     const state = this.states.get(side);
     summary.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
@@ -387,7 +387,7 @@ export class EwarControllerImpl implements EwarController {
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-haspopup", "menu");
     gear.setAttribute("aria-expanded", "false");
-    gear.setAttribute("aria-controls", `${side}-ewar-script-popup`);
+    gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
     gear.innerHTML = (
       '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
       '<use href="icons.svg#gear"></use></svg>'
@@ -438,7 +438,7 @@ export class EwarControllerImpl implements EwarController {
     const current = state.activation.disruptors[index].script;
     const disruptor = state.loadout.disruptors[index];
     const label = document.createElement("div");
-    label.id = `${side}-ewar-script-label`;
+    label.id = `${sideId(side)}-ewar-script-label`;
     label.className = "ewar-script-popup-label";
     label.textContent = this.fittingImport.itemName(disruptor.moduleName, this.i18n.current());
     popup.setAttribute("aria-labelledby", label.id);
@@ -636,5 +636,9 @@ export class EwarControllerImpl implements EwarController {
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }
 

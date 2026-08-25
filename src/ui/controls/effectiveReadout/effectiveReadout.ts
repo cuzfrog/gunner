@@ -13,13 +13,13 @@ interface ReadoutLike {
 }
 
 export interface EffectiveReadoutEls {
-  readonly attackerSpeed: InputLike;
-  readonly targetSpeed: InputLike;
+  readonly shipASpeed: InputLike;
+  readonly shipBSpeed: InputLike;
   readonly tracking: InputLike;
   readonly optimal: InputLike;
   readonly falloff: InputLike;
-  readonly attackerSpeedReadout: ReadoutLike;
-  readonly targetSpeedReadout: ReadoutLike;
+  readonly shipASpeedReadout: ReadoutLike;
+  readonly shipBSpeedReadout: ReadoutLike;
   readonly trackingReadout: ReadoutLike;
   readonly optimalReadout: ReadoutLike;
   readonly falloffReadout: ReadoutLike;
@@ -56,16 +56,16 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
         : buildStatTitle(values.trackingBreakdown.tracking, "label.trackingSpeed", t)
     );
     this.write(
-      this.els.attackerSpeedReadout,
-      formatSpeed(values.attackerSpeed),
-      isSpeedNegative(values.attackerSpeed, tryReadNumber(this.els.attackerSpeed)),
-      (t) => buildSpeedTitle(values.attackerSpeedBreakdown, t)
+      this.els.shipASpeedReadout,
+      formatSpeed(values.shipASpeed),
+      isSpeedNegative(values.shipASpeed, tryReadNumber(this.els.shipASpeed)),
+      (t) => buildSpeedTitle(values.shipASpeedBreakdown, t)
     );
     this.write(
-      this.els.targetSpeedReadout,
-      formatSpeed(values.targetSpeed),
-      isSpeedNegative(values.targetSpeed, tryReadNumber(this.els.targetSpeed)),
-      (t) => buildSpeedTitle(values.targetSpeedBreakdown, t)
+      this.els.shipBSpeedReadout,
+      formatSpeed(values.shipBSpeed),
+      isSpeedNegative(values.shipBSpeed, tryReadNumber(this.els.shipBSpeed)),
+      (t) => buildSpeedTitle(values.shipBSpeedBreakdown, t)
     );
     this.write(this.els.optimalReadout, formatDistance(values.optimal, t), isRangeNegative(values.optimal, values.boostedOptimal), (t) =>
       values.optimalBreakdown === undefined

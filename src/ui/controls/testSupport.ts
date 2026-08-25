@@ -68,7 +68,7 @@ export function addSigResButtons(document: Document): void {
 }
 
 function addPortraitChildren(document: Document): void {
-  for (const id of ["attacker-portrait", "target-portrait"]) {
+  for (const id of ["ship-a-portrait", "ship-b-portrait"]) {
     const root = getFake(document, id);
     const image = new FakeElement();
     image.tagName = "IMG";
@@ -87,19 +87,19 @@ function setControlDefaults(document: Document): void {
     tracking: "0.32",
     optimal: "1000",
     falloff: "3000",
-    "attacker-speed": "300",
-    "attacker-mass": "1000000",
-    "attacker-inertia": "3",
-    "attacker-range": "5000",
-    "attacker-mode": "orbit",
-    "attacker-skills": "5",
-    "target-speed": "300",
-    "target-mass": "1000000",
-    "target-inertia": "3",
-    "target-range": "5000",
-    "target-sig": "36",
-    "target-mode": "orbit",
-    "target-skills": "5",
+    "ship-a-speed": "300",
+    "ship-a-mass": "1000000",
+    "ship-a-inertia": "3",
+    "ship-a-range": "5000",
+    "ship-a-mode": "orbit",
+    "ship-a-skills": "5",
+    "ship-b-speed": "300",
+    "ship-b-mass": "1000000",
+    "ship-b-inertia": "3",
+    "ship-b-range": "5000",
+    "ship-b-sig": "36",
+    "ship-b-mode": "orbit",
+    "ship-b-skills": "5",
     "initial-distance": "5000",
     "maneuver-aggressivity": "1",
     "maneuver-aggressivity-slider": "0.5",
@@ -111,8 +111,8 @@ function setControlDefaults(document: Document): void {
     const el = getFake(document, id);
     el.value = value;
   }
-  getFake(document, "attacker-overload").checked = true;
-  getFake(document, "target-overload").checked = true;
+  getFake(document, "ship-a-overload").checked = true;
+  getFake(document, "ship-b-overload").checked = true;
   getFake(document, "auto-zoom").checked = true;
   getFake(document, "canvas-settings-popup").hidden = true;
   addSigResButtons(document);
@@ -253,7 +253,7 @@ class StubTurretController implements TurretController {
 }
 
 export function buildSidePanel(
-  side: Side = "attacker",
+  side: Side = "shipA",
   ships: Ships = mockShips(),
   fittingImport: FittingImport = mockFittingImport(),
 ) {
@@ -302,7 +302,7 @@ export function buildSidePanel(
   });
   registerSidePanelModule(cradle);
 
-  const panel = side === "attacker" ? cradle.cradle.attackerSide : cradle.cradle.targetSide;
+  const panel = side === "shipA" ? cradle.cradle.shipASide : cradle.cradle.shipBSide;
   panel.setImporter({
     autoLoadFittingTextFor: vi.fn(),
     importEftFitting: vi.fn(),

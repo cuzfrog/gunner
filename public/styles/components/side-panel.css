@@ -15,19 +15,19 @@
   padding-bottom: 6px;
 }
 
-.side-panel-attacker .side-panel-heading {
+.side-panel-ship-a .side-panel-heading {
   color: var(--accent-teal);
   border-bottom-color: var(--accent-teal-40);
 }
 
-.side-panel-attacker { border-left: 2px solid var(--accent-teal); }
+.side-panel-ship-a { border-left: 2px solid var(--accent-teal); }
 
-.side-panel-target .side-panel-heading {
+.side-panel-ship-b .side-panel-heading {
   color: var(--accent-orange);
   border-bottom-color: var(--accent-orange-40);
 }
 
-.side-panel-target { border-left: 2px solid var(--accent-orange); }
+.side-panel-ship-b { border-left: 2px solid var(--accent-orange); }
 
 .side-panel > .form-field { margin-bottom: 6px; }
 

@@ -6,12 +6,12 @@ export interface CombatantProfiles {
 }
 
 export interface PortraitsEls {
-  readonly attacker: HTMLElement;
-  readonly target: HTMLElement;
-  readonly attackerImage: HTMLImageElement;
-  readonly targetImage: HTMLImageElement;
-  readonly attackerEffects: HTMLElement;
-  readonly targetEffects: HTMLElement;
+  readonly shipA: HTMLElement;
+  readonly shipB: HTMLElement;
+  readonly shipAImage: HTMLImageElement;
+  readonly shipBImage: HTMLImageElement;
+  readonly shipAEffects: HTMLElement;
+  readonly shipBEffects: HTMLElement;
 }
 
 export interface PortraitsController {

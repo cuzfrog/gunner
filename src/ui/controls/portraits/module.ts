@@ -17,14 +17,14 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       ewarResolver,
       uiEvents,
       i18n,
-      attackerSide,
-      targetSide,
+      shipASide,
+      shipBSide,
     }) => new PortraitsControllerImpl({
       els: collectPortraitsEls(els),
       imageCatalog,
       ewarController,
       ewarResolver,
-      combatantProfiles: { profile: (side: Side) => (side === "attacker" ? attackerSide.profile : targetSide.profile) },
+      combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
       i18n,
     })).singleton(),
@@ -32,22 +32,22 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
 }
 
 function collectPortraitsEls(els: ControlsElements): PortraitsEls {
-  const attackerImage = els.attackerPortrait.querySelector(".portrait-image");
-  if (!attackerImage || !isHtmlImageElement(attackerImage)) {
-    throw new Error("Missing .portrait-image in #attacker-portrait");
+  const shipAImage = els.shipAPortrait.querySelector(".portrait-image");
+  if (!shipAImage || !isHtmlImageElement(shipAImage)) {
+    throw new Error("Missing .portrait-image in #ship-a-portrait");
   }
-  const targetImage = els.targetPortrait.querySelector(".portrait-image");
-  if (!targetImage || !isHtmlImageElement(targetImage)) throw new Error("Missing .portrait-image in #target-portrait");
-  const attackerEffects = els.attackerPortrait.querySelector<HTMLElement>(".portrait-effects");
-  if (!attackerEffects) throw new Error("Missing .portrait-effects in #attacker-portrait");
-  const targetEffects = els.targetPortrait.querySelector<HTMLElement>(".portrait-effects");
-  if (!targetEffects) throw new Error("Missing .portrait-effects in #target-portrait");
+  const shipBImage = els.shipBPortrait.querySelector(".portrait-image");
+  if (!shipBImage || !isHtmlImageElement(shipBImage)) throw new Error("Missing .portrait-image in #ship-b-portrait");
+  const shipAEffects = els.shipAPortrait.querySelector<HTMLElement>(".portrait-effects");
+  if (!shipAEffects) throw new Error("Missing .portrait-effects in #ship-a-portrait");
+  const shipBEffects = els.shipBPortrait.querySelector<HTMLElement>(".portrait-effects");
+  if (!shipBEffects) throw new Error("Missing .portrait-effects in #ship-b-portrait");
   return {
-    attacker: els.attackerPortrait,
-    target: els.targetPortrait,
-    attackerImage,
-    targetImage,
-    attackerEffects,
-    targetEffects,
+    shipA: els.shipAPortrait,
+    shipB: els.shipBPortrait,
+    shipAImage,
+    shipBImage,
+    shipAEffects,
+    shipBEffects,
   };
 }

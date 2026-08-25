@@ -37,7 +37,7 @@ export class ConfirmControllerImpl implements ConfirmController {
       open: () => this.openPopup(),
       close: () => this.closePopup(false),
       focusTrigger: () => { this.returnFocus?.focus(); },
-      contains: (target) => this.containsTarget(target),
+      contains: (domTarget) => this.containsTarget(domTarget),
     };
     this.els.confirmOk.addEventListener("click", () => this.closePopup(true));
     this.els.confirmCancel.addEventListener("click", () => this.closePopup(false));
@@ -79,10 +79,10 @@ export class ConfirmControllerImpl implements ConfirmController {
     this.currentPromise = undefined;
   }
 
-  private containsTarget(target: EventTarget): boolean {
-    if (!(target instanceof Element)) return false;
+  private containsTarget(domTarget: EventTarget): boolean {
+    if (!(domTarget instanceof Element)) return false;
     const popup = this.els.confirmPopup;
-    if (popup.contains(target)) return true;
-    return target === this.els.confirmOk || target === this.els.confirmCancel;
+    if (popup.contains(domTarget)) return true;
+    return domTarget === this.els.confirmOk || domTarget === this.els.confirmCancel;
   }
 }

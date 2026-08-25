@@ -56,8 +56,8 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
 
 function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  const sides = combatantSidesOf(c.attackerSide, c.targetSide);
-  const fittingPopups = { attacker: c.attackerFittingPopup, target: c.targetFittingPopup } as const;
+  const sides = combatantSidesOf(c.shipASide, c.shipBSide);
+  const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
   const host = {
     persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
     onConfigChange: () => c.controls.onConfigChange(),

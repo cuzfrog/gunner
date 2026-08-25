@@ -42,8 +42,8 @@ interface DomControlsAllDeps extends DomControlsDeps {
   profileController: ProfileController;
   engagementReadout: EngagementReadout;
   effectiveReadout: EffectiveReadout;
-  attackerSide: SidePanel;
-  targetSide: SidePanel;
+  shipASide: SidePanel;
+  shipBSide: SidePanel;
   turretController: TurretController;
   importController: ImportController;
   ewarController: EwarController;
@@ -67,8 +67,8 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly profileController: ProfileController;
   private readonly engagementReadout: EngagementReadout;
   private readonly effectiveReadout: EffectiveReadout;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
   private readonly turretController: TurretController;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
@@ -96,8 +96,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.profileController = all.profileController;
     this.engagementReadout = all.engagementReadout;
     this.effectiveReadout = all.effectiveReadout;
-    this.attackerSide = all.attackerSide;
-    this.targetSide = all.targetSide;
+    this.shipASide = all.shipASide;
+    this.shipBSide = all.shipBSide;
     this.turretController = all.turretController;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
@@ -124,8 +124,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.turretController.popup);
     this.popupGroup.register(this.preferencesController.popup);
     this.hullDatalist.populate();
-    this.attackerSide.sections.skill.renderSkillOptions();
-    this.targetSide.sections.skill.renderSkillOptions();
+    this.shipASide.sections.skill.renderSkillOptions();
+    this.shipBSide.sections.skill.renderSkillOptions();
     this.els.play.addEventListener("click", () => this.onPlayPause());
     this.els.reset.addEventListener("click", () => this.onReset());
     this.els.simSpeed.addEventListener("change", () => this.onSpeedChange(this.preferencesController.getSpeed()));
@@ -139,8 +139,8 @@ export class DomControls implements Controls, DomControlsHost {
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
   onConfigChange(persist = true): void {
-    this.attackerSide.sections.skill.setOverloadDisabled();
-    this.targetSide.sections.skill.setOverloadDisabled();
+    this.shipASide.sections.skill.setOverloadDisabled();
+    this.shipBSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
     this.boosterController.updateSummaries();
     this.rangeOverlayController.render();
@@ -202,14 +202,14 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   getTurret(): TurretSpec { return this.turretController.currentTurretSpec(); }
-  getTargetSig(): number { return this.targetSide.capture().sig ?? 1; }
+  getShipBSig(): number { return this.shipBSide.capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
-  hasAttackerGuns(): boolean { return this.turretController.turret() !== undefined; }
+  hasShipAGuns(): boolean { return this.turretController.turret() !== undefined; }
   update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
     this.currentDistanceValue = frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
@@ -245,10 +245,10 @@ export class DomControls implements Controls, DomControlsHost {
   private onDocumentPointerDown(event: PointerEvent): void {
     const previewOpen = this.previewManager.openSide();
     if (!this.popupGroup.hasOpen() && !previewOpen) return;
-    const target = event.target;
-    if (!isEventTargetWithClosest(target)) return;
-    this.popupGroup.onPointerDown(target);
-    this.previewManager.handlePointerDown(target);
+    const domTarget = event.composedPath()[0] ?? null;
+    if (!isEventTargetWithClosest(domTarget)) return;
+    this.popupGroup.onPointerDown(domTarget);
+    this.previewManager.handlePointerDown(domTarget);
   }
 
   private onDocumentKeyDown(event: KeyboardEvent): void {
@@ -258,6 +258,6 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private updatePlayEnabled(): void {
-    this.els.play.disabled = this.attackerSide.profile === undefined || this.targetSide.profile === undefined;
+    this.els.play.disabled = this.shipASide.profile === undefined || this.shipBSide.profile === undefined;
   }
 }

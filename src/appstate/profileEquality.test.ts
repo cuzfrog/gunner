@@ -27,19 +27,19 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
     sigRes: "S",
     optimal: 5000,
     falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: 1_000_000,
-    attackerInertia: 2,
+    shipASpeed: 1000,
+    shipAMode: "keepAtRange",
+    shipARange: 5000,
+    shipAMass: 1_000_000,
+    shipAInertia: 2,
     initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 1_000_000,
-    targetInertia: 2,
-    targetSig: 40,
-    attackerAmmo: "Hail S",
+    shipBSpeed: 1000,
+    shipBMode: "orbit",
+    shipBRange: 5000,
+    shipBMass: 1_000_000,
+    shipBInertia: 2,
+    shipBSig: 40,
+    shipAAmmo: "Hail S",
     ...overrides,
   };
 }
@@ -55,26 +55,26 @@ describe("CanonicalProfileEquality", () => {
   test("detects inequality for differing profile values", () => {
     const equality = new CanonicalProfileEquality();
     const a = baseProfileSettings();
-    const b = baseProfileSettings({ attackerSpeed: 2000 });
+    const b = baseProfileSettings({ shipASpeed: 2000 });
     expect(equality.equal(a, b)).toBe(false);
   });
 
   test("detects inequality for differing nested fitted hull mass", () => {
     const equality = new CanonicalProfileEquality();
     const a = baseProfileSettings({
-      attackerFittedHull: { ...baseFittedHullSummary, fitted: { ...baseFittedHull, mass: 1_000_000 } },
+      shipAFittedHull: { ...baseFittedHullSummary, fitted: { ...baseFittedHull, mass: 1_000_000 } },
     });
     const b = baseProfileSettings({
-      attackerFittedHull: { ...baseFittedHullSummary, fitted: { ...baseFittedHull, mass: 2_000_000 } },
+      shipAFittedHull: { ...baseFittedHullSummary, fitted: { ...baseFittedHull, mass: 2_000_000 } },
     });
     expect(equality.equal(a, b)).toBe(false);
   });
 
   test("detects inequality for differing nested e-war activation script", () => {
     const equality = new CanonicalProfileEquality();
-    const a = baseProfileSettings({ targetEwarActivation: baseEwarActivation });
+    const a = baseProfileSettings({ shipBEwarActivation: baseEwarActivation });
     const b = baseProfileSettings({
-      targetEwarActivation: { disruptors: [{ active: true, overloaded: false, script: "Script B" }] },
+      shipBEwarActivation: { disruptors: [{ active: true, overloaded: false, script: "Script B" }] },
     });
     expect(equality.equal(a, b)).toBe(false);
   });
@@ -97,8 +97,8 @@ describe("CanonicalProfileEquality", () => {
       massMultiplier: 1,
       mass: 1_000_000,
     };
-    const a = baseProfileSettings({ attackerFittedHull: { ...baseFittedHullSummary, fitted: fittedA } });
-    const b = baseProfileSettings({ attackerFittedHull: { ...baseFittedHullSummary, fitted: fittedB } });
+    const a = baseProfileSettings({ shipAFittedHull: { ...baseFittedHullSummary, fitted: fittedA } });
+    const b = baseProfileSettings({ shipAFittedHull: { ...baseFittedHullSummary, fitted: fittedB } });
     expect(equality.equal(a, b)).toBe(true);
   });
 });

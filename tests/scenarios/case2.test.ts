@@ -8,9 +8,9 @@ import type { ShipConfig, SimConfig } from "../../src/sim/types";
 const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }) };
 
 describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
-  test("predictive attacker reaches and holds within 15% of 2km", () => {
-    const attacker: ShipConfig = {
-      id: "attacker",
+  test("predictive shipA reaches and holds within 15% of 2km", () => {
+    const shipA: ShipConfig = {
+      id: "shipA",
       maxSpeed: 1400,
       mass: 997_000,
       inertiaModifier: 3.6,
@@ -19,8 +19,8 @@ describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
       aggressivity: 0.2,
       orbitDirection: "cw",
     };
-    const target: ShipConfig = {
-      id: "target",
+    const shipB: ShipConfig = {
+      id: "shipB",
       maxSpeed: 1200,
       mass: 1_067_000,
       inertiaModifier: 3.2,
@@ -29,12 +29,12 @@ describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
       aggressivity: 0.01,
       orbitDirection: "cw",
     };
-    const simConfig: SimConfig = { attacker, target, initialDistance: 15_000 };
+    const simConfig: SimConfig = { shipA, shipB, initialDistance: 15_000 };
 
     const kinematics = new KinematicsImpl();
     const reactive = new ReactiveAutopilot();
     const predictive = new PredictiveAutopilot({ reactiveSteering: reactive, kinematics });
-    const sim = new SimulationImpl({ attackerSteering: predictive, targetSteering: reactive, ewarResolver, simConfig });
+    const sim = new SimulationImpl({ shipASteering: predictive, shipBSteering: reactive, ewarResolver, simConfig });
 
     const dt = 0.25;
     const steps = Math.round(180 / dt);
@@ -44,7 +44,7 @@ describe("case2: Merlin keepAtRange 2km vs Rifter orbit 11km", () => {
     for (let i = 0; i < steps; i++) {
       sim.step(dt);
       const snap = sim.snapshot();
-      const frame = kinematics.computeEngagement(snap.attacker, snap.target, snap.time);
+      const frame = kinematics.computeEngagement(snap.shipA, snap.shipB, snap.time);
       if (i >= steps - windowSteps) {
         maxInFinalWindow = Math.max(maxInFinalWindow, frame.distance);
       }

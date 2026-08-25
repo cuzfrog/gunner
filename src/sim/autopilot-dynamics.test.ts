@@ -17,14 +17,14 @@ const ewarResolver: EwarResolver = {
 };
 
 const simConfig: SimConfig = {
-  attacker: { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
-  target: { id: "target", maxSpeed: 1500, mass: 10_000_000, inertiaModifier: 0.45, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
+  shipA: { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
+  shipB: { id: "shipB", maxSpeed: 1500, mass: 10_000_000, inertiaModifier: 0.45, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
   initialDistance: 5000,
 };
 
 const chaseConfig: SimConfig = {
-  attacker: { id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
-  target: { id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
+  shipA: { id: "shipA", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
+  shipB: { id: "shipB", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
   initialDistance: 14_000,
 };
 
@@ -33,7 +33,7 @@ const STEPS = 180 * 60;
 
 function runToSteadyState(): ReturnType<SimulationImpl["snapshot"]> {
   const steering = new ReactiveAutopilot();
-  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver, simConfig });
+  const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig });
   for (let i = 0; i < STEPS; i++) {
     sim.step(DT);
   }
@@ -46,30 +46,30 @@ function minDistance(config: SimConfig, steps: number): number {
 
 function approachResult(config: SimConfig, steps: number): { min: number; final: number } {
   const steering = new ReactiveAutopilot();
-  const sim = new SimulationImpl({ attackerSteering: steering, targetSteering: steering, ewarResolver, simConfig: config });
+  const sim = new SimulationImpl({ shipASteering: steering, shipBSteering: steering, ewarResolver, simConfig: config });
   let min = Number.POSITIVE_INFINITY;
   for (let i = 0; i < steps; i++) {
     sim.step(DT);
     const snapshot = sim.snapshot();
-    const d = snapshot.attacker.position.dist(snapshot.target.position);
+    const d = snapshot.shipA.position.dist(snapshot.shipB.position);
     if (d < min) min = d;
   }
-  return { min, final: sim.snapshot().attacker.position.dist(sim.snapshot().target.position) };
+  return { min, final: sim.snapshot().shipA.position.dist(sim.snapshot().shipB.position) };
 }
 
 describe("Autopilot + Dynamics", () => {
   test("orbit settles at its commanded radius despite dynamics lag", () => {
     const snapshot = runToSteadyState();
-    const finalDistance = snapshot.attacker.position.dist(snapshot.target.position);
+    const finalDistance = snapshot.shipA.position.dist(snapshot.shipB.position);
     expect(finalDistance).toBeGreaterThan(13300);
     expect(finalDistance).toBeLessThan(14700);
   });
 
   test("lag compensation consumes speed budget", () => {
     const snapshot = runToSteadyState();
-    const targetSpeed = snapshot.target.velocity.len();
-    expect(targetSpeed).toBeGreaterThan(1200);
-    expect(targetSpeed).toBeLessThan(1450);
+    const shipBSpeed = snapshot.shipB.velocity.len();
+    expect(shipBSpeed).toBeGreaterThan(1200);
+    expect(shipBSpeed).toBeLessThan(1450);
   });
 
   test("a faster orbiting Thrasher does not let a chasing Harbinger collapse the range", () => {
@@ -79,8 +79,8 @@ describe("Autopilot + Dynamics", () => {
 
   test("the reported bug: a Harbinger keeper starting at 20km does not collapse on a Thrasher orbit", () => {
     const config: SimConfig = {
-      attacker: { id: "attacker", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
-      target: { id: "target", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
+      shipA: { id: "shipA", maxSpeed: 1300, mass: 15_500_000, inertiaModifier: 0.57, mode: "keepAtRange", desiredRange: 10_000, aggressivity: 1 },
+      shipB: { id: "shipB", maxSpeed: 1500, mass: 1_600_000, inertiaModifier: 2.8, mode: "orbit", desiredRange: 14_000, aggressivity: 0.01, orbitDirection: "cw" },
       initialDistance: 20_000,
     };
     const min = minDistance(config, STEPS);
@@ -89,8 +89,8 @@ describe("Autopilot + Dynamics", () => {
 
   test("isolated keep-at-range overshoot grows monotonically with aggressivity", () => {
     const make = (aggressivity: number): SimConfig => ({
-      attacker: { id: "attacker", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity },
-      target: { id: "target", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 },
+      shipA: { id: "shipA", maxSpeed: 1000, mass: 2_000_000, inertiaModifier: 1, mode: "keepAtRange", desiredRange: 5000, aggressivity },
+      shipB: { id: "shipB", maxSpeed: 0, mass: 1, inertiaModifier: 1e-6, mode: "keepAtRange", desiredRange: 5000, aggressivity: 1 },
       initialDistance: 20_000,
     });
 

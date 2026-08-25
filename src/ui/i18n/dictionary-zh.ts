@@ -5,7 +5,8 @@ export const ZH: LanguageSlice<"zh"> = {
   "lang.en": { zh: "English" },
   "lang.zh": { zh: "中文" },
   "lang.ja": { zh: "日本語" },
-  "section.attackerTurret": { zh: "攻击者" },
+  "label.shipA": { zh: "舰船 A" },
+  "label.shipB": { zh: "舰船 B" },
   "label.trackingSpeed": { zh: "跟踪速度" },
   "label.trackingScore": { zh: "评分" },
   "label.turretSigResolution": { zh: "炮塔信号半径" },
@@ -13,7 +14,6 @@ export const ZH: LanguageSlice<"zh"> = {
   "turret.noGuns": { zh: "未装备炮台" },
   "label.optimalRange": { zh: "最佳射程" },
   "label.falloffRange": { zh: "衰减射程" },
-  "section.attackerShip": { zh: "攻击者舰船" },
   "label.hull": { zh: "舰船" },
   "label.propulsion": { zh: "推进模块" },
   "label.propulsionVariant": { zh: "推进模块型号" },
@@ -65,8 +65,6 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.version": { zh: "版本" },
   "label.initialDistance": { zh: "初始距离" },
   "label.alignTime": { zh: "对齐时间" },
-  "section.targetShip": { zh: "目标" },
-  "section.targetProfile": { zh: "目标属性" },
   "label.signatureRadius": { zh: "信号半径" },
   "label.simulationSpeed": { zh: "速度" },
   "button.play": { zh: "开始" },
@@ -154,7 +152,7 @@ export const ZH: LanguageSlice<"zh"> = {
   },
   "footer.mech.kinematics.heading": { zh: "运动学" },
   "footer.mech.kinematics.text": {
-    zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述目标相对运动，" +
+    zh: "舰船运动由质量与惯性决定：横向、径向与角速度描述舰船相对运动，" +
       "加速度按指数趋近最大速度。",
   },
   "footer.mech.kinematics.link": { zh: "Velocity" },

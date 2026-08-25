@@ -30,7 +30,7 @@ class FakeElement {
     this.attributes[name] = value;
   }
 
-  contains(target: EventTarget): boolean { return false; }
+  contains(domTarget: EventTarget): boolean { return false; }
 
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
