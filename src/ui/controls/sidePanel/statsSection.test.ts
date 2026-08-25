@@ -1,4 +1,5 @@
 import { createContainer, InjectionMode } from "awilix";
+import { registerGameDataModule } from "../../../gamedata";
 import type { Ships, StatConditions, ShipsCradle } from "../../../ships";
 import { registerShipsModule } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
@@ -20,6 +21,7 @@ function shipsWithStats(): Ships {
 
 function realShips(): Ships {
   const cradle = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+  registerGameDataModule(cradle);
   registerShipsModule(cradle);
   return cradle.cradle.ships;
 }

@@ -1,4 +1,5 @@
 import { createContainer, InjectionMode } from "awilix";
+import { registerGameDataModule } from "../gamedata";
 import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import { registerShipsModule, type ShipsCradle } from "../ships";
 import { SettingsParser } from "./settingsParser";
@@ -347,6 +348,7 @@ describe("SettingsParser", () => {
   test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when attackerSpeed is overridden", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+    registerGameDataModule(realShips);
     registerShipsModule(realShips);
     const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
     const override = 2000;
@@ -366,6 +368,7 @@ describe("SettingsParser", () => {
   test("decodeUrlSettings keeps baseMaxSpeed unscaled when attackerSpeed is not overridden", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+    registerGameDataModule(realShips);
     registerShipsModule(realShips);
     const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
     const settings: UserSettings = {

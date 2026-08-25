@@ -1,9 +1,11 @@
 import { createContainer, InjectionMode } from "awilix";
+import { registerGameDataModule } from "../../../gamedata";
 import { registerShipsModule, type ShipsCradle } from "../../../ships";
 import { RIFTER, buildSidePanel, getFake, mockShips } from "../testSupport";
 
 function realShips() {
   const cradle = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
+  registerGameDataModule(cradle);
   registerShipsModule(cradle);
   return cradle.cradle.ships;
 }

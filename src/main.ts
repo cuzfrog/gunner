@@ -1,6 +1,7 @@
 import { asValue } from "awilix";
 import { registerAppModule } from "./app";
 import { container } from "./container";
+import { registerGameDataModule } from "./gamedata";
 import { registerFittingModule } from "./fitting";
 import { registerShipsModule } from "./ships";
 import { registerSimModule } from "./sim";
@@ -25,6 +26,7 @@ function main(): void {
       writeText: (text: string) => window.navigator.clipboard.writeText(text),
     }),
   });
+  registerGameDataModule(container);
   registerShipsModule(container);
   registerFittingModule(container);
   // sim before ui: controls wiring resolves sessionCodec eagerly, which needs hitChance.

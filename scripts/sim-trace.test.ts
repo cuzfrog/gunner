@@ -1,10 +1,11 @@
 import { createContainer, InjectionMode } from "awilix";
+import { registerGameDataModule, type GameDataCradle } from "../src/gamedata";
 import { registerSimModule, type SimCradle } from "../src/sim";
 import { registerShipsModule, type ShipsCradle } from "../src/ships";
 import { registerFittingModule, type FittingCradle } from "../src/fitting";
 import { loadEwarProjection, parseParams } from "./sim-trace";
 
-type TestCradle = SimCradle & FittingCradle & ShipsCradle;
+type TestCradle = SimCradle & FittingCradle & ShipsCradle & GameDataCradle;
 
 describe("parseParams", () => {
   test("defaults to no ewar", () => {
@@ -47,6 +48,7 @@ describe("parseParams", () => {
 describe("loadEwarProjection", () => {
   function buildFittingImport() {
     const container = createContainer<TestCradle>({ injectionMode: InjectionMode.PROXY });
+    registerGameDataModule(container);
     registerSimModule(container);
     registerShipsModule(container);
     registerFittingModule(container);

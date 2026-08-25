@@ -5,10 +5,11 @@ import {
   type ShipStats,
 } from "./effectiveStats";
 import { fittingOptions as computeFittingOptions } from "./fitting";
-import { SHIP_PROFILES } from "./profiles";
 import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
-import { factionDisplayName, findShipProfileByName, hullTypeDisplayName, shipDisplayName, type ShipNameLanguage } from "./shipNames";
+import type { NameI18nCatalog } from "../gamedata/nameI18n";
+import type { ShipProfileCatalog } from "../gamedata/shipProfiles";
 import { hullTierOf } from "./tiers";
+import type { ShipNameLanguage } from "./shipNames";
 import type {
   FittedHull, HullTier, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions,
 } from "./types";
@@ -43,20 +44,30 @@ export interface Ships {
 }
 
 export class ShipsImpl implements Ships {
+  private readonly shipProfileCatalog: ShipProfileCatalog;
+  private readonly nameI18nCatalog: NameI18nCatalog;
+  private readonly hullLookup: ReadonlyMap<string, ShipProfile>;
+
+  constructor({ shipProfileCatalog, nameI18nCatalog }: { shipProfileCatalog: ShipProfileCatalog; nameI18nCatalog: NameI18nCatalog }) {
+    this.shipProfileCatalog = shipProfileCatalog;
+    this.nameI18nCatalog = nameI18nCatalog;
+    this.hullLookup = buildHullLookup(shipProfileCatalog, nameI18nCatalog);
+  }
+
   hulls(language: ShipNameLanguage): readonly HullView[] {
-    return SHIP_PROFILES.map((profile) => this.hullView(profile, language));
+    return this.shipProfileCatalog.all().map((profile) => this.hullView(profile, language));
   }
 
   hullView(profile: ShipProfile, language: ShipNameLanguage): HullView {
     return {
-      name: shipDisplayName(profile.name, language),
-      hullType: hullTypeDisplayName(profile.hullType, language),
-      faction: factionDisplayName(profile.faction, language),
+      name: this.nameI18nCatalog.shipName(profile.name, language),
+      hullType: this.nameI18nCatalog.hullTypeName(profile.hullType, language),
+      faction: this.nameI18nCatalog.factionName(profile.faction, language),
     };
   }
 
   findHull(name: string): ShipProfile | undefined {
-    return findShipProfileByName(name);
+    return this.hullLookup.get(normalize(name));
   }
 
   parsePropulsionId(value: unknown): PropulsionId | undefined {
@@ -96,6 +107,29 @@ export class ShipsImpl implements Ships {
 }
 
 const HULL_TIER_ORDER: readonly HullTier[] = ["small", "medium", "large", "capital"] as const;
+
+function buildHullLookup(catalog: ShipProfileCatalog, i18n: NameI18nCatalog): ReadonlyMap<string, ShipProfile> {
+  const map = new Map<string, ShipProfile>();
+  for (const profile of catalog.all()) {
+    map.set(normalize(profile.name), profile);
+  }
+  for (const profile of catalog.all()) {
+    const names = i18n.shipLocalizations(profile.name);
+    if (!names) continue;
+    for (const language of ["en", "zh", "ja"] as const) {
+      const localized = names[language].trim();
+      if (localized.length === 0) continue;
+      const key = normalize(localized);
+      if (map.has(key)) continue;
+      map.set(key, profile);
+    }
+  }
+  return map;
+}
+
+function normalize(input: string): string {
+  return input.trim().toLowerCase();
+}
 
 function turretSizeOptionsFor(profile: ShipProfile): readonly HullTier[] {
   const hullTier = hullTierOf(profile.hullType);

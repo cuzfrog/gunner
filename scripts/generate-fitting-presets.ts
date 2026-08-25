@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { SHIP_PROFILES } from "../src/ships/profiles";
+import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
 
 const FITTINGS_DIR = join(import.meta.dir, "..", "data", "ship-fittings");
 const OUT_FILE = join(import.meta.dir, "..", "src", "fitting", "fittingPresets.ts");

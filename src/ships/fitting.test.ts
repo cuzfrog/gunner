@@ -1,8 +1,10 @@
 import { fittingOptions } from "./fitting";
-import { SHIP_PROFILES } from "./profiles";
+import { StaticShipProfileCatalog } from "../gamedata/shipProfiles";
+
+const catalog = new StaticShipProfileCatalog();
 
 function profileByName(name: string) {
-  const found = SHIP_PROFILES.find((p) => p.name === name);
+  const found = catalog.byName(name);
   if (!found) throw new Error(`Missing test profile: ${name}`);
   return found;
 }

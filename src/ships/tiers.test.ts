@@ -1,9 +1,11 @@
-import { SHIP_PROFILES } from "./profiles";
+import { StaticShipProfileCatalog } from "../gamedata/shipProfiles";
 import { HULL_TIERS, hullTierOf } from "./tiers";
+
+const catalog = new StaticShipProfileCatalog();
 
 describe("HULL_TIERS", () => {
   test("covers every hull type in the profile data", () => {
-    for (const profile of SHIP_PROFILES) {
+    for (const profile of catalog.all()) {
       expect(HULL_TIERS).toHaveProperty(profile.hullType);
     }
   });

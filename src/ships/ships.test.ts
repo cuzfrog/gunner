@@ -2,19 +2,22 @@ import { ShipsImpl } from "./ships";
 import { fittingOptions } from "./fitting";
 import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { PROPULSION_MODULES } from "./propulsion";
-import { SHIP_PROFILES } from "./profiles";
+import { StaticNameI18nCatalog } from "../gamedata/nameI18n";
+import { StaticShipProfileCatalog } from "../gamedata/shipProfiles";
 import type { FittedHull, HullTier, PropulsionId, ShipProfile } from "./types";
 
-const rifter = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
+const shipProfileCatalog = new StaticShipProfileCatalog();
+const nameI18nCatalog = new StaticNameI18nCatalog();
+const ships = new ShipsImpl({ shipProfileCatalog, nameI18nCatalog });
+
+const rifter = shipProfileCatalog.byName("Rifter")!;
 const ab1 = fittingOptions(rifter).find((m) => m.id === "ab-1mn")!;
 const mwd5 = fittingOptions(rifter).find((m) => m.id === "mwd-5mn")!;
 
 describe("ShipsImpl", () => {
-  const ships = new ShipsImpl();
-
   test("hulls returns a localized view for every ship profile", () => {
     const views = ships.hulls("en");
-    expect(views.length).toBe(SHIP_PROFILES.length);
+    expect(views.length).toBe(shipProfileCatalog.all().length);
     expect(views[0]).toEqual({ name: "Abaddon", hullType: "Standard Battleships", faction: "Amarr Empire" });
   });
 
@@ -88,11 +91,11 @@ describe("ShipsImpl", () => {
   });
 
   test("turretSizeOptions follows the fittable-class rule", () => {
-    const small = SHIP_PROFILES.find((p) => p.name === "Rifter")!;
-    const medium = SHIP_PROFILES.find((p) => p.name === "Caracal")!;
-    const large = SHIP_PROFILES.find((p) => p.name === "Scorpion")!;
-    const capital = SHIP_PROFILES.find((p) => p.name === "Avatar")!;
-    const shuttle = SHIP_PROFILES.find((p) => p.name === "Caldari Shuttle")!;
+    const small = shipProfileCatalog.byName("Rifter")!;
+    const medium = shipProfileCatalog.byName("Caracal")!;
+    const large = shipProfileCatalog.byName("Scorpion")!;
+    const capital = shipProfileCatalog.byName("Avatar")!;
+    const shuttle = shipProfileCatalog.byName("Caldari Shuttle")!;
     expect(ships.turretSizeOptions(small)).toEqual<readonly HullTier[]>(["small", "medium"]);
     expect(ships.turretSizeOptions(medium)).toEqual<readonly HullTier[]>(["small", "medium", "large"]);
     expect(ships.turretSizeOptions(large)).toEqual<readonly HullTier[]>(["small", "medium", "large"]);
@@ -103,5 +106,20 @@ describe("ShipsImpl", () => {
   test("alignTime returns ln(4) * mass * inertiaModifier * 1e-6", () => {
     expect(ships.alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
     expect(ships.alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);
+  });
+
+  test("findHull is case-insensitive for Latin names and ignores surrounding whitespace", () => {
+    expect(ships.findHull("rifter")?.name).toBe("Rifter");
+    expect(ships.findHull("RIFTER")?.name).toBe("Rifter");
+    expect(ships.findHull("  Rifter  ")?.name).toBe("Rifter");
+    expect(ships.findHull("  裂谷级  ")?.name).toBe("Rifter");
+  });
+
+  test("findHull resolves Chinese collision to the first profile in profile order", () => {
+    expect(ships.findHull("救赎级")?.name).toBe("Absolution");
+  });
+
+  test("findHull gives canonical names priority over localized collisions", () => {
+    expect(ships.findHull("Salvation")?.name).toBe("Salvation");
   });
 });
