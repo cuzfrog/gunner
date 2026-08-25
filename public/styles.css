@@ -923,8 +923,8 @@ canvas {
   pointer-events: none;
 }
 
-.attacker-portrait { left: 12px; }
-.target-portrait { right: 12px; }
+.combatant-portrait-attacker { left: 12px; }
+.combatant-portrait-target { right: 12px; }
 
 .portrait-image {
   width: 96px;
@@ -936,8 +936,8 @@ canvas {
   border-radius: 2px;
 }
 
-.attacker-portrait .portrait-image { border-color: var(--accent-teal); }
-.target-portrait .portrait-image { border-color: var(--accent-orange); }
+.combatant-portrait-attacker .portrait-image { border-color: var(--accent-teal); }
+.combatant-portrait-target .portrait-image { border-color: var(--accent-orange); }
 
 .portrait-effects {
   display: flex;
@@ -1101,7 +1101,7 @@ canvas {
   border-color: var(--accent-teal);
 }
 
-.results {
+.result-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
@@ -1118,11 +1118,11 @@ canvas {
   padding: 8px 12px;
 }
 
-.result-card.hit-chance {
+.result-card.result-card-hit-chance {
   border-color: var(--accent-teal);
 }
 
-.result-card .label {
+.result-card .result-card-label {
   display: block;
   font-size: 10px;
   color: var(--text-secondary);
@@ -1131,14 +1131,14 @@ canvas {
   margin-bottom: 2px;
 }
 
-.result-card .value {
+.result-card .result-card-value {
   display: block;
   font-size: 18px;
   line-height: 28px;
   color: var(--text-primary);
 }
 
-.result-card.hit-chance .value {
+.result-card.result-card-hit-chance .result-card-value {
   font-size: 28px;
   font-family: "Chakra Petch", sans-serif;
 }
@@ -2008,17 +2008,17 @@ canvas {
     grid-template-columns: 1fr;
   }
 
-  .results {
+  .result-grid {
     display: flex;
     overflow-x: auto;
     scrollbar-width: thin;
   }
 
-  .results::-webkit-scrollbar {
+  .result-grid::-webkit-scrollbar {
     height: 6px;
   }
 
-  .results::-webkit-scrollbar-thumb {
+  .result-grid::-webkit-scrollbar-thumb {
     background: var(--border-dim);
     border-radius: 2px;
   }
