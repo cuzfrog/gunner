@@ -71,7 +71,7 @@ export class HullSection implements IHullSection {
     let imported: ImportedFitting | undefined;
     if (isGenuineChange && autoSelect) {
       const text = this.panel.importer.autoLoadFittingTextFor(profile.name);
-      if (text) imported = this.panel.importer.importEftFitting(text, false);
+      if (text) imported = this.panel.importer.importEftFitting(text, { persist: false, showImportedHint: false });
     }
 
     if (persist) {

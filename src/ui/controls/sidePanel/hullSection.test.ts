@@ -184,7 +184,7 @@ describe("HullSection", () => {
     importer.autoLoadFittingTextFor = vi.fn((hull: string) => (hull === "Rifter" ? "[Rifter, Recent]" : undefined));
     section.applyProfile(RIFTER, true, true);
     expect(importer.autoLoadFittingTextFor).toHaveBeenCalledWith("Rifter");
-    expect(importer.importEftFitting).toHaveBeenCalledWith("[Rifter, Recent]", false);
+    expect(importer.importEftFitting).toHaveBeenCalledWith("[Rifter, Recent]", { persist: false, showImportedHint: false });
     expect(panel.lastCommittedHull).toBe("Rifter");
     expect(host.persistConfigChange).toHaveBeenCalled();
   });

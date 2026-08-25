@@ -19,5 +19,5 @@ export interface ImportController {
   importFromText(side: Side, text: string): Promise<void>;
   importProfileClicked(): Promise<void>;
   onImportSideClick(side: Side): Promise<void>;
-  importEftFitting(side: Side, text: string, persist?: boolean): ImportedFitting | undefined;
+  importEftFitting(side: Side, text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean } | boolean): ImportedFitting | undefined;
 }

@@ -21,6 +21,7 @@ describe("ImportController", () => {
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(attackerPanel.fittingText).toBe(text);
     expect(turret.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
+    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
   });
@@ -55,7 +56,17 @@ describe("ImportController", () => {
     await controller.importFromText("attacker", text);
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(attackerPanel.fittingText).toBe(text);
+    expect(attackerPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+  });
+
+  test("importEftFitting can suppress the imported hint for auto-load", () => {
+    const { controller, fittingImport, attackerPanel, savedFittings } = buildImportController(globalThis.document);
+    const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
+    controller.importEftFitting("attacker", text, { persist: false, showImportedHint: false });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(attackerPanel.sections.paste.showImportHint).not.toHaveBeenCalledWith("status.fittingImported");
+    expect(savedFittings.record).not.toHaveBeenCalled();
   });
 
   test("importFromText emits fittingImported with the imported fitting", async () => {

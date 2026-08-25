@@ -79,7 +79,7 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
 function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings, presetFittings: PresetFittings) {
   return {
     autoLoadFittingTextFor: (hullName: string) => savedFittings.mostRecentFor(hullName)?.text ?? firstPresetText(presetFittings, hullName),
-    importEftFitting: (text: string, persist: boolean) => importer.importEftFitting(side, text, persist),
+    importEftFitting: (text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean }) => importer.importEftFitting(side, text, options),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
   };

@@ -102,7 +102,7 @@ export interface FittingPreviewControl {
 
 export interface SideImporter {
   autoLoadFittingTextFor(hullName: string): string | undefined;
-  importEftFitting(text: string, persist: boolean): ImportedFitting | undefined;
+  importEftFitting(text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean }): ImportedFitting | undefined;
   importFromText(text: string): Promise<void>;
   importFromClipboard(): Promise<void>;
 }

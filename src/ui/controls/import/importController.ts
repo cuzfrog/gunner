@@ -164,8 +164,10 @@ export class ImportControllerImpl implements ImportController {
     await this.importFromText(side, text);
   }
 
-  importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
-    const imported = this.eftSideImporter.importEftFitting(side, text, persist);
+  importEftFitting(side: Side, text: string, options: { readonly persist?: boolean; readonly showImportedHint?: boolean } | boolean = true): ImportedFitting | undefined {
+    const opts = typeof options === "boolean" ? { persist: options } : options;
+    const { persist = true, showImportedHint = true } = opts;
+    const imported = this.eftSideImporter.importEftFitting(side, text, { persist, showImportedHint });
     if (!imported) return undefined;
     this.events.emitFittingImported(side, imported);
     if (persist) this.events.emitConfigInvalidated(true);

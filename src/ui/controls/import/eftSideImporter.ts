@@ -28,7 +28,8 @@ export class EftSideImporter {
     return side === "attacker" ? this.attackerSide : this.targetSide;
   }
 
-  importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
+  importEftFitting(side: Side, text: string, options: { readonly persist?: boolean; readonly showImportedHint?: boolean } = {}): ImportedFitting | undefined {
+    const { persist = true, showImportedHint = true } = options;
     const panel = this.panel(side);
     const conditions = panel.skillConditions();
     const imported = this.fittingImport.importFitting(text, conditions);
@@ -45,7 +46,7 @@ export class EftSideImporter {
     if (persist) {
       panel.lastCommittedHull = imported.profile.name;
     }
-    panel.sections.paste.showImportHint("status.fittingImported");
+    if (showImportedHint) panel.sections.paste.showImportHint("status.fittingImported");
     return imported;
   }
 
