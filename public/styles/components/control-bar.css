@@ -1,7 +1,7 @@
 @layer components {
 .control-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
@@ -10,18 +10,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  grid-column: 1;
-  justify-self: start;
+  margin-right: auto;
 }
 
 .control-bar-playback > .btn {
   padding: 8px 14px;
   min-height: 32px;
-}
-
-.control-bar-zoom {
-  grid-column: 2;
-  justify-self: center;
 }
 
 .control-bar-field .form-slider-value {
@@ -32,8 +26,7 @@
 .control-bar-zoom .form-slider-value { min-width: 5ch; }
 
 .control-bar-speed {
-  grid-column: 3;
-  justify-self: end;
+  margin-left: auto;
 }
 
 .control-bar-field {
