@@ -7,10 +7,10 @@ export function isSigResolutionClass(value: unknown): value is SigResolutionClas
   return value === "S" || value === "M" || value === "L" || value === "XL";
 }
 
-export type AutopilotMode = "orbit" | "keepAtRange" | "midships";
+export type AutopilotMode = "orbit" | "keepAtRange" | "midships" | "maneuver";
 
 export function isAutopilotMode(value: unknown): value is AutopilotMode {
-  return value === "orbit" || value === "keepAtRange" || value === "midships";
+  return value === "orbit" || value === "keepAtRange" || value === "midships" || value === "maneuver";
 }
 
 export type OrbitDirection = "cw" | "ccw";

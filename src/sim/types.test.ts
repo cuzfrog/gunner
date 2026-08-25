@@ -23,6 +23,7 @@ describe("isAutopilotMode", () => {
     expect(isAutopilotMode("orbit")).toBe(true);
     expect(isAutopilotMode("keepAtRange")).toBe(true);
     expect(isAutopilotMode("midships")).toBe(true);
+    expect(isAutopilotMode("maneuver")).toBe(true);
   });
 
   test("rejects invalid values", () => {
