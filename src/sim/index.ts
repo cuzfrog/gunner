@@ -9,6 +9,7 @@ export type { EngagementFrameComposer, EngagementInput, EngagementView } from ".
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
+  AppliedEwarEffect,
   AutopilotMode,
   BoosterActivation,
   BoostActivation,
@@ -18,6 +19,7 @@ export type {
   DisruptorActivation,
   EngagementFrame,
   EwarActivation,
+  EwarEffectFamily,
   EwarLoadout,
   EwarProjection,
   GrapplerActivation,

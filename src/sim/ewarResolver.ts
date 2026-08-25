@@ -1,5 +1,5 @@
 import type { StackingPenalty } from "./stackingPenalty";
-import type { EwarProjection, TrackingDisruptorSpec, TurretSpec } from "./types";
+import type { AppliedEwarEffect, EwarEffectFamily, EwarProjection, TrackingDisruptorSpec, TurretSpec } from "./types";
 
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
@@ -8,7 +8,10 @@ export interface EwarResolver {
   disruptedTurretIgnoringRange(turret: TurretSpec, projection: EwarProjection | undefined): TurretSpec;
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
   propulsionSuppressedIgnoringRange(projection: EwarProjection | undefined): boolean;
+  appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[];
 }
+
+const MIN_APPLIED_EFFECTIVENESS = 0.01;
 
 export class EwarResolverImpl implements EwarResolver {
   private readonly stacking: StackingPenalty;
@@ -54,6 +57,51 @@ export class EwarResolverImpl implements EwarResolver {
       return true;
     }
     return false;
+  }
+
+  appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[] {
+    if (!projection) return [];
+    const effects: AppliedEwarEffect[] = [];
+    const representatives: Partial<Record<EwarEffectFamily, string>> = {};
+    for (let i = 0; i < projection.loadout.webs.length; i++) {
+      const spec = projection.loadout.webs[i];
+      const activation = projection.activation?.webs[i];
+      if (activation && !activation.active) continue;
+      if (representatives.web !== undefined) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      const range = spec.maxRange * overloadBonus;
+      if (range >= distance) representatives.web = spec.moduleName;
+    }
+    for (let i = 0; i < projection.loadout.grapplers.length; i++) {
+      const spec = projection.loadout.grapplers[i];
+      const activation = projection.activation?.grapplers[i];
+      if (activation && !activation.active) continue;
+      if (representatives.grappler !== undefined) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
+      const optimal = spec.optimal * overloadBonus;
+      if (this.falloffEffectiveness(distance, optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.grappler = spec.moduleName;
+    }
+    for (let i = 0; i < projection.loadout.scramblers.length; i++) {
+      const spec = projection.loadout.scramblers[i];
+      const activation = projection.activation?.scramblers[i];
+      if (activation && !activation.active) continue;
+      if (representatives.scrambler !== undefined) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
+      const range = spec.maxRange * overloadBonus;
+      if (range >= distance) representatives.scrambler = spec.moduleName;
+    }
+    for (let i = 0; i < projection.loadout.disruptors.length; i++) {
+      const spec = projection.loadout.disruptors[i];
+      const activation = projection.activation?.disruptors[i];
+      if (activation && !activation.active) continue;
+      if (representatives.disruptor !== undefined) continue;
+      if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.disruptor = spec.moduleName;
+    }
+    if (representatives.web !== undefined) effects.push({ family: "web", moduleName: representatives.web });
+    if (representatives.grappler !== undefined) effects.push({ family: "grappler", moduleName: representatives.grappler });
+    if (representatives.scrambler !== undefined) effects.push({ family: "scrambler", moduleName: representatives.scrambler });
+    if (representatives.disruptor !== undefined) effects.push({ family: "disruptor", moduleName: representatives.disruptor });
+    return effects;
   }
 
   private speedMultipliers(projection: EwarProjection | undefined, distance: number, ignoreRange: boolean): number[] {

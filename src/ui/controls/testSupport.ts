@@ -159,6 +159,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       disruptedTurretIgnoringRange: vi.fn((turret) => turret),
       propulsionSuppressed: vi.fn(() => false),
       propulsionSuppressedIgnoringRange: vi.fn(() => false),
+      appliedEffects: vi.fn(() => []),
     })),
     hitChance: asValue(vi.mocked<HitChance>({ ...mockHitChance(), ...options.hitChance })),
     ships: asValue(vi.mocked<Ships>({ ...mockShips(), ...options.ships })),

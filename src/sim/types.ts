@@ -180,6 +180,13 @@ export interface EwarProjection {
   readonly activation?: EwarActivation;
 }
 
+export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor";
+
+export interface AppliedEwarEffect {
+  readonly family: EwarEffectFamily;
+  readonly moduleName: string;
+}
+
 export interface BoosterActivation {
   readonly active: boolean;
   readonly script: TurretScriptSpec | undefined;

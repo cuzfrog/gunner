@@ -9,7 +9,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const attackerSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const targetSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [] };
 
 const scram: EwarProjection = {
   loadout: {
@@ -142,6 +142,7 @@ describe("SimulationImpl", () => {
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
+      appliedEffects: () => [],
     };
     const steering: Autopilot = { computeVelocity: (ship) => new Vec2(ship.maxSpeed, 0) };
     const config = simConfig("orbit");
@@ -159,6 +160,7 @@ describe("SimulationImpl", () => {
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
+      appliedEffects: () => [],
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const attackerWeb: EwarProjection = {
@@ -186,6 +188,7 @@ describe("SimulationImpl", () => {
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
+      appliedEffects: () => [],
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = {
@@ -206,6 +209,7 @@ describe("SimulationImpl", () => {
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
+      appliedEffects: () => [],
     };
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const config = { ...simConfig("orbit"), initialDistance: 5001 };

@@ -10,6 +10,7 @@ const resolver = vi.mocked<EwarResolver>({
   disruptedTurretIgnoringRange: vi.fn(),
   propulsionSuppressed: vi.fn(),
   propulsionSuppressedIgnoringRange: vi.fn(),
+  appliedEffects: vi.fn(),
 });
 
 const LABELS: Record<string, string> = {

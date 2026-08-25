@@ -66,6 +66,7 @@ function makeEvaluator(): {
   const ewarResolver = vi.mocked<EwarResolver>({
     speedMultiplier: vi.fn(() => 1),
     speedMultiplierIgnoringRange: vi.fn(() => 1),
+    appliedEffects: vi.fn(() => []),
     disruptedTurret: vi.fn(() => effectiveTurret),
     disruptedTurretIgnoringRange: vi.fn(() => effectiveTurret),
     propulsionSuppressed: vi.fn(() => false),

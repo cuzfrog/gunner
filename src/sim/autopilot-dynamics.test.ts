@@ -11,6 +11,7 @@ const ewarResolver: EwarResolver = {
   disruptedTurretIgnoringRange: (turret) => turret,
   propulsionSuppressed: () => false,
   propulsionSuppressedIgnoringRange: () => false,
+  appliedEffects: () => [],
 };
 
 const simConfig: SimConfig = {
