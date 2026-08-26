@@ -536,8 +536,7 @@ export class EwarControllerImpl implements EwarController {
 
   private isSameScript(a: DisruptionScriptSpec | undefined, b: DisruptionScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
-    if (a.moduleId !== undefined && b.moduleId !== undefined) return a.moduleId === b.moduleId;
-    return a.name === b.name;
+    return a.moduleId !== undefined && a.moduleId === b.moduleId;
   }
 
   private findGearFor(side: Side, index: number): HTMLButtonElement | undefined {

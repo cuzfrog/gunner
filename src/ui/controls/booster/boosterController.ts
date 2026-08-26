@@ -299,8 +299,7 @@ export class BoosterControllerImpl implements BoosterController {
 
   private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
-    if (a.moduleId !== undefined && b.moduleId !== undefined) return a.moduleId === b.moduleId;
-    return a.name === b.name;
+    return a.moduleId !== undefined && a.moduleId === b.moduleId;
   }
 
   private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
