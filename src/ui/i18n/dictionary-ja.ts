@@ -14,7 +14,6 @@ export const JA: LanguageSlice<"ja"> = {
   "turret.noGuns": { ja: "砲台未装備" },
   "label.optimalRange": { ja: "最適射程" },
   "label.falloffRange": { ja: "フォールオフ射程" },
-  "label.hull": { ja: "艦船" },
   "label.propulsion": { ja: "推進モジュール" },
   "label.propulsionVariant": { ja: "推進モジュール型" },
   "label.skillLevel": { ja: "パイロットスキル" },

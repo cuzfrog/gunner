@@ -14,7 +14,6 @@ export const ZH: LanguageSlice<"zh"> = {
   "turret.noGuns": { zh: "未装备炮台" },
   "label.optimalRange": { zh: "最佳射程" },
   "label.falloffRange": { zh: "衰减射程" },
-  "label.hull": { zh: "舰船" },
   "label.propulsion": { zh: "推进模块" },
   "label.propulsionVariant": { zh: "推进模块型号" },
   "label.skillLevel": { zh: "飞行员技能" },

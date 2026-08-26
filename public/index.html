@@ -167,7 +167,52 @@
     <main class="app-main">
       <!-- combatant-sections-start -->
       <section class="side-panel side-panel-ship-a surface-panel">
-        <h2 class="side-panel-heading" data-i18n="label.shipA">Ship A</h2>
+        <div class="side-panel-heading-row">
+          <h2 class="side-panel-heading" data-i18n="label.shipA">Ship A</h2>
+          <div class="side-panel-heading-actions">
+            <button type="button" id="ship-a-import-fitting" class="icon-button"
+                    data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
+            </button>
+            <div class="paste-popup popup popup-below popup-left" id="ship-a-paste-popup" hidden>
+              <textarea id="ship-a-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
+              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
+            </div>
+            <button type="button" id="ship-a-fitting-eye" class="fitting-eye icon-button"
+                    aria-pressed="false" disabled
+                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
+                    title="Show fitting details" aria-label="Show fitting details">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
+            </button>
+            <span class="hull-fitting-name" id="ship-a-fitting-name" hidden></span>
+          </div>
+        </div>
+
+        <div class="hull-field">
+          <div class="hull-input-row">
+            <img id="ship-a-ship-image" class="hull-ship-image" alt="" hidden>
+            <input type="text" class="input-field" id="ship-a-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <button type="button" id="ship-a-fitting-trigger" class="icon-button"
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-a-fitting-popup"
+                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
+                    title="Select fitting" aria-label="Select fitting" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-fitting-popup" hidden role="menu"
+                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
+              <span class="fitting-group-label" id="ship-a-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-a-fitting-saved-list"></ul>
+              <span class="fitting-group-label" id="ship-a-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-a-fitting-preset-list"></ul>
+              <p class="fitting-empty" id="ship-a-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+            </div>
+            <div class="fitting-preview popup popup-scroll" id="ship-a-fitting-preview" hidden aria-hidden="true"></div>
+          </div>
+          <span class="hull-hint" id="ship-a-hull-hint"></span>
+        </div>
+
         <label class="form-field">
           <span class="tracking-label-row">
             <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
@@ -248,51 +293,6 @@
           </div>
         </div>
 
-        <hr class="side-panel-divider">
-
-        <div class="hull-field">
-          <div class="hull-label-row">
-            <span class="field-label truncate" data-i18n="label.hull">Ship</span>
-            <button type="button" id="ship-a-import-fitting" class="icon-button"
-                    data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
-            </button>
-            <button type="button" id="ship-a-fitting-eye" class="fitting-eye icon-button"
-                    aria-pressed="false" disabled
-                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
-                    title="Show fitting details" aria-label="Show fitting details">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
-            </button>
-            <span class="hull-fitting-name" id="ship-a-fitting-name" hidden></span>
-            <div class="paste-popup popup popup-below popup-left" id="ship-a-paste-popup" hidden>
-              <textarea id="ship-a-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
-              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
-            </div>
-          </div>
-          <div class="hull-input-row">
-            <img id="ship-a-ship-image" class="hull-ship-image" alt="" hidden>
-            <input type="text" class="input-field" id="ship-a-hull" list="hull-options"
-                   autocomplete="off" autocapitalize="off" spellcheck="false"
-                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-            <button type="button" id="ship-a-fitting-trigger" class="icon-button"
-                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-a-fitting-popup"
-                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
-                    title="Select fitting" aria-label="Select fitting" disabled>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
-            </button>
-            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-fitting-popup" hidden role="menu"
-                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
-              <span class="fitting-group-label" id="ship-a-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
-              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-a-fitting-saved-list"></ul>
-              <span class="fitting-group-label" id="ship-a-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
-              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-a-fitting-preset-list"></ul>
-              <p class="fitting-empty" id="ship-a-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
-            </div>
-            <div class="fitting-preview popup popup-scroll" id="ship-a-fitting-preview" hidden aria-hidden="true"></div>
-          </div>
-          <span class="hull-hint" id="ship-a-hull-hint"></span>
-        </div>
-
         <div class="form-field-group ewar-group" id="ship-a-ewar-field">
           <button type="button" id="ship-a-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-a-ewar-popup"
@@ -309,6 +309,8 @@
             <div class="preview-section" id="ship-a-booster-section" hidden></div>
           </div>
         </div>
+
+        <hr class="side-panel-divider">
 
         <div class="form-field-row">
           <label class="form-field">
@@ -465,7 +467,52 @@
 
       <!-- combatant-sections-start -->
       <section class="side-panel side-panel-ship-b surface-panel">
-        <h2 class="side-panel-heading" data-i18n="label.shipB">Ship B</h2>
+        <div class="side-panel-heading-row">
+          <h2 class="side-panel-heading" data-i18n="label.shipB">Ship B</h2>
+          <div class="side-panel-heading-actions">
+            <button type="button" id="ship-b-import-fitting" class="icon-button"
+                    data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
+            </button>
+            <div class="paste-popup popup popup-below popup-left" id="ship-b-paste-popup" hidden>
+              <textarea id="ship-b-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
+              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
+            </div>
+            <button type="button" id="ship-b-fitting-eye" class="fitting-eye icon-button"
+                    aria-pressed="false" disabled
+                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
+                    title="Show fitting details" aria-label="Show fitting details">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
+            </button>
+            <span class="hull-fitting-name" id="ship-b-fitting-name" hidden></span>
+          </div>
+        </div>
+
+        <div class="hull-field">
+          <div class="hull-input-row">
+            <img id="ship-b-ship-image" class="hull-ship-image" alt="" hidden>
+            <input type="text" class="input-field" id="ship-b-hull" list="hull-options"
+                   autocomplete="off" autocapitalize="off" spellcheck="false"
+                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+            <button type="button" id="ship-b-fitting-trigger" class="icon-button"
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-b-fitting-popup"
+                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
+                    title="Select fitting" aria-label="Select fitting" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
+            </button>
+            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-fitting-popup" hidden role="menu"
+                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
+              <span class="fitting-group-label" id="ship-b-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-b-fitting-saved-list"></ul>
+              <span class="fitting-group-label" id="ship-b-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
+              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-b-fitting-preset-list"></ul>
+              <p class="fitting-empty" id="ship-b-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+            </div>
+            <div class="fitting-preview popup popup-scroll" id="ship-b-fitting-preview" hidden aria-hidden="true"></div>
+          </div>
+          <span class="hull-hint" id="ship-b-hull-hint"></span>
+        </div>
+
         <label class="form-field">
           <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
           <span class="input-with-unit input-with-unit-has-effective">
@@ -540,51 +587,6 @@
           </div>
         </div>
 
-        <hr class="side-panel-divider">
-
-        <div class="hull-field">
-          <div class="hull-label-row">
-            <span class="field-label truncate" data-i18n="label.hull">Ship</span>
-            <button type="button" id="ship-b-import-fitting" class="icon-button"
-                    data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
-            </button>
-            <button type="button" id="ship-b-fitting-eye" class="fitting-eye icon-button"
-                    aria-pressed="false" disabled
-                    data-i18n-title="button.fittingDetails" data-i18n-aria-label="button.fittingDetails"
-                    title="Show fitting details" aria-label="Show fitting details">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#eye"></use></svg>
-            </button>
-            <span class="hull-fitting-name" id="ship-b-fitting-name" hidden></span>
-            <div class="paste-popup popup popup-below popup-left" id="ship-b-paste-popup" hidden>
-              <textarea id="ship-b-paste-input" class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
-              <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
-            </div>
-          </div>
-          <div class="hull-input-row">
-            <img id="ship-b-ship-image" class="hull-ship-image" alt="" hidden>
-            <input type="text" class="input-field" id="ship-b-hull" list="hull-options"
-                   autocomplete="off" autocapitalize="off" spellcheck="false"
-                   data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
-            <button type="button" id="ship-b-fitting-trigger" class="icon-button"
-                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-b-fitting-popup"
-                    data-i18n-title="button.selectFitting" data-i18n-aria-label="button.selectFitting"
-                    title="Select fitting" aria-label="Select fitting" disabled>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
-            </button>
-            <div class="fitting-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-fitting-popup" hidden role="menu"
-                 data-i18n-aria-label="button.selectFitting" aria-label="Select fitting">
-              <span class="fitting-group-label" id="ship-b-fitting-saved-label" data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
-              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-b-fitting-saved-list"></ul>
-              <span class="fitting-group-label" id="ship-b-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
-              <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-b-fitting-preset-list"></ul>
-              <p class="fitting-empty" id="ship-b-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
-            </div>
-            <div class="fitting-preview popup popup-scroll" id="ship-b-fitting-preview" hidden aria-hidden="true"></div>
-          </div>
-          <span class="hull-hint" id="ship-b-hull-hint"></span>
-        </div>
-
         <div class="form-field-group ewar-group" id="ship-b-ewar-field">
           <button type="button" id="ship-b-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-b-ewar-popup"
@@ -601,6 +603,8 @@
             <div class="preview-section" id="ship-b-booster-section" hidden></div>
           </div>
         </div>
+
+        <hr class="side-panel-divider">
 
         <div class="form-field-row">
           <div class="form-field-group">

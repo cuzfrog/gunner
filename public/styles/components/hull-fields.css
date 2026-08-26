@@ -1,12 +1,6 @@
 @layer components {
 .hull-field { margin-bottom: 6px; }
 
-.hull-label-row {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
 .hull-input-row {
   display: flex;
   align-items: center;

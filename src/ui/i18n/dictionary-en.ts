@@ -14,7 +14,6 @@ export const EN: LanguageSlice<"en"> = {
   "turret.noGuns": { en: "No guns equipped" },
   "label.optimalRange": { en: "Optimal range" },
   "label.falloffRange": { en: "Falloff range" },
-  "label.hull": { en: "Ship" },
   "label.propulsion": { en: "Propulsion" },
   "label.propulsionVariant": { en: "Propulsion variant" },
   "label.skillLevel": { en: "Pilot skills" },

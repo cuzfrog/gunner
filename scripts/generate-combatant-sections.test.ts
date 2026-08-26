@@ -40,6 +40,14 @@ describe("generate-combatant-sections", () => {
     expect(shipA).not.toContain('<option value="orbit" selected');
   });
 
+  test("shipA section has heading row with actions and anchored paste popup", () => {
+    const { shipA } = generateSections(template);
+    expect(shipA).toContain('class="side-panel-heading-row"');
+    expect(shipA).toContain('class="side-panel-heading-actions"');
+    expect(shipA).toContain('id="ship-a-import-fitting"');
+    expect(shipA).toMatch(/class="side-panel-heading-actions"[\s\S]*?id="ship-a-paste-popup"/);
+  });
+
   test("shipA and shipB have side-specific default values", () => {
     const { shipA, shipB } = generateSections(template);
     expect(shipA).toContain('id="ship-a-speed" value="0"');
