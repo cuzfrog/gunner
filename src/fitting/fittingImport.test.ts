@@ -28,12 +28,14 @@ const OPTIMAL_RANGE_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name 
 const TRACKING_SPEED_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name === "Tracking Speed Disruption Script")!;
 const OPTIMAL_RANGE_SCRIPT: DisruptionScriptSpec = {
   name: OPTIMAL_RANGE_STAT.name,
+  moduleId: OPTIMAL_RANGE_STAT.id,
   trackingMultiplier: 1 + OPTIMAL_RANGE_STAT.trackingDeltaBonus / 100,
   optimalMultiplier: 1 + OPTIMAL_RANGE_STAT.rangeDeltaBonus / 100,
   falloffMultiplier: 1 + OPTIMAL_RANGE_STAT.falloffDeltaBonus / 100,
 };
 const TRACKING_SPEED_SCRIPT: DisruptionScriptSpec = {
   name: TRACKING_SPEED_STAT.name,
+  moduleId: TRACKING_SPEED_STAT.id,
   trackingMultiplier: 1 + TRACKING_SPEED_STAT.trackingDeltaBonus / 100,
   optimalMultiplier: 1 + TRACKING_SPEED_STAT.rangeDeltaBonus / 100,
   falloffMultiplier: 1 + TRACKING_SPEED_STAT.falloffDeltaBonus / 100,
@@ -396,10 +398,10 @@ describe("FittingImportImpl", () => {
     expect(result!.propulsion!.massAddition).toBe(50_000_000);
   });
 
-  test("propulsionVariantNames returns matching module names", () => {
+  test("propulsionVariantNames returns matching module names and ids", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const mwd = propulsionModules.find((m) => m.id === "mwd-5mn")!;
-    expect(importer.propulsionVariantNames(mwd)).toEqual(["5MN Microwarpdrive I"]);
+    expect(importer.propulsionVariantNames(mwd)).toEqual([{ id: "5MN Microwarpdrive I" as TypeId, name: "5MN Microwarpdrive I" }]);
   });
 
   test("propulsionVariantNames returns an empty list when no variants match", () => {
@@ -632,18 +634,18 @@ Tracking Disruptor II, Optimal Range Disruption Script`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.webs).toEqual([
-      { moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 },
+      expect.objectContaining({ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }),
     ]);
     expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
     expect(result!.ewar.disruptors).toEqual([
-      {
+      expect.objectContaining({
         moduleName: "Tracking Disruptor II",
         optimal: 48000,
         falloff: 24000,
         disruption: 0.1719,
         defaultScript: OPTIMAL_RANGE_SCRIPT,
         overloadStrengthBonusPercent: 20,
-      },
+      }),
     ]);
   });
 
@@ -697,14 +699,14 @@ Tracking Disruptor II`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.disruptors).toEqual([
-      {
+      expect.objectContaining({
         moduleName: "Tracking Disruptor II",
         optimal: 48000,
         falloff: 24000,
         disruption: 0.1719,
         defaultScript: undefined,
         overloadStrengthBonusPercent: 20,
-      },
+      }),
     ]);
     expect(result!.ewar.scripts).toEqual(DISRUPTION_SCRIPT_CATALOG);
   });
@@ -721,7 +723,7 @@ Warp Disruptor II`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.scramblers).toEqual([
-      { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 },
+      expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.grapplers).toEqual([]);
@@ -740,7 +742,7 @@ Heavy Stasis Grappler I`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.grapplers).toEqual([
-      { moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 },
+      expect.objectContaining({ moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
@@ -759,11 +761,11 @@ Tracking Computer I, Optimal Range Script`,
     );
     expect(result).toBeDefined();
     expect(result!.boosts.computers).toEqual([
-      { moduleName: "Tracking Computer I", trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: result!.boosts.scripts.find((s) => s.name === "Optimal Range Script") },
+      expect.objectContaining({ moduleName: "Tracking Computer I", trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: result!.boosts.scripts.find((s) => s.name === "Optimal Range Script") }),
     ]);
     expect(result!.boosts.scripts).toEqual([
-      { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
-      { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
+      { name: "Optimal Range Script", moduleId: "28999" as TypeId, trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 },
+      { name: "Tracking Speed Script", moduleId: "29001" as TypeId, trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 },
     ]);
   });
 
@@ -792,7 +794,7 @@ Warp Scrambler II, Gremlin K5`,
     );
     expect(result).toBeDefined();
     expect(result!.ewar.scramblers).toEqual([
-      { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 },
+      expect.objectContaining({ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }),
     ]);
     expect(result!.ewar.webs).toEqual([]);
     expect(result!.ewar.disruptors).toEqual([]);
@@ -831,16 +833,13 @@ Warp Scrambler II, Gremlin K5`,
     expect(names).toEqual(["Republic Fleet EMP S"]);
   });
 
-  test("itemName and itemNameForId delegate to ItemNameCatalog", () => {
+  test("itemNameForId delegates to ItemNameCatalog", () => {
     const mock = new TestItemNames();
     const mockResolver: ItemNameResolver = { idsForName: (name: string) => [name as TypeId] };
     const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, stackingPenalty, itemNameCatalog: mock, itemNameResolver: mockResolver, moduleSlotCatalog });
     expect(importer.itemNameForId("X" as TypeId, "zh")).toBe("X (zh)");
     expect(importer.itemNameForId("X" as TypeId, "ja")).toBe("X (ja)");
     expect(importer.itemNameForId("X" as TypeId, "en")).toBe("X");
-    expect(importer.itemName("X", "zh")).toBe("X (zh)");
-    expect(importer.itemName("X", "ja")).toBe("X (ja)");
-    expect(importer.itemName("X", "en")).toBe("X");
   });
 });
 
@@ -905,29 +904,36 @@ describe("FittingImportImpl.summarize", () => {
     expect(kinds).toEqual(["high", "mid", "low", "rig", "cargo", "drones"]);
   });
 
-  test("captures charges on module rows", () => {
-    const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+  test("captures charges and ids on module rows", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const high = summary!.sections.find((section) => section.kind === "high");
     expect(high!.rows[0].charge).toBe("Hail S");
+    expect(high!.rows[0].chargeId).toBeDefined();
+    expect(high!.rows[0].id).toBeDefined();
     expect(high!.rows[1].charge).toBe("Hail S");
+    expect(high!.rows[1].chargeId).toBeDefined();
+    expect(high!.rows[1].id).toBeDefined();
   });
 
-  test("captures cargo quantities", () => {
+  test("captures cargo quantities with resolved ids", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
-      { name: "Hail S", quantity: 1000 },
-      { name: "Republic Fleet EMP S", quantity: 500 },
+      expect.objectContaining({ name: "Hail S", quantity: 1000 }),
+      expect.objectContaining({ name: "Republic Fleet EMP S", quantity: 500 }),
     ]);
+    expect(cargo!.rows[0].id).toBeDefined();
+    expect(cargo!.rows[1].id).toBeDefined();
   });
 
-  test("captures drone quantities", () => {
+  test("captures drone quantities with resolved ids", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: summarizeDb(), chargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER);
     const drones = summary!.sections.find((section) => section.kind === "drones");
-    expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+    expect(drones!.rows).toEqual([expect.objectContaining({ name: "Hobgoblin I", quantity: 3 })]);
+    expect(drones!.rows[0].id).toBeDefined();
   });
 
   test("classifies cargo and drones by item kind regardless of position", () => {
@@ -943,8 +949,10 @@ Hobgoblin I x3
     const summary = importer.summarize(text);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     const drones = summary!.sections.find((section) => section.kind === "drones");
-    expect(cargo!.rows).toEqual([{ name: "Republic Fleet EMP S", quantity: 500 }]);
-    expect(drones!.rows).toEqual([{ name: "Hobgoblin I", quantity: 3 }]);
+    expect(cargo!.rows).toEqual([expect.objectContaining({ name: "Republic Fleet EMP S", quantity: 500 })]);
+    expect(drones!.rows).toEqual([expect.objectContaining({ name: "Hobgoblin I", quantity: 3 })]);
+    expect(cargo!.rows[0].id).toBeDefined();
+    expect(drones!.rows[0].id).toBeDefined();
   });
 
   test("places shield extenders in the mid section", async () => {
@@ -995,9 +1003,11 @@ Hobgoblin II x5
     expect(kinds).toEqual(["high", "mid", "cargo"]);
     const cargo = summary!.sections.find((section) => section.kind === "cargo");
     expect(cargo!.rows).toEqual([
-      { name: "Hail S", quantity: 1000 },
-      { name: "Republic Fleet EMP S", quantity: 500 },
+      expect.objectContaining({ name: "Hail S", quantity: 1000 }),
+      expect.objectContaining({ name: "Republic Fleet EMP S", quantity: 500 }),
     ]);
+    expect(cargo!.rows[0].id).toBeDefined();
+    expect(cargo!.rows[1].id).toBeDefined();
   });
 
   test("returns undefined for unparseable text", () => {
@@ -1080,15 +1090,18 @@ describe("FittingImportImpl localization", () => {
     expect(english?.fitted.mass).toBe(japanese?.fitted.mass);
   });
 
-  test("summarize canonicalizes localized item names to English", () => {
+  test("summarize canonicalizes localized item names to English and resolves ids", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const summary = importer.summarize(RIFTER_BRAWLER_ZH);
     expect(summary).toBeDefined();
     const high = summary!.sections.find((section) => section.kind === "high");
     expect(high!.rows[0].name).toBe("200mm AutoCannon I");
+    expect(high!.rows[0].id).toBeDefined();
     expect(high!.rows[0].charge).toBe("Hail S");
+    expect(high!.rows[0].chargeId).toBeDefined();
     const drones = summary!.sections.find((section) => section.kind === "drones");
     expect(drones!.rows[0].name).toBe("Hobgoblin I");
+    expect(drones!.rows[0].id).toBeDefined();
   });
 
   test("canonicalEftText produces English-only EFT from localized input", () => {

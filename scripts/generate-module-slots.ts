@@ -2,7 +2,15 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import * as process from "node:process";
-import { FITTING_MODULES, TURRETS } from "../src/gamedata/fittingDb";
+import {
+  FITTING_MODULES,
+  STASIS_GRAPPLERS,
+  STASIS_WEBS,
+  TRACKING_COMPUTERS,
+  TRACKING_DISRUPTORS,
+  TURRETS,
+  WARP_SCRAMBLERS,
+} from "../src/gamedata/fittingDb";
 
 const OUTPUT_PATH = "src/gamedata/moduleSlots/moduleSlots.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
@@ -22,6 +30,8 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Propulsion Module": "mid",
   "Tracking Computer": "mid",
   "Stasis Web": "mid",
+  "Stasis Grappler": "mid",
+  "Warp Scrambler": "mid",
   "Weapon Disruptor": "mid",
   "Armor Plate": "low",
   "Inertial Stabilizer": "low",
@@ -102,7 +112,15 @@ export function generateModuleSlotsContent(
 function main(): void {
   const raw: unknown = JSON.parse(readFileSync(NAME_TO_ID_PATH, "utf8"));
   const nameToId = decodeNameToId(raw);
-  const content = generateModuleSlotsContent(nameToId, Object.keys(FITTING_MODULES), Object.keys(TURRETS), GROUP_SLOTS);
+  const moduleNames = new Set<string>();
+  for (const stats of Object.values(FITTING_MODULES)) moduleNames.add(stats.name);
+  for (const stats of Object.values(STASIS_WEBS)) moduleNames.add(stats.name);
+  for (const stats of Object.values(STASIS_GRAPPLERS)) moduleNames.add(stats.name);
+  for (const stats of Object.values(TRACKING_COMPUTERS)) moduleNames.add(stats.name);
+  for (const stats of Object.values(TRACKING_DISRUPTORS)) moduleNames.add(stats.name);
+  for (const stats of Object.values(WARP_SCRAMBLERS)) moduleNames.add(stats.name);
+  const turretNames = Object.values(TURRETS).map((stats) => stats.name);
+  const content = generateModuleSlotsContent(nameToId, [...moduleNames], turretNames, GROUP_SLOTS);
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);

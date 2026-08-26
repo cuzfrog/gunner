@@ -1,5 +1,4 @@
-import type { TypeId } from "../gamedata/ids";
-import type { ShipId } from "../gamedata/ids";
+import type { ShipId, TypeId } from "../gamedata/ids";
 import type {
   FittedHull,
   HullTier,
@@ -51,7 +50,9 @@ export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCa
 
 export interface FittingRow {
   readonly name: string;
+  readonly id?: TypeId;
   readonly charge?: string;
+  readonly chargeId?: TypeId;
   readonly quantity?: number;
   readonly empty?: boolean;
 }
@@ -80,14 +81,18 @@ export interface ImportedFitting {
   readonly boosts: BoostLoadout;
 }
 
+export interface PropulsionVariant {
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 export interface FittingImport {
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined;
-  propulsionVariantNames(module: PropulsionModule): readonly string[];
+  propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[];
   propulsionStats(name: string): PropulsionStats | undefined;
   summarize(text: string): FittingSummary | undefined;
   canonicalEftText(text: string): string | undefined;
   itemNameForId(id: TypeId, language: ShipNameLanguage): string;
-  itemName(name: string, language: ShipNameLanguage): string;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -125,7 +130,7 @@ export class FittingImportImpl implements FittingImport {
     this.moduleSlotCatalog = moduleSlotCatalog;
   }
 
-  propulsionVariantNames(module: PropulsionModule): readonly string[] {
+  propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
     const matches = ([, stats]: [string, FittingModuleStats]) =>
       stats.propulsion?.kind === module.kind &&
       stats.propulsion?.sizeTier === module.sizeTier &&
@@ -133,13 +138,13 @@ export class FittingImportImpl implements FittingImport {
       stats.propulsion.speedBonus > 0;
     return Object.entries(this.db.modules)
       .filter(matches)
-      .map(([, stats]) => stats.name)
+      .map(([, stats]) => ({ id: stats.id, name: stats.name }))
       .sort((a, b) => {
-        const aStats = moduleByName(this.db, a)?.propulsion;
-        const bStats = moduleByName(this.db, b)?.propulsion;
-        if (!aStats || !bStats) return a.localeCompare(b);
+        const aStats = this.db.modules[a.id]?.propulsion;
+        const bStats = this.db.modules[b.id]?.propulsion;
+        if (!aStats || !bStats) return a.name.localeCompare(b.name);
         if (bStats.speedBonus !== aStats.speedBonus) return bStats.speedBonus - aStats.speedBonus;
-        return a.localeCompare(b);
+        return a.name.localeCompare(b.name);
       });
   }
 
@@ -204,16 +209,6 @@ export class FittingImportImpl implements FittingImport {
     return this.itemNameCatalog.nameForId(id, language);
   }
 
-  itemName(name: string, language: ShipNameLanguage): string {
-    const id = this.idForName(name, "en");
-    if (id === undefined) return name;
-    return this.itemNameCatalog.nameForId(id, language);
-  }
-
-  private idForName(name: string, language: ShipNameLanguage): TypeId | undefined {
-    return this.itemNameResolver.idsForName(name, language)[0];
-  }
-
   private resolveEftDocument(document: EftDocument): ResolvedEft | undefined {
     const language = this.detectLanguage(document);
     if (!language) return undefined;
@@ -236,13 +231,13 @@ export class FittingImportImpl implements FittingImport {
       const droneId = candidates.find((id) => this.db.drones[id] !== undefined);
       const chargeId = candidates.find((id) => this.db.charges[id] !== undefined);
       if (preferDrone && droneId) {
-        return { kind: "resolved", id: droneId, name: this.itemNameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+        return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
       }
       if (chargeId) {
-        return { kind: "resolved", id: chargeId, name: this.itemNameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
+        return { kind: "resolved", id: chargeId, name: this.itemNameCatalog.nameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
       }
       if (droneId) {
-        return { kind: "resolved", id: droneId, name: this.itemNameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+        return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
       }
       return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: false };
     };
@@ -566,6 +561,7 @@ function resolveBoosts(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCa
         const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
         computers.push({
           moduleName: computerStats.name,
+          moduleId: computerStats.id,
           trackingBonusPercent: computerStats.trackingBonusPercent,
           optimalBonusPercent: computerStats.optimalBonusPercent,
           falloffBonusPercent: computerStats.falloffBonusPercent,
@@ -594,6 +590,7 @@ function resolveEwar(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCata
       if (webStats) {
         webs.push({
           moduleName: webStats.name,
+          moduleId: webStats.id,
           maxRange: webStats.maxRange,
           speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000,
           overloadRangeBonusPercent: webStats.overloadRangeBonusPercent,
@@ -605,6 +602,7 @@ function resolveEwar(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCata
       if (grapplerStats) {
         grapplers.push({
           moduleName: grapplerStats.name,
+          moduleId: grapplerStats.id,
           optimal: grapplerStats.optimal,
           falloff: grapplerStats.falloff,
           speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000,
@@ -619,6 +617,7 @@ function resolveEwar(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCata
         const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
         disruptors.push({
           moduleName: disruptorStats.name,
+          moduleId: disruptorStats.id,
           optimal: disruptorStats.optimal,
           falloff: disruptorStats.falloff,
           disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000,
@@ -632,6 +631,7 @@ function resolveEwar(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCata
       if (scramblerStats) {
         scramblers.push({
           moduleName: scramblerStats.name,
+          moduleId: scramblerStats.id,
           maxRange: scramblerStats.maxRange,
           overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent,
         });
@@ -648,6 +648,7 @@ function scriptSpecsFrom(scripts: Readonly<Record<string, TurretScriptStats>>): 
   for (const stats of Object.values(scripts)) {
     result.push({
       name: stats.name,
+      moduleId: stats.id,
       trackingMultiplier: stats.trackingMultiplier,
       optimalMultiplier: stats.optimalMultiplier,
       falloffMultiplier: stats.falloffMultiplier,
@@ -661,6 +662,7 @@ function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionSc
   for (const stats of Object.values(scripts)) {
     result.push({
       name: stats.name,
+      moduleId: stats.id,
       trackingMultiplier: 1 + stats.trackingDeltaBonus / 100,
       optimalMultiplier: 1 + stats.rangeDeltaBonus / 100,
       falloffMultiplier: 1 + stats.falloffDeltaBonus / 100,
@@ -726,7 +728,7 @@ function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
       if (line.kind === "empty") {
         buckets[line.bank].push({ name: line.label, empty: true });
       } else if (line.kind === "module") {
-        buckets[line.bank].push({ name: line.moduleName, charge: line.chargeName });
+        buckets[line.bank].push({ name: line.moduleName, charge: line.chargeName, id: line.moduleId, chargeId: line.chargeId });
       } else {
         buckets[line.bank].push({ name: line.name, charge: line.charge });
       }
@@ -744,10 +746,10 @@ function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
 }
 
 function classifyQuantity(buckets: Record<FittingSectionKind, FittingRow[]>, item: ResolvedQuantity): void {
-  if (item.isDrone) {
-    buckets.drones.push({ name: item.name, quantity: item.quantity });
+  if (item.kind === "resolved") {
+    buckets[item.isDrone ? "drones" : "cargo"].push({ name: item.name, id: item.id, quantity: item.quantity });
   } else {
-    buckets.cargo.push({ name: item.name, quantity: item.quantity });
+    buckets[item.isDrone ? "drones" : "cargo"].push({ name: item.name, quantity: item.quantity });
   }
 }
 

@@ -77,7 +77,6 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
-    itemName: vi.fn((name: string) => name),
   });
 
   const i18n = createI18n();

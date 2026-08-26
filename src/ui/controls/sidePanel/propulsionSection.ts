@@ -168,8 +168,8 @@ export class PropulsionSection implements IPropulsionSection {
   }
 
   defaultPropulsionName(module: PropulsionModule): string {
-    const names = this.fittingImport.propulsionVariantNames(module);
-    return names.find((name) => name === module.label) ?? names[0] ?? module.label;
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    return variants.find((variant) => variant.name === module.label)?.name ?? variants[0]?.name ?? module.label;
   }
 
   nakedFitted(profile: ShipProfile): FittedHull {

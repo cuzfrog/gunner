@@ -1,3 +1,4 @@
+import type { TypeId } from "../../../gamedata/ids";
 import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
@@ -299,8 +300,8 @@ export class EwarControllerImpl implements EwarController {
       const overloaded = state.activation.webs[i].overloaded;
       const row = document.createElement("div");
       row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(active, web.moduleName);
-      const overloadButton = this.createOverloadButton(active, overloaded, i, web.moduleName, () => this.toggleWebOverload(side, i, overloadButton));
+      const button = this.createModuleButton(active, web);
+      const overloadButton = this.createOverloadButton(active, overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -314,9 +315,9 @@ export class EwarControllerImpl implements EwarController {
       const activation = state.activation.grapplers[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, grappler.moduleName);
+      const button = this.createModuleButton(activation.active, grappler);
       const onToggle = () => this.toggleGrapplerOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler.moduleName, onToggle);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler, onToggle);
       button.addEventListener("click", () => this.toggleGrappler(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -330,9 +331,9 @@ export class EwarControllerImpl implements EwarController {
       const activation = state.activation.disruptors[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, disruptor.moduleName);
+      const button = this.createModuleButton(activation.active, disruptor);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor.moduleName, onToggle);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -348,9 +349,9 @@ export class EwarControllerImpl implements EwarController {
       const activation = state.activation.scramblers[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, scrambler.moduleName);
+      const button = this.createModuleButton(activation.active, scrambler);
       const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
-      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler.moduleName, onToggle);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler, onToggle);
       button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
       row.appendChild(button);
       row.appendChild(overloadButton);
@@ -358,14 +359,18 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private createModuleButton(active: boolean, moduleName: string): HTMLButtonElement {
-    const displayName = this.fittingImport.itemName(moduleName, this.i18n.current());
+  private moduleDisplayName(spec: { readonly moduleName: string; readonly moduleId?: TypeId }): string {
+    return spec.moduleId !== undefined ? this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current()) : spec.moduleName;
+  }
+
+  private createModuleButton(active: boolean, spec: { readonly moduleName: string; readonly moduleId?: TypeId }): HTMLButtonElement {
+    const displayName = this.moduleDisplayName(spec);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", displayName);
-    const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
+    const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleName);
     const img = document.createElement("img");
     img.className = "ewar-module-icon";
     if (iconUrl !== undefined) img.src = iconUrl;
@@ -402,7 +407,7 @@ export class EwarControllerImpl implements EwarController {
     active: boolean,
     overloaded: boolean,
     index: number,
-    moduleName: string,
+    spec: { readonly moduleName: string; readonly moduleId?: TypeId },
     onToggle: () => void,
   ): HTMLButtonElement {
     const button = document.createElement("button");
@@ -410,7 +415,7 @@ export class EwarControllerImpl implements EwarController {
     button.className = "ewar-overload-button btn icon-button";
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
-    const label = `${this.i18n.t("label.overload")} ${this.fittingImport.itemName(moduleName, this.i18n.current())}`;
+    const label = `${this.i18n.t("label.overload")} ${this.moduleDisplayName(spec)}`;
     button.title = label;
     button.setAttribute("aria-label", label);
     button.innerHTML = (
@@ -440,7 +445,7 @@ export class EwarControllerImpl implements EwarController {
     const label = document.createElement("div");
     label.id = `${sideId(side)}-ewar-script-label`;
     label.className = "ewar-script-popup-label";
-    label.textContent = this.fittingImport.itemName(disruptor.moduleName, this.i18n.current());
+    label.textContent = this.moduleDisplayName(disruptor);
     popup.setAttribute("aria-labelledby", label.id);
     popup.appendChild(label);
 
@@ -456,14 +461,14 @@ export class EwarControllerImpl implements EwarController {
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
-      const name = this.fittingImport.itemName(script.name, this.i18n.current());
+      const name = script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name;
       const iconUrl = this.imageCatalog.itemIconUrl(script.name);
       const button = this.createScriptOptionButton(
         script.name,
         name,
         scriptStatSuffix(script),
         iconUrl,
-        current?.name === script.name,
+        this.isSameScript(current, script),
       );
       button.addEventListener("click", () => this.onScriptSelected(side, index, script.name));
       popup.appendChild(button);
@@ -518,13 +523,19 @@ export class EwarControllerImpl implements EwarController {
     this.events.emitConfigInvalidated(true);
   }
 
+  private isSameScript(a: DisruptionScriptSpec | undefined, b: DisruptionScriptSpec | undefined): boolean {
+    if (a === undefined || b === undefined) return a === b;
+    if (a.moduleId !== undefined && b.moduleId !== undefined) return a.moduleId === b.moduleId;
+    return a.name === b.name;
+  }
+
   private findGearFor(side: Side, index: number): HTMLButtonElement | undefined {
     const gearState = this.scriptGears.get(side);
     return gearState?.index === index ? gearState.gear : undefined;
   }
 
   private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
-    const title = script ? this.fittingImport.itemName(script.name, this.i18n.current()) : this.i18n.t("ewar.script.none");
+    const title = script ? (script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name) : this.i18n.t("ewar.script.none");
     gear.setAttribute("title", title);
     gear.setAttribute("aria-label", title);
   }

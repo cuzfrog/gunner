@@ -9,7 +9,6 @@ no-new-exports:
   - module.ts
   - propulsion.test.ts
   - propulsion.ts
-  - shipNames.ts
   - ships.test.ts
   - ships.ts
   - tiers.test.ts

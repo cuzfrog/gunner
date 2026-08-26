@@ -86,11 +86,11 @@ export class PropulsionVariantSection {
     if (!module) return;
     const fitted = this.panel.fittedHull;
     const currentName = fitted?.propulsionName ?? this.panel.sections.propulsion.defaultPropulsionName(module);
-    for (const name of this.fittingImport.propulsionVariantNames(module)) {
-      const iconUrl = this.imageCatalog.itemIconUrl(name);
-      const displayName = this.fittingImport.itemName(name, this.i18n.current());
-      const item = this.createVariantButton(name, currentName, iconUrl, displayName, () => this.onPropulsionVariantClick(name));
-      item.setAttribute("data-value", name);
+    for (const variant of this.fittingImport.propulsionVariantNames(module)) {
+      const iconUrl = this.imageCatalog.itemIconUrl(variant.name);
+      const displayName = this.fittingImport.itemNameForId(variant.id, this.i18n.current());
+      const item = this.createVariantButton(variant.name, currentName, iconUrl, displayName, () => this.onPropulsionVariantClick(variant.name));
+      item.setAttribute("data-value", variant.name);
       item.setAttribute("title", displayName);
       popup.appendChild(item);
     }

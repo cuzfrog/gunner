@@ -1,3 +1,4 @@
+import type { TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
 import type { DisruptionScriptSpec, EwarLoadout, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
@@ -12,26 +13,28 @@ import { EwarControllerImpl } from "./ewarController";
 import type { EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
-const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
-const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
+function asTypeId(value: string): TypeId { return value as TypeId; }
+
+const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: asTypeId("Stasis Webifier I"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
+const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: asTypeId("Stasis Webifier II"), maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
 const WEB3: StasisWebSpec = { ...WEB, moduleName: "Stasis Webifier III" };
 const OPTIMAL_SCRIPT: DisruptionScriptSpec = {
-  name: "Optimal Range Disruption Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2,
+  name: "Optimal Range Disruption Script", moduleId: asTypeId("Optimal Range Disruption Script"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2,
 };
 const TRACKING_SCRIPT: DisruptionScriptSpec = {
-  name: "Tracking Speed Disruption Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0,
+  name: "Tracking Speed Disruption Script", moduleId: asTypeId("Tracking Speed Disruption Script"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0,
 };
 const SCRIPTS: readonly DisruptionScriptSpec[] = [OPTIMAL_SCRIPT, TRACKING_SCRIPT];
 const DISRUPTOR: TrackingDisruptorSpec = {
-  moduleName: "Tracking Disruptor I", optimal: 10000, falloff: 30000,
+  moduleName: "Tracking Disruptor I", moduleId: asTypeId("Tracking Disruptor I"), optimal: 10000, falloff: 30000,
   disruption: -0.2, defaultScript: undefined, overloadStrengthBonusPercent: 20,
 };
 const DISRUPTOR2: TrackingDisruptorSpec = {
-  moduleName: "Tracking Disruptor II", optimal: 12000, falloff: 35000,
+  moduleName: "Tracking Disruptor II", moduleId: asTypeId("Tracking Disruptor II"), optimal: 12000, falloff: 35000,
   disruption: -0.25, defaultScript: OPTIMAL_SCRIPT, overloadStrengthBonusPercent: 20,
 };
-const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
-const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
+const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: asTypeId("Warp Scrambler II"), maxRange: 9000, overloadRangeBonusPercent: 20 };
+const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: asTypeId("Heavy Stasis Grappler I"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 
 class FakePopupGroup implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -108,7 +111,7 @@ function buildEwarController(
   shipBPopup.hidden = true;
   if (beforeConstruct) beforeConstruct(document, els);
   const fittingImport = vi.mocked(mockFittingImport());
-  fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
+  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
     webHint: vi.fn(() => "web-hint"),
@@ -559,7 +562,7 @@ describe("EwarController", () => {
     expect(webButton.children[1].title).toBe(`${WEB.moduleName} (zh)`);
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
     expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
-    expect(fittingImport.itemName).toHaveBeenCalledWith(WEB.moduleName, "zh");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(WEB.moduleId, "zh");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(WEB.moduleName);
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith(`${WEB.moduleName} (zh)`);
   });
@@ -618,7 +621,7 @@ describe("EwarController", () => {
     expect(optimalOption.children[0].tagName).toBe("IMG");
     expect(optimalOption.children[0].src).toBe("icons/Optimal_Range_Disruption_Script.png");
     expect(optimalOption.children[1].textContent).toBe("Optimal Range Disruption Script (zh)");
-    expect(fittingImport.itemName).toHaveBeenCalledWith("Optimal Range Disruption Script", "zh");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(OPTIMAL_SCRIPT.moduleId, "zh");
     expect(optimalOption.title).toBe("optimal x2 · falloff x2 · track x0");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Optimal Range Disruption Script");
   });

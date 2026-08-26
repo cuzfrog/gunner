@@ -1,3 +1,4 @@
+import type { TypeId } from "../../../gamedata/ids";
 import type { BoostLoadout, TurretScriptSpec } from "../../../sim";
 import { EMPTY_BOOST_LOADOUT } from "../../../sim";
 import type { Language } from "../../../appstate";
@@ -10,13 +11,15 @@ import { UiEventsImpl } from "../../events";
 import { BoosterControllerImpl } from "./boosterController";
 import type { BoosterEls } from "./boosterControllerContract";
 
+function asTypeId(value: string): TypeId { return value as TypeId; }
+
 const TRACKING_SCRIPT: TurretScriptSpec = { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
 const OPTIMAL_SCRIPT: TurretScriptSpec = { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
 
 const LOADOUT: BoostLoadout = {
   computers: [
-    { moduleName: "Tracking Computer I", trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: undefined },
-    { moduleName: "Tracking Computer II", trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: TRACKING_SCRIPT },
+    { moduleName: "Tracking Computer I", moduleId: asTypeId("Tracking Computer I"), trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: undefined },
+    { moduleName: "Tracking Computer II", moduleId: asTypeId("Tracking Computer II"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: TRACKING_SCRIPT },
   ],
   scripts: [TRACKING_SCRIPT, OPTIMAL_SCRIPT],
 };
@@ -57,7 +60,7 @@ function buildBoosterController() {
     summaries: { shipA: els.shipA.boosterSummary, shipB: els.shipB.boosterSummary },
   };
   const fittingImport = vi.mocked(mockFittingImport());
-  fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
+  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const controller = new BoosterControllerImpl({ els: boosterEls, popupGroup, imageCatalog, fittingImport, i18n, events });

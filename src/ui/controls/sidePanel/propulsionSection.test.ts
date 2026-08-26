@@ -1,4 +1,5 @@
 import type { FittingImport } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -9,6 +10,8 @@ import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
 const AB_1MN = "ab-1mn" as const;
+
+function asTypeId(value: string): TypeId { return value as TypeId; }
 
 const AB_MODULE: PropulsionModule = {
   id: AB_1MN,
@@ -23,8 +26,9 @@ const AB_MODULE: PropulsionModule = {
 
 function fittingForPropulsion(): FittingImport {
   const fitting = vi.mocked<FittingImport>(mockFittingImport());
-  fitting.propulsionVariantNames = vi.fn(() => ["1MN Afterburner I"]);
+  fitting.propulsionVariantNames = vi.fn(() => [{ id: asTypeId("1MN Afterburner I"), name: "1MN Afterburner I" }]);
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
+  fitting.itemNameForId = vi.fn(() => "1MN加力燃烧器 I");
   return fitting;
 }
 
@@ -172,7 +176,6 @@ describe("PropulsionSection", () => {
 
   test("variant button label and title are translated while data-value stays canonical", () => {
     const fitting = vi.mocked<FittingImport>(fittingForPropulsion());
-    fitting.itemName = vi.fn(() => "1MN加力燃烧器 I");
     const { document, panel, section, imageCatalog } = buildPropulsionSection(undefined, fitting);
     panel.profile = RIFTER;
     imageCatalog.itemIconUrl = vi.fn((name: string) => `icons/${name.replaceAll(" ", "_")}.png`);

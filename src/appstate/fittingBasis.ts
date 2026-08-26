@@ -48,7 +48,7 @@ export class FittingBasis {
         const generic = activePropulsionId ? this.ships.fittingOption(profile, activePropulsionId) : undefined;
         if (generic) {
           const variants = this.fittingImport.propulsionVariantNames(generic);
-          activePropulsionName = variants.find((name) => name === generic.label) ?? variants[0] ?? generic.label;
+          activePropulsionName = variants.find((variant) => variant.name === generic.label)?.name ?? variants[0]?.name ?? generic.label;
           activePropulsion = this.fittingImport.propulsionStats(activePropulsionName) ?? generic;
         }
       }

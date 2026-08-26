@@ -187,7 +187,6 @@ export function makeFittingImport() {
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),
-    itemName: vi.fn((name) => name),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {

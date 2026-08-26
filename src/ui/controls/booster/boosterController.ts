@@ -1,3 +1,4 @@
+import type { TypeId } from "../../../gamedata/ids";
 import type { BoostLoadout, TurretBoostProjection, TurretScriptSpec, TrackingBoosterSpec } from "../../../sim";
 import type { StoredBoosterActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
@@ -213,7 +214,7 @@ export class BoosterControllerImpl implements BoosterController {
       const activation = state.activation[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, computer.moduleName);
+      const button = this.createModuleButton(activation.active, computer);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
       const gear = this.createScriptGear(side, i, activation.script, activation.active);
@@ -222,14 +223,23 @@ export class BoosterControllerImpl implements BoosterController {
     }
   }
 
-  private createModuleButton(active: boolean, moduleName: string): HTMLButtonElement {
-    const displayName = this.fittingImport.itemName(moduleName, this.i18n.current());
+  private moduleDisplayName(spec: { readonly moduleName: string; readonly moduleId?: TypeId }): string {
+    return spec.moduleId !== undefined ? this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current()) : spec.moduleName;
+  }
+
+  private scriptDisplayName(script: TurretScriptSpec | undefined): string {
+    if (script === undefined) return this.i18n.t("ewar.script.none");
+    return script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name;
+  }
+
+  private createModuleButton(active: boolean, computer: TrackingBoosterSpec): HTMLButtonElement {
+    const displayName = this.moduleDisplayName(computer);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", displayName);
-    const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
+    const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleName);
     const img = document.createElement("img");
     if (iconUrl !== undefined) img.src = iconUrl;
     img.alt = "";
@@ -262,7 +272,7 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   private updateGearTitle(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
-    const name = script?.name ?? this.i18n.t("ewar.script.none");
+    const name = this.scriptDisplayName(script);
     const title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
     gear.setAttribute("title", title);
     gear.setAttribute("aria-label", title);
@@ -279,10 +289,16 @@ export class BoosterControllerImpl implements BoosterController {
     const noneButton = this.createScriptOption(side, index, gear, undefined, current === undefined);
     popup.appendChild(noneButton);
     for (const script of state.loadout.scripts) {
-      popup.appendChild(this.createScriptOption(side, index, gear, script, current?.name === script.name));
+      popup.appendChild(this.createScriptOption(side, index, gear, script, this.isSameScript(current, script)));
     }
     gear.setAttribute("aria-expanded", "true");
     this.scriptPopups[side].open();
+  }
+
+  private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
+    if (a === undefined || b === undefined) return a === b;
+    if (a.moduleId !== undefined && b.moduleId !== undefined) return a.moduleId === b.moduleId;
+    return a.name === b.name;
   }
 
   private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
@@ -291,7 +307,7 @@ export class BoosterControllerImpl implements BoosterController {
     button.className = "ewar-script-option";
     if (selected) button.setAttribute("aria-current", "true");
     button.setAttribute("role", "menuitem");
-    button.textContent = script ? `${script.name} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
+    button.textContent = script ? `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
     button.addEventListener("click", () => this.setScript(side, index, script, gear));
     return button;
   }

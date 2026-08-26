@@ -1,5 +1,6 @@
 import type { FittingSummary } from "../../../fitting";
 import type { Language } from "../../../appstate";
+import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { mockFittingImport } from "../testSupport";
@@ -101,25 +102,30 @@ function createImageCatalog(): ImageCatalog {
   };
 }
 
+const AC_ID: TypeId = "200mm AutoCannon I" as TypeId;
+const MWD_ID: TypeId = "5MN Microwarpdrive I" as TypeId;
+const PLATES_ID: TypeId = "400mm Steel Plates II" as TypeId;
+const HAIL_ID: TypeId = "Hail S" as TypeId;
+
 const SUMMARY: FittingSummary = {
   hullName: "Rifter",
   fittingName: "Brawler",
   sections: [
     {
       kind: "high",
-      rows: [{ name: "200mm AutoCannon I", charge: "Hail S" }],
+      rows: [{ name: "200mm AutoCannon I", id: AC_ID, charge: "Hail S", chargeId: HAIL_ID }],
     },
     {
       kind: "mid",
-      rows: [{ name: "5MN Microwarpdrive I" }],
+      rows: [{ name: "5MN Microwarpdrive I", id: MWD_ID }],
     },
     {
       kind: "low",
-      rows: [{ name: "400mm Steel Plates II" }],
+      rows: [{ name: "400mm Steel Plates II", id: PLATES_ID }],
     },
     {
       kind: "cargo",
-      rows: [{ name: "Hail S", quantity: 1000 }],
+      rows: [{ name: "Hail S", id: HAIL_ID, quantity: 1000 }],
     },
   ],
 };
@@ -146,7 +152,7 @@ describe("DomFittingPreview", () => {
     const anchor = new FakeElement();
     anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
     const fittingImport = vi.mocked(mockFittingImport());
-    fittingImport.itemName = vi.fn((name: string, lang: string) => (lang === "en" ? name : `${name} (${lang})`));
+    fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
     const imageCatalog = createImageCatalog();
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
@@ -276,8 +282,8 @@ describe("DomFittingPreview", () => {
     expect(row.children[0].src).toBe("");
   });
 
-  test("empty rows render with a muted style and no icon", () => {
-    const { container, anchor, preview } = buildPreview();
+  test("empty rows render with a muted style and no icon and do not call catalog", () => {
+    const { container, anchor, preview, fittingImport } = buildPreview();
     const summary: FittingSummary = {
       hullName: "Rifter",
       fittingName: "Brawler",
@@ -288,6 +294,7 @@ describe("DomFittingPreview", () => {
     expect(row.className).toBe("preview-row preview-row-empty");
     expect(row.children[0].src).toBe("");
     expect(row.children[1].children[0].textContent).toBe("[Empty High slot]");
+    expect(fittingImport.itemNameForId).not.toHaveBeenCalled();
   });
 
   test("show translates item and charge names and keeps icon inputs canonical", () => {
@@ -298,12 +305,27 @@ describe("DomFittingPreview", () => {
     expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I (zh)");
     expect(row.children[1].children[0].title).toBe("200mm AutoCannon I (zh)");
     expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
-    expect(fittingImport.itemName).toHaveBeenCalledWith("200mm AutoCannon I", "zh");
-    expect(fittingImport.itemName).toHaveBeenCalledWith("Hail S", "zh");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(AC_ID, "zh");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(HAIL_ID, "zh");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Hail S");
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("200mm AutoCannon I (zh)");
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("Hail S (zh)");
+  });
+
+  test("rows without ids render raw names and do not call catalog", () => {
+    const { container, anchor, preview, fittingImport } = buildPreview("zh");
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "high", rows: [{ name: "Unknown Module", charge: "Unknown Charge" }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const highSection = container.children[1];
+    const row = highSection.children[1];
+    expect(row.children[1].children[0].textContent).toBe("Unknown Module");
+    expect(row.children[1].children[2].textContent).toBe(", Unknown Charge");
+    expect(fittingImport.itemNameForId).not.toHaveBeenCalled();
   });
 
   test("hide clears and hides the container", () => {

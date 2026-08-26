@@ -140,7 +140,6 @@ export function buildImportController(document: Document) {
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
-    itemName: vi.fn((name: string) => name),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),

@@ -111,7 +111,6 @@ export function buildTurret(
     summarize: vi.fn(),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn(itemNameForId),
-    itemName: vi.fn((name: string) => name),
     ...options.fittingImport,
   });
   const turretOverrides = new TurretOverridesStore();

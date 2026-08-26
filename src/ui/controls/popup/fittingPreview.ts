@@ -133,10 +133,12 @@ function renderRow(
   const main = document.createElement("div");
   main.className = "preview-row-main";
 
+  const language = i18n.current();
+  const displayName = row.id !== undefined ? fittingImport.itemNameForId(row.id, language) : row.name;
   const name = document.createElement("span");
   name.className = "preview-name truncate";
-  name.textContent = fittingImport.itemName(row.name, i18n.current());
-  name.title = row.empty ? row.name : fittingImport.itemName(row.name, i18n.current());
+  name.textContent = displayName;
+  name.title = row.empty ? row.name : displayName;
   main.appendChild(name);
 
   if (row.charge) {
@@ -149,7 +151,8 @@ function renderRow(
 
     const charge = document.createElement("span");
     charge.className = "preview-charge";
-    charge.textContent = `, ${fittingImport.itemName(row.charge, i18n.current())}`;
+    const chargeName = row.chargeId !== undefined ? fittingImport.itemNameForId(row.chargeId, language) : row.charge;
+    charge.textContent = `, ${chargeName}`;
     main.appendChild(charge);
   }
 

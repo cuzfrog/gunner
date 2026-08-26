@@ -52,7 +52,6 @@ export function mockFittingImport(): FittingImport {
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId, _language: string) => NAME_FOR_ID[id] ?? id),
-    itemName: vi.fn((name: string) => name),
   };
 }
 

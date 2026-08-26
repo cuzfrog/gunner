@@ -7,15 +7,15 @@ import {
 import { fittingOptions as computeFittingOptions } from "./fitting";
 import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
 import type { HullTypeId, ShipId } from "../gamedata/ids";
+import type { ShipNameLanguage } from "../gamedata/i18n";
 import type { NameI18nCatalog } from "../gamedata/nameI18n";
 import type { ShipProfileCatalog } from "../gamedata/shipProfiles";
 import { hullTierOf } from "./tiers";
-import type { ShipNameLanguage } from "./shipNames";
 import type {
   FittedHull, HullTier, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions,
 } from "./types";
 
-export type { ShipNameLanguage } from "./shipNames";
+export type { ShipNameLanguage } from "../gamedata/i18n";
 export type { ShipStats } from "./effectiveStats";
 export type {
   FittedHull, HullTier, PropulsionId, PropulsionKind, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel,

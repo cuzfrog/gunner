@@ -42,7 +42,6 @@ function createManager(options: {
     summarize: vi.fn(() => options.summarize ?? PREVIEW_SUMMARY),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
-    itemName: vi.fn((name: string) => name),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(() => "images/ships/Rifter.webp"), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = vi.mocked<I18n>({
