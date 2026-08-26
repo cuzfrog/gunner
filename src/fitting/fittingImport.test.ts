@@ -1044,6 +1044,78 @@ Hobgoblin II x5
   });
 });
 
+describe("FittingImportImpl.canonicalEftText", () => {
+  beforeEach(() => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+  });
+
+  const RIFTER_DRONE_ONLY = `[Rifter, Drone Only]
+200mm AutoCannon I, Hail S
+
+Hobgoblin I x3`;
+
+  const RIFTER_CARGO_ONLY = `[Rifter, Cargo Only]
+200mm AutoCannon I, Hail S
+Hail S x1000
+Republic Fleet EMP S x500`;
+
+  const RIFTER_UNKNOWN_DRONE = `[Rifter, Unknown Drone]
+200mm AutoCannon I, Hail S
+
+Unknown Drone I x3
+
+Hail S x1000`;
+
+  test("separates drone and cargo blocks with two blank lines", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_BRAWLER);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(3);
+    expect(parts[1]).toBe("Hobgoblin I x3");
+    expect(parts[2]).toBe("Hail S x1000\nRepublic Fleet EMP S x500");
+  });
+
+  test("drone-only fit has no stray blank lines", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_DRONE_ONLY);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(2);
+    expect(parts[1]).toBe("Hobgoblin I x3");
+  });
+
+  test("cargo-only fit has no stray blank lines", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_CARGO_ONLY);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(2);
+    expect(parts[1]).toBe("Hail S x1000\nRepublic Fleet EMP S x500");
+  });
+
+  test("unresolved drone name stays in the drone section", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_UNKNOWN_DRONE);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(3);
+    expect(parts[1]).toBe("Unknown Drone I x3");
+    expect(parts[2]).toBe("Hail S x1000");
+  });
+
+  test("round-trip preserves the drone and cargo partition", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const original = parseEft(RIFTER_BRAWLER, MODULE_SLOT_CATALOG);
+    const canonical = importer.canonicalEftText(RIFTER_BRAWLER);
+    expect(canonical).toBeDefined();
+    const reparsed = parseEft(canonical!, MODULE_SLOT_CATALOG);
+    expect(reparsed!.drones).toEqual(original!.drones);
+    expect(reparsed!.cargo).toEqual(original!.cargo);
+  });
+});
+
 describe("FittingImportImpl localization", () => {
   const RIFTER_BRAWLER_ZH = `[裂谷级, Brawler]
 200mm自动加农炮 I, 冰雹 S

@@ -246,13 +246,13 @@ export class FittingImportImpl implements FittingImport {
       if (droneId) {
         return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
       }
-      return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: false };
+      return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: preferDrone };
     };
 
     const drones: ResolvedQuantity[] = [];
     const cargo: ResolvedQuantity[] = [];
 
-    for (const item of document.drones) cargo.push(resolveQuantity(item, true));
+    for (const item of document.drones) drones.push(resolveQuantity(item, true));
     for (const item of document.cargo) cargo.push(resolveQuantity(item, false));
 
     return { profile, language, fittingName: document.fittingName, banks, drones, cargo };
@@ -776,9 +776,17 @@ function serializeEftDocument(resolved: ResolvedEft): string {
   }
 
   if (resolved.drones.length > 0 || resolved.cargo.length > 0) {
-    if (lines.length > 1) lines.push("");
+    if (lines.length > 1) {
+      lines.push("");
+      lines.push("");
+    } else {
+      lines.push("");
+    }
     for (const item of resolved.drones) lines.push(`${item.name} x${item.quantity}`);
-    if (resolved.drones.length > 0 && resolved.cargo.length > 0) lines.push("");
+    if (resolved.drones.length > 0 && resolved.cargo.length > 0) {
+      lines.push("");
+      lines.push("");
+    }
     for (const item of resolved.cargo) lines.push(`${item.name} x${item.quantity}`);
   }
 
