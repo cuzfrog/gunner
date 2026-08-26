@@ -45,6 +45,8 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     importFromClipboard: vi.fn(() => Promise.resolve()),
   };
 
+  const i18n = mockI18n();
+
   const sections = vi.mocked<ISidePanelSections>({
     hull: {} as unknown as ISidePanelSections["hull"],
     stats: {
@@ -120,9 +122,8 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     setTurretProfile: vi.fn(),
   } as unknown as SidePanel);
 
-  const i18n = mockI18n();
   const section = new HullSection({ panel, els, ships, i18n });
-  return { document, panel, section, host };
+  return { document, panel, section, host, i18n };
 }
 
 describe("HullSection", () => {
@@ -202,5 +203,27 @@ describe("HullSection", () => {
     getFake(document, "ship-a-hull").value = "typed";
     section.refreshHullInputs();
     expect(getFake(document, "ship-a-hull").value).toBe("Rifter");
+  });
+
+  test("selecting a hull in English then switching language keeps the ShipId and shows the localized name", () => {
+    const ships = shipsWithHull();
+    ships.hullView = vi.fn((profile, language) => ({
+      name: language === "zh" ? "裂谷级" : profile.name,
+      hullType: "Frigate",
+      faction: "Minmatar Republic",
+    }));
+    const { document, panel, section, host, i18n } = buildHullSection(ships);
+    const input = getFake(document, "ship-a-hull") as unknown as HTMLInputElement;
+    input.value = "Rifter";
+    section.onHullChange();
+    expect(panel.profile).toBe(RIFTER);
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
+    expect(input.value).toBe("Rifter");
+    expect(host.persistConfigChange).toHaveBeenCalled();
+
+    i18n.current = vi.fn((): Language => "zh");
+    section.refreshHullInputs();
+    expect(input.value).toBe("裂谷级");
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
   });
 });
