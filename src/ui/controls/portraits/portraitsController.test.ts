@@ -4,15 +4,34 @@ import type { EwarProjection, EwarResolver } from "../../../sim";
 import type { EwarController } from "../ewar";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
+import type { FactionId, HullTypeId, ShipId } from "../../../gamedata/ids";
 import type { I18n, Language } from "../../i18n";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsController, PortraitsEls, CombatantProfiles } from "./portraitsControllerContract";
 
 const SHIP_A_PROFILE: ShipProfile = {
-  name: "Rifter", faction: "Minmatar", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36,
+  id: "587" as ShipId,
+  name: "Rifter",
+  faction: "Minmatar",
+  factionId: "minmatar" as FactionId,
+  hullType: "Frigate",
+  hullTypeId: "25" as HullTypeId,
+  mass: 1_000_000,
+  inertiaModifier: 3,
+  baseSpeed: 300,
+  sigRadius: 36,
 };
 const SHIP_B_PROFILE: ShipProfile = {
-  name: "Merlin", faction: "Caldari", hullType: "Frigate", mass: 1_000_000, inertiaModifier: 3, baseSpeed: 300, sigRadius: 36,
+  id: "602" as ShipId,
+  name: "Merlin",
+  faction: "Caldari",
+  factionId: "caldari" as FactionId,
+  hullType: "Frigate",
+  hullTypeId: "25" as HullTypeId,
+  mass: 1_000_000,
+  inertiaModifier: 3,
+  baseSpeed: 300,
+  sigRadius: 36,
 };
 
 function createFakePortraitEls(document: Document): PortraitsEls {

@@ -1,5 +1,6 @@
 import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings } from "../../fitting";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
+import type { FactionId, HullTypeId, ShipId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
@@ -95,9 +96,12 @@ export function mockGunFamilies(): GunFamilies {
 }
 
 export const RIFTER: ShipProfile = {
+  id: "587" as ShipId,
   name: "Rifter",
   faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
   hullType: "Standard Frigates",
+  hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
   baseSpeed: 365,

@@ -1,11 +1,15 @@
 import { alignTime, fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { fittingOptions } from "./fitting";
 import type { FittedHull, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
+import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
 
 const frigate: ShipProfile = {
+  id: "test-frigate" as ShipId,
   name: "Test Frigate",
   faction: "Test",
+  factionId: "test" as FactionId,
   hullType: "Standard Frigates",
+  hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
   baseSpeed: 400,
@@ -13,9 +17,12 @@ const frigate: ShipProfile = {
 };
 
 const battleship: ShipProfile = {
+  id: "test-battleship" as ShipId,
   name: "Test Battleship",
   faction: "Test",
+  factionId: "test" as FactionId,
   hullType: "Standard Battleships",
+  hullTypeId: "27" as HullTypeId,
   mass: 100_000_000,
   inertiaModifier: 0.14,
   baseSpeed: 100,
@@ -75,9 +82,12 @@ describe("naked hull", () => {
 
   test("Thrasher with 10MN compact afterburner reaches the expected 1536 m/s", () => {
     const thrasher: ShipProfile = {
+      id: "16236" as ShipId,
       name: "Thrasher",
       faction: "Minmatar Republic",
+      factionId: "minmatar-republic" as FactionId,
       hullType: "Standard Destroyers",
+      hullTypeId: "420" as HullTypeId,
       mass: 1_600_000,
       inertiaModifier: 2.8,
       baseSpeed: 270,
@@ -111,9 +121,12 @@ describe("naked hull", () => {
 
   test("afterburner with max skills and overload uses the worked example", () => {
     const profile: ShipProfile = {
+      id: "worked-example" as ShipId,
       name: "Worked Example",
       faction: "Test",
+      factionId: "test" as FactionId,
       hullType: "Standard Frigates",
+      hullTypeId: "25" as HullTypeId,
       mass: 1_150_000,
       inertiaModifier: 3,
       baseSpeed: 340,

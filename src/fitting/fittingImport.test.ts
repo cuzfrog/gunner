@@ -1,5 +1,6 @@
 import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
+import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
 import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl } from "./fittingImport";
@@ -78,9 +79,12 @@ const itemNameCatalog = new StaticItemNameCatalog();
 const moduleSlotCatalog = MODULE_SLOT_CATALOG;
 
 const profile: ShipProfile = {
+  id: "17347" as ShipId,
   name: "Harbinger",
   faction: "Amarr Empire",
+  factionId: "amarr-empire" as FactionId,
   hullType: "Standard Battlecruisers",
+  hullTypeId: "1201" as HullTypeId,
   mass: 15_500_000,
   inertiaModifier: 0.45,
   baseSpeed: 165,
@@ -88,9 +92,12 @@ const profile: ShipProfile = {
 };
 
 const frigateProfile: ShipProfile = {
+  id: "587" as ShipId,
   name: "Rifter",
   faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
   hullType: "Standard Frigates",
+  hullTypeId: "25" as HullTypeId,
   mass: 1_067_000,
   inertiaModifier: 3.2,
   baseSpeed: 365,
@@ -98,9 +105,12 @@ const frigateProfile: ShipProfile = {
 };
 
 const bonusProfile: ShipProfile = {
+  id: "11375" as ShipId,
   name: "Vagabond",
   faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
   hullType: "Heavy Assault Cruisers",
+  hullTypeId: "77" as HullTypeId,
   mass: 10_500_000,
   inertiaModifier: 0.5,
   baseSpeed: 205,
@@ -108,9 +118,12 @@ const bonusProfile: ShipProfile = {
 };
 
 const roleBonusProfile: ShipProfile = {
+  id: "12005" as ShipId,
   name: "Muninn",
   faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
   hullType: "Heavy Assault Cruisers",
+  hullTypeId: "358" as HullTypeId,
   mass: 10_800_000,
   inertiaModifier: 0.51,
   baseSpeed: 195,
@@ -118,9 +131,12 @@ const roleBonusProfile: ShipProfile = {
 };
 
 const abaddonProfile: ShipProfile = {
+  id: "645" as ShipId,
   name: "Abaddon",
   faction: "Amarr Empire",
+  factionId: "amarr-empire" as FactionId,
   hullType: "Standard Battleships",
+  hullTypeId: "27" as HullTypeId,
   mass: 103_200_000,
   inertiaModifier: 0.14,
   baseSpeed: 89,

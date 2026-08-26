@@ -1,5 +1,6 @@
 import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
+import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
@@ -102,9 +103,12 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   baseMaxSpeed: 456.25,
 };
 export const RIFTER_PROFILE: ShipProfile = {
+  id: "587" as ShipId,
   name: "Rifter",
   faction: "Minmatar",
+  factionId: "minmatar" as FactionId,
   hullType: "Frigate",
+  hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
   baseSpeed: 300,
