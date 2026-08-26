@@ -10,8 +10,8 @@ type SessionCodecEls = ConstructorParameters<typeof SessionCodecImpl>[0]["els"];
 
 export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    hullDatalist: asFunction(({ els, presetFittings, uiEvents }) =>
-      new HullDatalistImpl(els.hullOptions, presetFittings, uiEvents)
+    hullDatalist: asFunction(({ els, presetFittings, ships, i18n, uiEvents }) =>
+      new HullDatalistImpl(els.hullOptions, presetFittings, ships, i18n, uiEvents)
     ).singleton(),
     sessionCodec: asFunction((proxy) => new SessionCodecImpl({
       els: collectSessionCodecEls(proxy.els),

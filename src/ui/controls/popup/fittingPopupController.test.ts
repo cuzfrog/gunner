@@ -1,4 +1,5 @@
 import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import { UiEventsImpl } from "../../events";
@@ -6,12 +7,13 @@ import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "../testSupport";
+import type { ShipId } from "../../../gamedata/ids";
 import type { Side } from "../side";
 import type { FittingPopupHost } from "./fittingPopupHost";
 
 const SAVED_RIFTER: SavedFitting = {
-  id: "Rifter::Brawler",
-  hull: "Rifter",
+  id: `${RIFTER.id}::Brawler`,
+  hullId: RIFTER.id,
   name: "Brawler",
   text: "[Rifter, Brawler]\n200mm AutoCannon I, Hail S",
   savedAt: 0,
@@ -65,7 +67,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
   const presetFittings = vi.mocked<PresetFittings>({
     listHulls: vi.fn(),
     fittingsFor: vi.fn(() => PRESETS),
-    eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]\n${fit.body}`),
+    eftText: vi.fn((hullId: ShipId, fit) => `[${hullId === RIFTER.id ? "Rifter" : hullId}, ${fit.name}]\n${fit.body}`),
   });
 
   const fittingImport = vi.mocked<FittingImport>({
@@ -74,8 +76,8 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
     itemName: vi.fn((name: string) => name),
-    canonicalName: vi.fn((name: string) => name),
   });
 
   const i18n = createI18n();

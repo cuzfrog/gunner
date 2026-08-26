@@ -1,4 +1,5 @@
 import { USER_SETTINGS_VERSION, type ProfileEquality, type ProfileSettings } from "../../../appstate";
+import type { TypeId } from "../../../gamedata/ids";
 import { ProfileChangeTrackerImpl } from "./profileChangeTracker";
 
 const BASE_PROFILE: ProfileSettings = {
@@ -23,7 +24,7 @@ const BASE_PROFILE: ProfileSettings = {
   shipBMass: 10_000_000,
   shipBInertia: 0.45,
   shipBSig: 40,
-  shipAAmmo: "Hail S",
+  shipAAmmo: "12608" as TypeId,
 };
 
 function fakeEquality(result: boolean): ProfileEquality {

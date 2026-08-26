@@ -1,3 +1,4 @@
+import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
@@ -14,17 +15,18 @@ export interface ImportedTurret {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
-  readonly charge: string;
+  readonly chargeId: TypeId;
   readonly base: ImportedTurretBase;
-  readonly moduleName: string;
+  readonly moduleId: TypeId;
 }
 
 export interface CargoCharge {
-  readonly name: string;
+  readonly id: TypeId;
   readonly quantity: number;
 }
 
 export interface ChargeOption {
+  readonly id: TypeId;
   readonly name: string;
   readonly trackingMultiplier: number;
   readonly rangeMultiplier: number;
@@ -34,18 +36,18 @@ export interface ChargeOption {
 export type ChargeFamily = "projectile" | "hybrid" | "laser";
 
 export interface ChargeCatalog {
-  usualForChargeSize(chargeSize: number): string;
-  usualForTurret(turret: ImportedTurret): string;
+  usualForChargeSize(chargeSize: number): TypeId;
+  usualForTurret(turret: ImportedTurret): TypeId;
   chargesForSize(chargeSize: number): readonly ChargeOption[];
   chargesForTurret(turret: ImportedTurret): readonly ChargeOption[];
-  withCharge(turret: ImportedTurret, charge: string): ImportedTurret;
+  withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret;
+  idForName(name: string): TypeId | undefined;
 }
 
 interface ChargeCatalogDeps {
   readonly fittingDb: FittingDb;
   readonly gunFamilies: GunFamilies;
 }
-
 
 export class ChargeCatalogImpl implements ChargeCatalog {
   private readonly charges: Readonly<Record<string, ChargeStats>>;
@@ -56,12 +58,12 @@ export class ChargeCatalogImpl implements ChargeCatalog {
     this.gunFamilies = gunFamilies;
   }
 
-  usualForChargeSize(chargeSize: number): string {
+  usualForChargeSize(chargeSize: number): TypeId {
     return _usualForChargeSize(this.charges, chargeSize);
   }
 
-  usualForTurret(turret: ImportedTurret): string {
-    const family = _turretChargeFamily(turret.moduleName, this.gunFamilies);
+  usualForTurret(turret: ImportedTurret): TypeId {
+    const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
     if (family === undefined) return _usualFromOptions(this.chargesForSize(turret.chargeSize));
     const inFamily = this.chargesForTurret(turret);
     return _usualFromOptions(inFamily.length > 0 ? inFamily : this.chargesForSize(turret.chargeSize));
@@ -72,24 +74,31 @@ export class ChargeCatalogImpl implements ChargeCatalog {
   }
 
   chargesForTurret(turret: ImportedTurret): readonly ChargeOption[] {
-    const turretFamily = _turretChargeFamily(turret.moduleName, this.gunFamilies);
+    const turretFamily = _turretChargeFamily(turret.moduleId, this.gunFamilies);
     const all = this.chargesForSize(turret.chargeSize);
     if (turretFamily === undefined) return all;
     return all.filter((option) => _chargeFamilyOf(option.name) === turretFamily);
   }
 
-  withCharge(turret: ImportedTurret, charge: string): ImportedTurret {
+  withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret {
     const stats = this.charges[charge];
     if (!stats) return turret;
-    const family = _turretChargeFamily(turret.moduleName, this.gunFamilies);
-    if (family !== undefined && _chargeFamilyOf(charge) !== family) return turret;
+    const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
+    if (family !== undefined && _chargeFamilyOf(stats.name) !== family) return turret;
     return {
       ...turret,
-      charge,
+      chargeId: charge,
       tracking: turret.base.tracking * (stats.trackingMultiplier ?? 1),
       optimal: turret.base.optimal * (stats.rangeMultiplier ?? 1),
       falloff: turret.base.falloff * (stats.falloffMultiplier ?? 1),
     };
+  }
+
+  idForName(name: string): TypeId | undefined {
+    for (const stats of Object.values(this.charges)) {
+      if (stats.name === name) return stats.id;
+    }
+    return undefined;
   }
 }
 
@@ -115,10 +124,11 @@ export function _isNavyCharge(name: string): boolean {
 
 function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): ChargeOption[] {
   const result: ChargeOption[] = [];
-  for (const [name, stats] of Object.entries(charges)) {
-    if (_chargeSizeFromName(name) !== chargeSize) continue;
+  for (const stats of Object.values(charges)) {
+    if (_chargeSizeFromName(stats.name) !== chargeSize) continue;
     result.push({
-      name,
+      id: stats.id,
+      name: stats.name,
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
@@ -133,9 +143,10 @@ function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeS
 
 function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): ChargeOption[] {
   const result: ChargeOption[] = [];
-  for (const [name, stats] of Object.entries(charges)) {
+  for (const stats of Object.values(charges)) {
     result.push({
-      name,
+      id: stats.id,
+      name: stats.name,
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
@@ -148,17 +159,17 @@ function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): Char
   return result;
 }
 
-function _usualForChargeSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): string {
+function _usualForChargeSize(charges: Readonly<Record<string, ChargeStats>>, chargeSize: number): TypeId {
   let all = _chargesForSize(charges, chargeSize);
   if (all.length === 0) all = _allChargeOptions(charges);
   return _usualFromOptions(all);
 }
 
-function _usualFromOptions(options: readonly ChargeOption[]): string {
+function _usualFromOptions(options: readonly ChargeOption[]): TypeId {
   if (options.length === 0) throw new Error("Charge catalog is empty");
   const navy = options.filter((c) => _isNavyCharge(c.name));
   const chosen = navy.length > 0 ? navy : options;
-  return chosen[0].name;
+  return chosen[0].id;
 }
 
 const TURRET_CHARGE_FAMILIES: Readonly<Record<GunFamily, ChargeFamily>> = {
@@ -209,7 +220,7 @@ const CHARGE_FAMILY_BY_BASE: Readonly<Record<string, ChargeFamily>> = {
   Xray: "laser",
 } as const;
 
-function _chargeFamilyOf(name: string): ChargeFamily | undefined {
+export function _chargeFamilyOf(name: string): ChargeFamily | undefined {
   const stem = _chargeStem(name);
   const tokens = stem.split(/\s+/);
   if (tokens.length >= 2) {
@@ -221,9 +232,9 @@ function _chargeFamilyOf(name: string): ChargeFamily | undefined {
   return CHARGE_FAMILY_BY_BASE[one];
 }
 
-function _turretChargeFamily(moduleName: string, gunFamilies: GunFamilies): ChargeFamily | undefined {
+function _turretChargeFamily(moduleId: TypeId, gunFamilies: GunFamilies): ChargeFamily | undefined {
   try {
-    const family = gunFamilies.familyOf(moduleName);
+    const family = gunFamilies.familyOf(moduleId);
     return TURRET_CHARGE_FAMILIES[family];
   } catch {
     return undefined;
@@ -238,4 +249,4 @@ function _chargeStem(name: string): string {
   return name;
 }
 
-export { _chargeFamilyOf, _turretChargeFamily };
+export { _turretChargeFamily };

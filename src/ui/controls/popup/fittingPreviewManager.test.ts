@@ -1,4 +1,5 @@
 import type { FittingSummary } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import { FakeElement, RIFTER } from "../testSupport";
 import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
 import type { FittingPreview } from "./fittingPreview";
@@ -40,8 +41,8 @@ function createManager(options: {
     propulsionStats: vi.fn(),
     summarize: vi.fn(() => options.summarize ?? PREVIEW_SUMMARY),
     canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
     itemName: vi.fn((name: string) => name),
-    canonicalName: vi.fn((name: string) => name),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(() => "images/ships/Rifter.webp"), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = vi.mocked<I18n>({

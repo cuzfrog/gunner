@@ -1,12 +1,18 @@
 import { homedir } from "node:os";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import type { ShipId, TypeId } from "../src/gamedata/ids";
+import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
+import type { ShipNameLanguage } from "../src/ships";
 
 const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
 const OUT_FILE = join(import.meta.dir, "..", "src", "gamedata", "fittingDb", "fittingDb.ts");
 const I18N_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-en.ts");
 const I18N_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-zh.ts");
 const I18N_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-names-ja.ts");
+const COLLISION_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-en.ts");
+const COLLISION_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-zh.ts");
+const COLLISION_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-ja.ts");
 const NAME_TO_ID_FILE = join(import.meta.dir, "..", "data", "ship-modules", "nameToId.json");
 
 const MODULE_CATEGORY_ID = 7;
@@ -24,7 +30,14 @@ interface SdeType {
   published: number;
 }
 
-type LocalizedName = { readonly zh?: string; readonly ja?: string };
+type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
+
+type Row<T> = T & { readonly id: TypeId; readonly name: string };
+
+interface DroneEntry {
+  readonly id: TypeId;
+  readonly name: string;
+}
 
 interface SdeDogmaAttribute {
   attributeID: number;
@@ -260,6 +273,30 @@ const CHARGE_GROUPS = new Set([
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
+
+function stringifyWithTypeIds<T>(value: T): string {
+  return JSON.stringify(value).replace(/"id":"(\d+)"/g, '"id":"$1" as TypeId');
+}
+
+function stringifyHullBonuses(value: Record<ShipId, readonly HullBonus[]>): string {
+  const entries = Object.entries(value)
+    .map(([shipId, bonuses]) => `[${JSON.stringify(shipId)} as ShipId]:${JSON.stringify(bonuses)}`)
+    .join(",");
+  return `{${entries}}`;
+}
+
+function buildShipNameToId(): ReadonlyMap<string, ShipId> {
+  const map = new Map<string, ShipId>();
+  for (const profile of SHIP_PROFILES) map.set(profile.name, profile.id);
+  return map;
+}
+
+function resolveShipId(name: string, sdeType: SdeType | undefined, shipNameToId: ReadonlyMap<string, ShipId>): ShipId {
+  const legacy = shipNameToId.get(name);
+  if (legacy) return legacy;
+  if (sdeType) return String(sdeType.typeID) as ShipId;
+  throw new Error(`Unknown ship hull name: ${name}`);
+}
 
 async function loadMerged<T>(prefix: string): Promise<Record<string, T>> {
   const files = (await readdir(SDE_DIR))
@@ -577,20 +614,22 @@ async function main() {
   const attributeNames = buildAttributeNameMap(attributes);
   const shipGroupIds = new Set(Object.values(groups).filter((group) => group.categoryID === SHIP_CATEGORY_ID).map((group) => group.groupID));
 
-  const fittingModules: Record<string, FittingModuleStats> = {};
-  const turrets: Record<string, TurretStats> = {};
-  const charges: Record<string, ChargeStats> = {};
-  const scripts: Record<string, TurretScriptStats> = {};
-  const stasisWebs: Record<string, StasisWebStats> = {};
-  const stasisGrapplers: Record<string, StasisGrapplerStats> = {};
-  const trackingComputers: Record<string, TrackingComputerStats> = {};
-  const trackingDisruptors: Record<string, TrackingDisruptorStats> = {};
-  const warpScramblers: Record<string, WarpScramblerStats> = {};
-  const disruptionScripts: Record<string, DisruptionScriptStats> = {};
-  const hullBonuses: Record<string, readonly HullBonus[]> = {};
-  const drones: Record<string, true> = {};
+  const fittingModules: Record<string, Row<FittingModuleStats>> = {};
+  const turrets: Record<string, Row<TurretStats>> = {};
+  const charges: Record<string, Row<ChargeStats>> = {};
+  const scripts: Record<string, Row<TurretScriptStats>> = {};
+  const stasisWebs: Record<string, Row<StasisWebStats>> = {};
+  const stasisGrapplers: Record<string, Row<StasisGrapplerStats>> = {};
+  const trackingComputers: Record<string, Row<TrackingComputerStats>> = {};
+  const trackingDisruptors: Record<string, Row<TrackingDisruptorStats>> = {};
+  const warpScramblers: Record<string, Row<WarpScramblerStats>> = {};
+  const disruptionScripts: Record<string, Row<DisruptionScriptStats>> = {};
+  const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
+  const drones: Record<string, DroneEntry> = {};
   const itemNames: Record<string, LocalizedName> = {};
   const nameToType = new Map<string, SdeType>();
+  const idToType = new Map<string, SdeType>();
+  const shipNameToId = buildShipNameToId();
 
   for (const type of Object.values(types)) {
     if (!type.published) continue;
@@ -598,10 +637,13 @@ async function main() {
     const values = buildAttributeValues(attributeNames, typeDogma);
     const enName = type["typeName_en-us"];
     nameToType.set(enName, type);
+    const id = String(type.typeID) as TypeId;
+    idToType.set(id, type);
 
     if (shipGroupIds.has(type.groupID)) {
       const bonuses = buildHullBonuses(attributeNames, typeDogma);
-      if (bonuses.length > 0) hullBonuses[enName] = bonuses;
+      const shipId = resolveShipId(enName, type, shipNameToId);
+      if (bonuses.length > 0) hullBonuses[shipId] = bonuses;
       continue;
     }
 
@@ -609,14 +651,16 @@ async function main() {
       const tracking = values.get("trackingSpeed");
       const optimal = values.get("maxRange");
       if (tracking !== undefined && optimal !== undefined) {
-        turrets[enName] = {
+        turrets[id] = {
+          id,
+          name: enName,
           tracking,
           optimal,
           falloff: values.get("falloff") ?? 0,
           chargeSize: values.get("chargeSize") ?? 1,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
         };
-        addItemName(itemNames, enName, type);
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -626,8 +670,8 @@ async function main() {
       const rangeMultiplier = values.get("weaponRangeMultiplier");
       const falloffMultiplier = values.get("fallofMultiplier");
       if (trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined) {
-        charges[enName] = { trackingMultiplier, rangeMultiplier, falloffMultiplier };
-        addItemName(itemNames, enName, type);
+        charges[id] = { id, name: enName, trackingMultiplier, rangeMultiplier, falloffMultiplier };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -637,12 +681,14 @@ async function main() {
       const optimal = values.get("maxRangeBonusBonus");
       const falloff = values.get("falloffBonusBonus");
       if (tracking !== undefined || optimal !== undefined || falloff !== undefined) {
-        scripts[enName] = {
+        scripts[id] = {
+          id,
+          name: enName,
           trackingMultiplier: 1 + (tracking ?? 0) / 100,
           optimalMultiplier: 1 + (optimal ?? 0) / 100,
           falloffMultiplier: 1 + (falloff ?? 0) / 100,
         };
-        addItemName(itemNames, enName, type);
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -650,24 +696,24 @@ async function main() {
     if (EWAR_SCRIPT_GROUPS.has(type.groupID)) {
       const stats = buildDisruptionScriptStats(values);
       if (stats) {
-        disruptionScripts[enName] = stats;
-        addItemName(itemNames, enName, type);
+        disruptionScripts[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
 
     if (groups[String(type.groupID)]?.categoryID === DRONE_CATEGORY_ID) {
-      drones[enName] = true;
-      addItemName(itemNames, enName, type);
+      drones[id] = { id, name: enName };
+      addItemName(itemNames, id, type);
       continue;
     }
 
     if (type.groupID === STASIS_WEB_GROUP) {
       const stats = buildStasisWebStats(values);
       if (stats) {
-        stasisWebs[enName] = stats;
-        fittingModules[enName] = { stasisWeb: stats };
-        addItemName(itemNames, enName, type);
+        stasisWebs[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { stasisWeb: stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -675,9 +721,9 @@ async function main() {
     if (type.groupID === STASIS_GRAPPLER_GROUP) {
       const stats = buildStasisGrapplerStats(values);
       if (stats) {
-        stasisGrapplers[enName] = stats;
-        fittingModules[enName] = { stasisGrappler: stats };
-        addItemName(itemNames, enName, type);
+        stasisGrapplers[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { stasisGrappler: stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -685,9 +731,9 @@ async function main() {
     if (type.groupID === WEAPON_DISRUPTOR_GROUP) {
       const stats = buildTrackingDisruptorStats(values);
       if (stats) {
-        trackingDisruptors[enName] = stats;
-        fittingModules[enName] = { trackingDisruptor: stats };
-        addItemName(itemNames, enName, type);
+        trackingDisruptors[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { trackingDisruptor: stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -695,8 +741,8 @@ async function main() {
     if (type.groupID === TRACKING_COMPUTER_GROUP) {
       const stats = buildTrackingComputerStats(values);
       if (stats) {
-        trackingComputers[enName] = stats;
-        addItemName(itemNames, enName, type);
+        trackingComputers[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -704,9 +750,9 @@ async function main() {
     if (type.groupID === WARP_SCRAMBLER_GROUP) {
       const stats = buildWarpScramblerStats(values);
       if (stats) {
-        warpScramblers[enName] = stats;
-        fittingModules[enName] = { warpScrambler: stats };
-        addItemName(itemNames, enName, type);
+        warpScramblers[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { warpScrambler: stats, id, name: enName };
+        addItemName(itemNames, id, type);
       }
       continue;
     }
@@ -714,24 +760,27 @@ async function main() {
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
-        fittingModules[enName] = buildPropulsionStats(values, type);
-        addItemName(itemNames, enName, type);
+        fittingModules[id] = { ...buildPropulsionStats(values, type), id, name: enName };
+        addItemName(itemNames, id, type);
       } else {
         const stats = buildModuleStats(values, effects);
         if (stats) {
-          fittingModules[enName] = stats;
-          addItemName(itemNames, enName, type);
+          fittingModules[id] = { ...stats, id, name: enName };
+          addItemName(itemNames, id, type);
         }
       }
     }
   }
 
-  const sortedDrones = Object.fromEntries(Object.keys(drones).sort().map((name) => [name, true]));
+  const sortedDrones = Object.fromEntries(
+    Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
+  );
 
   const date = new Date().toISOString().split("T")[0];
   const header =
     `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
     `/* eslint-disable */\n\n` +
+    `import type { ShipId, TypeId } from "../ids";\n` +
     `import type { HullTier } from "../../ships";\n\n`;
   const typeDefinitions = `export interface FittingPropulsionStats {
   readonly kind: "afterburner" | "microwarpdrive";
@@ -755,10 +804,12 @@ export interface FittingModuleStats {
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
   readonly propulsion?: FittingPropulsionStats;
-  readonly stasisWeb?: StasisWebStats;
-  readonly stasisGrappler?: StasisGrapplerStats;
-  readonly trackingDisruptor?: TrackingDisruptorStats;
-  readonly warpScrambler?: WarpScramblerStats;
+  readonly stasisWeb?: Omit<StasisWebStats, "id" | "name">;
+  readonly stasisGrappler?: Omit<StasisGrapplerStats, "id" | "name">;
+  readonly trackingDisruptor?: Omit<TrackingDisruptorStats, "id" | "name">;
+  readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface TurretStats {
@@ -767,6 +818,8 @@ export interface TurretStats {
   readonly falloff: number;
   readonly chargeSize: number;
   readonly turretSkill?: string;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
@@ -782,18 +835,24 @@ export interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface TurretScriptStats {
   readonly trackingMultiplier: number;
   readonly optimalMultiplier: number;
   readonly falloffMultiplier: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface StasisWebStats {
   readonly maxRange: number;
   readonly speedFactorPercent: number;
   readonly overloadRangeBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface StasisGrapplerStats {
@@ -801,6 +860,8 @@ export interface StasisGrapplerStats {
   readonly falloff: number;
   readonly speedFactorPercent: number;
   readonly overloadOptimalBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface TrackingDisruptorStats {
@@ -808,40 +869,48 @@ export interface TrackingDisruptorStats {
   readonly falloff: number;
   readonly disruptionPercent: number;
   readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface DisruptionScriptStats {
   readonly trackingDeltaBonus: number;
   readonly rangeDeltaBonus: number;
   readonly falloffDeltaBonus: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface WarpScramblerStats {
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 export interface TrackingComputerStats {
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
 }
 
 `;
 
-  const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${JSON.stringify(scripts)};
+  const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
 
-export const STASIS_WEBS: Readonly<Record<string, StasisWebStats>> = ${JSON.stringify(stasisWebs)};
+export const STASIS_WEBS: Readonly<Record<string, StasisWebStats>> = ${stringifyWithTypeIds(stasisWebs)};
 
-export const STASIS_GRAPPLERS: Readonly<Record<string, StasisGrapplerStats>> = ${JSON.stringify(stasisGrapplers)};
+export const STASIS_GRAPPLERS: Readonly<Record<string, StasisGrapplerStats>> = ${stringifyWithTypeIds(stasisGrapplers)};
 
-export const TRACKING_COMPUTERS: Readonly<Record<string, TrackingComputerStats>> = ${JSON.stringify(trackingComputers)};
+export const TRACKING_COMPUTERS: Readonly<Record<string, TrackingComputerStats>> = ${stringifyWithTypeIds(trackingComputers)};
 
-export const TRACKING_DISRUPTORS: Readonly<Record<string, TrackingDisruptorStats>> = ${JSON.stringify(trackingDisruptors)};
+export const TRACKING_DISRUPTORS: Readonly<Record<string, TrackingDisruptorStats>> = ${stringifyWithTypeIds(trackingDisruptors)};
 
-export const WARP_SCRAMBLERS: Readonly<Record<string, WarpScramblerStats>> = ${JSON.stringify(warpScramblers)};
+export const WARP_SCRAMBLERS: Readonly<Record<string, WarpScramblerStats>> = ${stringifyWithTypeIds(warpScramblers)};
 
-export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>> = ${JSON.stringify(disruptionScripts)};
+export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>> = ${stringifyWithTypeIds(disruptionScripts)};
 
 `;
 
@@ -849,15 +918,15 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     header,
     typeDefinitions,
     scriptDefinitions,
-    `export const FITTING_MODULES: Readonly<Record<string, FittingModuleStats>> = ${JSON.stringify(fittingModules)};`,
+    `export const FITTING_MODULES: Readonly<Record<string, FittingModuleStats>> = ${stringifyWithTypeIds(fittingModules)};`,
     ``,
-    `export const TURRETS: Readonly<Record<string, TurretStats>> = ${JSON.stringify(turrets)};`,
+    `export const TURRETS: Readonly<Record<string, TurretStats>> = ${stringifyWithTypeIds(turrets)};`,
     ``,
-    `export const CHARGES: Readonly<Record<string, ChargeStats>> = ${JSON.stringify(charges)};`,
+    `export const CHARGES: Readonly<Record<string, ChargeStats>> = ${stringifyWithTypeIds(charges)};`,
     ``,
-    `export const HULL_BONUSES: Readonly<Record<string, readonly HullBonus[]>> = ${JSON.stringify(hullBonuses)};`,
+    `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
-    `export const DRONES: Readonly<Record<string, true>> = ${JSON.stringify(sortedDrones)};`,
+    `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,
   ];
 
@@ -876,7 +945,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     disruptionScripts,
     drones,
   );
-  const filteredItemNames = filterItemNames(itemNames, nameToType, groups, dbTableNames);
+  const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
 
   await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, lines.join("\n"));
@@ -901,12 +970,27 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
 
 function addItemName(
   itemNames: Record<string, LocalizedName>,
-  name: string,
-  type?: SdeType,
+  id: string,
+  type: SdeType,
 ): void {
-  itemNames[name] = {
-    zh: type?.typeName_zh && type.typeName_zh.trim().length > 0 ? type.typeName_zh.trim() : name,
-    ja: type?.typeName_ja && type.typeName_ja.trim().length > 0 ? type.typeName_ja.trim() : name,
+  const en = type["typeName_en-us"];
+  itemNames[id] = {
+    en,
+    zh: type.typeName_zh?.trim() || en,
+    ja: type.typeName_ja?.trim() || en,
+  };
+}
+
+interface IconEntry {
+  readonly id: number;
+  readonly files: readonly string[];
+  readonly group: string;
+  readonly kind: string;
+}
+
+interface NameToIdCatalog {
+  byName?: {
+    iconID?: Record<string, readonly IconEntry[]>;
   };
 }
 
@@ -914,11 +998,14 @@ async function addItemNamesFromIconCatalog(
   itemNames: Record<string, LocalizedName>,
   nameToType: ReadonlyMap<string, SdeType>,
 ): Promise<void> {
-  const raw: { byName?: { iconID?: Record<string, unknown> } } = JSON.parse(await readFile(NAME_TO_ID_FILE, "utf8"));
+  const raw: NameToIdCatalog = JSON.parse(await readFile(NAME_TO_ID_FILE, "utf8"));
   const catalog = raw.byName?.iconID ?? {};
   for (const name of Object.keys(catalog)) {
-    if (name in itemNames) continue;
-    addItemName(itemNames, name, nameToType.get(name));
+    const type = nameToType.get(name);
+    if (!type) continue;
+    const id = String(type.typeID);
+    if (id in itemNames) continue;
+    addItemName(itemNames, id, type);
   }
 }
 
@@ -933,7 +1020,7 @@ function collectDbTableNames(
   trackingDisruptors: Record<string, TrackingDisruptorStats>,
   warpScramblers: Record<string, WarpScramblerStats>,
   disruptionScripts: Record<string, DisruptionScriptStats>,
-  drones: Record<string, true>,
+  drones: Record<string, DroneEntry>,
 ): Set<string> {
   return new Set([
     ...Object.keys(fittingModules),
@@ -959,20 +1046,21 @@ function isFittableItem(type: SdeType | undefined, groups: Record<string, SdeGro
 
 function filterItemNames(
   itemNames: Record<string, LocalizedName>,
-  nameToType: ReadonlyMap<string, SdeType>,
+  idToType: ReadonlyMap<string, SdeType>,
   groups: Record<string, SdeGroup>,
   dbTableNames: ReadonlySet<string>,
 ): Record<string, LocalizedName> {
   const filtered: Record<string, LocalizedName> = {};
-  for (const [name, localizations] of Object.entries(itemNames)) {
-    if (dbTableNames.has(name) || isFittableItem(nameToType.get(name), groups)) {
-      filtered[name] = localizations;
+  for (const [id, localizations] of Object.entries(itemNames)) {
+    if (dbTableNames.has(id) || isFittableItem(idToType.get(id), groups)) {
+      filtered[id] = localizations;
     }
   }
   return filtered;
 }
 
-const CANONICAL_OVERRIDES = {
+const CANONICAL_OVERRIDES: Record<ShipNameLanguage, Record<string, string>> = {
+  en: {},
   zh: {
     "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
   },
@@ -985,40 +1073,117 @@ const CANONICAL_OVERRIDES = {
     "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
     "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
   },
-} as const;
+};
+
+interface CollisionTables {
+  readonly en: Record<string, string>;
+  readonly zh: Record<string, string>;
+  readonly ja: Record<string, string>;
+}
+
+function buildCollisionTables(
+  itemNames: Record<string, LocalizedName>,
+  canonicalOverrides: Record<ShipNameLanguage, Record<string, string>> = CANONICAL_OVERRIDES,
+): CollisionTables {
+  const groups: Record<ShipNameLanguage, Map<string, string[]>> = {
+    en: new Map(),
+    zh: new Map(),
+    ja: new Map(),
+  };
+  const languages: readonly ShipNameLanguage[] = ["en", "zh", "ja"];
+  for (const [id, names] of Object.entries(itemNames)) {
+    for (const language of languages) {
+      const name = (language === "en" ? names.en : names[language]?.trim() || names.en).trim();
+      if (name.length === 0) continue;
+      const list = groups[language].get(name) ?? [];
+      list.push(id);
+      groups[language].set(name, list);
+    }
+  }
+
+  const collisions: Record<ShipNameLanguage, Record<string, string>> = { en: {}, zh: {}, ja: {} };
+  for (const language of languages) {
+    for (const [name, ids] of groups[language]) {
+      if (ids.length < 2) continue;
+      const override = canonicalOverrides[language][name];
+      let preferred: string;
+      if (override) {
+        const match = ids.find((id) => itemNames[id].en === override);
+        if (!match) throw new Error(`Collision override for ${language} "${name}" maps to unknown English name "${override}"`);
+        preferred = match;
+      } else {
+        preferred = [...ids].sort((a, b) => Number(a) - Number(b))[0];
+      }
+      collisions[language][name] = preferred;
+    }
+  }
+
+  for (const language of languages) {
+    for (const [name, override] of Object.entries(canonicalOverrides[language])) {
+      const ids = groups[language].get(name);
+      if (!ids || ids.length < 2) throw new Error(`Collision override for ${language} "${name}" does not match a colliding name`);
+      if (!ids.some((id) => itemNames[id].en === override)) throw new Error(`Collision override for ${language} "${name}" maps to unknown English name "${override}"`);
+    }
+  }
+
+  return collisions;
+}
 
 interface WriteI18nOptions {
   readonly enFile?: string;
   readonly zhFile?: string;
   readonly jaFile?: string;
+  readonly collisionEnFile?: string;
+  readonly collisionZhFile?: string;
+  readonly collisionJaFile?: string;
+  readonly canonicalOverrides?: Record<ShipNameLanguage, Record<string, string>>;
 }
 
 async function writeI18nFiles(
   itemNames: Record<string, LocalizedName>,
   date: string,
-  { enFile = I18N_EN_FILE, zhFile = I18N_ZH_FILE, jaFile = I18N_JA_FILE }: WriteI18nOptions = {},
+  {
+    enFile = I18N_EN_FILE,
+    zhFile = I18N_ZH_FILE,
+    jaFile = I18N_JA_FILE,
+    collisionEnFile = COLLISION_EN_FILE,
+    collisionZhFile = COLLISION_ZH_FILE,
+    collisionJaFile = COLLISION_JA_FILE,
+    canonicalOverrides = CANONICAL_OVERRIDES,
+  }: WriteI18nOptions = {},
 ): Promise<void> {
-  const en = Object.keys(itemNames).sort((a, b) => a.localeCompare(b));
-  const zh = en.map((name) => itemNames[name].zh || name);
-  const ja = en.map((name) => itemNames[name].ja || name);
+  const sorted = Object.entries(itemNames).sort((a, b) => a[1].en.localeCompare(b[1].en));
+  const en: Record<string, string> = {};
+  const zh: Record<string, string> = {};
+  const ja: Record<string, string> = {};
+  for (const [id, names] of sorted) {
+    en[id] = names.en;
+    zh[id] = names.zh?.trim() || names.en;
+    ja[id] = names.ja?.trim() || names.en;
+  }
   const header = `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n/* eslint-disable */\n\n`;
-  const overrideType = "{ readonly [key: string]: string }";
-  const enNames = JSON.stringify(en);
-  const zhNames = JSON.stringify(zh);
-  const jaNames = JSON.stringify(ja);
-  const zhOverrides = JSON.stringify(CANONICAL_OVERRIDES.zh);
-  const jaOverrides = JSON.stringify(CANONICAL_OVERRIDES.ja);
-  const enContent = `${header}export const ITEM_NAMES_EN: readonly string[] = ${enNames};\n`;
-  const zhArray = `${header}export const ITEM_NAMES_ZH: readonly string[] = ${zhNames};\n`;
-  const zhOverrideContent = `export const ITEM_NAMES_ZH_OVERRIDES: ${overrideType} = ${zhOverrides};\n`;
-  const jaArray = `${header}export const ITEM_NAMES_JA: readonly string[] = ${jaNames};\n`;
-  const jaOverrideContent = `export const ITEM_NAMES_JA_OVERRIDES: ${overrideType} = ${jaOverrides};\n`;
+  const recordType = "Readonly<Record<string, string>>";
+  const enContent = `${header}export const ITEM_NAMES_EN: ${recordType} = ${JSON.stringify(en)};\n`;
+  const zhContent = `${header}export const ITEM_NAMES_ZH: ${recordType} = ${JSON.stringify(zh)};\n`;
+  const jaContent = `${header}export const ITEM_NAMES_JA: ${recordType} = ${JSON.stringify(ja)};\n`;
+
+  const collisions = buildCollisionTables(itemNames, canonicalOverrides);
+  const collisionEnContent = `${header}export const ITEM_NAME_COLLISIONS_EN: ${recordType} = ${JSON.stringify(collisions.en)};\n`;
+  const collisionZhContent = `${header}export const ITEM_NAME_COLLISIONS_ZH: ${recordType} = ${JSON.stringify(collisions.zh)};\n`;
+  const collisionJaContent = `${header}export const ITEM_NAME_COLLISIONS_JA: ${recordType} = ${JSON.stringify(collisions.ja)};\n`;
+
   await mkdir(dirname(enFile), { recursive: true });
   await writeFile(enFile, enContent);
   await mkdir(dirname(zhFile), { recursive: true });
-  await writeFile(zhFile, zhArray + zhOverrideContent);
+  await writeFile(zhFile, zhContent);
   await mkdir(dirname(jaFile), { recursive: true });
-  await writeFile(jaFile, jaArray + jaOverrideContent);
+  await writeFile(jaFile, jaContent);
+  await mkdir(dirname(collisionEnFile), { recursive: true });
+  await writeFile(collisionEnFile, collisionEnContent);
+  await mkdir(dirname(collisionZhFile), { recursive: true });
+  await writeFile(collisionZhFile, collisionZhContent);
+  await mkdir(dirname(collisionJaFile), { recursive: true });
+  await writeFile(collisionJaFile, collisionJaContent);
 }
 
 export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };

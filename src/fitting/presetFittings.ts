@@ -1,11 +1,12 @@
-import type { PresetFitting, PresetFitTexts } from "../gamedata/presets";
+import type { ShipId } from "../gamedata/ids";
+import type { PresetFitTexts, PresetFitting, PresetHull } from "../gamedata/presets";
 
 export type { PresetFitting };
 
 export interface PresetFittings {
-  listHulls(): readonly string[];
-  fittingsFor(hull: string): readonly PresetFitting[];
-  eftText(hull: string, fit: PresetFitting): string;
+  listHulls(): readonly PresetHull[];
+  fittingsFor(hullId: ShipId): readonly PresetFitting[];
+  eftText(hullId: ShipId, fit: PresetFitting): string;
 }
 
 export class PresetFittingsImpl implements PresetFittings {
@@ -15,15 +16,16 @@ export class PresetFittingsImpl implements PresetFittings {
     this.presetFitTexts = presetFitTexts;
   }
 
-  listHulls(): readonly string[] {
-    return this.presetFitTexts.hulls();
+  listHulls(): readonly PresetHull[] {
+    return this.presetFitTexts.listHulls();
   }
 
-  fittingsFor(hull: string): readonly PresetFitting[] {
-    return this.presetFitTexts.fittingsFor(hull);
+  fittingsFor(hullId: ShipId): readonly PresetFitting[] {
+    return this.presetFitTexts.fittingsFor(hullId);
   }
 
-  eftText(hull: string, fit: PresetFitting): string {
-    return `[${hull}, ${fit.name}]\n${fit.body}`;
+  eftText(hullId: ShipId, fit: PresetFitting): string {
+    const hullName = this.presetFitTexts.hullNameFor(hullId) ?? String(hullId);
+    return `[${hullName}, ${fit.name}]\n${fit.body}`;
   }
 }

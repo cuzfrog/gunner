@@ -1,5 +1,6 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
@@ -9,7 +10,7 @@ import { TurretOverridesStore } from "./turretOverrides";
 import type { Side } from "../side";
 import type { TurretEls } from "./turretEls";
 import {
-  addSigResButtons, fakeDocument, getFake, FakeElement, mockChargeCatalog, mockFittingImport, mockGunFamilies, mockShips,
+  addSigResButtons, fakeDocument, getFake, FakeElement, CHARGE_OPTIONS, mockGunFamilies, mockShips,
   mockTrackingInput,
 } from "../testSupport";
 import type { PopupGroup } from "../popup";
@@ -59,6 +60,7 @@ export function buildTurret(
     chargeCatalog?: Partial<ChargeCatalog>;
     fittingImport?: Partial<FittingImport>;
     ships?: Partial<Ships>;
+    i18n?: Partial<I18n>;
   } = {},
 ) {
   const side = options.side ?? "shipA";
@@ -74,6 +76,7 @@ export function buildTurret(
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
+    ...options.i18n,
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn(),
@@ -83,22 +86,32 @@ export function buildTurret(
   });
   const gunFamilies = mockGunFamilies();
   const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
+  const hail: TypeId = "12608" as TypeId;
   const chargeCatalog = vi.mocked<ChargeCatalog>({
-    usualForChargeSize: vi.fn(() => "Hail S"),
-    usualForTurret: vi.fn(() => "Hail S"),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret) => turret),
+    usualForChargeSize: vi.fn(() => hail),
+    usualForTurret: vi.fn(() => hail),
+    chargesForSize: vi.fn(() => CHARGE_OPTIONS),
+    chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
+    withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId })),
+    idForName: vi.fn((name) => CHARGE_OPTIONS.find((c) => c.name === name)?.id),
     ...options.chargeCatalog,
   });
+  const NAME_FOR_ID: Record<string, string> = {
+    "12608": "Hail S",
+    "21898": "Republic Fleet EMP S",
+  };
+  const itemNameForId = (id: TypeId, language: string): string => {
+    if (id === "12608" && language === "zh") return "海怪 S";
+    return NAME_FOR_ID[id] ?? String(id);
+  };
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn(itemNameForId),
     itemName: vi.fn((name: string) => name),
-    canonicalName: vi.fn((name: string) => name),
     ...options.fittingImport,
   });
   const turretOverrides = new TurretOverridesStore();

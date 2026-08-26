@@ -1,4 +1,5 @@
 import type { I18n, Language } from "../../i18n";
+import type { TypeId } from "../../../gamedata/ids";
 import { USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type StartupState } from "../../../appstate";
 import type { ConfirmController } from "../confirm";
 import type { Popup, PopupGroup } from "../popup";
@@ -29,7 +30,7 @@ const BASE_PROFILE: ProfileSettings = {
   shipBMass: 10_000_000,
   shipBInertia: 0.45,
   shipBSig: 40,
-  shipAAmmo: "Hail S",
+  shipAAmmo: "12608" as TypeId,
 };
 
 class FakeElement {

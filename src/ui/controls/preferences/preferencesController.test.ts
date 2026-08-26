@@ -133,6 +133,7 @@ class FakeTurretController implements TurretController {
   private readonly trackingInput: TrackingInput;
   turret = vi.fn(() => undefined as import("../../../fitting").ImportedTurret | undefined);
   ammo = vi.fn(() => "Hail S");
+  ammoId = vi.fn(() => "12608" as import("../../../gamedata/ids").TypeId);
   applyImported = vi.fn();
   restore(_arg1?: unknown, _arg2?: unknown, _arg3?: unknown, _arg4?: unknown): void {}
   clear = vi.fn();
@@ -143,7 +144,7 @@ class FakeTurretController implements TurretController {
     falloff: 3000,
   }));
   currentSigResClass = vi.fn((): import("../../../sim").SigResolutionClass => "S");
-  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
+  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as import("../../../gamedata/ids").TypeId }));
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();
@@ -164,11 +165,8 @@ function build() {
   const els = fakeEls();
   const i18n = mockI18n();
   const settingsStore = vi.mocked<SettingsStore>(mockSettingsStore());
-  const ensureLanguage = vi.fn(() => Promise.resolve());
   const itemNameCatalog: ItemNameCatalog = {
-    name: (name) => name,
-    canonicalName: (name) => name,
-    ensureLanguage,
+    nameForId: (id) => id,
   };
   const events: UiEvents = {
     onLanguageChanged: vi.fn(),
@@ -233,55 +231,28 @@ describe("PreferencesController", () => {
     expect(i18n.setLanguage).toHaveBeenCalledWith("zh");
     expect(els.langZh.getAttribute("aria-pressed")).toBe("true");
     expect(els.langEn.getAttribute("aria-pressed")).toBe("false");
-    expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("zh");
+    expect(events.emitLanguageChanged).toHaveBeenCalled();
     await Promise.resolve();
     expect(settingsStore.savePreferences).toHaveBeenCalled();
     expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
 
-  test("setLanguage loads the language pack and emits exactly once after it resolves", async () => {
-    const { controller, itemNameCatalog, events } = build();
-    let resolve: () => void;
-    const promise = new Promise<void>((res) => {
-      resolve = res;
-    });
-    itemNameCatalog.ensureLanguage = vi.fn(() => promise);
+  test("setLanguage emits language changed synchronously", async () => {
+    const { controller, events } = build();
     controller.setLanguage("zh");
-    expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("zh");
-    expect(events.emitLanguageChanged).not.toHaveBeenCalled();
-    resolve!();
-    await Promise.resolve();
     expect(events.emitLanguageChanged).toHaveBeenCalledTimes(1);
   });
 
-  test("setLanguage emits exactly once when the language pack rejects", async () => {
-    const { controller, itemNameCatalog, events } = build();
-    let reject: (reason?: unknown) => void;
-    const promise = new Promise<void>((_, rej) => {
-      reject = rej;
-    });
-    itemNameCatalog.ensureLanguage = vi.fn(() => promise);
-    controller.setLanguage("ja");
-    expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("ja");
-    reject!(new Error("load failed"));
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(events.emitLanguageChanged).toHaveBeenCalledTimes(1);
-  });
-
-  test("setLanguage calls ensureLanguage for English", async () => {
-    const { controller, itemNameCatalog, events } = build();
+  test("setLanguage emits language changed for English", async () => {
+    const { controller, events } = build();
     controller.setLanguage("en");
-    expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("en");
-    await Promise.resolve();
-    expect(events.emitLanguageChanged).toHaveBeenCalled();
+    expect(events.emitLanguageChanged).toHaveBeenCalledTimes(1);
   });
 
-  test("restore does not load the language pack for English", async () => {
-    const { controller, itemNameCatalog, events } = build();
+  test("restore does not emit language changed for English", () => {
+    const { controller, events } = build();
     const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
-    expect(itemNameCatalog.ensureLanguage).not.toHaveBeenCalled();
-    await Promise.resolve();
     expect(events.emitLanguageChanged).not.toHaveBeenCalled();
   });
 
@@ -361,8 +332,6 @@ describe("PreferencesController", () => {
     expect(els.simSpeed.value).toBe("3");
     expect(els.gridBrightnessValue.textContent).toBe("80%");
     expect(els.gridBrightnessSlider.value).toBe("0.8");
-    expect(itemNameCatalog.ensureLanguage).toHaveBeenCalledWith("ja");
-    await Promise.resolve();
     expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
 

@@ -2,7 +2,8 @@ import { buildTurret } from "./testSupport";
 import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
 import type { ShipProfile } from "../../../ships";
-import type { FactionId, HullTypeId, ShipId } from "../../../gamedata/ids";
+import type { FactionId, HullTypeId, ShipId, TypeId } from "../../../gamedata/ids";
+import type { Language } from "../../../ui/i18n";
 
 describe("TurretController", () => {
   test("initial state disables the trigger, inputs, and hides the summary icon", () => {
@@ -59,13 +60,13 @@ describe("TurretController", () => {
   test("restore imports the fitting and applies the stored ammo", () => {
     const { controller, fittingImport, chargeCatalog } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      chargeCatalog: { withCharge: vi.fn((turret, charge) => ({ ...turret, charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })) },
+      chargeCatalog: { withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })) },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, "Republic Fleet EMP S");
 
     expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
-    expect(chargeCatalog.withCharge).toHaveBeenCalledWith(TURRET, "Republic Fleet EMP S");
+    expect(chargeCatalog.withCharge).toHaveBeenCalledWith(TURRET, CHARGE_OPTIONS[1].id);
   });
 
   test("restore with no fitting text resets to the default charge", () => {
@@ -130,7 +131,7 @@ describe("TurretController", () => {
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       chargeCatalog: {
         chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
-        withCharge: vi.fn((turret, charge) => ({ ...turret, charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })),
+        withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })),
       },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
@@ -142,7 +143,7 @@ describe("TurretController", () => {
 
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Republic Fleet EMP S");
-    expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ charge: "Hail S" }), "Republic Fleet EMP S");
+    expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ chargeId: CHARGE_OPTIONS[0].id }), CHARGE_OPTIONS[1].id);
     expect(turretOverrides.get()).toEqual({ shipAMass: 1234 });
     expect(emitConfigInvalidated).toHaveBeenCalledWith(false);
     expect(getFake(document, "ship-a-tracking").value).toBe("0.42");
@@ -201,7 +202,7 @@ describe("TurretController", () => {
     expect(captured.sigRes).toBe("M");
     expect(captured.optimal).toBe(5000);
     expect(captured.falloff).toBe(4000);
-    expect(captured.ammo).toBe("Hail S");
+    expect(captured.ammo).toBe("12608" as TypeId);
   });
 
   test("language change re-renders", () => {
@@ -212,12 +213,12 @@ describe("TurretController", () => {
   });
 
   test("ammo labels use itemName while the stored ammo value stays canonical", () => {
-    const { document, controller, imageCatalog, fittingImport } = buildTurret({
+    const { document, controller, imageCatalog } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
       imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
+      i18n: { current: vi.fn((): Language => "zh") },
     });
-    fittingImport.itemName = vi.fn((name: string) => (name === "Hail S" ? "海怪 S" : name));
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
     controller.openAmmoPopup();
 

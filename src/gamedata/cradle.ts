@@ -1,5 +1,5 @@
 import type { FittingDbData } from "./fittingDb";
-import type { ItemNameCatalog } from "./itemNames";
+import type { ItemNameCatalog, ItemNameResolver } from "./itemNames";
 import type { ModuleSlotCatalog } from "./moduleSlots";
 import type { NameI18nCatalog } from "./nameI18n";
 import type { PresetFitTexts } from "./presets";
@@ -11,5 +11,6 @@ export interface GameDataCradle {
   readonly fittingDb: FittingDbData;
   readonly moduleSlotCatalog: ModuleSlotCatalog;
   readonly itemNameCatalog: ItemNameCatalog;
+  readonly itemNameResolver: ItemNameResolver;
   readonly presetFitTexts: PresetFitTexts;
 }

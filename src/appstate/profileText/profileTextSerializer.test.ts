@@ -1,3 +1,4 @@
+import type { TypeId } from "../../gamedata/ids";
 import { ProfileTextSerializer } from "./profileTextSerializer";
 import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 
@@ -5,14 +6,14 @@ const serializer = new ProfileTextSerializer();
 
 describe("profileTextSerializer", () => {
   test("emits the global ammo line as a global key", () => {
-    const profile = { ...MINIMAL_PROFILE, shipAAmmo: "Hail S" };
+    const profile = { ...MINIMAL_PROFILE, shipAAmmo: "Hail S" as TypeId };
     const text = serializer.serialize(profile);
     expect(text).toContain("ammo=Hail S");
     expect(text).not.toContain("shipA.ammo=");
   });
 
   test("emits the shipB ammo line as a side key", () => {
-    const profile = { ...MINIMAL_PROFILE, shipBAmmo: "Republic Fleet EMP S" };
+    const profile = { ...MINIMAL_PROFILE, shipBAmmo: "Republic Fleet EMP S" as TypeId };
     const text = serializer.serialize(profile);
     expect(text).toContain("shipB.ammo=Republic Fleet EMP S");
   });

@@ -13,10 +13,21 @@ import {
   isPositive,
   isSkillLevel,
 } from "../validators";
+import type { ChargeCatalog } from "../../fitting";
+import type { ShipId, TypeId } from "../../gamedata/ids";
 import type { SettingGuards } from "../settingGuards";
+import type { Ships } from "../../ships";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
 
-export function parseScalarValue(field: ScalarField, value: string, guards: SettingGuards): ScalarValue | undefined {
+const DEFAULT_TURRET_CHARGE_SIZE = 1;
+
+export function parseScalarValue(
+  field: ScalarField,
+  value: string,
+  guards: SettingGuards,
+  ships: Ships,
+  chargeCatalog: ChargeCatalog,
+): ScalarValue | undefined {
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
@@ -30,8 +41,10 @@ export function parseScalarValue(field: ScalarField, value: string, guards: Sett
     return guards.isSigResolutionClass(value) ? value : undefined;
   }
   if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
-  if (field === "shipAHull" || field === "shipAPropulsion" || field === "shipBHull" || field === "shipBPropulsion") return value;
-  if (field === "shipAAmmo" || field === "shipBAmmo") return value;
+  if (field === "shipAHullId" || field === "shipBHullId") return resolveHullId(value, ships);
+  if (field === "shipAPropulsion" || field === "shipBPropulsion") return value;
+  if (field === "shipAAmmo" || field === "shipBAmmo") return resolveAmmoId(value, chargeCatalog);
+
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
@@ -147,7 +160,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipASig: raw.shipASig,
     shipASkillLevel: raw.shipASkillLevel,
     shipAOverload: raw.shipAOverload,
-    shipAHull: raw.shipAHull,
+    shipAHullId: raw.shipAHullId,
     shipAPropulsion: raw.shipAPropulsion,
     shipAFitting: raw.shipAFitting,
     shipAOverrides: raw.shipAOverrides,
@@ -158,7 +171,7 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipBAmmo: raw.shipBAmmo,
     shipBSkillLevel: raw.shipBSkillLevel,
     shipBOverload: raw.shipBOverload,
-    shipBHull: raw.shipBHull,
+    shipBHullId: raw.shipBHullId,
     shipBPropulsion: raw.shipBPropulsion,
     shipBFitting: raw.shipBFitting,
     shipBOverrides: raw.shipBOverrides,
@@ -171,4 +184,16 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     if (value !== undefined) result[key] = value;
   }
   return result;
+}
+
+function resolveHullId(value: string, ships: Ships): ShipId | undefined {
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) return trimmed as ShipId;
+  return ships.findHull(trimmed)?.id;
+}
+
+function resolveAmmoId(value: string, chargeCatalog: ChargeCatalog): TypeId {
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) return trimmed as TypeId;
+  return chargeCatalog.idForName(trimmed) ?? chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
 }

@@ -1,5 +1,6 @@
 import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { HullTier, ShipProfile, Ships, StatConditions } from "../../../ships";
 import type { TrackingUnit } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
@@ -54,7 +55,7 @@ export class TurretControllerImpl implements TurretController {
   private selectedTurret?: ImportedTurret;
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
   private cargoCharges: readonly CargoCharge[] = [];
-  private currentAmmo: string;
+  private currentAmmoId: TypeId;
   private allExpanded = false;
   private ammoPopupOpen = false;
 
@@ -70,7 +71,7 @@ export class TurretControllerImpl implements TurretController {
     this.resolver = deps.resolver;
     this.ships = deps.ships;
     this.events = deps.events;
-    this.currentAmmo = this.chargeCatalog.usualForChargeSize(1);
+    this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.ammoList = new AmmoList({
@@ -104,7 +105,11 @@ export class TurretControllerImpl implements TurretController {
   }
 
   ammo(): string {
-    return this.currentAmmo;
+    return this.fittingImport.itemNameForId(this.currentAmmoId, "en");
+  }
+
+  ammoId(): TypeId {
+    return this.currentAmmoId;
   }
 
   applyImported(imported: ImportedFitting): void {
@@ -112,7 +117,7 @@ export class TurretControllerImpl implements TurretController {
     const { turret, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
     this.cargoCharges = cargoCharges;
     this.selectedTurret = turret;
-    this.currentAmmo = ammo;
+    this.currentAmmoId = ammo;
     if (turret) {
       this.turretOverrides.clearTurret();
       this.inputSet.set(turret);
@@ -145,20 +150,19 @@ export class TurretControllerImpl implements TurretController {
         : { fitting: arg1, conditions: arg2, ammo: arg3, tracking: arg4, sigRes: arg5, optimal: arg6, falloff: arg7 };
     this.allExpanded = false;
     if (settings.fitting && settings.conditions) {
-      if (settings.ammo !== undefined) this.currentAmmo = settings.ammo;
       const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
-        this.currentAmmo,
+        settings.ammo,
       );
       this.selectedTurret = turret;
       this.cargoCharges = cargoCharges;
-      this.currentAmmo = resolvedAmmo;
+      this.currentAmmoId = resolvedAmmo;
       if (turret) this.inputSet.set(turret);
     } else {
       this.selectedTurret = undefined;
       this.cargoCharges = [];
-      this.currentAmmo = this.chargeCatalog.usualForChargeSize(1);
+      this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     }
     if (!this.selectedTurret) {
       this.applyRawTurretValues(settings.tracking, settings.sigRes, settings.optimal, settings.falloff);
@@ -184,7 +188,7 @@ export class TurretControllerImpl implements TurretController {
   clear(): void {
     this.selectedTurret = undefined;
     this.cargoCharges = [];
-    this.currentAmmo = this.chargeCatalog.usualForChargeSize(1);
+    this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.allExpanded = false;
     this.render();
   }
@@ -225,13 +229,13 @@ export class TurretControllerImpl implements TurretController {
     this.events.emitDisplayInvalidated();
   }
 
-  capture(): { tracking: number; sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string } {
+  capture(): { tracking: number; sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: TypeId } {
     return {
       tracking: this.trackingInput.rad,
       sigRes: this.inputSet.currentSigResValue(),
       optimal: num(this.els.optimal),
       falloff: num(this.els.falloff),
-      ammo: this.currentAmmo,
+      ammo: this.currentAmmoId,
     };
   }
 
@@ -274,19 +278,19 @@ export class TurretControllerImpl implements TurretController {
     this.els.ammoTrigger.disabled = !hasGuns;
     this.els.ammoTrigger.title = hasGuns ? "" : this.i18n.t("turret.noGuns");
     this.ammoList.render({
-      turret: this.selectedTurret, ammo: this.currentAmmo,
+      turret: this.selectedTurret, ammo: this.currentAmmoId,
       cargo: this.cargoCharges, allExpanded: this.allExpanded,
     });
     this.sigResIcons.render({ sigResOptions: this.els.sigResOptions }, this.selectedTurret);
     this.renderSigResState();
   }
 
-  private applyAmmo(name: string): boolean {
+  private applyAmmo(id: TypeId): boolean {
     if (!this.selectedTurret) return false;
-    const updated = this.chargeCatalog.withCharge(this.selectedTurret, name);
+    const updated = this.chargeCatalog.withCharge(this.selectedTurret, id);
     if (updated === this.selectedTurret) return false;
     this.selectedTurret = updated;
-    this.currentAmmo = updated.charge;
+    this.currentAmmoId = updated.chargeId;
     this.turretOverrides.clearTurret();
     this.inputSet.set(updated);
     this.render();
@@ -294,8 +298,8 @@ export class TurretControllerImpl implements TurretController {
     return true;
   }
 
-  private onAmmoItemClick(name: string): void {
-    if (!this.applyAmmo(name)) return;
+  private onAmmoItemClick(id: TypeId): void {
+    if (!this.applyAmmo(id)) return;
     this.closeAmmoPopup();
     this.popupValue.focusTrigger();
   }

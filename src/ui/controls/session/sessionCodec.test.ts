@@ -8,6 +8,7 @@ import {
   type UserSettings,
 } from "../../../appstate";
 import type { ChargeCatalog } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { ImportedTurret } from "../../../fitting";
 import { type AutopilotMode, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
@@ -47,7 +48,7 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): Return
     aggressivity: (side === "shipA" ? settings.shipAAggressivity : settings.shipBAggressivity) ?? 1,
     skillLevel: side === "shipA" ? settings.shipASkillLevel : settings.shipBSkillLevel,
     overload: side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true,
-    hull: side === "shipA" ? settings.shipAHull : settings.shipBHull,
+    hull: side === "shipA" ? settings.shipAHullId : settings.shipBHullId,
     propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
     fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
     overrides: side === "shipA" ? {} : settings.shipBOverrides ?? {},
@@ -138,6 +139,7 @@ class FakeTurretController implements TurretController {
   private readonly trackingInput: TrackingInput;
   turret = vi.fn(() => undefined as ImportedTurret | undefined);
   ammo = vi.fn(() => "Hail S");
+  ammoId = vi.fn(() => "12608" as TypeId);
   applyImported = vi.fn();
   restore = vi.fn((..._args: unknown[]): void => {});
   clear = vi.fn();
@@ -148,7 +150,7 @@ class FakeTurretController implements TurretController {
     falloff: 3000,
   }));
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
-  capture = vi.fn(() => ({ tracking: this.trackingInput.rad, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
+  capture = vi.fn(() => ({ tracking: this.trackingInput.rad, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();
@@ -277,8 +279,8 @@ function makeProfile(): ProfileSettings {
     shipBOverload: true,
     shipASig: 40,
     shipBSig: 36,
-    shipAAmmo: "Hail S",
-    shipBAmmo: "Hail S",
+    shipAAmmo: "12608" as TypeId,
+    shipBAmmo: "12608" as TypeId,
   };
 }
 
@@ -317,8 +319,8 @@ describe("SessionCodec", () => {
     expect(settings.shipBAggressivity).toBe(1);
     expect(settings.simSpeed).toBe(4);
     expect(settings.language).toBe("en");
-    expect(settings.shipAAmmo).toBe("Hail S");
-    expect(settings.shipBAmmo).toBe("Hail S");
+    expect(settings.shipAAmmo).toBe("12608" as TypeId);
+    expect(settings.shipBAmmo).toBe("12608" as TypeId);
     expect(settings.shipAOverrides).toEqual({ shipAMass: 1_400_000 });
     expect(shipATurret.capture).toHaveBeenCalled();
     expect(shipBTurret.capture).toHaveBeenCalled();
@@ -349,7 +351,7 @@ describe("SessionCodec", () => {
       shipAInertia: 2.5,
       shipASkillLevel: 4,
       shipAOverload: false,
-      shipAHull: undefined,
+      shipAHullId: undefined,
       shipAPropulsion: undefined,
       shipAFitting: undefined,
       shipAOverrides: {},
@@ -363,13 +365,13 @@ describe("SessionCodec", () => {
       shipBSkillLevel: 3,
       shipBOverload: true,
       shipBSig: 50,
-      shipBHull: undefined,
+      shipBHullId: undefined,
       shipBPropulsion: undefined,
       shipBFitting: undefined,
       shipBOverrides: {},
       shipBFittedHull: undefined,
-      shipAAmmo: "Hail S",
-      shipBAmmo: "Hail S",
+      shipAAmmo: "12608" as TypeId,
+      shipBAmmo: "12608" as TypeId,
       simSpeed: 2,
       language: "zh",
     };
@@ -503,7 +505,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipA.restore).toHaveBeenCalledWith({
       fitting: undefined,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: 0.32,
       sigRes: "S",
       optimal: 1000,
@@ -512,7 +514,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipB.restore).toHaveBeenCalledWith({
       fitting: undefined,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: 0.32,
       sigRes: "S",
       optimal: 1000,
@@ -545,7 +547,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipA.restore).toHaveBeenCalledWith({
       fitting: profile.shipAFitting,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: profile.shipATracking,
       sigRes: profile.shipASigRes,
       optimal: profile.shipAOptimal,
@@ -554,7 +556,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipB.restore).toHaveBeenCalledWith({
       fitting: profile.shipBFitting,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: profile.shipBTracking,
       sigRes: profile.shipBSigRes,
       optimal: profile.shipBOptimal,
@@ -579,7 +581,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipA.restore).toHaveBeenCalledWith({
       fitting: profile.shipAFitting,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: profile.shipATracking,
       sigRes: profile.shipASigRes,
       optimal: profile.shipAOptimal,
@@ -588,7 +590,7 @@ describe("SessionCodec", () => {
     expect(turretControllers.shipB.restore).toHaveBeenCalledWith({
       fitting: profile.shipBFitting,
       conditions: { skillLevel: 5, overloaded: true },
-      ammo: "Hail S",
+      ammo: "12608",
       tracking: profile.shipBTracking,
       sigRes: profile.shipBSigRes,
       optimal: profile.shipBOptimal,

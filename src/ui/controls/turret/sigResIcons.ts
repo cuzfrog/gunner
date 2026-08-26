@@ -25,7 +25,7 @@ export class SigResIcons {
       const img = this.iconFor(button);
       const original = this.originalTitle(value, button);
       if (turret) {
-        const family = this.gunFamilies.familyOf(turret.moduleName);
+        const family = this.gunFamilies.familyOf(turret.moduleId);
         const representative = this.gunFamilies.representativeOf(family, value);
         const url = this.imageCatalog.itemIconUrl(representative);
         if (url) {

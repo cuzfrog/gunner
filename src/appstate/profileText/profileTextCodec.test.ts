@@ -3,9 +3,13 @@ import { LocalProfileTextCodec } from "./profileTextCodec";
 import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
 import type { SettingGuards } from "../settingGuards";
+import { makeShips, makeChargeCatalog, RIFTER_PROFILE } from "../localSettingsStore.testSupport";
 
 const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
-const codec = new LocalProfileTextCodec(guards);
+const ships = makeShips();
+ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
+const chargeCatalog = makeChargeCatalog();
+const codec = new LocalProfileTextCodec(guards, ships, chargeCatalog);
 
 describe("profileTextCodec", () => {
   test("serialize starts with the v1 header", () => {
@@ -106,7 +110,7 @@ describe("profileTextCodec", () => {
 
   test("a legacy profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=10
+version=11
 tracking=0.32
 sigRes=S
 optimal=5000

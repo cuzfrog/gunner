@@ -1,3 +1,4 @@
+import type { ShipId, TypeId } from "../ids";
 import {
   type ChargeStats,
   type DisruptionScriptStats,
@@ -40,19 +41,22 @@ export type {
   WarpScramblerStats,
 } from "./fittingDb";
 
+type Row<T> = T & { readonly id: TypeId; readonly name: string };
+type DroneEntry = (typeof DRONES)[string];
+
 export interface FittingDbData {
-  readonly modules: Readonly<Record<string, FittingModuleStats>>;
-  readonly turrets: Readonly<Record<string, TurretStats>>;
-  readonly charges: Readonly<Record<string, ChargeStats>>;
-  readonly scripts: Readonly<Record<string, TurretScriptStats>>;
-  readonly stasisWebs: Readonly<Record<string, StasisWebStats>>;
-  readonly stasisGrapplers: Readonly<Record<string, StasisGrapplerStats>>;
-  readonly trackingComputers: Readonly<Record<string, TrackingComputerStats>>;
-  readonly trackingDisruptors: Readonly<Record<string, TrackingDisruptorStats>>;
-  readonly warpScramblers: Readonly<Record<string, WarpScramblerStats>>;
-  readonly disruptionScripts: Readonly<Record<string, DisruptionScriptStats>>;
-  readonly hullBonuses: Readonly<Record<string, readonly HullBonus[]>>;
-  readonly drones: Readonly<Record<string, true>>;
+  readonly modules: Readonly<Record<string, Row<FittingModuleStats>>>;
+  readonly turrets: Readonly<Record<string, Row<TurretStats>>>;
+  readonly charges: Readonly<Record<string, Row<ChargeStats>>>;
+  readonly scripts: Readonly<Record<string, Row<TurretScriptStats>>>;
+  readonly stasisWebs: Readonly<Record<string, Row<StasisWebStats>>>;
+  readonly stasisGrapplers: Readonly<Record<string, Row<StasisGrapplerStats>>>;
+  readonly trackingComputers: Readonly<Record<string, Row<TrackingComputerStats>>>;
+  readonly trackingDisruptors: Readonly<Record<string, Row<TrackingDisruptorStats>>>;
+  readonly warpScramblers: Readonly<Record<string, Row<WarpScramblerStats>>>;
+  readonly disruptionScripts: Readonly<Record<string, Row<DisruptionScriptStats>>>;
+  readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
+  readonly drones: Readonly<Record<string, DroneEntry>>;
 }
 
 export type FittingDb = FittingDbData;

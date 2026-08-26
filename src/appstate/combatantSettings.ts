@@ -1,5 +1,6 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { SkillLevel } from "../ships";
+import type { ShipId, TypeId } from "../gamedata/ids";
 import {
   USER_SETTINGS_VERSION,
   type DisplayPreferences,
@@ -22,7 +23,7 @@ export interface CombatantSettings {
   readonly aggressivity: number;
   readonly skillLevel?: SkillLevel;
   readonly overload?: boolean;
-  readonly hull?: string;
+  readonly hull?: ShipId;
   readonly propulsion?: PropulsionSelection;
   readonly fitting?: string;
   readonly overrides?: Partial<ProfileParamOverrides>;
@@ -34,7 +35,7 @@ export interface CombatantSettings {
   readonly sigRes: SigResolutionClass;
   readonly optimal: number;
   readonly falloff: number;
-  readonly ammo: string;
+  readonly ammo: TypeId;
 }
 
 export interface InternalUserSettings {
@@ -64,7 +65,7 @@ export function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | 
     aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
     skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
     overload: sideValue(side, settings.shipAOverload, settings.shipBOverload),
-    hull: sideValue(side, settings.shipAHull, settings.shipBHull),
+    hull: sideValue(side, settings.shipAHullId, settings.shipBHullId),
     propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
     fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),
     overrides,

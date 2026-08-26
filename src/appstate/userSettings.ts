@@ -1,8 +1,9 @@
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import type { ShipId, TypeId } from "../gamedata/ids";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 10 as const;
+export const USER_SETTINGS_VERSION = 11 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
@@ -83,9 +84,9 @@ export interface UserSettings {
   shipBSig: number;
   shipBSkillLevel?: SkillLevel;
   shipBOverload?: boolean;
-  shipAHull?: string;
+  shipAHullId?: ShipId;
   shipAPropulsion?: PropulsionSelection;
-  shipBHull?: string;
+  shipBHullId?: ShipId;
   shipBPropulsion?: PropulsionSelection;
   shipAFitting?: string;
   shipAOverrides?: Partial<ProfileParamOverrides>;
@@ -97,8 +98,8 @@ export interface UserSettings {
   shipBEwarActivation?: StoredEwarActivation;
   shipABoosterActivation?: readonly StoredBoosterActivation[];
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
-  shipAAmmo: string;
-  shipBAmmo: string;
+  shipAAmmo: TypeId;
+  shipBAmmo: TypeId;
   simSpeed: number;
   language: Language;
 }
@@ -118,8 +119,8 @@ export type ProfileSettings = Omit<
   | "shipAAmmo"
   | "shipBAmmo"
 > & {
-  shipAAmmo?: string;
-  shipBAmmo?: string;
+  shipAAmmo?: TypeId;
+  shipBAmmo?: TypeId;
 };
 
 export interface DisplayPreferences {

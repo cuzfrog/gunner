@@ -12,6 +12,7 @@ function realShips() {
 
 function shipsWithHull() {
   const ships = mockShips();
+  ships.findHullById = vi.fn((id: string) => (id === RIFTER.id ? RIFTER : undefined));
   ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER : undefined));
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
   return ships;
@@ -69,11 +70,11 @@ describe("SidePanel", () => {
     panel.fittedHull = undefined;
     panel.fittingText = "fit";
     panel.recordOverride("shipAMass", 1000);
-    panel.lastCommittedHull = "Rifter";
+    panel.lastCommittedHull = RIFTER.id;
     expect(panel.profile).toBe(RIFTER);
     expect(panel.fittingText).toBe("fit");
     expect(panel.isOverridden("shipAMass")).toBe(true);
-    expect(panel.lastCommittedHull).toBe("Rifter");
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
   });
 
   test("shipA record lands in the turret overrides store", () => {
@@ -96,7 +97,7 @@ describe("SidePanel", () => {
     panel.recordOverride("shipBMass", 2000);
     const state = panel.capture();
     expect(state.overrides.shipBMass).toBe(2000);
-    expect(state.hull).toBe("Rifter");
+    expect(state.hull).toBe(RIFTER.id);
     panel.clearOverrides();
     expect(panel.isOverridden("shipBMass")).toBe(false);
     panel.restore(state);
@@ -109,7 +110,7 @@ describe("SidePanel", () => {
     panel.recordOverride("shipASpeed", 500);
     const state = panel.capture();
     expect(state.overrides).toEqual({ shipASpeed: 500 });
-    expect(state.hull).toBe("Rifter");
+    expect(state.hull).toBe(RIFTER.id);
     panel.restore(state);
     expect(turretOverrides.get().shipASpeed).toBe(500);
     expect(panel.isOverridden("shipASpeed")).toBe(true);
@@ -135,7 +136,7 @@ describe("SidePanel", () => {
     getFake(document, "ship-a-hull").value = "Rifter";
     panel.sections.hull.onHullChange();
     expect(panel.profile).toBe(RIFTER);
-    expect(panel.lastCommittedHull).toBe("Rifter");
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
   });
 
   test("setConfigInputsEnabled(false) disables the ship configuration controls", () => {

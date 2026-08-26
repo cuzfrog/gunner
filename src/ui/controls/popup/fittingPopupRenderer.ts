@@ -66,7 +66,7 @@ export class FittingPopupRenderer {
     }
 
     const conditions = panel.skillConditions();
-    const saved = this.savedFittings.listForHull(panel.profile.name);
+    const saved = this.savedFittings.listForHull(panel.profile.id);
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
       const onFittingClick = () => actions.onItemClick(fitting.text);
@@ -83,10 +83,10 @@ export class FittingPopupRenderer {
       savedList.appendChild(entry);
     }
 
-    const presets = this.presetFittings.fittingsFor(panel.profile.name);
+    const presets = this.presetFittings.fittingsFor(panel.profile.id);
     presetLabel.hidden = presets.length === 0;
     for (const fit of presets) {
-      const text = this.presetFittings.eftText(panel.profile.name, fit);
+      const text = this.presetFittings.eftText(panel.profile.id, fit);
       const onFittingClick = () => actions.onItemClick(text);
       const item = this.createFittingItem(fit.name, text, currentKey, onFittingClick);
       presetList.appendChild(this.createFittingEntry(text, item, undefined));

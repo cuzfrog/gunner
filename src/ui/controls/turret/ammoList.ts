@@ -1,4 +1,5 @@
 import type { CargoCharge, ChargeCatalog, FittingImport, ImportedTurret } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { chargeStatSuffix } from "../controlsFormat";
@@ -18,7 +19,7 @@ export interface AmmoListEls {
 
 export interface AmmoListState {
   readonly turret?: ImportedTurret;
-  readonly ammo: string;
+  readonly ammo: TypeId;
   readonly cargo: readonly CargoCharge[];
   readonly allExpanded: boolean;
 }
@@ -29,7 +30,7 @@ export class AmmoList {
   private readonly imageCatalog: ImageCatalog;
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
-  private readonly onSelect: (name: string) => void;
+  private readonly onSelect: (id: TypeId) => void;
   private readonly onExpand: () => void;
 
   constructor(deps: {
@@ -38,7 +39,7 @@ export class AmmoList {
     imageCatalog: ImageCatalog;
     fittingImport: FittingImport;
     i18n: I18n;
-    onSelect: (name: string) => void;
+    onSelect: (id: TypeId) => void;
     onExpand: () => void;
   }) {
     this.els = deps.els;
@@ -67,20 +68,21 @@ export class AmmoList {
   render(state: AmmoListState): void {
     const hasTurret = state.turret !== undefined;
     this.els.ammoTrigger.disabled = !hasTurret;
-    setText(this.els.ammoSummary, hasTurret ? this.fittingImport.itemName(state.ammo, this.i18n.current()) : "—");
+    setText(this.els.ammoSummary, hasTurret ? this.fittingImport.itemNameForId(state.ammo, this.i18n.current()) : "—");
     this.renderIcon(state.ammo, hasTurret);
     this.renderCargoList(state);
     this.renderAllList(state);
     this.renderExpand(state.allExpanded);
   }
 
-  private renderIcon(ammo: string, hasTurret: boolean): void {
+  private renderIcon(ammo: TypeId, hasTurret: boolean): void {
     const icon = this.els.ammoSummaryIcon;
     if (!hasTurret) {
       icon.hidden = true;
       return;
     }
-    const url = this.imageCatalog.itemIconUrl(ammo);
+    const englishName = this.fittingImport.itemNameForId(ammo, "en");
+    const url = this.imageCatalog.itemIconUrl(englishName);
     icon.src = url ?? "";
     icon.hidden = !url;
   }
@@ -103,25 +105,25 @@ export class AmmoList {
     list.hidden = false;
     label.hidden = false;
     for (const entry of entries) {
-      const item = this.createItem(entry.name, entry.name === state.ammo, this.i18n.t("button.selectAmmo"));
+      const item = this.createItem(entry.id, entry.id === state.ammo, this.i18n.t("button.selectAmmo"));
       if (entry.quantity !== undefined) {
         const quantity = document.createElement("span");
         quantity.className = "ammo-item-quantity mono";
         quantity.textContent = `x${entry.quantity}`;
         item.appendChild(quantity);
       }
-      item.addEventListener("click", () => this.onSelect(entry.name));
+      item.addEventListener("click", () => this.onSelect(entry.id));
       list.appendChild(item);
     }
   }
 
-  private cargoEntries(state: AmmoListState): { name: string; quantity?: number }[] {
+  private cargoEntries(state: AmmoListState): { id: TypeId; quantity?: number }[] {
     const loaded = state.ammo;
-    const inCargo = state.cargo.some((c) => c.name === loaded);
-    const entries: { name: string; quantity?: number }[] = [];
-    if (!inCargo) entries.push({ name: loaded });
+    const inCargo = state.cargo.some((c) => c.id === loaded);
+    const entries: { id: TypeId; quantity?: number }[] = [];
+    if (!inCargo) entries.push({ id: loaded });
     for (const charge of state.cargo) {
-      entries.push({ name: charge.name, quantity: charge.quantity });
+      entries.push({ id: charge.id, quantity: charge.quantity });
     }
     return entries;
   }
@@ -143,21 +145,22 @@ export class AmmoList {
     }
     list.hidden = false;
     for (const option of options) {
-      const item = this.createItem(option.name, option.name === state.ammo, chargeStatSuffix(option));
-      item.addEventListener("click", () => this.onSelect(option.name));
+      const item = this.createItem(option.id, option.id === state.ammo, chargeStatSuffix(option));
+      item.addEventListener("click", () => this.onSelect(option.id));
       list.appendChild(item);
     }
     section.hidden = !state.allExpanded;
   }
 
-  private createItem(name: string, selected: boolean, title: string): HTMLButtonElement {
+  private createItem(id: TypeId, selected: boolean, title: string): HTMLButtonElement {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "ammo-item btn";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(selected));
     item.title = title;
-    const iconUrl = this.imageCatalog.itemIconUrl(name);
+    const englishName = this.fittingImport.itemNameForId(id, "en");
+    const iconUrl = this.imageCatalog.itemIconUrl(englishName);
     if (iconUrl) {
       const icon = document.createElement("img");
       icon.className = "ammo-item-icon";
@@ -165,7 +168,7 @@ export class AmmoList {
       icon.alt = "";
       item.appendChild(icon);
     }
-    const displayName = this.fittingImport.itemName(name, this.i18n.current());
+    const displayName = this.fittingImport.itemNameForId(id, this.i18n.current());
     const label = document.createElement("span");
     label.className = "ammo-item-name truncate";
     label.textContent = displayName;

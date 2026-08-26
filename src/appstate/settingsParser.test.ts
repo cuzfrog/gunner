@@ -23,6 +23,7 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
+import type { ShipId, TypeId } from "../gamedata/ids";
 
 const testGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 
@@ -37,24 +38,26 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 through 9 and stamps 10", () => {
+  test("parseUserSettings accepts version 5 through 10 and stamps 11", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(10);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(10);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(10);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(10);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(10);
+    const v10 = { ...DEFAULT_SETTINGS, version: 10 };
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(11);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
     const { shipAAmmo: _, ...missing } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missing));
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipAAmmo).toBe("Hail S");
+    expect(parsed!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("parseUserSettings rejects an invalid language", () => {
@@ -258,7 +261,7 @@ describe("SettingsParser", () => {
     expect(parsed!.shipAMode).toBe("orbit");
     expect(parsed!.shipBSpeed).toBe(800);
     expect(parsed!.shipBSig).toBe(125);
-    expect(parsed!.shipAAmmo).toBe("Hail S");
+    expect(parsed!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
     expect("attackerSpeed" in parsed!).toBe(false);
     expect("targetSpeed" in parsed!).toBe(false);
   });
@@ -304,7 +307,7 @@ describe("SettingsParser", () => {
     expect(profile).not.toBeNull();
     expect(profile).not.toHaveProperty("language");
     expect(profile).not.toHaveProperty("trackingUnit");
-    expect(profile!.shipAAmmo).toBe("Hail S");
+    expect(profile!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("decodeUrlSettings rejects invalid base64", () => {
@@ -348,7 +351,7 @@ describe("SettingsParser", () => {
     expect(decoded!.shipASpeed).toBe(500);
     expect(decoded!.shipBSpeed).toBe(800);
     expect(decoded!.shipBSig).toBe(125);
-    expect(decoded!.shipAAmmo).toBe("Hail S");
+    expect(decoded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("decodeUrlSettings normalizes legacy overrides to shipA and shipB", () => {
@@ -466,23 +469,33 @@ describe("SettingsParser", () => {
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
     ships.fittedStats = vi.fn(() => RIFTER_MWD_STATS);
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
+    const hail: TypeId = "12608" as TypeId;
+    const emp: TypeId = "21898" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-      { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
     ]);
-    chargeCatalog.withCharge = vi.fn((turret, charge) => ({ ...turret, charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff }));
+    chargeCatalog.withCharge = vi.fn((turret, charge) => ({ ...turret, chargeId: charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff }));
 
-    const settings: UserSettings = {
+    const settings: Record<string, unknown> = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       shipAAmmo: "Republic Fleet EMP S",
     };
     const decoded = makeParser().decodeUrlSettings(urlFor(settings).split("c=")[1]);
     expect(decoded).not.toBeNull();
-    expect(decoded!.shipAAmmo).toBe("Republic Fleet EMP S");
+    expect(decoded!.shipAAmmo).toBe("21898" as TypeId);
     expect(decoded!.shipATracking).toBe(0.42);
     expect(decoded!.shipAOptimal).toBe(1200);
     expect(decoded!.shipAFalloff).toBe(3000);
+  });
+
+  test("decodeUrlSettings migrates a legacy shipA hull name to ShipId", () => {
+    ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
+    const settings = { ...DEFAULT_SETTINGS, shipAHullId: "Rifter" as ShipId, shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive" };
+    const decoded = makeParser().decodeUrlSettings(urlFor(settings).split("c=")[1]);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.shipAHullId).toBe(RIFTER_PROFILE.id);
   });
 
   test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when shipASpeed is overridden", () => {

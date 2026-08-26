@@ -1,7 +1,9 @@
-import { TURRETS } from "../gamedata/fittingDb";
+import type { TypeId } from "../gamedata/ids";
+import { FITTING_DB } from "../gamedata/fittingDb";
+import type { FittingDb, FittingModuleStats, TurretStats } from "../gamedata/fittingDb";
 import { GunFamiliesImpl, type GunFamily } from "./gunFamilies";
 
-const gunFamilies = new GunFamiliesImpl();
+const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });
 
 const FAMILIES: readonly GunFamily[] = ["pulseLaser", "beamLaser", "railgun", "blaster", "autocannon", "artillery"];
 
@@ -14,47 +16,65 @@ const REPRESENTATIVE_CANONICALS: { readonly family: GunFamily; readonly S: strin
   { family: "artillery", S: "280mm Howitzer Artillery I", M: "720mm Howitzer Artillery I", L: "1400mm Howitzer Artillery I", XL: "Quad 3500mm Siege Artillery I" },
 ] as const;
 
-const TRICKY_VARIANTS: { readonly name: string; readonly family: GunFamily }[] = [
-  { name: "Dark Blood Mega Pulse Laser", family: "pulseLaser" },
-  { name: "Gatling Modal Laser I", family: "pulseLaser" },
-  { name: "Gatling Modulated Energy Beam I", family: "pulseLaser" },
-  { name: "Quad Afocal Light Laser I", family: "beamLaser" },
-  { name: "Shadow Serpentis Dual 1000mm Railgun", family: "railgun" },
-  { name: "Tuvan's Modified Neutron Blaster Cannon", family: "blaster" },
-  { name: "Domination Quad 800mm Repeating Cannon", family: "autocannon" },
-  { name: "Hakim's Modified 1400mm Howitzer Artillery", family: "artillery" },
-] as const;
+const TRICKY_MODULES: Record<string, FittingModuleStats> = {
+  "dark-blood-mega-pulse": { id: "dark-blood-mega-pulse" as TypeId, name: "Dark Blood Mega Pulse Laser" },
+  "gatling-modal-laser": { id: "gatling-modal-laser" as TypeId, name: "Gatling Modal Laser I" },
+  "gatling-modulated-energy-beam": { id: "gatling-modulated-energy-beam" as TypeId, name: "Gatling Modulated Energy Beam I" },
+  "quad-afocal-light-laser": { id: "quad-afocal-light-laser" as TypeId, name: "Quad Afocal Light Laser I" },
+  "shadow-serpentis-dual-1000mm": { id: "shadow-serpentis-dual-1000mm" as TypeId, name: "Shadow Serpentis Dual 1000mm Railgun" },
+  "tuvan-neutron-blaster-cannon": { id: "tuvan-neutron-blaster-cannon" as TypeId, name: "Tuvan's Modified Neutron Blaster Cannon" },
+  "domination-quad-800mm": { id: "domination-quad-800mm" as TypeId, name: "Domination Quad 800mm Repeating Cannon" },
+  "hakim-1400mm-howitzer": { id: "hakim-1400mm-howitzer" as TypeId, name: "Hakim's Modified 1400mm Howitzer Artillery" },
+};
 
-function assertFamily(name: string, family: GunFamily): void {
-  const result = gunFamilies.familyOf(name);
+const TRICKY_DB: FittingDb = { ...FITTING_DB, modules: { ...FITTING_DB.modules, ...TRICKY_MODULES } };
+const trickyGunFamilies = new GunFamiliesImpl({ fittingDb: TRICKY_DB });
+
+function turretIdForName(name: string): TypeId {
+  for (const stats of Object.values(FITTING_DB.turrets)) {
+    if (stats.name === name) return stats.id;
+  }
+  for (const stats of Object.values(TRICKY_MODULES)) {
+    if (stats.name === name) return stats.id;
+  }
+  throw new Error(`Missing turret ${name}`);
+}
+
+function assertFamily(id: TypeId, family: GunFamily, families = gunFamilies): void {
+  const result = families.familyOf(id);
   if (result !== family) {
-    throw new Error(`Expected ${name} to be ${family}, got ${result}`);
+    throw new Error(`Expected ${id} to be ${family}, got ${result}`);
   }
 }
 
 describe("GunFamiliesImpl", () => {
   describe("familyOf", () => {
-    test("exhaustive: does not throw for every TURRETS key", () => {
-      for (const name of Object.keys(TURRETS)) {
-        const result = gunFamilies.familyOf(name);
+    test("exhaustive: does not throw for every TURRETS entry", () => {
+      for (const stats of Object.values(FITTING_DB.turrets)) {
+        const result = gunFamilies.familyOf(stats.id);
         expect(FAMILIES).toContain(result);
       }
     });
 
     for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
       test(`classifies ${family} representatives`, () => {
-        assertFamily(S, family);
-        assertFamily(M, family);
-        assertFamily(L, family);
-        assertFamily(XL, family);
+        assertFamily(turretIdForName(S), family);
+        assertFamily(turretIdForName(M), family);
+        assertFamily(turretIdForName(L), family);
+        assertFamily(turretIdForName(XL), family);
       });
     }
 
-    for (const { name, family } of TRICKY_VARIANTS) {
-      test(`classifies tricky variant ${name}`, () => {
-        assertFamily(name, family);
-      });
-    }
+    test("classifies tricky variants", () => {
+      assertFamily(turretIdForName("Dark Blood Mega Pulse Laser"), "pulseLaser", trickyGunFamilies);
+      assertFamily(turretIdForName("Gatling Modal Laser I"), "pulseLaser", trickyGunFamilies);
+      assertFamily(turretIdForName("Gatling Modulated Energy Beam I"), "pulseLaser", trickyGunFamilies);
+      assertFamily(turretIdForName("Quad Afocal Light Laser I"), "beamLaser", trickyGunFamilies);
+      assertFamily(turretIdForName("Shadow Serpentis Dual 1000mm Railgun"), "railgun", trickyGunFamilies);
+      assertFamily(turretIdForName("Tuvan's Modified Neutron Blaster Cannon"), "blaster", trickyGunFamilies);
+      assertFamily(turretIdForName("Domination Quad 800mm Repeating Cannon"), "autocannon", trickyGunFamilies);
+      assertFamily(turretIdForName("Hakim's Modified 1400mm Howitzer Artillery"), "artillery", trickyGunFamilies);
+    });
   });
 
   describe("representativeOf", () => {

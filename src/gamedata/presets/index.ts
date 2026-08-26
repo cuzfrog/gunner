@@ -1,2 +1,2 @@
-export type { PresetFitTexts, PresetFitting } from "./catalog";
+export type { PresetFitTexts, PresetFitting, PresetHull } from "./catalog";
 export { StaticPresetFitTexts } from "./catalog";

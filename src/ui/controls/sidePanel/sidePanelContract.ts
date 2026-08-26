@@ -4,6 +4,7 @@ import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { CombatantSettings, FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
+import type { ShipId } from "../../../gamedata/ids";
 import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
 import type { UiEvents } from "../../events";
@@ -25,7 +26,7 @@ export interface SidePanel {
   profile: ShipProfile | undefined;
   fittedHull: FittedHullSummary | undefined;
   fittingText: string | undefined;
-  lastCommittedHull: string | undefined;
+  lastCommittedHull: ShipId | undefined;
   importer: SideImporter;
   getSkillPopup(): Popup;
   getPastePopup(): Popup;
@@ -61,7 +62,7 @@ export interface SidePanelState {
   readonly aggressivity: number;
   readonly skillLevel: SkillLevel | undefined;
   readonly overload: boolean;
-  readonly hull: string | undefined;
+  readonly hull: ShipId | undefined;
   readonly propulsion: PropulsionSelection | undefined;
   readonly fitting: string | undefined;
   readonly overrides: Partial<ProfileParamOverrides>;
@@ -101,7 +102,7 @@ export interface FittingPreviewControl {
 }
 
 export interface SideImporter {
-  autoLoadFittingTextFor(hullName: string): string | undefined;
+  autoLoadFittingTextFor(hullId: ShipId): string | undefined;
   importEftFitting(text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean }): ImportedFitting | undefined;
   importFromText(text: string): Promise<void>;
   importFromClipboard(): Promise<void>;

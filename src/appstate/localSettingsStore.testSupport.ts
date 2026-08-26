@@ -1,6 +1,6 @@
 import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
-import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
+import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
@@ -53,8 +53,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipBSig: 40,
   shipAEwarActivation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }], scramblers: [] },
   shipBEwarActivation: { webs: [{ active: false, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }], scramblers: [] },
-  shipAAmmo: "Hail S",
-  shipBAmmo: "Hail S",
+  shipAAmmo: "12608" as TypeId,
+  shipBAmmo: "12608" as TypeId,
   simSpeed: 4,
   language: "en",
 };
@@ -154,9 +154,9 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     optimal: 600,
     falloff: 3000,
     chargeSize: 1,
-    charge: "Hail S",
+    chargeId: "12608" as TypeId,
     base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
-    moduleName: "200mm AutoCannon I",
+    moduleId: "486" as TypeId,
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
@@ -176,6 +176,11 @@ const simGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 export let ships: Ships;
 export let fittingImport: FittingImport;
 export let chargeCatalog: ChargeCatalog;
+const NAME_FOR_ID: Record<string, string> = {
+  "12608": "Hail S",
+  "21898": "Republic Fleet EMP S",
+};
+
 export function makeFittingImport() {
   return vi.mocked<FittingImport>({
     importFitting: vi.fn(() => undefined),
@@ -183,17 +188,20 @@ export function makeFittingImport() {
     propulsionStats: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),
     itemName: vi.fn((name) => name),
-    canonicalName: vi.fn((name) => name),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
+  const hail: TypeId = "12608" as TypeId;
+  const republic: TypeId = "21898" as TypeId;
   const catalog = vi.mocked<ChargeCatalog>({
-    usualForChargeSize: vi.fn(() => "Hail S"),
-    usualForTurret: vi.fn(() => "Hail S"),
+    usualForChargeSize: vi.fn(() => hail),
+    usualForTurret: vi.fn(() => hail),
     chargesForSize: vi.fn(() => []),
     chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret) => turret),
+    withCharge: vi.fn((turret, charge) => ({ ...turret, chargeId: charge })),
+    idForName: vi.fn((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
   });
   catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
   return catalog;
@@ -203,6 +211,8 @@ export function makeShips() {
     hulls: vi.fn(),
     hullView: vi.fn(),
     findHull: vi.fn(),
+    findHullById: vi.fn(),
+    findHullByName: vi.fn(),
     parsePropulsionId: vi.fn((value: unknown) => {
       if (typeof value !== "string") return undefined;
       return VALID_PROPULSION_IDS.includes(value) ? (value as PropulsionId) : undefined;

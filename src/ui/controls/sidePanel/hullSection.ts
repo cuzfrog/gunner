@@ -1,4 +1,5 @@
 import type { ImportedFitting } from "../../../fitting";
+import type { ShipId } from "../../../gamedata/ids";
 import type { ShipProfile, PropulsionModule, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { FittedHullSummary, PropulsionSelection } from "../../../appstate";
@@ -58,20 +59,20 @@ export class HullSection implements IHullSection {
 
   applyProfile(profile: ShipProfile, persist: boolean, autoSelect = false): void {
     const currentProfile = this.panel.profile;
-    const isSameAsCurrent = currentProfile?.name === profile.name;
-    const isGenuineChange = this.panel.lastCommittedHull !== profile.name;
+    const isSameAsCurrent = currentProfile?.id === profile.id;
+    const isGenuineChange = this.panel.lastCommittedHull !== profile.id;
     const propulsionId = isSameAsCurrent ? this.panel.sections.propulsion.currentPropulsionSelection() : undefined;
     if (!isSameAsCurrent) this.clearFittedHull();
     this.applyHull(profile, propulsionId, false, !isSameAsCurrent);
 
     let imported: ImportedFitting | undefined;
     if (isGenuineChange && autoSelect) {
-      const text = this.panel.importer.autoLoadFittingTextFor(profile.name);
+      const text = this.panel.importer.autoLoadFittingTextFor(profile.id);
       if (text) imported = this.panel.importer.importEftFitting(text, { persist: false, showImportedHint: false });
     }
 
     if (persist) {
-      if (autoSelect) this.panel.lastCommittedHull = imported?.profile.name ?? profile.name;
+      if (autoSelect) this.panel.lastCommittedHull = imported?.profile.id ?? profile.id;
       this.panel.host.persistConfigChange();
     }
   }
@@ -93,18 +94,18 @@ export class HullSection implements IHullSection {
     if (persist) this.panel.host.persistConfigChange();
   }
 
-  loadHull(hullName?: string, propulsionId?: PropulsionSelection): void {
+  loadHull(hullName?: ShipId, propulsionId?: PropulsionSelection): void {
     if (!hullName) {
       this.clearHull(true, false);
       return;
     }
-    const profile = this.ships.findHull(hullName);
+    const profile = this.ships.findHullById(hullName) ?? this.ships.findHull(hullName);
     if (!profile) {
       this.clearHull(true, false);
       return;
     }
     this.applyHull(profile, propulsionId, false, false);
-    this.panel.lastCommittedHull = profile.name;
+    this.panel.lastCommittedHull = profile.id;
   }
 
   clearHull(resetInput: boolean, persist: boolean): void {

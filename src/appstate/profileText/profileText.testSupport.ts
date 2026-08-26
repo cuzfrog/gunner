@@ -1,3 +1,4 @@
+import type { ShipId, TypeId } from "../../gamedata/ids";
 import type { FittedHullSummary, ProfileSettings } from "../userSettings";
 
 export const RIFTER_FITTING = `[Rifter, Brawler]
@@ -25,7 +26,7 @@ export const SHIP_B_FITTED_HULL: FittedHullSummary = {
 };
 
 export const FULL_PROFILE: ProfileSettings = {
-  version: 10,
+  version: 11,
   shipATracking: 0.315,
   shipASigRes: "S",
   shipAOptimal: 600,
@@ -52,9 +53,9 @@ export const FULL_PROFILE: ProfileSettings = {
   shipBSig: 40,
   shipBSkillLevel: 5,
   shipBOverload: true,
-  shipAHull: "Rifter",
+  shipAHullId: "587" as ShipId,
   shipAPropulsion: "mwd-5mn",
-  shipBHull: "Thrasher",
+  shipBHullId: "16242" as ShipId,
   shipBPropulsion: "mwd-5mn",
   shipAFitting: RIFTER_FITTING,
   shipAOverrides: { shipAMass: 2_000_000, tracking: 0.12 },
@@ -62,8 +63,8 @@ export const FULL_PROFILE: ProfileSettings = {
   shipBOverrides: { shipBMass: 11_000_000 },
   shipAFittedHull: SHIP_A_FITTED_HULL,
   shipBFittedHull: SHIP_B_FITTED_HULL,
-  shipAAmmo: "Hail S",
-  shipBAmmo: "Republic Fleet EMP S",
+  shipAAmmo: "12608" as TypeId,
+  shipBAmmo: "21898" as TypeId,
   shipAEwarActivation: {
     webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
     grapplers: [],
@@ -78,7 +79,7 @@ export const FULL_PROFILE: ProfileSettings = {
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {
-  version: 10,
+  version: 11,
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,

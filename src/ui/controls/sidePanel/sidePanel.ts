@@ -1,4 +1,5 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
 import {
@@ -63,7 +64,7 @@ export class SidePanelImpl implements SidePanel {
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
   private fittingTextValue?: string;
-  private lastCommittedHullValue?: string;
+  private lastCommittedHullValue?: ShipId;
   private importerValue?: SideImporter;
   readonly sections: ISidePanelSections;
   private fittingPopup?: FittingPopupControl;
@@ -110,8 +111,8 @@ export class SidePanelImpl implements SidePanel {
   set fittedHull(value: FittedHullSummary | undefined) { this.fittedHullValue = value; }
   get fittingText(): string | undefined { return this.fittingTextValue; }
   set fittingText(value: string | undefined) { this.fittingTextValue = value; }
-  get lastCommittedHull(): string | undefined { return this.lastCommittedHullValue; }
-  set lastCommittedHull(value: string | undefined) { this.lastCommittedHullValue = value; }
+  get lastCommittedHull(): ShipId | undefined { return this.lastCommittedHullValue; }
+  set lastCommittedHull(value: ShipId | undefined) { this.lastCommittedHullValue = value; }
   get importer(): SideImporter {
     if (!this.importerValue) throw new Error("SidePanel importer not set");
     return this.importerValue;
@@ -174,7 +175,7 @@ export class SidePanelImpl implements SidePanel {
       ...nav,
       skillLevel: this.sections.skill.currentSkillLevel(),
       overload: this.els.overload.checked,
-      hull: this.profile?.name,
+      hull: this.profile?.id,
       propulsion: this.sections.propulsion.currentPropulsionSelection(),
       fitting: this.fittingText,
       overrides: this.overrides.get(),

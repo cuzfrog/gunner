@@ -1,15 +1,24 @@
+import type { FittingDb, TurretStats } from "../gamedata/fittingDb";
+import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 
 export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery";
 
 export interface GunFamilies {
-  familyOf(moduleName: string): GunFamily;
+  familyOf(moduleId: TypeId): GunFamily;
   representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string;
 }
 
 export class GunFamiliesImpl implements GunFamilies {
-  familyOf(moduleName: string): GunFamily {
-    return gunFamilyOf(moduleName);
+  private readonly turretLookup: (id: TypeId) => TurretStats | undefined;
+
+  constructor({ fittingDb }: { fittingDb: FittingDb }) {
+    this.turretLookup = (id) => fittingDb.turrets[id] ?? fittingDb.modules[id];
+  }
+
+  familyOf(moduleId: TypeId): GunFamily {
+    const name = this.turretLookup(moduleId)?.name ?? "";
+    return gunFamilyOf(name);
   }
 
   representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string {

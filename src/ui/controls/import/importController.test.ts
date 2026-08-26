@@ -23,7 +23,7 @@ describe("ImportController", () => {
     expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
-    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
   test("importFromClipboard applies a valid EFT fitting to shipB", async () => {
@@ -35,7 +35,7 @@ describe("ImportController", () => {
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(shipBPanel.fittingText).toBe(text);
     expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
-    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
   test("importFromClipboard opens the paste popup when the clipboard is unavailable", async () => {
@@ -69,7 +69,7 @@ describe("ImportController", () => {
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(shipAPanel.fittingText).toBe(text);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
-    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
   test("importEftFitting can suppress the imported hint for auto-load", () => {
@@ -107,7 +107,7 @@ describe("ImportController", () => {
     await controller.importFromText("shipA", text);
     expect(shipAPanel.fittingText).toContain("[Rifter, Brawler]");
     expect(shipBPanel.fittingText).toBeUndefined();
-    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
   test("importFromText with a gunner profile missing the requested fitting shows invalid", async () => {
@@ -125,7 +125,7 @@ describe("ImportController", () => {
     const text = gunnerProfileText();
     clipboard.readText.mockResolvedValue(text);
     await controller.importProfileClicked();
-    expect(onProfileTextLoaded).toHaveBeenCalledWith(expect.objectContaining({ shipAHull: "Rifter", shipBHull: "Thrasher" }));
+    expect(onProfileTextLoaded).toHaveBeenCalledWith(expect.objectContaining({ shipAHullId: "587", shipBHullId: "16242" }));
   });
 
   test("importProfileClicked shows invalid status for non-gunner non-fitting text", async () => {
@@ -154,6 +154,6 @@ describe("ImportController", () => {
     await controller.onImportSideClick("shipA");
     expect(getFake(document, "import-side-popup").hidden).toBe(true);
     expect(shipAPanel.fittingText).toBe(text);
-    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hull: "Rifter", name: "Brawler" }));
+    expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 });

@@ -1,3 +1,4 @@
+import type { ShipId, TypeId } from "../gamedata/ids";
 import {
   chargeCatalog,
   ships,
@@ -204,9 +205,9 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips hull and propulsion selections", () => {
     const withHull: UserSettings = {
       ...DEFAULT_SETTINGS,
-      shipAHull: "Rifter",
+      shipAHullId: "587" as ShipId,
       shipAPropulsion: "mwd-5mn",
-      shipBHull: "Caldari Shuttle",
+      shipBHullId: "672" as ShipId,
     };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withHull)) });
     expect(store.loadStartupState().settings).toEqual(withHull);
@@ -221,7 +222,7 @@ describe("LocalSettingsStore", () => {
   });
 
   test("loadStartupState round-trips a deselected propulsion", () => {
-    const withNone: UserSettings = { ...DEFAULT_SETTINGS, shipAHull: "Rifter", shipAPropulsion: "none" };
+    const withNone: UserSettings = { ...DEFAULT_SETTINGS, shipAHullId: "587" as ShipId, shipAPropulsion: "none" };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withNone)) });
     expect(store.loadStartupState().settings).toEqual(withNone);
   });
@@ -249,10 +250,10 @@ describe("LocalSettingsStore", () => {
     expect(loaded!.shipAFittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
   });
 
-  test("loadStartupState rejects an empty hull name", () => {
+  test("loadStartupState rejects an empty hull id", () => {
     const store = makeStore({ parser: makeParser(),
       storage: fakeStorage(),
-      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAHull: "" })),
+      location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, shipAHullId: "" })),
     });
     expect(store.loadStartupState().settings).toBeNull();
   });
@@ -599,7 +600,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(10);
+    expect(loaded!.version).toBe(11);
     expect(loaded!.shipAFittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.shipAMass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
@@ -609,7 +610,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(10);
+    expect(loaded!.version).toBe(11);
     expect(loaded!.shipAFittedHull).toBeUndefined();
   });
 
@@ -731,7 +732,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("loadProfile normalizes a profile missing shipAAmmo", () => {
@@ -740,7 +741,7 @@ describe("LocalSettingsStore", () => {
     store.saveProfile("brawler", missingAmmo as ProfileSettings);
     const loaded = store.loadProfile("brawler");
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("basis re-import applies a stored charge that matches the turret size", () => {
@@ -748,15 +749,17 @@ describe("LocalSettingsStore", () => {
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
     ships.fittedStats = vi.fn(() => RIFTER_MWD_STATS);
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
+    const hail: TypeId = "12608" as TypeId;
+    const emp: TypeId = "21898" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-      { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
     ]);
     chargeCatalog.withCharge = vi.fn((turret, charge) => ({
-      ...turret, charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff,
+      ...turret, chargeId: charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff,
     }));
 
-    const settings: UserSettings = {
+    const settings: Record<string, unknown> = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       shipAAmmo: "Republic Fleet EMP S",
@@ -766,7 +769,7 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe("Republic Fleet EMP S");
+    expect(loaded!.shipAAmmo).toBe("21898" as TypeId);
     expect(loaded!.shipATracking).toBe(0.42);
     expect(loaded!.shipAOptimal).toBe(1200);
     expect(loaded!.shipAFalloff).toBe(3000);
@@ -782,12 +785,13 @@ describe("LocalSettingsStore", () => {
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
     ships.fittedStats = vi.fn(() => RIFTER_MWD_STATS);
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
+    const hail2: TypeId = "12608" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+      { id: hail2, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
     ]);
     chargeCatalog.withCharge = vi.fn((turret) => turret);
 
-    const settings: UserSettings = {
+    const settings: Record<string, unknown> = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
       shipAAmmo: "Mjolnir Rocket",
@@ -797,7 +801,7 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe("Hail S");
+    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
     expect(loaded!.shipAOptimal).toBe(600);
     expect(loaded!.shipATracking).toBe(0.315);
     expect(loaded!.shipASigRes).toBe("S");

@@ -1,6 +1,6 @@
 import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings } from "../../fitting";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
-import type { FactionId, HullTypeId, ShipId } from "../../gamedata/ids";
+import type { FactionId, HullTypeId, ShipId, TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
@@ -26,6 +26,8 @@ export function mockShips(): Ships {
     hulls: vi.fn(() => []),
     hullView: vi.fn((profile: ShipProfile, _language: Language): HullView => ({ name: profile.name, hullType: "Frigate", faction: "Unknown" })),
     findHull: vi.fn(() => undefined),
+    findHullById: vi.fn(() => undefined),
+    findHullByName: vi.fn(() => undefined),
     parsePropulsionId: vi.fn(() => undefined),
     fittingOptions: vi.fn(() => []),
     allFittingOptions: vi.fn(() => []),
@@ -37,6 +39,11 @@ export function mockShips(): Ships {
   };
 }
 
+const NAME_FOR_ID: Record<string, string> = {
+  "12608": "Hail S",
+  "21898": "Republic Fleet EMP S",
+};
+
 export function mockFittingImport(): FittingImport {
   return {
     importFitting: vi.fn(() => undefined),
@@ -44,18 +51,21 @@ export function mockFittingImport(): FittingImport {
     propulsionStats: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn((id: TypeId, _language: string) => NAME_FOR_ID[id] ?? id),
     itemName: vi.fn((name: string) => name),
-    canonicalName: vi.fn((name: string) => name),
   };
 }
 
+const HAIL: TypeId = "12608" as TypeId;
+
 export function mockChargeCatalog(): ChargeCatalog {
   return {
-    usualForChargeSize: vi.fn(() => "Hail S"),
-    usualForTurret: vi.fn(() => "Hail S"),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret) => turret),
+    usualForChargeSize: vi.fn(() => HAIL),
+    usualForTurret: vi.fn(() => HAIL),
+    chargesForSize: vi.fn(() => CHARGE_OPTIONS),
+    chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
+    withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId })),
+    idForName: vi.fn((name: string) => CHARGE_OPTIONS.find((c) => c.name === name)?.id),
   };
 }
 
@@ -90,7 +100,7 @@ const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, string>
 
 export function mockGunFamilies(): GunFamilies {
   return {
-    familyOf: vi.fn((moduleName: string) => (moduleName.includes("Howitzer") || moduleName.includes("Artillery") ? "artillery" : "autocannon")),
+    familyOf: vi.fn((moduleId: TypeId) => (String(moduleId).includes("Howitzer") || String(moduleId).includes("Artillery") ? "artillery" : "autocannon")),
     representativeOf: vi.fn((family: GunFamily, sigRes: SigResolutionClass) => MOCK_REPRESENTATIVES[family][sigRes]),
   };
 }
@@ -116,9 +126,9 @@ export const TURRET: ImportedTurret = {
   optimal: 600,
   falloff: 3000,
   chargeSize: 1,
-  charge: "Hail S",
+  chargeId: "12608" as TypeId,
   base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
-  moduleName: "200mm AutoCannon I",
+  moduleId: "486" as TypeId,
 };
 
 export const IMPORTED_RIFTER: ImportedFitting = {
@@ -131,9 +141,9 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
   boosts: { computers: [], scripts: [] },
 };
-export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
+export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };
 
 export const CHARGE_OPTIONS = [
-  { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-  { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+  { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+  { id: "21898" as TypeId, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
 ] as const;

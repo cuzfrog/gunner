@@ -26,8 +26,8 @@ const DEFAULT_SETTINGS = {
   shipBSkillLevel: 5,
   shipBOverload: true,
   shipBSig: 40,
-  shipAAmmo: "Hail S",
-  shipBAmmo: "Hail S",
+  shipAAmmo: "12608",
+  shipBAmmo: "12608",
   simSpeed: 4,
   language: "en" as const,
 };
@@ -263,7 +263,6 @@ describe("main", () => {
 
     const langZh = globalThis.document.getElementById("lang-zh") as unknown as FakeElement;
     langZh.trigger("click");
-    await container.cradle.itemNameCatalog.ensureLanguage("zh");
 
     expect(ctx.fillText.mock.calls.some((call) => String(call[0]).includes("距离"))).toBe(true);
   });

@@ -80,7 +80,7 @@ export class FittingBasis {
 
     const result: Partial<UserSettings> = {};
     if (side === "shipA") {
-      result.shipAHull = imported.profile.name;
+      result.shipAHullId = imported.profile.id;
       result.shipAPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
       result.shipAFittedHull = fittedHull;
       result.shipAMass = mass;
@@ -88,7 +88,7 @@ export class FittingBasis {
       result.shipASpeed = speed;
       result.shipASig = override.shipASig ?? stats.sigRadius;
     } else {
-      result.shipBHull = imported.profile.name;
+      result.shipBHullId = imported.profile.id;
       result.shipBPropulsion = explicitNone ? PROPULSION_NONE : activePropulsionId;
       result.shipBFittedHull = fittedHull;
       result.shipBMass = mass;
@@ -99,20 +99,20 @@ export class FittingBasis {
     if (imported.turret) {
       const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
       const storedAmmo = side === "shipA" ? settings.shipAAmmo : settings.shipBAmmo;
-      const valid = options.some((c) => c.name === storedAmmo);
-      const turret = valid ? this.chargeCatalog.withCharge(imported.turret, storedAmmo) : imported.turret;
+      const option = options.find((c) => c.name === storedAmmo || c.id === storedAmmo);
+      const turret = option ? this.chargeCatalog.withCharge(imported.turret, option.id) : imported.turret;
       if (side === "shipA") {
         result.shipATracking = override.tracking ?? turret.tracking;
         result.shipASigRes = override.sigRes ?? turret.sigResolutionClass;
         result.shipAOptimal = override.optimal ?? turret.optimal;
         result.shipAFalloff = override.falloff ?? turret.falloff;
-        result.shipAAmmo = turret.charge;
+        result.shipAAmmo = turret.chargeId;
       } else {
         result.shipBTracking = override.tracking ?? turret.tracking;
         result.shipBSigRes = override.sigRes ?? turret.sigResolutionClass;
         result.shipBOptimal = override.optimal ?? turret.optimal;
         result.shipBFalloff = override.falloff ?? turret.falloff;
-        result.shipBAmmo = turret.charge;
+        result.shipBAmmo = turret.chargeId;
       }
     }
     return result;

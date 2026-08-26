@@ -97,8 +97,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {

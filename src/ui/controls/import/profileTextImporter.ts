@@ -1,4 +1,5 @@
 import { type ProfileTextCodec, type ProfileSettings } from "../../../appstate";
+import type { TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import type { Side } from "../side";
 import type { ShipATurret } from "./shipATurret";
@@ -38,7 +39,7 @@ export class ProfileTextImporter {
     return side === "shipA" ? parsed.shipAFitting : parsed.shipBFitting;
   }
 
-  private resolveProfileAmmo(parsed: ProfileSettings, side: Side): string {
+  private resolveProfileAmmo(parsed: ProfileSettings, side: Side): TypeId {
     const ammoKey = side === "shipA" ? "shipAAmmo" : "shipBAmmo";
     const existing = parsed[ammoKey];
     if (existing) return existing;
@@ -51,8 +52,8 @@ export class ProfileTextImporter {
         skillLevel: parsed[skillLevelKey] ?? 5,
         overloaded: parsed[overloadKey] ?? true,
       });
-      if (imported?.turret) return imported.turret.charge;
+      if (imported?.turret) return imported.turret.chargeId;
     }
-    return this.turrets[side].ammo();
+    return this.turrets[side].ammoId();
   }
 }

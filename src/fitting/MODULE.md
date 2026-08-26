@@ -6,7 +6,7 @@ no-new-exports:
   - eft.test.ts
   - eft.ts
   - fittingImport.test.ts
-  - fittingImport.ts
+  # - fittingImport.ts
   - gunFamilies.test.ts
   - gunFamilies.ts
   - index.ts

@@ -1,5 +1,6 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
+import type { TypeId } from "../../gamedata/ids";
 import type { ItemNameCatalog } from "../../gamedata/itemNames";
 import type { Ships } from "../../ships";
 import type { EwarResolver, HitChance } from "../../sim";
@@ -142,9 +143,7 @@ interface BuildDomControlsOptions {
 
 function mockItemNames(): ItemNameCatalog {
   return {
-    name: (name) => name,
-    canonicalName: (name) => name,
-    ensureLanguage: () => Promise.resolve(),
+    nameForId: (id) => id,
   };
 }
 
@@ -247,6 +246,7 @@ class StubTurretController implements TurretController {
   popup: Popup = new StubPopup();
   turret = vi.fn(() => undefined);
   ammo = vi.fn(() => "Hail S");
+  ammoId = vi.fn(() => "12608" as TypeId);
   applyImported = vi.fn();
   restore(settings: { fitting?: string; conditions?: StatConditions; ammo?: string; tracking?: number; sigRes?: SigResolutionClass; optimal?: number; falloff?: number }): void;
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
@@ -254,7 +254,7 @@ class StubTurretController implements TurretController {
   clear = vi.fn();
   currentTurretSpec = vi.fn(() => ({ tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000 }));
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
-  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "Hail S" }));
+  capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();

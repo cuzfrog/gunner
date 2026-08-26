@@ -1,4 +1,5 @@
 import type { FittedHull } from "../ships";
+import type { TypeId } from "../gamedata/ids";
 import type { FittedHullSummary, ProfileSettings, StoredEwarActivation } from "./userSettings";
 import { CanonicalProfileEquality } from "./profileEquality";
 
@@ -22,7 +23,7 @@ const baseEwarActivation: StoredEwarActivation = {
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
-    version: 10,
+    version: 11,
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 5000,
@@ -43,7 +44,7 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
     shipBMass: 1_000_000,
     shipBInertia: 2,
     shipBSig: 40,
-    shipAAmmo: "Hail S",
+    shipAAmmo: "12608" as TypeId,
     ...overrides,
   };
 }

@@ -15,6 +15,11 @@ interface PresetFitting {
   readonly body: string;
 }
 
+interface HullPresets {
+  readonly name: string;
+  readonly fittings: PresetFitting[];
+}
+
 function splitFittingText(text: string): { name: string; body: string } | undefined {
   const lines = text.split("\n");
   const headerIndex = lines.findIndex((line) => HEADER_LINE.test(line.trim()));
@@ -30,16 +35,17 @@ function splitFittingText(text: string): { name: string; body: string } | undefi
 }
 
 async function main() {
-  const knownHulls = new Set(SHIP_PROFILES.map((profile) => profile.name));
+  const knownHulls = new Map<string, (typeof SHIP_PROFILES)[number]>(SHIP_PROFILES.map((profile) => [profile.name, profile]));
   const hullDirs = (await readdir(FITTINGS_DIR, { withFileTypes: true })).filter((entry) => entry.isDirectory());
 
-  const presetFittings: Record<string, PresetFitting[]> = {};
+  const presetFittings: Record<string, HullPresets> = {};
   let fitCount = 0;
   const skipped: string[] = [];
 
   for (const hullDir of hullDirs) {
     const hullName = hullDir.name.replace(/_/g, " ");
-    if (!knownHulls.has(hullName)) {
+    const profile = knownHulls.get(hullName);
+    if (!profile) {
       skipped.push(`${hullDir.name}: hull not in SHIP_PROFILES`);
       continue;
     }
@@ -56,16 +62,12 @@ async function main() {
       fittings.push(split);
       fitCount++;
     }
-    if (fittings.length > 0) presetFittings[hullName] = fittings;
+    if (fittings.length > 0) presetFittings[profile.id] = { name: profile.name, fittings };
   }
 
   const header = `// Generated from data/ship-fittings by scripts/generate-fitting-presets.ts. Do not edit by hand.\n/* eslint-disable */\n\n`;
-  const typeDefinitions = `export interface PresetFitting {
-  readonly name: string;
-  readonly body: string;
-}
-\n`;
-  const content = `${header}${typeDefinitions}export const PRESET_FITTINGS: Readonly<Record<string, readonly PresetFitting[]>> = ${JSON.stringify(presetFittings, null, 1)};\n`;
+  const typeDefinitions = `export interface PresetFitting {\n  readonly name: string;\n  readonly body: string;\n}\n\ninterface HullPresets {\n  readonly name: string;\n  readonly fittings: readonly PresetFitting[];\n}\n\n`;
+  const content = `${header}${typeDefinitions}export const PRESET_FITTINGS: Readonly<Record<string, HullPresets>> = ${JSON.stringify(presetFittings, null, 1)};\n`;
 
   await mkdir(dirname(OUT_FILE), { recursive: true });
   await writeFile(OUT_FILE, content);

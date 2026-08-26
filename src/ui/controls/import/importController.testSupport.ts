@@ -1,4 +1,5 @@
 import type { FittingImport } from "../../../fitting";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
 import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
@@ -67,7 +68,7 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       const trimmed = text.trimStart();
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
-        version: 10,
+        version: 11,
         shipATracking: 0.32,
         shipASigRes: "S",
         shipAOptimal: 5000,
@@ -88,9 +89,9 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
         shipBMass: 10_000_000,
         shipBInertia: 0.45,
         shipBSig: 40,
-        shipAAmmo: "Hail S",
-        shipAHull: "Rifter",
-        shipBHull: "Thrasher",
+        shipAAmmo: "12608" as TypeId,
+        shipAHullId: "587" as ShipId,
+        shipBHullId: "16242" as ShipId,
         shipAFitting: extractFitting(trimmed, "shipA"),
         shipBFitting: extractFitting(trimmed, "shipB"),
       };
@@ -103,7 +104,7 @@ export class FakeSidePanel {
   clearOverrides = vi.fn();
   fittingText?: string;
   overrides: Record<string, unknown> = {};
-  lastCommittedHull?: string;
+  lastCommittedHull?: ShipId;
   skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true }));
   pastePopup = fakePopup();
   getPastePopup = () => this.pastePopup;
@@ -138,8 +139,8 @@ export function buildImportController(document: Document) {
     propulsionStats: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
     itemName: vi.fn((name: string) => name),
-    canonicalName: vi.fn((name: string) => name),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),
@@ -147,8 +148,8 @@ export function buildImportController(document: Document) {
     record: vi.fn(),
     remove: vi.fn(),
   });
-  const shipATurret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
-  const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
+  const shipATurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
+  const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
   const turrets = { shipA: shipATurret, shipB: shipBTurret };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();

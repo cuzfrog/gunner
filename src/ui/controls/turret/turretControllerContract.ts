@@ -1,4 +1,5 @@
 import type { ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { TypeId } from "../../../gamedata/ids";
 import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { SigResolutionClass, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
@@ -34,6 +35,7 @@ export interface TurretController {
   readonly popup: Popup;
   turret(): ImportedTurret | undefined;
   ammo(): string;
+  ammoId(): TypeId;
   applyImported(imported: ImportedFitting): void;
   restore(
     fitting?: string,
@@ -56,7 +58,7 @@ export interface TurretController {
   clear(): void;
   currentTurretSpec(trackingOverride?: number): TurretSpec;
   currentSigResClass(): SigResolutionClass;
-  capture(): { tracking: number; sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: string };
+  capture(): { tracking: number; sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: TypeId };
   isAmmoPopupOpen(): boolean;
   openAmmoPopup(): void;
   closeAmmoPopup(): void;

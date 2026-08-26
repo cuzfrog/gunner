@@ -1,4 +1,5 @@
 import { type ClipboardProvider, type ProfileTextCodec, USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
 import { FakeElement, fakeDocument, getFake } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profile";
@@ -36,9 +37,9 @@ function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
     shipBSkillLevel: 5,
     shipBOverload: true,
     shipBSig: 40,
-    shipAHull: "Rifter",
+    shipAHullId: "587" as ShipId,
     shipAPropulsion: undefined,
-    shipBHull: "Thrasher",
+    shipBHullId: "16242" as ShipId,
     shipBPropulsion: undefined,
     shipAFitting: undefined,
     shipAOverrides: {},
@@ -46,8 +47,8 @@ function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
     shipBOverrides: {},
     shipAFittedHull: undefined,
     shipBFittedHull: undefined,
-    shipAAmmo: "Hail S",
-    shipBAmmo: "Hail S",
+    shipAAmmo: "12608" as TypeId,
+    shipBAmmo: "12608" as TypeId,
     simSpeed: 4,
     language: "en",
     ...overrides,

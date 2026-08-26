@@ -189,6 +189,6 @@ export class ImportControllerImpl implements ImportController {
   }
 
   private recordSavedFitting(imported: ImportedFitting, text: string): void {
-    this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
+    this.savedFittings.record({ hullId: imported.profile.id, name: imported.fittingName, text });
   }
 }

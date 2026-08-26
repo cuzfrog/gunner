@@ -1,5 +1,6 @@
 import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
+import type { ShipId } from "../../../gamedata/ids";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import { HullSection, type HullSectionEls } from "./hullSection";
 import type { Popup } from "../popup";
@@ -138,7 +139,7 @@ describe("HullSection", () => {
     getFake(document, "ship-a-hull").value = "Rifter";
     section.onHullChange();
     expect(panel.profile).toBe(RIFTER);
-    expect(panel.lastCommittedHull).toBe("Rifter");
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
     expect(host.persistConfigChange).toHaveBeenCalled();
   });
 
@@ -169,11 +170,11 @@ describe("HullSection", () => {
   test("applyProfile auto-loads the most recent fitting text and falls back to the first preset", () => {
     const { panel, section, host } = buildHullSection();
     const importer = panel.importer;
-    importer.autoLoadFittingTextFor = vi.fn((hull: string) => (hull === "Rifter" ? "[Rifter, Recent]" : undefined));
+    importer.autoLoadFittingTextFor = vi.fn((hullId: ShipId) => (hullId === RIFTER.id ? "[Rifter, Recent]" : undefined));
     section.applyProfile(RIFTER, true, true);
-    expect(importer.autoLoadFittingTextFor).toHaveBeenCalledWith("Rifter");
+    expect(importer.autoLoadFittingTextFor).toHaveBeenCalledWith(RIFTER.id);
     expect(importer.importEftFitting).toHaveBeenCalledWith("[Rifter, Recent]", { persist: false, showImportedHint: false });
-    expect(panel.lastCommittedHull).toBe("Rifter");
+    expect(panel.lastCommittedHull).toBe(RIFTER.id);
     expect(host.persistConfigChange).toHaveBeenCalled();
   });
 

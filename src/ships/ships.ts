@@ -6,6 +6,7 @@ import {
 } from "./effectiveStats";
 import { fittingOptions as computeFittingOptions } from "./fitting";
 import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
+import type { ShipId } from "../gamedata/ids";
 import type { NameI18nCatalog } from "../gamedata/nameI18n";
 import type { ShipProfileCatalog } from "../gamedata/shipProfiles";
 import { hullTierOf } from "./tiers";
@@ -31,6 +32,8 @@ export interface Ships {
   hulls(language: ShipNameLanguage): readonly HullView[];
   hullView(profile: ShipProfile, language: ShipNameLanguage): HullView;
   findHull(name: string): ShipProfile | undefined;
+  findHullById(id: ShipId): ShipProfile | undefined;
+  findHullByName(name: string, language: ShipNameLanguage): ShipProfile | undefined;
   parsePropulsionId(value: unknown): PropulsionId | undefined;
   fittingOptions(profile: ShipProfile): readonly PropulsionModule[];
   allFittingOptions(): readonly PropulsionModule[];
@@ -46,12 +49,14 @@ export interface Ships {
 export class ShipsImpl implements Ships {
   private readonly shipProfileCatalog: ShipProfileCatalog;
   private readonly nameI18nCatalog: NameI18nCatalog;
-  private readonly hullLookup: ReadonlyMap<string, ShipProfile>;
+  private readonly hullById: ReadonlyMap<ShipId, ShipProfile>;
+  private readonly hullByName: Record<ShipNameLanguage, ReadonlyMap<string, ShipProfile>>;
 
   constructor({ shipProfileCatalog, nameI18nCatalog }: { shipProfileCatalog: ShipProfileCatalog; nameI18nCatalog: NameI18nCatalog }) {
     this.shipProfileCatalog = shipProfileCatalog;
     this.nameI18nCatalog = nameI18nCatalog;
-    this.hullLookup = buildHullLookup(shipProfileCatalog, nameI18nCatalog);
+    this.hullById = buildHullById(shipProfileCatalog);
+    this.hullByName = buildHullByName(shipProfileCatalog, nameI18nCatalog);
   }
 
   hulls(language: ShipNameLanguage): readonly HullView[] {
@@ -67,7 +72,20 @@ export class ShipsImpl implements Ships {
   }
 
   findHull(name: string): ShipProfile | undefined {
-    return this.hullLookup.get(normalize(name));
+    const normalized = normalize(name);
+    for (const language of HULL_LANGUAGE_ORDER) {
+      const profile = this.hullByName[language].get(normalized);
+      if (profile) return profile;
+    }
+    return undefined;
+  }
+
+  findHullById(id: ShipId): ShipProfile | undefined {
+    return this.hullById.get(id);
+  }
+
+  findHullByName(name: string, language: ShipNameLanguage): ShipProfile | undefined {
+    return this.hullByName[language].get(normalize(name));
   }
 
   parsePropulsionId(value: unknown): PropulsionId | undefined {
@@ -107,24 +125,31 @@ export class ShipsImpl implements Ships {
 }
 
 const HULL_TIER_ORDER: readonly HullTier[] = ["small", "medium", "large", "capital"] as const;
+const HULL_LANGUAGE_ORDER: readonly ShipNameLanguage[] = ["en", "zh", "ja"] as const;
 
-function buildHullLookup(catalog: ShipProfileCatalog, i18n: NameI18nCatalog): ReadonlyMap<string, ShipProfile> {
-  const map = new Map<string, ShipProfile>();
+function buildHullById(catalog: ShipProfileCatalog): ReadonlyMap<ShipId, ShipProfile> {
+  const map = new Map<ShipId, ShipProfile>();
   for (const profile of catalog.all()) {
-    map.set(normalize(profile.name), profile);
+    map.set(profile.id, profile);
   }
+  return map;
+}
+
+function buildHullByName(catalog: ShipProfileCatalog, i18n: NameI18nCatalog): Record<ShipNameLanguage, ReadonlyMap<string, ShipProfile>> {
+  const maps: Record<ShipNameLanguage, Map<string, ShipProfile>> = { en: new Map(), zh: new Map(), ja: new Map() };
   for (const profile of catalog.all()) {
+    const enKey = normalize(profile.name);
+    if (!maps.en.has(enKey)) maps.en.set(enKey, profile);
     const names = i18n.shipLocalizations(profile.name);
     if (!names) continue;
-    for (const language of ["en", "zh", "ja"] as const) {
+    for (const language of ["zh", "ja"] as const) {
       const localized = names[language].trim();
       if (localized.length === 0) continue;
       const key = normalize(localized);
-      if (map.has(key)) continue;
-      map.set(key, profile);
+      if (!maps[language].has(key)) maps[language].set(key, profile);
     }
   }
-  return map;
+  return { en: maps.en, zh: maps.zh, ja: maps.ja };
 }
 
 function normalize(input: string): string {

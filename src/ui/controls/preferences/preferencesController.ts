@@ -210,11 +210,8 @@ export class PreferencesControllerImpl implements PreferencesController {
     if (preferences.language !== "en") this.loadPackAndRefresh(preferences.language);
   }
 
-  private loadPackAndRefresh(language: Language): void {
-    void this.itemNameCatalog
-      .ensureLanguage(language)
-      .then(() => this.events.emitLanguageChanged())
-      .catch(() => this.events.emitLanguageChanged());
+  private loadPackAndRefresh(_language: Language): void {
+    this.events.emitLanguageChanged();
   }
 
   private updateUnitToggle(): void {

@@ -61,7 +61,7 @@ describe("_filterItemNames", () => {
   }
 
   test("includes published fittable category items", () => {
-    const itemNames = { "A": { zh: "a", ja: "a" } };
+    const itemNames = { "A": { en: "A", zh: "a", ja: "a" } };
     const nameToType = new Map([["A", makeType({ published: 1, groupID: 1 })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
     const result = _filterItemNames(itemNames, nameToType, groups, new Set());
@@ -69,7 +69,7 @@ describe("_filterItemNames", () => {
   });
 
   test("excludes published structure modules", () => {
-    const itemNames = { "Structure X": { zh: "x", ja: "x" } };
+    const itemNames = { "Structure X": { en: "Structure X", zh: "x", ja: "x" } };
     const nameToType = new Map([["Structure X", makeType({ published: 1, groupID: 2, typeName: "Structure X" })]]);
     const groups = { "2": { groupID: 2, categoryID: 66 } };
     const result = _filterItemNames(itemNames, nameToType, groups, new Set());
@@ -77,7 +77,7 @@ describe("_filterItemNames", () => {
   });
 
   test("excludes unpublished modules", () => {
-    const itemNames = { "Unpublished Y": { zh: "y", ja: "y" } };
+    const itemNames = { "Unpublished Y": { en: "Unpublished Y", zh: "y", ja: "y" } };
     const nameToType = new Map([["Unpublished Y", makeType({ published: 0, groupID: 1, typeName: "Unpublished Y" })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
     const result = _filterItemNames(itemNames, nameToType, groups, new Set());
@@ -85,7 +85,7 @@ describe("_filterItemNames", () => {
   });
 
   test("includes names that are keys of emitted fittingDb tables", () => {
-    const itemNames = { "Table Key": { zh: "table", ja: "table" } };
+    const itemNames = { "Table Key": { en: "Table Key", zh: "table", ja: "table" } };
     const nameToType = new Map([["Table Key", makeType({ published: 0, groupID: 1, typeName: "Table Key" })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
     const result = _filterItemNames(itemNames, nameToType, groups, new Set(["Table Key"]));
@@ -178,6 +178,10 @@ describe("_writeI18nFiles", () => {
       enFile: join(tempDir, "item-names-en.ts"),
       zhFile: join(tempDir, "item-names-zh.ts"),
       jaFile: join(tempDir, "item-names-ja.ts"),
+      collisionEnFile: join(tempDir, "item-name-collisions-en.ts"),
+      collisionZhFile: join(tempDir, "item-name-collisions-zh.ts"),
+      collisionJaFile: join(tempDir, "item-name-collisions-ja.ts"),
+      canonicalOverrides: { en: {}, zh: {}, ja: {} },
     };
   }
 
@@ -188,65 +192,58 @@ describe("_writeI18nFiles", () => {
     return JSON.parse(match[1].trim());
   }
 
-  test("sorts English names and keeps zh/ja arrays index-aligned", async () => {
+  test("sorts English names and keeps zh/ja records keyed by id", async () => {
     const itemNames = {
-      B: { zh: "b-zh", ja: "b-ja" },
-      A: { zh: "a-zh", ja: "a-ja" },
-      C: { zh: "c-zh", ja: "c-ja" },
+      B: { en: "B", zh: "b-zh", ja: "b-ja" },
+      A: { en: "A", zh: "a-zh", ja: "a-ja" },
+      C: { en: "C", zh: "c-zh", ja: "c-ja" },
     };
     const paths = filePaths();
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
     const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
     const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
     const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
-    expect(en).toEqual(["A", "B", "C"]);
-    expect(zh).toEqual(["a-zh", "b-zh", "c-zh"]);
-    expect(ja).toEqual(["a-ja", "b-ja", "c-ja"]);
+    expect(en).toEqual({ A: "A", B: "B", C: "C" });
+    expect(zh).toEqual({ A: "a-zh", B: "b-zh", C: "c-zh" });
+    expect(ja).toEqual({ A: "a-ja", B: "b-ja", C: "c-ja" });
   });
 
   test("falls back to the English name when a localization is blank or missing", async () => {
     const itemNames = {
-      B: { zh: "b-zh" },
-      A: { zh: "", ja: "" },
-      C: { ja: "c-ja" },
+      B: { en: "B", zh: "b-zh" },
+      A: { en: "A", zh: "", ja: "" },
+      C: { en: "C", ja: "c-ja" },
     };
     const paths = filePaths();
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
     const en = parseExport(paths.enFile, "ITEM_NAMES_EN");
     const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
     const ja = parseExport(paths.jaFile, "ITEM_NAMES_JA");
-    expect(en).toEqual(["A", "B", "C"]);
-    expect(zh).toEqual(["A", "b-zh", "C"]);
-    expect(ja).toEqual(["A", "B", "c-ja"]);
+    expect(en).toEqual({ A: "A", B: "B", C: "C" });
+    expect(zh).toEqual({ A: "A", B: "b-zh", C: "C" });
+    expect(ja).toEqual({ A: "A", B: "B", C: "c-ja" });
   });
 
-  test("writes override objects alongside zh and ja arrays", async () => {
-    const itemNames = { A: { zh: "a-zh", ja: "a-ja" } };
+  test("writes per-language collision tables", async () => {
+    const itemNames = {
+      A: { en: "A", zh: "same-zh", ja: "same-ja" },
+      B: { en: "B", zh: "same-zh", ja: "same-ja" },
+    };
     const paths = filePaths();
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
-    const zh = parseExport(paths.zhFile, "ITEM_NAMES_ZH");
-    const zhOverrides = parseExport(paths.zhFile, "ITEM_NAMES_ZH_OVERRIDES");
-    const jaOverrides = parseExport(paths.jaFile, "ITEM_NAMES_JA_OVERRIDES");
-    expect(zh).toEqual(["a-zh"]);
-    expect(zhOverrides).toEqual({
-      "莱塞勒氏改良型爆炸装甲增强器": "Raysere's Modified Explosive Armor Hardener",
-    });
-    expect(jaOverrides).toEqual({
-      "ドミネーション炭化鉛弾XL": "Domination Carbonized Lead XL",
-      "デュアルアフォーカルパルスレーザーI": "Dual Afocal Pulse Laser I",
-      "大型エクスプローシブ・アーマーレインフォーサーII": "Large Explosive Armor Reinforcer II",
-      "大型キネティック・アーマーレインフォーサーI": "Large Kinetic Armor Reinforcer I",
-      "中型重力子スマートボムII": "Medium Graviton Smartbomb II",
-      "共和国海軍仕様炭化鉛弾S": "Republic Fleet Carbonized Lead S",
-      "トゥルーサンシャEMコーティング": "True Sansha EM Coating",
-    });
+    const enCollisions = parseExport(paths.collisionEnFile, "ITEM_NAME_COLLISIONS_EN");
+    const zhCollisions = parseExport(paths.collisionZhFile, "ITEM_NAME_COLLISIONS_ZH");
+    const jaCollisions = parseExport(paths.collisionJaFile, "ITEM_NAME_COLLISIONS_JA");
+    expect(enCollisions).toEqual({});
+    expect(zhCollisions).toEqual({ "same-zh": "A" });
+    expect(jaCollisions).toEqual({ "same-ja": "A" });
   });
 
-  test("does not write overrides in the English file", async () => {
-    const itemNames = { A: { zh: "a-zh", ja: "a-ja" } };
+  test("does not write collision tables in the item-name pack files", async () => {
+    const itemNames = { A: { en: "A", zh: "a-zh", ja: "a-ja" } };
     const paths = filePaths();
     await _writeI18nFiles(itemNames, "2026-08-24", paths);
-    const enContent = readFileSync(paths.enFile, "utf8");
-    expect(enContent).not.toContain("OVERRIDES");
+    const zhContent = readFileSync(paths.zhFile, "utf8");
+    expect(zhContent).not.toContain("COLLISIONS");
   });
 });

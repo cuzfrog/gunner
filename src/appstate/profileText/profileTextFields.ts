@@ -19,7 +19,7 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipASig",
   "shipASkillLevel",
   "shipAOverload",
-  "shipAHull",
+  "shipAHullId",
   "shipAPropulsion",
   "shipAFittedHull",
   "shipAEwarActivation",
@@ -41,7 +41,7 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBSig",
   "shipBSkillLevel",
   "shipBOverload",
-  "shipBHull",
+  "shipBHullId",
   "shipBPropulsion",
   "shipBFittedHull",
   "shipBEwarActivation",
@@ -80,6 +80,8 @@ function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
   }
   map.set("shipA.ammo", "shipAAmmo");
   map.set("shipB.ammo", "shipBAmmo");
+  map.set("shipA.hull", "shipAHullId");
+  map.set("shipB.hull", "shipBHullId");
   map.set("tracking", "shipATracking");
   map.set("sigRes", "shipASigRes");
   map.set("optimal", "shipAOptimal");

@@ -168,7 +168,7 @@ export class SettingsParser {
       isOptionalNonNegative(s[`${p}Aggressivity`]) &&
       isOptionalSkillLevel(s[`${p}SkillLevel`]) &&
       isOptionalBoolean(s[`${p}Overload`]) &&
-      isOptionalNonEmptyString(s[`${p}Hull`]) &&
+      isOptionalNonEmptyString(s[`${p}HullId`]) &&
       this.isOptionalPropulsionSelection(s[`${p}Propulsion`]) &&
       isOptionalFittingText(s[`${p}Fitting`]) &&
       isOptionalProfileParamOverrides(s[`${p}Overrides`], this.guards) &&
@@ -183,7 +183,33 @@ export class SettingsParser {
     return value === undefined || value === PROPULSION_NONE || this.ships.parsePropulsionId(value) !== undefined;
   }
 
+  private migrateLegacyIdentity(record: Record<string, unknown>, side: "shipA" | "shipB"): void {
+    const hullKey = `${side}Hull`;
+    const hullIdKey = `${side}HullId`;
+    const ammoKey = `${side}Ammo`;
+    const hullValue = record[hullKey];
+    if (record[hullIdKey] === undefined && typeof hullValue === "string") {
+      const profile = this.ships.findHull(hullValue);
+      if (profile) record[hullIdKey] = profile.id;
+      delete record[hullKey];
+    }
+    const hullIdValue = record[hullIdKey];
+    if (typeof hullIdValue === "string" && !/^\d+$/.test(hullIdValue)) {
+      const profile = this.ships.findHull(hullIdValue);
+      if (profile) record[hullIdKey] = profile.id;
+    }
+    const ammoValue = record[ammoKey];
+    if (typeof ammoValue === "string") {
+      if (!/^\d+$/.test(ammoValue)) {
+        const id = this.chargeCatalog.idForName(ammoValue);
+        record[ammoKey] = id ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+      }
+    }
+  }
+
   private applyUserDefaults(record: Record<string, unknown>): void {
+    this.migrateLegacyIdentity(record, "shipA");
+    this.migrateLegacyIdentity(record, "shipB");
     if (record.shipAAmmo === undefined) {
       record.shipAAmmo = this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
@@ -357,7 +383,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   const p = side;
   if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
   if (combatant.overload !== undefined) wire[`${p}Overload` as const] = combatant.overload;
-  if (combatant.hull !== undefined) wire[`${p}Hull` as const] = combatant.hull;
+  if (combatant.hull !== undefined) wire[`${p}HullId` as const] = combatant.hull;
   if (combatant.propulsion !== undefined) wire[`${p}Propulsion` as const] = combatant.propulsion;
   if (combatant.fitting !== undefined) wire[`${p}Fitting` as const] = combatant.fitting;
   if (combatant.overrides !== undefined) wire[`${p}Overrides` as const] = combatant.overrides;

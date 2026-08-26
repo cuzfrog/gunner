@@ -1,4 +1,5 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
+import type { TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown, type EngagementView } from "../../../sim";
 import type { Ships } from "../../../ships";
@@ -16,8 +17,8 @@ import {
 } from "../testSupport";
 
 const SAVED_RIFTER: SavedFitting = {
-  id: "Rifter::Brawler",
-  hull: "Rifter",
+  id: `${RIFTER.id}::Brawler`,
+  hullId: RIFTER.id,
   name: "Brawler",
   text: "[Rifter, Brawler]\n200mm AutoCannon I, Hail S",
   savedAt: 0,
@@ -93,9 +94,9 @@ function baseSettings(): UserSettings {
     shipBSig: 40,
     shipBSkillLevel: 5,
     shipBOverload: true,
-    shipAHull: undefined,
+    shipAHullId: undefined,
     shipAPropulsion: undefined,
-    shipBHull: undefined,
+    shipBHullId: undefined,
     shipBPropulsion: undefined,
     shipAFitting: undefined,
     shipAOverrides: {},
@@ -103,8 +104,8 @@ function baseSettings(): UserSettings {
     shipBOverrides: {},
     shipAFittedHull: undefined,
     shipBFittedHull: undefined,
-    shipAAmmo: "Hail S",
-    shipBAmmo: "Hail S",
+    shipAAmmo: "12608" as TypeId,
+    shipBAmmo: "12608" as TypeId,
     simSpeed: 2,
     language: "en",
   };

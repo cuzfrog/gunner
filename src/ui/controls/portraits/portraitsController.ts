@@ -1,3 +1,4 @@
+import type { ShipId } from "../../../gamedata/ids";
 import type { AppliedEwarEffect, EwarResolver } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
@@ -8,7 +9,7 @@ import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./por
 
 interface SideState {
   lastKey: string;
-  lastName: string;
+  lastId: ShipId | "";
 }
 
 export class PortraitsControllerImpl implements PortraitsController {
@@ -20,8 +21,8 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly events: UiEvents;
   private readonly i18n: I18n;
   private distance = 0;
-  private readonly shipAState: SideState = { lastKey: "", lastName: "" };
-  private readonly shipBState: SideState = { lastKey: "", lastName: "" };
+  private readonly shipAState: SideState = { lastKey: "", lastId: "" };
+  private readonly shipBState: SideState = { lastKey: "", lastId: "" };
 
   constructor(deps: {
     els: PortraitsEls;
@@ -58,18 +59,18 @@ export class PortraitsControllerImpl implements PortraitsController {
       root.hidden = true;
       effects.hidden = true;
       state.lastKey = "";
-      state.lastName = "";
+      state.lastId = "";
       return;
     }
     const enemySide: Side = side === "shipA" ? "shipB" : "shipA";
     const projection = this.ewarController.projection(enemySide);
     const applied = this.ewarResolver.appliedEffects(projection, this.distance);
-    const key = buildDiffKey(profile.name, applied);
+    const key = buildDiffKey(profile.id, applied);
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
-    if (state.lastName !== profile.name) {
-      state.lastName = profile.name;
+    if (state.lastId !== profile.id) {
+      state.lastId = profile.id;
       image.src = this.imageCatalog.shipImageUrl(profile.name);
     }
     effects.innerHTML = "";
@@ -93,8 +94,8 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
   return side === "shipA" ? shipAState : shipBState;
 }
 
-function buildDiffKey(name: string, effects: readonly AppliedEwarEffect[]): string {
-  return `${name}|${effects.map((e) => `${e.family}:${e.moduleName}`).join(",")}`;
+function buildDiffKey(id: ShipId, effects: readonly AppliedEwarEffect[]): string {
+  return `${id}|${effects.map((e) => `${e.family}:${e.moduleName}`).join(",")}`;
 }
 
 function buildEffectTitle(effect: AppliedEwarEffect, i18n: I18n): string {

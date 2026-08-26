@@ -1,6 +1,7 @@
 import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
 import type { PresetFittings } from "../../fitting";
 import type { SavedFittings } from "../../appstate";
+import type { ShipId } from "../../gamedata/ids";
 import type { ControlsCradle } from "./cradle";
 import { combatantSidesOf, forEachSide, wireCombatantSide } from "./combatantSide";
 import { createControlsEls } from "./elements";
@@ -75,14 +76,14 @@ function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
 
 function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings, presetFittings: PresetFittings) {
   return {
-    autoLoadFittingTextFor: (hullName: string) => savedFittings.mostRecentFor(hullName)?.text ?? firstPresetText(presetFittings, hullName),
+    autoLoadFittingTextFor: (hullId: ShipId) => savedFittings.mostRecentFor(hullId)?.text ?? firstPresetText(presetFittings, hullId),
     importEftFitting: (text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean }) => importer.importEftFitting(side, text, options),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
   };
 }
 
-function firstPresetText(presetFittings: PresetFittings, hull: string): string | undefined {
-  const fit = presetFittings.fittingsFor(hull)[0];
-  return fit ? presetFittings.eftText(hull, fit) : undefined;
+function firstPresetText(presetFittings: PresetFittings, hullId: ShipId): string | undefined {
+  const fit = presetFittings.fittingsFor(hullId)[0];
+  return fit ? presetFittings.eftText(hullId, fit) : undefined;
 }

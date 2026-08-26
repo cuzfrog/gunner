@@ -1,7 +1,8 @@
-import { buildDomControls } from "./testSupport";
+import { buildDomControls, RIFTER } from "./testSupport";
 import { DomControls } from "./domControls";
 import type { ControlsCradle } from "./cradle";
 import type { SavedFitting } from "../../appstate";
+import type { ShipId } from "../../gamedata/ids";
 import { mockPresetFittings, mockSavedFittings } from "../testing";
 
 const controlsCradleKeys = {
@@ -68,21 +69,23 @@ describe("registerControlsModule", () => {
   });
 
   test("wiring gives each side an importer that auto-loads recent text and falls back to the first preset", () => {
-    const recentRifter: SavedFitting = { id: "r", hull: "Rifter", name: "Recent", text: "[Rifter, Recent]", savedAt: 0 };
+    const THRASHER_ID = "16242" as ShipId;
+    const UNKNOWN_ID = "99999" as ShipId;
+    const recentRifter: SavedFitting = { id: `${RIFTER.id}::Recent`, hullId: RIFTER.id, name: "Recent", text: "[Rifter, Recent]", savedAt: 0 };
     const savedFittings = {
       ...mockSavedFittings(),
-      mostRecentFor: vi.fn((hull: string) => (hull === "Rifter" ? recentRifter : undefined)),
+      mostRecentFor: vi.fn((hullId: ShipId) => (hullId === RIFTER.id ? recentRifter : undefined)),
     };
     const presetFittings = {
       ...mockPresetFittings(),
-      fittingsFor: vi.fn((hull: string) => (hull === "Thrasher" ? [{ name: "Brawny", body: "" }] : [])),
-      eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]`),
+      fittingsFor: vi.fn((hullId: ShipId) => (hullId === THRASHER_ID ? [{ name: "Brawny", body: "" }] : [])),
+      eftText: vi.fn((hullId: ShipId, fit) => `[${hullId === RIFTER.id ? "Rifter" : hullId === THRASHER_ID ? "Thrasher" : hullId}, ${fit.name}]`),
     };
     const { cradle } = buildDomControls({ savedFittings, presetFittings });
     const importer = cradle.cradle.shipASide.importer;
-    expect(importer.autoLoadFittingTextFor("Rifter")).toBe("[Rifter, Recent]");
-    expect(importer.autoLoadFittingTextFor("Thrasher")).toBe("[Thrasher, Brawny]");
-    expect(importer.autoLoadFittingTextFor("Unknown")).toBeUndefined();
+    expect(importer.autoLoadFittingTextFor(RIFTER.id)).toBe("[Rifter, Recent]");
+    expect(importer.autoLoadFittingTextFor(THRASHER_ID)).toBe("[Thrasher, Brawny]");
+    expect(importer.autoLoadFittingTextFor(UNKNOWN_ID)).toBeUndefined();
   });
 
   test("does not register old Create* factory keys", () => {

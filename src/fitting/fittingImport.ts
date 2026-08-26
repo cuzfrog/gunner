@@ -1,3 +1,5 @@
+import type { TypeId } from "../gamedata/ids";
+import type { ShipId } from "../gamedata/ids";
 import type {
   FittedHull,
   HullTier,
@@ -26,7 +28,7 @@ import {
 } from "../sim";
 import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, type QuantityItem } from "./eft";
 
-import type { ItemNameCatalog } from "../gamedata/itemNames";
+import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
 import type {
@@ -84,8 +86,8 @@ export interface FittingImport {
   propulsionStats(name: string): PropulsionStats | undefined;
   summarize(text: string): FittingSummary | undefined;
   canonicalEftText(text: string): string | undefined;
+  itemNameForId(id: TypeId, language: ShipNameLanguage): string;
   itemName(name: string, language: ShipNameLanguage): string;
-  canonicalName(name: string): string;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -94,6 +96,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly chargeCatalog: ChargeCatalog;
   private readonly stacking: StackingPenalty;
   private readonly itemNameCatalog: ItemNameCatalog;
+  private readonly itemNameResolver: ItemNameResolver;
   private readonly moduleSlotCatalog: ModuleSlotCatalog;
 
   constructor({
@@ -102,6 +105,7 @@ export class FittingImportImpl implements FittingImport {
     chargeCatalog,
     stackingPenalty,
     itemNameCatalog,
+    itemNameResolver,
     moduleSlotCatalog,
   }: {
     ships: Ships;
@@ -109,6 +113,7 @@ export class FittingImportImpl implements FittingImport {
     chargeCatalog: ChargeCatalog;
     stackingPenalty: StackingPenalty;
     itemNameCatalog: ItemNameCatalog;
+    itemNameResolver: ItemNameResolver;
     moduleSlotCatalog: ModuleSlotCatalog;
   }) {
     this.ships = ships;
@@ -116,6 +121,7 @@ export class FittingImportImpl implements FittingImport {
     this.chargeCatalog = chargeCatalog;
     this.stacking = stackingPenalty;
     this.itemNameCatalog = itemNameCatalog;
+    this.itemNameResolver = itemNameResolver;
     this.moduleSlotCatalog = moduleSlotCatalog;
   }
 
@@ -127,10 +133,10 @@ export class FittingImportImpl implements FittingImport {
       stats.propulsion.speedBonus > 0;
     return Object.entries(this.db.modules)
       .filter(matches)
-      .map(([name]) => name)
+      .map(([, stats]) => stats.name)
       .sort((a, b) => {
-        const aStats = this.db.modules[a]?.propulsion;
-        const bStats = this.db.modules[b]?.propulsion;
+        const aStats = moduleByName(this.db, a)?.propulsion;
+        const bStats = moduleByName(this.db, b)?.propulsion;
         if (!aStats || !bStats) return a.localeCompare(b);
         if (bStats.speedBonus !== aStats.speedBonus) return bStats.speedBonus - aStats.speedBonus;
         return a.localeCompare(b);
@@ -138,29 +144,29 @@ export class FittingImportImpl implements FittingImport {
   }
 
   propulsionStats(name: string): PropulsionStats | undefined {
-    const stats = this.db.modules[name]?.propulsion;
+    const stats = moduleByName(this.db, name)?.propulsion;
     if (!stats) return undefined;
     return { thrust: stats.thrust, speedBonus: stats.speedBonus, massAddition: stats.massAddition, sigBloom: stats.sigBloom };
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
-    const document = this.parseAndCanonicalize(text);
-    if (!document) return undefined;
+    const parsed = parseEft(text, this.moduleSlotCatalog);
+    if (!parsed) return undefined;
 
-    const profile = this.ships.findHull(document.hullName);
-    if (!profile) return undefined;
+    const resolved = this.resolveEftDocument(parsed);
+    if (!resolved) return undefined;
 
-    const hullBonuses = this.db.hullBonuses[profile.name] ?? [];
-    const hullSide = aggregateHullSide(profile, this.db, document, hullBonuses, conditions.skillLevel, this.stacking);
-    const propulsion = resolvePropulsion(profile, this.ships, this.db, document, hullSide.propulsionName);
-    const turret = resolveTurret(this.db, this.chargeCatalog, document, conditions.skillLevel, hullBonuses, this.stacking);
-    const cargoCharges = resolveCargoCharges(this.db, document);
-    const ewar = resolveEwar(this.db, document);
-    const boosts = resolveBoosts(this.db, document);
+    const hullBonuses = this.db.hullBonuses[resolved.profile.id] ?? [];
+    const hullSide = aggregateHullSide(resolved, this.db, hullBonuses, conditions.skillLevel, this.stacking);
+    const propulsion = resolvePropulsion(resolved, this.ships, this.db, hullSide.propulsionId);
+    const turret = resolveTurret(this.db, this.chargeCatalog, resolved, conditions.skillLevel, hullBonuses, this.stacking);
+    const cargoCharges = resolveCargoCharges(this.db, resolved);
+    const ewar = resolveEwar(this.db, resolved, this.itemNameCatalog);
+    const boosts = resolveBoosts(this.db, resolved, this.itemNameCatalog);
 
     return {
-      profile,
-      fittingName: document.fittingName,
+      profile: resolved.profile,
+      fittingName: resolved.fittingName,
       fitted: hullSide.fitted,
       propulsion,
       turret,
@@ -171,52 +177,184 @@ export class FittingImportImpl implements FittingImport {
   }
 
   summarize(text: string): FittingSummary | undefined {
-    const document = this.parseAndCanonicalize(text);
-    if (!document) return undefined;
-    const hullName = this.canonicalHullName(document.hullName);
+    const parsed = parseEft(text, this.moduleSlotCatalog);
+    if (!parsed) return undefined;
+
+    const resolved = this.resolveEftDocument(parsed);
+    if (!resolved) return undefined;
+
     return {
-      hullName,
-      fittingName: document.fittingName,
-      sections: buildSections({ ...document, hullName }, this.db),
+      hullName: resolved.profile.name,
+      fittingName: resolved.fittingName,
+      sections: buildSections(resolved),
     };
   }
 
   canonicalEftText(text: string): string | undefined {
-    const document = this.parseAndCanonicalize(text);
-    if (!document) return undefined;
-    const hullName = this.canonicalHullName(document.hullName);
-    return serializeEftDocument({ ...document, hullName });
+    const parsed = parseEft(text, this.moduleSlotCatalog);
+    if (!parsed) return undefined;
+
+    const resolved = this.resolveEftDocument(parsed);
+    if (!resolved) return undefined;
+
+    return serializeEftDocument(resolved);
+  }
+
+  itemNameForId(id: TypeId, language: ShipNameLanguage): string {
+    return this.itemNameCatalog.nameForId(id, language);
   }
 
   itemName(name: string, language: ShipNameLanguage): string {
-    return this.itemNameCatalog.name(name, language);
+    const id = this.idForName(name, "en");
+    if (id === undefined) return name;
+    return this.itemNameCatalog.nameForId(id, language);
   }
 
-  canonicalName(name: string): string {
-    return this.itemNameCatalog.canonicalName(name);
+  private idForName(name: string, language: ShipNameLanguage): TypeId | undefined {
+    return this.itemNameResolver.idsForName(name, language)[0];
   }
 
-  private parseAndCanonicalize(text: string): EftDocument | undefined {
-    const parsed = parseEft(text, this.moduleSlotCatalog);
-    if (!parsed) return undefined;
-    const normalized = normalizeEftDocument(parsed, (name) => this.itemNameCatalog.canonicalName(name));
-    return parseEft(serializeEftDocument(normalized), this.moduleSlotCatalog);
+  private resolveEftDocument(document: EftDocument): ResolvedEft | undefined {
+    const language = this.detectLanguage(document);
+    if (!language) return undefined;
+
+    const profile = this.ships.findHullByName(document.hullName, language);
+    if (!profile) return undefined;
+
+    const banks: ResolvedBank[] = [];
+    for (const bank of document.banks) {
+      const lines: ResolvedLine[] = [];
+      for (const line of bank.lines) {
+        const resolved = resolveLine(line, bank.bank, language, this.db, this.itemNameResolver, this.itemNameCatalog, this.moduleSlotCatalog);
+        if (resolved) lines.push(resolved);
+      }
+      if (lines.length > 0) banks.push({ bank: bank.bank, lines });
+    }
+
+    const resolveQuantity = (item: QuantityItem, preferDrone: boolean): ResolvedQuantity => {
+      const candidates = this.itemNameResolver.idsForName(item.name, language);
+      const droneId = candidates.find((id) => this.db.drones[id] !== undefined);
+      const chargeId = candidates.find((id) => this.db.charges[id] !== undefined);
+      if (preferDrone && droneId) {
+        return { kind: "resolved", id: droneId, name: this.itemNameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+      }
+      if (chargeId) {
+        return { kind: "resolved", id: chargeId, name: this.itemNameForId(chargeId, "en"), quantity: item.quantity, isDrone: false };
+      }
+      if (droneId) {
+        return { kind: "resolved", id: droneId, name: this.itemNameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
+      }
+      return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: false };
+    };
+
+    const drones: ResolvedQuantity[] = [];
+    const cargo: ResolvedQuantity[] = [];
+
+    for (const item of document.drones) cargo.push(resolveQuantity(item, true));
+    for (const item of document.cargo) cargo.push(resolveQuantity(item, false));
+
+    return { profile, language, fittingName: document.fittingName, banks, drones, cargo };
   }
 
-  private canonicalHullName(hullName: string): string {
-    return this.ships.findHull(hullName)?.name ?? hullName;
+  private detectLanguage(document: EftDocument): ShipNameLanguage | undefined {
+    for (const language of _detectionOrder(document)) {
+      if (this.ships.findHullByName(document.hullName, language)) return language;
+    }
+    return undefined;
   }
 }
+
+interface ResolvedEft {
+  readonly profile: ShipProfile;
+  readonly language: ShipNameLanguage;
+  readonly fittingName: string;
+  readonly banks: readonly ResolvedBank[];
+  readonly drones: readonly ResolvedQuantity[];
+  readonly cargo: readonly ResolvedQuantity[];
+}
+
+interface ResolvedBank {
+  readonly bank: BankKind;
+  readonly lines: readonly ResolvedLine[];
+}
+
+type ResolvedLine =
+  | { readonly kind: "empty"; readonly bank: BankKind; readonly label: string }
+  | { readonly kind: "module"; readonly bank: BankKind; readonly moduleId: TypeId; readonly moduleName: string; readonly chargeId?: TypeId; readonly chargeName?: string; readonly offline: boolean }
+  | { readonly kind: "unresolved"; readonly bank: BankKind; readonly name: string; readonly charge?: string; readonly offline: boolean };
+
+type ResolvedQuantity =
+  | { readonly kind: "resolved"; readonly id: TypeId; readonly name: string; readonly quantity: number; readonly isDrone: boolean }
+  | { readonly kind: "unresolved"; readonly name: string; readonly quantity: number; readonly isDrone: boolean };
 
 interface HullSideAggregation {
   readonly fitted: FittedHull;
-  readonly propulsionName?: string;
+  readonly propulsionId?: TypeId;
+}
+
+function resolveLine(
+  line: EftLine,
+  bank: BankKind,
+  language: ShipNameLanguage,
+  db: FittingDb,
+  resolver: ItemNameResolver,
+  catalog: ItemNameCatalog,
+  slotCatalog: ModuleSlotCatalog,
+): ResolvedLine | undefined {
+  if (line.kind === "empty") return { kind: "empty", bank, label: line.label };
+
+  const moduleIds = resolver.idsForName(line.name, language).filter((id) => isModuleRole(id, db));
+  if (moduleIds.length === 0) {
+    return { kind: "unresolved", bank, name: line.name, charge: line.charge, offline: line.offline };
+  }
+
+  const moduleId = moduleIds[0];
+  const moduleName = catalog.nameForId(moduleId, "en");
+  const resolvedBank = slotCatalog.slotOf(moduleName) ?? bank;
+
+  let chargeId: TypeId | undefined;
+  let chargeName: string | undefined;
+  if (line.charge) {
+    const chargeIds = resolver.idsForName(line.charge, language).filter((id) => isChargeRole(id, db));
+    if (chargeIds.length > 0) {
+      chargeId = chargeIds[0];
+      chargeName = catalog.nameForId(chargeId, "en");
+    }
+  }
+
+  return { kind: "module", bank: resolvedBank, moduleId, moduleName, chargeId, chargeName, offline: line.offline };
+}
+
+function isModuleRole(id: TypeId, db: FittingDb): boolean {
+  return (
+    db.modules[id] !== undefined ||
+    db.turrets[id] !== undefined ||
+    db.stasisWebs[id] !== undefined ||
+    db.stasisGrapplers[id] !== undefined ||
+    db.trackingComputers[id] !== undefined ||
+    db.trackingDisruptors[id] !== undefined ||
+    db.warpScramblers[id] !== undefined
+  );
+}
+
+function isChargeRole(id: TypeId, db: FittingDb): boolean {
+  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined;
+}
+
+function isDroneRole(id: TypeId, db: FittingDb): boolean {
+  return db.drones[id] !== undefined;
+}
+
+function moduleByName(db: FittingDb, name: string): FittingModuleStats | undefined {
+  for (const stats of Object.values(db.modules)) {
+    if (stats.name === name) return stats;
+  }
+  return undefined;
 }
 
 function aggregateHullSide(
-  profile: ShipProfile,
+  resolved: ResolvedEft,
   db: FittingDb,
-  parsed: EftDocument,
   hullBonuses: readonly HullBonus[],
   skillLevel: number,
   stacking: StackingPenalty,
@@ -227,26 +365,28 @@ function aggregateHullSide(
   const agilityMultipliers: number[] = [];
   const sigPercents: number[] = [];
   let sigRadiusAdd = 0;
-  let propulsionName: string | undefined;
+  let propulsionId: TypeId | undefined;
 
-  for (const line of moduleLines(parsed)) {
-    if (line.offline) continue;
-    const stats = db.modules[line.name];
-    if (!stats) continue;
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
+      const stats = db.modules[line.moduleId];
+      if (!stats) continue;
 
-    if (stats.propulsion) {
-      if (!propulsionName) propulsionName = line.name;
-      continue;
+      if (stats.propulsion) {
+        if (!propulsionId) propulsionId = line.moduleId;
+        continue;
+      }
+
+      if (stats.massAddition) flatMass += stats.massAddition;
+      if (stats.massBonusPercentage) massPercentages.push(stats.massBonusPercentage / 100);
+      if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
+      if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
+      if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
+      if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
+      if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
+      if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
     }
-
-    if (stats.massAddition) flatMass += stats.massAddition;
-    if (stats.massBonusPercentage) massPercentages.push(stats.massBonusPercentage / 100);
-    if (stats.speedBonusPercent) speedPercents.push(stats.speedBonusPercent / 100);
-    if (stats.agilityMultiplier) agilityMultipliers.push(stats.agilityMultiplier);
-    if (stats.agilityDrawbackPercent) agilityMultipliers.push(1 + stats.agilityDrawbackPercent / 100);
-    if (stats.sigRadiusAdd) sigRadiusAdd += stats.sigRadiusAdd;
-    if (stats.sigBonusPercent) sigPercents.push(stats.sigBonusPercent / 100);
-    if (stats.sigDrawbackPercent) sigPercents.push(stats.sigDrawbackPercent / 100);
   }
 
   for (const bonus of hullBonuses) {
@@ -262,41 +402,41 @@ function aggregateHullSide(
 
   return {
     fitted: {
-      mass: profile.mass + flatMass,
+      mass: resolved.profile.mass + flatMass,
       massMultiplier,
       speedMultiplier,
       inertiaMultiplier,
       sigMultiplier,
       sigRadiusAdd,
     },
-    propulsionName,
+    propulsionId,
   };
 }
 
 function resolvePropulsion(
-  profile: ShipProfile,
+  resolved: ResolvedEft,
   ships: Ships,
   db: FittingDb,
-  parsed: EftDocument,
-  propulsionName: string | undefined,
+  propulsionId: TypeId | undefined,
 ): (PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionName: string }) | undefined {
-  const name = propulsionName ?? findFirstPropulsion(parsed, db);
-  if (!name) return undefined;
+  const id = propulsionId ?? findFirstPropulsionModuleId(resolved, db);
+  if (!id) return undefined;
 
-  const stats = db.modules[name]?.propulsion;
+  const stats = db.modules[id]?.propulsion;
   if (!stats) return undefined;
 
-  const propulsionId = findGenericPropulsionId(ships, profile, stats.kind, stats.sizeTier);
-  if (!propulsionId) return undefined;
+  const propulsionIdGeneric = findGenericPropulsionId(ships, resolved.profile, stats.kind, stats.sizeTier);
+  if (!propulsionIdGeneric) return undefined;
 
-  return { ...stats, propulsionId, propulsionName: name };
+  return { ...stats, propulsionId: propulsionIdGeneric, propulsionName: db.modules[id].name };
 }
 
-function findFirstPropulsion(parsed: EftDocument, db: FittingDb): string | undefined {
-  for (const line of moduleLines(parsed)) {
-    if (line.offline) continue;
-    const stats = db.modules[line.name];
-    if (stats?.propulsion) return line.name;
+function findFirstPropulsionModuleId(resolved: ResolvedEft, db: FittingDb): TypeId | undefined {
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
+      if (db.modules[line.moduleId]?.propulsion) return line.moduleId;
+    }
   }
   return undefined;
 }
@@ -314,7 +454,7 @@ function findGenericPropulsionId(
 function resolveTurret(
   db: FittingDb,
   chargeCatalog: ChargeCatalog,
-  parsed: EftDocument,
+  resolved: ResolvedEft,
   skillLevel: number,
   hullBonuses: readonly HullBonus[],
   stacking: StackingPenalty,
@@ -323,27 +463,29 @@ function resolveTurret(
   const optimalPercents: number[] = [];
   const falloffPercents: number[] = [];
   let turret: TurretStats | undefined;
-  let chargeName: string | undefined;
-  let moduleName: string | undefined;
+  let chargeId: TypeId | undefined;
+  let moduleId: TypeId | undefined;
 
-  for (const line of moduleLines(parsed)) {
-    if (line.offline) continue;
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
 
-    const lineTurret = db.turrets[line.name];
-    if (lineTurret && !turret) {
-      turret = lineTurret;
-      chargeName = line.charge;
-      moduleName = line.name;
-      continue;
+      const lineTurret = db.turrets[line.moduleId];
+      if (lineTurret && !turret) {
+        turret = lineTurret;
+        chargeId = line.chargeId;
+        moduleId = line.moduleId;
+        continue;
+      }
+
+      const stats = db.modules[line.moduleId];
+      if (!stats) continue;
+      const script = line.chargeId ? db.scripts[line.chargeId] : undefined;
+      collectTurretPercents(stats, script, trackingPercents, optimalPercents, falloffPercents);
     }
-
-    const stats = db.modules[line.name];
-    if (!stats) continue;
-    const script = line.charge ? db.scripts[line.charge] : undefined;
-    collectTurretPercents(stats, script, trackingPercents, optimalPercents, falloffPercents);
   }
 
-  if (!turret) return undefined;
+  if (!turret || !moduleId) return undefined;
 
   for (const bonus of hullBonuses) {
     if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
@@ -379,11 +521,11 @@ function resolveTurret(
     optimal: base.optimal,
     falloff: base.falloff,
     chargeSize: turret.chargeSize,
-    charge: "",
+    chargeId: chargeId ?? chargeCatalog.usualForChargeSize(turret.chargeSize),
     base,
-    moduleName: moduleName ?? "Unknown Turret",
+    moduleId,
   };
-  const selectedCharge = chargeName && db.charges[chargeName] ? chargeName : chargeCatalog.usualForTurret(turretForChargeSelection);
+  const selectedCharge = chargeId && db.charges[chargeId] ? chargeId : chargeCatalog.usualForTurret(turretForChargeSelection);
   const charge = db.charges[selectedCharge] ?? {};
 
   return {
@@ -392,119 +534,139 @@ function resolveTurret(
     optimal: base.optimal * (charge.rangeMultiplier ?? 1),
     falloff: base.falloff * (charge.falloffMultiplier ?? 1),
     chargeSize: turret.chargeSize,
-    charge: selectedCharge,
+    chargeId: selectedCharge,
     base,
-    moduleName: moduleName ?? "Unknown Turret",
+    moduleId,
   };
 }
 
-function resolveCargoCharges(db: FittingDb, document: EftDocument): readonly CargoCharge[] {
+function resolveCargoCharges(db: FittingDb, resolved: ResolvedEft): readonly CargoCharge[] {
   const charges: CargoCharge[] = [];
-  for (const item of document.drones) {
-    if (db.charges[item.name]) charges.push({ name: item.name, quantity: item.quantity });
+  for (const item of resolved.drones) {
+    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
   }
-  for (const item of document.cargo) {
-    if (db.charges[item.name]) charges.push({ name: item.name, quantity: item.quantity });
+  for (const item of resolved.cargo) {
+    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
   }
   return charges;
 }
 
-function resolveBoosts(db: FittingDb, parsed: EftDocument): BoostLoadout {
-  const scripts: TurretScriptSpec[] = Object.entries(db.scripts).map(([name, stats]) => ({
-    name,
-    trackingMultiplier: stats.trackingMultiplier,
-    optimalMultiplier: stats.optimalMultiplier,
-    falloffMultiplier: stats.falloffMultiplier,
-  }));
+function resolveBoosts(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCatalog): BoostLoadout {
+  const scripts = scriptSpecsFrom(db.scripts);
   const scriptByName = new Map(scripts.map((s) => [s.name, s]));
   const computers: TrackingBoosterSpec[] = [];
 
-  for (const line of moduleLines(parsed)) {
-    if (line.offline) continue;
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
 
-    const computerStats = db.trackingComputers[line.name];
-    if (computerStats) {
-      const scriptName = line.charge ?? undefined;
-      const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
-      computers.push({
-        moduleName: line.name,
-        trackingBonusPercent: computerStats.trackingBonusPercent,
-        optimalBonusPercent: computerStats.optimalBonusPercent,
-        falloffBonusPercent: computerStats.falloffBonusPercent,
-        defaultScript,
-      });
+      const computerStats = db.trackingComputers[line.moduleId];
+      if (computerStats) {
+        const scriptName = line.chargeId ? catalog.nameForId(line.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
+        computers.push({
+          moduleName: computerStats.name,
+          trackingBonusPercent: computerStats.trackingBonusPercent,
+          optimalBonusPercent: computerStats.optimalBonusPercent,
+          falloffBonusPercent: computerStats.falloffBonusPercent,
+          defaultScript,
+        });
+      }
     }
   }
 
   return { computers, scripts };
 }
 
-function resolveEwar(db: FittingDb, parsed: EftDocument): EwarLoadout {
-  const scripts = Object.entries(db.disruptionScripts).map(([name, stats]) => ({
-    name,
-    trackingMultiplier: 1 + stats.trackingDeltaBonus / 100,
-    optimalMultiplier: 1 + stats.rangeDeltaBonus / 100,
-    falloffMultiplier: 1 + stats.falloffDeltaBonus / 100,
-  }));
+function resolveEwar(db: FittingDb, resolved: ResolvedEft, catalog: ItemNameCatalog): EwarLoadout {
+  const scripts = disruptionScriptSpecsFrom(db.disruptionScripts);
   const scriptByName = new Map(scripts.map((s) => [s.name, s]));
   const webs: StasisWebSpec[] = [];
   const grapplers: StasisGrapplerSpec[] = [];
   const disruptors: TrackingDisruptorSpec[] = [];
   const scramblers: WarpScramblerSpec[] = [];
 
-  for (const line of moduleLines(parsed)) {
-    if (line.offline) continue;
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
 
-    const webStats = db.stasisWebs[line.name];
-    if (webStats) {
-      webs.push({
-        moduleName: line.name,
-        maxRange: webStats.maxRange,
-        speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000,
-        overloadRangeBonusPercent: webStats.overloadRangeBonusPercent,
-      });
-      continue;
-    }
+      const webStats = db.stasisWebs[line.moduleId];
+      if (webStats) {
+        webs.push({
+          moduleName: webStats.name,
+          maxRange: webStats.maxRange,
+          speedFactor: Math.round(-webStats.speedFactorPercent * 10000) / 1000000,
+          overloadRangeBonusPercent: webStats.overloadRangeBonusPercent,
+        });
+        continue;
+      }
 
-    const grapplerStats = db.stasisGrapplers[line.name];
-    if (grapplerStats) {
-      grapplers.push({
-        moduleName: line.name,
-        optimal: grapplerStats.optimal,
-        falloff: grapplerStats.falloff,
-        speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000,
-        overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent,
-      });
-      continue;
-    }
+      const grapplerStats = db.stasisGrapplers[line.moduleId];
+      if (grapplerStats) {
+        grapplers.push({
+          moduleName: grapplerStats.name,
+          optimal: grapplerStats.optimal,
+          falloff: grapplerStats.falloff,
+          speedFactor: Math.round(-grapplerStats.speedFactorPercent * 10000) / 1000000,
+          overloadOptimalBonusPercent: grapplerStats.overloadOptimalBonusPercent,
+        });
+        continue;
+      }
 
-    const disruptorStats = db.trackingDisruptors[line.name];
-    if (disruptorStats) {
-      const scriptName = line.charge ?? undefined;
-      const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
-      disruptors.push({
-        moduleName: line.name,
-        optimal: disruptorStats.optimal,
-        falloff: disruptorStats.falloff,
-        disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000,
-        defaultScript,
-        overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent,
-      });
-      continue;
-    }
+      const disruptorStats = db.trackingDisruptors[line.moduleId];
+      if (disruptorStats) {
+        const scriptName = line.chargeId ? catalog.nameForId(line.chargeId, "en") : undefined;
+        const defaultScript = scriptName ? scriptByName.get(scriptName) : undefined;
+        disruptors.push({
+          moduleName: disruptorStats.name,
+          optimal: disruptorStats.optimal,
+          falloff: disruptorStats.falloff,
+          disruption: Math.round(-disruptorStats.disruptionPercent * 10000) / 1000000,
+          defaultScript,
+          overloadStrengthBonusPercent: disruptorStats.overloadStrengthBonusPercent,
+        });
+        continue;
+      }
 
-    const scramblerStats = db.warpScramblers[line.name];
-    if (scramblerStats) {
-      scramblers.push({
-        moduleName: line.name,
-        maxRange: scramblerStats.maxRange,
-        overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent,
-      });
+      const scramblerStats = db.warpScramblers[line.moduleId];
+      if (scramblerStats) {
+        scramblers.push({
+          moduleName: scramblerStats.name,
+          maxRange: scramblerStats.maxRange,
+          overloadRangeBonusPercent: scramblerStats.overloadRangeBonusPercent,
+        });
+      }
     }
   }
 
   if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
   return { webs, grapplers, disruptors, scramblers, scripts };
+}
+
+function scriptSpecsFrom(scripts: Readonly<Record<string, TurretScriptStats>>): TurretScriptSpec[] {
+  const result: TurretScriptSpec[] = [];
+  for (const stats of Object.values(scripts)) {
+    result.push({
+      name: stats.name,
+      trackingMultiplier: stats.trackingMultiplier,
+      optimalMultiplier: stats.optimalMultiplier,
+      falloffMultiplier: stats.falloffMultiplier,
+    });
+  }
+  return result;
+}
+
+function disruptionScriptSpecsFrom(scripts: Readonly<Record<string, DisruptionScriptStats>>): DisruptionScriptSpec[] {
+  const result: DisruptionScriptSpec[] = [];
+  for (const stats of Object.values(scripts)) {
+    result.push({
+      name: stats.name,
+      trackingMultiplier: 1 + stats.trackingDeltaBonus / 100,
+      optimalMultiplier: 1 + stats.rangeDeltaBonus / 100,
+      falloffMultiplier: 1 + stats.falloffDeltaBonus / 100,
+    });
+  }
+  return result;
 }
 
 function collectTurretPercents(
@@ -544,18 +706,10 @@ function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClas
   return "S";
 }
 
-const SECTION_ORDER: readonly FittingSectionKind[] = [
-  "high",
-  "mid",
-  "low",
-  "rig",
-  "subsystem",
-  "service",
-  "cargo",
-  "drones",
-];
+const SECTION_ORDER: readonly FittingSectionKind[] = ["high", "mid", "low", "rig", "subsystem", "service", "cargo", "drones"] as const;
+const CANONICAL_BANK_ORDER: readonly BankKind[] = ["low", "mid", "high", "rig", "subsystem", "service"] as const;
 
-function buildSections(document: EftDocument, db: FittingDb): readonly FittingSection[] {
+function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
   const buckets: Record<FittingSectionKind, FittingRow[]> = {
     low: [],
     mid: [],
@@ -567,18 +721,20 @@ function buildSections(document: EftDocument, db: FittingDb): readonly FittingSe
     drones: [],
   };
 
-  for (const bank of document.banks) {
+  for (const bank of resolved.banks) {
     for (const line of bank.lines) {
-      if (line.kind === "module") {
-        buckets[bank.bank].push({ name: line.name, charge: line.charge });
+      if (line.kind === "empty") {
+        buckets[line.bank].push({ name: line.label, empty: true });
+      } else if (line.kind === "module") {
+        buckets[line.bank].push({ name: line.moduleName, charge: line.chargeName });
       } else {
-        buckets[bank.bank].push({ name: line.label, empty: true });
+        buckets[line.bank].push({ name: line.name, charge: line.charge });
       }
     }
   }
 
-  for (const item of document.drones) classifyQuantity(db, buckets, item);
-  for (const item of document.cargo) classifyQuantity(db, buckets, item);
+  for (const item of resolved.drones) classifyQuantity(buckets, item);
+  for (const item of resolved.cargo) classifyQuantity(buckets, item);
 
   const sections: FittingSection[] = [];
   for (const kind of SECTION_ORDER) {
@@ -587,58 +743,80 @@ function buildSections(document: EftDocument, db: FittingDb): readonly FittingSe
   return sections;
 }
 
-function classifyQuantity(
-  db: FittingDb,
-  buckets: Record<FittingSectionKind, FittingRow[]>,
-  item: QuantityItem,
-): void {
-  if (db.drones[item.name]) {
+function classifyQuantity(buckets: Record<FittingSectionKind, FittingRow[]>, item: ResolvedQuantity): void {
+  if (item.isDrone) {
     buckets.drones.push({ name: item.name, quantity: item.quantity });
   } else {
     buckets.cargo.push({ name: item.name, quantity: item.quantity });
   }
 }
 
-function normalizeEftDocument(document: EftDocument, canonicalName: (name: string) => string): EftDocument {
-  return {
-    hullName: canonicalName(document.hullName),
-    fittingName: document.fittingName,
-    banks: document.banks.map((bank) => ({ bank: bank.bank, lines: bank.lines.map((line) => normalizeEftLine(line, canonicalName)) })),
-    drones: document.drones.map((item) => ({ name: canonicalName(item.name), quantity: item.quantity })),
-    cargo: document.cargo.map((item) => ({ name: canonicalName(item.name), quantity: item.quantity })),
-  };
-}
-
-function normalizeEftLine(line: EftLine, canonicalName: (name: string) => string): EftLine {
-  if (line.kind === "empty") return line;
-  const charge = line.charge !== undefined ? canonicalName(line.charge) : line.charge;
-  return { kind: "module", name: canonicalName(line.name), charge, offline: line.offline };
-}
-
-function serializeEftDocument(document: EftDocument): string {
-  const lines: string[] = [`[${document.hullName}, ${document.fittingName}]`];
-  for (const bank of document.banks) {
-    if (lines.length > 1) lines.push("");
+function serializeEftDocument(resolved: ResolvedEft): string {
+  const lines: string[] = [`[${resolved.profile.name}, ${resolved.fittingName}]`];
+  const bankLines: Record<BankKind, string[]> = { low: [], mid: [], high: [], rig: [], subsystem: [], service: [] };
+  for (const bank of resolved.banks) {
     for (const line of bank.lines) {
-      if (line.kind === "empty") {
-        lines.push(line.label);
-      } else {
-        const parts: string[] = [line.name];
-        if (line.charge !== undefined) parts.push(line.charge);
-        const suffix = line.offline ? " /OFFLINE" : "";
-        lines.push(parts.join(", ") + suffix);
-      }
+      const text = serializeResolvedLine(line);
+      if (text) bankLines[line.bank].push(text);
     }
   }
-  if (document.drones.length > 0) {
+  for (const kind of CANONICAL_BANK_ORDER) {
+    if (bankLines[kind].length === 0) continue;
     if (lines.length > 1) lines.push("");
-    for (const item of document.drones) lines.push(`${item.name} x${item.quantity}`);
+    for (const text of bankLines[kind]) lines.push(text);
   }
-  if (document.cargo.length > 0) {
+
+  if (resolved.drones.length > 0 || resolved.cargo.length > 0) {
     if (lines.length > 1) lines.push("");
-    for (const item of document.cargo) lines.push(`${item.name} x${item.quantity}`);
+    for (const item of resolved.drones) lines.push(`${item.name} x${item.quantity}`);
+    if (resolved.drones.length > 0 && resolved.cargo.length > 0) lines.push("");
+    for (const item of resolved.cargo) lines.push(`${item.name} x${item.quantity}`);
   }
+
   return lines.join("\n");
 }
 
+function serializeResolvedLine(line: ResolvedLine): string {
+  if (line.kind === "empty") return line.label;
+  if (line.kind === "module") {
+    const parts: string[] = [line.moduleName];
+    if (line.chargeName) parts.push(line.chargeName);
+    return parts.join(", ") + (line.offline ? " /OFFLINE" : "");
+  }
+  const parts: string[] = [line.name];
+  if (line.charge) parts.push(line.charge);
+  return parts.join(", ") + (line.offline ? " /OFFLINE" : "");
+}
 
+export function _detectionOrder(document: EftDocument): ShipNameLanguage[] {
+  const text = collectDocumentNames(document).join(" ");
+  if (hasKana(text)) return ["ja", "zh", "en"];
+  if (hasCjk(text)) return ["zh", "ja", "en"];
+  return ["en", "zh", "ja"];
+}
+
+function collectDocumentNames(document: EftDocument): string[] {
+  const names: string[] = [document.hullName];
+  for (const bank of document.banks) {
+    for (const line of bank.lines) {
+      if (line.kind === "module") {
+        names.push(line.name);
+        if (line.charge) names.push(line.charge);
+      }
+    }
+  }
+  for (const item of document.drones) names.push(item.name);
+  for (const item of document.cargo) names.push(item.name);
+  return names;
+}
+
+const KANA_PATTERN = /\p{Script=Katakana}|\p{Script=Hiragana}/u;
+const CJK_PATTERN = /\p{Script=Han}/u;
+
+function hasKana(text: string): boolean {
+  return KANA_PATTERN.test(text);
+}
+
+function hasCjk(text: string): boolean {
+  return CJK_PATTERN.test(text);
+}

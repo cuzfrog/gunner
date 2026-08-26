@@ -1,6 +1,8 @@
 import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "../legacyScriptNames";
 import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
+import type { ChargeCatalog } from "../../fitting";
 import type { SettingGuards } from "../settingGuards";
+import type { Ships } from "../../ships";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
 import { normalizeProfileTextDotKey } from "./profileTextCompat";
@@ -9,9 +11,13 @@ import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
 
 export class ProfileTextParser {
   private readonly guards: SettingGuards;
+  private readonly ships: Ships;
+  private readonly chargeCatalog: ChargeCatalog;
 
-  constructor(settingGuards: SettingGuards) {
+  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog) {
     this.guards = settingGuards;
+    this.ships = ships;
+    this.chargeCatalog = chargeCatalog;
   }
 
   hasHeader(text: string): boolean {
@@ -86,7 +92,7 @@ export class ProfileTextParser {
         shipBBoosterActivationRaw = value;
         continue;
       }
-      const parsed = parseScalarValue(field, value, this.guards);
+      const parsed = parseScalarValue(field, value, this.guards, this.ships, this.chargeCatalog);
       if (parsed === undefined) return undefined;
       raw = { ...raw, [field]: parsed };
     }
