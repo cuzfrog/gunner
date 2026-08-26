@@ -47,7 +47,7 @@ export function resolveHullId(name: string, ships: Ships): ShipId | undefined {
   const trimmed = name.trim();
   try {
     const id = toShipId(trimmed);
-    return ships.findHullById(id)?.id;
+    return ships.findHullById(id)?.id ?? ships.findHull(trimmed)?.id;
   } catch {
     return ships.findHull(trimmed)?.id;
   }
@@ -57,7 +57,7 @@ export function resolveHull(name: string, ships: Ships): ShipProfile | undefined
   const trimmed = name.trim();
   try {
     const id = toShipId(trimmed);
-    return ships.findHullById(id);
+    return ships.findHullById(id) ?? ships.findHull(trimmed);
   } catch {
     return ships.findHull(trimmed);
   }
