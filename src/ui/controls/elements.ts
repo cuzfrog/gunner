@@ -40,9 +40,6 @@ export function createControlsEls(): ControlsElements {
 function createGlobalControlsEls(): GlobalControlsEls {
   return {
     appVersion: el(globalElementId("appVersion")),
-    trackingLabelText: el(globalElementId("trackingLabelText")),
-    trackingUnitRad: elOf(globalElementId("trackingUnitRad"), isHtmlButtonElement),
-    trackingUnitScore: elOf(globalElementId("trackingUnitScore"), isHtmlButtonElement),
     hullOptions: el(globalElementId("hullOptions")),
     play: elOf(globalElementId("play"), isHtmlButtonElement),
     reset: elOf(globalElementId("reset"), isHtmlButtonElement),
@@ -97,6 +94,8 @@ function createGlobalControlsEls(): GlobalControlsEls {
 function createCombatantEls(side: Side): CombatantEls {
   return {
     tracking: elOf(combatantElementId("tracking", side), isHtmlInputElement),
+    trackingUnitRad: elOf(combatantElementId("trackingUnitRad", side), isHtmlButtonElement),
+    trackingUnitScore: elOf(combatantElementId("trackingUnitScore", side), isHtmlButtonElement),
     sigRes: elOf(combatantElementId("sigRes", side), isHtmlSelectElement),
     sigResOptions: el(combatantElementId("sigResOptions", side)),
     optimal: elOf(combatantElementId("optimal", side), isHtmlInputElement),

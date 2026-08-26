@@ -28,8 +28,10 @@ export function registerPreferencesModule<T extends ControlsCradle>(cradle: Awil
 
 function collectPreferencesEls(els: ControlsElements): PreferencesEls {
   return {
-    trackingUnitRad: els.trackingUnitRad,
-    trackingUnitScore: els.trackingUnitScore,
+    trackingUnit: {
+      shipA: { rad: els.shipA.trackingUnitRad, score: els.shipA.trackingUnitScore },
+      shipB: { rad: els.shipB.trackingUnitRad, score: els.shipB.trackingUnitScore },
+    },
     langEn: els.langEn,
     langZh: els.langZh,
     langJa: els.langJa,

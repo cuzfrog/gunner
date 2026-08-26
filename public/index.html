@@ -121,32 +121,26 @@
         <span class="result-card-value mono" id="res-distance">0 m</span>
       </div>
       <div class="result-card result-card-ship-a">
-        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
         <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
         <span class="result-card-value mono" id="res-track-pen-a">0%</span>
       </div>
       <div class="result-card result-card-ship-b">
-        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
         <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
         <span class="result-card-value mono" id="res-track-pen-b">0%</span>
       </div>
       <div class="result-card result-card-ship-a">
-        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
         <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
         <span class="result-card-value mono" id="res-range-pen-a">0%</span>
       </div>
       <div class="result-card result-card-ship-b">
-        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
         <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
         <span class="result-card-value mono" id="res-range-pen-b">0%</span>
       </div>
       <div class="result-card result-card-hit-chance result-card-ship-a">
-        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
         <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
         <span class="result-card-value mono" id="res-hit-a">0%</span>
       </div>
       <div class="result-card result-card-hit-chance result-card-ship-b">
-        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
         <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
         <span class="result-card-value mono" id="res-hit-b">0%</span>
       </div>
@@ -203,10 +197,10 @@
 
         <label class="form-field">
           <span class="tracking-label-row">
-            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
             <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
-              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
-              <button type="button" id="tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+              <button type="button" id="ship-a-tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+              <button type="button" id="ship-a-tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
             </span>
           </span>
           <span class="input-with-unit input-with-unit-has-effective">
@@ -507,7 +501,13 @@
         </div>
 
         <label class="form-field">
-          <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+          <span class="tracking-label-row">
+            <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+              <button type="button" id="ship-b-tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+              <button type="button" id="ship-b-tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+            </span>
+          </span>
           <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" class="input-field" id="ship-b-tracking" value="0.32" step="any" min="0">
             <span class="effective-value mono" id="effective-ship-b-tracking"></span>

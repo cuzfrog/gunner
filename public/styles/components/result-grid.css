@@ -30,18 +30,6 @@
   margin-bottom: 2px;
 }
 
-.result-card-side {
-  display: block;
-  font-family: "Chakra Petch", sans-serif;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 2px;
-}
-
-.result-card-ship-a .result-card-side { color: var(--accent-teal); }
-.result-card-ship-b .result-card-side { color: var(--accent-orange); }
-
 .result-card-value {
   display: block;
   font-size: 18px;

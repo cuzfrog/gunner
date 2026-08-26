@@ -52,9 +52,6 @@ interface GlobalElementDefinition<T extends HtmlTag = HtmlTag> {
 
 const GLOBAL_ELEMENT_DEFINITIONS = {
   appVersion: { id: "app-version", tag: "SPAN" as const, defaultValue: undefined },
-  trackingLabelText: { id: "tracking-label-text", tag: "SPAN" as const, defaultValue: undefined },
-  trackingUnitRad: { id: "tracking-unit-rad", tag: "BUTTON" as const, defaultValue: undefined },
-  trackingUnitScore: { id: "tracking-unit-score", tag: "BUTTON" as const, defaultValue: undefined },
   hullOptions: { id: "hull-options", tag: "DATALIST" as const, defaultValue: undefined },
   play: { id: "play", tag: "BUTTON" as const, defaultValue: undefined },
   reset: { id: "reset", tag: "BUTTON" as const, defaultValue: undefined },
@@ -113,6 +110,8 @@ interface CombatantElementDefinition<T extends HtmlTag = HtmlTag> {
 
 const COMBATANT_ELEMENT_DEFINITIONS = {
   tracking: { tag: "INPUT" as const, baseId: "tracking", defaultValue: "0.32" },
+  trackingUnitRad: { tag: "BUTTON" as const, baseId: "tracking-unit-rad", defaultValue: undefined },
+  trackingUnitScore: { tag: "BUTTON" as const, baseId: "tracking-unit-score", defaultValue: undefined },
   sigRes: { tag: "SELECT" as const, baseId: "sigRes", defaultValue: "S" },
   sigResOptions: { tag: "DIV" as const, baseId: "sig-res-options", defaultValue: undefined },
   optimal: { tag: "INPUT" as const, baseId: "optimal", defaultValue: "5000" },

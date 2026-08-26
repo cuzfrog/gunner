@@ -20,10 +20,12 @@ describe("generate-combatant-sections", () => {
     }
   });
 
-  test("shipA section contains the global tracking-unit toggle", () => {
-    const { shipA } = generateSections(template);
-    expect(shipA).toContain('id="tracking-unit-rad"');
-    expect(shipA).toContain('id="tracking-unit-score"');
+  test("each side section contains a per-side tracking-unit toggle", () => {
+    const { shipA, shipB } = generateSections(template);
+    expect(shipA).toContain('id="ship-a-tracking-unit-rad"');
+    expect(shipA).toContain('id="ship-a-tracking-unit-score"');
+    expect(shipB).toContain('id="ship-b-tracking-unit-rad"');
+    expect(shipB).toContain('id="ship-b-tracking-unit-score"');
   });
 
   test("neither side panel contains the initial-distance input and shipB orbit mode is selected", () => {

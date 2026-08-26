@@ -42,10 +42,19 @@ class FakeElement {
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
 }
 
+function fakeTrackingUnitEls(): { rad: HTMLButtonElement; score: HTMLButtonElement } {
+  return {
+    rad: new FakeElement() as unknown as HTMLButtonElement,
+    score: new FakeElement() as unknown as HTMLButtonElement,
+  };
+}
+
 function fakeEls(): PreferencesEls {
   return {
-    trackingUnitRad: new FakeElement() as unknown as HTMLButtonElement,
-    trackingUnitScore: new FakeElement() as unknown as HTMLButtonElement,
+    trackingUnit: {
+      shipA: fakeTrackingUnitEls(),
+      shipB: fakeTrackingUnitEls(),
+    },
     langEn: new FakeElement() as unknown as HTMLButtonElement,
     langZh: new FakeElement() as unknown as HTMLButtonElement,
     langJa: new FakeElement() as unknown as HTMLButtonElement,
@@ -281,8 +290,10 @@ describe("PreferencesController", () => {
     controller.setTrackingUnit("score");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");
     expect(shipBTurretController.setTrackingUnit).toHaveBeenCalledWith("score");
-    expect(els.trackingUnitScore.getAttribute("aria-pressed")).toBe("true");
-    expect(els.trackingUnitRad.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipA.score.getAttribute("aria-pressed")).toBe("true");
+    expect(els.trackingUnit.shipA.rad.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipB.score.getAttribute("aria-pressed")).toBe("true");
+    expect(els.trackingUnit.shipB.rad.getAttribute("aria-pressed")).toBe("false");
   });
 
   test("setTrackingUnit saves preferences", () => {
@@ -345,7 +356,8 @@ describe("PreferencesController", () => {
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");
-    expect(els.trackingUnitScore.getAttribute("aria-pressed")).toBe("true");
+    expect(els.trackingUnit.shipA.score.getAttribute("aria-pressed")).toBe("true");
+    expect(els.trackingUnit.shipB.score.getAttribute("aria-pressed")).toBe("true");
     expect(els.simSpeed.value).toBe("3");
     expect(els.gridBrightnessValue.textContent).toBe("80%");
     expect(els.gridBrightnessSlider.value).toBe("0.8");

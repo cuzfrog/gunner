@@ -46,7 +46,13 @@
         </div>
 
         <label class="form-field">
-{{TRACKING_HEADER}}
+          <span class="tracking-label-row">
+            <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+              <button type="button" id="{{ID_PREFIX}}-tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+              <button type="button" id="{{ID_PREFIX}}-tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+            </span>
+          </span>
           <span class="input-with-unit input-with-unit-has-effective">
             <input type="number" class="input-field" id="{{ID_PREFIX}}-tracking" value="{{TRACKING_VALUE}}" step="any" min="0">
             <span class="effective-value mono" id="effective-{{EFFECTIVE_TRACKING_ID}}"></span>

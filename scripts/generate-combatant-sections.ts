@@ -12,22 +12,6 @@ interface PlaceholderValues {
   readonly [placeholder: string]: string;
 }
 
-function trackingHeader(side: SideConfig): string {
-  if (side.key === "shipA") {
-    return [
-      '          <span class="tracking-label-row">',
-      '            <span class="field-label" id="tracking-label-text" data-i18n="label.trackingSpeed">Tracking speed</span>',
-      '            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">',
-      '              <button type="button" id="tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>',
-      '              <button type="button" id="tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" ' +
-      'data-i18n="label.trackingScore">Score</button>',
-      '            </span>',
-      '          </span>',
-    ].join("\n");
-  }
-  return '          <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>';
-}
-
 function modeOptions(side: SideConfig): string {
   const selected = side.key === "shipA" ? "keepAtRange" : "orbit";
   const first = selected === "keepAtRange"
@@ -74,7 +58,6 @@ export function renderSection(template: string, side: SideConfig): string {
     "{{SIDE_CLASS}}": side.idPrefix,
     "{{SIDE_LABEL}}": side.label,
     "{{SIDE_KEY}}": side.i18nKey,
-    "{{TRACKING_HEADER}}": trackingHeader(side),
     "{{MODE_OPTIONS}}": modeOptions(side),
     "{{EFFECTIVE_TRACKING_ID}}": effectiveTrackingId(side),
     "{{EFFECTIVE_OPTIMAL_ID}}": effectiveOptimalId(side),

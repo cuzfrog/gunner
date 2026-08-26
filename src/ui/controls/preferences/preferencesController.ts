@@ -7,10 +7,10 @@ import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { TurretController } from "../turret";
+import type { Side } from "../side";
 
 export interface PreferencesEls {
-  readonly trackingUnitRad: HTMLButtonElement;
-  readonly trackingUnitScore: HTMLButtonElement;
+  readonly trackingUnit: Readonly<Record<Side, { readonly rad: HTMLButtonElement; readonly score: HTMLButtonElement }>>;
   readonly langEn: HTMLButtonElement;
   readonly langZh: HTMLButtonElement;
   readonly langJa: HTMLButtonElement;
@@ -87,8 +87,10 @@ export class PreferencesControllerImpl implements PreferencesController {
       contains: (domTarget) => this.containsCanvasSettings(domTarget),
     };
     this.popupGroup.register(this.canvasSettingsPopupValue);
-    this.els.trackingUnitRad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
-    this.els.trackingUnitScore.addEventListener("click", () => this.onTrackingUnitClick("score"));
+    for (const unit of Object.values(this.els.trackingUnit)) {
+      unit.rad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
+      unit.score.addEventListener("click", () => this.onTrackingUnitClick("score"));
+    }
     this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
     this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
     this.els.langJa.addEventListener("click", () => this.setLanguage("ja"));
@@ -217,8 +219,10 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   private updateUnitToggle(): void {
     const unit = this.shipATurretController.trackingUnit();
-    this.els.trackingUnitRad.setAttribute("aria-pressed", String(unit === "rad"));
-    this.els.trackingUnitScore.setAttribute("aria-pressed", String(unit === "score"));
+    for (const buttons of Object.values(this.els.trackingUnit)) {
+      buttons.rad.setAttribute("aria-pressed", String(unit === "rad"));
+      buttons.score.setAttribute("aria-pressed", String(unit === "score"));
+    }
   }
 
   private updateLanguageToggle(): void {
