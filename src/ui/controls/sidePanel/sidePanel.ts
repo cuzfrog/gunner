@@ -53,7 +53,7 @@ export class SidePanelImpl implements SidePanel {
   readonly els: SidePanelElements;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
-  readonly imageCatalog: ImageCatalog;
+  private readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly timer: Timer;
   private readonly popupGroup: PopupGroup;
@@ -142,7 +142,7 @@ export class SidePanelImpl implements SidePanel {
 
   setFittingPopup(popup: FittingPopupControl): void { this.fittingPopup = popup; }
   setFittingPreview(preview: FittingPreviewControl): void { this.fittingPreview = preview; }
-  setFittingTriggerEnabled(enabled: boolean): void { this.fittingPopup?.setTriggerEnabled(enabled); }
+  setFittingEyeEnabled(enabled: boolean): void { this.fittingPopup?.setFittingEyeEnabled(enabled); }
   setConfigInputsEnabled(enabled: boolean): void {
     const { els } = this;
     els.speed.disabled = !enabled;

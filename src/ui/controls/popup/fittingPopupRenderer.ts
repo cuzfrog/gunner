@@ -110,7 +110,6 @@ export class FittingPopupRenderer {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
-    button.setAttribute("role", "menuitem");
     if (currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey)) {
       button.setAttribute("aria-current", "true");
     }

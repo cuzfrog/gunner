@@ -103,7 +103,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     fittingText: undefined,
     lastCommittedHull: undefined,
     importer,
-    setFittingTriggerEnabled: vi.fn(),
+    setFittingEyeEnabled: vi.fn(),
     setConfigInputsEnabled: vi.fn(),
     renderFittingPopupIfOpen: vi.fn(),
     closeFittingPopupIfOpen: vi.fn(),
@@ -161,6 +161,7 @@ describe("HullSection", () => {
   test("applyHull enables the ship configuration controls and forwards the hull profile to the turret", () => {
     const { panel, section } = buildHullSection();
     section.applyHull(RIFTER);
+    expect(panel.setFittingEyeEnabled).toHaveBeenCalledWith(true);
     expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(true);
     expect(panel.setTurretProfile).toHaveBeenCalledWith(RIFTER);
   });
@@ -182,6 +183,7 @@ describe("HullSection", () => {
     panel.setConfigInputsEnabled.mockClear();
     panel.setTurretProfile.mockClear();
     section.clearHull(true, false);
+    expect(panel.setFittingEyeEnabled).toHaveBeenCalledWith(false);
     expect(panel.setConfigInputsEnabled).toHaveBeenCalledWith(false);
     expect(panel.setTurretProfile).toHaveBeenCalledWith(undefined);
   });

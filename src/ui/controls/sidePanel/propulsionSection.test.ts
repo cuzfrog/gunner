@@ -108,7 +108,7 @@ function buildPropulsionSection(ships: Ships = shipsWithPropulsion(), fittingImp
     fittingText: undefined,
     lastCommittedHull: undefined,
     importer,
-    setFittingTriggerEnabled: vi.fn(),
+    setFittingEyeEnabled: vi.fn(),
     renderFittingPopupIfOpen: vi.fn(),
     closeFittingPopupIfOpen: vi.fn(),
     hideFittingPreview: vi.fn(),

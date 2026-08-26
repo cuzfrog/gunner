@@ -33,7 +33,7 @@ export interface SidePanel {
   setHost(host: SidePanelHost): void;
   setFittingPopup(popup: FittingPopupControl): void;
   setFittingPreview(preview: FittingPreviewControl): void;
-  setFittingTriggerEnabled(enabled: boolean): void;
+  setFittingEyeEnabled(enabled: boolean): void;
   setConfigInputsEnabled(enabled: boolean): void;
   setImporter(importer: SideImporter): void;
   isOverridden(key: keyof ProfileParamOverrides): boolean;
@@ -91,7 +91,7 @@ export function stateSliceOf(combatant: CombatantSettings): SidePanelState {
 
 export interface FittingPopupControl {
   readonly popup: Popup;
-  setTriggerEnabled(enabled: boolean): void;
+  setFittingEyeEnabled(enabled: boolean): void;
   renderIfOpen(): void;
   closeIfOpen(): void;
 }

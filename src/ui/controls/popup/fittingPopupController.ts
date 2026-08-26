@@ -1,7 +1,6 @@
 import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fitting";
 import type { SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import type { Popup, PopupGroup } from "./popupGroup";
 import type { UiEvents } from "../../events";
 import { fittingAreaSelector } from "../controlsDom";
@@ -19,7 +18,6 @@ interface FittingPopupControllerDeps {
   savedFittings: SavedFittings;
   presetFittings: PresetFittings;
   fittingImport: FittingImport;
-  imageCatalog: ImageCatalog;
   i18n: I18n;
   els: FittingPopupEls;
   panel: FittingPopupHost;
@@ -30,7 +28,7 @@ interface FittingPopupControllerDeps {
 
 export interface FittingPopupController {
   readonly popup: Popup;
-  setTriggerEnabled(enabled: boolean): void;
+  setFittingEyeEnabled(enabled: boolean): void;
   renderIfOpen(): void;
   closeIfOpen(): void;
 }
@@ -75,8 +73,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
 
   get popup(): Popup { return this.popupValue; }
 
-  setTriggerEnabled(enabled: boolean): void {
-    this.renderer.fittingEls.trigger.disabled = !enabled;
+  setFittingEyeEnabled(enabled: boolean): void {
     this.renderer.fittingEls.eye.disabled = !enabled;
   }
 
@@ -89,9 +86,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
     els.popup.hidden = false;
     els.trigger.setAttribute("aria-expanded", "true");
     this.open = true;
-    const current = this.renderer.findFittingItem((item) => item.getAttribute("aria-current") === "true");
-    const first = current ?? this.renderer.findFittingItem((item) => !item.disabled);
-    first?.focus();
+    els.hull.focus();
   }
 
   private closePopup(): void {

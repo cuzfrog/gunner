@@ -15,7 +15,7 @@
   margin-top: 4px;
 }
 
-.side-panel-heading-actions .ship-select-popup {
+.side-panel-heading-actions > .ship-select-popup {
   left: 0;
   right: 0;
 }

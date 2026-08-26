@@ -1,7 +1,6 @@
 import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../../../fitting";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import { UiEventsImpl } from "../../events";
 import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
@@ -79,7 +78,6 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     canonicalName: vi.fn((name: string) => name),
   });
 
-  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = createI18n();
   const popupGroup = makePopupGroup();
   const applyFitting = vi.fn(() => options.applyFitting ?? IMPORTED_RIFTER);
@@ -99,6 +97,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     trigger: getFake(document, "ship-a-ship-select-trigger") as unknown as HTMLButtonElement,
     eye: getFake(document, "ship-a-fitting-eye") as unknown as HTMLButtonElement,
     popup: getFake(document, "ship-a-ship-select-popup") as unknown as HTMLElement,
+    hull: getFake(document, "ship-a-hull") as unknown as HTMLInputElement,
     savedList: getFake(document, "ship-a-fitting-saved-list") as unknown as HTMLElement,
     presetList: getFake(document, "ship-a-fitting-preset-list") as unknown as HTMLElement,
     savedLabel: getFake(document, "ship-a-fitting-saved-label") as unknown as HTMLElement,
@@ -112,7 +111,6 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     savedFittings,
     presetFittings,
     fittingImport,
-    imageCatalog,
     i18n,
     els,
     panel,
@@ -139,6 +137,17 @@ describe("FittingPopupController", () => {
     expect(els.savedList.children.length).toBe(1);
     expect(els.presetList.children.length).toBe(2);
     expect(els.empty.hidden).toBe(true);
+    expect(els.hull.focus).toHaveBeenCalled();
+  });
+
+  test("setFittingEyeEnabled only disables the fitting eye, not the trigger", () => {
+    const { controller, els } = createController();
+    controller.setFittingEyeEnabled(false);
+    expect(els.eye.disabled).toBe(true);
+    expect(els.trigger.disabled).toBe(false);
+    controller.setFittingEyeEnabled(true);
+    expect(els.eye.disabled).toBe(false);
+    expect(els.trigger.disabled).toBe(false);
   });
 
   test("invalid saved fittings are disabled and deletable", () => {

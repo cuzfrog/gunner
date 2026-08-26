@@ -161,12 +161,12 @@
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
             <button type="button" id="ship-a-ship-select-trigger" class="icon-button"
-                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-a-ship-select-popup"
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-a-ship-select-popup"
                     data-i18n-title="button.selectShip" data-i18n-aria-label="button.selectShip"
-                    title="Select ship & fitting" aria-label="Select ship & fitting" disabled>
+                    title="Select ship & fitting" aria-label="Select ship & fitting">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#search"></use></svg>
             </button>
-            <div class="ship-select-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-ship-select-popup" hidden role="menu"
+            <div class="ship-select-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-ship-select-popup" hidden role="dialog" aria-modal="true"
                  data-i18n-aria-label="button.selectShip" aria-label="Select ship & fitting">
               <input type="text" class="input-field ship-select-hull" id="ship-a-hull" list="hull-options"
                      autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -175,7 +175,7 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-a-fitting-saved-list"></ul>
               <span class="fitting-group-label" id="ship-a-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-a-fitting-preset-list"></ul>
-              <p class="fitting-empty" id="ship-a-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+              <p class="fitting-empty" id="ship-a-fitting-empty" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
               <span class="ship-select-hint" id="ship-a-hull-hint"></span>
             </div>
             <button type="button" id="ship-a-fitting-eye" class="fitting-eye icon-button"
@@ -310,7 +310,7 @@
             <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" class="input-field" id="ship-a-speed" value="0" step="any" min="0" aria-describedby="ship-a-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <input type="number" class="input-field" id="ship-a-speed" value="0" step="any" min="0" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-ship-a-speed"></span>
           </span>
           <input type="checkbox" id="ship-a-overload" hidden checked>
@@ -460,12 +460,12 @@
               <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
             </div>
             <button type="button" id="ship-b-ship-select-trigger" class="icon-button"
-                    aria-haspopup="menu" aria-expanded="false" aria-controls="ship-b-ship-select-popup"
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-b-ship-select-popup"
                     data-i18n-title="button.selectShip" data-i18n-aria-label="button.selectShip"
-                    title="Select ship & fitting" aria-label="Select ship & fitting" disabled>
+                    title="Select ship & fitting" aria-label="Select ship & fitting">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#search"></use></svg>
             </button>
-            <div class="ship-select-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-ship-select-popup" hidden role="menu"
+            <div class="ship-select-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-ship-select-popup" hidden role="dialog" aria-modal="true"
                  data-i18n-aria-label="button.selectShip" aria-label="Select ship & fitting">
               <input type="text" class="input-field ship-select-hull" id="ship-b-hull" list="hull-options"
                      autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -474,7 +474,7 @@
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id="ship-b-fitting-saved-list"></ul>
               <span class="fitting-group-label" id="ship-b-fitting-preset-label" data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
               <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id="ship-b-fitting-preset-list"></ul>
-              <p class="fitting-empty" id="ship-b-fitting-empty" role="menuitem" aria-disabled="true" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+              <p class="fitting-empty" id="ship-b-fitting-empty" data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
               <span class="ship-select-hint" id="ship-b-hull-hint"></span>
             </div>
             <button type="button" id="ship-b-fitting-eye" class="fitting-eye icon-button"
@@ -609,7 +609,7 @@
             <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
           </button>
           <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" class="input-field" id="ship-b-speed" value="1000" step="any" min="0" aria-describedby="ship-b-hull-hint" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
+            <input type="number" class="input-field" id="ship-b-speed" value="1000" step="any" min="0" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
             <span class="effective-value mono" id="effective-ship-b-speed"></span>
           </span>
           <input type="checkbox" id="ship-b-overload" hidden checked>

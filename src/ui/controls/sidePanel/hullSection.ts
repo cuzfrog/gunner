@@ -80,7 +80,7 @@ export class HullSection implements IHullSection {
     this.panel.profile = profile;
     this.els.hull.value = this.ships.hullView(profile, this.i18n.current()).name;
     this.setHullValidation(false);
-    this.panel.setFittingTriggerEnabled(true);
+    this.panel.setFittingEyeEnabled(true);
     this.panel.setConfigInputsEnabled(true);
     this.panel.setTurretProfile(profile);
     this.panel.renderFittingPopupIfOpen();
@@ -113,7 +113,7 @@ export class HullSection implements IHullSection {
     this.panel.hideFittingPreview();
     this.panel.lastCommittedHull = undefined;
     if (resetInput) this.els.hull.value = "";
-    this.panel.setFittingTriggerEnabled(false);
+    this.panel.setFittingEyeEnabled(false);
     this.panel.setConfigInputsEnabled(false);
     this.panel.setTurretProfile(undefined);
     this.panel.closeFittingPopupIfOpen();

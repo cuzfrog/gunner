@@ -99,7 +99,7 @@ Variants:
 
 - Toggle group buttons (`.lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
 - Primary action (`.controls button.primary`): blue border/text.
-- Icon-only buttons (`.ship-select-trigger`, `.import-fitting-button`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
+- Icon-only buttons (`.icon-button`, `.fitting-eye`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
 - Danger affordance (`.fitting-delete`): dim -> red on hover.
 
 State rules: hover swaps border/text to teal unless the control uses an orange active state (then hover stays teal, active is orange). Disabled = `opacity` + `cursor: not-allowed` (or `pointer-events: none` for groups).
