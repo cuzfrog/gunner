@@ -39,6 +39,7 @@ function createManager(options: {
     importFitting: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(() => options.summarize ?? PREVIEW_SUMMARY),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId) => String(id)),

@@ -1,5 +1,6 @@
 import type { ShipId } from "../gamedata/ids";
 import type { ShipProfile, Ships } from "../ships";
+import { resolveHull } from "./settingsCompat";
 import type { StorageProvider } from "./providers";
 
 export interface SavedFitting {
@@ -107,7 +108,7 @@ function parseSavedFittings(raw: string, ships: Ships): { version: number; state
     const parsed: unknown = JSON.parse(raw);
     if (!isSavedFittingStorage(parsed)) return { version: -1, state: { resolved: [], unresolved: [] } };
     if (parsed.version === 1) return { version: 1, state: migrateV1Fittings(parsed, ships) };
-    if (parsed.version === SAVED_FITTINGS_VERSION) return { version: SAVED_FITTINGS_VERSION, state: parseV2Fittings(parsed, ships) };
+    if (parsed.version === SAVED_FITTINGS_VERSION) return { version: SAVED_FITTINGS_VERSION, state: parseV2Fittings(parsed) };
     return { version: parsed.version, state: { resolved: [], unresolved: [] } };
   } catch {
     return { version: -1, state: { resolved: [], unresolved: [] } };
@@ -140,7 +141,7 @@ function migrateV1Fittings(storage: { version: number; fittings: unknown[]; unre
   return { resolved, unresolved };
 }
 
-function parseV2Fittings(storage: { version: number; fittings: unknown[]; unresolved?: unknown[] }, ships: Ships): SavedFittingsState {
+function parseV2Fittings(storage: { version: number; fittings: unknown[]; unresolved?: unknown[] }): SavedFittingsState {
   const resolved: SavedFitting[] = [];
   for (const value of storage.fittings) {
     if (isSavedFitting(value)) resolved.push(value);
@@ -152,12 +153,6 @@ function parseV2Fittings(storage: { version: number; fittings: unknown[]; unreso
     }
   }
   return { resolved, unresolved };
-}
-
-function resolveHull(hull: string, ships: Ships): ShipProfile | undefined {
-  const trimmed = hull.trim();
-  const byId = /^\d+$/.test(trimmed) ? ships.findHullById(trimmed as ShipId) : undefined;
-  return byId ?? ships.findHull(trimmed);
 }
 
 function isLegacyFitting(value: unknown): value is LegacyFitting {

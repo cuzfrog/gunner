@@ -1,5 +1,7 @@
+import type { ChargeCatalog } from "../fitting";
+import type { ShipId, TypeId } from "../gamedata/ids";
 import type { AutopilotMode, SigResolutionClass } from "../sim";
-import type { SkillLevel } from "../ships";
+import type { ShipProfile, Ships, SkillLevel } from "../ships";
 import type { FittedHullSummary, PropulsionSelection, StoredBoosterActivation, StoredEwarActivation } from "./userSettings";
 
 const SHIP_A_LEGACY_PREFIX = "attacker";
@@ -39,6 +41,24 @@ export interface LegacyUserSettings {
   targetEwarActivation?: StoredEwarActivation;
   targetBoosterActivation?: readonly StoredBoosterActivation[];
   targetOverrides?: Record<string, unknown>;
+}
+
+export function resolveHullId(name: string, ships: Ships): ShipId | undefined {
+  const trimmed = name.trim();
+  if (/^\d+$/.test(trimmed)) return trimmed as ShipId;
+  return ships.findHull(trimmed)?.id;
+}
+
+export function resolveHull(name: string, ships: Ships): ShipProfile | undefined {
+  const trimmed = name.trim();
+  if (/^\d+$/.test(trimmed)) return ships.findHullById(trimmed as ShipId);
+  return ships.findHull(trimmed);
+}
+
+export function resolveAmmoId(name: string, chargeCatalog: ChargeCatalog): TypeId | undefined {
+  const trimmed = name.trim();
+  if (/^\d+$/.test(trimmed)) return trimmed as TypeId;
+  return chargeCatalog.idForName(trimmed);
 }
 
 export function normalizeLegacySettings(record: Record<string, unknown>): void {

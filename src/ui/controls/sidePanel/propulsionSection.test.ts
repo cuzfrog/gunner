@@ -28,6 +28,7 @@ function fittingForPropulsion(): FittingImport {
   const fitting = vi.mocked<FittingImport>(mockFittingImport());
   fitting.propulsionVariantNames = vi.fn(() => [{ id: asTypeId("1MN Afterburner I"), name: "1MN Afterburner I" }]);
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
+  fitting.propulsionStatsById = vi.fn(() => AB_MODULE);
   fitting.itemNameForId = vi.fn(() => "1MN加力燃烧器 I");
   return fitting;
 }

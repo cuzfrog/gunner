@@ -137,6 +137,7 @@ export function buildImportController(document: Document) {
     importFitting: vi.fn((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : undefined)),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),

@@ -96,6 +96,7 @@ export const FITTED_PROPULSION = {
 export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
   propulsionId: "ab-1mn",
+  propulsionModuleId: "439" as TypeId,
   propulsionName: "1MN Afterburner I",
   propulsionKind: "afterburner",
   fitted: FITTED_HULL,
@@ -123,7 +124,7 @@ export const RIFTER_MODULE: PropulsionModule = {
   massAddition: 500_000,
   sigBloom: 5,
 };
-export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn" };
+export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn", propulsionModuleId: "434" as TypeId };
 export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5 };
 export const RIFTER_BASE_STATS: ShipStats = {
   mass: 1_000_000,
@@ -177,6 +178,8 @@ export let chargeCatalog: ChargeCatalog;
 const NAME_FOR_ID: Record<string, string> = {
   "12608": "Hail S",
   "21898": "Republic Fleet EMP S",
+  "5973": "5MN Y-T8 Compact Microwarpdrive",
+  "439": "1MN Afterburner I",
 };
 
 export function makeFittingImport() {
@@ -184,6 +187,7 @@ export function makeFittingImport() {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
+    propulsionStatsById: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),

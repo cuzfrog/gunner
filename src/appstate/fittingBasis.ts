@@ -1,4 +1,5 @@
 import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { TypeId } from "../gamedata/ids";
 import type { PropulsionId, PropulsionStats, Ships } from "../ships";
 import { PROPULSION_NONE, type FittedHullSummary, type UserSettings } from "./userSettings";
 
@@ -34,33 +35,54 @@ export class FittingBasis {
     let activePropulsionId: PropulsionId | undefined;
     let activePropulsion: PropulsionStats | undefined;
     let activePropulsionName: string | undefined;
+    let activePropulsionModuleId: TypeId | undefined;
 
     if (!explicitNone) {
       activePropulsionId = storedPropulsionId ?? importedPropulsionId;
-      if (activePropulsionId && storedFittedHull?.propulsionId === activePropulsionId && storedFittedHull.propulsionName) {
-        const exact = this.fittingImport.propulsionStats(storedFittedHull.propulsionName);
-        if (exact) {
-          activePropulsion = exact;
-          activePropulsionName = storedFittedHull.propulsionName;
+      if (activePropulsionId && storedFittedHull?.propulsionId === activePropulsionId) {
+        const storedModuleId = storedFittedHull.propulsionModuleId;
+        const storedName = storedFittedHull.propulsionName;
+        if (storedModuleId) {
+          const exact = this.fittingImport.propulsionStatsById(storedModuleId);
+          if (exact) {
+            activePropulsion = exact;
+            activePropulsionModuleId = storedModuleId;
+            activePropulsionName = this.fittingImport.itemNameForId(storedModuleId, "en");
+          }
+        }
+        if (!activePropulsion && storedName) {
+          const exact = this.fittingImport.propulsionStats(storedName);
+          if (exact) {
+            activePropulsion = exact;
+            activePropulsionName = storedName;
+          }
         }
       }
       if (!activePropulsion) {
         const generic = activePropulsionId ? this.ships.fittingOption(profile, activePropulsionId) : undefined;
         if (generic) {
           const variants = this.fittingImport.propulsionVariantNames(generic);
-          activePropulsionName = variants.find((variant) => variant.name === generic.label)?.name ?? variants[0]?.name ?? generic.label;
-          activePropulsion = this.fittingImport.propulsionStats(activePropulsionName) ?? generic;
+          const defaultVariant = variants.find((variant) => variant.name === generic.label) ?? variants[0];
+          activePropulsionName = defaultVariant ? this.fittingImport.itemNameForId(defaultVariant.id, "en") : generic.label;
+          if (defaultVariant) {
+            activePropulsionModuleId = defaultVariant.id;
+            activePropulsion = this.fittingImport.propulsionStatsById(defaultVariant.id) ?? generic;
+          } else {
+            activePropulsion = generic;
+          }
         }
       }
       if (!activePropulsion && importedPropulsion) {
         activePropulsion = importedPropulsion;
         activePropulsionId = importedPropulsionId;
+        activePropulsionModuleId = importedPropulsion.propulsionModuleId;
         activePropulsionName = importedPropulsion.propulsionName ?? activePropulsionName;
       }
     }
     const fittedPropulsion = explicitNone ? importedPropulsion : activePropulsion;
     const fittedPropulsionId = explicitNone ? importedPropulsionId : activePropulsionId;
     const fittedPropulsionName = explicitNone ? importedPropulsion?.propulsionName : activePropulsionName;
+    const fittedPropulsionModuleId = explicitNone ? importedPropulsion?.propulsionModuleId : activePropulsionModuleId;
     const overrides = side === "shipA" ? settings.shipAOverrides : settings.shipBOverrides;
     const override = overrides ?? {};
     const speedOverride = side === "shipA" ? override.shipASpeed : override.shipBSpeed;
@@ -68,6 +90,7 @@ export class FittingBasis {
     const fittedHull: FittedHullSummary = {
       fittingName: imported.fittingName,
       propulsionId: fittedPropulsionId,
+      propulsionModuleId: fittedPropulsionModuleId,
       propulsionName: fittedPropulsionName,
       propulsionKind: fittedPropulsionId !== undefined ? this.ships.fittingOption(profile, fittedPropulsionId)?.kind : undefined,
       fitted: imported.fitted,

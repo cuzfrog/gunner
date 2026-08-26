@@ -652,6 +652,7 @@ describe("LocalSettingsStore", () => {
 
   test("loadStartupState preserves an exact propulsion variant from the fitted hull summary", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
+    fittingImport.propulsionStatsById = vi.fn((id: TypeId) => (id === "5973" ? COMPACT_MWD : undefined));
     fittingImport.propulsionStats = vi.fn((name: string) => (name === "5MN Y-T8 Compact Microwarpdrive" ? COMPACT_MWD : undefined));
     ships.fittingOption = vi.fn(() => RIFTER_MODULE);
     ships.fittedStats = vi.fn(() => RIFTER_MWD_STATS);
@@ -663,6 +664,7 @@ describe("LocalSettingsStore", () => {
       shipAFittedHull: {
         ...FITTED_HULL_SUMMARY,
         propulsionId: "mwd-5mn",
+        propulsionModuleId: "5973" as TypeId,
         propulsionName: "5MN Y-T8 Compact Microwarpdrive",
         propulsion: COMPACT_MWD,
       },
@@ -672,6 +674,7 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
+    expect(loaded!.shipAFittedHull?.propulsionModuleId).toBe("5973" as TypeId);
     expect(loaded!.shipAFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
     expect(loaded!.shipAFittedHull?.propulsion).toEqual(COMPACT_MWD);
     expect(loaded!.shipASpeed).toBe(4_650);

@@ -1,4 +1,5 @@
 import type { FittingImport } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { FittedHull, PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -121,19 +122,22 @@ export class PropulsionSection implements IPropulsionSection {
     if (propulsionId) {
       const module = this.ships.fittingOption(profile, propulsionId);
       if (module) {
-        const propulsionName = this.defaultPropulsionName(module);
-        const propulsion = this.fittingImport.propulsionStats(propulsionName) ?? module;
+        const variant = this.defaultPropulsionVariant(module);
+        const propulsionModuleId = variant?.id;
+        const propulsionName = variant?.name ?? module.label;
+        const propulsion = (propulsionModuleId ? this.fittingImport.propulsionStatsById(propulsionModuleId) : undefined) ?? module;
         updated = {
           fittingName: fitted?.fittingName ?? "",
           fitted: fitted?.fitted ?? this.nakedFitted(profile),
           propulsionId,
+          propulsionModuleId,
           propulsionName,
           propulsionKind: module.kind,
           propulsion,
         };
       }
     } else if (fitted) {
-      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionName: undefined, propulsionKind: undefined, propulsion: undefined } : undefined;
+      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionModuleId: undefined, propulsionName: undefined, propulsionKind: undefined, propulsion: undefined } : undefined;
     }
     if (updated) {
       this.panel.fittedHull = updated;
@@ -167,9 +171,13 @@ export class PropulsionSection implements IPropulsionSection {
     this.els.propulsion.dispatchEvent(new Event("change"));
   }
 
-  defaultPropulsionName(module: PropulsionModule): string {
+  defaultPropulsionVariant(module: PropulsionModule): { readonly id: TypeId; readonly name: string } | undefined {
     const variants = this.fittingImport.propulsionVariantNames(module);
-    return variants.find((variant) => variant.name === module.label)?.name ?? variants[0]?.name ?? module.label;
+    return variants.find((variant) => variant.name === module.label) ?? variants[0];
+  }
+
+  defaultPropulsionName(module: PropulsionModule): string {
+    return this.defaultPropulsionVariant(module)?.name ?? module.label;
   }
 
   nakedFitted(profile: ShipProfile): FittedHull {

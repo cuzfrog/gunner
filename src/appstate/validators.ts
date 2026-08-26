@@ -170,6 +170,7 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   if (!isFittedHull(s.fitted)) return false;
   if (!isOptionalPropulsionStats(s.propulsion)) return false;
   if (s.propulsionId !== undefined && typeof s.propulsionId !== "string") return false;
+  if (s.propulsionModuleId !== undefined && typeof s.propulsionModuleId !== "string") return false;
   if (s.propulsionName !== undefined && typeof s.propulsionName !== "string") return false;
   if (s.propulsionKind !== undefined && !isPropulsionKind(s.propulsionKind)) return false;
   if (s.baseMaxSpeed !== undefined && !isNonNegative(s.baseMaxSpeed)) return false;

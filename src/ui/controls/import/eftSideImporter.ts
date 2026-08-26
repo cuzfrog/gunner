@@ -55,6 +55,7 @@ export class EftSideImporter {
     return {
       fittingName: imported.fittingName,
       propulsionId,
+      propulsionModuleId: imported.propulsion?.propulsionModuleId,
       propulsionName: imported.propulsion?.propulsionName,
       propulsionKind: propulsionId !== undefined ? this.panel(side).ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
       fitted: imported.fitted,

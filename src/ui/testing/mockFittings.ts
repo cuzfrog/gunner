@@ -49,6 +49,7 @@ export function mockFittingImport(): FittingImport {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
+    propulsionStatsById: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId, _language: string) => NAME_FOR_ID[id] ?? id),

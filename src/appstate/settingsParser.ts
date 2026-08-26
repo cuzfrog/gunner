@@ -12,7 +12,7 @@ import { clampManeuverAggressivity } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
-import { normalizeLegacySettings, type LegacyUserSettings } from "./settingsCompat";
+import { normalizeLegacySettings, resolveAmmoId, resolveHullId, type LegacyUserSettings } from "./settingsCompat";
 import { toCombatantSettings, type CombatantSettings, type InternalUserSettings } from "./combatantSettings";
 import type { SettingGuards } from "./settingGuards";
 import {
@@ -189,19 +189,19 @@ export class SettingsParser {
     const ammoKey = `${side}Ammo`;
     const hullValue = record[hullKey];
     if (record[hullIdKey] === undefined && typeof hullValue === "string") {
-      const profile = this.ships.findHull(hullValue);
-      if (profile) record[hullIdKey] = profile.id;
+      const id = resolveHullId(hullValue, this.ships);
+      if (id) record[hullIdKey] = id;
       delete record[hullKey];
     }
     const hullIdValue = record[hullIdKey];
     if (typeof hullIdValue === "string" && !/^\d+$/.test(hullIdValue)) {
-      const profile = this.ships.findHull(hullIdValue);
-      if (profile) record[hullIdKey] = profile.id;
+      const id = resolveHullId(hullIdValue, this.ships);
+      if (id) record[hullIdKey] = id;
     }
     const ammoValue = record[ammoKey];
     if (typeof ammoValue === "string") {
       if (!/^\d+$/.test(ammoValue)) {
-        const id = this.chargeCatalog.idForName(ammoValue);
+        const id = resolveAmmoId(ammoValue, this.chargeCatalog);
         record[ammoKey] = id ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
       }
     }

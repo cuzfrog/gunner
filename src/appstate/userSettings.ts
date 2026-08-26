@@ -24,6 +24,7 @@ export interface StoredEwarActivation {
 export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
+  readonly propulsionModuleId?: TypeId;
   readonly propulsionName?: string;
   readonly propulsionKind?: PropulsionKind;
   readonly fitted: FittedHull;

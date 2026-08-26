@@ -1,5 +1,6 @@
 import type { FittingImport } from "../../../fitting";
-import type { FittedHull, PropulsionModule, ShipProfile } from "../../../ships";
+import type { TypeId } from "../../../gamedata/ids";
+import type { PropulsionModule, ShipProfile } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary } from "../../../appstate";
@@ -58,9 +59,9 @@ export class PropulsionVariantSection {
     return this.propulsionVariantPopupOpen;
   }
 
-  onPropulsionVariantClick(name: string): void {
+  onPropulsionVariantClick(id: TypeId, name: string): void {
     const profile = this.panel.profile;
-    const propulsion = this.fittingImport.propulsionStats(name);
+    const propulsion = this.fittingImport.propulsionStatsById(id);
     const propulsionId = this.panel.sections.propulsion.currentPropulsionId();
     if (!profile || !propulsion || !propulsionId) return;
     const fitted = this.panel.fittedHull;
@@ -68,6 +69,7 @@ export class PropulsionVariantSection {
       fittingName: fitted?.fittingName ?? "",
       fitted: fitted?.fitted ?? this.panel.sections.propulsion.nakedFitted(profile),
       propulsionId,
+      propulsionModuleId: id,
       propulsionName: name,
       propulsionKind: this.panel.sections.propulsion.currentPropulsionModule()?.kind,
       propulsion,
@@ -85,15 +87,22 @@ export class PropulsionVariantSection {
     popup.innerHTML = "";
     if (!module) return;
     const fitted = this.panel.fittedHull;
-    const currentName = fitted?.propulsionName ?? this.panel.sections.propulsion.defaultPropulsionName(module);
+    const currentId = this.currentPropulsionVariantId(module, fitted);
     for (const variant of this.fittingImport.propulsionVariantNames(module)) {
       const iconUrl = this.imageCatalog.itemIconUrl(variant.name);
       const displayName = this.fittingImport.itemNameForId(variant.id, this.i18n.current());
-      const item = this.createVariantButton(variant.name, currentName, iconUrl, displayName, () => this.onPropulsionVariantClick(variant.name));
-      item.setAttribute("data-value", variant.name);
+      const item = this.createVariantButton(variant.id, currentId, iconUrl, displayName, () => this.onPropulsionVariantClick(variant.id, variant.name));
+      item.setAttribute("data-value", variant.id);
       item.setAttribute("title", displayName);
       popup.appendChild(item);
     }
+  }
+
+  private currentPropulsionVariantId(module: PropulsionModule, fitted: FittedHullSummary | undefined): TypeId | undefined {
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    if (fitted?.propulsionModuleId !== undefined) return fitted.propulsionModuleId;
+    if (fitted?.propulsionName !== undefined) return variants.find((variant) => variant.name === fitted.propulsionName)?.id;
+    return variants.find((variant) => variant.name === module.label)?.id ?? variants[0]?.id;
   }
 
   updateUI(): void {
@@ -102,8 +111,8 @@ export class PropulsionVariantSection {
   }
 
   private createVariantButton(
-    name: string,
-    currentName: string,
+    id: TypeId,
+    currentId: TypeId | undefined,
     iconUrl: string | undefined,
     displayName: string,
     onClick: () => void,
@@ -112,7 +121,7 @@ export class PropulsionVariantSection {
     button.type = "button";
     button.className = "fitting-item btn";
     button.setAttribute("role", "menuitem");
-    if (currentName === name) button.setAttribute("aria-current", "true");
+    if (currentId === id) button.setAttribute("aria-current", "true");
     if (iconUrl) {
       const icon = document.createElement("img");
       icon.className = "propulsion-icon";

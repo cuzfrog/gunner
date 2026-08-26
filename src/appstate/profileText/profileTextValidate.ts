@@ -17,6 +17,7 @@ import type { ChargeCatalog } from "../../fitting";
 import type { ShipId, TypeId } from "../../gamedata/ids";
 import type { SettingGuards } from "../settingGuards";
 import type { Ships } from "../../ships";
+import { resolveAmmoId, resolveHullId } from "../settingsCompat";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
 
 const DEFAULT_TURRET_CHARGE_SIZE = 1;
@@ -41,9 +42,9 @@ export function parseScalarValue(
     return guards.isSigResolutionClass(value) ? value : undefined;
   }
   if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
-  if (field === "shipAHullId" || field === "shipBHullId") return resolveHullId(value, ships);
+  if (field === "shipAHullId" || field === "shipBHullId") return resolveLegacyHullId(value, ships);
   if (field === "shipAPropulsion" || field === "shipBPropulsion") return value;
-  if (field === "shipAAmmo" || field === "shipBAmmo") return resolveAmmoId(value, chargeCatalog);
+  if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
 
 
   const num = Number(value);
@@ -186,14 +187,10 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
   return result;
 }
 
-function resolveHullId(value: string, ships: Ships): ShipId | undefined {
-  const trimmed = value.trim();
-  if (/^\d+$/.test(trimmed)) return trimmed as ShipId;
-  return ships.findHull(trimmed)?.id;
+function resolveLegacyHullId(value: string, ships: Ships): ShipId | undefined {
+  return resolveHullId(value, ships);
 }
 
-function resolveAmmoId(value: string, chargeCatalog: ChargeCatalog): TypeId {
-  const trimmed = value.trim();
-  if (/^\d+$/.test(trimmed)) return trimmed as TypeId;
-  return chargeCatalog.idForName(trimmed) ?? chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
+function resolveLegacyAmmoId(value: string, chargeCatalog: ChargeCatalog): TypeId {
+  return resolveAmmoId(value, chargeCatalog) ?? chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
 }

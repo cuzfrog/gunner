@@ -108,6 +108,7 @@ export function buildTurret(
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn(itemNameForId),

@@ -74,6 +74,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     importFitting: vi.fn(() => (options.invalid ? undefined : IMPORTED_RIFTER)),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
