@@ -1,4 +1,5 @@
-import type { ShipId, TypeId } from "../../gamedata/ids";
+import { toShipId, toTypeId } from "../../gamedata/ids";
+import { StaticItemNameResolver } from "../../gamedata/itemNames";
 import { isAutopilotMode, isSigResolutionClass } from "../../sim";
 import { ProfileTextParser } from "./profileTextParser";
 import { ProfileTextSerializer } from "./profileTextSerializer";
@@ -11,7 +12,8 @@ const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();
-const parser = new ProfileTextParser(guards, ships, chargeCatalog);
+const itemNameResolver = new StaticItemNameResolver();
+const parser = new ProfileTextParser(guards, ships, chargeCatalog, itemNameResolver);
 const serializer = new ProfileTextSerializer();
 
 describe("profileTextParser", () => {
@@ -75,7 +77,7 @@ describe("profileTextParser", () => {
 
   test("reads a global ammo line", () => {
     const text = `# gunner v1\nversion=11\nammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40\nsimSpeed=4`;
-    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: "12608" as TypeId });
+    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: toTypeId("12608") });
   });
 
   test("ignores an ewar activation line with an invalid disruptor script", () => {
@@ -90,12 +92,12 @@ describe("profileTextParser", () => {
 
   test("still accepts a legacy shipA.ammo line", () => {
     const text = `# gunner v1\nversion=11\nshipA.ammo=Hail S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40\nsimSpeed=4`;
-    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: "12608" as TypeId });
+    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipAAmmo: toTypeId("12608") });
   });
 
   test("reads a shipB ammo line", () => {
     const text = `# gunner v1\nversion=11\nshipB.ammo=Republic Fleet EMP S\ntracking=0.32\nsigRes=S\noptimal=5000\nfalloff=5000\nshipA.speed=0\nshipA.mode=keepAtRange\nshipA.range=5000\nshipA.mass=1200000\nshipA.inertia=3\ninitialDistance=5000\nshipB.speed=1000\nshipB.mode=orbit\nshipB.range=5000\nshipB.mass=10000000\nshipB.inertia=0.45\nshipB.sig=40\nsimSpeed=4`;
-    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipBAmmo: "21898" as TypeId });
+    expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipBAmmo: toTypeId("21898") });
   });
 
   test("resolves a legacy-wraith hull id in profile text", () => {
@@ -121,7 +123,7 @@ shipB.sig=40
 simSpeed=4`;
     expect(parser.parse(text)).toEqual({
       ...MINIMAL_PROFILE,
-      shipAHullId: "legacy-wraith" as ShipId,
+      shipAHullId: toShipId("legacy-wraith"),
     });
   });
 
@@ -173,7 +175,7 @@ shipB.sig=40
 simSpeed=4`;
     expect(parser.parse(text)).toEqual({
       ...MINIMAL_PROFILE,
-      shipBHullId: "16242" as ShipId,
+      shipBHullId: toShipId("16242"),
     });
   });
 
@@ -231,8 +233,8 @@ shipB.sig=40
 simSpeed=4`;
     expect(parser.parse(text)).toEqual({
       ...MINIMAL_PROFILE,
-      shipAHullId: "587" as ShipId,
-      shipAAmmo: "12608" as TypeId,
+      shipAHullId: toShipId("587"),
+      shipAAmmo: toTypeId("12608"),
     });
   });
 

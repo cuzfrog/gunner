@@ -23,7 +23,7 @@ import {
   type UserSettings,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
-import type { ShipId, TypeId } from "../gamedata/ids";
+import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 
 const testGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 
@@ -109,8 +109,8 @@ describe("SettingsParser", () => {
     expect(parsed).not.toBeNull();
     expect(parsed!.shipAEwarActivation?.grapplers).toEqual([{ active: true, overloaded: true }]);
     expect(parsed!.shipBEwarActivation?.grapplers).toEqual([{ active: false, overloaded: true }]);
-    expect(parsed!.shipABoosterActivation).toEqual(v10.shipABoosterActivation);
-    expect(parsed!.shipBBoosterActivation).toEqual(v10.shipBBoosterActivation);
+    expect(parsed!.shipABoosterActivation).toEqual([{ active: true, script: toTypeId("28999") }, { active: false, script: "none" }]);
+    expect(parsed!.shipBBoosterActivation).toEqual([{ active: true, script: toTypeId("29001") }]);
   });
 
   test("parseUserSettings leaves absent ewar and booster activation fields undefined", () => {
@@ -137,7 +137,7 @@ describe("SettingsParser", () => {
       { active: false, script: "none" },
       { active: true, script: "none" },
     ]);
-    expect(parsed!.shipBBoosterActivation).toEqual([{ active: false, script: "Optimal Range Script" }]);
+    expect(parsed!.shipBBoosterActivation).toEqual([{ active: false, script: toTypeId("28999") }]);
   });
 
   test("parseUserSettings rejects malformed booster activations like it does for ewar", () => {
@@ -157,9 +157,9 @@ describe("SettingsParser", () => {
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(v6));
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Tracking Speed Disruption Script" });
+    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: toTypeId("29007") });
     expect(parsed!.shipAEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: true });
-    expect(parsed!.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+    expect(parsed!.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: toTypeId("29005") });
     expect(parsed!.shipBEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
   });
 
@@ -179,7 +179,7 @@ describe("SettingsParser", () => {
     });
     expect(parsed!.shipBEwarActivation).toEqual({
       webs: [{ active: false, overloaded: true }],
-      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+      disruptors: [{ active: true, overloaded: true, script: toTypeId("29005") }],
     });
   });
 
@@ -214,14 +214,14 @@ describe("SettingsParser", () => {
     expect(second).toEqual(first);
   });
 
-  test("parseUserSettings leaves unknown disruptor script names unchanged", () => {
+  test("parseUserSettings falls back to none for unknown disruptor script names", () => {
     const input = {
       ...DEFAULT_SETTINGS,
       shipAEwarActivation: { disruptors: [{ active: true, script: "custom script" }] },
     };
     const parsed = makeParser().parseUserSettings(JSON.stringify(input));
     expect(parsed).not.toBeNull();
-    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "custom script" });
+    expect(parsed!.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "none" });
   });
 
   test("parseUserSettings normalizes legacy attacker and target keys to shipA and shipB", () => {
@@ -575,7 +575,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, settingGuards: testGuards });
     const override = 2000;
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
@@ -595,7 +595,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, settingGuards: testGuards });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, settingGuards: testGuards });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",

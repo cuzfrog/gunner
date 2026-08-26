@@ -5,6 +5,7 @@ import type { SettingsParser } from "./settingsParser";
 import type { ProfileTextCodec } from "./profileText";
 import type { ProfileEquality } from "./profileEquality";
 import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { ItemNameResolver } from "../gamedata/itemNames";
 import type { Ships } from "../ships";
 import type { SettingGuards } from "./settingGuards";
 
@@ -21,4 +22,5 @@ export interface AppstateCradle {
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
   readonly chargeCatalog: ChargeCatalog;
+  readonly itemNameResolver: ItemNameResolver;
 }

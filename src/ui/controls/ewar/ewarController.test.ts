@@ -1,4 +1,4 @@
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
 import type { DisruptionScriptSpec, EwarLoadout, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
@@ -18,13 +18,13 @@ function asTypeId(value: string): TypeId { return value as TypeId; }
 const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: asTypeId("Stasis Webifier I"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
 const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: asTypeId("Stasis Webifier II"), maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
 const WEB3: StasisWebSpec = { ...WEB, moduleName: "Stasis Webifier III" };
-const OPTIMAL_SCRIPT: DisruptionScriptSpec = {
-  name: "Optimal Range Disruption Script", moduleId: asTypeId("Optimal Range Disruption Script"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2,
+const OPTIMAL_SCRIPT: DisruptionScriptSpec & { readonly moduleId: TypeId } = {
+  name: "Optimal Range Disruption Script", moduleId: toTypeId("29005"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2,
 };
-const TRACKING_SCRIPT: DisruptionScriptSpec = {
-  name: "Tracking Speed Disruption Script", moduleId: asTypeId("Tracking Speed Disruption Script"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0,
+const TRACKING_SCRIPT: DisruptionScriptSpec & { readonly moduleId: TypeId } = {
+  name: "Tracking Speed Disruption Script", moduleId: toTypeId("29007"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0,
 };
-const SCRIPTS: readonly DisruptionScriptSpec[] = [OPTIMAL_SCRIPT, TRACKING_SCRIPT];
+const SCRIPTS: readonly (DisruptionScriptSpec & { readonly moduleId: TypeId })[] = [OPTIMAL_SCRIPT, TRACKING_SCRIPT];
 const DISRUPTOR: TrackingDisruptorSpec = {
   moduleName: "Tracking Disruptor I", moduleId: asTypeId("Tracking Disruptor I"), optimal: 10000, falloff: 30000,
   disruption: -0.2, defaultScript: undefined, overloadStrengthBonusPercent: 20,
@@ -110,8 +110,15 @@ function buildEwarController(
   shipAPopup.hidden = true;
   shipBPopup.hidden = true;
   if (beforeConstruct) beforeConstruct(document, els);
+  const NAME_FOR_ID: Record<string, string> = {
+    "29005": "Optimal Range Disruption Script",
+    "29007": "Tracking Speed Disruption Script",
+  };
   const fittingImport = vi.mocked(mockFittingImport());
-  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
+  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
+    const name = NAME_FOR_ID[id] ?? id;
+    return lang === "en" ? name : `${name} (${lang})`;
+  });
   const ewarEffectDescriber = vi.mocked<EwarEffectDescriber>({
     webDescription: vi.fn(() => "web-title"),
     webHint: vi.fn(() => "web-hint"),
@@ -402,24 +409,24 @@ describe("EwarController", () => {
     firstGear.trigger("click");
     const firstScriptPopup = scriptPopupFor(document, "shipB");
     expect(firstScriptPopup.hidden).toBe(false);
-    scriptOptionFor(firstScriptPopup, "Optimal Range Disruption Script")!.trigger("click");
-    expect(controller.capture("shipB")?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    scriptOptionFor(firstScriptPopup, String(OPTIMAL_SCRIPT.moduleId))!.trigger("click");
+    expect(controller.capture("shipB")?.disruptors?.[0]?.script).toBe(OPTIMAL_SCRIPT.moduleId);
     expect(firstGear.getAttribute("title")).toBe("Optimal Range Disruption Script");
 
     const secondRow = section.children[2];
     const secondGear = gearFor(secondRow);
     secondGear.trigger("click");
     const secondScriptPopup = scriptPopupFor(document, "shipB");
-    scriptOptionFor(secondScriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
-    expect(controller.capture("shipB")?.disruptors?.[1]?.script).toBe("Tracking Speed Disruption Script");
+    scriptOptionFor(secondScriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
+    expect(controller.capture("shipB")?.disruptors?.[1]?.script).toBe(TRACKING_SCRIPT.moduleId);
 
     const captured = controller.capture("shipB");
     expect(captured).toEqual({
       webs: [],
       grapplers: [],
       disruptors: [
-        { active: true, overloaded: false, script: "Optimal Range Disruption Script" },
-        { active: true, overloaded: false, script: "Tracking Speed Disruption Script" },
+        { active: true, overloaded: false, script: OPTIMAL_SCRIPT.moduleId },
+        { active: true, overloaded: false, script: TRACKING_SCRIPT.moduleId },
       ],
     });
 
@@ -444,9 +451,9 @@ describe("EwarController", () => {
       ],
       grapplers: [],
       disruptors: [
-        { active: false, overloaded: true, script: "Tracking Speed Disruption Script" },
+        { active: false, overloaded: true, script: TRACKING_SCRIPT.moduleId },
         { active: true, overloaded: false, script: "none" },
-        { active: true, overloaded: true, script: "Optimal Range Disruption Script" },
+        { active: true, overloaded: true, script: OPTIMAL_SCRIPT.moduleId },
       ],
     };
     controller.setLoadout("shipA", longLoadout);
@@ -456,7 +463,7 @@ describe("EwarController", () => {
     expect(controller.capture("shipA")).toEqual({
       webs: [{ active: false, overloaded: true }, { active: true, overloaded: false }],
       grapplers: [],
-      disruptors: [{ active: false, overloaded: true, script: "Tracking Speed Disruption Script" }],
+      disruptors: [{ active: false, overloaded: true, script: TRACKING_SCRIPT.moduleId }],
     });
   });
 
@@ -492,13 +499,13 @@ describe("EwarController", () => {
     const firstGear = gearFor(disruptorSec.children[1]);
     firstGear.trigger("click");
     const scriptPopup = scriptPopupFor(document, "shipB");
-    scriptOptionFor(scriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
+    scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
 
     expect(controller.capture("shipB")).toEqual({
       webs: [{ active: true, overloaded: false }, { active: false, overloaded: false }],
       grapplers: [],
       disruptors: [
-        { active: true, overloaded: false, script: "Tracking Speed Disruption Script" },
+        { active: true, overloaded: false, script: TRACKING_SCRIPT.moduleId },
         { active: false, overloaded: false, script: "none" },
       ],
     });
@@ -537,9 +544,9 @@ describe("EwarController", () => {
     expect(gear.getAttribute("aria-expanded")).toBe("true");
     expect(scriptPopup.children.length).toBe(4);
     expect(scriptPopup.children[0].textContent).toBe(DISRUPTOR2.moduleName);
-    expect(selectedScriptOption(scriptPopup)?.getAttribute("data-value")).toBe("Optimal Range Disruption Script");
+    expect(selectedScriptOption(scriptPopup)?.getAttribute("data-value")).toBe(String(OPTIMAL_SCRIPT.moduleId));
 
-    scriptOptionFor(scriptPopup, "Tracking Speed Disruption Script")!.trigger("click");
+    scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
     expect(scriptPopup.hidden).toBe(true);
     expect(gear.getAttribute("aria-expanded")).toBe("false");
     expect(gear.getAttribute("title")).toBe("Tracking Speed Disruption Script");
@@ -548,7 +555,7 @@ describe("EwarController", () => {
     expect(controller.capture("shipA")).toEqual({
       webs: [],
       grapplers: [],
-      disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }],
+      disruptors: [{ active: true, overloaded: false, script: TRACKING_SCRIPT.moduleId }],
     });
   });
 
@@ -617,7 +624,7 @@ describe("EwarController", () => {
     expect(noneOption.children[0].textContent).toBe("ewar.script.none");
     expect(noneOption.title).toBe("ewar.script.none.hint");
 
-    const optimalOption = scriptOptionFor(scriptPopup, "Optimal Range Disruption Script")!;
+    const optimalOption = scriptOptionFor(scriptPopup, String(OPTIMAL_SCRIPT.moduleId))!;
     expect(optimalOption.children[0].tagName).toBe("IMG");
     expect(optimalOption.children[0].src).toBe("icons/Optimal_Range_Disruption_Script.png");
     expect(optimalOption.children[1].textContent).toBe("Optimal Range Disruption Script (zh)");
@@ -656,7 +663,7 @@ describe("EwarController", () => {
     expect(controller.capture("shipA")).toEqual({
       webs: [{ active: true, overloaded: true }],
       grapplers: [],
-      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+      disruptors: [{ active: true, overloaded: true, script: OPTIMAL_SCRIPT.moduleId }],
     });
   });
 

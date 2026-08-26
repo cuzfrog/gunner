@@ -1,8 +1,9 @@
-import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "../legacyScriptNames";
-import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
+import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation } from "../userSettings";
 import type { ChargeCatalog } from "../../fitting";
+import type { ItemNameResolver } from "../../gamedata/itemNames";
 import type { SettingGuards } from "../settingGuards";
 import type { Ships } from "../../ships";
+import { resolveBoosterScript, resolveDisruptionScript } from "../settingsCompat";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey, type ScalarField } from "./profileTextFields";
 import { normalizeProfileTextDotKey } from "./profileTextCompat";
@@ -20,11 +21,13 @@ export class ProfileTextParser {
   private readonly guards: SettingGuards;
   private readonly ships: Ships;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly itemNameResolver: ItemNameResolver;
 
-  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog) {
+  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog, itemNameResolver: ItemNameResolver) {
     this.guards = settingGuards;
     this.ships = ships;
     this.chargeCatalog = chargeCatalog;
+    this.itemNameResolver = itemNameResolver;
   }
 
   hasHeader(text: string): boolean {
@@ -111,20 +114,20 @@ export class ProfileTextParser {
     if (Object.keys(shipBOverrides).length > 0) raw = { ...raw, shipBOverrides };
 
     if (shipABoosterActivationRaw !== undefined) {
-      const activation = parseBoosterActivation(shipABoosterActivationRaw);
+      const activation = this.parseBoosterActivation(shipABoosterActivationRaw);
       if (activation !== undefined) raw = { ...raw, shipABoosterActivation: activation };
     }
     if (shipBBoosterActivationRaw !== undefined) {
-      const activation = parseBoosterActivation(shipBBoosterActivationRaw);
+      const activation = this.parseBoosterActivation(shipBBoosterActivationRaw);
       if (activation !== undefined) raw = { ...raw, shipBBoosterActivation: activation };
     }
 
     if (shipAEwarActivationRaw !== undefined) {
-      const activation = parseEwarActivation(shipAEwarActivationRaw, raw.shipAOverload !== false);
+      const activation = this.parseEwarActivation(shipAEwarActivationRaw, raw.shipAOverload !== false);
       if (activation !== undefined) raw = { ...raw, shipAEwarActivation: activation };
     }
     if (shipBEwarActivationRaw !== undefined) {
-      const activation = parseEwarActivation(shipBEwarActivationRaw, raw.shipBOverload !== false);
+      const activation = this.parseEwarActivation(shipBEwarActivationRaw, raw.shipBOverload !== false);
       if (activation !== undefined) raw = { ...raw, shipBEwarActivation: activation };
     }
 
@@ -138,6 +141,94 @@ export class ProfileTextParser {
     raw.shipBFalloff ??= 0;
 
     return profileSettingsFromRaw(raw);
+  }
+
+  private parseEwarActivation(value: string, sideOverload: boolean): StoredEwarActivation | undefined {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      if (!isRecord(parsed)) return undefined;
+      const webs = this.migrateToggleableArray(parsed.webs, sideOverload);
+      const grapplers = this.migrateToggleableArray(parsed.grapplers, sideOverload);
+      const scramblers = this.migrateToggleableArray(parsed.scramblers, sideOverload);
+      const disruptors = parsed.disruptors !== undefined ? this.migrateDisruptorArray(parsed.disruptors, sideOverload) : undefined;
+      if (disruptors === undefined && parsed.disruptors !== undefined) return undefined;
+      const result: StoredEwarActivation = {
+        ...(webs !== undefined ? { webs } : {}),
+        ...(grapplers !== undefined ? { grapplers } : {}),
+        ...(disruptors !== undefined ? { disruptors } : {}),
+        ...(scramblers !== undefined ? { scramblers } : {}),
+      };
+      return isOptionalEwarActivation(result) ? result : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private parseBoosterActivation(raw: string): readonly StoredBoosterActivation[] | undefined {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return undefined;
+      const result: StoredBoosterActivation[] = [];
+      for (const item of parsed) {
+        const row = this.parseBoosterRow(item);
+        if (row === undefined) return undefined;
+        result.push(row);
+      }
+      return isOptionalBoosterActivations(result) ? result : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private migrateToggleableArray(value: unknown, sideOverload: boolean): readonly { active: boolean; overloaded: boolean }[] | undefined {
+    if (value === undefined) return undefined;
+    if (!Array.isArray(value)) return undefined;
+    const result: { active: boolean; overloaded: boolean }[] = [];
+    for (const item of value) {
+      const row = this.migrateToggleableActivation(item, sideOverload);
+      if (row === undefined) return undefined;
+      result.push(row);
+    }
+    return result;
+  }
+
+  private migrateToggleableActivation(item: unknown, sideOverload: boolean): { active: boolean; overloaded: boolean } | undefined {
+    if (typeof item === "boolean") return { active: item, overloaded: sideOverload };
+    if (!isRecord(item)) return undefined;
+    if (typeof item.active !== "boolean") return undefined;
+    return { active: item.active, overloaded: typeof item.overloaded === "boolean" ? item.overloaded : sideOverload };
+  }
+
+  private migrateDisruptorArray(
+    value: unknown,
+    sideOverload: boolean,
+  ): readonly { active: boolean; overloaded: boolean; script: StoredDisruptionScript }[] | undefined {
+    if (value === undefined) return undefined;
+    if (!Array.isArray(value)) return undefined;
+    const result: { active: boolean; overloaded: boolean; script: StoredDisruptionScript }[] = [];
+    for (const item of value) {
+      const row = this.migrateDisruptorActivation(item, sideOverload);
+      if (row === undefined) return undefined;
+      result.push(row);
+    }
+    return result;
+  }
+
+  private migrateDisruptorActivation(item: unknown, sideOverload: boolean): { active: boolean; overloaded: boolean; script: StoredDisruptionScript } | undefined {
+    if (typeof item === "boolean") return { active: item, overloaded: sideOverload, script: "none" };
+    if (!isRecord(item)) return undefined;
+    if (typeof item.active !== "boolean") return undefined;
+    if (typeof item.script !== "string" || item.script.length === 0) return undefined;
+    return { active: item.active, overloaded: typeof item.overloaded === "boolean" ? item.overloaded : sideOverload, script: resolveDisruptionScript(item.script, this.itemNameResolver) };
+  }
+
+  private parseBoosterRow(item: unknown): StoredBoosterActivation | undefined {
+    if (typeof item === "boolean") return { active: item, script: "none" };
+    if (!isRecord(item)) return undefined;
+    const active = typeof item.active === "boolean" ? item.active : false;
+    if (item.script === undefined) return { active, script: "none" };
+    if (typeof item.script !== "string") return undefined;
+    return { active, script: resolveBoosterScript(item.script, this.itemNameResolver) };
   }
 }
 
@@ -157,58 +248,6 @@ function readFittingBlock(lines: string[], start: number): { body: string | unde
   return { body: bodyLines.join("\n"), nextIndex: i };
 }
 
-function parseEwarActivation(value: string, sideOverload: boolean): StoredEwarActivation | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    if (isOptionalEwarActivation(parsed) && parsed !== undefined) {
-      const migratedWebs = parsed.webs?.map((item) => migrateToggleableActivation(item, sideOverload));
-      const migratedGrapplers = parsed.grapplers?.map((item) => migrateToggleableActivation(item, sideOverload));
-      const migratedDisruptors = parsed.disruptors?.map((item) => migrateDisruptorActivation(item, sideOverload));
-      const migratedScramblers = parsed.scramblers?.map((item) => migrateToggleableActivation(item, sideOverload));
-      const result: StoredEwarActivation = {
-        ...(migratedWebs !== undefined ? { webs: migratedWebs } : {}),
-        ...(migratedGrapplers !== undefined ? { grapplers: migratedGrapplers } : {}),
-        ...(migratedDisruptors !== undefined ? { disruptors: migratedDisruptors } : {}),
-        ...(migratedScramblers !== undefined ? { scramblers: migratedScramblers } : {}),
-      };
-      return result;
-    }
-    return undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function migrateToggleableActivation(
-  item: Readonly<{ active: boolean; overloaded?: boolean }> | boolean,
-  sideOverload: boolean,
-): Readonly<{ active: boolean; overloaded: boolean }> {
-  if (typeof item === "boolean") return { active: item, overloaded: sideOverload };
-  return { active: item.active, overloaded: item.overloaded ?? sideOverload };
-}
-
-function migrateDisruptorActivation(
-  item: Readonly<{ active: boolean; overloaded?: boolean; script: string }>,
-  sideOverload: boolean,
-): Readonly<{ active: boolean; overloaded: boolean; script: string }> {
-  const script = LEGACY_DISRUPTION_SCRIPT_NAMES[item.script] ?? item.script;
-  return { active: item.active, overloaded: item.overloaded ?? sideOverload, script };
-}
-
-function parseBoosterActivation(raw: string): readonly StoredBoosterActivation[] | undefined {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return undefined;
-    const result = parsed.map((item) => {
-      if (typeof item === "boolean") return { active: item, script: "none" };
-      if (!item || typeof item !== "object" || Array.isArray(item)) return { active: false, script: "none" };
-      const record = item as Record<string, unknown>;
-      const active = typeof record.active === "boolean" ? record.active : false;
-      const script = typeof record.script === "string" && record.script !== "" ? record.script : "none";
-      return { active, script };
-    });
-    return isOptionalBoosterActivations(result) ? result : undefined;
-  } catch {
-    return undefined;
-  }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }

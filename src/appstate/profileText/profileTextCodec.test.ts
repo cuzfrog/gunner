@@ -1,4 +1,6 @@
 import { isAutopilotMode, isSigResolutionClass } from "../../sim";
+import { toTypeId } from "../../gamedata/ids";
+import { StaticItemNameResolver } from "../../gamedata/itemNames";
 import { LocalProfileTextCodec } from "./profileTextCodec";
 import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
@@ -9,7 +11,8 @@ const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();
-const codec = new LocalProfileTextCodec(guards, ships, chargeCatalog);
+const itemNameResolver = new StaticItemNameResolver();
+const codec = new LocalProfileTextCodec(guards, ships, chargeCatalog, itemNameResolver);
 
 describe("profileTextCodec", () => {
   test("serialize starts with the v1 header", () => {
@@ -58,7 +61,7 @@ describe("profileTextCodec", () => {
       ...MINIMAL_PROFILE,
       shipAEwarActivation: {
         webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
-        disruptors: [{ active: true, overloaded: true, script: "Tracking Speed Disruption Script" }],
+        disruptors: [{ active: true, overloaded: true, script: toTypeId("29007") }],
       },
       shipBEwarActivation: {
         webs: [{ active: false, overloaded: false }],
@@ -73,9 +76,9 @@ describe("profileTextCodec", () => {
     const shipAEwar = JSON.stringify({ webs: [true], disruptors: [{ active: true, script: "trackingSpeed" }] });
     const shipBEwar = JSON.stringify({ webs: [false], disruptors: [{ active: true, script: "optimalRange" }] });
     const parsed = codec.parse(`${base}\nshipA.ewarActivation=${shipAEwar}\nshipB.ewarActivation=${shipBEwar}`);
-    expect(parsed?.shipAEwarActivation?.disruptors?.[0]?.script).toBe("Tracking Speed Disruption Script");
+    expect(parsed?.shipAEwarActivation?.disruptors?.[0]?.script).toBe(toTypeId("29007"));
     expect(parsed?.shipAEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
-    expect(parsed?.shipBEwarActivation?.disruptors?.[0]?.script).toBe("Optimal Range Disruption Script");
+    expect(parsed?.shipBEwarActivation?.disruptors?.[0]?.script).toBe(toTypeId("29005"));
     expect(parsed?.shipBEwarActivation?.disruptors?.[0]?.overloaded).toBe(true);
   });
 
@@ -96,7 +99,7 @@ describe("profileTextCodec", () => {
     expect(parsed?.shipAEwarActivation?.webs?.[0]).toEqual({ active: true, overloaded: false });
     expect(parsed?.shipAEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: false, script: "none" });
     expect(parsed?.shipBEwarActivation?.webs?.[0]).toEqual({ active: false, overloaded: true });
-    expect(parsed?.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: "Optimal Range Disruption Script" });
+    expect(parsed?.shipBEwarActivation?.disruptors?.[0]).toEqual({ active: true, overloaded: true, script: toTypeId("29005") });
   });
 
   test("migration is idempotent for already-migrated version 8 activation", () => {
@@ -104,7 +107,7 @@ describe("profileTextCodec", () => {
     const shipAEwar = JSON.stringify({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
     const shipBEwar = JSON.stringify({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
     const parsed = codec.parse(`${base}\nshipA.overload=true\nshipA.ewarActivation=${shipAEwar}\nshipB.overload=true\nshipB.ewarActivation=${shipBEwar}`);
-    expect(parsed?.shipAEwarActivation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: "Tracking Speed Disruption Script" }] });
+    expect(parsed?.shipAEwarActivation).toEqual({ webs: [{ active: true, overloaded: false }], disruptors: [{ active: true, overloaded: false, script: toTypeId("29007") }] });
     expect(parsed?.shipBEwarActivation).toEqual({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
   });
 
@@ -142,7 +145,7 @@ shipB.sig=40`;
         disruptors: [],
         scramblers: [],
       },
-      shipABoosterActivation: [{ active: false, script: "Optimal Range Script" }, { active: true, script: "none" }],
+      shipABoosterActivation: [{ active: false, script: toTypeId("28999") }, { active: true, script: "none" }],
       shipBBoosterActivation: [{ active: true, script: "none" }],
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);

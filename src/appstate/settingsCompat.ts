@@ -1,8 +1,11 @@
 import type { ChargeCatalog } from "../fitting";
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
+import type { ItemNameResolver } from "../gamedata/itemNames";
+import type { ShipNameLanguage } from "../gamedata/i18n";
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { ShipProfile, Ships, SkillLevel } from "../ships";
-import type { FittedHullSummary, PropulsionSelection, StoredBoosterActivation, StoredEwarActivation } from "./userSettings";
+import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "./legacyScriptNames";
+import type { FittedHullSummary, PropulsionSelection, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation } from "./userSettings";
 
 const SHIP_A_LEGACY_PREFIX = "attacker";
 const SHIP_B_LEGACY_PREFIX = "target";
@@ -74,6 +77,25 @@ export function resolveAmmoId(name: string, chargeCatalog: ChargeCatalog): TypeI
   return chargeCatalog.idForName(trimmed);
 }
 
+export function resolveScriptId(value: string, resolver: ItemNameResolver, language: ShipNameLanguage = "en"): TypeId | undefined {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  if (/^\d+$/.test(trimmed)) return toTypeId(trimmed);
+  return resolver.idsForName(trimmed, language)[0];
+}
+
+export function resolveDisruptionScript(value: string, resolver: ItemNameResolver, language: ShipNameLanguage = "en"): StoredDisruptionScript {
+  if (value === "none" || value.length === 0) return "none";
+  const legacyName = LEGACY_DISRUPTION_SCRIPT_NAMES[value];
+  const name = legacyName ?? value;
+  return resolveScriptId(name, resolver, language) ?? "none";
+}
+
+export function resolveBoosterScript(value: string, resolver: ItemNameResolver, language: ShipNameLanguage = "en"): StoredDisruptionScript {
+  if (value === "none" || value.length === 0) return "none";
+  return resolveScriptId(value, resolver, language) ?? "none";
+}
+
 export function normalizeLegacySettings(record: Record<string, unknown>): void {
   normalizeLegacyOverrides(record, "attackerOverrides", "shipAOverrides");
   normalizeLegacyOverrides(record, "targetOverrides", "shipBOverrides");
@@ -97,7 +119,7 @@ function normalizeLegacyOverrides(record: Record<string, unknown>, oldKey: strin
   }
   if (!(newKey in record)) {
     const normalized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(overrides as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(overrides)) {
       const newInnerKey = newOverrideKeyFor(key);
       if (newInnerKey === undefined) continue;
       normalized[newInnerKey] = value;

@@ -1,7 +1,7 @@
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { BoostLoadout, TurretScriptSpec } from "../../../sim";
 import { EMPTY_BOOST_LOADOUT } from "../../../sim";
-import type { Language } from "../../../appstate";
+import type { Language, StoredBoosterActivation } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { createControlsEls } from "../elements";
@@ -13,8 +13,8 @@ import type { BoosterEls } from "./boosterControllerContract";
 
 function asTypeId(value: string): TypeId { return value as TypeId; }
 
-const TRACKING_SCRIPT: TurretScriptSpec = { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
-const OPTIMAL_SCRIPT: TurretScriptSpec = { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
+const TRACKING_SCRIPT: TurretScriptSpec & { readonly moduleId: TypeId } = { name: "Tracking Speed Script", moduleId: toTypeId("29001"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
+const OPTIMAL_SCRIPT: TurretScriptSpec & { readonly moduleId: TypeId } = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
 
 const LOADOUT: BoostLoadout = {
   computers: [
@@ -59,8 +59,15 @@ function buildBoosterController() {
     sections: { shipA: els.shipA.boosterSection, shipB: els.shipB.boosterSection },
     summaries: { shipA: els.shipA.boosterSummary, shipB: els.shipB.boosterSummary },
   };
+  const NAME_FOR_ID: Record<string, string> = {
+    "28999": "Optimal Range Script",
+    "29001": "Tracking Speed Script",
+  };
   const fittingImport = vi.mocked(mockFittingImport());
-  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
+  fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
+    const name = NAME_FOR_ID[id] ?? id;
+    return lang === "en" ? name : `${name} (${lang})`;
+  });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
   const controller = new BoosterControllerImpl({ els: boosterEls, popupGroup, imageCatalog, fittingImport, i18n, events });
@@ -111,15 +118,15 @@ describe("BoosterController", () => {
     const { controller } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const captured = controller.capture("shipA");
-    expect(captured).toEqual([{ active: true, script: "none" }, { active: true, script: TRACKING_SCRIPT.name }]);
-    const saved = [
-      { active: false, script: OPTIMAL_SCRIPT.name },
+    expect(captured).toEqual([{ active: true, script: "none" }, { active: true, script: TRACKING_SCRIPT.moduleId }]);
+    const saved: StoredBoosterActivation[] = [
+      { active: false, script: OPTIMAL_SCRIPT.moduleId },
       { active: true, script: "none" },
     ];
     controller.restore("shipA", LOADOUT, saved);
     const projection = controller.projection("shipA")!;
     expect(projection.activation?.computers[0].active).toBe(false);
-    expect(projection.activation?.computers[0].script?.name).toBe(OPTIMAL_SCRIPT.name);
+    expect(projection.activation?.computers[0].script?.moduleId).toBe(OPTIMAL_SCRIPT.moduleId);
     expect(projection.activation?.computers[1].active).toBe(true);
     expect(projection.activation?.computers[1].script).toBeUndefined();
   });
@@ -153,7 +160,7 @@ describe("BoosterController", () => {
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
     expect(optimalOption).toBeDefined();
     optimalOption!.trigger("click");
-    expect(controller.capture("shipA")?.[0]?.script).toBe(OPTIMAL_SCRIPT.name);
+    expect(controller.capture("shipA")?.[0]?.script).toBe(OPTIMAL_SCRIPT.moduleId);
     expect(gear.getAttribute("title")).toContain(OPTIMAL_SCRIPT.name);
   });
 });

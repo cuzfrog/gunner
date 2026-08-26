@@ -1,4 +1,4 @@
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { BoostLoadout, TurretBoostProjection, TurretScriptSpec, TrackingBoosterSpec } from "../../../sim";
 import type { StoredBoosterActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
@@ -75,7 +75,7 @@ export class BoosterControllerImpl implements BoosterController {
     if (!state || state.loadout.computers.length === 0) return undefined;
     return state.activation.map((a) => ({
       active: a.active,
-      script: a.script?.name ?? "none",
+      script: a.script?.moduleId ?? "none",
     }));
   }
 
@@ -195,14 +195,16 @@ export class BoosterControllerImpl implements BoosterController {
   private clampActivation(loadout: BoostLoadout, saved?: readonly StoredBoosterActivation[]): MutableBoosterActivation[] {
     return loadout.computers.map((spec, i) => {
       const savedActivation = saved?.[i];
-      const savedScriptName = savedActivation?.script;
+      const savedScript = savedActivation?.script;
       let script: TurretScriptSpec | undefined;
-      if (savedScriptName === "none" || savedScriptName === "") {
-        script = undefined;
-      } else if (savedScriptName !== undefined) {
-        script = loadout.scripts.find((s) => s.name === savedScriptName) ?? spec.defaultScript;
-      } else {
+      if (savedScript === undefined) {
         script = spec.defaultScript;
+      } else if (savedScript === "none" || savedScript === "") {
+        script = undefined;
+      } else {
+        const byId = typeIdFromString(savedScript);
+        script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId !== undefined && s.moduleId === byId) : undefined;
+        if (script === undefined) script = spec.defaultScript;
       }
       return { active: savedActivation?.active ?? true, script };
     });
@@ -336,4 +338,9 @@ export class BoosterControllerImpl implements BoosterController {
 
 function sideId(side: Side): "ship-a" | "ship-b" {
   return side === "shipA" ? "ship-a" : "ship-b";
+}
+
+function typeIdFromString(value: string): TypeId | undefined {
+  if (/^\d+$/.test(value)) return toTypeId(value);
+  return undefined;
 }

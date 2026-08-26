@@ -1,5 +1,6 @@
 import type { ProfileSettings } from "../userSettings";
 import type { ChargeCatalog } from "../../fitting";
+import type { ItemNameResolver } from "../../gamedata/itemNames";
 import type { SettingGuards } from "../settingGuards";
 import type { Ships } from "../../ships";
 import { ProfileTextParser } from "./profileTextParser";
@@ -15,8 +16,8 @@ export class LocalProfileTextCodec implements ProfileTextCodec {
   private readonly parser: ProfileTextParser;
   private readonly serializer = new ProfileTextSerializer();
 
-  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog) {
-    this.parser = new ProfileTextParser(settingGuards, ships, chargeCatalog);
+  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog, itemNameResolver: ItemNameResolver) {
+    this.parser = new ProfileTextParser(settingGuards, ships, chargeCatalog, itemNameResolver);
   }
 
   parse(text: string): ProfileSettings | undefined {

@@ -1,7 +1,7 @@
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { ShipId } from "../gamedata/ids";
+import type { ItemNameResolver } from "../gamedata/itemNames";
 import type { Ships } from "../ships";
-import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "./legacyScriptNames";
 import {
   PROPULSION_NONE,
   USER_SETTINGS_VERSION,
@@ -13,7 +13,14 @@ import { clampManeuverAggressivity } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
-import { normalizeLegacySettings, resolveAmmoId, resolveHullId, type LegacyUserSettings } from "./settingsCompat";
+import {
+  normalizeLegacySettings,
+  resolveAmmoId,
+  resolveBoosterScript,
+  resolveDisruptionScript,
+  resolveHullId,
+  type LegacyUserSettings,
+} from "./settingsCompat";
 import { toCombatantSettings, type CombatantSettings, type InternalUserSettings } from "./combatantSettings";
 import type { SettingGuards } from "./settingGuards";
 import {
@@ -44,13 +51,15 @@ export class SettingsParser {
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly itemNameResolver: ItemNameResolver;
   private readonly fittingBasis: FittingBasis;
   private readonly guards: SettingGuards;
 
-  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; settingGuards: SettingGuards }) {
+  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; itemNameResolver: ItemNameResolver; settingGuards: SettingGuards }) {
     this.ships = deps.ships;
     this.fittingImport = deps.fittingImport;
     this.chargeCatalog = deps.chargeCatalog;
+    this.itemNameResolver = deps.itemNameResolver;
     this.guards = deps.settingGuards;
     this.fittingBasis = new FittingBasis(deps);
   }
@@ -58,8 +67,8 @@ export class SettingsParser {
   parseUserSettings(raw: string): UserSettingsWire | null {
     try {
       const parsed: unknown = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-      const record = parsed as Record<string, unknown>;
+      if (!isRecord(parsed)) return null;
+      const record = parsed;
       normalizeLegacySettings(record);
       this.normalizeAndDefaultAggressivity(record);
       this.migrateBoosterActivation(record);
@@ -101,8 +110,8 @@ export class SettingsParser {
   }
 
   profileFromUnknown(value: unknown): ProfileSettingsWire | null {
-    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-    const record = { ...value } as Record<string, unknown>;
+    if (!isRecord(value)) return null;
+    const record: Record<string, unknown> = { ...value };
     normalizeLegacySettings(record);
     this.normalizeAndDefaultAggressivity(record);
     this.migrateBoosterActivation(record);
@@ -121,8 +130,8 @@ export class SettingsParser {
   }
 
   private isProfileSettings(value: unknown): value is UserSettingsWire {
-    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-    const s = value as Record<string, unknown>;
+    if (!isRecord(value)) return false;
+    const s = value;
     return (
       isSettingsVersion(s.version) &&
       isNonNegative(s.shipATracking) &&
@@ -143,18 +152,17 @@ export class SettingsParser {
 
   private isUserSettings(value: unknown): value is UserSettingsWire {
     if (!this.isProfileSettings(value)) return false;
-    const s = value as unknown as Record<string, unknown>;
     return (
-      isLanguage(s.language) &&
-      (s.trackingUnit === "rad" || s.trackingUnit === "score") &&
-      isPositive(s.simSpeed) &&
-      isFiniteNumber(s.gridBrightness) &&
-      (s.autoZoom === undefined || typeof s.autoZoom === "boolean") &&
-      (s.zoomFactor === undefined || isPositive(s.zoomFactor)) &&
-      typeof s.shipAAmmo === "string" &&
-      s.shipAAmmo.length > 0 &&
-      typeof s.shipBAmmo === "string" &&
-      s.shipBAmmo.length > 0
+      isLanguage(value.language) &&
+      (value.trackingUnit === "rad" || value.trackingUnit === "score") &&
+      isPositive(value.simSpeed) &&
+      isFiniteNumber(value.gridBrightness) &&
+      (value.autoZoom === undefined || typeof value.autoZoom === "boolean") &&
+      (value.zoomFactor === undefined || isPositive(value.zoomFactor)) &&
+      typeof value.shipAAmmo === "string" &&
+      value.shipAAmmo.length > 0 &&
+      typeof value.shipBAmmo === "string" &&
+      value.shipBAmmo.length > 0
     );
   }
 
@@ -251,11 +259,12 @@ export class SettingsParser {
 
   private migrateBoosterEntry(item: unknown): unknown {
     if (typeof item === "boolean") return { active: item, script: "none" };
-    if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-    const record = { ...(item as Record<string, unknown>) };
-    if (typeof record.active !== "boolean") return item;
-    if (record.script === "") record.script = "none";
-    return record;
+    if (!isRecord(item)) return item;
+    const record = { ...item };
+    const active = typeof record.active === "boolean" ? record.active : false;
+    if (record.script === undefined) return { active, script: "none" };
+    if (typeof record.script !== "string") return item;
+    return { active, script: resolveBoosterScript(record.script, this.itemNameResolver) };
   }
 
   private migrateEwarActivation(value: Record<string, unknown>): void {
@@ -271,8 +280,8 @@ export class SettingsParser {
   }
 
   private migrateSideEwarActivation(saved: unknown, defaultOverload: boolean): void {
-    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
-    const s = saved as Record<string, unknown>;
+    if (!isRecord(saved)) return;
+    const s = saved;
     if (s.webs !== undefined && Array.isArray(s.webs)) {
       s.webs = s.webs.map((item) => this.migrateToggleEntry(item, defaultOverload));
     }
@@ -280,27 +289,35 @@ export class SettingsParser {
       s.grapplers = s.grapplers.map((item) => this.migrateToggleEntry(item, defaultOverload));
     }
     if (s.disruptors !== undefined && Array.isArray(s.disruptors)) {
-      s.disruptors = s.disruptors.map((item) => {
-        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-        const d = { ...(item as Record<string, unknown>) };
-        if (typeof d.script === "string") d.script = LEGACY_DISRUPTION_SCRIPT_NAMES[d.script] ?? d.script;
-        if (typeof d.active === "boolean") d.overloaded ??= defaultOverload;
-        return d;
-      });
+      s.disruptors = s.disruptors.map((item) => this.migrateDisruptorEntry(item, defaultOverload));
     }
     if (s.scramblers !== undefined && Array.isArray(s.scramblers)) {
       s.scramblers = s.scramblers.map((item) => this.migrateToggleEntry(item, defaultOverload));
     }
   }
 
+  private migrateDisruptorEntry(item: unknown, defaultOverload: boolean): unknown {
+    if (typeof item === "boolean") return { active: item, overloaded: defaultOverload, script: "none" };
+    if (!isRecord(item)) return item;
+    const d = { ...item };
+    const active = typeof d.active === "boolean" ? d.active : false;
+    const overloaded = typeof d.overloaded === "boolean" ? d.overloaded : defaultOverload;
+    if (d.script === undefined) return { active, overloaded, script: "none" };
+    if (typeof d.script !== "string") return item;
+    return { active, overloaded, script: resolveDisruptionScript(d.script, this.itemNameResolver) };
+  }
+
   private migrateToggleEntry(item: unknown, defaultOverload: boolean): unknown {
     if (typeof item === "boolean") return { active: item, overloaded: defaultOverload };
-    if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-    const record = item as Record<string, unknown>;
-    if (typeof record.active !== "boolean") return item;
-    record.overloaded ??= defaultOverload;
-    return record;
+    if (!isRecord(item)) return item;
+    if (typeof item.active !== "boolean") return item;
+    item.overloaded ??= defaultOverload;
+    return item;
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function isProfileStorage(value: unknown): value is Record<string, unknown> {

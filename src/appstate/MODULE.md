@@ -24,7 +24,6 @@ no-new-exports:
   - validators.ts
   - settingGuards.ts
   - userSettings.ts
-  - settingsCompat.ts
   - index.ts
 ---
 

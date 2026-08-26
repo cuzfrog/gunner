@@ -1,5 +1,5 @@
 import type { FittedHull } from "../ships";
-import type { TypeId } from "../gamedata/ids";
+import { toTypeId } from "../gamedata/ids";
 import type { FittedHullSummary, ProfileSettings, StoredEwarActivation } from "./userSettings";
 import { CanonicalProfileEquality } from "./profileEquality";
 
@@ -18,7 +18,7 @@ const baseFittedHullSummary: FittedHullSummary = {
 };
 
 const baseEwarActivation: StoredEwarActivation = {
-  disruptors: [{ active: true, overloaded: false, script: "Script A" }],
+  disruptors: [{ active: true, overloaded: false, script: toTypeId("29005") }],
 };
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
@@ -44,7 +44,7 @@ function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileS
     shipBMass: 1_000_000,
     shipBInertia: 2,
     shipBSig: 40,
-    shipAAmmo: "12608" as TypeId,
+    shipAAmmo: toTypeId("12608"),
     ...overrides,
   };
 }
@@ -79,7 +79,7 @@ describe("CanonicalProfileEquality", () => {
     const equality = new CanonicalProfileEquality();
     const a = baseProfileSettings({ shipBEwarActivation: baseEwarActivation });
     const b = baseProfileSettings({
-      shipBEwarActivation: { disruptors: [{ active: true, overloaded: false, script: "Script B" }] },
+      shipBEwarActivation: { disruptors: [{ active: true, overloaded: false, script: toTypeId("29007") }] },
     });
     expect(equality.equal(a, b)).toBe(false);
   });

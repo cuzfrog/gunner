@@ -1,4 +1,4 @@
-import type { ShipId, TypeId } from "../../gamedata/ids";
+import { toShipId, toTypeId } from "../../gamedata/ids";
 import type { FittedHullSummary, ProfileSettings } from "../userSettings";
 
 export const RIFTER_FITTING = `[Rifter, Brawler]
@@ -53,9 +53,9 @@ export const FULL_PROFILE: ProfileSettings = {
   shipBSig: 40,
   shipBSkillLevel: 5,
   shipBOverload: true,
-  shipAHullId: "587" as ShipId,
+  shipAHullId: toShipId("587"),
   shipAPropulsion: "mwd-5mn",
-  shipBHullId: "16242" as ShipId,
+  shipBHullId: toShipId("16242"),
   shipBPropulsion: "mwd-5mn",
   shipAFitting: RIFTER_FITTING,
   shipAOverrides: { shipAMass: 2_000_000, tracking: 0.12 },
@@ -63,18 +63,18 @@ export const FULL_PROFILE: ProfileSettings = {
   shipBOverrides: { shipBMass: 11_000_000 },
   shipAFittedHull: SHIP_A_FITTED_HULL,
   shipBFittedHull: SHIP_B_FITTED_HULL,
-  shipAAmmo: "12608" as TypeId,
-  shipBAmmo: "21898" as TypeId,
+  shipAAmmo: toTypeId("12608"),
+  shipBAmmo: toTypeId("21898"),
   shipAEwarActivation: {
     webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
     grapplers: [],
     disruptors: [
-      { active: true, overloaded: true, script: "Optimal Range Disruption Script" },
-      { active: false, overloaded: false, script: "Tracking Speed Disruption Script" },
+      { active: true, overloaded: true, script: toTypeId("29005") },
+      { active: false, overloaded: false, script: toTypeId("29007") },
     ],
   },
   shipBEwarActivation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }] },
-  shipABoosterActivation: [{ active: true, script: "Optimal Range Script" }],
+  shipABoosterActivation: [{ active: true, script: toTypeId("28999") }],
   shipBBoosterActivation: [{ active: false, script: "none" }],
 };
 

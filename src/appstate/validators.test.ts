@@ -1,3 +1,4 @@
+import { toTypeId } from "../gamedata/ids";
 import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalHiddenRangeOverlays } from "./validators";
 
 describe("isOptionalEwarActivation", () => {
@@ -5,7 +6,7 @@ describe("isOptionalEwarActivation", () => {
     expect(isOptionalEwarActivation({
       webs: [{ active: true, overloaded: false }, { active: false, overloaded: true }],
       grapplers: [{ active: true, overloaded: false }],
-      disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }],
+      disruptors: [{ active: true, overloaded: true, script: toTypeId("29005") }],
     })).toBe(true);
   });
 
@@ -58,7 +59,7 @@ describe("isOptionalHiddenRangeOverlays", () => {
 
 describe("isOptionalBoosterActivations", () => {
   test("accepts a valid array of active and scripted booster entries", () => {
-    expect(isOptionalBoosterActivations([{ active: true, script: "Optimal Range Script" }, { active: false, script: "none" }])).toBe(true);
+    expect(isOptionalBoosterActivations([{ active: true, script: toTypeId("28999") }, { active: false, script: "none" }])).toBe(true);
   });
 
   test("accepts undefined", () => {

@@ -1,6 +1,6 @@
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type WarpScramblerSpec } from "../../../sim";
-import type { StoredEwarActivation } from "../../../appstate";
+import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -93,7 +93,7 @@ export class EwarControllerImpl implements EwarController {
       disruptors: state.activation.disruptors.map((d) => ({
         active: d.active,
         overloaded: d.overloaded,
-        script: d.script?.name ?? "none",
+        script: d.script?.moduleId ?? "none",
       })),
       ...(storedScramblers !== undefined ? { scramblers: storedScramblers } : {}),
     };
@@ -271,12 +271,14 @@ export class EwarControllerImpl implements EwarController {
         const savedDisruptor = saved?.disruptors?.[i];
         const savedScript = savedDisruptor?.script;
         let script: DisruptionScriptSpec | undefined;
-        if (savedScript === "none") {
-          script = undefined;
-        } else if (savedScript !== undefined) {
-          script = loadout.scripts.find((s) => s.name === savedScript) ?? disruptor.defaultScript;
-        } else {
+        if (savedScript === undefined) {
           script = disruptor.defaultScript;
+        } else if (savedScript === "none") {
+          script = undefined;
+        } else {
+          const byId = typeIdFromString(savedScript);
+          script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId !== undefined && s.moduleId === byId) : undefined;
+          if (script === undefined) script = disruptor.defaultScript;
         }
         return {
           active: savedDisruptor?.active ?? true,
@@ -461,16 +463,18 @@ export class EwarControllerImpl implements EwarController {
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
-      const name = script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name;
+      if (script.moduleId === undefined) continue;
+      const name = this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
       const iconUrl = this.imageCatalog.itemIconUrl(script.name);
+      const value = script.moduleId;
       const button = this.createScriptOptionButton(
-        script.name,
+        value,
         name,
         scriptStatSuffix(script),
         iconUrl,
         this.isSameScript(current, script),
       );
-      button.addEventListener("click", () => this.onScriptSelected(side, index, script.name));
+      button.addEventListener("click", () => this.onScriptSelected(side, index, value));
       popup.appendChild(button);
     }
   }
@@ -507,8 +511,15 @@ export class EwarControllerImpl implements EwarController {
   private onScriptSelected(side: Side, index: number, value: string): void {
     const state = this.states.get(side);
     if (!state) return;
-    const script = value === "none" ? undefined : state.loadout.scripts.find((s) => s.name === value);
-    if (value !== "none" && script === undefined) return;
+    if (value === "none") {
+      this.onScriptInput(side, index, undefined);
+      this.scriptPopups[side].close();
+      this.scriptPopups[side].focusTrigger();
+      return;
+    }
+    const byId = typeIdFromString(value);
+    const script = byId !== undefined ? state.loadout.scripts.find((s) => s.moduleId === byId) : undefined;
+    if (script === undefined) return;
     this.onScriptInput(side, index, script);
     this.scriptPopups[side].close();
     this.scriptPopups[side].focusTrigger();
@@ -651,5 +662,10 @@ export class EwarControllerImpl implements EwarController {
 
 function sideId(side: Side): "ship-a" | "ship-b" {
   return side === "shipA" ? "ship-a" : "ship-b";
+}
+
+function typeIdFromString(value: string): TypeId | undefined {
+  if (/^\d+$/.test(value)) return toTypeId(value);
+  return undefined;
 }
 

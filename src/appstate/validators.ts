@@ -1,4 +1,5 @@
 import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
+import { toTypeId } from "../gamedata/ids";
 import type { Language } from "./language";
 import type { SettingGuards } from "./settingGuards";
 import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings } from "./userSettings";
@@ -7,10 +8,10 @@ export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
 }
 
-export function isOptionalEwarActivation(value: unknown): value is StoredEwarActivation | undefined {
+export function isOptionalEwarActivation(value: unknown): boolean {
   if (value === undefined) return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const s = value;
   if (s.webs !== undefined && (!Array.isArray(s.webs) || !s.webs.every(isStoredWebActivation))) return false;
   if (s.grapplers !== undefined && (!Array.isArray(s.grapplers) || !s.grapplers.every(isStoredWebActivation))) return false;
   if (s.disruptors !== undefined) {
@@ -23,41 +24,57 @@ export function isOptionalEwarActivation(value: unknown): value is StoredEwarAct
   return true;
 }
 
-export function isOptionalBoosterActivation(value: unknown): value is StoredBoosterActivation | undefined {
+export function isOptionalBoosterActivation(value: unknown): boolean {
   if (value === undefined) return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const item = value as Record<string, unknown>;
-  return typeof item.active === "boolean" && typeof item.script === "string";
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.active === "boolean" && isStoredBoosterScript(item.script);
 }
 
-export function isOptionalBoosterActivations(value: unknown): value is readonly StoredBoosterActivation[] | undefined {
+export function isOptionalBoosterActivations(value: unknown): boolean {
   if (value === undefined) return true;
   if (!Array.isArray(value)) return false;
   return value.every(isOptionalBoosterActivation);
 }
 
+function isTypeIdString(value: string): boolean {
+  try {
+    toTypeId(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isStoredDisruptionScript(value: unknown): boolean {
+  return typeof value === "string" && (value === "none" || isTypeIdString(value));
+}
+
+function isStoredBoosterScript(value: unknown): boolean {
+  return typeof value === "string" && (value === "none" || isTypeIdString(value));
+}
+
 function isStoredWebActivation(value: unknown): boolean {
   if (typeof value === "boolean") return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const item = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
 }
 
 function isStoredDisruptorActivation(value: unknown): boolean {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const item = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const item = value;
   return (
     typeof item.active === "boolean" &&
     (item.overloaded === undefined || typeof item.overloaded === "boolean") &&
-    typeof item.script === "string" &&
-    item.script.length > 0
+    isStoredDisruptionScript(item.script)
   );
 }
 
 function isStoredScramblerActivation(value: unknown): boolean {
   if (typeof value === "boolean") return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const item = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const item = value;
   return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean");
 }
 
@@ -126,8 +143,8 @@ const PROFILE_PARAM_OVERRIDE_KEYS: readonly (keyof ProfileParamOverrides)[] = [
 
 export function isOptionalProfileParamOverrides(value: unknown, guards: SettingGuards): value is Partial<ProfileParamOverrides> | undefined {
   if (value === undefined) return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const s = value;
   for (const key of Object.keys(s)) {
     if (!PROFILE_PARAM_OVERRIDE_KEYS.some((k) => k === key)) return false;
     if (key === "sigRes") {
@@ -142,8 +159,8 @@ export function isOptionalProfileParamOverrides(value: unknown, guards: SettingG
 }
 
 export function isFittedHull(value: unknown): value is FittedHull {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const s = value;
   if (s.massMultiplier === undefined) s.massMultiplier = 1;
   return (
     isNonNegative(s.mass) &&
@@ -157,15 +174,15 @@ export function isFittedHull(value: unknown): value is FittedHull {
 
 export function isOptionalPropulsionStats(value: unknown): value is PropulsionStats | undefined {
   if (value === undefined) return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const s = value;
   return isNonNegative(s.thrust) && isNonNegative(s.speedBonus) && isNonNegative(s.massAddition) && isNonNegative(s.sigBloom);
 }
 
 export function isOptionalFittedHullSummary(value: unknown): value is FittedHullSummary | undefined {
   if (value === undefined) return true;
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const s = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const s = value;
   if (typeof s.fittingName !== "string") return false;
   if (!isFittedHull(s.fitted)) return false;
   if (!isOptionalPropulsionStats(s.propulsion)) return false;
@@ -186,6 +203,10 @@ export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
   const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, autoZoom: ______, zoomFactor: _______, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function isPropulsionKind(value: unknown): value is PropulsionKind {

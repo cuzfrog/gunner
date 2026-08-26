@@ -1,7 +1,9 @@
 import { isAutopilotMode, isSigResolutionClass } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
-import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
+import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
+import type { ItemNameResolver } from "../gamedata/itemNames";
+import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
 import type { ProfileEquality } from "./profileEquality";
@@ -52,9 +54,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipBOverload: true,
   shipBSig: 40,
   shipAEwarActivation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "none" }], scramblers: [] },
-  shipBEwarActivation: { webs: [{ active: false, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: "Optimal Range Disruption Script" }], scramblers: [] },
-  shipAAmmo: "12608" as TypeId,
-  shipBAmmo: "12608" as TypeId,
+  shipBEwarActivation: { webs: [{ active: false, overloaded: true }], grapplers: [], disruptors: [{ active: true, overloaded: true, script: toTypeId("29005") }], scramblers: [] },
+  shipAAmmo: toTypeId("12608"),
+  shipBAmmo: toTypeId("12608"),
   simSpeed: 4,
   language: "en",
 };
@@ -96,7 +98,7 @@ export const FITTED_PROPULSION = {
 export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   fittingName: "Brawler",
   propulsionId: "ab-1mn",
-  propulsionModuleId: "439" as TypeId,
+  propulsionModuleId: toTypeId("439"),
   propulsionName: "1MN Afterburner I",
   propulsionKind: "afterburner",
   fitted: FITTED_HULL,
@@ -104,7 +106,7 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
   baseMaxSpeed: 456.25,
 };
 export const RIFTER_PROFILE: ShipProfile = {
-  id: "587" as ShipId,
+  id: toShipId("587"),
   name: "Rifter",
   factionId: "minmatar-republic" as FactionId,
   hullTypeId: "25" as HullTypeId,
@@ -115,7 +117,7 @@ export const RIFTER_PROFILE: ShipProfile = {
 };
 
 const THRASHER_PROFILE: ShipProfile = {
-  id: "16242" as ShipId,
+  id: toShipId("16242"),
   name: "Thrasher",
   factionId: "minmatar-republic" as FactionId,
   hullTypeId: "420" as HullTypeId,
@@ -126,7 +128,7 @@ const THRASHER_PROFILE: ShipProfile = {
 };
 
 const BRUTIX_PROFILE: ShipProfile = {
-  id: "672" as ShipId,
+  id: toShipId("672"),
   name: "Brutix",
   factionId: "gallente-federation" as FactionId,
   hullTypeId: "120" as HullTypeId,
@@ -137,7 +139,7 @@ const BRUTIX_PROFILE: ShipProfile = {
 };
 
 const WRAITH_PROFILE: ShipProfile = {
-  id: "legacy-wraith" as ShipId,
+  id: toShipId("legacy-wraith"),
   name: "Wraith",
   factionId: "gallente-federation" as FactionId,
   hullTypeId: "120" as HullTypeId,
@@ -166,7 +168,7 @@ export const RIFTER_MODULE: PropulsionModule = {
   massAddition: 500_000,
   sigBloom: 5,
 };
-export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn", propulsionModuleId: "434" as TypeId };
+export const RIFTER_PROPULSION: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId } = { ...RIFTER_MODULE, propulsionId: "mwd-5mn", propulsionModuleId: toTypeId("434") };
 export const COMPACT_MWD: PropulsionStats = { thrust: 1_500_000, speedBonus: 5.05, massAddition: 500_000, sigBloom: 5 };
 export const RIFTER_BASE_STATS: ShipStats = {
   mass: 1_000_000,
@@ -195,9 +197,9 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     optimal: 600,
     falloff: 3000,
     chargeSize: 1,
-    chargeId: "12608" as TypeId,
+    chargeId: toTypeId("12608"),
     base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
-    moduleId: "486" as TypeId,
+    moduleId: toTypeId("486"),
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
@@ -222,6 +224,10 @@ const NAME_FOR_ID: Record<string, string> = {
   "21898": "Republic Fleet EMP S",
   "5973": "5MN Y-T8 Compact Microwarpdrive",
   "439": "1MN Afterburner I",
+  "29005": "Optimal Range Disruption Script",
+  "29007": "Tracking Speed Disruption Script",
+  "28999": "Optimal Range Script",
+  "29001": "Tracking Speed Script",
 };
 
 export function makeFittingImport() {
@@ -236,8 +242,8 @@ export function makeFittingImport() {
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
-  const hail: TypeId = "12608" as TypeId;
-  const republic: TypeId = "21898" as TypeId;
+  const hail = toTypeId("12608");
+  const republic = toTypeId("21898");
   const catalog = vi.mocked<ChargeCatalog>({
     usualForChargeSize: vi.fn(() => hail),
     usualForTurret: vi.fn(() => hail),
@@ -276,7 +282,7 @@ export function resetMocks(): void {
   chargeCatalog = makeChargeCatalog();
 }
 export function makeParser(): SettingsParser {
-  return new SettingsParser({ ships, fittingImport, chargeCatalog, settingGuards: simGuards });
+  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), settingGuards: simGuards });
 }
 
 export function fakeEquality(equal = true): ProfileEquality {
