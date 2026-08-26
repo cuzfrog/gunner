@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS = {
   shipAInertia: 3,
   shipASkillLevel: 5,
   shipAOverload: true,
-  initialDistance: 5000,
+  initialDistance: 20000,
   shipBSpeed: 1000,
   shipBMode: "orbit" as const,
   shipBRange: 5000,

@@ -59,7 +59,7 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   play: { id: "play", tag: "BUTTON" as const, defaultValue: undefined },
   reset: { id: "reset", tag: "BUTTON" as const, defaultValue: undefined },
   simSpeed: { id: "sim-speed", tag: "SELECT" as const, defaultValue: "4" },
-  initialDistance: { id: "initial-distance", tag: "INPUT" as const, defaultValue: "5000" },
+  initialDistance: { id: "initial-distance", tag: "INPUT" as const, defaultValue: "20000" },
   gridBrightnessSlider: { id: "grid-brightness-slider", tag: "INPUT" as const, defaultValue: "0.5" },
   gridBrightnessValue: { id: "grid-brightness-value", tag: "OUTPUT" as const, defaultValue: undefined },
   canvasSettingsTrigger: { id: "canvas-settings-trigger", tag: "BUTTON" as const, defaultValue: undefined },

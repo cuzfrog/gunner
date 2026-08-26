@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   shipAInertia: 3,
   shipASkillLevel: 5,
   shipAOverload: true,
-  initialDistance: 5000,
+  initialDistance: 20000,
   shipBSpeed: 1000,
   shipBMode: "orbit",
   shipBRange: 5000,
