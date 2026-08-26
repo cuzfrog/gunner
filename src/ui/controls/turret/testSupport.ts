@@ -14,29 +14,30 @@ import {
 } from "../testSupport";
 import type { PopupGroup } from "../popup";
 
+const SIDE_ID: Record<Side, "ship-a" | "ship-b"> = { shipA: "ship-a", shipB: "ship-b" };
+
 function sideId(side: Side): "ship-a" | "ship-b" {
-  return side === "shipA" ? "ship-a" : "ship-b";
+  return SIDE_ID[side];
 }
 
 export function collectTurretEls(document: Document, side: Side): TurretEls {
-  const get = (id: string) => getFake(document, id) as unknown as HTMLElement;
   const id = sideId(side);
   return {
-    tracking: get(`${id}-tracking`) as HTMLInputElement,
-    sigRes: get(`${id}-sigRes`) as HTMLSelectElement,
-    sigResOptions: get(`${id}-sig-res-options`),
-    optimal: get(`${id}-optimal`) as HTMLInputElement,
-    falloff: get(`${id}-falloff`) as HTMLInputElement,
-    ammoField: get(`${id}-ammo-field`),
-    ammoTrigger: get(`${id}-ammo-trigger`) as HTMLButtonElement,
-    ammoSummary: get(`${id}-ammo-summary`),
-    ammoSummaryIcon: get(`${id}-ammo-summary-icon`) as HTMLImageElement,
-    ammoPopup: get(`${id}-ammo-popup`),
-    ammoCargoLabel: get(`${id}-ammo-cargo-label`),
-    ammoCargoList: get(`${id}-ammo-cargo-list`),
-    ammoExpand: get(`${id}-ammo-expand`) as HTMLButtonElement,
-    ammoAllSection: get(`${id}-ammo-all-section`),
-    ammoAllList: get(`${id}-ammo-all-list`),
+    tracking: document.getElementById(`${id}-tracking`)! as HTMLInputElement,
+    sigRes: document.getElementById(`${id}-sigRes`)! as HTMLSelectElement,
+    sigResOptions: document.getElementById(`${id}-sig-res-options`)!,
+    optimal: document.getElementById(`${id}-optimal`)! as HTMLInputElement,
+    falloff: document.getElementById(`${id}-falloff`)! as HTMLInputElement,
+    ammoField: document.getElementById(`${id}-ammo-field`)!,
+    ammoTrigger: document.getElementById(`${id}-ammo-trigger`)! as HTMLButtonElement,
+    ammoSummary: document.getElementById(`${id}-ammo-summary`)!,
+    ammoSummaryIcon: document.getElementById(`${id}-ammo-summary-icon`)! as HTMLImageElement,
+    ammoPopup: document.getElementById(`${id}-ammo-popup`)!,
+    ammoCargoLabel: document.getElementById(`${id}-ammo-cargo-label`)!,
+    ammoCargoList: document.getElementById(`${id}-ammo-cargo-list`)!,
+    ammoExpand: document.getElementById(`${id}-ammo-expand`)! as HTMLButtonElement,
+    ammoAllSection: document.getElementById(`${id}-ammo-all-section`)!,
+    ammoAllList: document.getElementById(`${id}-ammo-all-list`)!,
   };
 }
 
@@ -62,8 +63,7 @@ export function buildTurret(
 ) {
   const side = options.side ?? "shipA";
   const document = fakeDocument();
-  globalThis.document = document as unknown as Document;
-  globalThis.Element = FakeElement as unknown as typeof Element;
+  globalThis.document = document;
   const els = collectTurretEls(document, side);
   setTurretInputs(document, side);
   addSigResButtons(document);

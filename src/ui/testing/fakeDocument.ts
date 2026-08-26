@@ -17,6 +17,7 @@ function tagForId(id: string): string {
 export function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
   const docHandlers: Record<string, Array<(event?: unknown) => void>> = {};
+  globalThis.Element = FakeElement as unknown as typeof Element;
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {

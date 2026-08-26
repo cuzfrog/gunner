@@ -1,15 +1,26 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
-import type { createControlsEls } from "../elements";
-import type { ControlsCradle } from "../cradle";
 import { TrackingInputImpl } from "../trackingInput";
+import type { ControlsCradle } from "../cradle";
 import type { Side } from "../side";
 import type { TurretController } from "./turretControllerContract";
 import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
-import { collectTurretEls, type TurretEls } from "./turretEls";
+import { collectTurretEls } from "./turretEls";
 
-type ControlsElements = ReturnType<typeof createControlsEls>;
+type TurretControllerFactoryDeps = Pick<
+  ControlsCradle,
+  | "els"
+  | "chargeCatalog"
+  | "fittingImport"
+  | "gunFamilies"
+  | "imageCatalog"
+  | "i18n"
+  | "ships"
+  | "uiEvents"
+  | "popupGroup"
+  | "turretOverridesBySide"
+>;
 
 export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
@@ -19,8 +30,8 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
       shipA: shipATurretOverrides,
       shipB: shipBTurretOverrides,
     })).singleton(),
-    shipATurretController: asFunction((cradle) => createTurretController("shipA", cradle as unknown as ControlsCradle)).singleton(),
-    shipBTurretController: asFunction((cradle) => createTurretController("shipB", cradle as unknown as ControlsCradle)).singleton(),
+    shipATurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipA", deps)).singleton(),
+    shipBTurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipB", deps)).singleton(),
     turretControllers: asFunction(({ shipATurretController, shipBTurretController }): Record<Side, TurretController> => ({
       shipA: shipATurretController,
       shipB: shipBTurretController,
@@ -28,22 +39,21 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
   });
 }
 
-function createTurretController(side: Side, cradle: ControlsCradle): TurretControllerImpl {
-  const overrides = side === "shipA" ? cradle.shipATurretOverrides : cradle.shipBTurretOverrides;
-  const resolver = new TurretStateResolver({ chargeCatalog: cradle.chargeCatalog, fittingImport: cradle.fittingImport });
+function createTurretController(side: Side, deps: TurretControllerFactoryDeps): TurretControllerImpl {
+  const resolver = new TurretStateResolver({ chargeCatalog: deps.chargeCatalog, fittingImport: deps.fittingImport });
   return new TurretControllerImpl({
     side,
-    els: collectTurretEls(cradle.els, side),
-    chargeCatalog: cradle.chargeCatalog,
-    gunFamilies: cradle.gunFamilies,
-    imageCatalog: cradle.imageCatalog,
+    els: collectTurretEls(deps.els, side),
+    chargeCatalog: deps.chargeCatalog,
+    gunFamilies: deps.gunFamilies,
+    imageCatalog: deps.imageCatalog,
     trackingInput: new TrackingInputImpl(),
-    i18n: cradle.i18n,
-    fittingImport: cradle.fittingImport,
+    i18n: deps.i18n,
+    fittingImport: deps.fittingImport,
     resolver,
-    turretOverrides: overrides,
-    ships: cradle.ships,
-    events: cradle.uiEvents,
-    popupGroup: cradle.popupGroup,
+    turretOverrides: deps.turretOverridesBySide[side],
+    ships: deps.ships,
+    events: deps.uiEvents,
+    popupGroup: deps.popupGroup,
   });
 }
