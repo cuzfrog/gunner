@@ -79,12 +79,12 @@ const itemNameCatalog = new StaticItemNameCatalog();
 const moduleSlotCatalog = MODULE_SLOT_CATALOG;
 
 const profile: ShipProfile = {
-  id: "17347" as ShipId,
+  id: "24696" as ShipId,
   name: "Harbinger",
   faction: "Amarr Empire",
   factionId: "amarr-empire" as FactionId,
   hullType: "Standard Battlecruisers",
-  hullTypeId: "1201" as HullTypeId,
+  hullTypeId: "419" as HullTypeId,
   mass: 15_500_000,
   inertiaModifier: 0.45,
   baseSpeed: 165,
@@ -105,12 +105,12 @@ const frigateProfile: ShipProfile = {
 };
 
 const bonusProfile: ShipProfile = {
-  id: "11375" as ShipId,
+  id: "11999" as ShipId,
   name: "Vagabond",
   faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
   hullType: "Heavy Assault Cruisers",
-  hullTypeId: "77" as HullTypeId,
+  hullTypeId: "358" as HullTypeId,
   mass: 10_500_000,
   inertiaModifier: 0.5,
   baseSpeed: 205,
@@ -118,7 +118,7 @@ const bonusProfile: ShipProfile = {
 };
 
 const roleBonusProfile: ShipProfile = {
-  id: "12005" as ShipId,
+  id: "12015" as ShipId,
   name: "Muninn",
   faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
@@ -131,7 +131,7 @@ const roleBonusProfile: ShipProfile = {
 };
 
 const abaddonProfile: ShipProfile = {
-  id: "645" as ShipId,
+  id: "24692" as ShipId,
   name: "Abaddon",
   faction: "Amarr Empire",
   factionId: "amarr-empire" as FactionId,

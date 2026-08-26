@@ -105,9 +105,9 @@ export const FITTED_HULL_SUMMARY: FittedHullSummary = {
 export const RIFTER_PROFILE: ShipProfile = {
   id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar",
-  factionId: "minmatar" as FactionId,
-  hullType: "Frigate",
+  faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
+  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,

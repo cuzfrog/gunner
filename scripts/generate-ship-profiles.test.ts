@@ -1,23 +1,23 @@
-import { buildShipNameToType, parseProfile, resolveShipIds, slugify } from "./generate-ship-profiles";
+import { _buildShipNameToType, _parseProfile, _resolveShipIds, _slugify } from "./generate-ship-profiles";
 import type { SdeGroup, SdeType } from "./generate-ship-profiles";
 
-describe("slugify", () => {
+describe("_slugify", () => {
   test("lowercases and joins words with hyphens", () => {
-    expect(slugify("Amarr Empire")).toBe("amarr-empire");
-    expect(slugify("Jovian Directorate")).toBe("jovian-directorate");
+    expect(_slugify("Amarr Empire")).toBe("amarr-empire");
+    expect(_slugify("Jovian Directorate")).toBe("jovian-directorate");
   });
 
   test("strips apostrophes and collapses punctuation", () => {
-    expect(slugify("Mordu's Legion")).toBe("mordus-legion");
-    expect(slugify("Sisters of EVE")).toBe("sisters-of-eve");
+    expect(_slugify("Mordu's Legion")).toBe("mordus-legion");
+    expect(_slugify("Sisters of EVE")).toBe("sisters-of-eve");
   });
 
   test("trims leading and trailing non-alphanumerics", () => {
-    expect(slugify("  Gallente Federation  ")).toBe("gallente-federation");
+    expect(_slugify("  Gallente Federation  ")).toBe("gallente-federation");
   });
 });
 
-describe("buildShipNameToType", () => {
+describe("_buildShipNameToType", () => {
   function makeType(overrides: { typeID: number; typeName: string; groupID: number; published?: number }): SdeType {
     return {
       typeID: overrides.typeID,
@@ -45,7 +45,7 @@ describe("buildShipNameToType", () => {
       "25": makeGroup({ groupID: 25, categoryID: 6 }),
       "100": makeGroup({ groupID: 100, categoryID: 18 }),
     };
-    const map = buildShipNameToType(types, groups);
+    const map = _buildShipNameToType(types, groups);
     expect(map.get("Rifter")?.typeID).toBe(1);
     expect(map.has("Gecko")).toBe(false);
   });
@@ -56,11 +56,11 @@ describe("buildShipNameToType", () => {
       "2": makeType({ typeID: 2, typeName: "Rifter", groupID: 25 }),
     };
     const groups: Record<string, SdeGroup> = { "25": makeGroup({ groupID: 25, categoryID: 6 }) };
-    expect(() => buildShipNameToType(types, groups)).toThrow('Duplicate ship name "Rifter" in SDE.');
+    expect(() => _buildShipNameToType(types, groups)).toThrow('Duplicate ship name "Rifter" in SDE.');
   });
 });
 
-describe("resolveShipIds", () => {
+describe("_resolveShipIds", () => {
   function rifterType(): SdeType {
     return { typeID: 587, "typeName_en-us": "Rifter", groupID: 25, published: 1 };
   }
@@ -68,13 +68,10 @@ describe("resolveShipIds", () => {
   const map = new Map<string, SdeType>([["Rifter", rifterType()]]);
 
   test("resolves type and group ids for a known ship", () => {
-    const result = resolveShipIds({
+    const result = _resolveShipIds({
       name: "Rifter",
       faction: "Minmatar Republic",
       hullType: "Standard Frigates",
-      navigation: {},
-      structure: {},
-      targeting: {},
     }, map);
     expect(String(result.id)).toBe("587");
     expect(String(result.factionId)).toBe("minmatar-republic");
@@ -83,13 +80,10 @@ describe("resolveShipIds", () => {
   });
 
   test("falls back to legacy ids for a missing ship", () => {
-    const result = resolveShipIds({
+    const result = _resolveShipIds({
       name: "Eidolon",
       faction: "Jovian Directorate",
       hullType: "Standard Battleships",
-      navigation: {},
-      structure: {},
-      targeting: {},
     }, map);
     expect(String(result.id)).toBe("legacy-eidolon");
     expect(String(result.factionId)).toBe("jovian-directorate");
@@ -98,7 +92,7 @@ describe("resolveShipIds", () => {
   });
 });
 
-describe("parseProfile", () => {
+describe("_parseProfile", () => {
   const shipNameToType = new Map<string, SdeType>([["Rifter", { typeID: 587, "typeName_en-us": "Rifter", groupID: 25, published: 1 }]]);
 
   test("parses a valid profile and resolves ids", () => {
@@ -110,7 +104,7 @@ describe("parseProfile", () => {
       structure: { mass: "1,067,000 kg" },
       targeting: { sigRadius: "35 m" },
     };
-    const profile = parseProfile(raw, 0, shipNameToType);
+    const profile = _parseProfile(raw, 0, shipNameToType);
     expect(String(profile.id)).toBe("587");
     expect(profile.name).toBe("Rifter");
     expect(String(profile.factionId)).toBe("minmatar-republic");
@@ -121,10 +115,10 @@ describe("parseProfile", () => {
   });
 
   test("throws for a non-object entry", () => {
-    expect(() => parseProfile(null, 0, shipNameToType)).toThrow("Entry 0 is not an object");
+    expect(() => _parseProfile(null, 0, shipNameToType)).toThrow("Entry 0 is not an object");
   });
 
   test("throws for an empty name", () => {
-    expect(() => parseProfile({ name: "" }, 0, shipNameToType)).toThrow("Entry 0 has an empty name");
+    expect(() => _parseProfile({ name: "" }, 0, shipNameToType)).toThrow("Entry 0 has an empty name");
   });
 });

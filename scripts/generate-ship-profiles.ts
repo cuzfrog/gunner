@@ -4,10 +4,13 @@ import { homedir } from "node:os";
 import type { ShipProfile } from "../src/ships";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
 
-interface RawProfile {
+interface ShipIdentity {
   readonly name: string;
   readonly faction: string;
   readonly hullType: string;
+}
+
+interface RawProfile extends ShipIdentity {
   readonly navigation: Readonly<Record<string, string>>;
   readonly structure: Readonly<Record<string, string>>;
   readonly targeting: Readonly<Record<string, string>>;
@@ -60,7 +63,7 @@ function hasString(value: Record<string, unknown>, key: string, context: string)
   return field;
 }
 
-export function slugify(input: string): string {
+function slugify(input: string): string {
   return input
     .toLowerCase()
     .replaceAll("'", "")
@@ -97,7 +100,7 @@ async function loadSdeData(sdeDir = SDE_DIR): Promise<{ types: Record<string, Sd
   return { types, groups };
 }
 
-export function buildShipNameToType(
+function buildShipNameToType(
   types: Record<string, SdeType>,
   groups: Record<string, SdeGroup>,
 ): ReadonlyMap<string, SdeType> {
@@ -113,8 +116,8 @@ export function buildShipNameToType(
   return map;
 }
 
-export function resolveShipIds(
-  profile: RawProfile,
+function resolveShipIds(
+  profile: ShipIdentity,
   shipNameToType: ReadonlyMap<string, SdeType>,
 ): { id: ShipId; factionId: FactionId; hullTypeId: HullTypeId; matched: boolean } {
   const ship = shipNameToType.get(profile.name);
@@ -134,7 +137,7 @@ export function resolveShipIds(
   };
 }
 
-export function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<string, SdeType>): ShipProfile {
+function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<string, SdeType>): ShipProfile {
   if (!raw || typeof raw !== "object") throw new Error(`Entry ${index} is not an object`);
   const record = raw as Record<string, unknown>;
 
@@ -147,7 +150,7 @@ export function parseProfile(raw: unknown, index: number, shipNameToType: Readon
   const structure = hasObject(raw, "structure");
   const targeting = hasObject(raw, "targeting");
 
-  const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType, navigation, structure, targeting } as RawProfile, shipNameToType);
+  const { id, factionId, hullTypeId } = resolveShipIds({ name, faction, hullType }, shipNameToType);
 
   return {
     id,
@@ -214,6 +217,8 @@ async function main(): Promise<void> {
   await writeFile(OUTPUT_PATH, buildSource(profiles));
   console.log(`Generated ${OUTPUT_PATH} with ${profiles.length} profiles.`);
 }
+
+export { buildShipNameToType as _buildShipNameToType, parseProfile as _parseProfile, resolveShipIds as _resolveShipIds, slugify as _slugify };
 
 if (import.meta.main) {
   main().catch((error) => {

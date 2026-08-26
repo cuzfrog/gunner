@@ -2,6 +2,7 @@ import { buildTurret } from "./testSupport";
 import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
 import type { ShipProfile } from "../../../ships";
+import type { FactionId, HullTypeId, ShipId } from "../../../gamedata/ids";
 
 describe("TurretController", () => {
   test("initial state disables the trigger, inputs, and hides the summary icon", () => {
@@ -276,7 +277,7 @@ describe("TurretController", () => {
   test("setHullProfile clamps an invalid current class to the highest allowed class when no turret is fitted", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
     getFake(document, "ship-a-sigRes").value = "XL";
-    const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
+    const mediumProfile: ShipProfile = { ...RIFTER, id: "621" as ShipId, name: "Caracal", faction: "Caldari State", factionId: "caldari-state" as FactionId, hullType: "Standard Cruisers", hullTypeId: "26" as HullTypeId };
     controller.setHullProfile(mediumProfile);
     expect(getFake(document, "ship-a-sigRes").value).toBe("L");
     expect(buttonFor(document, "L").getAttribute("aria-pressed")).toBe("true");
@@ -285,7 +286,7 @@ describe("TurretController", () => {
 
   test("setHullProfile re-enables larger classes when a bigger hull is selected", () => {
     const { document, controller } = buildTurret({ ships: { turretSizeOptions: mockTurretSizeOptions() } });
-    const mediumProfile: ShipProfile = { ...RIFTER, name: "Caracal", hullType: "Standard Cruisers" };
+    const mediumProfile: ShipProfile = { ...RIFTER, id: "621" as ShipId, name: "Caracal", faction: "Caldari State", factionId: "caldari-state" as FactionId, hullType: "Standard Cruisers", hullTypeId: "26" as HullTypeId };
     controller.applyImported(IMPORTED_RIFTER);
     controller.setHullProfile(RIFTER);
     expect(buttonFor(document, "L").disabled).toBe(true);

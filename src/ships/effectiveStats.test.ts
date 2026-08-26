@@ -82,7 +82,7 @@ describe("naked hull", () => {
 
   test("Thrasher with 10MN compact afterburner reaches the expected 1536 m/s", () => {
     const thrasher: ShipProfile = {
-      id: "16236" as ShipId,
+      id: "16242" as ShipId,
       name: "Thrasher",
       faction: "Minmatar Republic",
       factionId: "minmatar-republic" as FactionId,

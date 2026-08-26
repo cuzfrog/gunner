@@ -12,9 +12,9 @@ import type { PortraitsController, PortraitsEls, CombatantProfiles } from "./por
 const SHIP_A_PROFILE: ShipProfile = {
   id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar",
-  factionId: "minmatar" as FactionId,
-  hullType: "Frigate",
+  faction: "Minmatar Republic",
+  factionId: "minmatar-republic" as FactionId,
+  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
@@ -22,11 +22,11 @@ const SHIP_A_PROFILE: ShipProfile = {
   sigRadius: 36,
 };
 const SHIP_B_PROFILE: ShipProfile = {
-  id: "602" as ShipId,
+  id: "603" as ShipId,
   name: "Merlin",
-  faction: "Caldari",
-  factionId: "caldari" as FactionId,
-  hullType: "Frigate",
+  faction: "Caldari State",
+  factionId: "caldari-state" as FactionId,
+  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
