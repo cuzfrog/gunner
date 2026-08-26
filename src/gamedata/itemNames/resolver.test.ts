@@ -66,4 +66,12 @@ describe("StaticItemNameResolver", () => {
     });
     expect(r.idsForName("Alpha", "zh")).toEqual(["1" as TypeId]);
   });
+
+  test("drops a collision-preferred id that is not present in the pack", () => {
+    const r = resolver({
+      en: { "3": "Shared", "4": "Shared" },
+      collisionsEn: { Shared: "5" },
+    });
+    expect(r.idsForName("Shared", "en")).toEqual(["3" as TypeId, "4" as TypeId]);
+  });
 });

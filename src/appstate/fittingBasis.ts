@@ -122,7 +122,7 @@ export class FittingBasis {
     if (imported.turret) {
       const options = this.chargeCatalog.chargesForSize(imported.turret.chargeSize);
       const storedAmmo = side === "shipA" ? settings.shipAAmmo : settings.shipBAmmo;
-      const option = options.find((c) => c.name === storedAmmo || c.id === storedAmmo);
+      const option = options.find((c) => c.id === storedAmmo);
       const turret = option ? this.chargeCatalog.withCharge(imported.turret, option.id) : imported.turret;
       if (side === "shipA") {
         result.shipATracking = override.tracking ?? turret.tracking;

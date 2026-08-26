@@ -22,7 +22,8 @@ import {
   type FittingDb,
 } from "../gamedata/fittingDb";
 import { MODULE_SLOTS, MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
-import { moduleLines, parseEft } from "./eft";
+import { moduleLines, parseEft, type EftDocument } from "./eft";
+import { _detectionOrder } from "./fittingImport";
 
 const OPTIMAL_RANGE_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name === "Optimal Range Disruption Script")!;
 const TRACKING_SPEED_STAT = Object.values(DISRUPTION_SCRIPTS).find((s) => s.name === "Tracking Speed Disruption Script")!;
@@ -1210,5 +1211,35 @@ Unknown Custom Module I
     expect(canonical).toContain("Brawler");
     expect(canonical).toContain("Unknown Custom Module I");
     expect(canonical).toContain("5MN Microwarpdrive I");
+  });
+});
+
+function eftDocument(hullName: string, names: readonly string[] = []): EftDocument {
+  const lines = names.map((name) => ({ kind: "module" as const, name, offline: false }));
+  return { hullName, fittingName: "Test", banks: [{ bank: "low" as const, lines }], drones: [], cargo: [] };
+}
+
+describe("_detectionOrder", () => {
+  test("latin-only names return en first", () => {
+    expect(_detectionOrder(eftDocument("Rifter", ["200mm AutoCannon I"]))).toEqual(["en", "zh", "ja"]);
+  });
+
+  test("kana anywhere in the document returns ja first", () => {
+    expect(_detectionOrder(eftDocument("リフター"))).toEqual(["ja", "zh", "en"]);
+    expect(_detectionOrder(eftDocument("Rifter", ["200mm AC", "リフター"]))).toEqual(["ja", "zh", "en"]);
+  });
+
+  test("Han ideographs without kana return zh first", () => {
+    expect(_detectionOrder(eftDocument("裂谷级"))).toEqual(["zh", "ja", "en"]);
+    expect(_detectionOrder(eftDocument("Rifter", ["裂谷级"]))).toEqual(["zh", "ja", "en"]);
+  });
+
+  test("mixed kana and Han gives ja first", () => {
+    expect(_detectionOrder(eftDocument("裂谷级", ["リフター"]))).toEqual(["ja", "zh", "en"]);
+  });
+
+  test("fitting name is excluded from language detection", () => {
+    expect(_detectionOrder({ ...eftDocument("Rifter"), fittingName: "裂谷级" })).toEqual(["en", "zh", "ja"]);
+    expect(_detectionOrder({ ...eftDocument("Rifter"), fittingName: "リフター" })).toEqual(["en", "zh", "ja"]);
   });
 });

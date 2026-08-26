@@ -343,10 +343,6 @@ function isChargeRole(id: TypeId, db: FittingDb): boolean {
   return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined;
 }
 
-function isDroneRole(id: TypeId, db: FittingDb): boolean {
-  return db.drones[id] !== undefined;
-}
-
 function moduleByName(db: FittingDb, name: string): FittingModuleStats | undefined {
   for (const stats of Object.values(db.modules)) {
     if (stats.name === name) return stats;

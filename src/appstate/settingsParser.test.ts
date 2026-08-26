@@ -514,6 +514,19 @@ describe("SettingsParser", () => {
     expect("shipAHull" in jaParsed!).toBe(false);
   });
 
+  test("parseUserSettings preserves resolved localized hull ids through a reparse", () => {
+    const zh = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "裂谷级", shipBHull: "Thrasher" };
+    const parser = makeParser();
+    const first = parser.parseUserSettings(JSON.stringify(zh));
+    expect(first).not.toBeNull();
+    expect(first!.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect(first!.shipBHullId).toBe("16242" as ShipId);
+    expect("shipAHull" in first!).toBe(false);
+    expect("shipBHull" in first!).toBe(false);
+    const second = parser.parseUserSettings(parser.serialize(first!));
+    expect(second).toEqual(first);
+  });
+
   test("parseUserSettings drops a garbage numeric hullId and deletes the legacy hull key", () => {
     const bad = { ...DEFAULT_SETTINGS, version: 10, shipAHullId: "999999999" as ShipId, shipAHull: "USS Enterprise" };
     const parsed = makeParser().parseUserSettings(JSON.stringify(bad));

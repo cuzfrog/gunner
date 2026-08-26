@@ -69,7 +69,7 @@ function buildReverseMap(pack: Readonly<Record<string, string>>, collisions: Rea
     const preferredId = collisions[name];
     const preferred = preferredId !== undefined ? toTypeId(preferredId) : undefined;
     const sorted = [...ids].sort((a, b) => Number(a) - Number(b));
-    if (preferred) {
+    if (preferred && ids.includes(preferred)) {
       const rest = sorted.filter((id) => id !== preferred);
       map.set(name, [preferred, ...rest]);
     } else {
