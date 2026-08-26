@@ -65,9 +65,9 @@ export class ShipsImpl implements Ships {
 
   hullView(profile: ShipProfile, language: ShipNameLanguage): HullView {
     return {
-      name: this.nameI18nCatalog.shipName(profile.name, language),
-      hullType: this.nameI18nCatalog.hullTypeName(profile.hullType, language),
-      faction: this.nameI18nCatalog.factionName(profile.faction, language),
+      name: this.nameI18nCatalog.shipName(profile.id, language) ?? profile.name,
+      hullType: this.nameI18nCatalog.hullTypeName(profile.hullTypeId, language) ?? profile.hullType,
+      faction: this.nameI18nCatalog.factionName(profile.factionId, language) ?? profile.faction,
     };
   }
 
@@ -138,15 +138,12 @@ function buildHullById(catalog: ShipProfileCatalog): ReadonlyMap<ShipId, ShipPro
 function buildHullByName(catalog: ShipProfileCatalog, i18n: NameI18nCatalog): Record<ShipNameLanguage, ReadonlyMap<string, ShipProfile>> {
   const maps: Record<ShipNameLanguage, Map<string, ShipProfile>> = { en: new Map(), zh: new Map(), ja: new Map() };
   for (const profile of catalog.all()) {
-    const enKey = normalize(profile.name);
-    if (!maps.en.has(enKey)) maps.en.set(enKey, profile);
-    const names = i18n.shipLocalizations(profile.name);
-    if (!names) continue;
-    for (const language of ["zh", "ja"] as const) {
-      const localized = names[language].trim();
-      if (localized.length === 0) continue;
-      const key = normalize(localized);
-      if (!maps[language].has(key)) maps[language].set(key, profile);
+    for (const language of HULL_LANGUAGE_ORDER) {
+      const name = i18n.shipName(profile.id, language);
+      if (name === undefined) continue;
+      const key = normalize(name);
+      if (maps[language].has(key)) continue;
+      maps[language].set(key, profile);
     }
   }
   return { en: maps.en, zh: maps.zh, ja: maps.ja };

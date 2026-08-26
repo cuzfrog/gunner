@@ -122,4 +122,10 @@ describe("ShipsImpl", () => {
   test("findHull gives canonical names priority over localized collisions", () => {
     expect(ships.findHull("Salvation")?.name).toBe("Salvation");
   });
+
+  test("findHullByName resolves only the requested language", () => {
+    expect(ships.findHullByName("Rifter", "en")?.name).toBe("Rifter");
+    expect(ships.findHullByName("裂谷级", "zh")?.name).toBe("Rifter");
+    expect(ships.findHullByName("Rifter", "zh")).toBeUndefined();
+  });
 });

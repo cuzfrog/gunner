@@ -13,6 +13,7 @@
     "preview": "bun run scripts/preview.ts",
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
+    "generate:name-i18n": "bun run scripts/generate-name-i18n.ts",
     "generate:combatant-sections": "bun run scripts/generate-combatant-sections.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
