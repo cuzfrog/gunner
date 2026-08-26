@@ -108,9 +108,7 @@ export function mockGunFamilies(): GunFamilies {
 export const RIFTER: ShipProfile = {
   id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,

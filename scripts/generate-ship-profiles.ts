@@ -155,9 +155,7 @@ function parseProfile(raw: unknown, index: number, shipNameToType: ReadonlyMap<s
   return {
     id,
     name,
-    faction,
     factionId,
-    hullType,
     hullTypeId,
     mass: parseNumber(hasString(structure, "mass", name)),
     inertiaModifier: parseNumber(hasString(navigation, "inertiaModifier", name)),
@@ -178,9 +176,7 @@ function buildSource(profiles: readonly ShipProfile[]): string {
     lines.push("  {");
     lines.push(`    id: ${JSON.stringify(p.id)} as ShipProfile["id"],`);
     lines.push(`    name: ${JSON.stringify(p.name)},`);
-    lines.push(`    faction: ${JSON.stringify(p.faction)},`);
     lines.push(`    factionId: ${JSON.stringify(p.factionId)} as ShipProfile["factionId"],`);
-    lines.push(`    hullType: ${JSON.stringify(p.hullType)},`);
     lines.push(`    hullTypeId: ${JSON.stringify(p.hullTypeId)} as ShipProfile["hullTypeId"],`);
     lines.push(`    mass: ${p.mass},`);
     lines.push(`    inertiaModifier: ${p.inertiaModifier},`);

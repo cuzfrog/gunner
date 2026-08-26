@@ -1,1 +1,1 @@
-export type ShipNameLanguage = "en" | "zh" | "ja";
+export type { ShipNameLanguage } from "../gamedata/i18n";

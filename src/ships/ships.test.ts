@@ -1,18 +1,18 @@
 import { ShipsImpl } from "./ships";
-import { fittingOptions } from "./fitting";
 import { fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { PROPULSION_MODULES } from "./propulsion";
 import { StaticNameI18nCatalog } from "../gamedata/nameI18n";
-import { StaticShipProfileCatalog } from "../gamedata/shipProfiles";
-import type { FittedHull, HullTier, PropulsionId, ShipProfile } from "./types";
+import { StaticShipProfileCatalog, type ShipProfileCatalog } from "../gamedata/shipProfiles";
+import type { HullTypeId, ShipId } from "../gamedata/ids";
+import type { FittedHull, HullTier, ShipProfile } from "./types";
 
 const shipProfileCatalog = new StaticShipProfileCatalog();
 const nameI18nCatalog = new StaticNameI18nCatalog();
 const ships = new ShipsImpl({ shipProfileCatalog, nameI18nCatalog });
 
 const rifter = shipProfileCatalog.byName("Rifter")!;
-const ab1 = fittingOptions(rifter).find((m) => m.id === "ab-1mn")!;
-const mwd5 = fittingOptions(rifter).find((m) => m.id === "mwd-5mn")!;
+const ab1 = ships.fittingOption(rifter, "ab-1mn")!;
+const mwd5 = ships.fittingOption(rifter, "mwd-5mn")!;
 
 describe("ShipsImpl", () => {
   test("hulls returns a localized view for every ship profile", () => {
@@ -24,6 +24,18 @@ describe("ShipsImpl", () => {
   test("hullView localizes the profile in the requested language", () => {
     expect(ships.hullView(rifter, "zh")).toEqual({ name: "裂谷级", hullType: "护卫舰", faction: "米玛塔尔" });
     expect(ships.hullView(rifter, "ja")).toEqual({ name: "リフター", hullType: "フリゲート", faction: "ミンマター共和国" });
+  });
+
+  test("hullView falls back to raw ids when no localization is available", () => {
+    const fallback = new ShipsImpl({
+      shipProfileCatalog,
+      nameI18nCatalog: {
+        shipName: () => undefined,
+        hullTypeName: () => undefined,
+        factionName: () => undefined,
+      },
+    });
+    expect(fallback.hullView(rifter, "en")).toEqual({ name: "Rifter", hullType: rifter.hullTypeId, faction: rifter.factionId });
   });
 
   test("findHull resolves canonical and localized names", () => {
@@ -53,10 +65,31 @@ describe("ShipsImpl", () => {
     expect(options.map((m) => m.id)).toEqual(["ab-1mn", "mwd-5mn", "ab-10mn"]);
   });
 
+  test("fittingOptions and turretSizeOptions return empty when the hull type has no tier", () => {
+    const unknownHullType = {
+      ...rifter,
+      id: "no-tier" as ShipId,
+      hullTypeId: "unknown-hull" as HullTypeId,
+    };
+    const catalog: ShipProfileCatalog = {
+      all: () => [unknownHullType],
+      byId: () => undefined,
+      byName: () => undefined,
+    };
+    const fallback = new ShipsImpl({ shipProfileCatalog: catalog, nameI18nCatalog });
+    expect(fallback.fittingOptions(unknownHullType)).toHaveLength(0);
+    expect(fallback.turretSizeOptions(unknownHullType)).toHaveLength(0);
+  });
+
+  test("fittingOptions returns empty for a hull with no tier", () => {
+    const shuttle = shipProfileCatalog.byName("Caldari Shuttle")!;
+    expect(ships.fittingOptions(shuttle)).toHaveLength(0);
+  });
+
   test("fittingOption returns the requested module if it fits", () => {
     expect(ships.fittingOption(rifter, "mwd-5mn")).toEqual(mwd5);
     expect(ships.fittingOption(rifter, "ab-1mn")).toEqual(ab1);
-    expect(ships.fittingOption(rifter, "mwd-500mn" as PropulsionId)).toBeUndefined();
+    expect(ships.fittingOption(rifter, "mwd-500mn")).toBeUndefined();
   });
 
   test("fittedStats with undefined fitted delegates to the naked hull", () => {

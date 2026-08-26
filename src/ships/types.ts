@@ -17,9 +17,7 @@ export type PropulsionId =
 export interface ShipProfile {
   readonly id: ShipId;
   readonly name: string;
-  readonly faction: string;
   readonly factionId: FactionId;
-  readonly hullType: string;
   readonly hullTypeId: HullTypeId;
   readonly mass: number;
   readonly inertiaModifier: number;

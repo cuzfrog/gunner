@@ -9,3 +9,4 @@ export type FactionId = string & { readonly [FactionIdBrand]: true };
 
 declare const TypeIdBrand: unique symbol;
 export type TypeId = string & { readonly [TypeIdBrand]: true };
+

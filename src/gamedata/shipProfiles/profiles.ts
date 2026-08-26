@@ -5,9 +5,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24692" as ShipProfile["id"],
     name: "Abaddon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103200000,
     inertiaModifier: 0.14,
@@ -17,9 +15,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22448" as ShipProfile["id"],
     name: "Absolution",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 12300000,
     inertiaModifier: 0.71,
@@ -29,9 +25,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2836" as ShipProfile["id"],
     name: "Adrestia",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11100000,
     inertiaModifier: 0.457,
@@ -41,9 +35,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23919" as ShipProfile["id"],
     name: "Aeon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1780000000,
     inertiaModifier: 0.035,
@@ -53,9 +45,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32872" as ShipProfile["id"],
     name: "Algos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.85,
@@ -65,9 +55,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "91849" as ShipProfile["id"],
     name: "Algos Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.71,
@@ -77,9 +65,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32848" as ShipProfile["id"],
     name: "Aliastra Catalyst",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -89,9 +75,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78366" as ShipProfile["id"],
     name: "Alligator",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.65,
@@ -101,9 +85,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11134" as ShipProfile["id"],
     name: "Amarr Shuttle",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -113,9 +95,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11188" as ShipProfile["id"],
     name: "Anathema",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1147000,
     inertiaModifier: 4.89,
@@ -125,9 +105,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89807" as ShipProfile["id"],
     name: "Anhinga",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Battlecruisers",
     hullTypeId: "1201" as ShipProfile["hullTypeId"],
     mass: 14760000,
     inertiaModifier: 0.45,
@@ -137,9 +115,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28848" as ShipProfile["id"],
     name: "Anshar",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Jump Freighters",
     hullTypeId: "902" as ShipProfile["hullTypeId"],
     mass: 940000000,
     inertiaModifier: 0.055,
@@ -149,9 +125,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "642" as ShipProfile["id"],
     name: "Apocalypse",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97100000,
     inertiaModifier: 0.119,
@@ -161,9 +135,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11936" as ShipProfile["id"],
     name: "Apocalypse Imperial Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.136,
@@ -173,9 +145,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17726" as ShipProfile["id"],
     name: "Apocalypse Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97100000,
     inertiaModifier: 0.115,
@@ -185,9 +155,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37604" as ShipProfile["id"],
     name: "Apostle",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1310000000,
     inertiaModifier: 0.042,
@@ -197,9 +165,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29266" as ShipProfile["id"],
     name: "Apotheosis",
-    faction: "Society of Conscious Thought",
     factionId: "society-of-conscious-thought" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -209,9 +175,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11969" as ShipProfile["id"],
     name: "Arazu",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 11650000,
     inertiaModifier: 0.59,
@@ -221,9 +185,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "628" as ShipProfile["id"],
     name: "Arbitrator",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11200000,
     inertiaModifier: 0.56,
@@ -233,9 +195,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23757" as ShipProfile["id"],
     name: "Archon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Carriers",
     hullTypeId: "547" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.041,
@@ -245,9 +205,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11202" as ShipProfile["id"],
     name: "Ares",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 950000,
     inertiaModifier: 3.45,
@@ -257,9 +215,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28850" as ShipProfile["id"],
     name: "Ark",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Jump Freighters",
     hullTypeId: "902" as ShipProfile["hullTypeId"],
     mass: 900000000,
     inertiaModifier: 0.055,
@@ -269,9 +225,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "643" as ShipProfile["id"],
     name: "Armageddon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 105200000,
     inertiaModifier: 0.13,
@@ -281,9 +235,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11938" as ShipProfile["id"],
     name: "Armageddon Imperial Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97100000,
     inertiaModifier: 0.136,
@@ -293,9 +245,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32305" as ShipProfile["id"],
     name: "Armageddon Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 105200000,
     inertiaModifier: 0.13,
@@ -305,9 +255,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17922" as ShipProfile["id"],
     name: "Ashimmu",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11010000,
     inertiaModifier: 0.55,
@@ -317,9 +265,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22466" as ShipProfile["id"],
     name: "Astarte",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 12300000,
     inertiaModifier: 0.69,
@@ -329,9 +275,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33468" as ShipProfile["id"],
     name: "Astero",
-    faction: "Sisters of EVE",
     factionId: "sisters-of-eve" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 975000,
     inertiaModifier: 2.87,
@@ -341,9 +285,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "608" as ShipProfile["id"],
     name: "Atron",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1050000,
     inertiaModifier: 2.8,
@@ -353,9 +295,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "625" as ShipProfile["id"],
     name: "Augoror",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 12870000,
     inertiaModifier: 0.56,
@@ -365,9 +305,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29337" as ShipProfile["id"],
     name: "Augoror Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 13150000,
     inertiaModifier: 0.38,
@@ -377,9 +315,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "81040" as ShipProfile["id"],
     name: "Avalanche",
-    faction: "Upwell",
     factionId: "upwell" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 960000000,
     inertiaModifier: 0.063,
@@ -389,9 +325,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11567" as ShipProfile["id"],
     name: "Avatar",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2400000000,
     inertiaModifier: 0.034,
@@ -401,9 +335,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78576" as ShipProfile["id"],
     name: "Azariel",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2200000000,
     inertiaModifier: 0.031,
@@ -413,9 +345,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "88001" as ShipProfile["id"],
     name: "Babaroga",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Marauders",
     hullTypeId: "900" as ShipProfile["hullTypeId"],
     mass: 143000000,
     inertiaModifier: 0.08,
@@ -425,9 +355,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "648" as ShipProfile["id"],
     name: "Badger",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 10650000,
     inertiaModifier: 0.94,
@@ -437,9 +365,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77283" as ShipProfile["id"],
     name: "Bane",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Lancer Dreadnoughts",
     hullTypeId: "4594" as ShipProfile["hullTypeId"],
     mass: 1290000000,
     inertiaModifier: 0.044,
@@ -449,9 +375,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "582" as ShipProfile["id"],
     name: "Bantam",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1480000,
     inertiaModifier: 4.1,
@@ -461,9 +385,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33820" as ShipProfile["id"],
     name: "Barghest",
-    faction: "Mordu's Legion",
     factionId: "mordus-legion" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 98467000,
     inertiaModifier: 0.098,
@@ -473,9 +395,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11985" as ShipProfile["id"],
     name: "Basilisk",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 13130000,
     inertiaModifier: 0.505,
@@ -485,9 +405,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "630" as ShipProfile["id"],
     name: "Bellicose",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11550000,
     inertiaModifier: 0.51,
@@ -497,9 +415,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "74316" as ShipProfile["id"],
     name: "Bestla",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11650000,
     inertiaModifier: 0.47,
@@ -509,9 +425,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "1944" as ShipProfile["id"],
     name: "Bestower",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.95,
@@ -521,9 +435,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17920" as ShipProfile["id"],
     name: "Bhaalgorn",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97100000,
     inertiaModifier: 0.125,
@@ -533,9 +445,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37480" as ShipProfile["id"],
     name: "Bifrost",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1235000,
     inertiaModifier: 3.3,
@@ -545,9 +455,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "632" as ShipProfile["id"],
     name: "Blackbird",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 13190000,
     inertiaModifier: 0.48,
@@ -557,9 +465,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "64034" as ShipProfile["id"],
     name: "Boobook",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -569,9 +475,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34328" as ShipProfile["id"],
     name: "Bowhead",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 400000000,
     inertiaModifier: 0.108,
@@ -581,9 +485,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "598" as ShipProfile["id"],
     name: "Breacher",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1087000,
     inertiaModifier: 3.1,
@@ -593,9 +495,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12013" as ShipProfile["id"],
     name: "Broadsword",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.55,
@@ -605,9 +505,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16229" as ShipProfile["id"],
     name: "Brutix",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 11800000,
     inertiaModifier: 0.68,
@@ -617,9 +515,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33151" as ShipProfile["id"],
     name: "Brutix Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 11800000,
     inertiaModifier: 0.63,
@@ -629,9 +525,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "599" as ShipProfile["id"],
     name: "Burst",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1420000,
     inertiaModifier: 3.9,
@@ -641,9 +535,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12731" as ShipProfile["id"],
     name: "Bustard",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "380" as ShipProfile["hullTypeId"],
     mass: 20000000,
     inertiaModifier: 1,
@@ -653,9 +545,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11192" as ShipProfile["id"],
     name: "Buzzard",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1270000,
     inertiaModifier: 4.27,
@@ -665,9 +555,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42246" as ShipProfile["id"],
     name: "Caedes",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1200000,
     inertiaModifier: 3.6,
@@ -677,9 +565,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45647" as ShipProfile["id"],
     name: "Caiman",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1270000000,
     inertiaModifier: 0.038,
@@ -689,9 +575,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17619" as ShipProfile["id"],
     name: "Caldari Navy Hookbill",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1081000,
     inertiaModifier: 3.3,
@@ -701,9 +585,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "672" as ShipProfile["id"],
     name: "Caldari Shuttle",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -713,9 +595,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32788" as ShipProfile["id"],
     name: "Cambion",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 997000,
     inertiaModifier: 3.5,
@@ -725,9 +605,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "621" as ShipProfile["id"],
     name: "Caracal",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11910000,
     inertiaModifier: 0.47,
@@ -737,9 +615,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17634" as ShipProfile["id"],
     name: "Caracal Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9600000,
     inertiaModifier: 0.51,
@@ -749,9 +625,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16240" as ShipProfile["id"],
     name: "Catalyst",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -761,9 +635,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73796" as ShipProfile["id"],
     name: "Catalyst Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.65,
@@ -773,9 +645,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "633" as ShipProfile["id"],
     name: "Celestis",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 12070000,
     inertiaModifier: 0.505,
@@ -785,9 +655,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "85086" as ShipProfile["id"],
     name: "Cenotaph",
-    faction: "Deathless Circle",
     factionId: "deathless-circle" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 13000000,
     inertiaModifier: 0.55,
@@ -797,9 +665,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11993" as ShipProfile["id"],
     name: "Cerberus",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 12720000,
     inertiaModifier: 0.463,
@@ -809,9 +675,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33675" as ShipProfile["id"],
     name: "Chameleon",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 12000000,
     inertiaModifier: 0.6,
@@ -821,9 +685,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "20185" as ShipProfile["id"],
     name: "Charon",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 960000000,
     inertiaModifier: 0.063,
@@ -833,9 +695,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11182" as ShipProfile["id"],
     name: "Cheetah",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1430000,
     inertiaModifier: 3.77,
@@ -845,9 +705,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42243" as ShipProfile["id"],
     name: "Chemosh",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1290000000,
     inertiaModifier: 0.04,
@@ -857,9 +715,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23915" as ShipProfile["id"],
     name: "Chimera",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Carriers",
     hullTypeId: "547" as ShipProfile["hullTypeId"],
     mass: 1240000000,
     inertiaModifier: 0.042,
@@ -869,9 +725,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33397" as ShipProfile["id"],
     name: "Chremoas",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 930000,
     inertiaModifier: 3.12,
@@ -881,9 +735,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "27299" as ShipProfile["id"],
     name: "Civilian Amarr Shuttle",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -893,9 +745,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "27301" as ShipProfile["id"],
     name: "Civilian Caldari Shuttle",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -905,9 +755,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "27303" as ShipProfile["id"],
     name: "Civilian Gallente Shuttle",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -917,9 +765,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "27305" as ShipProfile["id"],
     name: "Civilian Minmatar Shuttle",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -929,9 +775,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11196" as ShipProfile["id"],
     name: "Claw",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1100000,
     inertiaModifier: 3.15,
@@ -941,9 +785,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22468" as ShipProfile["id"],
     name: "Claymore",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 12500000,
     inertiaModifier: 0.7,
@@ -953,9 +795,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "85229" as ShipProfile["id"],
     name: "Cobra",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 12500000,
     inertiaModifier: 0.48,
@@ -965,9 +805,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16236" as ShipProfile["id"],
     name: "Coercer",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1650000,
     inertiaModifier: 2.77,
@@ -977,9 +815,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73789" as ShipProfile["id"],
     name: "Coercer Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1650000,
     inertiaModifier: 2.78,
@@ -989,9 +825,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "583" as ShipProfile["id"],
     name: "Condor",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1100000,
     inertiaModifier: 2.9,
@@ -1001,9 +835,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34317" as ShipProfile["id"],
     name: "Confessor",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Tactical Destroyers",
     hullTypeId: "1305" as ShipProfile["hullTypeId"],
     mass: 1800000,
     inertiaModifier: 3,
@@ -1013,9 +845,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32876" as ShipProfile["id"],
     name: "Corax",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1750000,
     inertiaModifier: 2.7,
@@ -1025,9 +855,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "91857" as ShipProfile["id"],
     name: "Corax Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1750000,
     inertiaModifier: 2.565,
@@ -1037,9 +865,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16238" as ShipProfile["id"],
     name: "Cormorant",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1700000,
     inertiaModifier: 2.78,
@@ -1049,9 +875,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73795" as ShipProfile["id"],
     name: "Cormorant Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1700000,
     inertiaModifier: 2.78,
@@ -1061,9 +885,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34496" as ShipProfile["id"],
     name: "Council Diplomatic Shuttle",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -1073,9 +895,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17476" as ShipProfile["id"],
     name: "Covetor",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Mining Barges",
     hullTypeId: "463" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.6,
@@ -1085,9 +905,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12729" as ShipProfile["id"],
     name: "Crane",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "1202" as ShipProfile["hullTypeId"],
     mass: 11000000,
     inertiaModifier: 0.51,
@@ -1097,9 +915,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11176" as ShipProfile["id"],
     name: "Crow",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1065000,
     inertiaModifier: 3.25,
@@ -1109,9 +925,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2161" as ShipProfile["id"],
     name: "Crucifier",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1064000,
     inertiaModifier: 3.35,
@@ -1121,9 +935,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37453" as ShipProfile["id"],
     name: "Crucifier Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1064000,
     inertiaModifier: 3.35,
@@ -1133,9 +945,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17926" as ShipProfile["id"],
     name: "Cruor",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1003000,
     inertiaModifier: 3.4,
@@ -1145,9 +955,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11184" as ShipProfile["id"],
     name: "Crusader",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1050000,
     inertiaModifier: 3.2,
@@ -1157,9 +965,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "20125" as ShipProfile["id"],
     name: "Curse",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "906" as ShipProfile["hullTypeId"],
     mass: 11810000,
     inertiaModifier: 0.61,
@@ -1169,9 +975,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77726" as ShipProfile["id"],
     name: "Cybele",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11100000,
     inertiaModifier: 0.457,
@@ -1181,9 +985,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16231" as ShipProfile["id"],
     name: "Cyclone",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12400000,
     inertiaModifier: 0.68,
@@ -1193,9 +995,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72811" as ShipProfile["id"],
     name: "Cyclone Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12400000,
     inertiaModifier: 0.68,
@@ -1205,9 +1005,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17720" as ShipProfile["id"],
     name: "Cynabal",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9047000,
     inertiaModifier: 0.45,
@@ -1217,9 +1015,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42242" as ShipProfile["id"],
     name: "Dagon",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1310000000,
     inertiaModifier: 0.038,
@@ -1229,9 +1025,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "47269" as ShipProfile["id"],
     name: "Damavik",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 950000,
     inertiaModifier: 3,
@@ -1241,9 +1035,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22474" as ShipProfile["id"],
     name: "Damnation",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.7,
@@ -1253,9 +1045,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17928" as ShipProfile["id"],
     name: "Daredevil",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 823000,
     inertiaModifier: 3.2,
@@ -1265,9 +1055,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37457" as ShipProfile["id"],
     name: "Deacon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Logistics Frigates",
     hullTypeId: "1527" as ShipProfile["hullTypeId"],
     mass: 1630000,
     inertiaModifier: 3.5,
@@ -1277,9 +1065,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12023" as ShipProfile["id"],
     name: "Deimos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11460000,
     inertiaModifier: 0.475,
@@ -1289,9 +1075,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "81046" as ShipProfile["id"],
     name: "Deluge",
-    faction: "Upwell",
     factionId: "upwell" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "1202" as ShipProfile["hullTypeId"],
     mass: 10800000,
     inertiaModifier: 0.59,
@@ -1301,9 +1085,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12017" as ShipProfile["id"],
     name: "Devoter",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 16200000,
     inertiaModifier: 0.51,
@@ -1313,9 +1095,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "645" as ShipProfile["id"],
     name: "Dominix",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 100250000,
     inertiaModifier: 0.125,
@@ -1325,9 +1105,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32307" as ShipProfile["id"],
     name: "Dominix Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97100000,
     inertiaModifier: 0.12,
@@ -1337,9 +1115,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32874" as ShipProfile["id"],
     name: "Dragoon",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1700000,
     inertiaModifier: 2.87,
@@ -1349,9 +1125,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "91775" as ShipProfile["id"],
     name: "Dragoon Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1700000,
     inertiaModifier: 2.73,
@@ -1361,9 +1135,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24698" as ShipProfile["id"],
     name: "Drake",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.65,
@@ -1373,9 +1145,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33153" as ShipProfile["id"],
     name: "Drake Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.53,
@@ -1385,9 +1155,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17932" as ShipProfile["id"],
     name: "Dramiel",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 950000,
     inertiaModifier: 3.1,
@@ -1397,9 +1165,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "52254" as ShipProfile["id"],
     name: "Draugur",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1450000,
     inertiaModifier: 2.88,
@@ -1409,9 +1175,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "49711" as ShipProfile["id"],
     name: "Drekavac",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 10700000,
     inertiaModifier: 0.74,
@@ -1421,9 +1185,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12011" as ShipProfile["id"],
     name: "Eagle",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11720000,
     inertiaModifier: 0.576,
@@ -1433,9 +1195,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3532" as ShipProfile["id"],
     name: "Echelon",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1124000,
     inertiaModifier: 2.45,
@@ -1445,9 +1205,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "617" as ShipProfile["id"],
     name: "Echo",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Special Edition Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1157000,
     inertiaModifier: 4.35,
@@ -1457,9 +1215,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-eidolon" as ShipProfile["id"],
     name: "Eidolon",
-    faction: "Jovian Directorate",
     factionId: "jovian-directorate" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "legacy-standard-battleships" as ShipProfile["hullTypeId"],
     mass: 100000000,
     inertiaModifier: 0.155,
@@ -1469,9 +1225,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37135" as ShipProfile["id"],
     name: "Endurance",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Expedition Frigates",
     hullTypeId: "1283" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.4,
@@ -1481,9 +1235,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "44995" as ShipProfile["id"],
     name: "Enforcer",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 12500000,
     inertiaModifier: 0.55,
@@ -1493,9 +1245,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12044" as ShipProfile["id"],
     name: "Enyo",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1053900,
     inertiaModifier: 3.922,
@@ -1505,9 +1255,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22442" as ShipProfile["id"],
     name: "Eos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 12500000,
     inertiaModifier: 0.704,
@@ -1517,9 +1265,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "655" as ShipProfile["id"],
     name: "Epithal",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 12800000,
     inertiaModifier: 0.9,
@@ -1529,9 +1275,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "671" as ShipProfile["id"],
     name: "Erebus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2100000000,
     inertiaModifier: 0.037,
@@ -1541,9 +1285,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22460" as ShipProfile["id"],
     name: "Eris",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Interdictors",
     hullTypeId: "541" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 3.7,
@@ -1553,9 +1295,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32790" as ShipProfile["id"],
     name: "Etana",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 13130000,
     inertiaModifier: 0.61,
@@ -1565,9 +1305,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "589" as ShipProfile["id"],
     name: "Executioner",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1090000,
     inertiaModifier: 2.85,
@@ -1577,9 +1315,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "634" as ShipProfile["id"],
     name: "Exequror",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11020000,
     inertiaModifier: 0.61,
@@ -1589,9 +1325,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29344" as ShipProfile["id"],
     name: "Exequror Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11280000,
     inertiaModifier: 0.44,
@@ -1601,9 +1335,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11957" as ShipProfile["id"],
     name: "Falcon",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 12230000,
     inertiaModifier: 0.64,
@@ -1613,9 +1345,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17841" as ShipProfile["id"],
     name: "Federation Navy Comet",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 970000,
     inertiaModifier: 3.135,
@@ -1625,9 +1355,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "20189" as ShipProfile["id"],
     name: "Fenrir",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 820000000,
     inertiaModifier: 0.063,
@@ -1637,9 +1365,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16227" as ShipProfile["id"],
     name: "Ferox",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 14250000,
     inertiaModifier: 0.66,
@@ -1649,9 +1375,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72812" as ShipProfile["id"],
     name: "Ferox Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 14250000,
     inertiaModifier: 0.69,
@@ -1661,9 +1385,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "35781" as ShipProfile["id"],
     name: "Fiend",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 9000000,
     inertiaModifier: 0.6,
@@ -1673,9 +1395,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22464" as ShipProfile["id"],
     name: "Flycatcher",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Interdictors",
     hullTypeId: "541" as ShipProfile["hullTypeId"],
     mass: 1350000,
     inertiaModifier: 3.6,
@@ -1685,9 +1405,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32207" as ShipProfile["id"],
     name: "Freki",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1309000,
     inertiaModifier: 3.056,
@@ -1697,9 +1415,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92824" as ShipProfile["id"],
     name: "Gaia",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Command Carriers",
     hullTypeId: "5120" as ShipProfile["hullTypeId"],
     mass: 1220000000,
     inertiaModifier: 0.039,
@@ -1709,9 +1425,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11129" as ShipProfile["id"],
     name: "Gallente Shuttle",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -1721,9 +1435,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33816" as ShipProfile["id"],
     name: "Garmur",
-    faction: "Mordu's Legion",
     factionId: "mordus-legion" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 987000,
     inertiaModifier: 3.2,
@@ -1733,9 +1445,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-gecko" as ShipProfile["id"],
     name: "Gecko",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Faction Heavy Drone",
     hullTypeId: "legacy-faction-heavy-drone" as ShipProfile["hullTypeId"],
     mass: 10000,
     inertiaModifier: 100,
@@ -1745,9 +1455,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "74141" as ShipProfile["id"],
     name: "Geri",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1309000,
     inertiaModifier: 2.5,
@@ -1757,9 +1465,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17715" as ShipProfile["id"],
     name: "Gila",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9600000,
     inertiaModifier: 0.66,
@@ -1769,9 +1475,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3756" as ShipProfile["id"],
     name: "Gnosis",
-    faction: "Society of Conscious Thought",
     factionId: "society-of-conscious-thought" as ShipProfile["factionId"],
-    hullType: "Special Edition Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 10000000,
     inertiaModifier: 0.45,
@@ -1781,9 +1485,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11940" as ShipProfile["id"],
     name: "Gold Magnate",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1500000,
     inertiaModifier: 2.2,
@@ -1793,9 +1495,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28710" as ShipProfile["id"],
     name: "Golem",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Marauders",
     hullTypeId: "900" as ShipProfile["hullTypeId"],
     mass: 157000000,
     inertiaModifier: 0.077,
@@ -1805,9 +1505,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "21097" as ShipProfile["id"],
     name: "Goru's Shuttle",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -1817,9 +1515,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "584" as ShipProfile["id"],
     name: "Griffin",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1056000,
     inertiaModifier: 3.5,
@@ -1829,9 +1525,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37455" as ShipProfile["id"],
     name: "Griffin Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1056000,
     inertiaModifier: 3.45,
@@ -1841,9 +1535,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11987" as ShipProfile["id"],
     name: "Guardian",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 11980000,
     inertiaModifier: 0.61,
@@ -1853,9 +1545,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11011" as ShipProfile["id"],
     name: "Guardian-Vexor",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 10910000,
     inertiaModifier: 0.546,
@@ -1865,9 +1555,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "21628" as ShipProfile["id"],
     name: "Guristas Shuttle",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -1877,9 +1565,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24696" as ShipProfile["id"],
     name: "Harbinger",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 15500000,
     inertiaModifier: 0.57,
@@ -1889,9 +1575,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33155" as ShipProfile["id"],
     name: "Harbinger Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 15500000,
     inertiaModifier: 0.52,
@@ -1901,9 +1585,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11381" as ShipProfile["id"],
     name: "Harpy",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1039500,
     inertiaModifier: 3.633,
@@ -1913,9 +1595,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11379" as ShipProfile["id"],
     name: "Hawk",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1095300,
     inertiaModifier: 3.768,
@@ -1925,9 +1605,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "35683" as ShipProfile["id"],
     name: "Hecate",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Tactical Destroyers",
     hullTypeId: "1305" as ShipProfile["hullTypeId"],
     mass: 1050000,
     inertiaModifier: 6,
@@ -1937,9 +1615,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22852" as ShipProfile["id"],
     name: "Hel",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1650000000,
     inertiaModifier: 0.035,
@@ -1949,9 +1625,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11172" as ShipProfile["id"],
     name: "Helios",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1271000,
     inertiaModifier: 4.142,
@@ -1961,9 +1635,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33079" as ShipProfile["id"],
     name: "Hematos",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Special Edition Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1148000,
     inertiaModifier: 4.45,
@@ -1973,9 +1645,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-herald" as ShipProfile["id"],
     name: "Herald",
-    faction: "Amarr",
     factionId: "amarr" as ShipProfile["factionId"],
-    hullType: "Electronic Attack Frigates",
     hullTypeId: "legacy-electronic-attack-frigates" as ShipProfile["hullTypeId"],
     mass: 0,
     inertiaModifier: 0,
@@ -1985,9 +1655,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22452" as ShipProfile["id"],
     name: "Heretic",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Interdictors",
     hullTypeId: "541" as ShipProfile["hullTypeId"],
     mass: 1300000,
     inertiaModifier: 3.6,
@@ -1997,9 +1665,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "605" as ShipProfile["id"],
     name: "Heron",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1150000,
     inertiaModifier: 3.57,
@@ -2009,9 +1675,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72904" as ShipProfile["id"],
     name: "Heron Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1150000,
     inertiaModifier: 3.57,
@@ -2021,9 +1685,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "651" as ShipProfile["id"],
     name: "Hoarder",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 10625000,
     inertiaModifier: 0.85,
@@ -2033,9 +1695,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12034" as ShipProfile["id"],
     name: "Hound",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "834" as ShipProfile["hullTypeId"],
     mass: 1455000,
     inertiaModifier: 4.4,
@@ -2045,9 +1705,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77281" as ShipProfile["id"],
     name: "Hubris",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Lancer Dreadnoughts",
     hullTypeId: "4594" as ShipProfile["hullTypeId"],
     mass: 1250000000,
     inertiaModifier: 0.045,
@@ -2057,9 +1715,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11961" as ShipProfile["id"],
     name: "Huginn",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "906" as ShipProfile["hullTypeId"],
     mass: 11550000,
     inertiaModifier: 0.57,
@@ -2069,9 +1725,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22544" as ShipProfile["id"],
     name: "Hulk",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Exhumers",
     hullTypeId: "543" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.6,
@@ -2081,9 +1735,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24702" as ShipProfile["id"],
     name: "Hurricane",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12800000,
     inertiaModifier: 0.67,
@@ -2093,9 +1745,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33157" as ShipProfile["id"],
     name: "Hurricane Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12800000,
     inertiaModifier: 0.61,
@@ -2105,9 +1755,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "48636" as ShipProfile["id"],
     name: "Hydra",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 950000,
     inertiaModifier: 3.15,
@@ -2117,9 +1765,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11387" as ShipProfile["id"],
     name: "Hyena",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Electronic Attack Frigates",
     hullTypeId: "893" as ShipProfile["hullTypeId"],
     mass: 1191300,
     inertiaModifier: 3.93,
@@ -2129,9 +1775,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24690" as ShipProfile["id"],
     name: "Hyperion",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 100200000,
     inertiaModifier: 0.118,
@@ -2141,9 +1785,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "601" as ShipProfile["id"],
     name: "Ibis",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1163000,
     inertiaModifier: 4.5,
@@ -2153,9 +1795,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "52252" as ShipProfile["id"],
     name: "Ikitursa",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11900000,
     inertiaModifier: 0.64,
@@ -2165,9 +1805,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "607" as ShipProfile["id"],
     name: "Imicus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 997000,
     inertiaModifier: 4.15,
@@ -2177,9 +1815,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72913" as ShipProfile["id"],
     name: "Imicus Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 997000,
     inertiaModifier: 4.15,
@@ -2189,9 +1825,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "615" as ShipProfile["id"],
     name: "Immolator",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Special Edition Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1148000,
     inertiaModifier: 4.45,
@@ -2201,9 +1835,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "35779" as ShipProfile["id"],
     name: "Imp",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Special Edition Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 900000,
     inertiaModifier: 3.3,
@@ -2213,9 +1845,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "596" as ShipProfile["id"],
     name: "Impairor",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1148000,
     inertiaModifier: 4.45,
@@ -2225,9 +1855,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12753" as ShipProfile["id"],
     name: "Impel",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "380" as ShipProfile["hullTypeId"],
     mass: 19500000,
     inertiaModifier: 1,
@@ -2237,9 +1865,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17703" as ShipProfile["id"],
     name: "Imperial Navy Slicer",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1003000,
     inertiaModifier: 3.3,
@@ -2249,9 +1875,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "594" as ShipProfile["id"],
     name: "Incursus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1028000,
     inertiaModifier: 3.15,
@@ -2261,9 +1885,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32844" as ShipProfile["id"],
     name: "Inner Zone Shipping Catalyst",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -2273,9 +1895,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32985" as ShipProfile["id"],
     name: "Inner Zone Shipping Imicus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 997000,
     inertiaModifier: 4.15,
@@ -2285,9 +1905,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "590" as ShipProfile["id"],
     name: "Inquisitor",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1630000,
     inertiaModifier: 3.55,
@@ -2297,9 +1915,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32842" as ShipProfile["id"],
     name: "Intaki Syndicate Catalyst",
-    faction: "Intaki Syndicate",
     factionId: "intaki-syndicate" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -2309,9 +1925,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32840" as ShipProfile["id"],
     name: "InterBus Catalyst",
-    faction: "InterBus",
     factionId: "interbus" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -2321,9 +1935,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "30842" as ShipProfile["id"],
     name: "InterBus Shuttle",
-    faction: "InterBus",
     factionId: "interbus" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -2333,9 +1945,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12042" as ShipProfile["id"],
     name: "Ishkur",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1094400,
     inertiaModifier: 3.868,
@@ -2345,9 +1955,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12005" as ShipProfile["id"],
     name: "Ishtar",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 10600000,
     inertiaModifier: 0.565,
@@ -2357,9 +1965,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "657" as ShipProfile["id"],
     name: "Iteron Mark V",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 13500000,
     inertiaModifier: 0.87,
@@ -2369,9 +1975,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-ixion" as ShipProfile["id"],
     name: "Ixion",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "legacy-pirate-faction-cruisers" as ShipProfile["hullTypeId"],
     mass: 12155000,
     inertiaModifier: 0.65,
@@ -2381,9 +1985,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34828" as ShipProfile["id"],
     name: "Jackdaw",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Tactical Destroyers",
     hullTypeId: "1305" as ShipProfile["hullTypeId"],
     mass: 1100000,
     inertiaModifier: 6,
@@ -2393,9 +1995,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11400" as ShipProfile["id"],
     name: "Jaguar",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1229400,
     inertiaModifier: 3.176,
@@ -2405,9 +2005,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77284" as ShipProfile["id"],
     name: "Karura",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Lancer Dreadnoughts",
     hullTypeId: "4594" as ShipProfile["hullTypeId"],
     mass: 1270000000,
     inertiaModifier: 0.045,
@@ -2417,9 +2015,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11174" as ShipProfile["id"],
     name: "Keres",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Electronic Attack Frigates",
     hullTypeId: "893" as ShipProfile["hullTypeId"],
     mass: 1204500,
     inertiaModifier: 4.1,
@@ -2429,9 +2025,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "602" as ShipProfile["id"],
     name: "Kestrel",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1113000,
     inertiaModifier: 3.27,
@@ -2441,9 +2035,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78369" as ShipProfile["id"],
     name: "Khizriel",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 11520000,
     inertiaModifier: 0.59,
@@ -2453,9 +2045,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "49710" as ShipProfile["id"],
     name: "Kikimora",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1560000,
     inertiaModifier: 2.92,
@@ -2465,9 +2055,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37458" as ShipProfile["id"],
     name: "Kirin",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Logistics Frigates",
     hullTypeId: "1527" as ShipProfile["hullTypeId"],
     mass: 1480000,
     inertiaModifier: 3.95,
@@ -2477,9 +2065,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11194" as ShipProfile["id"],
     name: "Kitsune",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Electronic Attack Frigates",
     hullTypeId: "893" as ShipProfile["hullTypeId"],
     mass: 1228700,
     inertiaModifier: 3.86,
@@ -2489,9 +2075,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45649" as ShipProfile["id"],
     name: "Komodo",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2300000000,
     inertiaModifier: 0.0315,
@@ -2501,9 +2085,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28661" as ShipProfile["id"],
     name: "Kronos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Marauders",
     hullTypeId: "900" as ShipProfile["hullTypeId"],
     mass: 148000000,
     inertiaModifier: 0.074,
@@ -2513,9 +2095,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "654" as ShipProfile["id"],
     name: "Kryos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 12625000,
     inertiaModifier: 0.92,
@@ -2525,9 +2105,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11971" as ShipProfile["id"],
     name: "Lachesis",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "906" as ShipProfile["hullTypeId"],
     mass: 12070000,
     inertiaModifier: 0.56,
@@ -2537,9 +2115,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "60764" as ShipProfile["id"],
     name: "Laelaps",
-    faction: "Mordu's Legion",
     factionId: "mordus-legion" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 10298000,
     inertiaModifier: 0.48,
@@ -2549,9 +2125,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29986" as ShipProfile["id"],
     name: "Legion",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Strategic Cruisers",
     hullTypeId: "963" as ShipProfile["hullTypeId"],
     mass: 14500000,
     inertiaModifier: 0.52,
@@ -2561,9 +2135,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33513" as ShipProfile["id"],
     name: "Leopard",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -2573,9 +2145,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "47271" as ShipProfile["id"],
     name: "Leshak",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 78000000,
     inertiaModifier: 0.163,
@@ -2585,9 +2155,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3764" as ShipProfile["id"],
     name: "Leviathan",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2300000000,
     inertiaModifier: 0.035,
@@ -2597,9 +2165,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37606" as ShipProfile["id"],
     name: "Lif",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.042,
@@ -2609,9 +2175,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45645" as ShipProfile["id"],
     name: "Loggerhead",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1300000000,
     inertiaModifier: 0.038,
@@ -2621,9 +2185,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29990" as ShipProfile["id"],
     name: "Loki",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Strategic Cruisers",
     hullTypeId: "963" as ShipProfile["hullTypeId"],
     mass: 13800000,
     inertiaModifier: 0.54,
@@ -2633,9 +2195,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17738" as ShipProfile["id"],
     name: "Machariel",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 94680000,
     inertiaModifier: 0.096,
@@ -2645,9 +2205,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22548" as ShipProfile["id"],
     name: "Mackinaw",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Exhumers",
     hullTypeId: "543" as ShipProfile["hullTypeId"],
     mass: 17500000,
     inertiaModifier: 0.7,
@@ -2657,9 +2215,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24694" as ShipProfile["id"],
     name: "Maelstrom",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103600000,
     inertiaModifier: 0.111,
@@ -2669,9 +2225,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29248" as ShipProfile["id"],
     name: "Magnate",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1072000,
     inertiaModifier: 3.8,
@@ -2681,9 +2235,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72907" as ShipProfile["id"],
     name: "Magnate Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1072000,
     inertiaModifier: 3.8,
@@ -2693,9 +2245,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37483" as ShipProfile["id"],
     name: "Magus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1150000,
     inertiaModifier: 3.2,
@@ -2705,9 +2255,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11186" as ShipProfile["id"],
     name: "Malediction",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1140000,
     inertiaModifier: 3.05,
@@ -2717,9 +2265,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3516" as ShipProfile["id"],
     name: "Malice",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1271000,
     inertiaModifier: 2.43,
@@ -2729,9 +2275,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "624" as ShipProfile["id"],
     name: "Maller",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 13150000,
     inertiaModifier: 0.476,
@@ -2741,9 +2285,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78367" as ShipProfile["id"],
     name: "Mamba",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1750000,
     inertiaModifier: 2.7,
@@ -2753,9 +2295,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "652" as ShipProfile["id"],
     name: "Mammoth",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11500000,
     inertiaModifier: 0.91,
@@ -2765,9 +2305,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12032" as ShipProfile["id"],
     name: "Manticore",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "834" as ShipProfile["hullTypeId"],
     mass: 1470000,
     inertiaModifier: 4.5,
@@ -2777,9 +2315,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "44996" as ShipProfile["id"],
     name: "Marshal",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Special Edition Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 150000000,
     inertiaModifier: 0.07,
@@ -2789,9 +2325,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12747" as ShipProfile["id"],
     name: "Mastodon",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "380" as ShipProfile["hullTypeId"],
     mass: 19200000,
     inertiaModifier: 1,
@@ -2801,9 +2335,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "609" as ShipProfile["id"],
     name: "Maulus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1063000,
     inertiaModifier: 3.25,
@@ -2813,9 +2345,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37456" as ShipProfile["id"],
     name: "Maulus Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1063000,
     inertiaModifier: 3.35,
@@ -2825,9 +2355,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "616" as ShipProfile["id"],
     name: "Medusa",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1200000,
     inertiaModifier: 3.1,
@@ -2837,9 +2365,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "641" as ShipProfile["id"],
     name: "Megathron",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 98400000,
     inertiaModifier: 0.114,
@@ -2849,9 +2375,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "13202" as ShipProfile["id"],
     name: "Megathron Federate Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 105200000,
     inertiaModifier: 0.122,
@@ -2861,9 +2385,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17728" as ShipProfile["id"],
     name: "Megathron Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 98400000,
     inertiaModifier: 0.105,
@@ -2873,9 +2395,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78333" as ShipProfile["id"],
     name: "Mekubal",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1440000,
     inertiaModifier: 2.475,
@@ -2885,9 +2405,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "603" as ShipProfile["id"],
     name: "Merlin",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 997000,
     inertiaModifier: 3.6,
@@ -2897,9 +2415,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77114" as ShipProfile["id"],
     name: "Metamorphosis",
-    faction: "Society of Conscious Thought",
     factionId: "society-of-conscious-thought" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 2.8,
@@ -2909,9 +2425,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "656" as ShipProfile["id"],
     name: "Miasmos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 12975000,
     inertiaModifier: 0.94,
@@ -2921,9 +2435,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32811" as ShipProfile["id"],
     name: "Miasmos Amastris Edition",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Industrial Ships",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11250000,
     inertiaModifier: 0.9,
@@ -2933,9 +2445,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4363" as ShipProfile["id"],
     name: "Miasmos Quafe Ultra Edition",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Industrial Ships",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11250000,
     inertiaModifier: 0.9,
@@ -2945,9 +2455,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4388" as ShipProfile["id"],
     name: "Miasmos Quafe Ultramarine Edition",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Industrial Ships",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11250000,
     inertiaModifier: 0.9,
@@ -2957,9 +2465,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32209" as ShipProfile["id"],
     name: "Mimir",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11650000,
     inertiaModifier: 0.51,
@@ -2969,9 +2475,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11132" as ShipProfile["id"],
     name: "Minmatar Shuttle",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Shuttles",
     hullTypeId: "31" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 1,
@@ -2981,9 +2485,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37605" as ShipProfile["id"],
     name: "Minokawa",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1300000000,
     inertiaModifier: 0.043,
@@ -2993,9 +2495,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "623" as ShipProfile["id"],
     name: "Moa",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 12000000,
     inertiaModifier: 0.52,
@@ -3005,9 +2505,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42241" as ShipProfile["id"],
     name: "Molok",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2400000000,
     inertiaModifier: 0.03,
@@ -3017,9 +2515,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45534" as ShipProfile["id"],
     name: "Monitor",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Flag Cruiser",
     hullTypeId: "1972" as ShipProfile["hullTypeId"],
     mass: 16000000,
     inertiaModifier: 0.6,
@@ -3029,9 +2525,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33395" as ShipProfile["id"],
     name: "Moracha",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 8700000,
     inertiaModifier: 0.47,
@@ -3041,9 +2535,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92283" as ShipProfile["id"],
     name: "Moreau YC128 Campaign Bus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "5087" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 4,
@@ -3053,9 +2545,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "19724" as ShipProfile["id"],
     name: "Moros",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1250000000,
     inertiaModifier: 0.045,
@@ -3065,9 +2555,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73792" as ShipProfile["id"],
     name: "Moros Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1250000000,
     inertiaModifier: 0.045,
@@ -3077,9 +2565,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12015" as ShipProfile["id"],
     name: "Muninn",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11000000,
     inertiaModifier: 0.571,
@@ -3089,9 +2575,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24700" as ShipProfile["id"],
     name: "Myrmidon",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12700000,
     inertiaModifier: 0.7,
@@ -3101,9 +2585,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72869" as ShipProfile["id"],
     name: "Myrmidon Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 12700000,
     inertiaModifier: 0.67,
@@ -3113,9 +2595,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4306" as ShipProfile["id"],
     name: "Naga",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "1201" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.525,
@@ -3125,9 +2605,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "19722" as ShipProfile["id"],
     name: "Naglfar",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.045,
@@ -3137,9 +2615,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73787" as ShipProfile["id"],
     name: "Naglfar Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.045,
@@ -3149,9 +2625,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "592" as ShipProfile["id"],
     name: "Navitas",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1450000,
     inertiaModifier: 3.75,
@@ -3161,9 +2635,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33099" as ShipProfile["id"],
     name: "Nefantar Thrasher",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.8,
@@ -3173,9 +2645,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11377" as ShipProfile["id"],
     name: "Nemesis",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "834" as ShipProfile["hullTypeId"],
     mass: 1410000,
     inertiaModifier: 4.6,
@@ -3185,9 +2655,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "650" as ShipProfile["id"],
     name: "Nereus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11250000,
     inertiaModifier: 0.78,
@@ -3197,9 +2665,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "52250" as ShipProfile["id"],
     name: "Nergal",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1043000,
     inertiaModifier: 2.9,
@@ -3209,9 +2675,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33472" as ShipProfile["id"],
     name: "Nestor",
-    faction: "Sisters of EVE",
     factionId: "sisters-of-eve" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 20000000,
     inertiaModifier: 0.35,
@@ -3221,9 +2685,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24483" as ShipProfile["id"],
     name: "Nidhoggur",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Carriers",
     hullTypeId: "547" as ShipProfile["hullTypeId"],
     mass: 1230000000,
     inertiaModifier: 0.039,
@@ -3233,9 +2695,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22470" as ShipProfile["id"],
     name: "Nighthawk",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 13200000,
     inertiaModifier: 0.65,
@@ -3245,9 +2705,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17736" as ShipProfile["id"],
     name: "Nightmare",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.122,
@@ -3257,9 +2715,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37607" as ShipProfile["id"],
     name: "Ninazu",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Force Auxiliaries",
     hullTypeId: "1538" as ShipProfile["hullTypeId"],
     mass: 1250000000,
     inertiaModifier: 0.042,
@@ -3269,9 +2725,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2998" as ShipProfile["id"],
     name: "Noctis",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 14640000,
     inertiaModifier: 1,
@@ -3281,9 +2735,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28846" as ShipProfile["id"],
     name: "Nomad",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Jump Freighters",
     hullTypeId: "902" as ShipProfile["hullTypeId"],
     mass: 820000000,
     inertiaModifier: 0.055,
@@ -3293,9 +2745,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23913" as ShipProfile["id"],
     name: "Nyx",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1600000000,
     inertiaModifier: 0.036,
@@ -3305,9 +2755,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "20187" as ShipProfile["id"],
     name: "Obelisk",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 940000000,
     inertiaModifier: 0.063,
@@ -3317,9 +2765,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12745" as ShipProfile["id"],
     name: "Occator",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "380" as ShipProfile["hullTypeId"],
     mass: 19000000,
     inertiaModifier: 1,
@@ -3329,9 +2775,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89607" as ShipProfile["id"],
     name: "Odysseus",
-    faction: "Sisters of EVE",
     factionId: "sisters-of-eve" as ShipProfile["factionId"],
-    hullType: "Expedition Command Ships",
     hullTypeId: "4902" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.675,
@@ -3341,9 +2785,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2006" as ShipProfile["id"],
     name: "Omen",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 13000000,
     inertiaModifier: 0.43,
@@ -3353,9 +2795,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17709" as ShipProfile["id"],
     name: "Omen Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 10850000,
     inertiaModifier: 0.43,
@@ -3365,9 +2805,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11989" as ShipProfile["id"],
     name: "Oneiros",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 13160000,
     inertiaModifier: 0.56,
@@ -3377,9 +2815,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11995" as ShipProfile["id"],
     name: "Onyx",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 15400000,
     inertiaModifier: 0.55,
@@ -3389,9 +2825,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "635" as ShipProfile["id"],
     name: "Opux Luxury Yacht",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "5087" as ShipProfile["hullTypeId"],
     mass: 13075000,
     inertiaModifier: 0.65,
@@ -3401,9 +2835,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4302" as ShipProfile["id"],
     name: "Oracle",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "1201" as ShipProfile["hullTypeId"],
     mass: 14760000,
     inertiaModifier: 0.495,
@@ -3413,9 +2845,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28606" as ShipProfile["id"],
     name: "Orca",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Industrial Command Ships",
     hullTypeId: "941" as ShipProfile["hullTypeId"],
     mass: 150000000,
     inertiaModifier: 0.2,
@@ -3425,9 +2855,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33818" as ShipProfile["id"],
     name: "Orthrus",
-    faction: "Mordu's Legion",
     factionId: "mordus-legion" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9362000,
     inertiaModifier: 0.48,
@@ -3437,9 +2865,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "620" as ShipProfile["id"],
     name: "Osprey",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11100000,
     inertiaModifier: 0.61,
@@ -3449,9 +2875,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29340" as ShipProfile["id"],
     name: "Osprey Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11780000,
     inertiaModifier: 0.385,
@@ -3461,9 +2885,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89649" as ShipProfile["id"],
     name: "Outrider",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1300000,
     inertiaModifier: 3.6,
@@ -3473,9 +2895,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "44993" as ShipProfile["id"],
     name: "Pacifier",
-    faction: "CONCORD",
     factionId: "concord" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1400000,
     inertiaModifier: 3.6,
@@ -3485,9 +2905,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28659" as ShipProfile["id"],
     name: "Paladin",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Marauders",
     hullTypeId: "900" as ShipProfile["hullTypeId"],
     mass: 160000000,
     inertiaModifier: 0.069,
@@ -3497,9 +2915,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22440" as ShipProfile["id"],
     name: "Panther",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 148800000,
     inertiaModifier: 0.064,
@@ -3509,9 +2925,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-penitence" as ShipProfile["id"],
     name: "Penitence",
-    faction: "Amarr",
     factionId: "amarr" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "legacy-recon-ships" as ShipProfile["hullTypeId"],
     mass: 0,
     inertiaModifier: 0,
@@ -3521,9 +2935,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "91174" as ShipProfile["id"],
     name: "Perseverance",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 3,
@@ -3533,9 +2945,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17718" as ShipProfile["id"],
     name: "Phantasm",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9600000,
     inertiaModifier: 0.62,
@@ -3545,9 +2955,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-phantom" as ShipProfile["id"],
     name: "Phantom",
-    faction: "Jovian Directorate",
     factionId: "jovian-directorate" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "legacy-standard-cruisers" as ShipProfile["hullTypeId"],
     mass: 10000000,
     inertiaModifier: 0.65,
@@ -3557,9 +2965,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12021" as ShipProfile["id"],
     name: "Phobos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Heavy Interdiction Cruisers",
     hullTypeId: "894" as ShipProfile["hullTypeId"],
     mass: 14000000,
     inertiaModifier: 0.58,
@@ -3569,9 +2975,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "19726" as ShipProfile["id"],
     name: "Phoenix",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1270000000,
     inertiaModifier: 0.045,
@@ -3581,9 +2985,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73793" as ShipProfile["id"],
     name: "Phoenix Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1270000000,
     inertiaModifier: 0.045,
@@ -3593,9 +2995,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11965" as ShipProfile["id"],
     name: "Pilgrim",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 11370000,
     inertiaModifier: 0.61,
@@ -3605,9 +3005,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89240" as ShipProfile["id"],
     name: "Pioneer",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 3,
@@ -3617,9 +3015,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89647" as ShipProfile["id"],
     name: "Pioneer Consortium Issue",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 3,
@@ -3629,9 +3025,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37481" as ShipProfile["id"],
     name: "Pontifex",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1250000,
     inertiaModifier: 3.4,
@@ -3641,9 +3035,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42244" as ShipProfile["id"],
     name: "Porpoise",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Industrial Command Ships",
     hullTypeId: "941" as ShipProfile["hullTypeId"],
     mass: 4500000,
     inertiaModifier: 1.5,
@@ -3653,9 +3045,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "47466" as ShipProfile["id"],
     name: "Praxis",
-    faction: "Society of Conscious Thought",
     factionId: "society-of-conscious-thought" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 87000000,
     inertiaModifier: 0.1,
@@ -3665,9 +3055,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2863" as ShipProfile["id"],
     name: "Primae",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Special Edition Industrial Ships",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 15000000,
     inertiaModifier: 0.7,
@@ -3677,9 +3065,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "586" as ShipProfile["id"],
     name: "Probe",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1123000,
     inertiaModifier: 3.58,
@@ -3689,9 +3075,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72903" as ShipProfile["id"],
     name: "Probe Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1123000,
     inertiaModifier: 3.58,
@@ -3701,9 +3085,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17480" as ShipProfile["id"],
     name: "Procurer",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Mining Barges",
     hullTypeId: "463" as ShipProfile["hullTypeId"],
     mass: 20000000,
     inertiaModifier: 0.64,
@@ -3713,9 +3095,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16233" as ShipProfile["id"],
     name: "Prophecy",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 15300000,
     inertiaModifier: 0.57,
@@ -3725,9 +3105,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "72872" as ShipProfile["id"],
     name: "Prophecy Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Battlecruisers",
     hullTypeId: "419" as ShipProfile["hullTypeId"],
     mass: 15300000,
     inertiaModifier: 0.57,
@@ -3737,9 +3115,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12733" as ShipProfile["id"],
     name: "Prorator",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "1202" as ShipProfile["hullTypeId"],
     mass: 10750000,
     inertiaModifier: 0.52,
@@ -3749,9 +3125,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33697" as ShipProfile["id"],
     name: "Prospect",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Expedition Frigates",
     hullTypeId: "1283" as ShipProfile["hullTypeId"],
     mass: 1400000,
     inertiaModifier: 3,
@@ -3761,9 +3135,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29988" as ShipProfile["id"],
     name: "Proteus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Strategic Cruisers",
     hullTypeId: "963" as ShipProfile["hullTypeId"],
     mass: 13300000,
     inertiaModifier: 0.56,
@@ -3773,9 +3145,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "20183" as ShipProfile["id"],
     name: "Providence",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Freighters",
     hullTypeId: "513" as ShipProfile["hullTypeId"],
     mass: 900000000,
     inertiaModifier: 0.063,
@@ -3785,9 +3155,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12735" as ShipProfile["id"],
     name: "Prowler",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "1202" as ShipProfile["hullTypeId"],
     mass: 11200000,
     inertiaModifier: 0.485,
@@ -3797,9 +3165,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "597" as ShipProfile["id"],
     name: "Punisher",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1190000,
     inertiaModifier: 2.9,
@@ -3809,9 +3175,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12038" as ShipProfile["id"],
     name: "Purifier",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Covert Ops",
     hullTypeId: "834" as ShipProfile["hullTypeId"],
     mass: 1495000,
     inertiaModifier: 4.4,
@@ -3821,9 +3185,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "85236" as ShipProfile["id"],
     name: "Python",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 141700000,
     inertiaModifier: 0.051,
@@ -3833,9 +3195,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32846" as ShipProfile["id"],
     name: "Quafe Catalyst",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.76,
@@ -3845,9 +3205,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42245" as ShipProfile["id"],
     name: "Rabisu",
-    faction: "Blood Raiders",
     factionId: "blood-raiders" as ShipProfile["factionId"],
-    hullType: "Special Edition Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 13000000,
     inertiaModifier: 0.52,
@@ -3857,9 +3215,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23773" as ShipProfile["id"],
     name: "Ragnarok",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2200000000,
     inertiaModifier: 0.036,
@@ -3869,9 +3225,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "60765" as ShipProfile["id"],
     name: "Raiju",
-    faction: "Mordu's Legion",
     factionId: "mordus-legion" as ShipProfile["factionId"],
-    hullType: "Special Edition Electronic Attack Ships",
     hullTypeId: "893" as ShipProfile["hullTypeId"],
     mass: 987000,
     inertiaModifier: 3.1,
@@ -3881,9 +3235,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11963" as ShipProfile["id"],
     name: "Rapier",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 11040000,
     inertiaModifier: 0.59,
@@ -3893,9 +3245,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11178" as ShipProfile["id"],
     name: "Raptor",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1050000,
     inertiaModifier: 3.4,
@@ -3905,9 +3255,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17918" as ShipProfile["id"],
     name: "Rattlesnake",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.128,
@@ -3917,9 +3265,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34151" as ShipProfile["id"],
     name: "Rattlesnake Victory Edition",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Ships Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.128,
@@ -3929,9 +3275,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "638" as ShipProfile["id"],
     name: "Raven",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.12,
@@ -3941,9 +3285,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17636" as ShipProfile["id"],
     name: "Raven Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 97300000,
     inertiaModifier: 0.12,
@@ -3953,9 +3295,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "26840" as ShipProfile["id"],
     name: "Raven State Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99300000,
     inertiaModifier: 0.128,
@@ -3965,9 +3305,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "588" as ShipProfile["id"],
     name: "Reaper",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1157000,
     inertiaModifier: 4.35,
@@ -3977,9 +3315,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22428" as ShipProfile["id"],
     name: "Redeemer",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 150300000,
     inertiaModifier: 0.072,
@@ -3989,9 +3325,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17812" as ShipProfile["id"],
     name: "Republic Fleet Firetail",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1098000,
     inertiaModifier: 3.2,
@@ -4001,9 +3335,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11393" as ShipProfile["id"],
     name: "Retribution",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1053900,
     inertiaModifier: 4.128,
@@ -4013,9 +3345,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17478" as ShipProfile["id"],
     name: "Retriever",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Mining Barges",
     hullTypeId: "463" as ShipProfile["hullTypeId"],
     mass: 17500000,
     inertiaModifier: 0.7,
@@ -4025,9 +3355,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "19720" as ShipProfile["id"],
     name: "Revelation",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1290000000,
     inertiaModifier: 0.044,
@@ -4037,9 +3365,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73790" as ShipProfile["id"],
     name: "Revelation Navy Issue",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1290000000,
     inertiaModifier: 0.044,
@@ -4049,9 +3375,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3514" as ShipProfile["id"],
     name: "Revenant",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1600000000,
     inertiaModifier: 0.035,
@@ -4061,9 +3385,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28844" as ShipProfile["id"],
     name: "Rhea",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Jump Freighters",
     hullTypeId: "902" as ShipProfile["hullTypeId"],
     mass: 960000000,
     inertiaModifier: 0.055,
@@ -4073,9 +3395,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "587" as ShipProfile["id"],
     name: "Rifter",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1067000,
     inertiaModifier: 3.2,
@@ -4085,9 +3405,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92284" as ShipProfile["id"],
     name: "Roden YC128 Campaign Bus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "5087" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 4,
@@ -4097,9 +3415,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "49712" as ShipProfile["id"],
     name: "Rodiva",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 10120000,
     inertiaModifier: 0.68,
@@ -4109,9 +3425,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "24688" as ShipProfile["id"],
     name: "Rokh",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 105300000,
     inertiaModifier: 0.136,
@@ -4121,9 +3435,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11959" as ShipProfile["id"],
     name: "Rook",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Recon Ships",
     hullTypeId: "906" as ShipProfile["hullTypeId"],
     mass: 12730000,
     inertiaModifier: 0.61,
@@ -4133,9 +3445,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28352" as ShipProfile["id"],
     name: "Rorqual",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Capital Industrial Ships",
     hullTypeId: "883" as ShipProfile["hullTypeId"],
     mass: 800000000,
     inertiaModifier: 0.07,
@@ -4145,9 +3455,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "629" as ShipProfile["id"],
     name: "Rupture",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 12200000,
     inertiaModifier: 0.5,
@@ -4157,9 +3465,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22456" as ShipProfile["id"],
     name: "Sabre",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Interdictors",
     hullTypeId: "541" as ShipProfile["hullTypeId"],
     mass: 1285000,
     inertiaModifier: 3.7,
@@ -4169,9 +3475,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12019" as ShipProfile["id"],
     name: "Sacrilege",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11750000,
     inertiaModifier: 0.567,
@@ -4181,9 +3485,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92822" as ShipProfile["id"],
     name: "Salvation",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Command Carriers",
     hullTypeId: "5120" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.041,
@@ -4193,9 +3495,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "87381" as ShipProfile["id"],
     name: "Sarathiel",
-    faction: "Angel Cartel",
     factionId: "angel-cartel" as ShipProfile["factionId"],
-    hullType: "Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1130000000,
     inertiaModifier: 0.04,
@@ -4205,9 +3505,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32987" as ShipProfile["id"],
     name: "Sarum Magnate",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1072000,
     inertiaModifier: 3.8,
@@ -4217,9 +3515,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37460" as ShipProfile["id"],
     name: "Scalpel",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Logistics Frigates",
     hullTypeId: "1527" as ShipProfile["hullTypeId"],
     mass: 1420000,
     inertiaModifier: 3.85,
@@ -4229,9 +3525,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11978" as ShipProfile["id"],
     name: "Scimitar",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 12090000,
     inertiaModifier: 0.55,
@@ -4241,9 +3535,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "640" as ShipProfile["id"],
     name: "Scorpion",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103600000,
     inertiaModifier: 0.116,
@@ -4253,9 +3545,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4005" as ShipProfile["id"],
     name: "Scorpion Ishukone Watch",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103600000,
     inertiaModifier: 0.116,
@@ -4265,9 +3555,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32309" as ShipProfile["id"],
     name: "Scorpion Navy Issue",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103600000,
     inertiaModifier: 0.125,
@@ -4277,9 +3565,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "631" as ShipProfile["id"],
     name: "Scythe",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11110000,
     inertiaModifier: 0.57,
@@ -4289,9 +3575,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29336" as ShipProfile["id"],
     name: "Scythe Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 10910000,
     inertiaModifier: 0.44,
@@ -4301,9 +3585,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11190" as ShipProfile["id"],
     name: "Sentinel",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Electronic Attack Frigates",
     hullTypeId: "893" as ShipProfile["hullTypeId"],
     mass: 1223200,
     inertiaModifier: 4.25,
@@ -4313,9 +3595,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "78414" as ShipProfile["id"],
     name: "Shapash",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1054000,
     inertiaModifier: 3.467,
@@ -4325,9 +3605,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "85062" as ShipProfile["id"],
     name: "Sidewinder",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "830" as ShipProfile["hullTypeId"],
     mass: 1400000,
     inertiaModifier: 3.2,
@@ -4337,9 +3615,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "19744" as ShipProfile["id"],
     name: "Sigil",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 11000000,
     inertiaModifier: 0.86,
@@ -4349,9 +3625,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11942" as ShipProfile["id"],
     name: "Silver Magnate",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1500000,
     inertiaModifier: 2.2,
@@ -4361,9 +3635,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92823" as ShipProfile["id"],
     name: "Simurgh",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Command Carriers",
     hullTypeId: "5120" as ShipProfile["hullTypeId"],
     mass: 1270000000,
     inertiaModifier: 0.045,
@@ -4373,9 +3645,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22430" as ShipProfile["id"],
     name: "Sin",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 141700000,
     inertiaModifier: 0.0513,
@@ -4385,9 +3655,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22546" as ShipProfile["id"],
     name: "Skiff",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Exhumers",
     hullTypeId: "543" as ShipProfile["hullTypeId"],
     mass: 20000000,
     inertiaModifier: 0.64,
@@ -4397,9 +3665,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89808" as ShipProfile["id"],
     name: "Skua",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Tactical Destroyers",
     hullTypeId: "1305" as ShipProfile["hullTypeId"],
     mass: 1100000,
     inertiaModifier: 6,
@@ -4409,9 +3675,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "54731" as ShipProfile["id"],
     name: "Skybreaker",
-    faction: "EDENCOM",
     factionId: "edencom" as ShipProfile["factionId"],
-    hullType: "EDENCOM Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 967090,
     inertiaModifier: 3.6,
@@ -4421,9 +3685,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "585" as ShipProfile["id"],
     name: "Slasher",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1075000,
     inertiaModifier: 2.83,
@@ -4433,9 +3695,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22444" as ShipProfile["id"],
     name: "Sleipnir",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 12800000,
     inertiaModifier: 0.704,
@@ -4445,9 +3705,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-specter" as ShipProfile["id"],
     name: "Specter",
-    faction: "Jovian Directorate",
     factionId: "jovian-directorate" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "legacy-standard-frigates" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 3.1,
@@ -4457,9 +3715,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "81008" as ShipProfile["id"],
     name: "Squall",
-    faction: "Upwell",
     factionId: "upwell" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 12800000,
     inertiaModifier: 0.8,
@@ -4469,9 +3725,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "622" as ShipProfile["id"],
     name: "Stabber",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11400000,
     inertiaModifier: 0.5,
@@ -4481,9 +3735,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17713" as ShipProfile["id"],
     name: "Stabber Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 10810000,
     inertiaModifier: 0.465,
@@ -4493,9 +3745,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11198" as ShipProfile["id"],
     name: "Stiletto",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1010000,
     inertiaModifier: 3.5,
@@ -4505,9 +3755,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37482" as ShipProfile["id"],
     name: "Stork",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Command Destroyers",
     hullTypeId: "1534" as ShipProfile["hullTypeId"],
     mass: 1300000,
     inertiaModifier: 3.6,
@@ -4517,9 +3765,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "54732" as ShipProfile["id"],
     name: "Stormbringer",
-    faction: "EDENCOM",
     factionId: "edencom" as ShipProfile["factionId"],
-    hullType: "EDENCOM Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11640000,
     inertiaModifier: 0.52,
@@ -4529,9 +3775,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33470" as ShipProfile["id"],
     name: "Stratios",
-    faction: "Sisters of EVE",
     factionId: "sisters-of-eve" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9350000,
     inertiaModifier: 0.47,
@@ -4541,9 +3785,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33553" as ShipProfile["id"],
     name: "Stratios Emergency Responder",
-    faction: "Sisters of EVE",
     factionId: "sisters-of-eve" as ShipProfile["factionId"],
-    hullType: "Special Edition Ships",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9350000,
     inertiaModifier: 0.47,
@@ -4553,9 +3795,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17924" as ShipProfile["id"],
     name: "Succubus",
-    faction: "Sansha's Nation",
     factionId: "sanshas-nation" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 965000,
     inertiaModifier: 3.5,
@@ -4565,9 +3805,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32983" as ShipProfile["id"],
     name: "Sukuuvestaa Heron",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1150000,
     inertiaModifier: 3.57,
@@ -4577,9 +3815,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42685" as ShipProfile["id"],
     name: "Sunesis",
-    faction: "Society of Conscious Thought",
     factionId: "society-of-conscious-thought" as ShipProfile["factionId"],
-    hullType: "Special Edition Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1550000,
     inertiaModifier: 2.85,
@@ -4589,9 +3825,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34562" as ShipProfile["id"],
     name: "Svipul",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Tactical Destroyers",
     hullTypeId: "1305" as ShipProfile["hullTypeId"],
     mass: 1400000,
     inertiaModifier: 3.8,
@@ -4601,9 +3835,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33081" as ShipProfile["id"],
     name: "Taipan",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1163000,
     inertiaModifier: 4.5,
@@ -4613,9 +3845,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4308" as ShipProfile["id"],
     name: "Talos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "1201" as ShipProfile["hullTypeId"],
     mass: 15552000,
     inertiaModifier: 0.45,
@@ -4625,9 +3855,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32878" as ShipProfile["id"],
     name: "Talwar",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1650000,
     inertiaModifier: 2.9,
@@ -4637,9 +3865,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "91858" as ShipProfile["id"],
     name: "Talwar Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1650000,
     inertiaModifier: 2.755,
@@ -4649,9 +3875,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11200" as ShipProfile["id"],
     name: "Taranis",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1060000,
     inertiaModifier: 3.25,
@@ -4661,9 +3885,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33190" as ShipProfile["id"],
     name: "Tash-Murkon Magnate",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1072000,
     inertiaModifier: 3.8,
@@ -4673,9 +3895,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "649" as ShipProfile["id"],
     name: "Tayra",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 13000000,
     inertiaModifier: 0.97,
@@ -4685,9 +3905,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "639" as ShipProfile["id"],
     name: "Tempest",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 99500000,
     inertiaModifier: 0.116,
@@ -4697,9 +3915,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17732" as ShipProfile["id"],
     name: "Tempest Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103300000,
     inertiaModifier: 0.115,
@@ -4709,9 +3925,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "26842" as ShipProfile["id"],
     name: "Tempest Tribal Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 103300000,
     inertiaModifier: 0.12,
@@ -4721,9 +3935,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "29984" as ShipProfile["id"],
     name: "Tengu",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Strategic Cruisers",
     hullTypeId: "963" as ShipProfile["hullTypeId"],
     mass: 14400000,
     inertiaModifier: 0.52,
@@ -4733,9 +3945,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92282" as ShipProfile["id"],
     name: "Tenzin YC128 Campaign Bus",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "5087" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 4,
@@ -4745,9 +3955,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37459" as ShipProfile["id"],
     name: "Thalia",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Logistics Frigates",
     hullTypeId: "1527" as ShipProfile["hullTypeId"],
     mass: 1450000,
     inertiaModifier: 3.7,
@@ -4757,9 +3965,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23911" as ShipProfile["id"],
     name: "Thanatos",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Carriers",
     hullTypeId: "547" as ShipProfile["hullTypeId"],
     mass: 1220000000,
     inertiaModifier: 0.039,
@@ -4769,9 +3975,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "85087" as ShipProfile["id"],
     name: "Tholos",
-    faction: "Deathless Circle",
     factionId: "deathless-circle" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1700000,
     inertiaModifier: 2.75,
@@ -4781,9 +3985,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "627" as ShipProfile["id"],
     name: "Thorax",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11280000,
     inertiaModifier: 0.49,
@@ -4793,9 +3995,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "16242" as ShipProfile["id"],
     name: "Thrasher",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.8,
@@ -4805,9 +4005,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "73794" as ShipProfile["id"],
     name: "Thrasher Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Destroyers",
     hullTypeId: "420" as ShipProfile["hullTypeId"],
     mass: 1600000,
     inertiaModifier: 2.75,
@@ -4817,9 +4015,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "54733" as ShipProfile["id"],
     name: "Thunderchild",
-    faction: "EDENCOM",
     factionId: "edencom" as ShipProfile["factionId"],
-    hullType: "EDENCOM Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 102141000,
     inertiaModifier: 0.136,
@@ -4829,9 +4025,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "48635" as ShipProfile["id"],
     name: "Tiamat",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 9530000,
     inertiaModifier: 0.48,
@@ -4841,9 +4035,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "591" as ShipProfile["id"],
     name: "Tormentor",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1080000,
     inertiaModifier: 3.1,
@@ -4853,9 +4045,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "4310" as ShipProfile["id"],
     name: "Tornado",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battlecruisers",
     hullTypeId: "1201" as ShipProfile["hullTypeId"],
     mass: 15228000,
     inertiaModifier: 0.54,
@@ -4865,9 +4055,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "81047" as ShipProfile["id"],
     name: "Torrent",
-    faction: "Upwell",
     factionId: "upwell" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "380" as ShipProfile["hullTypeId"],
     mass: 19800000,
     inertiaModifier: 1,
@@ -4877,9 +4065,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "593" as ShipProfile["id"],
     name: "Tristan",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1044000,
     inertiaModifier: 3.44,
@@ -4889,9 +4075,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "644" as ShipProfile["id"],
     name: "Typhoon",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 100600000,
     inertiaModifier: 0.11,
@@ -4901,9 +4085,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32311" as ShipProfile["id"],
     name: "Typhoon Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 102600000,
     inertiaModifier: 0.11,
@@ -4913,9 +4095,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2834" as ShipProfile["id"],
     name: "Utu",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1216000,
     inertiaModifier: 3.467,
@@ -4925,9 +4105,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11999" as ShipProfile["id"],
     name: "Vagabond",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11590000,
     inertiaModifier: 0.504,
@@ -4937,9 +4115,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "77288" as ShipProfile["id"],
     name: "Valravn",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Lancer Dreadnoughts",
     hullTypeId: "4594" as ShipProfile["hullTypeId"],
     mass: 1260000000,
     inertiaModifier: 0.045,
@@ -4949,9 +4125,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3518" as ShipProfile["id"],
     name: "Vangel",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Special Edition Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 11890000,
     inertiaModifier: 0.51,
@@ -4961,9 +4135,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42126" as ShipProfile["id"],
     name: "Vanquisher",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Titans",
     hullTypeId: "30" as ShipProfile["hullTypeId"],
     mass: 2100000000,
     inertiaModifier: 0.032,
@@ -4973,9 +4145,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "28665" as ShipProfile["id"],
     name: "Vargur",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Marauders",
     hullTypeId: "900" as ShipProfile["hullTypeId"],
     mass: 150000000,
     inertiaModifier: 0.071,
@@ -4985,9 +4155,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "47270" as ShipProfile["id"],
     name: "Vedmak",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9530000,
     inertiaModifier: 0.45,
@@ -4997,9 +4165,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42124" as ShipProfile["id"],
     name: "Vehement",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1250000000,
     inertiaModifier: 0.038,
@@ -5009,9 +4175,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "606" as ShipProfile["id"],
     name: "Velator",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1148000,
     inertiaModifier: 4.35,
@@ -5021,9 +4185,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "42125" as ShipProfile["id"],
     name: "Vendetta",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1600000000,
     inertiaModifier: 0.031,
@@ -5033,9 +4195,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11365" as ShipProfile["id"],
     name: "Vengeance",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1046700,
     inertiaModifier: 4.264,
@@ -5045,9 +4205,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32880" as ShipProfile["id"],
     name: "Venture",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1200000,
     inertiaModifier: 3.6,
@@ -5057,9 +4215,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "89648" as ShipProfile["id"],
     name: "Venture Consortium Issue",
-    faction: "Outer Ring Excavations",
     factionId: "outer-ring-excavations" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1200000,
     inertiaModifier: 3.5,
@@ -5069,9 +4225,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "626" as ShipProfile["id"],
     name: "Vexor",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Standard Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 11100000,
     inertiaModifier: 0.56,
@@ -5081,9 +4235,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17843" as ShipProfile["id"],
     name: "Vexor Navy Issue",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9700000,
     inertiaModifier: 0.51,
@@ -5093,9 +4245,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "32989" as ShipProfile["id"],
     name: "Vherokior Probe",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1123000,
     inertiaModifier: 3.58,
@@ -5105,9 +4255,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12743" as ShipProfile["id"],
     name: "Viator",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Transport Ships",
     hullTypeId: "1202" as ShipProfile["hullTypeId"],
     mass: 10000000,
     inertiaModifier: 0.54,
@@ -5117,9 +4265,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45531" as ShipProfile["id"],
     name: "Victor",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Special Edition Recon Ships",
     hullTypeId: "833" as ShipProfile["hullTypeId"],
     mass: 11650000,
     inertiaModifier: 0.59,
@@ -5129,9 +4275,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "34590" as ShipProfile["id"],
     name: "Victorieux Luxury Yacht",
-    faction: "Intaki Syndicate",
     factionId: "intaki-syndicate" as ShipProfile["factionId"],
-    hullType: "Special Edition Cruisers",
     hullTypeId: "5087" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 4,
@@ -5141,9 +4285,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "3766" as ShipProfile["id"],
     name: "Vigil",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1080000,
     inertiaModifier: 3.22,
@@ -5153,9 +4295,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "37454" as ShipProfile["id"],
     name: "Vigil Fleet Issue",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 1080000,
     inertiaModifier: 3.22,
@@ -5165,9 +4305,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17722" as ShipProfile["id"],
     name: "Vigilant",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Cruisers",
     hullTypeId: "26" as ShipProfile["hullTypeId"],
     mass: 9830000,
     inertiaModifier: 0.48,
@@ -5177,9 +4315,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17740" as ShipProfile["id"],
     name: "Vindicator",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Battleships",
     hullTypeId: "27" as ShipProfile["hullTypeId"],
     mass: 105200000,
     inertiaModifier: 0.083,
@@ -5189,9 +4325,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33083" as ShipProfile["id"],
     name: "Violator",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Special Edition Corvettes",
     hullTypeId: "237" as ShipProfile["hullTypeId"],
     mass: 1148000,
     inertiaModifier: 4.35,
@@ -5201,9 +4335,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "45530" as ShipProfile["id"],
     name: "Virtuoso",
-    faction: "Serpentis",
     factionId: "serpentis" as ShipProfile["factionId"],
-    hullType: "Special Edition Covert Ops",
     hullTypeId: "834" as ShipProfile["hullTypeId"],
     mass: 1410000,
     inertiaModifier: 4,
@@ -5213,9 +4345,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-visitant" as ShipProfile["id"],
     name: "Visitant",
-    faction: "Jovian Directorate",
     factionId: "jovian-directorate" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "legacy-haulers" as ShipProfile["hullTypeId"],
     mass: 15260000,
     inertiaModifier: 0.65,
@@ -5225,9 +4355,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22446" as ShipProfile["id"],
     name: "Vulture",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Command Ships",
     hullTypeId: "540" as ShipProfile["hullTypeId"],
     mass: 14000000,
     inertiaModifier: 0.67,
@@ -5237,9 +4365,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "33673" as ShipProfile["id"],
     name: "Whiptail",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Special Edition Interceptors",
     hullTypeId: "831" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 3.7,
@@ -5249,9 +4375,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "22436" as ShipProfile["id"],
     name: "Widow",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Black Ops",
     hullTypeId: "898" as ShipProfile["hullTypeId"],
     mass: 151100000,
     inertiaModifier: 0.068,
@@ -5261,9 +4385,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "11371" as ShipProfile["id"],
     name: "Wolf",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Assault Frigates",
     hullTypeId: "324" as ShipProfile["hullTypeId"],
     mass: 1178100,
     inertiaModifier: 3.456,
@@ -5273,9 +4395,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "17930" as ShipProfile["id"],
     name: "Worm",
-    faction: "Guristas",
     factionId: "guristas" as ShipProfile["factionId"],
-    hullType: "Pirate Faction Frigates",
     hullTypeId: "25" as ShipProfile["hullTypeId"],
     mass: 981000,
     inertiaModifier: 3.8,
@@ -5285,9 +4405,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "legacy-wraith" as ShipProfile["id"],
     name: "Wraith",
-    faction: "Jovian Directorate",
     factionId: "jovian-directorate" as ShipProfile["factionId"],
-    hullType: "Standard Frigates",
     hullTypeId: "legacy-standard-frigates" as ShipProfile["hullTypeId"],
     mass: 1000000,
     inertiaModifier: 3.1,
@@ -5297,9 +4415,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "653" as ShipProfile["id"],
     name: "Wreathe",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Haulers",
     hullTypeId: "28" as ShipProfile["hullTypeId"],
     mass: 10000000,
     inertiaModifier: 0.81,
@@ -5309,9 +4425,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "23917" as ShipProfile["id"],
     name: "Wyvern",
-    faction: "Caldari State",
     factionId: "caldari-state" as ShipProfile["factionId"],
-    hullType: "Supercarriers",
     hullTypeId: "659" as ShipProfile["hullTypeId"],
     mass: 1700000000,
     inertiaModifier: 0.036,
@@ -5321,9 +4435,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "92825" as ShipProfile["id"],
     name: "Ymir",
-    faction: "Minmatar Republic",
     factionId: "minmatar-republic" as ShipProfile["factionId"],
-    hullType: "Command Carriers",
     hullTypeId: "5120" as ShipProfile["hullTypeId"],
     mass: 1230000000,
     inertiaModifier: 0.039,
@@ -5333,9 +4445,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "49713" as ShipProfile["id"],
     name: "Zarmazd",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Logistics Cruisers",
     hullTypeId: "832" as ShipProfile["hullTypeId"],
     mass: 10240000,
     inertiaModifier: 0.72,
@@ -5345,9 +4455,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "12003" as ShipProfile["id"],
     name: "Zealot",
-    faction: "Amarr Empire",
     factionId: "amarr-empire" as ShipProfile["factionId"],
-    hullType: "Heavy Assault Cruisers",
     hullTypeId: "358" as ShipProfile["hullTypeId"],
     mass: 12580000,
     inertiaModifier: 0.553,
@@ -5357,9 +4465,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "2078" as ShipProfile["id"],
     name: "Zephyr",
-    faction: "Gallente Federation",
     factionId: "gallente-federation" as ShipProfile["factionId"],
-    hullType: "Special Edition Frigates",
     hullTypeId: "1022" as ShipProfile["hullTypeId"],
     mass: 5000,
     inertiaModifier: 1000,
@@ -5369,9 +4475,7 @@ export const SHIP_PROFILES: readonly ShipProfile[] = [
   {
     id: "52907" as ShipProfile["id"],
     name: "Zirnitra",
-    faction: "Triglavian Collective",
     factionId: "triglavian-collective" as ShipProfile["factionId"],
-    hullType: "Precursor Dreadnoughts",
     hullTypeId: "485" as ShipProfile["hullTypeId"],
     mass: 1100000000,
     inertiaModifier: 0.044,

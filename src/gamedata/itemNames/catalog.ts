@@ -2,7 +2,7 @@ import { ITEM_NAMES_EN } from "./item-names-en";
 import { ITEM_NAMES_JA } from "./item-names-ja";
 import { ITEM_NAMES_ZH } from "./item-names-zh";
 import type { TypeId } from "../ids";
-import type { ShipNameLanguage } from "../../ships";
+import type { ShipNameLanguage } from "../i18n";
 
 export interface ItemNameCatalog {
   nameForId(id: TypeId, language: ShipNameLanguage): string;

@@ -81,9 +81,7 @@ function row<T>(id: string, name: string, stats: T): T & { readonly id: TypeId; 
 const profile: ShipProfile = {
   id: "24696" as ShipId,
   name: "Harbinger",
-  faction: "Amarr Empire",
   factionId: "amarr-empire" as FactionId,
-  hullType: "Standard Battlecruisers",
   hullTypeId: "419" as HullTypeId,
   mass: 15_500_000,
   inertiaModifier: 0.45,
@@ -94,9 +92,7 @@ const profile: ShipProfile = {
 const frigateProfile: ShipProfile = {
   id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_067_000,
   inertiaModifier: 3.2,
@@ -107,9 +103,7 @@ const frigateProfile: ShipProfile = {
 const bonusProfile: ShipProfile = {
   id: "11999" as ShipId,
   name: "Vagabond",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Heavy Assault Cruisers",
   hullTypeId: "358" as HullTypeId,
   mass: 10_500_000,
   inertiaModifier: 0.5,
@@ -120,9 +114,7 @@ const bonusProfile: ShipProfile = {
 const roleBonusProfile: ShipProfile = {
   id: "12015" as ShipId,
   name: "Muninn",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Heavy Assault Cruisers",
   hullTypeId: "358" as HullTypeId,
   mass: 10_800_000,
   inertiaModifier: 0.51,
@@ -133,9 +125,7 @@ const roleBonusProfile: ShipProfile = {
 const abaddonProfile: ShipProfile = {
   id: "24692" as ShipId,
   name: "Abaddon",
-  faction: "Amarr Empire",
   factionId: "amarr-empire" as FactionId,
-  hullType: "Standard Battleships",
   hullTypeId: "27" as HullTypeId,
   mass: 103_200_000,
   inertiaModifier: 0.14,

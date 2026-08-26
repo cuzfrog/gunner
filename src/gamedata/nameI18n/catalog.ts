@@ -1,8 +1,8 @@
 import type { FactionId, HullTypeId, ShipId } from "../ids";
+import type { ShipNameLanguage } from "../i18n";
 import { FACTION_NAMES } from "./faction-i18n";
 import { HULL_TYPE_NAMES } from "./hull-types-i18n";
 import { SHIP_NAMES } from "./ship-names-i18n";
-import type { ShipNameLanguage } from "../../ships";
 
 export interface NameI18nCatalog {
   shipName(id: ShipId, language: ShipNameLanguage): string | undefined;

@@ -5,7 +5,7 @@ import { ITEM_NAME_COLLISIONS_EN } from "./item-name-collisions-en";
 import { ITEM_NAME_COLLISIONS_JA } from "./item-name-collisions-ja";
 import { ITEM_NAME_COLLISIONS_ZH } from "./item-name-collisions-zh";
 import type { TypeId } from "../ids";
-import type { ShipNameLanguage } from "../../ships";
+import type { ShipNameLanguage } from "../i18n";
 
 export interface ItemNameResolver {
   idsForName(name: string, language: ShipNameLanguage): readonly TypeId[];

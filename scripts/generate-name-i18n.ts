@@ -1,10 +1,17 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
-import type { ShipProfile } from "../src/ships";
 import type { FactionId, HullTypeId, ShipId } from "../src/gamedata/ids";
+import type { ShipNameLanguage } from "../src/gamedata/i18n";
 
-type ShipNameLanguage = "en" | "zh" | "ja";
+export interface I18nProfile {
+  readonly id: ShipId;
+  readonly name: string;
+  readonly faction: string;
+  readonly factionId: FactionId;
+  readonly hullType: string;
+  readonly hullTypeId: HullTypeId;
+}
 
 interface I18nPack {
   readonly en: string;
@@ -15,6 +22,7 @@ interface I18nPack {
 const SHIP_NAMES_JSON = "data/ship-names-i18n.json";
 const FACTION_NAMES_JSON = "data/faction-i18n.json";
 const HULL_TYPE_NAMES_JSON = "data/hull-type-i18n.json";
+const SHIP_PROFILES_JSON = "data/ship-profiles.json";
 
 const SHIP_NAMES_OUTPUT = "src/gamedata/nameI18n/ship-names-i18n.ts";
 const FACTION_NAMES_OUTPUT = "src/gamedata/nameI18n/faction-i18n.ts";
@@ -41,7 +49,7 @@ function requirePack(pack: Readonly<Record<string, I18nPack>>, key: string, en: 
 }
 
 export function buildShipNameI18n(
-  profiles: readonly ShipProfile[],
+  profiles: readonly I18nProfile[],
   pack: Readonly<Record<string, I18nPack>>,
 ): Record<ShipId, I18nPack> {
   const result: Record<ShipId, I18nPack> = {};
@@ -52,7 +60,7 @@ export function buildShipNameI18n(
 }
 
 export function buildFactionNameI18n(
-  profiles: readonly ShipProfile[],
+  profiles: readonly I18nProfile[],
   pack: Readonly<Record<string, I18nPack>>,
 ): Record<FactionId, I18nPack> {
   const result: Record<FactionId, I18nPack> = {};
@@ -74,7 +82,7 @@ function selectCanonicalHullType(hullTypes: readonly string[]): string {
 }
 
 export function buildHullTypeNameI18n(
-  profiles: readonly ShipProfile[],
+  profiles: readonly I18nProfile[],
   pack: Readonly<Record<string, I18nPack>>,
 ): Record<HullTypeId, I18nPack> {
   const result: Record<HullTypeId, I18nPack> = {};
@@ -120,16 +128,44 @@ async function writeIfChanged(path: string, content: string): Promise<void> {
   console.log(`Generated ${path}.`);
 }
 
+interface RawProfile {
+  readonly name: string;
+  readonly faction: string;
+  readonly hullType: string;
+}
+
+async function loadI18nProfiles(): Promise<readonly I18nProfile[]> {
+  const text = await readFile(SHIP_PROFILES_JSON, "utf8");
+  const raw: RawProfile[] = JSON.parse(text);
+  const sourceByName = new Map<string, RawProfile>(raw.map((r) => [r.name, r]));
+
+  const profiles: I18nProfile[] = [];
+  for (const profile of SHIP_PROFILES) {
+    const source = sourceByName.get(profile.name);
+    if (!source) throw new Error(`Missing source profile for "${profile.name}".`);
+    profiles.push({
+      id: profile.id,
+      name: profile.name,
+      faction: source.faction,
+      factionId: profile.factionId,
+      hullType: source.hullType,
+      hullTypeId: profile.hullTypeId,
+    });
+  }
+  return profiles;
+}
+
 export async function main(): Promise<void> {
-  const [shipPack, factionPack, hullTypePack] = await Promise.all([
+  const [shipPack, factionPack, hullTypePack, profiles] = await Promise.all([
     loadI18nPack(SHIP_NAMES_JSON),
     loadI18nPack(FACTION_NAMES_JSON),
     loadI18nPack(HULL_TYPE_NAMES_JSON),
+    loadI18nProfiles(),
   ]);
 
-  const shipNames = buildShipNameI18n(SHIP_PROFILES, shipPack);
-  const factionNames = buildFactionNameI18n(SHIP_PROFILES, factionPack);
-  const hullTypeNames = buildHullTypeNameI18n(SHIP_PROFILES, hullTypePack);
+  const shipNames = buildShipNameI18n(profiles, shipPack);
+  const factionNames = buildFactionNameI18n(profiles, factionPack);
+  const hullTypeNames = buildHullTypeNameI18n(profiles, hullTypePack);
 
   await Promise.all([
     writeIfChanged(SHIP_NAMES_OUTPUT, buildSource("SHIP_NAMES", shipNames)),

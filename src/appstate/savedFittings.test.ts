@@ -19,9 +19,7 @@ import { LocalSavedFittings, type SavedFittings } from "./savedFittings";
 const RIFTER: ShipProfile = {
   id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
@@ -32,9 +30,7 @@ const RIFTER: ShipProfile = {
 const THRASHER: ShipProfile = {
   id: "16242" as ShipId,
   name: "Thrasher",
-  faction: "Minmatar Republic",
   factionId: "minmatar-republic" as FactionId,
-  hullType: "Standard Destroyers",
   hullTypeId: "420" as HullTypeId,
   mass: 1_600_000,
   inertiaModifier: 3,
@@ -55,7 +51,7 @@ function fakeShips(): Ships {
   const profiles = [RIFTER, THRASHER];
   return {
     hulls: vi.fn((_language: ShipNameLanguage): readonly HullView[] => []),
-    hullView: vi.fn((profile: ShipProfile, _language: ShipNameLanguage): HullView => ({ name: profile.name, hullType: profile.hullType, faction: profile.faction })),
+    hullView: vi.fn((profile: ShipProfile, _language: ShipNameLanguage): HullView => ({ name: profile.name, hullType: "Standard Frigates", faction: "Minmatar Republic" })),
     findHull: vi.fn((name: string): ShipProfile | undefined => {
       const normalized = name.trim().toLowerCase();
       return profiles.find((p) => p.name.toLowerCase() === normalized);

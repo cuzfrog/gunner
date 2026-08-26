@@ -1,30 +1,21 @@
-import { buildFactionNameI18n, buildHullTypeNameI18n, buildShipNameI18n } from "./generate-name-i18n";
-import type { ShipProfile } from "../src/ships";
+import { buildFactionNameI18n, buildHullTypeNameI18n, buildShipNameI18n, type I18nProfile } from "./generate-name-i18n";
 
-const rifter: ShipProfile = {
-  id: "587" as ShipProfile["id"],
+const rifter: I18nProfile = {
+  id: "587" as I18nProfile["id"],
   name: "Rifter",
   faction: "Minmatar Republic",
-  factionId: "minmatar-republic" as ShipProfile["factionId"],
+  factionId: "minmatar-republic" as I18nProfile["factionId"],
   hullType: "Standard Frigates",
-  hullTypeId: "25" as ShipProfile["hullTypeId"],
-  mass: 1_067_000,
-  inertiaModifier: 3,
-  baseSpeed: 365,
-  sigRadius: 35,
+  hullTypeId: "25" as I18nProfile["hullTypeId"],
 };
 
-const eidolon: ShipProfile = {
-  id: "legacy-eidolon" as ShipProfile["id"],
+const eidolon: I18nProfile = {
+  id: "legacy-eidolon" as I18nProfile["id"],
   name: "Eidolon",
   faction: "Jovian Directorate",
-  factionId: "jovian-directorate" as ShipProfile["factionId"],
+  factionId: "jovian-directorate" as I18nProfile["factionId"],
   hullType: "Standard Battleships",
-  hullTypeId: "legacy-standard-battleships" as ShipProfile["hullTypeId"],
-  mass: 100_000_000,
-  inertiaModifier: 0.1,
-  baseSpeed: 100,
-  sigRadius: 100,
+  hullTypeId: "legacy-standard-battleships" as I18nProfile["hullTypeId"],
 };
 
 const pack = {
@@ -39,8 +30,8 @@ describe("buildShipNameI18n", () => {
       Rifter: pack,
       Eidolon: { en: "Eidolon", zh: "", ja: "" },
     });
-    expect(result["587" as ShipProfile["id"]]).toEqual({ en: "Rifter", zh: "裂谷级", ja: "リフター" });
-    expect(result["legacy-eidolon" as ShipProfile["id"]]).toEqual({ en: "Eidolon", zh: "Eidolon", ja: "Eidolon" });
+    expect(result["587" as I18nProfile["id"]]).toEqual({ en: "Rifter", zh: "裂谷级", ja: "リフター" });
+    expect(result["legacy-eidolon" as I18nProfile["id"]]).toEqual({ en: "Eidolon", zh: "Eidolon", ja: "Eidolon" });
   });
 
   test("throws when a profile has no i18n entry", () => {
@@ -54,7 +45,7 @@ describe("buildFactionNameI18n", () => {
       "Minmatar Republic": { en: "Minmatar Republic", zh: "米玛塔尔", ja: "ミンマター共和国" },
       "Jovian Directorate": { en: "Jovian Directorate", zh: "朱庇特", ja: "ジョビアン" },
     });
-    expect(result["minmatar-republic" as ShipProfile["factionId"]]).toEqual({
+    expect(result["minmatar-republic" as I18nProfile["factionId"]]).toEqual({
       en: "Minmatar Republic",
       zh: "米玛塔尔",
       ja: "ミンマター共和国",
@@ -69,12 +60,12 @@ describe("buildHullTypeNameI18n", () => {
       "Standard Frigates": { en: "Standard Frigates", zh: "护卫舰", ja: "フリゲート" },
       "Standard Battleships": { en: "Standard Battleships", zh: "战列舰", ja: "戦艦" },
     });
-    expect(result["25" as ShipProfile["hullTypeId"]]).toEqual({
+    expect(result["25" as I18nProfile["hullTypeId"]]).toEqual({
       en: "Standard Frigates",
       zh: "护卫舰",
       ja: "フリゲート",
     });
-    expect(result["legacy-standard-battleships" as ShipProfile["hullTypeId"]]).toEqual({
+    expect(result["legacy-standard-battleships" as I18nProfile["hullTypeId"]]).toEqual({
       en: "Standard Battleships",
       zh: "战列舰",
       ja: "戦艦",
@@ -82,13 +73,13 @@ describe("buildHullTypeNameI18n", () => {
   });
 
   test("prefers the shortest non-standard name when no standard variant exists", () => {
-    const titan: ShipProfile = { ...rifter, hullTypeId: "30" as ShipProfile["hullTypeId"], hullType: "Titans" };
-    const pirateTitan: ShipProfile = { ...rifter, hullTypeId: "30" as ShipProfile["hullTypeId"], hullType: "Pirate Faction Titans" };
+    const titan: I18nProfile = { ...rifter, hullTypeId: "30" as I18nProfile["hullTypeId"], hullType: "Titans" };
+    const pirateTitan: I18nProfile = { ...rifter, hullTypeId: "30" as I18nProfile["hullTypeId"], hullType: "Pirate Faction Titans" };
     const result = buildHullTypeNameI18n([titan, pirateTitan], {
       "Titans": { en: "Titans", zh: "泰坦", ja: "タイタン" },
       "Pirate Faction Titans": { en: "Pirate Faction Titans", zh: "海盗泰坦", ja: "海賊タイタン" },
     });
-    expect(result["30" as ShipProfile["hullTypeId"]]).toEqual({
+    expect(result["30" as I18nProfile["hullTypeId"]]).toEqual({
       en: "Titans",
       zh: "泰坦",
       ja: "タイタン",

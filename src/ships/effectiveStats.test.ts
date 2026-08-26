@@ -6,9 +6,7 @@ import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
 const frigate: ShipProfile = {
   id: "test-frigate" as ShipId,
   name: "Test Frigate",
-  faction: "Test",
   factionId: "test" as FactionId,
-  hullType: "Standard Frigates",
   hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
@@ -19,9 +17,7 @@ const frigate: ShipProfile = {
 const battleship: ShipProfile = {
   id: "test-battleship" as ShipId,
   name: "Test Battleship",
-  faction: "Test",
   factionId: "test" as FactionId,
-  hullType: "Standard Battleships",
   hullTypeId: "27" as HullTypeId,
   mass: 100_000_000,
   inertiaModifier: 0.14,
@@ -29,10 +25,10 @@ const battleship: ShipProfile = {
   sigRadius: 470,
 };
 
-const mwd5 = fittingOptions(frigate).find((m) => m.id === "mwd-5mn")!;
-const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
-const ab10 = fittingOptions(frigate).find((m) => m.id === "ab-10mn")!;
-const mwd500 = fittingOptions(battleship).find((m) => m.id === "mwd-500mn")!;
+const mwd5 = fittingOptions("small").find((m) => m.id === "mwd-5mn")!;
+const ab1 = fittingOptions("small").find((m) => m.id === "ab-1mn")!;
+const ab10 = fittingOptions("small").find((m) => m.id === "ab-10mn")!;
+const mwd500 = fittingOptions("large").find((m) => m.id === "mwd-500mn")!;
 
 describe("naked hull", () => {
   test("returns base hull values and align time without a module", () => {
@@ -84,9 +80,7 @@ describe("naked hull", () => {
     const thrasher: ShipProfile = {
       id: "16242" as ShipId,
       name: "Thrasher",
-      faction: "Minmatar Republic",
       factionId: "minmatar-republic" as FactionId,
-      hullType: "Standard Destroyers",
       hullTypeId: "420" as HullTypeId,
       mass: 1_600_000,
       inertiaModifier: 2.8,
@@ -123,9 +117,7 @@ describe("naked hull", () => {
     const profile: ShipProfile = {
       id: "worked-example" as ShipId,
       name: "Worked Example",
-      faction: "Test",
       factionId: "test" as FactionId,
-      hullType: "Standard Frigates",
       hullTypeId: "25" as HullTypeId,
       mass: 1_150_000,
       inertiaModifier: 3,

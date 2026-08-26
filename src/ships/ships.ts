@@ -6,7 +6,7 @@ import {
 } from "./effectiveStats";
 import { fittingOptions as computeFittingOptions } from "./fitting";
 import { isPropulsionId, PROPULSION_MODULES } from "./propulsion";
-import type { ShipId } from "../gamedata/ids";
+import type { HullTypeId, ShipId } from "../gamedata/ids";
 import type { NameI18nCatalog } from "../gamedata/nameI18n";
 import type { ShipProfileCatalog } from "../gamedata/shipProfiles";
 import { hullTierOf } from "./tiers";
@@ -51,12 +51,14 @@ export class ShipsImpl implements Ships {
   private readonly nameI18nCatalog: NameI18nCatalog;
   private readonly hullById: ReadonlyMap<ShipId, ShipProfile>;
   private readonly hullByName: Record<ShipNameLanguage, ReadonlyMap<string, ShipProfile>>;
+  private readonly hullTierById: ReadonlyMap<HullTypeId, HullTier>;
 
   constructor({ shipProfileCatalog, nameI18nCatalog }: { shipProfileCatalog: ShipProfileCatalog; nameI18nCatalog: NameI18nCatalog }) {
     this.shipProfileCatalog = shipProfileCatalog;
     this.nameI18nCatalog = nameI18nCatalog;
     this.hullById = buildHullById(shipProfileCatalog);
     this.hullByName = buildHullByName(shipProfileCatalog, nameI18nCatalog);
+    this.hullTierById = buildHullTierById(shipProfileCatalog, nameI18nCatalog);
   }
 
   hulls(language: ShipNameLanguage): readonly HullView[] {
@@ -66,8 +68,8 @@ export class ShipsImpl implements Ships {
   hullView(profile: ShipProfile, language: ShipNameLanguage): HullView {
     return {
       name: this.nameI18nCatalog.shipName(profile.id, language) ?? profile.name,
-      hullType: this.nameI18nCatalog.hullTypeName(profile.hullTypeId, language) ?? profile.hullType,
-      faction: this.nameI18nCatalog.factionName(profile.factionId, language) ?? profile.faction,
+      hullType: this.nameI18nCatalog.hullTypeName(profile.hullTypeId, language) ?? profile.hullTypeId,
+      faction: this.nameI18nCatalog.factionName(profile.factionId, language) ?? profile.factionId,
     };
   }
 
@@ -94,7 +96,9 @@ export class ShipsImpl implements Ships {
   }
 
   fittingOptions(profile: ShipProfile): readonly PropulsionModule[] {
-    return computeFittingOptions(profile);
+    const tier = this.shipTierFor(profile);
+    if (!tier) return [];
+    return computeFittingOptions(tier);
   }
 
   allFittingOptions(): readonly PropulsionModule[] {
@@ -102,11 +106,15 @@ export class ShipsImpl implements Ships {
   }
 
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined {
-    return computeFittingOptions(profile).find((module) => module.id === id);
+    const tier = this.shipTierFor(profile);
+    if (!tier) return undefined;
+    return computeFittingOptions(tier).find((module) => module.id === id);
   }
 
   turretSizeOptions(profile: ShipProfile): readonly HullTier[] {
-    return turretSizeOptionsFor(profile);
+    const tier = this.shipTierFor(profile);
+    if (!tier) return [];
+    return turretSizeOptionsFor(tier);
   }
 
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions, maxSpeedOverride?: number): ShipStats {
@@ -121,6 +129,10 @@ export class ShipsImpl implements Ships {
 
   alignTime(mass: number, inertiaModifier: number): number {
     return computeAlignTime(mass, inertiaModifier);
+  }
+
+  private shipTierFor(profile: ShipProfile): HullTier | null {
+    return this.hullTierById.get(profile.hullTypeId) ?? null;
   }
 }
 
@@ -153,9 +165,19 @@ function normalize(input: string): string {
   return input.trim().toLowerCase();
 }
 
-function turretSizeOptionsFor(profile: ShipProfile): readonly HullTier[] {
-  const hullTier = hullTierOf(profile.hullType);
-  if (!hullTier) return [];
-  const hullRank = HULL_TIER_ORDER.indexOf(hullTier);
-  return HULL_TIER_ORDER.filter((tier, rank) => rank <= hullRank || (rank === hullRank + 1 && tier !== "capital"));
+function buildHullTierById(catalog: ShipProfileCatalog, i18n: NameI18nCatalog): ReadonlyMap<HullTypeId, HullTier> {
+  const map = new Map<HullTypeId, HullTier>();
+  for (const profile of catalog.all()) {
+    if (map.has(profile.hullTypeId)) continue;
+    const hullType = i18n.hullTypeName(profile.hullTypeId, "en");
+    if (hullType === undefined) continue;
+    const tier = hullTierOf(hullType);
+    if (tier) map.set(profile.hullTypeId, tier);
+  }
+  return map;
+}
+
+function turretSizeOptionsFor(tier: HullTier): readonly HullTier[] {
+  const hullRank = HULL_TIER_ORDER.indexOf(tier);
+  return HULL_TIER_ORDER.filter((candidate, rank) => rank <= hullRank || (rank === hullRank + 1 && candidate !== "capital"));
 }

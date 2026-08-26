@@ -1,0 +1,3 @@
+# i18n
+
+Shared i18n language and catalog types used across gamedata sub-modules.
