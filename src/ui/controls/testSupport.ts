@@ -1,7 +1,6 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
 import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
-import type { ItemNameCatalog } from "../../gamedata/itemNames";
 import type { Ships } from "../../ships";
 import type { EwarResolver, HitChance } from "../../sim";
 import type { I18n, Language } from "../i18n";
@@ -137,14 +136,7 @@ interface BuildDomControlsOptions {
   fittingImport?: Partial<FittingImport>;
   presetFittings?: Partial<PresetFittings>;
   savedFittings?: Partial<SavedFittings>;
-  itemNameCatalog?: Partial<ItemNameCatalog>;
   now?: () => number;
-}
-
-function mockItemNames(): ItemNameCatalog {
-  return {
-    nameForId: (id) => id,
-  };
 }
 
 function mockI18n(): I18n {
@@ -172,7 +164,6 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
   cradle.register({
     now: asValue(options.now ?? (() => Date.now())),
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
-    itemNameCatalog: asValue(vi.mocked<ItemNameCatalog>({ ...mockItemNames(), ...options.itemNameCatalog })),
     imageCatalog: asValue(mockImageCatalog()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
       speedMultiplier: vi.fn(() => 1),

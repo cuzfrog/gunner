@@ -3,7 +3,6 @@ import type { UiEvents } from "../../events";
 import { mockTrackingInput } from "../testSupport";
 import type { TrackingUnit } from "../../../appstate";
 import type { DisplayPreferences, SettingsStore } from "../../../appstate";
-import type { ItemNameCatalog } from "../../../gamedata/itemNames";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
@@ -165,9 +164,6 @@ function build() {
   const els = fakeEls();
   const i18n = mockI18n();
   const settingsStore = vi.mocked<SettingsStore>(mockSettingsStore());
-  const itemNameCatalog: ItemNameCatalog = {
-    nameForId: (id) => id,
-  };
   const events: UiEvents = {
     onLanguageChanged: vi.fn(),
     offLanguageChanged: vi.fn(),
@@ -213,7 +209,6 @@ function build() {
   const controller = new PreferencesControllerImpl({
     els,
     i18n,
-    itemNameCatalog,
     popupGroup,
     settingsStore,
     shipATurretController,
@@ -221,12 +216,12 @@ function build() {
     events,
     rangeOverlayController,
   });
-  return { controller, els, i18n, itemNameCatalog, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController };
+  return { controller, els, i18n, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController };
 }
 
 describe("PreferencesController", () => {
   test("setLanguage persists language, updates toggles, and emits language changed", async () => {
-    const { controller, els, i18n, itemNameCatalog, settingsStore, events } = build();
+    const { controller, els, i18n, settingsStore, events } = build();
     controller.setLanguage("zh");
     expect(i18n.setLanguage).toHaveBeenCalledWith("zh");
     expect(els.langZh.getAttribute("aria-pressed")).toBe("true");
@@ -322,7 +317,7 @@ describe("PreferencesController", () => {
   });
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
-    const { controller, els, i18n, itemNameCatalog, events, shipATurretController } = build();
+    const { controller, els, i18n, events, shipATurretController } = build();
     const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");

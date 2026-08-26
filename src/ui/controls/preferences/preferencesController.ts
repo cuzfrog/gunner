@@ -2,7 +2,6 @@ import { num, setText } from "../controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import type { I18n, Language } from "../../i18n";
 import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../../appstate";
-import type { ItemNameCatalog } from "../../../gamedata/itemNames";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
@@ -53,7 +52,6 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly shipATurretController: TurretController;
   private readonly shipBTurretController: TurretController;
   private readonly events: UiEvents;
-  private readonly itemNameCatalog: ItemNameCatalog;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly popupGroup: PopupGroup;
   private readonly canvasSettingsPopupValue: Popup;
@@ -66,7 +64,6 @@ export class PreferencesControllerImpl implements PreferencesController {
     shipATurretController: TurretController;
     shipBTurretController: TurretController;
     events: UiEvents;
-    itemNameCatalog: ItemNameCatalog;
     rangeOverlayController: RangeOverlayController;
     popupGroup: PopupGroup;
   }) {
@@ -76,7 +73,6 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.shipATurretController = deps.shipATurretController;
     this.shipBTurretController = deps.shipBTurretController;
     this.events = deps.events;
-    this.itemNameCatalog = deps.itemNameCatalog;
     this.rangeOverlayController = deps.rangeOverlayController;
     this.popupGroup = deps.popupGroup;
     this.canvasSettingsPopupValue = {

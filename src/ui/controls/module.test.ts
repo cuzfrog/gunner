@@ -8,7 +8,6 @@ import { mockPresetFittings, mockSavedFittings } from "../testing";
 const controlsCradleKeys = {
   hitChance: "hitChance",
   i18n: "i18n",
-  itemNameCatalog: "itemNameCatalog",
   settingsStore: "settingsStore",
   ships: "ships",
   fittingImport: "fittingImport",
