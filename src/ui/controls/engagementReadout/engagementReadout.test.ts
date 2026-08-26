@@ -44,9 +44,6 @@ function fakeReadoutEls(): ReadoutEls {
   const shipB = fakeHitEls();
   return {
     resDistance: make(),
-    resTransversal: make(),
-    resAngular: make(),
-    resRadial: make(),
     shipA,
     shipB,
   };
@@ -104,16 +101,6 @@ describe("EngagementReadout", () => {
     const view = makeView({ distance: 1234.4 });
     readout.update(view, T);
     expect(els.resDistance.textContent).toBe("1,234 m");
-  });
-
-  test("writes speed, angular and radial readouts with units", () => {
-    const els = fakeReadoutEls();
-    const readout = new EngagementReadoutImpl(els);
-    const view = makeView({ distance: 1000, radialVelocity: 1234.5, transversalSpeed: 1234.5, angularVelocity: 0.1234 });
-    readout.update(view, T);
-    expect(els.resTransversal.textContent).toBe("1,234.5 m/s");
-    expect(els.resAngular.textContent).toBe("0.1234 rad/s");
-    expect(els.resRadial.textContent).toBe("1,234.5 m/s");
   });
 
   test("computes tracking and range penalties from terms for shipA", () => {

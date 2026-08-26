@@ -10,9 +10,6 @@ interface SideHitEls {
 
 export interface ReadoutEls {
   readonly resDistance: HTMLElement;
-  readonly resTransversal: HTMLElement;
-  readonly resAngular: HTMLElement;
-  readonly resRadial: HTMLElement;
   readonly shipA: SideHitEls;
   readonly shipB: SideHitEls;
 }
@@ -31,9 +28,6 @@ export class EngagementReadoutImpl implements EngagementReadout {
   update(view: EngagementView, t: (key: string) => string): void {
     const { frame, hits } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    setText(this.els.resTransversal, `${formatWithCommas(frame.transversalSpeed, 1)} m/s`);
-    setText(this.els.resAngular, `${formatWithCommas(frame.angularVelocity, 4)} rad/s`);
-    setText(this.els.resRadial, `${formatWithCommas(frame.radialVelocity, 1)} m/s`);
     this.updateSide(this.els.shipA, hits.shipA);
     this.updateSide(this.els.shipB, hits.shipB);
   }

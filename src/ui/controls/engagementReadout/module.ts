@@ -17,9 +17,6 @@ export function registerEngagementReadoutModule<T extends ControlsCradle>(cradle
 function collectReadoutEls(els: ControlsElements): ReadoutEls {
   return {
     resDistance: els.resDistance,
-    resTransversal: els.resTransversal,
-    resAngular: els.resAngular,
-    resRadial: els.resRadial,
     shipA: {
       resTrackPen: els.resTrackPenA,
       resRangePen: els.resRangePenA,

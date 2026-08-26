@@ -57,6 +57,7 @@ const APPROVED_PREFIXES = [
   "fitting",
   "preview",
   "result-grid",
+  "result-column",
   "result-card",
   "range-overlay",
   "combatant-portrait",

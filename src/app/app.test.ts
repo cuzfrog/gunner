@@ -143,7 +143,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turrets: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, turret, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -167,7 +167,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, hit, effectiveTurret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, effectiveTurret, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
       shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
@@ -179,7 +179,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, turret, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),

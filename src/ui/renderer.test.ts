@@ -1,4 +1,4 @@
-import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import { Vec2, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
 import type { I18n } from "./i18n";
 import { CanvasRenderer, type RangeOverlay } from "./renderer";
 
@@ -11,10 +11,11 @@ function fakeI18n(): I18n {
   };
 }
 
-function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][] } {
+function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[] } {
   const strokeStyles: string[] = [];
   const arcs: number[][] = [];
   const dashes: number[][] = [];
+  const fillTexts: string[] = [];
   const methods = [
     "fillRect",
     "strokeRect",
@@ -31,12 +32,12 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
     "translate",
     "rotate",
     "setLineDash",
-    "fillText",
   ];
   const shipB: Record<string, unknown> = {
     strokeStyles,
     arcs,
     dashes,
+    fillTexts,
     strokeStyle: "",
     fillStyle: "",
     lineWidth: 0,
@@ -49,6 +50,7 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
   }
   shipB.arc = (...args: number[]) => arcs.push(args);
   shipB.setLineDash = (dash: number[]) => dashes.push(dash);
+  shipB.fillText = (text: string) => fillTexts.push(text);
   shipB.measureText = () => ({ width: 0 });
   return new Proxy(shipB, {
     get(o, p) {
@@ -59,7 +61,7 @@ function fakeContext(): CanvasRenderingContext2D & { strokeStyles: string[]; arc
       o[p as string] = v;
       return true;
     },
-  }) as unknown as CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][] };
+  }) as unknown as CanvasRenderingContext2D & { strokeStyles: string[]; arcs: number[][]; dashes: number[][]; fillTexts: string[] };
 }
 
 function fakeCanvas(clientWidth = 0, clientHeight = 0): HTMLCanvasElement {
@@ -106,10 +108,9 @@ const frame: EngagementFrame = {
 };
 
 const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
-const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
-  renderer.draw(snapshot, frame, hit, turret, []);
+  renderer.draw(snapshot, frame, turret, []);
   return (canvas.getContext("2d") as unknown as { strokeStyles: string[] }).strokeStyles[0];
 }
 
@@ -126,7 +127,7 @@ function cameraScaleFor(shipA: ShipState, shipB: ShipState, clientWidth = 1000, 
     shipB,
     commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
   };
-  renderer.draw(testSnapshot, frame, hit, turret, []);
+  renderer.draw(testSnapshot, frame, turret, []);
   return (renderer as unknown as { camera: { scale: number } }).camera.scale;
 }
 
@@ -161,9 +162,24 @@ describe("CanvasRenderer", () => {
   test("draw resizes the canvas buffer to match the displayed size", () => {
     const canvas = fakeCanvas(1000, 400);
     const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-    renderer.draw(snapshot, frame, hit, turret, []);
+    renderer.draw(snapshot, frame, turret, []);
     expect(canvas.width).toBe(1000);
     expect(canvas.height).toBe(400);
+  });
+
+  test("drawReadouts shows common real-time values and no hit or turret data", () => {
+    const canvas = fakeCanvas();
+    const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
+    renderer.draw(snapshot, frame, turret, []);
+    const ctx = canvas.getContext("2d") as unknown as { fillTexts: string[] };
+    const readouts = ctx.fillTexts.filter((t) => t.startsWith("readout."));
+    expect(readouts).toEqual([
+      "readout.time0:00.0",
+      "readout.range5,000 unit.meter",
+      "readout.angular0.0000 rad/s",
+      "readout.transversal0.0 m/s",
+      "readout.radial0.0 m/s",
+    ]);
   });
 
   describe("updateCamera", () => {
@@ -220,7 +236,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const overlay: RangeOverlay = { side: "shipA", kind: "web", radius: 3000 };
-      renderer.draw(snapshot, frame, hit, turret, [overlay]);
+      renderer.draw(snapshot, frame, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const camera = cameraOf(renderer);
       const expected = screenPosition(canvas, renderer, snapshot.shipA.position);
@@ -233,7 +249,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const overlay: RangeOverlay = { side: "shipA", kind: "grappler", radius: 1000, falloffRadius: 8000 };
-      renderer.draw(snapshot, frame, hit, turret, [overlay]);
+      renderer.draw(snapshot, frame, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][]; dashes: number[][] };
       const camera = cameraOf(renderer);
       const radii = new Set(ctx.arcs.map((a) => a[2]));
@@ -246,7 +262,7 @@ describe("CanvasRenderer", () => {
     test("skips overlay arcs when the overlay list is empty", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
-      renderer.draw(snapshot, frame, hit, turret, []);
+      renderer.draw(snapshot, frame, turret, []);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const arcsBeforeOverlays = 2;
       expect(ctx.arcs.length).toBe(arcsBeforeOverlays);
@@ -256,7 +272,7 @@ describe("CanvasRenderer", () => {
       const canvas = fakeCanvas();
       const renderer = new CanvasRenderer({ canvas, i18n: fakeI18n() });
       const bad: RangeOverlay = { side: "shipA", kind: "web", radius: 0 };
-      renderer.draw(snapshot, frame, hit, turret, [bad]);
+      renderer.draw(snapshot, frame, turret, [bad]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       expect(ctx.arcs.every((a) => a[2] !== 0)).toBe(true);
     });
@@ -268,7 +284,7 @@ describe("CanvasRenderer", () => {
       const shipBPos = new Vec2(1000, 0);
       const testSnapshot = { ...snapshot, shipA: { ...ship, position: shipAPos }, shipB: { ...ship, position: shipBPos } };
       const overlay: RangeOverlay = { side: "shipB", kind: "scrambler", radius: 3000 };
-      renderer.draw(testSnapshot, frame, hit, turret, [overlay]);
+      renderer.draw(testSnapshot, frame, turret, [overlay]);
       const ctx = canvas.getContext("2d") as unknown as { arcs: number[][] };
       const expected = screenPosition(canvas, renderer, shipBPos);
       const expectedRadius = overlay.radius * cameraOf(renderer).scale;

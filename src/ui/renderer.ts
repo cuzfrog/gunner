@@ -1,4 +1,4 @@
-import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import { Vec2, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
 
@@ -15,7 +15,7 @@ export interface Renderer {
   setGridBrightness(brightness: number): void;
   setRangeRingsEnabled(enabled: boolean): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
 }
 
 const COLORS = {
@@ -91,7 +91,7 @@ export class CanvasRenderer implements Renderer {
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
     this.syncBufferSize();
     this.updateCamera(snapshot, turret);
     this.clear();
@@ -108,7 +108,7 @@ export class CanvasRenderer implements Renderer {
     this.drawShip(snapshot.shipB, COLORS.shipB);
     this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
     this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
-    this.drawReadouts(frame, hit, turret);
+    this.drawReadouts(frame);
   }
 
   private updateCamera(snapshot: SimSnapshot, turret: TurretSpec): void {
@@ -304,16 +304,13 @@ export class CanvasRenderer implements Renderer {
     this.drawTextAt(p.x, p.y + dy, `${formatWithCommas(speed)} m/s`, color, true, 11);
   }
 
-  private drawReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
+  private drawReadouts(frame: EngagementFrame): void {
     const lines = [
       `${this.i18n.t("readout.time")}${formatTime(frame.time)}`,
       `${this.i18n.t("readout.range")}${this.formatDistance(frame.distance)}`,
       `${this.i18n.t("readout.angular")}${formatWithCommas(frame.angularVelocity, 4)} rad/s`,
       `${this.i18n.t("readout.transversal")}${formatWithCommas(frame.transversalSpeed, 1)} m/s`,
       `${this.i18n.t("readout.radial")}${formatWithCommas(frame.radialVelocity, 1)} m/s`,
-      `${this.i18n.t("readout.optimal")}${this.formatDistance(turret.optimal)}`,
-      `${this.i18n.t("readout.falloff")}${turret.falloff > 0 ? this.formatDistance(turret.falloff) : this.i18n.t("readout.none")}`,
-      `${this.i18n.t("readout.hitChance")}${formatWithCommas(hit.chance * 100, 1)}%`,
     ];
 
     this.ctx.textAlign = "left";
