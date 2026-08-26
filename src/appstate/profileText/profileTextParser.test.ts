@@ -125,7 +125,7 @@ simSpeed=4`;
     });
   });
 
-  test("rejects a garbage numeric hull id in profile text", () => {
+  test("degrades a garbage shipA hull id while keeping the rest of the profile", () => {
     const text = `# gunner v1
 version=11
 tracking=0.32
@@ -146,12 +146,64 @@ shipB.mass=10000000
 shipB.inertia=0.45
 shipB.sig=40
 simSpeed=4`;
-    expect(parser.parse(text)).toBeUndefined();
+    expect(parser.parse(text)).toEqual(MINIMAL_PROFILE);
   });
 
-  test("rejects an invalid propulsion id in profile text", () => {
+  test("degrades a garbage shipA hull id while keeping shipB hull", () => {
+    const text = `# gunner v1
+version=11
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+shipA.hull=999999999
+shipB.hull=16242
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+initialDistance=5000
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+simSpeed=4`;
+    expect(parser.parse(text)).toEqual({
+      ...MINIMAL_PROFILE,
+      shipBHullId: "16242" as ShipId,
+    });
+  });
+
+  test("degrades an invalid propulsion id in profile text", () => {
     const text = `${serializer.serialize(MINIMAL_PROFILE)}
 shipA.propulsion=ab-5mn`;
+    expect(parser.parse(text)).toEqual(MINIMAL_PROFILE);
+  });
+
+  test("rejects a structurally invalid numeric field even when a hull is resolvable", () => {
+    const text = `# gunner v1
+version=11
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+shipA.hull=Rifter
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+initialDistance=abc
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+simSpeed=4`;
     expect(parser.parse(text)).toBeUndefined();
   });
 

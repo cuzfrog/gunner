@@ -4,10 +4,17 @@ import type { ChargeCatalog } from "../../fitting";
 import type { SettingGuards } from "../settingGuards";
 import type { Ships } from "../../ships";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
-import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey } from "./profileTextFields";
+import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey, type ScalarField } from "./profileTextFields";
 import { normalizeProfileTextDotKey } from "./profileTextCompat";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
+
+const DEGRADABLE_FIELDS: ReadonlySet<ScalarField> = new Set([
+  "shipAHullId",
+  "shipBHullId",
+  "shipAPropulsion",
+  "shipBPropulsion",
+]);
 
 export class ProfileTextParser {
   private readonly guards: SettingGuards;
@@ -93,7 +100,10 @@ export class ProfileTextParser {
         continue;
       }
       const parsed = parseScalarValue(field, value, this.guards, this.ships, this.chargeCatalog);
-      if (parsed === undefined) return undefined;
+      if (parsed === undefined) {
+        if (DEGRADABLE_FIELDS.has(field)) continue;
+        return undefined;
+      }
       raw = { ...raw, [field]: parsed };
     }
 
