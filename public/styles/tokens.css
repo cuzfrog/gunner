@@ -31,6 +31,7 @@
   --warn-yellow-65: rgba(252, 228, 71, 0.65);
   --warn-yellow-85: rgba(252, 228, 71, 0.85);
   --shadow-color: rgba(0, 0, 0, 0.45);
+  --gap-field: 8px;
   --z-canvas-overlay: 5;
   --z-popup: 30;
   --canvas-overlay-inset: 24px;

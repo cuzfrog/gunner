@@ -9,10 +9,7 @@
   letter-spacing: 0.05em;
 }
 
-.ewar-group {
-  position: relative;
-  margin-bottom: 6px;
-}
+.ewar-group { position: relative; }
 
 .ewar-popup { width: 100%; }
 

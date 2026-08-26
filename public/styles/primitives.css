@@ -245,27 +245,18 @@ select.input-field:disabled {
 
 .form-field { display: block; }
 
-.form-field-group { margin-bottom: 6px; }
+.form-slider-field { display: block; }
 
 .form-field-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr));
-  gap: 8px;
+  gap: var(--gap-field);
   align-items: end;
 }
 
 .form-field-row > .form-field, .form-field-row > .form-field-group { min-width: 0; }
 
-.form-slider-field { margin-bottom: 6px; }
-
 .form-slider-label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.form-field-label-row {
   display: flex;
   align-items: center;
   gap: 6px;

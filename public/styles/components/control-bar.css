@@ -25,11 +25,7 @@
 
 .control-bar-zoom .form-slider-value { min-width: 5ch; }
 
-.control-bar-initial-distance .form-field-label-row {
-  margin-bottom: 0;
-}
-
-.control-bar-initial-distance .form-field-label-row .field-label {
+.control-bar-initial-distance .field-label {
   margin-bottom: 0;
 }
 

@@ -1,21 +1,9 @@
 @layer components {
 .result-grid {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: start;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
   margin: 10px 0;
-}
-
-.result-column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.result-column.result-column-ship-a,
-.result-column.result-column-ship-b {
-  min-width: 0;
 }
 
 .result-card {

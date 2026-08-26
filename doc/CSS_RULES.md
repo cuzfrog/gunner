@@ -48,7 +48,7 @@ Current base classes:
 - `input-field`
 - `field-label`
 - `form-field`, `form-field-group`, `form-field-row`
-- `form-slider`, `form-slider-field`, `form-slider-label-row`, `form-field-label-row`, `form-slider-value`
+- `form-slider`, `form-slider-field`, `form-slider-label-row`, `form-slider-value`
 - `input-with-unit`, `input-suffix`
 - `effective-value`
 - `segmented-control`, `choice-selector`

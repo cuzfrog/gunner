@@ -116,43 +116,39 @@
     </section>
 
     <section class="result-grid">
-      <div class="result-column result-column-ship-a">
-        <div class="result-card result-card-ship-a">
-          <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
-          <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
-          <span class="result-card-value mono" id="res-track-pen-a">0%</span>
-        </div>
-        <div class="result-card result-card-ship-a">
-          <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
-          <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
-          <span class="result-card-value mono" id="res-range-pen-a">0%</span>
-        </div>
-        <div class="result-card result-card-hit-chance result-card-ship-a">
-          <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
-          <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
-          <span class="result-card-value mono" id="res-hit-a">0%</span>
-        </div>
-      </div>
-      <div class="result-card result-card-distance">
+      <div class="result-card">
         <span class="result-card-label" data-i18n="result.distance">Distance</span>
         <span class="result-card-value mono" id="res-distance">0 m</span>
       </div>
-      <div class="result-column result-column-ship-b">
-        <div class="result-card result-card-ship-b">
-          <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
-          <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
-          <span class="result-card-value mono" id="res-track-pen-b">0%</span>
-        </div>
-        <div class="result-card result-card-ship-b">
-          <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
-          <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
-          <span class="result-card-value mono" id="res-range-pen-b">0%</span>
-        </div>
-        <div class="result-card result-card-hit-chance result-card-ship-b">
-          <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
-          <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
-          <span class="result-card-value mono" id="res-hit-b">0%</span>
-        </div>
+      <div class="result-card result-card-ship-a">
+        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
+        <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
+        <span class="result-card-value mono" id="res-track-pen-a">0%</span>
+      </div>
+      <div class="result-card result-card-ship-b">
+        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
+        <span class="result-card-label" data-i18n="result.trackingPenalty">Tracking penalty</span>
+        <span class="result-card-value mono" id="res-track-pen-b">0%</span>
+      </div>
+      <div class="result-card result-card-ship-a">
+        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
+        <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
+        <span class="result-card-value mono" id="res-range-pen-a">0%</span>
+      </div>
+      <div class="result-card result-card-ship-b">
+        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
+        <span class="result-card-label" data-i18n="result.rangePenalty">Range penalty</span>
+        <span class="result-card-value mono" id="res-range-pen-b">0%</span>
+      </div>
+      <div class="result-card result-card-hit-chance result-card-ship-a">
+        <span class="result-card-side" data-i18n="label.shipA">Ship A</span>
+        <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
+        <span class="result-card-value mono" id="res-hit-a">0%</span>
+      </div>
+      <div class="result-card result-card-hit-chance result-card-ship-b">
+        <span class="result-card-side" data-i18n="label.shipB">Ship B</span>
+        <span class="result-card-label" data-i18n="result.hitChance">Hit chance</span>
+        <span class="result-card-value mono" id="res-hit-b">0%</span>
       </div>
     </section>
 
@@ -421,14 +417,7 @@
           </div>
 
           <div class="control-bar-field control-bar-initial-distance">
-            <span class="form-field-label-row">
-              <label for="initial-distance" class="field-label truncate" data-i18n="label.initialDistance">Initial distance</label>
-              <button type="button" class="info-hint"
-                      data-i18n-title="hint.initialDistance"
-                      data-i18n-aria-label="hint.initialDistance"
-                      title="Changes apply on reset."
-                      aria-label="About initial distance">?</button>
-            </span>
+            <label for="initial-distance" class="field-label truncate" data-i18n="label.initialDistance">Initial distance</label>
             <span class="input-with-unit">
               <input type="number" class="input-field" id="initial-distance" value="20000" step="any" min="1">
               <span class="input-suffix mono" aria-hidden="true">m</span>

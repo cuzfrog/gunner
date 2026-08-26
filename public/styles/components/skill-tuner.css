@@ -1,8 +1,5 @@
 @layer components {
-.skill-section {
-  margin-top: auto;
-  margin-bottom: 0;
-}
+.skill-section { margin-top: auto; }
 
 .skill-select { position: relative; }
 

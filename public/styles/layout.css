@@ -28,11 +28,6 @@
     border-radius: 2px;
   }
 
-  .result-column,
-  .result-card-distance {
-    flex: 0 0 auto;
-  }
-
   .result-card {
     flex: 0 0 auto;
     min-width: 80px;

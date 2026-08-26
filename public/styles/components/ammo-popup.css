@@ -9,10 +9,7 @@
   letter-spacing: 0.05em;
 }
 
-.ammo-group {
-  position: relative;
-  margin-bottom: 6px;
-}
+.ammo-group { position: relative; }
 
 .ammo-summary-row {
   display: flex;
