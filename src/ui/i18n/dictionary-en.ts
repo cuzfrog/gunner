@@ -84,7 +84,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.author": { en: "Author:" },
   "label.corp": { en: "Corp:" },
   "select.profile": { en: "Select profile..." },
-  "button.selectFitting": { en: "Select fitting" },
+  "button.selectShip": { en: "Select ship & fitting" },
   "button.fittingDetails": { en: "Show fitting details" },
   "button.selectAmmo": { en: "Select ammunition" },
   "label.ammo": { en: "Ammo" },

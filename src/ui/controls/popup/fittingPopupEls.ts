@@ -7,5 +7,4 @@ export interface FittingPopupEls {
   readonly savedLabel: HTMLElement;
   readonly presetLabel: HTMLElement;
   readonly empty: HTMLElement;
-  readonly shipImage: HTMLImageElement;
 }

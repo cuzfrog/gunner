@@ -81,7 +81,7 @@ export class SidePanelImpl implements SidePanel {
     this.timer = timer;
     this.overrides = overrides;
     this.turretLink = turretLink;
-    const hull = new HullSection({ panel: this, els, ships, i18n, imageCatalog });
+    const hull = new HullSection({ panel: this, els, ships, i18n });
     const nav = new NavSection({ panel: this, els });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
     const skill = new SkillOverloadSection({ panel: this, els, i18n, popupGroup });

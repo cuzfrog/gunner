@@ -83,7 +83,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.author": { ja: "作者：" },
   "label.corp": { ja: "コーポ：" },
   "select.profile": { ja: "プロファイルを選択..." },
-  "button.selectFitting": { ja: "フィッティングを選択" },
+  "button.selectShip": { ja: "艦船とフィッティングを選択" },
   "button.fittingDetails": { ja: "フィッティング詳細を表示" },
   "button.selectAmmo": { ja: "弾薬を選択" },
   "label.ammo": { ja: "弾薬" },

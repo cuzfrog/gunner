@@ -1,6 +1,5 @@
 import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import { HullSection, type HullSectionEls } from "./hullSection";
 import type { Popup } from "../popup";
@@ -23,14 +22,6 @@ function mockI18n(): I18n {
   });
 }
 
-function mockImageCatalog(): ImageCatalog {
-  return vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn(() => "ship.png"),
-    itemIconUrl: vi.fn(),
-    droneIconUrl: vi.fn(),
-  });
-}
-
 function buildHullSection(ships: Ships = shipsWithHull()) {
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
@@ -38,7 +29,6 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
 
   const els: HullSectionEls = {
     hull: getFake(document, "ship-a-hull") as unknown as HTMLInputElement,
-    shipImage: getFake(document, "ship-a-ship-image") as unknown as HTMLImageElement,
     hullHint: getFake(document, "ship-a-hull-hint") as unknown as HTMLElement,
   };
 
@@ -130,8 +120,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
   } as unknown as SidePanel);
 
   const i18n = mockI18n();
-  const imageCatalog = mockImageCatalog();
-  const section = new HullSection({ panel, els, ships, i18n, imageCatalog });
+  const section = new HullSection({ panel, els, ships, i18n });
   return { document, panel, section, host };
 }
 
@@ -161,13 +150,12 @@ describe("HullSection", () => {
     expect(getFake(document, "ship-a-hull").classList.toggle).toHaveBeenCalledWith("hull-invalid", true);
   });
 
-  test("clearHull resets the hull and image", () => {
+  test("clearHull resets the hull", () => {
     const { document, panel, section } = buildHullSection();
     section.applyProfile(RIFTER, false);
     section.clearHull(true, true);
     expect(panel.profile).toBeUndefined();
     expect(getFake(document, "ship-a-hull").value).toBe("");
-    expect(getFake(document, "ship-a-ship-image").hidden).toBe(true);
   });
 
   test("applyHull enables the ship configuration controls and forwards the hull profile to the turret", () => {

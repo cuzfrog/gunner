@@ -96,15 +96,14 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
   } as unknown as FittingPreviewManager;
 
   const els: FittingPopupEls = {
-    trigger: getFake(document, "ship-a-fitting-trigger") as unknown as HTMLButtonElement,
+    trigger: getFake(document, "ship-a-ship-select-trigger") as unknown as HTMLButtonElement,
     eye: getFake(document, "ship-a-fitting-eye") as unknown as HTMLButtonElement,
-    popup: getFake(document, "ship-a-fitting-popup") as unknown as HTMLElement,
+    popup: getFake(document, "ship-a-ship-select-popup") as unknown as HTMLElement,
     savedList: getFake(document, "ship-a-fitting-saved-list") as unknown as HTMLElement,
     presetList: getFake(document, "ship-a-fitting-preset-list") as unknown as HTMLElement,
     savedLabel: getFake(document, "ship-a-fitting-saved-label") as unknown as HTMLElement,
     presetLabel: getFake(document, "ship-a-fitting-preset-label") as unknown as HTMLElement,
     empty: getFake(document, "ship-a-fitting-empty") as unknown as HTMLElement,
-    shipImage: getFake(document, "ship-a-ship-image") as unknown as HTMLImageElement,
   };
 
   const controller = new FittingPopupControllerImpl({

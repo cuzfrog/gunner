@@ -1,8 +1,6 @@
 @layer components {
 .fitting-eye[aria-pressed="true"] { color: var(--accent-teal); }
 
-.fitting-popup { width: 100%; }
-
 .fitting-group-label {
   display: block;
   font-family: "Chakra Petch", sans-serif;

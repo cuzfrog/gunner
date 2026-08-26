@@ -26,7 +26,6 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly shipASide: FittingPopupHost;
   private readonly shipBSide: FittingPopupHost;
   private readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
-  private readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   private readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
   private openPreviewSide: Side | null = null;
   private currentPreviewAnchor?: HTMLElement;
@@ -41,7 +40,6 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     shipASide: FittingPopupHost;
     shipBSide: FittingPopupHost;
     previewsBySide: Readonly<Record<Side, FittingPreview>>;
-    shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
     events: UiEvents;
   }) {
@@ -51,7 +49,6 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     this.shipASide = deps.shipASide;
     this.shipBSide = deps.shipBSide;
     this.previewsBySide = deps.previewsBySide;
-    this.shipImageBySide = deps.shipImageBySide;
     this.eyeBySide = deps.eyeBySide;
     deps.events.onLanguageChanged(() => this.refresh());
   }
@@ -59,7 +56,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   toggle(side: Side): void {
     const text = this.fittingTextOf(side);
     if (!text) return;
-    this.show(side, text, this.shipImageBySide[side], this.eyeBySide[side], false);
+    this.show(side, text, this.eyeBySide[side], this.eyeBySide[side], false);
   }
 
   showInMenu(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement): void {

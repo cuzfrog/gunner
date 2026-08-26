@@ -10,7 +10,6 @@ import type {
   StatConditions,
 } from "../../../ships";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
 import type { Popup } from "../popup";
 import type { INavSection } from "./navSection";
@@ -23,8 +22,6 @@ export interface IHullSection {
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void;
   clearHull(resetInput: boolean, persist: boolean): void;
   clearFittedHull(): void;
-  updateShipImage(): void;
-  clearShipImage(): void;
   setHullValidation(isInvalid: boolean): void;
   updateHullHint(module?: PropulsionModule): void;
   refreshHullInputs(): void;

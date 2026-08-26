@@ -1,18 +1,4 @@
 @layer components {
-.hull-field { display: block; }
-
-.hull-input-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-}
-
-.hull-input-row > .input-field {
-  flex: 1;
-  min-width: 0;
-}
-
 .hull-ship-image {
   display: block;
   width: 28px;
@@ -43,11 +29,4 @@
 }
 
 .hull-fitting-name.is-error, .hull-fitting-name.is-error .hull-fitting-name-value { color: var(--danger-red); }
-
-.hull-hint {
-  display: block;
-  font-size: 10px;
-  color: var(--text-dim);
-  min-height: 14px;
-}
 }

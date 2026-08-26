@@ -22,6 +22,7 @@ const STYLES_MANIFEST = [
   "styles/components/control-bar.css",
   "styles/components/side-panel.css",
   "styles/components/hull-fields.css",
+  "styles/components/ship-select-popup.css",
   "styles/components/tracking-unit.css",
   "styles/components/skill-tuner.css",
   "styles/components/ammo-popup.css",

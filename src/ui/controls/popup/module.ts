@@ -22,7 +22,6 @@ export function registerPopupModule<T extends ControlsCradle>(cradle: AwilixCont
       shipASide: proxy.shipASide,
       shipBSide: proxy.shipBSide,
       previewsBySide: { shipA: proxy.shipAFittingPreview, shipB: proxy.shipBFittingPreview },
-      shipImageBySide: { shipA: proxy.els.shipA.shipImage, shipB: proxy.els.shipB.shipImage },
       eyeBySide: { shipA: proxy.els.shipA.fittingEye, shipB: proxy.els.shipB.fittingEye },
       events: proxy.uiEvents,
     })).singleton(),
@@ -61,14 +60,13 @@ function popupDeps<T extends ControlsCradle>(proxy: T, side: Side) {
 function collectFittingPopupEls(els: ControlsElements, side: Side): FittingPopupEls {
   const combatant = els[side];
   return {
-    trigger: combatant.fittingTrigger,
+    trigger: combatant.shipSelectTrigger,
     eye: combatant.fittingEye,
-    popup: combatant.fittingPopup,
+    popup: combatant.shipSelectPopup,
     savedList: combatant.fittingSavedList,
     presetList: combatant.fittingPresetList,
     savedLabel: combatant.fittingSavedLabel,
     presetLabel: combatant.fittingPresetLabel,
     empty: combatant.fittingEmpty,
-    shipImage: combatant.shipImage,
   };
 }

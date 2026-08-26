@@ -1,7 +1,6 @@
 import type { ImportedFitting } from "../../../fitting";
 import type { ShipProfile, PropulsionModule, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, PropulsionSelection } from "../../../appstate";
 import { setText } from "../controlsDom";
 import type { Side } from "../side";
@@ -10,7 +9,6 @@ import type { IHullSection } from "./sidePanelSections";
 
 export interface HullSectionEls {
   readonly hull: HTMLInputElement;
-  readonly shipImage: HTMLImageElement;
   readonly hullHint: HTMLElement;
 }
 
@@ -19,16 +17,14 @@ export class HullSection implements IHullSection {
   private readonly els: HullSectionEls;
   private readonly ships: Ships;
   private readonly i18n: I18n;
-  private readonly imageCatalog: ImageCatalog;
 
   constructor({
-    panel, els, ships, i18n, imageCatalog,
-  }: { panel: SidePanel; els: HullSectionEls; ships: Ships; i18n: I18n; imageCatalog: ImageCatalog }) {
+    panel, els, ships, i18n,
+  }: { panel: SidePanel; els: HullSectionEls; ships: Ships; i18n: I18n }) {
     this.panel = panel;
     this.els = els;
     this.ships = ships;
     this.i18n = i18n;
-    this.imageCatalog = imageCatalog;
     this.els.hull.addEventListener("input", () => this.onHullInput());
     this.els.hull.addEventListener("change", () => this.onHullChange());
   }
@@ -83,7 +79,6 @@ export class HullSection implements IHullSection {
   applyHull(profile: ShipProfile, propulsionId?: PropulsionSelection, persist = false, updateStats = true): void {
     this.panel.profile = profile;
     this.els.hull.value = this.ships.hullView(profile, this.i18n.current()).name;
-    this.updateShipImage();
     this.setHullValidation(false);
     this.panel.setFittingTriggerEnabled(true);
     this.panel.setConfigInputsEnabled(true);
@@ -116,7 +111,6 @@ export class HullSection implements IHullSection {
     this.panel.profile = undefined;
     this.clearFittedHull();
     this.panel.hideFittingPreview();
-    this.clearShipImage();
     this.panel.lastCommittedHull = undefined;
     if (resetInput) this.els.hull.value = "";
     this.panel.setFittingTriggerEnabled(false);
@@ -135,21 +129,6 @@ export class HullSection implements IHullSection {
     this.panel.clearTurret();
     this.panel.hideFittingPreview();
     this.panel.sections.paste.clearImportHint();
-  }
-
-  updateShipImage(): void {
-    if (this.panel.profile) {
-      this.els.shipImage.src = this.imageCatalog.shipImageUrl(this.panel.profile.name);
-      this.els.shipImage.hidden = false;
-    } else {
-      this.els.shipImage.hidden = true;
-      this.els.shipImage.src = "";
-    }
-  }
-
-  clearShipImage(): void {
-    this.els.shipImage.hidden = true;
-    this.els.shipImage.src = "";
   }
 
   setHullValidation(isInvalid: boolean): void {

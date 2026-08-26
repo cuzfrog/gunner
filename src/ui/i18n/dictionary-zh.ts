@@ -84,7 +84,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.author": { zh: "作者：" },
   "label.corp": { zh: "公司：" },
   "select.profile": { zh: "选择配置..." },
-  "button.selectFitting": { zh: "选择装配" },
+  "button.selectShip": { zh: "选择舰船与装配" },
   "button.fittingDetails": { zh: "显示装配详情" },
   "button.selectAmmo": { zh: "选择弹药" },
   "label.ammo": { zh: "弹药" },

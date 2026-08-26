@@ -5,7 +5,6 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export interface SidePanelElements {
   readonly hull: HTMLInputElement;
-  readonly shipImage: HTMLImageElement;
   readonly fittingName: HTMLElement;
   readonly hullHint: HTMLElement;
   readonly speed: HTMLInputElement;
@@ -38,7 +37,6 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
   const combatant = els[side];
   return {
     hull: combatant.hull,
-    shipImage: combatant.shipImage,
     fittingName: combatant.fittingName,
     hullHint: combatant.hullHint,
     speed: combatant.speed,

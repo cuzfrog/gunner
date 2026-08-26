@@ -31,7 +31,6 @@ function createManager(options: {
   const preview = options.preview ?? createPreview();
   const shipAPreview = preview;
   const shipBPreview = createPreview();
-  const shipImage = new FakeElement();
   const eye = new FakeElement();
   eye.tagName = "BUTTON";
   const events = new UiEventsImpl();
@@ -65,12 +64,10 @@ function createManager(options: {
       shipASide,
       shipBSide,
       previewsBySide: { shipA: shipAPreview, shipB: shipBPreview } as const,
-      shipImageBySide: { shipA: shipImage as unknown as HTMLImageElement, shipB: shipImage as unknown as HTMLImageElement } as const,
       eyeBySide: { shipA: eye as unknown as HTMLButtonElement, shipB: eye as unknown as HTMLButtonElement } as const,
       events,
     }),
     preview,
-    shipImage,
     eye,
   };
 }
@@ -86,7 +83,7 @@ describe("FittingPreviewManager", () => {
     globalThis.Element = undefined as unknown as typeof Element;
   });
 
-  test("toggle shows the current fitting at the ship image and hides on second toggle", () => {
+  test("toggle shows the current fitting at the eye and hides on second toggle", () => {
     const { manager, preview } = createManager();
     manager.toggle("shipA");
     expect(preview.show).toHaveBeenCalled();
@@ -112,7 +109,7 @@ describe("FittingPreviewManager", () => {
     expect(eye.getAttribute("aria-pressed")).toBe("false");
   });
 
-  test("menu eye is unpressed when the ship image eye is toggled", () => {
+  test("menu eye is unpressed when the eye button is toggled", () => {
     const { manager, eye } = createManager();
     const menuEye = new FakeElement();
     menuEye.tagName = "BUTTON";
@@ -131,10 +128,10 @@ describe("FittingPreviewManager", () => {
   });
 
   test("pointerdown inside the fitting area keeps the preview", () => {
-    const { manager, preview, shipImage } = createManager();
+    const { manager, preview, eye } = createManager();
     manager.toggle("shipA");
     const inside = new FakeElement();
-    inside.closest = () => shipImage;
+    inside.closest = () => eye;
     manager.handlePointerDown(inside as unknown as EventTarget);
     expect(preview.hide).not.toHaveBeenCalled();
   });
@@ -155,9 +152,9 @@ describe("FittingPreviewManager", () => {
   });
 
   test("refresh hides the preview when the anchor is no longer connected", () => {
-    const { manager, preview, shipImage } = createManager();
+    const { manager, preview, eye } = createManager();
     manager.toggle("shipA");
-    shipImage.isConnected = false;
+    eye.isConnected = false;
     manager.refresh();
     expect(preview.hide).toHaveBeenCalled();
   });

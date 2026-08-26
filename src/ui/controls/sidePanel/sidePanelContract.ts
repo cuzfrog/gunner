@@ -19,7 +19,6 @@ export interface SidePanel {
   readonly els: SidePanelElements;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
-  readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly timer: Timer;
   readonly sections: ISidePanelSections;

@@ -1,0 +1,22 @@
+@layer components {
+.ship-select-popup {
+  width: 100%;
+}
+
+.ship-select-popup > .ship-select-hull {
+  margin-bottom: 4px;
+}
+
+.ship-select-popup > .ship-select-hint {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  min-height: 14px;
+  margin-top: 4px;
+}
+
+.side-panel-heading-actions .ship-select-popup {
+  left: 0;
+  right: 0;
+}
+}

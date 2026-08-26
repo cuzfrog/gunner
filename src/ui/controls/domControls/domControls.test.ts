@@ -288,7 +288,7 @@ describe("DomControls", () => {
     const { document, controls } = buildDomControls({ savedFittings, fittingImport, ships });
     controls["shipASide"].profile = RIFTER;
     controls["shipBSide"].profile = RIFTER;
-    getFake(document, "ship-b-fitting-trigger").trigger("click");
+    getFake(document, "ship-b-ship-select-trigger").trigger("click");
     const item = getFake(document, "ship-b-fitting-saved-list").children[0].children[0] as unknown as FakeElement;
     item.trigger("click");
     expect(controls["shipBSide"].fittingText).toBe(SAVED_RIFTER.text);

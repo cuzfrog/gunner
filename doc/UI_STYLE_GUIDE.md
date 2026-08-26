@@ -99,7 +99,7 @@ Variants:
 
 - Toggle group buttons (`.lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
 - Primary action (`.controls button.primary`): blue border/text.
-- Icon-only buttons (`.fitting-trigger`, `.import-fitting-button`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
+- Icon-only buttons (`.ship-select-trigger`, `.import-fitting-button`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
 - Danger affordance (`.fitting-delete`): dim -> red on hover.
 
 State rules: hover swaps border/text to teal unless the control uses an orange active state (then hover stays teal, active is orange). Disabled = `opacity` + `cursor: not-allowed` (or `pointer-events: none` for groups).
@@ -112,7 +112,7 @@ Validation: `.hull-invalid` / `.error` classes apply `--danger-red`. The `.effec
 
 ### Popups
 
-Anchored dropdowns (`.fitting-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.import-side-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
+Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.import-side-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
 
 List entries: transparent-bg buttons, hover fills `var(--bg-inset)`, selected entry gets `border-left: 2px solid var(--accent-teal)` + teal text. Group labels (`.fitting-group-label`) are 10px uppercase Chakra Petch.
 

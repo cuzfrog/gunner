@@ -48,10 +48,9 @@ export function fittingAreaSelector(side: "shipA" | "shipB"): string {
   const id = sideId(side);
   return [
     `#${id}-hull`,
-    `#${id}-ship-image`,
-    `#${id}-fitting-trigger`,
+    `#${id}-ship-select-trigger`,
+    `#${id}-ship-select-popup`,
     `#${id}-fitting-eye`,
-    `#${id}-fitting-popup`,
     `#${id}-fitting-preview`,
   ].join(", ");
 }
