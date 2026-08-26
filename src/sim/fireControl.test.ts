@@ -2,9 +2,8 @@ import { Vec2 } from "./vec2";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
-import type { Kinematics } from "./kinematics";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "./types";
+import type { EngagementFrame, HitChanceBreakdown, ShipState, TurretSpec } from "./types";
 
 const turret: TurretSpec = { tracking: 0.1, sigResolution: 40, optimal: 5000, falloff: 5000 };
 const boostedTurret: TurretSpec = { tracking: 0.11, sigResolution: 40, optimal: 5500, falloff: 5000 };
@@ -52,16 +51,12 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
-
 function makeEvaluator(): {
-  kinematics: Kinematics;
   hitChance: HitChance;
   ewarResolver: EwarResolver;
   turretBoosterResolver: TurretBoosterResolver;
   evaluator: EngagementEvaluatorImpl;
 } {
-  const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
   const ewarResolver = vi.mocked<EwarResolver>({
     speedMultiplier: vi.fn(() => 1),
@@ -75,27 +70,25 @@ function makeEvaluator(): {
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
-  const evaluator = new EngagementEvaluatorImpl({ kinematics, hitChance, ewarResolver, turretBoosterResolver });
-  return { kinematics, hitChance, ewarResolver, turretBoosterResolver, evaluator };
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver });
+  return { hitChance, ewarResolver, turretBoosterResolver, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {
   test("evaluates shipA attack using shipB ewar", () => {
-    const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { shipA: { turret, shipBSigRadius: 40 } });
+    const { hitChance, ewarResolver, evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipA: { turret, targetSigRadius: 40 } });
     expect(result.shipA).toEqual({ boostedTurret, effectiveTurret, hit });
     expect(result.shipB).toBeUndefined();
-    expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipB.ewar, 6000);
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 40);
   });
 
   test("evaluates shipB attack using shipA ewar", () => {
-    const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { shipB: { turret, shipBSigRadius: 30 } });
+    const { hitChance, ewarResolver, evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, { shipB: { turret, targetSigRadius: 30 } });
     expect(result.shipB).toEqual({ boostedTurret, effectiveTurret, hit });
     expect(result.shipA).toBeUndefined();
-    expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipB, shipA, 1);
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipA.ewar, 6000);
     expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 30);
   });
@@ -105,8 +98,8 @@ describe("EngagementEvaluatorImpl", () => {
     const boosted: TurretSpec = { tracking: 0.12, sigResolution: 40, optimal: 5500, falloff: 5500 };
     vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
     const shipAWithBoosts = { ...shipA, boosts: { loadout: { computers: [], scripts: [] } } };
-    const snapshotWithBoosts = { ...snapshot, shipA: shipAWithBoosts };
-    const result = evaluator.evaluate(snapshotWithBoosts, { shipA: { turret, shipBSigRadius: 40 } });
+    const frameWithBoosts = { ...frame, shipA: shipAWithBoosts };
+    const result = evaluator.evaluate(frameWithBoosts, { shipA: { turret, targetSigRadius: 40 } });
     expect(result.shipA?.boostedTurret).toEqual(boosted);
     expect(result.shipA?.effectiveTurret).toEqual(effectiveTurret);
     expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, shipAWithBoosts.boosts);
@@ -114,18 +107,17 @@ describe("EngagementEvaluatorImpl", () => {
   });
 
   test("returns empty result when no attacks are requested", () => {
-    const { kinematics, hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, {});
+    const { hitChance, ewarResolver, evaluator } = makeEvaluator();
+    const result = evaluator.evaluate(frame, {});
     expect(result.shipA).toBeUndefined();
     expect(result.shipB).toBeUndefined();
-    expect(kinematics.computeEngagement).not.toHaveBeenCalled();
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
     expect(hitChance.compute).not.toHaveBeenCalled();
   });
 
   test("uses effective turret for renderer and hit for readout", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(snapshot, { shipA: { turret, shipBSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { turret, targetSigRadius: 40 } });
     expect(result.shipA!.effectiveTurret).not.toEqual(turret);
     expect(result.shipA!.hit).toEqual(hit);
   });

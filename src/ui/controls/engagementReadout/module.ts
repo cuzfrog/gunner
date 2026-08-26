@@ -20,8 +20,15 @@ function collectReadoutEls(els: ControlsElements): ReadoutEls {
     resTransversal: els.resTransversal,
     resAngular: els.resAngular,
     resRadial: els.resRadial,
-    resTrackPen: els.resTrackPen,
-    resRangePen: els.resRangePen,
-    resHit: els.resHit,
+    shipA: {
+      resTrackPen: els.resTrackPenA,
+      resRangePen: els.resRangePenA,
+      resHit: els.resHitA,
+    },
+    shipB: {
+      resTrackPen: els.resTrackPenB,
+      resRangePen: els.resRangePenB,
+      resHit: els.resHitB,
+    },
   };
 }

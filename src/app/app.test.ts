@@ -21,14 +21,14 @@ import { AppImpl } from "./app";
 
 const controls = vi.mocked<Controls>({
   getTurret: vi.fn(),
-  getShipBSig: vi.fn(),
+  getSig: vi.fn(),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
   getAutoZoom: vi.fn(),
   getZoomFactor: vi.fn(),
   getOverlays: vi.fn(() => []),
-  hasShipAGuns: vi.fn(),
+  hasGuns: vi.fn(),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
@@ -95,7 +95,23 @@ const config: SimConfig = {
 
 function baseView(): EngagementView {
   const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
-  return { frame, assessment, effectiveTurret: turret, hit };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+}
+
+function sideReadoutValues(
+  speed = 0,
+  tracking = 0.32,
+  optimal = 5000,
+  falloff = 5000,
+  boostedTracking = 0.32,
+  boostedOptimal = 5000,
+  boostedFalloff = 5000,
+  speedBreakdown: SpeedBreakdown | undefined = emptySpeedBreakdown,
+  trackingBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+  optimalBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+  falloffBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+) {
+  return { speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
 }
 
 describe("AppImpl", () => {
@@ -105,10 +121,11 @@ describe("AppImpl", () => {
     simulation.snapshot.mockReturnValue(snapshot);
     engagementFrameComposer.compose.mockReturnValue(baseView());
     controls.getTurret.mockReturnValue(turret);
-    controls.getShipBSig.mockReturnValue(40);
+    controls.getSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
+    controls.hasGuns.mockReturnValue(true);
     ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
     ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
@@ -125,52 +142,47 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turret, shipBSigRadius: 40 });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turrets: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
-      shipASpeed: 0, shipBSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
-      shipASpeedBreakdown: emptySpeedBreakdown, shipBSpeedBreakdown: emptySpeedBreakdown,
-      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    expect(controls.update).toHaveBeenCalledWith(baseView(), {
+      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
     });
   });
 
-  test("renderFrame passes effective attribute values and boosted baselines from view", () => {
+  test("renderFrame passes per-side effective attribute values and boosted baselines from view", () => {
     const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
     const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
     const boostedShipA = { ...ship, maxSpeed: 250 };
     const boostedShipB = { ...ship, id: "shipB" as const, maxSpeed: 120 };
     const boostedSnapshot = { ...snapshot, shipA: boostedShipA, shipB: boostedShipB };
+    const assessment: AttackAssessment = { boostedTurret, effectiveTurret, hit };
     const view: EngagementView = {
       frame,
-      assessment: { boostedTurret, effectiveTurret, hit },
-      effectiveTurret,
-      hit,
+      attacks: { shipA: assessment, shipB: assessment },
+      effectiveTurrets: { shipA: effectiveTurret, shipB: effectiveTurret },
+      hits: { shipA: hit, shipB: hit },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, hit, effectiveTurret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
-      shipASpeed: 250, shipBSpeed: 120, tracking: 0.5, optimal: 6000, falloff: 4000,
-      boostedTracking: 0.45, boostedOptimal: 5800, boostedFalloff: 3800,
-      shipASpeedBreakdown: emptySpeedBreakdown, shipBSpeedBreakdown: emptySpeedBreakdown,
-      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    expect(controls.update).toHaveBeenCalledWith(view, {
+      shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
+      shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
     });
   });
 
   test("falls back to the view's effective turret when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, assessment: undefined, effectiveTurret: turret, hit };
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret, []);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
-      shipASpeed: 0, shipBSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
-      shipASpeedBreakdown: emptySpeedBreakdown, shipBSpeedBreakdown: emptySpeedBreakdown,
-      trackingBreakdown: emptyDisruptionBreakdown, optimalBreakdown: emptyDisruptionBreakdown, falloffBreakdown: emptyDisruptionBreakdown,
+    expect(controls.update).toHaveBeenCalledWith(view, {
+      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
     });
   });
 
@@ -222,7 +234,7 @@ describe("AppImpl", () => {
     expect(loop.setSpeed).toHaveBeenCalledWith(4);
   });
 
-  test("passes ewar breakdowns from the resolver into effective readouts", () => {
+  test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
     const shipAEwar: EwarProjection = {
       loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
@@ -242,22 +254,26 @@ describe("AppImpl", () => {
       effects: [{ family: "scrambler" as const, moduleName: "Warp Scrambler II", multiplier: 1 }],
       propulsionSuppressed: true,
     };
-    const disruption: DisruptionBreakdown = {
+    const disruptionA: DisruptionBreakdown = {
       tracking: [{ moduleName: "Tracking Disruptor II", scriptName: undefined, multiplier: 0.8281 }],
       optimal: [],
       falloff: [],
     };
+    const disruptionB: DisruptionBreakdown = {
+      tracking: [],
+      optimal: [{ moduleName: "Tracking Disruptor II", scriptName: undefined, multiplier: 0.7 }],
+      falloff: [],
+    };
     ewarResolver.speedBreakdown.mockReturnValueOnce(shipASpeed).mockReturnValueOnce(shipBSpeed);
-    ewarResolver.disruptionBreakdown.mockReturnValue(disruption);
+    ewarResolver.disruptionBreakdown.mockReturnValueOnce(disruptionA).mockReturnValueOnce(disruptionB);
     app.start();
     expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
     expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
-    expect(ewarResolver.disruptionBreakdown).toHaveBeenCalledWith(shipBEwar, 5000);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit, {
-      shipASpeed: 0, shipBSpeed: 0, tracking: 0.32, optimal: 5000, falloff: 5000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 5000,
-      shipASpeedBreakdown: shipASpeed, shipBSpeedBreakdown: shipBSpeed,
-      trackingBreakdown: disruption, optimalBreakdown: disruption, falloffBreakdown: disruption,
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
+    expect(controls.update).toHaveBeenCalledWith(baseView(), {
+      shipA: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipASpeed, trackingBreakdown: disruptionA, optimalBreakdown: disruptionA, falloffBreakdown: disruptionA },
+      shipB: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipBSpeed, trackingBreakdown: disruptionB, optimalBreakdown: disruptionB, falloffBreakdown: disruptionB },
     });
   });
 });

@@ -1,8 +1,6 @@
 import {
-  type EngagementFrame,
-  type HitChanceBreakdown,
+  type EngagementView,
   type SimConfig,
-  type TurretSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
@@ -82,7 +80,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly now: () => number;
   private currentDistanceValue: number;
   private lastReadoutApplyMs = -Infinity;
-  private cachedReadouts?: { frame: EngagementFrame; hit: HitChanceBreakdown; effective: EffectiveReadouts };
+  private cachedReadouts?: { view: EngagementView; effective: EffectiveReadouts };
 
   private callbacks?: ControlsCallbacks;
   private playing = false;
@@ -203,26 +201,26 @@ export class DomControls implements Controls, DomControlsHost {
     if (notify) this.callbacks?.onConfigChange();
   }
 
-  getTurret(): TurretSpec { return this.turretControllers.shipA.currentTurretSpec(); }
-  getShipBSig(): number { return this.shipBSide.capture().sig ?? 1; }
+  getTurret(side: Side) { return this.turretControllers[side].currentTurretSpec(); }
+  getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
   getGridBrightness(): number { return this.preferencesController.getGridBrightness(); }
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
-  hasShipAGuns(): boolean { return this.turretControllers.shipA.turret() !== undefined; }
-  update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
-    this.currentDistanceValue = frame.distance;
+  hasGuns(side: Side): boolean { return this.turretControllers[side].turret() !== undefined; }
+  update(view: EngagementView, effective: EffectiveReadouts): void {
+    this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
-    this.cachedReadouts = { frame, hit, effective };
+    this.cachedReadouts = { view, effective };
     this.applyReadoutsIfReady();
     this.rangeOverlayController.update();
     this.portraitsController.update();
   }
   setPlaying(playing: boolean): void {
     if (!playing && this.playing && this.cachedReadouts) {
-      this.applyReadouts(this.cachedReadouts.frame, this.cachedReadouts.hit, this.cachedReadouts.effective);
+      this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
       this.lastReadoutApplyMs = this.now();
     }
     this.playing = playing;
@@ -235,12 +233,12 @@ export class DomControls implements Controls, DomControlsHost {
     const now = this.now();
     if (this.playing && now - this.lastReadoutApplyMs < READOUT_INTERVAL_MS) return;
     if (!this.cachedReadouts) return;
-    this.applyReadouts(this.cachedReadouts.frame, this.cachedReadouts.hit, this.cachedReadouts.effective);
+    this.applyReadouts(this.cachedReadouts.view, this.cachedReadouts.effective);
     this.lastReadoutApplyMs = now;
   }
 
-  private applyReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void {
-    this.engagementReadout.update(frame, hit, (key) => this.deps.i18n.t(key));
+  private applyReadouts(view: EngagementView, effective: EffectiveReadouts): void {
+    this.engagementReadout.update(view, (key) => this.deps.i18n.t(key));
     this.effectiveReadout.update(effective);
   }
 
@@ -262,4 +260,6 @@ export class DomControls implements Controls, DomControlsHost {
   private updatePlayEnabled(): void {
     this.els.play.disabled = this.shipASide.profile === undefined || this.shipBSide.profile === undefined;
   }
+
+  private sideFor(side: Side): SidePanel { return side === "shipA" ? this.shipASide : this.shipBSide; }
 }

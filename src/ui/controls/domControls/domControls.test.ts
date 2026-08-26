@@ -1,6 +1,6 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
-import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown } from "../../../sim";
+import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown, type EngagementView } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -31,6 +31,33 @@ function mockCallbacks() {
     onDisplayChange: vi.fn(),
     onSpeedChange: vi.fn(),
   };
+}
+
+function sideReadoutValues(speed: number, tracking: number, optimal: number, falloff: number, boostedTracking: number, boostedOptimal: number, boostedFalloff: number) {
+  return { speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40 };
+}
+
+function makeView(distance: number): EngagementView {
+  const shipAState = {
+    id: "shipA" as const,
+    position: new Vec2(0, 0),
+    velocity: new Vec2(0, 0),
+    maxSpeed: 0,
+    mass: 1,
+    inertiaModifier: 1,
+    mode: "orbit" as const,
+    desiredRange: 0,
+    aggressivity: 1,
+  };
+  const shipBState = { ...shipAState, id: "shipB" as const };
+  const frame: EngagementFrame = {
+    time: 0, shipA: shipAState, shipB: shipBState,
+    relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
+    radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
+  };
+  const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+  const turret = { tracking: 0, sigResolution: 40, optimal: 0, falloff: 0 };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
 }
 
 function baseSettings(): UserSettings {
@@ -86,10 +113,10 @@ function baseSettings(): UserSettings {
 describe("DomControls", () => {
   test("facade reads turret, shipB sig, speed, grid brightness and config", () => {
     const { document, controls } = buildDomControls();
-    const turret = controls.getTurret();
-    expect(turret.optimal).toBe(1000);
-    expect(turret.falloff).toBe(3000);
-    expect(controls.getShipBSig()).toBe(36);
+    const shipATurret = controls.getTurret("shipA");
+    expect(shipATurret.optimal).toBe(1000);
+    expect(shipATurret.falloff).toBe(3000);
+    expect(controls.getSig("shipB")).toBe(36);
     expect(controls.getSpeed()).toBe(4);
     expect(controls.getGridBrightness()).toBe(0.2);
     const config = controls.getConfig();
@@ -115,11 +142,13 @@ describe("DomControls", () => {
     expect(getFake(document, "play").disabled).toBe(true);
   });
 
-  test("hasShipAGuns reflects whether the shipA has a fitted turret", () => {
+  test("hasGuns reflects whether the ship has a fitted turret on each side", () => {
     const { controls, cradle } = buildDomControls();
-    expect(controls.hasShipAGuns()).toBe(false);
+    expect(controls.hasGuns("shipA")).toBe(false);
+    expect(controls.hasGuns("shipB")).toBe(false);
     cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER);
-    expect(controls.hasShipAGuns()).toBe(true);
+    expect(controls.hasGuns("shipA")).toBe(true);
+    expect(controls.hasGuns("shipB")).toBe(false);
   });
 
   test("callback routing", () => {
@@ -296,26 +325,11 @@ describe("DomControls", () => {
 
   test("update displays effective attributes and highlights affected values", () => {
     const { document, controls } = buildDomControls();
-    const shipAState = {
-      id: "shipA" as const,
-      position: new Vec2(0, 0),
-      velocity: new Vec2(0, 0),
-      maxSpeed: 0,
-      mass: 1,
-      inertiaModifier: 1,
-      mode: "orbit" as const,
-      desiredRange: 0,
-      aggressivity: 1,
-    };
-    const shipBState = { ...shipAState, id: "shipB" as const };
-    const frame: EngagementFrame = {
-      time: 0, shipA: shipAState, shipB: shipBState,
-      relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
-      radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
-    };
-    const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-    const effective = { shipASpeed: 300, shipBSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
-    controls.update(frame, hit, effective);
+    const view = makeView(0);
+    const sideA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 2000, 3000);
+    const sideB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
+    const effective: EffectiveReadouts = { shipA: sideA, shipB: sideB };
+    controls.update(view, effective);
     expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
     expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
@@ -357,35 +371,20 @@ describe("DomControls", () => {
   });
 
   function readoutFixtures() {
-    const shipAState = {
-      id: "shipA" as const,
-      position: new Vec2(0, 0),
-      velocity: new Vec2(0, 0),
-      maxSpeed: 0,
-      mass: 1,
-      inertiaModifier: 1,
-      mode: "orbit" as const,
-      desiredRange: 0,
-      aggressivity: 1,
-    };
-    const shipBState = { ...shipAState, id: "shipB" as const };
-    const frame: EngagementFrame = {
-      time: 0, shipA: shipAState, shipB: shipBState,
-      relPosition: new Vec2(0, 0), distance: 0, relVelocity: new Vec2(0, 0),
-      radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
-    };
-    const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-    const effective: EffectiveReadouts = { shipASpeed: 300, shipBSpeed: 150, tracking: 0.32, optimal: 1000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 2000, boostedFalloff: 3000 };
-    return { frame, hit, effective };
+    const view = makeView(0);
+    const shipA = sideReadoutValues(300, 0.32, 1000, 3000, 0.32, 1000, 3000);
+    const shipB = sideReadoutValues(150, 0.32, 1000, 3000, 0.32, 1000, 3000);
+    const effective: EffectiveReadouts = { shipA, shipB };
+    return { view, effective };
   }
 
   test("readouts update immediately when not playing", () => {
     const { controls, cradle } = buildDomControls({ now: () => 0 });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
-    const { frame, hit, effective } = readoutFixtures();
-    controls.update(frame, hit, effective);
-    controls.update(frame, hit, effective);
+    const { view, effective } = readoutFixtures();
+    controls.update(view, effective);
+    controls.update(view, effective);
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
@@ -395,13 +394,13 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls({ now: () => fakeNow });
     const engagementUpdate = vi.spyOn(cradle.cradle.engagementReadout, "update");
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
-    const { frame, hit, effective } = readoutFixtures();
+    const { view, effective } = readoutFixtures();
     controls.setPlaying(true);
-    controls.update(frame, hit, effective);
+    controls.update(view, effective);
     fakeNow = 10;
-    controls.update(frame, hit, effective);
+    controls.update(view, effective);
     fakeNow = 60;
-    controls.update(frame, hit, effective);
+    controls.update(view, effective);
     expect(engagementUpdate).toHaveBeenCalledTimes(2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);
   });
@@ -410,12 +409,12 @@ describe("DomControls", () => {
     let fakeNow = 0;
     const { controls, cradle } = buildDomControls({ now: () => fakeNow });
     const effectiveUpdate = vi.spyOn(cradle.cradle.effectiveReadout, "update");
-    const { frame, hit, effective } = readoutFixtures();
-    const effective2 = { ...effective, shipBSpeed: 50 };
+    const { view, effective } = readoutFixtures();
+    const effective2: EffectiveReadouts = { ...effective, shipB: { ...effective.shipB, speed: 50 } };
     controls.setPlaying(true);
-    controls.update(frame, hit, effective);
+    controls.update(view, effective);
     fakeNow = 10;
-    controls.update(frame, hit, effective2);
+    controls.update(view, effective2);
     controls.setPlaying(false);
     expect(effectiveUpdate).toHaveBeenLastCalledWith(effective2);
     expect(effectiveUpdate).toHaveBeenCalledTimes(2);

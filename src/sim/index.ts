@@ -29,6 +29,7 @@ export type {
   ScramblerActivation,
   ShipConfig,
   ShipState,
+  Side,
   SigResolutionClass,
   SimConfig,
   SimSnapshot,

@@ -1,18 +1,18 @@
 import type { AttackAssessment, AttackState, EngagementEvaluator } from "./fireControl";
 import type { HitChance } from "./hitChance";
 import type { Kinematics } from "./kinematics";
-import type { EngagementFrame, HitChanceBreakdown, SimSnapshot, TurretSpec } from "./types";
+import type { EngagementFrame, HitChanceBreakdown, Side, SimSnapshot, TurretSpec } from "./types";
 
 export interface EngagementInput {
-  readonly turret: TurretSpec;
-  readonly shipBSigRadius: number;
+  readonly turrets: Record<Side, TurretSpec>;
+  readonly sigRadii: Record<Side, number>;
 }
 
 export interface EngagementView {
   readonly frame: EngagementFrame;
-  readonly assessment: AttackAssessment | undefined;
-  readonly effectiveTurret: TurretSpec;
-  readonly hit: HitChanceBreakdown;
+  readonly attacks: Record<Side, AttackAssessment | undefined>;
+  readonly effectiveTurrets: Record<Side, TurretSpec>;
+  readonly hits: Record<Side, HitChanceBreakdown>;
 }
 
 export interface EngagementFrameComposer {
@@ -36,11 +36,18 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
 
   compose(snapshot: SimSnapshot, input: EngagementInput): EngagementView {
     const frame = this.kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
-    const attack: AttackState = { turret: input.turret, shipBSigRadius: input.shipBSigRadius };
-    const result = this.engagementEvaluator.evaluate(snapshot, { shipA: attack });
-    const assessment = result.shipA;
-    const effectiveTurret = assessment?.effectiveTurret ?? input.turret;
-    const hit = assessment?.hit ?? this.hitChance.compute(frame, input.turret, input.shipBSigRadius);
-    return { frame, assessment, effectiveTurret, hit };
+    const attacks = this.engagementEvaluator.evaluate(frame, {
+      shipA: { turret: input.turrets.shipA, targetSigRadius: input.sigRadii.shipB },
+      shipB: { turret: input.turrets.shipB, targetSigRadius: input.sigRadii.shipA },
+    });
+    const effectiveTurrets: Record<Side, TurretSpec> = {
+      shipA: attacks.shipA?.effectiveTurret ?? input.turrets.shipA,
+      shipB: attacks.shipB?.effectiveTurret ?? input.turrets.shipB,
+    };
+    const hits: Record<Side, HitChanceBreakdown> = {
+      shipA: attacks.shipA?.hit ?? this.hitChance.compute(frame, effectiveTurrets.shipA, input.sigRadii.shipB),
+      shipB: attacks.shipB?.hit ?? this.hitChance.compute(frame, effectiveTurrets.shipB, input.sigRadii.shipA),
+    };
+    return { frame, attacks, effectiveTurrets, hits };
   }
 }

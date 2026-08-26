@@ -1,7 +1,7 @@
 @layer components {
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   gap: 10px;
   margin: 10px 0;
 }
@@ -16,7 +16,10 @@
   padding: 8px 12px;
 }
 
-.result-card.result-card-hit-chance { border-color: var(--accent-teal); }
+.result-card-ship-a { border-left: 2px solid var(--accent-teal); }
+.result-card-ship-b { border-left: 2px solid var(--accent-orange); }
+.result-card-ship-a.result-card-hit-chance { border-color: var(--accent-teal); }
+.result-card-ship-b.result-card-hit-chance { border-color: var(--accent-orange); }
 
 .result-card-label {
   display: block;
@@ -26,6 +29,18 @@
   letter-spacing: 0.05em;
   margin-bottom: 2px;
 }
+
+.result-card-side {
+  display: block;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.result-card-ship-a .result-card-side { color: var(--accent-teal); }
+.result-card-ship-b .result-card-side { color: var(--accent-orange); }
 
 .result-card-value {
   display: block;

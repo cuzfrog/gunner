@@ -1,5 +1,4 @@
 import { asFunction, type AwilixContainer } from "awilix";
-import { SIG_RESOLUTIONS } from "../../../sim";
 import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
 import { TrackingInputImpl } from "../trackingInput";
@@ -22,7 +21,6 @@ export function registerEffectiveReadoutModule<T extends ControlsCradle>(cradle:
             return trackingCalculator.displayFor(rad, sigResolution);
           },
         },
-        sigResolution: () => SIG_RESOLUTIONS[shipATurretController.currentSigResClass()],
       });
     }).singleton(),
   });
@@ -30,15 +28,25 @@ export function registerEffectiveReadoutModule<T extends ControlsCradle>(cradle:
 
 function collectEffectiveReadoutEls(els: ControlsElements): EffectiveReadoutEls {
   return {
-    shipASpeed: els.shipA.speed,
-    shipBSpeed: els.shipB.speed,
-    tracking: els.shipA.tracking,
-    optimal: els.shipA.optimal,
-    falloff: els.shipA.falloff,
-    shipASpeedReadout: els.shipA.effectiveSpeed,
-    shipBSpeedReadout: els.shipB.effectiveSpeed,
-    trackingReadout: els.shipA.effectiveTracking,
-    optimalReadout: els.shipA.effectiveOptimal,
-    falloffReadout: els.shipA.effectiveFalloff,
+    shipA: {
+      speed: els.shipA.speed,
+      tracking: els.shipA.tracking,
+      optimal: els.shipA.optimal,
+      falloff: els.shipA.falloff,
+      speedReadout: els.shipA.effectiveSpeed,
+      trackingReadout: els.shipA.effectiveTracking,
+      optimalReadout: els.shipA.effectiveOptimal,
+      falloffReadout: els.shipA.effectiveFalloff,
+    },
+    shipB: {
+      speed: els.shipB.speed,
+      tracking: els.shipB.tracking,
+      optimal: els.shipB.optimal,
+      falloff: els.shipB.falloff,
+      speedReadout: els.shipB.effectiveSpeed,
+      trackingReadout: els.shipB.effectiveTracking,
+      optimalReadout: els.shipB.effectiveOptimal,
+      falloffReadout: els.shipB.effectiveFalloff,
+    },
   };
 }

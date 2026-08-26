@@ -1,12 +1,11 @@
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
-import type { Kinematics } from "./kinematics";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "./types";
+import type { EngagementFrame, HitChanceBreakdown, ShipState, Side, TurretSpec } from "./types";
 
 export interface AttackState {
   readonly turret: TurretSpec;
-  readonly shipBSigRadius: number;
+  readonly targetSigRadius: number;
 }
 
 export interface AttackAssessment {
@@ -16,49 +15,35 @@ export interface AttackAssessment {
 }
 
 export interface EngagementEvaluator {
-  evaluate(snapshot: SimSnapshot, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): {
-    readonly shipA?: AttackAssessment;
-    readonly shipB?: AttackAssessment;
-  };
+  evaluate(frame: EngagementFrame, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): Record<Side, AttackAssessment | undefined>;
 }
 
 export class EngagementEvaluatorImpl implements EngagementEvaluator {
-  private readonly kinematics: Kinematics;
   private readonly hitChance: HitChance;
   private readonly ewarResolver: EwarResolver;
   private readonly boosters: TurretBoosterResolver;
 
-  constructor({ kinematics, hitChance, ewarResolver, turretBoosterResolver }: {
-    kinematics: Kinematics;
+  constructor({ hitChance, ewarResolver, turretBoosterResolver }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
   }) {
-    this.kinematics = kinematics;
     this.hitChance = hitChance;
     this.ewarResolver = ewarResolver;
     this.boosters = turretBoosterResolver;
   }
 
-  evaluate(snapshot: SimSnapshot, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): {
-    readonly shipA?: AttackAssessment;
-    readonly shipB?: AttackAssessment;
-  } {
-    const result: { shipA?: AttackAssessment; shipB?: AttackAssessment } = {};
-    if (attacks.shipA) {
-      result.shipA = this.assess(snapshot.shipA, snapshot.shipB, snapshot.time, attacks.shipA);
-    }
-    if (attacks.shipB) {
-      result.shipB = this.assess(snapshot.shipB, snapshot.shipA, snapshot.time, attacks.shipB);
-    }
-    return result;
+  evaluate(frame: EngagementFrame, attacks: { readonly shipA?: AttackState; readonly shipB?: AttackState }): Record<Side, AttackAssessment | undefined> {
+    return {
+      shipA: attacks.shipA ? this.assess(frame, frame.shipA, frame.shipB, attacks.shipA) : undefined,
+      shipB: attacks.shipB ? this.assess(frame, frame.shipB, frame.shipA, attacks.shipB) : undefined,
+    };
   }
 
-  private assess(ship: ShipState, opponent: ShipState, time: number, attack: AttackState): AttackAssessment {
-    const frame = this.kinematics.computeEngagement(ship, opponent, time);
+  private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     const boosted = this.boosters.boostedTurret(attack.turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, attack.shipBSigRadius);
+    const hit = this.hitChance.compute(frame, effectiveTurret, attack.targetSigRadius);
     return { boostedTurret: boosted, effectiveTurret, hit };
   }
 }

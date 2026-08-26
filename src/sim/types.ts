@@ -7,6 +7,8 @@ export function isSigResolutionClass(value: unknown): value is SigResolutionClas
   return value === "S" || value === "M" || value === "L" || value === "XL";
 }
 
+export type Side = "shipA" | "shipB";
+
 export const AGGRESSIVITY_MIN = 0.01;
 export const AGGRESSIVITY_MAX = 100;
 

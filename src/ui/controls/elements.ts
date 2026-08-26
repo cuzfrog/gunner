@@ -55,9 +55,12 @@ interface GlobalControlsEls {
   readonly resTransversal: HTMLElement;
   readonly resAngular: HTMLElement;
   readonly resRadial: HTMLElement;
-  readonly resTrackPen: HTMLElement;
-  readonly resRangePen: HTMLElement;
-  readonly resHit: HTMLElement;
+  readonly resTrackPenA: HTMLElement;
+  readonly resRangePenA: HTMLElement;
+  readonly resHitA: HTMLElement;
+  readonly resTrackPenB: HTMLElement;
+  readonly resRangePenB: HTMLElement;
+  readonly resHitB: HTMLElement;
   readonly rangeOverlayLegend: HTMLElement;
   readonly slideHints: HTMLElement;
 }
@@ -190,9 +193,12 @@ function createGlobalControlsEls(): GlobalControlsEls {
     resTransversal: el("res-transversal"),
     resAngular: el("res-angular"),
     resRadial: el("res-radial"),
-    resTrackPen: el("res-track-pen"),
-    resRangePen: el("res-range-pen"),
-    resHit: el("res-hit"),
+    resTrackPenA: el("res-track-pen-a"),
+    resRangePenA: el("res-range-pen-a"),
+    resHitA: el("res-hit-a"),
+    resTrackPenB: el("res-track-pen-b"),
+    resRangePenB: el("res-range-pen-b"),
+    resHitB: el("res-hit-b"),
     rangeOverlayLegend: el("range-overlay-legend"),
     slideHints: el("slide-hints"),
   };

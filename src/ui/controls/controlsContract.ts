@@ -1,5 +1,6 @@
-import type { DisruptionBreakdown, EngagementFrame, HitChanceBreakdown, ShipConfig, SimConfig, SpeedBreakdown, TurretSpec } from "../../sim";
+import type { DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, TurretSpec } from "../../sim";
 import type { RangeOverlay } from "../renderer";
+import type { Side } from "./side";
 
 export interface ControlsCallbacks {
   readonly onReset: () => void;
@@ -9,33 +10,37 @@ export interface ControlsCallbacks {
   readonly onSpeedChange: (speed: number) => void;
 }
 
-export interface EffectiveReadouts {
-  readonly shipASpeed: number;
-  readonly shipBSpeed: number;
+export interface SideReadoutValues {
+  readonly speed: number;
   readonly tracking: number;
   readonly optimal: number;
   readonly falloff: number;
   readonly boostedTracking: number;
   readonly boostedOptimal: number;
   readonly boostedFalloff: number;
-  readonly shipASpeedBreakdown?: SpeedBreakdown;
-  readonly shipBSpeedBreakdown?: SpeedBreakdown;
+  readonly sigResolution: number;
+  readonly speedBreakdown?: SpeedBreakdown;
   readonly trackingBreakdown?: DisruptionBreakdown;
   readonly optimalBreakdown?: DisruptionBreakdown;
   readonly falloffBreakdown?: DisruptionBreakdown;
 }
 
+export interface EffectiveReadouts {
+  readonly shipA: SideReadoutValues;
+  readonly shipB: SideReadoutValues;
+}
+
 export interface Controls {
-  getTurret(): TurretSpec;
-  getShipBSig(): number;
+  getTurret(side: Side): TurretSpec;
+  getSig(side: Side): number;
   getConfig(): SimConfig;
   getSpeed(): number;
   getGridBrightness(): number;
   getAutoZoom(): boolean;
   getZoomFactor(): number;
   getOverlays(): readonly RangeOverlay[];
-  hasShipAGuns(): boolean;
-  update(frame: EngagementFrame, hit: HitChanceBreakdown, effective: EffectiveReadouts): void;
+  hasGuns(side: Side): boolean;
+  update(view: EngagementView, effective: EffectiveReadouts): void;
   setPlaying(playing: boolean): void;
   setCallbacks(callbacks: ControlsCallbacks): void;
 }

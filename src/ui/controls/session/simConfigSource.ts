@@ -1,6 +1,7 @@
 import type { CombatantConfig, SimConfig } from "../../../sim";
 import type { BoosterController } from "../booster";
 import type { EwarController } from "../ewar";
+import type { Side } from "../side";
 import type { SidePanelState } from "../sidePanel";
 
 export interface SimConfigSource {
@@ -39,7 +40,7 @@ export class SimConfigSourceImpl implements SimConfigSource {
     return { shipA, shipB, initialDistance };
   }
 
-  private buildCombatantConfig(state: SidePanelState, side: "shipA" | "shipB"): CombatantConfig {
+  private buildCombatantConfig(state: SidePanelState, side: Side): CombatantConfig {
     return {
       id: side,
       maxSpeed: state.speed,

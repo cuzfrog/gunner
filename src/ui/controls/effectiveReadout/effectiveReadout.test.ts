@@ -13,17 +13,20 @@ interface FakeReadout {
 
 interface FakeInput { value: string; }
 
-interface FakeEls {
-  shipASpeed: FakeInput;
-  shipBSpeed: FakeInput;
+interface FakeSideEls {
+  speed: FakeInput;
   tracking: FakeInput;
   optimal: FakeInput;
   falloff: FakeInput;
-  shipASpeedReadout: FakeReadout;
-  shipBSpeedReadout: FakeReadout;
+  speedReadout: FakeReadout;
   trackingReadout: FakeReadout;
   optimalReadout: FakeReadout;
   falloffReadout: FakeReadout;
+}
+
+interface FakeEls {
+  shipA: FakeSideEls;
+  shipB: FakeSideEls;
 }
 
 function fakeInput(value: string): FakeInput { return { value }; }
@@ -32,32 +35,35 @@ function fakeReadout(): FakeReadout {
   return { textContent: null, title: "", classList: { add: vi.fn(), remove: vi.fn() } };
 }
 
-function fakeEls(): FakeEls {
+function fakeSideEls(speed = "400", tracking = "0.32", optimal = "5000", falloff = "3000"): FakeSideEls {
   return {
-    shipASpeed: fakeInput("400"),
-    shipBSpeed: fakeInput("250"),
-    tracking: fakeInput("0.32"),
-    optimal: fakeInput("5000"),
-    falloff: fakeInput("3000"),
-    shipASpeedReadout: fakeReadout(),
-    shipBSpeedReadout: fakeReadout(),
+    speed: fakeInput(speed),
+    tracking: fakeInput(tracking),
+    optimal: fakeInput(optimal),
+    falloff: fakeInput(falloff),
+    speedReadout: fakeReadout(),
     trackingReadout: fakeReadout(),
     optimalReadout: fakeReadout(),
     falloffReadout: fakeReadout(),
   };
 }
 
+function fakeEls(): FakeEls {
+  return { shipA: fakeSideEls(), shipB: fakeSideEls("250", "0.2", "4000", "2500") };
+}
+
 function fakeTrackingInput(rad = 0.32, unit: TrackingUnit = "rad"): TrackingInput {
   return {
     rad,
     unit,
-    setRadValue: () => 0,
-    setUnit: () => 0,
-    setDisplayValue: () => 0,
-    displayValue: () => 0,
+    setRadValue: (_rad: number, _sigResolution: number) => 0,
+    setUnit: (_unit: TrackingUnit, _sigResolution: number) => 0,
+    setDisplayValue: (_displayValue: number, _sigResolution: number) => 0,
+    displayValue: (_sigResolution: number) => 0,
     displayFor: (value: number, _sigResolution: number) => unit === "score" ? (value * 40000) / 40 : value,
   };
 }
+
 
 function fakeI18n(): I18n {
   const t = (key: string): string => ({
@@ -87,86 +93,117 @@ function fakeI18nWithEmptyAffected(): I18n {
   return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
 }
 
+function sideValues(tracking = 0.32, optimal = 5000, falloff = 3000, boostedTracking = 0.32, boostedOptimal = 5000, boostedFalloff = 3000, speed = 400) {
+  return {
+    speed,
+    tracking,
+    optimal,
+    falloff,
+    boostedTracking,
+    boostedOptimal,
+    boostedFalloff,
+    sigResolution: 40,
+  };
+}
+
 describe("EffectiveReadoutImpl", () => {
   test("formats and displays all effective values without negative state when equal to raw inputs", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipASpeedReadout.textContent).toBe("400 m/s");
-    expect(els.shipBSpeedReadout.textContent).toBe("250 m/s");
-    expect(els.trackingReadout.textContent).toBe("0.32 rad/s");
-    expect(els.optimalReadout.textContent).toBe("5,000 m");
-    expect(els.falloffReadout.textContent).toBe("3,000 m");
-    expect(els.shipASpeedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({ shipA: sideValues(), shipB: sideValues(0.2, 4000, 2500, 0.2, 4000, 2500, 250) });
+    expect(els.shipA.speedReadout.textContent).toBe("400 m/s");
+    expect(els.shipB.speedReadout.textContent).toBe("250 m/s");
+    expect(els.shipA.trackingReadout.textContent).toBe("0.32 rad/s");
+    expect(els.shipA.optimalReadout.textContent).toBe("5,000 m");
+    expect(els.shipA.falloffReadout.textContent).toBe("3,000 m");
+    expect(els.shipA.speedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("marks shipB speed and optimal as negative when effective values are below their baselines", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 125, tracking: 0.32, optimal: 4000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipBSpeedReadout.classList.add).toHaveBeenCalledWith("is-negative");
-    expect(els.shipBSpeedReadout.title).toBe("Affected");
-    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
-    expect(els.optimalReadout.textContent).toBe("4,000 m");
-    expect(els.shipASpeedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: sideValues(),
+      shipB: { speed: 125, tracking: 0.2, optimal: 4000, falloff: 2500, boostedTracking: 0.2, boostedOptimal: 5000, boostedFalloff: 2500, sigResolution: 40 },
+    });
+    expect(els.shipB.speedReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipB.speedReadout.title).toBe("Affected");
+    expect(els.shipB.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipB.optimalReadout.textContent).toBe("4,000 m");
+    expect(els.shipA.speedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("does not mark speed as negative when the effective value exceeds the raw input", () => {
     const els = fakeEls();
-    els.shipASpeed.value = "1000";
+    els.shipA.speed.value = "1000";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 1500, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipASpeedReadout.classList.add).not.toHaveBeenCalled();
-    expect(els.shipASpeedReadout.textContent).toBe("1,500 m/s");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 1500, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.speedReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.shipA.speedReadout.textContent).toBe("1,500 m/s");
   });
 
   test("renders tracking in score unit when tracking input is in score mode", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "score");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.16, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.trackingReadout.textContent).toBe("160 Score");
-    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 400, tracking: 0.16, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.trackingReadout.textContent).toBe("160 Score");
+    expect(els.shipA.trackingReadout.classList.add).toHaveBeenCalledWith("is-negative");
   });
 
   test("uses kilometer formatting for long distances", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.32, optimal: 15000, falloff: 12000, boostedTracking: 0.32, boostedOptimal: 15000, boostedFalloff: 12000 });
-    expect(els.optimalReadout.textContent).toBe("15.0 km");
-    expect(els.falloffReadout.textContent).toBe("12.0 km");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 400, tracking: 0.32, optimal: 15000, falloff: 12000, boostedTracking: 0.32, boostedOptimal: 15000, boostedFalloff: 12000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.optimalReadout.textContent).toBe("15.0 km");
+    expect(els.shipA.falloffReadout.textContent).toBe("12.0 km");
   });
 
   test("does not mark turret values negative when only friendly boosts change the effective value", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.64, optimal: 7500, falloff: 4500, boostedTracking: 0.64, boostedOptimal: 7500, boostedFalloff: 4500 });
-    expect(els.trackingReadout.textContent).toBe("0.64 rad/s");
-    expect(els.optimalReadout.textContent).toBe("7,500 m");
-    expect(els.trackingReadout.classList.add).not.toHaveBeenCalled();
-    expect(els.optimalReadout.classList.add).not.toHaveBeenCalled();
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 400, tracking: 0.64, optimal: 7500, falloff: 4500, boostedTracking: 0.64, boostedOptimal: 7500, boostedFalloff: 4500, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.trackingReadout.textContent).toBe("0.64 rad/s");
+    expect(els.shipA.optimalReadout.textContent).toBe("7,500 m");
+    expect(els.shipA.trackingReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.shipA.optimalReadout.classList.add).not.toHaveBeenCalled();
   });
 
   test("marks turret values negative when effective is below the boosted baseline", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.trackingReadout.classList.add).toHaveBeenCalledWith("is-negative");
-    expect(els.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
-    expect(els.falloffReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 400, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.trackingReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipA.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    expect(els.shipA.falloffReadout.classList.add).toHaveBeenCalledWith("is-negative");
   });
 });
 
@@ -175,7 +212,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
     const shipASpeedBreakdown = {
       effects: [
         { family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 },
@@ -184,57 +221,54 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
       propulsionSuppressed: true,
     };
     readout.update({
-      shipASpeed: 225, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
-      shipASpeedBreakdown,
+      shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, speedBreakdown: shipASpeedBreakdown },
+      shipB: sideValues(),
     });
-    expect(els.shipASpeedReadout.title).toBe("Stasis Webifier II -55%; Warp Scrambler II stopped MWD");
+    expect(els.shipA.speedReadout.title).toBe("Stasis Webifier II -55%; Warp Scrambler II stopped MWD");
   });
 
   test("uses the generic attribution title when a speed breakdown is undefined", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
     readout.update({
-      shipASpeed: 225, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
+      shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
     });
-    expect(els.shipASpeedReadout.title).toBe("Affected");
+    expect(els.shipA.speedReadout.title).toBe("Affected");
   });
 
   test("leaves the speed tooltip empty when the breakdown has no effects", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
     const shipASpeedBreakdown = { effects: [] as const, propulsionSuppressed: false };
     readout.update({
-      shipASpeed: 225, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
-      shipASpeedBreakdown,
+      shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, speedBreakdown: shipASpeedBreakdown },
+      shipB: sideValues(),
     });
-    expect(els.shipASpeedReadout.title).toBe("");
+    expect(els.shipA.speedReadout.title).toBe("");
   });
 
   test("builds stat tooltips including script names for disruptors", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
     const disruptionBreakdown = {
       tracking: [{ moduleName: "Tracking Disruptor II", scriptName: "Tracking Speed Disruption Script", multiplier: 0.6562 }],
       optimal: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
       falloff: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
     };
     readout.update({
-      shipASpeed: 400, shipBSpeed: 250, tracking: 0.16, optimal: 4000, falloff: 2500,
-      boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000,
-      trackingBreakdown: disruptionBreakdown, optimalBreakdown: disruptionBreakdown, falloffBreakdown: disruptionBreakdown,
+      shipA: { speed: 400, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, trackingBreakdown: disruptionBreakdown, optimalBreakdown: disruptionBreakdown, falloffBreakdown: disruptionBreakdown },
+      shipB: sideValues(),
     });
-    expect(els.trackingReadout.title).toBe("Tracking Disruptor II (Tracking Speed Disruption Script) -34% Tracking speed");
-    expect(els.optimalReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Optimal range");
-    expect(els.falloffReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Falloff range");
+    expect(els.shipA.trackingReadout.title).toBe("Tracking Disruptor II (Tracking Speed Disruption Script) -34% Tracking speed");
+    expect(els.shipA.optimalReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Optimal range");
+    expect(els.shipA.falloffReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Falloff range");
   });
 });
 
@@ -276,54 +310,69 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    const values = { shipASpeed: 400, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 };
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const values = { shipA: sideValues(), shipB: sideValues(0.2, 4000, 2500, 0.2, 4000, 2500, 250) };
     readout.update(values);
-    const addCount = (els.shipASpeedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length;
-    const removeCount = (els.shipASpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length;
-    (els.shipASpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
-    (els.shipASpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    const addCount = (els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length;
+    const removeCount = (els.shipA.speedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length;
+    (els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.shipA.speedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
     readout.update(values);
-    expect((els.shipASpeedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
-    expect((els.shipASpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+    expect((els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+    expect((els.shipA.speedReadout.classList.remove as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
     expect(addCount + removeCount).toBe(1);
   });
 
   test("re-writes DOM when negative state changes even with the same text", () => {
     const els = fakeEls();
-    els.shipASpeed.value = "200";
+    els.shipA.speed.value = "200";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 200, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    (els.shipASpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
-    (els.shipASpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
-    readout.update({ shipASpeed: 100, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipASpeedReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 200, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    (els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.shipA.speedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    readout.update({
+      shipA: { speed: 100, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.speedReadout.classList.add).toHaveBeenCalledWith("is-negative");
   });
 
   test("does not mark speed as negative when the raw input is not a valid non-negative number", () => {
     const els = fakeEls();
-    els.shipASpeed.value = "abc";
+    els.shipA.speed.value = "abc";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 400, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipASpeedReadout.classList.add).not.toHaveBeenCalled();
-    expect(els.shipASpeedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 400, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.speedReadout.classList.add).not.toHaveBeenCalled();
+    expect(els.shipA.speedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("re-writes negative class when negative state changes and the affected title is empty", () => {
     const els = fakeEls();
-    els.shipASpeed.value = "99.5";
+    els.shipA.speed.value = "99.5";
     const i18n = fakeI18nWithEmptyAffected();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, sigResolution: () => 40 });
-    readout.update({ shipASpeed: 99.5, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    (els.shipASpeedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
-    (els.shipASpeedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
-    readout.update({ shipASpeed: 98.4, shipBSpeed: 250, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000 });
-    expect(els.shipASpeedReadout.textContent).toBe("98 m/s");
-    expect(els.shipASpeedReadout.classList.add).toHaveBeenCalledWith("is-negative");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    readout.update({
+      shipA: { speed: 99.5, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    (els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mockClear();
+    (els.shipA.speedReadout.classList.remove as ReturnType<typeof vi.fn>).mockClear();
+    readout.update({
+      shipA: { speed: 98.4, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
+      shipB: sideValues(),
+    });
+    expect(els.shipA.speedReadout.textContent).toBe("98 m/s");
+    expect(els.shipA.speedReadout.classList.add).toHaveBeenCalledWith("is-negative");
   });
 });
