@@ -45,19 +45,32 @@ export interface LegacyUserSettings {
 
 export function resolveHullId(name: string, ships: Ships): ShipId | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return toShipId(trimmed);
-  return ships.findHull(trimmed)?.id;
+  try {
+    const id = toShipId(trimmed);
+    return ships.findHullById(id)?.id;
+  } catch {
+    return ships.findHull(trimmed)?.id;
+  }
 }
 
 export function resolveHull(name: string, ships: Ships): ShipProfile | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return ships.findHullById(toShipId(trimmed));
-  return ships.findHull(trimmed);
+  try {
+    const id = toShipId(trimmed);
+    return ships.findHullById(id);
+  } catch {
+    return ships.findHull(trimmed);
+  }
 }
 
 export function resolveAmmoId(name: string, chargeCatalog: ChargeCatalog): TypeId | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return toTypeId(trimmed);
+  try {
+    const id = toTypeId(trimmed);
+    if (chargeCatalog.has(id)) return id;
+  } catch {
+    // fall through to name lookup
+  }
   return chargeCatalog.idForName(trimmed);
 }
 

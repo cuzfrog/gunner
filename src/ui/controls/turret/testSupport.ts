@@ -94,6 +94,7 @@ export function buildTurret(
     chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
     withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId })),
     idForName: vi.fn((name) => CHARGE_OPTIONS.find((c) => c.name === name)?.id),
+    has: vi.fn((id: TypeId) => CHARGE_OPTIONS.some((c) => c.id === id)),
     ...options.chargeCatalog,
   });
   const NAME_FOR_ID: Record<string, string> = {

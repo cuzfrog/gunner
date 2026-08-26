@@ -1,4 +1,5 @@
 import {
+  PROPULSION_NONE,
   USER_SETTINGS_VERSION,
   type FittedHullSummary,
   type ProfileParamOverrides,
@@ -43,7 +44,10 @@ export function parseScalarValue(
   }
   if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
   if (field === "shipAHullId" || field === "shipBHullId") return resolveLegacyHullId(value, ships);
-  if (field === "shipAPropulsion" || field === "shipBPropulsion") return value;
+  if (field === "shipAPropulsion" || field === "shipBPropulsion") {
+    if (value === PROPULSION_NONE) return value;
+    return ships.parsePropulsionId(value);
+  }
   if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
 
 

@@ -249,6 +249,18 @@ describe("ChargeCatalogImpl", () => {
     }
   });
 
+  test("has returns true for a known charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.has(chargeByName("Republic Fleet EMP S").id)).toBe(true);
+    expect(catalog.has(chargeByName("Titanium Sabot S").id)).toBe(true);
+  });
+
+  test("has returns false for an unknown charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.has(MISSING_CHARGE)).toBe(false);
+    expect(catalog.has("0" as TypeId)).toBe(false);
+  });
+
   test("turretChargeFamily maps turret families to charge families", () => {
     expect(_turretChargeFamily(turretIdForName("200mm AutoCannon I"), gunFamilies)).toBe("projectile");
     expect(_turretChargeFamily(turretIdForName("280mm Howitzer Artillery I"), gunFamilies)).toBe("projectile");

@@ -27,7 +27,9 @@ The public boundary is `index.ts`, which exports the `FittingImport`,
 `ChargeCatalog`, `PresetFittings`, and `GunFamilies` abstractions,
 `ImportedFitting`, `ImportedTurret`, `CargoCharge`, `ChargeOption`,
 `PresetFitting`, `FittingRow`, `FittingSection`, `FittingSummary`,
-and the module registration. `ImportedFitting.ewar` is an `EwarLoadout` from
+and the module registration. `ChargeCatalog` adds `has(charge)` so
+persistence modules can existence-check stored charge ids without
+reaching into the catalog's internal record. `ImportedFitting.ewar` is an `EwarLoadout` from
 the `sim` boundary. `FittingImport` consumes a `StackingPenalty` from the `sim`
 boundary via DI. `FittingImport.summarize` produces a structural fitting
 summary for UI previews. Icon and drone image identifiers have moved to the

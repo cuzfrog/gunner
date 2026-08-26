@@ -498,6 +498,59 @@ describe("SettingsParser", () => {
     expect(decoded!.shipAHullId).toBe(RIFTER_PROFILE.id);
   });
 
+  test("parseUserSettings resolves v10 hull by English, Chinese, and Japanese names", () => {
+    const en = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "Rifter" };
+    const zh = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "裂谷级" };
+    const ja = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "リフター" };
+    const parser = makeParser();
+    const enParsed = parser.parseUserSettings(JSON.stringify(en));
+    const zhParsed = parser.parseUserSettings(JSON.stringify(zh));
+    const jaParsed = parser.parseUserSettings(JSON.stringify(ja));
+    expect(enParsed?.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect(zhParsed?.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect(jaParsed?.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect("shipAHull" in enParsed!).toBe(false);
+    expect("shipAHull" in zhParsed!).toBe(false);
+    expect("shipAHull" in jaParsed!).toBe(false);
+  });
+
+  test("parseUserSettings drops a garbage numeric hullId and deletes the legacy hull key", () => {
+    const bad = { ...DEFAULT_SETTINGS, version: 10, shipAHullId: "999999999" as ShipId, shipAHull: "USS Enterprise" };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(bad));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAHullId).toBeUndefined();
+    expect("shipAHull" in parsed!).toBe(false);
+  });
+
+  test("parseUserSettings resolves a legacy-wraith hull id and typed legacy-wraith name", () => {
+    const byId = { ...DEFAULT_SETTINGS, version: 10, shipAHullId: "legacy-wraith" as ShipId };
+    const byName = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "legacy-wraith" };
+    const parser = makeParser();
+    const byIdParsed = parser.parseUserSettings(JSON.stringify(byId));
+    const byNameParsed = parser.parseUserSettings(JSON.stringify(byName));
+    expect(byIdParsed?.shipAHullId).toBe("legacy-wraith" as ShipId);
+    expect(byNameParsed?.shipAHullId).toBe("legacy-wraith" as ShipId);
+    expect("shipAHull" in byIdParsed!).toBe(false);
+    expect("shipAHull" in byNameParsed!).toBe(false);
+  });
+
+  test("parseUserSettings replaces a garbage ammo id with the default charge", () => {
+    const bad = { ...DEFAULT_SETTINGS, version: 10, shipAAmmo: "999999999" as TypeId };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(bad));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
+  });
+
+  test("parseUserSettings resolves an ammo name to a stable id and keeps it through a reparse", () => {
+    const v10 = { ...DEFAULT_SETTINGS, version: 10, shipAAmmo: "Hail S" };
+    const parser = makeParser();
+    const first = parser.parseUserSettings(JSON.stringify(v10));
+    expect(first).not.toBeNull();
+    expect(first!.shipAAmmo).toBe("12608" as TypeId);
+    const second = parser.parseUserSettings(parser.serialize(first!));
+    expect(second).toEqual(first);
+  });
+
   test("decodeUrlSettings scales fitted baseMaxSpeed proportionally when shipASpeed is overridden", () => {
     fittingImport.importFitting = vi.fn(() => IMPORTED_RIFTER);
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });

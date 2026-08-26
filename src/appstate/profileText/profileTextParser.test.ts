@@ -98,6 +98,63 @@ describe("profileTextParser", () => {
     expect(parser.parse(text)).toEqual({ ...MINIMAL_PROFILE, shipBAmmo: "21898" as TypeId });
   });
 
+  test("resolves a legacy-wraith hull id in profile text", () => {
+    const text = `# gunner v1
+version=11
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+shipA.hull=legacy-wraith
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+initialDistance=5000
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+simSpeed=4`;
+    expect(parser.parse(text)).toEqual({
+      ...MINIMAL_PROFILE,
+      shipAHullId: "legacy-wraith" as ShipId,
+    });
+  });
+
+  test("rejects a garbage numeric hull id in profile text", () => {
+    const text = `# gunner v1
+version=11
+tracking=0.32
+sigRes=S
+optimal=5000
+falloff=5000
+shipA.hull=999999999
+shipA.speed=0
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+initialDistance=5000
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+simSpeed=4`;
+    expect(parser.parse(text)).toBeUndefined();
+  });
+
+  test("rejects an invalid propulsion id in profile text", () => {
+    const text = `${serializer.serialize(MINIMAL_PROFILE)}
+shipA.propulsion=ab-5mn`;
+    expect(parser.parse(text)).toBeUndefined();
+  });
+
   test("resolves legacy hull and ammo names to stable IDs", () => {
     const text = `# gunner v1
 version=11

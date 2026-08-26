@@ -113,6 +113,48 @@ export const RIFTER_PROFILE: ShipProfile = {
   baseSpeed: 300,
   sigRadius: 36,
 };
+
+const THRASHER_PROFILE: ShipProfile = {
+  id: "16242" as ShipId,
+  name: "Thrasher",
+  factionId: "minmatar-republic" as FactionId,
+  hullTypeId: "420" as HullTypeId,
+  mass: 1_600_000,
+  inertiaModifier: 3,
+  baseSpeed: 250,
+  sigRadius: 120,
+};
+
+const BRUTIX_PROFILE: ShipProfile = {
+  id: "672" as ShipId,
+  name: "Brutix",
+  factionId: "gallente-federation" as FactionId,
+  hullTypeId: "120" as HullTypeId,
+  mass: 9_500_000,
+  inertiaModifier: 0.55,
+  baseSpeed: 165,
+  sigRadius: 300,
+};
+
+const WRAITH_PROFILE: ShipProfile = {
+  id: "legacy-wraith" as ShipId,
+  name: "Wraith",
+  factionId: "gallente-federation" as FactionId,
+  hullTypeId: "120" as HullTypeId,
+  mass: 1_000_000,
+  inertiaModifier: 2,
+  baseSpeed: 300,
+  sigRadius: 36,
+};
+
+const KNOWN_HULLS: readonly ShipProfile[] = [RIFTER_PROFILE, THRASHER_PROFILE, BRUTIX_PROFILE, WRAITH_PROFILE];
+
+const HULL_BY_ID = new Map<ShipId, ShipProfile>(KNOWN_HULLS.map((p) => [p.id, p]));
+
+const HULL_BY_NAME = new Map<string, ShipProfile>();
+for (const profile of KNOWN_HULLS) HULL_BY_NAME.set(profile.name.toLowerCase(), profile);
+HULL_BY_NAME.set("裂谷级", RIFTER_PROFILE);
+HULL_BY_NAME.set("リフター", RIFTER_PROFILE);
 export const RIFTER_FITTED: FittedHull = { mass: 1_000_000, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
 export const RIFTER_MODULE: PropulsionModule = {
   id: "mwd-5mn",
@@ -203,6 +245,7 @@ export function makeChargeCatalog(): ChargeCatalog {
     chargesForTurret: vi.fn(() => []),
     withCharge: vi.fn((turret, charge) => ({ ...turret, chargeId: charge })),
     idForName: vi.fn((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
+    has: vi.fn((id: TypeId) => id === hail || id === republic),
   });
   catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
   return catalog;
@@ -211,8 +254,8 @@ export function makeShips() {
   return vi.mocked<Ships>({
     hulls: vi.fn(),
     hullView: vi.fn(),
-    findHull: vi.fn(),
-    findHullById: vi.fn(),
+    findHull: vi.fn((name: string) => HULL_BY_NAME.get(name.trim().toLowerCase())),
+    findHullById: vi.fn((id: ShipId) => HULL_BY_ID.get(id)),
     findHullByName: vi.fn(),
     parsePropulsionId: vi.fn((value: unknown) => {
       if (typeof value !== "string") return undefined;

@@ -42,6 +42,7 @@ export interface ChargeCatalog {
   chargesForTurret(turret: ImportedTurret): readonly ChargeOption[];
   withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret;
   idForName(name: string): TypeId | undefined;
+  has(charge: TypeId): boolean;
 }
 
 interface ChargeCatalogDeps {
@@ -99,6 +100,10 @@ export class ChargeCatalogImpl implements ChargeCatalog {
       if (stats.name === name) return stats.id;
     }
     return undefined;
+  }
+
+  has(charge: TypeId): boolean {
+    return this.charges[charge] !== undefined;
   }
 }
 

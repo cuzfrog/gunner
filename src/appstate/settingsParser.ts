@@ -1,4 +1,5 @@
 import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { ShipId } from "../gamedata/ids";
 import type { Ships } from "../ships";
 import { LEGACY_DISRUPTION_SCRIPT_NAMES } from "./legacyScriptNames";
 import {
@@ -187,23 +188,19 @@ export class SettingsParser {
     const hullKey = `${side}Hull`;
     const hullIdKey = `${side}HullId`;
     const ammoKey = `${side}Ammo`;
-    const hullValue = record[hullKey];
-    if (record[hullIdKey] === undefined && typeof hullValue === "string") {
-      const id = resolveHullId(hullValue, this.ships);
-      if (id) record[hullIdKey] = id;
-      delete record[hullKey];
-    }
+
     const hullIdValue = record[hullIdKey];
-    if (typeof hullIdValue === "string" && !/^\d+$/.test(hullIdValue)) {
-      const id = resolveHullId(hullIdValue, this.ships);
-      if (id) record[hullIdKey] = id;
-    }
+    const hullValue = record[hullKey];
+    let resolvedHull: ShipId | undefined;
+    if (typeof hullIdValue === "string" && hullIdValue.length > 0) resolvedHull = resolveHullId(hullIdValue, this.ships);
+    if (resolvedHull === undefined && typeof hullValue === "string" && hullValue.length > 0) resolvedHull = resolveHullId(hullValue, this.ships);
+    if (resolvedHull) record[hullIdKey] = resolvedHull;
+    else if (typeof hullIdValue === "string" && hullIdValue.length > 0) delete record[hullIdKey];
+    delete record[hullKey];
+
     const ammoValue = record[ammoKey];
     if (typeof ammoValue === "string") {
-      if (!/^\d+$/.test(ammoValue)) {
-        const id = resolveAmmoId(ammoValue, this.chargeCatalog);
-        record[ammoKey] = id ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
-      }
+      record[ammoKey] = resolveAmmoId(ammoValue, this.chargeCatalog) ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
     }
   }
 
