@@ -25,6 +25,19 @@
 
 .control-bar-zoom .form-slider-value { min-width: 5ch; }
 
+.control-bar-initial-distance .form-field-label-row {
+  margin-bottom: 0;
+}
+
+.control-bar-initial-distance .form-field-label-row .field-label {
+  margin-bottom: 0;
+}
+
+.control-bar-initial-distance .input-with-unit {
+  width: 96px;
+  min-width: 64px;
+}
+
 .control-bar-speed {
   margin-left: auto;
 }
@@ -51,7 +64,11 @@
 .control-bar-canvas-settings-popup {
   bottom: 48px;
   left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-width: 200px;
+  max-width: calc(100% - 24px);
   padding: 8px;
 }
 

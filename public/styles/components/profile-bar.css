@@ -30,7 +30,10 @@
   font-size: 13px;
   text-transform: none;
   letter-spacing: 0;
-  min-height: 30px;
+}
+
+.profile-bar .btn-panel {
+  min-height: var(--control-height-profile);
 }
 
 .profile-bar > .icon-button {

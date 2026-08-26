@@ -48,30 +48,6 @@ function modeOptions(side: SideConfig): string {
   ].join("\n");
 }
 
-function initialDistanceBlock(side: SideConfig): string {
-  if (side.key === "shipA") return "";
-  const value = DEFAULT_VALUES["initial-distance"] ?? "5000";
-  return [
-    '          <div class="form-field-group">',
-    '            <span class="form-field-label-row">',
-    '              <label for="initial-distance">',
-    '                <span class="field-label truncate" data-i18n="label.initialDistance">Initial distance</span>',
-    '              </label>',
-    '              <button type="button" class="info-hint"',
-    '                      data-i18n-title="hint.initialDistance"',
-    '                      data-i18n-aria-label="hint.initialDistance"',
-    '                      title="Changes apply on reset."',
-    '                      aria-label="About initial distance">?</button>',
-    '            </span>',
-    '            <span class="input-with-unit">',
-    `              <input type="number" class="input-field" id="initial-distance" value="${value}" step="any" min="1">`,
-    '              <span class="input-suffix mono" aria-hidden="true">m</span>',
-    '            </span>',
-    '          </div>',
-    "",
-  ].join("\n");
-}
-
 function effectiveTrackingId(side: SideConfig): string {
   return `${side.idPrefix}-tracking`;
 }
@@ -100,7 +76,6 @@ export function renderSection(template: string, side: SideConfig): string {
     "{{SIDE_KEY}}": side.i18nKey,
     "{{TRACKING_HEADER}}": trackingHeader(side),
     "{{MODE_OPTIONS}}": modeOptions(side),
-    "{{INITIAL_DISTANCE_BLOCK}}": initialDistanceBlock(side),
     "{{EFFECTIVE_TRACKING_ID}}": effectiveTrackingId(side),
     "{{EFFECTIVE_OPTIMAL_ID}}": effectiveOptimalId(side),
     "{{EFFECTIVE_FALLOFF_ID}}": effectiveFalloffId(side),

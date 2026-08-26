@@ -138,15 +138,13 @@
 
         <hr class="side-panel-divider">
 
-        <div class="form-field-row">
-{{INITIAL_DISTANCE_BLOCK}}          <label class="form-field">
-            <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
-            <span class="input-with-unit">
-              <input type="number" class="input-field" id="{{ID_PREFIX}}-sig" value="{{SIG_VALUE}}" step="any" min="1">
-              <span class="input-suffix mono" aria-hidden="true">m</span>
-            </span>
-          </label>
-        </div>
+        <label class="form-field">
+          <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
+          <span class="input-with-unit">
+            <input type="number" class="input-field" id="{{ID_PREFIX}}-sig" value="{{SIG_VALUE}}" step="any" min="1">
+            <span class="input-suffix mono" aria-hidden="true">m</span>
+          </span>
+        </label>
 
         <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>

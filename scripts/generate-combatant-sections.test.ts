@@ -26,9 +26,10 @@ describe("generate-combatant-sections", () => {
     expect(shipA).toContain('id="tracking-unit-score"');
   });
 
-  test("shipB section contains the initial-distance input and orbit mode selected", () => {
-    const { shipB } = generateSections(template);
-    expect(shipB).toContain('id="initial-distance"');
+  test("neither side panel contains the initial-distance input and shipB orbit mode is selected", () => {
+    const { shipA, shipB } = generateSections(template);
+    expect(shipA).not.toContain('id="initial-distance"');
+    expect(shipB).not.toContain('id="initial-distance"');
     expect(shipB).toContain('value="5000"');
     expect(shipB).toContain('<option value="orbit" selected');
     expect(shipB).not.toContain('<option value="keepAtRange" selected');

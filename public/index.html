@@ -312,15 +312,13 @@
 
         <hr class="side-panel-divider">
 
-        <div class="form-field-row">
-          <label class="form-field">
-            <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
-            <span class="input-with-unit">
-              <input type="number" class="input-field" id="ship-a-sig" value="40" step="any" min="1">
-              <span class="input-suffix mono" aria-hidden="true">m</span>
-            </span>
-          </label>
-        </div>
+        <label class="form-field">
+          <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
+          <span class="input-with-unit">
+            <input type="number" class="input-field" id="ship-a-sig" value="40" step="any" min="1">
+            <span class="input-suffix mono" aria-hidden="true">m</span>
+          </span>
+        </label>
 
         <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
@@ -430,15 +428,19 @@
             </button>
           </div>
 
-          <div class="control-bar-field control-bar-zoom">
-            <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
-            <input type="range" id="zoom-slider" class="form-slider" min="0.25" max="4" step="0.05" value="1"
-                   style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
-            <output class="form-slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
-            <label class="zoom-auto-option">
-              <input type="checkbox" id="auto-zoom" class="zoom-auto-checkbox" checked>
-              <span data-i18n="label.autoZoom">Auto-zoom</span>
-            </label>
+          <div class="control-bar-field control-bar-initial-distance">
+            <span class="form-field-label-row">
+              <label for="initial-distance" class="field-label truncate" data-i18n="label.initialDistance">Initial distance</label>
+              <button type="button" class="info-hint"
+                      data-i18n-title="hint.initialDistance"
+                      data-i18n-aria-label="hint.initialDistance"
+                      title="Changes apply on reset."
+                      aria-label="About initial distance">?</button>
+            </span>
+            <span class="input-with-unit">
+              <input type="number" class="input-field" id="initial-distance" value="20000" step="any" min="1">
+              <span class="input-suffix mono" aria-hidden="true">m</span>
+            </span>
           </div>
 
           <div class="control-bar-field control-bar-speed">
@@ -456,6 +458,16 @@
 
         <div id="canvas-settings-popup" class="control-bar-canvas-settings-popup popup" hidden role="dialog"
              data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
+          <div class="control-bar-field control-bar-zoom">
+            <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
+            <input type="range" id="zoom-slider" class="form-slider" min="0.25" max="4" step="0.05" value="1"
+                   style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
+            <output class="form-slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
+            <label class="zoom-auto-option">
+              <input type="checkbox" id="auto-zoom" class="zoom-auto-checkbox" checked>
+              <span data-i18n="label.autoZoom">Auto-zoom</span>
+            </label>
+          </div>
           <div class="control-bar-field">
             <label for="grid-brightness-slider" class="field-label" data-i18n="label.gridBrightness">Grid brightness</label>
             <input type="range" id="grid-brightness-slider" class="form-slider" min="0" max="1" step="0.01" value="0.5"
@@ -606,31 +618,13 @@
 
         <hr class="side-panel-divider">
 
-        <div class="form-field-row">
-          <div class="form-field-group">
-            <span class="form-field-label-row">
-              <label for="initial-distance">
-                <span class="field-label truncate" data-i18n="label.initialDistance">Initial distance</span>
-              </label>
-              <button type="button" class="info-hint"
-                      data-i18n-title="hint.initialDistance"
-                      data-i18n-aria-label="hint.initialDistance"
-                      title="Changes apply on reset."
-                      aria-label="About initial distance">?</button>
-            </span>
-            <span class="input-with-unit">
-              <input type="number" class="input-field" id="initial-distance" value="20000" step="any" min="1">
-              <span class="input-suffix mono" aria-hidden="true">m</span>
-            </span>
-          </div>
-          <label class="form-field">
-            <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
-            <span class="input-with-unit">
-              <input type="number" class="input-field" id="ship-b-sig" value="40" step="any" min="1">
-              <span class="input-suffix mono" aria-hidden="true">m</span>
-            </span>
-          </label>
-        </div>
+        <label class="form-field">
+          <span class="field-label truncate" data-i18n="label.signatureRadius">Signature radius</span>
+          <span class="input-with-unit">
+            <input type="number" class="input-field" id="ship-b-sig" value="40" step="any" min="1">
+            <span class="input-suffix mono" aria-hidden="true">m</span>
+          </span>
+        </label>
 
         <div class="form-field-group propulsion-group">
           <span class="field-label truncate" data-i18n="label.maxSpeed">Max speed</span>
