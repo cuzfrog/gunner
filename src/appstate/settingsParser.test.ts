@@ -516,15 +516,21 @@ describe("SettingsParser", () => {
 
   test("parseUserSettings preserves resolved localized hull ids through a reparse", () => {
     const zh = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "裂谷级", shipBHull: "Thrasher" };
+    const ja = { ...DEFAULT_SETTINGS, version: 10, shipAHull: "リフター", shipBHull: "Thrasher" };
     const parser = makeParser();
-    const first = parser.parseUserSettings(JSON.stringify(zh));
-    expect(first).not.toBeNull();
-    expect(first!.shipAHullId).toBe(RIFTER_PROFILE.id);
-    expect(first!.shipBHullId).toBe("16242" as ShipId);
-    expect("shipAHull" in first!).toBe(false);
-    expect("shipBHull" in first!).toBe(false);
-    const second = parser.parseUserSettings(parser.serialize(first!));
-    expect(second).toEqual(first);
+
+    const firstZh = parser.parseUserSettings(JSON.stringify(zh));
+    expect(firstZh).not.toBeNull();
+    expect(firstZh!.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect(firstZh!.shipBHullId).toBe("16242" as ShipId);
+    expect("shipAHull" in firstZh!).toBe(false);
+    expect("shipBHull" in firstZh!).toBe(false);
+    expect(parser.parseUserSettings(parser.serialize(firstZh!))).toEqual(firstZh);
+
+    const firstJa = parser.parseUserSettings(JSON.stringify(ja));
+    expect(firstJa).not.toBeNull();
+    expect(firstJa!.shipAHullId).toBe(RIFTER_PROFILE.id);
+    expect(parser.parseUserSettings(parser.serialize(firstJa!))).toEqual(firstJa);
   });
 
   test("parseUserSettings drops a garbage numeric hullId and deletes the legacy hull key", () => {
