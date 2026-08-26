@@ -2,7 +2,7 @@ import type { I18n } from "../../i18n";
 import type { TrackingUnit } from "../../../appstate";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts, SideReadoutValues } from "../controlsContract";
-import type { SpeedBreakdown, SpeedEffectAttribution, StatEffectAttribution } from "../../../sim";
+import type { SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 
 interface InputLike { readonly value: string; }
 

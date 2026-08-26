@@ -1,6 +1,6 @@
 {
   "name": "gunner",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
     "preview": "bun run scripts/preview.ts",
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
+    "generate:combatant-sections": "bun run scripts/generate-combatant-sections.ts",
     "sync-html-version": "bun run scripts/sync-html-version.ts"
   },
   "dependencies": {

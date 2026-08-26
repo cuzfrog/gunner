@@ -5,7 +5,7 @@ import type { EngagementFrame, HitChanceBreakdown, ShipState, Side, TurretSpec }
 
 export interface AttackState {
   readonly turret: TurretSpec;
-  readonly targetSigRadius: number;
+  readonly opponentSigRadius: number;
 }
 
 export interface AttackAssessment {
@@ -43,7 +43,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
     const boosted = this.boosters.boostedTurret(attack.turret, ship.boosts);
     const effectiveTurret = this.ewarResolver.disruptedTurret(boosted, opponent.ewar, frame.distance);
-    const hit = this.hitChance.compute(frame, effectiveTurret, attack.targetSigRadius);
+    const hit = this.hitChance.compute(frame, effectiveTurret, attack.opponentSigRadius);
     return { boostedTurret: boosted, effectiveTurret, hit };
   }
 }

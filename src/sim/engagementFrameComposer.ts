@@ -37,8 +37,8 @@ export class EngagementFrameComposerImpl implements EngagementFrameComposer {
   compose(snapshot: SimSnapshot, input: EngagementInput): EngagementView {
     const frame = this.kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
     const attacks = this.engagementEvaluator.evaluate(frame, {
-      shipA: { turret: input.turrets.shipA, targetSigRadius: input.sigRadii.shipB },
-      shipB: { turret: input.turrets.shipB, targetSigRadius: input.sigRadii.shipA },
+      shipA: { turret: input.turrets.shipA, opponentSigRadius: input.sigRadii.shipB },
+      shipB: { turret: input.turrets.shipB, opponentSigRadius: input.sigRadii.shipA },
     });
     const effectiveTurrets: Record<Side, TurretSpec> = {
       shipA: attacks.shipA?.effectiveTurret ?? input.turrets.shipA,

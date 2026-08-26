@@ -3,6 +3,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, r
 import { basename, extname, join } from "node:path";
 import { ITEM_ICON_IDS } from "../src/ui/icons/iconIds";
 import { DRONE_TYPE_IDS } from "../src/ui/icons/droneIconIds";
+import { updateIndexHtml } from "./generate-combatant-sections";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";
@@ -65,6 +66,8 @@ if (jsEntry === undefined) {
 const mainJsName = basename(jsEntry.path);
 
 mkdirSync(DISTRIBUTION_DIRECTORY, { recursive: true });
+
+updateIndexHtml();
 
 for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
   if (entry.name === "styles") continue;

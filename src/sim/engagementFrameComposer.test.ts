@@ -81,8 +81,8 @@ describe("EngagementFrameComposerImpl", () => {
     expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(kinematics.computeEngagement).toHaveBeenCalledTimes(1);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: { turret: shipATurret, targetSigRadius: 40 },
-      shipB: { turret: shipBTurret, targetSigRadius: 30 },
+      shipA: { turret: shipATurret, opponentSigRadius: 40 },
+      shipB: { turret: shipBTurret, opponentSigRadius: 30 },
     });
   });
 
@@ -102,8 +102,8 @@ describe("EngagementFrameComposerImpl", () => {
     expect(hitChance.compute).toHaveBeenNthCalledWith(1, frame, shipATurret, 40);
     expect(hitChance.compute).toHaveBeenNthCalledWith(2, frame, shipBTurret, 30);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: { turret: shipATurret, targetSigRadius: 40 },
-      shipB: { turret: shipBTurret, targetSigRadius: 30 },
+      shipA: { turret: shipATurret, opponentSigRadius: 40 },
+      shipB: { turret: shipBTurret, opponentSigRadius: 30 },
     });
   });
 });

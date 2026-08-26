@@ -77,7 +77,7 @@ function makeEvaluator(): {
 describe("EngagementEvaluatorImpl", () => {
   test("evaluates shipA attack using shipB ewar", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { turret, targetSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { turret, opponentSigRadius: 40 } });
     expect(result.shipA).toEqual({ boostedTurret, effectiveTurret, hit });
     expect(result.shipB).toBeUndefined();
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipB.ewar, 6000);
@@ -86,7 +86,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("evaluates shipB attack using shipA ewar", () => {
     const { hitChance, ewarResolver, evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipB: { turret, targetSigRadius: 30 } });
+    const result = evaluator.evaluate(frame, { shipB: { turret, opponentSigRadius: 30 } });
     expect(result.shipB).toEqual({ boostedTurret, effectiveTurret, hit });
     expect(result.shipA).toBeUndefined();
     expect(ewarResolver.disruptedTurret).toHaveBeenCalledWith(boostedTurret, shipA.ewar, 6000);
@@ -99,7 +99,7 @@ describe("EngagementEvaluatorImpl", () => {
     vi.mocked(turretBoosterResolver.boostedTurret).mockReturnValue(boosted);
     const shipAWithBoosts = { ...shipA, boosts: { loadout: { computers: [], scripts: [] } } };
     const frameWithBoosts = { ...frame, shipA: shipAWithBoosts };
-    const result = evaluator.evaluate(frameWithBoosts, { shipA: { turret, targetSigRadius: 40 } });
+    const result = evaluator.evaluate(frameWithBoosts, { shipA: { turret, opponentSigRadius: 40 } });
     expect(result.shipA?.boostedTurret).toEqual(boosted);
     expect(result.shipA?.effectiveTurret).toEqual(effectiveTurret);
     expect(turretBoosterResolver.boostedTurret).toHaveBeenCalledWith(turret, shipAWithBoosts.boosts);
@@ -117,7 +117,7 @@ describe("EngagementEvaluatorImpl", () => {
 
   test("uses effective turret for renderer and hit for readout", () => {
     const { evaluator } = makeEvaluator();
-    const result = evaluator.evaluate(frame, { shipA: { turret, targetSigRadius: 40 } });
+    const result = evaluator.evaluate(frame, { shipA: { turret, opponentSigRadius: 40 } });
     expect(result.shipA!.effectiveTurret).not.toEqual(turret);
     expect(result.shipA!.hit).toEqual(hit);
   });
