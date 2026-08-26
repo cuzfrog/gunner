@@ -1,5 +1,5 @@
 import type { ChargeCatalog } from "../fitting";
-import type { ShipId, TypeId } from "../gamedata/ids";
+import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { AutopilotMode, SigResolutionClass } from "../sim";
 import type { ShipProfile, Ships, SkillLevel } from "../ships";
 import type { FittedHullSummary, PropulsionSelection, StoredBoosterActivation, StoredEwarActivation } from "./userSettings";
@@ -45,19 +45,19 @@ export interface LegacyUserSettings {
 
 export function resolveHullId(name: string, ships: Ships): ShipId | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return trimmed as ShipId;
+  if (/^\d+$/.test(trimmed)) return toShipId(trimmed);
   return ships.findHull(trimmed)?.id;
 }
 
 export function resolveHull(name: string, ships: Ships): ShipProfile | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return ships.findHullById(trimmed as ShipId);
+  if (/^\d+$/.test(trimmed)) return ships.findHullById(toShipId(trimmed));
   return ships.findHull(trimmed);
 }
 
 export function resolveAmmoId(name: string, chargeCatalog: ChargeCatalog): TypeId | undefined {
   const trimmed = name.trim();
-  if (/^\d+$/.test(trimmed)) return trimmed as TypeId;
+  if (/^\d+$/.test(trimmed)) return toTypeId(trimmed);
   return chargeCatalog.idForName(trimmed);
 }
 

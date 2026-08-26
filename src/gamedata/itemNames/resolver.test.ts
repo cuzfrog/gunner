@@ -10,9 +10,9 @@ function resolver(overrides: {
   collisionsJa?: Record<string, string>;
 } = {}): ItemNameResolver {
   return new StaticItemNameResolver({
-    en: overrides.en ?? { a: "Alpha", b: "Beta" },
-    zh: overrides.zh ?? { a: "阿尔法", b: "贝塔" },
-    ja: overrides.ja ?? { a: "アルファ", b: "ベータ" },
+    en: overrides.en ?? { "1": "Alpha", "2": "Beta" },
+    zh: overrides.zh ?? { "1": "阿尔法", "2": "贝塔" },
+    ja: overrides.ja ?? { "1": "アルファ", "2": "ベータ" },
     collisionsEn: overrides.collisionsEn ?? {},
     collisionsZh: overrides.collisionsZh ?? {},
     collisionsJa: overrides.collisionsJa ?? {},
@@ -21,19 +21,19 @@ function resolver(overrides: {
 
 describe("StaticItemNameResolver", () => {
   test("resolves an English name in the English map", () => {
-    expect(resolver().idsForName("Beta", "en")).toEqual(["b" as TypeId]);
+    expect(resolver().idsForName("Beta", "en")).toEqual(["2" as TypeId]);
   });
 
   test("resolves a Chinese name in the Chinese map", () => {
-    expect(resolver().idsForName("贝塔", "zh")).toEqual(["b" as TypeId]);
+    expect(resolver().idsForName("贝塔", "zh")).toEqual(["2" as TypeId]);
   });
 
   test("resolves a Japanese name in the Japanese map", () => {
-    expect(resolver().idsForName("ベータ", "ja")).toEqual(["b" as TypeId]);
+    expect(resolver().idsForName("ベータ", "ja")).toEqual(["2" as TypeId]);
   });
 
   test("trims whitespace before resolving", () => {
-    expect(resolver().idsForName("  Beta  ", "en")).toEqual(["b" as TypeId]);
+    expect(resolver().idsForName("  Beta  ", "en")).toEqual(["2" as TypeId]);
   });
 
   test("returns an empty array for an unknown name", () => {
@@ -42,28 +42,28 @@ describe("StaticItemNameResolver", () => {
 
   test("cross-language identical names resolve per language", () => {
     const r = resolver({
-      en: { a: "Same", b: "Other" },
-      zh: { a: "相同", b: "相同" },
-      ja: { a: "同じ", b: "同じ" },
+      en: { "1": "Same", "2": "Other" },
+      zh: { "1": "相同", "2": "相同" },
+      ja: { "1": "同じ", "2": "同じ" },
     });
-    expect(r.idsForName("Same", "en")).toEqual(["a" as TypeId]);
-    expect(r.idsForName("相同", "zh")).toEqual(["a" as TypeId, "b" as TypeId]);
-    expect(r.idsForName("同じ", "ja")).toEqual(["a" as TypeId, "b" as TypeId]);
+    expect(r.idsForName("Same", "en")).toEqual(["1" as TypeId]);
+    expect(r.idsForName("相同", "zh")).toEqual(["1" as TypeId, "2" as TypeId]);
+    expect(r.idsForName("同じ", "ja")).toEqual(["1" as TypeId, "2" as TypeId]);
   });
 
   test("returns all ids sorted ascending for an intra-language collision", () => {
     const r = resolver({
-      en: { a: "10", c: "Shared", d: "Shared" },
-      collisionsEn: { Shared: "d" },
+      en: { "1": "10", "3": "Shared", "4": "Shared" },
+      collisionsEn: { Shared: "4" },
     });
-    expect(r.idsForName("Shared", "en")).toEqual(["d" as TypeId, "c" as TypeId]);
+    expect(r.idsForName("Shared", "en")).toEqual(["4" as TypeId, "3" as TypeId]);
   });
 
   test("falls back to English values in zh/ja maps when a translation is missing", () => {
     const r = resolver({
-      en: { a: "Alpha" },
-      zh: { a: "Alpha" },
+      en: { "1": "Alpha" },
+      zh: { "1": "Alpha" },
     });
-    expect(r.idsForName("Alpha", "zh")).toEqual(["a" as TypeId]);
+    expect(r.idsForName("Alpha", "zh")).toEqual(["1" as TypeId]);
   });
 });

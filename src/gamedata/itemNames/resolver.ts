@@ -4,7 +4,7 @@ import { ITEM_NAMES_ZH } from "./item-names-zh";
 import { ITEM_NAME_COLLISIONS_EN } from "./item-name-collisions-en";
 import { ITEM_NAME_COLLISIONS_JA } from "./item-name-collisions-ja";
 import { ITEM_NAME_COLLISIONS_ZH } from "./item-name-collisions-zh";
-import type { TypeId } from "../ids";
+import { toTypeId, type TypeId } from "../ids";
 import type { ShipNameLanguage } from "../i18n";
 
 export interface ItemNameResolver {
@@ -58,7 +58,7 @@ export class StaticItemNameResolver implements ItemNameResolver {
 function buildReverseMap(pack: Readonly<Record<string, string>>, collisions: Readonly<Record<string, string>>): NameToIds {
   const groups = new Map<string, TypeId[]>();
   for (const [id, name] of Object.entries(pack)) {
-    const typeId = id as TypeId;
+    const typeId = toTypeId(id);
     const list = groups.get(name) ?? [];
     list.push(typeId);
     groups.set(name, list);
@@ -66,7 +66,8 @@ function buildReverseMap(pack: Readonly<Record<string, string>>, collisions: Rea
 
   const map = new Map<string, TypeId[]>();
   for (const [name, ids] of groups) {
-    const preferred = collisions[name] as TypeId | undefined;
+    const preferredId = collisions[name];
+    const preferred = preferredId !== undefined ? toTypeId(preferredId) : undefined;
     const sorted = [...ids].sort((a, b) => Number(a) - Number(b));
     if (preferred) {
       const rest = sorted.filter((id) => id !== preferred);

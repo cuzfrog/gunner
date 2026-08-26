@@ -1,4 +1,4 @@
-import type { ShipId } from "../ids";
+import { toShipId, type ShipId } from "../ids";
 import { PRESET_FITTINGS, type PresetFitting } from "./fittingPresets";
 
 export type { PresetFitting };
@@ -17,7 +17,7 @@ export interface PresetFitTexts {
 export class StaticPresetFitTexts implements PresetFitTexts {
   listHulls(): readonly PresetHull[] {
     return Object.entries(PRESET_FITTINGS)
-      .map(([id, hull]) => ({ id: id as ShipId, label: hull.name }))
+      .map(([id, hull]) => ({ id: toShipId(id), label: hull.name }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }
 
