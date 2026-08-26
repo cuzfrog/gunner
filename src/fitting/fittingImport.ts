@@ -249,11 +249,16 @@ export class FittingImportImpl implements FittingImport {
       return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: preferDrone };
     };
 
+    const resolvedDrones: ResolvedQuantity[] = [];
+    const resolvedCargo: ResolvedQuantity[] = [];
+
+    for (const item of document.drones) resolvedDrones.push(resolveQuantity(item, true));
+    for (const item of document.cargo) resolvedCargo.push(resolveQuantity(item, false));
+
     const drones: ResolvedQuantity[] = [];
     const cargo: ResolvedQuantity[] = [];
-
-    for (const item of document.drones) drones.push(resolveQuantity(item, true));
-    for (const item of document.cargo) cargo.push(resolveQuantity(item, false));
+    for (const item of resolvedDrones) (item.isDrone ? drones : cargo).push(item);
+    for (const item of resolvedCargo) (item.isDrone ? drones : cargo).push(item);
 
     return { profile, language, fittingName: document.fittingName, banks, drones, cargo };
   }
@@ -767,7 +772,7 @@ function serializeEftDocument(resolved: ResolvedEft): string {
   }
   for (const kind of CANONICAL_BANK_ORDER) {
     if (bankLines[kind].length === 0) continue;
-    if (lines.length > 1) lines.push("");
+    lines.push("");
     for (const text of bankLines[kind]) lines.push(text);
   }
 

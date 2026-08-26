@@ -1115,6 +1115,31 @@ Hail S x1000`;
     expect(reparsed!.drones).toEqual(original!.drones);
     expect(reparsed!.cargo).toEqual(original!.cargo);
   });
+
+  test("moves a charge in the first quantity block to the cargo section", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_EXTRA_CHARGE_IN_DRONE_BLOCK);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(2);
+    expect(parts[1]).toBe("Hail S x1000\nRepublic Fleet EMP S x500");
+  });
+
+  test("moves a drone in the second quantity block to the drone section", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(RIFTER_DRONE_AFTER_CARGO);
+    expect(canonical).toBeDefined();
+    const parts = canonical!.split("\n\n\n");
+    expect(parts).toHaveLength(3);
+    expect(parts[1]).toBe("Hobgoblin I x3");
+    expect(parts[2]).toBe("Republic Fleet EMP S x500");
+  });
+
+  test("adds one blank line between the header and the first module bank", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const canonical = importer.canonicalEftText(`[Rifter, Header]\n200mm AutoCannon I, Hail S\n`);
+    expect(canonical).toBe(`[Rifter, Header]\n\n200mm AutoCannon I, Hail S`);
+  });
 });
 
 describe("FittingImportImpl localization", () => {
