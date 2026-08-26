@@ -332,13 +332,13 @@ describe("DomControls", () => {
     controls.update(view, effective);
     expect(getFake(document, "effective-ship-a-speed").textContent).toBe("300 m/s");
     expect(getFake(document, "effective-ship-b-speed").textContent).toBe("150 m/s");
-    expect(getFake(document, "effective-tracking").textContent).toBe("0.32 rad/s");
-    expect(getFake(document, "effective-optimal").textContent).toBe("1,000 unit.meter");
-    expect(getFake(document, "effective-falloff").textContent).toBe("3,000 unit.meter");
+    expect(getFake(document, "effective-ship-a-tracking").textContent).toBe("0.32 rad/s");
+    expect(getFake(document, "effective-ship-a-optimal").textContent).toBe("1,000 unit.meter");
+    expect(getFake(document, "effective-ship-a-falloff").textContent).toBe("3,000 unit.meter");
     expect(getFake(document, "effective-ship-b-speed").classList.add).toHaveBeenCalledWith("is-negative");
     expect(getFake(document, "effective-ship-a-speed").classList.remove).toHaveBeenCalledWith("is-negative");
-    expect(getFake(document, "effective-optimal").classList.add).toHaveBeenCalledWith("is-negative");
-    expect(getFake(document, "effective-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-ship-a-optimal").classList.add).toHaveBeenCalledWith("is-negative");
+    expect(getFake(document, "effective-ship-a-falloff").classList.remove).toHaveBeenCalledWith("is-negative");
   });
 
   test("sessionRestored preserves playing state and resets the simulation", () => {

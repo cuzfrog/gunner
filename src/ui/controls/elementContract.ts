@@ -219,18 +219,11 @@ export function globalElementId<K extends keyof GlobalElementDefinitionMap>(key:
 
 export function combatantElementId<K extends keyof CombatantElementDefinitionMap>(key: K, side: Side): string {
   const sideConfig = sideConfigFor(side);
-  switch (key) {
-    case "effectiveTracking":
-      return side === "shipA" ? "effective-tracking" : "effective-ship-b-tracking";
-    case "effectiveOptimal":
-      return side === "shipA" ? "effective-optimal" : "effective-ship-b-optimal";
-    case "effectiveFalloff":
-      return side === "shipA" ? "effective-falloff" : "effective-ship-b-falloff";
-    case "effectiveSpeed":
-      return `effective-${sideConfig.idPrefix}-speed`;
-    default:
-      return `${sideConfig.idPrefix}-${COMBATANT_ELEMENT_DEFINITIONS[key].baseId}`;
+  const def = COMBATANT_ELEMENT_DEFINITIONS[key];
+  if (key === "effectiveTracking" || key === "effectiveOptimal" || key === "effectiveFalloff" || key === "effectiveSpeed") {
+    return `effective-${sideConfig.idPrefix}-${def.baseId}`;
   }
+  return `${sideConfig.idPrefix}-${def.baseId}`;
 }
 
 function buildInventory(): ControlElement[] {

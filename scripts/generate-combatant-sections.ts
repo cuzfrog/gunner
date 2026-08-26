@@ -73,15 +73,19 @@ function initialDistanceBlock(side: SideConfig): string {
 }
 
 function effectiveTrackingId(side: SideConfig): string {
-  return side.key === "shipA" ? "tracking" : "ship-b-tracking";
+  return `${side.idPrefix}-tracking`;
 }
 
 function effectiveOptimalId(side: SideConfig): string {
-  return side.key === "shipA" ? "optimal" : "ship-b-optimal";
+  return `${side.idPrefix}-optimal`;
 }
 
 function effectiveFalloffId(side: SideConfig): string {
-  return side.key === "shipA" ? "falloff" : "ship-b-falloff";
+  return `${side.idPrefix}-falloff`;
+}
+
+function effectiveSpeedId(side: SideConfig): string {
+  return `${side.idPrefix}-speed`;
 }
 
 function sideValue(side: SideConfig, baseId: string): string {
@@ -100,7 +104,7 @@ export function renderSection(template: string, side: SideConfig): string {
     "{{EFFECTIVE_TRACKING_ID}}": effectiveTrackingId(side),
     "{{EFFECTIVE_OPTIMAL_ID}}": effectiveOptimalId(side),
     "{{EFFECTIVE_FALLOFF_ID}}": effectiveFalloffId(side),
-    "{{EFFECTIVE_SPEED_ID}}": `${side.idPrefix}-speed`,
+    "{{EFFECTIVE_SPEED_ID}}": effectiveSpeedId(side),
     "{{TRACKING_VALUE}}": sideValue(side, "tracking"),
     "{{OPTIMAL_VALUE}}": sideValue(side, "optimal"),
     "{{FALLOFF_VALUE}}": sideValue(side, "falloff"),
