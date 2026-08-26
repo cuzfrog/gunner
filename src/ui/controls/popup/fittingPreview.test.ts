@@ -92,7 +92,7 @@ function createI18n(): I18n {
 
 function createImageCatalog(): ImageCatalog {
   return {
-    shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
+    shipImageUrl: (_shipId, shipName) => `images/ships/${shipName}.webp`,
     itemIconUrl: vi.fn((itemName: string) => {
       if (itemName === "200mm AutoCannon I") return "images/icons/1@1x.png";
       if (itemName === "Hail S") return "images/icons/hail_s.png";

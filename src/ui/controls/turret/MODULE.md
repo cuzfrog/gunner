@@ -5,16 +5,17 @@ no-new-exports:
   - sigResIcons.ts
   - turretController.ts
   - turretControllerContract.ts
-  # - turretEls.ts
+  - testSupport.ts
+  - module.ts
+  - module.test.ts
+  - turretEls.ts
+  - turretController.test.ts
+  - index.ts
   - turretInputSet.ts
   - turretStateResolver.ts
   - turretOverrides.ts
-  - testSupport.ts
-  - module.ts
-  - turretController.test.ts
-  - index.ts
-  - module.test.ts
 ---
+
 
 
 

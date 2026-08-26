@@ -1,3 +1,8 @@
+sealed:
+  - index.ts
+  - ids.test.ts
+  - ids.ts
+---
 # ids
 
 Branded string identity types for game entities (ships, hull types, factions, and items).

@@ -48,6 +48,12 @@ function assertFamily(id: TypeId, family: GunFamily, families = gunFamilies): vo
 }
 
 describe("GunFamiliesImpl", () => {
+  test("constructor throws when a family override has no matching turret or module", () => {
+    const turrets: Record<string, TurretStats> = { ...FITTING_DB.turrets };
+    delete turrets["8907"];
+    expect(() => new GunFamiliesImpl({ fittingDb: { ...FITTING_DB, turrets } })).toThrow("250mm Light Gallium Cannon");
+  });
+
   describe("familyOf", () => {
     test("exhaustive: does not throw for every TURRETS entry", () => {
       for (const stats of Object.values(FITTING_DB.turrets)) {

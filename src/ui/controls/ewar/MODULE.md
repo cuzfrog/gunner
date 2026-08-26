@@ -6,7 +6,9 @@ no-new-exports:
   - ewarEffectDescriber.ts
   - ewarEffectDescriber.test.ts
   - module.ts
+  - index.ts
 ---
+
 
 # ewar
 

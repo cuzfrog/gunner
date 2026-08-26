@@ -22,7 +22,10 @@ no-new-exports:
   - turretLink.ts
   - overrides.ts
   - module.test.ts
+  - navSection.ts
+  - navSection.test.ts
 ---
+
 
 
 

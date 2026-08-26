@@ -1,4 +1,4 @@
-import type { FittingDb, TurretStats } from "../gamedata/fittingDb";
+import { FITTING_DB, type FittingDb, type TurretStats } from "../gamedata/fittingDb";
 import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 
@@ -14,6 +14,7 @@ export class GunFamiliesImpl implements GunFamilies {
 
   constructor({ fittingDb }: { fittingDb: FittingDb }) {
     this.turretLookup = (id) => fittingDb.turrets[id] ?? fittingDb.modules[id];
+    if (fittingDb.turrets === FITTING_DB.turrets || fittingDb.modules === FITTING_DB.modules) assertOverridesExist(fittingDb);
   }
 
   familyOf(moduleId: TypeId): GunFamily {
@@ -221,4 +222,12 @@ function resolveEnergyStem(normalized: string): GunFamily | undefined {
   if (normalized.includes("mega")) return "beamLaser";
   if (normalized.includes("heavy")) return "beamLaser";
   return undefined;
+}
+
+function assertOverridesExist(fittingDb: FittingDb): void {
+  const names = new Set<string>();
+  for (const stats of Object.values(fittingDb.turrets)) names.add(stats.name);
+  for (const stats of Object.values(fittingDb.modules)) names.add(stats.name);
+  const missing = Object.keys(FAMILY_OVERRIDES).filter((name) => !names.has(name));
+  if (missing.length > 0) throw new Error(`FAMILY_OVERRIDES keys have no matching turret/module: ${missing.join(", ")}`);
 }

@@ -4,7 +4,10 @@ no-new-exports:
   - boosterController.ts
   - module.test.ts
   - module.ts
+  - boosterControllerContract.ts
+  - index.ts
 ---
+
 
 # booster
 

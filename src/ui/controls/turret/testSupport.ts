@@ -79,7 +79,7 @@ export function buildTurret(
     ...options.i18n,
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn(),
+    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
     itemIconUrl: vi.fn(() => undefined),
     droneIconUrl: vi.fn(),
     ...options.imageCatalog,

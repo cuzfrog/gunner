@@ -15,22 +15,24 @@ no-new-exports:
   - ewarResolver.ts
   - engagementFrameComposer.test.ts
   - engagementFrameComposer.ts
-  # index.ts is intentionally ungated: it re-exports cross-boundary simulation DTOs.
-  # - index.ts
-  - kinematics.test.ts
+  - types.ts
+  - settingGuards.ts
   - kinematics.ts
-  - module.ts
   - predictiveAutopilot.test.ts
-  - predictiveAutopilot.ts
-  - simulation.test.ts
   - simulation.ts
   - stackingPenalty.test.ts
-  - stackingPenalty.ts
-  # types.ts and types.test.ts are intentionally ungated: they host shared cross-boundary DTOs.
-  # - types.test.ts
-  # - types.ts
+  - module.ts
   - vec2.test.ts
+  - simulation.test.ts
+  - stackingPenalty.ts
+  - predictiveAutopilot.ts
+  - kinematics.test.ts
+  - types.test.ts
+  - index.ts
+  - turretBoosterResolver.ts
+  - turretBoosterResolver.test.ts
 ---
+
 
 
 

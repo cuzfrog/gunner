@@ -1,14 +1,15 @@
+import { toShipId } from "../../gamedata/ids";
 import { StaticImageCatalog } from "./imageCatalog";
 
 describe("StaticImageCatalog", () => {
   const catalog = new StaticImageCatalog();
 
-  test("shipImageUrl replaces spaces with underscores", () => {
-    expect(catalog.shipImageUrl("Algos Navy Issue")).toBe("images/ships/Algos_Navy_Issue.webp");
+  test("shipImageUrl looks up a known ship by id", () => {
+    expect(catalog.shipImageUrl(toShipId("587"), "Rifter")).toBe("images/ships/Rifter.webp");
   });
 
-  test("shipImageUrl leaves single-word names unchanged", () => {
-    expect(catalog.shipImageUrl("Rifter")).toBe("images/ships/Rifter.webp");
+  test("shipImageUrl falls back to a name-keyed path for an unknown id", () => {
+    expect(catalog.shipImageUrl(toShipId("legacy-unknown"), "Algos Navy Issue")).toBe("images/ships/Algos_Navy_Issue.webp");
   });
 
   test("itemIconUrl returns the icon path for a known item", () => {

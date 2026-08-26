@@ -7,7 +7,11 @@ no-new-exports:
   - startupDefaults.ts
   - module.test.ts
   - simConfigSource.ts
+  - simConfigSource.test.ts
+  - index.ts
+  - hullDatalist.test.ts
 ---
+
 
 
 

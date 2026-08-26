@@ -2,7 +2,9 @@
 no-new-exports:
   - moduleSlots.ts
   - catalog.ts
+  - index.ts
 ---
+
 
 # moduleSlots
 

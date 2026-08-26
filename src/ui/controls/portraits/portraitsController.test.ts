@@ -82,7 +82,7 @@ function buildController() {
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((name) => `images/ships/${name.replaceAll(" ", "_")}.webp`),
+    shipImageUrl: vi.fn((_shipId, shipName) => `images/ships/${shipName.replaceAll(" ", "_")}.webp`),
     itemIconUrl: vi.fn((name) => (name === "Stasis Webifier II" ? "images/icons/1234@1x.png" : undefined)),
     droneIconUrl: vi.fn(),
   });

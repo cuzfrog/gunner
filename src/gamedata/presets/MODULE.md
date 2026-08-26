@@ -1,7 +1,10 @@
 ---
 no-new-exports:
   - fittingPresets.ts
+  - catalog.ts
+  - index.ts
 ---
+
 
 # presets
 

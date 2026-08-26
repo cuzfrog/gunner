@@ -55,7 +55,7 @@ function mockI18n(): I18n {
 
 function mockImageCatalog(): ImageCatalog {
   return vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn(),
+    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
     itemIconUrl: vi.fn(),
     droneIconUrl: vi.fn(),
   });

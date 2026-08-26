@@ -71,7 +71,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     if (root.hidden) root.hidden = false;
     if (state.lastId !== profile.id) {
       state.lastId = profile.id;
-      image.src = this.imageCatalog.shipImageUrl(profile.name);
+      image.src = this.imageCatalog.shipImageUrl(profile.id, profile.name);
     }
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();

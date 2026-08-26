@@ -6,6 +6,7 @@ no-new-exports:
   - index.ts
   - iconIds.ts
   - droneIconIds.ts
+  - shipImageIds.ts
 ---
 
 
@@ -13,4 +14,4 @@ no-new-exports:
 
 Static image and icon URL catalog.
 
-`iconIds.ts` and `droneIconIds.ts` are generated data files consumed only by `imageCatalog.ts`. The public surface is `ImageCatalog` and `registerIconsModule`. `StaticImageCatalog` is registered by `module.ts` under the key `imageCatalog`.
+`iconIds.ts`, `droneIconIds.ts`, and `shipImageIds.ts` are generated data files consumed only by `imageCatalog.ts`. The public surface is `ImageCatalog` and `registerIconsModule`. `StaticImageCatalog` is registered by `module.ts` under the key `imageCatalog`.

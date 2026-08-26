@@ -36,7 +36,7 @@ function buildBoosterController() {
     translateDocument: vi.fn(),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn(),
+    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
     itemIconUrl: vi.fn(),
     droneIconUrl: vi.fn(),
   });

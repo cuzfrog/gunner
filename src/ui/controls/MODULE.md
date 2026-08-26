@@ -52,66 +52,19 @@ no-new-exports:
   - turret/sigResIcons.ts
   - turret/turretController.ts
   - turret/turretControllerContract.ts
-  # - turret/turretEls.ts
-  - turret/module.ts
-  - turret/turretInputSet.ts
-  - turret/turretStateResolver.ts
-  - turret/testSupport.ts
   - choiceGroup.test.ts
+  - controlsFormat.ts
   - trackingInput.ts
-  - preferences/index.ts
-  - preferences/module.ts
-  - preferences/preferencesController.test.ts
+  - controlsContract.ts
   - testSupport.ts
   - controlsFormat.test.ts
-  - effectiveReadout/effectiveReadout.test.ts
-  - effectiveReadout/index.ts
-  - effectiveReadout/module.ts
-  - engagementReadout/engagementReadout.test.ts
-  - engagementReadout/index.ts
-  - engagementReadout/module.ts
   - trackingInput.test.ts
-  - domControls/domControls.test.ts
-  - domControls/domControlsContract.ts
-  - domControls/index.ts
-  - domControls/module.ts
   - cradle.ts
-  # index.ts re-exports cross-boundary controls DTOs and is intentionally open for additions.
-  # - index.ts
-  - profile/profileController.test.ts
   - module.test.ts
-  - ewar/ewarController.ts
-  - ewar/ewarController.test.ts
-  - ewar/ewarControllerContract.ts
-  - ewar/module.ts
-  - ewar/MODULE.md
-  - booster/MODULE.md
-  - booster/boosterController.ts
-  - booster/boosterController.test.ts
-  - booster/boosterControllerContract.ts
-  - booster/index.ts
-  - booster/module.ts
-  - rangeOverlay/MODULE.md
-  - rangeOverlay/rangeOverlayController.ts
-  - rangeOverlay/rangeOverlayController.test.ts
-  - rangeOverlay/rangeOverlayControllerContract.ts
-  - rangeOverlay/index.ts
-  - rangeOverlay/module.ts
-  - portraits/MODULE.md
-  - portraits/portraitsController.ts
-  - portraits/portraitsController.test.ts
-  - portraits/portraitsControllerContract.ts
-  - portraits/module.ts
-  - portraits/index.ts
-  - confirm/confirmController.test.ts
-  - confirm/confirmController.ts
-  - confirm/index.ts
-  - confirm/module.ts
-  - profile/index.ts
-  - profile/module.ts
-  - profile/profileChangeTracker.test.ts
-  - profile/profileChangeTracker.ts
+  - elementContract.ts
+  - index.ts
 ---
+
 
 
 

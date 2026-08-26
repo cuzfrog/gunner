@@ -1,15 +1,17 @@
+import type { ShipId } from "../../gamedata/ids";
 import { ITEM_ICON_IDS } from "./iconIds";
 import { DRONE_TYPE_IDS } from "./droneIconIds";
+import { SHIP_IMAGE_FILES } from "./shipImageIds";
 
 export interface ImageCatalog {
-  shipImageUrl(shipName: string): string;
+  shipImageUrl(shipId: ShipId, shipName: string): string;
   itemIconUrl(itemName: string): string | undefined;
   droneIconUrl(droneName?: string): string | undefined;
 }
 
 export class StaticImageCatalog implements ImageCatalog {
-  shipImageUrl(shipName: string): string {
-    return `images/ships/${shipName.replaceAll(" ", "_")}.webp`;
+  shipImageUrl(shipId: ShipId, shipName: string): string {
+    return SHIP_IMAGE_FILES[shipId] ?? `images/ships/${shipName.replaceAll(" ", "_")}.webp`;
   }
 
   itemIconUrl(itemName: string): string | undefined {

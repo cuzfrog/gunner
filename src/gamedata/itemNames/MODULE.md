@@ -6,7 +6,13 @@ no-new-exports:
   - item-name-collisions-en.ts
   - item-name-collisions-zh.ts
   - item-name-collisions-ja.ts
+  - catalog.test.ts
+  - resolver.test.ts
+  - catalog.ts
+  - index.ts
+  - resolver.ts
 ---
+
 
 # itemNames
 

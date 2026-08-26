@@ -1,6 +1,6 @@
 import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
-import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
+import { FITTING_DB, type ChargeStats, type FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
 
 export interface ImportedTurretBase {
@@ -57,6 +57,7 @@ export class ChargeCatalogImpl implements ChargeCatalog {
   constructor({ fittingDb, gunFamilies }: ChargeCatalogDeps) {
     this.charges = fittingDb.charges;
     this.gunFamilies = gunFamilies;
+    if (this.charges === FITTING_DB.charges) assertChargeFamilyBases(this.charges);
   }
 
   usualForChargeSize(chargeSize: number): TypeId {
@@ -95,6 +96,7 @@ export class ChargeCatalogImpl implements ChargeCatalog {
     };
   }
 
+  // Legacy migration only: settingsCompat resolves stored charge names to TypeIds.
   idForName(name: string): TypeId | undefined {
     for (const stats of Object.values(this.charges)) {
       if (stats.name === name) return stats.id;
@@ -252,6 +254,18 @@ function _chargeStem(name: string): string {
     if (name.endsWith(suffix)) return name.slice(0, -suffix.length);
   }
   return name;
+}
+
+function assertChargeFamilyBases(charges: Readonly<Record<string, ChargeStats>>): void {
+  const matched = new Set<string>();
+  for (const stats of Object.values(charges)) {
+    const stem = _chargeStem(stats.name);
+    for (const base of Object.keys(CHARGE_FAMILY_BY_BASE)) {
+      if (stem === base || stem.endsWith(` ${base}`)) matched.add(base);
+    }
+  }
+  const missing = Object.keys(CHARGE_FAMILY_BY_BASE).filter((base) => !matched.has(base));
+  if (missing.length > 0) throw new Error(`CHARGE_FAMILY_BY_BASE keys have no matching charge name: ${missing.join(", ")}`);
 }
 
 export { _turretChargeFamily };
