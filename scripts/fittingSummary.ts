@@ -1,6 +1,5 @@
 // Generated from EVE fitting analysis heuristics (2026-08-20). Do not edit by hand.
 
-import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { moduleLines, parseEft } from "../src/fitting/eft";
 import type { EftModule, QuantityItem } from "../src/fitting/eft";
 
@@ -31,7 +30,7 @@ const NON_TANK_MODULE = /Afterburner|Microwarpdrive|Heat Sink|Gyrostabilizer|Mag
 const NON_TANK_BODY = /Laser|Blaster|Rail(?:gun)?|Cannon|Launcher|Artillery|Howitzer|Torpedo|Rocket|Missile|Tracking Computer/;
 
 export function summarizeFitting(text: string): FittingSummary | undefined {
-  const parsed = parseEft(text, MODULE_SLOT_CATALOG);
+  const parsed = parseEft(text);
   if (!parsed) return undefined;
 
   const modules = moduleLines(parsed).filter((m) => !m.offline);
@@ -63,11 +62,8 @@ export function renameFittingText(text: string): string | undefined {
   const summary = summarizeFitting(text);
   if (!summary) return undefined;
 
-  const parsed = parseEft(text, MODULE_SLOT_CATALOG);
-  if (!parsed) return undefined;
-
   const rest = text.replace(/^\[[^\]]*\]\r?\n?/, "").trimStart();
-  return `[${parsed.hullName}, ${summary.displayName}]\n${rest}`;
+  return `[${summary.shipName}, ${summary.displayName}]\n${rest}`;
 }
 
 // --- Weapon detection ---

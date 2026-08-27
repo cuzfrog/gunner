@@ -163,6 +163,8 @@ export const RIFTER_MODULE: PropulsionModule = {
   kind: "microwarpdrive",
   sizeTier: "small",
   label: "5MN Microwarpdrive",
+  iconId: toTypeId("434"),
+  defaultModuleId: toTypeId("434"),
   thrust: 1_500_000,
   speedBonus: 5,
   massAddition: 500_000,

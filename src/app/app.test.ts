@@ -16,6 +16,7 @@ import {
   type SpeedBreakdown,
   type TurretSpec,
 } from "../sim";
+import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
@@ -247,11 +248,11 @@ describe("AppImpl", () => {
     const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };
     simulation.snapshot.mockReturnValue({ ...snapshot, shipA: shipAShip, shipB: shipBShip });
     const shipASpeed: SpeedBreakdown = {
-      effects: [{ family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 }],
+      effects: [{ family: "web" as const, moduleId: toTypeId("527"), multiplier: 0.45 }],
       propulsionSuppressed: false,
     };
     const shipBSpeed: SpeedBreakdown = {
-      effects: [{ family: "scrambler" as const, moduleName: "Warp Scrambler II", multiplier: 1 }],
+      effects: [{ family: "scrambler" as const, moduleId: toTypeId("448"), multiplier: 1 }],
       propulsionSuppressed: true,
     };
     const disruptionA: DisruptionBreakdown = {
