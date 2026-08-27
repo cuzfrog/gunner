@@ -1,3 +1,4 @@
+import type { TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "./stackingPenalty";
 import type {
   AppliedEwarEffect,
@@ -52,7 +53,7 @@ export class EwarResolverImpl implements EwarResolver {
     return this.scramblerAttribution(projection, distance) !== undefined;
   }
 
-  private scramblerAttribution(projection: EwarProjection | undefined, distance: number): { readonly moduleName: string } | undefined {
+  private scramblerAttribution(projection: EwarProjection | undefined, distance: number): { readonly moduleId: TypeId } | undefined {
     if (!projection) return undefined;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const spec = projection.loadout.scramblers[i];
@@ -60,7 +61,7 @@ export class EwarResolverImpl implements EwarResolver {
       if (activation && !activation.active) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
-      if (range >= distance) return { moduleName: spec.moduleName };
+      if (range >= distance) return { moduleId: spec.moduleId };
     }
     return undefined;
   }
@@ -78,7 +79,7 @@ export class EwarResolverImpl implements EwarResolver {
   appliedEffects(projection: EwarProjection | undefined, distance: number): readonly AppliedEwarEffect[] {
     if (!projection) return [];
     const effects: AppliedEwarEffect[] = [];
-    const representatives: Partial<Record<EwarEffectFamily, string>> = {};
+    const representatives: Partial<Record<EwarEffectFamily, TypeId>> = {};
     for (let i = 0; i < projection.loadout.webs.length; i++) {
       const spec = projection.loadout.webs[i];
       const activation = projection.activation?.webs[i];
@@ -86,7 +87,7 @@ export class EwarResolverImpl implements EwarResolver {
       if (representatives.web !== undefined) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
-      if (range >= distance) representatives.web = spec.moduleName;
+      if (range >= distance) representatives.web = spec.moduleId;
     }
     for (let i = 0; i < projection.loadout.grapplers.length; i++) {
       const spec = projection.loadout.grapplers[i];
@@ -95,7 +96,7 @@ export class EwarResolverImpl implements EwarResolver {
       if (representatives.grappler !== undefined) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
       const optimal = spec.optimal * overloadBonus;
-      if (this.falloffEffectiveness(distance, optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.grappler = spec.moduleName;
+      if (this.falloffEffectiveness(distance, optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.grappler = spec.moduleId;
     }
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const spec = projection.loadout.scramblers[i];
@@ -104,19 +105,19 @@ export class EwarResolverImpl implements EwarResolver {
       if (representatives.scrambler !== undefined) continue;
       const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
       const range = spec.maxRange * overloadBonus;
-      if (range >= distance) representatives.scrambler = spec.moduleName;
+      if (range >= distance) representatives.scrambler = spec.moduleId;
     }
     for (let i = 0; i < projection.loadout.disruptors.length; i++) {
       const spec = projection.loadout.disruptors[i];
       const activation = projection.activation?.disruptors[i];
       if (activation && !activation.active) continue;
       if (representatives.disruptor !== undefined) continue;
-      if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.disruptor = spec.moduleName;
+      if (this.falloffEffectiveness(distance, spec.optimal, spec.falloff) >= MIN_APPLIED_EFFECTIVENESS) representatives.disruptor = spec.moduleId;
     }
-    if (representatives.web !== undefined) effects.push({ family: "web", moduleName: representatives.web });
-    if (representatives.grappler !== undefined) effects.push({ family: "grappler", moduleName: representatives.grappler });
-    if (representatives.scrambler !== undefined) effects.push({ family: "scrambler", moduleName: representatives.scrambler });
-    if (representatives.disruptor !== undefined) effects.push({ family: "disruptor", moduleName: representatives.disruptor });
+    if (representatives.web !== undefined) effects.push({ family: "web", moduleId: representatives.web });
+    if (representatives.grappler !== undefined) effects.push({ family: "grappler", moduleId: representatives.grappler });
+    if (representatives.scrambler !== undefined) effects.push({ family: "scrambler", moduleId: representatives.scrambler });
+    if (representatives.disruptor !== undefined) effects.push({ family: "disruptor", moduleId: representatives.disruptor });
     return effects;
   }
 
@@ -130,7 +131,7 @@ export class EwarResolverImpl implements EwarResolver {
         if (activation && !activation.active) continue;
         const overloadBonus = activation?.overloaded ? 1 + spec.overloadRangeBonusPercent / 100 : 1;
         const range = spec.maxRange * overloadBonus;
-        if (range >= distance) webCandidates.push({ family: "web", moduleName: spec.moduleName, multiplier: 1 - spec.speedFactor });
+        if (range >= distance) webCandidates.push({ family: "web", moduleId: spec.moduleId, multiplier: 1 - spec.speedFactor });
       }
       for (let i = 0; i < projection.loadout.grapplers.length; i++) {
         const spec = projection.loadout.grapplers[i];
@@ -140,7 +141,7 @@ export class EwarResolverImpl implements EwarResolver {
         const optimal = spec.optimal * overloadBonus;
         const effectiveness = this.falloffEffectiveness(distance, optimal, spec.falloff);
         if (effectiveness > 0) {
-          grapplerCandidates.push({ family: "grappler", moduleName: spec.moduleName, multiplier: 1 - spec.speedFactor * effectiveness });
+          grapplerCandidates.push({ family: "grappler", moduleId: spec.moduleId, multiplier: 1 - spec.speedFactor * effectiveness });
         }
       }
     }
@@ -151,7 +152,7 @@ export class EwarResolverImpl implements EwarResolver {
     if (grappler !== undefined) effects.push(grappler);
     const scrambler = this.scramblerAttribution(projection, distance);
     const propulsionSuppressed = scrambler !== undefined;
-    if (scrambler !== undefined) effects.push({ family: "scrambler", moduleName: scrambler.moduleName, multiplier: 1 });
+    if (scrambler !== undefined) effects.push({ family: "scrambler", moduleId: scrambler.moduleId, multiplier: 1 });
     return { effects, propulsionSuppressed };
   }
 

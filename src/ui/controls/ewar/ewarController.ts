@@ -217,24 +217,24 @@ export class EwarControllerImpl implements EwarController {
     const webTotal = state.loadout.webs.length;
     const webActive = state.activation.webs.filter((w) => w.active).length;
     const webTitle = webTotal > 0 ? this.ewarEffectDescriber.webHint(projection) : "";
-    if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleName, webActive, webTotal, webTitle);
+    if (webTotal > 0) this.appendSummaryItem(summary, state.loadout.webs[0].moduleId, webActive, webTotal, webTitle);
     const grapplerTotal = state.loadout.grapplers.length;
     const grapplerActive = state.activation.grapplers.filter((g) => g.active).length;
     const grapplerTitle = grapplerTotal > 0 ? this.ewarEffectDescriber.grapplerHint(projection) : "";
-    if (grapplerTotal > 0) this.appendSummaryItem(summary, state.loadout.grapplers[0].moduleName, grapplerActive, grapplerTotal, grapplerTitle);
+    if (grapplerTotal > 0) this.appendSummaryItem(summary, state.loadout.grapplers[0].moduleId, grapplerActive, grapplerTotal, grapplerTitle);
     const disruptorTotal = state.loadout.disruptors.length;
     const disruptorActive = state.activation.disruptors.filter((d) => d.active).length;
     const disruptorTitle = disruptorTotal > 0 ? this.ewarEffectDescriber.disruptorHint(projection) : "";
-    if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleName, disruptorActive, disruptorTotal, disruptorTitle);
+    if (disruptorTotal > 0) this.appendSummaryItem(summary, state.loadout.disruptors[0].moduleId, disruptorActive, disruptorTotal, disruptorTitle);
     const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
     const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
-    if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleName, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
+    if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleId, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
     const item = document.createElement("span");
     item.className = "ewar-summary-item";
-    const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
+    const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
     const img = document.createElement("img");
     img.className = "ewar-summary-icon";
     img.alt = "";
@@ -277,7 +277,7 @@ export class EwarControllerImpl implements EwarController {
           script = undefined;
         } else {
           const byId = typeIdFromString(savedScript);
-          script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId !== undefined && s.moduleId === byId) : undefined;
+          script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId === byId) : undefined;
           if (script === undefined) script = disruptor.defaultScript;
         }
         return {
@@ -361,18 +361,18 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
-  private moduleDisplayName(spec: { readonly moduleName: string; readonly moduleId?: TypeId }): string {
-    return spec.moduleId !== undefined ? this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current()) : spec.moduleName;
+  private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
+    return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, spec: { readonly moduleName: string; readonly moduleId?: TypeId }): HTMLButtonElement {
+  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }): HTMLButtonElement {
     const displayName = this.moduleDisplayName(spec);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", displayName);
-    const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleName);
+    const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
     const img = document.createElement("img");
     img.className = "ewar-module-icon";
     if (iconUrl !== undefined) img.src = iconUrl;
@@ -463,9 +463,8 @@ export class EwarControllerImpl implements EwarController {
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
-      if (script.moduleId === undefined) continue;
       const name = this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
-      const iconUrl = this.imageCatalog.itemIconUrl(script.name);
+      const iconUrl = this.imageCatalog.itemIconUrl(script.moduleId);
       const value = script.moduleId;
       const button = this.createScriptOptionButton(
         value,

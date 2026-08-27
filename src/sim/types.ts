@@ -96,7 +96,7 @@ export interface HitChanceBreakdown {
 
 export interface DisruptionScriptSpec {
   readonly name: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly trackingMultiplier: number;
   readonly optimalMultiplier: number;
   readonly falloffMultiplier: number;
@@ -104,7 +104,7 @@ export interface DisruptionScriptSpec {
 
 export interface TurretScriptSpec {
   readonly name: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly trackingMultiplier: number;
   readonly optimalMultiplier: number;
   readonly falloffMultiplier: number;
@@ -112,7 +112,7 @@ export interface TurretScriptSpec {
 
 export interface StasisWebSpec {
   readonly moduleName: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly maxRange: number;
   readonly speedFactor: number;
   readonly overloadRangeBonusPercent: number;
@@ -120,7 +120,7 @@ export interface StasisWebSpec {
 
 export interface StasisGrapplerSpec {
   readonly moduleName: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly optimal: number;
   readonly falloff: number;
   readonly speedFactor: number;
@@ -129,7 +129,7 @@ export interface StasisGrapplerSpec {
 
 export interface TrackingDisruptorSpec {
   readonly moduleName: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly optimal: number;
   readonly falloff: number;
   readonly disruption: number;
@@ -139,14 +139,14 @@ export interface TrackingDisruptorSpec {
 
 export interface WarpScramblerSpec {
   readonly moduleName: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly maxRange: number;
   readonly overloadRangeBonusPercent: number;
 }
 
 export interface TrackingBoosterSpec {
   readonly moduleName: string;
-  readonly moduleId?: TypeId;
+  readonly moduleId: TypeId;
   readonly trackingBonusPercent: number;
   readonly optimalBonusPercent: number;
   readonly falloffBonusPercent: number;
@@ -207,12 +207,12 @@ export type EwarEffectFamily = "web" | "grappler" | "scrambler" | "disruptor";
 
 export interface AppliedEwarEffect {
   readonly family: EwarEffectFamily;
-  readonly moduleName: string;
+  readonly moduleId: TypeId;
 }
 
 export interface SpeedEffectAttribution {
   readonly family: EwarEffectFamily;
-  readonly moduleName: string;
+  readonly moduleId: TypeId;
   readonly multiplier: number; // 0..1 factor applied to speed by this module alone
 }
 
