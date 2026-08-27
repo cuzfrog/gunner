@@ -130,6 +130,15 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.hidden).toBe(true);
   });
 
+  test("shipImageUrl returning undefined sets an empty src without crashing", () => {
+    const { controller, els, profiles, imageCatalog } = buildController();
+    profiles.shipA = SHIP_A_PROFILE;
+    imageCatalog.shipImageUrl.mockReturnValue(undefined);
+    controller.update();
+    expect(els.shipA.hidden).toBe(false);
+    expect(els.shipAImage.src).toBe("");
+  });
+
   test("applied empty hides the effects row", () => {
     const { controller, els, profiles, ewarResolver } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
