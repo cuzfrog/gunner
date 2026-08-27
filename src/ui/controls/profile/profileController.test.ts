@@ -125,12 +125,20 @@ class StubProfileChangeTracker implements ProfileChangeTracker {
 function fakeProfileEls(): ProfileEls {
   const profilePopup = new FakeElement() as unknown as HTMLElement;
   const newProfilePopup = new FakeElement() as unknown as HTMLElement;
+  const newProfileDirtyNote = new FakeElement() as unknown as HTMLElement;
+  const newProfileCurrentSection = new FakeElement() as unknown as HTMLElement;
+  const newProfileSaveCurrent = new FakeElement() as unknown as HTMLButtonElement;
+  const newProfileCurrentName = new FakeElement() as unknown as HTMLElement;
   const newProfileName = new FakeElement() as unknown as HTMLInputElement;
   const newProfileConfirm = new FakeElement() as unknown as HTMLButtonElement;
-  const newProfileCancel = new FakeElement() as unknown as HTMLButtonElement;
+  const newProfileStartBlank = new FakeElement() as unknown as HTMLButtonElement;
+  newProfilePopup.appendChild(newProfileDirtyNote);
+  newProfilePopup.appendChild(newProfileCurrentSection);
+  newProfileCurrentSection.appendChild(newProfileSaveCurrent);
+  newProfileSaveCurrent.appendChild(newProfileCurrentName);
   newProfilePopup.appendChild(newProfileName);
   newProfilePopup.appendChild(newProfileConfirm);
-  newProfilePopup.appendChild(newProfileCancel);
+  newProfilePopup.appendChild(newProfileStartBlank);
   return {
     profileSave: new FakeElement() as unknown as HTMLButtonElement,
     profileSelectTrigger: new FakeElement() as unknown as HTMLButtonElement,
@@ -139,9 +147,13 @@ function fakeProfileEls(): ProfileEls {
     profileDelete: new FakeElement() as unknown as HTMLButtonElement,
     profileNew: new FakeElement() as unknown as HTMLButtonElement,
     newProfilePopup,
+    newProfileDirtyNote,
+    newProfileCurrentSection,
+    newProfileSaveCurrent,
+    newProfileCurrentName,
     newProfileName,
     newProfileConfirm,
-    newProfileCancel,
+    newProfileStartBlank,
     shareStatus: new FakeElement() as unknown as HTMLElement,
   };
 }
@@ -226,11 +238,15 @@ describe("ProfileController", () => {
     expect(changeTracker.setBaseline).toHaveBeenCalledWith(expect.any(Object));
   });
 
-  test("save writes to the selected profile only", async () => {
+  test("save with no selection opens the new-profile popup instead of saving", async () => {
     const { controller, els, settingsStore } = build({ list: ["brawler"] });
     await controller.saveProfile();
+    expect(els.newProfilePopup.hidden).toBe(false);
     expect(settingsStore.saveProfile).not.toHaveBeenCalled();
+  });
 
+  test("save with a selection quick-saves to the selected profile", async () => {
+    const { controller, els, settingsStore } = build({ list: ["brawler"] });
     controller.markLoaded("brawler");
     await controller.saveProfile();
     expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
@@ -380,13 +396,14 @@ describe("ProfileController", () => {
     expect(onLoaded).toHaveBeenLastCalledWith("brawler");
   });
 
-  test("updateActionBarState drives save and delete from selection and dirty state", () => {
+  test("updateActionBarState drives save from dirty only and delete from selection", () => {
     const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
 
     controller.updateActionBarState();
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
     expect(els.profileDelete.disabled).toBe(true);
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
 
     controller.markLoaded("brawler");
     vi.mocked(els.profileSave.classList.toggle).mockClear();
@@ -394,13 +411,21 @@ describe("ProfileController", () => {
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
     expect(els.profileSave.disabled).toBe(true);
     expect(els.profileDelete.disabled).toBe(false);
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
 
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", true);
     expect(els.profileSave.disabled).toBe(false);
+    expect(els.newProfileSaveCurrent.disabled).toBe(false);
 
     controller.refresh();
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
+    controller.updateActionBarState();
+    expect(els.profileSave.disabled).toBe(false);
+    expect(els.profileDelete.disabled).toBe(true);
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
+
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
     controller.updateActionBarState();
     expect(els.profileSave.classList.toggle).toHaveBeenLastCalledWith("is-unsaved", false);
@@ -419,32 +444,31 @@ describe("ProfileController", () => {
     expect(popupGroup.open).toHaveBeenCalled();
   });
 
-  test("confirm with an empty name clears ship state and saves nothing", async () => {
+  test("confirm with an empty name saves nothing and does not reset", async () => {
     const { controller, els, settingsStore, onNewProfile } = build();
     controller.toggleNewProfilePopup();
     els.newProfileName.value = "   ";
     (els.newProfileConfirm as unknown as FakeElement).trigger("click");
     await Promise.resolve();
-    expect(onNewProfile).toHaveBeenCalledTimes(1);
+    expect(onNewProfile).not.toHaveBeenCalled();
     expect(settingsStore.saveProfile).not.toHaveBeenCalled();
-    expect(els.newProfilePopup.hidden).toBe(true);
   });
 
-  test("confirm with a name clears ship state and saves the cleared snapshot under the name", async () => {
-    const { controller, els, settingsStore, onNewProfile } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+  test("confirm with a name saves the current snapshot under the name without resetting", async () => {
+    const { controller, els, settingsStore, onNewProfile, snapshotSource } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleNewProfilePopup();
     els.newProfileName.value = "kappa";
     (els.newProfileName as unknown as FakeElement).trigger("input");
     (els.newProfileConfirm as unknown as FakeElement).trigger("click");
     await Promise.resolve();
-    expect(onNewProfile).toHaveBeenCalledTimes(1);
-    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kappa", expect.any(Object));
+    expect(onNewProfile).not.toHaveBeenCalled();
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("kappa", snapshotSource());
     expect(settingsStore.selectProfile).toHaveBeenLastCalledWith("kappa");
     expect(controller.selectedName()).toBe("kappa");
     expect(els.shareStatus.textContent).toBe("status.profileSaved");
   });
 
-  test("new-profile confirm is disabled for empty, whitespace or duplicate names and enabled for a fresh name", () => {
+  test("new-profile confirm is disabled for empty or whitespace and enabled for any non-empty name", () => {
     const { controller, els } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleNewProfilePopup();
 
@@ -456,7 +480,7 @@ describe("ProfileController", () => {
 
     els.newProfileName.value = "brawler";
     (els.newProfileName as unknown as FakeElement).trigger("input");
-    expect(els.newProfileConfirm.disabled).toBe(true);
+    expect(els.newProfileConfirm.disabled).toBe(false);
 
     els.newProfileName.value = "   ";
     (els.newProfileName as unknown as FakeElement).trigger("input");
@@ -467,7 +491,7 @@ describe("ProfileController", () => {
     const { controller, els, settingsStore } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleNewProfilePopup();
 
-    els.newProfileName.value = "brawler";
+    els.newProfileName.value = "   ";
     (els.newProfileName as unknown as FakeElement).trigger("input");
     (els.newProfileName as unknown as FakeElement).trigger("keydown", { key: "Enter", preventDefault: vi.fn() });
     await Promise.resolve();
@@ -482,14 +506,23 @@ describe("ProfileController", () => {
     expect(els.newProfilePopup.hidden).toBe(true);
   });
 
-  test("cancel closes the new profile popup without action", async () => {
-    const { controller, els, settingsStore, onNewProfile } = build();
+  test("save-as with a duplicate name asks confirm.overwriteProfile and aborts on cancel", async () => {
+    const { controller, els, settingsStore, confirmController } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.toggleNewProfilePopup();
+    vi.mocked(confirmController.confirm).mockResolvedValue(false);
     els.newProfileName.value = "brawler";
-    (els.newProfileCancel as unknown as FakeElement).trigger("click");
-    expect(els.newProfilePopup.hidden).toBe(true);
-    expect(onNewProfile).not.toHaveBeenCalled();
+    (els.newProfileName as unknown as FakeElement).trigger("input");
+    (els.newProfileConfirm as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(confirmController.confirm).toHaveBeenLastCalledWith("confirm.overwriteProfile");
     expect(settingsStore.saveProfile).not.toHaveBeenCalled();
+    expect(els.newProfilePopup.hidden).toBe(false);
+    expect(els.newProfileName.value).toBe("brawler");
+
+    vi.mocked(confirmController.confirm).mockResolvedValue(true);
+    (els.newProfileConfirm as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
   });
 
   test("outside pointer-down and Escape close the new profile popup without action", () => {
@@ -504,6 +537,104 @@ describe("ProfileController", () => {
     popupGroup.onKeyDown({ key: "Escape" });
     expect(els.newProfilePopup.hidden).toBe(true);
     expect(els.profileNew.focus).toHaveBeenCalled();
+  });
+
+  test("popup open with no profile and clean hides current section, disables start-blank", () => {
+    const { controller, els, changeTracker } = build();
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
+    controller.toggleNewProfilePopup();
+    expect(els.newProfileDirtyNote.hidden).toBe(true);
+    expect(els.newProfileCurrentSection.hidden).toBe(true);
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
+    expect(els.newProfileStartBlank.disabled).toBe(true);
+  });
+
+  test("popup open with no profile and dirty shows dirty note, hides current section, enables start-blank", () => {
+    const { controller, els, changeTracker } = build();
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
+    controller.toggleNewProfilePopup();
+    expect(els.newProfileDirtyNote.hidden).toBe(false);
+    expect(els.newProfileCurrentSection.hidden).toBe(true);
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
+    expect(els.newProfileStartBlank.disabled).toBe(false);
+  });
+
+  test("popup open with profile and clean shows current section, disables save-current and start-blank stays enabled", () => {
+    const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.markLoaded("brawler");
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
+    controller.toggleNewProfilePopup();
+    expect(els.newProfileDirtyNote.hidden).toBe(true);
+    expect(els.newProfileCurrentSection.hidden).toBe(false);
+    expect(els.newProfileCurrentName.textContent).toBe("brawler");
+    expect(els.newProfileSaveCurrent.disabled).toBe(true);
+    expect(els.newProfileStartBlank.disabled).toBe(false);
+  });
+
+  test("popup open with profile and dirty shows dirty note, current section, enables save-current", () => {
+    const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.markLoaded("brawler");
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
+    controller.toggleNewProfilePopup();
+    expect(els.newProfileDirtyNote.hidden).toBe(false);
+    expect(els.newProfileCurrentSection.hidden).toBe(false);
+    expect(els.newProfileCurrentName.textContent).toBe("brawler");
+    expect(els.newProfileSaveCurrent.disabled).toBe(false);
+    expect(els.newProfileStartBlank.disabled).toBe(false);
+  });
+
+  test("save-current from popup quick-saves to the selected profile and closes", async () => {
+    const { controller, els, settingsStore, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.markLoaded("brawler");
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
+    controller.toggleNewProfilePopup();
+    (els.newProfileSaveCurrent as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(settingsStore.saveProfile).toHaveBeenLastCalledWith("brawler", expect.any(Object));
+    expect(els.shareStatus.textContent).toBe("status.profileSaved");
+  });
+
+  test("start-blank emits newProfile without confirm when clean", async () => {
+    const { controller, els, onNewProfile, confirmController, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.markLoaded("brawler");
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
+    controller.toggleNewProfilePopup();
+    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(confirmController.confirm).not.toHaveBeenCalled();
+    expect(onNewProfile).toHaveBeenCalledTimes(1);
+    expect(els.newProfilePopup.hidden).toBe(true);
+  });
+
+  test("start-blank asks confirm.discardChanges when dirty; cancel aborts and preserves popup, accept emits", async () => {
+    const { controller, els, onNewProfile, confirmController, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
+    controller.markLoaded("brawler");
+    vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
+    controller.toggleNewProfilePopup();
+    els.newProfileName.value = "kappa";
+    vi.mocked(confirmController.confirm).mockResolvedValue(false);
+    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(confirmController.confirm).toHaveBeenLastCalledWith("confirm.discardChanges");
+    expect(onNewProfile).not.toHaveBeenCalled();
+    expect(els.newProfilePopup.hidden).toBe(false);
+    expect(els.newProfileName.value).toBe("kappa");
+
+    vi.mocked(confirmController.confirm).mockResolvedValue(true);
+    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    await Promise.resolve();
+    expect(onNewProfile).toHaveBeenCalledTimes(1);
+    expect(els.newProfilePopup.hidden).toBe(true);
+  });
+
+  test("save icon with no selection opens popup and returns focus to save icon on Escape", () => {
+    const { controller, els, popupGroup } = build();
+    void controller.saveProfile();
+    expect(els.newProfilePopup.hidden).toBe(false);
+    popupGroup.onKeyDown({ key: "Escape" });
+    expect(els.newProfilePopup.hidden).toBe(true);
+    expect(els.profileSave.focus).toHaveBeenCalled();
   });
 
   test("showStatus displays translated text, clears after the timeout, and cancels previous timeouts", () => {

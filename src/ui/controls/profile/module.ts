@@ -37,9 +37,13 @@ function collectProfileEls(els: ControlsElements): ProfileEls {
     profileDelete: els.profileDelete,
     profileNew: els.profileNew,
     newProfilePopup: els.newProfilePopup,
+    newProfileDirtyNote: els.newProfileDirtyNote,
+    newProfileCurrentSection: els.newProfileCurrentSection,
+    newProfileSaveCurrent: els.newProfileSaveCurrent,
+    newProfileCurrentName: els.newProfileCurrentName,
     newProfileName: els.newProfileName,
     newProfileConfirm: els.newProfileConfirm,
-    newProfileCancel: els.newProfileCancel,
+    newProfileStartBlank: els.newProfileStartBlank,
     shareStatus: els.shareStatus,
   };
 }
