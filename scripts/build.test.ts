@@ -1,8 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
-import { ITEM_ICON_IDS } from "../src/ui/icons/iconIds";
-import { DRONE_TYPE_IDS } from "../src/ui/icons/droneIconIds";
+import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
 const DISTRIBUTION_DIRECTORY = "dist";
 const STYLES_LINK_PATTERN = /href="styles-[a-f0-9]{8}\.css"/;
@@ -36,11 +35,14 @@ describe("build", () => {
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "author-portrait.jpg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "corporation-emblem.png"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "ships", "Abaddon.webp"))).toBe(true);
-    const knownIconId = ITEM_ICON_IDS[toTypeId("12608")];
-    if (knownIconId === undefined) throw new Error("Hail S has no icon id");
-    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "icons", `${knownIconId}@1x.png`))).toBe(true);
-    const knownDroneTypeId = DRONE_TYPE_IDS[toTypeId("2454")];
-    if (knownDroneTypeId === undefined) throw new Error("Hobgoblin I has no drone type id");
-    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "icons", `${knownDroneTypeId}@1x.png`))).toBe(true);
+    const hailIconFile = TYPE_ICON_FILES[toTypeId("12608")];
+    if (hailIconFile === undefined) throw new Error("Hail S has no icon file");
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", hailIconFile))).toBe(true);
+    const droneIconFile = TYPE_ICON_FILES[toTypeId("2454")];
+    if (droneIconFile === undefined) throw new Error("Hobgoblin I has no icon file");
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", droneIconFile))).toBe(true);
+    const waspIconFile = TYPE_ICON_FILES[toTypeId("1201")];
+    if (waspIconFile === undefined) throw new Error("Wasp I has no icon file");
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", waspIconFile))).toBe(true);
   });
 });

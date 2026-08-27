@@ -1,14 +1,13 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { basename, extname, join } from "node:path";
-import { ITEM_ICON_IDS } from "../src/ui/icons/iconIds";
-import { DRONE_TYPE_IDS } from "../src/ui/icons/droneIconIds";
+import { basename, dirname, extname, join } from "node:path";
+import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 import { updateIndexHtml } from "./generate-combatant-sections";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";
 const SHIP_IMAGES_SOURCE = "data/ship-images";
-const ICONS_SOURCE_DIRECTORY = "data/ship-modules/icons";
+const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
 const STYLES_FILE_NAME = "styles.css";
 const INDEX_FILE_NAME = "index.html";
 
@@ -86,12 +85,12 @@ for (const entry of readdirSync(SHIP_IMAGES_SOURCE, { withFileTypes: true })) {
   }
 }
 
-const iconsDist = join(DISTRIBUTION_DIRECTORY, "images", "icons");
-mkdirSync(iconsDist, { recursive: true });
-for (const iconId of new Set([...Object.values(ITEM_ICON_IDS), ...Object.values(DRONE_TYPE_IDS)])) {
-  const src = join(ICONS_SOURCE_DIRECTORY, `${iconId}@1x.png`);
+for (const file of new Set(Object.values(TYPE_ICON_FILES))) {
+  const src = join(ICONS_SOURCE_DIRECTORY, file);
   if (!existsSync(src)) throw new Error(`Missing icon source: ${src}`);
-  cpSync(src, join(iconsDist, `${iconId}@1x.png`));
+  const dst = join(DISTRIBUTION_DIRECTORY, "images", file);
+  mkdirSync(dirname(dst), { recursive: true });
+  cpSync(src, dst);
 }
 
 const stylesContent = STYLES_MANIFEST.map((path) => readFileSync(join(PUBLIC_DIRECTORY, path))).join("");

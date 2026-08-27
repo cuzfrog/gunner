@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { StackingPenalty } from "../src/sim";
 import { FittingImportImpl, type FittingRow } from "../src/fitting/fittingImport";
@@ -13,6 +13,7 @@ import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { FITTING_DB } from "../src/gamedata/fittingDb";
 import { PRESET_FITTINGS } from "../src/gamedata/presets/fittingPresets";
 import { StaticImageCatalog } from "../src/ui/icons/imageCatalog";
+import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
 const ALLOWED_NO_IDENTITY = new Set([
   "Adaptive Invulnerability Field II",
@@ -144,5 +145,13 @@ describe("bundled fitting icon coverage", () => {
       }
     }
     expect(failures, failures.join("\n")).toEqual([]);
+  });
+
+  test("every TYPE_ICON_FILES entry has a corresponding icon file on disk", () => {
+    const missing: string[] = [];
+    for (const file of new Set(Object.values(TYPE_ICON_FILES))) {
+      if (!existsSync(join("data/ship-modules", file))) missing.push(file);
+    }
+    expect(missing, `Missing icon files: ${missing.join(", ")}`).toEqual([]);
   });
 });

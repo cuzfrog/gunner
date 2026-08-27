@@ -40,7 +40,7 @@ describe("StaticImageCatalog", () => {
   });
 
   test("itemIconUrl resolves a drone id that only lives in the drone table", () => {
-    expect(catalog.itemIconUrl(toTypeId("2454"))).toBe("images/icons/2454@1x.png");
+    expect(catalog.itemIconUrl(toTypeId("2454"))).toBe("images/type-icons/2454@1x.png");
   });
 
   test("itemIconUrl resolves a charge id whose icon is keyed by iconId", () => {

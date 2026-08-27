@@ -96,7 +96,7 @@ function createImageCatalog(): ImageCatalog {
     itemIconUrl: vi.fn((id: TypeId) => {
       if (id === AC_ID) return "images/icons/1@1x.png";
       if (id === HAIL_ID) return "images/icons/hail_s.png";
-      if (id === DRONE_ID) return "images/icons/2456@1x.png";
+      if (id === DRONE_ID) return "images/type-icons/2456@1x.png";
       if (id === SCRIPT_ID) return "images/icons/3344@1x.png";
       return undefined;
     }),
@@ -272,7 +272,7 @@ describe("DomFittingPreview", () => {
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];
     expect(droneRow.children[0].tagName).toBe("img");
-    expect(droneRow.children[0].src).toBe("images/icons/2456@1x.png");
+    expect(droneRow.children[0].src).toBe("images/type-icons/2456@1x.png");
   });
 
   test("non-drone items in the drones section resolve icons through itemIconUrl", () => {
