@@ -60,35 +60,59 @@ describe("_filterItemNames", () => {
     };
   }
 
-  test("includes published fittable category items", () => {
+  test("includes published in-scope category items", () => {
     const itemNames = { "A": { en: "A", zh: "a", ja: "a" } };
-    const nameToType = new Map([["A", makeType({ published: 1, groupID: 1 })]]);
+    const idToType = new Map([["A", makeType({ published: 1, groupID: 1 })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
-    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
     expect(Object.keys(result)).toContain("A");
   });
 
-  test("excludes published structure modules", () => {
+  test("includes published structure modules (category 66 is in scope)", () => {
     const itemNames = { "Structure X": { en: "Structure X", zh: "x", ja: "x" } };
-    const nameToType = new Map([["Structure X", makeType({ published: 1, groupID: 2, typeName: "Structure X" })]]);
+    const idToType = new Map([["Structure X", makeType({ published: 1, groupID: 2, typeName: "Structure X" })]]);
     const groups = { "2": { groupID: 2, categoryID: 66 } };
-    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
-    expect(Object.keys(result)).not.toContain("Structure X");
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
+    expect(Object.keys(result)).toContain("Structure X");
   });
 
-  test("excludes unpublished modules", () => {
+  test("includes unpublished in-scope items", () => {
     const itemNames = { "Unpublished Y": { en: "Unpublished Y", zh: "y", ja: "y" } };
-    const nameToType = new Map([["Unpublished Y", makeType({ published: 0, groupID: 1, typeName: "Unpublished Y" })]]);
+    const idToType = new Map([["Unpublished Y", makeType({ published: 0, groupID: 1, typeName: "Unpublished Y" })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
-    const result = _filterItemNames(itemNames, nameToType, groups, new Set());
-    expect(Object.keys(result)).not.toContain("Unpublished Y");
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
+    expect(Object.keys(result)).toContain("Unpublished Y");
+  });
+
+  test("includes fuel category items (category 4 is in scope)", () => {
+    const itemNames = { "Nitrogen Isotopes": { en: "Nitrogen Isotopes", zh: "n", ja: "n" } };
+    const idToType = new Map([["Nitrogen Isotopes", makeType({ published: 1, groupID: 3, typeName: "Nitrogen Isotopes" })]]);
+    const groups = { "3": { groupID: 3, categoryID: 4 } };
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
+    expect(Object.keys(result)).toContain("Nitrogen Isotopes");
+  });
+
+  test("includes deployable category items (category 22 is in scope)", () => {
+    const itemNames = { "Mobile Depot": { en: "Mobile Depot", zh: "m", ja: "m" } };
+    const idToType = new Map([["Mobile Depot", makeType({ published: 1, groupID: 4, typeName: "Mobile Depot" })]]);
+    const groups = { "4": { groupID: 4, categoryID: 22 } };
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
+    expect(Object.keys(result)).toContain("Mobile Depot");
+  });
+
+  test("excludes out-of-scope category items", () => {
+    const itemNames = { "Out Of Scope": { en: "Out Of Scope", zh: "o", ja: "o" } };
+    const idToType = new Map([["Out Of Scope", makeType({ published: 1, groupID: 5, typeName: "Out Of Scope" })]]);
+    const groups = { "5": { groupID: 5, categoryID: 1 } };
+    const result = _filterItemNames(itemNames, idToType, groups, new Set());
+    expect(Object.keys(result)).not.toContain("Out Of Scope");
   });
 
   test("includes names that are keys of emitted fittingDb tables", () => {
     const itemNames = { "Table Key": { en: "Table Key", zh: "table", ja: "table" } };
-    const nameToType = new Map([["Table Key", makeType({ published: 0, groupID: 1, typeName: "Table Key" })]]);
+    const idToType = new Map([["Table Key", makeType({ published: 0, groupID: 1, typeName: "Table Key" })]]);
     const groups = { "1": { groupID: 1, categoryID: 7 } };
-    const result = _filterItemNames(itemNames, nameToType, groups, new Set(["Table Key"]));
+    const result = _filterItemNames(itemNames, idToType, groups, new Set(["Table Key"]));
     expect(Object.keys(result)).toContain("Table Key");
   });
 });

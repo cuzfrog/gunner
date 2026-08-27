@@ -1313,6 +1313,21 @@ describe("FittingImportImpl identity resolution", () => {
     const canonical = importer.canonicalEftText(`[Rifter, Mixed]\nHeavy Pulse Laser II, Caldari Navy Inferno Rocket\n`);
     expect(canonical).toBe(`[Rifter, Mixed]\n\nHeavy Pulse Laser II, Caldari Navy Inferno Rocket`);
   });
+
+  test("canonicalEftText is stable under repeated canonicalization", () => {
+    const text = `[Rifter, Brawler]\n200mm AutoCannon I, Hail S\nMagnetic Field Stabilizer II\n\nHobgoblin I x3\nHail S x100`;
+    const once = importer.canonicalEftText(text);
+    const twice = importer.canonicalEftText(once!);
+    expect(twice).toBe(once);
+  });
+
+  test("canonicalEftText is stable for a fitting using an aliased legacy name", () => {
+    const text = `[Rifter, Legacy]\nAdaptive Invulnerability Field II\n\nHobgoblin I x3`;
+    const once = importer.canonicalEftText(text);
+    expect(once).toBeDefined();
+    const twice = importer.canonicalEftText(once!);
+    expect(twice).toBe(once);
+  });
 });
 
 function eftDocument(hullName: string, names: readonly string[] = []): EftDocument {

@@ -8,6 +8,7 @@ function resolver(overrides: {
   collisionsEn?: Record<string, string>;
   collisionsZh?: Record<string, string>;
   collisionsJa?: Record<string, string>;
+  aliasesEn?: Record<string, string>;
 } = {}): ItemNameResolver {
   return new StaticItemNameResolver({
     en: overrides.en ?? { "1": "Alpha", "2": "Beta" },
@@ -16,6 +17,7 @@ function resolver(overrides: {
     collisionsEn: overrides.collisionsEn ?? {},
     collisionsZh: overrides.collisionsZh ?? {},
     collisionsJa: overrides.collisionsJa ?? {},
+    aliasesEn: overrides.aliasesEn ?? {},
   });
 }
 
@@ -73,5 +75,43 @@ describe("StaticItemNameResolver", () => {
       collisionsEn: { Shared: "5" },
     });
     expect(r.idsForName("Shared", "en")).toEqual(["3" as TypeId, "4" as TypeId]);
+  });
+
+  test("resolves a legacy English name via the alias table after an exact miss", () => {
+    const r = resolver({
+      en: { "1": "Multispectrum Shield Hardener" },
+      aliasesEn: { "Adaptive Invulnerability Field": "Multispectrum Shield Hardener" },
+    });
+    expect(r.idsForName("Adaptive Invulnerability Field", "en")).toEqual(["1" as TypeId]);
+  });
+
+  test("resolves an aliased name the same as its current target name", () => {
+    const r = resolver({
+      en: { "1": "Multispectrum Shield Hardener" },
+      aliasesEn: { "Adaptive Invulnerability Field": "Multispectrum Shield Hardener" },
+    });
+    expect(r.idsForName("Adaptive Invulnerability Field", "en")).toEqual(r.idsForName("Multispectrum Shield Hardener", "en"));
+  });
+
+  test("returns empty for an unknown English name with no alias", () => {
+    expect(resolver({ aliasesEn: { "Old": "Beta" } }).idsForName("Completely Unknown", "en")).toEqual([]);
+  });
+
+  test("does not apply English aliases to zh", () => {
+    const r = resolver({
+      en: { "1": "Multispectrum Shield Hardener" },
+      zh: { "1": "自适应全能护盾增强器" },
+      aliasesEn: { "Old Name": "Multispectrum Shield Hardener" },
+    });
+    expect(r.idsForName("Old Name", "zh")).toEqual([]);
+  });
+
+  test("does not apply English aliases to ja", () => {
+    const r = resolver({
+      en: { "1": "Multispectrum Shield Hardener" },
+      ja: { "1": "マルチスペクトラムシールドハードナー" },
+      aliasesEn: { "Old Name": "Multispectrum Shield Hardener" },
+    });
+    expect(r.idsForName("Old Name", "ja")).toEqual([]);
   });
 });

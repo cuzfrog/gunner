@@ -15,42 +15,6 @@ import { PRESET_FITTINGS } from "../src/gamedata/presets/fittingPresets";
 import { StaticImageCatalog } from "../src/ui/icons/imageCatalog";
 import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
-const ALLOWED_NO_IDENTITY = new Set([
-  "Adaptive Invulnerability Field II",
-  "Adaptive Nano Plating II",
-  "Armor Explosive Hardener II",
-  "Armor Kinetic Hardener II",
-  "Armor Thermal Hardener II",
-  "Civilian Gatling Autocannon",
-  "Civilian Gatling Pulse Laser",
-  "Civilian Gatling Railgun",
-  "EM Ward Field II",
-  "Energized Adaptive Nano Membrane II",
-  "Explosive Plating II",
-  "F85 Peripheral Damage System I",
-  "Gistum C-Type Adaptive Invulnerability Field",
-  "Helium Isotopes",
-  "Hydrogen Isotopes",
-  "Kinetic Plating II",
-  "Large Anti-EM Screen Reinforcer II",
-  "Limited Energized Explosive Membrane I",
-  "Liquid Ozone",
-  "Local Hull Conversion Nanofiber Structure I",
-  "Medium Anti-EM Screen Reinforcer I",
-  "Mobile Depot",
-  "Mobile Small Warp Disruptor I",
-  "Mobile Small Warp Disruptor II",
-  "Nitrogen Isotopes",
-  "Oxygen Isotopes",
-  "Pneumatic Stabilization Actuator I",
-  "Prototype 'Arbalest' Light Missile Launcher",
-  "Small Anti-EM Screen Reinforcer I",
-  "Stabilized Weapon Mounts",
-  "Strontium Clathrates",
-  "Thermal Plating II",
-  "True Sansha Energized Adaptive Nano Membrane",
-]);
-
 class TestStackingPenalty implements StackingPenalty {
   apply(multipliers: readonly number[]): number {
     const values = multipliers.filter((value) => value !== 1);
@@ -97,19 +61,13 @@ function checkFitting(text: string, sourceKey: string, failures: string[]): void
   for (const section of summary.sections) {
     for (const row of section.rows) {
       if (row.empty) continue;
-      if (ALLOWED_NO_IDENTITY.has(row.name)) {
-        if (row.id !== undefined) failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" - allowlisted as no-identity but resolved id ${row.id}`);
-        continue;
-      }
       if (row.id === undefined) {
         failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" - missing identity id`);
         continue;
       }
       if (!iconResolves(row.id)) failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" - no icon for id ${row.id}`);
       if (row.charge) {
-        if (ALLOWED_NO_IDENTITY.has(row.charge)) {
-          if (row.chargeId !== undefined) failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" charge "${row.charge}" - allowlisted as no-identity but resolved chargeId ${row.chargeId}`);
-        } else if (row.chargeId === undefined) {
+        if (row.chargeId === undefined) {
           failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" charge "${row.charge}" - missing charge identity id`);
         } else if (imageCatalog.itemIconUrl(row.chargeId) === undefined) {
           failures.push(`[${sourceKey}] ${section.kind}: "${row.name}" charge "${row.charge}" - no icon for chargeId ${row.chargeId}`);

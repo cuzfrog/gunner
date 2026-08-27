@@ -13,13 +13,19 @@ const I18N_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames",
 const COLLISION_EN_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-en.ts");
 const COLLISION_ZH_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-zh.ts");
 const COLLISION_JA_FILE = join(import.meta.dir, "..", "src", "gamedata", "itemNames", "item-name-collisions-ja.ts");
-const NAME_TO_ID_FILE = join(import.meta.dir, "..", "data", "ship-modules", "nameToId.json");
 
 const MODULE_CATEGORY_ID = 7;
 const CHARGE_CATEGORY_ID = 8;
 const DRONE_CATEGORY_ID = 18;
 const SUBSYSTEM_CATEGORY_ID = 32;
-const FITTABLE_CATEGORY_IDS = new Set([MODULE_CATEGORY_ID, CHARGE_CATEGORY_ID, DRONE_CATEGORY_ID, SUBSYSTEM_CATEGORY_ID]);
+const STRUCTURE_MODULE_CATEGORY_ID = 66;
+const FIGHTER_CATEGORY_ID = 87;
+const FUEL_CATEGORY_ID = 4;
+const DEPLOYABLE_CATEGORY_ID = 22;
+const IN_SCOPE_CATEGORY_IDS = new Set([
+  MODULE_CATEGORY_ID, CHARGE_CATEGORY_ID, DRONE_CATEGORY_ID, SUBSYSTEM_CATEGORY_ID,
+  STRUCTURE_MODULE_CATEGORY_ID, FIGHTER_CATEGORY_ID, FUEL_CATEGORY_ID, DEPLOYABLE_CATEGORY_ID,
+]);
 
 interface SdeType {
   typeID: number;
@@ -627,18 +633,16 @@ async function main() {
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
   const itemNames: Record<string, LocalizedName> = {};
-  const nameToType = new Map<string, SdeType>();
   const idToType = new Map<string, SdeType>();
   const shipNameToId = buildShipNameToId();
 
   for (const type of Object.values(types)) {
+    const id = String(type.typeID) as TypeId;
+    idToType.set(id, type);
     if (!type.published) continue;
     const typeDogma = typedogmas[String(type.typeID)];
     const values = buildAttributeValues(attributeNames, typeDogma);
     const enName = type["typeName_en-us"];
-    nameToType.set(enName, type);
-    const id = String(type.typeID) as TypeId;
-    idToType.set(id, type);
 
     if (shipGroupIds.has(type.groupID)) {
       const bonuses = buildHullBonuses(attributeNames, typeDogma);
@@ -930,7 +934,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     ``,
   ];
 
-  await addItemNamesFromIconCatalog(itemNames, nameToType);
+  addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
 
   const dbTableNames = collectDbTableNames(
     fittingModules,
@@ -981,29 +985,18 @@ function addItemName(
   };
 }
 
-interface IconEntry {
-  readonly id: number;
-  readonly files: readonly string[];
-  readonly group: string;
-  readonly kind: string;
-}
-
-interface NameToIdCatalog {
-  byName?: {
-    iconID?: Record<string, readonly IconEntry[]>;
-  };
-}
-
-async function addItemNamesFromIconCatalog(
+function addInScopeItemNames(
   itemNames: Record<string, LocalizedName>,
-  nameToType: ReadonlyMap<string, SdeType>,
-): Promise<void> {
-  const raw: NameToIdCatalog = JSON.parse(await readFile(NAME_TO_ID_FILE, "utf8"));
-  const catalog = raw.byName?.iconID ?? {};
-  for (const name of Object.keys(catalog)) {
-    const type = nameToType.get(name);
-    if (!type) continue;
-    const id = String(type.typeID);
+  types: Readonly<Record<string, SdeType>>,
+  groups: Readonly<Record<string, SdeGroup>>,
+  inScopeCategoryIds: ReadonlySet<number>,
+): void {
+  const inScopeGroupIds = new Set<string>();
+  for (const [gid, group] of Object.entries(groups)) {
+    if (inScopeCategoryIds.has(group.categoryID)) inScopeGroupIds.add(gid);
+  }
+  for (const [id, type] of Object.entries(types)) {
+    if (!inScopeGroupIds.has(String(type.groupID))) continue;
     if (id in itemNames) continue;
     addItemName(itemNames, id, type);
   }
@@ -1037,11 +1030,11 @@ function collectDbTableNames(
   ]);
 }
 
-function isFittableItem(type: SdeType | undefined, groups: Record<string, SdeGroup>): boolean {
-  if (!type?.published) return false;
+function isInScopeItem(type: SdeType | undefined, groups: Record<string, SdeGroup>): boolean {
+  if (!type) return false;
   const group = groups[String(type.groupID)];
   if (!group) return false;
-  return FITTABLE_CATEGORY_IDS.has(group.categoryID);
+  return IN_SCOPE_CATEGORY_IDS.has(group.categoryID);
 }
 
 function filterItemNames(
@@ -1052,7 +1045,7 @@ function filterItemNames(
 ): Record<string, LocalizedName> {
   const filtered: Record<string, LocalizedName> = {};
   for (const [id, localizations] of Object.entries(itemNames)) {
-    if (dbTableNames.has(id) || isFittableItem(idToType.get(id), groups)) {
+    if (dbTableNames.has(id) || isInScopeItem(idToType.get(id), groups)) {
       filtered[id] = localizations;
     }
   }
