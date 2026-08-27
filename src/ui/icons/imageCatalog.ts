@@ -6,7 +6,6 @@ import { SHIP_IMAGE_FILES } from "./shipImageIds";
 export interface ImageCatalog {
   shipImageUrl(shipId: ShipId): string | undefined;
   itemIconUrl(typeId: TypeId): string | undefined;
-  droneIconUrl(typeId?: TypeId): string | undefined;
 }
 
 export class StaticImageCatalog implements ImageCatalog {
@@ -15,15 +14,14 @@ export class StaticImageCatalog implements ImageCatalog {
   }
 
   itemIconUrl(typeId: TypeId): string | undefined {
-    const id = ITEM_ICON_IDS[typeId];
-    if (id === undefined) return undefined;
-    return `images/icons/${id}@1x.png`;
+    return resolveItemIconUrl(typeId);
   }
+}
 
-  droneIconUrl(typeId?: TypeId): string | undefined {
-    if (typeId === undefined) return undefined;
-    const id = DRONE_TYPE_IDS[typeId];
-    if (id === undefined) return undefined;
-    return `images/icons/${id}@1x.png`;
-  }
+function resolveItemIconUrl(typeId: TypeId): string | undefined {
+  const iconId = ITEM_ICON_IDS[typeId];
+  if (iconId !== undefined) return `images/icons/${iconId}@1x.png`;
+  const droneTypeId = DRONE_TYPE_IDS[typeId];
+  if (droneTypeId !== undefined) return `images/icons/${droneTypeId}@1x.png`;
+  return undefined;
 }

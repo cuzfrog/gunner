@@ -39,15 +39,11 @@ describe("StaticImageCatalog", () => {
     expect(catalog.itemIconUrl(toTypeId("0"))).toBeUndefined();
   });
 
-  test("droneIconUrl returns the specific icon path for a known drone", () => {
-    expect(catalog.droneIconUrl(toTypeId("2454"))).toBe("images/icons/2454@1x.png");
+  test("itemIconUrl resolves a drone id that only lives in the drone table", () => {
+    expect(catalog.itemIconUrl(toTypeId("2454"))).toBe("images/icons/2454@1x.png");
   });
 
-  test("droneIconUrl returns undefined when no type id is given", () => {
-    expect(catalog.droneIconUrl()).toBeUndefined();
-  });
-
-  test("droneIconUrl returns undefined for an unknown drone", () => {
-    expect(catalog.droneIconUrl(toTypeId("0"))).toBeUndefined();
+  test("itemIconUrl resolves a charge id whose icon is keyed by iconId", () => {
+    expect(catalog.itemIconUrl(toTypeId("29005"))).toBe("images/icons/3344@1x.png");
   });
 });

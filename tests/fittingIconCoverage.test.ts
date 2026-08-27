@@ -79,7 +79,7 @@ const imageCatalog = new StaticImageCatalog();
 
 function iconResolves(id: FittingRow["id"]): boolean {
   if (id === undefined) return false;
-  return imageCatalog.itemIconUrl(id) !== undefined || imageCatalog.droneIconUrl(id) !== undefined;
+  return imageCatalog.itemIconUrl(id) !== undefined;
 }
 
 function checkFitting(text: string, sourceKey: string, failures: string[]): void {

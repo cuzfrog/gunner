@@ -84,7 +84,6 @@ function buildController() {
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
     itemIconUrl: vi.fn((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined)),
-    droneIconUrl: vi.fn(),
   });
   const events = new UiEventsImpl();
   const createElementSpy = vi.spyOn(document, "createElement");

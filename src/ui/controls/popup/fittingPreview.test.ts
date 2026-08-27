@@ -96,9 +96,10 @@ function createImageCatalog(): ImageCatalog {
     itemIconUrl: vi.fn((id: TypeId) => {
       if (id === AC_ID) return "images/icons/1@1x.png";
       if (id === HAIL_ID) return "images/icons/hail_s.png";
+      if (id === DRONE_ID) return "images/icons/2456@1x.png";
+      if (id === SCRIPT_ID) return "images/icons/3344@1x.png";
       return undefined;
     }),
-    droneIconUrl: (id?: TypeId) => (id === DRONE_ID ? "images/icons/2456@1x.png" : undefined),
   };
 }
 
@@ -107,6 +108,7 @@ const MWD_ID: TypeId = toTypeId("434");
 const PLATES_ID: TypeId = toTypeId("20349");
 const HAIL_ID: TypeId = toTypeId("12608");
 const DRONE_ID: TypeId = toTypeId("2456");
+const SCRIPT_ID: TypeId = toTypeId("29005");
 
 const SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -158,6 +160,7 @@ describe("DomFittingPreview", () => {
       "20349": "400mm Steel Plates II",
       "12608": "Hail S",
       "2456": "Hobgoblin II",
+      "29005": "Optimal Range Disruption Script",
     };
     const fittingImport = vi.mocked(mockFittingImport());
     fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
@@ -270,6 +273,20 @@ describe("DomFittingPreview", () => {
     const droneRow = container.children[1].children[1];
     expect(droneRow.children[0].tagName).toBe("img");
     expect(droneRow.children[0].src).toBe("images/icons/2456@1x.png");
+  });
+
+  test("non-drone items in the drones section resolve icons through itemIconUrl", () => {
+    const { container, anchor, preview, imageCatalog } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "drones", rows: [{ name: "Optimal Range Disruption Script", id: SCRIPT_ID, quantity: 2 }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const row = container.children[1].children[1];
+    expect(row.children[0].tagName).toBe("img");
+    expect(row.children[0].src).toBe("images/icons/3344@1x.png");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(SCRIPT_ID);
   });
 
   test("drone rows have no icon for unknown drones", () => {

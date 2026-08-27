@@ -104,7 +104,7 @@ function renderSection(i18n: I18n, imageCatalog: ImageCatalog, fittingImport: Fi
   container.appendChild(label);
 
   for (const row of section.rows) {
-    container.appendChild(renderRow(i18n, imageCatalog, fittingImport, row, section.kind));
+    container.appendChild(renderRow(i18n, imageCatalog, fittingImport, row));
   }
   return container;
 }
@@ -114,16 +114,11 @@ function renderRow(
   imageCatalog: ImageCatalog,
   fittingImport: FittingImport,
   row: FittingRow,
-  sectionKind: FittingSection["kind"],
 ): HTMLElement {
   const rowEl = document.createElement("div");
   rowEl.className = row.empty ? "preview-row preview-row-empty" : "preview-row";
 
-  const iconUrl = row.empty
-    ? undefined
-    : sectionKind === "drones"
-      ? imageCatalog.droneIconUrl(row.id)
-      : (row.id ? imageCatalog.itemIconUrl(row.id) : undefined);
+  const iconUrl = row.empty ? undefined : (row.id ? imageCatalog.itemIconUrl(row.id) : undefined);
   const icon = document.createElement("img");
   icon.className = "preview-icon";
   icon.alt = "";
