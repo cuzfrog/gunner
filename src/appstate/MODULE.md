@@ -25,7 +25,9 @@ no-new-exports:
   - settingGuards.ts
   - userSettings.ts
   - index.ts
+  - settingsCompat.ts
 ---
+
 
 
 # appstate
