@@ -1,5 +1,5 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { FittedHullSummary } from "../../../appstate";
+import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
@@ -40,7 +40,7 @@ export class EftSideImporter {
     panel.sections.hull.clearFittedHull();
     panel.fittingText = this.fittingImport.canonicalEftText(text) ?? text;
     panel.clearOverrides();
-    panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId);
+    panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId ?? PROPULSION_NONE);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
     this.turrets[side].applyImported(imported, conditions);
     if (persist) {

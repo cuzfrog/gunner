@@ -2,7 +2,7 @@ import type { ImportedFitting } from "../../../fitting";
 import type { ShipId } from "../../../gamedata/ids";
 import type { ShipProfile, PropulsionModule, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
-import type { FittedHullSummary, PropulsionSelection } from "../../../appstate";
+import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { setText } from "../controlsDom";
 import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
@@ -85,7 +85,7 @@ export class HullSection implements IHullSection {
     this.panel.setConfigInputsEnabled(true);
     this.panel.setTurretProfile(profile);
     this.panel.renderFittingPopupIfOpen();
-    this.panel.sections.propulsion.renderPropulsionOptions(propulsionId ?? "");
+    this.panel.sections.propulsion.renderPropulsionOptions(propulsionId);
     if (updateStats) {
       this.panel.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
     } else {
@@ -155,7 +155,7 @@ export class HullSection implements IHullSection {
 
   applyImportedFitting(summary: FittedHullSummary): void {
     this.panel.fittedHull = summary;
-    this.panel.sections.propulsion.renderPropulsionOptions(summary.propulsionId ?? "");
+    this.panel.sections.propulsion.renderPropulsionOptions(summary.propulsionId ?? PROPULSION_NONE);
     this.panel.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
   }
 

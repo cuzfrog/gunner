@@ -61,7 +61,7 @@ export interface IPropulsionSection {
   currentPropulsionSelection(): PropulsionSelection | undefined;
   currentPropulsionId(): PropulsionId | undefined;
   currentPropulsionModule(): PropulsionModule | undefined;
-  renderPropulsionOptions(selectedId?: string): void;
+  renderPropulsionOptions(selectedId?: PropulsionSelection): void;
   onPropulsionChange(): void;
   setPropulsionActive(propulsionId: string): void;
   defaultPropulsionName(module: PropulsionModule): string;

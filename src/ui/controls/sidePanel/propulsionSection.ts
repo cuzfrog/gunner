@@ -65,7 +65,7 @@ export class PropulsionSection implements IPropulsionSection {
     return this.ships.fittingOption(this.panel.profile, id);
   }
 
-  renderPropulsionOptions(selectedId: string = this.currentPropulsionSelection() ?? ""): void {
+  renderPropulsionOptions(selectedId: PropulsionSelection | undefined = this.currentPropulsionSelection()): void {
     const profile = this.panel.profile;
     const select = this.els.propulsion;
     const group = this.els.propulsionOptions;
@@ -78,8 +78,8 @@ export class PropulsionSection implements IPropulsionSection {
     const all = this.ships.allFittingOptions();
     const modules = profile ? this.ships.fittingOptions(profile) : all.slice(0, 3);
     const moduleSet = new Set(modules.map((module) => module.id));
-    const selectedPropulsionId = this.ships.parsePropulsionId(selectedId);
     const noneRequested = selectedId === PROPULSION_NONE;
+    const requestedId = noneRequested || selectedId === undefined ? undefined : selectedId;
     let selected = "";
 
     for (const module of modules) {
@@ -100,8 +100,8 @@ export class PropulsionSection implements IPropulsionSection {
     if (profile) {
       selected = noneRequested
         ? PROPULSION_NONE
-        : selectedPropulsionId && moduleSet.has(selectedPropulsionId)
-          ? selectedPropulsionId
+        : requestedId && moduleSet.has(requestedId)
+          ? requestedId
           : (modules[0]?.id ?? "");
     }
 

@@ -1,6 +1,7 @@
 import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ShipId } from "../../../gamedata/ids";
+import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
 import { fakeDocument, getFake, FakeElement, mockShips, RIFTER } from "../testSupport";
 import { HullSection, type HullSectionEls } from "./hullSection";
 import type { Popup } from "../popup";
@@ -225,5 +226,19 @@ describe("HullSection", () => {
     section.refreshHullInputs();
     expect(input.value).toBe("裂谷级");
     expect(panel.lastCommittedHull).toBe(RIFTER.id);
+  });
+
+  test("applyImportedFitting with no propulsion passes PROPULSION_NONE to renderPropulsionOptions", () => {
+    const { panel, section } = buildHullSection();
+    const summary: FittedHullSummary = { fittingName: "Brawler", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    section.applyImportedFitting(summary);
+    expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith(PROPULSION_NONE);
+  });
+
+  test("applyImportedFitting with propulsion passes the propulsionId to renderPropulsionOptions", () => {
+    const { panel, section } = buildHullSection();
+    const summary: FittedHullSummary = { fittingName: "Brawler", propulsionId: "ab-1mn", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    section.applyImportedFitting(summary);
+    expect(panel.sections.propulsion.renderPropulsionOptions).toHaveBeenCalledWith("ab-1mn");
   });
 });

@@ -3,6 +3,7 @@ import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { PROPULSION_NONE } from "../../../appstate";
 import { fakeDocument, getFake, FakeElement, mockFittingImport, mockShips, RIFTER } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
@@ -152,6 +153,31 @@ describe("PropulsionSection", () => {
     section.renderPropulsionOptions();
     expect(getFake(document, "ship-a-propulsion").children.length).toBeGreaterThan(0);
     expect(getFake(document, "ship-a-propulsion-options").children.length).toBeGreaterThan(0);
+  });
+
+  test("renderPropulsionOptions with PROPULSION_NONE deactivates all buttons and disables gear", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    section.renderPropulsionOptions(PROPULSION_NONE);
+    const select = getFake(document, "ship-a-propulsion") as unknown as HTMLSelectElement;
+    expect(select.value).toBe(PROPULSION_NONE);
+    const group = getFake(document, "ship-a-propulsion-options");
+    for (const button of group.children) {
+      expect(button.getAttribute("aria-pressed")).toBe("false");
+    }
+    const gear = getFake(document, "ship-a-propulsion-gear") as unknown as HTMLButtonElement;
+    expect(gear.disabled).toBe(true);
+  });
+
+  test("renderPropulsionOptions with undefined auto-selects the first module", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    section.renderPropulsionOptions(undefined);
+    const select = getFake(document, "ship-a-propulsion") as unknown as HTMLSelectElement;
+    expect(select.value).toBe(AB_1MN);
+    const group = getFake(document, "ship-a-propulsion-options");
+    const firstButton = group.children[0];
+    expect(firstButton.getAttribute("aria-pressed")).toBe("true");
   });
 
   test("onPropulsionChange fits a propulsion to the hull", () => {
