@@ -1,7 +1,7 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
+import type { DisplayPreferences, ProfileSettings, TrackingUnit, StartupState, UserSettings } from "./userSettings";
 import type { Language } from "./language";
 import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
@@ -111,7 +111,8 @@ export class LocalSettingsStore implements SettingsStore {
       const s = parsed as Record<string, unknown>;
       return {
         language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
-        trackingUnit: s.trackingUnit === "score" ? "score" : DEFAULT_PREFERENCES.trackingUnit,
+        shipATrackingUnit: resolveTrackingUnit(s.shipATrackingUnit, s.trackingUnit),
+        shipBTrackingUnit: resolveTrackingUnit(s.shipBTrackingUnit, s.trackingUnit),
         simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
         gridBrightness:
           isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined
@@ -170,4 +171,10 @@ function detectInitialLanguage(navigatorLanguage: string): Language {
   if (prefix === "zh") return "zh";
   if (prefix === "ja") return "ja";
   return "en";
+}
+
+function resolveTrackingUnit(perShip: unknown, legacy: unknown): TrackingUnit {
+  if (perShip === "rad" || perShip === "score") return perShip;
+  if (legacy === "rad" || legacy === "score") return legacy;
+  return DEFAULT_PREFERENCES.shipATrackingUnit;
 }

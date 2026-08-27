@@ -42,7 +42,8 @@ export interface InternalUserSettings {
   readonly version: typeof USER_SETTINGS_VERSION;
   readonly language: Language;
   readonly simSpeed: number;
-  readonly trackingUnit: TrackingUnit;
+  readonly shipATrackingUnit: TrackingUnit;
+  readonly shipBTrackingUnit: TrackingUnit;
   readonly gridBrightness: number;
   readonly autoZoom: boolean;
   readonly zoomFactor: number;

@@ -9,7 +9,8 @@ import { ShareControllerImpl } from "./shareController";
 function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
     version: USER_SETTINGS_VERSION,
-    trackingUnit: "rad",
+    shipATrackingUnit: "rad",
+    shipBTrackingUnit: "rad",
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 5000,
@@ -83,7 +84,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
   const sessionCodec = vi.mocked<SessionCodec>({
     capture: vi.fn(() => captured),
     captureProfile: vi.fn((): ProfileSettings => {
-      const { language: _l, trackingUnit: _t, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
+      const { language: _l, shipATrackingUnit: _tu, shipBTrackingUnit: _tbu, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
       return profile;
     }),
     getInitialDistance: vi.fn(),
@@ -213,6 +214,6 @@ describe("ShareController", () => {
 });
 
 function expectedProfileFor(captured: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = captured;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, ...rest } = captured;
   return rest;
 }

@@ -152,8 +152,8 @@ export class SessionCodecImpl implements SessionCodec {
 
   captureProfile(): ProfileSettings {
     const {
-      language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____,
-      autoZoom: _____, zoomFactor: ______, ...profile
+      language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____,
+      autoZoom: ______, zoomFactor: _______, ...profile
     } = this.capture();
     return profile;
   }
@@ -162,7 +162,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.applyShipState(settings);
     this.preferencesController.restore({
       language: settings.language,
-      trackingUnit: settings.trackingUnit,
+      shipATrackingUnit: settings.shipATrackingUnit,
+      shipBTrackingUnit: settings.shipBTrackingUnit,
       simSpeed: settings.simSpeed,
       gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
       autoZoom: settings.autoZoom ?? true,

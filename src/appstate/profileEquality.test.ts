@@ -23,7 +23,7 @@ const baseEwarActivation: StoredEwarActivation = {
 
 function baseProfileSettings(overrides: Partial<ProfileSettings> = {}): ProfileSettings {
   return {
-    version: 11,
+    version: 12,
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 5000,

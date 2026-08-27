@@ -64,7 +64,8 @@ function makeView(distance: number): EngagementView {
 function baseSettings(): UserSettings {
   return {
     version: USER_SETTINGS_VERSION,
-    trackingUnit: "rad",
+    shipATrackingUnit: "rad",
+    shipBTrackingUnit: "rad",
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 1000,

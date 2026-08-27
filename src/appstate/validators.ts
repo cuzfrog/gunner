@@ -114,8 +114,8 @@ export function isOptionalUnitInterval(value: unknown): value is number | undefi
   return value === undefined || (isFiniteNumber(value) && value >= 0 && value <= 1);
 }
 
-export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 {
-  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11;
+export function isSettingsVersion(value: unknown): value is 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 {
+  return value === 5 || value === 6 || value === 7 || value === 8 || value === 9 || value === 10 || value === 11 || value === 12;
 }
 
 export function isOptionalNonEmptyString(value: unknown): value is string | undefined {
@@ -201,7 +201,7 @@ export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly
 }
 
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, hiddenRangeOverlays: _____, autoZoom: ______, zoomFactor: _______, ...rest } = value as Record<string, unknown>;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, hiddenRangeOverlays: ______, autoZoom: _______, zoomFactor: ________, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 

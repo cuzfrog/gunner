@@ -303,7 +303,8 @@ describe("LocalSettingsStore", () => {
     const stored = JSON.parse(raw).brawler;
     expect(stored).toEqual(DEFAULT_PROFILE);
     expect(stored).not.toHaveProperty("language");
-    expect(stored).not.toHaveProperty("trackingUnit");
+    expect(stored).not.toHaveProperty("shipATrackingUnit");
+    expect(stored).not.toHaveProperty("shipBTrackingUnit");
     expect(stored).not.toHaveProperty("simSpeed");
     expect(stored).not.toHaveProperty("gridBrightness");
     expect(stored).toHaveProperty("initialDistance");
@@ -311,7 +312,7 @@ describe("LocalSettingsStore", () => {
 
   test("loadProfile strips legacy display preference fields from stored profiles", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" } }));
+    storage.setItem("gunner-profiles-v6", JSON.stringify({ brawler: { ...DEFAULT_SETTINGS, language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad" } }));
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadProfile("brawler")).toEqual(DEFAULT_PROFILE);
   });
@@ -562,16 +563,34 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
 
   test("loadPreferences falls back per field for invalid values", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-prefs-v1", JSON.stringify({ language: "klingon", trackingUnit: "meters", simSpeed: -1, gridBrightness: 2 }));
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ language: "klingon", shipATrackingUnit: "meters", simSpeed: -1, gridBrightness: 2 }));
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
+  });
+
+  test("loadPreferences migrates a legacy global trackingUnit to both per-ship fields", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ trackingUnit: "score" }));
+    const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.loadPreferences();
+    expect(loaded.shipATrackingUnit).toBe("score");
+    expect(loaded.shipBTrackingUnit).toBe("score");
+  });
+
+  test("loadPreferences keeps independent per-ship tracking units", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ shipATrackingUnit: "score", shipBTrackingUnit: "rad" }));
+    const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    const loaded = store.loadPreferences();
+    expect(loaded.shipATrackingUnit).toBe("score");
+    expect(loaded.shipBTrackingUnit).toBe("rad");
   });
 
   test("loadPreferences returns defaults for malformed JSON", () => {
@@ -583,7 +602,7 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip hidden range overlays", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
@@ -600,7 +619,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(11);
+    expect(loaded!.version).toBe(12);
     expect(loaded!.shipAFittedHull).toEqual(FITTED_HULL_SUMMARY);
     expect(loaded!.shipAMass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
@@ -610,7 +629,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(v5)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.version).toBe(11);
+    expect(loaded!.version).toBe(12);
     expect(loaded!.shipAFittedHull).toBeUndefined();
   });
 

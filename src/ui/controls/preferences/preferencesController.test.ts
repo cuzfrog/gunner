@@ -246,28 +246,40 @@ describe("PreferencesController", () => {
 
   test("restore does not emit language changed for English", () => {
     const { controller, events } = build();
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(events.emitLanguageChanged).not.toHaveBeenCalled();
   });
 
-  test("setTrackingUnit delegates to both turret controllers and updates toggles", () => {
+  test("setTrackingUnit delegates to the matching turret controller and updates its toggle", () => {
     const { controller, els, shipATurretController, shipBTurretController } = build();
-    controller.setTrackingUnit("score");
+    controller.setTrackingUnit("shipA", "score");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");
-    expect(shipBTurretController.setTrackingUnit).toHaveBeenCalledWith("score");
+    expect(shipBTurretController.setTrackingUnit).not.toHaveBeenCalled();
     expect(els.trackingUnit.shipA.score.getAttribute("aria-pressed")).toBe("true");
     expect(els.trackingUnit.shipA.rad.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipB.score.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipB.rad.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("setTrackingUnit for shipB only affects shipB", () => {
+    const { controller, els, shipATurretController, shipBTurretController } = build();
+    controller.setTrackingUnit("shipB", "score");
+    expect(shipBTurretController.setTrackingUnit).toHaveBeenCalledWith("score");
+    expect(shipATurretController.setTrackingUnit).not.toHaveBeenCalled();
     expect(els.trackingUnit.shipB.score.getAttribute("aria-pressed")).toBe("true");
     expect(els.trackingUnit.shipB.rad.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipA.score.getAttribute("aria-pressed")).toBe("false");
+    expect(els.trackingUnit.shipA.rad.getAttribute("aria-pressed")).toBe("true");
   });
 
   test("setTrackingUnit saves preferences", () => {
     const { controller, settingsStore, shipATurretController } = build();
-    controller.setTrackingUnit("score");
+    controller.setTrackingUnit("shipA", "score");
     const calls = settingsStore.savePreferences.mock.calls;
     const [saved] = calls[calls.length - 1];
-    expect(saved.trackingUnit).toBe("score");
+    expect(saved.shipATrackingUnit).toBe("score");
+    expect(saved.shipBTrackingUnit).toBe("rad");
     expect(shipATurretController.trackingUnit()).toBe("score");
   });
 
@@ -300,12 +312,12 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", trackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
+    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
   });
 
   test("restore applies hidden range overlay state", () => {
     const { controller, rangeOverlayController } = build();
-    const preferences: DisplayPreferences = { language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(rangeOverlayController.restoreHidden).toHaveBeenCalledWith(["web"]);
   });
@@ -318,7 +330,7 @@ describe("PreferencesController", () => {
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
     const { controller, els, i18n, events, shipATurretController } = build();
-    const preferences: DisplayPreferences = { language: "ja", trackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");

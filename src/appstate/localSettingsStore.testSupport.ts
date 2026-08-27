@@ -23,7 +23,8 @@ export function base64Url(value: unknown): string { return Buffer.from(JSON.stri
 export function urlFor(value: unknown): string { return `http://localhost/?c=${base64Url(value)}`; }
 export const DEFAULT_SETTINGS: UserSettings = {
   version: USER_SETTINGS_VERSION,
-  trackingUnit: "rad",
+  shipATrackingUnit: "rad",
+  shipBTrackingUnit: "rad",
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,
@@ -84,7 +85,7 @@ export const URL_SETTINGS: UserSettings = {
   language: "ja",
 };
 export function profileFrom(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...rest } = settings;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, autoZoom: ______, zoomFactor: _______, ...rest } = settings;
   return rest;
 }
 export const DEFAULT_PROFILE: ProfileSettings = profileFrom(DEFAULT_SETTINGS);

@@ -16,7 +16,7 @@ export function mockSettingsStore(): SettingsStore {
     selectProfile: vi.fn(),
     clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(() => ""),
-    loadPreferences: vi.fn(() => ({ language: "en" as const, trackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 })),
+    loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 })),
     savePreferences: vi.fn(),
   };
 }

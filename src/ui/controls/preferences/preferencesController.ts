@@ -34,7 +34,7 @@ export interface PreferencesController {
   restore(preferences: DisplayPreferences): void;
   savePreferences(): void;
   capture(): DisplayPreferences;
-  setTrackingUnit(unit: TrackingUnit): void;
+  setTrackingUnit(side: Side, unit: TrackingUnit): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
   onZoomChange(): void;
@@ -83,9 +83,9 @@ export class PreferencesControllerImpl implements PreferencesController {
       contains: (domTarget) => this.containsCanvasSettings(domTarget),
     };
     this.popupGroup.register(this.canvasSettingsPopupValue);
-    for (const unit of Object.values(this.els.trackingUnit)) {
-      unit.rad.addEventListener("click", () => this.onTrackingUnitClick("rad"));
-      unit.score.addEventListener("click", () => this.onTrackingUnitClick("score"));
+    for (const side of Object.keys(this.els.trackingUnit) as Side[]) {
+      this.els.trackingUnit[side].rad.addEventListener("click", () => this.onTrackingUnitClick(side, "rad"));
+      this.els.trackingUnit[side].score.addEventListener("click", () => this.onTrackingUnitClick(side, "score"));
     }
     this.els.langEn.addEventListener("click", () => this.setLanguage("en"));
     this.els.langZh.addEventListener("click", () => this.setLanguage("zh"));
@@ -129,7 +129,8 @@ export class PreferencesControllerImpl implements PreferencesController {
   capture(): DisplayPreferences {
     return {
       language: this.i18n.current(),
-      trackingUnit: this.shipATurretController.trackingUnit(),
+      shipATrackingUnit: this.shipATurretController.trackingUnit(),
+      shipBTrackingUnit: this.shipBTurretController.trackingUnit(),
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
       hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
@@ -138,10 +139,11 @@ export class PreferencesControllerImpl implements PreferencesController {
     };
   }
 
-  setTrackingUnit(unit: TrackingUnit): void {
-    this.shipATurretController.setTrackingUnit(unit);
-    this.shipBTurretController.setTrackingUnit(unit);
-    this.updateUnitToggle();
+  setTrackingUnit(side: Side, unit: TrackingUnit): void {
+    const controller = side === "shipA" ? this.shipATurretController : this.shipBTurretController;
+    controller.setTrackingUnit(unit);
+    this.updateUnitToggle("shipA");
+    this.updateUnitToggle("shipB");
     this.savePreferences();
     this.events.emitDisplayInvalidated();
   }
@@ -185,7 +187,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     if ("setProperty" in slider.style) slider.style.setProperty("--fill", `${fill}%`);
   }
 
-  private onTrackingUnitClick(unit: TrackingUnit): void { this.setTrackingUnit(unit); }
+  private onTrackingUnitClick(side: Side, unit: TrackingUnit): void { this.setTrackingUnit(side, unit); }
 
   private applyLanguage(language: Language): void {
     this.i18n.setLanguage(language);
@@ -194,12 +196,13 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   private applyDisplayPreferences(preferences: DisplayPreferences): void {
     this.applyLanguage(preferences.language);
-    this.shipATurretController.setTrackingUnit(preferences.trackingUnit);
-    this.shipBTurretController.setTrackingUnit(preferences.trackingUnit);
+    this.shipATurretController.setTrackingUnit(preferences.shipATrackingUnit);
+    this.shipBTurretController.setTrackingUnit(preferences.shipBTrackingUnit);
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
-    this.updateUnitToggle();
+    this.updateUnitToggle("shipA");
+    this.updateUnitToggle("shipB");
     this.els.autoZoomCheckbox.checked = preferences.autoZoom ?? true;
     this.els.zoomSlider.disabled = preferences.autoZoom ?? true;
     this.updateZoomDisplay(preferences.zoomFactor);
@@ -210,12 +213,12 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.events.emitLanguageChanged();
   }
 
-  private updateUnitToggle(): void {
-    const unit = this.shipATurretController.trackingUnit();
-    for (const buttons of Object.values(this.els.trackingUnit)) {
-      buttons.rad.setAttribute("aria-pressed", String(unit === "rad"));
-      buttons.score.setAttribute("aria-pressed", String(unit === "score"));
-    }
+  private updateUnitToggle(side: Side): void {
+    const controller = side === "shipA" ? this.shipATurretController : this.shipBTurretController;
+    const unit = controller.trackingUnit();
+    const buttons = this.els.trackingUnit[side];
+    buttons.rad.setAttribute("aria-pressed", String(unit === "rad"));
+    buttons.score.setAttribute("aria-pressed", String(unit === "score"));
   }
 
   private updateLanguageToggle(): void {

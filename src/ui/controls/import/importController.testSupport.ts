@@ -68,7 +68,7 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       const trimmed = text.trimStart();
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
-        version: 11,
+        version: 12,
         shipATracking: 0.32,
         shipASigRes: "S",
         shipAOptimal: 5000,

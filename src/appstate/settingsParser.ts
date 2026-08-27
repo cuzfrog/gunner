@@ -154,7 +154,8 @@ export class SettingsParser {
     if (!this.isProfileSettings(value)) return false;
     return (
       isLanguage(value.language) &&
-      (value.trackingUnit === "rad" || value.trackingUnit === "score") &&
+      isTrackingUnitValue(value.shipATrackingUnit) &&
+      isTrackingUnitValue(value.shipBTrackingUnit) &&
       isPositive(value.simSpeed) &&
       isFiniteNumber(value.gridBrightness) &&
       (value.autoZoom === undefined || typeof value.autoZoom === "boolean") &&
@@ -230,7 +231,7 @@ export class SettingsParser {
     record.shipBOptimal ??= 0;
     record.shipBFalloff ??= 0;
     record.language ??= DEFAULT_PREFERENCES.language;
-    record.trackingUnit ??= DEFAULT_PREFERENCES.trackingUnit;
+    this.migrateTrackingUnit(record);
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
     record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
@@ -314,10 +315,24 @@ export class SettingsParser {
     item.overloaded ??= defaultOverload;
     return item;
   }
+
+  private migrateTrackingUnit(record: Record<string, unknown>): void {
+    if (isTrackingUnitValue(record.trackingUnit)) {
+      record.shipATrackingUnit ??= record.trackingUnit;
+      record.shipBTrackingUnit ??= record.trackingUnit;
+    }
+    delete record.trackingUnit;
+    record.shipATrackingUnit = isTrackingUnitValue(record.shipATrackingUnit) ? record.shipATrackingUnit : DEFAULT_PREFERENCES.shipATrackingUnit;
+    record.shipBTrackingUnit = isTrackingUnitValue(record.shipBTrackingUnit) ? record.shipBTrackingUnit : DEFAULT_PREFERENCES.shipBTrackingUnit;
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isTrackingUnitValue(value: unknown): value is "rad" | "score" {
+  return value === "rad" || value === "score";
 }
 
 function isProfileStorage(value: unknown): value is Record<string, unknown> {
@@ -336,13 +351,15 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
     version: wire.version,
     language: wire.language,
     simSpeed: wire.simSpeed,
-    trackingUnit: wire.trackingUnit,
+    shipATrackingUnit: wire.shipATrackingUnit,
+    shipBTrackingUnit: wire.shipBTrackingUnit,
     gridBrightness,
     autoZoom,
     zoomFactor,
     display: {
       language: wire.language,
-      trackingUnit: wire.trackingUnit,
+      shipATrackingUnit: wire.shipATrackingUnit,
+      shipBTrackingUnit: wire.shipBTrackingUnit,
       simSpeed: wire.simSpeed,
       gridBrightness,
       autoZoom,
@@ -358,7 +375,8 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
   const wire: UserSettingsWire = {
     version: internal.version,
     language: internal.language,
-    trackingUnit: internal.trackingUnit,
+    shipATrackingUnit: internal.shipATrackingUnit,
+    shipBTrackingUnit: internal.shipBTrackingUnit,
     simSpeed: internal.simSpeed,
     gridBrightness: internal.gridBrightness,
     autoZoom: internal.display.autoZoom,

@@ -38,19 +38,19 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify({ ...DEFAULT_SETTINGS, version: 4 }))).toBeNull();
   });
 
-  test("parseUserSettings accepts version 5 through 10 and stamps 11", () => {
+  test("parseUserSettings accepts version 5 through 10 and stamps 12", () => {
     const v5 = { ...DEFAULT_SETTINGS, version: 5 };
     const v6 = { ...DEFAULT_SETTINGS, version: 6 };
     const v7 = { ...DEFAULT_SETTINGS, version: 7 };
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
     const v10 = { ...DEFAULT_SETTINGS, version: 10 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(11);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(11);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(11);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(11);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(11);
-    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(11);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(12);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
@@ -66,13 +66,32 @@ describe("SettingsParser", () => {
   });
 
   test("parseUserSettings defaults missing display preferences", () => {
-    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...missingPrefs } = DEFAULT_SETTINGS;
+    const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, autoZoom: ______, zoomFactor: _______, ...missingPrefs } = DEFAULT_SETTINGS;
     const parsed = makeParser().parseUserSettings(JSON.stringify(missingPrefs));
     expect(parsed).not.toBeNull();
     expect(parsed!.language).toBe("en");
-    expect(parsed!.trackingUnit).toBe("rad");
+    expect(parsed!.shipATrackingUnit).toBe("rad");
+    expect(parsed!.shipBTrackingUnit).toBe("rad");
     expect(parsed!.simSpeed).toBe(4);
     expect(parsed!.gridBrightness).toBe(0.5);
+  });
+
+  test("parseUserSettings migrates legacy trackingUnit to per-ship fields", () => {
+    const { shipATrackingUnit: _, shipBTrackingUnit: __, ...legacy } = DEFAULT_SETTINGS;
+    const withLegacy = { ...legacy, trackingUnit: "score" as const };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(withLegacy));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipATrackingUnit).toBe("score");
+    expect(parsed!.shipBTrackingUnit).toBe("score");
+    expect(parsed!).not.toHaveProperty("trackingUnit");
+  });
+
+  test("parseUserSettings preserves independent per-ship tracking units", () => {
+    const settings = { ...DEFAULT_SETTINGS, shipATrackingUnit: "score" as const, shipBTrackingUnit: "rad" as const };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(settings));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipATrackingUnit).toBe("score");
+    expect(parsed!.shipBTrackingUnit).toBe("rad");
   });
 
   test("parseUserSettings rejects a non-positive initialDistance", () => {
@@ -303,10 +322,11 @@ describe("SettingsParser", () => {
   });
 
   test("profileFromUnknown strips display preferences and defaults ammo", () => {
-    const profile = makeParser().profileFromUnknown({ ...DEFAULT_SETTINGS, language: "ja", trackingUnit: "score" });
+    const profile = makeParser().profileFromUnknown({ ...DEFAULT_SETTINGS, language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad" });
     expect(profile).not.toBeNull();
     expect(profile).not.toHaveProperty("language");
-    expect(profile).not.toHaveProperty("trackingUnit");
+    expect(profile).not.toHaveProperty("shipATrackingUnit");
+    expect(profile).not.toHaveProperty("shipBTrackingUnit");
     expect(profile!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
@@ -429,11 +449,12 @@ describe("SettingsParser", () => {
   });
 
   test("decodeUrlSettings defaults missing display preferences", () => {
-    const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, autoZoom: _____, zoomFactor: ______, ...missingPrefs } = DEFAULT_SETTINGS;
+    const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, autoZoom: ______, zoomFactor: _______, ...missingPrefs } = DEFAULT_SETTINGS;
     const decoded = makeParser().decodeUrlSettings(urlFor(missingPrefs).split("c=")[1]);
     expect(decoded).not.toBeNull();
     expect(decoded!.language).toBe("en");
-    expect(decoded!.trackingUnit).toBe("rad");
+    expect(decoded!.shipATrackingUnit).toBe("rad");
+    expect(decoded!.shipBTrackingUnit).toBe("rad");
     expect(decoded!.simSpeed).toBe(4);
     expect(decoded!.gridBrightness).toBe(0.5);
   });
