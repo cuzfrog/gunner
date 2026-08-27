@@ -85,6 +85,7 @@ export class PasteImportSection implements IPasteImportSection {
   }
 
   private createPastePopup(): Popup {
+    const id = sideId(this.panel.side);
     return {
       isOpen: () => this.isPastePopupOpen(),
       open: () => this.openPastePopup(),
@@ -92,7 +93,11 @@ export class PasteImportSection implements IPasteImportSection {
       focusTrigger: () => this.els.importFitting.focus(),
       contains: (domTarget) =>
         domTarget instanceof Element
-        && domTarget.closest(`#${this.panel.side}-paste-popup, #${this.panel.side}-import-fitting`) !== null,
+        && domTarget.closest(`#${id}-paste-popup, #${id}-import-fitting`) !== null,
     };
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

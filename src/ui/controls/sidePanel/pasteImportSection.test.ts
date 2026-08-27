@@ -93,4 +93,22 @@ describe("PasteImportSection", () => {
     expect(getFake(document, "ship-a-paste-popup").hidden).toBe(true);
     expect(section.isPastePopupOpen()).toBe(false);
   });
+
+  test("popup contains returns true for the paste popup element", () => {
+    const { document, section } = buildPasteSection();
+    const popup = getFake(document, "ship-a-paste-popup");
+    expect(section.popup.contains(popup as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns true for the import fitting trigger", () => {
+    const { document, section } = buildPasteSection();
+    const trigger = getFake(document, "ship-a-import-fitting");
+    expect(section.popup.contains(trigger as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns false for an outside element", () => {
+    const { document, section } = buildPasteSection();
+    const outside = getFake(document, "ship-a-fitting-name");
+    expect(section.popup.contains(outside as unknown as EventTarget)).toBe(false);
+  });
 });

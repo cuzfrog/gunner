@@ -72,7 +72,12 @@ export class FakeElement {
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;
     const ids = selector.split(",").map((s) => s.trim()).filter((s) => s.startsWith("#")).map((s) => s.slice(1));
-    return ids.includes(this.id) ? this : null;
+    let current: FakeElement | null = this;
+    while (current) {
+      if (ids.includes(current.id)) return current;
+      current = current.parent;
+    }
+    return null;
   }
   querySelector(selector: string): FakeElement | null {
     if (selector.startsWith('[aria-selected="true"]')) {

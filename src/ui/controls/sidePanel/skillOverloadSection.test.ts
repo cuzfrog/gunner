@@ -121,4 +121,24 @@ describe("SkillOverloadSection", () => {
     expect(getFake(document, "ship-a-overload").disabled).toBe(false);
     expect(getFake(document, "ship-a-overload-button").disabled).toBe(false);
   });
+
+  test("popup contains returns true for the skill field element", () => {
+    const { document, section } = buildSkillSection();
+    const field = getFake(document, "ship-a-skill-field");
+    expect(section.popup.contains(field as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns true for a child inside the skill field", () => {
+    const { document, section } = buildSkillSection();
+    const field = getFake(document, "ship-a-skill-field");
+    const trigger = getFake(document, "ship-a-skill-trigger");
+    trigger.parent = field;
+    expect(section.popup.contains(trigger as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns false for an outside element", () => {
+    const { document, section } = buildSkillSection();
+    const outside = getFake(document, "ship-a-overload");
+    expect(section.popup.contains(outside as unknown as EventTarget)).toBe(false);
+  });
 });

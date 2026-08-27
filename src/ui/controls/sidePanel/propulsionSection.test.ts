@@ -192,4 +192,32 @@ describe("PropulsionSection", () => {
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("1MN Afterburner I");
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("1MN加力燃烧器 I");
   });
+
+  test("popup contains returns true for the variant popup element", () => {
+    const { document, section } = buildPropulsionSection();
+    const popupEl = getFake(document, "ship-a-propulsion-variants");
+    expect(section.popup.contains(popupEl as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns true for the gear button", () => {
+    const { document, section } = buildPropulsionSection();
+    const gearEl = getFake(document, "ship-a-propulsion-gear");
+    expect(section.popup.contains(gearEl as unknown as EventTarget)).toBe(true);
+  });
+
+  test("popup contains returns true for a child inside the variant popup", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    section.renderPropulsionOptions();
+    section.popup.open();
+    const variants = getFake(document, "ship-a-propulsion-variants");
+    const child = variants.children[0] as unknown as EventTarget;
+    expect(section.popup.contains(child)).toBe(true);
+  });
+
+  test("popup contains returns false for an outside element", () => {
+    const { document, section } = buildPropulsionSection();
+    const outside = getFake(document, "ship-a-propulsion");
+    expect(section.popup.contains(outside as unknown as EventTarget)).toBe(false);
+  });
 });

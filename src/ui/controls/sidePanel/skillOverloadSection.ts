@@ -3,6 +3,7 @@ import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISkillOverloadSection } from "./sidePanelSections";
 
@@ -158,12 +159,17 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   }
 
   private createSkillPopup(): Popup {
+    const id = sideId(this.panel.side);
     return {
       isOpen: () => this.isSkillPopupOpen(),
       open: () => this.openSkillPopup(),
       close: () => this.closeSkillPopup(),
       focusTrigger: () => this.els.skillTrigger.focus(),
-      contains: (domTarget) => domTarget instanceof Element && domTarget.closest(`#${this.panel.side}-skill-field`) !== null,
+      contains: (domTarget) => domTarget instanceof Element && domTarget.closest(`#${id}-skill-field`) !== null,
     };
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

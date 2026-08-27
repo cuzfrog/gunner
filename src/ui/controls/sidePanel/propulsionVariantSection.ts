@@ -139,6 +139,7 @@ export class PropulsionVariantSection {
   }
 
   private createPropulsionVariantPopup(): Popup {
+    const id = sideId(this.panel.side);
     return {
       isOpen: () => this.isPropulsionVariantPopupOpen(),
       open: () => this.openPropulsionVariantPopup(),
@@ -146,7 +147,11 @@ export class PropulsionVariantSection {
       focusTrigger: () => this.els.propulsionGear.focus(),
       contains: (domTarget) =>
         domTarget instanceof Element &&
-        domTarget.closest(`#${this.panel.side}-propulsion-variants, #${this.panel.side}-propulsion-gear`) !== null,
+        domTarget.closest(`#${id}-propulsion-variants, #${id}-propulsion-gear`) !== null,
     };
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }
