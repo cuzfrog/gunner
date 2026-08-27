@@ -201,7 +201,7 @@ function buildCodec(options: {
   const turretControllers = options.turretControllers ?? mockTurretControllers();
   const turretOverridesBySide = options.turretOverridesBySide ?? mockTurretOverridesBySide();
   const preferences = {
-    capture: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
+    capture: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })),
     restore: vi.fn(),
     applyPreferences: vi.fn(),
     savePreferences: vi.fn(),
@@ -332,6 +332,7 @@ describe("SessionCodec", () => {
       version: USER_SETTINGS_VERSION,
       shipATrackingUnit: "score",
       shipBTrackingUnit: "score",
+      weaponRangeVisibility: "both",
       shipATracking: 0.5,
       shipASigRes: "M",
       shipAOptimal: 2000,
@@ -413,7 +414,7 @@ describe("SessionCodec", () => {
       optimal: settings.shipBOptimal,
       falloff: settings.shipBFalloff,
     });
-    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", shipATrackingUnit: "score", shipBTrackingUnit: "score", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
+    expect(preferences.restore).toHaveBeenCalledWith({ language: "zh", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.75, autoZoom: true, zoomFactor: 1 });
     expect(preferences.savePreferences).toHaveBeenCalled();
     expect(i18n.translateDocument).toHaveBeenCalled();
     expect(hintRotator.refresh).toHaveBeenCalled();
@@ -463,7 +464,7 @@ describe("SessionCodec", () => {
   test("corrupt startup data falls back to defaults", () => {
     const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
-    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn() } as unknown as SettingsStore;
+    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn() } as unknown as SettingsStore;
     const events = new UiEventsImpl();
     const onStartupDefaultsApplied = vi.fn();
     events.onStartupDefaultsApplied(onStartupDefaultsApplied);
@@ -473,7 +474,7 @@ describe("SessionCodec", () => {
 
     expect(profileController.restoreFromStartup).toHaveBeenCalled();
     expect(settingsStore.loadPreferences).toHaveBeenCalled();
-    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
+    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
     expect(shipA.sections.skill.setSkillLevel).toHaveBeenCalledWith(5);
     expect(shipA.sections.skill.setOverloadActive).toHaveBeenCalledWith(true);
     expect(shipA.sections.skill.setOverloadDisabled).toHaveBeenCalled();
@@ -492,7 +493,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", pristineShipA);
     const shipB = mockSidePanel("shipB", pristineShipB);
     const clearSelectedProfile = vi.fn();
-    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
+    const settingsStore = { loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 })), savePreferences: vi.fn(), clearSelectedProfile } as unknown as SettingsStore;
     const events = new UiEventsImpl();
     const onStartupDefaultsApplied = vi.fn();
     events.onStartupDefaultsApplied(onStartupDefaultsApplied);
@@ -523,7 +524,7 @@ describe("SessionCodec", () => {
     });
     expect(turretOverridesBySide.shipA.set).toHaveBeenCalledWith({});
     expect(turretOverridesBySide.shipB.set).toHaveBeenCalledWith({});
-    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
+    expect(preferences.applyPreferences).toHaveBeenCalledWith({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 });
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
     expect(onStartupDefaultsApplied).toHaveBeenCalled();
   });
@@ -603,7 +604,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const clearSelectedProfile = vi.fn();
-    const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
+    const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
     const settingsStore = { loadPreferences, clearSelectedProfile } as unknown as SettingsStore;
     const events = new UiEventsImpl();
     const onSessionReset = vi.fn();
@@ -624,7 +625,7 @@ describe("SessionCodec", () => {
     const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });
     const clearSelectedProfile = vi.fn();
-    const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
+    const loadPreferences = vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2, autoZoom: true, zoomFactor: 1 }));
     const settingsStore = { loadPreferences, clearSelectedProfile } as unknown as SettingsStore;
     const events = new UiEventsImpl();
     const onSessionReset = vi.fn();

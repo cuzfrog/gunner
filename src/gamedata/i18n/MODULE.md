@@ -2,6 +2,10 @@ sealed:
   - index.ts
   - language.ts
 ---
+sealed:
+  - index.ts
+  - language.ts
+---
 
 # i18n
 

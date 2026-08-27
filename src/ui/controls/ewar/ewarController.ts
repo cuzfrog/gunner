@@ -36,6 +36,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
+  private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
 
   constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
@@ -160,6 +161,7 @@ export class EwarControllerImpl implements EwarController {
     popup.setAttribute("aria-label", modulesLabel);
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
+    this.disruptorNameSpans.delete(side);
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       trigger.disabled = true;
@@ -302,7 +304,7 @@ export class EwarControllerImpl implements EwarController {
       const overloaded = state.activation.webs[i].overloaded;
       const row = document.createElement("div");
       row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(active, web);
+      const { button } = this.createModuleButton(active, web, this.ewarEffectDescriber.webModuleEffect(web));
       const overloadButton = this.createOverloadButton(active, overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
       row.appendChild(button);
@@ -317,7 +319,7 @@ export class EwarControllerImpl implements EwarController {
       const activation = state.activation.grapplers[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, grappler);
+      const { button } = this.createModuleButton(activation.active, grappler, this.ewarEffectDescriber.grapplerModuleEffect(grappler));
       const onToggle = () => this.toggleGrapplerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler, onToggle);
       button.addEventListener("click", () => this.toggleGrappler(side, i, button, row));
@@ -328,12 +330,14 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private renderDisruptors(side: Side, state: EwarState, section: HTMLElement): void {
+    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
       const activation = state.activation.disruptors[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, disruptor);
+      const { button, nameSpan } = this.createModuleButton(activation.active, disruptor, this.ewarEffectDescriber.disruptorModuleEffect(disruptor, activation.script));
+      nameSpans.push(nameSpan);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
@@ -343,6 +347,7 @@ export class EwarControllerImpl implements EwarController {
       row.appendChild(gear);
       section.appendChild(row);
     }
+    this.disruptorNameSpans.set(side, nameSpans);
   }
 
   private renderScramblers(side: Side, state: EwarState, section: HTMLElement): void {
@@ -351,7 +356,7 @@ export class EwarControllerImpl implements EwarController {
       const activation = state.activation.scramblers[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, scrambler);
+      const { button } = this.createModuleButton(activation.active, scrambler, this.ewarEffectDescriber.scramblerModuleEffect());
       const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler, onToggle);
       button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
@@ -365,7 +370,7 @@ export class EwarControllerImpl implements EwarController {
     return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }): HTMLButtonElement {
+  private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }, effectTitle: string): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(spec);
     const button = document.createElement("button");
     button.type = "button";
@@ -382,9 +387,9 @@ export class EwarControllerImpl implements EwarController {
     const nameSpan = document.createElement("span");
     nameSpan.className = "ewar-module-name truncate";
     nameSpan.textContent = displayName;
-    nameSpan.title = displayName;
+    nameSpan.title = effectTitle;
     button.appendChild(nameSpan);
-    return button;
+    return { button, nameSpan };
   }
 
   private createScriptGear(side: Side, index: number, script: DisruptionScriptSpec | undefined, active: boolean): HTMLButtonElement {
@@ -530,6 +535,8 @@ export class EwarControllerImpl implements EwarController {
     state.activation.disruptors[index].script = script;
     const gear = this.findGearFor(side, index);
     if (gear) this.updateGearTitle(gear, script);
+    const nameSpan = this.disruptorNameSpans.get(side)?.[index];
+    if (nameSpan) nameSpan.title = this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script);
     this.events.emitConfigInvalidated(true);
   }
 

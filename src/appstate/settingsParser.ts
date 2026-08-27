@@ -8,6 +8,7 @@ import {
   type ProfileSettings as ProfileSettingsWire,
   type PropulsionSelection,
   type UserSettings,
+  type WeaponRangeVisibility,
 } from "./userSettings";
 import { clampManeuverAggressivity } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
@@ -156,6 +157,7 @@ export class SettingsParser {
       isLanguage(value.language) &&
       isTrackingUnitValue(value.shipATrackingUnit) &&
       isTrackingUnitValue(value.shipBTrackingUnit) &&
+      isWeaponRangeVisibilityValue(value.weaponRangeVisibility) &&
       isPositive(value.simSpeed) &&
       isFiniteNumber(value.gridBrightness) &&
       (value.autoZoom === undefined || typeof value.autoZoom === "boolean") &&
@@ -232,6 +234,7 @@ export class SettingsParser {
     record.shipBFalloff ??= 0;
     record.language ??= DEFAULT_PREFERENCES.language;
     this.migrateTrackingUnit(record);
+    record.weaponRangeVisibility = isWeaponRangeVisibilityValue(record.weaponRangeVisibility) ? record.weaponRangeVisibility : DEFAULT_PREFERENCES.weaponRangeVisibility;
     record.simSpeed ??= DEFAULT_PREFERENCES.simSpeed;
     record.gridBrightness ??= DEFAULT_PREFERENCES.gridBrightness;
     record.autoZoom ??= DEFAULT_PREFERENCES.autoZoom;
@@ -335,6 +338,10 @@ function isTrackingUnitValue(value: unknown): value is "rad" | "score" {
   return value === "rad" || value === "score";
 }
 
+function isWeaponRangeVisibilityValue(value: unknown): value is WeaponRangeVisibility {
+  return value === "shipA" || value === "shipB" || value === "both" || value === "none";
+}
+
 function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -353,6 +360,7 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
     simSpeed: wire.simSpeed,
     shipATrackingUnit: wire.shipATrackingUnit,
     shipBTrackingUnit: wire.shipBTrackingUnit,
+    weaponRangeVisibility: wire.weaponRangeVisibility,
     gridBrightness,
     autoZoom,
     zoomFactor,
@@ -360,6 +368,7 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
       language: wire.language,
       shipATrackingUnit: wire.shipATrackingUnit,
       shipBTrackingUnit: wire.shipBTrackingUnit,
+      weaponRangeVisibility: wire.weaponRangeVisibility,
       simSpeed: wire.simSpeed,
       gridBrightness,
       autoZoom,
@@ -377,6 +386,7 @@ function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
     language: internal.language,
     shipATrackingUnit: internal.shipATrackingUnit,
     shipBTrackingUnit: internal.shipBTrackingUnit,
+    weaponRangeVisibility: internal.weaponRangeVisibility,
     simSpeed: internal.simSpeed,
     gridBrightness: internal.gridBrightness,
     autoZoom: internal.display.autoZoom,

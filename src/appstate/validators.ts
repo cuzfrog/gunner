@@ -201,7 +201,7 @@ export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly
 }
 
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, hiddenRangeOverlays: ______, autoZoom: _______, zoomFactor: ________, ...rest } = value as Record<string, unknown>;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, hiddenRangeOverlays: _______, autoZoom: ________, zoomFactor: _________, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 

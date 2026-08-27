@@ -28,6 +28,7 @@ const controls = vi.mocked<Controls>({
   getGridBrightness: vi.fn(),
   getAutoZoom: vi.fn(),
   getZoomFactor: vi.fn(),
+  getWeaponRangeVisibility: vi.fn(() => "both" as const),
   getOverlays: vi.fn(() => []),
   hasGuns: vi.fn(),
   update: vi.fn(),
@@ -36,7 +37,7 @@ const controls = vi.mocked<Controls>({
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
 const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
-const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setRangeRingsEnabled: vi.fn(), setManualZoom: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),
@@ -143,8 +144,9 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
+    expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
     expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turrets: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, turret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -168,7 +170,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, effectiveTurret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: effectiveTurret, shipB: effectiveTurret }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
       shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
@@ -180,7 +182,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, turret, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),

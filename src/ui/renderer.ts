@@ -1,4 +1,5 @@
 import { Vec2, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
 
@@ -11,11 +12,16 @@ export interface RangeOverlay {
   readonly falloffRadius?: number;
 }
 
+export interface WeaponRangeTurrets {
+  readonly shipA: TurretSpec;
+  readonly shipB: TurretSpec;
+}
+
 export interface Renderer {
   setGridBrightness(brightness: number): void;
-  setRangeRingsEnabled(enabled: boolean): void;
+  setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void;
   setManualZoom(autoZoom: boolean, factor: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, turret: TurretSpec, overlays: readonly RangeOverlay[]): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turrets: WeaponRangeTurrets, overlays: readonly RangeOverlay[]): void;
 }
 
 const COLORS = {
@@ -65,7 +71,7 @@ export class CanvasRenderer implements Renderer {
   private readonly i18n: I18n;
   private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
-  private rangeRingsEnabled = true;
+  private weaponRangeVisibility: WeaponRangeVisibility = "both";
   private autoZoom = true;
   private zoomFactor = 1;
 
@@ -82,8 +88,8 @@ export class CanvasRenderer implements Renderer {
     this.gridBrightness = Math.max(0, Math.min(1, brightness));
   }
 
-  setRangeRingsEnabled(enabled: boolean): void {
-    this.rangeRingsEnabled = enabled;
+  setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void {
+    this.weaponRangeVisibility = visibility;
   }
 
   setManualZoom(autoZoom: boolean, factor: number): void {
@@ -91,12 +97,12 @@ export class CanvasRenderer implements Renderer {
     if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, turret: TurretSpec, overlays: readonly RangeOverlay[]): void {
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turrets: WeaponRangeTurrets, overlays: readonly RangeOverlay[]): void {
     this.syncBufferSize();
-    this.updateCamera(snapshot, turret);
+    this.updateCamera(snapshot, turrets);
     this.clear();
     this.drawGrid();
-    this.drawRangeRings(snapshot.shipA.position, turret);
+    this.drawWeaponRangeRings(snapshot, turrets);
     this.drawRangeOverlays(snapshot, overlays);
     this.drawLineOfSight(snapshot.shipA.position, snapshot.shipB.position, frame.distance);
     this.drawWorldVector(snapshot.shipA.position, snapshot.shipA.velocity, COLORS.shipA);
@@ -111,13 +117,17 @@ export class CanvasRenderer implements Renderer {
     this.drawReadouts(frame);
   }
 
-  private updateCamera(snapshot: SimSnapshot, turret: TurretSpec): void {
+  private updateCamera(snapshot: SimSnapshot, turrets: WeaponRangeTurrets): void {
     const { shipA, shipB } = snapshot;
     const center = shipA.position.add(shipB.position).scale(0.5);
     const distance = shipA.position.dist(shipB.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
 
-    const farRadius = Math.max(turret.optimal + turret.falloff, shipA.desiredRange, shipB.desiredRange, 500);
+    const farRadius = Math.max(
+      turrets.shipA.optimal + turrets.shipA.falloff,
+      turrets.shipB.optimal + turrets.shipB.falloff,
+      shipA.desiredRange, shipB.desiredRange, 500,
+    );
     const farScale = minDim / (2 * farRadius * FAR_MARGIN);
 
     const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
@@ -179,8 +189,17 @@ export class CanvasRenderer implements Renderer {
     this.ctx.stroke();
   }
 
+  private drawWeaponRangeRings(snapshot: SimSnapshot, turrets: WeaponRangeTurrets): void {
+    if (this.weaponRangeVisibility === "none") return;
+    if (this.weaponRangeVisibility === "shipA" || this.weaponRangeVisibility === "both") {
+      this.drawRangeRings(snapshot.shipA.position, turrets.shipA);
+    }
+    if (this.weaponRangeVisibility === "shipB" || this.weaponRangeVisibility === "both") {
+      this.drawRangeRings(snapshot.shipB.position, turrets.shipB);
+    }
+  }
+
   private drawRangeRings(center: Vec2, turret: TurretSpec): void {
-    if (!this.rangeRingsEnabled) return;
     this.drawRingAt(center, turret.optimal, COLORS.optimalRing, [8, 6]);
     if (turret.falloff > 0) {
       this.drawRingAt(center, turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);

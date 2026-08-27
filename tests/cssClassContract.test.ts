@@ -27,6 +27,7 @@ const APPROVED_PREFIXES = [
   "speed-control",
   "grid-brightness",
   "auto-zoom",
+  "weapon-range",
   "form-slider",
   "form-field",
   "form-maneuver",

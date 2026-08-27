@@ -11,6 +11,7 @@ function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
     version: USER_SETTINGS_VERSION,
     shipATrackingUnit: "rad",
     shipBTrackingUnit: "rad",
+    weaponRangeVisibility: "both",
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 5000,
@@ -84,7 +85,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
   const sessionCodec = vi.mocked<SessionCodec>({
     capture: vi.fn(() => captured),
     captureProfile: vi.fn((): ProfileSettings => {
-      const { language: _l, shipATrackingUnit: _tu, shipBTrackingUnit: _tbu, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
+      const { language: _l, shipATrackingUnit: _tu, shipBTrackingUnit: _tbu, weaponRangeVisibility: _wrv, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
       return profile;
     }),
     getInitialDistance: vi.fn(),
@@ -214,6 +215,6 @@ describe("ShareController", () => {
 });
 
 function expectedProfileFor(captured: UserSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____, ...rest } = captured;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, ...rest } = captured;
   return rest;
 }

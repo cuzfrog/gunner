@@ -1,0 +1,19 @@
+@layer components {
+.weapon-range-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  font-size: 11px;
+  min-width: 140px;
+}
+
+.weapon-range-toggle[data-weapon-range="none"] {
+  opacity: 0.6;
+}
+
+.weapon-range-toggle[aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+}

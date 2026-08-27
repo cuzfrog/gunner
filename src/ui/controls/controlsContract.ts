@@ -1,4 +1,5 @@
 import type { DisruptionBreakdown, EngagementView, SimConfig, SpeedBreakdown, TurretSpec } from "../../sim";
+import type { WeaponRangeVisibility } from "../../appstate";
 import type { RangeOverlay } from "../renderer";
 import type { Side } from "./side";
 
@@ -38,6 +39,7 @@ export interface Controls {
   getGridBrightness(): number;
   getAutoZoom(): boolean;
   getZoomFactor(): number;
+  getWeaponRangeVisibility(): WeaponRangeVisibility;
   getOverlays(): readonly RangeOverlay[];
   hasGuns(side: Side): boolean;
   update(view: EngagementView, effective: EffectiveReadouts): void;

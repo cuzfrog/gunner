@@ -20,6 +20,7 @@ import type { BoosterController } from "../booster";
 import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
+import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { PortraitsController } from "../portraits";
 
@@ -209,6 +210,7 @@ export class DomControls implements Controls, DomControlsHost {
   getAutoZoom(): boolean { return this.preferencesController.getAutoZoom(); }
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
+  getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
   hasGuns(side: Side): boolean { return this.turretControllers[side].turret() !== undefined; }
   update(view: EngagementView, effective: EffectiveReadouts): void {
     this.currentDistanceValue = view.frame.distance;

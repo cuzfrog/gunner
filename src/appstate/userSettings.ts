@@ -6,6 +6,7 @@ import type { Language } from "./language";
 export const USER_SETTINGS_VERSION = 12 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
+export type WeaponRangeVisibility = "shipA" | "shipB" | "both" | "none";
 export type PropulsionSelection = PropulsionId | typeof PROPULSION_NONE;
 export type StoredDisruptionScript = TypeId | "none";
 
@@ -52,6 +53,7 @@ export interface UserSettings {
   version: typeof USER_SETTINGS_VERSION;
   shipATrackingUnit: TrackingUnit;
   shipBTrackingUnit: TrackingUnit;
+  weaponRangeVisibility: WeaponRangeVisibility;
   shipATracking: number;
   shipASigRes: SigResolutionClass;
   shipAOptimal: number;
@@ -111,6 +113,7 @@ export type ProfileSettings = Omit<
   | "language"
   | "shipATrackingUnit"
   | "shipBTrackingUnit"
+  | "weaponRangeVisibility"
   | "simSpeed"
   | "gridBrightness"
   | "autoZoom"
@@ -130,6 +133,7 @@ export interface DisplayPreferences {
   readonly language: Language;
   readonly shipATrackingUnit: TrackingUnit;
   readonly shipBTrackingUnit: TrackingUnit;
+  readonly weaponRangeVisibility: WeaponRangeVisibility;
   readonly simSpeed: number;
   readonly gridBrightness: number;
   readonly hiddenRangeOverlays?: readonly string[];

@@ -152,8 +152,8 @@ export class SessionCodecImpl implements SessionCodec {
 
   captureProfile(): ProfileSettings {
     const {
-      language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, simSpeed: ____, gridBrightness: _____,
-      autoZoom: ______, zoomFactor: _______, ...profile
+      language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______,
+      autoZoom: _______, zoomFactor: ________, ...profile
     } = this.capture();
     return profile;
   }
@@ -164,6 +164,7 @@ export class SessionCodecImpl implements SessionCodec {
       language: settings.language,
       shipATrackingUnit: settings.shipATrackingUnit,
       shipBTrackingUnit: settings.shipBTrackingUnit,
+      weaponRangeVisibility: settings.weaponRangeVisibility,
       simSpeed: settings.simSpeed,
       gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
       autoZoom: settings.autoZoom ?? true,

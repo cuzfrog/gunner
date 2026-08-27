@@ -65,6 +65,7 @@ function fakeEls(): PreferencesEls {
     zoomSlider: new FakeElement() as unknown as HTMLInputElement,
     zoomValue: new FakeElement() as unknown as HTMLElement,
     autoZoomCheckbox: new FakeElement() as unknown as HTMLInputElement,
+    weaponRangeButton: new FakeElement() as unknown as HTMLButtonElement,
   };
 }
 
@@ -232,6 +233,12 @@ describe("PreferencesController", () => {
     expect(events.emitLanguageChanged).toHaveBeenCalled();
   });
 
+  test("setLanguage refreshes the weapon range button text", () => {
+    const { controller, els } = build();
+    controller.setLanguage("zh");
+    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange.both");
+  });
+
   test("setLanguage emits language changed synchronously", async () => {
     const { controller, events } = build();
     controller.setLanguage("zh");
@@ -246,7 +253,7 @@ describe("PreferencesController", () => {
 
   test("restore does not emit language changed for English", () => {
     const { controller, events } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 1, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(events.emitLanguageChanged).not.toHaveBeenCalled();
   });
@@ -312,12 +319,64 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
+    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
+  });
+
+  test("getWeaponRangeVisibility defaults to both", () => {
+    const { controller } = build();
+    expect(controller.getWeaponRangeVisibility()).toBe("both");
+  });
+
+  test("cycleWeaponRange cycles through both, shipA, shipB, none, and back to both", () => {
+    const { controller, els } = build();
+    expect(controller.getWeaponRangeVisibility()).toBe("both");
+    controller.cycleWeaponRange();
+    expect(controller.getWeaponRangeVisibility()).toBe("shipA");
+    expect(els.weaponRangeButton.getAttribute("aria-pressed")).toBe("true");
+    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipA");
+    controller.cycleWeaponRange();
+    expect(controller.getWeaponRangeVisibility()).toBe("shipB");
+    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipB");
+    controller.cycleWeaponRange();
+    expect(controller.getWeaponRangeVisibility()).toBe("none");
+    expect(els.weaponRangeButton.getAttribute("aria-pressed")).toBe("false");
+    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("none");
+    controller.cycleWeaponRange();
+    expect(controller.getWeaponRangeVisibility()).toBe("both");
+  });
+
+  test("cycleWeaponRange saves preferences and emits display invalidation", () => {
+    const { controller, settingsStore, events } = build();
+    controller.cycleWeaponRange();
+    expect(settingsStore.savePreferences).toHaveBeenCalled();
+    expect(events.emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("cycleWeaponRange updates the button label via i18n", () => {
+    const { controller, els, i18n } = build();
+    controller.cycleWeaponRange();
+    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange.shipA");
+    expect(i18n.t).toHaveBeenCalledWith("label.weaponRange.shipA");
+  });
+
+  test("restore applies the persisted weapon range visibility", () => {
+    const { controller, els } = build();
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "shipB", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    controller.restore(preferences);
+    expect(controller.getWeaponRangeVisibility()).toBe("shipB");
+    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipB");
+  });
+
+  test("capture includes the current weapon range visibility", () => {
+    const { controller } = build();
+    controller.cycleWeaponRange();
+    controller.cycleWeaponRange();
+    expect(controller.capture().weaponRangeVisibility).toBe("shipB");
   });
 
   test("restore applies hidden range overlay state", () => {
     const { controller, rangeOverlayController } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(rangeOverlayController.restoreHidden).toHaveBeenCalledWith(["web"]);
   });
@@ -330,7 +389,7 @@ describe("PreferencesController", () => {
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {
     const { controller, els, i18n, events, shipATurretController } = build();
-    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "score", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "score", weaponRangeVisibility: "both", simSpeed: 3, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
     expect(i18n.setLanguage).toHaveBeenCalledWith("ja");
     expect(shipATurretController.setTrackingUnit).toHaveBeenCalledWith("score");

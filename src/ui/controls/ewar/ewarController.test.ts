@@ -133,6 +133,10 @@ function buildEwarController(
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    webModuleEffect: vi.fn(() => "web-effect"),
+    grapplerModuleEffect: vi.fn(() => "grappler-effect"),
+    disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
+    scramblerModuleEffect: vi.fn(() => "scrambler-effect"),
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
@@ -233,7 +237,7 @@ describe("EwarController", () => {
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
     expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
-    expect(webButton.children[1].title).toBe(WEB2.moduleName);
+    expect(webButton.children[1].title).toBe("web-effect");
 
     const disruptors = disruptorSection(document, "shipA")!;
     expect(disruptors.className).toBe("preview-section");
@@ -564,6 +568,25 @@ describe("EwarController", () => {
     });
   });
 
+  test("selecting a disruptor script updates the module button title to reflect the script multipliers", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("shipA", { webs: [], disruptors: [DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS });
+    ewarEffectDescriber.disruptorModuleEffect.mockReturnValue("disruptor-with-optimal");
+    const popup = getFake(document, "ship-a-ewar-popup");
+    popup.hidden = false;
+    const section = disruptorSection(document, "shipA")!;
+    const row = section.children[1];
+    const button = row.children[0];
+    const gear = gearFor(row);
+    expect(button.children[1].title).toBe("disruptor-effect");
+    gear.trigger("click");
+    const scriptPopup = scriptPopupFor(document, "shipA");
+    ewarEffectDescriber.disruptorModuleEffect.mockReturnValue("disruptor-with-tracking");
+    scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
+    expect(button.children[1].title).toBe("disruptor-with-tracking");
+    expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR2, TRACKING_SCRIPT);
+  });
+
   test("setLoadout renders translated module names and keeps icon inputs canonical", () => {
     const { controller, document, fittingImport, imageCatalog } = buildEwarController("zh");
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
@@ -571,12 +594,29 @@ describe("EwarController", () => {
     const webButton = webSectionEl.children[1].children[0];
     const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
-    expect(webButton.children[1].title).toBe(`${WEB.moduleName} (zh)`);
+    expect(webButton.children[1].title).toBe("web-effect");
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
     expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(WEB.moduleId, "zh");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(WEB.moduleId);
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith(`${WEB.moduleName} (zh)`);
+  });
+
+  test("module button title shows the effect description instead of the module name", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [GRAPPLER], scramblers: [SCRAMBLER], scripts: SCRIPTS });
+    const webButton = webSection(document, "shipA")!.children[1].children[0];
+    expect(webButton.children[1].title).toBe("web-effect");
+    expect(ewarEffectDescriber.webModuleEffect).toHaveBeenCalledWith(WEB);
+    const grapplerButton = grapplerSection(document, "shipA")!.children[1].children[0];
+    expect(grapplerButton.children[1].title).toBe("grappler-effect");
+    expect(ewarEffectDescriber.grapplerModuleEffect).toHaveBeenCalledWith(GRAPPLER);
+    const disruptorButton = disruptorSection(document, "shipA")!.children[1].children[0];
+    expect(disruptorButton.children[1].title).toBe("disruptor-effect");
+    expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR, undefined);
+    const scramblerButton = scramblerSection(document, "shipA")!.children[1].children[0];
+    expect(scramblerButton.children[1].title).toBe("scrambler-effect");
+    expect(ewarEffectDescriber.scramblerModuleEffect).toHaveBeenCalled();
   });
 
   test("summary hides an icon when no icon URL is available", () => {

@@ -42,5 +42,6 @@ function collectPreferencesEls(els: ControlsElements): PreferencesEls {
     zoomSlider: els.zoomSlider,
     zoomValue: els.zoomValue,
     autoZoomCheckbox: els.autoZoomCheckbox,
+    weaponRangeButton: els.weaponRangeButton,
   };
 }

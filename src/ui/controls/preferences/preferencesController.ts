@@ -1,7 +1,7 @@
 import { num, setText } from "../controlsDom";
 import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import type { I18n, Language } from "../../i18n";
-import type { DisplayPreferences, SettingsStore, TrackingUnit } from "../../../appstate";
+import type { DisplayPreferences, SettingsStore, TrackingUnit, WeaponRangeVisibility } from "../../../appstate";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
@@ -21,6 +21,7 @@ export interface PreferencesEls {
   readonly zoomSlider: HTMLInputElement;
   readonly zoomValue: HTMLElement;
   readonly autoZoomCheckbox: HTMLInputElement;
+  readonly weaponRangeButton: HTMLButtonElement;
 }
 
 export interface PreferencesController {
@@ -29,18 +30,22 @@ export interface PreferencesController {
   getGridBrightness(): number;
   getAutoZoom(): boolean;
   getZoomFactor(): number;
+  getWeaponRangeVisibility(): WeaponRangeVisibility;
   setLanguage(language: Language): void;
   applyPreferences(preferences: DisplayPreferences): void;
   restore(preferences: DisplayPreferences): void;
   savePreferences(): void;
   capture(): DisplayPreferences;
   setTrackingUnit(side: Side, unit: TrackingUnit): void;
+  cycleWeaponRange(): void;
   onGridBrightnessChange(): void;
   updateGridBrightnessDisplay(value?: number): void;
   onZoomChange(): void;
   onAutoZoomChange(): void;
   updateZoomDisplay(value?: number): void;
 }
+
+const WEAPON_RANGE_CYCLE: readonly WeaponRangeVisibility[] = ["both", "shipA", "shipB", "none"];
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
@@ -56,6 +61,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly popupGroup: PopupGroup;
   private readonly canvasSettingsPopupValue: Popup;
   private canvasSettingsOpen = false;
+  private weaponRangeVisibility: WeaponRangeVisibility = "both";
 
   constructor(deps: {
     els: PreferencesEls;
@@ -93,6 +99,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.els.gridBrightnessSlider.addEventListener("input", () => this.onGridBrightnessChange());
     this.els.canvasSettingsTrigger.addEventListener("click", () => this.toggleCanvasSettings());
     this.els.zoomSlider.addEventListener("input", () => this.onZoomChange());
+    this.els.weaponRangeButton.addEventListener("click", () => this.cycleWeaponRange());
     this.els.autoZoomCheckbox.addEventListener("change", () => this.onAutoZoomChange());
   }
 
@@ -131,12 +138,25 @@ export class PreferencesControllerImpl implements PreferencesController {
       language: this.i18n.current(),
       shipATrackingUnit: this.shipATurretController.trackingUnit(),
       shipBTrackingUnit: this.shipBTurretController.trackingUnit(),
+      weaponRangeVisibility: this.weaponRangeVisibility,
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
       hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
       autoZoom: this.getAutoZoom(),
       zoomFactor: this.getZoomFactor(),
     };
+  }
+
+  getWeaponRangeVisibility(): WeaponRangeVisibility {
+    return this.weaponRangeVisibility;
+  }
+
+  cycleWeaponRange(): void {
+    const currentIndex = WEAPON_RANGE_CYCLE.indexOf(this.weaponRangeVisibility);
+    this.weaponRangeVisibility = WEAPON_RANGE_CYCLE[(currentIndex + 1) % WEAPON_RANGE_CYCLE.length];
+    this.updateWeaponRangeButton();
+    this.savePreferences();
+    this.events.emitDisplayInvalidated();
   }
 
   setTrackingUnit(side: Side, unit: TrackingUnit): void {
@@ -192,17 +212,20 @@ export class PreferencesControllerImpl implements PreferencesController {
   private applyLanguage(language: Language): void {
     this.i18n.setLanguage(language);
     this.updateLanguageToggle();
+    this.updateWeaponRangeButton();
   }
 
   private applyDisplayPreferences(preferences: DisplayPreferences): void {
     this.applyLanguage(preferences.language);
     this.shipATurretController.setTrackingUnit(preferences.shipATrackingUnit);
     this.shipBTurretController.setTrackingUnit(preferences.shipBTrackingUnit);
+    this.weaponRangeVisibility = preferences.weaponRangeVisibility;
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
     this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
     this.updateUnitToggle("shipA");
     this.updateUnitToggle("shipB");
+    this.updateWeaponRangeButton();
     this.els.autoZoomCheckbox.checked = preferences.autoZoom ?? true;
     this.els.zoomSlider.disabled = preferences.autoZoom ?? true;
     this.updateZoomDisplay(preferences.zoomFactor);
@@ -219,6 +242,13 @@ export class PreferencesControllerImpl implements PreferencesController {
     const buttons = this.els.trackingUnit[side];
     buttons.rad.setAttribute("aria-pressed", String(unit === "rad"));
     buttons.score.setAttribute("aria-pressed", String(unit === "score"));
+  }
+
+  private updateWeaponRangeButton(): void {
+    const button = this.els.weaponRangeButton;
+    button.setAttribute("aria-pressed", String(this.weaponRangeVisibility !== "none"));
+    button.setAttribute("data-weapon-range", this.weaponRangeVisibility);
+    button.textContent = this.i18n.t(`label.weaponRange.${this.weaponRangeVisibility}`);
   }
 
   private updateLanguageToggle(): void {

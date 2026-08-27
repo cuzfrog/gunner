@@ -70,9 +70,9 @@ export class AppImpl implements App {
       shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
     };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
-    this.renderer.setRangeRingsEnabled(this.controls.hasGuns("shipA"));
+    this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, view.effectiveTurrets.shipA, this.controls.getOverlays());
+    this.renderer.draw(snapshot, view.frame, view.effectiveTurrets, this.controls.getOverlays());
     this.controls.update(view, effectiveReadouts);
   }
 

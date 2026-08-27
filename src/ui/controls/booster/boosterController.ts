@@ -31,6 +31,7 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
+  private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -117,6 +118,7 @@ export class BoosterControllerImpl implements BoosterController {
     const state = this.states.get(side);
     this.scriptPopups[side].close();
     this.scriptGears.delete(side);
+    this.computerNameSpans.delete(side);
     section.innerHTML = "";
     section.appendChild(this.scriptPopupEls.get(side)!);
     if (!state || state.loadout.computers.length === 0) {
@@ -211,18 +213,21 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   private renderComputers(side: Side, state: BoosterState, section: HTMLElement): void {
+    const nameSpans: HTMLSpanElement[] = [];
     for (let i = 0; i < state.loadout.computers.length; i++) {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
       const row = document.createElement("div");
       row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-      const button = this.createModuleButton(activation.active, computer);
+      const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script);
+      nameSpans.push(nameSpan);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
       const gear = this.createScriptGear(side, i, activation.script, activation.active);
       row.appendChild(gear);
       section.appendChild(row);
     }
+    this.computerNameSpans.set(side, nameSpans);
   }
 
   private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
@@ -234,8 +239,9 @@ export class BoosterControllerImpl implements BoosterController {
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, computer: TrackingBoosterSpec): HTMLButtonElement {
+  private createModuleButton(active: boolean, computer: TrackingBoosterSpec, script: TurretScriptSpec | undefined): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(computer);
+    const effectTitle = this.boosterModuleEffect(computer, script);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ewar-module-toggle";
@@ -250,9 +256,20 @@ export class BoosterControllerImpl implements BoosterController {
     const nameSpan = document.createElement("span");
     nameSpan.className = "truncate";
     nameSpan.textContent = displayName;
-    nameSpan.title = displayName;
+    nameSpan.title = effectTitle;
     button.appendChild(nameSpan);
-    return button;
+    return { button, nameSpan };
+  }
+
+  private boosterModuleEffect(spec: TrackingBoosterSpec, script: TurretScriptSpec | undefined): string {
+    const tracking = spec.trackingBonusPercent * (script?.trackingMultiplier ?? 1);
+    const optimal = spec.optimalBonusPercent * (script?.optimalMultiplier ?? 1);
+    const falloff = spec.falloffBonusPercent * (script?.falloffMultiplier ?? 1);
+    const parts: string[] = [];
+    if (tracking !== 0) parts.push(`${this.i18n.t("ewar.hover.tracking")} ${tracking > 0 ? "+" : ""}${tracking.toFixed(1)}%`);
+    if (optimal !== 0) parts.push(`${this.i18n.t("ewar.hover.optimal")} ${optimal > 0 ? "+" : ""}${optimal.toFixed(1)}%`);
+    if (falloff !== 0) parts.push(`${this.i18n.t("ewar.hover.falloff")} ${falloff > 0 ? "+" : ""}${falloff.toFixed(1)}%`);
+    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
   private createScriptGear(side: Side, index: number, script: TurretScriptSpec | undefined, active: boolean): HTMLButtonElement {
@@ -318,6 +335,8 @@ export class BoosterControllerImpl implements BoosterController {
     if (!state) return;
     state.activation[index].script = script;
     this.updateGearTitle(gear, script);
+    const nameSpan = this.computerNameSpans.get(side)?.[index];
+    if (nameSpan) nameSpan.title = this.boosterModuleEffect(state.loadout.computers[index], script);
     this.scriptPopups[side].close();
     this.updateSummary(side);
     this.events.emitConfigInvalidated(true);

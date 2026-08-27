@@ -1,5 +1,5 @@
 import type { EwarResolver } from "../../../sim";
-import type { EwarProjection, TurretSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 
 export interface EwarEffectDescriber {
@@ -11,6 +11,10 @@ export interface EwarEffectDescriber {
   disruptorHint(projection: EwarProjection): string;
   scramblerDescription(projection: EwarProjection, distance: number): string;
   scramblerHint(projection: EwarProjection): string;
+  webModuleEffect(spec: StasisWebSpec): string;
+  grapplerModuleEffect(spec: StasisGrapplerSpec): string;
+  disruptorModuleEffect(spec: TrackingDisruptorSpec, script: DisruptionScriptSpec | undefined): string;
+  scramblerModuleEffect(): string;
 }
 
 export class EwarEffectDescriberImpl implements EwarEffectDescriber {
@@ -133,5 +137,28 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
       ? `${(meters / 1000).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${this.i18n.t("unit.kilometer")}`
       : `${Math.round(meters)} ${this.i18n.t("unit.meter")}`;
     return this.i18n.t("ewar.hint.range").replace("{0}", value);
+  }
+
+  webModuleEffect(spec: StasisWebSpec): string {
+    return this.speedDescription(1 - spec.speedFactor);
+  }
+
+  grapplerModuleEffect(spec: StasisGrapplerSpec): string {
+    return this.speedDescription(1 - spec.speedFactor);
+  }
+
+  disruptorModuleEffect(spec: TrackingDisruptorSpec, script: DisruptionScriptSpec | undefined): string {
+    const strength = spec.disruption;
+    const tracking = Math.round(strength * (script?.trackingMultiplier ?? 1) * 100);
+    const optimal = Math.round(strength * (script?.optimalMultiplier ?? 1) * 100);
+    const falloff = Math.round(strength * (script?.falloffMultiplier ?? 1) * 100);
+    const trackingLabel = this.i18n.t("ewar.hover.tracking");
+    const optimalLabel = this.i18n.t("ewar.hover.optimal");
+    const falloffLabel = this.i18n.t("ewar.hover.falloff");
+    return `${trackingLabel} -${tracking}% · ${optimalLabel} -${optimal}% · ${falloffLabel} -${falloff}%`;
+  }
+
+  scramblerModuleEffect(): string {
+    return this.i18n.t("ewar.hover.scrambler");
   }
 }

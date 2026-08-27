@@ -34,6 +34,7 @@ const STYLES_MANIFEST = [
   "styles/components/ewar-popup.css",
   "styles/components/info-hint.css",
   "styles/components/canvas-overlays.css",
+  "styles/components/weapon-range.css",
   "styles/components/footer.css",
   "styles/layout.css",
 ] as const;

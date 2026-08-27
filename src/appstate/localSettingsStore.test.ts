@@ -563,9 +563,30 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "ja", shipATrackingUnit: "score", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.8, autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
+  });
+
+  test("savePreferences and loadPreferences round-trip weapon range visibility", () => {
+    const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "shipA", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    store.savePreferences(preferences);
+    expect(store.loadPreferences().weaponRangeVisibility).toBe("shipA");
+  });
+
+  test("loadPreferences defaults weapon range visibility to both when missing", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5 }));
+    const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadPreferences().weaponRangeVisibility).toBe("both");
+  });
+
+  test("loadPreferences defaults weapon range visibility to both when invalid", () => {
+    const storage = fakeStorage();
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "invalid", simSpeed: 4, gridBrightness: 0.5 }));
+    const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
+    expect(store.loadPreferences().weaponRangeVisibility).toBe("both");
   });
 
   test("loadPreferences falls back per field for invalid values", () => {
@@ -602,7 +623,7 @@ describe("LocalSettingsStore", () => {
 
   test("savePreferences and loadPreferences round-trip hidden range overlays", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });

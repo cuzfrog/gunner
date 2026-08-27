@@ -1,5 +1,5 @@
 import { toTypeId } from "../../../gamedata/ids";
-import type { EwarProjection } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { EwarResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
@@ -160,5 +160,47 @@ describe("EwarEffectDescriber", () => {
     } as EwarProjection;
     resolver.propulsionSuppressedIgnoringRange.mockReturnValue(true);
     expect(describer.scramblerHint(scramblerProjection)).toBe("Disables MWD · range 10.8 km");
+  });
+
+  test("webModuleEffect reports the speed reduction from the spec", () => {
+    const spec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.55, overloadRangeBonusPercent: 30 };
+    expect(describer.webModuleEffect(spec)).toBe("Reduce speed by 55%");
+  });
+
+  test("webModuleEffect reports out-of-range when speedFactor is 0", () => {
+    const spec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0, overloadRangeBonusPercent: 30 };
+    expect(describer.webModuleEffect(spec)).toBe("No effect at this range");
+  });
+
+  test("grapplerModuleEffect reports the speed reduction from the spec", () => {
+    const spec: StasisGrapplerSpec = { moduleName: "Stasis Grappler II", moduleId: toTypeId("449"), optimal: 20000, falloff: 10000, speedFactor: 0.45, overloadOptimalBonusPercent: 30 };
+    expect(describer.grapplerModuleEffect(spec)).toBe("Reduce speed by 45%");
+  });
+
+  test("disruptorModuleEffect reports per-channel percentages without a script", () => {
+    const spec: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
+    expect(describer.disruptorModuleEffect(spec, undefined)).toBe("Tracking -17% · Optimal -17% · Falloff -17%");
+  });
+
+  test("disruptorModuleEffect applies script multipliers to the disruption strength", () => {
+    const spec: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
+    const script: DisruptionScriptSpec = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 1.5, falloffMultiplier: 1.5 };
+    expect(describer.disruptorModuleEffect(spec, script)).toBe("Tracking -0% · Optimal -26% · Falloff -26%");
+  });
+
+  test("scramblerModuleEffect reports MWD disabled", () => {
+    expect(describer.scramblerModuleEffect()).toBe("Disables MWD");
+  });
+
+  test("webModuleEffect agrees with webHint for a single-web projection at point-blank range", () => {
+    const speedFactor = 0.6;
+    const webSpec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor, overloadRangeBonusPercent: 30 };
+    const webProj = {
+      loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
+    } as EwarProjection;
+    resolver.speedMultiplierIgnoringRange.mockReturnValue(1 - speedFactor);
+    const hintEffect = describer.webHint(webProj).split(" · ")[0];
+    expect(describer.webModuleEffect(webSpec)).toBe(hintEffect);
   });
 });

@@ -11,6 +11,7 @@ import {
   type StoredEwarActivation,
   type TrackingUnit,
   type UserSettings as UserSettingsWire,
+  type WeaponRangeVisibility,
 } from "./userSettings";
 import type { Language } from "./language";
 
@@ -44,6 +45,7 @@ export interface InternalUserSettings {
   readonly simSpeed: number;
   readonly shipATrackingUnit: TrackingUnit;
   readonly shipBTrackingUnit: TrackingUnit;
+  readonly weaponRangeVisibility: WeaponRangeVisibility;
   readonly gridBrightness: number;
   readonly autoZoom: boolean;
   readonly zoomFactor: number;

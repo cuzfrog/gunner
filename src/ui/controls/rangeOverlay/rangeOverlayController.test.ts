@@ -49,6 +49,10 @@ function buildController(now: () => number = () => 0): {
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    webModuleEffect: vi.fn(() => "web-effect"),
+    grapplerModuleEffect: vi.fn(() => "grappler-effect"),
+    disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
+    scramblerModuleEffect: vi.fn(() => "scrambler-effect"),
   });
   const events = new UiEventsImpl();
   const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");

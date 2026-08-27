@@ -66,6 +66,7 @@ function baseSettings(): UserSettings {
     version: USER_SETTINGS_VERSION,
     shipATrackingUnit: "rad",
     shipBTrackingUnit: "rad",
+    weaponRangeVisibility: "both",
     shipATracking: 0.32,
     shipASigRes: "S",
     shipAOptimal: 1000,

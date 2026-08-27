@@ -12,6 +12,7 @@ export type {
   StoredEwarActivation,
   TrackingUnit,
   UserSettings,
+  WeaponRangeVisibility,
 } from "./userSettings";
 export type { CombatantSettings } from "./combatantSettings";
 export { toCombatantSettings } from "./combatantSettings";

@@ -1,7 +1,7 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import type { DisplayPreferences, ProfileSettings, TrackingUnit, StartupState, UserSettings } from "./userSettings";
+import type { DisplayPreferences, ProfileSettings, TrackingUnit, StartupState, UserSettings, WeaponRangeVisibility } from "./userSettings";
 import type { Language } from "./language";
 import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
@@ -113,6 +113,7 @@ export class LocalSettingsStore implements SettingsStore {
         language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
         shipATrackingUnit: resolveTrackingUnit(s.shipATrackingUnit, s.trackingUnit),
         shipBTrackingUnit: resolveTrackingUnit(s.shipBTrackingUnit, s.trackingUnit),
+        weaponRangeVisibility: resolveWeaponRangeVisibility(s.weaponRangeVisibility),
         simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
         gridBrightness:
           isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined
@@ -177,4 +178,9 @@ function resolveTrackingUnit(perShip: unknown, legacy: unknown): TrackingUnit {
   if (perShip === "rad" || perShip === "score") return perShip;
   if (legacy === "rad" || legacy === "score") return legacy;
   return DEFAULT_PREFERENCES.shipATrackingUnit;
+}
+
+function resolveWeaponRangeVisibility(value: unknown): WeaponRangeVisibility {
+  if (value === "shipA" || value === "shipB" || value === "both" || value === "none") return value;
+  return DEFAULT_PREFERENCES.weaponRangeVisibility;
 }
