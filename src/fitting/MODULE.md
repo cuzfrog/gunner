@@ -15,6 +15,7 @@ no-new-exports:
   - presetFittings.ts
   - turretCatalog.test.ts
   - turretCatalog.ts
+  - turretStats.ts
 ---
 
 # fitting

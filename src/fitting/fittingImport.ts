@@ -16,7 +16,6 @@ import {
   type BoostLoadout,
   type DisruptionScriptSpec,
   type EwarLoadout,
-  type SigResolutionClass,
   type StackingPenalty,
   type StasisGrapplerSpec,
   type StasisWebSpec,
@@ -30,6 +29,7 @@ import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, t
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
 import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
+import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
 import type {
   FittingDb,
   ChargeStats,
@@ -701,20 +701,8 @@ function collectTurretPercents(
   }
 }
 
-const TRACKING_SKILL_BONUS = 0.05;
-const OPTIMAL_SKILL_BONUS = 0.05;
-const FALLOFF_SKILL_BONUS = 0.05;
-const STANDARD_SIGNATURE_RESOLUTION = 40_000;
-
 function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {
   return bonus.magnitude * (bonus.skill ? skillLevel : 1);
-}
-
-function sigResolutionClassFromChargeSize(chargeSize: number): SigResolutionClass {
-  if (chargeSize >= 4) return "XL";
-  if (chargeSize === 3) return "L";
-  if (chargeSize === 2) return "M";
-  return "S";
 }
 
 const SECTION_ORDER: readonly FittingSectionKind[] = ["high", "mid", "low", "rig", "subsystem", "service", "cargo", "drones"] as const;

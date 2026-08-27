@@ -153,8 +153,8 @@ export class TurretControllerImpl implements TurretController {
         ? arg1
         : { fitting: arg1, conditions: arg2, ammo: arg3, tracking: arg4, sigRes: arg5, optimal: arg6, falloff: arg7 };
     this.allExpanded = false;
+    if (settings.conditions) this.skillLevel = settings.conditions.skillLevel;
     if (settings.fitting && settings.conditions) {
-      this.skillLevel = settings.conditions.skillLevel;
       const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
