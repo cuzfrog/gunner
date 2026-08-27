@@ -146,13 +146,4 @@
   white-space: nowrap;
 }
 
-.share-popup {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px;
-  white-space: nowrap;
-  right: auto;
-}
-
 }

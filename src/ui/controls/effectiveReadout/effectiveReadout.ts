@@ -4,6 +4,7 @@ import type { FittingImport } from "../../../fitting";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts, SideReadoutValues } from "../controlsContract";
 import type { SpeedBreakdown, StatEffectAttribution } from "../../../sim";
+import type { Side } from "../side";
 
 interface InputLike { readonly value: string; }
 
@@ -41,29 +42,29 @@ export interface EffectiveReadout {
 export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly els: EffectiveReadoutEls;
   private readonly i18n: I18n;
-  private readonly trackingInput: TrackingDisplay;
+  private readonly trackingDisplays: Readonly<Record<Side, TrackingDisplay>>;
   private readonly fittingImport: FittingImport;
   private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; title: string }>();
 
-  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingDisplay; fittingImport: FittingImport }) {
+  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingDisplays: Readonly<Record<Side, TrackingDisplay>>; fittingImport: FittingImport }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
-    this.trackingInput = deps.trackingInput;
+    this.trackingDisplays = deps.trackingDisplays;
     this.fittingImport = deps.fittingImport;
   }
 
   update(values: EffectiveReadouts): void {
     const t = (key: string): string => this.i18n.t(key);
-    this.writeSide(values.shipA, this.els.shipA, t);
-    this.writeSide(values.shipB, this.els.shipB, t);
+    this.writeSide(values.shipA, this.els.shipA, this.trackingDisplays.shipA, t);
+    this.writeSide(values.shipB, this.els.shipB, this.trackingDisplays.shipB, t);
   }
 
-  private writeSide(sideValues: SideReadoutValues, sideEls: SideReadoutEls, t: (key: string) => string): void {
+  private writeSide(sideValues: SideReadoutValues, sideEls: SideReadoutEls, trackingDisplay: TrackingDisplay, t: (key: string) => string): void {
     const language = this.i18n.current();
-    const trackingDisplay = this.trackingInput.displayFor(sideValues.tracking, sideValues.sigResolution);
-    const tracking = this.trackingInput.unit === "score"
-      ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
-      : `${formatNumber(trackingDisplay, 4)} rad/s`;
+    const trackingValue = trackingDisplay.displayFor(sideValues.tracking, sideValues.sigResolution);
+    const tracking = trackingDisplay.unit === "score"
+      ? `${formatNumber(trackingValue, 2)} ${t("label.trackingScore")}`
+      : `${formatNumber(trackingValue, 4)} rad/s`;
     this.write(sideEls.trackingReadout, tracking, isTrackingNegative(sideValues.tracking, sideValues.boostedTracking), (t) =>
       sideValues.trackingBreakdown === undefined
         ? t("readout.effectiveAffected")

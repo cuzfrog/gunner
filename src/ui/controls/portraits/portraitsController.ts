@@ -1,6 +1,5 @@
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { AppliedEwarEffect, EwarResolver } from "../../../sim";
-import type { FittingImport } from "../../../fitting";
+import type { DisruptionBreakdown, EwarResolver, SpeedBreakdown, StatEffectAttribution } from "../../../sim";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -13,6 +12,11 @@ interface SideState {
   lastId: ShipId | "";
 }
 
+interface PortraitEffect {
+  readonly moduleId: TypeId;
+  readonly title: string;
+}
+
 export class PortraitsControllerImpl implements PortraitsController {
   private readonly els: PortraitsEls;
   private readonly imageCatalog: ImageCatalog;
@@ -21,7 +25,6 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
-  private readonly fittingImport: FittingImport;
   private distance = 0;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
@@ -34,7 +37,6 @@ export class PortraitsControllerImpl implements PortraitsController {
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
-    fittingImport: FittingImport;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
@@ -43,7 +45,6 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
-    this.fittingImport = deps.fittingImport;
     this.events.onDistanceChanged((d) => { this.distance = d; });
     this.update();
   }
@@ -68,8 +69,10 @@ export class PortraitsControllerImpl implements PortraitsController {
     }
     const enemySide: Side = side === "shipA" ? "shipB" : "shipA";
     const projection = this.ewarController.projection(enemySide);
-    const applied = this.ewarResolver.appliedEffects(projection, this.distance);
-    const key = buildDiffKey(profile.id, applied);
+    const speedBreakdown = this.ewarResolver.speedBreakdown(projection, this.distance);
+    const disruptionBreakdown = this.ewarResolver.disruptionBreakdown(projection, this.distance);
+    const portraitEffects = buildPortraitEffects(speedBreakdown, disruptionBreakdown, this.i18n);
+    const key = buildDiffKey(profile.id, portraitEffects);
     if (state.lastKey === key) return;
     state.lastKey = key;
     if (root.hidden) root.hidden = false;
@@ -79,14 +82,14 @@ export class PortraitsControllerImpl implements PortraitsController {
     }
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
-    for (const effect of applied) {
+    for (const effect of portraitEffects) {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
       const img = document.createElement("img");
       img.className = "portrait-effect-icon";
       img.alt = "";
       img.src = iconUrl;
-      img.title = buildEffectTitle(effect, this.fittingImport, this.i18n);
+      img.title = effect.title;
       icons.appendChild(img);
     }
     effects.appendChild(icons);
@@ -98,11 +101,39 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
   return side === "shipA" ? shipAState : shipBState;
 }
 
-function buildDiffKey(id: ShipId, effects: readonly AppliedEwarEffect[]): string {
-  return `${id}|${effects.map((e) => `${e.family}:${e.moduleId}`).join(",")}`;
+function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[]): string {
+  return `${id}|${effects.map((e) => `${e.moduleId}:${e.title}`).join(",")}`;
 }
 
-function buildEffectTitle(effect: AppliedEwarEffect, fittingImport: FittingImport, i18n: I18n): string {
-  const moduleName = fittingImport.itemNameForId(effect.moduleId, i18n.current());
-  return `${i18n.t(`label.ewar.${effect.family}`)}: ${moduleName}`;
+function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, i18n: I18n): PortraitEffect[] {
+  const effects: PortraitEffect[] = [];
+  for (const effect of speed.effects) {
+    if (effect.family === "scrambler") {
+      effects.push({ moduleId: effect.moduleId, title: i18n.t("ewar.hover.scrambler") });
+    } else {
+      const percent = Math.round((1 - effect.multiplier) * 100);
+      effects.push({ moduleId: effect.moduleId, title: `${i18n.t("ewar.hover.web")} ${percent}%` });
+    }
+  }
+  const disruptorMap = new Map<TypeId, { tracking: number; optimal: number; falloff: number }>();
+  for (const entry of disruption.tracking) accumulateDisruption(disruptorMap, entry, "tracking");
+  for (const entry of disruption.optimal) accumulateDisruption(disruptorMap, entry, "optimal");
+  for (const entry of disruption.falloff) accumulateDisruption(disruptorMap, entry, "falloff");
+  for (const [moduleId, channels] of disruptorMap) {
+    const parts: string[] = [];
+    if (channels.tracking < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${Math.round((1 - channels.tracking) * 100)}%`);
+    if (channels.optimal < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${Math.round((1 - channels.optimal) * 100)}%`);
+    if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${Math.round((1 - channels.falloff) * 100)}%`);
+    if (parts.length > 0) effects.push({ moduleId, title: parts.join(" · ") });
+  }
+  return effects;
+}
+
+function accumulateDisruption(map: Map<TypeId, { tracking: number; optimal: number; falloff: number }>, entry: StatEffectAttribution, channel: "tracking" | "optimal" | "falloff"): void {
+  let existing = map.get(entry.moduleId);
+  if (!existing) {
+    existing = { tracking: 1, optimal: 1, falloff: 1 };
+    map.set(entry.moduleId, existing);
+  }
+  existing[channel] = entry.multiplier;
 }

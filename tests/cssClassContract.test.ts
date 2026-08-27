@@ -50,7 +50,6 @@ const APPROVED_PREFIXES = [
   "profile",
   "new-profile",
   "import-side-popup",
-  "share-popup",
   "paste",
   "confirm",
   "hints-slide",
