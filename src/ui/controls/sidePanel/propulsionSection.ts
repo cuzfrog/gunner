@@ -122,7 +122,7 @@ export class PropulsionSection implements IPropulsionSection {
     if (propulsionId) {
       const module = this.ships.fittingOption(profile, propulsionId);
       if (module) {
-        const variant = this.defaultPropulsionVariant(module);
+        const variant = this.resolvePropulsionVariant(module, fitted);
         const propulsionModuleId = variant?.id;
         const propulsionName = variant?.name ?? module.label;
         const propulsion = (propulsionModuleId ? this.fittingImport.propulsionStatsById(propulsionModuleId) : undefined) ?? module;
@@ -137,12 +137,10 @@ export class PropulsionSection implements IPropulsionSection {
         };
       }
     } else if (fitted) {
-      updated = fitted.fittingName ? { ...fitted, propulsionId: undefined, propulsionModuleId: undefined, propulsionName: undefined, propulsionKind: undefined, propulsion: undefined } : undefined;
+      updated = { ...fitted, propulsionId: undefined, propulsionKind: undefined, propulsion: undefined };
     }
     if (updated) {
       this.panel.fittedHull = updated;
-    } else if (!propulsionId && fitted && !fitted.fittingName) {
-      this.panel.fittedHull = undefined;
     }
     this.panel.sections.stats.updateShipStats({ updateInertia: false, updateMass: true, updateSig: true });
     this.panel.sections.skill.setOverloadDisabled();
@@ -174,6 +172,19 @@ export class PropulsionSection implements IPropulsionSection {
   defaultPropulsionVariant(module: PropulsionModule): { readonly id: TypeId; readonly name: string } | undefined {
     const variants = this.fittingImport.propulsionVariantNames(module);
     return variants.find((variant) => variant.id === module.defaultModuleId) ?? variants[0];
+  }
+
+  resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined {
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    if (fitted?.propulsionModuleId !== undefined) {
+      const preserved = variants.find((variant) => variant.id === fitted.propulsionModuleId);
+      if (preserved) return preserved;
+    }
+    if (fitted?.propulsionName !== undefined) {
+      const byName = variants.find((variant) => variant.name === fitted.propulsionName);
+      if (byName) return byName;
+    }
+    return this.defaultPropulsionVariant(module);
   }
 
   defaultPropulsionName(module: PropulsionModule): string {

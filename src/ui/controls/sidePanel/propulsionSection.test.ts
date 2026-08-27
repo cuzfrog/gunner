@@ -3,7 +3,7 @@ import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { PROPULSION_NONE } from "../../../appstate";
+import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
 import { fakeDocument, getFake, FakeElement, mockFittingImport, mockShips, RIFTER } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
 import { PropulsionSection, type PropulsionSectionEls } from "./propulsionSection";
@@ -11,27 +11,52 @@ import type { SidePanel } from "./sidePanelContract";
 import type { ISidePanelSections } from "./sidePanelSections";
 
 const AB_1MN = "ab-1mn" as const;
+const MWD_5MN = "mwd-5mn" as const;
 
-function asTypeId(value: string): TypeId { return value as TypeId; }
+const AB_DEFAULT_ID = toTypeId("439");
+const AB_VARIANT_II_ID = toTypeId("440");
+const MWD_DEFAULT_ID = toTypeId("434");
 
 const AB_MODULE: PropulsionModule = {
   id: AB_1MN,
   kind: "afterburner",
   sizeTier: "small",
   label: "1MN Afterburner I",
-  iconId: toTypeId("439"),
-  defaultModuleId: toTypeId("439"),
+  iconId: AB_DEFAULT_ID,
+  defaultModuleId: AB_DEFAULT_ID,
   thrust: 150,
   speedBonus: 1.5,
   massAddition: 0,
   sigBloom: 0,
 };
 
+const MWD_MODULE: PropulsionModule = {
+  id: MWD_5MN,
+  kind: "microwarpdrive",
+  sizeTier: "small",
+  label: "5MN Microwarpdrive I",
+  iconId: MWD_DEFAULT_ID,
+  defaultModuleId: MWD_DEFAULT_ID,
+  thrust: 1_500_000,
+  speedBonus: 5,
+  massAddition: 500_000,
+  sigBloom: 5,
+};
+
 function fittingForPropulsion(): FittingImport {
   const fitting = vi.mocked<FittingImport>(mockFittingImport());
-  fitting.propulsionVariantNames = vi.fn(() => [{ id: asTypeId("1MN Afterburner I"), name: "1MN Afterburner I" }]);
+  fitting.propulsionVariantNames = vi.fn((module: PropulsionModule) => {
+    if (module.id === AB_1MN) return [{ id: AB_DEFAULT_ID, name: "1MN Afterburner I" }, { id: AB_VARIANT_II_ID, name: "1MN Afterburner II" }];
+    if (module.id === MWD_5MN) return [{ id: MWD_DEFAULT_ID, name: "5MN Microwarpdrive I" }];
+    return [];
+  });
   fitting.propulsionStats = vi.fn(() => AB_MODULE);
-  fitting.propulsionStatsById = vi.fn(() => AB_MODULE);
+  fitting.propulsionStatsById = vi.fn((id: TypeId) => {
+    if (id === AB_VARIANT_II_ID) return { thrust: 150, speedBonus: 1.675, massAddition: 0, sigBloom: 0 };
+    if (id === AB_DEFAULT_ID) return { thrust: 150, speedBonus: 1.5, massAddition: 0, sigBloom: 0 };
+    if (id === MWD_DEFAULT_ID) return { thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5 };
+    return undefined;
+  });
   fitting.itemNameForId = vi.fn(() => "1MN加力燃烧器 I");
   return fitting;
 }
@@ -40,10 +65,10 @@ function shipsWithPropulsion(): Ships {
   const ships = vi.mocked<Ships>(mockShips());
   ships.findHull = vi.fn(() => RIFTER);
   ships.hullView = vi.fn((profile) => ({ name: profile.name, hullType: "Frigate", faction: "Minmatar Republic" }));
-  ships.fittingOptions = vi.fn(() => [AB_MODULE]);
-  ships.allFittingOptions = vi.fn(() => [AB_MODULE]);
-  ships.fittingOption = vi.fn((_profile: ShipProfile, id: PropulsionId) => (id === AB_1MN ? AB_MODULE : undefined));
-  ships.parsePropulsionId = vi.fn((id: string) => (id === AB_1MN ? id : undefined));
+  ships.fittingOptions = vi.fn(() => [AB_MODULE, MWD_MODULE]);
+  ships.allFittingOptions = vi.fn(() => [AB_MODULE, MWD_MODULE]);
+  ships.fittingOption = vi.fn((_profile: ShipProfile, id: PropulsionId) => (id === AB_1MN ? AB_MODULE : id === MWD_5MN ? MWD_MODULE : undefined));
+  ships.parsePropulsionId = vi.fn((id: string) => (id === AB_1MN || id === MWD_5MN ? id as PropulsionId : undefined));
   return ships;
 }
 
@@ -206,17 +231,16 @@ describe("PropulsionSection", () => {
     const fitting = vi.mocked<FittingImport>(fittingForPropulsion());
     const { document, panel, section, imageCatalog } = buildPropulsionSection(undefined, fitting);
     panel.profile = RIFTER;
-    imageCatalog.itemIconUrl = vi.fn((name: string) => `icons/${name.replaceAll(" ", "_")}.png`);
+    imageCatalog.itemIconUrl = vi.fn((id: TypeId) => `icons/${id}.png`);
     section.renderPropulsionOptions();
     section.popup.open();
 
     const variants = getFake(document, "ship-a-propulsion-variants");
     const button = variants.children[0] as unknown as HTMLElement;
-    expect(button.getAttribute("data-value")).toBe("1MN Afterburner I");
+    expect(button.getAttribute("data-value")).toBe(AB_DEFAULT_ID);
     expect(button.getAttribute("title")).toBe("1MN加力燃烧器 I");
     expect(button.children[1].textContent).toBe("1MN加力燃烧器 I");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("1MN Afterburner I");
-    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("1MN加力燃烧器 I");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(AB_DEFAULT_ID);
   });
 
   test("popup contains returns true for the variant popup element", () => {
@@ -245,5 +269,95 @@ describe("PropulsionSection", () => {
     const { document, section } = buildPropulsionSection();
     const outside = getFake(document, "ship-a-propulsion");
     expect(section.popup.contains(outside as unknown as EventTarget)).toBe(false);
+  });
+
+  test("toggle off preserves propulsionModuleId and propulsionName for reactivation", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_DEFAULT_ID);
+    // Simulate user selecting variant II via the variant popup
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    // Toggle off
+    getFake(document, "ship-a-propulsion").value = PROPULSION_NONE;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBeUndefined();
+    expect(panel.fittedHull?.propulsion).toBeUndefined();
+    expect(panel.fittedHull?.propulsionKind).toBeUndefined();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+    expect(panel.fittedHull?.propulsionName).toBe("1MN Afterburner II");
+  });
+
+  test("toggle off then on restores the previously selected variant", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    // Toggle off
+    getFake(document, "ship-a-propulsion").value = PROPULSION_NONE;
+    section.onPropulsionChange();
+    // Toggle back on
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBe(AB_1MN);
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+    expect(panel.fittedHull?.propulsionName).toBe("1MN Afterburner II");
+  });
+
+  test("toggle off then on restores variant even with empty fittingName (manual hull)", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    panel.fittedHull = { ...panel.fittedHull!, fittingName: "", propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    // Toggle off
+    getFake(document, "ship-a-propulsion").value = PROPULSION_NONE;
+    section.onPropulsionChange();
+    expect(panel.fittedHull).toBeDefined();
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+    // Toggle back on
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBe(AB_1MN);
+    expect(panel.fittedHull?.propulsionModuleId).toBe(AB_VARIANT_II_ID);
+  });
+
+  test("switching from AB to MWD does not preserve the stale AB variant", () => {
+    const { document, panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    getFake(document, "ship-a-propulsion").value = AB_1MN;
+    section.onPropulsionChange();
+    panel.fittedHull = { ...panel.fittedHull!, propulsionModuleId: AB_VARIANT_II_ID, propulsionName: "1MN Afterburner II" };
+    // Switch to MWD
+    getFake(document, "ship-a-propulsion").value = MWD_5MN;
+    section.onPropulsionChange();
+    expect(panel.fittedHull?.propulsionId).toBe(MWD_5MN);
+    expect(panel.fittedHull?.propulsionModuleId).toBe(MWD_DEFAULT_ID);
+    expect(panel.fittedHull?.propulsionName).toBe("5MN Microwarpdrive I");
+  });
+
+  test("resolvePropulsionVariant falls back to default when fitted has no variant", () => {
+    const { panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    const variant = section.resolvePropulsionVariant(AB_MODULE, undefined);
+    expect(variant?.id).toBe(AB_DEFAULT_ID);
+  });
+
+  test("resolvePropulsionVariant preserves fitted variant id", () => {
+    const { panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: AB_VARIANT_II_ID, fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
+    expect(variant?.id).toBe(AB_VARIANT_II_ID);
+  });
+
+  test("resolvePropulsionVariant falls back to name when module id is stale", () => {
+    const { panel, section } = buildPropulsionSection();
+    panel.profile = RIFTER;
+    const fitted: FittedHullSummary = { fittingName: "Test", propulsionModuleId: toTypeId("999"), propulsionName: "1MN Afterburner II", fitted: { mass: 1, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } };
+    const variant = section.resolvePropulsionVariant(AB_MODULE, fitted);
+    expect(variant?.id).toBe(AB_VARIANT_II_ID);
   });
 });

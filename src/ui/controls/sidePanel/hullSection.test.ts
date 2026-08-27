@@ -81,6 +81,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       renderPropulsionOptions: vi.fn(),
       onPropulsionChange: vi.fn(),
       setPropulsionActive: vi.fn(),
+      resolvePropulsionVariant: vi.fn(),
       defaultPropulsionName: vi.fn(),
       nakedFitted: vi.fn(),
       popup: {} as unknown as Popup,

@@ -1,6 +1,6 @@
 import type { FittingImport } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
-import type { PropulsionModule, ShipProfile } from "../../../ships";
+import type { ShipProfile } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary } from "../../../appstate";
@@ -87,7 +87,8 @@ export class PropulsionVariantSection {
     popup.innerHTML = "";
     if (!module) return;
     const fitted = this.panel.fittedHull;
-    const currentId = this.currentPropulsionVariantId(module, fitted);
+    const currentVariant = this.panel.sections.propulsion.resolvePropulsionVariant(module, fitted);
+    const currentId = currentVariant?.id;
     for (const variant of this.fittingImport.propulsionVariantNames(module)) {
       const iconUrl = this.imageCatalog.itemIconUrl(variant.id);
       const displayName = this.fittingImport.itemNameForId(variant.id, this.i18n.current());
@@ -96,13 +97,6 @@ export class PropulsionVariantSection {
       item.setAttribute("title", displayName);
       popup.appendChild(item);
     }
-  }
-
-  private currentPropulsionVariantId(module: PropulsionModule, fitted: FittedHullSummary | undefined): TypeId | undefined {
-    const variants = this.fittingImport.propulsionVariantNames(module);
-    if (fitted?.propulsionModuleId !== undefined) return fitted.propulsionModuleId;
-    if (fitted?.propulsionName !== undefined) return variants.find((variant) => variant.name === fitted.propulsionName)?.id;
-    return variants.find((variant) => variant.id === module.defaultModuleId)?.id ?? variants[0]?.id;
   }
 
   updateUI(): void {

@@ -1,4 +1,5 @@
 import type { ImportedFitting } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type {
   FittedHull,
   PropulsionId,
@@ -64,6 +65,7 @@ export interface IPropulsionSection {
   renderPropulsionOptions(selectedId?: PropulsionSelection): void;
   onPropulsionChange(): void;
   setPropulsionActive(propulsionId: string): void;
+  resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
   defaultPropulsionName(module: PropulsionModule): string;
   nakedFitted(profile: ShipProfile): FittedHull;
 }
