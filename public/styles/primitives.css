@@ -28,6 +28,28 @@
   scrollbar-color: var(--accent-teal-35) transparent;
 }
 
+/* ---- popup-item ---- */
+.popup-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: "Saira", sans-serif;
+  font-size: 13px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  border-radius: 2px;
+  min-width: 100%;
+}
+
+.popup-item:hover { background: var(--bg-inset); }
+
+.popup-item:focus-visible { outline-offset: -1px; }
+
 
 /* ---- trigger ---- */
 .trigger {

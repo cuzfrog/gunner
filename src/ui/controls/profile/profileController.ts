@@ -131,7 +131,7 @@ export class ProfileControllerImpl implements ProfileController {
     for (const name of names) {
       const item = document.createElement("button");
       item.type = "button";
-      item.className = "profile-menu-item";
+      item.className = "popup-item profile-menu-item";
       item.setAttribute("role", "menuitem");
       item.textContent = name;
       item.addEventListener("click", () => void this.loadProfile(name));

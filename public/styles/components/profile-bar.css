@@ -91,30 +91,11 @@
   white-space: nowrap;
 }
 
-.profile-menu-item {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-family: "Saira", sans-serif;
-  font-size: 13px;
-  text-align: left;
-  text-transform: none;
-  cursor: pointer;
-  border-radius: 2px;
-}
-
-.profile-menu-item:hover { background: var(--bg-inset); }
-
 .profile-menu-item[aria-current="true"] {
   border-left: 2px solid var(--accent-teal);
   color: var(--accent-teal);
   padding-left: 6px;
 }
-
-.profile-menu-item:focus-visible { outline-offset: -1px; }
 
 .new-profile-popup {
   display: flex;

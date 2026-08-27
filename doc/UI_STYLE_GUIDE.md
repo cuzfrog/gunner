@@ -8,7 +8,7 @@ Sources of truth:
 - `public/index.html` — markup structure and class naming
 - `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
-- `public/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `trigger`, `truncate`, `chevron`
+- `public/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `popup-item`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 

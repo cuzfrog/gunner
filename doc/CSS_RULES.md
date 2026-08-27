@@ -42,6 +42,7 @@ Repeated surfaces (popups, icon buttons, disclosure triggers, field labels) beco
 Current base classes:
 
 - `popup` (and `popup-below`, `popup-above`, `popup-left`, `popup-right`, `popup-scroll`)
+- `popup-item`
 - `trigger`
 - `btn` (and `btn-panel`, `btn-primary-text`)
 - `icon-button`
