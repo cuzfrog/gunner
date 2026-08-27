@@ -13,6 +13,8 @@ no-new-exports:
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
+  - turretCatalog.test.ts
+  - turretCatalog.ts
 ---
 
 # fitting
@@ -24,14 +26,17 @@ extracting the fitted ewar loadout (stasis webs, tracking disruptors, and
 scripts) for the `sim` module.
 
 The public boundary is `index.ts`, which exports the `FittingImport`,
-`ChargeCatalog`, `PresetFittings`, and `GunFamilies` abstractions,
-`ImportedFitting`, `ImportedTurret`, `CargoCharge`, `ChargeOption`,
-`PresetFitting`, `FittingRow`, `FittingSection`, `FittingSummary`,
-and the module registration. `ChargeCatalog` adds `has(charge)` so
-persistence modules can existence-check stored charge ids without
-reaching into the catalog's internal record. `ChargeCatalog` adds
-`equivalentInSize(charge, chargeSize)` so the turret controller can
-preserve the user's ammo selection when switching weapon size class. `ImportedFitting.ewar` is an `EwarLoadout` from
+`ChargeCatalog`, `PresetFittings`, `GunFamilies`, and `TurretCatalog`
+abstractions, `ImportedFitting`, `ImportedTurret`, `CargoCharge`,
+`ChargeOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
+`FittingSummary`, and the module registration. `ChargeCatalog` adds
+`has(charge)` so persistence modules can existence-check stored charge
+ids without reaching into the catalog's internal record.
+`ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` so
+`TurretCatalog` can preserve the user's ammo selection when switching
+weapon size class. `TurretCatalog` resizes a fitted turret to a
+different signature-resolution class by swapping to the same-family
+representative module and recomputing stats with skill multipliers. `ImportedFitting.ewar` is an `EwarLoadout` from
 the `sim` boundary. `FittingImport` consumes a `StackingPenalty` from the `sim`
 boundary via DI. `FittingImport.summarize` produces a structural fitting
 summary for UI previews. Icon and drone image identifiers have moved to the
