@@ -21,7 +21,7 @@ export interface ProfileEls {
   readonly newProfileCurrentName: HTMLElement;
   readonly newProfileName: HTMLInputElement;
   readonly newProfileConfirm: HTMLButtonElement;
-  readonly newProfileStartBlank: HTMLButtonElement;
+  readonly newProfileClearSession: HTMLButtonElement;
   readonly shareStatus: HTMLElement;
 }
 
@@ -100,7 +100,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.popupGroup.register(this.newProfilePopupValue);
     this.els.newProfileConfirm.addEventListener("click", () => void this.onConfirmNewProfile());
     this.els.newProfileSaveCurrent.addEventListener("click", () => { this.closeNewProfilePopup(); void this.saveProfile(); });
-    this.els.newProfileStartBlank.addEventListener("click", () => void this.onStartBlankSession());
+    this.els.newProfileClearSession.addEventListener("click", () => void this.onClearSession());
     this.els.newProfileName.addEventListener("input", () => this.updateNewProfileConfirmState());
     this.els.newProfileName.addEventListener("keydown", (event: KeyboardEvent) => {
       if (event.key !== "Enter" || this.els.newProfileConfirm.disabled) return;
@@ -258,7 +258,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.showStatus("status.profileSaved");
   }
 
-  private async onStartBlankSession(): Promise<void> {
+  private async onClearSession(): Promise<void> {
     if (this.isDirty() && !(await this.confirmController.confirm("confirm.discardChanges"))) {
       this.reopenProfilePopupPreservingName(this.els.newProfileName.value.trim());
       return;
@@ -299,7 +299,7 @@ export class ProfileControllerImpl implements ProfileController {
     this.els.newProfileCurrentSection.hidden = !hasSelection;
     this.els.newProfileCurrentName.textContent = this.selectedNameValue;
     this.els.newProfileSaveCurrent.disabled = !(hasSelection && dirty);
-    this.els.newProfileStartBlank.disabled = !dirty && !hasSelection;
+    this.els.newProfileClearSession.disabled = !dirty && !hasSelection;
     this.els.newProfileName.value = "";
     this.updateNewProfileConfirmState();
     this.els.newProfilePopup.hidden = false;

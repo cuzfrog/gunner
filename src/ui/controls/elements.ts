@@ -69,7 +69,7 @@ function createGlobalControlsEls(): GlobalControlsEls {
     newProfileCurrentName: el(globalElementId("newProfileCurrentName")),
     newProfileName: elOf(globalElementId("newProfileName"), isHtmlInputElement),
     newProfileConfirm: elOf(globalElementId("newProfileConfirm"), isHtmlButtonElement),
-    newProfileStartBlank: elOf(globalElementId("newProfileStartBlank"), isHtmlButtonElement),
+    newProfileClearSession: elOf(globalElementId("newProfileClearSession"), isHtmlButtonElement),
     shareLink: elOf(globalElementId("shareLink"), isHtmlButtonElement),
     sharePopup: el(globalElementId("sharePopup")),
     shareCopyUrl: elOf(globalElementId("shareCopyUrl"), isHtmlButtonElement),

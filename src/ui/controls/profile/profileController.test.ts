@@ -131,14 +131,14 @@ function fakeProfileEls(): ProfileEls {
   const newProfileCurrentName = new FakeElement() as unknown as HTMLElement;
   const newProfileName = new FakeElement() as unknown as HTMLInputElement;
   const newProfileConfirm = new FakeElement() as unknown as HTMLButtonElement;
-  const newProfileStartBlank = new FakeElement() as unknown as HTMLButtonElement;
+  const newProfileClearSession = new FakeElement() as unknown as HTMLButtonElement;
   newProfilePopup.appendChild(newProfileDirtyNote);
   newProfilePopup.appendChild(newProfileCurrentSection);
   newProfileCurrentSection.appendChild(newProfileSaveCurrent);
   newProfileSaveCurrent.appendChild(newProfileCurrentName);
   newProfilePopup.appendChild(newProfileName);
   newProfilePopup.appendChild(newProfileConfirm);
-  newProfilePopup.appendChild(newProfileStartBlank);
+  newProfilePopup.appendChild(newProfileClearSession);
   return {
     profileSave: new FakeElement() as unknown as HTMLButtonElement,
     profileSelectTrigger: new FakeElement() as unknown as HTMLButtonElement,
@@ -153,7 +153,7 @@ function fakeProfileEls(): ProfileEls {
     newProfileCurrentName,
     newProfileName,
     newProfileConfirm,
-    newProfileStartBlank,
+    newProfileClearSession,
     shareStatus: new FakeElement() as unknown as HTMLElement,
   };
 }
@@ -539,27 +539,27 @@ describe("ProfileController", () => {
     expect(els.profileNew.focus).toHaveBeenCalled();
   });
 
-  test("popup open with no profile and clean hides current section, disables start-blank", () => {
+  test("popup open with no profile and clean hides current section, disables clear-session", () => {
     const { controller, els, changeTracker } = build();
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
     controller.toggleNewProfilePopup();
     expect(els.newProfileDirtyNote.hidden).toBe(true);
     expect(els.newProfileCurrentSection.hidden).toBe(true);
     expect(els.newProfileSaveCurrent.disabled).toBe(true);
-    expect(els.newProfileStartBlank.disabled).toBe(true);
+    expect(els.newProfileClearSession.disabled).toBe(true);
   });
 
-  test("popup open with no profile and dirty shows dirty note, hides current section, enables start-blank", () => {
+  test("popup open with no profile and dirty shows dirty note, hides current section, enables clear-session", () => {
     const { controller, els, changeTracker } = build();
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     controller.toggleNewProfilePopup();
     expect(els.newProfileDirtyNote.hidden).toBe(false);
     expect(els.newProfileCurrentSection.hidden).toBe(true);
     expect(els.newProfileSaveCurrent.disabled).toBe(true);
-    expect(els.newProfileStartBlank.disabled).toBe(false);
+    expect(els.newProfileClearSession.disabled).toBe(false);
   });
 
-  test("popup open with profile and clean shows current section, disables save-current and start-blank stays enabled", () => {
+  test("popup open with profile and clean shows current section, disables save-current and clear-session stays enabled", () => {
     const { controller, els, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.markLoaded("brawler");
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
@@ -568,7 +568,7 @@ describe("ProfileController", () => {
     expect(els.newProfileCurrentSection.hidden).toBe(false);
     expect(els.newProfileCurrentName.textContent).toBe("brawler");
     expect(els.newProfileSaveCurrent.disabled).toBe(true);
-    expect(els.newProfileStartBlank.disabled).toBe(false);
+    expect(els.newProfileClearSession.disabled).toBe(false);
   });
 
   test("popup open with profile and dirty shows dirty note, current section, enables save-current", () => {
@@ -580,7 +580,7 @@ describe("ProfileController", () => {
     expect(els.newProfileCurrentSection.hidden).toBe(false);
     expect(els.newProfileCurrentName.textContent).toBe("brawler");
     expect(els.newProfileSaveCurrent.disabled).toBe(false);
-    expect(els.newProfileStartBlank.disabled).toBe(false);
+    expect(els.newProfileClearSession.disabled).toBe(false);
   });
 
   test("save-current from popup quick-saves to the selected profile and closes", async () => {
@@ -595,26 +595,26 @@ describe("ProfileController", () => {
     expect(els.shareStatus.textContent).toBe("status.profileSaved");
   });
 
-  test("start-blank emits newProfile without confirm when clean", async () => {
+  test("clear-session emits newProfile without confirm when clean", async () => {
     const { controller, els, onNewProfile, confirmController, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.markLoaded("brawler");
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(false);
     controller.toggleNewProfilePopup();
-    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    (els.newProfileClearSession as unknown as FakeElement).trigger("click");
     await Promise.resolve();
     expect(confirmController.confirm).not.toHaveBeenCalled();
     expect(onNewProfile).toHaveBeenCalledTimes(1);
     expect(els.newProfilePopup.hidden).toBe(true);
   });
 
-  test("start-blank asks confirm.discardChanges when dirty; cancel aborts and preserves popup, accept emits", async () => {
+  test("clear-session asks confirm.discardChanges when dirty; cancel aborts and preserves popup, accept emits", async () => {
     const { controller, els, onNewProfile, confirmController, changeTracker } = build({ profiles: { brawler: BASE_PROFILE }, list: ["brawler"] });
     controller.markLoaded("brawler");
     vi.mocked(changeTracker.hasUnsavedChanges).mockReturnValue(true);
     controller.toggleNewProfilePopup();
     els.newProfileName.value = "kappa";
     vi.mocked(confirmController.confirm).mockResolvedValue(false);
-    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    (els.newProfileClearSession as unknown as FakeElement).trigger("click");
     await Promise.resolve();
     expect(confirmController.confirm).toHaveBeenLastCalledWith("confirm.discardChanges");
     expect(onNewProfile).not.toHaveBeenCalled();
@@ -622,7 +622,7 @@ describe("ProfileController", () => {
     expect(els.newProfileName.value).toBe("kappa");
 
     vi.mocked(confirmController.confirm).mockResolvedValue(true);
-    (els.newProfileStartBlank as unknown as FakeElement).trigger("click");
+    (els.newProfileClearSession as unknown as FakeElement).trigger("click");
     await Promise.resolve();
     expect(onNewProfile).toHaveBeenCalledTimes(1);
     expect(els.newProfilePopup.hidden).toBe(true);

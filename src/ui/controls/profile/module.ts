@@ -43,7 +43,7 @@ function collectProfileEls(els: ControlsElements): ProfileEls {
     newProfileCurrentName: els.newProfileCurrentName,
     newProfileName: els.newProfileName,
     newProfileConfirm: els.newProfileConfirm,
-    newProfileStartBlank: els.newProfileStartBlank,
+    newProfileClearSession: els.newProfileClearSession,
     shareStatus: els.shareStatus,
   };
 }

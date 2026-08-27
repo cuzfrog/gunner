@@ -81,7 +81,7 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   newProfileCurrentName: { id: "new-profile-current-name", tag: "SPAN" as const, defaultValue: undefined },
   newProfileName: { id: "new-profile-name", tag: "INPUT" as const, defaultValue: undefined },
   newProfileConfirm: { id: "new-profile-confirm", tag: "BUTTON" as const, defaultValue: undefined },
-  newProfileStartBlank: { id: "new-profile-start-blank", tag: "BUTTON" as const, defaultValue: undefined },
+  newProfileClearSession: { id: "new-profile-clear-session", tag: "BUTTON" as const, defaultValue: undefined },
   shareLink: { id: "share-link", tag: "BUTTON" as const, defaultValue: undefined },
   sharePopup: { id: "share-popup", tag: "DIV" as const, defaultValue: undefined },
   shareCopyUrl: { id: "share-copy-url", tag: "BUTTON" as const, defaultValue: undefined },
