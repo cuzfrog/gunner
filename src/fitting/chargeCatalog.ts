@@ -43,6 +43,7 @@ export interface ChargeCatalog {
   withCharge(turret: ImportedTurret, charge: TypeId): ImportedTurret;
   idForName(name: string): TypeId | undefined;
   has(charge: TypeId): boolean;
+  equivalentInSize(charge: TypeId, chargeSize: number): TypeId | undefined;
 }
 
 interface ChargeCatalogDeps {
@@ -106,6 +107,10 @@ export class ChargeCatalogImpl implements ChargeCatalog {
 
   has(charge: TypeId): boolean {
     return this.charges[charge] !== undefined;
+  }
+
+  equivalentInSize(charge: TypeId, chargeSize: number): TypeId | undefined {
+    return _equivalentInSize(this.charges, charge, chargeSize);
   }
 }
 
@@ -246,6 +251,19 @@ function _turretChargeFamily(moduleId: TypeId, gunFamilies: GunFamilies): Charge
   } catch {
     return undefined;
   }
+}
+
+function _equivalentInSize(charges: Readonly<Record<string, ChargeStats>>, charge: TypeId, chargeSize: number): TypeId | undefined {
+  const stats = charges[charge];
+  if (!stats) return undefined;
+  const stem = _chargeStem(stats.name);
+  const targetSuffix = SIZE_SUFFIXES.find((entry) => entry.chargeSize === chargeSize)?.suffix;
+  if (!targetSuffix) return undefined;
+  const targetName = `${stem}${targetSuffix}`;
+  for (const candidate of Object.values(charges)) {
+    if (candidate.name === targetName) return candidate.id;
+  }
+  return undefined;
 }
 
 function _chargeStem(name: string): string {

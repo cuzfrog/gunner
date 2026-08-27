@@ -67,6 +67,7 @@ export function mockChargeCatalog(): ChargeCatalog {
     withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId })),
     idForName: vi.fn((name: string) => CHARGE_OPTIONS.find((c) => c.name === name)?.id),
     has: vi.fn((id: TypeId) => CHARGE_OPTIONS.some((c) => c.id === id)),
+    equivalentInSize: vi.fn(() => undefined),
   };
 }
 

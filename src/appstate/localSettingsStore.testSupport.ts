@@ -256,6 +256,7 @@ export function makeChargeCatalog(): ChargeCatalog {
     withCharge: vi.fn((turret, charge) => ({ ...turret, chargeId: charge })),
     idForName: vi.fn((name: string) => (name === "Hail S" ? hail : name === "Republic Fleet EMP S" ? republic : undefined)),
     has: vi.fn((id: TypeId) => id === hail || id === republic),
+    equivalentInSize: vi.fn(() => undefined),
   });
   catalog.chargesForTurret = vi.fn((turret) => catalog.chargesForSize(turret.chargeSize));
   return catalog;

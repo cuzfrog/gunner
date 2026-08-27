@@ -261,6 +261,43 @@ describe("ChargeCatalogImpl", () => {
     expect(catalog.has("0" as TypeId)).toBe(false);
   });
 
+  test("equivalentInSize returns undefined when the target size has no matching stem", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 2)).toBeUndefined();
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 2)).toBeUndefined();
+  });
+
+  test("equivalentInSize maps a charge to the same-stem charge in the target size with matching target", () => {
+    const titaniumSabotM = charge("Titanium Sabot M", { trackingMultiplier: 1.2, rangeMultiplier: 1 });
+    const republicFleetEmpM = charge("Republic Fleet EMP M", { rangeMultiplier: 0.5 });
+    const chargesWithM = { ...TEST_CHARGES, [titaniumSabotM.id]: titaniumSabotM, [republicFleetEmpM.id]: republicFleetEmpM };
+    const catalog = buildCatalog(chargesWithM);
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 2)).toBe(titaniumSabotM.id);
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 2)).toBe(republicFleetEmpM.id);
+  });
+
+  test("equivalentInSize maps navy charges across sizes", () => {
+    const republicFleetEmpXL = charge("Republic Fleet EMP XL", { rangeMultiplier: 0.5 });
+    const chargesWithXL = { ...TEST_CHARGES, [republicFleetEmpXL.id]: republicFleetEmpXL };
+    const catalog = buildCatalog(chargesWithXL);
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 4)).toBe(republicFleetEmpXL.id);
+  });
+
+  test("equivalentInSize returns undefined for an unknown charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(MISSING_CHARGE, 2)).toBeUndefined();
+  });
+
+  test("equivalentInSize returns undefined when no same-stem charge exists in the target size", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 3)).toBeUndefined();
+  });
+
+  test("equivalentInSize returns the same id when the charge is already in the target size", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 1)).toBe(chargeByName("Titanium Sabot S").id);
+  });
+
   test("turretChargeFamily maps turret families to charge families", () => {
     expect(_turretChargeFamily(turretIdForName("200mm AutoCannon I"), gunFamilies)).toBe("projectile");
     expect(_turretChargeFamily(turretIdForName("280mm Howitzer Artillery I"), gunFamilies)).toBe("projectile");
