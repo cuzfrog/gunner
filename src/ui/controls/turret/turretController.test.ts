@@ -1,6 +1,7 @@
 import { buildTurret } from "./testSupport";
 import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
+import { toTypeId } from "../../../gamedata/ids";
 import type { ShipProfile } from "../../../ships";
 import type { FactionId, HullTypeId, ShipId, TypeId } from "../../../gamedata/ids";
 import type { Language } from "../../../ui/i18n";
@@ -21,8 +22,9 @@ describe("TurretController", () => {
   });
 
   test("applyImported with a turret sets inputs, renders lists and sig-res icons", () => {
+    const nameForId: Record<string, string> = { "486": "200mm AutoCannon I", "491": "220mm Vulcan AutoCannon I", "496": "Dual 180mm AutoCannon I", "37289": "Dual 425mm AutoCannon I", "12608": "Hail S", "21898": "Republic Fleet EMP S" };
     const { document, controller, imageCatalog, chargeCatalog } = buildTurret({
-      imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
+      imageCatalog: { itemIconUrl: vi.fn((id: TypeId) => `images/icons/${nameForId[id]!.replaceAll(" ", "_")}.png`) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS) },
     });
     controller.applyImported(IMPORTED_RIFTER_WITH_CARGO);
@@ -38,7 +40,7 @@ describe("TurretController", () => {
     expect(getFake(document, "ship-a-falloff").value).toBe("3000");
     expect(getFake(document, "ship-a-ammo-cargo-list").children.length).toBe(2);
     expect(getFake(document, "ship-a-ammo-all-list").children.length).toBe(2);
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(toTypeId("486"));
     expect(getFake(document, "ship-a-sig-res-options").children[0].title).toContain("Original S");
     expect(getFake(document, "ship-a-tracking").disabled).toBe(false);
     expect(getFake(document, "ship-a-sigRes").disabled).toBe(false);
@@ -223,7 +225,7 @@ describe("TurretController", () => {
     controller.openAmmoPopup();
 
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("海怪 S");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Hail S");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(toTypeId("12608"));
 
     const cargoList = getFake(document, "ship-a-ammo-cargo-list");
     expect(cargoList.children.length).toBe(2);

@@ -1,3 +1,4 @@
+import type { TypeId } from "../src/gamedata/ids";
 import { generateModuleSlotsContent, type ModuleSlot } from "./generate-module-slots";
 
 function nameToIdFixture(): {
@@ -25,29 +26,40 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Rig Armor": "rig",
 };
 
+function asTypeId(value: string): TypeId {
+  return value as TypeId;
+}
+
 describe("generateModuleSlotsContent", () => {
   test("classifies known names to their slot", () => {
     const content = generateModuleSlotsContent(
       nameToIdFixture(),
-      ["1MN Afterburner I", "Medium Shield Extender II"],
-      ["250mm Railgun I"],
+      [
+        { name: "1MN Afterburner I", id: asTypeId("439") },
+        { name: "Medium Shield Extender II", id: asTypeId("382") },
+      ],
+      [{ name: "250mm Railgun I", id: asTypeId("570") }],
       GROUP_SLOTS,
     );
-    expect(content).toMatch(/^export type ModuleSlot = "high" \| "mid" \| "low" \| "rig";\n/);
+    expect(content).toMatch(/^import type \{ TypeId \} from "\.\.\/ids";\n/);
+    expect(content).toMatch(/^export type ModuleSlot = "high" \| "mid" \| "low" \| "rig";\n/m);
     expect(content).toContain('"1MN Afterburner I": "mid",');
     expect(content).toContain('"250mm Railgun I": "high",');
     expect(content).toContain('"Medium Shield Extender II": "mid",');
+    expect(content).toContain('["439" as TypeId]: "mid",');
+    expect(content).toContain('["570" as TypeId]: "high",');
+    expect(content).toContain('["382" as TypeId]: "mid",');
   });
 
   test("throws when a name is missing from nameToId", () => {
     expect(() =>
-      generateModuleSlotsContent(nameToIdFixture(), ["Missing Module"], [], GROUP_SLOTS),
+      generateModuleSlotsContent(nameToIdFixture(), [{ name: "Missing Module", id: asTypeId("0") }], [], GROUP_SLOTS),
     ).toThrow(/missing from nameToId/);
   });
 
   test("throws when a group has no slot mapping", () => {
     expect(() =>
-      generateModuleSlotsContent(nameToIdFixture(), ["Unknown Group Module"], [], GROUP_SLOTS),
+      generateModuleSlotsContent(nameToIdFixture(), [{ name: "Unknown Group Module", id: asTypeId("0") }], [], GROUP_SLOTS),
     ).toThrow(/unmatched groups/);
   });
 });

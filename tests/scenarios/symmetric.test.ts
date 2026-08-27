@@ -3,6 +3,7 @@ import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameCompos
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { Vec2 } from "../../src/sim/vec2";
+import { toTypeId } from "../../src/gamedata/ids";
 import type { EwarProjection, ShipState, SimSnapshot, TurretSpec } from "../../src/sim/types";
 import type { EwarResolver } from "../../src/sim/ewarResolver";
 import type { TurretBoosterResolver } from "../../src/sim/turretBoosterResolver";
@@ -28,7 +29,7 @@ const disruptorEwar: EwarProjection = {
   loadout: {
     webs: [],
     grapplers: [],
-    disruptors: [{ moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.5, defaultScript: undefined, overloadStrengthBonusPercent: 0 }],
+    disruptors: [{ moduleName: "Tracking Disruptor I", moduleId: toTypeId("2108"), optimal: 1, falloff: 1, disruption: 0.5, defaultScript: undefined, overloadStrengthBonusPercent: 0 }],
     scramblers: [],
     scripts: [],
   },

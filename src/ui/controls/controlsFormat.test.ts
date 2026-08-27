@@ -1,6 +1,6 @@
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
-import type { TypeId } from "../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import type { I18n } from "../i18n";
 import {
@@ -79,6 +79,8 @@ describe("propulsion label", () => {
       kind: "afterburner",
       sizeTier: "small",
       label: "1MN Afterburner I",
+      iconId: toTypeId("439"),
+      defaultModuleId: toTypeId("439"),
       thrust: 1.5e6,
       massAddition: 500_000,
       speedBonus: 1.15,
@@ -120,6 +122,7 @@ describe("charge stat suffix", () => {
 describe("script stat suffix", () => {
   test("formats all three disruption multipliers", () => {
     const script: DisruptionScriptSpec = {
+      moduleId: toTypeId("29005"),
       name: "Optimal Range Disruption Script",
       trackingMultiplier: 0,
       optimalMultiplier: 2,
@@ -132,6 +135,7 @@ describe("script stat suffix", () => {
 describe("booster script stat suffix", () => {
   test("formats all three turret multipliers", () => {
     const script: TurretScriptSpec = {
+      moduleId: toTypeId("28999"),
       name: "Optimal Range Script",
       trackingMultiplier: 0,
       optimalMultiplier: 2,

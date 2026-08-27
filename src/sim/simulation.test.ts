@@ -5,6 +5,7 @@ import type { EwarResolver } from "./ewarResolver";
 import { EwarResolverImpl } from "./ewarResolver";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
+import { toTypeId } from "../gamedata/ids";
 import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./types";
 
 const shipASteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
@@ -16,7 +17,7 @@ const scram: EwarProjection = {
     webs: [],
     grapplers: [],
     disruptors: [],
-    scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
+    scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
     scripts: [],
   },
   activation: {
@@ -173,7 +174,7 @@ describe("SimulationImpl", () => {
     const steering: Autopilot = { computeVelocity: () => new Vec2(0, 0) };
     const shipAWeb: EwarProjection = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
         grapplers: [],
         disruptors: [],
         scramblers: [],
@@ -251,7 +252,7 @@ describe("SimulationImpl", () => {
   test("shipB velocity recovers when it moves outside web range", () => {
     const web: EwarProjection = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 5000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
         grapplers: [],
         disruptors: [],
         scramblers: [],

@@ -1,3 +1,4 @@
+import { toTypeId } from "../gamedata/ids";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import type { TrackingBoosterSpec, TurretScriptSpec, TurretSpec } from "./types";
@@ -5,6 +6,7 @@ import type { TrackingBoosterSpec, TurretScriptSpec, TurretSpec } from "./types"
 function spec(bonus: { tracking?: number; optimal?: number; falloff?: number }, defaultScript: TurretScriptSpec | undefined = undefined): TrackingBoosterSpec {
   return {
     moduleName: "Tracking Computer I",
+    moduleId: toTypeId("29011"),
     trackingBonusPercent: bonus.tracking ?? 0,
     optimalBonusPercent: bonus.optimal ?? 0,
     falloffBonusPercent: bonus.falloff ?? 0,
@@ -12,8 +14,8 @@ function spec(bonus: { tracking?: number; optimal?: number; falloff?: number }, 
   };
 }
 
-const optimalRangeScript: TurretScriptSpec = { name: "Optimal Range Script", trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
-const trackingSpeedScript: TurretScriptSpec = { name: "Tracking Speed Script", trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
+const optimalRangeScript: TurretScriptSpec = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
+const trackingSpeedScript: TurretScriptSpec = { name: "Tracking Speed Script", moduleId: toTypeId("29001"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
 
 const baseTurret: TurretSpec = { tracking: 0.315, sigResolution: 40, optimal: 6000, falloff: 3000 };
 

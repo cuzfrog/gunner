@@ -1,3 +1,4 @@
+import { toTypeId } from "../../../gamedata/ids";
 import type { EwarProjection } from "../../../sim";
 import type { EwarResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
@@ -126,7 +127,7 @@ describe("EwarEffectDescriber", () => {
   test("webHint formats the overloaded range of a fitted web", () => {
     const webProjection = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
         grapplers: [], disruptors: [], scramblers: [], scripts: [],
       },
       activation: { webs: [{ active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: [] },
@@ -139,7 +140,7 @@ describe("EwarEffectDescriber", () => {
     const disruptorProjection = {
       loadout: {
         webs: [], grapplers: [],
-        disruptors: [{ moduleName: "Tracking Disruptor II", optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 }],
+        disruptors: [{ moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 }],
         scramblers: [], scripts: [],
       },
       activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: [] },
@@ -152,7 +153,7 @@ describe("EwarEffectDescriber", () => {
     const scramblerProjection = {
       loadout: {
         webs: [], grapplers: [], disruptors: [],
-        scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
+        scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
         scripts: [],
       },
       activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active: true, overloaded: true }] },

@@ -1,11 +1,12 @@
-import { fakeDocument, getFake } from "../../testing";
+import { fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import type { EwarProjection, EwarResolver } from "../../../sim";
 import type { EwarController } from "../ewar";
 import type { ImageCatalog } from "../../icons";
 import type { ShipProfile } from "../../../ships";
-import type { FactionId, HullTypeId, ShipId } from "../../../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId } from "../../../gamedata/ids";
 import type { I18n, Language } from "../../i18n";
+import type { FittingImport } from "../../../fitting";
 import { PortraitsControllerImpl } from "./portraitsController";
 import type { PortraitsController, PortraitsEls, CombatantProfiles } from "./portraitsControllerContract";
 
@@ -82,10 +83,12 @@ function buildController() {
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((_shipId, shipName) => `images/ships/${shipName.replaceAll(" ", "_")}.webp`),
-    itemIconUrl: vi.fn((name) => (name === "Stasis Webifier II" ? "images/icons/1234@1x.png" : undefined)),
+    shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"),
+    itemIconUrl: vi.fn((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined)),
     droneIconUrl: vi.fn(),
   });
+  const NAME_FOR_ID: Record<string, string> = { "527": "Stasis Webifier II", "448": "Warp Scrambler II" };
+  const fittingImport = vi.mocked<FittingImport>({ ...mockFittingImport(), itemNameForId: vi.fn((id, _language) => NAME_FOR_ID[id] ?? String(id)) });
   const events = new UiEventsImpl();
   const createElementSpy = vi.spyOn(document, "createElement");
   const i18n = vi.mocked<I18n>({
@@ -102,8 +105,9 @@ function buildController() {
     combatantProfiles,
     events,
     i18n,
+    fittingImport,
   });
-  return { controller, els, profiles, projections, ewarController, ewarResolver, imageCatalog, events, createElementSpy, i18n };
+  return { controller, els, profiles, projections, ewarController, ewarResolver, imageCatalog, events, createElementSpy, i18n, fittingImport };
 }
 
 describe("PortraitsController", () => {
@@ -141,7 +145,7 @@ describe("PortraitsController", () => {
     profiles.shipA = SHIP_A_PROFILE;
     projections.shipB = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
         grapplers: [], disruptors: [], scramblers: [], scripts: [],
       },
       activation: {
@@ -149,7 +153,7 @@ describe("PortraitsController", () => {
         grapplers: [], disruptors: [], scramblers: [],
       },
     };
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAEffects.hidden).toBe(false);
@@ -165,7 +169,7 @@ describe("PortraitsController", () => {
     profiles.shipA = SHIP_A_PROFILE;
     projections.shipB = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }],
         grapplers: [], disruptors: [], scramblers: [], scripts: [],
       },
       activation: {
@@ -173,7 +177,7 @@ describe("PortraitsController", () => {
         grapplers: [], disruptors: [], scramblers: [],
       },
     };
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
@@ -189,7 +193,7 @@ describe("PortraitsController", () => {
     projections.shipA = {
       loadout: {
         webs: [], grapplers: [], disruptors: [],
-        scramblers: [{ moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 }],
+        scramblers: [{ moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 }],
         scripts: [],
       },
       activation: {
@@ -197,9 +201,9 @@ describe("PortraitsController", () => {
         scramblers: [{ active: true, overloaded: false }],
       },
     };
-    imageCatalog.itemIconUrl.mockImplementation((name) => (name === "Warp Scrambler II" ? "images/icons/5678@1x.png" : undefined));
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("448") ? "images/icons/5678@1x.png" : undefined));
     ewarResolver.appliedEffects.mockImplementation((projection) => {
-      if (projection === projections.shipA) return [{ family: "scrambler", moduleName: "Warp Scrambler II" }];
+      if (projection === projections.shipA) return [{ family: "scrambler", moduleId: toTypeId("448") }];
       return [];
     });
     controller.update();
@@ -226,8 +230,8 @@ describe("PortraitsController", () => {
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.itemIconUrl.mockReturnValue(undefined);
     ewarResolver.appliedEffects.mockReturnValue([
-      { family: "web", moduleName: "Stasis Webifier II" },
-      { family: "scrambler", moduleName: "Warp Scrambler II" },
+      { family: "web", moduleId: toTypeId("527") },
+      { family: "scrambler", moduleId: toTypeId("448") },
     ]);
     controller.update();
     expect(els.shipAEffects.children.length).toBe(0);
@@ -237,7 +241,7 @@ describe("PortraitsController", () => {
   test("resolver returning a single web for a loadout with two webs appends one icon", () => {
     const { controller, els, profiles, ewarResolver } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
@@ -246,10 +250,10 @@ describe("PortraitsController", () => {
   test("itemIconUrl returning undefined skips that icon but appends the rest", () => {
     const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    imageCatalog.itemIconUrl.mockImplementation((name) => (name === "Stasis Webifier II" ? undefined : "images/icons/2@1x.png"));
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? undefined : "images/icons/2@1x.png"));
     ewarResolver.appliedEffects.mockReturnValue([
-      { family: "web", moduleName: "Stasis Webifier II" },
-      { family: "scrambler", moduleName: "Warp Scrambler II" },
+      { family: "web", moduleId: toTypeId("527") },
+      { family: "scrambler", moduleId: toTypeId("448") },
     ]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
@@ -271,7 +275,7 @@ describe("PortraitsController", () => {
   test("re-adding the same profile after removal shows the portrait and effects again", () => {
     const { controller, els, profiles, ewarResolver } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipA.hidden).toBe(false);
     expect(els.shipAImage.src).toBe("images/ships/Rifter.webp");
@@ -293,7 +297,7 @@ describe("PortraitsController", () => {
     profiles.shipA = SHIP_A_PROFILE;
     projections.shipB = {
       loadout: {
-        webs: [{ moduleName: "Stasis Webifier II", maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
+        webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
         grapplers: [], disruptors: [], scramblers: [], scripts: [],
       },
       activation: {
@@ -301,9 +305,9 @@ describe("PortraitsController", () => {
         grapplers: [], disruptors: [], scramblers: [],
       },
     };
-    imageCatalog.itemIconUrl.mockImplementation((name) => (name === "Stasis Webifier II" ? "images/icons/1234@1x.png" : undefined));
+    imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));
     ewarResolver.appliedEffects.mockImplementation((projection, distance) =>
-      projection === projections.shipB && distance <= 10000 ? [{ family: "web", moduleName: "Stasis Webifier II" }] : []
+      projection === projections.shipB && distance <= 10000 ? [{ family: "web", moduleId: toTypeId("527") }] : []
     );
     events.emitDistanceChanged(15000);
     controller.update();
@@ -321,7 +325,7 @@ describe("PortraitsController", () => {
   test("distance changes that do not change the applied set do not create new img elements", () => {
     const { controller, els, profiles, ewarResolver, events, createElementSpy } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     events.emitDistanceChanged(5000);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
@@ -338,14 +342,14 @@ describe("PortraitsController", () => {
     const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.itemIconUrl.mockImplementation((name) =>
-      name === "Stasis Webifier II" ? "images/icons/1234@1x.png" : "images/icons/fallback@1x.png"
+      name === toTypeId("527") ? "images/icons/1234@1x.png" : "images/icons/fallback@1x.png"
     );
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     expect((els.shipAEffects.children[0] as unknown as HTMLImageElement).src).toBe("images/icons/1234@1x.png");
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Shadow Serpentis Stasis Webifier" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("14270") }]);
     controller.update();
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
@@ -356,15 +360,15 @@ describe("PortraitsController", () => {
     const { controller, els, profiles, ewarResolver, imageCatalog } = buildController();
     profiles.shipA = SHIP_A_PROFILE;
     imageCatalog.shipImageUrl.mockClear();
-    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleName: "Stasis Webifier II" }]);
+    ewarResolver.appliedEffects.mockReturnValue([{ family: "web", moduleId: toTypeId("527") }]);
     controller.update();
     expect(els.shipAImage.src).toBe("images/ships/Rifter.webp");
     expect(els.shipAEffects.hidden).toBe(false);
     expect(els.shipAEffects.children.length).toBe(1);
     imageCatalog.shipImageUrl.mockClear();
     ewarResolver.appliedEffects.mockReturnValue([
-      { family: "web", moduleName: "Stasis Webifier II" },
-      { family: "scrambler", moduleName: "Warp Scrambler II" },
+      { family: "web", moduleId: toTypeId("527") },
+      { family: "scrambler", moduleId: toTypeId("448") },
     ]);
     controller.update();
     expect(imageCatalog.shipImageUrl).not.toHaveBeenCalled();

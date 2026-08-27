@@ -1,9 +1,12 @@
 import type { TrackingUnit } from "../../../appstate";
+import { toTypeId } from "../../../gamedata/ids";
+import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected as _isNegative, _readNumber } from "./effectiveReadout";
+import { mockFittingImport } from "../../testing";
 
 interface FakeReadout {
   textContent: string | null;
@@ -93,6 +96,11 @@ function fakeI18nWithEmptyAffected(): I18n {
   return { current: () => "en", setLanguage: () => {}, t, translateDocument: () => {} };
 }
 
+function fakeFittingImport(): FittingImport {
+  const NAME_FOR_ID: Record<string, string> = { "527": "Stasis Webifier II", "448": "Warp Scrambler II" };
+  return { ...mockFittingImport(), itemNameForId: vi.fn((id, _language) => NAME_FOR_ID[id] ?? String(id)) };
+}
+
 function sideValues(tracking = 0.32, optimal = 5000, falloff = 3000, boostedTracking = 0.32, boostedOptimal = 5000, boostedFalloff = 3000, speed = 400) {
   return {
     speed,
@@ -111,7 +119,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({ shipA: sideValues(), shipB: sideValues(0.2, 4000, 2500, 0.2, 4000, 2500, 250) });
     expect(els.shipA.speedReadout.textContent).toBe("400 m/s");
     expect(els.shipB.speedReadout.textContent).toBe("250 m/s");
@@ -125,7 +133,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: sideValues(),
       shipB: { speed: 125, tracking: 0.2, optimal: 4000, falloff: 2500, boostedTracking: 0.2, boostedOptimal: 5000, boostedFalloff: 2500, sigResolution: 40 },
@@ -142,7 +150,7 @@ describe("EffectiveReadoutImpl", () => {
     els.shipA.speed.value = "1000";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 1500, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -155,7 +163,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "score");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 400, tracking: 0.16, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -168,7 +176,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 400, tracking: 0.32, optimal: 15000, falloff: 12000, boostedTracking: 0.32, boostedOptimal: 15000, boostedFalloff: 12000, sigResolution: 40 },
       shipB: sideValues(),
@@ -181,7 +189,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 400, tracking: 0.64, optimal: 7500, falloff: 4500, boostedTracking: 0.64, boostedOptimal: 7500, boostedFalloff: 4500, sigResolution: 40 },
       shipB: sideValues(),
@@ -196,7 +204,7 @@ describe("EffectiveReadoutImpl", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 400, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -212,11 +220,11 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     const shipASpeedBreakdown = {
       effects: [
-        { family: "web" as const, moduleName: "Stasis Webifier II", multiplier: 0.45 },
-        { family: "scrambler" as const, moduleName: "Warp Scrambler II", multiplier: 1 },
+        { family: "web" as const, moduleId: toTypeId("527"), multiplier: 0.45 },
+        { family: "scrambler" as const, moduleId: toTypeId("448"), multiplier: 1 },
       ],
       propulsionSuppressed: true,
     };
@@ -231,7 +239,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -243,7 +251,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     const shipASpeedBreakdown = { effects: [] as const, propulsionSuppressed: false };
     readout.update({
       shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, speedBreakdown: shipASpeedBreakdown },
@@ -256,7 +264,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     const disruptionBreakdown = {
       tracking: [{ moduleName: "Tracking Disruptor II", scriptName: "Tracking Speed Disruption Script", multiplier: 0.6562 }],
       optimal: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
@@ -310,7 +318,7 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     const els = fakeEls();
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     const values = { shipA: sideValues(), shipB: sideValues(0.2, 4000, 2500, 0.2, 4000, 2500, 250) };
     readout.update(values);
     const addCount = (els.shipA.speedReadout.classList.add as ReturnType<typeof vi.fn>).mock.calls.length;
@@ -328,7 +336,7 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     els.shipA.speed.value = "200";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 200, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -347,7 +355,7 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     els.shipA.speed.value = "abc";
     const i18n = fakeI18n();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 400, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),
@@ -361,7 +369,7 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     els.shipA.speed.value = "99.5";
     const i18n = fakeI18nWithEmptyAffected();
     const trackingInput = fakeTrackingInput(0.32, "rad");
-    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput });
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     readout.update({
       shipA: { speed: 99.5, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40 },
       shipB: sideValues(),

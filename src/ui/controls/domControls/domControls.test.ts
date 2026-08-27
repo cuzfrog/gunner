@@ -1,5 +1,5 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown, type EngagementView } from "../../../sim";
 import type { Ships } from "../../../ships";
@@ -250,7 +250,7 @@ describe("DomControls", () => {
   test("getConfig includes per-side ewar projections with per-module activation and no global overload flag", () => {
     const { controls, cradle } = buildDomControls();
     const shipAEwar: EwarLoadout = {
-      webs: [{ moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
+      webs: [{ moduleId: toTypeId("527"), moduleName: "Stasis Webifier I", maxRange: 10000, speedFactor: 0.5, overloadRangeBonusPercent: 15 }],
       grapplers: [],
       disruptors: [],
       scramblers: [],
@@ -270,7 +270,7 @@ describe("DomControls", () => {
       webs: [],
       grapplers: [],
       disruptors: [{
-        moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2,
+        moduleId: toTypeId("2109"), moduleName: "Tracking Disruptor I", optimal: 1, falloff: 1, disruption: 0.2,
         defaultScript: undefined, overloadStrengthBonusPercent: 0,
       }],
       scramblers: [],
@@ -297,9 +297,10 @@ describe("DomControls", () => {
   });
 
   test("getConfig uses a manually derived baseMaxSpeed for shipB and includes an active scrambler projection", () => {
-    const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
+    const SCRAMBLER: WarpScramblerSpec = { moduleId: toTypeId("448"), moduleName: "Warp Scrambler II", maxRange: 9000, overloadRangeBonusPercent: 20 };
     const mwd5 = {
       id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN Microwarpdrive I",
+      iconId: toTypeId("434"), defaultModuleId: toTypeId("434"),
       thrust: 1_500_000, speedBonus: 5, massAddition: 500_000, sigBloom: 5,
     } as const;
     const ships = vi.mocked<Ships>({

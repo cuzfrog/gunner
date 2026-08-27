@@ -92,13 +92,13 @@ function createI18n(): I18n {
 
 function createImageCatalog(): ImageCatalog {
   return {
-    shipImageUrl: (_shipId, shipName) => `images/ships/${shipName}.webp`,
+    shipImageUrl: (_shipId) => "images/ships/Rifter.webp",
     itemIconUrl: vi.fn((itemName: string) => {
       if (itemName === "200mm AutoCannon I") return "images/icons/1@1x.png";
       if (itemName === "Hail S") return "images/icons/hail_s.png";
       return undefined;
     }),
-    droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : undefined),
+    droneIconUrl: (id?: TypeId) => (id === "2456" as TypeId ? "images/icons/2456@1x.png" : undefined),
   };
 }
 
@@ -253,7 +253,7 @@ describe("DomFittingPreview", () => {
     const summary: FittingSummary = {
       hullName: "Rifter",
       fittingName: "Brawler",
-      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", quantity: 3 }] }],
+      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", id: "2456" as TypeId, quantity: 3 }] }],
     };
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];

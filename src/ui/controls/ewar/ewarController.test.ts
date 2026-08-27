@@ -83,8 +83,8 @@ function buildEwarController(
     translateDocument: vi.fn(),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
-    itemIconUrl: vi.fn((name) => `icons/${name.replaceAll(" ", "_")}.png`),
+    shipImageUrl: vi.fn((_shipId) => ""),
+    itemIconUrl: vi.fn((name) => `icons/${String(name).replaceAll(" ", "_")}.png`),
     droneIconUrl: vi.fn(),
   });
   const popupGroup = new FakePopupGroup();
@@ -626,11 +626,11 @@ describe("EwarController", () => {
 
     const optimalOption = scriptOptionFor(scriptPopup, String(OPTIMAL_SCRIPT.moduleId))!;
     expect(optimalOption.children[0].tagName).toBe("IMG");
-    expect(optimalOption.children[0].src).toBe("icons/Optimal_Range_Disruption_Script.png");
+    expect(optimalOption.children[0].src).toBe("icons/29005.png");
     expect(optimalOption.children[1].textContent).toBe("Optimal Range Disruption Script (zh)");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(OPTIMAL_SCRIPT.moduleId, "zh");
     expect(optimalOption.title).toBe("optimal x2 · falloff x2 · track x0");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Optimal Range Disruption Script");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(OPTIMAL_SCRIPT.moduleId);
   });
 
   test("overload buttons are present per web and disruptor row", () => {
