@@ -5,15 +5,15 @@ import type {
   EngagementFrameComposer,
   HitChance,
   Kinematics,
+  SimValueParser,
   Simulation,
   StackingPenalty,
   TurretBoosterResolver,
 } from "./index";
 import type { SimConfig } from "./types";
-import type { SettingGuards } from "../appstate";
 
 export interface SimCradle {
-  readonly settingGuards: SettingGuards;
+  readonly simValueParser: SimValueParser;
   readonly stackingPenalty: StackingPenalty;
   readonly ewarResolver: EwarResolver;
   readonly turretBoosterResolver: TurretBoosterResolver;

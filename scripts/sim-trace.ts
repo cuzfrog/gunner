@@ -1,6 +1,6 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import {
-  isAutopilotMode,
+  createSimValueParser,
   ReactiveAutopilot,
   registerSimModule,
   Vec2,
@@ -189,10 +189,11 @@ function parseShipASteering(raw: string): "predictive" | "reactive" {
 }
 
 function parseMode(raw: string): AutopilotMode {
-  if (!isAutopilotMode(raw) || !AUTOPILOT_MODES.includes(raw)) {
+  const parsed = createSimValueParser().parseAutopilotMode(raw);
+  if (parsed === undefined || !AUTOPILOT_MODES.includes(parsed)) {
     throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
   }
-  return raw;
+  return parsed;
 }
 
 function loadEwarProjection(fittingImport: FittingImport, path: string, overloaded: boolean): EwarProjection {
