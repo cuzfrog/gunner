@@ -216,14 +216,14 @@ export class EwarResolverImpl implements EwarResolver {
       const effectiveness = ignoreRange ? 1 : this.disruptorEffectiveness(distance, spec);
       if (effectiveness <= 0) continue;
       const script = activation?.script ?? spec.defaultScript;
-      const scriptName = script?.name;
+      const scriptId = script?.moduleId;
       const trackingEffect = strength * (script?.trackingMultiplier ?? 1);
       const optimalEffect = strength * (script?.optimalMultiplier ?? 1);
       const falloffEffect = strength * (script?.falloffMultiplier ?? 1);
 
-      if (trackingEffect > 0) tracking.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - trackingEffect * effectiveness });
-      if (optimalEffect > 0) optimal.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - optimalEffect * effectiveness });
-      if (falloffEffect > 0) falloff.push({ moduleName: spec.moduleName, scriptName, multiplier: 1 - falloffEffect * effectiveness });
+      if (trackingEffect > 0) tracking.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - trackingEffect * effectiveness });
+      if (optimalEffect > 0) optimal.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - optimalEffect * effectiveness });
+      if (falloffEffect > 0) falloff.push({ moduleId: spec.moduleId, scriptId, multiplier: 1 - falloffEffect * effectiveness });
     }
 
     return { tracking, optimal, falloff };

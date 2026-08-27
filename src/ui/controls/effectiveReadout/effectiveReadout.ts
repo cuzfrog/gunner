@@ -1,5 +1,5 @@
 import type { I18n } from "../../i18n";
-import type { TrackingUnit } from "../../../appstate";
+import type { Language, TrackingUnit } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts, SideReadoutValues } from "../controlsContract";
@@ -59,6 +59,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   }
 
   private writeSide(sideValues: SideReadoutValues, sideEls: SideReadoutEls, t: (key: string) => string): void {
+    const language = this.i18n.current();
     const trackingDisplay = this.trackingInput.displayFor(sideValues.tracking, sideValues.sigResolution);
     const tracking = this.trackingInput.unit === "score"
       ? `${formatNumber(trackingDisplay, 2)} ${t("label.trackingScore")}`
@@ -66,7 +67,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     this.write(sideEls.trackingReadout, tracking, isTrackingNegative(sideValues.tracking, sideValues.boostedTracking), (t) =>
       sideValues.trackingBreakdown === undefined
         ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.trackingBreakdown.tracking, "label.trackingSpeed", t)
+        : buildStatTitle(sideValues.trackingBreakdown.tracking, this.fittingImport, language, "label.trackingSpeed", t)
     );
     this.write(
       sideEls.speedReadout,
@@ -77,12 +78,12 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), isRangeNegative(sideValues.optimal, sideValues.boostedOptimal), (t) =>
       sideValues.optimalBreakdown === undefined
         ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.optimalBreakdown.optimal, "label.optimalRange", t)
+        : buildStatTitle(sideValues.optimalBreakdown.optimal, this.fittingImport, language, "label.optimalRange", t)
     );
     this.write(sideEls.falloffReadout, formatDistance(sideValues.falloff, t), isRangeNegative(sideValues.falloff, sideValues.boostedFalloff), (t) =>
       sideValues.falloffBreakdown === undefined
         ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.falloffBreakdown.falloff, "label.falloffRange", t)
+        : buildStatTitle(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
     );
   }
 
@@ -149,10 +150,11 @@ function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, fittingImport: F
   return entries.join("; ");
 }
 
-function buildStatTitle(entries: readonly StatEffectAttribution[], statKey: string, t: (key: string) => string): string {
+function buildStatTitle(entries: readonly StatEffectAttribution[], fittingImport: FittingImport, language: Language, statKey: string, t: (key: string) => string): string {
   if (entries.length === 0) return "";
   return entries.map((entry) => {
-    const prefix = entry.scriptName === undefined ? entry.moduleName : `${entry.moduleName} (${entry.scriptName})`;
+    const moduleName = fittingImport.itemNameForId(entry.moduleId, language);
+    const prefix = entry.scriptId === undefined ? moduleName : `${moduleName} (${fittingImport.itemNameForId(entry.scriptId, language)})`;
     return `${prefix} -${percentOf(entry.multiplier)}% ${t(statKey)}`;
   }).join("; ");
 }

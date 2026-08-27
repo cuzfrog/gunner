@@ -409,7 +409,7 @@ export class EwarControllerImpl implements EwarController {
     active: boolean,
     overloaded: boolean,
     index: number,
-    spec: { readonly moduleName: string; readonly moduleId: TypeId },
+    spec: { readonly moduleId: TypeId },
     onToggle: () => void,
   ): HTMLButtonElement {
     const button = document.createElement("button");
@@ -535,7 +535,7 @@ export class EwarControllerImpl implements EwarController {
 
   private isSameScript(a: DisruptionScriptSpec | undefined, b: DisruptionScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
-    return a.moduleId !== undefined && a.moduleId === b.moduleId;
+    return a.moduleId === b.moduleId;
   }
 
   private findGearFor(side: Side, index: number): HTMLButtonElement | undefined {
@@ -544,7 +544,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
-    const title = script ? (script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name) : this.i18n.t("ewar.script.none");
+    const title = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
     gear.setAttribute("title", title);
     gear.setAttribute("aria-label", title);
   }

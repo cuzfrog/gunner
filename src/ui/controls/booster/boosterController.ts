@@ -174,10 +174,10 @@ export class BoosterControllerImpl implements BoosterController {
     return total;
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId | undefined, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
     const item = document.createElement("span");
     item.className = "ewar-summary-item";
-    const iconUrl = moduleId !== undefined ? this.imageCatalog.itemIconUrl(moduleId) : undefined;
+    const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
     const img = document.createElement("img");
     img.className = "ewar-summary-icon";
     img.alt = "";
@@ -203,7 +203,7 @@ export class BoosterControllerImpl implements BoosterController {
         script = undefined;
       } else {
         const byId = typeIdFromString(savedScript);
-        script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId !== undefined && s.moduleId === byId) : undefined;
+        script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId === byId) : undefined;
         if (script === undefined) script = spec.defaultScript;
       }
       return { active: savedActivation?.active ?? true, script };
@@ -225,13 +225,13 @@ export class BoosterControllerImpl implements BoosterController {
     }
   }
 
-  private moduleDisplayName(spec: { readonly moduleName: string; readonly moduleId?: TypeId }): string {
-    return spec.moduleId !== undefined ? this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current()) : spec.moduleName;
+  private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
+    return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
   }
 
   private scriptDisplayName(script: TurretScriptSpec | undefined): string {
     if (script === undefined) return this.i18n.t("ewar.script.none");
-    return script.moduleId !== undefined ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : script.name;
+    return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
   private createModuleButton(active: boolean, computer: TrackingBoosterSpec): HTMLButtonElement {
@@ -241,7 +241,7 @@ export class BoosterControllerImpl implements BoosterController {
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", displayName);
-    const iconUrl = computer.moduleId !== undefined ? this.imageCatalog.itemIconUrl(computer.moduleId) : undefined;
+    const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
     const img = document.createElement("img");
     if (iconUrl !== undefined) img.src = iconUrl;
     img.alt = "";
@@ -299,7 +299,7 @@ export class BoosterControllerImpl implements BoosterController {
 
   private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
-    return a.moduleId !== undefined && a.moduleId === b.moduleId;
+    return a.moduleId === b.moduleId;
   }
 
   private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {

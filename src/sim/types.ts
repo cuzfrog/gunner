@@ -222,8 +222,8 @@ export interface SpeedBreakdown {
 }
 
 export interface StatEffectAttribution {
-  readonly moduleName: string;
-  readonly scriptName: string | undefined;
+  readonly moduleId: TypeId;
+  readonly scriptId: TypeId | undefined;
   readonly multiplier: number; // factor applied to this stat by this module alone
 }
 
