@@ -1,5 +1,5 @@
 import type { ImageCatalog } from "../../icons";
-import type { ChargeCatalog, FittingImport } from "../../../fitting";
+import type { ChargeCatalog, FittingImport, TurretCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
@@ -59,6 +59,7 @@ export function buildTurret(
     imageCatalog?: Partial<ImageCatalog>;
     chargeCatalog?: Partial<ChargeCatalog>;
     fittingImport?: Partial<FittingImport>;
+    turretCatalog?: Partial<TurretCatalog>;
     ships?: Partial<Ships>;
     i18n?: Partial<I18n>;
   } = {},
@@ -117,6 +118,10 @@ export function buildTurret(
   });
   const turretOverrides = new TurretOverridesStore();
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
+  const turretCatalog = vi.mocked<TurretCatalog>({
+    resize: vi.fn(() => undefined),
+    ...options.turretCatalog,
+  });
   const events = new UiEventsImpl();
   const popupGroup = vi.mocked<PopupGroup>({
     register: vi.fn(),
@@ -133,6 +138,7 @@ export function buildTurret(
     els,
     chargeCatalog,
     gunFamilies,
+    turretCatalog,
     imageCatalog,
     trackingInput,
     i18n,
@@ -150,6 +156,7 @@ export function buildTurret(
     imageCatalog,
     fittingImport,
     gunFamilies,
+    turretCatalog,
     i18n,
     trackingInput,
     turretOverrides,

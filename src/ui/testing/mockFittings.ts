@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings, TurretCatalog } from "../../fitting";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
@@ -57,6 +57,10 @@ export function mockFittingImport(): FittingImport {
 }
 
 const HAIL: TypeId = "12608" as TypeId;
+
+export function mockTurretCatalog(): TurretCatalog {
+  return { resize: vi.fn(() => undefined) };
+}
 
 export function mockChargeCatalog(): ChargeCatalog {
   return {

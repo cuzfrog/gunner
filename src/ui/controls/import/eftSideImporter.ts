@@ -42,7 +42,7 @@ export class EftSideImporter {
     panel.clearOverrides();
     panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId);
     panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
-    this.turrets[side].applyImported(imported);
+    this.turrets[side].applyImported(imported, conditions);
     if (persist) {
       panel.lastCommittedHull = imported.profile.id;
     }

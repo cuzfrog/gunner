@@ -14,6 +14,7 @@ type TurretControllerFactoryDeps = Pick<
   | "chargeCatalog"
   | "fittingImport"
   | "gunFamilies"
+  | "turretCatalog"
   | "imageCatalog"
   | "i18n"
   | "ships"
@@ -46,6 +47,7 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     els: collectTurretEls(deps.els, side),
     chargeCatalog: deps.chargeCatalog,
     gunFamilies: deps.gunFamilies,
+    turretCatalog: deps.turretCatalog,
     imageCatalog: deps.imageCatalog,
     trackingInput: new TrackingInputImpl(),
     i18n: deps.i18n,

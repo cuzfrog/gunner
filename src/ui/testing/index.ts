@@ -8,6 +8,7 @@ export {
   RIFTER,
   TURRET,
   mockChargeCatalog,
+  mockTurretCatalog,
   mockClipboard,
   mockFittingImport,
   mockGunFamilies,

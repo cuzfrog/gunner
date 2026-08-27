@@ -1,7 +1,7 @@
 import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
-import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
+import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret, TurretCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
-import type { HullTier, ShipProfile, Ships, StatConditions } from "../../../ships";
+import type { HullTier, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { TrackingUnit } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
 import type { I18n } from "../../i18n";
@@ -42,6 +42,7 @@ export class TurretControllerImpl implements TurretController {
   private readonly popupValue: Popup;
   private readonly popupGroup: PopupGroup;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly turretCatalog: TurretCatalog;
   private readonly fittingImport: FittingImport;
   private readonly trackingInput: TrackingInput;
   private readonly i18n: I18n;
@@ -56,6 +57,7 @@ export class TurretControllerImpl implements TurretController {
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
   private cargoCharges: readonly CargoCharge[] = [];
   private currentAmmoId: TypeId;
+  private skillLevel: SkillLevel = 5;
   private allExpanded = false;
   private ammoPopupOpen = false;
 
@@ -64,6 +66,7 @@ export class TurretControllerImpl implements TurretController {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.chargeCatalog = deps.chargeCatalog;
+    this.turretCatalog = deps.turretCatalog;
     this.fittingImport = deps.fittingImport;
     this.trackingInput = deps.trackingInput;
     this.i18n = deps.i18n;
@@ -112,8 +115,9 @@ export class TurretControllerImpl implements TurretController {
     return this.currentAmmoId;
   }
 
-  applyImported(imported: ImportedFitting): void {
+  applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.allExpanded = false;
+    this.skillLevel = conditions.skillLevel;
     const { turret, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
     this.cargoCharges = cargoCharges;
     this.selectedTurret = turret;
@@ -150,6 +154,7 @@ export class TurretControllerImpl implements TurretController {
         : { fitting: arg1, conditions: arg2, ammo: arg3, tracking: arg4, sigRes: arg5, optimal: arg6, falloff: arg7 };
     this.allExpanded = false;
     if (settings.fitting && settings.conditions) {
+      this.skillLevel = settings.conditions.skillLevel;
       const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
@@ -218,6 +223,19 @@ export class TurretControllerImpl implements TurretController {
 
   private onSigResChange(): void {
     const sigRes = this.currentSigResClass();
+    if (this.selectedTurret) {
+      const resized = this.turretCatalog.resize(this.selectedTurret, sigRes, this.skillLevel);
+      if (resized) {
+        this.selectedTurret = resized;
+        this.currentAmmoId = resized.chargeId;
+        this.cargoCharges = [];
+        this.turretOverrides.clearTurret();
+        this.inputSet.set(resized);
+        this.render();
+        this.events.emitConfigInvalidated();
+        return;
+      }
+    }
     this.inputSet.setSigRes(sigRes);
     this.turretOverrides.set({ sigRes });
     this.events.emitDisplayInvalidated();

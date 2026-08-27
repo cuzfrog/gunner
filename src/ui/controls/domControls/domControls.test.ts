@@ -149,7 +149,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     expect(controls.hasGuns("shipA")).toBe(false);
     expect(controls.hasGuns("shipB")).toBe(false);
-    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER);
+    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     expect(controls.hasGuns("shipA")).toBe(true);
     expect(controls.hasGuns("shipB")).toBe(false);
   });

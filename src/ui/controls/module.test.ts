@@ -12,6 +12,7 @@ const controlsCradleKeys = {
   ships: "ships",
   fittingImport: "fittingImport",
   gunFamilies: "gunFamilies",
+  turretCatalog: "turretCatalog",
   presetFittings: "presetFittings",
   savedFittings: "savedFittings",
   clipboard: "clipboard",

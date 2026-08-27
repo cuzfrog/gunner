@@ -20,7 +20,7 @@ describe("ImportController", () => {
     await controller.importFromClipboard("shipA");
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(shipAPanel.fittingText).toBe(text);
-    expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
+    expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
@@ -34,7 +34,7 @@ describe("ImportController", () => {
     await controller.importFromClipboard("shipB");
     expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
     expect(shipBPanel.fittingText).toBe(text);
-    expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER);
+    expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
