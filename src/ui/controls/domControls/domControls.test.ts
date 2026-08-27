@@ -30,6 +30,7 @@ function mockCallbacks() {
     onReset: vi.fn(),
     onConfigChange: vi.fn(),
     onDisplayChange: vi.fn(),
+    onStop: vi.fn(),
     onSpeedChange: vi.fn(),
   };
 }
@@ -363,13 +364,13 @@ describe("DomControls", () => {
     expect(callbacks.onConfigChange).not.toHaveBeenCalled();
   });
 
-  test("sessionReset pauses and resets the simulation", () => {
-    const { document, controls, cradle } = buildDomControls();
+  test("sessionReset stops the loop and resets the simulation", () => {
+    const { controls, cradle } = buildDomControls();
     const callbacks = mockCallbacks();
     controls.setCallbacks(callbacks);
     controls.setPlaying(true);
     cradle.cradle.uiEvents.emitSessionReset();
-    expect(getFake(document, "play").textContent).toBe("button.play");
+    expect(callbacks.onStop).toHaveBeenCalled();
     expect(callbacks.onReset).toHaveBeenCalled();
     expect(callbacks.onConfigChange).not.toHaveBeenCalled();
   });

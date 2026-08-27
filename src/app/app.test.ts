@@ -231,6 +231,13 @@ describe("AppImpl", () => {
     expect(controls.setPlaying).toHaveBeenCalledWith(true);
   });
 
+  test("stop halts the loop and sets playing to false", () => {
+    app.start();
+    callbacks().onStop();
+    expect(loop.stop).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+  });
+
   test("speed change is forwarded to the loop", () => {
     app.start();
     callbacks().onSpeedChange(4);

@@ -8,6 +8,7 @@ export interface ControlsCallbacks {
   readonly onConfigChange: () => void;
   readonly onDisplayChange: () => void;
   readonly onPlayPause: () => void;
+  readonly onStop: () => void;
   readonly onSpeedChange: (speed: number) => void;
 }
 

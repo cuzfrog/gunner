@@ -48,6 +48,10 @@ export class AppImpl implements App {
         this.loop.toggle();
         this.controls.setPlaying(this.loop.isRunning());
       },
+      onStop: () => {
+        this.loop.stop();
+        this.controls.setPlaying(false);
+      },
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
     this.renderFrame();

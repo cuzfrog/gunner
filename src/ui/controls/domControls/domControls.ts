@@ -183,7 +183,7 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private onSessionReset(): void {
-    this.setPlaying(false);
+    this.callbacks?.onStop();
     this.updatePlayEnabled();
     this.portraitsController.update();
     this.callbacks?.onReset();
