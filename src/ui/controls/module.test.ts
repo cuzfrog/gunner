@@ -9,6 +9,7 @@ const controlsCradleKeys = {
   hitChance: "hitChance",
   i18n: "i18n",
   settingsStore: "settingsStore",
+  parser: "parser",
   ships: "ships",
   fittingImport: "fittingImport",
   gunFamilies: "gunFamilies",

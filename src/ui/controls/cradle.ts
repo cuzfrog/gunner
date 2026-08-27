@@ -1,4 +1,4 @@
-import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsStore } from "../../appstate";
+import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
 import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings, TurretCatalog } from "../../fitting";
 import type { EwarResolver, HitChance } from "../../sim";
 import type { Ships } from "../../ships";
@@ -34,6 +34,7 @@ export interface ControlsCradle {
   readonly hitChance: HitChance;
   readonly i18n: I18n;
   readonly settingsStore: SettingsStore;
+  readonly parser: SettingsParser;
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
   readonly gunFamilies: GunFamilies;

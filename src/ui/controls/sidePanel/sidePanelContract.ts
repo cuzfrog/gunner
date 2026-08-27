@@ -3,7 +3,7 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { AutopilotMode } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { CombatantSettings, FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
+import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
 import type { ShipId } from "../../../gamedata/ids";
 import type { Popup, PopupGroup } from "../popup";
 import type { Timer } from "../../timer";
@@ -43,7 +43,6 @@ export interface SidePanel {
   clearTurret(): void;
   restoreTurret(): void;
   setTurretProfile(profile: ShipProfile | undefined): void;
-  stateFrom(combatant: CombatantSettings): SidePanelState;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;
@@ -68,26 +67,6 @@ export interface SidePanelState {
   readonly overrides: Partial<ProfileParamOverrides>;
   readonly fittedHull: FittedHullSummary | undefined;
   readonly sig?: number;
-}
-
-export function stateSliceOf(combatant: CombatantSettings): SidePanelState {
-  return {
-    speed: combatant.speed,
-    baseMaxSpeed: combatant.fittedHull?.baseMaxSpeed ?? combatant.speed,
-    mass: combatant.mass,
-    inertia: combatant.inertia,
-    mode: combatant.mode,
-    range: combatant.range,
-    aggressivity: combatant.aggressivity,
-    skillLevel: combatant.skillLevel,
-    overload: combatant.overload ?? true,
-    hull: combatant.hull,
-    propulsion: combatant.propulsion,
-    fitting: combatant.fitting,
-    overrides: combatant.overrides ?? {},
-    fittedHull: combatant.fittedHull,
-    sig: combatant.sig,
-  };
 }
 
 export interface FittingPopupControl {

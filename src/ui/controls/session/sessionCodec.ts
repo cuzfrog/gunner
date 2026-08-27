@@ -1,11 +1,12 @@
-import { SIG_RESOLUTIONS } from "../../../sim";
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import {
   USER_SETTINGS_VERSION,
-  toCombatantSettings,
+  type CombatantSettings,
   type ProfileSettings,
+  type SessionSettings,
+  type SettingsParser,
   type SettingsStore,
   type StartupState,
   type StoredBoosterActivation,
@@ -15,21 +16,20 @@ import {
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import { num } from "../controlsDom";
-import { DEFAULT_GRID_BRIGHTNESS } from "../controlsFormat";
 import { applyStartupDefaults } from "./startupDefaults";
 import type { HintRotator } from "../hints";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
 import type { Side } from "../side";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, SidePanelState } from "../sidePanel";
 import type { TurretController, TurretOverrides } from "../turret";
 
 export interface SessionCodec {
   capture(): UserSettings;
   captureProfile(): ProfileSettings;
   getInitialDistance(): number;
-  restore(settings: UserSettings, selectedName?: string): void;
-  fromProfile(profile: ProfileSettings): UserSettings;
+  restore(settings: SessionSettings, selectedName?: string): void;
+  fromProfile(profile: ProfileSettings): SessionSettings;
   restoreStartup(startup: StartupState): void;
   resetToDefaults(): void;
 }
@@ -54,7 +54,8 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
   private readonly fittingImport: FittingImport;
-  private readonly pristineSettings: UserSettings;
+  private readonly parser: SettingsParser;
+  private readonly pristineSettings: SessionSettings;
 
   constructor(deps: {
     els: SessionCodecEls;
@@ -72,6 +73,7 @@ export class SessionCodecImpl implements SessionCodec {
     ewarController: EwarController;
     boosterController: BoosterController;
     fittingImport: FittingImport;
+    parser: SettingsParser;
   }) {
     this.els = deps.els;
     this.shipASide = deps.shipASide;
@@ -88,7 +90,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
     this.fittingImport = deps.fittingImport;
-    this.pristineSettings = this.capture();
+    this.parser = deps.parser;
+    this.pristineSettings = this.parser.fromWire(this.capture());
     this.events.onProfileLoaded((name) => this.onProfileLoaded(name));
     this.events.onNewProfile(() => this.onNewProfile());
     this.events.onProfileDeleted(() => this.onProfileDeleted());
@@ -158,18 +161,9 @@ export class SessionCodecImpl implements SessionCodec {
     return profile;
   }
 
-  restore(settings: UserSettings, selectedName = ""): void {
+  restore(settings: SessionSettings, selectedName = ""): void {
     this.applyShipState(settings);
-    this.preferencesController.restore({
-      language: settings.language,
-      shipATrackingUnit: settings.shipATrackingUnit,
-      shipBTrackingUnit: settings.shipBTrackingUnit,
-      weaponRangeVisibility: settings.weaponRangeVisibility,
-      simSpeed: settings.simSpeed,
-      gridBrightness: settings.gridBrightness ?? DEFAULT_GRID_BRIGHTNESS,
-      autoZoom: settings.autoZoom ?? true,
-      zoomFactor: settings.zoomFactor ?? 1,
-    });
+    this.preferencesController.restore(settings.display);
     this.i18n.translateDocument();
     this.shipASide.sections.skill.setOverloadDisabled();
     this.shipBSide.sections.skill.setOverloadDisabled();
@@ -181,22 +175,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.events.emitSessionRestored();
   }
 
-  fromProfile(profile: ProfileSettings): UserSettings {
-    const { rangeOverlayVisibility: _, ...preferences } = this.preferencesController.capture();
-    return {
-      ...profile,
-      shipATracking: profile.shipATracking ?? 0,
-      shipASigRes: profile.shipASigRes ?? "S",
-      shipAOptimal: profile.shipAOptimal ?? 0,
-      shipAFalloff: profile.shipAFalloff ?? 0,
-      shipBTracking: profile.shipBTracking ?? 0,
-      shipBSigRes: profile.shipBSigRes ?? "S",
-      shipBOptimal: profile.shipBOptimal ?? 0,
-      shipBFalloff: profile.shipBFalloff ?? 0,
-      shipAAmmo: profile.shipAAmmo ?? this.chargeCatalog.usualForChargeSize(1),
-      shipBAmmo: profile.shipBAmmo ?? this.chargeCatalog.usualForChargeSize(1),
-      ...preferences,
-    };
+  fromProfile(profile: ProfileSettings): SessionSettings {
+    return this.parser.fromProfile(profile, this.preferencesController.capture());
   }
 
   getInitialDistance(): number {
@@ -221,34 +201,34 @@ export class SessionCodecImpl implements SessionCodec {
     this.applyDefaultStartup();
   }
 
-  private applyShipState(settings: UserSettings): void {
+  private applyShipState(settings: SessionSettings): void {
     this.els.initialDistance.value = String(settings.initialDistance);
-    this.shipASide.restore(this.shipASide.stateFrom(toCombatantSettings(settings, "shipA")));
-    this.shipBSide.restore(this.shipBSide.stateFrom(toCombatantSettings(settings, "shipB")));
-    this.turretOverridesBySide.shipA.set(settings.shipAOverrides ?? {});
-    this.turretOverridesBySide.shipB.set(settings.shipBOverrides ?? {});
+    this.shipASide.restore(sidePanelStateOf(settings.shipA));
+    this.shipBSide.restore(sidePanelStateOf(settings.shipB));
+    this.turretOverridesBySide.shipA.set(settings.shipA.overrides);
+    this.turretOverridesBySide.shipB.set(settings.shipB.overrides);
     this.turretControllers.shipA.restore({
-      fitting: settings.shipAFitting,
+      fitting: settings.shipA.fitting,
       conditions: this.shipASide.skillConditions(),
-      ammo: settings.shipAAmmo,
-      tracking: settings.shipATracking,
-      sigRes: settings.shipASigRes,
-      optimal: settings.shipAOptimal,
-      falloff: settings.shipAFalloff,
+      ammo: settings.shipA.ammo,
+      tracking: settings.shipA.tracking,
+      sigRes: settings.shipA.sigRes,
+      optimal: settings.shipA.optimal,
+      falloff: settings.shipA.falloff,
     });
     this.turretControllers.shipB.restore({
-      fitting: settings.shipBFitting,
+      fitting: settings.shipB.fitting,
       conditions: this.shipBSide.skillConditions(),
-      ammo: settings.shipBAmmo,
-      tracking: settings.shipBTracking,
-      sigRes: settings.shipBSigRes,
-      optimal: settings.shipBOptimal,
-      falloff: settings.shipBFalloff,
+      ammo: settings.shipB.ammo,
+      tracking: settings.shipB.tracking,
+      sigRes: settings.shipB.sigRes,
+      optimal: settings.shipB.optimal,
+      falloff: settings.shipB.falloff,
     });
-    this.restoreEwar("shipA", settings.shipAFitting, settings.shipAEwarActivation);
-    this.restoreEwar("shipB", settings.shipBFitting, settings.shipBEwarActivation);
-    this.restoreBooster("shipA", settings.shipAFitting, settings.shipABoosterActivation);
-    this.restoreBooster("shipB", settings.shipBFitting, settings.shipBBoosterActivation);
+    this.restoreEwar("shipA", settings.shipA.fitting, settings.shipA.ewarActivation);
+    this.restoreEwar("shipB", settings.shipB.fitting, settings.shipB.ewarActivation);
+    this.restoreBooster("shipA", settings.shipA.fitting, settings.shipA.boosterActivation);
+    this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
   }
 
   restoreStartup(startup: StartupState): void {
@@ -293,4 +273,23 @@ export class SessionCodecImpl implements SessionCodec {
     this.resetToDefaults();
     this.events.emitSessionReset();
   }
+}
+
+function sidePanelStateOf(combatant: CombatantSettings): SidePanelState {
+  return {
+    speed: combatant.speed,
+    mass: combatant.mass,
+    inertia: combatant.inertia,
+    mode: combatant.mode,
+    range: combatant.range,
+    aggressivity: combatant.aggressivity,
+    skillLevel: combatant.skillLevel,
+    overload: combatant.overload,
+    hull: combatant.hull,
+    propulsion: combatant.propulsion,
+    fitting: combatant.fitting,
+    overrides: combatant.overrides,
+    fittedHull: combatant.fittedHull,
+    sig: combatant.sig,
+  };
 }

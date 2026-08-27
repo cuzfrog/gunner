@@ -13,6 +13,7 @@ export {
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
+  mockParser,
   mockPresetFittings,
   mockSavedFittings,
   mockSettingsStore,

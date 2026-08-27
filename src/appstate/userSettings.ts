@@ -140,8 +140,3 @@ export interface DisplayPreferences {
   readonly autoZoom?: boolean;
   readonly zoomFactor?: number;
 }
-
-export interface StartupState {
-  readonly settings: UserSettings | null;
-  readonly selectedProfileName: string | null;
-}

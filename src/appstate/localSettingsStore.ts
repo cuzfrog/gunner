@@ -1,7 +1,8 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import type { DisplayPreferences, ProfileSettings, TrackingUnit, StartupState, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { DisplayPreferences, ProfileSettings, TrackingUnit, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { SessionSettings, StartupState } from "./combatantSettings";
 import type { Language } from "./language";
 import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
@@ -130,18 +131,18 @@ export class LocalSettingsStore implements SettingsStore {
   savePreferences(preferences: DisplayPreferences): void {
     this.storage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
   }
-  private decodeUrl(): UserSettings | null {
+  private decodeUrl(): SessionSettings | null {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
     return this.parser.decodeUrlSettings(encoded);
   }
-  private matchingSelectedProfile(urlSettings: UserSettings): string | null {
+  private matchingSelectedProfile(urlSettings: SessionSettings): string | null {
     const name = this.readSelectedProfileName();
     if (!name) return null;
     const profile = this.loadProfile(name);
     if (!profile) return null;
-    return this.equality.equal(profile, stripDisplayPreferences(urlSettings)) ? name : null;
+    return this.equality.equal(profile, stripDisplayPreferences(this.parser.toWire(urlSettings))) ? name : null;
   }
 
   private readSelectedProfileName(): string | null {

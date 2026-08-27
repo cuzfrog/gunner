@@ -1,7 +1,8 @@
 import {
   USER_SETTINGS_VERSION,
-  toCombatantSettings,
   type ProfileSettings,
+  type SessionSettings,
+  type SettingsParser,
   type SettingsStore,
   type StartupState,
   type TrackingUnit,
@@ -10,9 +11,9 @@ import {
 import type { ChargeCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { ImportedTurret } from "../../../fitting";
-import { type AutopilotMode, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
+import { type AutopilotMode, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
-import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput } from "../testSupport";
+import { createControlsEls, fakeDocument, FakeElement, fakeTrackingInput, mockParser } from "../testSupport";
 import { UiEventsImpl, type UiEvents } from "../../events";
 import type { I18n } from "../../i18n";
 import type { HintRotator } from "../hints";
@@ -34,13 +35,15 @@ function fakeEls() {
   return createControlsEls();
 }
 
-function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): ReturnType<SidePanel["stateFrom"]> {
+function sessionFromWire(wire: UserSettings): SessionSettings {
+  return mockParser().fromWire(wire);
+}
+
+function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): SidePanelState {
   const mode: AutopilotMode = side === "shipA" ? settings.shipAMode : settings.shipBMode;
-  const speed = side === "shipA" ? settings.shipASpeed : settings.shipBSpeed;
   const fittedHull = side === "shipA" ? settings.shipAFittedHull : settings.shipBFittedHull;
-  const base = {
-    speed,
-    baseMaxSpeed: fittedHull?.baseMaxSpeed ?? speed,
+  return {
+    speed: side === "shipA" ? settings.shipASpeed : settings.shipBSpeed,
     mass: side === "shipA" ? settings.shipAMass : settings.shipBMass,
     inertia: side === "shipA" ? settings.shipAInertia : settings.shipBInertia,
     mode,
@@ -51,10 +54,10 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): Return
     hull: side === "shipA" ? settings.shipAHullId : settings.shipBHullId,
     propulsion: side === "shipA" ? settings.shipAPropulsion : settings.shipBPropulsion,
     fitting: side === "shipA" ? settings.shipAFitting : settings.shipBFitting,
-    overrides: side === "shipA" ? {} : settings.shipBOverrides ?? {},
+    overrides: side === "shipA" ? (settings.shipAOverrides ?? {}) : (settings.shipBOverrides ?? {}),
     fittedHull,
+    sig: side === "shipA" ? settings.shipASig : settings.shipBSig,
   };
-  return { ...base, sig: side === "shipA" ? (settings.shipASig ?? 1) : settings.shipBSig };
 }
 
 function sidePanelStateWithDefaults(state: Partial<SidePanelState>): SidePanelState {
@@ -80,7 +83,6 @@ function mockSidePanel(side: "shipA" | "shipB", captured: Partial<SidePanelState
   const full = sidePanelStateWithDefaults(captured);
   return {
     capture: vi.fn(() => full),
-    stateFrom: vi.fn(() => full),
     restore: vi.fn(),
     skillConditions: vi.fn(() => ({ skillLevel: 5, overloaded: true })),
     sections: {
@@ -193,6 +195,7 @@ function buildCodec(options: {
   ewarController?: Partial<EwarController>;
   boosterController?: Partial<BoosterController>;
   fittingImport?: Partial<FittingImport>;
+  parser?: Partial<SettingsParser>;
   events?: UiEvents;
 } = {}) {
   const els = options.els ?? fakeEls();
@@ -228,6 +231,7 @@ function buildCodec(options: {
   const ewarController = { ...mockEwarController(), ...options.ewarController } as unknown as EwarController;
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
+  const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
   const codec = new SessionCodecImpl({
     els,
@@ -245,8 +249,9 @@ function buildCodec(options: {
     ewarController,
     boosterController,
     fittingImport,
+    parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, fittingImport };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -379,8 +384,6 @@ describe("SessionCodec", () => {
     };
     const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
     const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
-    shipA.stateFrom = vi.fn(() => panelStateFrom(settings, "shipA"));
-    shipB.stateFrom = vi.fn(() => panelStateFrom(settings, "shipB"));
     const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
     const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
     const i18n = { translateDocument: vi.fn() } as unknown as I18n;
@@ -388,13 +391,12 @@ describe("SessionCodec", () => {
     const events = new UiEventsImpl();
     const onSessionRestored = vi.fn();
     events.onSessionRestored(onSessionRestored);
+    const session = sessionFromWire(settings);
     const { codec, turretControllers, turretOverridesBySide, preferences } = buildCodec({ shipA, shipB, profileController, settingsStore, i18n, hintRotator, events });
 
-    codec.restoreStartup({ settings, selectedProfileName: null });
+    codec.restoreStartup({ settings: session, selectedProfileName: null });
 
-    expect(shipA.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "shipA"));
     expect(shipA.restore).toHaveBeenCalledWith(panelStateFrom(settings, "shipA"));
-    expect(shipB.stateFrom).toHaveBeenCalledWith(toCombatantSettings(settings, "shipB"));
     expect(shipB.restore).toHaveBeenCalledWith(panelStateFrom(settings, "shipB"));
     expect(turretControllers.shipA.restore).toHaveBeenCalledWith({
       fitting: settings.shipAFitting,
@@ -455,7 +457,7 @@ describe("SessionCodec", () => {
       disruptors: [{ active: true, overloaded: false, script: "none" }],
     });
 
-    codec.restore(settings);
+    codec.restore(sessionFromWire(settings));
     expect(ewarController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAEwarActivation);
     expect(ewarController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBEwarActivation);
     expect(onSessionRestored).toHaveBeenCalled();
@@ -488,7 +490,7 @@ describe("SessionCodec", () => {
   });
 
   test("resetToDefaults clears the selected profile and ship state back to pristine", () => {
-    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined };
+    const pristineShipA = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
     const pristineShipB = { speed: 0, mass: 0, inertia: 0, mode: "orbit" as const, range: 0, aggressivity: 1, skillLevel: 5 as const, overload: true, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 };
     const shipA = mockSidePanel("shipA", pristineShipA);
     const shipB = mockSidePanel("shipB", pristineShipB);

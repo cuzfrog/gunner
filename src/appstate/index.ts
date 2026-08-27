@@ -6,7 +6,6 @@ export type {
   ProfileParamOverrides,
   ProfileSettings,
   PropulsionSelection,
-  StartupState,
   StoredBoosterActivation,
   StoredDisruptionScript,
   StoredEwarActivation,
@@ -14,13 +13,13 @@ export type {
   UserSettings,
   WeaponRangeVisibility,
 } from "./userSettings";
-export type { CombatantSettings } from "./combatantSettings";
-export { toCombatantSettings } from "./combatantSettings";
+export type { CombatantSettings, SessionSettings, StartupState } from "./combatantSettings";
 export type { Language } from "./language";
 export type { SettingGuards } from "./settingGuards";
 export type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 export { ClipboardUnavailableError } from "./providers";
 export type { SettingsStore } from "./settingsStore";
+export type { SettingsParser } from "./settingsParser";
 export type { SavedFitting, SavedFittings } from "./savedFittings";
 export type { AppstateCradle } from "./cradle";
 export type { ProfileTextCodec } from "./profileText";

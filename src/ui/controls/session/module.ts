@@ -29,6 +29,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
       fittingImport: proxy.fittingImport,
+      parser: proxy.parser,
     })).singleton(),
     simConfigSource: asFunction((proxy) => new SimConfigSourceImpl({
       shipASide: proxy.shipASide,

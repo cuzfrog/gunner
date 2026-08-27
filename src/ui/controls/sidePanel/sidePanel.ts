@@ -3,7 +3,6 @@ import type { ShipId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
 import type { AutopilotMode } from "../../../sim";
 import {
-  type CombatantSettings,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type PropulsionSelection,
@@ -26,7 +25,6 @@ import type { Side } from "../side";
 import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
 import {
-  stateSliceOf,
   type FittingPopupControl,
   type FittingPreviewControl,
   type SideImporter,
@@ -160,7 +158,6 @@ export class SidePanelImpl implements SidePanel {
   }
 
   setImporter(importer: SideImporter): void { this.importerValue = importer; }
-  stateFrom(combatant: CombatantSettings): SidePanelState { return stateSliceOf(combatant); }
   renderFittingPopupIfOpen(): void { this.fittingPopup?.renderIfOpen(); }
   closeFittingPopupIfOpen(): void { this.fittingPopup?.closeIfOpen(); }
   hideFittingPreview(): void { this.fittingPreview?.hide(this.side); }
@@ -193,7 +190,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.nav.restore({ mode: state.mode, range: state.range, aggressivity: state.aggressivity });
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
-    this.sections.skill.setOverloadActive(state.overload ?? true);
+    this.sections.skill.setOverloadActive(state.overload);
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);

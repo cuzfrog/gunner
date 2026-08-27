@@ -1,4 +1,5 @@
-import type { UserSettings, ProfileSettings, DisplayPreferences, StartupState } from "./userSettings";
+import type { UserSettings, ProfileSettings, DisplayPreferences } from "./userSettings";
+import type { StartupState } from "./combatantSettings";
 
 export interface SettingsStore {
   loadStartupState(): StartupState;

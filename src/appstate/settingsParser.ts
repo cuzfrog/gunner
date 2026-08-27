@@ -5,6 +5,8 @@ import type { Ships } from "../ships";
 import {
   PROPULSION_NONE,
   USER_SETTINGS_VERSION,
+  type DisplayPreferences,
+  type ProfileParamOverrides,
   type ProfileSettings as ProfileSettingsWire,
   type PropulsionSelection,
   type UserSettings,
@@ -22,7 +24,7 @@ import {
   resolveHullId,
   type LegacyUserSettings,
 } from "./settingsCompat";
-import { toCombatantSettings, type CombatantSettings, type InternalUserSettings } from "./combatantSettings";
+import { type CombatantSettings, type SessionSettings } from "./combatantSettings";
 import type { SettingGuards } from "./settingGuards";
 import {
   isLanguage,
@@ -65,22 +67,33 @@ export class SettingsParser {
     this.fittingBasis = new FittingBasis(deps);
   }
 
-  parseUserSettings(raw: string): UserSettingsWire | null {
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (!isRecord(parsed)) return null;
-      const record = parsed;
-      normalizeLegacySettings(record);
-      this.normalizeAndDefaultAggressivity(record);
-      this.migrateBoosterActivation(record);
-      this.migrateEwarActivation(record);
-      this.applyUserDefaults(record);
-      if (!this.isUserSettings(record)) return null;
-      record.version = USER_SETTINGS_VERSION;
-      return toWireSettings(fromWireSettings(record));
-    } catch {
-      return null;
-    }
+  parseUserSettings(raw: string): SessionSettings | null {
+    const wire = this.parseWire(raw);
+    return wire ? fromWireSettings(wire) : null;
+  }
+
+  fromWire(wire: UserSettings): SessionSettings {
+    return fromWireSettings(wire);
+  }
+
+  toWire(settings: SessionSettings): UserSettings {
+    return toWireSettings(settings);
+  }
+
+  fromProfile(profile: ProfileSettingsWire, display: DisplayPreferences): SessionSettings {
+    return fromWireSettings({
+      ...profile,
+      shipAAmmo: profile.shipAAmmo ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE),
+      shipBAmmo: profile.shipBAmmo ?? this.chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE),
+      language: display.language,
+      shipATrackingUnit: display.shipATrackingUnit,
+      shipBTrackingUnit: display.shipBTrackingUnit,
+      weaponRangeVisibility: display.weaponRangeVisibility,
+      simSpeed: display.simSpeed,
+      gridBrightness: display.gridBrightness,
+      autoZoom: display.autoZoom,
+      zoomFactor: display.zoomFactor,
+    });
   }
 
   parseProfiles(raw: string): Record<string, ProfileSettingsWire> {
@@ -98,13 +111,13 @@ export class SettingsParser {
     }
   }
 
-  decodeUrlSettings(encoded: string): UserSettingsWire | null {
+  decodeUrlSettings(encoded: string): SessionSettings | null {
     try {
-      const settings = this.parseUserSettings(decodeBase64(encoded));
-      if (!settings) return null;
-      const shipA = this.fittingBasis.rebuild(settings, "shipA");
-      const shipB = this.fittingBasis.rebuild(settings, "shipB");
-      return { ...settings, ...shipA, ...shipB };
+      const wire = this.parseWire(decodeBase64(encoded));
+      if (!wire) return null;
+      const shipA = this.fittingBasis.rebuild(wire, "shipA");
+      const shipB = this.fittingBasis.rebuild(wire, "shipB");
+      return fromWireSettings({ ...wire, ...shipA, ...shipB });
     } catch {
       return null;
     }
@@ -123,11 +136,29 @@ export class SettingsParser {
     return stripDisplayPreferences(record as ProfileSettingsWire);
   }
 
-  serialize(settings: UserSettingsWire | ProfileSettingsWire | InternalUserSettings): string {
-    if (isInternalUserSettings(settings)) {
+  serialize(settings: SessionSettings | ProfileSettingsWire | UserSettingsWire): string {
+    if (isSessionSettings(settings)) {
       return JSON.stringify(toWireSettings(settings));
     }
     return JSON.stringify(settings);
+  }
+
+  private parseWire(raw: string): UserSettingsWire | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isRecord(parsed)) return null;
+      const record = parsed;
+      normalizeLegacySettings(record);
+      this.normalizeAndDefaultAggressivity(record);
+      this.migrateBoosterActivation(record);
+      this.migrateEwarActivation(record);
+      this.applyUserDefaults(record);
+      if (!this.isUserSettings(record)) return null;
+      record.version = USER_SETTINGS_VERSION;
+      return record;
+    } catch {
+      return null;
+    }
   }
 
   private isProfileSettings(value: unknown): value is UserSettingsWire {
@@ -346,24 +377,16 @@ function isProfileStorage(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-function isInternalUserSettings(value: UserSettingsWire | ProfileSettingsWire | InternalUserSettings): value is InternalUserSettings {
+function isSessionSettings(value: UserSettingsWire | ProfileSettingsWire | SessionSettings): value is SessionSettings {
   return "shipA" in value;
 }
 
-function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
+function fromWireSettings(wire: UserSettingsWire): SessionSettings {
   const gridBrightness = wire.gridBrightness ?? DEFAULT_PREFERENCES.gridBrightness;
   const autoZoom = wire.autoZoom ?? true;
   const zoomFactor = wire.zoomFactor ?? 1;
   return {
     version: wire.version,
-    language: wire.language,
-    simSpeed: wire.simSpeed,
-    shipATrackingUnit: wire.shipATrackingUnit,
-    shipBTrackingUnit: wire.shipBTrackingUnit,
-    weaponRangeVisibility: wire.weaponRangeVisibility,
-    gridBrightness,
-    autoZoom,
-    zoomFactor,
     display: {
       language: wire.language,
       shipATrackingUnit: wire.shipATrackingUnit,
@@ -380,57 +403,90 @@ function fromWireSettings(wire: UserSettingsWire): InternalUserSettings {
   };
 }
 
-function toWireSettings(internal: InternalUserSettings): UserSettingsWire {
+function toWireSettings(session: SessionSettings): UserSettingsWire {
   const wire: UserSettingsWire = {
-    version: internal.version,
-    language: internal.language,
-    shipATrackingUnit: internal.shipATrackingUnit,
-    shipBTrackingUnit: internal.shipBTrackingUnit,
-    weaponRangeVisibility: internal.weaponRangeVisibility,
-    simSpeed: internal.simSpeed,
-    gridBrightness: internal.gridBrightness,
-    autoZoom: internal.display.autoZoom,
-    zoomFactor: internal.display.zoomFactor,
-    initialDistance: internal.initialDistance,
-    shipAAmmo: internal.shipA.ammo,
-    shipBAmmo: internal.shipB.ammo,
-    shipATracking: internal.shipA.tracking,
-    shipASigRes: internal.shipA.sigRes,
-    shipAOptimal: internal.shipA.optimal,
-    shipAFalloff: internal.shipA.falloff,
-    shipBTracking: internal.shipB.tracking,
-    shipBSigRes: internal.shipB.sigRes,
-    shipBOptimal: internal.shipB.optimal,
-    shipBFalloff: internal.shipB.falloff,
-    shipASpeed: internal.shipA.speed,
-    shipAMode: internal.shipA.mode,
-    shipARange: internal.shipA.range,
-    shipAAggressivity: internal.shipA.aggressivity,
-    shipAMass: internal.shipA.mass,
-    shipAInertia: internal.shipA.inertia,
-    shipBSpeed: internal.shipB.speed,
-    shipBMode: internal.shipB.mode,
-    shipBRange: internal.shipB.range,
-    shipBAggressivity: internal.shipB.aggressivity,
-    shipBMass: internal.shipB.mass,
-    shipBInertia: internal.shipB.inertia,
-    shipBSig: internal.shipB.sig ?? 1,
+    version: session.version,
+    language: session.display.language,
+    shipATrackingUnit: session.display.shipATrackingUnit,
+    shipBTrackingUnit: session.display.shipBTrackingUnit,
+    weaponRangeVisibility: session.display.weaponRangeVisibility,
+    simSpeed: session.display.simSpeed,
+    gridBrightness: session.display.gridBrightness,
+    autoZoom: session.display.autoZoom,
+    zoomFactor: session.display.zoomFactor,
+    initialDistance: session.initialDistance,
+    shipAAmmo: session.shipA.ammo,
+    shipBAmmo: session.shipB.ammo,
+    shipATracking: session.shipA.tracking,
+    shipASigRes: session.shipA.sigRes,
+    shipAOptimal: session.shipA.optimal,
+    shipAFalloff: session.shipA.falloff,
+    shipBTracking: session.shipB.tracking,
+    shipBSigRes: session.shipB.sigRes,
+    shipBOptimal: session.shipB.optimal,
+    shipBFalloff: session.shipB.falloff,
+    shipASpeed: session.shipA.speed,
+    shipAMode: session.shipA.mode,
+    shipARange: session.shipA.range,
+    shipAAggressivity: session.shipA.aggressivity,
+    shipAMass: session.shipA.mass,
+    shipAInertia: session.shipA.inertia,
+    shipBSpeed: session.shipB.speed,
+    shipBMode: session.shipB.mode,
+    shipBRange: session.shipB.range,
+    shipBAggressivity: session.shipB.aggressivity,
+    shipBMass: session.shipB.mass,
+    shipBInertia: session.shipB.inertia,
+    shipBSig: session.shipB.sig ?? 1,
   };
-  setOptionalShipFields(wire, internal.shipA, "shipA");
-  setOptionalShipFields(wire, internal.shipB, "shipB");
+  setOptionalShipFields(wire, session.shipA, "shipA");
+  setOptionalShipFields(wire, session.shipB, "shipB");
   return wire;
 }
 
 function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSettings, side: "shipA" | "shipB"): void {
   const p = side;
   if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
-  if (combatant.overload !== undefined) wire[`${p}Overload` as const] = combatant.overload;
+  wire[`${p}Overload` as const] = combatant.overload;
   if (combatant.hull !== undefined) wire[`${p}HullId` as const] = combatant.hull;
   if (combatant.propulsion !== undefined) wire[`${p}Propulsion` as const] = combatant.propulsion;
   if (combatant.fitting !== undefined) wire[`${p}Fitting` as const] = combatant.fitting;
-  if (combatant.overrides !== undefined) wire[`${p}Overrides` as const] = combatant.overrides;
+  if (Object.keys(combatant.overrides).length > 0) wire[`${p}Overrides` as const] = combatant.overrides;
   if (combatant.fittedHull !== undefined) wire[`${p}FittedHull` as const] = combatant.fittedHull;
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
+}
+
+function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"): CombatantSettings {
+  const overrides = sideValue(side, settings.shipAOverrides, settings.shipBOverrides) ?? {};
+  const sigKey: keyof ProfileParamOverrides = side === "shipA" ? "shipASig" : "shipBSig";
+  const sig = sideValue(side, settings.shipASig, settings.shipBSig) ?? overrides[sigKey];
+  return {
+    speed: sideValue(side, settings.shipASpeed, settings.shipBSpeed),
+    mode: sideValue(side, settings.shipAMode, settings.shipBMode),
+    range: sideValue(side, settings.shipARange, settings.shipBRange),
+    mass: sideValue(side, settings.shipAMass, settings.shipBMass),
+    inertia: sideValue(side, settings.shipAInertia, settings.shipBInertia),
+    aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
+    skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
+    overload: sideValue(side, settings.shipAOverload, settings.shipBOverload) ?? true,
+    hull: sideValue(side, settings.shipAHullId, settings.shipBHullId),
+    propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
+    fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),
+    overrides,
+    fittedHull: sideValue(side, settings.shipAFittedHull, settings.shipBFittedHull),
+    ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
+    boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
+    sig,
+    tracking: sideValue(side, settings.shipATracking, settings.shipBTracking) ?? settings.tracking ?? 0,
+    sigRes: sideValue(side, settings.shipASigRes, settings.shipBSigRes) ?? settings.sigRes ?? "S",
+    optimal: sideValue(side, settings.shipAOptimal, settings.shipBOptimal) ?? settings.optimal ?? 0,
+    falloff: sideValue(side, settings.shipAFalloff, settings.shipBFalloff) ?? settings.falloff ?? 0,
+    ammo: sideValue(side, settings.shipAAmmo, settings.shipBAmmo),
+  };
+}
+
+function sideValue<T>(side: "shipA" | "shipB", shipAValue: T, shipBValue: T): T {
+  return side === "shipA" ? shipAValue : shipBValue;
 }

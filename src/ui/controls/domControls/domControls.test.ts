@@ -9,6 +9,7 @@ import {
   buildDomControls,
   getFake,
   mockFittingImport,
+  mockParser,
   mockSavedFittings,
   mockShips,
   RIFTER,
@@ -222,7 +223,8 @@ describe("DomControls", () => {
 
   test("restoreStartup round-trips stored settings through SessionCodec", () => {
     const settings = baseSettings();
-    const loadStartupState = vi.fn(() => ({ settings, selectedProfileName: "brawler" }));
+    const session = mockParser().fromWire(settings);
+    const loadStartupState = vi.fn(() => ({ settings: session, selectedProfileName: "brawler" }));
     const { controls } = buildDomControls({ settingsStore: { loadStartupState } });
     const config = controls.getConfig();
     expect(config.shipA.maxSpeed).toBe(400);

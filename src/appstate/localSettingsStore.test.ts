@@ -29,8 +29,13 @@ import {
   type DisplayPreferences,
   type ProfileSettings,
 } from "./localSettingsStore.testSupport";
+import type { SessionSettings } from "./combatantSettings";
 
 beforeEach(() => resetMocks());
+
+function sessionFromWire(wire: UserSettings): SessionSettings {
+  return makeParser().fromWire(wire);
+}
 describe("LocalSettingsStore", () => {
   test("loadStartupState returns null settings without a URL parameter", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
@@ -39,7 +44,7 @@ describe("LocalSettingsStore", () => {
 
   test("loadStartupState decodes settings from the URL", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(URL_SETTINGS)) });
-    expect(store.loadStartupState().settings).toEqual(URL_SETTINGS);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(URL_SETTINGS));
   });
 
   test("loadStartupState ignores local storage snapshots from previous versions", () => {
@@ -82,7 +87,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation(url) });
     store.saveProfile("shared", profileFrom(URL_SETTINGS));
     store.selectProfile("shared");
-    expect(store.loadStartupState()).toEqual({ settings: { ...URL_SETTINGS, ...DEFAULT_PREFERENCES }, selectedProfileName: "shared" });
+    expect(store.loadStartupState()).toEqual({ settings: sessionFromWire({ ...URL_SETTINGS, ...DEFAULT_PREFERENCES }), selectedProfileName: "shared" });
   });
 
   test("loadStartupState drops the selection for a foreign URL but keeps it stored", () => {
@@ -127,7 +132,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage, location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
     const reloaded = makeStore({ parser: makeParser(), storage, location: fakeLocation(url) });
-    expect(reloaded.loadStartupState().settings).toEqual(DEFAULT_SETTINGS);
+    expect(reloaded.loadStartupState().settings).toEqual(sessionFromWire(DEFAULT_SETTINGS));
   });
 
   test("loadStartupState prefers the URL language over the navigator language", () => {
@@ -139,7 +144,7 @@ describe("LocalSettingsStore", () => {
       location: fakeLocation(urlFor(urlSettings)),
       navigatorLanguage: "zh-CN",
     });
-    expect(store.loadStartupState().settings?.language).toBe("ja");
+    expect(store.loadStartupState().settings?.display.language).toBe("ja");
   });
 
   test("loadStartupState rejects a version-2 payload", () => {
@@ -199,7 +204,7 @@ describe("LocalSettingsStore", () => {
       shipBFittedHull: FITTED_HULL_SUMMARY,
     };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withFitted)) });
-    expect(store.loadStartupState().settings).toEqual(withFitted);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(withFitted));
   });
 
   test("loadStartupState round-trips hull and propulsion selections", () => {
@@ -210,7 +215,7 @@ describe("LocalSettingsStore", () => {
       shipBHullId: "672" as ShipId,
     };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withHull)) });
-    expect(store.loadStartupState().settings).toEqual(withHull);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(withHull));
   });
 
   test("loadStartupState rejects an invalid propulsion id", () => {
@@ -224,7 +229,7 @@ describe("LocalSettingsStore", () => {
   test("loadStartupState round-trips a deselected propulsion", () => {
     const withNone: UserSettings = { ...DEFAULT_SETTINGS, shipAHullId: "587" as ShipId, shipAPropulsion: "none" };
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(withNone)) });
-    expect(store.loadStartupState().settings).toEqual(withNone);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(withNone));
   });
 
   test("rebuild with explicit none keeps the fitted hull but uses base stats", () => {
@@ -243,11 +248,11 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAPropulsion).toBe("none");
-    expect(loaded!.shipASpeed).toBe(456.25);
-    expect(loaded!.shipAMass).toBe(1_000_000);
-    expect(loaded!.shipAFittedHull!.propulsionId).toBe("mwd-5mn");
-    expect(loaded!.shipAFittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
+    expect(loaded!.shipA.propulsion).toBe("none");
+    expect(loaded!.shipA.speed).toBe(456.25);
+    expect(loaded!.shipA.mass).toBe(1_000_000);
+    expect(loaded!.shipA.fittedHull!.propulsionId).toBe("mwd-5mn");
+    expect(loaded!.shipA.fittedHull!.propulsion).toEqual(RIFTER_PROPULSION);
   });
 
   test("loadStartupState rejects an empty hull id", () => {
@@ -352,7 +357,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location });
     const url = store.encodeUrl(DEFAULT_SETTINGS);
     const decoded = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(url) });
-    expect(decoded.loadStartupState().settings).toEqual(DEFAULT_SETTINGS);
+    expect(decoded.loadStartupState().settings).toEqual(sessionFromWire(DEFAULT_SETTINGS));
     expect(location.href).toBe("http://localhost/index.html");
   });
 
@@ -401,7 +406,7 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAFittedHull!.fitted.massMultiplier).toBe(1);
+    expect(loaded!.shipA.fittedHull!.fitted.massMultiplier).toBe(1);
   });
 
   test("loadStartupState accepts settings without skill and overload fields", () => {
@@ -411,14 +416,14 @@ describe("LocalSettingsStore", () => {
     delete partial.shipBSkillLevel;
     delete partial.shipBOverload;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
-    expect(store.loadStartupState().settings).toEqual(partial);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(partial));
   });
 
   test("loadStartupState accepts settings without gridBrightness", () => {
     const partial: UserSettings = { ...DEFAULT_SETTINGS };
     delete partial.gridBrightness;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
-    expect(store.loadStartupState().settings).toEqual({ ...partial, gridBrightness: DEFAULT_PREFERENCES.gridBrightness });
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire({ ...partial, gridBrightness: DEFAULT_PREFERENCES.gridBrightness }));
   });
 
   test("loadStartupState round-trips non-default per-side aggressivity", () => {
@@ -426,7 +431,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
-    expect(store.loadStartupState().settings).toEqual(settings);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(settings));
   });
 
   test("loadStartupState defaults missing per-side aggressivity to 1", () => {
@@ -434,7 +439,7 @@ describe("LocalSettingsStore", () => {
     delete partial.shipAAggressivity;
     delete partial.shipBAggressivity;
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(partial)) });
-    expect(store.loadStartupState().settings).toEqual({ ...partial, shipAAggressivity: 1, shipBAggressivity: 1 });
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire({ ...partial, shipAAggressivity: 1, shipBAggressivity: 1 }));
   });
 
   test("loadStartupState rejects an out-of-range skill level", () => {
@@ -464,7 +469,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
-    expect(store.loadStartupState().settings).toEqual(settings);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(settings));
   });
 
   test("loadStartupState round-trips a custom gridBrightness", () => {
@@ -472,7 +477,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
-    expect(store.loadStartupState().settings).toEqual(settings);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(settings));
   });
 
   test("loadStartupState round-trips midships mode", () => {
@@ -482,7 +487,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(settings)),
     });
-    expect(store.loadStartupState().settings).toEqual(settings);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(settings));
   });
 
   test("loadStartupState accepts gridBrightness at the interval endpoints", () => {
@@ -490,10 +495,10 @@ describe("LocalSettingsStore", () => {
     const one: UserSettings = { ...DEFAULT_SETTINGS, gridBrightness: 1 };
     expect(makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(zero)),
-    }).loadStartupState().settings).toEqual(zero);
+    }).loadStartupState().settings).toEqual(sessionFromWire(zero));
     expect(makeStore({
       parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(one)),
-    }).loadStartupState().settings).toEqual(one);
+    }).loadStartupState().settings).toEqual(sessionFromWire(one));
   });
 
   test("loadStartupState accepts an out-of-range gridBrightness which the controls clamp", () => {
@@ -501,7 +506,7 @@ describe("LocalSettingsStore", () => {
       storage: fakeStorage(),
       location: fakeLocation(urlFor({ ...DEFAULT_SETTINGS, gridBrightness: 1.5 })),
     });
-    expect(store.loadStartupState().settings).toEqual({ ...DEFAULT_SETTINGS, gridBrightness: 1.5 });
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire({ ...DEFAULT_SETTINGS, gridBrightness: 1.5 }));
   });
 
   test("loadPreferences returns defaults when nothing is stored", () => {
@@ -641,8 +646,8 @@ describe("LocalSettingsStore", () => {
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(12);
-    expect(loaded!.shipAFittedHull).toEqual(FITTED_HULL_SUMMARY);
-    expect(loaded!.shipAMass).toBe(DEFAULT_SETTINGS.shipAMass);
+    expect(loaded!.shipA.fittedHull).toEqual(FITTED_HULL_SUMMARY);
+    expect(loaded!.shipA.mass).toBe(DEFAULT_SETTINGS.shipAMass);
   });
 
   test("loadStartupState migrates a v5 payload without fitted hull summaries", () => {
@@ -651,7 +656,7 @@ describe("LocalSettingsStore", () => {
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
     expect(loaded!.version).toBe(12);
-    expect(loaded!.shipAFittedHull).toBeUndefined();
+    expect(loaded!.shipA.fittedHull).toBeUndefined();
   });
 
   test("loadStartupState round-trips v6 fitting basis with per-side overrides", () => {
@@ -670,9 +675,9 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAFitting).toBe(settings.shipAFitting);
-    expect(loaded!.shipAOverrides).toEqual({ shipAMass: 2_000_000 });
-    expect(loaded!.shipAFittedHull).toEqual({
+    expect(loaded!.shipA.fitting).toBe(settings.shipAFitting);
+    expect(loaded!.shipA.overrides).toEqual({ shipAMass: 2_000_000 });
+    expect(loaded!.shipA.fittedHull).toEqual({
       fittingName: "Brawler",
       propulsionId: "mwd-5mn",
       propulsionName: RIFTER_MODULE.label,
@@ -681,13 +686,13 @@ describe("LocalSettingsStore", () => {
       propulsion: RIFTER_MODULE,
       baseMaxSpeed: RIFTER_MWD_STATS.baseMaxSpeed,
     });
-    expect(loaded!.shipAMass).toBe(2_000_000);
-    expect(loaded!.shipAInertia).toBe(2);
-    expect(loaded!.shipASpeed).toBe(4_649.72);
-    expect(loaded!.shipATracking).toBe(0.315);
-    expect(loaded!.shipASigRes).toBe("S");
-    expect(loaded!.shipAOptimal).toBe(600);
-    expect(loaded!.shipAFalloff).toBe(3000);
+    expect(loaded!.shipA.mass).toBe(2_000_000);
+    expect(loaded!.shipA.inertia).toBe(2);
+    expect(loaded!.shipA.speed).toBe(4_649.72);
+    expect(loaded!.shipA.tracking).toBe(0.315);
+    expect(loaded!.shipA.sigRes).toBe("S");
+    expect(loaded!.shipA.optimal).toBe(600);
+    expect(loaded!.shipA.falloff).toBe(3000);
   });
 
   test("loadStartupState preserves an exact propulsion variant from the fitted hull summary", () => {
@@ -714,10 +719,10 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAFittedHull?.propulsionModuleId).toBe("5973" as TypeId);
-    expect(loaded!.shipAFittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
-    expect(loaded!.shipAFittedHull?.propulsion).toEqual(COMPACT_MWD);
-    expect(loaded!.shipASpeed).toBe(4_650);
+    expect(loaded!.shipA.fittedHull?.propulsionModuleId).toBe("5973" as TypeId);
+    expect(loaded!.shipA.fittedHull?.propulsionName).toBe("5MN Y-T8 Compact Microwarpdrive");
+    expect(loaded!.shipA.fittedHull?.propulsion).toEqual(COMPACT_MWD);
+    expect(loaded!.shipA.speed).toBe(4_650);
   });
 
   test("basis re-import on load overwrites stale parameter cache", () => {
@@ -740,13 +745,13 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(stale)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAMass).toBe(1_500_000);
-    expect(loaded!.shipASpeed).toBe(4_649.72);
-    expect(loaded!.shipATracking).toBe(0.315);
-    expect(loaded!.shipASigRes).toBe("S");
-    expect(loaded!.shipAOptimal).toBe(600);
-    expect(loaded!.shipAFalloff).toBe(3000);
-    expect(loaded!.shipAFittedHull!.propulsionId).toBe("mwd-5mn");
+    expect(loaded!.shipA.mass).toBe(1_500_000);
+    expect(loaded!.shipA.speed).toBe(4_649.72);
+    expect(loaded!.shipA.tracking).toBe(0.315);
+    expect(loaded!.shipA.sigRes).toBe("S");
+    expect(loaded!.shipA.optimal).toBe(600);
+    expect(loaded!.shipA.falloff).toBe(3000);
+    expect(loaded!.shipA.fittedHull!.propulsionId).toBe("mwd-5mn");
   });
 
   test("re-import on load recomputes speed using the overridden mass", () => {
@@ -765,8 +770,8 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAMass).toBe(2_000_000);
-    expect(loaded!.shipASpeed).toBe(4_000);
+    expect(loaded!.shipA.mass).toBe(2_000_000);
+    expect(loaded!.shipA.speed).toBe(4_000);
   });
 
   test("loadStartupState normalizes a v6 payload missing shipAAmmo", () => {
@@ -775,7 +780,7 @@ describe("LocalSettingsStore", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(missingAmmo)) });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
+    expect(loaded!.shipA.ammo).toBe(DEFAULT_SETTINGS.shipAAmmo);
   });
 
   test("loadProfile normalizes a profile missing shipAAmmo", () => {
@@ -812,15 +817,15 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe("21898" as TypeId);
-    expect(loaded!.shipATracking).toBe(0.42);
-    expect(loaded!.shipAOptimal).toBe(1200);
-    expect(loaded!.shipAFalloff).toBe(3000);
+    expect(loaded!.shipA.ammo).toBe("21898" as TypeId);
+    expect(loaded!.shipA.tracking).toBe(0.42);
+    expect(loaded!.shipA.optimal).toBe(1200);
+    expect(loaded!.shipA.falloff).toBe(3000);
   });
 
   test("golden URL round-trip preserves URL_SETTINGS", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation(urlFor(URL_SETTINGS)) });
-    expect(store.loadStartupState().settings).toEqual(URL_SETTINGS);
+    expect(store.loadStartupState().settings).toEqual(sessionFromWire(URL_SETTINGS));
   });
 
   test("basis re-import falls back to the imported charge when the stored charge is invalid", () => {
@@ -844,10 +849,10 @@ describe("LocalSettingsStore", () => {
     });
     const loaded = store.loadStartupState().settings;
     expect(loaded).not.toBeNull();
-    expect(loaded!.shipAAmmo).toBe(DEFAULT_SETTINGS.shipAAmmo);
-    expect(loaded!.shipAOptimal).toBe(600);
-    expect(loaded!.shipATracking).toBe(0.315);
-    expect(loaded!.shipASigRes).toBe("S");
-    expect(loaded!.shipAFalloff).toBe(3000);
+    expect(loaded!.shipA.ammo).toBe(DEFAULT_SETTINGS.shipAAmmo);
+    expect(loaded!.shipA.optimal).toBe(600);
+    expect(loaded!.shipA.tracking).toBe(0.315);
+    expect(loaded!.shipA.sigRes).toBe("S");
+    expect(loaded!.shipA.falloff).toBe(3000);
   });
 });
