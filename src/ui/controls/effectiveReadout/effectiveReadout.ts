@@ -1,5 +1,6 @@
 import type { I18n } from "../../i18n";
 import type { TrackingUnit } from "../../../appstate";
+import type { FittingImport } from "../../../fitting";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { EffectiveReadouts, SideReadoutValues } from "../controlsContract";
 import type { SpeedBreakdown, StatEffectAttribution } from "../../../sim";
@@ -41,12 +42,14 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly els: EffectiveReadoutEls;
   private readonly i18n: I18n;
   private readonly trackingInput: TrackingDisplay;
+  private readonly fittingImport: FittingImport;
   private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; title: string }>();
 
-  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingDisplay }) {
+  constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingInput: TrackingDisplay; fittingImport: FittingImport }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
     this.trackingInput = deps.trackingInput;
+    this.fittingImport = deps.fittingImport;
   }
 
   update(values: EffectiveReadouts): void {
@@ -69,7 +72,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
       sideEls.speedReadout,
       formatSpeed(sideValues.speed),
       isSpeedNegative(sideValues.speed, tryReadNumber(sideEls.speed)),
-      (t) => buildSpeedTitle(sideValues.speedBreakdown, t)
+      (t) => buildSpeedTitle(sideValues.speedBreakdown, this.fittingImport, t)
     );
     this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), isRangeNegative(sideValues.optimal, sideValues.boostedOptimal), (t) =>
       sideValues.optimalBreakdown === undefined
@@ -132,15 +135,16 @@ function isNegative(effective: number, baseline: number, epsilon: { readonly abs
   return effective < baseline - threshold;
 }
 
-function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, t: (key: string) => string): string {
+function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, fittingImport: FittingImport, t: (key: string) => string): string {
   if (breakdown === undefined) return t("readout.effectiveAffected");
   const entries: string[] = [];
   for (const effect of breakdown.effects) {
+    const moduleName = fittingImport.itemNameForId(effect.moduleId, "en");
     if (effect.family === "scrambler") {
-      if (breakdown.propulsionSuppressed) entries.push(`${effect.moduleName} ${t("readout.stoppedMwd")}`);
+      if (breakdown.propulsionSuppressed) entries.push(`${moduleName} ${t("readout.stoppedMwd")}`);
       continue;
     }
-    entries.push(`${effect.moduleName} -${percentOf(effect.multiplier)}%`);
+    entries.push(`${moduleName} -${percentOf(effect.multiplier)}%`);
   }
   return entries.join("; ");
 }

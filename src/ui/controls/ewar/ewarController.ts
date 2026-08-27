@@ -409,7 +409,7 @@ export class EwarControllerImpl implements EwarController {
     active: boolean,
     overloaded: boolean,
     index: number,
-    spec: { readonly moduleName: string; readonly moduleId?: TypeId },
+    spec: { readonly moduleName: string; readonly moduleId: TypeId },
     onToggle: () => void,
   ): HTMLButtonElement {
     const button = document.createElement("button");

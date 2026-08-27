@@ -1,6 +1,7 @@
 import { isSigResolutionClass, type SigResolutionClass } from "../../../sim";
-import type { GunFamilies, ImportedTurret } from "../../../fitting";
+import type { FittingImport, GunFamilies, ImportedTurret } from "../../../fitting";
 import type { ImageCatalog } from "../../icons";
+import type { I18n } from "../../i18n";
 import { isHtmlButtonElement, isHtmlImageElement } from "../controlsDom";
 
 export interface SigResIconEls {
@@ -10,11 +11,15 @@ export interface SigResIconEls {
 export class SigResIcons {
   private readonly gunFamilies: GunFamilies;
   private readonly imageCatalog: ImageCatalog;
+  private readonly i18n: I18n;
+  private readonly fittingImport: FittingImport;
   private readonly originalTitles: Partial<Record<SigResolutionClass, string>> = {};
 
-  constructor(deps: { gunFamilies: GunFamilies; imageCatalog: ImageCatalog }) {
+  constructor(deps: { gunFamilies: GunFamilies; imageCatalog: ImageCatalog; i18n: I18n; fittingImport: FittingImport }) {
     this.gunFamilies = deps.gunFamilies;
     this.imageCatalog = deps.imageCatalog;
+    this.i18n = deps.i18n;
+    this.fittingImport = deps.fittingImport;
   }
 
   render(els: SigResIconEls, turret: ImportedTurret | undefined): void {
@@ -31,7 +36,8 @@ export class SigResIcons {
         if (url) {
           img.src = url;
           img.hidden = false;
-          button.title = `${representative} · ${original}`;
+          const name = this.fittingImport.itemNameForId(representative, this.i18n.current());
+          button.title = `${name} · ${original}`;
           continue;
         }
       }

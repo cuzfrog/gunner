@@ -150,7 +150,7 @@ function mockI18n(): I18n {
 
 function mockImageCatalog(): ImageCatalog {
   return vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
+    shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(() => undefined),
     droneIconUrl: vi.fn(),
   });
@@ -277,7 +277,7 @@ export function buildSidePanel(
     translateDocument: vi.fn(),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
+    shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(() => undefined),
     droneIconUrl: vi.fn(),
   });

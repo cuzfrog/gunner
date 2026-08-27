@@ -17,6 +17,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       ewarResolver,
       uiEvents,
       i18n,
+      fittingImport,
       shipASide,
       shipBSide,
     }) => new PortraitsControllerImpl({
@@ -27,6 +28,7 @@ export function registerPortraitsModule<T extends ControlsCradle>(cradle: Awilix
       combatantProfiles: { profile: (side: Side) => (side === "shipA" ? shipASide.profile : shipBSide.profile) },
       events: uiEvents,
       i18n,
+      fittingImport,
     })).singleton(),
   });
 }

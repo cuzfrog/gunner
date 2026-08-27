@@ -143,7 +143,7 @@ export class BoosterControllerImpl implements BoosterController {
     }
     const active = state.activation.filter((a) => a.active).length;
     const title = this.boosterDescription(state);
-    this.appendSummaryItem(summary, state.loadout.computers[0].moduleName, active, state.loadout.computers.length, title);
+    this.appendSummaryItem(summary, state.loadout.computers[0].moduleId, active, state.loadout.computers.length, title);
   }
 
   private boosterDescription(state: BoosterState): string {
@@ -174,10 +174,10 @@ export class BoosterControllerImpl implements BoosterController {
     return total;
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleName: string, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId | undefined, active: number, total: number, title: string): void {
     const item = document.createElement("span");
     item.className = "ewar-summary-item";
-    const iconUrl = this.imageCatalog.itemIconUrl(moduleName);
+    const iconUrl = moduleId !== undefined ? this.imageCatalog.itemIconUrl(moduleId) : undefined;
     const img = document.createElement("img");
     img.className = "ewar-summary-icon";
     img.alt = "";
@@ -241,7 +241,7 @@ export class BoosterControllerImpl implements BoosterController {
     button.className = "ewar-module-toggle";
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", displayName);
-    const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleName);
+    const iconUrl = computer.moduleId !== undefined ? this.imageCatalog.itemIconUrl(computer.moduleId) : undefined;
     const img = document.createElement("img");
     if (iconUrl !== undefined) img.src = iconUrl;
     img.alt = "";

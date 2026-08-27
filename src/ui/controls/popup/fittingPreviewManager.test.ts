@@ -44,7 +44,7 @@ function createManager(options: {
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
   });
-  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((_shipId, _shipName) => "images/ships/Rifter.webp"), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): ReturnType<I18n["current"]> => "en"),
     setLanguage: vi.fn(),

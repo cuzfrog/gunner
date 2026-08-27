@@ -1,5 +1,6 @@
-import type { ShipId } from "../../../gamedata/ids";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { AppliedEwarEffect, EwarResolver } from "../../../sim";
+import type { FittingImport } from "../../../fitting";
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
@@ -20,6 +21,7 @@ export class PortraitsControllerImpl implements PortraitsController {
   private readonly combatantProfiles: CombatantProfiles;
   private readonly events: UiEvents;
   private readonly i18n: I18n;
+  private readonly fittingImport: FittingImport;
   private distance = 0;
   private readonly shipAState: SideState = { lastKey: "", lastId: "" };
   private readonly shipBState: SideState = { lastKey: "", lastId: "" };
@@ -32,6 +34,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     combatantProfiles: CombatantProfiles;
     events: UiEvents;
     i18n: I18n;
+    fittingImport: FittingImport;
   }) {
     this.els = deps.els;
     this.imageCatalog = deps.imageCatalog;
@@ -40,6 +43,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     this.combatantProfiles = deps.combatantProfiles;
     this.events = deps.events;
     this.i18n = deps.i18n;
+    this.fittingImport = deps.fittingImport;
     this.events.onDistanceChanged((d) => { this.distance = d; });
     this.update();
   }
@@ -71,18 +75,18 @@ export class PortraitsControllerImpl implements PortraitsController {
     if (root.hidden) root.hidden = false;
     if (state.lastId !== profile.id) {
       state.lastId = profile.id;
-      image.src = this.imageCatalog.shipImageUrl(profile.id, profile.name);
+      image.src = this.imageCatalog.shipImageUrl(profile.id) ?? "";
     }
     effects.innerHTML = "";
     const icons = document.createDocumentFragment();
     for (const effect of applied) {
-      const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleName);
+      const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
       const img = document.createElement("img");
       img.className = "portrait-effect-icon";
       img.alt = "";
       img.src = iconUrl;
-      img.title = buildEffectTitle(effect, this.i18n);
+      img.title = buildEffectTitle(effect, this.fittingImport, this.i18n);
       icons.appendChild(img);
     }
     effects.appendChild(icons);
@@ -95,9 +99,10 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
 }
 
 function buildDiffKey(id: ShipId, effects: readonly AppliedEwarEffect[]): string {
-  return `${id}|${effects.map((e) => `${e.family}:${e.moduleName}`).join(",")}`;
+  return `${id}|${effects.map((e) => `${e.family}:${e.moduleId}`).join(",")}`;
 }
 
-function buildEffectTitle(effect: AppliedEwarEffect, i18n: I18n): string {
-  return `${i18n.t(`label.ewar.${effect.family}`)}: ${effect.moduleName}`;
+function buildEffectTitle(effect: AppliedEwarEffect, fittingImport: FittingImport, i18n: I18n): string {
+  const moduleName = fittingImport.itemNameForId(effect.moduleId, i18n.current());
+  return `${i18n.t(`label.ewar.${effect.family}`)}: ${moduleName}`;
 }

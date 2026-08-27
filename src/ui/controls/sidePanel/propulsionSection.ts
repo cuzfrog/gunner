@@ -173,7 +173,7 @@ export class PropulsionSection implements IPropulsionSection {
 
   defaultPropulsionVariant(module: PropulsionModule): { readonly id: TypeId; readonly name: string } | undefined {
     const variants = this.fittingImport.propulsionVariantNames(module);
-    return variants.find((variant) => variant.name === module.label) ?? variants[0];
+    return variants.find((variant) => variant.id === module.defaultModuleId) ?? variants[0];
   }
 
   defaultPropulsionName(module: PropulsionModule): string {
@@ -192,7 +192,7 @@ export class PropulsionSection implements IPropulsionSection {
     button.setAttribute("aria-pressed", "false");
     const text = propulsionOptionLabel(module);
     button.setAttribute("title", text);
-    const iconUrl = this.imageCatalog.itemIconUrl(module.label);
+    const iconUrl = this.imageCatalog.itemIconUrl(module.iconId);
     if (iconUrl) {
       const icon = document.createElement("img");
       icon.className = "propulsion-icon";

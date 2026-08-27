@@ -147,7 +147,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
       return;
     }
     const profile = this.profileOf(side);
-    const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.id, profile.name) : undefined;
+    const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.id) : undefined;
     this.currentPreviewEye?.setAttribute("aria-pressed", "false");
     this.currentPreviewAnchor = anchor;
     this.currentPreviewText = text;

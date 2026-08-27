@@ -1,4 +1,4 @@
-import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
+import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
 
 export type HullTier = "small" | "medium" | "large" | "capital";
 
@@ -44,6 +44,8 @@ export interface PropulsionModule extends PropulsionStats {
   readonly kind: PropulsionKind;
   readonly sizeTier: HullTier;
   readonly label: string;
+  readonly iconId: TypeId;
+  readonly defaultModuleId: TypeId;
 }
 
 export interface FittedHull {

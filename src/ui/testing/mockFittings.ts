@@ -1,6 +1,6 @@
 import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings } from "../../fitting";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
-import type { FactionId, HullTypeId, ShipId, TypeId } from "../../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
 import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
@@ -90,13 +90,13 @@ export function mockHitChance(): HitChance {
   return { compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })), findBestDistance: vi.fn(() => 5000) };
 }
 
-const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, string>> = {
-  autocannon: { S: "200mm AutoCannon I", M: "425mm AutoCannon I", L: "800mm Repeating Cannon I", XL: "Quad 800mm Repeating Cannon I" },
-  artillery: { S: "280mm Howitzer Artillery I", M: "720mm Howitzer Artillery I", L: "1400mm Howitzer Artillery I", XL: "Quad 3500mm Siege Artillery I" },
-  pulseLaser: { S: "Gatling Pulse Laser I", M: "Heavy Pulse Laser I", L: "Mega Pulse Laser I", XL: "Dual Giga Pulse Laser I" },
-  beamLaser: { S: "Small Focused Beam Laser I", M: "Heavy Beam Laser I", L: "Tachyon Beam Laser I", XL: "Dual Giga Beam Laser I" },
-  blaster: { S: "Light Neutron Blaster I", M: "Heavy Neutron Blaster I", L: "Neutron Blaster Cannon I", XL: "Ion Siege Blaster I" },
-  railgun: { S: "150mm Railgun I", M: "250mm Railgun I", L: "425mm Railgun I", XL: "Dual 1000mm Railgun I" },
+const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, TypeId>> = {
+  autocannon: { S: toTypeId("486"), M: toTypeId("491"), L: toTypeId("496"), XL: toTypeId("37289") },
+  artillery: { S: toTypeId("488"), M: toTypeId("493"), L: toTypeId("498"), XL: toTypeId("20454") },
+  pulseLaser: { S: toTypeId("450"), M: toTypeId("458"), L: toTypeId("462"), XL: toTypeId("20444") },
+  beamLaser: { S: toTypeId("454"), M: toTypeId("459"), L: toTypeId("464"), XL: toTypeId("20446") },
+  blaster: { S: toTypeId("564"), M: toTypeId("568"), L: toTypeId("573"), XL: toTypeId("20450") },
+  railgun: { S: toTypeId("565"), M: toTypeId("570"), L: toTypeId("574"), XL: toTypeId("20448") },
 };
 
 export function mockGunFamilies(): GunFamilies {

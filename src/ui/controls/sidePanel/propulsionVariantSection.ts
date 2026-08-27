@@ -89,7 +89,7 @@ export class PropulsionVariantSection {
     const fitted = this.panel.fittedHull;
     const currentId = this.currentPropulsionVariantId(module, fitted);
     for (const variant of this.fittingImport.propulsionVariantNames(module)) {
-      const iconUrl = this.imageCatalog.itemIconUrl(variant.name);
+      const iconUrl = this.imageCatalog.itemIconUrl(variant.id);
       const displayName = this.fittingImport.itemNameForId(variant.id, this.i18n.current());
       const item = this.createVariantButton(variant.id, currentId, iconUrl, displayName, () => this.onPropulsionVariantClick(variant.id, variant.name));
       item.setAttribute("data-value", variant.id);
@@ -102,7 +102,7 @@ export class PropulsionVariantSection {
     const variants = this.fittingImport.propulsionVariantNames(module);
     if (fitted?.propulsionModuleId !== undefined) return fitted.propulsionModuleId;
     if (fitted?.propulsionName !== undefined) return variants.find((variant) => variant.name === fitted.propulsionName)?.id;
-    return variants.find((variant) => variant.name === module.label)?.id ?? variants[0]?.id;
+    return variants.find((variant) => variant.id === module.defaultModuleId)?.id ?? variants[0]?.id;
   }
 
   updateUI(): void {

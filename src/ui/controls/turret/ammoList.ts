@@ -81,8 +81,7 @@ export class AmmoList {
       icon.hidden = true;
       return;
     }
-    const englishName = this.fittingImport.itemNameForId(ammo, "en");
-    const url = this.imageCatalog.itemIconUrl(englishName);
+    const url = this.imageCatalog.itemIconUrl(ammo);
     icon.src = url ?? "";
     icon.hidden = !url;
   }
@@ -159,8 +158,7 @@ export class AmmoList {
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(selected));
     item.title = title;
-    const englishName = this.fittingImport.itemNameForId(id, "en");
-    const iconUrl = this.imageCatalog.itemIconUrl(englishName);
+    const iconUrl = this.imageCatalog.itemIconUrl(id);
     if (iconUrl) {
       const icon = document.createElement("img");
       icon.className = "ammo-item-icon";

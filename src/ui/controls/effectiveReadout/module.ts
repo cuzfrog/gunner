@@ -9,11 +9,12 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerEffectiveReadoutModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    effectiveReadout: asFunction(({ els, i18n, shipATurretController }: ControlsCradle) => {
+    effectiveReadout: asFunction(({ els, i18n, fittingImport, shipATurretController }: ControlsCradle) => {
       const trackingCalculator = new TrackingInputImpl();
       return new EffectiveReadoutImpl({
         els: collectEffectiveReadoutEls(els),
         i18n,
+        fittingImport,
         trackingInput: {
           get unit() { return shipATurretController.trackingUnit(); },
           displayFor(rad: number, sigResolution: number) {

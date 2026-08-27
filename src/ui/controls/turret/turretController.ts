@@ -83,7 +83,7 @@ export class TurretControllerImpl implements TurretController {
       onSelect: (name) => this.onAmmoItemClick(name),
       onExpand: () => this.onAmmoExpandClick(),
     });
-    this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog });
+    this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, i18n: deps.i18n, fittingImport: this.fittingImport });
     this.inputSet = new TurretInputSet({
       els: this.els,
       trackingInput: this.trackingInput,

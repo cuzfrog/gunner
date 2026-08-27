@@ -122,8 +122,8 @@ function renderRow(
   const iconUrl = row.empty
     ? undefined
     : sectionKind === "drones"
-      ? imageCatalog.droneIconUrl(row.name)
-      : imageCatalog.itemIconUrl(row.name);
+      ? imageCatalog.droneIconUrl(row.id)
+      : (row.id ? imageCatalog.itemIconUrl(row.id) : undefined);
   const icon = document.createElement("img");
   icon.className = "preview-icon";
   icon.alt = "";
@@ -145,7 +145,7 @@ function renderRow(
     const chargeIcon = document.createElement("img");
     chargeIcon.className = "preview-charge-icon";
     chargeIcon.alt = "";
-    const chargeIconUrl = imageCatalog.itemIconUrl(row.charge);
+    const chargeIconUrl = row.chargeId ? imageCatalog.itemIconUrl(row.chargeId) : undefined;
     if (chargeIconUrl) chargeIcon.src = chargeIconUrl;
     main.appendChild(chargeIcon);
 

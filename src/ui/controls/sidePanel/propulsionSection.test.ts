@@ -1,5 +1,5 @@
 import type { FittingImport } from "../../../fitting";
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { PropulsionId, PropulsionModule, ShipProfile, Ships } from "../../../ships";
 import type { I18n, Language } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -18,6 +18,8 @@ const AB_MODULE: PropulsionModule = {
   kind: "afterburner",
   sizeTier: "small",
   label: "1MN Afterburner I",
+  iconId: toTypeId("439"),
+  defaultModuleId: toTypeId("439"),
   thrust: 150,
   speedBonus: 1.5,
   massAddition: 0,
@@ -55,7 +57,7 @@ function mockI18n(): I18n {
 
 function mockImageCatalog(): ImageCatalog {
   return vi.mocked<ImageCatalog>({
-    shipImageUrl: vi.fn((_shipId, _shipName) => ""),
+    shipImageUrl: vi.fn((_shipId) => ""),
     itemIconUrl: vi.fn(),
     droneIconUrl: vi.fn(),
   });
