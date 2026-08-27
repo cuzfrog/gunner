@@ -43,19 +43,17 @@ describe("UiEvents", () => {
     events.onConfigInvalidated(a);
     events.onConfigInvalidated(b);
     events.offConfigInvalidated(a);
-    events.emitConfigInvalidated(false);
+    events.emitConfigInvalidated();
     expect(a).not.toHaveBeenCalled();
-    expect(b).toHaveBeenCalledWith(false);
+    expect(b).toHaveBeenCalled();
   });
 
-  test("emitConfigInvalidated passes the persist payload", () => {
+  test("emitConfigInvalidated calls registered listeners", () => {
     const events = new UiEventsImpl();
     const listener = vi.fn();
     events.onConfigInvalidated(listener);
-    events.emitConfigInvalidated(true);
-    expect(listener).toHaveBeenCalledWith(true);
-    events.emitConfigInvalidated(false);
-    expect(listener).toHaveBeenLastCalledWith(false);
+    events.emitConfigInvalidated();
+    expect(listener).toHaveBeenCalled();
   });
 
   test("offDisplayInvalidated removes a listener without affecting others", () => {
@@ -79,9 +77,9 @@ describe("UiEvents", () => {
     events.emitLanguageChanged();
     expect(language).toHaveBeenCalled();
     expect(config).not.toHaveBeenCalled();
-    events.emitConfigInvalidated(true);
+    events.emitConfigInvalidated();
     expect(language).toHaveBeenCalledTimes(1);
-    expect(config).toHaveBeenCalledWith(true);
+    expect(config).toHaveBeenCalled();
   });
 
   test("emitFittingImported passes side and imported fitting", () => {

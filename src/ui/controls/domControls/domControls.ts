@@ -111,7 +111,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.currentDistanceValue = num(this.els.initialDistance);
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
     this.deps.events.onLanguageChanged(() => this.onLanguageChanged());
-    this.deps.events.onConfigInvalidated((persist) => this.onConfigInvalidated(persist));
+    this.deps.events.onConfigInvalidated(() => this.onConfigInvalidated());
     this.deps.events.onDisplayInvalidated(() => this.onDisplayChange());
     this.deps.events.onSessionRestored(() => this.onSessionRestored());
     this.deps.events.onSessionReset(() => this.onSessionReset());
@@ -139,7 +139,7 @@ export class DomControls implements Controls, DomControlsHost {
   onPlayPause(): void { this.callbacks?.onPlayPause(); }
   onReset(): void { this.callbacks?.onReset(); }
   onSpeedChange(speed: number): void { this.callbacks?.onSpeedChange(speed); }
-  onConfigChange(persist = true): void {
+  onConfigChange(): void {
     this.shipASide.sections.skill.setOverloadDisabled();
     this.shipBSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
@@ -147,7 +147,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.rangeOverlayController.render();
     this.portraitsController.update();
     this.preferencesController.savePreferences();
-    if (persist) this.profileController.updateActionBarState();
+    this.profileController.updateActionBarState();
     this.updatePlayEnabled();
     this.callbacks?.onConfigChange();
   }
@@ -157,8 +157,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.notifyDisplayChange();
   }
 
-  private onConfigInvalidated(persist: boolean): void {
-    this.onConfigChange(persist);
+  private onConfigInvalidated(): void {
+    this.onConfigChange();
   }
 
   private onLanguageChanged(): void {

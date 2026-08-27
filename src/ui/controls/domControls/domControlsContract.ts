@@ -13,7 +13,7 @@ export interface DomControlsHost {
   onPlayPause(): void;
   onReset(): void;
   onSpeedChange(speed: number): void;
-  onConfigChange(persist?: boolean): void;
+  onConfigChange(): void;
   onDisplayChange(): void;
   persistConfigChange(notify?: boolean): void;
 }

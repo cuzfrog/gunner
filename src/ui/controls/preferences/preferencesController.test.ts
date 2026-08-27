@@ -171,7 +171,7 @@ function build() {
     emitLanguageChanged: vi.fn(),
     onConfigInvalidated: vi.fn(),
     offConfigInvalidated: vi.fn(),
-    emitConfigInvalidated: vi.fn((_persist: boolean) => {}),
+    emitConfigInvalidated: vi.fn(),
     onDisplayInvalidated: vi.fn(),
     offDisplayInvalidated: vi.fn(),
     emitDisplayInvalidated: vi.fn(),

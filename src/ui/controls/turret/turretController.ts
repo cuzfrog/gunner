@@ -11,7 +11,7 @@ import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { AmmoList, type AmmoListEls } from "./ammoList";
-import { SigResButtons } from "./sigResButtons";
+import { ChoiceGroupImpl } from "../choiceGroup";
 import { SigResIcons } from "./sigResIcons";
 import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
@@ -87,7 +87,7 @@ export class TurretControllerImpl implements TurretController {
     this.inputSet = new TurretInputSet({
       els: this.els,
       trackingInput: this.trackingInput,
-      sigResButtons: new SigResButtons({ sigResOptions: this.els.sigResOptions }),
+      sigResChoice: new ChoiceGroupImpl(this.els.sigResOptions, this.els.sigRes, [...SIG_RESOLUTIONS_ORDER]),
       turretOverrides: this.turretOverrides,
     });
     this.els.tracking.addEventListener("input", () => this.onTrackingInput());
@@ -294,7 +294,7 @@ export class TurretControllerImpl implements TurretController {
     this.turretOverrides.clearTurret();
     this.inputSet.set(updated);
     this.render();
-    this.events.emitConfigInvalidated(false);
+    this.events.emitConfigInvalidated();
     return true;
   }
 

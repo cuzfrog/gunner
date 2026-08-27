@@ -147,7 +147,7 @@ describe("TurretController", () => {
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Republic Fleet EMP S");
     expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ chargeId: CHARGE_OPTIONS[0].id }), CHARGE_OPTIONS[1].id);
     expect(turretOverrides.get()).toEqual({ shipAMass: 1234 });
-    expect(emitConfigInvalidated).toHaveBeenCalledWith(false);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
     expect(getFake(document, "ship-a-tracking").value).toBe("0.42");
     expect(getFake(document, "ship-a-optimal").value).toBe("1200");
     expect(getFake(document, "ship-a-falloff").value).toBe("3000");
@@ -314,6 +314,18 @@ describe("TurretController", () => {
     getFake(document, "ship-a-sigRes").trigger("input");
     expect(turretOverrides.get().sigRes).toBe("M");
     expect(emitDisplayInvalidated).toHaveBeenCalled();
+  });
+
+  test("clicking a sig-res button changes the class, records the override and emits displayInvalidated", () => {
+    const { document, controller, turretOverrides, events } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+    controller.applyImported(IMPORTED_RIFTER);
+    buttonFor(document, "M").trigger("click");
+    expect(getFake(document, "ship-a-sigRes").value).toBe("M");
+    expect(turretOverrides.get().sigRes).toBe("M");
+    expect(emitDisplayInvalidated).toHaveBeenCalled();
+    expect(buttonFor(document, "M").getAttribute("aria-pressed")).toBe("true");
+    expect(buttonFor(document, "S").getAttribute("aria-pressed")).toBe("false");
   });
 
   test("optimal input updates the optimal override and emits displayInvalidated", () => {

@@ -1,7 +1,6 @@
 ---
 no-new-exports:
   - ammoList.ts
-  - sigResButtons.ts
   - sigResIcons.ts
   - turretController.ts
   - turretControllerContract.ts

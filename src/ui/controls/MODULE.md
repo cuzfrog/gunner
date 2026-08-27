@@ -48,7 +48,6 @@ no-new-exports:
   - sidePanel/skillOverloadSection.ts
   - sidePanel/statsSection.ts
   - turret/ammoList.ts
-  - turret/sigResButtons.ts
   - turret/sigResIcons.ts
   - turret/turretController.ts
   - turret/turretControllerContract.ts

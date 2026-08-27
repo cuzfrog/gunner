@@ -342,7 +342,7 @@ describe("EwarController", () => {
       { active: false, overloaded: false },
       { active: true, overloaded: false },
     ]);
-    expect(emitConfigInvalidated).toHaveBeenCalledWith(true);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
 
     firstToggle.trigger("click");
     expect(summary.children[0].children[1].textContent).toBe("2/2");
@@ -559,7 +559,7 @@ describe("EwarController", () => {
     expect(gear.getAttribute("aria-expanded")).toBe("false");
     expect(gear.getAttribute("title")).toBe("Tracking Speed Disruption Script");
     expect(gear.getAttribute("aria-label")).toBe("Tracking Speed Disruption Script");
-    expect(emitConfigInvalidated).toHaveBeenCalledWith(true);
+    expect(emitConfigInvalidated).toHaveBeenCalled();
     expect(controller.capture("shipA")).toEqual({
       webs: [],
       grapplers: [],

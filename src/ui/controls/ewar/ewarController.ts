@@ -537,7 +537,7 @@ export class EwarControllerImpl implements EwarController {
     if (gear) this.updateGearTitle(gear, script);
     const nameSpan = this.disruptorNameSpans.get(side)?.[index];
     if (nameSpan) nameSpan.title = this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private isSameScript(a: DisruptionScriptSpec | undefined, b: DisruptionScriptSpec | undefined): boolean {
@@ -569,7 +569,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleWebOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -580,7 +580,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleDisruptor(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -596,7 +596,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleDisruptorOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -607,7 +607,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleScrambler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -623,7 +623,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleScramblerOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -634,7 +634,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleGrappler(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -650,7 +650,7 @@ export class EwarControllerImpl implements EwarController {
       }
     }
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleGrapplerOverload(side: Side, index: number, button: HTMLButtonElement): void {
@@ -661,7 +661,7 @@ export class EwarControllerImpl implements EwarController {
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 }
 

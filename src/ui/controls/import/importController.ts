@@ -170,7 +170,7 @@ export class ImportControllerImpl implements ImportController {
     const imported = this.eftSideImporter.importEftFitting(side, text, { persist, showImportedHint });
     if (!imported) return undefined;
     this.events.emitFittingImported(side, imported);
-    if (persist) this.events.emitConfigInvalidated(true);
+    if (persist) this.events.emitConfigInvalidated();
     return imported;
   }
 

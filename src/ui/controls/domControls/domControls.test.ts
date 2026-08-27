@@ -135,13 +135,13 @@ describe("DomControls", () => {
     controls.wireControls();
     expect(getFake(document, "play").disabled).toBe(true);
     cradle.cradle.shipASide.profile = RIFTER;
-    controls.onConfigChange(false);
+    controls.onConfigChange();
     expect(getFake(document, "play").disabled).toBe(true);
     cradle.cradle.shipBSide.profile = RIFTER;
-    controls.onConfigChange(false);
+    controls.onConfigChange();
     expect(getFake(document, "play").disabled).toBe(false);
     cradle.cradle.shipASide.profile = undefined;
-    controls.onConfigChange(false);
+    controls.onConfigChange();
     expect(getFake(document, "play").disabled).toBe(true);
   });
 
@@ -152,6 +152,13 @@ describe("DomControls", () => {
     cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER);
     expect(controls.hasGuns("shipA")).toBe(true);
     expect(controls.hasGuns("shipB")).toBe(false);
+  });
+
+  test("config invalidation refreshes the profile action bar dirty state", () => {
+    const { cradle } = buildDomControls();
+    const updateActionBarState = vi.spyOn(cradle.cradle.profileController, "updateActionBarState");
+    cradle.cradle.uiEvents.emitConfigInvalidated();
+    expect(updateActionBarState).toHaveBeenCalled();
   });
 
   test("callback routing", () => {

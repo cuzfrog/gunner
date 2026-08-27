@@ -339,7 +339,7 @@ export class BoosterControllerImpl implements BoosterController {
     if (nameSpan) nameSpan.title = this.boosterModuleEffect(state.loadout.computers[index], script);
     this.scriptPopups[side].close();
     this.updateSummary(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 
   private toggleComputer(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -350,7 +350,7 @@ export class BoosterControllerImpl implements BoosterController {
     button.setAttribute("aria-pressed", String(activation.active));
     row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
     this.renderSide(side);
-    this.events.emitConfigInvalidated(true);
+    this.events.emitConfigInvalidated();
   }
 }
 

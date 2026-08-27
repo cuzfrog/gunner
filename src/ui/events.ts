@@ -5,9 +5,9 @@ export interface UiEvents {
   onLanguageChanged(listener: () => void): void;
   offLanguageChanged(listener: () => void): void;
   emitLanguageChanged(): void;
-  onConfigInvalidated(listener: (persist: boolean) => void): void;
-  offConfigInvalidated(listener: (persist: boolean) => void): void;
-  emitConfigInvalidated(persist: boolean): void;
+  onConfigInvalidated(listener: () => void): void;
+  offConfigInvalidated(listener: () => void): void;
+  emitConfigInvalidated(): void;
   onDisplayInvalidated(listener: () => void): void;
   offDisplayInvalidated(listener: () => void): void;
   emitDisplayInvalidated(): void;
@@ -42,7 +42,7 @@ export interface UiEvents {
 
 export class UiEventsImpl implements UiEvents {
   private readonly languageChanged = new Set<() => void>();
-  private readonly configInvalidated = new Set<(persist: boolean) => void>();
+  private readonly configInvalidated = new Set<() => void>();
   private readonly displayInvalidated = new Set<() => void>();
   private readonly fittingImported = new Set<(side: "shipA" | "shipB", imported: ImportedFitting) => void>();
   private readonly profileLoaded = new Set<(name: string) => void>();
@@ -58,9 +58,9 @@ export class UiEventsImpl implements UiEvents {
   offLanguageChanged(listener: () => void): void { this.languageChanged.delete(listener); }
   emitLanguageChanged(): void { this.emit(this.languageChanged); }
 
-  onConfigInvalidated(listener: (persist: boolean) => void): void { this.configInvalidated.add(listener); }
-  offConfigInvalidated(listener: (persist: boolean) => void): void { this.configInvalidated.delete(listener); }
-  emitConfigInvalidated(persist: boolean): void { this.emitWithArg(this.configInvalidated, persist); }
+  onConfigInvalidated(listener: () => void): void { this.configInvalidated.add(listener); }
+  offConfigInvalidated(listener: () => void): void { this.configInvalidated.delete(listener); }
+  emitConfigInvalidated(): void { this.emit(this.configInvalidated); }
 
   onDisplayInvalidated(listener: () => void): void { this.displayInvalidated.add(listener); }
   offDisplayInvalidated(listener: () => void): void { this.displayInvalidated.delete(listener); }
@@ -114,10 +114,6 @@ export class UiEventsImpl implements UiEvents {
 
   private emit(listeners: ReadonlySet<() => void>): void {
     for (const listener of Array.from(listeners)) listener();
-  }
-
-  private emitWithArg(listeners: ReadonlySet<(persist: boolean) => void>, persist: boolean): void {
-    for (const listener of Array.from(listeners)) listener(persist);
   }
 
   private emitWithStringArg(listeners: ReadonlySet<(name: string) => void>, name: string): void {
