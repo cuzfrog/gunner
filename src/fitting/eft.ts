@@ -1,4 +1,4 @@
-import type { ModuleSlot, ModuleSlotCatalog } from "../gamedata/moduleSlots";
+import { MODULE_SLOTS_BY_NAME, type ModuleSlot } from "../gamedata/moduleSlots";
 
 export type BankKind = "low" | "mid" | "high" | "rig" | "subsystem" | "service";
 
@@ -47,7 +47,7 @@ const BANK_BY_NORMAL_NAME: Readonly<Record<string, BankKind>> = {
   service: "service",
 };
 
-export function parseEft(text: string, slotCatalog: ModuleSlotCatalog): EftDocument | undefined {
+export function parseEft(text: string): EftDocument | undefined {
   const groups = trimmedLineGroups(text);
   if (groups.length === 0) return undefined;
 
@@ -91,7 +91,7 @@ export function parseEft(text: string, slotCatalog: ModuleSlotCatalog): EftDocum
         bankLines[line.bank].push({ kind: "empty", label: line.label });
         continue;
       }
-      const bank = moduleBank(line.module, intended, slotCatalog);
+      const bank = moduleBank(line.module, intended);
       if (bank === undefined) continue;
       bankLines[bank].push(eftLineFromModule(line.module));
     }
@@ -238,8 +238,8 @@ function parseModuleLine(line: string): EftModule | undefined {
   return { name, charge: charge && charge.length > 0 ? charge : undefined, offline: match[3] !== undefined };
 }
 
-function moduleBank(module: EftModule, intended: BankKind | undefined, catalog: ModuleSlotCatalog): BankKind | undefined {
-  const slot: ModuleSlot | undefined = catalog.slotOf(module.name);
+function moduleBank(module: EftModule, intended: BankKind | undefined): BankKind | undefined {
+  const slot: ModuleSlot | undefined = MODULE_SLOTS_BY_NAME[module.name];
   if (slot !== undefined) return slot;
   return intended;
 }

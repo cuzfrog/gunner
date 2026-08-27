@@ -162,7 +162,7 @@ export class FittingImportImpl implements FittingImport {
   }
 
   importFitting(text: string, conditions: StatConditions): ImportedFitting | undefined {
-    const parsed = parseEft(text, this.moduleSlotCatalog);
+    const parsed = parseEft(text);
     if (!parsed) return undefined;
 
     const resolved = this.resolveEftDocument(parsed);
@@ -189,7 +189,7 @@ export class FittingImportImpl implements FittingImport {
   }
 
   summarize(text: string): FittingSummary | undefined {
-    const parsed = parseEft(text, this.moduleSlotCatalog);
+    const parsed = parseEft(text);
     if (!parsed) return undefined;
 
     const resolved = this.resolveEftDocument(parsed);
@@ -203,7 +203,7 @@ export class FittingImportImpl implements FittingImport {
   }
 
   canonicalEftText(text: string): string | undefined {
-    const parsed = parseEft(text, this.moduleSlotCatalog);
+    const parsed = parseEft(text);
     if (!parsed) return undefined;
 
     const resolved = this.resolveEftDocument(parsed);
@@ -317,7 +317,7 @@ function resolveLine(
 
   const moduleId = moduleIds[0];
   const moduleName = catalog.nameForId(moduleId, "en");
-  const resolvedBank = slotCatalog.slotOf(moduleName) ?? bank;
+  const resolvedBank = slotCatalog.slotOf(moduleId) ?? bank;
 
   let chargeId: TypeId | undefined;
   let chargeName: string | undefined;

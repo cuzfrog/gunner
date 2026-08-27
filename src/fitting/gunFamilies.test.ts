@@ -1,4 +1,4 @@
-import type { TypeId } from "../gamedata/ids";
+import { toTypeId, type TypeId } from "../gamedata/ids";
 import { FITTING_DB } from "../gamedata/fittingDb";
 import type { FittingDb, FittingModuleStats, TurretStats } from "../gamedata/fittingDb";
 import { GunFamiliesImpl, type GunFamily } from "./gunFamilies";
@@ -86,10 +86,10 @@ describe("GunFamiliesImpl", () => {
   describe("representativeOf", () => {
     for (const { family, S, M, L, XL } of REPRESENTATIVE_CANONICALS) {
       test(`returns the representative for ${family}`, () => {
-        expect(gunFamilies.representativeOf(family, "S")).toBe(S);
-        expect(gunFamilies.representativeOf(family, "M")).toBe(M);
-        expect(gunFamilies.representativeOf(family, "L")).toBe(L);
-        expect(gunFamilies.representativeOf(family, "XL")).toBe(XL);
+        expect(gunFamilies.representativeOf(family, "S")).toBe(turretIdForName(S));
+        expect(gunFamilies.representativeOf(family, "M")).toBe(turretIdForName(M));
+        expect(gunFamilies.representativeOf(family, "L")).toBe(turretIdForName(L));
+        expect(gunFamilies.representativeOf(family, "XL")).toBe(turretIdForName(XL));
       });
     }
   });

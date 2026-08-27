@@ -1,12 +1,12 @@
 import { FITTING_DB, type FittingDb, type TurretStats } from "../gamedata/fittingDb";
-import type { TypeId } from "../gamedata/ids";
+import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 
 export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery";
 
 export interface GunFamilies {
   familyOf(moduleId: TypeId): GunFamily;
-  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string;
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId;
 }
 
 export class GunFamiliesImpl implements GunFamilies {
@@ -22,8 +22,8 @@ export class GunFamiliesImpl implements GunFamilies {
     return gunFamilyOf(name);
   }
 
-  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string {
-    return gunIconNames(family)[sigResolutionClass];
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId {
+    return GUN_FAMILY_REPRESENTATIVES[family][sigResolutionClass];
   }
 }
 
@@ -41,46 +41,42 @@ function gunFamilyOf(moduleName: string): GunFamily {
   return disambiguateEnergy(normalized, moduleName);
 }
 
-function gunIconNames(family: GunFamily): Readonly<Record<SigResolutionClass, string>> {
-  return GUN_FAMILY_REPRESENTATIVES[family];
-}
-
-const GUN_FAMILY_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<SigResolutionClass, string>>>> = {
+const GUN_FAMILY_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<SigResolutionClass, TypeId>>>> = {
   pulseLaser: {
-    S: "Gatling Pulse Laser I",
-    M: "Heavy Pulse Laser I",
-    L: "Mega Pulse Laser I",
-    XL: "Dual Giga Pulse Laser I",
+    S: toTypeId("450"),
+    M: toTypeId("458"),
+    L: toTypeId("462"),
+    XL: toTypeId("20444"),
   },
   beamLaser: {
-    S: "Small Focused Beam Laser I",
-    M: "Heavy Beam Laser I",
-    L: "Tachyon Beam Laser I",
-    XL: "Dual Giga Beam Laser I",
+    S: toTypeId("454"),
+    M: toTypeId("459"),
+    L: toTypeId("464"),
+    XL: toTypeId("20446"),
   },
   blaster: {
-    S: "Light Neutron Blaster I",
-    M: "Heavy Neutron Blaster I",
-    L: "Neutron Blaster Cannon I",
-    XL: "Ion Siege Blaster I",
+    S: toTypeId("564"),
+    M: toTypeId("568"),
+    L: toTypeId("573"),
+    XL: toTypeId("20450"),
   },
   railgun: {
-    S: "150mm Railgun I",
-    M: "250mm Railgun I",
-    L: "425mm Railgun I",
-    XL: "Dual 1000mm Railgun I",
+    S: toTypeId("565"),
+    M: toTypeId("570"),
+    L: toTypeId("574"),
+    XL: toTypeId("20448"),
   },
   autocannon: {
-    S: "200mm AutoCannon I",
-    M: "425mm AutoCannon I",
-    L: "800mm Repeating Cannon I",
-    XL: "Quad 800mm Repeating Cannon I",
+    S: toTypeId("486"),
+    M: toTypeId("491"),
+    L: toTypeId("496"),
+    XL: toTypeId("37289"),
   },
   artillery: {
-    S: "280mm Howitzer Artillery I",
-    M: "720mm Howitzer Artillery I",
-    L: "1400mm Howitzer Artillery I",
-    XL: "Quad 3500mm Siege Artillery I",
+    S: toTypeId("488"),
+    M: toTypeId("493"),
+    L: toTypeId("498"),
+    XL: toTypeId("20454"),
   },
 } as const;
 

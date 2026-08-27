@@ -1,4 +1,3 @@
-import { MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
 import { parseEft } from "./eft";
 import { type PresetFitting } from "../gamedata/presets";
 import { PresetFittingsImpl, type PresetFittings } from "./presetFittings";
@@ -41,7 +40,7 @@ describe("PresetFittings", () => {
   test("eftText round-trips through parseEft with the same hull and name", () => {
     const fit = presets.fittingsFor(RIFTER_ID)[0];
     const text = presets.eftText(RIFTER_ID, fit);
-    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
+    const parsed = parseEft(text);
     if (!parsed) throw new Error("expected parsed fitting");
     expect(parsed.hullName).toBe("Rifter");
     expect(parsed.fittingName).toBe(fit.name);
@@ -50,7 +49,7 @@ describe("PresetFittings", () => {
   test("eftText round-trips for a fit whose name contains commas", () => {
     const fit: PresetFitting = { name: "Name, With, Commas", body: "1MN Afterburner II\nStasis Webifier II" };
     const text = presets.eftText(THRASHER_ID, fit);
-    const parsed = parseEft(text, MODULE_SLOT_CATALOG);
+    const parsed = parseEft(text);
     if (!parsed) throw new Error("expected parsed fitting");
     expect(parsed.hullName).toBe("Thrasher");
     expect(parsed.fittingName).toBe("Name, With, Commas");

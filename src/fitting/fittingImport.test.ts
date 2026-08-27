@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { PropulsionModule, ShipNameLanguage, ShipProfile, Ships, StatConditions } from "../ships";
-import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisruptionScriptSpec, StackingPenalty } from "../sim";
 import { ChargeCatalogImpl } from "./chargeCatalog";
 import { FittingImportImpl } from "./fittingImport";
@@ -21,7 +21,7 @@ import {
   WARP_SCRAMBLERS,
   type FittingDb,
 } from "../gamedata/fittingDb";
-import { MODULE_SLOTS, MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
+import { MODULE_SLOTS_BY_NAME, MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
 import { moduleLines, parseEft, type EftDocument } from "./eft";
 import { _detectionOrder } from "./fittingImport";
 
@@ -137,10 +137,10 @@ const abaddonProfile: ShipProfile = {
 };
 
 const propulsionModules: readonly PropulsionModule[] = [
-  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
-  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0 },
-  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "ab-1mn", kind: "afterburner", sizeTier: "small", label: "1MN Afterburner I", iconId: toTypeId("439"), defaultModuleId: toTypeId("439"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "mwd-5mn", kind: "microwarpdrive", sizeTier: "small", label: "5MN MWD", iconId: toTypeId("434"), defaultModuleId: toTypeId("434"), thrust: 1.5e6, massAddition: 500_000, speedBonus: 5, sigBloom: 5 },
+  { id: "ab-10mn", kind: "afterburner", sizeTier: "medium", label: "10MN AB", iconId: toTypeId("12056"), defaultModuleId: toTypeId("12056"), thrust: 15e6, massAddition: 5_000_000, speedBonus: 1.15, sigBloom: 0 },
+  { id: "ab-100mn", kind: "afterburner", sizeTier: "large", label: "100MN AB", iconId: toTypeId("12066"), defaultModuleId: toTypeId("12066"), thrust: 150e6, massAddition: 50_000_000, speedBonus: 1.15, sigBloom: 0 },
 ];
 
 const ships = vi.mocked<Ships>({
@@ -1038,9 +1038,9 @@ Hobgoblin II x5
   });
 
   test("fixture modules are all present in the generated slot map", () => {
-    const parsed = parseEft(RIFTER_BRAWLER, MODULE_SLOT_CATALOG);
+    const parsed = parseEft(RIFTER_BRAWLER);
     for (const line of moduleLines(parsed!)) {
-      expect(MODULE_SLOTS[line.name]).toBeDefined();
+      expect(MODULE_SLOTS_BY_NAME[line.name]).toBeDefined();
     }
   });
 });
@@ -1108,10 +1108,10 @@ Hail S x1000`;
 
   test("round-trip preserves the drone and cargo partition", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
-    const original = parseEft(RIFTER_BRAWLER, MODULE_SLOT_CATALOG);
+    const original = parseEft(RIFTER_BRAWLER);
     const canonical = importer.canonicalEftText(RIFTER_BRAWLER);
     expect(canonical).toBeDefined();
-    const reparsed = parseEft(canonical!, MODULE_SLOT_CATALOG);
+    const reparsed = parseEft(canonical!);
     expect(reparsed!.drones).toEqual(original!.drones);
     expect(reparsed!.cargo).toEqual(original!.cargo);
   });
