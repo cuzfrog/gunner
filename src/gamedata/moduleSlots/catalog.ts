@@ -1,14 +1,15 @@
-import { MODULE_SLOTS, type ModuleSlot } from "./moduleSlots";
+import type { TypeId } from "../ids";
+import { MODULE_SLOTS_BY_ID, type ModuleSlot } from "./moduleSlots";
 
 export type { ModuleSlot } from "./moduleSlots";
 
 export interface ModuleSlotCatalog {
-  slotOf(moduleName: string): ModuleSlot | undefined;
+  slotOf(moduleId: TypeId): ModuleSlot | undefined;
 }
 
 export class StaticModuleSlotCatalog implements ModuleSlotCatalog {
-  slotOf(moduleName: string): ModuleSlot | undefined {
-    return MODULE_SLOTS[moduleName];
+  slotOf(moduleId: TypeId): ModuleSlot | undefined {
+    return MODULE_SLOTS_BY_ID[moduleId];
   }
 }
 

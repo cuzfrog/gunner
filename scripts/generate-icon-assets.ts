@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { extname } from "node:path";
 import * as process from "node:process";
 import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
+import { ITEM_NAMES_EN } from "../src/gamedata/itemNames/item-names-en";
 import type { ShipProfile } from "../src/ships";
 
 const ICON_OUTPUT_PATH = "src/ui/icons/iconIds.ts";
@@ -16,17 +17,22 @@ interface NameToId {
   };
 }
 
-export function generateIconIdsContent(nameToId: NameToId): string {
+export function generateIconIdsContent(
+  itemNamesEn: Readonly<Record<string, string>>,
+  nameToId: NameToId,
+): string {
   const ids: Record<string, number> = {};
-  for (const [name, entries] of Object.entries(nameToId.byName.iconID)) {
-    if (entries.length > 0) ids[name] = entries[0].id;
+  for (const [typeId, name] of Object.entries(itemNamesEn)) {
+    const entries = nameToId.byName.iconID[name];
+    if (entries === undefined || entries.length === 0) continue;
+    ids[typeId] = entries[0].id;
   }
 
   const lines = Object.keys(ids)
-    .sort()
-    .map((name) => `  ${JSON.stringify(name)}: ${ids[name]},`);
+    .sort((a, b) => Number(a) - Number(b))
+    .map((typeId) => `  [${JSON.stringify(typeId)} as TypeId]: ${ids[typeId]},`);
 
-  return `export const ITEM_ICON_IDS: Readonly<Record<string, number>> = {\n${lines.join("\n")}\n} as const;\n`;
+  return `import type { TypeId } from "../../gamedata/ids";\n\nexport const ITEM_ICON_IDS: Readonly<Record<TypeId, number>> = {\n${lines.join("\n")}\n} as const;\n`;
 }
 
 export function generateShipImageIdsContent(shipProfiles: readonly Pick<ShipProfile, "id" | "name">[], imageFileNames: readonly string[]): string {
@@ -58,9 +64,9 @@ function readShipImageFileNames(): string[] {
 function main(): void {
   const raw: unknown = JSON.parse(readFileSync(NAME_TO_ID_PATH, "utf8"));
   const nameToId = decodeNameToId(raw);
-  const iconContent = generateIconIdsContent(nameToId);
+  const iconContent = generateIconIdsContent(ITEM_NAMES_EN, nameToId);
   writeFileSync(ICON_OUTPUT_PATH, iconContent, "utf8");
-  console.log(`Wrote ${ICON_OUTPUT_PATH} with ${Object.keys(nameToId.byName.iconID).length} icon ids`);
+  console.log(`Wrote ${ICON_OUTPUT_PATH}`);
 
   const shipImageContent = generateShipImageIdsContent(SHIP_PROFILES, readShipImageFileNames());
   writeFileSync(SHIP_IMAGE_OUTPUT_PATH, shipImageContent, "utf8");

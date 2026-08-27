@@ -2,6 +2,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import * as process from "node:process";
+import type { TypeId } from "../src/gamedata/ids";
 import {
   FITTING_MODULES,
   STASIS_GRAPPLERS,
@@ -16,6 +17,11 @@ const OUTPUT_PATH = "src/gamedata/moduleSlots/moduleSlots.ts";
 const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
 
 export type ModuleSlot = "high" | "mid" | "low" | "rig";
+
+interface NamedTypeId {
+  readonly name: string;
+  readonly id: TypeId;
+}
 
 interface NameToId {
   readonly byName: {
@@ -60,16 +66,17 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
 
 export function generateModuleSlotsContent(
   nameToId: NameToId,
-  moduleNames: readonly string[],
-  turretNames: readonly string[],
+  modules: readonly NamedTypeId[],
+  turrets: readonly NamedTypeId[],
   groupSlots: Readonly<Record<string, ModuleSlot>>,
 ): string {
   const missing: string[] = [];
   const unmatched: string[] = [];
-  const slots: Record<string, ModuleSlot> = {};
+  const slotsByName: Record<string, ModuleSlot> = {};
+  const slotsById: Record<string, ModuleSlot> = {};
 
-  for (const name of moduleNames) collectSlot(name);
-  for (const name of turretNames) collectSlot(name);
+  for (const module of modules) collectSlot(module);
+  for (const turret of turrets) collectSlot(turret);
 
   if (missing.length > 0 || unmatched.length > 0) {
     missing.sort();
@@ -86,41 +93,49 @@ export function generateModuleSlotsContent(
     throw new Error(parts.join("; "));
   }
 
-  const lines = Object.keys(slots)
+  const nameLines = Object.keys(slotsByName)
     .sort()
-    .map((name) => `  ${JSON.stringify(name)}: "${slots[name]}",`);
+    .map((name) => `  ${JSON.stringify(name)}: "${slotsByName[name]}",`);
 
-  return `export type ModuleSlot = "high" | "mid" | "low" | "rig";\n\nexport const MODULE_SLOTS: Readonly<Record<string, ModuleSlot>> = {\n${lines.join("\n")}\n} as const;\n`;
+  const idLines = Object.keys(slotsById)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((id) => `  [${JSON.stringify(id)} as TypeId]: "${slotsById[id]}",`);
 
-  function collectSlot(name: string): void {
-    if (name in slots) return;
-    const entries = nameToId.byName.iconID[name];
+  return `import type { TypeId } from "../ids";\n\nexport type ModuleSlot = "high" | "mid" | "low" | "rig";\n\nexport const MODULE_SLOTS_BY_NAME: Readonly<Record<string, ModuleSlot>> = {\n${nameLines.join("\n")}\n} as const;\n\nexport const MODULE_SLOTS_BY_ID: Readonly<Record<TypeId, ModuleSlot>> = {\n${idLines.join("\n")}\n} as const;\n`;
+
+  function collectSlot(item: NamedTypeId): void {
+    if (item.name in slotsByName) return;
+    const entries = nameToId.byName.iconID[item.name];
     if (entries === undefined || entries.length === 0) {
-      if (!missing.includes(name)) missing.push(name);
+      if (!missing.includes(item.name)) missing.push(item.name);
       return;
     }
     const group = entries[0].group;
     const slot = groupSlots[group];
     if (slot === undefined) {
-      if (!unmatched.includes(`${name} (${group})`)) unmatched.push(`${name} (${group})`);
+      if (!unmatched.includes(`${item.name} (${group})`)) unmatched.push(`${item.name} (${group})`);
       return;
     }
-    slots[name] = slot;
+    slotsByName[item.name] = slot;
+    slotsById[item.id] = slot;
   }
 }
 
 function main(): void {
   const raw: unknown = JSON.parse(readFileSync(NAME_TO_ID_PATH, "utf8"));
   const nameToId = decodeNameToId(raw);
-  const moduleNames = new Set<string>();
-  for (const stats of Object.values(FITTING_MODULES)) moduleNames.add(stats.name);
-  for (const stats of Object.values(STASIS_WEBS)) moduleNames.add(stats.name);
-  for (const stats of Object.values(STASIS_GRAPPLERS)) moduleNames.add(stats.name);
-  for (const stats of Object.values(TRACKING_COMPUTERS)) moduleNames.add(stats.name);
-  for (const stats of Object.values(TRACKING_DISRUPTORS)) moduleNames.add(stats.name);
-  for (const stats of Object.values(WARP_SCRAMBLERS)) moduleNames.add(stats.name);
-  const turretNames = Object.values(TURRETS).map((stats) => stats.name);
-  const content = generateModuleSlotsContent(nameToId, [...moduleNames], turretNames, GROUP_SLOTS);
+  const modulesByName = new Map<string, TypeId>();
+  for (const stats of Object.values(FITTING_MODULES)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(STASIS_WEBS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(STASIS_GRAPPLERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(TRACKING_COMPUTERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(TRACKING_DISRUPTORS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(WARP_SCRAMBLERS)) modulesByName.set(stats.name, stats.id);
+  const modules: NamedTypeId[] = [...modulesByName.entries()].map(([name, id]) => ({ name, id })).sort((a, b) => a.name.localeCompare(b.name));
+  const turrets: NamedTypeId[] = Object.values(TURRETS)
+    .map((stats) => ({ name: stats.name, id: stats.id }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const content = generateModuleSlotsContent(nameToId, modules, turrets, GROUP_SLOTS);
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, content, "utf8");
   console.log(`Wrote ${OUTPUT_PATH}`);

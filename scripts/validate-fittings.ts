@@ -5,7 +5,6 @@
 // Reports any failures found.
 import * as fsp from "node:fs/promises";
 
-import { MODULE_SLOT_CATALOG } from "../src/gamedata/moduleSlots";
 import { parseEft } from "../src/fitting/eft";
 import { summarizeFitting } from "./fittingSummary";
 
@@ -32,7 +31,7 @@ async function main(): Promise<void> {
   for (const fp of files) {
     const raw = await fsp.readFile(fp, "utf-8");
 
-    const parsed = parseEft(raw, MODULE_SLOT_CATALOG);
+    const parsed = parseEft(raw);
     if (!parsed) {
       failed++;
       failures.push(`[PARSE FAIL] ${fp}`);
