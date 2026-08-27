@@ -1096,7 +1096,7 @@ Hail S x1000`;
     expect(parts[1]).toBe("Hail S x1000\nRepublic Fleet EMP S x500");
   });
 
-  test("unresolved drone name stays in the drone section", () => {
+  test("unrecognized drone name stays in the drone section", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
     const canonical = importer.canonicalEftText(RIFTER_UNKNOWN_DRONE);
     expect(canonical).toBeDefined();
@@ -1236,6 +1236,82 @@ Unknown Custom Module I
     expect(canonical).toContain("Brawler");
     expect(canonical).toContain("Unknown Custom Module I");
     expect(canonical).toContain("5MN Microwarpdrive I");
+  });
+});
+
+describe("FittingImportImpl identity resolution", () => {
+  const importer = new FittingImportImpl({
+    ships,
+    fittingDb: fullFittingDb,
+    chargeCatalog: fullChargeCatalog,
+    stackingPenalty,
+    itemNameCatalog,
+    itemNameResolver: fullResolver,
+    moduleSlotCatalog,
+  });
+
+  beforeEach(() => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+  });
+
+  test("attaches an identity id to a non-db damage mod in the low bank", () => {
+    const summary = importer.summarize(`[Rifter, Damage Mod]\nMagnetic Field Stabilizer II\n`);
+    expect(summary).toBeDefined();
+    const low = summary!.sections.find((section) => section.kind === "low");
+    expect(low).toBeDefined();
+    expect(low!.rows).toHaveLength(1);
+    expect(low!.rows[0]).toEqual({ name: "Magnetic Field Stabilizer II", id: toTypeId("10190") });
+  });
+
+  test("attaches identity ids to a non-db launcher and its faction charge", () => {
+    const summary = importer.summarize(`[Rifter, Faction]\nCaldari Navy Rocket Launcher, Caldari Navy Inferno Rocket\n`);
+    expect(summary).toBeDefined();
+    const low = summary!.sections.find((section) => section.kind === "low");
+    expect(low).toBeDefined();
+    const row = low!.rows.find((r) => r.name === "Caldari Navy Rocket Launcher");
+    expect(row).toBeDefined();
+    expect(row!.id).toBe(toTypeId("16065"));
+    expect(row!.chargeId).toBe(toTypeId("27315"));
+    expect(row!.charge).toBe("Caldari Navy Inferno Rocket");
+  });
+
+  test("attaches an identity id to a cargo item that is neither drone nor charge role", () => {
+    const summary = importer.summarize(`[Rifter, Cargo]\n200mm AutoCannon I, Hail S\nNanite Repair Paste x5\n`);
+    expect(summary).toBeDefined();
+    const cargo = summary!.sections.find((section) => section.kind === "cargo");
+    expect(cargo).toBeDefined();
+    expect(cargo!.rows).toContainEqual({ name: "Nanite Repair Paste", id: toTypeId("28668"), quantity: 5 });
+  });
+
+  test("leaves a fully unknown name id-less without throwing", () => {
+    const summary = importer.summarize(`[Rifter, Unknown]\nZor's Custom Hyperblaster\n`);
+    expect(summary).toBeDefined();
+    const row = summary!.sections.flatMap((section) => section.rows).find((r) => r.name === "Zor's Custom Hyperblaster");
+    expect(row).toBeDefined();
+    expect(row!.id).toBeUndefined();
+  });
+
+  test("stats aggregation is unaffected by an identity-only damage mod", () => {
+    const without = importer.importFitting(`[Rifter, Stats]\n200mm AutoCannon I, Hail S\n`, conditions);
+    const withDamageMod = importer.importFitting(`[Rifter, Stats]\n200mm AutoCannon I, Hail S\nMagnetic Field Stabilizer II\n`, conditions);
+    expect(withDamageMod).toBeDefined();
+    expect(without).toBeDefined();
+    expect(withDamageMod).toEqual(without);
+  });
+
+  test("a db turret keeps a charge identity even when the charge is not in db.charges", () => {
+    const summary = importer.summarize(`[Rifter, Mixed]\nHeavy Pulse Laser II, Caldari Navy Inferno Rocket\n`);
+    expect(summary).toBeDefined();
+    const row = summary!.sections.flatMap((section) => section.rows).find((r) => r.name === "Heavy Pulse Laser II");
+    expect(row).toBeDefined();
+    expect(row!.id).toBe(toTypeId("3520"));
+    expect(row!.chargeId).toBe(toTypeId("27315"));
+  });
+
+  test("canonicalEftText preserves a non-db charge name on a db turret line", () => {
+    const canonical = importer.canonicalEftText(`[Rifter, Mixed]\nHeavy Pulse Laser II, Caldari Navy Inferno Rocket\n`);
+    expect(canonical).toBe(`[Rifter, Mixed]\n\nHeavy Pulse Laser II, Caldari Navy Inferno Rocket`);
   });
 });
 

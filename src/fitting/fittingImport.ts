@@ -246,7 +246,10 @@ export class FittingImportImpl implements FittingImport {
       if (droneId) {
         return { kind: "resolved", id: droneId, name: this.itemNameCatalog.nameForId(droneId, "en"), quantity: item.quantity, isDrone: true };
       }
-      return { kind: "unresolved", name: item.name, quantity: item.quantity, isDrone: preferDrone };
+      if (candidates.length > 0) {
+        return { kind: "resolved", id: candidates[0], name: this.itemNameCatalog.nameForId(candidates[0], "en"), quantity: item.quantity, isDrone: preferDrone };
+      }
+      return { kind: "unrecognized", name: item.name, quantity: item.quantity, isDrone: preferDrone };
     };
 
     const resolvedDrones: ResolvedQuantity[] = [];
@@ -288,11 +291,11 @@ interface ResolvedBank {
 type ResolvedLine =
   | { readonly kind: "empty"; readonly bank: BankKind; readonly label: string }
   | { readonly kind: "module"; readonly bank: BankKind; readonly moduleId: TypeId; readonly moduleName: string; readonly chargeId?: TypeId; readonly chargeName?: string; readonly offline: boolean }
-  | { readonly kind: "unresolved"; readonly bank: BankKind; readonly name: string; readonly charge?: string; readonly offline: boolean };
+  | { readonly kind: "unrecognized"; readonly bank: BankKind; readonly name: string; readonly charge?: string; readonly offline: boolean; readonly id?: TypeId; readonly chargeId?: TypeId };
 
 type ResolvedQuantity =
   | { readonly kind: "resolved"; readonly id: TypeId; readonly name: string; readonly quantity: number; readonly isDrone: boolean }
-  | { readonly kind: "unresolved"; readonly name: string; readonly quantity: number; readonly isDrone: boolean };
+  | { readonly kind: "unrecognized"; readonly name: string; readonly quantity: number; readonly isDrone: boolean; readonly id?: TypeId };
 
 interface HullSideAggregation {
   readonly fitted: FittedHull;
@@ -310,24 +313,22 @@ function resolveLine(
 ): ResolvedLine | undefined {
   if (line.kind === "empty") return { kind: "empty", bank, label: line.label };
 
-  const moduleIds = resolver.idsForName(line.name, language).filter((id) => isModuleRole(id, db));
+  const candidateIds = resolver.idsForName(line.name, language);
+  const moduleIds = candidateIds.filter((id) => isModuleRole(id, db));
+  const id = moduleIds[0] ?? candidateIds[0];
+
+  const chargeCandidates = line.charge ? resolver.idsForName(line.charge, language) : [];
+  const chargeId = chargeCandidates.find((cid) => isChargeRole(cid, db)) ?? chargeCandidates[0];
+
   if (moduleIds.length === 0) {
-    return { kind: "unresolved", bank, name: line.name, charge: line.charge, offline: line.offline };
+    const resolvedBank = id ? (slotCatalog.slotOf(id) ?? bank) : bank;
+    return { kind: "unrecognized", bank: resolvedBank, name: line.name, charge: line.charge, offline: line.offline, id, chargeId };
   }
 
   const moduleId = moduleIds[0];
   const moduleName = catalog.nameForId(moduleId, "en");
   const resolvedBank = slotCatalog.slotOf(moduleId) ?? bank;
-
-  let chargeId: TypeId | undefined;
-  let chargeName: string | undefined;
-  if (line.charge) {
-    const chargeIds = resolver.idsForName(line.charge, language).filter((id) => isChargeRole(id, db));
-    if (chargeIds.length > 0) {
-      chargeId = chargeIds[0];
-      chargeName = catalog.nameForId(chargeId, "en");
-    }
-  }
+  const chargeName = chargeId ? catalog.nameForId(chargeId, "en") : undefined;
 
   return { kind: "module", bank: resolvedBank, moduleId, moduleName, chargeId, chargeName, offline: line.offline };
 }
@@ -738,7 +739,7 @@ function buildSections(resolved: ResolvedEft): readonly FittingSection[] {
       } else if (line.kind === "module") {
         buckets[line.bank].push({ name: line.moduleName, charge: line.chargeName, id: line.moduleId, chargeId: line.chargeId });
       } else {
-        buckets[line.bank].push({ name: line.name, charge: line.charge });
+        buckets[line.bank].push({ name: line.name, charge: line.charge, id: line.id, chargeId: line.chargeId });
       }
     }
   }
