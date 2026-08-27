@@ -78,14 +78,6 @@ function buildDotKeyToFieldMap(): ReadonlyMap<string, ScalarField> {
   for (const field of ALL_FIELDS) {
     map.set(dotKeyForField(field), field);
   }
-  map.set("shipA.ammo", "shipAAmmo");
-  map.set("shipB.ammo", "shipBAmmo");
-  map.set("shipA.hull", "shipAHullId");
-  map.set("shipB.hull", "shipBHullId");
-  map.set("tracking", "shipATracking");
-  map.set("sigRes", "shipASigRes");
-  map.set("optimal", "shipAOptimal");
-  map.set("falloff", "shipAFalloff");
   return map;
 }
 
@@ -101,8 +93,6 @@ function buildOverrideDotKeyToFullMap(): ReadonlyMap<string, keyof ProfileParamO
 }
 
 export function dotKeyForField(field: ScalarField): string {
-  if (field === "shipAAmmo") return "ammo";
-  if (field === "shipBAmmo") return "shipB.ammo";
   if (field.startsWith("shipA")) return `shipA.${lowerFirst(field.slice("shipA".length))}`;
   if (field.startsWith("shipB")) return `shipB.${lowerFirst(field.slice("shipB".length))}`;
   return field;

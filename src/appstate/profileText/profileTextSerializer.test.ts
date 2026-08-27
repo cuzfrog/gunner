@@ -5,17 +5,12 @@ import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 const serializer = new ProfileTextSerializer();
 
 describe("profileTextSerializer", () => {
-  test("emits the global ammo line as a global key", () => {
-    const profile = { ...MINIMAL_PROFILE, shipAAmmo: "Hail S" as TypeId };
+  test("emits shipA and shipB ammo lines as symmetric side keys", () => {
+    const profile = { ...MINIMAL_PROFILE, shipAAmmo: "Hail S" as TypeId, shipBAmmo: "Republic Fleet EMP S" as TypeId };
     const text = serializer.serialize(profile);
-    expect(text).toContain("ammo=Hail S");
-    expect(text).not.toContain("shipA.ammo=");
-  });
-
-  test("emits the shipB ammo line as a side key", () => {
-    const profile = { ...MINIMAL_PROFILE, shipBAmmo: "Republic Fleet EMP S" as TypeId };
-    const text = serializer.serialize(profile);
+    expect(text).toContain("shipA.ammo=Hail S");
     expect(text).toContain("shipB.ammo=Republic Fleet EMP S");
+    expect(text).not.toContain("\nammo=");
   });
 
   test("emits only shipA and shipB dot keys and no attacker or target keys", () => {

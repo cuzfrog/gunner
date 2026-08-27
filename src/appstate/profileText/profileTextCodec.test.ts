@@ -111,13 +111,13 @@ describe("profileTextCodec", () => {
     expect(parsed?.shipBEwarActivation).toEqual({ webs: [{ active: false, overloaded: true }], disruptors: [{ active: false, overloaded: true, script: "none" }] });
   });
 
-  test("a legacy profile without ewar activations parses with defaults", () => {
+  test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
 version=12
-tracking=0.32
-sigRes=S
-optimal=5000
-falloff=5000
+shipA.tracking=0.32
+shipA.sigRes=S
+shipA.optimal=5000
+shipA.falloff=5000
 shipA.speed=0
 shipA.mode=keepAtRange
 shipA.range=5000

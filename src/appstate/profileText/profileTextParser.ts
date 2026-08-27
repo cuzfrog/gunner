@@ -6,7 +6,6 @@ import type { Ships } from "../../ships";
 import { resolveBoosterScript, resolveDisruptionScript } from "../settingsCompat";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey, type ScalarField } from "./profileTextFields";
-import { normalizeProfileTextDotKey } from "./profileTextCompat";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
 
@@ -56,7 +55,7 @@ export class ProfileTextParser {
       if (line === "---") return undefined;
 
       if (line.endsWith(".fitting:")) {
-        const dotKey = normalizeProfileTextDotKey(line.slice(0, line.length - ".fitting:".length));
+        const dotKey = line.slice(0, line.length - ".fitting:".length);
         const side = sideFromFittingDotKey(dotKey);
         if (side === undefined) return undefined;
         const { body, nextIndex } = readFittingBlock(rawLines, i);
@@ -69,7 +68,7 @@ export class ProfileTextParser {
 
       const eq = line.indexOf("=");
       if (eq < 0) return undefined;
-      const dotKey = normalizeProfileTextDotKey(line.slice(0, eq));
+      const dotKey = line.slice(0, eq);
       const value = line.slice(eq + 1);
 
       const override = OVERRIDE_DOT_KEY_TO_FULL.get(dotKey);

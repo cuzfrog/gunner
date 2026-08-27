@@ -12,7 +12,6 @@ no-new-exports:
   - profileTextCodec.ts
   - profileTextParser.ts
   - profileTextSerializer.ts
-  - profileTextCompat.ts
 ---
 
 

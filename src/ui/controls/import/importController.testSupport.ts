@@ -22,25 +22,25 @@ class FakePopupGroup implements PopupGroup {
 
 const GUNNER_PROFILE_BODY = `# gunner v1
 version=8
-tracking=0.32
-sigRes=S
-optimal=5000
-falloff=5000
-ammo=Hail S
+shipA.tracking=0.32
+shipA.sigRes=S
+shipA.optimal=5000
+shipA.falloff=5000
+shipA.ammo=Hail S
 initialDistance=5000
 shipA.speed=1000
 shipA.mode=keepAtRange
 shipA.range=5000
 shipA.mass=1200000
 shipA.inertia=3
-shipA.hull=Rifter
+shipA.hullId=Rifter
 shipB.speed=1000
 shipB.mode=orbit
 shipB.range=5000
 shipB.mass=10000000
 shipB.inertia=0.45
 shipB.sig=40
-shipB.hull=Thrasher`;
+shipB.hullId=Thrasher`;
 
 export function gunnerProfileText(overrides: { shipAFitting?: string; shipBFitting?: string } = {}): string {
   let text = GUNNER_PROFILE_BODY;
