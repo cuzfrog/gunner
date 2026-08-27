@@ -13,11 +13,9 @@ import { EwarControllerImpl } from "./ewarController";
 import type { EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
-function asTypeId(value: string): TypeId { return value as TypeId; }
-
-const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: asTypeId("Stasis Webifier I"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
-const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: asTypeId("Stasis Webifier II"), maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
-const WEB3: StasisWebSpec = { ...WEB, moduleName: "Stasis Webifier III" };
+const WEB: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: toTypeId("526"), maxRange: 10000, speedFactor: -0.5, overloadRangeBonusPercent: 15 };
+const WEB2: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 12000, speedFactor: -0.55, overloadRangeBonusPercent: 15 };
+const WEB3: StasisWebSpec = { ...WEB, moduleName: "Stasis Webifier III", moduleId: toTypeId("528") };
 const OPTIMAL_SCRIPT: DisruptionScriptSpec & { readonly moduleId: TypeId } = {
   name: "Optimal Range Disruption Script", moduleId: toTypeId("29005"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2,
 };
@@ -26,15 +24,15 @@ const TRACKING_SCRIPT: DisruptionScriptSpec & { readonly moduleId: TypeId } = {
 };
 const SCRIPTS: readonly (DisruptionScriptSpec & { readonly moduleId: TypeId })[] = [OPTIMAL_SCRIPT, TRACKING_SCRIPT];
 const DISRUPTOR: TrackingDisruptorSpec = {
-  moduleName: "Tracking Disruptor I", moduleId: asTypeId("Tracking Disruptor I"), optimal: 10000, falloff: 30000,
+  moduleName: "Tracking Disruptor I", moduleId: toTypeId("2108"), optimal: 10000, falloff: 30000,
   disruption: -0.2, defaultScript: undefined, overloadStrengthBonusPercent: 20,
 };
 const DISRUPTOR2: TrackingDisruptorSpec = {
-  moduleName: "Tracking Disruptor II", moduleId: asTypeId("Tracking Disruptor II"), optimal: 12000, falloff: 35000,
+  moduleName: "Tracking Disruptor II", moduleId: toTypeId("2109"), optimal: 12000, falloff: 35000,
   disruption: -0.25, defaultScript: OPTIMAL_SCRIPT, overloadStrengthBonusPercent: 20,
 };
-const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: asTypeId("Warp Scrambler II"), maxRange: 9000, overloadRangeBonusPercent: 20 };
-const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: asTypeId("Heavy Stasis Grappler I"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
+const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
+const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: toTypeId("41040"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
 
 class FakePopupGroup implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -84,7 +82,7 @@ function buildEwarController(
   });
   const imageCatalog = vi.mocked<ImageCatalog>({
     shipImageUrl: vi.fn((_shipId) => ""),
-    itemIconUrl: vi.fn((name) => `icons/${String(name).replaceAll(" ", "_")}.png`),
+    itemIconUrl: vi.fn((id) => `icons/${String(id)}.png`),
     droneIconUrl: vi.fn(),
   });
   const popupGroup = new FakePopupGroup();
@@ -111,6 +109,13 @@ function buildEwarController(
   shipBPopup.hidden = true;
   if (beforeConstruct) beforeConstruct(document, els);
   const NAME_FOR_ID: Record<string, string> = {
+    "526": "Stasis Webifier I",
+    "527": "Stasis Webifier II",
+    "528": "Stasis Webifier III",
+    "2108": "Tracking Disruptor I",
+    "2109": "Tracking Disruptor II",
+    "448": "Warp Scrambler II",
+    "41040": "Heavy Stasis Grappler I",
     "29005": "Optimal Range Disruption Script",
     "29007": "Tracking Speed Disruption Script",
   };
@@ -201,7 +206,7 @@ describe("EwarController", () => {
     const webSummary = summary.children[0];
     expect(webSummary.className).toBe("ewar-summary-item");
     expect(webSummary.children[0].tagName).toBe("IMG");
-    expect(webSummary.children[0].src).toBe("icons/Stasis_Webifier_II.png");
+    expect(webSummary.children[0].src).toBe("icons/527.png");
     expect(webSummary.children[0].hidden).toBe(false);
     expect(webSummary.children[1].className).toBe("ewar-summary-count mono");
     expect(webSummary.children[1].textContent).toBe("1/1");
@@ -209,7 +214,7 @@ describe("EwarController", () => {
     const disruptorSummary = summary.children[1];
     expect(disruptorSummary.className).toBe("ewar-summary-item");
     expect(disruptorSummary.children[0].tagName).toBe("IMG");
-    expect(disruptorSummary.children[0].src).toBe("icons/Tracking_Disruptor_I.png");
+    expect(disruptorSummary.children[0].src).toBe("icons/2108.png");
     expect(disruptorSummary.children[0].hidden).toBe(false);
     expect(disruptorSummary.children[1].textContent).toBe("2/2");
 
@@ -397,7 +402,7 @@ describe("EwarController", () => {
 
   test("TD script choice persists per row and survives capture/restore round-trip", () => {
     const { controller, document } = buildEwarController();
-    const loadout: EwarLoadout = { webs: [], disruptors: [DISRUPTOR, { ...DISRUPTOR, moduleName: "Tracking Disruptor II" }], grapplers: [], scramblers: [], scripts: SCRIPTS };
+    const loadout: EwarLoadout = { webs: [], disruptors: [DISRUPTOR, DISRUPTOR2], grapplers: [], scramblers: [], scripts: SCRIPTS };
     controller.setLoadout("shipB", loadout);
 
     const popup = getFake(document, "ship-b-ewar-popup");
@@ -485,7 +490,7 @@ describe("EwarController", () => {
 
   test("capture returns StoredEwarActivation matching the current state", () => {
     const { controller, document } = buildEwarController();
-    const d2 = { ...DISRUPTOR, moduleName: "Tracking Disruptor II" };
+    const d2: TrackingDisruptorSpec = { ...DISRUPTOR2, defaultScript: undefined };
     const loadout: EwarLoadout = { webs: [WEB, WEB2], disruptors: [DISRUPTOR, d2], grapplers: [], scramblers: [], scripts: SCRIPTS };
     controller.setLoadout("shipB", loadout);
 
@@ -570,14 +575,14 @@ describe("EwarController", () => {
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
     expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(WEB.moduleId, "zh");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(WEB.moduleName);
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(WEB.moduleId);
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith(`${WEB.moduleName} (zh)`);
   });
 
   test("summary hides an icon when no icon URL is available", () => {
     const { controller, document, imageCatalog } = buildEwarController();
-    imageCatalog.itemIconUrl.mockImplementation((name) =>
-      name === WEB.moduleName ? undefined : `icons/${name.replaceAll(" ", "_")}.png`
+    imageCatalog.itemIconUrl.mockImplementation((id) =>
+      id === WEB.moduleId ? undefined : `icons/${String(id)}.png`
     );
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], scripts: SCRIPTS });
 
@@ -585,7 +590,7 @@ describe("EwarController", () => {
     expect(summary.children[0].children[0].tagName).toBe("IMG");
     expect(summary.children[0].children[0].hidden).toBe(true);
     expect(summary.children[0].children[0].src).toBe("");
-    expect(summary.children[1].children[0].src).toBe("icons/Tracking_Disruptor_I.png");
+    expect(summary.children[1].children[0].src).toBe("icons/2108.png");
   });
 
   test("selecting None persists over capture/restore round-trip", () => {

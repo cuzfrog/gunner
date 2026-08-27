@@ -256,13 +256,13 @@ describe("AppImpl", () => {
       propulsionSuppressed: true,
     };
     const disruptionA: DisruptionBreakdown = {
-      tracking: [{ moduleName: "Tracking Disruptor II", scriptName: undefined, multiplier: 0.8281 }],
+      tracking: [{ moduleId: toTypeId("2109"), scriptId: undefined, multiplier: 0.8281 }],
       optimal: [],
       falloff: [],
     };
     const disruptionB: DisruptionBreakdown = {
       tracking: [],
-      optimal: [{ moduleName: "Tracking Disruptor II", scriptName: undefined, multiplier: 0.7 }],
+      optimal: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.7 }],
       falloff: [],
     };
     ewarResolver.speedBreakdown.mockReturnValueOnce(shipASpeed).mockReturnValueOnce(shipBSpeed);

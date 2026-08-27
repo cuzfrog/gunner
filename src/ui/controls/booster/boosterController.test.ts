@@ -11,15 +11,13 @@ import { UiEventsImpl } from "../../events";
 import { BoosterControllerImpl } from "./boosterController";
 import type { BoosterEls } from "./boosterControllerContract";
 
-function asTypeId(value: string): TypeId { return value as TypeId; }
-
 const TRACKING_SCRIPT: TurretScriptSpec & { readonly moduleId: TypeId } = { name: "Tracking Speed Script", moduleId: toTypeId("29001"), trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 };
 const OPTIMAL_SCRIPT: TurretScriptSpec & { readonly moduleId: TypeId } = { name: "Optimal Range Script", moduleId: toTypeId("28999"), trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 };
 
 const LOADOUT: BoostLoadout = {
   computers: [
-    { moduleName: "Tracking Computer I", moduleId: asTypeId("Tracking Computer I"), trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: undefined },
-    { moduleName: "Tracking Computer II", moduleId: asTypeId("Tracking Computer II"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: TRACKING_SCRIPT },
+    { moduleName: "Tracking Computer I", moduleId: toTypeId("1977"), trackingBonusPercent: 10, optimalBonusPercent: 5, falloffBonusPercent: 10, defaultScript: undefined },
+    { moduleName: "Tracking Computer II", moduleId: toTypeId("1978"), trackingBonusPercent: 15, optimalBonusPercent: 7.5, falloffBonusPercent: 15, defaultScript: TRACKING_SCRIPT },
   ],
   scripts: [TRACKING_SCRIPT, OPTIMAL_SCRIPT],
 };
@@ -60,6 +58,8 @@ function buildBoosterController() {
     summaries: { shipA: els.shipA.boosterSummary, shipB: els.shipB.boosterSummary },
   };
   const NAME_FOR_ID: Record<string, string> = {
+    "1977": "Tracking Computer I",
+    "1978": "Tracking Computer II",
     "28999": "Optimal Range Script",
     "29001": "Tracking Speed Script",
   };

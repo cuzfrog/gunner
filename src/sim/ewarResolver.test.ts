@@ -682,7 +682,7 @@ describe("EwarResolverImpl", () => {
       expect(resolver.disruptionBreakdown(undefined, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
     });
 
-    test("unscripted disruptor produces one entry per stat with undefined scriptName", () => {
+    test("unscripted disruptor produces one entry per stat with undefined scriptId", () => {
       const projection = disruptorProjection([TD]);
       const breakdown = resolver.disruptionBreakdown(projection, 10000);
       expect(breakdown.tracking).toHaveLength(1);
@@ -690,8 +690,8 @@ describe("EwarResolverImpl", () => {
       expect(breakdown.falloff).toHaveLength(1);
       for (const stat of ["tracking", "optimal", "falloff"] as const) {
         const entry = breakdown[stat][0];
-        expect(entry.moduleName).toBe("Tracking Disruptor II");
-        expect(entry.scriptName).toBeUndefined();
+        expect(entry.moduleId).toBe(TD_II_ID);
+        expect(entry.scriptId).toBeUndefined();
         expect(entry.multiplier).toBeCloseTo(0.8281, 10);
       }
     });
@@ -702,7 +702,7 @@ describe("EwarResolverImpl", () => {
       expect(breakdown.tracking).toHaveLength(0);
       expect(breakdown.optimal).toHaveLength(1);
       expect(breakdown.falloff).toHaveLength(1);
-      expect(breakdown.optimal[0].scriptName).toBe("Optimal Range Disruption Script");
+      expect(breakdown.optimal[0].scriptId).toBe(OPTIMAL_SCRIPT_ID);
       expect(breakdown.optimal[0].multiplier).toBeCloseTo(0.6562, 10);
       expect(breakdown.falloff[0].multiplier).toBeCloseTo(0.6562, 10);
     });
@@ -713,7 +713,7 @@ describe("EwarResolverImpl", () => {
       expect(breakdown.tracking).toHaveLength(1);
       expect(breakdown.optimal).toHaveLength(0);
       expect(breakdown.falloff).toHaveLength(0);
-      expect(breakdown.tracking[0].scriptName).toBe("Tracking Speed Disruption Script");
+      expect(breakdown.tracking[0].scriptId).toBe(TRACKING_SCRIPT_ID);
       expect(breakdown.tracking[0].multiplier).toBeCloseTo(0.6562, 10);
     });
 
@@ -731,12 +731,12 @@ describe("EwarResolverImpl", () => {
       expect(resolver.disruptionBreakdown(projection, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
     });
 
-    test("entries preserve moduleName and scriptName and are returned in loadout order", () => {
+    test("entries preserve moduleId and scriptId and are returned in loadout order", () => {
       const first: TrackingDisruptorSpec = { ...TD, moduleName: "Tracking Disruptor I", moduleId: TD_I_ID };
       const second: TrackingDisruptorSpec = { ...TD, moduleName: "Tracking Disruptor II", moduleId: TD_II_ID };
       const projection = disruptorProjection([first, second]);
       const breakdown = resolver.disruptionBreakdown(projection, 10000);
-      expect(breakdown.tracking.map((entry) => entry.moduleName)).toEqual(["Tracking Disruptor I", "Tracking Disruptor II"]);
+      expect(breakdown.tracking.map((entry) => entry.moduleId)).toEqual([TD_I_ID, TD_II_ID]);
     });
   });
 });

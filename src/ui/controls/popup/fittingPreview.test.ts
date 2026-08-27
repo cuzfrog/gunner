@@ -1,6 +1,6 @@
 import type { FittingSummary } from "../../../fitting";
 import type { Language } from "../../../appstate";
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { mockFittingImport } from "../testSupport";
@@ -93,19 +93,20 @@ function createI18n(): I18n {
 function createImageCatalog(): ImageCatalog {
   return {
     shipImageUrl: (_shipId) => "images/ships/Rifter.webp",
-    itemIconUrl: vi.fn((itemName: string) => {
-      if (itemName === "200mm AutoCannon I") return "images/icons/1@1x.png";
-      if (itemName === "Hail S") return "images/icons/hail_s.png";
+    itemIconUrl: vi.fn((id: TypeId) => {
+      if (id === AC_ID) return "images/icons/1@1x.png";
+      if (id === HAIL_ID) return "images/icons/hail_s.png";
       return undefined;
     }),
-    droneIconUrl: (id?: TypeId) => (id === "2456" as TypeId ? "images/icons/2456@1x.png" : undefined),
+    droneIconUrl: (id?: TypeId) => (id === DRONE_ID ? "images/icons/2456@1x.png" : undefined),
   };
 }
 
-const AC_ID: TypeId = "200mm AutoCannon I" as TypeId;
-const MWD_ID: TypeId = "5MN Microwarpdrive I" as TypeId;
-const PLATES_ID: TypeId = "400mm Steel Plates II" as TypeId;
-const HAIL_ID: TypeId = "Hail S" as TypeId;
+const AC_ID: TypeId = toTypeId("486");
+const MWD_ID: TypeId = toTypeId("434");
+const PLATES_ID: TypeId = toTypeId("20349");
+const HAIL_ID: TypeId = toTypeId("12608");
+const DRONE_ID: TypeId = toTypeId("2456");
 
 const SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -151,8 +152,18 @@ describe("DomFittingPreview", () => {
     container.offsetHeight = 200;
     const anchor = new FakeElement();
     anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
+    const NAME_FOR_ID: Record<string, string> = {
+      "486": "200mm AutoCannon I",
+      "434": "5MN Microwarpdrive I",
+      "20349": "400mm Steel Plates II",
+      "12608": "Hail S",
+      "2456": "Hobgoblin II",
+    };
     const fittingImport = vi.mocked(mockFittingImport());
-    fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => (lang === "en" ? id : `${id} (${lang})`));
+    fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
+      const name = NAME_FOR_ID[id] ?? id;
+      return lang === "en" ? name : `${name} (${lang})`;
+    });
     const imageCatalog = createImageCatalog();
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
@@ -253,7 +264,7 @@ describe("DomFittingPreview", () => {
     const summary: FittingSummary = {
       hullName: "Rifter",
       fittingName: "Brawler",
-      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", id: "2456" as TypeId, quantity: 3 }] }],
+      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", id: DRONE_ID, quantity: 3 }] }],
     };
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];
@@ -307,8 +318,8 @@ describe("DomFittingPreview", () => {
     expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(AC_ID, "zh");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(HAIL_ID, "zh");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("200mm AutoCannon I");
-    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith("Hail S");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(AC_ID);
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(HAIL_ID);
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("200mm AutoCannon I (zh)");
     expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("Hail S (zh)");
   });

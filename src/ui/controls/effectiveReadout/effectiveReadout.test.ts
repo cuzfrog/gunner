@@ -97,7 +97,7 @@ function fakeI18nWithEmptyAffected(): I18n {
 }
 
 function fakeFittingImport(): FittingImport {
-  const NAME_FOR_ID: Record<string, string> = { "527": "Stasis Webifier II", "448": "Warp Scrambler II" };
+  const NAME_FOR_ID: Record<string, string> = { "527": "Stasis Webifier II", "448": "Warp Scrambler II", "2109": "Tracking Disruptor II", "29007": "Tracking Speed Disruption Script", "29005": "Optimal Range Disruption Script" };
   return { ...mockFittingImport(), itemNameForId: vi.fn((id, _language) => NAME_FOR_ID[id] ?? String(id)) };
 }
 
@@ -266,9 +266,9 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
     const trackingInput = fakeTrackingInput(0.32, "rad");
     const readout: EffectiveReadout = new EffectiveReadoutImpl({ els, i18n, trackingInput, fittingImport: fakeFittingImport() });
     const disruptionBreakdown = {
-      tracking: [{ moduleName: "Tracking Disruptor II", scriptName: "Tracking Speed Disruption Script", multiplier: 0.6562 }],
-      optimal: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
-      falloff: [{ moduleName: "Tracking Disruptor II", scriptName: "Optimal Range Disruption Script", multiplier: 0.6562 }],
+      tracking: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29007"), multiplier: 0.6562 }],
+      optimal: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.6562 }],
+      falloff: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.6562 }],
     };
     readout.update({
       shipA: { speed: 400, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, trackingBreakdown: disruptionBreakdown, optimalBreakdown: disruptionBreakdown, falloffBreakdown: disruptionBreakdown },
