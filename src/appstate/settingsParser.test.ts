@@ -1,9 +1,8 @@
 import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../gamedata";
-import { isAutopilotMode, isSigResolutionClass } from "../sim";
+import { createSimValueParser } from "../sim";
 import { registerShipsModule, type ShipsCradle } from "../ships";
 import { SettingsParser } from "./settingsParser";
-import type { SettingGuards } from "./settingGuards";
 import {
   chargeCatalog,
   ships,
@@ -27,7 +26,7 @@ import {
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
 
-const testGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
+const simValueParser = createSimValueParser();
 
 beforeEach(() => resetMocks());
 
@@ -583,7 +582,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, settingGuards: testGuards });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
     const override = 2000;
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
@@ -603,7 +602,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, settingGuards: testGuards });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",

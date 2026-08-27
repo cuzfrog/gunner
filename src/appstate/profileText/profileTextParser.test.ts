@@ -1,19 +1,18 @@
 import { toShipId, toTypeId } from "../../gamedata/ids";
 import { StaticItemNameResolver } from "../../gamedata/itemNames";
-import { isAutopilotMode, isSigResolutionClass } from "../../sim";
+import { createSimValueParser } from "../../sim";
 import { ProfileTextParser } from "./profileTextParser";
 import { ProfileTextSerializer } from "./profileTextSerializer";
 import { MINIMAL_PROFILE, SHIP_A_FITTED_HULL } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
-import type { SettingGuards } from "../settingGuards";
 import { makeShips, makeChargeCatalog, RIFTER_PROFILE } from "../localSettingsStore.testSupport";
 
-const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
+const simValueParser = createSimValueParser();
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();
 const itemNameResolver = new StaticItemNameResolver();
-const parser = new ProfileTextParser(guards, ships, chargeCatalog, itemNameResolver);
+const parser = new ProfileTextParser({ simValueParser, ships, chargeCatalog, itemNameResolver });
 const serializer = new ProfileTextSerializer();
 
 describe("profileTextParser", () => {

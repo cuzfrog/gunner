@@ -7,7 +7,7 @@ import type { ProfileEquality } from "./profileEquality";
 import type { ChargeCatalog, FittingImport } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import type { Ships } from "../ships";
-import type { SettingGuards } from "./settingGuards";
+import type { SimValueParser } from "../sim";
 
 export interface AppstateCradle {
   readonly settingsStore: SettingsStore;
@@ -15,7 +15,7 @@ export interface AppstateCradle {
   readonly savedFittings: SavedFittings;
   readonly profileTextCodec: ProfileTextCodec;
   readonly profileEquality: ProfileEquality;
-  readonly settingGuards: SettingGuards;
+  readonly simValueParser: SimValueParser;
   readonly storage: StorageProvider;
   readonly location: LocationProvider;
   readonly navigatorLanguage: string;

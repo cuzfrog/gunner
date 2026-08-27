@@ -1,18 +1,21 @@
-import { isAutopilotMode, isSigResolutionClass } from "../../sim";
+import { asClass, asFunction, createContainer, InjectionMode, type AwilixContainer } from "awilix";
+import { createSimValueParser, type SimValueParser } from "../../sim";
 import { toTypeId } from "../../gamedata/ids";
 import { StaticItemNameResolver } from "../../gamedata/itemNames";
-import { LocalProfileTextCodec } from "./profileTextCodec";
+import type { ChargeCatalog } from "../../fitting";
+import type { ItemNameResolver } from "../../gamedata/itemNames";
+import type { Ships } from "../../ships";
+import { LocalProfileTextCodec, type ProfileTextCodec } from "./profileTextCodec";
 import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
-import type { SettingGuards } from "../settingGuards";
 import { makeShips, makeChargeCatalog, RIFTER_PROFILE } from "../localSettingsStore.testSupport";
 
-const guards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
+const simValueParser = createSimValueParser();
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();
 const itemNameResolver = new StaticItemNameResolver();
-const codec = new LocalProfileTextCodec(guards, ships, chargeCatalog, itemNameResolver);
+const codec = new LocalProfileTextCodec({ simValueParser, ships, chargeCatalog, itemNameResolver });
 
 describe("profileTextCodec", () => {
   test("serialize starts with the v1 header", () => {
@@ -149,5 +152,25 @@ shipB.sig=40`;
       shipBBoosterActivation: [{ active: true, script: "none" }],
     };
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
+  test("parses profile text when constructed through the DI container", () => {
+    interface RegressionCradle {
+      readonly simValueParser: SimValueParser;
+      readonly ships: Ships;
+      readonly chargeCatalog: ChargeCatalog;
+      readonly itemNameResolver: ItemNameResolver;
+      readonly profileTextCodec: ProfileTextCodec;
+    }
+    const container: AwilixContainer<RegressionCradle> = createContainer<RegressionCradle>({ injectionMode: InjectionMode.PROXY });
+    container.register({
+      simValueParser: asFunction(createSimValueParser).singleton(),
+      ships: asFunction(() => ships).singleton(),
+      chargeCatalog: asFunction(() => chargeCatalog).singleton(),
+      itemNameResolver: asFunction(() => itemNameResolver).singleton(),
+      profileTextCodec: asClass(LocalProfileTextCodec).singleton(),
+    });
+    const parsed = container.cradle.profileTextCodec.parse(codec.serialize(MINIMAL_PROFILE));
+    expect(parsed).toBeDefined();
   });
 });

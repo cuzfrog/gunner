@@ -22,7 +22,6 @@ no-new-exports:
   - settingsStore.ts
   - combatantSettings.ts
   - validators.ts
-  - settingGuards.ts
   - userSettings.ts
   - index.ts
   - settingsCompat.ts

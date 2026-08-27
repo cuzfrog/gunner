@@ -6,7 +6,7 @@ import {
   type ProfileSettings,
   type StoredBoosterActivation,
 } from "../userSettings";
-import { clampManeuverAggressivity } from "../../sim";
+import type { SimValueParser } from "../../sim";
 import {
   isNonNegative,
   isOptionalBoosterActivations,
@@ -16,7 +16,6 @@ import {
 } from "../validators";
 import type { ChargeCatalog } from "../../fitting";
 import type { ShipId, TypeId } from "../../gamedata/ids";
-import type { SettingGuards } from "../settingGuards";
 import type { Ships } from "../../ships";
 import { resolveAmmoId, resolveHullId } from "../settingsCompat";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
@@ -26,7 +25,7 @@ const DEFAULT_TURRET_CHARGE_SIZE = 1;
 export function parseScalarValue(
   field: ScalarField,
   value: string,
-  guards: SettingGuards,
+  simValueParser: SimValueParser,
   ships: Ships,
   chargeCatalog: ChargeCatalog,
 ): ScalarValue | undefined {
@@ -34,13 +33,13 @@ export function parseScalarValue(
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
   if (field === "shipAOverload" || field === "shipBOverload") return value === "true" ? true : value === "false" ? false : undefined;
-  if (field === "shipAMode" || field === "shipBMode") return guards.isAutopilotMode(value) ? value : undefined;
+  if (field === "shipAMode" || field === "shipBMode") return simValueParser.parseAutopilotMode(value);
   if (field === "shipASkillLevel" || field === "shipBSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
   }
   if (field === "shipASigRes" || field === "shipBSigRes") {
-    return guards.isSigResolutionClass(value) ? value : undefined;
+    return simValueParser.parseSigResolutionClass(value);
   }
   if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
   if (field === "shipAHullId" || field === "shipBHullId") return resolveLegacyHullId(value, ships);
@@ -54,17 +53,17 @@ export function parseScalarValue(
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
   if (field === "initialDistance" || field === "shipBSig" || field === "shipASig") return isPositive(num) ? num : undefined;
-  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? clampManeuverAggressivity(num) : undefined;
+  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? simValueParser.normalizeAggressivity(num) : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 
 export function parseOverrideValue(
   key: keyof ProfileParamOverrides,
   value: string,
-  guards: SettingGuards,
+  simValueParser: SimValueParser,
 ): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
   if (value === "") return undefined;
-  if (key === "sigRes") return guards.isSigResolutionClass(value) ? value : undefined;
+  if (key === "sigRes") return simValueParser.parseSigResolutionClass(value);
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
   if (key === "shipASig" || key === "shipBSig") return isPositive(num) ? num : undefined;

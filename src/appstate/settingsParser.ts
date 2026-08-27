@@ -12,7 +12,7 @@ import {
   type UserSettings,
   type WeaponRangeVisibility,
 } from "./userSettings";
-import { clampManeuverAggressivity } from "../sim";
+import type { SimValueParser } from "../sim";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { decodeBase64 } from "./urlCodec";
 import { FittingBasis } from "./fittingBasis";
@@ -25,7 +25,6 @@ import {
   type LegacyUserSettings,
 } from "./settingsCompat";
 import { type CombatantSettings, type SessionSettings } from "./combatantSettings";
-import type { SettingGuards } from "./settingGuards";
 import {
   isLanguage,
   isNonNegative,
@@ -56,14 +55,14 @@ export class SettingsParser {
   private readonly chargeCatalog: ChargeCatalog;
   private readonly itemNameResolver: ItemNameResolver;
   private readonly fittingBasis: FittingBasis;
-  private readonly guards: SettingGuards;
+  private readonly guards: SimValueParser;
 
-  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; itemNameResolver: ItemNameResolver; settingGuards: SettingGuards }) {
+  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; itemNameResolver: ItemNameResolver; simValueParser: SimValueParser }) {
     this.ships = deps.ships;
     this.fittingImport = deps.fittingImport;
     this.chargeCatalog = deps.chargeCatalog;
     this.itemNameResolver = deps.itemNameResolver;
-    this.guards = deps.settingGuards;
+    this.guards = deps.simValueParser;
     this.fittingBasis = new FittingBasis(deps);
   }
 
@@ -167,11 +166,11 @@ export class SettingsParser {
     return (
       isSettingsVersion(s.version) &&
       isNonNegative(s.shipATracking) &&
-      this.guards.isSigResolutionClass(s.shipASigRes) &&
+      this.guards.parseSigResolutionClass(s.shipASigRes) !== undefined &&
       isNonNegative(s.shipAOptimal) &&
       isNonNegative(s.shipAFalloff) &&
       isNonNegative(s.shipBTracking) &&
-      this.guards.isSigResolutionClass(s.shipBSigRes) &&
+      this.guards.parseSigResolutionClass(s.shipBSigRes) !== undefined &&
       isNonNegative(s.shipBOptimal) &&
       isNonNegative(s.shipBFalloff) &&
       isPositive(s.initialDistance) &&
@@ -204,7 +203,7 @@ export class SettingsParser {
     const p = side;
     return (
       isNonNegative(s[`${p}Speed`]) &&
-      this.guards.isAutopilotMode(s[`${p}Mode`]) &&
+      this.guards.parseAutopilotMode(s[`${p}Mode`]) !== undefined &&
       isNonNegative(s[`${p}Range`]) &&
       isNonNegative(s[`${p}Mass`]) &&
       isNonNegative(s[`${p}Inertia`]) &&
@@ -274,10 +273,10 @@ export class SettingsParser {
 
   private normalizeAndDefaultAggressivity(record: Record<string, unknown>): void {
     if (record.shipAAggressivity === undefined && isFiniteNumber(record.maneuverAggressivity)) {
-      record.shipAAggressivity = clampManeuverAggressivity(record.maneuverAggressivity);
+      record.shipAAggressivity = this.guards.normalizeAggressivity(record.maneuverAggressivity);
     }
-    record.shipAAggressivity = clampManeuverAggressivity(isFiniteNumber(record.shipAAggressivity) ? record.shipAAggressivity : AGGRESSIVITY_DEFAULT);
-    record.shipBAggressivity = clampManeuverAggressivity(isFiniteNumber(record.shipBAggressivity) ? record.shipBAggressivity : AGGRESSIVITY_DEFAULT);
+    record.shipAAggressivity = this.guards.normalizeAggressivity(isFiniteNumber(record.shipAAggressivity) ? record.shipAAggressivity : AGGRESSIVITY_DEFAULT);
+    record.shipBAggressivity = this.guards.normalizeAggressivity(isFiniteNumber(record.shipBAggressivity) ? record.shipBAggressivity : AGGRESSIVITY_DEFAULT);
     delete record.maneuverAggressivity;
   }
 

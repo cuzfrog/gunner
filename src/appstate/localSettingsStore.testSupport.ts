@@ -1,4 +1,4 @@
-import { isAutopilotMode, isSigResolutionClass } from "../sim";
+import { createSimValueParser } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
@@ -7,7 +7,6 @@ import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
 import type { ProfileEquality } from "./profileEquality";
-import type { SettingGuards } from "./settingGuards";
 import {
   USER_SETTINGS_VERSION,
   type DisplayPreferences,
@@ -219,7 +218,6 @@ export function fakeClipboard(): ClipboardProvider {
   return { readText: async () => lastText, writeText: async (text) => { lastText = text; } };
 }
 const VALID_PROPULSION_IDS: readonly string[] = ["ab-1mn", "ab-10mn", "ab-100mn", "ab-10000mn", "mwd-5mn", "mwd-50mn", "mwd-500mn", "mwd-50000mn"];
-const simGuards: SettingGuards = { isAutopilotMode, isSigResolutionClass };
 export let ships: Ships;
 export let fittingImport: FittingImport;
 export let chargeCatalog: ChargeCatalog;
@@ -287,7 +285,7 @@ export function resetMocks(): void {
   chargeCatalog = makeChargeCatalog();
 }
 export function makeParser(): SettingsParser {
-  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), settingGuards: simGuards });
+  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), simValueParser: createSimValueParser() });
 }
 
 export function fakeEquality(equal = true): ProfileEquality {

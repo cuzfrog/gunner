@@ -1,7 +1,7 @@
 import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation } from "../userSettings";
 import type { ChargeCatalog } from "../../fitting";
 import type { ItemNameResolver } from "../../gamedata/itemNames";
-import type { SettingGuards } from "../settingGuards";
+import type { SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import { resolveBoosterScript, resolveDisruptionScript } from "../settingsCompat";
 import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
@@ -17,16 +17,16 @@ const DEGRADABLE_FIELDS: ReadonlySet<ScalarField> = new Set([
 ]);
 
 export class ProfileTextParser {
-  private readonly guards: SettingGuards;
+  private readonly simValueParser: SimValueParser;
   private readonly ships: Ships;
   private readonly chargeCatalog: ChargeCatalog;
   private readonly itemNameResolver: ItemNameResolver;
 
-  constructor(settingGuards: SettingGuards, ships: Ships, chargeCatalog: ChargeCatalog, itemNameResolver: ItemNameResolver) {
-    this.guards = settingGuards;
-    this.ships = ships;
-    this.chargeCatalog = chargeCatalog;
-    this.itemNameResolver = itemNameResolver;
+  constructor(deps: { simValueParser: SimValueParser; ships: Ships; chargeCatalog: ChargeCatalog; itemNameResolver: ItemNameResolver }) {
+    this.simValueParser = deps.simValueParser;
+    this.ships = deps.ships;
+    this.chargeCatalog = deps.chargeCatalog;
+    this.itemNameResolver = deps.itemNameResolver;
   }
 
   hasHeader(text: string): boolean {
@@ -73,7 +73,7 @@ export class ProfileTextParser {
 
       const override = OVERRIDE_DOT_KEY_TO_FULL.get(dotKey);
       if (override !== undefined) {
-        const parsed = parseOverrideValue(override, value, this.guards);
+        const parsed = parseOverrideValue(override, value, this.simValueParser);
         if (parsed === undefined) return undefined;
         if (dotKey.startsWith("override.shipA.")) {
           shipAOverrides = { ...shipAOverrides, [override]: parsed };
@@ -101,7 +101,7 @@ export class ProfileTextParser {
         shipBBoosterActivationRaw = value;
         continue;
       }
-      const parsed = parseScalarValue(field, value, this.guards, this.ships, this.chargeCatalog);
+      const parsed = parseScalarValue(field, value, this.simValueParser, this.ships, this.chargeCatalog);
       if (parsed === undefined) {
         if (DEGRADABLE_FIELDS.has(field)) continue;
         return undefined;
