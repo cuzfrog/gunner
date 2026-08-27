@@ -50,6 +50,15 @@
 
 .popup-item:focus-visible { outline-offset: -1px; }
 
+/* ---- menu-popup (composition of popup for small popup-item lists) ---- */
+.menu-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  white-space: nowrap;
+}
+
 
 /* ---- trigger ---- */
 .trigger {

@@ -621,16 +621,16 @@ describe("LocalSettingsStore", () => {
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });
 
-  test("savePreferences and loadPreferences round-trip hidden range overlays", () => {
+  test("savePreferences and loadPreferences round-trip range overlay visibility", () => {
     const store = makeStore({ parser: makeParser(), storage: fakeStorage(), location: fakeLocation("http://localhost/") });
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web", "disruptor"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA", disruptor: "both" }, autoZoom: true, zoomFactor: 1 };
     store.savePreferences(preferences);
     expect(store.loadPreferences()).toEqual(preferences);
   });
 
-  test("loadPreferences falls back for invalid hidden range overlays", () => {
+  test("loadPreferences falls back for invalid range overlay visibility", () => {
     const storage = fakeStorage();
-    storage.setItem("gunner-prefs-v1", JSON.stringify({ ...DEFAULT_PREFERENCES, hiddenRangeOverlays: ["web", "invalid"] }));
+    storage.setItem("gunner-prefs-v1", JSON.stringify({ ...DEFAULT_PREFERENCES, rangeOverlayVisibility: { web: "invalid" } }));
     const store = makeStore({ parser: makeParser(), storage, location: fakeLocation("http://localhost/") });
     expect(store.loadPreferences()).toEqual(DEFAULT_PREFERENCES);
   });

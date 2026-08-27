@@ -49,7 +49,7 @@ const APPROVED_PREFIXES = [
   "booster",
   "profile",
   "new-profile",
-  "import-side-popup",
+  "menu-popup",
   "paste",
   "confirm",
   "hints-slide",

@@ -112,7 +112,7 @@ Validation: `.hull-invalid` / `.error` classes apply `--danger-red`. The `.effec
 
 ### Popups
 
-Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.import-side-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
+Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.menu-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
 
 List entries: transparent-bg buttons, hover fills `var(--bg-inset)`, selected entry gets `border-left: 2px solid var(--accent-teal)` + teal text. Group labels (`.fitting-group-label`) are 10px uppercase Chakra Petch.
 

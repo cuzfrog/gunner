@@ -100,7 +100,7 @@ export class SessionCodecImpl implements SessionCodec {
     const shipB = this.shipBSide.capture();
     const shipATurret = this.turretControllers.shipA.capture();
     const shipBTurret = this.turretControllers.shipB.capture();
-    const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
+    const { rangeOverlayVisibility: _, ...preferences } = this.preferencesController.capture();
     return {
       version: USER_SETTINGS_VERSION,
       ...preferences,
@@ -182,7 +182,7 @@ export class SessionCodecImpl implements SessionCodec {
   }
 
   fromProfile(profile: ProfileSettings): UserSettings {
-    const { hiddenRangeOverlays: _, ...preferences } = this.preferencesController.capture();
+    const { rangeOverlayVisibility: _, ...preferences } = this.preferencesController.capture();
     return {
       ...profile,
       shipATracking: profile.shipATracking ?? 0,

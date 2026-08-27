@@ -1,5 +1,5 @@
 import { toTypeId } from "../gamedata/ids";
-import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalHiddenRangeOverlays } from "./validators";
+import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalRangeOverlayVisibility } from "./validators";
 
 describe("isOptionalEwarActivation", () => {
   test("accepts a valid activation with webs and scripted disruptors", () => {
@@ -39,21 +39,25 @@ describe("isOptionalEwarActivation", () => {
   });
 });
 
-describe("isOptionalHiddenRangeOverlays", () => {
+describe("isOptionalRangeOverlayVisibility", () => {
   test("accepts undefined", () => {
-    expect(isOptionalHiddenRangeOverlays(undefined)).toBe(true);
+    expect(isOptionalRangeOverlayVisibility(undefined)).toBe(true);
   });
 
-  test("accepts a valid list of hidden overlay kinds", () => {
-    expect(isOptionalHiddenRangeOverlays(["web", "grappler", "scrambler", "disruptor"])).toBe(true);
+  test("accepts a valid visibility map", () => {
+    expect(isOptionalRangeOverlayVisibility({ web: "shipA", grappler: "both", scrambler: "none", disruptor: "shipB" })).toBe(true);
   });
 
-  test("rejects an unknown kind", () => {
-    expect(isOptionalHiddenRangeOverlays(["web", " ECM "])).toBe(false);
+  test("rejects an unknown kind key", () => {
+    expect(isOptionalRangeOverlayVisibility({ web: "both", ecm: "shipA" })).toBe(false);
   });
 
-  test("rejects a non-array", () => {
-    expect(isOptionalHiddenRangeOverlays({ web: true })).toBe(false);
+  test("rejects an invalid visibility value", () => {
+    expect(isOptionalRangeOverlayVisibility({ web: "all" })).toBe(false);
+  });
+
+  test("rejects a non-object", () => {
+    expect(isOptionalRangeOverlayVisibility(["web", "grappler"])).toBe(false);
   });
 });
 

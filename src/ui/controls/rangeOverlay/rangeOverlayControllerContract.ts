@@ -1,4 +1,4 @@
-import type { EwarProjection } from "../../../sim";
+import type { WeaponRangeVisibility } from "../../../appstate";
 import type { RangeOverlay, RangeOverlayKind } from "../../renderer";
 
 export interface RangeOverlayEls {
@@ -9,10 +9,10 @@ export interface RangeOverlayController {
   descriptors(): readonly RangeOverlayKind[];
   overlays(): readonly RangeOverlay[];
   toggle(kind: RangeOverlayKind): void;
-  isVisible(kind: RangeOverlayKind): boolean;
+  visibilityFor(kind: RangeOverlayKind): WeaponRangeVisibility;
   describe(kind: RangeOverlayKind): string;
-  hiddenKinds(): readonly RangeOverlayKind[];
-  restoreHidden(kinds?: readonly string[]): void;
+  overlayVisibility(): Record<string, WeaponRangeVisibility>;
+  restoreVisibility(entries?: Record<string, WeaponRangeVisibility>): void;
   render(): void;
   update(): void;
 }

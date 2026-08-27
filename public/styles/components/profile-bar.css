@@ -138,12 +138,4 @@
 
 .confirm-buttons > .btn { min-width: 80px; }
 
-.import-side-popup {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px;
-  white-space: nowrap;
-}
-
 }

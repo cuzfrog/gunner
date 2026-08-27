@@ -141,7 +141,7 @@ export class PreferencesControllerImpl implements PreferencesController {
       weaponRangeVisibility: this.weaponRangeVisibility,
       simSpeed: num(this.els.simSpeed),
       gridBrightness: this.getGridBrightness(),
-      hiddenRangeOverlays: this.rangeOverlayController.hiddenKinds(),
+      rangeOverlayVisibility: this.rangeOverlayController.overlayVisibility(),
       autoZoom: this.getAutoZoom(),
       zoomFactor: this.getZoomFactor(),
     };
@@ -222,7 +222,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.weaponRangeVisibility = preferences.weaponRangeVisibility;
     this.els.simSpeed.value = String(preferences.simSpeed);
     this.updateGridBrightnessDisplay(preferences.gridBrightness);
-    this.rangeOverlayController.restoreHidden(preferences.hiddenRangeOverlays);
+    this.rangeOverlayController.restoreVisibility(preferences.rangeOverlayVisibility);
     this.updateUnitToggle("shipA");
     this.updateUnitToggle("shipB");
     this.updateWeaponRangeButton();
@@ -246,9 +246,10 @@ export class PreferencesControllerImpl implements PreferencesController {
 
   private updateWeaponRangeButton(): void {
     const button = this.els.weaponRangeButton;
-    button.setAttribute("aria-pressed", String(this.weaponRangeVisibility !== "none"));
+    const visible = this.weaponRangeVisibility !== "none";
+    button.setAttribute("aria-pressed", String(visible));
     button.setAttribute("data-weapon-range", this.weaponRangeVisibility);
-    button.textContent = this.i18n.t(`label.weaponRange.${this.weaponRangeVisibility}`);
+    button.textContent = this.i18n.t("label.weaponRange");
   }
 
   private updateLanguageToggle(): void {

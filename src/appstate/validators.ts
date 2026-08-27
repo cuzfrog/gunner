@@ -2,7 +2,7 @@ import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "..
 import { toTypeId } from "../gamedata/ids";
 import type { Language } from "./language";
 import type { SettingGuards } from "./settingGuards";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings } from "./userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -194,14 +194,20 @@ export function isOptionalFittedHullSummary(value: unknown): value is FittedHull
   return true;
 }
 
-export function isOptionalHiddenRangeOverlays(value: unknown): value is readonly string[] | undefined {
+export function isOptionalRangeOverlayVisibility(value: unknown): value is Record<string, WeaponRangeVisibility> | undefined {
   if (value === undefined) return true;
-  if (!Array.isArray(value)) return false;
-  return value.every((item) => item === "web" || item === "grappler" || item === "scrambler" || item === "disruptor");
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  for (const key of Object.keys(record)) {
+    if (key !== "web" && key !== "grappler" && key !== "scrambler" && key !== "disruptor") return false;
+    const v = record[key];
+    if (v !== "shipA" && v !== "shipB" && v !== "both" && v !== "none") return false;
+  }
+  return true;
 }
 
 export function stripDisplayPreferences(value: ProfileSettings): ProfileSettings {
-  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, hiddenRangeOverlays: _______, autoZoom: ________, zoomFactor: _________, ...rest } = value as Record<string, unknown>;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, rangeOverlayVisibility: _______, autoZoom: ________, zoomFactor: _________, ...rest } = value as Record<string, unknown>;
   return rest as ProfileSettings;
 }
 

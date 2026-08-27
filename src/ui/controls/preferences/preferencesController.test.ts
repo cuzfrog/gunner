@@ -101,10 +101,10 @@ function mockRangeOverlayController(): RangeOverlayController {
     descriptors: vi.fn(() => []),
     overlays: vi.fn(() => []),
     toggle: vi.fn(),
-    isVisible: vi.fn(() => true),
+    visibilityFor: vi.fn(() => "none" as const),
     describe: vi.fn(() => ""),
-    hiddenKinds: vi.fn(() => []),
-    restoreHidden: vi.fn(),
+    overlayVisibility: vi.fn(() => ({})),
+    restoreVisibility: vi.fn(),
     render: vi.fn(),
     update: vi.fn(),
   };
@@ -236,7 +236,7 @@ describe("PreferencesController", () => {
   test("setLanguage refreshes the weapon range button text", () => {
     const { controller, els } = build();
     controller.setLanguage("zh");
-    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange.both");
+    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange");
   });
 
   test("setLanguage emits language changed synchronously", async () => {
@@ -319,7 +319,7 @@ describe("PreferencesController", () => {
     const { controller, els } = build();
     els.gridBrightnessSlider.value = "0.5";
     els.simSpeed.value = "2";
-    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.5, hiddenRangeOverlays: [], autoZoom: true, zoomFactor: 1 });
+    expect(controller.capture()).toEqual({ language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 2, gridBrightness: 0.5, rangeOverlayVisibility: {}, autoZoom: true, zoomFactor: 1 });
   });
 
   test("getWeaponRangeVisibility defaults to both", () => {
@@ -327,7 +327,7 @@ describe("PreferencesController", () => {
     expect(controller.getWeaponRangeVisibility()).toBe("both");
   });
 
-  test("cycleWeaponRange cycles through both, shipA, shipB, none, and back to both", () => {
+  test("cycleWeaponRange cycles through both, shipA, shipB, none", () => {
     const { controller, els } = build();
     expect(controller.getWeaponRangeVisibility()).toBe("both");
     controller.cycleWeaponRange();
@@ -336,7 +336,6 @@ describe("PreferencesController", () => {
     expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipA");
     controller.cycleWeaponRange();
     expect(controller.getWeaponRangeVisibility()).toBe("shipB");
-    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipB");
     controller.cycleWeaponRange();
     expect(controller.getWeaponRangeVisibility()).toBe("none");
     expect(els.weaponRangeButton.getAttribute("aria-pressed")).toBe("false");
@@ -355,36 +354,35 @@ describe("PreferencesController", () => {
   test("cycleWeaponRange updates the button label via i18n", () => {
     const { controller, els, i18n } = build();
     controller.cycleWeaponRange();
-    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange.shipA");
-    expect(i18n.t).toHaveBeenCalledWith("label.weaponRange.shipA");
+    expect(els.weaponRangeButton.textContent).toBe("label.weaponRange");
+    expect(i18n.t).toHaveBeenCalledWith("label.weaponRange");
   });
 
   test("restore applies the persisted weapon range visibility", () => {
     const { controller, els } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "shipB", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "none", simSpeed: 4, gridBrightness: 0.5, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
-    expect(controller.getWeaponRangeVisibility()).toBe("shipB");
-    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("shipB");
+    expect(controller.getWeaponRangeVisibility()).toBe("none");
+    expect(els.weaponRangeButton.getAttribute("data-weapon-range")).toBe("none");
   });
 
   test("capture includes the current weapon range visibility", () => {
     const { controller } = build();
     controller.cycleWeaponRange();
-    controller.cycleWeaponRange();
-    expect(controller.capture().weaponRangeVisibility).toBe("shipB");
+    expect(controller.capture().weaponRangeVisibility).toBe("shipA");
   });
 
-  test("restore applies hidden range overlay state", () => {
+  test("restore applies range overlay visibility", () => {
     const { controller, rangeOverlayController } = build();
-    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, hiddenRangeOverlays: ["web"], autoZoom: true, zoomFactor: 1 };
+    const preferences: DisplayPreferences = { language: "en", shipATrackingUnit: "rad", shipBTrackingUnit: "rad", weaponRangeVisibility: "both", simSpeed: 4, gridBrightness: 0.5, rangeOverlayVisibility: { web: "shipA" }, autoZoom: true, zoomFactor: 1 };
     controller.restore(preferences);
-    expect(rangeOverlayController.restoreHidden).toHaveBeenCalledWith(["web"]);
+    expect(rangeOverlayController.restoreVisibility).toHaveBeenCalledWith({ web: "shipA" });
   });
 
-  test("capture includes hidden range overlay kinds", () => {
+  test("capture includes range overlay visibility", () => {
     const { controller, rangeOverlayController } = build();
-    vi.mocked(rangeOverlayController.hiddenKinds).mockReturnValue(["grappler"]);
-    expect(controller.capture().hiddenRangeOverlays).toEqual(["grappler"]);
+    vi.mocked(rangeOverlayController.overlayVisibility).mockReturnValue({ grappler: "both" });
+    expect(controller.capture().rangeOverlayVisibility).toEqual({ grappler: "both" });
   });
 
   test("restore applies display preferences to the DOM and loads the language pack", async () => {

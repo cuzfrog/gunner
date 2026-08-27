@@ -1,11 +1,14 @@
+import type { WeaponRangeVisibility } from "../../../appstate";
 import type { EwarActivation, EwarLoadout, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { RangeOverlay, RangeOverlayKind } from "../../renderer";
 import type { EwarController, EwarEffectDescriber } from "../ewar";
+import type { Side } from "../side";
 import type { UiEvents } from "../../events";
 import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
 
 const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor"];
+const SIDES: readonly Side[] = ["shipA", "shipB"];
 const TITLE_REFRESH_INTERVAL_MS = 250;
 
 export class RangeOverlayControllerImpl implements RangeOverlayController {
@@ -16,7 +19,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   private readonly ewarController: EwarController;
   private readonly events: UiEvents;
   private distance = 0;
-  private readonly hiddenSet = new Set<RangeOverlayKind>(ALL_KINDS);
+  private readonly visibilityMap = new Map<RangeOverlayKind, WeaponRangeVisibility>();
   private readonly chips = new Map<RangeOverlayKind, HTMLButtonElement>();
   private lastTitleRefresh = 0;
   private lastDescriptors: readonly RangeOverlayKind[] = [];
@@ -28,6 +31,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.ewarController = deps.ewarController;
     this.events = deps.events;
     this.now = deps.now;
+    for (const kind of ALL_KINDS) this.visibilityMap.set(kind, "none");
     this.events.onDistanceChanged((d) => { this.distance = d; });
     this.render();
   }
@@ -44,11 +48,11 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
 
   overlays(): readonly RangeOverlay[] {
     const out: RangeOverlay[] = [];
-    for (const side of ["shipA", "shipB"] as const) {
+    for (const side of SIDES) {
       const projection = this.ewarController.projection(side);
       if (!projection) continue;
       for (const kind of this.descriptors()) {
-        if (!this.isVisible(kind)) continue;
+        if (!this.isSideVisible(kind, side)) continue;
         const overlay = this.overlayFor(side, kind, projection);
         if (overlay) out.push(overlay);
       }
@@ -57,14 +61,17 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   toggle(kind: RangeOverlayKind): void {
-    if (this.hiddenSet.has(kind)) this.hiddenSet.delete(kind);
-    else this.hiddenSet.add(kind);
+    const cycle = this.cycleFor(kind);
+    const current = this.visibilityFor(kind);
+    const index = cycle.indexOf(current);
+    const next = index >= 0 ? cycle[(index + 1) % cycle.length] : cycle[0];
+    this.visibilityMap.set(kind, next);
     this.updateChipState(kind);
     this.events.emitDisplayInvalidated();
   }
 
-  isVisible(kind: RangeOverlayKind): boolean {
-    return !this.hiddenSet.has(kind);
+  visibilityFor(kind: RangeOverlayKind): WeaponRangeVisibility {
+    return this.visibilityMap.get(kind) ?? "none";
   }
 
   describe(kind: RangeOverlayKind): string {
@@ -79,15 +86,17 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     }
   }
 
-  hiddenKinds(): readonly RangeOverlayKind[] {
-    return [...this.hiddenSet];
+  overlayVisibility(): Record<string, WeaponRangeVisibility> {
+    const out: Record<string, WeaponRangeVisibility> = {};
+    for (const kind of ALL_KINDS) out[kind] = this.visibilityFor(kind);
+    return out;
   }
 
-  restoreHidden(kinds?: readonly string[]): void {
-    if (kinds) {
-      this.hiddenSet.clear();
-      for (const kind of kinds) {
-        if (isRangeOverlayKind(kind)) this.hiddenSet.add(kind);
+  restoreVisibility(entries?: Record<string, WeaponRangeVisibility>): void {
+    if (entries) {
+      for (const kind of ALL_KINDS) {
+        const value = entries[kind];
+        this.visibilityMap.set(kind, isWeaponRangeVisibility(value) ? value : "none");
       }
     }
     this.render();
@@ -97,9 +106,8 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     const now = this.now();
     const current = this.descriptors();
     this.lastDescriptors = current;
-    this.els.legend.hidden = current.length === 0;
     if (current.length === 0) {
-      this.els.legend.innerHTML = "";
+      for (const chip of this.chips.values()) chip.remove();
       this.chips.clear();
       this.lastTitleRefresh = now;
       return;
@@ -112,7 +120,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         this.els.legend.appendChild(chip);
       }
       chip.textContent = this.i18n.t(`label.ewar.${kind}`);
-      chip.setAttribute("aria-pressed", String(this.isVisible(kind)));
+      chip.setAttribute("aria-pressed", String(this.visibilityFor(kind) !== "none"));
     }
     for (const [kind, chip] of this.chips) {
       if (!current.includes(kind)) {
@@ -136,7 +144,21 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.refreshTitles();
   }
 
-  private overlayFor(side: "shipA" | "shipB", kind: RangeOverlayKind, projection: EwarProjection): RangeOverlay | undefined {
+  private isSideVisible(kind: RangeOverlayKind, side: Side): boolean {
+    const visibility = this.visibilityFor(kind);
+    return visibility === "both" || visibility === side;
+  }
+
+  private cycleFor(kind: RangeOverlayKind): readonly WeaponRangeVisibility[] {
+    const shipAHas = hasKind(this.ewarController.projection("shipA"), kind);
+    const shipBHas = hasKind(this.ewarController.projection("shipB"), kind);
+    if (shipAHas && shipBHas) return ["both", "shipA", "shipB", "none"];
+    if (shipAHas) return ["both", "none"];
+    if (shipBHas) return ["both", "none"];
+    return ["none"];
+  }
+
+  private overlayFor(side: Side, kind: RangeOverlayKind, projection: EwarProjection): RangeOverlay | undefined {
     switch (kind) {
       case "web": return this.webOverlay(side, projection);
       case "grappler": return this.grapplerOverlay(side, projection);
@@ -145,7 +167,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     }
   }
 
-  private webOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
+  private webOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
     let maxRange = 0;
     for (let i = 0; i < projection.loadout.webs.length; i++) {
       const activation = projection.activation?.webs[i];
@@ -159,7 +181,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     return { side, kind: "web", radius: maxRange };
   }
 
-  private scramblerOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
+  private scramblerOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
     let maxRange = 0;
     for (let i = 0; i < projection.loadout.scramblers.length; i++) {
       const activation = projection.activation?.scramblers[i];
@@ -173,14 +195,14 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     return { side, kind: "scrambler", radius: maxRange };
   }
 
-  private grapplerOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
+  private grapplerOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
     return this.falloffOverlay(side, "grappler", projection, projection.loadout.grapplers, (spec, activation) => {
       const scale = activation?.overloaded ? 1 + spec.overloadOptimalBonusPercent / 100 : 1;
       return { optimal: spec.optimal * scale, falloff: spec.falloff };
     });
   }
 
-  private disruptorOverlay(side: "shipA" | "shipB", projection: EwarProjection): RangeOverlay | undefined {
+  private disruptorOverlay(side: Side, projection: EwarProjection): RangeOverlay | undefined {
     return this.falloffOverlay(side, "disruptor", projection, projection.loadout.disruptors, (spec) => ({
       optimal: spec.optimal,
       falloff: spec.falloff,
@@ -188,7 +210,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private falloffOverlay<T extends StasisGrapplerSpec | TrackingDisruptorSpec>(
-    side: "shipA" | "shipB",
+    side: Side,
     kind: "grappler" | "disruptor",
     projection: EwarProjection,
     specs: readonly T[],
@@ -226,7 +248,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
 
   private updateChipState(kind: RangeOverlayKind): void {
     const chip = this.chips.get(kind);
-    if (chip) chip.setAttribute("aria-pressed", String(this.isVisible(kind)));
+    if (chip) chip.setAttribute("aria-pressed", String(this.visibilityFor(kind) !== "none"));
   }
 
   private refreshTitles(): void {
@@ -267,8 +289,8 @@ function hasKind(projection: EwarProjection | undefined, kind: RangeOverlayKind)
   }
 }
 
-function isRangeOverlayKind(value: string): value is RangeOverlayKind {
-  return value === "web" || value === "grappler" || value === "scrambler" || value === "disruptor";
+function isWeaponRangeVisibility(value: unknown): value is WeaponRangeVisibility {
+  return value === "shipA" || value === "shipB" || value === "both" || value === "none";
 }
 
 function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {

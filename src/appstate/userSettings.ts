@@ -136,7 +136,7 @@ export interface DisplayPreferences {
   readonly weaponRangeVisibility: WeaponRangeVisibility;
   readonly simSpeed: number;
   readonly gridBrightness: number;
-  readonly hiddenRangeOverlays?: readonly string[];
+  readonly rangeOverlayVisibility?: Record<string, WeaponRangeVisibility>;
   readonly autoZoom?: boolean;
   readonly zoomFactor?: number;
 }
