@@ -1,4 +1,5 @@
 import type { ChargeCatalog, FittingImport } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
 import {
@@ -15,6 +16,8 @@ import {
 } from "../../../appstate";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { LauncherController } from "../launcher";
+import type { WeaponSystemSwitch } from "../sidePanel";
 import { num } from "../controlsDom";
 import { applyStartupDefaults } from "./startupDefaults";
 import type { HintRotator } from "../hints";
@@ -44,6 +47,8 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly turretOverridesBySide: Record<Side, TurretOverrides>;
+  private readonly launcherControllers: Record<Side, LauncherController>;
+  private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly preferencesController: PreferencesController;
   private readonly profileController: ProfileController;
   private readonly i18n: I18n;
@@ -63,6 +68,8 @@ export class SessionCodecImpl implements SessionCodec {
     shipBSide: SidePanel;
     turretControllers: Record<Side, TurretController>;
     turretOverridesBySide: Record<Side, TurretOverrides>;
+    launcherControllers: Record<Side, LauncherController>;
+    weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
     preferences: PreferencesController;
     profileController: ProfileController;
     i18n: I18n;
@@ -80,6 +87,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.shipBSide = deps.shipBSide;
     this.turretControllers = deps.turretControllers;
     this.turretOverridesBySide = deps.turretOverridesBySide;
+    this.launcherControllers = deps.launcherControllers;
+    this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.preferencesController = deps.preferences;
     this.profileController = deps.profileController;
     this.i18n = deps.i18n;
@@ -103,6 +112,10 @@ export class SessionCodecImpl implements SessionCodec {
     const shipB = this.shipBSide.capture();
     const shipATurret = this.turretControllers.shipA.capture();
     const shipBTurret = this.turretControllers.shipB.capture();
+    const shipALauncher = this.launcherControllers.shipA.capture();
+    const shipBLauncher = this.launcherControllers.shipB.capture();
+    const shipAWeaponKind = this.weaponSystemSwitches.shipA.activeKind();
+    const shipBWeaponKind = this.weaponSystemSwitches.shipB.activeKind();
     const { rangeOverlayVisibility: _, ...preferences } = this.preferencesController.capture();
     return {
       version: USER_SETTINGS_VERSION,
@@ -146,6 +159,10 @@ export class SessionCodecImpl implements SessionCodec {
       shipBFittedHull: shipB.fittedHull,
       shipAAmmo: shipATurret.ammo,
       shipBAmmo: shipBTurret.ammo,
+      shipAWeaponKind,
+      shipBWeaponKind,
+      shipAMissileAmmo: shipALauncher.ammo,
+      shipBMissileAmmo: shipBLauncher.ammo,
       shipAEwarActivation: this.ewarController.capture("shipA"),
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
@@ -195,6 +212,11 @@ export class SessionCodecImpl implements SessionCodec {
     this.boosterController.restore(side, loadout, activation);
   }
 
+  private restoreLauncher(side: Side, fitting: string | undefined, ammoId: TypeId | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    this.launcherControllers[side].restore(fitting, panel.skillConditions(), ammoId);
+  }
+
   resetToDefaults(): void {
     this.settingsStore.clearSelectedProfile();
     this.applyShipState(this.pristineSettings);
@@ -225,6 +247,10 @@ export class SessionCodecImpl implements SessionCodec {
       optimal: settings.shipB.optimal,
       falloff: settings.shipB.falloff,
     });
+    this.restoreLauncher("shipA", settings.shipA.fitting, settings.shipA.missileAmmo);
+    this.restoreLauncher("shipB", settings.shipB.fitting, settings.shipB.missileAmmo);
+    this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
+    this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
     this.restoreEwar("shipA", settings.shipA.fitting, settings.shipA.ewarActivation);
     this.restoreEwar("shipB", settings.shipB.fitting, settings.shipB.ewarActivation);
     this.restoreBooster("shipA", settings.shipA.fitting, settings.shipA.boosterActivation);

@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { ChargeCatalog, FittingImport, MissileCatalog } from "../fitting";
 import type { ShipId } from "../gamedata/ids";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import type { Ships } from "../ships";
@@ -57,7 +57,7 @@ export class SettingsParser {
   private readonly fittingBasis: FittingBasis;
   private readonly guards: SimValueParser;
 
-  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; itemNameResolver: ItemNameResolver; simValueParser: SimValueParser }) {
+  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; missileCatalog: MissileCatalog; itemNameResolver: ItemNameResolver; simValueParser: SimValueParser }) {
     this.ships = deps.ships;
     this.fittingImport = deps.fittingImport;
     this.chargeCatalog = deps.chargeCatalog;
@@ -217,6 +217,8 @@ export class SettingsParser {
       isOptionalFittedHullSummary(s[`${p}FittedHull`]) &&
       isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
       isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
+      isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
+      isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
       (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
     );
   }
@@ -454,6 +456,8 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.fittedHull !== undefined) wire[`${p}FittedHull` as const] = combatant.fittedHull;
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
+  if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
+  if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
 }
 
@@ -483,9 +487,15 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     optimal: sideValue(side, settings.shipAOptimal, settings.shipBOptimal) ?? settings.optimal ?? 0,
     falloff: sideValue(side, settings.shipAFalloff, settings.shipBFalloff) ?? settings.falloff ?? 0,
     ammo: sideValue(side, settings.shipAAmmo, settings.shipBAmmo),
+    weaponKind: sideValue(side, settings.shipAWeaponKind, settings.shipBWeaponKind),
+    missileAmmo: sideValue(side, settings.shipAMissileAmmo, settings.shipBMissileAmmo),
   };
 }
 
 function sideValue<T>(side: "shipA" | "shipB", shipAValue: T, shipBValue: T): T {
   return side === "shipA" ? shipAValue : shipBValue;
+}
+
+function isOptionalWeaponKind(value: unknown): value is "turret" | "missile" | undefined {
+  return value === undefined || value === "turret" || value === "missile";
 }

@@ -25,6 +25,15 @@ import {
 } from "./localSettingsStore.testSupport";
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
+import type { MissileCatalog } from "../fitting";
+
+const stubMissileCatalog: MissileCatalog = {
+  missilesForLauncher: () => [],
+  usualForLauncher: () => undefined,
+  withCharge: () => { throw new Error("not used"); },
+  has: () => false,
+  idForName: () => undefined,
+};
 
 const simValueParser: SimValueParser = (() => {
   const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
@@ -50,12 +59,12 @@ describe("SettingsParser", () => {
     const v8 = { ...DEFAULT_SETTINGS, version: 8 };
     const v9 = { ...DEFAULT_SETTINGS, version: 9 };
     const v10 = { ...DEFAULT_SETTINGS, version: 10 };
-    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(12);
-    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(12);
-    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(12);
-    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(12);
-    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(12);
-    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(12);
+    expect(makeParser().parseUserSettings(JSON.stringify(v5))?.version).toBe(13);
+    expect(makeParser().parseUserSettings(JSON.stringify(v6))?.version).toBe(13);
+    expect(makeParser().parseUserSettings(JSON.stringify(v7))?.version).toBe(13);
+    expect(makeParser().parseUserSettings(JSON.stringify(v8))?.version).toBe(13);
+    expect(makeParser().parseUserSettings(JSON.stringify(v9))?.version).toBe(13);
+    expect(makeParser().parseUserSettings(JSON.stringify(v10))?.version).toBe(13);
   });
 
   test("parseUserSettings defaults missing shipAAmmo", () => {
@@ -586,7 +595,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, missileCatalog: stubMissileCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
     const override = 2000;
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
@@ -606,7 +615,7 @@ describe("SettingsParser", () => {
     const realShips = createContainer<ShipsCradle>({ injectionMode: InjectionMode.PROXY });
     registerGameDataModule(realShips);
     registerShipsModule(realShips);
-    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
+    const parser = new SettingsParser({ ships: realShips.cradle.ships, fittingImport, chargeCatalog, missileCatalog: stubMissileCatalog, itemNameResolver: realShips.cradle.itemNameResolver, simValueParser });
     const settings: UserSettings = {
       ...DEFAULT_SETTINGS,
       shipAFitting: "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive",
@@ -685,6 +694,38 @@ describe("SettingsParser", () => {
     const parser = makeParser();
     const session = parser.fromWire(URL_SETTINGS);
     expect(parser.toWire(session)).toEqual(URL_SETTINGS);
+  });
+
+  test("fromWire and toWire round-trip preserves weaponKind and missileAmmo", () => {
+    const parser = makeParser();
+    const wire: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      shipAWeaponKind: "missile",
+      shipBWeaponKind: "turret",
+      shipAMissileAmmo: toTypeId("202"),
+    };
+    const session = parser.fromWire(wire);
+    expect(session.shipA.weaponKind).toBe("missile");
+    expect(session.shipB.weaponKind).toBe("turret");
+    expect(session.shipA.missileAmmo).toBe(toTypeId("202"));
+    expect(session.shipB.missileAmmo).toBeUndefined();
+    expect(parser.toWire(session)).toEqual(wire);
+  });
+
+  test("absent weaponKind defaults to undefined in session settings", () => {
+    const parser = makeParser();
+    const session = parser.fromWire(DEFAULT_SETTINGS);
+    expect(session.shipA.weaponKind).toBeUndefined();
+    expect(session.shipB.weaponKind).toBeUndefined();
+  });
+
+  test("version 12 settings migrate to version 13", () => {
+    const parser = makeParser();
+    const v12 = JSON.stringify({ ...DEFAULT_SETTINGS, version: 12 });
+    const parsed = parser.parseUserSettings(v12);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.version).toBe(13);
+    expect(parsed!.shipA.weaponKind).toBeUndefined();
   });
 
   test("fromProfile defaults missing ammo to usualForChargeSize(1)", () => {

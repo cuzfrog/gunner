@@ -2,7 +2,7 @@ import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
-import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
+import type { ChargeCatalog, FittingImport, ImportedFitting, MissileCatalog } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
@@ -212,6 +212,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
   boosts: { computers: [], scripts: [] },
+  hullBonuses: [],
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
@@ -290,7 +291,7 @@ export function resetMocks(): void {
   chargeCatalog = makeChargeCatalog();
 }
 export function makeParser(): SettingsParser {
-  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), simValueParser: simValueParserFromContainer() });
+  return new SettingsParser({ ships, fittingImport, chargeCatalog, missileCatalog: mockMissileCatalog(), itemNameResolver: new StaticItemNameResolver(), simValueParser: simValueParserFromContainer() });
 }
 
 function simValueParserFromContainer(): SimValueParser {
@@ -317,4 +318,14 @@ export function makeStore(options: {
     profileEquality: options.equality ?? fakeEquality(true),
     navigatorLanguage: options.navigatorLanguage,
   });
+}
+
+function mockMissileCatalog(): MissileCatalog {
+  return {
+    missilesForLauncher: vi.fn(() => []),
+    usualForLauncher: vi.fn(() => undefined),
+    withCharge: vi.fn(),
+    has: vi.fn(() => false),
+    idForName: vi.fn(() => undefined),
+  };
 }

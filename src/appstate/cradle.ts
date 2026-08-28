@@ -4,7 +4,7 @@ import type { SettingsStore } from "./settingsStore";
 import type { SettingsParser } from "./settingsParser";
 import type { ProfileTextCodec } from "./profileText";
 import type { ProfileEquality } from "./profileEquality";
-import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { ChargeCatalog, FittingImport, MissileCatalog } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import type { Ships } from "../ships";
 import type { SimValueParser } from "../sim";
@@ -22,5 +22,6 @@ export interface AppstateCradle {
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
   readonly chargeCatalog: ChargeCatalog;
+  readonly missileCatalog: MissileCatalog;
   readonly itemNameResolver: ItemNameResolver;
 }

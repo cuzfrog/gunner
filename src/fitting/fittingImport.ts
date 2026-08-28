@@ -85,6 +85,7 @@ export interface ImportedFitting {
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
+  readonly hullBonuses: readonly HullBonus[];
 }
 
 export interface PropulsionVariant {
@@ -201,6 +202,7 @@ export class FittingImportImpl implements FittingImport {
       cargoCharges,
       ewar,
       boosts,
+      hullBonuses,
     };
   }
 

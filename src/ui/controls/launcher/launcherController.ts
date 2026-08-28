@@ -75,7 +75,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.render();
   }
 
-  restore(fitting?: string, conditions?: StatConditions, ammo?: string): void {
+  restore(fitting?: string, conditions?: StatConditions, ammoId?: TypeId): void {
     if (conditions) this.skillLevel = conditions.skillLevel;
     if (fitting && conditions) {
       const imported = this.resolveFitting(fitting, conditions);
@@ -83,12 +83,9 @@ export class LauncherControllerImpl implements LauncherController {
         this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;
-        if (ammo) {
-          const ammoId = this.missileCatalog.idForName(ammo);
-          if (ammoId && this.missileCatalog.has(ammoId)) {
-            this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, ammoId, this.hullBonuses, this.skillLevel);
-            this.currentAmmoId = ammoId;
-          }
+        if (ammoId && this.missileCatalog.has(ammoId)) {
+          this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, ammoId, this.hullBonuses, this.skillLevel);
+          this.currentAmmoId = ammoId;
         }
       } else {
         this.selectedLauncher = undefined;

@@ -54,7 +54,7 @@ describe("LauncherController", () => {
     const { controller, fittingImport, missileCatalog } = buildLauncher({
       fittingImport: { importFitting: vi.fn(() => importedWithLauncher(importedLauncherFixture())) },
     });
-    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, "Nova Light Missile");
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, NOVA_LIGHT_ID);
     expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
     expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
     expect(missileCatalog.withCharge).toHaveBeenCalledWith(expect.anything(), NOVA_LIGHT_ID, [], 5);

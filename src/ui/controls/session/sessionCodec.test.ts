@@ -9,7 +9,7 @@ import {
   type UserSettings,
 } from "../../../appstate";
 import type { ChargeCatalog } from "../../../fitting";
-import type { TypeId } from "../../../gamedata/ids";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { ImportedTurret } from "../../../fitting";
 import { type AutopilotMode, type SigResolutionClass, type TurretSpec } from "../../../sim";
 import { SessionCodecImpl } from "./sessionCodec";
@@ -27,6 +27,8 @@ import type { TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { LauncherController } from "../launcher";
+import type { WeaponSystemSwitch } from "../sidePanel";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 
 function fakeEls() {
@@ -57,6 +59,58 @@ function panelStateFrom(settings: UserSettings, side: "shipA" | "shipB"): SidePa
     overrides: side === "shipA" ? (settings.shipAOverrides ?? {}) : (settings.shipBOverrides ?? {}),
     fittedHull,
     sig: side === "shipA" ? settings.shipASig : settings.shipBSig,
+  };
+}
+
+function makeSettings(): UserSettings {
+  return {
+    version: USER_SETTINGS_VERSION,
+    shipATrackingUnit: "score",
+    shipBTrackingUnit: "score",
+    weaponRangeVisibility: "both",
+    shipATracking: 0.5,
+    shipASigRes: "M",
+    shipAOptimal: 2000,
+    shipAFalloff: 4000,
+    shipBTracking: 0.6,
+    shipBSigRes: "S",
+    shipBOptimal: 8000,
+    shipBFalloff: 5000,
+    shipASpeed: 450,
+    shipAMode: "keepAtRange",
+    shipARange: 8000,
+    shipAAggressivity: 1.5,
+    shipBAggressivity: 1,
+    gridBrightness: 0.75,
+    autoZoom: true,
+    zoomFactor: 1,
+    shipAMass: 1_100_000,
+    shipAInertia: 2.5,
+    shipASkillLevel: 4,
+    shipAOverload: false,
+    shipAHullId: undefined,
+    shipAPropulsion: undefined,
+    shipAFitting: undefined,
+    shipAOverrides: {},
+    shipAFittedHull: undefined,
+    initialDistance: 7000,
+    shipBSpeed: 260,
+    shipBMode: "orbit",
+    shipBRange: 7000,
+    shipBMass: 1_200_000,
+    shipBInertia: 2.8,
+    shipBSkillLevel: 3,
+    shipBOverload: true,
+    shipBSig: 50,
+    shipBHullId: undefined,
+    shipBPropulsion: undefined,
+    shipBFitting: undefined,
+    shipBOverrides: {},
+    shipBFittedHull: undefined,
+    shipAAmmo: "12608" as TypeId,
+    shipBAmmo: "12608" as TypeId,
+    simSpeed: 2,
+    language: "zh",
   };
 }
 
@@ -184,12 +238,44 @@ function mockTurretOverridesBySide(shipAOverrides: TurretOverrides = mockTurretO
   return { shipA: shipAOverrides, shipB: shipBOverrides };
 }
 
+function mockLauncherControllers(): Record<Side, LauncherController> {
+  const make = (): LauncherController => ({
+    side: "shipA",
+    popup: mockPopup(),
+    launcher: vi.fn(() => undefined),
+    ammoId: vi.fn(() => undefined),
+    currentMissileSpec: vi.fn(() => undefined),
+    applyImported: vi.fn(),
+    restore: vi.fn(),
+    clear: vi.fn(),
+    capture: vi.fn(() => ({ ammo: undefined })),
+    isAmmoPopupOpen: vi.fn(() => false),
+    openAmmoPopup: vi.fn(),
+    closeAmmoPopup: vi.fn(),
+    render: vi.fn(),
+  });
+  return { shipA: make(), shipB: make() };
+}
+
+function mockWeaponSystemSwitches(): Record<Side, WeaponSystemSwitch> {
+  const make = (): WeaponSystemSwitch => ({
+    side: "shipA",
+    activeKind: vi.fn(() => "turret" as const),
+    setActiveKind: vi.fn(),
+    refresh: vi.fn(),
+    clear: vi.fn(),
+  });
+  return { shipA: make(), shipB: make() };
+}
+
 function buildCodec(options: {
   els?: ReturnType<typeof createControlsEls>;
   shipA?: SidePanel;
   shipB?: SidePanel;
   turretControllers?: Record<Side, FakeTurretController>;
   turretOverridesBySide?: Record<Side, TurretOverrides>;
+  launcherControllers?: Record<Side, LauncherController>;
+  weaponSystemSwitches?: Record<Side, WeaponSystemSwitch>;
   preferences?: Partial<PreferencesController>;
   profileController?: Partial<ProfileController>;
   settingsStore?: Partial<SettingsStore>;
@@ -237,12 +323,16 @@ function buildCodec(options: {
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
+  const launcherControllers = options.launcherControllers ?? mockLauncherControllers();
+  const weaponSystemSwitches = options.weaponSystemSwitches ?? mockWeaponSystemSwitches();
   const codec = new SessionCodecImpl({
     els,
     shipASide: shipA,
     shipBSide: shipB,
     turretControllers,
     turretOverridesBySide,
+    launcherControllers,
+    weaponSystemSwitches,
     preferences,
     profileController,
     i18n,
@@ -255,7 +345,7 @@ function buildCodec(options: {
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {
@@ -428,6 +518,45 @@ describe("SessionCodec", () => {
     expect(turretOverridesBySide.shipA.set).toHaveBeenCalledWith({});
     expect(turretOverridesBySide.shipB.set).toHaveBeenCalledWith({});
     expect(profileController.markLoaded).toHaveBeenCalledWith("");
+  });
+
+  test("restore applies launcher ammo and weapon kind", () => {
+    const settings: UserSettings = {
+      ...makeSettings(),
+      shipAWeaponKind: "missile",
+      shipBWeaponKind: "turret",
+      shipAMissileAmmo: toTypeId("202"),
+    };
+    const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
+    const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
+    const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
+    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
+    const events = new UiEventsImpl();
+    const session = sessionFromWire(settings);
+    const { codec, launcherControllers, weaponSystemSwitches } = buildCodec({ shipA, shipB, profileController, settingsStore, i18n, hintRotator, events });
+    codec.restoreStartup({ settings: session, selectedProfileName: null });
+    expect(launcherControllers.shipA.restore).toHaveBeenCalledWith(settings.shipAFitting, { skillLevel: 5, overloaded: true }, toTypeId("202"));
+    expect(launcherControllers.shipB.restore).toHaveBeenCalledWith(settings.shipBFitting, { skillLevel: 5, overloaded: true }, undefined);
+    expect(weaponSystemSwitches.shipA.setActiveKind).toHaveBeenCalledWith("missile");
+    expect(weaponSystemSwitches.shipB.setActiveKind).toHaveBeenCalledWith("turret");
+  });
+
+  test("restore defaults absent weapon kind to turret", () => {
+    const settings = makeSettings();
+    const shipA = mockSidePanel("shipA", panelStateFrom(settings, "shipA"));
+    const shipB = mockSidePanel("shipB", panelStateFrom(settings, "shipB"));
+    const profileController = { restoreFromStartup: vi.fn(() => false), markLoaded: vi.fn(), refresh: vi.fn() } as unknown as ProfileController;
+    const settingsStore = { savePreferences: vi.fn(), loadPreferences: vi.fn() } as unknown as SettingsStore;
+    const i18n = { translateDocument: vi.fn() } as unknown as I18n;
+    const hintRotator = { refresh: vi.fn() } as unknown as HintRotator;
+    const events = new UiEventsImpl();
+    const session = sessionFromWire(settings);
+    const { codec, weaponSystemSwitches } = buildCodec({ shipA, shipB, profileController, settingsStore, i18n, hintRotator, events });
+    codec.restoreStartup({ settings: session, selectedProfileName: null });
+    expect(weaponSystemSwitches.shipA.setActiveKind).toHaveBeenCalledWith("turret");
+    expect(weaponSystemSwitches.shipB.setActiveKind).toHaveBeenCalledWith("turret");
   });
 
   test("capture and restore include ewar activations", () => {

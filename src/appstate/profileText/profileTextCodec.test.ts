@@ -120,7 +120,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=12
+version=13
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

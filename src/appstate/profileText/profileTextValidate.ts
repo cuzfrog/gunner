@@ -48,6 +48,8 @@ export function parseScalarValue(
     return ships.parsePropulsionId(value);
   }
   if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
+  if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" ? value : undefined;
+  if (field === "shipAMissileAmmo" || field === "shipBMissileAmmo") return value.length > 0 ? value : undefined;
 
 
   const num = Number(value);
@@ -172,7 +174,11 @@ function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, un
     shipAEwarActivation: raw.shipAEwarActivation,
     shipABoosterActivation: raw.shipABoosterActivation,
     shipAAmmo: raw.shipAAmmo,
+    shipAWeaponKind: raw.shipAWeaponKind,
+    shipAMissileAmmo: raw.shipAMissileAmmo,
     shipBAmmo: raw.shipBAmmo,
+    shipBWeaponKind: raw.shipBWeaponKind,
+    shipBMissileAmmo: raw.shipBMissileAmmo,
     shipBSkillLevel: raw.shipBSkillLevel,
     shipBOverload: raw.shipBOverload,
     shipBHullId: raw.shipBHullId,

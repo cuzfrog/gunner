@@ -19,6 +19,8 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       shipBSide: proxy.shipBSide,
       turretControllers: proxy.turretControllers,
       turretOverridesBySide: proxy.turretOverridesBySide,
+      launcherControllers: proxy.launcherControllers,
+      weaponSystemSwitches: proxy.weaponSystemSwitches,
       preferences: proxy.preferencesController,
       profileController: proxy.profileController,
       i18n: proxy.i18n,

@@ -43,7 +43,7 @@ export interface LauncherController {
   ammoId(): TypeId | undefined;
   currentMissileSpec(): MissileSpec | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
-  restore(fitting?: string, conditions?: StatConditions, ammo?: string): void;
+  restore(fitting?: string, conditions?: StatConditions, ammoId?: TypeId): void;
   clear(): void;
   capture(): { ammo: TypeId | undefined };
   isAmmoPopupOpen(): boolean;
