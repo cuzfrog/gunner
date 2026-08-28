@@ -85,6 +85,13 @@ describe("LauncherClasses", () => {
     });
   });
 
+  describe("allClasses", () => {
+    test("returns all launcher classes in canonical order", () => {
+      const cls = createClasses();
+      expect(cls.allClasses()).toEqual<readonly LauncherClass[]>(_launcherClassOrder);
+    });
+  });
+
   describe("data integrity", () => {
     test("every launcher class has a group mapping", () => {
       for (const cls of _launcherClassOrder) {

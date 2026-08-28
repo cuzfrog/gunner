@@ -203,5 +203,6 @@ export function mockLauncherClasses(): LauncherClasses {
     classOf: vi.fn(() => "rocket" as LauncherClass),
     representativeOf: vi.fn(() => toTypeId("0")),
     classesForTiers: vi.fn(() => []),
+    allClasses: vi.fn(() => [] as readonly LauncherClass[]),
   };
 }

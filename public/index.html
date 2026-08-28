@@ -233,20 +233,6 @@
         <div class="side-panel-heading-row">
           <h2 class="side-panel-heading" data-i18n="label.shipA">Ship A</h2>
           <div class="side-panel-heading-actions">
-            <div class="weapon-kind-switch" id="ship-a-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
-              <button type="button" id="ship-a-weapon-system-turret" class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
-                      data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
-              </button>
-              <button type="button" id="ship-a-weapon-system-missile" class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
-                      data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
-              </button>
-              <button type="button" id="ship-a-weapon-system-drone" class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
-                      data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
-              </button>
-            </div>
             <button type="button" id="ship-a-import-fitting" class="icon-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
@@ -281,6 +267,20 @@
             </button>
             <span class="hull-fitting-name" id="ship-a-fitting-name" hidden></span>
             <div class="fitting-preview popup popup-scroll" id="ship-a-fitting-preview" hidden aria-hidden="true"></div>
+          </div>
+          <div class="weapon-kind-switch" id="ship-a-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+            <button type="button" id="ship-a-weapon-system-turret" class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
+                    data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
+            </button>
+            <button type="button" id="ship-a-weapon-system-missile" class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
+                    data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
+            </button>
+            <button type="button" id="ship-a-weapon-system-drone" class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
+                    data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
+            </button>
           </div>
         </div>
 
@@ -403,6 +403,18 @@
               <div class="launcher-telemetry-row">
                 <span class="launcher-telemetry-label" data-i18n="label.damageReductionFactor">DRF</span>
                 <span class="launcher-telemetry-value mono" id="ship-a-launcher-damage-reduction-factor">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
+                <span class="launcher-telemetry-value mono" id="ship-a-launcher-missile-velocity">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
+                <span class="launcher-telemetry-value mono" id="ship-a-launcher-flight-time">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
+                <span class="launcher-telemetry-value mono" id="ship-a-launcher-flight-range">-</span>
               </div>
             </div>
           </div>
@@ -608,20 +620,6 @@
         <div class="side-panel-heading-row">
           <h2 class="side-panel-heading" data-i18n="label.shipB">Ship B</h2>
           <div class="side-panel-heading-actions">
-            <div class="weapon-kind-switch" id="ship-b-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
-              <button type="button" id="ship-b-weapon-system-turret" class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
-                      data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
-              </button>
-              <button type="button" id="ship-b-weapon-system-missile" class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
-                      data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
-              </button>
-              <button type="button" id="ship-b-weapon-system-drone" class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
-                      data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
-              </button>
-            </div>
             <button type="button" id="ship-b-import-fitting" class="icon-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
@@ -656,6 +654,20 @@
             </button>
             <span class="hull-fitting-name" id="ship-b-fitting-name" hidden></span>
             <div class="fitting-preview popup popup-scroll" id="ship-b-fitting-preview" hidden aria-hidden="true"></div>
+          </div>
+          <div class="weapon-kind-switch" id="ship-b-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+            <button type="button" id="ship-b-weapon-system-turret" class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
+                    data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
+            </button>
+            <button type="button" id="ship-b-weapon-system-missile" class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
+                    data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
+            </button>
+            <button type="button" id="ship-b-weapon-system-drone" class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
+                    data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
+            </button>
           </div>
         </div>
 
@@ -778,6 +790,18 @@
               <div class="launcher-telemetry-row">
                 <span class="launcher-telemetry-label" data-i18n="label.damageReductionFactor">DRF</span>
                 <span class="launcher-telemetry-value mono" id="ship-b-launcher-damage-reduction-factor">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
+                <span class="launcher-telemetry-value mono" id="ship-b-launcher-missile-velocity">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
+                <span class="launcher-telemetry-value mono" id="ship-b-launcher-flight-time">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
+                <span class="launcher-telemetry-value mono" id="ship-b-launcher-flight-range">-</span>
               </div>
             </div>
           </div>

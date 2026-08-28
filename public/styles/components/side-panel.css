@@ -15,8 +15,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 2px 0;
-  margin-right: 4px;
+  flex: 0 0 auto;
 }
 
 .weapon-kind-button {

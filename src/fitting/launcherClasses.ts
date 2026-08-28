@@ -12,6 +12,7 @@ export interface LauncherClasses {
   classOf(moduleId: TypeId): LauncherClass;
   representativeOf(launcherClass: LauncherClass): TypeId;
   classesForTiers(tiers: readonly HullTier[]): readonly LauncherClass[];
+  allClasses(): readonly LauncherClass[];
 }
 
 interface LauncherClassesDeps {
@@ -66,6 +67,10 @@ export class LauncherClassesImpl implements LauncherClasses {
   classesForTiers(tiers: readonly HullTier[]): readonly LauncherClass[] {
     const tierSet = new Set(tiers);
     return LAUNCHER_CLASS_ORDER.filter((cls) => tierSet.has(LAUNCHER_CLASS_TIERS[cls]));
+  }
+
+  allClasses(): readonly LauncherClass[] {
+    return LAUNCHER_CLASS_ORDER;
   }
 }
 

@@ -136,6 +136,7 @@ export function buildLauncher(
     classOf: vi.fn(() => "light" as LauncherClass),
     representativeOf: vi.fn(() => "499" as TypeId),
     classesForTiers: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
+    allClasses: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
     ...options.launcherClasses,
   });
   const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });

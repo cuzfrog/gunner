@@ -2,20 +2,20 @@
 .result-grid {
   display: flex;
   align-items: stretch;
-  gap: 6px;
-  margin: 10px 0;
+  gap: 4px;
+  margin: 6px 0;
 }
 
 .result-side {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   flex: 1 1 0;
   min-width: 0;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 8px 10px;
+  padding: 5px 8px 6px;
 }
 
 .result-side-a { border-left: 2px solid var(--accent-teal); }
@@ -24,19 +24,20 @@
 .result-side-hero {
   display: flex;
   flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 0;
 }
 
-.result-side-support {
+.result-side-support,
+.result-side-weapon {
   display: flex;
   gap: 6px;
 }
 
 .result-side-weapon {
-  display: flex;
-  gap: 6px;
+  padding-top: 3px;
+  border-top: 1px solid var(--border-dim);
 }
 
 .result-side-weapon[hidden] { display: none; }
@@ -49,9 +50,9 @@
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
-  padding: 8px 12px;
+  padding: 4px 10px;
   flex: 0 0 auto;
-  min-width: 120px;
+  min-width: 88px;
 }
 
 .result-metric {
@@ -63,40 +64,44 @@
 
 .result-card-label {
   display: block;
-  font-size: 10px;
+  font-size: 9px;
+  line-height: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 2px;
+  letter-spacing: 0.06em;
 }
 
 .result-card-value {
   display: block;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 18px;
   color: var(--text-primary);
 }
 
 .result-hero-value {
-  font-size: 28px;
-  line-height: 32px;
+  font-size: 24px;
+  line-height: 26px;
   font-family: "Chakra Petch", sans-serif;
 }
 
 .result-metric-label {
   display: block;
-  font-size: 9px;
+  font-size: 8px;
+  line-height: 11px;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .result-metric-value {
   display: block;
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 11px;
+  line-height: 14px;
   color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .result-card-value.is-dim { color: var(--text-dim); }

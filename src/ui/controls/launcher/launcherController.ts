@@ -17,12 +17,6 @@ import type { LauncherEls } from "./launcherControllerContract";
 
 export type { LauncherController } from "./launcherControllerContract";
 
-const LAUNCHER_CLASS_ORDER: readonly LauncherClass[] = [
-  "rocket", "light", "ham", "heavy", "rapidLight",
-  "torpedo", "cruise", "rapidHeavy",
-  "xlTorpedo", "xlCruise", "rapidTorpedo",
-];
-
 export class LauncherControllerImpl implements LauncherController {
   readonly side: Side;
   private readonly els: LauncherEls;
@@ -182,7 +176,7 @@ export class LauncherControllerImpl implements LauncherController {
   private renderClassSelector(): void {
     const launcher = this.selectedLauncher;
     const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) : undefined;
-    const allowed = tier ? this.launcherClasses.classesForTiers([tier]) : LAUNCHER_CLASS_ORDER;
+    const allowed = tier ? this.launcherClasses.classesForTiers([tier]) : this.launcherClasses.allClasses();
     const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
     this.els.classOptions.innerHTML = "";
     for (const cls of allowed) {
