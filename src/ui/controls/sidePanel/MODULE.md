@@ -18,9 +18,9 @@ no-new-exports:
   - hullSection.test.ts
   - sidePanelContract.ts
   - statsSection.test.ts
-  - index.ts
   - turretLink.ts
   - launcherLink.ts
+  - weaponSystemSwitch.ts
   - overrides.ts
   - module.test.ts
   - navSection.ts

@@ -13,7 +13,7 @@ import type { HullDatalist, SimConfigSource } from "../session";
 import type { PreferencesController } from "../preferences";
 import type { ProfileController } from "../profile";
 import type { EngagementReadout } from "../engagementReadout";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { LauncherController } from "../launcher";
@@ -48,6 +48,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
   launcherControllers: Record<Side, LauncherController>;
+  weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   importController: ImportController;
   ewarController: EwarController;
   boosterController: BoosterController;
@@ -74,6 +75,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
   private readonly launcherControllers: Record<Side, LauncherController>;
+  private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
@@ -104,6 +106,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
     this.launcherControllers = all.launcherControllers;
+    this.weaponSystemSwitches = all.weaponSystemSwitches;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
@@ -153,6 +156,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.boosterController.updateSummaries();
     this.rangeOverlayController.render();
     this.portraitsController.update();
+    this.weaponSystemSwitches.shipA.refresh();
+    this.weaponSystemSwitches.shipB.refresh();
     this.preferencesController.savePreferences();
     this.profileController.updateActionBarState();
     this.updatePlayEnabled();
@@ -210,11 +215,15 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   getWeapon(side: Side): WeaponSpec | undefined {
-    const turret = this.turretControllers[side].turret();
-    if (turret) return this.turretControllers[side].currentTurretSpec();
-    const missile = this.launcherControllers[side].currentMissileSpec();
-    if (missile) return missile;
-    return undefined;
+    const activeKind = this.weaponSystemSwitches[side].activeKind();
+    if (activeKind === "missile") {
+      const missile = this.launcherControllers[side].currentMissileSpec();
+      if (missile) return missile;
+      return this.turretControllers[side].currentTurretSpec();
+    }
+    const turret = this.turretControllers[side].currentTurretSpec();
+    if (turret) return turret;
+    return this.launcherControllers[side].currentMissileSpec();
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }

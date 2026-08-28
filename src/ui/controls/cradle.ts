@@ -21,7 +21,7 @@ import type { PreferencesController } from "./preferences";
 import type { ProfileController, ProfileChangeTracker } from "./profile";
 import type { ShareController } from "./share";
 import type { HullDatalist, SessionCodec, SimConfigSource } from "./session";
-import type { SidePanel } from "./sidePanel";
+import type { SidePanel, WeaponSystemSwitch } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { RangeOverlayController } from "./rangeOverlay";
@@ -67,6 +67,7 @@ export interface ControlsCradle {
   readonly shipALauncherController: LauncherController;
   readonly shipBLauncherController: LauncherController;
   readonly launcherControllers: Record<Side, LauncherController>;
+  readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
   readonly shipASide: SidePanel;

@@ -82,6 +82,10 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
           ? t("readout.effectiveAffected")
           : buildStatTitle(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
       );
+    } else if (sideValues.kind === "missile") {
+      this.write(sideEls.trackingReadout, formatDistance(sideValues.explosionRadius, t), false, () => "");
+      this.write(sideEls.optimalReadout, `${formatWithCommas(sideValues.explosionVelocity, 0)} m/s`, false, () => "");
+      this.write(sideEls.falloffReadout, formatDistance(sideValues.flightRange, t), false, () => "");
     } else {
       this.write(sideEls.trackingReadout, "-", false, () => "");
       this.write(sideEls.optimalReadout, "-", false, () => "");
