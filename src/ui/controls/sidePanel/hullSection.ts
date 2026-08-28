@@ -128,6 +128,7 @@ export class HullSection implements IHullSection {
     this.panel.fittingText = undefined;
     this.panel.clearOverrides();
     this.panel.clearTurret();
+    this.panel.clearLauncher();
     this.panel.hideFittingPreview();
     this.panel.sections.paste.clearImportHint();
   }

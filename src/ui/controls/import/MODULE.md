@@ -1,6 +1,7 @@
 ---
 no-new-exports:
   - shipATurret.ts
+  - shipALauncher.ts
   - eftSideImporter.ts
   - importController.testSupport.ts
   - importController.ts

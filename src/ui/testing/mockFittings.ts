@@ -171,6 +171,7 @@ export function mockFittingDb(): FittingDb {
   return {
     missiles: {},
     launchers: {},
+    hullBonuses: {},
   } as unknown as FittingDb;
 }
 

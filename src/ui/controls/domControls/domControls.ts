@@ -226,7 +226,7 @@ export class DomControls implements Controls, DomControlsHost {
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
-  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined; }
+  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined || this.launcherControllers[side].launcher() !== undefined; }
   update(view: EngagementView, effective: EffectiveReadouts): void {
     this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);

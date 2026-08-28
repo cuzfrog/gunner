@@ -38,6 +38,7 @@ import type { Popup, PopupGroup } from "./popup";
 import type { Side } from "./side";
 import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { LauncherController } from "./launcher";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
@@ -270,6 +271,25 @@ class StubTurretController implements TurretController {
   }
 }
 
+class StubLauncherController implements LauncherController {
+  readonly side: Side;
+  popup: Popup = new StubPopup();
+  launcher = vi.fn(() => undefined);
+  ammoId = vi.fn(() => "" as TypeId);
+  applyImported = vi.fn();
+  restore = vi.fn();
+  clear = vi.fn();
+  capture = vi.fn(() => ({ ammo: "" as TypeId }));
+  isAmmoPopupOpen = vi.fn();
+  openAmmoPopup = vi.fn();
+  closeAmmoPopup = vi.fn();
+  render = vi.fn();
+
+  constructor(side: Side) {
+    this.side = side;
+  }
+}
+
 export function buildSidePanel(
   side: Side = "shipA",
   ships: Ships = mockShips(),
@@ -305,6 +325,8 @@ export function buildSidePanel(
   const shipBTurretOverrides: TurretOverrides = new StubTurretOverrides();
   const shipATurretController: TurretController = new StubTurretController("shipA");
   const shipBTurretController: TurretController = new StubTurretController("shipB");
+  const shipALauncherController: LauncherController = new StubLauncherController("shipA");
+  const shipBLauncherController: LauncherController = new StubLauncherController("shipB");
 
   const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   registerSimModule(cradle);
@@ -320,6 +342,7 @@ export function buildSidePanel(
     shipATurretController: asValue(shipATurretController),
     shipBTurretController: asValue(shipBTurretController),
     turretControllers: asValue({ shipA: shipATurretController, shipB: shipBTurretController }),
+    launcherControllers: asValue({ shipA: shipALauncherController, shipB: shipBLauncherController }),
     shipATurretOverrides: asValue(shipATurretOverrides),
     shipBTurretOverrides: asValue(shipBTurretOverrides),
     turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),

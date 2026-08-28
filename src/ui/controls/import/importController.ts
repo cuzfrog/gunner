@@ -7,6 +7,7 @@ import type { ProfileController } from "../profile";
 import type { Side } from "../side";
 import type { SidePanel } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
+import type { ShipALauncher } from "./shipALauncher";
 import { EftSideImporter } from "./eftSideImporter";
 import { ProfileTextImporter } from "./profileTextImporter";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -24,6 +25,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly profileController: ProfileController;
   private readonly profileTextCodec: ProfileTextCodec;
   private readonly turrets: Record<Side, ShipATurret>;
+  private readonly launchers: Record<Side, ShipALauncher>;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly events: UiEvents;
@@ -40,6 +42,7 @@ export class ImportControllerImpl implements ImportController {
     shipASide: SidePanel;
     shipBSide: SidePanel;
     turrets: Record<Side, ShipATurret>;
+    launchers: Record<Side, ShipALauncher>;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
@@ -52,6 +55,7 @@ export class ImportControllerImpl implements ImportController {
     this.shipASide = deps.shipASide;
     this.shipBSide = deps.shipBSide;
     this.turrets = deps.turrets;
+    this.launchers = deps.launchers;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
@@ -59,6 +63,7 @@ export class ImportControllerImpl implements ImportController {
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
       turrets: deps.turrets,
+      launchers: deps.launchers,
       fittingImport: deps.fittingImport,
     });
     this.profileTextImporter = new ProfileTextImporter({

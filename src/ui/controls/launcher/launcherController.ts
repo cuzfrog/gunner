@@ -1,6 +1,6 @@
 import type { FittingDb, FittingImport, MissileCatalog, MissileOption } from "../../../fitting";
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
-import type { HullBonus, LauncherStats } from "../../../gamedata/fittingDb";
+import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
@@ -59,9 +59,9 @@ export class LauncherControllerImpl implements LauncherController {
     return this.currentAmmoId;
   }
 
-  applyImported(imported: ImportedFitting, conditions: StatConditions, hullBonuses: readonly HullBonus[]): void {
+  applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.skillLevel = conditions.skillLevel;
-    this.hullBonuses = hullBonuses;
+    this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.selectedLauncher = imported.launcher;
     if (imported.launcher) {
       this.currentAmmoId = imported.launcher.chargeId;
@@ -69,12 +69,12 @@ export class LauncherControllerImpl implements LauncherController {
     this.render();
   }
 
-  restore(fitting?: string, conditions?: StatConditions, ammo?: string, hullBonuses?: readonly HullBonus[]): void {
+  restore(fitting?: string, conditions?: StatConditions, ammo?: string): void {
     if (conditions) this.skillLevel = conditions.skillLevel;
-    if (hullBonuses) this.hullBonuses = hullBonuses;
     if (fitting && conditions) {
       const imported = this.resolveFitting(fitting, conditions);
       if (imported?.launcher) {
+        this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;
         if (ammo) {

@@ -146,7 +146,7 @@ describe("DomControls", () => {
     expect(getFake(document, "play").disabled).toBe(true);
   });
 
-  test("hasWeapon reflects whether the ship has a fitted turret on each side", () => {
+  test("hasWeapon reflects whether the ship has a fitted turret or launcher on each side", () => {
     const { controls, cradle } = buildDomControls();
     expect(controls.hasWeapon("shipA")).toBe(false);
     expect(controls.hasWeapon("shipB")).toBe(false);

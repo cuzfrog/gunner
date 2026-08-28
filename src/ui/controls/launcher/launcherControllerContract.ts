@@ -1,6 +1,5 @@
 import type { FittingDb, FittingImport, MissileCatalog, MissileOption } from "../../../fitting";
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
-import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
@@ -42,8 +41,8 @@ export interface LauncherController {
   readonly popup: Popup;
   launcher(): ImportedLauncher | undefined;
   ammoId(): TypeId;
-  applyImported(imported: ImportedFitting, conditions: StatConditions, hullBonuses: readonly HullBonus[]): void;
-  restore(fitting?: string, conditions?: StatConditions, ammo?: string, hullBonuses?: readonly HullBonus[]): void;
+  applyImported(imported: ImportedFitting, conditions: StatConditions): void;
+  restore(fitting?: string, conditions?: StatConditions, ammo?: string): void;
   clear(): void;
   capture(): { ammo: TypeId };
   isAmmoPopupOpen(): boolean;

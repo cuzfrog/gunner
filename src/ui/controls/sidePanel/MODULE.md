@@ -20,6 +20,7 @@ no-new-exports:
   - statsSection.test.ts
   - index.ts
   - turretLink.ts
+  - launcherLink.ts
   - overrides.ts
   - module.test.ts
   - navSection.ts

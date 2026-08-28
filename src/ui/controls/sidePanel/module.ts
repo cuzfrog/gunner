@@ -6,6 +6,7 @@ import type { Side } from "../side";
 import type { SidePanelDeps } from "./sidePanelContract";
 import { createPanelOverrides } from "./overrides";
 import { createPanelTurretLink } from "./turretLink";
+import { createPanelLauncherLink } from "./launcherLink";
 
 export function registerSidePanelModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
@@ -27,6 +28,7 @@ function sideDeps<T extends ControlsCradle>(proxy: T, side: Side): SidePanelDeps
     events: proxy.uiEvents,
     overrides: createPanelOverrides(side, proxy.turretOverridesBySide),
     turretLink: createPanelTurretLink(side, proxy.turretControllers, proxy.popupGroup),
+    launcherLink: createPanelLauncherLink(side, proxy.launcherControllers, proxy.popupGroup),
     simValueParser: proxy.simValueParser,
   };
 }

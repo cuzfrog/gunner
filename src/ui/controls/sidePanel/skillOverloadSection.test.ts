@@ -54,6 +54,7 @@ function buildSkillSection() {
     fittedHull: undefined,
     fittingText: undefined,
     restoreTurret: vi.fn(),
+    restoreLauncher: vi.fn(),
   } as unknown as SidePanel);
 
   const i18n = mockI18n();

@@ -151,6 +151,9 @@ export function buildImportController(document: Document) {
   const shipATurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
   const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
   const turrets = { shipA: shipATurret, shipB: shipBTurret };
+  const shipALauncher = { applyImported: vi.fn() };
+  const shipBLauncher = { applyImported: vi.fn() };
+  const launchers = { shipA: shipALauncher, shipB: shipBLauncher };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -173,12 +176,13 @@ export function buildImportController(document: Document) {
     shipASide: shipAPanel as unknown as SidePanel,
     shipBSide: shipBPanel as unknown as SidePanel,
     turrets,
+    launchers,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets, launchers,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

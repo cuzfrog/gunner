@@ -24,6 +24,7 @@ import { StatsSection } from "./statsSection";
 import type { Side } from "../side";
 import type { PanelOverrides } from "./overrides";
 import type { PanelTurretLink } from "./turretLink";
+import type { PanelLauncherLink } from "./launcherLink";
 import {
   type FittingPopupControl,
   type FittingPreviewControl,
@@ -58,6 +59,7 @@ export class SidePanelImpl implements SidePanel {
   private readonly popupGroup: PopupGroup;
   private readonly overrides: PanelOverrides;
   private readonly turretLink: PanelTurretLink;
+  private readonly launcherLink: PanelLauncherLink;
   private hostValue: SidePanelHost = NOOP_HOST;
   private profileValue?: ShipProfile;
   private fittedHullValue?: FittedHullSummary;
@@ -69,7 +71,7 @@ export class SidePanelImpl implements SidePanel {
   private fittingPreview?: FittingPreviewControl;
 
   constructor(deps: SidePanelDeps) {
-    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, simValueParser } = deps;
+    const { side, popupGroup, els, i18n, ships, fittingImport, imageCatalog, timer, events, overrides, turretLink, launcherLink, simValueParser } = deps;
     this.side = side;
     this.popupGroup = popupGroup;
     this.els = els;
@@ -80,6 +82,7 @@ export class SidePanelImpl implements SidePanel {
     this.timer = timer;
     this.overrides = overrides;
     this.turretLink = turretLink;
+    this.launcherLink = launcherLink;
     const hull = new HullSection({ panel: this, els, ships, i18n });
     const nav = new NavSection({ panel: this, els, simValueParser });
     const stats = new StatsSection({ panel: this, els, ships, i18n });
@@ -225,6 +228,14 @@ export class SidePanelImpl implements SidePanel {
 
   setTurretProfile(profile: ShipProfile | undefined): void {
     this.turretLink.setHullProfile(profile);
+  }
+
+  clearLauncher(): void {
+    this.launcherLink.clear();
+  }
+
+  restoreLauncher(): void {
+    this.launcherLink.restore(this.fittingText, this.skillConditions());
   }
 
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
