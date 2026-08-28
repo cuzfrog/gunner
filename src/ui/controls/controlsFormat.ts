@@ -1,25 +1,10 @@
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, clampManeuverAggressivity, type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
+import { type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
-export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN };
 export const DEFAULT_GRID_BRIGHTNESS = 0.5;
 export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
-
-export function aggressivityFromPosition(pos: number): number {
-  const clamped = Math.max(0, Math.min(1, pos));
-  return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
-}
-
-export function positionFromAggressivity(value: number): number {
-  const clamped = clampManeuverAggressivity(value);
-  return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
-}
-
-export function parseManeuverAggressivity(input: HTMLInputElement): number {
-  return clampManeuverAggressivity(Number.parseFloat(input.value));
-}
 
 export function formatWithCommas(value: number, decimals = 0): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });

@@ -1,4 +1,4 @@
-import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass } from "../../../sim";
+import { SIG_RESOLUTIONS, type SigResolutionClass, type SimValueParser } from "../../../sim";
 import type { ImportedTurret } from "../../../fitting";
 import type { ChoiceGroup } from "../choiceGroup";
 import type { TrackingInput } from "../trackingInput";
@@ -10,6 +10,7 @@ interface TurretInputSetDeps {
   readonly trackingInput: TrackingInput;
   readonly sigResChoice: ChoiceGroup;
   readonly turretOverrides: TurretOverrides;
+  readonly simValueParser: SimValueParser;
 }
 
 export class TurretInputSet {
@@ -17,12 +18,14 @@ export class TurretInputSet {
   private readonly trackingInput: TrackingInput;
   private readonly sigResChoice: ChoiceGroup;
   private readonly turretOverrides: TurretOverrides;
+  private readonly simValueParser: SimValueParser;
 
   constructor(deps: TurretInputSetDeps) {
     this.els = deps.els;
     this.trackingInput = deps.trackingInput;
     this.sigResChoice = deps.sigResChoice;
     this.turretOverrides = deps.turretOverrides;
+    this.simValueParser = deps.simValueParser;
   }
 
   set(turret: ImportedTurret): void {
@@ -53,9 +56,9 @@ export class TurretInputSet {
     this.els.falloff.disabled = !enabled;
   }
 
-  currentSigResValue(): "S" | "M" | "L" | "XL" {
-    const value = this.els.sigRes.value;
-    if (!isSigResolutionClass(value)) throw new Error(`Invalid sigRes value: ${value}`);
-    return value;
+  currentSigResValue(): SigResolutionClass {
+    const parsed = this.simValueParser.parseSigResolutionClass(this.els.sigRes.value);
+    if (parsed === undefined) throw new Error(`Invalid sigRes value: ${this.els.sigRes.value}`);
+    return parsed;
   }
 }

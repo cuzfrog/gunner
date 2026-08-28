@@ -2,6 +2,7 @@ import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport, TurretCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
+import { createSimValueParser } from "../../../sim";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
@@ -148,6 +149,7 @@ export function buildTurret(
     ships,
     events,
     popupGroup,
+    simValueParser: createSimValueParser(),
   });
   return {
     document,

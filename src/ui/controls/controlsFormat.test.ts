@@ -4,41 +4,18 @@ import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import type { I18n } from "../i18n";
 import {
-  AGGRESSIVITY_MAX,
-  AGGRESSIVITY_MIN,
-  aggressivityFromPosition,
   chargeStatSuffix,
   escapeHtml,
   formatDistance,
   formatMultiplier,
   formatNumber,
   formatWithCommas,
-  positionFromAggressivity,
   propulsionOptionLabel,
   scriptStatSuffix,
   boosterScriptStatSuffix,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
-
-describe("aggressivity conversion", () => {
-  test("round-trips the minimum value through position", () => {
-    const pos = positionFromAggressivity(AGGRESSIVITY_MIN);
-    expect(pos).toBeCloseTo(0, 10);
-    expect(aggressivityFromPosition(pos)).toBeCloseTo(AGGRESSIVITY_MIN, 10);
-  });
-
-  test("round-trips the midpoint value through position", () => {
-    expect(aggressivityFromPosition(0.5)).toBeCloseTo(1, 10);
-    expect(positionFromAggressivity(1)).toBeCloseTo(0.5, 10);
-  });
-
-  test("round-trips the maximum value through position", () => {
-    const pos = positionFromAggressivity(AGGRESSIVITY_MAX);
-    expect(pos).toBeCloseTo(1, 10);
-    expect(aggressivityFromPosition(pos)).toBeCloseTo(AGGRESSIVITY_MAX, 10);
-  });
-});
 
 describe("formatting", () => {
   test("adds comma separators and respects decimals", () => {

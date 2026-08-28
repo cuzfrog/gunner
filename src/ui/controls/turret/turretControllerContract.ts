@@ -1,7 +1,7 @@
 import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { TypeId } from "../../../gamedata/ids";
 import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret, TurretCatalog } from "../../../fitting";
-import type { SigResolutionClass, TurretSpec } from "../../../sim";
+import type { SigResolutionClass, SimValueParser, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { TrackingUnit } from "../../../appstate";
@@ -29,6 +29,7 @@ export interface TurretControllerDeps {
   readonly ships: Ships;
   readonly events: UiEvents;
   readonly popupGroup: PopupGroup;
+  readonly simValueParser: SimValueParser;
 }
 
 export interface TurretController {

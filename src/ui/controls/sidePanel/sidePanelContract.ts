@@ -1,6 +1,6 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
-import type { AutopilotMode } from "../../../sim";
+import type { AutopilotMode, SimValueParser } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection, SavedFitting } from "../../../appstate";
@@ -105,4 +105,5 @@ export interface SidePanelDeps {
   events: UiEvents;
   overrides: PanelOverrides;
   turretLink: PanelTurretLink;
+  simValueParser: SimValueParser;
 }

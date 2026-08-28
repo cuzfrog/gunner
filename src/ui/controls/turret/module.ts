@@ -21,6 +21,7 @@ type TurretControllerFactoryDeps = Pick<
   | "uiEvents"
   | "popupGroup"
   | "turretOverridesBySide"
+  | "simValueParser"
 >;
 
 export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
@@ -57,5 +58,6 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     ships: deps.ships,
     events: deps.uiEvents,
     popupGroup: deps.popupGroup,
+    simValueParser: deps.simValueParser,
   });
 }

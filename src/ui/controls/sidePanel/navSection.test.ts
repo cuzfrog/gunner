@@ -1,6 +1,9 @@
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, createSimValueParser } from "../../../sim";
 import { fakeDocument, getFake, FakeElement } from "../testSupport";
 import { NavSection, type NavSectionEls } from "./navSection";
 import type { SidePanel } from "./sidePanelContract";
+
+const simValueParser = createSimValueParser();
 
 function mockPanel() {
   const host = { onConfigChange: vi.fn(), onDisplayChange: vi.fn() };
@@ -24,7 +27,7 @@ describe("NavSection", () => {
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
     getFake(document, "ship-a-mode").value = "orbit";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     expect(els.aggressivitySlider.disabled).toBe(true);
     expect(section.capture().mode).toBe("orbit");
   });
@@ -34,7 +37,7 @@ describe("NavSection", () => {
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
     getFake(document, "ship-a-mode").value = "maneuver";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     expect(els.aggressivitySlider.disabled).toBe(false);
   });
 
@@ -43,7 +46,7 @@ describe("NavSection", () => {
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
     getFake(document, "ship-a-mode").value = "orbit";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     getFake(document, "ship-a-mode").value = "maneuver";
     (els.mode as unknown as FakeElement).trigger("input");
     expect(els.aggressivitySlider.disabled).toBe(false);
@@ -55,7 +58,7 @@ describe("NavSection", () => {
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
     getFake(document, "ship-a-mode").value = "maneuver";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     getFake(document, "ship-a-mode").value = "keepAtRange";
     (els.mode as unknown as FakeElement).trigger("input");
     expect(els.aggressivitySlider.disabled).toBe(true);
@@ -66,7 +69,7 @@ describe("NavSection", () => {
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
     getFake(document, "ship-a-mode").value = "maneuver";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     section.setEnabled(false);
     expect(els.mode.disabled).toBe(true);
     expect(els.range.disabled).toBe(true);
@@ -81,7 +84,7 @@ describe("NavSection", () => {
     const document = fakeDocument();
     const panel = mockPanel();
     const els = navElsFor(document, "shipA");
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     section.restore({ mode: "maneuver", range: 7500, aggressivity: 2.5 });
     expect(els.mode.value).toBe("maneuver");
     expect(els.range.value).toBe("7500");
@@ -96,7 +99,7 @@ describe("NavSection", () => {
     getFake(document, "ship-a-mode").value = "keepAtRange";
     getFake(document, "ship-a-range").value = "3000";
     getFake(document, "ship-a-aggressivity").value = "0.5";
-    const section = new NavSection({ panel, els });
+    const section = new NavSection({ panel, els, simValueParser });
     const state = section.capture();
     expect(state.mode).toBe("keepAtRange");
     expect(state.range).toBe(3000);
@@ -111,8 +114,8 @@ describe("NavSection", () => {
     const elsB = navElsFor(document, "shipB");
     getFake(document, "ship-a-mode").value = "maneuver";
     getFake(document, "ship-b-mode").value = "orbit";
-    new NavSection({ panel: panelA, els: elsA });
-    new NavSection({ panel: panelB, els: elsB });
+    new NavSection({ panel: panelA, els: elsA, simValueParser });
+    new NavSection({ panel: panelB, els: elsB, simValueParser });
     expect(elsA.aggressivitySlider.disabled).toBe(false);
     expect(elsB.aggressivitySlider.disabled).toBe(true);
 
@@ -125,5 +128,43 @@ describe("NavSection", () => {
     (elsA.mode as unknown as FakeElement).trigger("input");
     expect(elsA.aggressivitySlider.disabled).toBe(true);
     expect(elsB.aggressivitySlider.disabled).toBe(false);
+  });
+
+  test("restoring the minimum aggressivity positions the slider at 0", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    const section = new NavSection({ panel, els, simValueParser });
+    section.restore({ mode: "maneuver", range: 5000, aggressivity: AGGRESSIVITY_MIN });
+    expect(els.aggressivitySlider.value).toBe("0");
+  });
+
+  test("restoring the maximum aggressivity positions the slider at 1", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    const section = new NavSection({ panel, els, simValueParser });
+    section.restore({ mode: "maneuver", range: 5000, aggressivity: AGGRESSIVITY_MAX });
+    expect(els.aggressivitySlider.value).toBe("1");
+  });
+
+  test("capturing an out-of-range aggressivity clamps to the maximum", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    getFake(document, "ship-a-mode").value = "maneuver";
+    getFake(document, "ship-a-aggressivity").value = "500";
+    const section = new NavSection({ panel, els, simValueParser });
+    expect(section.capture().aggressivity).toBe(100);
+  });
+
+  test("capturing a non-numeric aggressivity normalizes to 1", () => {
+    const document = fakeDocument();
+    const panel = mockPanel();
+    const els = navElsFor(document, "shipA");
+    getFake(document, "ship-a-mode").value = "maneuver";
+    getFake(document, "ship-a-aggressivity").value = "abc";
+    const section = new NavSection({ panel, els, simValueParser });
+    expect(section.capture().aggressivity).toBe(1);
   });
 });

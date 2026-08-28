@@ -7,6 +7,7 @@ import { mockPresetFittings, mockSavedFittings } from "../testing";
 
 const controlsCradleKeys = {
   hitChance: "hitChance",
+  simValueParser: "simValueParser",
   i18n: "i18n",
   settingsStore: "settingsStore",
   parser: "parser",

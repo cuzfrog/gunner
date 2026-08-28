@@ -1,4 +1,4 @@
-import { isSigResolutionClass, SIG_RESOLUTIONS, type SigResolutionClass, type TurretSpec } from "../../../sim";
+import { SIG_RESOLUTIONS, type SigResolutionClass, type SimValueParser, type TurretSpec } from "../../../sim";
 import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret, TurretCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { HullTier, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
@@ -53,6 +53,7 @@ export class TurretControllerImpl implements TurretController {
   private readonly resolver: TurretStateResolver;
   private readonly ships: Ships;
   private readonly events: UiEvents;
+  private readonly simValueParser: SimValueParser;
   private selectedTurret?: ImportedTurret;
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
   private cargoCharges: readonly CargoCharge[] = [];
@@ -74,6 +75,7 @@ export class TurretControllerImpl implements TurretController {
     this.resolver = deps.resolver;
     this.ships = deps.ships;
     this.events = deps.events;
+    this.simValueParser = deps.simValueParser;
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
@@ -86,12 +88,13 @@ export class TurretControllerImpl implements TurretController {
       onSelect: (name) => this.onAmmoItemClick(name),
       onExpand: () => this.onAmmoExpandClick(),
     });
-    this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, i18n: deps.i18n, fittingImport: this.fittingImport });
+    this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, i18n: deps.i18n, fittingImport: this.fittingImport, simValueParser: this.simValueParser });
     this.inputSet = new TurretInputSet({
       els: this.els,
       trackingInput: this.trackingInput,
       sigResChoice: new ChoiceGroupImpl(this.els.sigResOptions, this.els.sigRes, [...SIG_RESOLUTIONS_ORDER]),
       turretOverrides: this.turretOverrides,
+      simValueParser: this.simValueParser,
     });
     this.els.tracking.addEventListener("input", () => this.onTrackingInput());
     this.els.sigRes.addEventListener("input", () => this.onSigResChange());
@@ -355,14 +358,15 @@ export class TurretControllerImpl implements TurretController {
     const hasGuns = this.selectedTurret !== undefined;
     for (const button of Array.from(this.els.sigResOptions.children)) {
       if (!isHtmlButtonElement(button)) continue;
-      const value = button.getAttribute("data-value") ?? "";
-      if (!isSigResolutionClass(value)) continue;
-      button.disabled = !hasGuns || !allowed.has(value);
+      const sigRes = this.simValueParser.parseSigResolutionClass(button.getAttribute("data-value") ?? "");
+      if (sigRes === undefined) continue;
+      button.disabled = !hasGuns || !allowed.has(sigRes);
       if (hasGuns && button.disabled) button.title = notFittable;
     }
     for (const option of Array.from(this.els.sigRes.options)) {
-      if (!isSigResolutionClass(option.value)) continue;
-      option.disabled = !hasGuns || !allowed.has(option.value);
+      const sigRes = this.simValueParser.parseSigResolutionClass(option.value);
+      if (sigRes === undefined) continue;
+      option.disabled = !hasGuns || !allowed.has(sigRes);
     }
   }
 }
