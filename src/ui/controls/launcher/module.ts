@@ -25,6 +25,9 @@ function createLauncherController(side: Side, deps: ControlsCradle): LauncherCon
     fittingDb: deps.fittingDb,
     fittingImport: deps.fittingImport,
     missileCatalog: deps.missileCatalog,
+    launcherCatalog: deps.launcherCatalog,
+    launcherClasses: deps.launcherClasses,
+    ships: deps.ships,
     imageCatalog: deps.imageCatalog,
     i18n: deps.i18n,
     events: deps.uiEvents,
@@ -39,6 +42,10 @@ function collectLauncherEls(els: ControlsElements, side: Side): LauncherEls {
     ammoSummary: s.launcherAmmoSummary,
     ammoPopup: s.launcherAmmoPopup,
     ammoList: s.launcherAmmoList,
+    classOptions: s.launcherClassOptions,
+    attributesTrigger: s.launcherAttributesTrigger,
+    attributesSummary: s.launcherAttributesSummary,
+    attributesPopup: s.launcherAttributesPopup,
     volleyDamage: s.launcherVolleyDamage,
     rateOfFire: s.launcherRateOfFire,
     explosionRadius: s.launcherExplosionRadius,
@@ -46,5 +53,6 @@ function collectLauncherEls(els: ControlsElements, side: Side): LauncherEls {
     missileVelocity: s.launcherMissileVelocity,
     flightTime: s.launcherFlightTime,
     flightRange: s.launcherFlightRange,
+    damageReductionFactor: s.launcherDamageReductionFactor,
   };
 }

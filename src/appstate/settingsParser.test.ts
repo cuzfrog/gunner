@@ -33,6 +33,7 @@ const stubMissileCatalog: MissileCatalog = {
   withCharge: () => { throw new Error("not used"); },
   has: () => false,
   idForName: () => undefined,
+  equivalentInGroups: () => undefined,
 };
 
 const simValueParser: SimValueParser = (() => {

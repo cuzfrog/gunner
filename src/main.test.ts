@@ -43,6 +43,7 @@ class FakeElement {
   src = "";
   tagName = "";
   className = "";
+  dataset: Record<string, string> = {};
   style: Record<string, string> = {};
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn() };
   children: FakeElement[] = [];

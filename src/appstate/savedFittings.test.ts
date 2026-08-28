@@ -63,6 +63,7 @@ function fakeShips(): Ships {
     allFittingOptions: vi.fn((): readonly PropulsionModule[] => []),
     fittingOption: vi.fn((_profile: ShipProfile, _id: PropulsionId): PropulsionModule | undefined => undefined),
     turretSizeOptions: vi.fn((_profile: ShipProfile): readonly HullTier[] => []),
+    shipTier: vi.fn((_profile: ShipProfile): HullTier | undefined => undefined),
     fittedStats: vi.fn(
       (_profile: ShipProfile, _fitted?: FittedHull, _module?: PropulsionStats, _conditions?: StatConditions, _maxSpeedOverride?: number): ShipStats => ({
         mass: 0,

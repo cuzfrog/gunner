@@ -15,6 +15,7 @@ export interface MissileCatalog {
   missilesForLauncher(launcher: LauncherStats): readonly MissileOption[];
   usualForLauncher(launcher: LauncherStats): TypeId | undefined;
   withCharge(launcher: ImportedLauncher, missileId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher;
+  equivalentInGroups(missile: TypeId, chargeGroups: readonly number[]): TypeId | undefined;
   has(missile: TypeId): boolean;
   idForName(name: string): TypeId | undefined;
 }
@@ -70,6 +71,10 @@ export class MissileCatalogImpl implements MissileCatalog {
     return this.missiles[missile] !== undefined;
   }
 
+  equivalentInGroups(missile: TypeId, chargeGroups: readonly number[]): TypeId | undefined {
+    return _equivalentInGroups(this.missiles, missile, chargeGroups);
+  }
+
   idForName(name: string): TypeId | undefined {
     for (const stats of Object.values(this.missiles)) {
       if (stats.name === name) return stats.id;
@@ -86,4 +91,33 @@ function _missilesForLauncher(missiles: Readonly<Record<string, MissileStats>>, 
   }
   result.sort((a, b) => a.name.localeCompare(b.name));
   return result;
+}
+
+const MISSILE_SIZE_SUFFIXES: readonly string[] = [
+  "Heavy Assault Missile", "XL Cruise Missile", "Cruise Missile", "Heavy Missile",
+  "Light Missile", "XL Torpedo", "Torpedo", "Rocket",
+] as const;
+
+function _equivalentInGroups(
+  missiles: Readonly<Record<string, MissileStats>>,
+  missile: TypeId,
+  chargeGroups: readonly number[],
+): TypeId | undefined {
+  const current = missiles[missile];
+  if (!current) return undefined;
+  const stem = missileStem(current.name);
+  if (!stem) return undefined;
+  const groupSet = new Set(chargeGroups);
+  for (const candidate of Object.values(missiles)) {
+    if (!groupSet.has(candidate.chargeGroup)) continue;
+    if (missileStem(candidate.name) === stem) return candidate.id;
+  }
+  return undefined;
+}
+
+function missileStem(name: string): string | undefined {
+  for (const suffix of MISSILE_SIZE_SUFFIXES) {
+    if (name.endsWith(suffix)) return name.slice(0, -suffix.length).trim();
+  }
+  return undefined;
 }

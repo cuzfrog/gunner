@@ -136,6 +136,22 @@ describe("ShipsImpl", () => {
     expect(ships.turretSizeOptions(shuttle)).toEqual<readonly HullTier[]>([]);
   });
 
+  test("shipTier returns the hull tier for known profiles", () => {
+    const small = shipProfileCatalog.byName("Rifter")!;
+    const medium = shipProfileCatalog.byName("Caracal")!;
+    const large = shipProfileCatalog.byName("Scorpion")!;
+    const capital = shipProfileCatalog.byName("Avatar")!;
+    expect(ships.shipTier(small)).toBe("small");
+    expect(ships.shipTier(medium)).toBe("medium");
+    expect(ships.shipTier(large)).toBe("large");
+    expect(ships.shipTier(capital)).toBe("capital");
+  });
+
+  test("shipTier returns undefined for a hull with no tier", () => {
+    const shuttle = shipProfileCatalog.byName("Caldari Shuttle")!;
+    expect(ships.shipTier(shuttle)).toBeUndefined();
+  });
+
   test("alignTime returns ln(4) * mass * inertiaModifier * 1e-6", () => {
     expect(ships.alignTime(1_200_000, 3)).toBeCloseTo(Math.log(4) * 3.6, 10);
     expect(ships.alignTime(10_000_000, 0.45)).toBeCloseTo(Math.log(4) * 4.5, 10);

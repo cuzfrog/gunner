@@ -169,6 +169,7 @@ const ships = vi.mocked<Ships>({
   allFittingOptions: vi.fn(),
   fittingOption: vi.fn(),
   turretSizeOptions: vi.fn(),
+  shipTier: vi.fn(),
   fittedStats: vi.fn(),
   maxSpeedForFittedMass: vi.fn(),
   alignTime: vi.fn(),

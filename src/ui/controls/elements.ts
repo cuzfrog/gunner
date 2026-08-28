@@ -205,10 +205,15 @@ function createCombatantEls(side: Side): CombatantEls {
     weaponSystem: el(combatantElementId("weaponSystem", side)),
     weaponSystemTurret: elOf(combatantElementId("weaponSystemTurret", side), isHtmlButtonElement),
     weaponSystemMissile: elOf(combatantElementId("weaponSystemMissile", side), isHtmlButtonElement),
+    weaponSystemDrone: elOf(combatantElementId("weaponSystemDrone", side), isHtmlButtonElement),
     launcherAmmoTrigger: elOf(combatantElementId("launcherAmmoTrigger", side), isHtmlButtonElement),
     launcherAmmoSummary: el(combatantElementId("launcherAmmoSummary", side)),
     launcherAmmoPopup: el(combatantElementId("launcherAmmoPopup", side)),
     launcherAmmoList: el(combatantElementId("launcherAmmoList", side)),
+    launcherClassOptions: el(combatantElementId("launcherClassOptions", side)),
+    launcherAttributesTrigger: elOf(combatantElementId("launcherAttributesTrigger", side), isHtmlButtonElement),
+    launcherAttributesSummary: el(combatantElementId("launcherAttributesSummary", side)),
+    launcherAttributesPopup: el(combatantElementId("launcherAttributesPopup", side)),
     launcherVolleyDamage: el(combatantElementId("launcherVolleyDamage", side)),
     launcherRateOfFire: el(combatantElementId("launcherRateOfFire", side)),
     launcherExplosionRadius: el(combatantElementId("launcherExplosionRadius", side)),
@@ -216,5 +221,6 @@ function createCombatantEls(side: Side): CombatantEls {
     launcherMissileVelocity: el(combatantElementId("launcherMissileVelocity", side)),
     launcherFlightTime: el(combatantElementId("launcherFlightTime", side)),
     launcherFlightRange: el(combatantElementId("launcherFlightRange", side)),
+    launcherDamageReductionFactor: el(combatantElementId("launcherDamageReductionFactor", side)),
   };
 }

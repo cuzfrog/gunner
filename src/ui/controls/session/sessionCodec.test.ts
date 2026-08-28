@@ -247,6 +247,7 @@ function mockLauncherControllers(): Record<Side, LauncherController> {
     currentMissileSpec: vi.fn(() => undefined),
     applyImported: vi.fn(),
     restore: vi.fn(),
+    setHullProfile: vi.fn(),
     clear: vi.fn(),
     capture: vi.fn(() => ({ ammo: undefined })),
     isAmmoPopupOpen: vi.fn(() => false),

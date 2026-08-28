@@ -25,8 +25,7 @@ class PanelLauncherLinkImpl implements PanelLauncherLink {
     this.launcher.restore(fittingText, conditions);
   }
 
-  setHullProfile(_profile: ShipProfile | undefined): void {
-    // Hull bonuses are applied through MissileCatalog.withCharge, invoked by
-    // LauncherController. This seam exists for future hull-bonus-driven stats.
+  setHullProfile(profile: ShipProfile | undefined): void {
+    this.launcher.setHullProfile(profile);
   }
 }

@@ -1,9 +1,9 @@
-import type { FittingDb, FittingImport, MissileCatalog, MissileOption } from "../../../fitting";
+import type { FittingDb, FittingImport, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
 import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
 import type { MissileSpec } from "../../../sim";
-import type { SkillLevel, StatConditions } from "../../../ships";
+import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
@@ -17,22 +17,34 @@ import type { LauncherEls } from "./launcherControllerContract";
 
 export type { LauncherController } from "./launcherControllerContract";
 
+const LAUNCHER_CLASS_ORDER: readonly LauncherClass[] = [
+  "rocket", "light", "ham", "heavy", "rapidLight",
+  "torpedo", "cruise", "rapidHeavy",
+  "xlTorpedo", "xlCruise", "rapidTorpedo",
+];
+
 export class LauncherControllerImpl implements LauncherController {
   readonly side: Side;
   private readonly els: LauncherEls;
   private readonly fittingDb: FittingDb;
   private readonly fittingImport: FittingImport;
   private readonly missileCatalog: MissileCatalog;
+  private readonly launcherCatalog: LauncherCatalog;
+  private readonly launcherClasses: LauncherClasses;
+  private readonly ships: Ships;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly popupGroup: PopupGroup;
-  private readonly popupValue: Popup;
+  private readonly ammoPopupValue: Popup;
+  private readonly attributesPopupValue: Popup;
   private selectedLauncher?: ImportedLauncher;
   private currentAmmoId: TypeId | undefined;
+  private hullProfile: ShipProfile | undefined;
   private hullBonuses: readonly HullBonus[] = [];
   private skillLevel: SkillLevel = 5;
   private ammoPopupOpen = false;
+  private attributesPopupOpen = false;
 
   constructor(deps: LauncherControllerDeps) {
     this.side = deps.side;
@@ -40,18 +52,23 @@ export class LauncherControllerImpl implements LauncherController {
     this.fittingDb = deps.fittingDb;
     this.fittingImport = deps.fittingImport;
     this.missileCatalog = deps.missileCatalog;
+    this.launcherCatalog = deps.launcherCatalog;
+    this.launcherClasses = deps.launcherClasses;
+    this.ships = deps.ships;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
     this.currentAmmoId = undefined;
-    this.popupValue = this.createAmmoPopup();
-    this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    this.ammoPopupValue = this.createAmmoPopup();
+    this.attributesPopupValue = this.createAttributesPopup();
+    this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ammoPopupValue));
+    this.els.attributesTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attributesPopupValue));
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 
-  get popup(): Popup { return this.popupValue; }
+  get popup(): Popup { return this.ammoPopupValue; }
 
   launcher(): ImportedLauncher | undefined {
     return this.selectedLauncher;
@@ -98,8 +115,14 @@ export class LauncherControllerImpl implements LauncherController {
     this.render();
   }
 
+  setHullProfile(profile: ShipProfile | undefined): void {
+    this.hullProfile = profile;
+    this.renderClassSelector();
+  }
+
   clear(): void {
-    this.popupGroup.close(this.popupValue);
+    this.popupGroup.close(this.ammoPopupValue);
+    this.popupGroup.close(this.attributesPopupValue);
     this.selectedLauncher = undefined;
     this.currentAmmoId = undefined;
     this.render();
@@ -124,7 +147,11 @@ export class LauncherControllerImpl implements LauncherController {
   render(): void {
     const launcher = this.selectedLauncher;
     const hasLauncher = launcher !== undefined;
-    if (!hasLauncher) return;
+    if (!hasLauncher) {
+      this.renderClassSelector();
+      this.renderAttributesSummary(undefined);
+      return;
+    }
     const t = (key: string): string => this.i18n.t(key);
     setText(this.els.ammoSummary, launcher.chargeName);
     setText(this.els.volleyDamage, formatWithCommas(launcher.damagePerMissile * launcher.count, 1));
@@ -134,7 +161,54 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.missileVelocity, `${formatWithCommas(launcher.maxVelocity, 0)} m/s`);
     setText(this.els.flightTime, `${formatNumber(launcher.flightTime, 1)} s`);
     setText(this.els.flightRange, formatDistance(launcher.maxVelocity * launcher.flightTime, t));
+    setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
+    this.renderAttributesSummary(launcher);
     this.renderAmmoList(launcher);
+    this.renderClassSelector();
+  }
+
+  private renderAttributesSummary(launcher: ImportedLauncher | undefined): void {
+    if (!launcher) {
+      setText(this.els.attributesSummary, "-");
+      return;
+    }
+    const t = (key: string): string => this.i18n.t(key);
+    const range = formatDistance(launcher.maxVelocity * launcher.flightTime, t);
+    const speed = `${formatWithCommas(launcher.maxVelocity, 0)} m/s`;
+    const flight = `${formatNumber(launcher.flightTime, 1)}s`;
+    setText(this.els.attributesSummary, `${range} / ${speed} / ${flight}`);
+  }
+
+  private renderClassSelector(): void {
+    const launcher = this.selectedLauncher;
+    const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) : undefined;
+    const allowed = tier ? this.launcherClasses.classesForTiers([tier]) : LAUNCHER_CLASS_ORDER;
+    const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
+    this.els.classOptions.innerHTML = "";
+    for (const cls of allowed) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn launcher-class-option";
+      btn.dataset.value = cls;
+      btn.setAttribute("aria-pressed", String(cls === currentClass));
+      btn.textContent = launcherClassLabel(cls);
+      if (!launcher) btn.disabled = true;
+      btn.addEventListener("click", () => this.onClassSelect(cls));
+      this.els.classOptions.appendChild(btn);
+    }
+  }
+
+  private onClassSelect(target: LauncherClass): void {
+    const launcher = this.selectedLauncher;
+    if (!launcher) return;
+    const currentClass = this.launcherClasses.classOf(launcher.moduleId);
+    if (currentClass === target) return;
+    const next = this.launcherCatalog.switchClass(launcher, target, this.hullBonuses, this.skillLevel);
+    if (!next) return;
+    this.selectedLauncher = next;
+    this.currentAmmoId = next.chargeId;
+    this.render();
+    this.events.emitConfigInvalidated();
   }
 
   private renderAmmoList(launcher: ImportedLauncher): void {
@@ -166,8 +240,9 @@ export class LauncherControllerImpl implements LauncherController {
     if (!this.selectedLauncher) return;
     this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, missileId, this.hullBonuses, this.skillLevel);
     this.currentAmmoId = missileId;
-    this.popupGroup.close(this.popupValue);
+    this.popupGroup.close(this.ammoPopupValue);
     this.render();
+    this.events.emitConfigInvalidated();
   }
 
   private missileOptionsForLauncher(launcher: ImportedLauncher): readonly MissileOption[] {
@@ -190,6 +265,17 @@ export class LauncherControllerImpl implements LauncherController {
     };
     return popup;
   }
+
+  private createAttributesPopup(): Popup {
+    const popup: Popup = {
+      open: () => { this.els.attributesPopup.hidden = false; this.attributesPopupOpen = true; },
+      close: () => { this.els.attributesPopup.hidden = true; this.attributesPopupOpen = false; },
+      isOpen: () => this.attributesPopupOpen,
+      focusTrigger: () => this.els.attributesTrigger.focus(),
+      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.attributesPopup.contains(domTarget),
+    };
+    return popup;
+  }
 }
 
 function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec {
@@ -205,4 +291,20 @@ function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec 
     flightTime: launcher.flightTime,
     flightRange: launcher.maxVelocity * launcher.flightTime,
   };
+}
+
+function launcherClassLabel(cls: LauncherClass): string {
+  switch (cls) {
+    case "rocket": return "Rocket";
+    case "light": return "Light";
+    case "ham": return "HAM";
+    case "heavy": return "Heavy";
+    case "rapidLight": return "Rapid Light";
+    case "torpedo": return "Torpedo";
+    case "cruise": return "Cruise";
+    case "rapidHeavy": return "Rapid Heavy";
+    case "xlTorpedo": return "XL Torp";
+    case "xlCruise": return "XL Cruise";
+    case "rapidTorpedo": return "Rapid Torp";
+  }
 }

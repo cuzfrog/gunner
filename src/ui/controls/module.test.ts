@@ -44,6 +44,8 @@ const controlsCradleKeys = {
   weaponSystemSwitches: "weaponSystemSwitches",
   fittingDb: "fittingDb",
   missileCatalog: "missileCatalog",
+  launcherCatalog: "launcherCatalog",
+  launcherClasses: "launcherClasses",
   shipASide: "shipASide",
   shipBSide: "shipBSide",
   shipAFittingPreview: "shipAFittingPreview",

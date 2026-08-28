@@ -10,6 +10,7 @@ export class FakeElement {
   id = "";
   disabled = false;
   isConnected = true;
+  dataset: Record<string, string> = {};
   children: FakeElement[] = [];
   parent: FakeElement | null = null;
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: vi.fn(() => false) };

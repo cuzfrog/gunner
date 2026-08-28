@@ -138,4 +138,29 @@ describe("MissileCatalogImpl", () => {
     const result = catalog().withCharge(base, SCOURGE_LIGHT.id, bonuses, 5);
     expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5) * 1.25, 6);
   });
+
+  test("equivalentInGroups finds a stem-matching missile in the target charge groups", () => {
+    const result = catalog().equivalentInGroups(SCOURGE_ROCKET.id, [384, 394]);
+    expect(result).toBe(SCOURGE_LIGHT.id);
+  });
+
+  test("equivalentInGroups returns undefined when no stem match exists in the target groups", () => {
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], id: toTypeId("999"), name: "Empty" };
+    expect(catalog().equivalentInGroups(SCOURGE_ROCKET.id, emptyLauncher.chargeGroups)).toBeUndefined();
+  });
+
+  test("equivalentInGroups returns undefined for an unknown missile id", () => {
+    expect(catalog().equivalentInGroups(toTypeId("99999"), [384])).toBeUndefined();
+  });
+
+  test("equivalentInGroups preserves the damage type across size classes", () => {
+    const infernoRocket: MissileStats = { damage: 45, damageType: "thermal", explosionRadius: 20, explosionVelocity: 225, damageReductionFactor: 1.5, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("302"), name: "Inferno Rocket" };
+    const dbWithInferno: Pick<FittingDb, "missiles" | "launchers"> = {
+      missiles: { ...missiles, [String(infernoRocket.id)]: infernoRocket },
+      launchers,
+    };
+    const cat = new MissileCatalogImpl({ fittingDb: dbWithInferno, missileSkillModel: skillModel });
+    const result = cat.equivalentInGroups(infernoRocket.id, [384, 394]);
+    expect(result).toBe(INFERNO_LIGHT.id);
+  });
 });

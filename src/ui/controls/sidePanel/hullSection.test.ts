@@ -124,6 +124,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     setTurretProfile: vi.fn(),
     clearLauncher: vi.fn(),
     restoreLauncher: vi.fn(),
+    setLauncherProfile: vi.fn(),
   } as unknown as SidePanel);
 
   const section = new HullSection({ panel, els, ships, i18n });

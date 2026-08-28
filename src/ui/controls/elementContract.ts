@@ -237,10 +237,15 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   weaponSystem: { tag: "DIV" as const, baseId: "weapon-system", defaultValue: undefined },
   weaponSystemTurret: { tag: "BUTTON" as const, baseId: "weapon-system-turret", defaultValue: undefined },
   weaponSystemMissile: { tag: "BUTTON" as const, baseId: "weapon-system-missile", defaultValue: undefined },
+  weaponSystemDrone: { tag: "BUTTON" as const, baseId: "weapon-system-drone", defaultValue: undefined },
   launcherAmmoTrigger: { tag: "BUTTON" as const, baseId: "launcher-ammo-trigger", defaultValue: undefined },
   launcherAmmoSummary: { tag: "SPAN" as const, baseId: "launcher-ammo-summary", defaultValue: undefined },
   launcherAmmoPopup: { tag: "DIV" as const, baseId: "launcher-ammo-popup", defaultValue: undefined },
   launcherAmmoList: { tag: "UL" as const, baseId: "launcher-ammo-list", defaultValue: undefined },
+  launcherClassOptions: { tag: "DIV" as const, baseId: "launcher-class-options", defaultValue: undefined },
+  launcherAttributesTrigger: { tag: "BUTTON" as const, baseId: "launcher-attributes-trigger", defaultValue: undefined },
+  launcherAttributesSummary: { tag: "SPAN" as const, baseId: "launcher-attributes-summary", defaultValue: undefined },
+  launcherAttributesPopup: { tag: "DIV" as const, baseId: "launcher-attributes-popup", defaultValue: undefined },
   launcherVolleyDamage: { tag: "SPAN" as const, baseId: "launcher-volley-damage", defaultValue: undefined },
   launcherRateOfFire: { tag: "SPAN" as const, baseId: "launcher-rate-of-fire", defaultValue: undefined },
   launcherExplosionRadius: { tag: "SPAN" as const, baseId: "launcher-explosion-radius", defaultValue: undefined },
@@ -248,6 +253,7 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   launcherMissileVelocity: { tag: "SPAN" as const, baseId: "launcher-missile-velocity", defaultValue: undefined },
   launcherFlightTime: { tag: "SPAN" as const, baseId: "launcher-flight-time", defaultValue: undefined },
   launcherFlightRange: { tag: "SPAN" as const, baseId: "launcher-flight-range", defaultValue: undefined },
+  launcherDamageReductionFactor: { tag: "SPAN" as const, baseId: "launcher-damage-reduction-factor", defaultValue: undefined },
 } as const satisfies { readonly [K: string]: CombatantElementDefinition };
 
 export type GlobalElementDefinitionMap = typeof GLOBAL_ELEMENT_DEFINITIONS;

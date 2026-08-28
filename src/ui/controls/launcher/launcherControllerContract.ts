@@ -1,7 +1,7 @@
-import type { FittingDb, FittingImport, ImportedFitting, ImportedLauncher, MissileCatalog } from "../../../fitting";
+import type { FittingDb, FittingImport, ImportedFitting, ImportedLauncher, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { MissileSpec } from "../../../sim";
-import type { SkillLevel, StatConditions } from "../../../ships";
+import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
@@ -15,6 +15,9 @@ export interface LauncherControllerDeps {
   readonly fittingDb: FittingDb;
   readonly fittingImport: FittingImport;
   readonly missileCatalog: MissileCatalog;
+  readonly launcherCatalog: LauncherCatalog;
+  readonly launcherClasses: LauncherClasses;
+  readonly ships: Ships;
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly events: UiEvents;
@@ -26,6 +29,10 @@ export interface LauncherEls {
   readonly ammoSummary: HTMLElement;
   readonly ammoPopup: HTMLElement;
   readonly ammoList: HTMLElement;
+  readonly classOptions: HTMLElement;
+  readonly attributesTrigger: HTMLButtonElement;
+  readonly attributesSummary: HTMLElement;
+  readonly attributesPopup: HTMLElement;
   readonly volleyDamage: HTMLElement;
   readonly rateOfFire: HTMLElement;
   readonly explosionRadius: HTMLElement;
@@ -33,6 +40,7 @@ export interface LauncherEls {
   readonly missileVelocity: HTMLElement;
   readonly flightTime: HTMLElement;
   readonly flightRange: HTMLElement;
+  readonly damageReductionFactor: HTMLElement;
 }
 
 export interface LauncherController {
@@ -43,6 +51,7 @@ export interface LauncherController {
   currentMissileSpec(): MissileSpec | undefined;
   applyImported(imported: ImportedFitting, conditions: StatConditions): void;
   restore(fitting?: string, conditions?: StatConditions, ammoId?: TypeId): void;
+  setHullProfile(profile: ShipProfile | undefined): void;
   clear(): void;
   capture(): { ammo: TypeId | undefined };
   isAmmoPopupOpen(): boolean;

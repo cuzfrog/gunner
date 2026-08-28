@@ -17,6 +17,8 @@ import {
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
+  mockLauncherCatalog,
+  mockLauncherClasses,
   mockMissileCatalog,
   mockParser,
   mockPresetFittings,
@@ -198,6 +200,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
     fittingDb: asValue(mockFittingDb()),
     missileCatalog: asValue(mockMissileCatalog()),
+    launcherCatalog: asValue(mockLauncherCatalog()),
+    launcherClasses: asValue(mockLauncherClasses()),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
   });
   return cradle;
@@ -279,6 +283,7 @@ class StubLauncherController implements LauncherController {
   currentMissileSpec = vi.fn(() => undefined);
   applyImported = vi.fn();
   restore = vi.fn();
+  setHullProfile = vi.fn();
   clear = vi.fn();
   capture = vi.fn(() => ({ ammo: undefined }));
   isAmmoPopupOpen = vi.fn();

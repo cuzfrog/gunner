@@ -280,6 +280,7 @@ export function makeShips() {
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(),
     turretSizeOptions: vi.fn(),
+    shipTier: vi.fn(),
     fittedStats: vi.fn(),
     maxSpeedForFittedMass: vi.fn(),
     alignTime: vi.fn(),
@@ -327,5 +328,6 @@ function mockMissileCatalog(): MissileCatalog {
     withCharge: vi.fn(),
     has: vi.fn(() => false),
     idForName: vi.fn(() => undefined),
+    equivalentInGroups: vi.fn(() => undefined),
   };
 }

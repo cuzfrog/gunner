@@ -28,6 +28,7 @@ function createWeaponSystemSwitch(side: Side, deps: ControlsCradle): WeaponSyste
     container: deps.els[side].weaponSystem,
     turretButton: deps.els[side].weaponSystemTurret,
     missileButton: deps.els[side].weaponSystemMissile,
+    droneButton: deps.els[side].weaponSystemDrone,
     turretPanel: deps.els[side].turretPanel,
     launcherPanel: deps.els[side].launcherPanel,
     turretController: deps.turretControllers[side],

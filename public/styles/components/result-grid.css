@@ -6,31 +6,60 @@
   margin: 10px 0;
 }
 
-.result-card {
+.result-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  padding: 8px 10px;
+}
+
+.result-side-a { border-left: 2px solid var(--accent-teal); }
+.result-side-b { border-left: 2px solid var(--accent-orange); }
+
+.result-side-hero {
   display: flex;
   flex-direction: column;
   text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.result-side-support {
+  display: flex;
+  gap: 6px;
+}
+
+.result-side-weapon {
+  display: flex;
+  gap: 6px;
+}
+
+.result-side-weapon[hidden] { display: none; }
+
+.result-range {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
   background: var(--bg-panel);
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   padding: 8px 12px;
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.result-metric {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
   min-width: 0;
 }
-
-.result-card-group {
-  display: flex;
-  gap: 6px;
-  flex: 3 1 0;
-  min-width: 0;
-}
-
-.result-card-group[hidden] { display: none; }
-
-.result-card-ship-a { border-left: 2px solid var(--accent-teal); }
-.result-card-ship-b { border-left: 2px solid var(--accent-orange); }
-.result-card-ship-a.result-card-hit-chance { border-color: var(--accent-teal); }
-.result-card-ship-b.result-card-hit-chance { border-color: var(--accent-orange); }
 
 .result-card-label {
   display: block;
@@ -43,14 +72,31 @@
 
 .result-card-value {
   display: block;
-  font-size: 18px;
-  line-height: 28px;
+  font-size: 16px;
+  line-height: 24px;
   color: var(--text-primary);
 }
 
-.result-card-hit-chance .result-card-value {
+.result-hero-value {
   font-size: 28px;
+  line-height: 32px;
   font-family: "Chakra Petch", sans-serif;
+}
+
+.result-metric-label {
+  display: block;
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1px;
+}
+
+.result-metric-value {
+  display: block;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-primary);
 }
 
 .result-card-value.is-dim { color: var(--text-dim); }

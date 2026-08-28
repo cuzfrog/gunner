@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
 import type { FittingDb } from "../../gamedata/fittingDb";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
@@ -35,6 +35,7 @@ export function mockShips(): Ships {
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(() => undefined),
     turretSizeOptions: vi.fn(() => [] as const),
+    shipTier: vi.fn(() => undefined),
     fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 })),
     maxSpeedForFittedMass: vi.fn(() => 0),
     alignTime: vi.fn(() => 0),
@@ -187,5 +188,20 @@ export function mockMissileCatalog(): MissileCatalog {
     withCharge: vi.fn(),
     has: vi.fn(() => false),
     idForName: vi.fn(() => undefined),
+    equivalentInGroups: vi.fn(() => undefined),
+  };
+}
+
+export function mockLauncherCatalog(): LauncherCatalog {
+  return {
+    switchClass: vi.fn((_launcher: ImportedLauncher, _target: LauncherClass) => undefined),
+  };
+}
+
+export function mockLauncherClasses(): LauncherClasses {
+  return {
+    classOf: vi.fn(() => "rocket" as LauncherClass),
+    representativeOf: vi.fn(() => toTypeId("0")),
+    classesForTiers: vi.fn(() => []),
   };
 }

@@ -1,13 +1,14 @@
 import type { ImageCatalog } from "../../icons";
-import type { FittingImport, ImportedLauncher, MissileCatalog, MissileOption } from "../../../fitting";
+import type { FittingImport, ImportedLauncher, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
 import type { ShipId, TypeId } from "../../../gamedata/ids";
-import type { SkillLevel } from "../../../ships";
+import type { Ships, SkillLevel } from "../../../ships";
 import { UiEventsImpl } from "../../events";
 import type { I18n, Language } from "../../i18n";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { fakeDocument, getFake } from "../testSupport";
+import { fakeDocument } from "../testSupport";
+import { mockShips } from "../../testing";
 import { LauncherControllerImpl } from "./launcherController";
 import type { LauncherEls } from "./launcherControllerContract";
 
@@ -24,6 +25,10 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
     ammoSummary: document.getElementById(`${id}-launcher-ammo-summary`)!,
     ammoPopup: document.getElementById(`${id}-launcher-ammo-popup`)!,
     ammoList: document.getElementById(`${id}-launcher-ammo-list`)!,
+    classOptions: document.getElementById(`${id}-launcher-class-options`)!,
+    attributesTrigger: document.getElementById(`${id}-launcher-attributes-trigger`)! as HTMLButtonElement,
+    attributesSummary: document.getElementById(`${id}-launcher-attributes-summary`)!,
+    attributesPopup: document.getElementById(`${id}-launcher-attributes-popup`)!,
     volleyDamage: document.getElementById(`${id}-launcher-volley-damage`)!,
     rateOfFire: document.getElementById(`${id}-launcher-rate-of-fire`)!,
     explosionRadius: document.getElementById(`${id}-launcher-explosion-radius`)!,
@@ -31,6 +36,7 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
     missileVelocity: document.getElementById(`${id}-launcher-missile-velocity`)!,
     flightTime: document.getElementById(`${id}-launcher-flight-time`)!,
     flightRange: document.getElementById(`${id}-launcher-flight-range`)!,
+    damageReductionFactor: document.getElementById(`${id}-launcher-damage-reduction-factor`)!,
   };
 }
 
@@ -80,6 +86,9 @@ export function buildLauncher(
     imageCatalog?: Partial<ImageCatalog>;
     fittingImport?: Partial<FittingImport>;
     missileCatalog?: Partial<MissileCatalog>;
+    launcherCatalog?: Partial<LauncherCatalog>;
+    launcherClasses?: Partial<LauncherClasses>;
+    ships?: Partial<Ships>;
     fittingDb?: Partial<FittingDb>;
     i18n?: Partial<I18n>;
   } = {},
@@ -116,8 +125,20 @@ export function buildLauncher(
     withCharge: vi.fn((_launcher, missileId) => importedLauncherFixture({ chargeId: missileId, chargeName: missileId === NOVA_LIGHT.id ? NOVA_LIGHT.name : SCOURGE_LIGHT.name })),
     has: vi.fn((id: TypeId) => id === SCOURGE_LIGHT.id || id === NOVA_LIGHT.id),
     idForName: vi.fn((name: string) => MISSILE_OPTIONS.find((m) => m.name === name)?.id),
+    equivalentInGroups: vi.fn(() => undefined),
     ...options.missileCatalog,
   });
+  const launcherCatalog = vi.mocked<LauncherCatalog>({
+    switchClass: vi.fn(() => undefined),
+    ...options.launcherCatalog,
+  });
+  const launcherClasses = vi.mocked<LauncherClasses>({
+    classOf: vi.fn(() => "light" as LauncherClass),
+    representativeOf: vi.fn(() => "499" as TypeId),
+    classesForTiers: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
+    ...options.launcherClasses,
+  });
+  const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });
   const fittingDb = vi.mocked<FittingDb>({
     missiles: { [SCOURGE_LIGHT.id]: SCOURGE_LIGHT, [NOVA_LIGHT.id]: NOVA_LIGHT },
     launchers: { "499": LIGHT_MISSILE_LAUNCHER },
@@ -141,10 +162,13 @@ export function buildLauncher(
     fittingDb,
     fittingImport,
     missileCatalog,
+    launcherCatalog,
+    launcherClasses,
+    ships,
     imageCatalog,
     i18n,
     events,
     popupGroup,
   });
-  return { document, controller, missileCatalog, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup };
+  return { document, controller, missileCatalog, launcherCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup };
 }

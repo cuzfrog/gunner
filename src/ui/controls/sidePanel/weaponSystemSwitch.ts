@@ -17,6 +17,7 @@ export interface WeaponSystemSwitchDeps {
   readonly container: HTMLElement;
   readonly turretButton: HTMLButtonElement;
   readonly missileButton: HTMLButtonElement;
+  readonly droneButton: HTMLButtonElement;
   readonly turretPanel: HTMLElement;
   readonly launcherPanel: HTMLElement;
   readonly turretController: TurretController;
@@ -29,6 +30,7 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
   private readonly container: HTMLElement;
   private readonly turretButton: HTMLButtonElement;
   private readonly missileButton: HTMLButtonElement;
+  private readonly droneButton: HTMLButtonElement;
   private readonly turretPanel: HTMLElement;
   private readonly launcherPanel: HTMLElement;
   private readonly turretController: TurretController;
@@ -41,6 +43,7 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.container = deps.container;
     this.turretButton = deps.turretButton;
     this.missileButton = deps.missileButton;
+    this.droneButton = deps.droneButton;
     this.turretPanel = deps.turretPanel;
     this.launcherPanel = deps.launcherPanel;
     this.turretController = deps.turretController;
@@ -69,8 +72,9 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     if (!hasLauncher && this.kind === "missile") {
       this.kind = hasTurret ? "turret" : "missile";
     }
-    const showSwitch = hasTurret && hasLauncher;
-    this.container.hidden = !showSwitch;
+    this.turretButton.disabled = !hasTurret;
+    this.missileButton.disabled = !hasLauncher;
+    this.droneButton.disabled = true;
     this.turretPanel.hidden = !hasTurret || this.kind !== "turret";
     this.launcherPanel.hidden = !hasLauncher || this.kind !== "missile";
     this.turretButton.setAttribute("aria-pressed", String(this.kind === "turret"));

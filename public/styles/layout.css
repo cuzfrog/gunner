@@ -28,15 +28,6 @@
     border-radius: 2px;
   }
 
-  .result-card {
-    flex: 0 0 auto;
-    min-width: 80px;
-  }
-
-  .result-card-group {
-    flex: 0 0 auto;
-  }
-
   .skill-section { margin-top: 0; }
 }
 
@@ -44,6 +35,11 @@
   .app-footer { grid-template-columns: 1fr; }
 
   .combatant-portrait { bottom: 152px; }
+}
+
+@media (max-width: 720px) {
+  .result-grid { flex-direction: column; }
+  .result-range { order: 2; }
 }
 
 @media (min-width: 901px) {

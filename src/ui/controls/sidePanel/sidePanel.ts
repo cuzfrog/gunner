@@ -238,5 +238,9 @@ export class SidePanelImpl implements SidePanel {
     this.launcherLink.restore(this.fittingText, this.skillConditions());
   }
 
+  setLauncherProfile(profile: ShipProfile | undefined): void {
+    this.launcherLink.setHullProfile(profile);
+  }
+
   skillConditions(): StatConditions { return this.sections.skill.skillConditions(); }
 }

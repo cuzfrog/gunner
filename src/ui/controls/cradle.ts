@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { I18n } from "../i18n";
@@ -70,6 +70,8 @@ export interface ControlsCradle {
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
+  readonly launcherCatalog: LauncherCatalog;
+  readonly launcherClasses: LauncherClasses;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
   readonly shipAFittingPreview: FittingPreview;

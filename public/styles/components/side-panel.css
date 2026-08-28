@@ -11,8 +11,40 @@
   row-gap: var(--gap-field);
 }
 
-.weapon-system-switch {
+.weapon-kind-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   padding: 2px 0;
+  margin-right: 4px;
+}
+
+.weapon-kind-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.weapon-kind-button[aria-pressed="true"] {
+  color: var(--text-primary);
+  border-color: var(--accent-teal);
+}
+
+.side-panel-ship-b .weapon-kind-button[aria-pressed="true"] {
+  border-color: var(--accent-orange);
+}
+
+.weapon-kind-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .side-panel-heading-row {

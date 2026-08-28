@@ -14,6 +14,8 @@ export {
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
+  mockLauncherCatalog,
+  mockLauncherClasses,
   mockMissileCatalog,
   mockParser,
   mockPresetFittings,

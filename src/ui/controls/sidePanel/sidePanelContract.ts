@@ -46,6 +46,7 @@ export interface SidePanel {
   setTurretProfile(profile: ShipProfile | undefined): void;
   clearLauncher(): void;
   restoreLauncher(): void;
+  setLauncherProfile(profile: ShipProfile | undefined): void;
   renderFittingPopupIfOpen(): void;
   closeFittingPopupIfOpen(): void;
   hideFittingPreview(): void;

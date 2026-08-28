@@ -2,6 +2,20 @@
         <div class="side-panel-heading-row">
           <h2 class="side-panel-heading" data-i18n="label.{{SIDE_KEY}}">{{SIDE_LABEL}}</h2>
           <div class="side-panel-heading-actions">
+            <div class="weapon-kind-switch" id="{{ID_PREFIX}}-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+              <button type="button" id="{{ID_PREFIX}}-weapon-system-turret" class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
+                      data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
+              </button>
+              <button type="button" id="{{ID_PREFIX}}-weapon-system-missile" class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
+                      data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
+              </button>
+              <button type="button" id="{{ID_PREFIX}}-weapon-system-drone" class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
+                      data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
+              </button>
+            </div>
             <button type="button" id="{{ID_PREFIX}}-import-fitting" class="icon-button"
                     data-i18n-title="button.importFitting" data-i18n-aria-label="button.importFitting" aria-label="Import from clipboard" title="Import from clipboard">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#import"></use></svg>
@@ -39,25 +53,7 @@
           </div>
         </div>
 
-        <div class="segmented-control choice-selector weapon-system-switch" id="{{ID_PREFIX}}-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system" hidden>
-          <button type="button" id="{{ID_PREFIX}}-weapon-system-turret" data-value="turret" class="btn" aria-pressed="true" data-i18n="label.turret">Turret</button>
-          <button type="button" id="{{ID_PREFIX}}-weapon-system-missile" data-value="missile" class="btn" aria-pressed="false" data-i18n="label.launcher">Launcher</button>
-        </div>
-
         <div class="weapon-panel" id="{{ID_PREFIX}}-turret-panel">
-        <label class="form-field">
-          <span class="tracking-label-row">
-            <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
-            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
-              <button type="button" id="{{ID_PREFIX}}-tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
-              <button type="button" id="{{ID_PREFIX}}-tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
-            </span>
-          </span>
-          <span class="input-with-unit input-with-unit-has-effective">
-            <input type="number" class="input-field" id="{{ID_PREFIX}}-tracking" value="{{TRACKING_VALUE}}" step="any" min="0">
-            <span class="effective-value mono" id="effective-{{EFFECTIVE_TRACKING_ID}}"></span>
-          </span>
-        </label>
         <div class="form-field-group">
           <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
 
@@ -85,6 +81,19 @@
             </button>
           </div>
         </div>
+        <label class="form-field">
+          <span class="tracking-label-row">
+            <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+            <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+              <button type="button" id="{{ID_PREFIX}}-tracking-unit-rad" data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+              <button type="button" id="{{ID_PREFIX}}-tracking-unit-score" data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+            </span>
+          </span>
+          <span class="input-with-unit input-with-unit-has-effective">
+            <input type="number" class="input-field" id="{{ID_PREFIX}}-tracking" value="{{TRACKING_VALUE}}" step="any" min="0">
+            <span class="effective-value mono" id="effective-{{EFFECTIVE_TRACKING_ID}}"></span>
+          </span>
+        </label>
         <div class="form-field-row">
           <label class="form-field">
             <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
@@ -127,6 +136,45 @@
         </div>
 
         <div class="launcher-panel" id="{{ID_PREFIX}}-launcher-panel" hidden>
+          <div class="form-field-group">
+            <span class="field-label truncate" data-i18n="label.launcherClass">Launcher class</span>
+            <div class="segmented-control choice-selector launcher-class-selector"
+                 id="{{ID_PREFIX}}-launcher-class-options" role="group"
+                 data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
+            </div>
+          </div>
+          <div class="form-field-group">
+            <button type="button" id="{{ID_PREFIX}}-launcher-attributes-trigger" class="trigger launcher-attributes-trigger"
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ID_PREFIX}}-launcher-attributes-popup"
+                    data-i18n-title="button.missileAttributes" data-i18n-aria-label="button.missileAttributes"
+                    title="Missile attributes" aria-label="Missile attributes">
+              <span class="launcher-attributes-label truncate" data-i18n="label.missileAttributes">Missile</span>
+              <span class="launcher-attributes-summary mono truncate" id="{{ID_PREFIX}}-launcher-attributes-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </button>
+            <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id="{{ID_PREFIX}}-launcher-attributes-popup" hidden role="dialog" aria-modal="false">
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
+                <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-volley-damage">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
+                <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-rate-of-fire">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
+                <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-explosion-radius">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
+                <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-explosion-velocity">-</span>
+              </div>
+              <div class="launcher-telemetry-row">
+                <span class="launcher-telemetry-label" data-i18n="label.damageReductionFactor">DRF</span>
+                <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-damage-reduction-factor">-</span>
+              </div>
+            </div>
+          </div>
           <div class="form-field-group ammo-group">
             <button type="button" id="{{ID_PREFIX}}-launcher-ammo-trigger" class="launcher-ammo-trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="{{ID_PREFIX}}-launcher-ammo-popup"
@@ -139,34 +187,6 @@
             <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id="{{ID_PREFIX}}-launcher-ammo-popup" hidden>
               <ul class="launcher-ammo-list" id="{{ID_PREFIX}}-launcher-ammo-list" role="listbox"></ul>
             </div>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-volley-damage">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-rate-of-fire">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-explosion-radius">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-explosion-velocity">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-missile-velocity">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-flight-time">-</span>
-          </div>
-          <div class="launcher-telemetry-row">
-            <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
-            <span class="launcher-telemetry-value mono" id="{{ID_PREFIX}}-launcher-flight-range">-</span>
           </div>
         </div>
 
