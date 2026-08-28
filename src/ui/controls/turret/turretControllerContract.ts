@@ -58,7 +58,7 @@ export interface TurretController {
     falloff?: number;
   }): void;
   clear(): void;
-  currentTurretSpec(trackingOverride?: number): TurretSpec;
+  currentTurretSpec(trackingOverride?: number): TurretSpec | undefined;
   currentSigResClass(): SigResolutionClass;
   capture(): { tracking: number; sigRes: SigResolutionClass; optimal: number; falloff: number; ammo: TypeId };
   isAmmoPopupOpen(): boolean;

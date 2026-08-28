@@ -145,7 +145,7 @@ class FakeTurretController implements TurretController {
   applyImported = vi.fn();
   restore = vi.fn((..._args: unknown[]): void => {});
   clear = vi.fn();
-  currentTurretSpec = vi.fn((): TurretSpec => ({
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({
     kind: "turret",
     tracking: this.trackingInput.rad,
     sigResolution: 40,

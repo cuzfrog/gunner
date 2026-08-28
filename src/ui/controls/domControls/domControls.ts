@@ -1,10 +1,8 @@
 import {
   type EngagementView,
-  type MissileSpec,
   type SimConfig,
   type WeaponSpec,
 } from "../../../sim";
-import type { ImportedLauncher } from "../../../fitting";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
@@ -214,9 +212,9 @@ export class DomControls implements Controls, DomControlsHost {
   getWeapon(side: Side): WeaponSpec | undefined {
     const turret = this.turretControllers[side].turret();
     if (turret) return this.turretControllers[side].currentTurretSpec();
-    const launcher = this.launcherControllers[side].launcher();
-    if (launcher) return importedLauncherToMissileSpec(launcher);
-    return this.turretControllers[side].currentTurretSpec();
+    const missile = this.launcherControllers[side].currentMissileSpec();
+    if (missile) return missile;
+    return undefined;
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
@@ -279,19 +277,4 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private sideFor(side: Side): SidePanel { return side === "shipA" ? this.shipASide : this.shipBSide; }
-}
-
-function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec {
-  return {
-    kind: "missile",
-    damagePerMissile: launcher.damagePerMissile,
-    cycleTime: launcher.cycleTime,
-    launcherCount: launcher.count,
-    explosionRadius: launcher.explosionRadius,
-    explosionVelocity: launcher.explosionVelocity,
-    damageReductionFactor: launcher.damageReductionFactor,
-    maxVelocity: launcher.maxVelocity,
-    flightTime: launcher.flightTime,
-    flightRange: launcher.maxVelocity * launcher.flightTime,
-  };
 }

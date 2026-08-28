@@ -1,9 +1,7 @@
 import type { ImageCatalog } from "../../icons";
-import type { FittingImport, MissileCatalog, MissileOption } from "../../../fitting";
-import type { FittingDb } from "../../../gamedata/fittingDb";
-import type { HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
-import type { TypeId } from "../../../gamedata/ids";
-import type { ShipId } from "../../../gamedata/ids";
+import type { FittingImport, ImportedLauncher, MissileCatalog, MissileOption } from "../../../fitting";
+import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { SkillLevel } from "../../../ships";
 import { UiEventsImpl } from "../../events";
 import type { I18n, Language } from "../../i18n";
@@ -55,11 +53,11 @@ const LIGHT_MISSILE_LAUNCHER: LauncherStats = {
 };
 
 const MISSILE_OPTIONS: readonly MissileOption[] = [
-  { id: SCOURGE_LIGHT.id, name: SCOURGE_LIGHT.name, chargeGroup: 384 },
-  { id: NOVA_LIGHT.id, name: NOVA_LIGHT.name, chargeGroup: 384 },
+  { id: SCOURGE_LIGHT.id, name: SCOURGE_LIGHT.name, damage: SCOURGE_LIGHT.damage, damageType: SCOURGE_LIGHT.damageType },
+  { id: NOVA_LIGHT.id, name: NOVA_LIGHT.name, damage: NOVA_LIGHT.damage, damageType: NOVA_LIGHT.damageType },
 ];
 
-export function importedLauncherFixture(overrides: Partial<import("../../../fitting").ImportedLauncher> = {}): import("../../../fitting").ImportedLauncher {
+export function importedLauncherFixture(overrides: Partial<ImportedLauncher> = {}): ImportedLauncher {
   return {
     moduleId: "499" as TypeId,
     name: "Light Missile Launcher I",

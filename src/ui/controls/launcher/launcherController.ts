@@ -2,6 +2,7 @@ import type { FittingDb, FittingImport, MissileCatalog, MissileOption } from "..
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
 import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
+import type { MissileSpec } from "../../../sim";
 import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -28,7 +29,7 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly popupGroup: PopupGroup;
   private readonly popupValue: Popup;
   private selectedLauncher?: ImportedLauncher;
-  private currentAmmoId: TypeId;
+  private currentAmmoId: TypeId | undefined;
   private hullBonuses: readonly HullBonus[] = [];
   private skillLevel: SkillLevel = 5;
   private ammoPopupOpen = false;
@@ -43,7 +44,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
-    this.currentAmmoId = "" as TypeId;
+    this.currentAmmoId = undefined;
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.events.onLanguageChanged(() => this.render());
@@ -56,17 +57,21 @@ export class LauncherControllerImpl implements LauncherController {
     return this.selectedLauncher;
   }
 
-  ammoId(): TypeId {
+  ammoId(): TypeId | undefined {
     return this.currentAmmoId;
+  }
+
+  currentMissileSpec(): MissileSpec | undefined {
+    const launcher = this.selectedLauncher;
+    if (!launcher) return undefined;
+    return importedLauncherToMissileSpec(launcher);
   }
 
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.skillLevel = conditions.skillLevel;
     this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.selectedLauncher = imported.launcher;
-    if (imported.launcher) {
-      this.currentAmmoId = imported.launcher.chargeId;
-    }
+    this.currentAmmoId = imported.launcher?.chargeId;
     this.render();
   }
 
@@ -87,9 +92,11 @@ export class LauncherControllerImpl implements LauncherController {
         }
       } else {
         this.selectedLauncher = undefined;
+        this.currentAmmoId = undefined;
       }
     } else {
       this.selectedLauncher = undefined;
+      this.currentAmmoId = undefined;
     }
     this.render();
   }
@@ -97,11 +104,11 @@ export class LauncherControllerImpl implements LauncherController {
   clear(): void {
     this.popupGroup.close(this.popupValue);
     this.selectedLauncher = undefined;
-    this.currentAmmoId = "" as TypeId;
+    this.currentAmmoId = undefined;
     this.render();
   }
 
-  capture(): { ammo: TypeId } {
+  capture(): { ammo: TypeId | undefined } {
     return { ammo: this.currentAmmoId };
   }
 
@@ -140,18 +147,18 @@ export class LauncherControllerImpl implements LauncherController {
     for (const option of options) {
       const li = document.createElement("li");
       li.setAttribute("role", "option");
-      li.classList.add("ammo-list-item");
+      li.classList.add("launcher-ammo-item");
       if (option.id === this.currentAmmoId) li.classList.add("is-selected");
       const iconUrl = this.imageCatalog.itemIconUrl(option.id);
       if (iconUrl) {
         const img = document.createElement("img");
-        img.classList.add("ammo-list-icon");
+        img.classList.add("launcher-ammo-icon");
         img.src = iconUrl;
         img.alt = "";
         li.appendChild(img);
       }
       const nameSpan = document.createElement("span");
-      nameSpan.classList.add("ammo-list-name", "truncate");
+      nameSpan.classList.add("launcher-ammo-name", "truncate");
       nameSpan.textContent = option.name;
       li.appendChild(nameSpan);
       li.addEventListener("click", () => this.onAmmoSelect(option.id));
@@ -187,4 +194,19 @@ export class LauncherControllerImpl implements LauncherController {
     };
     return popup;
   }
+}
+
+function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec {
+  return {
+    kind: "missile",
+    damagePerMissile: launcher.damagePerMissile,
+    cycleTime: launcher.cycleTime,
+    launcherCount: launcher.count,
+    explosionRadius: launcher.explosionRadius,
+    explosionVelocity: launcher.explosionVelocity,
+    damageReductionFactor: launcher.damageReductionFactor,
+    maxVelocity: launcher.maxVelocity,
+    flightTime: launcher.flightTime,
+    flightRange: launcher.maxVelocity * launcher.flightTime,
+  };
 }

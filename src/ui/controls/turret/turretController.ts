@@ -201,7 +201,8 @@ export class TurretControllerImpl implements TurretController {
     this.render();
   }
 
-  currentTurretSpec(trackingOverride?: number): TurretSpec {
+  currentTurretSpec(trackingOverride?: number): TurretSpec | undefined {
+    if (!this.selectedTurret) return undefined;
     return {
       kind: "turret",
       tracking: trackingOverride ?? this.trackingInput.rad,
@@ -249,8 +250,8 @@ export class TurretControllerImpl implements TurretController {
   }
 
   private onTurretSpecInput(key: "optimal" | "falloff"): void {
-    const spec = this.currentTurretSpec();
-    this.turretOverrides.set(key === "optimal" ? { optimal: spec.optimal } : { falloff: spec.falloff });
+    const value = num(key === "optimal" ? this.els.optimal : this.els.falloff);
+    this.turretOverrides.set(key === "optimal" ? { optimal: value } : { falloff: value });
     this.events.emitDisplayInvalidated();
   }
 

@@ -15,7 +15,7 @@ describe("LauncherController", () => {
     const { document, controller } = buildLauncher();
     expect(getFake(document, "ship-a-launcher-panel").classList.toggle).toHaveBeenCalledWith("is-hidden", true);
     expect(controller.launcher()).toBeUndefined();
-    expect(controller.ammoId()).toBe("" as TypeId);
+    expect(controller.ammoId()).toBeUndefined();
   });
 
   test("applyImported with a launcher shows the panel and renders telemetry", () => {
@@ -83,6 +83,23 @@ describe("LauncherController", () => {
     const { controller } = buildLauncher();
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
     expect(controller.capture().ammo).toBe(SCOURGE_LIGHT_ID);
+  });
+
+  test("currentMissileSpec returns undefined when no launcher is fitted", () => {
+    const { controller } = buildLauncher();
+    expect(controller.currentMissileSpec()).toBeUndefined();
+  });
+
+  test("currentMissileSpec returns a MissileSpec with flightRange when a launcher is fitted", () => {
+    const { controller } = buildLauncher();
+    const launcher = importedLauncherFixture();
+    controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false });
+    const spec = controller.currentMissileSpec();
+    expect(spec).toBeDefined();
+    expect(spec!.kind).toBe("missile");
+    expect(spec!.damagePerMissile).toBe(83);
+    expect(spec!.launcherCount).toBe(2);
+    expect(spec!.flightRange).toBe(3750 * 5);
   });
 
   test("ammo popup toggle opens and closes", () => {

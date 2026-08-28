@@ -1,4 +1,4 @@
-import type { EngagementFrameComposer, EngagementView, EwarResolver, MissileSpec, ShipState, Side, Simulation, TurretSpec, WeaponSpec } from "../sim";
+import type { EngagementFrameComposer, EngagementView, EwarResolver, ShipState, Side, Simulation, WeaponSpec } from "../sim";
 import type { Controls, EffectiveReadouts, Loop, Renderer, TurretRange, MissileRange, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {

@@ -27,7 +27,7 @@ import {
   mockTimer,
 } from "../testing";
 import type { StatConditions } from "../../ships";
-import type { SigResolutionClass } from "../../sim";
+import type { SigResolutionClass, TurretSpec } from "../../sim";
 import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { DomControls } from "./domControls";
 import type { ConfirmController } from "./confirm";
@@ -254,7 +254,7 @@ class StubTurretController implements TurretController {
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
-  currentTurretSpec = vi.fn(() => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 0, cycleTime: 1, turretCount: 1 }));
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 0, cycleTime: 1, turretCount: 1 }));
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();
@@ -275,11 +275,12 @@ class StubLauncherController implements LauncherController {
   readonly side: Side;
   popup: Popup = new StubPopup();
   launcher = vi.fn(() => undefined);
-  ammoId = vi.fn(() => "" as TypeId);
+  ammoId = vi.fn(() => undefined);
+  currentMissileSpec = vi.fn(() => undefined);
   applyImported = vi.fn();
   restore = vi.fn();
   clear = vi.fn();
-  capture = vi.fn(() => ({ ammo: "" as TypeId }));
+  capture = vi.fn(() => ({ ammo: undefined }));
   isAmmoPopupOpen = vi.fn();
   openAmmoPopup = vi.fn();
   closeAmmoPopup = vi.fn();

@@ -55,7 +55,7 @@
   gap: 2px;
 }
 
-.ammo-list-item {
+.launcher-ammo-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -65,21 +65,21 @@
   color: var(--text-primary);
 }
 
-.ammo-list-item.is-selected {
+.launcher-ammo-item.is-selected {
   background: var(--surface-active, rgba(255, 255, 255, 0.08));
 }
 
-.ammo-list-item:hover {
+.launcher-ammo-item:hover {
   background: var(--surface-hover, rgba(255, 255, 255, 0.04));
 }
 
-.ammo-list-icon {
+.launcher-ammo-icon {
   width: 16px;
   height: 16px;
   flex: 0 0 auto;
 }
 
-.ammo-list-name {
+.launcher-ammo-name {
   flex: 1 1 auto;
   min-width: 0;
 }

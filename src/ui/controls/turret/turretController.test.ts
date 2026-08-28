@@ -186,12 +186,18 @@ describe("TurretController", () => {
   test("currentTurretSpec reads inputs and uses the provided tracking override", () => {
     const { controller, trackingInput } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
-    const spec = controller.currentTurretSpec(0.5);
+    const spec = controller.currentTurretSpec(0.5)!;
     expect(spec.tracking).toBe(0.5);
     expect(spec.sigResolution).toBe(40);
     expect(spec.optimal).toBe(600);
     expect(spec.falloff).toBe(3000);
-    expect(controller.currentTurretSpec().tracking).toBe(trackingInput.rad);
+    expect(controller.currentTurretSpec()!.tracking).toBe(trackingInput.rad);
+  });
+
+  test("currentTurretSpec returns undefined when no turret is fitted", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined })) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
   test("capture returns the current turret inputs and ammo", () => {
