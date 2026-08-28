@@ -34,6 +34,11 @@ function catalog(): MissileCatalogImpl {
   return new MissileCatalogImpl({ fittingDb: testDb, missileSkillModel: skillModel });
 }
 
+beforeEach(() => {
+  stacking.apply.mockReset();
+  stacking.apply.mockImplementation((m: readonly number[]) => m.reduce((p, x) => p * x, 1));
+});
+
 function importedLauncher(overrides: Partial<ImportedLauncher> = {}): ImportedLauncher {
   return {
     moduleId: LIGHT_MISSILE_LAUNCHER.id,

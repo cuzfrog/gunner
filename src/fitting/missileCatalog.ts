@@ -45,9 +45,9 @@ export class MissileCatalogImpl implements MissileCatalog {
   }
 
   withCharge(launcher: ImportedLauncher, missileId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher {
-    const missile = this.missiles[String(missileId)];
+    const missile = this.missiles[missileId];
     if (!missile) return launcher;
-    const launcherStats = this.launchers[String(launcher.moduleId)];
+    const launcherStats = this.launchers[launcher.moduleId];
     if (!launcherStats || !launcherStats.chargeGroups.includes(missile.chargeGroup)) return launcher;
     const output = this.skillModel.compute(launcherStats, missile, hullBonuses, skillLevel);
     return {
@@ -67,7 +67,7 @@ export class MissileCatalogImpl implements MissileCatalog {
   }
 
   has(missile: TypeId): boolean {
-    return this.missiles[String(missile)] !== undefined;
+    return this.missiles[missile] !== undefined;
   }
 
   idForName(name: string): TypeId | undefined {

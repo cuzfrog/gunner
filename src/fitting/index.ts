@@ -1,7 +1,7 @@
 export type { FittingDb, FittingImport, FittingRow, FittingSection, FittingSummary, ImportedFitting, ImportedTurret, ImportedLauncher } from "./fittingImport";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
-export type { MissileSkillModel, MissileSkillOutput } from "./missileStats";
+export type { MissileSkillModel } from "./missileStats";
 export type { PresetFitting, PresetFittings } from "./presetFittings";
 export type { ModuleSlot } from "../gamedata/moduleSlots";
 export type { GunFamilies, GunFamily } from "./gunFamilies";

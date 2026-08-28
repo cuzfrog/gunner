@@ -579,6 +579,7 @@ function resolveLauncher(
       const existing = counts.get(line.moduleId);
       if (existing) {
         existing.count++;
+        if (existing.chargeId === undefined && line.chargeId !== undefined) existing.chargeId = line.chargeId;
       } else {
         counts.set(line.moduleId, { count: 1, chargeId: line.chargeId, order: order++ });
       }
@@ -604,7 +605,7 @@ function resolveLauncher(
   const chargeId = resolveMissileChargeId(db, missileCatalog, launcherStats, counts.get(bestModuleId)?.chargeId);
   if (!chargeId) return undefined;
 
-  const missileStats = db.missiles[String(chargeId)];
+  const missileStats = db.missiles[chargeId];
   if (!missileStats) return undefined;
 
   const output = missileSkillModel.compute(launcherStats, missileStats, hullBonuses, skillLevel);
@@ -625,7 +626,7 @@ function resolveLauncher(
 }
 
 function resolveMissileChargeId(db: FittingDb, missileCatalog: MissileCatalog, launcher: LauncherStats, loadedChargeId: TypeId | undefined): TypeId | undefined {
-  if (loadedChargeId && db.missiles[String(loadedChargeId)] && launcher.chargeGroups.includes(db.missiles[String(loadedChargeId)].chargeGroup)) {
+  if (loadedChargeId && db.missiles[loadedChargeId] && launcher.chargeGroups.includes(db.missiles[loadedChargeId].chargeGroup)) {
     return loadedChargeId;
   }
   return missileCatalog.usualForLauncher(launcher);
@@ -634,10 +635,10 @@ function resolveMissileChargeId(db: FittingDb, missileCatalog: MissileCatalog, l
 function resolveCargoCharges(db: FittingDb, resolved: ResolvedEft): readonly CargoCharge[] {
   const charges: CargoCharge[] = [];
   for (const item of resolved.drones) {
-    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
+    if (item.kind === "resolved" && (db.charges[item.id] || db.missiles[item.id])) charges.push({ id: item.id, quantity: item.quantity });
   }
   for (const item of resolved.cargo) {
-    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
+    if (item.kind === "resolved" && (db.charges[item.id] || db.missiles[item.id])) charges.push({ id: item.id, quantity: item.quantity });
   }
   return charges;
 }

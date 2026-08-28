@@ -31,6 +31,11 @@ function model(): MissileSkillModelImpl {
   return new MissileSkillModelImpl({ stackingPenalty: stacking });
 }
 
+beforeEach(() => {
+  stacking.apply.mockReset();
+  stacking.apply.mockImplementation((multipliers: readonly number[]) => multipliers.reduce((p, m) => p * m, 1));
+});
+
 describe("MissileSkillModelImpl", () => {
   test("skill level 0 returns base missile and launcher stats unchanged", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 0);
@@ -48,7 +53,7 @@ describe("MissileSkillModelImpl", () => {
     expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
   });
 
-  test("skill level 5 applies ROF bonus from Missile Launcher Operation + Rapid Launch (-2% + -3% = -5%/lvl)", () => {
+  test("skill level 5 applies ROF bonus from Missile Launcher Operation + Rapid Launch (multiplicative)", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 5);
     const rofMultiplier = (1 - 0.02 * 5) * (1 - 0.03 * 5);
     expect(result.cycleTime).toBeCloseTo(16 * rofMultiplier, 6);
