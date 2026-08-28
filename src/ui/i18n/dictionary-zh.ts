@@ -151,6 +151,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "result.appliedDps": { zh: "实际 DPS" },
   "result.nominalDps": { zh: "纸面 DPS" },
   "result.application": { zh: "应用率" },
+  "result.timeToImpact": { zh: "命中时间" },
   "readout.time": { zh: "T +" },
   "readout.range": { zh: "距离：" },
   "readout.angular": { zh: "角速度：" },

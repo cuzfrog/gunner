@@ -1,8 +1,8 @@
 @layer components {
 .result-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 10px;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
   margin: 10px 0;
 }
 
@@ -14,7 +14,18 @@
   border: 1px solid var(--border-dim);
   border-radius: 2px;
   padding: 8px 12px;
+  flex: 1 1 0;
+  min-width: 0;
 }
+
+.result-card-group {
+  display: flex;
+  gap: 6px;
+  flex: 3 1 0;
+  min-width: 0;
+}
+
+.result-card-group[hidden] { display: none; }
 
 .result-card-ship-a { border-left: 2px solid var(--accent-teal); }
 .result-card-ship-b { border-left: 2px solid var(--accent-orange); }
@@ -42,6 +53,7 @@
   font-family: "Chakra Petch", sans-serif;
 }
 
+.result-card-value.is-dim { color: var(--text-dim); }
 .result-card-value.is-optimal { color: var(--optimal-green); }
 .result-card-value.is-good { color: var(--accent-teal); }
 .result-card-value.is-caution { color: var(--warn-yellow); }

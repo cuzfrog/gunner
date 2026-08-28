@@ -151,6 +151,7 @@ export const EN: LanguageSlice<"en"> = {
   "result.appliedDps": { en: "Applied DPS" },
   "result.nominalDps": { en: "Nominal DPS" },
   "result.application": { en: "Application" },
+  "result.timeToImpact": { en: "Time to impact" },
   "readout.time": { en: "T +" },
   "readout.range": { en: "Range: " },
   "readout.angular": { en: "Angular: " },

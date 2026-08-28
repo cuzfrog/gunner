@@ -407,3 +407,38 @@ describe("EffectiveReadoutImpl redundant write skipping", () => {
     expect(els.shipA.speedReadout.classList.add).toHaveBeenCalledWith("is-negative");
   });
 });
+
+describe("EffectiveReadoutImpl missile branch", () => {
+  test("renders missile attributes in tracking/optimal/falloff slots", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingDisplays = fakeTrackingDisplays(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
+    readout.update({
+      shipA: {
+        kind: "missile", speed: 400,
+        explosionRadius: 40, explosionVelocity: 170, maxVelocity: 3750, flightTime: 5, flightRange: 18750,
+      } as never,
+      shipB: sideValues(),
+    });
+    expect(els.shipA.trackingReadout.textContent).toBe("40 m");
+    expect(els.shipA.optimalReadout.textContent).toBe("170 m/s");
+    expect(els.shipA.falloffReadout.textContent).toBe("18.8 km");
+  });
+});
+
+describe("EffectiveReadoutImpl no-weapon branch", () => {
+  test("renders em-dash in tracking/optimal/falloff slots", () => {
+    const els = fakeEls();
+    const i18n = fakeI18n();
+    const trackingDisplays = fakeTrackingDisplays(0.32, "rad");
+    const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
+    readout.update({
+      shipA: { kind: "none", speed: 400 } as never,
+      shipB: sideValues(),
+    });
+    expect(els.shipA.trackingReadout.textContent).toBe("-");
+    expect(els.shipA.optimalReadout.textContent).toBe("-");
+    expect(els.shipA.falloffReadout.textContent).toBe("-");
+  });
+});
