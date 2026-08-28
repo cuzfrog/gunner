@@ -4,6 +4,8 @@ no-new-exports:
   - launcherControllerContract.ts
   - module.ts
   - index.ts
+  - testSupport.ts
+  - launcherController.test.ts
 ---
 
 # launcher

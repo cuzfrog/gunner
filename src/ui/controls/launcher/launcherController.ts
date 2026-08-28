@@ -47,6 +47,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
     this.events.onLanguageChanged(() => this.render());
+    this.render();
   }
 
   get popup(): Popup { return this.popupValue; }
