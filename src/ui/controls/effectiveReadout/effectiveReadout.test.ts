@@ -4,6 +4,7 @@ import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { TrackingInput } from "../trackingInput";
 import type { Side } from "../side";
+import type { MissileReadoutValues, NoWeaponReadoutValues } from "../controlsContract";
 import type { EffectiveReadout } from "./effectiveReadout";
 import { EffectiveReadoutImpl } from "./effectiveReadout";
 import { _formatSpeed, _isAffected as _isNegative, _readNumber } from "./effectiveReadout";
@@ -414,13 +415,11 @@ describe("EffectiveReadoutImpl missile branch", () => {
     const i18n = fakeI18n();
     const trackingDisplays = fakeTrackingDisplays(0.32, "rad");
     const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
-    readout.update({
-      shipA: {
-        kind: "missile", speed: 400,
-        explosionRadius: 40, explosionVelocity: 170, maxVelocity: 3750, flightTime: 5, flightRange: 18750,
-      } as never,
-      shipB: sideValues(),
-    });
+    const missile: MissileReadoutValues = {
+      kind: "missile", speed: 400,
+      explosionRadius: 40, explosionVelocity: 170, maxVelocity: 3750, flightTime: 5, flightRange: 18750,
+    };
+    readout.update({ shipA: missile, shipB: sideValues() });
     expect(els.shipA.trackingReadout.textContent).toBe("40 m");
     expect(els.shipA.optimalReadout.textContent).toBe("170 m/s");
     expect(els.shipA.falloffReadout.textContent).toBe("18.8 km");
@@ -433,10 +432,8 @@ describe("EffectiveReadoutImpl no-weapon branch", () => {
     const i18n = fakeI18n();
     const trackingDisplays = fakeTrackingDisplays(0.32, "rad");
     const readout = new EffectiveReadoutImpl({ els, i18n, trackingDisplays, fittingImport: fakeFittingImport() });
-    readout.update({
-      shipA: { kind: "none", speed: 400 } as never,
-      shipB: sideValues(),
-    });
+    const noWeapon: NoWeaponReadoutValues = { kind: "none", speed: 400 };
+    readout.update({ shipA: noWeapon, shipB: sideValues() });
     expect(els.shipA.trackingReadout.textContent).toBe("-");
     expect(els.shipA.optimalReadout.textContent).toBe("-");
     expect(els.shipA.falloffReadout.textContent).toBe("-");

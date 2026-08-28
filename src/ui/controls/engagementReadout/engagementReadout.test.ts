@@ -186,6 +186,13 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resAppliedDps.classList.contains("is-good")).toBe(true);
   });
 
+  test("turret side with zero applied DPS shows is-danger", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 0, application: 0, volley: 100 } }), T);
+    expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
+  });
+
   test("missile side shows DPS cards and missile cards, hides turret cards", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
