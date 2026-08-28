@@ -1,0 +1,89 @@
+import type { TypeId } from "../gamedata/ids";
+import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
+import type { SkillLevel } from "../ships";
+import type { ImportedLauncher } from "./chargeCatalog";
+import type { MissileSkillModel } from "./missileStats";
+
+export interface MissileOption {
+  readonly id: TypeId;
+  readonly name: string;
+  readonly damage: number;
+  readonly damageType: "em" | "thermal" | "kinetic" | "explosive";
+}
+
+export interface MissileCatalog {
+  missilesForLauncher(launcher: LauncherStats): readonly MissileOption[];
+  usualForLauncher(launcher: LauncherStats): TypeId | undefined;
+  withCharge(launcher: ImportedLauncher, missileId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher;
+  has(missile: TypeId): boolean;
+  idForName(name: string): TypeId | undefined;
+}
+
+interface MissileCatalogDeps {
+  readonly fittingDb: Pick<FittingDb, "missiles" | "launchers">;
+  readonly missileSkillModel: MissileSkillModel;
+}
+
+export class MissileCatalogImpl implements MissileCatalog {
+  private readonly missiles: Readonly<Record<string, MissileStats>>;
+  private readonly launchers: Readonly<Record<string, LauncherStats>>;
+  private readonly skillModel: MissileSkillModel;
+
+  constructor({ fittingDb, missileSkillModel }: MissileCatalogDeps) {
+    this.missiles = fittingDb.missiles;
+    this.launchers = fittingDb.launchers;
+    this.skillModel = missileSkillModel;
+  }
+
+  missilesForLauncher(launcher: LauncherStats): readonly MissileOption[] {
+    return _missilesForLauncher(this.missiles, launcher);
+  }
+
+  usualForLauncher(launcher: LauncherStats): TypeId | undefined {
+    const options = this.missilesForLauncher(launcher);
+    return options.length > 0 ? options[0].id : undefined;
+  }
+
+  withCharge(launcher: ImportedLauncher, missileId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher {
+    const missile = this.missiles[String(missileId)];
+    if (!missile) return launcher;
+    const launcherStats = this.launchers[String(launcher.moduleId)];
+    if (!launcherStats || !launcherStats.chargeGroups.includes(missile.chargeGroup)) return launcher;
+    const output = this.skillModel.compute(launcherStats, missile, hullBonuses, skillLevel);
+    return {
+      moduleId: launcher.moduleId,
+      name: launcher.name,
+      count: launcher.count,
+      chargeId: missileId,
+      chargeName: missile.name,
+      damagePerMissile: output.damagePerMissile,
+      cycleTime: output.cycleTime,
+      explosionRadius: output.explosionRadius,
+      explosionVelocity: output.explosionVelocity,
+      damageReductionFactor: output.damageReductionFactor,
+      maxVelocity: output.maxVelocity,
+      flightTime: output.flightTime,
+    };
+  }
+
+  has(missile: TypeId): boolean {
+    return this.missiles[String(missile)] !== undefined;
+  }
+
+  idForName(name: string): TypeId | undefined {
+    for (const stats of Object.values(this.missiles)) {
+      if (stats.name === name) return stats.id;
+    }
+    return undefined;
+  }
+}
+
+function _missilesForLauncher(missiles: Readonly<Record<string, MissileStats>>, launcher: LauncherStats): MissileOption[] {
+  const result: MissileOption[] = [];
+  for (const stats of Object.values(missiles)) {
+    if (!launcher.chargeGroups.includes(stats.chargeGroup)) continue;
+    result.push({ id: stats.id, name: stats.name, damage: stats.damage, damageType: stats.damageType });
+  }
+  result.sort((a, b) => a.name.localeCompare(b.name));
+  return result;
+}

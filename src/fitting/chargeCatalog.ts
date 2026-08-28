@@ -20,6 +20,21 @@ export interface ImportedTurret {
   readonly moduleId: TypeId;
 }
 
+export interface ImportedLauncher {
+  readonly moduleId: TypeId;
+  readonly name: string;
+  readonly count: number;
+  readonly chargeId: TypeId;
+  readonly chargeName: string;
+  readonly damagePerMissile: number;
+  readonly cycleTime: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number;
+}
+
 export interface CargoCharge {
   readonly id: TypeId;
   readonly quantity: number;
