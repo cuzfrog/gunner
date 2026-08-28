@@ -1,8 +1,10 @@
 import {
   type EngagementView,
+  type MissileSpec,
   type SimConfig,
   type WeaponSpec,
 } from "../../../sim";
+import type { ImportedLauncher } from "../../../fitting";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
 import type { DomControlsDeps, DomControlsHost } from "./domControlsContract";
@@ -16,6 +18,7 @@ import type { EngagementReadout } from "../engagementReadout";
 import type { SidePanel } from "../sidePanel";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
+import type { LauncherController } from "../launcher";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
 import type { ImportController } from "../import";
@@ -46,6 +49,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   shipASide: SidePanel;
   shipBSide: SidePanel;
   turretControllers: Record<Side, TurretController>;
+  launcherControllers: Record<Side, LauncherController>;
   importController: ImportController;
   ewarController: EwarController;
   boosterController: BoosterController;
@@ -71,6 +75,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly shipASide: SidePanel;
   private readonly shipBSide: SidePanel;
   private readonly turretControllers: Record<Side, TurretController>;
+  private readonly launcherControllers: Record<Side, LauncherController>;
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
@@ -100,6 +105,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shipASide = all.shipASide;
     this.shipBSide = all.shipBSide;
     this.turretControllers = all.turretControllers;
+    this.launcherControllers = all.launcherControllers;
     this.importController = all.importController;
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
@@ -124,6 +130,8 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretControllers.shipA.popup);
     this.popupGroup.register(this.turretControllers.shipB.popup);
+    this.popupGroup.register(this.launcherControllers.shipA.popup);
+    this.popupGroup.register(this.launcherControllers.shipB.popup);
     this.popupGroup.register(this.preferencesController.popup);
     this.hullDatalist.populate();
     this.shipASide.sections.skill.renderSkillOptions();
@@ -204,6 +212,10 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   getWeapon(side: Side): WeaponSpec | undefined {
+    const turret = this.turretControllers[side].turret();
+    if (turret) return this.turretControllers[side].currentTurretSpec();
+    const launcher = this.launcherControllers[side].launcher();
+    if (launcher) return importedLauncherToMissileSpec(launcher);
     return this.turretControllers[side].currentTurretSpec();
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
@@ -267,4 +279,19 @@ export class DomControls implements Controls, DomControlsHost {
   }
 
   private sideFor(side: Side): SidePanel { return side === "shipA" ? this.shipASide : this.shipBSide; }
+}
+
+function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec {
+  return {
+    kind: "missile",
+    damagePerMissile: launcher.damagePerMissile,
+    cycleTime: launcher.cycleTime,
+    launcherCount: launcher.count,
+    explosionRadius: launcher.explosionRadius,
+    explosionVelocity: launcher.explosionVelocity,
+    damageReductionFactor: launcher.damageReductionFactor,
+    maxVelocity: launcher.maxVelocity,
+    flightTime: launcher.flightTime,
+    flightRange: launcher.maxVelocity * launcher.flightTime,
+  };
 }

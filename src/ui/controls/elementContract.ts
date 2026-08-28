@@ -204,6 +204,18 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   aggressivityField: { tag: "DIV" as const, baseId: "aggressivity-field", defaultValue: undefined },
   shipSig: { tag: "INPUT" as const, baseId: "sig", defaultValue: "40" },
   portrait: { tag: "DIV" as const, baseId: "portrait", defaultValue: undefined },
+  launcherPanel: { tag: "DIV" as const, baseId: "launcher-panel", defaultValue: undefined },
+  launcherAmmoTrigger: { tag: "BUTTON" as const, baseId: "launcher-ammo-trigger", defaultValue: undefined },
+  launcherAmmoSummary: { tag: "SPAN" as const, baseId: "launcher-ammo-summary", defaultValue: undefined },
+  launcherAmmoPopup: { tag: "DIV" as const, baseId: "launcher-ammo-popup", defaultValue: undefined },
+  launcherAmmoList: { tag: "UL" as const, baseId: "launcher-ammo-list", defaultValue: undefined },
+  launcherVolleyDamage: { tag: "SPAN" as const, baseId: "launcher-volley-damage", defaultValue: undefined },
+  launcherRateOfFire: { tag: "SPAN" as const, baseId: "launcher-rate-of-fire", defaultValue: undefined },
+  launcherExplosionRadius: { tag: "SPAN" as const, baseId: "launcher-explosion-radius", defaultValue: undefined },
+  launcherExplosionVelocity: { tag: "SPAN" as const, baseId: "launcher-explosion-velocity", defaultValue: undefined },
+  launcherMissileVelocity: { tag: "SPAN" as const, baseId: "launcher-missile-velocity", defaultValue: undefined },
+  launcherFlightTime: { tag: "SPAN" as const, baseId: "launcher-flight-time", defaultValue: undefined },
+  launcherFlightRange: { tag: "SPAN" as const, baseId: "launcher-flight-range", defaultValue: undefined },
 } as const satisfies { readonly [K: string]: CombatantElementDefinition };
 
 export type GlobalElementDefinitionMap = typeof GLOBAL_ELEMENT_DEFINITIONS;

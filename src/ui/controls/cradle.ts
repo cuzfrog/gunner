@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingImport, GunFamilies, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { I18n } from "../i18n";
@@ -23,6 +23,7 @@ import type { ShareController } from "./share";
 import type { HullDatalist, SessionCodec, SimConfigSource } from "./session";
 import type { SidePanel } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { LauncherController } from "./launcher";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { ProfileEquality } from "../../appstate";
@@ -63,6 +64,11 @@ export interface ControlsCradle {
   readonly shipATurretController: TurretController;
   readonly shipBTurretController: TurretController;
   readonly turretControllers: Record<Side, TurretController>;
+  readonly shipALauncherController: LauncherController;
+  readonly shipBLauncherController: LauncherController;
+  readonly launcherControllers: Record<Side, LauncherController>;
+  readonly fittingDb: FittingDb;
+  readonly missileCatalog: MissileCatalog;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;
   readonly shipAFittingPreview: FittingPreview;

@@ -25,6 +25,7 @@ const STYLES_MANIFEST = [
   "styles/components/tracking-unit.css",
   "styles/components/skill-tuner.css",
   "styles/components/ammo-popup.css",
+  "styles/components/launcher-panel.css",
   "styles/components/paste-popup.css",
   "styles/components/fitting-preview.css",
   "styles/components/fitting-popup.css",

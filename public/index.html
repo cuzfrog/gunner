@@ -286,6 +286,50 @@
           </div>
         </div>
 
+        <div class="launcher-panel is-hidden" id="ship-a-launcher-panel">
+          <div class="form-field-group ammo-group">
+            <button type="button" id="ship-a-launcher-ammo-trigger" class="launcher-ammo-trigger"
+                    aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-a-launcher-ammo-popup"
+                    data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+                    title="Select missile" aria-label="Select missile">
+              <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
+              <span class="launcher-ammo-summary truncate" id="ship-a-launcher-ammo-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </button>
+            <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-launcher-ammo-popup" hidden>
+              <ul class="launcher-ammo-list" id="ship-a-launcher-ammo-list" role="listbox"></ul>
+            </div>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-volley-damage">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-rate-of-fire">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-explosion-radius">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-explosion-velocity">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-missile-velocity">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-flight-time">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
+            <span class="launcher-telemetry-value mono" id="ship-a-launcher-flight-range">-</span>
+          </div>
+        </div>
+
         <div class="form-field-group ewar-group" id="ship-a-ewar-field">
           <button type="button" id="ship-a-ewar-trigger" class="trigger"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-a-ewar-popup"
@@ -587,6 +631,50 @@
               <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
               <ul class="ammo-list" id="ship-b-ammo-all-list" role="listbox"></ul>
             </div>
+          </div>
+        </div>
+
+        <div class="launcher-panel is-hidden" id="ship-b-launcher-panel">
+          <div class="form-field-group ammo-group">
+            <button type="button" id="ship-b-launcher-ammo-trigger" class="launcher-ammo-trigger"
+                    aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-b-launcher-ammo-popup"
+                    data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+                    title="Select missile" aria-label="Select missile">
+              <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
+              <span class="launcher-ammo-summary truncate" id="ship-b-launcher-ammo-summary"></span>
+              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+            </button>
+            <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-launcher-ammo-popup" hidden>
+              <ul class="launcher-ammo-list" id="ship-b-launcher-ammo-list" role="listbox"></ul>
+            </div>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-volley-damage">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-rate-of-fire">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-explosion-radius">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-explosion-velocity">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-missile-velocity">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-flight-time">-</span>
+          </div>
+          <div class="launcher-telemetry-row">
+            <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
+            <span class="launcher-telemetry-value mono" id="ship-b-launcher-flight-range">-</span>
           </div>
         </div>
 

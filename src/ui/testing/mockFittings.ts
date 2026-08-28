@@ -1,4 +1,5 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { FittingDb } from "../../gamedata/fittingDb";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
@@ -164,4 +165,21 @@ export function mockParser(): SettingsParser {
     profileFromUnknown: vi.fn(() => null),
     serialize: vi.fn(() => ""),
   } as unknown as SettingsParser;
+}
+
+export function mockFittingDb(): FittingDb {
+  return {
+    missiles: {},
+    launchers: {},
+  } as unknown as FittingDb;
+}
+
+export function mockMissileCatalog(): MissileCatalog {
+  return {
+    missilesForLauncher: vi.fn(() => []),
+    usualForLauncher: vi.fn(() => undefined),
+    withCharge: vi.fn(),
+    has: vi.fn(() => false),
+    idForName: vi.fn(() => undefined),
+  };
 }

@@ -172,5 +172,17 @@ function createCombatantEls(side: Side): CombatantEls {
     aggressivityField: el(combatantElementId("aggressivityField", side)),
     shipSig: elOf(combatantElementId("shipSig", side), isHtmlInputElement),
     portrait: el(combatantElementId("portrait", side)),
+    launcherPanel: el(combatantElementId("launcherPanel", side)),
+    launcherAmmoTrigger: elOf(combatantElementId("launcherAmmoTrigger", side), isHtmlButtonElement),
+    launcherAmmoSummary: el(combatantElementId("launcherAmmoSummary", side)),
+    launcherAmmoPopup: el(combatantElementId("launcherAmmoPopup", side)),
+    launcherAmmoList: el(combatantElementId("launcherAmmoList", side)),
+    launcherVolleyDamage: el(combatantElementId("launcherVolleyDamage", side)),
+    launcherRateOfFire: el(combatantElementId("launcherRateOfFire", side)),
+    launcherExplosionRadius: el(combatantElementId("launcherExplosionRadius", side)),
+    launcherExplosionVelocity: el(combatantElementId("launcherExplosionVelocity", side)),
+    launcherMissileVelocity: el(combatantElementId("launcherMissileVelocity", side)),
+    launcherFlightTime: el(combatantElementId("launcherFlightTime", side)),
+    launcherFlightRange: el(combatantElementId("launcherFlightRange", side)),
   };
 }

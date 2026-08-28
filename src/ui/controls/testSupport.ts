@@ -13,9 +13,11 @@ import {
   getFake,
   mockChargeCatalog,
   mockClipboard,
+  mockFittingDb,
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
+  mockMissileCatalog,
   mockParser,
   mockPresetFittings,
   mockTurretCatalog,
@@ -193,6 +195,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     clipboard: asValue(mockClipboard()),
     timer: asValue(mockTimer()),
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
+    fittingDb: asValue(mockFittingDb()),
+    missileCatalog: asValue(mockMissileCatalog()),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
   });
   return cradle;

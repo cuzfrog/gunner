@@ -11,6 +11,7 @@ import { registerEffectiveReadoutModule } from "./effectiveReadout";
 import { registerEngagementReadoutModule } from "./engagementReadout";
 import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
+import { registerLauncherModule } from "./launcher";
 import { registerPopupModule } from "./popup";
 import { registerPreferencesModule } from "./preferences";
 import { registerProfileModule } from "./profile";
@@ -33,6 +34,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   });
   registerHintsModule(cradle);
   registerTurretModule(cradle);
+  registerLauncherModule(cradle);
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
   registerBoosterModule(cradle);

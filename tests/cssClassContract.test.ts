@@ -40,6 +40,7 @@ const APPROVED_PREFIXES = [
   "skill-tuner",
   "skill",
   "ammo",
+  "launcher",
   "turret-mode",
   "sigres",
   "overload-button",
