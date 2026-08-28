@@ -15,7 +15,7 @@ import {
   isSkillLevel,
 } from "../validators";
 import type { ChargeCatalog } from "../../fitting";
-import type { ShipId, TypeId } from "../../gamedata/ids";
+import { toTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { resolveAmmoId, resolveHullId } from "../settingsCompat";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
@@ -49,8 +49,7 @@ export function parseScalarValue(
   }
   if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
   if (field === "shipAWeaponKind" || field === "shipBWeaponKind") return value === "turret" || value === "missile" ? value : undefined;
-  if (field === "shipAMissileAmmo" || field === "shipBMissileAmmo") return value.length > 0 ? value : undefined;
-
+  if (field === "shipAMissileAmmo" || field === "shipBMissileAmmo") return toTypeId(value);
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;

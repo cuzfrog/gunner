@@ -53,6 +53,11 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("round-trips a profile with weaponKind and missileAmmo", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "missile", shipAMissileAmmo: toTypeId("202") };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
   test("fitting body preserves blank lines and empty slot stubs", () => {
     const fitting = `[Rifter, Brawler]
 5MN Y-T8 Compact Microwarpdrive
