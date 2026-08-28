@@ -18,6 +18,10 @@ export interface ImportedTurret {
   readonly chargeId: TypeId;
   readonly base: ImportedTurretBase;
   readonly moduleId: TypeId;
+  readonly damageMultiplier: number;
+  readonly damagePerShot: number;
+  readonly cycleTime: number;
+  readonly turretCount: number;
 }
 
 export interface ImportedLauncher {
@@ -103,12 +107,14 @@ export class ChargeCatalogImpl implements ChargeCatalog {
     if (!stats) return turret;
     const family = _turretChargeFamily(turret.moduleId, this.gunFamilies);
     if (family !== undefined && _chargeFamilyOf(stats.name) !== family) return turret;
+    const chargeDamage = (stats.emDamage ?? 0) + (stats.thermalDamage ?? 0) + (stats.kineticDamage ?? 0) + (stats.explosiveDamage ?? 0);
     return {
       ...turret,
       chargeId: charge,
       tracking: turret.base.tracking * (stats.trackingMultiplier ?? 1),
       optimal: turret.base.optimal * (stats.rangeMultiplier ?? 1),
       falloff: turret.base.falloff * (stats.falloffMultiplier ?? 1),
+      damagePerShot: turret.damageMultiplier * chargeDamage,
     };
   }
 

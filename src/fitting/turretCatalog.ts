@@ -45,8 +45,17 @@ export class TurretCatalogImpl implements TurretCatalog {
       chargeId,
       base,
       moduleId,
+      damageMultiplier: stats.damageMultiplier,
+      damagePerShot: stats.damageMultiplier * chargeDamage(this.db.charges[chargeId]),
+      cycleTime: stats.cycleTime,
+      turretCount: turret.turretCount,
     };
   }
+}
+
+function chargeDamage(charge: { readonly emDamage?: number; readonly thermalDamage?: number; readonly kineticDamage?: number; readonly explosiveDamage?: number } | undefined): number {
+  if (!charge) return 0;
+  return (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
 }
 
 function resolveCharge(chargeCatalog: ChargeCatalog, currentChargeId: TypeId, targetStats: TurretStats): TypeId {
@@ -56,6 +65,7 @@ function resolveCharge(chargeCatalog: ChargeCatalog, currentChargeId: TypeId, ta
     tracking: 0, sigResolutionClass: sigResolutionClassFromChargeSize(targetStats.chargeSize),
     optimal: 0, falloff: 0, chargeSize: targetStats.chargeSize, chargeId: currentChargeId,
     base: { tracking: 0, optimal: 0, falloff: 0 }, moduleId: targetStats.id,
+    damageMultiplier: targetStats.damageMultiplier, damagePerShot: 0, cycleTime: targetStats.cycleTime, turretCount: 1,
   };
   return chargeCatalog.usualForTurret(placeholder);
 }

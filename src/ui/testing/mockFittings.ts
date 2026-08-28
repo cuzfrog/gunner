@@ -135,6 +135,10 @@ export const TURRET: ImportedTurret = {
   chargeId: "12608" as TypeId,
   base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
   moduleId: "486" as TypeId,
+  damageMultiplier: 3,
+  damagePerShot: 12,
+  cycleTime: 5,
+  turretCount: 1,
 };
 
 export const IMPORTED_RIFTER: ImportedFitting = {

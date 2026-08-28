@@ -77,7 +77,7 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   }
 
   private assessMissile(frame: EngagementFrame, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number): AttackAssessment {
-    const breakdown = this.missileApplication.compute(frame, missile, opponentSigRadius);
+    const breakdown = this.missileApplication.compute(frame, missile, opponent, opponentSigRadius);
     const nominalDps = missile.cycleTime > 0 ? (missile.damagePerMissile * missile.launcherCount) / missile.cycleTime : 0;
     const appliedDps = breakdown.inRange ? nominalDps * breakdown.application : 0;
     const volley = missile.damagePerMissile * missile.launcherCount;

@@ -483,19 +483,22 @@ function resolveTurret(
   const trackingPercents: number[] = [];
   const optimalPercents: number[] = [];
   const falloffPercents: number[] = [];
-  let turret: TurretStats | undefined;
-  let chargeId: TypeId | undefined;
-  let moduleId: TypeId | undefined;
+  const counts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
+  let order = 0;
 
   for (const bank of resolved.banks) {
     for (const line of bank.lines) {
       if (line.kind !== "module" || line.offline) continue;
 
       const lineTurret = db.turrets[line.moduleId];
-      if (lineTurret && !turret) {
-        turret = lineTurret;
-        chargeId = line.chargeId;
-        moduleId = line.moduleId;
+      if (lineTurret) {
+        const existing = counts.get(line.moduleId);
+        if (existing) {
+          existing.count++;
+          if (existing.chargeId === undefined && line.chargeId !== undefined) existing.chargeId = line.chargeId;
+        } else {
+          counts.set(line.moduleId, { count: 1, chargeId: line.chargeId, order: order++ });
+        }
         continue;
       }
 
@@ -506,7 +509,23 @@ function resolveTurret(
     }
   }
 
-  if (!turret || !moduleId) return undefined;
+  if (counts.size === 0) return undefined;
+
+  let bestModuleId: TypeId | undefined;
+  let bestCount = 0;
+  let bestOrder = Infinity;
+  for (const [moduleId, entry] of counts) {
+    if (entry.count > bestCount || (entry.count === bestCount && entry.order < bestOrder)) {
+      bestModuleId = moduleId;
+      bestCount = entry.count;
+      bestOrder = entry.order;
+    }
+  }
+  if (!bestModuleId) return undefined;
+
+  const turret = db.turrets[bestModuleId];
+  if (!turret) return undefined;
+  const chargeId = counts.get(bestModuleId)?.chargeId;
 
   for (const bonus of hullBonuses) {
     if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
@@ -544,10 +563,15 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     chargeId: chargeId ?? chargeCatalog.usualForChargeSize(turret.chargeSize),
     base,
-    moduleId,
+    moduleId: bestModuleId,
+    damageMultiplier: turret.damageMultiplier,
+    damagePerShot: 0,
+    cycleTime: turret.cycleTime,
+    turretCount: bestCount,
   };
   const selectedCharge = chargeId && db.charges[chargeId] ? chargeId : chargeCatalog.usualForTurret(turretForChargeSelection);
   const charge = db.charges[selectedCharge] ?? {};
+  const chargeDamage = (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
 
   return {
     tracking: base.tracking * (charge.trackingMultiplier ?? 1),
@@ -557,7 +581,11 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     chargeId: selectedCharge,
     base,
-    moduleId,
+    moduleId: bestModuleId,
+    damageMultiplier: turret.damageMultiplier,
+    damagePerShot: turret.damageMultiplier * chargeDamage,
+    cycleTime: turret.cycleTime,
+    turretCount: bestCount,
   };
 }
 

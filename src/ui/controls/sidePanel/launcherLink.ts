@@ -26,8 +26,7 @@ class PanelLauncherLinkImpl implements PanelLauncherLink {
   }
 
   setHullProfile(_profile: ShipProfile | undefined): void {
-    // Launcher stats do not depend on hull bonuses directly; hull bonuses are
-    // applied inside LauncherController via fittingDb. This seam exists for
-    // future hull-bonus-driven launcher stats.
+    // Hull bonuses are applied through MissileCatalog.withCharge, invoked by
+    // LauncherController. This seam exists for future hull-bonus-driven stats.
   }
 }

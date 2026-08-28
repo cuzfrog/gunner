@@ -151,7 +151,7 @@ describe("EngagementEvaluatorImpl", () => {
     expect(result.shipA?.damage.appliedDps).toBeCloseTo(((200 * 2) / 10) * 0.8, 10);
     expect(result.shipA?.damage.volley).toBe(400);
     expect(result.shipA?.turret).toBeUndefined();
-    expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, 40);
+    expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, frame.shipB, 40);
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
     expect(turretBoosterResolver.boostedTurret).not.toHaveBeenCalled();
   });

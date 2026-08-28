@@ -1,12 +1,12 @@
-import type { EngagementFrame, MissileDamageBreakdown, MissileSpec } from "./types";
+import type { EngagementFrame, MissileDamageBreakdown, MissileSpec, ShipState } from "./types";
 
 export interface MissileApplication {
-  compute(frame: EngagementFrame, missile: MissileSpec, opponentSigRadius: number): MissileDamageBreakdown;
+  compute(frame: EngagementFrame, missile: MissileSpec, opponent: ShipState, opponentSigRadius: number): MissileDamageBreakdown;
 }
 
 export class MissileApplicationImpl implements MissileApplication {
-  compute(frame: EngagementFrame, missile: MissileSpec, opponentSigRadius: number): MissileDamageBreakdown {
-    const targetSpeed = frame.shipB.velocity.len();
+  compute(frame: EngagementFrame, missile: MissileSpec, opponent: ShipState, opponentSigRadius: number): MissileDamageBreakdown {
+    const targetSpeed = opponent.velocity.len();
     const inRange = frame.distance <= missile.flightRange;
     const timeToImpact = missile.maxVelocity > 0 ? frame.distance / missile.maxVelocity : 0;
     const signatureTerm = opponentSigRadius > 0 && missile.explosionRadius > 0

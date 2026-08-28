@@ -499,6 +499,8 @@ interface TurretStats {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly damageMultiplier: number;
+  readonly cycleTime: number;
   readonly turretSkill?: string;
 }
 
@@ -506,6 +508,10 @@ interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+  readonly emDamage?: number;
+  readonly thermalDamage?: number;
+  readonly kineticDamage?: number;
+  readonly explosiveDamage?: number;
 }
 
 interface LauncherStats {
@@ -836,7 +842,9 @@ async function main() {
     if (TURRET_GROUPS.has(type.groupID)) {
       const tracking = values.get("trackingSpeed");
       const optimal = values.get("maxRange");
-      if (tracking !== undefined && optimal !== undefined) {
+      const speed = values.get("speed");
+      const damageMultiplier = values.get("damageMultiplier");
+      if (tracking !== undefined && optimal !== undefined && speed !== undefined && damageMultiplier !== undefined) {
         turrets[id] = {
           id,
           name: enName,
@@ -844,6 +852,8 @@ async function main() {
           optimal,
           falloff: values.get("falloff") ?? 0,
           chargeSize: values.get("chargeSize") ?? 1,
+          damageMultiplier,
+          cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
         };
         addItemName(itemNames, id, type);
@@ -855,8 +865,14 @@ async function main() {
       const trackingMultiplier = values.get("trackingSpeedMultiplier");
       const rangeMultiplier = values.get("weaponRangeMultiplier");
       const falloffMultiplier = values.get("fallofMultiplier");
-      if (trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined) {
-        charges[id] = { id, name: enName, trackingMultiplier, rangeMultiplier, falloffMultiplier };
+      const emDamage = values.get("emDamage");
+      const thermalDamage = values.get("thermalDamage");
+      const kineticDamage = values.get("kineticDamage");
+      const explosiveDamage = values.get("explosiveDamage");
+      const hasRangeMods = trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined;
+      const hasDamage = (emDamage ?? 0) + (thermalDamage ?? 0) + (kineticDamage ?? 0) + (explosiveDamage ?? 0) > 0;
+      if (hasRangeMods || hasDamage) {
+        charges[id] = { id, name: enName, trackingMultiplier, rangeMultiplier, falloffMultiplier, emDamage, thermalDamage, kineticDamage, explosiveDamage };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -1021,6 +1037,8 @@ export interface TurretStats {
   readonly optimal: number;
   readonly falloff: number;
   readonly chargeSize: number;
+  readonly damageMultiplier: number;
+  readonly cycleTime: number;
   readonly turretSkill?: string;
   readonly id: TypeId;
   readonly name: string;
@@ -1040,6 +1058,10 @@ export interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+  readonly emDamage?: number;
+  readonly thermalDamage?: number;
+  readonly kineticDamage?: number;
+  readonly explosiveDamage?: number;
   readonly id: TypeId;
   readonly name: string;
 }
