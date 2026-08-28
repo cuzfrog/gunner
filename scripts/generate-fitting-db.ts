@@ -64,7 +64,7 @@ interface SdeTypeDogma {
   dogmaEffects: readonly SdeDogmaEffect[];
 }
 
-type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
+type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF";
 
 interface HullBonusRule {
   readonly attribute: BonusAttribute;
@@ -73,6 +73,7 @@ interface HullBonusRule {
   readonly constant?: number;
   readonly skill?: string;
   readonly turretSkill?: string;
+  readonly launcherGroup?: number;
 }
 
 interface HullBonus {
@@ -80,6 +81,7 @@ interface HullBonus {
   readonly magnitude: number;
   readonly skill?: string;
   readonly turretSkill?: string;
+  readonly launcherGroup?: number;
 }
 
 // Copied from pyfa (eos/effects.py) effect handlers: maps ship dogma effectIDs to the attributes they boost.
@@ -232,6 +234,108 @@ const BONUS_EFFECTS: Readonly<Record<number, readonly HullBonusRule[]>> = {
   12213: [{ attribute: "turretFalloff", bonusAttr: "ShipBonusMC3", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
   12245: [{ attribute: "turretFalloff", bonusAttr: "shipBonusDreadnoughtG1", skill: "Gallente Dreadnought", turretSkill: "Capital Projectile Turret" }],
   12567: [{ attribute: "turretFalloff", bonusAttr: "shipBonusRole6", turretSkill: "Small Projectile Turret" }],
+  // Missile damage bonuses (per-damage-type effects are deduplicated in buildHullBonuses by bonusAttr+launcherGroup+skill).
+  // Light missile damage (launcherGroup 509)
+  5234: [{ attribute: "missileDamage", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", launcherGroup: 509 }],
+  5237: [{ attribute: "missileDamage", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", launcherGroup: 509 }],
+  5240: [{ attribute: "missileDamage", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", launcherGroup: 509 }],
+  5243: [{ attribute: "missileDamage", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", launcherGroup: 509 }],
+  11070: [{ attribute: "missileDamage", bonusAttr: "shipBonusCF", skill: "Caldari Frigate", launcherGroup: 509 }],
+  6096: [{ attribute: "missileDamage", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", launcherGroup: 509 }],
+  12807: [{ attribute: "missileDamage", bonusAttr: "shipBonusAD1", skill: "Amarr Destroyer", launcherGroup: 509 }],
+  12812: [{ attribute: "missileDamage", bonusAttr: "shipBonusCD1", skill: "Caldari Destroyer", launcherGroup: 509 }],
+  12813: [{ attribute: "missileDamage", bonusAttr: "shipBonusCD2", skill: "Caldari Destroyer", launcherGroup: 509 }],
+  5319: [{ attribute: "missileDamage", bonusAttr: "shipBonusMD1", skill: "Minmatar Destroyer", launcherGroup: 509 }],
+  11513: [{ attribute: "missileDamage", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", launcherGroup: 509 }],
+  // Rocket damage (launcherGroup 507)
+  3234: [{ attribute: "missileDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", launcherGroup: 507 }],
+  3235: [{ attribute: "missileDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", launcherGroup: 507 }],
+  3236: [{ attribute: "missileDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", launcherGroup: 507 }],
+  3237: [{ attribute: "missileDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", launcherGroup: 507 }],
+  5306: [{ attribute: "missileDamage", bonusAttr: "shipBonusCD1", skill: "Caldari Destroyer", launcherGroup: 507 }],
+  5320: [{ attribute: "missileDamage", bonusAttr: "shipBonusMD1", skill: "Minmatar Destroyer", launcherGroup: 507 }],
+  6360: [{ attribute: "missileDamage", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", launcherGroup: 507 }],
+  6361: [{ attribute: "missileDamage", bonusAttr: "shipBonusMF3", skill: "Minmatar Frigate", launcherGroup: 507 }],
+  // Heavy missile damage (launcherGroup 510)
+  5340: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC1", skill: "Caldari Battlecruiser", launcherGroup: 510 }],
+  5636: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 510 }],
+  5637: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 510 }],
+  5638: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 510 }],
+  5639: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 510 }],
+  6093: [{ attribute: "missileDamage", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", launcherGroup: 510 }],
+  7031: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 510 }],
+  7032: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 510 }],
+  7033: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 510 }],
+  7034: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 510 }],
+  11411: [{ attribute: "missileDamage", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", launcherGroup: 510 }],
+  11423: [{ attribute: "missileDamage", bonusAttr: "shipBonusAB", skill: "Amarr Battleship", launcherGroup: 510 }],
+  12892: [{ attribute: "missileDamage", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", launcherGroup: 510 }],
+  // Heavy assault missile damage (launcherGroup 771)
+  5339: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC1", skill: "Caldari Battlecruiser", launcherGroup: 771 }],
+  4643: [{ attribute: "missileDamage", bonusAttr: "shipBonusAC1", skill: "Amarr Cruiser", launcherGroup: 771 }],
+  6088: [{ attribute: "missileDamage", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", launcherGroup: 771 }],
+  7035: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 771 }],
+  7036: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 771 }],
+  7037: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 771 }],
+  7038: [{ attribute: "missileDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", launcherGroup: 771 }],
+  12893: [{ attribute: "missileDamage", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", launcherGroup: 771 }],
+  // Cruise missile damage (launcherGroup 506)
+  5862: [{ attribute: "missileDamage", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  5863: [{ attribute: "missileDamage", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  5864: [{ attribute: "missileDamage", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  5865: [{ attribute: "missileDamage", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  5628: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 506 }],
+  5629: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 506 }],
+  5630: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 506 }],
+  5631: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 506 }],
+  11422: [{ attribute: "missileDamage", bonusAttr: "shipBonusAB", skill: "Amarr Battleship", launcherGroup: 506 }],
+  // Torpedo damage (launcherGroup 508)
+  4393: [{ attribute: "missileDamage", bonusAttr: "eliteBonusCovertOps2", skill: "Covert Ops", launcherGroup: 508 }],
+  4394: [{ attribute: "missileDamage", bonusAttr: "eliteBonusCovertOps2", skill: "Covert Ops", launcherGroup: 508 }],
+  4395: [{ attribute: "missileDamage", bonusAttr: "eliteBonusCovertOps2", skill: "Covert Ops", launcherGroup: 508 }],
+  4396: [{ attribute: "missileDamage", bonusAttr: "eliteBonusCovertOps2", skill: "Covert Ops", launcherGroup: 508 }],
+  5632: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 508 }],
+  5633: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 508 }],
+  5634: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 508 }],
+  5635: [{ attribute: "missileDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 508 }],
+  11421: [{ attribute: "missileDamage", bonusAttr: "shipBonusAB", skill: "Amarr Battleship", launcherGroup: 508 }],
+  // Missile ROF bonuses (negative magnitude = faster firing)
+  760: [{ attribute: "missileRoF", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", launcherGroup: 509 }],
+  912: [{ attribute: "missileRoF", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser", launcherGroup: 510 }],
+  1885: [{ attribute: "missileRoF", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  1886: [{ attribute: "missileRoF", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship", launcherGroup: 508 }],
+  2647: [{ attribute: "missileRoF", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", launcherGroup: 510 }],
+  2648: [{ attribute: "missileRoF", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", launcherGroup: 771 }],
+  2649: [{ attribute: "missileRoF", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", launcherGroup: 509 }],
+  3703: [{ attribute: "missileRoF", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", launcherGroup: 510 }],
+  4645: [{ attribute: "missileRoF", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers" }],
+  4649: [{ attribute: "missileRoF", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  4793: [{ attribute: "missileRoF", bonusAttr: "shipBonusATC1", skill: "Amarr Battlecruiser", launcherGroup: 510 }],
+  4794: [{ attribute: "missileRoF", bonusAttr: "shipBonusATC1", skill: "Amarr Battlecruiser", launcherGroup: 509 }],
+  4795: [{ attribute: "missileRoF", bonusAttr: "shipBonusATC1", skill: "Amarr Battlecruiser", launcherGroup: 771 }],
+  4972: [{ attribute: "missileRoF", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", launcherGroup: 509 }],
+  4973: [{ attribute: "missileRoF", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", launcherGroup: 507 }],
+  5131: [{ attribute: "missileRoF", bonusAttr: "shipBonusCC", skill: "Caldari Cruiser" }],
+  5349: [{ attribute: "missileRoF", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", launcherGroup: 510 }],
+  5350: [{ attribute: "missileRoF", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", launcherGroup: 771 }],
+  5456: [{ attribute: "missileRoF", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 506 }],
+  5457: [{ attribute: "missileRoF", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 508 }],
+  5496: [{ attribute: "missileRoF", bonusAttr: "eliteBonusCommandShipHAMRoFCS1", skill: "Command Ships", launcherGroup: 771 }],
+  5497: [{ attribute: "missileRoF", bonusAttr: "eliteBonusCommandShipHMRoFCS1", skill: "Command Ships", launcherGroup: 510 }],
+  5618: [{ attribute: "missileRoF", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship", launcherGroup: 1245 }],
+  5619: [{ attribute: "missileRoF", bonusAttr: "shipBonusCB", skill: "Caldari Battleship", launcherGroup: 1245 }],
+  5620: [{ attribute: "missileRoF", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 1245 }],
+  5621: [{ attribute: "missileRoF", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 506 }],
+  5622: [{ attribute: "missileRoF", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", launcherGroup: 508 }],
+  5678: [{ attribute: "missileRoF", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", launcherGroup: 509 }],
+  5778: [{ attribute: "missileRoF", bonusAttr: "shipBonusMF2", skill: "Minmatar Frigate", launcherGroup: 509 }],
+  5939: [{ attribute: "missileRoF", bonusAttr: "shipBonusAF2", skill: "Amarr Frigate", launcherGroup: 507 }],
+  5944: [{ attribute: "missileRoF", bonusAttr: "shipBonusAD1", skill: "Amarr Destroyer" }],
+  6085: [{ attribute: "missileRoF", bonusAttr: "shipBonusTacticalDestroyerCaldari1", skill: "Caldari Tactical Destroyer" }],
+  6880: [{ attribute: "missileRoF", bonusAttr: "shipBonus2CB", skill: "Caldari Battleship" }],
+  11068: [{ attribute: "missileRoF", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", launcherGroup: 509 }],
+  11512: [{ attribute: "missileRoF", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", launcherGroup: 509 }],
+  12817: [{ attribute: "missileRoF", bonusAttr: "shipBonusMD3", skill: "Minmatar Destroyer" }],
 };
 
 const MODULE_GROUPS = new Set([
@@ -271,9 +375,15 @@ const TURRET_GROUPS = new Set([53, 55, 74]);
 const CHARGE_GROUPS = new Set([
   83, 85, 86,
   372, 373, 374, 375, 376, 377,
-  648, 653, 654, 655, 656, 657,
-  1677, 1678,
   1987, 1989,
+]);
+
+const LAUNCHER_GROUPS = new Set([
+  506, 507, 508, 509, 510, 511, 524, 771, 1245, 1673, 1674,
+]);
+
+const MISSILE_CHARGE_GROUPS = new Set([
+  89, 384, 385, 386, 387, 394, 395, 396, 476, 648, 653, 654, 655, 656, 657, 772, 1019, 1677, 1678,
 ]);
 
 const RIG_SIG_DRAWBACK_EFFECT = 2716;
@@ -396,6 +506,24 @@ interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+}
+
+interface LauncherStats {
+  readonly rateOfFire: number;
+  readonly launcherGroup: number;
+  readonly chargeGroups: readonly number[];
+}
+
+interface MissileStats {
+  readonly damage: number;
+  readonly damageType: "em" | "thermal" | "kinetic" | "explosive";
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number;
+  readonly launcherGroup: number;
+  readonly chargeGroup: number;
 }
 
 interface TurretScriptStats {
@@ -577,13 +705,17 @@ function buildHullBonuses(attributeNames: Map<number, string>, typeDogma: SdeTyp
   const effects = buildEffectSet(typeDogma);
 
   const bonuses: HullBonus[] = [];
+  const seen = new Set<string>();
   for (const effectID of effects) {
     const rules = BONUS_EFFECTS[effectID];
     if (!rules) continue;
     for (const rule of rules) {
       const magnitude = resolveBonusMagnitude(rule, values);
       if (magnitude === undefined || !Number.isFinite(magnitude) || magnitude === 0) continue;
-      bonuses.push({ attribute: rule.attribute, magnitude, skill: rule.skill, turretSkill: rule.turretSkill });
+      const key = `${rule.attribute}:${rule.bonusAttr ?? ""}:${rule.launcherGroup ?? ""}:${rule.skill ?? ""}:${rule.turretSkill ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      bonuses.push({ attribute: rule.attribute, magnitude, skill: rule.skill, turretSkill: rule.turretSkill, launcherGroup: rule.launcherGroup });
     }
   }
   return bonuses;
@@ -611,6 +743,54 @@ function turretSkillFromRequired(
   return undefined;
 }
 
+export function buildLauncherStats(values: Map<string, number>, groupID: number): LauncherStats | undefined {
+  const speed = values.get("speed");
+  if (speed === undefined || speed <= 0) return undefined;
+  const chargeGroups: number[] = [];
+  for (const attr of ["chargeGroup1", "chargeGroup2", "chargeGroup3", "chargeGroup4", "chargeGroup5"]) {
+    const group = values.get(attr);
+    if (group !== undefined && group > 0) chargeGroups.push(group);
+  }
+  if (chargeGroups.length === 0) return undefined;
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups };
+}
+
+export function buildMissileStats(values: Map<string, number>, groupID: number): MissileStats | undefined {
+  const emDamage = values.get("emDamage") ?? 0;
+  const thermalDamage = values.get("thermalDamage") ?? 0;
+  const kineticDamage = values.get("kineticDamage") ?? 0;
+  const explosiveDamage = values.get("explosiveDamage") ?? 0;
+  const damage = emDamage + thermalDamage + kineticDamage + explosiveDamage;
+  if (damage <= 0) return undefined;
+  const explosionRadius = values.get("aoeCloudSize");
+  const explosionVelocity = values.get("aoeVelocity");
+  const damageReductionFactor = values.get("aoeDamageReductionFactor");
+  const maxVelocity = values.get("maxVelocity");
+  const flightTime = values.get("explosionDelay");
+  const launcherGroup = values.get("launcherGroup");
+  if (explosionRadius === undefined || explosionVelocity === undefined) return undefined;
+  if (damageReductionFactor === undefined || maxVelocity === undefined) return undefined;
+  if (flightTime === undefined || launcherGroup === undefined) return undefined;
+  return {
+    damage,
+    damageType: damageTypeFromValues(emDamage, thermalDamage, kineticDamage, explosiveDamage),
+    explosionRadius,
+    explosionVelocity,
+    damageReductionFactor,
+    maxVelocity,
+    flightTime: flightTime / 1000,
+    launcherGroup,
+    chargeGroup: groupID,
+  };
+}
+
+function damageTypeFromValues(em: number, thermal: number, kinetic: number, explosive: number): "em" | "thermal" | "kinetic" | "explosive" {
+  if (em > 0) return "em";
+  if (thermal > 0) return "thermal";
+  if (kinetic > 0) return "kinetic";
+  return "explosive";
+}
+
 async function main() {
   const types = await loadMerged<SdeType>("types.");
   const typedogmas = await loadMerged<SdeTypeDogma>("typedogma.");
@@ -623,6 +803,8 @@ async function main() {
   const fittingModules: Record<string, Row<FittingModuleStats>> = {};
   const turrets: Record<string, Row<TurretStats>> = {};
   const charges: Record<string, Row<ChargeStats>> = {};
+  const launchers: Record<string, Row<LauncherStats>> = {};
+  const missiles: Record<string, Row<MissileStats>> = {};
   const scripts: Record<string, Row<TurretScriptStats>> = {};
   const stasisWebs: Record<string, Row<StasisWebStats>> = {};
   const stasisGrapplers: Record<string, Row<StasisGrapplerStats>> = {};
@@ -675,6 +857,24 @@ async function main() {
       const falloffMultiplier = values.get("fallofMultiplier");
       if (trackingMultiplier !== undefined || rangeMultiplier !== undefined || falloffMultiplier !== undefined) {
         charges[id] = { id, name: enName, trackingMultiplier, rangeMultiplier, falloffMultiplier };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (LAUNCHER_GROUPS.has(type.groupID)) {
+      const stats = buildLauncherStats(values, type.groupID);
+      if (stats) {
+        launchers[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (MISSILE_CHARGE_GROUPS.has(type.groupID)) {
+      const stats = buildMissileStats(values, type.groupID);
+      if (stats) {
+        missiles[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
       }
       continue;
@@ -826,19 +1026,42 @@ export interface TurretStats {
   readonly name: string;
 }
 
-export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility";
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF";
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
   readonly magnitude: number;
   readonly skill?: string;
   readonly turretSkill?: string;
+  readonly launcherGroup?: number;
 }
 
 export interface ChargeStats {
   readonly trackingMultiplier?: number;
   readonly rangeMultiplier?: number;
   readonly falloffMultiplier?: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface LauncherStats {
+  readonly rateOfFire: number;
+  readonly launcherGroup: number;
+  readonly chargeGroups: readonly number[];
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface MissileStats {
+  readonly damage: number;
+  readonly damageType: "em" | "thermal" | "kinetic" | "explosive";
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number;
+  readonly launcherGroup: number;
+  readonly chargeGroup: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -928,6 +1151,10 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     ``,
     `export const CHARGES: Readonly<Record<string, ChargeStats>> = ${stringifyWithTypeIds(charges)};`,
     ``,
+    `export const LAUNCHERS: Readonly<Record<string, LauncherStats>> = ${stringifyWithTypeIds(launchers)};`,
+    ``,
+    `export const MISSILES: Readonly<Record<string, MissileStats>> = ${stringifyWithTypeIds(missiles)};`,
+    ``,
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
@@ -940,6 +1167,8 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     fittingModules,
     turrets,
     charges,
+    launchers,
+    missiles,
     scripts,
     stasisWebs,
     stasisGrapplers,
@@ -958,6 +1187,8 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     `${Object.keys(fittingModules).length} modules`,
     `${Object.keys(turrets).length} turrets`,
     `${Object.keys(charges).length} charges`,
+    `${Object.keys(launchers).length} launchers`,
+    `${Object.keys(missiles).length} missiles`,
     `${Object.keys(scripts).length} turret scripts`,
     `${Object.keys(stasisWebs).length} stasis webs`,
     `${Object.keys(stasisGrapplers).length} stasis grapplers`,
@@ -1006,6 +1237,8 @@ function collectDbTableNames(
   fittingModules: Record<string, FittingModuleStats>,
   turrets: Record<string, TurretStats>,
   charges: Record<string, ChargeStats>,
+  launchers: Record<string, LauncherStats>,
+  missiles: Record<string, MissileStats>,
   scripts: Record<string, TurretScriptStats>,
   stasisWebs: Record<string, StasisWebStats>,
   stasisGrapplers: Record<string, StasisGrapplerStats>,
@@ -1019,6 +1252,8 @@ function collectDbTableNames(
     ...Object.keys(fittingModules),
     ...Object.keys(turrets),
     ...Object.keys(charges),
+    ...Object.keys(launchers),
+    ...Object.keys(missiles),
     ...Object.keys(scripts),
     ...Object.keys(stasisWebs),
     ...Object.keys(stasisGrapplers),

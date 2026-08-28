@@ -12,6 +12,8 @@ import {
   DRONES,
   FITTING_MODULES,
   HULL_BONUSES,
+  LAUNCHERS,
+  MISSILES,
   SCRIPTS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
@@ -202,6 +204,8 @@ const db: FittingDb = {
     "Conflagration M": row("Conflagration M", "Conflagration M", { trackingMultiplier: 0.7, rangeMultiplier: 0.5 }),
     "EMP S": row("EMP S", "EMP S", { rangeMultiplier: 0.5 }),
   },
+  launchers: {},
+  missiles: {},
   scripts: {
     "Tracking Speed Script": row("Tracking Speed Script", "Tracking Speed Script", { trackingMultiplier: 2, optimalMultiplier: 0, falloffMultiplier: 0 }),
     "Optimal Range Script": row("Optimal Range Script", "Optimal Range Script", { trackingMultiplier: 0, optimalMultiplier: 2, falloffMultiplier: 2 }),
@@ -241,6 +245,8 @@ const fullFittingDb: FittingDb = {
   modules: FITTING_MODULES,
   turrets: TURRETS,
   charges: CHARGES,
+  launchers: LAUNCHERS,
+  missiles: MISSILES,
   scripts: SCRIPTS,
   stasisWebs: STASIS_WEBS,
   stasisGrapplers: STASIS_GRAPPLERS,
@@ -893,7 +899,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {

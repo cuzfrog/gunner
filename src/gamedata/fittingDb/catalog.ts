@@ -5,6 +5,8 @@ import {
   type FittingModuleStats,
   type FittingPropulsionStats,
   type HullBonus,
+  type LauncherStats,
+  type MissileStats,
   type StasisGrapplerStats,
   type StasisWebStats,
   type TrackingComputerStats,
@@ -17,6 +19,8 @@ import {
   DRONES,
   FITTING_MODULES,
   HULL_BONUSES,
+  LAUNCHERS,
+  MISSILES,
   SCRIPTS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
@@ -32,6 +36,8 @@ export type {
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
+  LauncherStats,
+  MissileStats,
   StasisGrapplerStats,
   StasisWebStats,
   TrackingComputerStats,
@@ -48,6 +54,8 @@ export interface FittingDbData {
   readonly modules: Readonly<Record<string, Row<FittingModuleStats>>>;
   readonly turrets: Readonly<Record<string, Row<TurretStats>>>;
   readonly charges: Readonly<Record<string, Row<ChargeStats>>>;
+  readonly launchers: Readonly<Record<string, Row<LauncherStats>>>;
+  readonly missiles: Readonly<Record<string, Row<MissileStats>>>;
   readonly scripts: Readonly<Record<string, Row<TurretScriptStats>>>;
   readonly stasisWebs: Readonly<Record<string, Row<StasisWebStats>>>;
   readonly stasisGrapplers: Readonly<Record<string, Row<StasisGrapplerStats>>>;
@@ -65,6 +73,8 @@ export const FITTING_DB: FittingDbData = {
   modules: FITTING_MODULES,
   turrets: TURRETS,
   charges: CHARGES,
+  launchers: LAUNCHERS,
+  missiles: MISSILES,
   scripts: SCRIPTS,
   stasisWebs: STASIS_WEBS,
   stasisGrapplers: STASIS_GRAPPLERS,
