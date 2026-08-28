@@ -1,7 +1,8 @@
 import { Vec2 } from "./vec2";
 import type { Autopilot } from "./autopilot";
 import { integrateShip } from "./dynamics";
-import type { ShipConfig, ShipState, SimConfig, SimSnapshot } from "./types";
+import type { EwarResolver } from "./ewarResolver";
+import type { CombatantConfig, ShipState, SimConfig, SimSnapshot } from "./types";
 
 export interface Simulation {
   step(dt: number): void;
@@ -11,62 +12,79 @@ export interface Simulation {
 }
 
 export class SimulationImpl implements Simulation {
-  private readonly attackerSteering: Autopilot;
-  private readonly targetSteering: Autopilot;
+  private readonly shipASteering: Autopilot;
+  private readonly shipBSteering: Autopilot;
+  private readonly ewarResolver: EwarResolver;
   private time: number;
-  private attacker: ShipState;
-  private target: ShipState;
+  private shipA: ShipState;
+  private shipB: ShipState;
 
-  constructor({ attackerSteering, targetSteering, simConfig }: {
-    attackerSteering: Autopilot;
-    targetSteering: Autopilot;
+  constructor({ shipASteering, shipBSteering, ewarResolver, simConfig }: {
+    shipASteering: Autopilot;
+    shipBSteering: Autopilot;
+    ewarResolver: EwarResolver;
     simConfig: SimConfig;
   }) {
-    this.attackerSteering = attackerSteering;
-    this.targetSteering = targetSteering;
+    this.shipASteering = shipASteering;
+    this.shipBSteering = shipBSteering;
+    this.ewarResolver = ewarResolver;
     this.time = 0;
-    this.attacker = asState(simConfig.attacker, new Vec2(0, 0));
-    this.target = asState(simConfig.target, new Vec2(0, simConfig.initialDistance));
+    this.shipA = asState(simConfig.shipA, new Vec2(0, 0));
+    this.shipB = asState(simConfig.shipB, new Vec2(0, simConfig.initialDistance));
   }
 
   step(dt: number): void {
-    const commands = this.computeCommands();
-    this.attacker = { ...this.attacker, ...integrateShip(this.attacker, commands.attacker, dt) };
-    this.target = { ...this.target, ...integrateShip(this.target, commands.target, dt) };
+    const frame = this.computeFrame();
+    this.shipA = { ...this.shipA, ...integrateShip(frame.shipA, frame.commands.shipA, dt) };
+    this.shipB = { ...this.shipB, ...integrateShip(frame.shipB, frame.commands.shipB, dt) };
     this.time += dt;
   }
 
   snapshot(): SimSnapshot {
+    const frame = this.computeFrame();
     return {
       time: this.time,
-      attacker: this.attacker,
-      target: this.target,
-      commands: this.computeCommands(),
+      shipA: frame.shipA,
+      shipB: frame.shipB,
+      commands: frame.commands,
     };
   }
 
   reset(config: SimConfig): void {
     this.time = 0;
-    this.attacker = asState(config.attacker, new Vec2(0, 0));
-    this.target = asState(config.target, new Vec2(0, config.initialDistance));
+    this.shipA = asState(config.shipA, new Vec2(0, 0));
+    this.shipB = asState(config.shipB, new Vec2(0, config.initialDistance));
   }
 
   update(config: SimConfig): void {
-    this.attacker = withConfig(this.attacker, config.attacker);
-    this.target = withConfig(this.target, config.target);
+    this.shipA = withConfig(this.shipA, config.shipA);
+    this.shipB = withConfig(this.shipB, config.shipB);
   }
 
-  private computeCommands(): { attacker: Vec2; target: Vec2 } {
-    const attacker = this.attackerSteering.computeVelocity(this.attacker, this.target, this.time);
-    const target = this.targetSteering.computeVelocity(this.target, this.attacker, this.time);
-    return { attacker, target };
+  private computeFrame(): { shipA: ShipState; shipB: ShipState; commands: { shipA: Vec2; shipB: Vec2 } } {
+    const distance = this.shipB.position.sub(this.shipA.position).len();
+    const shipA = effectiveState(this.ewarResolver, this.shipA, this.shipB, distance);
+    const shipB = effectiveState(this.ewarResolver, this.shipB, this.shipA, distance);
+    const commands = {
+      shipA: this.shipASteering.computeVelocity(shipA, shipB, this.time),
+      shipB: this.shipBSteering.computeVelocity(shipB, shipA, this.time),
+    };
+    return { shipA, shipB, commands };
   }
 }
 
-function asState(config: ShipConfig, position: Vec2): ShipState {
+function effectiveState(resolver: EwarResolver, ship: ShipState, opponent: ShipState, distance: number): ShipState {
+  const multiplier = resolver.speedMultiplier(opponent.ewar, distance);
+  const suppressed = resolver.propulsionSuppressed(opponent.ewar, distance);
+  if (multiplier === 1 && !suppressed) return ship;
+  const baseSpeed = suppressed ? ship.suppressedMaxSpeed ?? ship.baseMaxSpeed ?? ship.maxSpeed : ship.maxSpeed;
+  return { ...ship, maxSpeed: baseSpeed * multiplier };
+}
+
+function asState(config: CombatantConfig, position: Vec2): ShipState {
   return { ...config, position, velocity: new Vec2(0, 0) };
 }
 
-function withConfig(state: ShipState, config: ShipConfig): ShipState {
+function withConfig(state: ShipState, config: CombatantConfig): ShipState {
   return { ...state, ...config };
 }

@@ -1,13 +1,14 @@
 [Taipan, Rocket Shield Taipan]
-Dread Guristas Rocket Launcher, Caldari Navy Nova Rocket
-Dread Guristas Rocket Launcher, Caldari Navy Nova Rocket
+
+'Basic' Power Diagnostic System
+IFFA Compact Damage Control
 
 Enduring Multispectrum Shield Hardener
 5MN Microwarpdrive II
 Small Ancillary Shield Booster, Navy Cap Booster 25
 
-'Basic' Power Diagnostic System
-IFFA Compact Damage Control
+Dread Guristas Rocket Launcher, Caldari Navy Nova Rocket
+Dread Guristas Rocket Launcher, Caldari Navy Nova Rocket
 
 
 Hobgoblin II x3

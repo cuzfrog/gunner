@@ -1,44 +1,31 @@
+import { type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
-import { PALETTE } from "../palette";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
-import type { ProfileSettings, UserSettings } from "../../appstate";
 
-export const AGGRESSIVITY_MIN = 0.01;
-export const AGGRESSIVITY_MAX = 100;
-export const DEFAULT_GRID_BRIGHTNESS = 0.2;
+export const DEFAULT_GRID_BRIGHTNESS = 0.5;
 export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
-
-export function aggressivityFromPosition(pos: number): number {
-  const clamped = Math.max(0, Math.min(1, pos));
-  return AGGRESSIVITY_MIN * (AGGRESSIVITY_MAX / AGGRESSIVITY_MIN) ** clamped;
-}
-
-export function positionFromAggressivity(value: number): number {
-  const clamped = Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
-  return Math.log(clamped / AGGRESSIVITY_MIN) / Math.log(AGGRESSIVITY_MAX / AGGRESSIVITY_MIN);
-}
-
-export function parseManeuverAggressivity(input: HTMLInputElement): number {
-  const value = Number.parseFloat(input.value);
-  if (!Number.isFinite(value)) return 1;
-  return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));
-}
 
 export function formatWithCommas(value: number, decimals = 0): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+export function formatDistance(m: number, t: (key: string) => string): string {
+  const roundedM = Math.round(m);
+  if (roundedM >= 10000) return `${formatWithCommas(m / 1000, 1)} ${t("unit.kilometer")}`;
+  return `${formatWithCommas(roundedM)} ${t("unit.meter")}`;
 }
 
 export function formatNumber(value: number, decimals = 2): string {
   return String(Number(value.toFixed(decimals)));
 }
 
-export function hitChanceColor(chance: number): string {
-  if (chance >= 0.9) return PALETTE.optimalGreen;
-  if (chance >= 0.5) return PALETTE.accentTeal;
-  if (chance >= 0.25) return PALETTE.warnYellow;
-  if (chance >= 0.05) return PALETTE.accentOrange;
-  return PALETTE.dangerRed;
+export function hitChanceClass(chance: number): string {
+  if (chance >= 0.9) return "is-optimal";
+  if (chance >= 0.5) return "is-good";
+  if (chance >= 0.25) return "is-caution";
+  if (chance >= 0.05) return "is-warn";
+  return "is-danger";
 }
 
 export function propulsionOptionLabel(module: PropulsionModule): string {
@@ -63,13 +50,26 @@ export function chargeStatSuffix(option: ChargeOption): string {
   return parts.join(" · ");
 }
 
-export function formatMultiplier(value: number): string {
-  return String(Number(value.toFixed(2)));
+export function scriptStatSuffix(script: DisruptionScriptSpec): string {
+  const parts = [
+    `optimal x${formatMultiplier(script.optimalMultiplier)}`,
+    `falloff x${formatMultiplier(script.falloffMultiplier)}`,
+    `track x${formatMultiplier(script.trackingMultiplier)}`,
+  ];
+  return parts.join(" · ");
 }
 
-export function profileSettingsOf(settings: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = settings;
-  return rest;
+export function boosterScriptStatSuffix(script: TurretScriptSpec): string {
+  const parts = [
+    `track x${formatMultiplier(script.trackingMultiplier)}`,
+    `optimal x${formatMultiplier(script.optimalMultiplier)}`,
+    `falloff x${formatMultiplier(script.falloffMultiplier)}`,
+  ];
+  return parts.join(" · ");
+}
+
+export function formatMultiplier(value: number): string {
+  return String(Number(value.toFixed(2)));
 }
 
 export function escapeHtml(value: string): string {

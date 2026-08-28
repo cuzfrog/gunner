@@ -1,14 +1,4 @@
 [Deimos, Rail Armor Deimos]
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-
-Sensor Booster II, Scan Resolution Script
-Small Capacitor Booster II, Navy Cap Booster 400
-50MN Cold-Gas Enduring Microwarpdrive
-Optical Compact Tracking Computer, Tracking Speed Script
 
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
@@ -16,6 +6,17 @@ True Sansha Explosive Armor Hardener
 1600mm Steel Plates II
 Assault Damage Control II
 Multispectrum Energized Membrane II
+
+Sensor Booster II, Scan Resolution Script
+Small Capacitor Booster II, Navy Cap Booster 400
+50MN Cold-Gas Enduring Microwarpdrive
+Optical Compact Tracking Computer, Tracking Speed Script
+
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
 
 Medium Ancillary Current Router I
 Medium Ancillary Current Router I

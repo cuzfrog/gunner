@@ -1,33 +1,33 @@
 [Vulture, Ewar Rail Shield Vulture]
-Shield Command Burst II, Active Shielding Charge
-Shield Command Burst II, Shield Extension Charge
-Shield Command Burst II, Shield Harmonizing Charge
-Auto Targeting System I
-Information Command Burst I, Sensor Optimization Charge
-Civilian Gatling Railgun
-Auto Targeting System I
-
-Large Shield Extender II
-Large Shield Extender II
-Target Painter II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-50MN Cold-Gas Enduring Microwarpdrive
 
 Damage Control II
 Power Diagnostic System II
 Power Diagnostic System II
 Power Diagnostic System II
 
-Medium Command Processor I
-Medium Command Processor I
+Large Shield Extender II
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+50MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+
+Shield Command Burst II, Active Shielding Charge
+Shield Command Burst II, Shield Extension Charge
+Shield Command Burst II, Shield Harmonizing Charge
+Information Command Burst I, Sensor Optimization Charge
+Civilian Gatling Railgun
+[Empty High slot]
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hobgoblin I x2
 Hobgoblin I x2
 
 
-Mobile Tractor Unit x1
 Shield Extension Charge x987
 Shield Harmonizing Charge x987
 Sensor Optimization Charge x987

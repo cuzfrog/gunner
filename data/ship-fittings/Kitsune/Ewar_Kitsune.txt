@@ -1,0 +1,27 @@
+[Kitsune, Ewar Kitsune]
+
+Power Diagnostic System II
+Ballistic Control System II
+
+Magnetometric ECM II
+Magnetometric ECM II
+'Inception' Target Painter
+5MN Y-T8 Compact Microwarpdrive
+Missile Guidance Computer II
+
+Light Missile Launcher II
+Light Missile Launcher II
+Light Missile Launcher II
+
+Small Warhead Flare Catalyst II
+Small Particle Dispersion Augmentor II
+
+
+Nova Fury Light Missile x2000
+Missile Range Script x1
+Inferno Fury Light Missile x2159
+Mjolnir Fury Light Missile x2000
+Scourge Fury Light Missile x2000
+Radar ECM II x2
+Gravimetric ECM II x2
+Ladar ECM II x2

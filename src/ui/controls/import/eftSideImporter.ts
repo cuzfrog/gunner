@@ -1,36 +1,35 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { FittedHullSummary } from "../../../appstate";
-import type { Side, SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import { PROPULSION_NONE, type FittedHullSummary } from "../../../appstate";
+import type { Side } from "../side";
+import type { SidePanel } from "../sidePanel";
+import type { ShipATurret } from "./shipATurret";
 
 interface EftSideImporterDeps {
-  readonly attackerSide: SidePanel;
-  readonly targetSide: SidePanel;
-  readonly turret: AttackerTurret;
+  readonly shipASide: SidePanel;
+  readonly shipBSide: SidePanel;
+  readonly turrets: Record<Side, ShipATurret>;
   readonly fittingImport: FittingImport;
-  readonly onConfigPersisted: () => void;
 }
 
 export class EftSideImporter {
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
-  private readonly turret: AttackerTurret;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
+  private readonly turrets: Record<Side, ShipATurret>;
   private readonly fittingImport: FittingImport;
-  private readonly onConfigPersisted: () => void;
 
   constructor(deps: EftSideImporterDeps) {
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
-    this.turret = deps.turret;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
+    this.turrets = deps.turrets;
     this.fittingImport = deps.fittingImport;
-    this.onConfigPersisted = deps.onConfigPersisted;
   }
 
   private panel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
-  importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
+  importEftFitting(side: Side, text: string, options: { readonly persist?: boolean; readonly showImportedHint?: boolean } = {}): ImportedFitting | undefined {
+    const { persist = true, showImportedHint = true } = options;
     const panel = this.panel(side);
     const conditions = panel.skillConditions();
     const imported = this.fittingImport.importFitting(text, conditions);
@@ -39,24 +38,26 @@ export class EftSideImporter {
       return undefined;
     }
     panel.sections.hull.clearFittedHull();
-    panel.fittingText = text;
+    panel.fittingText = this.fittingImport.canonicalEftText(text) ?? text;
     panel.clearOverrides();
-    panel.sections.hull.loadHull(imported.profile.name, imported.propulsion?.propulsionId);
-    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(imported));
-    if (side === "attacker") this.turret.applyImported(imported);
+    panel.sections.hull.loadHull(imported.profile.id, imported.propulsion?.propulsionId ?? PROPULSION_NONE);
+    panel.sections.hull.applyImportedFitting(this.fittedHullSummary(side, imported));
+    this.turrets[side].applyImported(imported, conditions);
     if (persist) {
-      panel.lastCommittedHull = imported.profile.name;
-      this.onConfigPersisted();
+      panel.lastCommittedHull = imported.profile.id;
     }
-    panel.sections.paste.showImportHint("status.fittingImported");
+    if (showImportedHint) panel.sections.paste.showImportHint("status.fittingImported");
     return imported;
   }
 
-  private fittedHullSummary(imported: ImportedFitting): FittedHullSummary {
+  private fittedHullSummary(side: Side, imported: ImportedFitting): FittedHullSummary {
+    const propulsionId = imported.propulsion?.propulsionId;
     return {
       fittingName: imported.fittingName,
-      propulsionId: imported.propulsion?.propulsionId,
+      propulsionId,
+      propulsionModuleId: imported.propulsion?.propulsionModuleId,
       propulsionName: imported.propulsion?.propulsionName,
+      propulsionKind: propulsionId !== undefined ? this.panel(side).ships.fittingOption(imported.profile, propulsionId)?.kind : undefined,
       fitted: imported.fitted,
       propulsion: imported.propulsion,
     };

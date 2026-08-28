@@ -1,16 +1,18 @@
 [Venture, Ewar Shield Venture]
-Industrial Cynosural Field Generator
-Small Ghoul Compact Energy Nosferatu
+
+Damage Control II
 
 Multispectrum Shield Hardener II
 1MN Monopropellant Enduring Afterburner
 Medium Ancillary Shield Booster, Cap Booster 50
 
-Damage Control II
+Small Ghoul Compact Energy Nosferatu
+[Empty High slot]
+[Empty High slot]
 
-Small Cargohold Optimization I
-Small Cargohold Optimization II
-Small Cargohold Optimization II
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hobgoblin I x1

@@ -1,4 +1,19 @@
 [Maelstrom, Tackle AC Shield Maelstrom]
+
+Co-Processor II
+Damage Control II
+Co-Processor II
+Gyrostabilizer II
+Gyrostabilizer II
+
+X-Large Ancillary Shield Booster
+Warp Scrambler II
+Heavy Stasis Grappler II
+X-Large Ancillary Shield Booster
+Multispectrum Shield Hardener II
+X-Large Ancillary Shield Booster
+[Empty Med slot]
+
 Dual 425mm AutoCannon II, Republic Fleet EMP L
 Dual 425mm AutoCannon II, Republic Fleet EMP L
 Dual 425mm AutoCannon II, Republic Fleet EMP L
@@ -7,23 +22,9 @@ Dual 425mm AutoCannon II, Republic Fleet EMP L
 Dual 425mm AutoCannon II, Republic Fleet EMP L
 Dual 425mm AutoCannon II, Republic Fleet EMP L
 
-X-Large Ancillary Shield Booster
-Warp Scrambler II
-Heavy Stasis Grappler II
-X-Large Ancillary Shield Booster
-Multispectrum Shield Hardener II
-Gist X-Type Shield Boost Amplifier
-X-Large Ancillary Shield Booster
-
-Co-Processor II
-Damage Control II
-Co-Processor II
-Gyrostabilizer II
-Gyrostabilizer II
-
 Large Processor Overclocking Unit I
-Large Cargohold Optimization I
 Large EM Shield Reinforcer I
+[Empty Rig slot]
 
 
 Hornet EC-300 x5

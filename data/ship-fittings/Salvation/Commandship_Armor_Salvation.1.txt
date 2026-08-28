@@ -1,24 +1,25 @@
 [Salvation, Commandship Armor Salvation]
-Armor Command Burst II, Armor Energizing Charge
-Armor Command Burst II, Armor Reinforcement Charge
-Fighter Support Unit I
-Information Command Burst II, Sensor Optimization Charge
-Fighter Support Unit I
-Integrated Sensor Array
-
-Capital Shield Extender II
-Pithum C-Type Multispectrum Shield Hardener
-Capital Shield Extender II
-Pithum C-Type Multispectrum Shield Hardener
 
 25000mm Steel Plates II
-Centii A-Type Multispectrum Coating
 25000mm Steel Plates II
 Reactive Armor Hardener
-Centii A-Type Multispectrum Coating
 25000mm Steel Plates II
 25000mm Steel Plates II
 Damage Control II
+[Empty Low slot]
+[Empty Low slot]
+
+Capital Shield Extender II
+Capital Shield Extender II
+Pithum C-Type Multispectrum Shield Hardener
+Pithum C-Type Multispectrum Shield Hardener
+
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Armor Reinforcement Charge
+Information Command Burst II, Sensor Optimization Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II

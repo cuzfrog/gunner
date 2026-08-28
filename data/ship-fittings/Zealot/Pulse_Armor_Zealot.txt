@@ -1,21 +1,22 @@
 [Zealot, Pulse Armor Zealot]
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
+
+Assault Damage Control II
+Reactive Armor Hardener
+Heat Sink II
+Reactor Control Unit II
+Medium Armor Repairer II
+Medium Armor Repairer II
+[Empty Low slot]
 
 10MN Afterburner II
 Republic Fleet Medium Cap Battery
 Republic Fleet Large Cap Battery
 
-Assault Damage Control II
-Reactive Armor Hardener
-Thermal Energized Membrane II
-Heat Sink II
-Reactor Control Unit II
-Medium Armor Repairer II
-Medium Armor Repairer II
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
 
 Medium EM Armor Reinforcer II
 Medium Auxiliary Nano Pump II

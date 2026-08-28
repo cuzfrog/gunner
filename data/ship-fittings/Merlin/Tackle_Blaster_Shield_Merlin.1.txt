@@ -1,16 +1,17 @@
 [Merlin, Tackle Blaster Shield Merlin]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
+
+Overdrive Injector System II
+Magnetic Field Stabilizer II
+IFFA Compact Damage Control
 
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 Fleeting Compact Stasis Webifier
 Faint Epsilon Scoped Warp Scrambler
 1MN Y-S8 Compact Afterburner
 
-Overdrive Injector System II
-Magnetic Field Stabilizer II
-IFFA Compact Damage Control
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
 
 Small Ancillary Current Router I
 Small Thermal Shield Reinforcer I

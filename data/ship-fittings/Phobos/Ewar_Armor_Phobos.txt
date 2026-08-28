@@ -1,22 +1,23 @@
 [Phobos, Ewar Armor Phobos]
-True Sansha Warp Disruption Field Generator, Focused Warp Scrambling Script
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-Small Ghoul Compact Energy Nosferatu
-Medium Ghoul Compact Energy Nosferatu
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-Small Ghoul Compact Energy Nosferatu
-
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
-Sensor Booster II, Scan Resolution Script
-50MN Quad LiF Restrained Microwarpdrive
 
 Medium Ancillary Armor Repairer, Nanite Repair Paste
 Multispectrum Energized Membrane II
 1600mm Steel Plates II
 Reactive Armor Hardener
 Medium Armor Repairer II
-Corelum C-Type Explosive Energized Membrane
+[Empty Low slot]
+
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Sensor Booster II, Scan Resolution Script
+50MN Quad LiF Restrained Microwarpdrive
+
+Small Ghoul Compact Energy Nosferatu
+Medium Ghoul Compact Energy Nosferatu
+Small Ghoul Compact Energy Nosferatu
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Ancillary Current Router II
 Medium Explosive Armor Reinforcer II

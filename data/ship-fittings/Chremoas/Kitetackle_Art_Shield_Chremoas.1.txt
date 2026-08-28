@@ -1,20 +1,22 @@
 [Chremoas, Kitetackle Art Shield Chremoas]
+
+Republic Fleet Gyrostabilizer
+Republic Fleet Gyrostabilizer
+[Empty Low slot]
+
+Thukker Medium Shield Extender
+Pithum A-Type Multispectrum Shield Hardener
+Imperial Navy Small Capacitor Booster, Navy Cap Booster 400
+Coreli A-Type 5MN Microwarpdrive
+Domination Warp Disruptor
+
 280mm Howitzer Artillery II, Domination Depleted Uranium S
 280mm Howitzer Artillery II, Domination Depleted Uranium S
 'Smokescreen' Covert Ops Cloaking Device II
 
-Pithum A-Type Multispectrum Shield Hardener
-Imperial Navy Small Capacitor Booster, Navy Cap Booster 400
-Coreli A-Type 5MN Microwarpdrive
-Thukker Medium Shield Extender
-Domination Warp Disruptor
-
-Republic Fleet Gyrostabilizer
-Republic Fleet Gyrostabilizer
-Micro Auxiliary Power Core II
-
 Small Projectile Metastasis Adjuster II
 Small Ancillary Current Router II
+[Empty Rig slot]
 
 
 'Augmented' Warrior x3

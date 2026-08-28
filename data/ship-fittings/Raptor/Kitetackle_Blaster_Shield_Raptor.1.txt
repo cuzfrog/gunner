@@ -1,16 +1,17 @@
 [Raptor, Kitetackle Blaster Shield Raptor]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
+
+Vortex Compact Magnetic Field Stabilizer
+Damage Control II
+[Empty Low slot]
 
 Small Shield Extender II
 5MN Y-T8 Compact Microwarpdrive
 Initiated Compact Warp Disruptor
 Fleeting Compact Stasis Webifier
 
-Vortex Compact Magnetic Field Stabilizer
-Damage Control II
-Signal Amplifier II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
 
 Small Processor Overclocking Unit I
 Small Polycarbon Engine Housing II

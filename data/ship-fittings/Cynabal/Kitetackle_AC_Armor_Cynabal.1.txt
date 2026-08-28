@@ -1,9 +1,10 @@
 [Cynabal, Kitetackle AC Armor Cynabal]
-220mm Vulcan AutoCannon II, Republic Fleet EMP M
-220mm Vulcan AutoCannon II, Republic Fleet EMP M
-220mm Vulcan AutoCannon II, Republic Fleet EMP M
-Medium Infectious Scoped Energy Neutralizer
-220mm Vulcan AutoCannon II, Republic Fleet EMP M
+
+Multispectrum Energized Membrane II
+Damage Control II
+Medium Ancillary Armor Repairer
+Medium Armor Repairer II
+Gyrostabilizer II
 
 Warp Scrambler II
 10MN Afterburner II
@@ -11,11 +12,11 @@ Warp Scrambler II
 Warp Disruptor II
 Medium F-RX Compact Capacitor Booster
 
-Multispectrum Energized Membrane II
-Damage Control II
-Medium Ancillary Armor Repairer
-Medium Armor Repairer II
-Gyrostabilizer II
+220mm Vulcan AutoCannon II, Republic Fleet EMP M
+220mm Vulcan AutoCannon II, Republic Fleet EMP M
+220mm Vulcan AutoCannon II, Republic Fleet EMP M
+Medium Infectious Scoped Energy Neutralizer
+220mm Vulcan AutoCannon II, Republic Fleet EMP M
 
 Medium Auxiliary Nano Pump I
 Medium Auxiliary Nano Pump I
@@ -27,7 +28,6 @@ Warrior II x5
 
 Republic Fleet Phased Plasma M x2000
 Navy Cap Booster 800 x8
-Synth Exile Booster x1
 Barrage M x2000
 Republic Fleet Fusion M x2000
 Nanite Repair Paste x200

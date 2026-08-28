@@ -1,15 +1,4 @@
 [Cyclone, Missile Shield Cyclone]
-'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
-
-X-Large Ancillary Shield Booster, Cap Booster 400
-X-Large Ancillary Shield Booster, Cap Booster 400
-Multispectrum Shield Hardener II
-Large Compact Pb-Acid Cap Battery
-Compact Multispectrum Shield Hardener
 
 Ballistic Control System II
 Reactor Control Unit II
@@ -17,9 +6,23 @@ Reactor Control Unit II
 Co-Processor II
 Nanofiber Internal Structure II
 
+X-Large Ancillary Shield Booster, Cap Booster 400
+X-Large Ancillary Shield Booster, Cap Booster 400
+Multispectrum Shield Hardener II
+Large Compact Pb-Acid Cap Battery
+Compact Multispectrum Shield Hardener
+
+'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
+'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
+'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
+'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
+'Arbalest' Heavy Missile Launcher, Nova Heavy Missile
+[Empty High slot]
+[Empty High slot]
+
 Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
-Medium Command Processor I
+[Empty Rig slot]
 
 
 Cap Booster 400 x6

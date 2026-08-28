@@ -1,26 +1,26 @@
 [Corax Navy Issue, Kitetackle Missile Shield Corax Navy Issue]
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
 
-Fleeting Compact Stasis Webifier
+Ballistic Control System II
+Nanofiber Internal Structure II
+
 Medium F-S9 Regolith Compact Shield Extender
+Fleeting Compact Stasis Webifier
 Warp Disruptor II
 5MN Y-T8 Compact Microwarpdrive
 Compact Multispectrum Shield Hardener
 
-Ballistic Control System II
-Nanofiber Internal Structure II
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
 
 Small EM Shield Reinforcer I
 Small Ancillary Current Router II
 Small Auxiliary Thrusters I
 
 
-Border-5 'Pochven' Filament x1
 Caldari Navy Mjolnir Light Missile x1200
 Caldari Navy Scourge Light Missile x1080
 Mjolnir Fury Light Missile x1200

@@ -1,15 +1,16 @@
 [Navitas, Logi Armor Navitas]
-Small Remote Armor Repairer II
-Small Coaxial Compact Remote Armor Repairer
-Small Coaxial Compact Remote Armor Repairer
+
+Damage Control II
+Multispectrum Energized Membrane II
+400mm Rolled Tungsten Compact Plates
 
 Sensor Booster I, Scan Resolution Script
 1MN Monopropellant Enduring Afterburner
 Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
 
-Damage Control II
-Multispectrum Energized Membrane II
-400mm Rolled Tungsten Compact Plates
+Small Remote Armor Repairer II
+Small Coaxial Compact Remote Armor Repairer
+Small Coaxial Compact Remote Armor Repairer
 
 Small Trimark Armor Pump I
 Small Ancillary Current Router I

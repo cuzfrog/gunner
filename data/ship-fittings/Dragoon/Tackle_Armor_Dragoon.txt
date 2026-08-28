@@ -1,18 +1,19 @@
 [Dragoon, Tackle Armor Dragoon]
-Small Energy Nosferatu II
-Small Gremlin Compact Energy Neutralizer
-Small Gremlin Compact Energy Neutralizer
-Small Energy Nosferatu II
-Small Gremlin Compact Energy Neutralizer
-
-Faint Epsilon Scoped Warp Scrambler
-1MN Monopropellant Enduring Afterburner
-X5 Enduring Stasis Webifier
 
 400mm Steel Plates II
 Co-Processor II
 Damage Control II
 Multispectrum Energized Membrane II
+
+Faint Epsilon Scoped Warp Scrambler
+1MN Monopropellant Enduring Afterburner
+X5 Enduring Stasis Webifier
+
+Small Energy Nosferatu II
+Small Gremlin Compact Energy Neutralizer
+Small Gremlin Compact Energy Neutralizer
+Small Energy Nosferatu II
+Small Gremlin Compact Energy Neutralizer
 
 Small Ancillary Current Router I
 Small Ancillary Current Router I

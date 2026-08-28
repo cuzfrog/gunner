@@ -1,9 +1,10 @@
 [Cynabal, Kitetackle AC Shield Cynabal]
-Medium Energy Neutralizer II
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
+
+Damage Control II
+Tracking Enhancer II
+Tracking Enhancer II
+Gyrostabilizer II
+Gyrostabilizer II
 
 Republic Fleet Large Shield Extender
 Republic Fleet Large Shield Extender
@@ -11,11 +12,11 @@ Multispectrum Shield Hardener II
 50MN Cold-Gas Enduring Microwarpdrive
 Dread Guristas Warp Disruptor
 
-Damage Control II
-Tracking Enhancer II
-Tracking Enhancer II
-Gyrostabilizer II
-Gyrostabilizer II
+Medium Energy Neutralizer II
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
 
 Medium Core Defense Field Extender II
 Medium Thermal Shield Reinforcer II

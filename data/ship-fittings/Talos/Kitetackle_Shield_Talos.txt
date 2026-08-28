@@ -1,16 +1,4 @@
 [Talos, Kitetackle Shield Talos]
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
-
-50MN Y-T8 Compact Microwarpdrive
-Large Shield Extender II
-Large Shield Extender II
-Faint Epsilon Scoped Warp Scrambler
 
 Magnetic Field Stabilizer II
 Tracking Enhancer II
@@ -18,8 +6,23 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
-Medium Hybrid Collision Accelerator I
-Medium Hybrid Collision Accelerator I
+Large Shield Extender II
+Large Shield Extender II
+50MN Y-T8 Compact Microwarpdrive
+Faint Epsilon Scoped Warp Scrambler
+
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+425mm Prototype Gauss Gun, Federation Navy Antimatter Charge L
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hobgoblin II x2

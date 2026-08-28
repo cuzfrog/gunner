@@ -1,10 +1,13 @@
 import type { SettingsParser } from "./settingsParser";
 import type { ClipboardProvider, LocationProvider, StorageProvider } from "./providers";
 import type { SettingsStore } from "./settingsStore";
-import type { DisplayPreferences, ProfileSettings, StartupState, UserSettings } from "./userSettings";
+import type { DisplayPreferences, ProfileSettings, TrackingUnit, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { SessionSettings, StartupState } from "./combatantSettings";
+import type { Language } from "./language";
+import type { ProfileEquality } from "./profileEquality";
 import { DEFAULT_PREFERENCES } from "./defaultPreferences";
 import { encodeBase64, URL_PARAM } from "./urlCodec";
-import { isLanguage, isOptionalUnitInterval, isPositive, profilesEqual, stripDisplayPreferences } from "./validators";
+import { isFiniteNumber, isLanguage, isOptionalRangeOverlayVisibility, isOptionalUnitInterval, isPositive, stripDisplayPreferences } from "./validators";
 
 const PROFILES_KEY = "gunner-profiles-v6";
 const SELECTED_PROFILE_KEY = "gunner-selected-profile-v6";
@@ -16,11 +19,27 @@ export class LocalSettingsStore implements SettingsStore {
   private readonly storage: StorageProvider;
   private readonly location: LocationProvider;
   private readonly parser: SettingsParser;
+  private readonly equality: ProfileEquality;
+  private readonly navigatorLanguage: string;
 
-  constructor({ storage, location, parser }: { storage: StorageProvider; location: LocationProvider; parser: SettingsParser }) {
+  constructor({
+    storage,
+    location,
+    parser,
+    profileEquality,
+    navigatorLanguage = "",
+  }: {
+    storage: StorageProvider;
+    location: LocationProvider;
+    parser: SettingsParser;
+    profileEquality: ProfileEquality;
+    navigatorLanguage?: string;
+  }) {
     this.storage = storage;
     this.location = location;
     this.parser = parser;
+    this.equality = profileEquality;
+    this.navigatorLanguage = navigatorLanguage;
   }
 
   loadStartupState(): StartupState {
@@ -73,6 +92,11 @@ export class LocalSettingsStore implements SettingsStore {
     this.storage.setItem(SELECTED_PROFILE_KEY, name);
   }
 
+  clearSelectedProfile(): void {
+    this.storage.removeItem(SELECTED_PROFILE_KEY);
+    this.storage.removeItem(MIGRATED_SELECTED_PROFILE_KEY);
+  }
+
   encodeUrl(settings: ProfileSettings): string {
     const url = new URL(this.location.href);
     url.searchParams.set(URL_PARAM, encodeBase64(stripDisplayPreferences(settings)));
@@ -81,19 +105,24 @@ export class LocalSettingsStore implements SettingsStore {
 
   loadPreferences(): DisplayPreferences {
     const raw = this.storage.getItem(PREFERENCES_KEY);
-    if (!raw) return { ...DEFAULT_PREFERENCES };
+    if (!raw) return { ...DEFAULT_PREFERENCES, language: detectInitialLanguage(this.navigatorLanguage) };
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { ...DEFAULT_PREFERENCES };
       const s = parsed as Record<string, unknown>;
       return {
         language: isLanguage(s.language) ? s.language : DEFAULT_PREFERENCES.language,
-        trackingUnit: s.trackingUnit === "score" ? "score" : DEFAULT_PREFERENCES.trackingUnit,
+        shipATrackingUnit: resolveTrackingUnit(s.shipATrackingUnit, s.trackingUnit),
+        shipBTrackingUnit: resolveTrackingUnit(s.shipBTrackingUnit, s.trackingUnit),
+        weaponRangeVisibility: resolveWeaponRangeVisibility(s.weaponRangeVisibility),
         simSpeed: isPositive(s.simSpeed) ? s.simSpeed : DEFAULT_PREFERENCES.simSpeed,
         gridBrightness:
           isOptionalUnitInterval(s.gridBrightness) && s.gridBrightness !== undefined
             ? s.gridBrightness
             : DEFAULT_PREFERENCES.gridBrightness,
+        rangeOverlayVisibility: isOptionalRangeOverlayVisibility(s.rangeOverlayVisibility) ? s.rangeOverlayVisibility : undefined,
+        autoZoom: typeof s.autoZoom === "boolean" ? s.autoZoom : DEFAULT_PREFERENCES.autoZoom,
+        zoomFactor: isFiniteNumber(s.zoomFactor) ? Math.max(0.25, Math.min(4, s.zoomFactor)) : DEFAULT_PREFERENCES.zoomFactor,
       };
     } catch {
       return { ...DEFAULT_PREFERENCES };
@@ -102,18 +131,18 @@ export class LocalSettingsStore implements SettingsStore {
   savePreferences(preferences: DisplayPreferences): void {
     this.storage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
   }
-  private decodeUrl(): UserSettings | null {
+  private decodeUrl(): SessionSettings | null {
     const url = new URL(this.location.href);
     const encoded = url.searchParams.get(URL_PARAM);
     if (!encoded) return null;
     return this.parser.decodeUrlSettings(encoded);
   }
-  private matchingSelectedProfile(urlSettings: UserSettings): string | null {
+  private matchingSelectedProfile(urlSettings: SessionSettings): string | null {
     const name = this.readSelectedProfileName();
     if (!name) return null;
     const profile = this.loadProfile(name);
     if (!profile) return null;
-    return profilesEqual(profile, stripDisplayPreferences(urlSettings)) ? name : null;
+    return this.equality.equal(profile, stripDisplayPreferences(this.parser.toWire(urlSettings))) ? name : null;
   }
 
   private readSelectedProfileName(): string | null {
@@ -137,4 +166,22 @@ export class LocalSettingsStore implements SettingsStore {
     if (!raw) return {};
     return this.parser.parseProfiles(raw);
   }
+}
+
+function detectInitialLanguage(navigatorLanguage: string): Language {
+  const prefix = navigatorLanguage.split(/[-_]/, 1)[0].toLowerCase();
+  if (prefix === "zh") return "zh";
+  if (prefix === "ja") return "ja";
+  return "en";
+}
+
+function resolveTrackingUnit(perShip: unknown, legacy: unknown): TrackingUnit {
+  if (perShip === "rad" || perShip === "score") return perShip;
+  if (legacy === "rad" || legacy === "score") return legacy;
+  return DEFAULT_PREFERENCES.shipATrackingUnit;
+}
+
+function resolveWeaponRangeVisibility(value: unknown): WeaponRangeVisibility {
+  if (value === "shipA" || value === "shipB" || value === "both" || value === "none") return value;
+  return DEFAULT_PREFERENCES.weaponRangeVisibility;
 }

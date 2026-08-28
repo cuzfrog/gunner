@@ -1,15 +1,16 @@
 [Crucifier, Tackle Pulse Armor Crucifier]
-Dual Afocal Pulse Laser I
-Dual Afocal Pulse Laser I
+
+Coreli A-Type Small Armor Repairer
+Multispectrum Energized Membrane II
+[Empty Low slot]
 
 Tracking Disruptor II
 Tracking Disruptor II
 1MN Monopropellant Enduring Afterburner
 Warp Scrambler II
 
-Multispectrum Coating II
-Coreli A-Type Small Armor Repairer
-Multispectrum Energized Membrane II
+Dual Afocal Pulse Laser I
+Dual Afocal Pulse Laser I
 
 Small Trimark Armor Pump II
 Small Trimark Armor Pump II

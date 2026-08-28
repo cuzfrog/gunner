@@ -1,16 +1,17 @@
 [Ares, Kitetackle Blaster Shield Ares]
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-
-5MN Y-T8 Compact Microwarpdrive
-Medium F-S9 Regolith Compact Shield Extender
-Initiated Compact Warp Scrambler
 
 Inertial Stabilizers II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
-Micro Auxiliary Power Core II
+[Empty Low slot]
+
+Medium F-S9 Regolith Compact Shield Extender
+5MN Y-T8 Compact Microwarpdrive
+Initiated Compact Warp Scrambler
+
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
 
 Small Low Friction Nozzle Joints II
 Small Low Friction Nozzle Joints II

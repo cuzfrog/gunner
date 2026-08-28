@@ -1,17 +1,19 @@
 [Harpy, Rail Shield Harpy]
-150mm Railgun II, Spike S
-150mm Railgun II, Spike S
-150mm Railgun II, Spike S
-150mm Railgun II, Spike S
-
-F-90 Compact Sensor Booster, Targeting Range Script
-5MN Y-T8 Compact Microwarpdrive
-Caldari Navy Small Shield Extender
-Compact EM Shield Amplifier
 
 EFFA Compact Assault Damage Control
 Vortex Compact Magnetic Field Stabilizer
 Magnetic Field Stabilizer II
+
+Caldari Navy Small Shield Extender
+F-90 Compact Sensor Booster, Targeting Range Script
+5MN Y-T8 Compact Microwarpdrive
+Compact EM Shield Amplifier
+
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+150mm Railgun II, Spike S
+[Empty High slot]
 
 Small Hybrid Locus Coordinator II
 Small Hybrid Locus Coordinator II

@@ -1,19 +1,29 @@
+import { FITTING_DB, type FittingDb, type TurretStats } from "../gamedata/fittingDb";
+import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 
 export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "autocannon" | "artillery";
 
 export interface GunFamilies {
-  familyOf(moduleName: string): GunFamily;
-  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string;
+  familyOf(moduleId: TypeId): GunFamily;
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId;
 }
 
 export class GunFamiliesImpl implements GunFamilies {
-  familyOf(moduleName: string): GunFamily {
-    return gunFamilyOf(moduleName);
+  private readonly turretLookup: (id: TypeId) => TurretStats | undefined;
+
+  constructor({ fittingDb }: { fittingDb: FittingDb }) {
+    this.turretLookup = (id) => fittingDb.turrets[id] ?? fittingDb.modules[id];
+    if (fittingDb.turrets === FITTING_DB.turrets || fittingDb.modules === FITTING_DB.modules) assertOverridesExist(fittingDb);
   }
 
-  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): string {
-    return gunIconNames(family)[sigResolutionClass];
+  familyOf(moduleId: TypeId): GunFamily {
+    const name = this.turretLookup(moduleId)?.name ?? "";
+    return gunFamilyOf(name);
+  }
+
+  representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId {
+    return GUN_FAMILY_REPRESENTATIVES[family][sigResolutionClass];
   }
 }
 
@@ -31,46 +41,42 @@ function gunFamilyOf(moduleName: string): GunFamily {
   return disambiguateEnergy(normalized, moduleName);
 }
 
-function gunIconNames(family: GunFamily): Readonly<Record<SigResolutionClass, string>> {
-  return GUN_FAMILY_REPRESENTATIVES[family];
-}
-
-const GUN_FAMILY_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<SigResolutionClass, string>>>> = {
+const GUN_FAMILY_REPRESENTATIVES: Readonly<Record<GunFamily, Readonly<Record<SigResolutionClass, TypeId>>>> = {
   pulseLaser: {
-    S: "Gatling Pulse Laser I",
-    M: "Heavy Pulse Laser I",
-    L: "Mega Pulse Laser I",
-    XL: "Dual Giga Pulse Laser I",
+    S: toTypeId("450"),
+    M: toTypeId("458"),
+    L: toTypeId("462"),
+    XL: toTypeId("20444"),
   },
   beamLaser: {
-    S: "Small Focused Beam Laser I",
-    M: "Heavy Beam Laser I",
-    L: "Tachyon Beam Laser I",
-    XL: "Dual Giga Beam Laser I",
+    S: toTypeId("454"),
+    M: toTypeId("459"),
+    L: toTypeId("464"),
+    XL: toTypeId("20446"),
   },
   blaster: {
-    S: "Light Neutron Blaster I",
-    M: "Heavy Neutron Blaster I",
-    L: "Neutron Blaster Cannon I",
-    XL: "Ion Siege Blaster I",
+    S: toTypeId("564"),
+    M: toTypeId("568"),
+    L: toTypeId("573"),
+    XL: toTypeId("20450"),
   },
   railgun: {
-    S: "150mm Railgun I",
-    M: "250mm Railgun I",
-    L: "425mm Railgun I",
-    XL: "Dual 1000mm Railgun I",
+    S: toTypeId("565"),
+    M: toTypeId("570"),
+    L: toTypeId("574"),
+    XL: toTypeId("20448"),
   },
   autocannon: {
-    S: "200mm AutoCannon I",
-    M: "425mm AutoCannon I",
-    L: "800mm Repeating Cannon I",
-    XL: "Quad 800mm Repeating Cannon I",
+    S: toTypeId("486"),
+    M: toTypeId("491"),
+    L: toTypeId("496"),
+    XL: toTypeId("37289"),
   },
   artillery: {
-    S: "280mm Howitzer Artillery I",
-    M: "720mm Howitzer Artillery I",
-    L: "1400mm Howitzer Artillery I",
-    XL: "Quad 3500mm Siege Artillery I",
+    S: toTypeId("488"),
+    M: toTypeId("493"),
+    L: toTypeId("498"),
+    XL: toTypeId("20454"),
   },
 } as const;
 
@@ -212,4 +218,12 @@ function resolveEnergyStem(normalized: string): GunFamily | undefined {
   if (normalized.includes("mega")) return "beamLaser";
   if (normalized.includes("heavy")) return "beamLaser";
   return undefined;
+}
+
+function assertOverridesExist(fittingDb: FittingDb): void {
+  const names = new Set<string>();
+  for (const stats of Object.values(fittingDb.turrets)) names.add(stats.name);
+  for (const stats of Object.values(fittingDb.modules)) names.add(stats.name);
+  const missing = Object.keys(FAMILY_OVERRIDES).filter((name) => !names.has(name));
+  if (missing.length > 0) throw new Error(`FAMILY_OVERRIDES keys have no matching turret/module: ${missing.join(", ")}`);
 }

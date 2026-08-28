@@ -1,18 +1,20 @@
 [Mekubal, Kitetackle AC Shield Mekubal]
-200mm AutoCannon II, Hail S
-200mm AutoCannon II, Hail S
-Small Energy Neutralizer II
-200mm AutoCannon II, Hail S
-200mm AutoCannon II, Hail S
-
-Coreli A-Type 5MN Microwarpdrive
-Republic Fleet Medium Shield Extender
-Warp Scrambler II
 
 Gyrostabilizer II
 Damage Control II
 Domination Nanofiber Structure
 Gyrostabilizer II
+
+Republic Fleet Medium Shield Extender
+Coreli A-Type 5MN Microwarpdrive
+Warp Scrambler II
+
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+Small Energy Neutralizer II
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+[Empty High slot]
 
 Small EM Shield Reinforcer II
 Small Core Defense Field Extender II

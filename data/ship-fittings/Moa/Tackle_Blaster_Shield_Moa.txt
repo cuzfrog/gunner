@@ -1,20 +1,21 @@
 [Moa, Tackle Blaster Shield Moa]
-Heavy Neutron Blaster II, Null M
-Heavy Neutron Blaster II, Null M
-Heavy Neutron Blaster II, Null M
-Heavy Neutron Blaster II, Null M
-Heavy Neutron Blaster II, Null M
-
-Multispectrum Shield Hardener II
-10MN Afterburner II
-Warp Scrambler II
-Stasis Webifier II
-Large Shield Extender II
 
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
+
+Large Shield Extender II
+Multispectrum Shield Hardener II
+10MN Afterburner II
+Warp Scrambler II
+Stasis Webifier II
+
+Heavy Neutron Blaster II, Null M
+Heavy Neutron Blaster II, Null M
+Heavy Neutron Blaster II, Null M
+Heavy Neutron Blaster II, Null M
+Heavy Neutron Blaster II, Null M
 
 Medium EM Shield Reinforcer I
 Medium Core Defense Field Extender I

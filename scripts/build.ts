@@ -1,15 +1,42 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { basename, extname, join } from "node:path";
-import { DRONE_ICON_ID, ITEM_ICON_IDS } from "../src/ui/icons/iconIds";
-import { DRONE_TYPE_IDS } from "../src/ui/icons/droneIconIds";
+import { basename, dirname, extname, join } from "node:path";
+import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
+import { updateIndexHtml } from "./generate-combatant-sections";
 
 const PUBLIC_DIRECTORY = "public";
 const DISTRIBUTION_DIRECTORY = "dist";
 const SHIP_IMAGES_SOURCE = "data/ship-images";
-const ICONS_SOURCE_DIRECTORY = "data/ship-modules/icons";
+const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
 const STYLES_FILE_NAME = "styles.css";
 const INDEX_FILE_NAME = "index.html";
+
+const STYLES_MANIFEST = [
+  "styles/tokens.css",
+  "styles/base.css",
+  "styles/primitives.css",
+  "styles/components/app-shell.css",
+  "styles/components/profile-bar.css",
+  "styles/components/result-grid.css",
+  "styles/components/control-bar.css",
+  "styles/components/side-panel.css",
+  "styles/components/hull-fields.css",
+  "styles/components/ship-select-popup.css",
+  "styles/components/tracking-unit.css",
+  "styles/components/skill-tuner.css",
+  "styles/components/ammo-popup.css",
+  "styles/components/paste-popup.css",
+  "styles/components/fitting-preview.css",
+  "styles/components/fitting-popup.css",
+  "styles/components/sigres-selector.css",
+  "styles/components/propulsion-group.css",
+  "styles/components/ewar-popup.css",
+  "styles/components/info-hint.css",
+  "styles/components/canvas-overlays.css",
+  "styles/components/weapon-range.css",
+  "styles/components/footer.css",
+  "styles/layout.css",
+] as const;
 const HASH_LENGTH = 8;
 const STYLES_LINK_PATTERN = /href=["']styles\.css["']/;
 const SCRIPT_SRC_PATTERN = /src=["']\.\/main\.js["']/;
@@ -22,7 +49,8 @@ const result = await Bun.build({
   outdir: DISTRIBUTION_DIRECTORY,
   target: "browser",
   minify: true,
-  naming: { entry: ENTRY_NAMING_PATTERN },
+  splitting: true,
+  naming: { entry: ENTRY_NAMING_PATTERN, chunk: "[name]-[hash].[ext]" },
 });
 
 if (!result.success) {
@@ -40,7 +68,10 @@ const mainJsName = basename(jsEntry.path);
 
 mkdirSync(DISTRIBUTION_DIRECTORY, { recursive: true });
 
+updateIndexHtml();
+
 for (const entry of readdirSync(PUBLIC_DIRECTORY, { withFileTypes: true })) {
+  if (entry.name === "styles") continue;
   const src = join(PUBLIC_DIRECTORY, entry.name);
   const dst = join(DISTRIBUTION_DIRECTORY, entry.name);
   cpSync(src, dst, { force: true, recursive: true });
@@ -54,15 +85,17 @@ for (const entry of readdirSync(SHIP_IMAGES_SOURCE, { withFileTypes: true })) {
   }
 }
 
-const iconsDist = join(DISTRIBUTION_DIRECTORY, "images", "icons");
-mkdirSync(iconsDist, { recursive: true });
-for (const iconId of new Set([...Object.values(ITEM_ICON_IDS), ...Object.values(DRONE_TYPE_IDS), DRONE_ICON_ID])) {
-  const src = join(ICONS_SOURCE_DIRECTORY, `${iconId}@1x.png`);
+for (const file of new Set(Object.values(TYPE_ICON_FILES))) {
+  const src = join(ICONS_SOURCE_DIRECTORY, file);
   if (!existsSync(src)) throw new Error(`Missing icon source: ${src}`);
-  cpSync(src, join(iconsDist, `${iconId}@1x.png`));
+  const dst = join(DISTRIBUTION_DIRECTORY, "images", file);
+  mkdirSync(dirname(dst), { recursive: true });
+  cpSync(src, dst);
 }
 
-const stylesHash = hashFile(join(PUBLIC_DIRECTORY, STYLES_FILE_NAME));
+const stylesContent = STYLES_MANIFEST.map((path) => readFileSync(join(PUBLIC_DIRECTORY, path))).join("");
+writeFileSync(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME), stylesContent);
+const stylesHash = hashFile(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME));
 const hashedStylesName = `styles-${stylesHash}.css`;
 renameSync(join(DISTRIBUTION_DIRECTORY, STYLES_FILE_NAME), join(DISTRIBUTION_DIRECTORY, hashedStylesName));
 

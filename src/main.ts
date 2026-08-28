@@ -1,10 +1,12 @@
 import { asValue } from "awilix";
 import { registerAppModule } from "./app";
 import { container } from "./container";
+import { registerGameDataModule } from "./gamedata";
 import { registerFittingModule } from "./fitting";
 import { registerShipsModule } from "./ships";
 import { registerSimModule } from "./sim";
-import { ClipboardUnavailableError, registerUiModule } from "./ui";
+import { ClipboardUnavailableError } from "./appstate";
+import { registerUiModule } from "./ui";
 
 function main(): void {
   const canvas = document.getElementById("scene");
@@ -18,11 +20,14 @@ function main(): void {
         return window.location.href;
       },
     }),
+    navigatorLanguage: asValue(window.navigator.language),
     clipboard: asValue({
       readText: readClipboardText,
       writeText: (text: string) => window.navigator.clipboard.writeText(text),
     }),
+    now: asValue(() => performance.now()),
   });
+  registerGameDataModule(container);
   registerShipsModule(container);
   registerFittingModule(container);
   // sim before ui: controls wiring resolves sessionCodec eagerly, which needs hitChance.

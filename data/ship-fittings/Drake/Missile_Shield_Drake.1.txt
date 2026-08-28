@@ -1,23 +1,24 @@
 [Drake, Missile Shield Drake]
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-Core Probe Launcher I, Core Scanner Probe I
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
-'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
 
+Mark I Compact Shield Power Relay
+Mark I Compact Shield Power Relay
+Mark I Compact Shield Power Relay
+Mark I Compact Shield Power Relay
+
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
 Multispectrum Shield Hardener I
-Large F-S9 Regolith Compact Shield Extender
-Large F-S9 Regolith Compact Shield Extender
 Multispectrum Shield Hardener I
 10MN Monopropellant Enduring Afterburner
-Large F-S9 Regolith Compact Shield Extender
 
-Mark I Compact Shield Power Relay
-Mark I Compact Shield Power Relay
-Mark I Compact Shield Power Relay
-Mark I Compact Shield Power Relay
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+'Arbalest' Heavy Missile Launcher, Scourge Heavy Missile
+[Empty High slot]
 
 Medium Core Defense Field Purger I
 Medium Core Defense Field Purger I

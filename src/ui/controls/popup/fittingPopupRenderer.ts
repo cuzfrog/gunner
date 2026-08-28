@@ -4,7 +4,8 @@ import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../side";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 interface FittingPopupRendererDeps {
   readonly side: Side;
@@ -13,7 +14,7 @@ interface FittingPopupRendererDeps {
   readonly fittingImport: FittingImport;
   readonly i18n: I18n;
   readonly els: FittingPopupEls;
-  readonly panel: SidePanel;
+  readonly panel: FittingPopupHost;
   readonly previews: FittingPreviewManager;
 }
 
@@ -29,7 +30,7 @@ export class FittingPopupRenderer {
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly els: FittingPopupEls;
-  private readonly panel: SidePanel;
+  private readonly panel: FittingPopupHost;
   private readonly previews: FittingPreviewManager;
 
   constructor(deps: FittingPopupRendererDeps) {
@@ -55,6 +56,7 @@ export class FittingPopupRenderer {
     savedList.innerHTML = "";
     presetList.innerHTML = "";
     const currentText = panel.fittingText;
+    const currentKey = currentText !== undefined ? this.fittingImport.canonicalEftText(currentText) ?? currentText : undefined;
 
     if (!panel.profile) {
       savedLabel.hidden = true;
@@ -64,14 +66,14 @@ export class FittingPopupRenderer {
     }
 
     const conditions = panel.skillConditions();
-    const saved = this.savedFittings.listForHull(panel.profile.name);
+    const saved = this.savedFittings.listForHull(panel.profile.id);
     savedLabel.hidden = saved.length === 0;
     for (const fitting of saved) {
       const onFittingClick = () => actions.onItemClick(fitting.text);
-      const item = this.createFittingItem(fitting.name, fitting.text, currentText, onFittingClick);
+      const item = this.createFittingItem(fitting.name, fitting.text, currentKey, onFittingClick);
       const imported = this.fittingImport.importFitting(fitting.text, conditions);
       if (!imported) {
-        item.classList.toggle("invalid", true);
+        item.classList.toggle("is-invalid", true);
         const invalidText = this.i18n.t("fitting.invalid");
         item.title = invalidText;
         item.disabled = true;
@@ -81,12 +83,12 @@ export class FittingPopupRenderer {
       savedList.appendChild(entry);
     }
 
-    const presets = this.presetFittings.fittingsFor(panel.profile.name);
+    const presets = this.presetFittings.fittingsFor(panel.profile.id);
     presetLabel.hidden = presets.length === 0;
     for (const fit of presets) {
-      const text = this.presetFittings.eftText(panel.profile.name, fit);
+      const text = this.presetFittings.eftText(panel.profile.id, fit);
       const onFittingClick = () => actions.onItemClick(text);
-      const item = this.createFittingItem(fit.name, text, currentText, onFittingClick);
+      const item = this.createFittingItem(fit.name, text, currentKey, onFittingClick);
       presetList.appendChild(this.createFittingEntry(text, item, undefined));
     }
 
@@ -104,14 +106,15 @@ export class FittingPopupRenderer {
     return undefined;
   }
 
-  private createFittingItem(name: string, text: string, currentText: string | undefined, onClick: () => void): HTMLButtonElement {
+  private createFittingItem(name: string, text: string, currentKey: string | undefined, onClick: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fitting-item";
-    button.setAttribute("role", "menuitem");
-    if (currentText === text) button.setAttribute("aria-current", "true");
+    if (currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey)) {
+      button.setAttribute("aria-current", "true");
+    }
     const span = document.createElement("span");
-    span.className = "fitting-item-name";
+    span.className = "fitting-item-name truncate";
     span.textContent = name;
     span.title = name;
     button.appendChild(span);
@@ -128,7 +131,7 @@ export class FittingPopupRenderer {
     if (onDelete) {
       const del = document.createElement("button");
       del.type = "button";
-      del.className = "fitting-delete";
+      del.className = "fitting-delete icon-button";
       del.setAttribute("title", this.i18n.t("button.deleteFitting"));
       del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
       del.innerHTML = DELETE_ICON_SVG;
@@ -141,7 +144,7 @@ export class FittingPopupRenderer {
   private createFittingItemEye(text: string): HTMLButtonElement {
     const eye = document.createElement("button");
     eye.type = "button";
-    eye.className = "fitting-item-eye";
+    eye.className = "fitting-item-eye icon-button";
     eye.setAttribute("aria-pressed", "false");
     eye.setAttribute("title", this.i18n.t("button.fittingDetails"));
     eye.setAttribute("aria-label", this.i18n.t("button.fittingDetails"));

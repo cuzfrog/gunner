@@ -1,14 +1,21 @@
 [Vherokior Probe, Missile Shield Vherokior Probe]
-Light Missile Launcher I, Inferno Light Missile
-Light Missile Launcher I, Inferno Light Missile
-
-Small Subordinate Screen Stabilizer I
-1MN Afterburner I
-Civilian Kinetic Shield Hardener
-Supplemental Scanning CPU I
 
 Type-D Restrained Inertial Stabilizers
 Overdrive Injector System I
+[Empty Low slot]
+
+1MN Afterburner I
+Civilian Kinetic Shield Hardener
+[Empty Med slot]
+[Empty Med slot]
+
+Light Missile Launcher I, Inferno Light Missile
+Light Missile Launcher I, Inferno Light Missile
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Inferno Light Missile x162

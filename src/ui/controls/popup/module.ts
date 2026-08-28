@@ -1,38 +1,41 @@
 import { asClass, asFunction, type AwilixContainer } from "awilix";
+import type { createControlsEls } from "../elements";
 import type { ControlsCradle } from "../cradle";
-import { collectFittingPopupEls } from "../elementCollectors";
-import type { Side } from "../sidePanel";
+import type { Side } from "../side";
 import { DomFittingPreview } from "./fittingPreview";
 import { FittingPopupControllerImpl } from "./fittingPopupController";
 import { FittingPreviewManagerImpl } from "./fittingPreviewManager";
 import { PopupGroupImpl } from "./popupGroup";
+import type { FittingPopupEls } from "./fittingPopupEls";
+
+type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export function registerPopupModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     popupGroup: asClass(PopupGroupImpl).singleton(),
-    attackerFittingPreview: asFunction((proxy) => new DomFittingPreview(previewDeps(proxy, "attacker"))).singleton(),
-    targetFittingPreview: asFunction((proxy) => new DomFittingPreview(previewDeps(proxy, "target"))).singleton(),
+    shipAFittingPreview: asFunction((proxy) => new DomFittingPreview(previewDeps(proxy, "shipA"))).singleton(),
+    shipBFittingPreview: asFunction((proxy) => new DomFittingPreview(previewDeps(proxy, "shipB"))).singleton(),
     previewManager: asFunction((proxy) => new FittingPreviewManagerImpl({
       fittingImport: proxy.fittingImport,
       imageCatalog: proxy.imageCatalog,
       i18n: proxy.i18n,
-      attackerSide: proxy.attackerSide,
-      targetSide: proxy.targetSide,
-      previewsBySide: { attacker: proxy.attackerFittingPreview, target: proxy.targetFittingPreview },
-      shipImageBySide: { attacker: proxy.els.attackerShipImage, target: proxy.els.targetShipImage },
-      eyeBySide: { attacker: proxy.els.attackerFittingEye, target: proxy.els.targetFittingEye },
+      shipASide: proxy.shipASide,
+      shipBSide: proxy.shipBSide,
+      previewsBySide: { shipA: proxy.shipAFittingPreview, shipB: proxy.shipBFittingPreview },
+      eyeBySide: { shipA: proxy.els.shipA.fittingEye, shipB: proxy.els.shipB.fittingEye },
       events: proxy.uiEvents,
     })).singleton(),
-    attackerFittingPopup: asFunction((proxy) => new FittingPopupControllerImpl(popupDeps(proxy, "attacker"))).singleton(),
-    targetFittingPopup: asFunction((proxy) => new FittingPopupControllerImpl(popupDeps(proxy, "target"))).singleton(),
+    shipAFittingPopup: asFunction((proxy) => new FittingPopupControllerImpl(popupDeps(proxy, "shipA"))).singleton(),
+    shipBFittingPopup: asFunction((proxy) => new FittingPopupControllerImpl(popupDeps(proxy, "shipB"))).singleton(),
   });
 }
 
 function previewDeps<T extends ControlsCradle>(proxy: T, side: Side) {
   return {
-    container: side === "attacker" ? proxy.els.attackerFittingPreview : proxy.els.targetFittingPreview,
+    container: proxy.els[side].fittingPreview,
     i18n: proxy.i18n,
     imageCatalog: proxy.imageCatalog,
+    fittingImport: proxy.fittingImport,
     viewport: () => window,
   };
 }
@@ -44,12 +47,26 @@ function popupDeps<T extends ControlsCradle>(proxy: T, side: Side) {
     savedFittings: proxy.savedFittings,
     presetFittings: proxy.presetFittings,
     fittingImport: proxy.fittingImport,
-    imageCatalog: proxy.imageCatalog,
     i18n: proxy.i18n,
     els: collectFittingPopupEls(proxy.els, side),
-    panel: side === "attacker" ? proxy.attackerSide : proxy.targetSide,
+    panel: side === "shipA" ? proxy.shipASide : proxy.shipBSide,
     applyFitting: (text: string) => proxy.importController.importEftFitting(side, text, true),
     previews: proxy.previewManager,
     events: proxy.uiEvents,
+  };
+}
+
+function collectFittingPopupEls(els: ControlsElements, side: Side): FittingPopupEls {
+  const combatant = els[side];
+  return {
+    trigger: combatant.shipSelectTrigger,
+    eye: combatant.fittingEye,
+    popup: combatant.shipSelectPopup,
+    hull: combatant.hull,
+    savedList: combatant.fittingSavedList,
+    presetList: combatant.fittingPresetList,
+    savedLabel: combatant.fittingSavedLabel,
+    presetLabel: combatant.fittingPresetLabel,
+    empty: combatant.fittingEmpty,
   };
 }

@@ -1,14 +1,4 @@
 [Ashimmu, Kitetackle Pulse Armor Ashimmu]
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Corpum A-Type Medium Energy Nosferatu
-Heavy Pulse Laser II, Conflagration M
-Medium Energy Neutralizer II
-
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
-Fleeting Compact Stasis Webifier
-50MN Y-T8 Compact Microwarpdrive
-Warp Disruptor II
 
 Medium Ancillary Armor Repairer, Nanite Repair Paste
 Multispectrum Energized Membrane II
@@ -16,6 +6,17 @@ Medium Armor Repairer II
 Multispectrum Energized Membrane II
 Reactive Armor Hardener
 Heat Sink II
+
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 800
+Fleeting Compact Stasis Webifier
+50MN Y-T8 Compact Microwarpdrive
+Warp Disruptor II
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Corpum A-Type Medium Energy Nosferatu
+Heavy Pulse Laser II, Conflagration M
+Medium Energy Neutralizer II
 
 Medium Auxiliary Nano Pump I
 Medium Nanobot Accelerator I

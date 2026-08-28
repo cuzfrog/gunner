@@ -1,4 +1,17 @@
 [Cyclone, Kitetackle Missile Shield Cyclone]
+
+Ballistic Control System II
+Damage Control II
+Ballistic Control System II
+Co-Processor II
+Ballistic Control System II
+
+X-Large Ancillary Shield Booster
+Multispectrum Shield Hardener II
+50MN Quad LiF Restrained Microwarpdrive
+Warp Scrambler II
+[Empty Med slot]
+
 Rapid Light Missile Launcher II, Nova Fury Light Missile
 Rapid Light Missile Launcher II, Nova Fury Light Missile
 Rapid Light Missile Launcher II, Nova Fury Light Missile
@@ -6,18 +19,6 @@ Rapid Light Missile Launcher II, Nova Fury Light Missile
 Shield Command Burst I, Active Shielding Charge
 Medium Knave Scoped Energy Nosferatu
 Rapid Light Missile Launcher II, Nova Fury Light Missile
-
-X-Large Ancillary Shield Booster
-Multispectrum Shield Hardener II
-Copasetic Compact Shield Boost Amplifier
-50MN Quad LiF Restrained Microwarpdrive
-Warp Scrambler II
-
-Ballistic Control System II
-Damage Control II
-Ballistic Control System II
-Co-Processor II
-Ballistic Control System II
 
 Medium Polycarbon Engine Housing I
 Medium EM Shield Reinforcer II

@@ -1,10 +1,9 @@
 [Drake, Missile Shield Drake]
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
+
+Damage Control II
+Shield Power Relay II
+Ballistic Control System II
+[Empty Low slot]
 
 Large Shield Extender II
 Large Shield Extender II
@@ -13,10 +12,13 @@ EM Shield Amplifier II
 10MN Monopropellant Enduring Afterburner
 Multispectrum Shield Hardener II
 
-Missile Guidance Enhancer II
-Damage Control II
-Shield Power Relay II
-Ballistic Control System II
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+[Empty High slot]
 
 Medium Thermal Shield Reinforcer I
 Medium Core Defense Field Extender I

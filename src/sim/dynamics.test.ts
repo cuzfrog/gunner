@@ -4,7 +4,7 @@ import type { ShipState } from "./types";
 
 function ship(extra: Partial<ShipState> = {}): ShipState {
   return {
-    id: "attacker",
+    id: "shipA",
     position: new Vec2(0, 0),
     velocity: new Vec2(0, 0),
     maxSpeed: 100,

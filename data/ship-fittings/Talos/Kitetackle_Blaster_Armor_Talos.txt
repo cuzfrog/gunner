@@ -1,17 +1,4 @@
 [Talos, Kitetackle Blaster Armor Talos]
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-Polarized Neutron Blaster Cannon, Void L
-
-50MN Y-T8 Compact Microwarpdrive
-Stasis Webifier II
-Warp Scrambler II
-Stasis Webifier II
 
 Magnetic Field Stabilizer II
 1600mm Rolled Tungsten Compact Plates
@@ -19,8 +6,23 @@ Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
+50MN Y-T8 Compact Microwarpdrive
+Stasis Webifier II
+Warp Scrambler II
+Stasis Webifier II
+
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+Polarized Neutron Blaster Cannon, Void L
+
 Medium Ancillary Current Router I
-Medium Hybrid Collision Accelerator II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Warrior SW-300 x3

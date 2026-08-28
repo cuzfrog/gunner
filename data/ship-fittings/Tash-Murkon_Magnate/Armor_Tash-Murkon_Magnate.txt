@@ -1,26 +1,21 @@
 [Tash-Murkon Magnate, Armor Tash-Murkon Magnate]
-Improved Cloaking Device II
-Salvager I
-Salvager I
-
-5MN Microwarpdrive I
-Small Shield Extender I
 
 Reinforced Bulkheads I
 Small Armor Repairer II
 Inertial Stabilizers I
 Nanofiber Internal Structure I
 
+Small Shield Extender I
+5MN Microwarpdrive I
+[Empty Med slot]
+
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+
 Small Processor Overclocking Unit I
 Small Processor Overclocking Unit I
+[Empty Rig slot]
 
 
 Hobgoblin I x3
-
-
-Metal Scraps x5
-Contaminated Lorentz Fluid x3
-Burned Logic Circuit x16
-Armor Plates x2
-Broken Drone Transceiver x3
-Fried Interface Circuit x5

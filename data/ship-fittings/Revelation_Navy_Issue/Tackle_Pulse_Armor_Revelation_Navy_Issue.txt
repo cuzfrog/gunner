@@ -1,15 +1,4 @@
 [Revelation Navy Issue, Tackle Pulse Armor Revelation Navy Issue]
-Quad Mega Pulse Laser II, Sanshas Multifrequency XL
-Quad Mega Pulse Laser II, Sanshas Multifrequency XL
-Corpus X-Type Heavy Energy Neutralizer
-Siege Module II
-Quad Mega Pulse Laser II, Sanshas Multifrequency XL
-Corpus X-Type Heavy Energy Neutralizer
-
-Shadow Serpentis Tracking Computer, Tracking Speed Script
-Domination Heavy Stasis Grappler
-Capital Capacitor Booster II, Navy Cap Booster 3200
-Shadow Serpentis Tracking Computer, Tracking Speed Script
 
 Imperial Navy Heat Sink
 Imperial Navy Heat Sink
@@ -20,6 +9,18 @@ Corpum B-Type Multispectrum Energized Membrane
 Imperial Navy 'Atonement' Tracking Enhancer
 Corpum B-Type Multispectrum Energized Membrane
 
+Shadow Serpentis Tracking Computer, Tracking Speed Script
+Domination Heavy Stasis Grappler
+Capital Capacitor Booster II, Navy Cap Booster 3200
+Shadow Serpentis Tracking Computer, Tracking Speed Script
+
+Quad Mega Pulse Laser II, Sanshas Multifrequency XL
+Quad Mega Pulse Laser II, Sanshas Multifrequency XL
+Corpus X-Type Heavy Energy Neutralizer
+Quad Mega Pulse Laser II, Sanshas Multifrequency XL
+Corpus X-Type Heavy Energy Neutralizer
+[Empty High slot]
+
 Capital Auxiliary Nano Pump II
 Capital Energy Metastasis Adjuster II
 Capital Auxiliary Nano Pump I
@@ -29,7 +30,6 @@ Conflagration XL x1
 Conflagration XL x5
 Scorch XL x6
 Tracking Speed Script x4
-Strong Exile Booster x1
 Optimal Range Script x2
 Nanite Repair Paste x600
 Navy Cap Booster 3200 x10

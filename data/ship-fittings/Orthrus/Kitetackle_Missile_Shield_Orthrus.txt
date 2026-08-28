@@ -1,10 +1,9 @@
 [Orthrus, Kitetackle Missile Shield Orthrus]
-Rapid Light Missile Launcher II, Nova Fury Light Missile
-Rapid Light Missile Launcher II, Nova Fury Light Missile
-Rapid Light Missile Launcher II, Nova Fury Light Missile
-Rapid Light Missile Launcher II, Nova Fury Light Missile
-Small Energy Neutralizer II
-Rapid Light Missile Launcher II, Nova Fury Light Missile
+
+Damage Control II
+Ballistic Control System II
+Nanofiber Internal Structure II
+Ballistic Control System II
 
 Small F-RX Compact Capacitor Booster
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
@@ -12,10 +11,12 @@ Republic Fleet Warp Disruptor
 Multispectrum Shield Hardener II
 50MN Microwarpdrive II
 
-Damage Control II
-Ballistic Control System II
-Nanofiber Internal Structure II
-Ballistic Control System II
+Rapid Light Missile Launcher II, Nova Fury Light Missile
+Rapid Light Missile Launcher II, Nova Fury Light Missile
+Rapid Light Missile Launcher II, Nova Fury Light Missile
+Rapid Light Missile Launcher II, Nova Fury Light Missile
+Small Energy Neutralizer II
+Rapid Light Missile Launcher II, Nova Fury Light Missile
 
 Medium Ancillary Current Router I
 Medium Processor Overclocking Unit I
@@ -33,4 +34,3 @@ Navy Cap Booster 400 x11
 Nanite Repair Paste x486
 Caldari Navy Inferno Light Missile x465
 Caldari Navy Nova Light Missile x1000
-Agency 'Overclocker' SB5 Dose II x1

@@ -1,17 +1,19 @@
 [Wolf, Kitetackle Art Armor Wolf]
-250mm Light Artillery Cannon II, Republic Fleet EMP S
-250mm Light Artillery Cannon II, Republic Fleet EMP S
-250mm Light Artillery Cannon II, Republic Fleet EMP S
-250mm Light Artillery Cannon II, Republic Fleet EMP S
+
+Gyrostabilizer II
+Assault Damage Control II
+Federation Navy 200mm Steel Plates
+[Empty Low slot]
+[Empty Low slot]
 
 J5 Enduring Warp Disruptor
 5MN Quad LiF Restrained Microwarpdrive
 
-Kinetic Coating II
-Gyrostabilizer II
-Assault Damage Control II
-Explosive Coating II
-Federation Navy 200mm Steel Plates
+250mm Light Artillery Cannon II, Republic Fleet EMP S
+250mm Light Artillery Cannon II, Republic Fleet EMP S
+250mm Light Artillery Cannon II, Republic Fleet EMP S
+250mm Light Artillery Cannon II, Republic Fleet EMP S
+[Empty High slot]
 
 Small Projectile Ambit Extension I
 Small Processor Overclocking Unit II

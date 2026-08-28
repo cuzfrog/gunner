@@ -1,4 +1,5 @@
 import type { ImportedFitting } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type {
   FittedHull,
   PropulsionId,
@@ -10,9 +11,9 @@ import type {
   StatConditions,
 } from "../../../ships";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import type { FittedHullSummary, ProfileParamOverrides, PropulsionSelection } from "../../../appstate";
-import type { Popup } from "./popup";
+import type { Popup } from "../popup";
+import type { INavSection } from "./navSection";
 
 export interface IHullSection {
   onHullInput(): void;
@@ -22,8 +23,6 @@ export interface IHullSection {
   loadHull(hullName?: string, propulsionId?: PropulsionSelection): void;
   clearHull(resetInput: boolean, persist: boolean): void;
   clearFittedHull(): void;
-  updateShipImage(): void;
-  clearShipImage(): void;
   setHullValidation(isInvalid: boolean): void;
   updateHullHint(module?: PropulsionModule): void;
   refreshHullInputs(): void;
@@ -38,6 +37,7 @@ export interface IStatsSection {
   isOverridden(key: keyof ProfileParamOverrides): boolean;
   currentFittedPropulsion(fitted: FittedHullSummary): PropulsionStats | undefined;
   currentFittedPropulsionModule(fitted: FittedHullSummary | undefined): PropulsionModule | undefined;
+  currentBaseMaxSpeed(): number;
 }
 
 export interface ISkillOverloadSection {
@@ -62,9 +62,10 @@ export interface IPropulsionSection {
   currentPropulsionSelection(): PropulsionSelection | undefined;
   currentPropulsionId(): PropulsionId | undefined;
   currentPropulsionModule(): PropulsionModule | undefined;
-  renderPropulsionOptions(selectedId?: string): void;
+  renderPropulsionOptions(selectedId?: PropulsionSelection): void;
   onPropulsionChange(): void;
   setPropulsionActive(propulsionId: string): void;
+  resolvePropulsionVariant(module: PropulsionModule, fitted: FittedHullSummary | undefined): { readonly id: TypeId; readonly name: string } | undefined;
   defaultPropulsionName(module: PropulsionModule): string;
   nakedFitted(profile: ShipProfile): FittedHull;
 }
@@ -83,6 +84,7 @@ export interface IPasteImportSection {
 
 export interface ISidePanelSections {
   readonly hull: IHullSection;
+  readonly nav: INavSection;
   readonly stats: IStatsSection;
   readonly skill: ISkillOverloadSection;
   readonly propulsion: IPropulsionSection;

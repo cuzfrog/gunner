@@ -1,23 +1,24 @@
 [Intaki Syndicate Catalyst, Kitetackle Blaster Shield Intaki Syndicate Catalyst]
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-Light Ion Blaster II, Federation Navy Antimatter Charge S
-
-Warp Scrambler II
-5MN Y-T8 Compact Microwarpdrive
 
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
-Small Transverse Bulkhead II
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
+Warp Scrambler II
+5MN Y-T8 Compact Microwarpdrive
+
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+Light Ion Blaster II, Federation Navy Antimatter Charge S
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Federation Navy Antimatter Charge S x2040

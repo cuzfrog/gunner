@@ -1,21 +1,22 @@
 [Rook, Missile Shield Rook]
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Improved Cloaking Device II
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-Heavy Missile Launcher II, Scourge Fury Heavy Missile
-
-Large Shield Extender II
-Ladar ECM II
-Large Shield Extender II
-Gravimetric ECM II
-50MN Microwarpdrive II
-Radar ECM II
-Magnetometric ECM II
 
 Ballistic Control System II
-Signal Distortion Amplifier II
-Signal Distortion Amplifier II
+[Empty Low slot]
+[Empty Low slot]
+
+Large Shield Extender II
+Large Shield Extender II
+50MN Microwarpdrive II
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+Heavy Missile Launcher II, Scourge Fury Heavy Missile
+[Empty High slot]
 
 Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender II

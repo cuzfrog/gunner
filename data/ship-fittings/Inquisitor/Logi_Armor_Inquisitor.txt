@@ -1,15 +1,16 @@
 [Inquisitor, Logi Armor Inquisitor]
-Small Solace Scoped Remote Armor Repairer
-Small Solace Scoped Remote Armor Repairer
-Small Solace Scoped Remote Armor Repairer
-
-1MN Y-S8 Compact Afterburner
-Small Capacitor Booster II
 
 IFFA Compact Damage Control
 Multispectrum Energized Membrane II
 400mm Rolled Tungsten Compact Plates
 Multispectrum Energized Membrane II
+
+1MN Y-S8 Compact Afterburner
+Small Capacitor Booster II
+
+Small Solace Scoped Remote Armor Repairer
+Small Solace Scoped Remote Armor Repairer
+Small Solace Scoped Remote Armor Repairer
 
 Small Thermal Armor Reinforcer I
 Small Kinetic Armor Reinforcer I

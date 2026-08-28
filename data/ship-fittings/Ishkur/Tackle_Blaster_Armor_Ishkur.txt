@@ -1,17 +1,18 @@
 [Ishkur, Tackle Blaster Armor Ishkur]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Small Ghoul Compact Energy Nosferatu
+
+Coreli A-Type Small Armor Repairer
+Assault Damage Control II
+Coreli A-Type Small Armor Repairer
 
 Stasis Webifier II
 1MN Y-S8 Compact Afterburner
 Small Capacitor Booster II
 Warp Scrambler II
 
-Coreli A-Type Small Armor Repairer
-Assault Damage Control II
-Coreli A-Type Small Armor Repairer
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Small Ghoul Compact Energy Nosferatu
 
 Small Explosive Armor Reinforcer II
 Small Explosive Armor Reinforcer II
@@ -19,8 +20,6 @@ Small Explosive Armor Reinforcer II
 
 Null S x1374
 Caldari Navy Antimatter Charge S x1991
-Standard Exile Booster x2
-Agency 'Hardshell' TB5 Dose II x2
 Nanite Repair Paste x150
 Void S x2983
 Navy Cap Booster 200 x12

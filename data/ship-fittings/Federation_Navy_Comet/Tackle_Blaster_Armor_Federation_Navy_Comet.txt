@@ -1,20 +1,21 @@
 [Federation Navy Comet, Tackle Blaster Armor Federation Navy Comet]
-Light Neutron Blaster II, Null S
-Light Neutron Blaster II, Null S
-Small Infectious Scoped Energy Neutralizer
-
-Fleeting Compact Stasis Webifier
-1MN Y-S8 Compact Afterburner
-Faint Epsilon Scoped Warp Scrambler
 
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Damage Control II
 
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
+Fleeting Compact Stasis Webifier
+1MN Y-S8 Compact Afterburner
+Faint Epsilon Scoped Warp Scrambler
+
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+Small Infectious Scoped Energy Neutralizer
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Void S x2012

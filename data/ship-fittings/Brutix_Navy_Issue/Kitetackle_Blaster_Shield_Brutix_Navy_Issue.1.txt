@@ -1,15 +1,4 @@
 [Brutix Navy Issue, Kitetackle Blaster Shield Brutix Navy Issue]
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-Heavy Neutron Blaster II, Void M
-
-50MN Y-T8 Compact Microwarpdrive
-Medium Capacitor Booster II, Navy Cap Booster 800
-Warp Scrambler II
-Stasis Webifier II
 
 Reinforced Bulkheads II
 Damage Control II
@@ -19,9 +8,22 @@ Reinforced Bulkheads II
 Reinforced Bulkheads II
 Reinforced Bulkheads II
 
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
+50MN Y-T8 Compact Microwarpdrive
+Medium Capacitor Booster II, Navy Cap Booster 800
+Warp Scrambler II
+Stasis Webifier II
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hornet EC-300 x5

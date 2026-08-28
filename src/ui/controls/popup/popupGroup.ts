@@ -1,6 +1,21 @@
-import type { Popup, PopupGroup } from "../sidePanel";
+export interface Popup {
+  isOpen(): boolean;
+  open(): void;
+  close(): void;
+  focusTrigger(): void;
+  contains(domTarget: EventTarget): boolean;
+}
 
-export type { Popup, PopupGroup } from "../sidePanel";
+export interface PopupGroup {
+  register(popup: Popup): void;
+  open(popup: Popup): void;
+  toggle(popup: Popup): void;
+  close(popup: Popup): void;
+  closeAll(): void;
+  hasOpen(): boolean;
+  onPointerDown(domTarget: EventTarget | null): void;
+  onKeyDown(event: { readonly key: string }): void;
+}
 
 export class PopupGroupImpl implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -33,9 +48,9 @@ export class PopupGroupImpl implements PopupGroup {
     return this.popups.some((p) => p.isOpen());
   }
 
-  onPointerDown(target: EventTarget | null): void {
-    if (!target) return;
-    for (const p of this.popups) if (p.isOpen() && !p.contains(target)) p.close();
+  onPointerDown(domTarget: EventTarget | null): void {
+    if (!domTarget) return;
+    for (const p of this.popups) if (p.isOpen() && !p.contains(domTarget)) p.close();
   }
 
   onKeyDown(event: { readonly key: string }): void {

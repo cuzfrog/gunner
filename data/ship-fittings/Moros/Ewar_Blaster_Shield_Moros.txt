@@ -1,32 +1,31 @@
 [Moros, Ewar Blaster Shield Moros]
-Ion Siege Blaster II, Void XL
-Ion Siege Blaster II, Void XL
-Capital Gremlin Compact Energy Neutralizer
-Siege Module II
-Ion Siege Blaster II, Void XL
+
+Reinforced Bulkheads II
+Magnetic Field Stabilizer II
+Reinforced Bulkheads II
+Reinforced Bulkheads II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Tracking Computer II, Optimal Range Script
 Tracking Computer II, Optimal Range Script
 Capital Capacitor Booster I, Cap Booster 3200
 Tracking Computer II, Optimal Range Script
 
-Capital Emergency Hull Energizer II
-Reinforced Bulkheads II
-Magnetic Field Stabilizer II
-Reinforced Bulkheads II
-Reinforced Bulkheads II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+Ion Siege Blaster II, Void XL
+Ion Siege Blaster II, Void XL
+Capital Gremlin Compact Energy Neutralizer
+Ion Siege Blaster II, Void XL
+[Empty High slot]
 
-Capital Transverse Bulkhead I
-Capital Transverse Bulkhead I
-Capital Hybrid Collision Accelerator II
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
-Zainou 'Deadeye' Trajectory Analysis TA-701 x1
 Tracking Speed Script x3
-Eifyr and Co. 'Gunslinger' Surgical Strike SS-903 x1
 Null XL x450
 Cap Booster 3200 x4
 Void XL x210

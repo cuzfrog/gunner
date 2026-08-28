@@ -1,18 +1,20 @@
 [Cormorant Navy Issue, Kitetackle Rail Shield Cormorant Navy Issue]
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
-125mm Railgun II, Spike S
+
+Damage Control II
+Magnetic Field Stabilizer II
 
 Medium Shield Extender II
 Multispectrum Shield Hardener II
 5MN Cold-Gas Enduring Microwarpdrive
 Stasis Webifier II
 
-Damage Control II
-Magnetic Field Stabilizer II
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+125mm Railgun II, Spike S
+[Empty High slot]
 
 Small Core Defense Field Extender I
 Small EM Shield Reinforcer I

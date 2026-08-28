@@ -1,10 +1,7 @@
 [Tholos, Tackle Rocket Shield Tholos]
-Rocket Launcher II, Inferno Rage Rocket
-Covert Ops Cloaking Device II
-200mm AutoCannon II, Hail S
-Small Breacher Pod Launcher, SCARAB Breacher Pod S
-200mm AutoCannon II, Hail S
-Rocket Launcher II, Inferno Rage Rocket
+
+Nanofiber Internal Structure II
+[Empty Low slot]
 
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 Multispectrum Shield Hardener II
@@ -13,8 +10,12 @@ Medium Ancillary Shield Booster, Navy Cap Booster 50
 Dread Guristas Warp Scrambler
 Dread Guristas Stasis Webifier
 
-Micro Auxiliary Power Core II
-Nanofiber Internal Structure II
+Rocket Launcher II, Inferno Rage Rocket
+Covert Ops Cloaking Device II
+200mm AutoCannon II, Hail S
+200mm AutoCannon II, Hail S
+Rocket Launcher II, Inferno Rage Rocket
+[Empty High slot]
 
 Small EM Shield Reinforcer I
 Small Ancillary Current Router II

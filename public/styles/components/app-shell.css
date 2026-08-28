@@ -1,0 +1,85 @@
+@layer components {
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
+.app-header-left {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.app-version-text {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.app-title {
+  margin: 0;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 20px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.app-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.app-lang-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.app-lang-toggle > .btn {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.app-lang-toggle [aria-pressed="true"] {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.app-github-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.app-github-link:hover { color: var(--accent-teal); }
+
+.app-github-link:focus-visible { outline-offset: 2px; }
+
+.app-github-icon { display: block; }
+
+.app-main {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(280px, 320px);
+  gap: 14px;
+}
+
+}

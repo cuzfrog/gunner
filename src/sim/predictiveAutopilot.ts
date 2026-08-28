@@ -33,7 +33,7 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   computeVelocity(ship: ShipState, other: ShipState, time: number): Vec2 {
-    if (ship.mode === "midships") {
+    if (ship.mode !== "maneuver") {
       return this.reactiveSteering.computeVelocity(ship, other, time);
     }
     const configChanged = this.lastShipConfig === null || this.lastOtherConfig === null ||
@@ -64,22 +64,22 @@ export class PredictiveAutopilot implements Autopilot {
   }
 
   private rolloutCost(ship: ShipState, other: ShipState, command: Vec2, time: number, horizon: number): number {
-    let attacker = ship;
-    let target = other;
+    let shipA = ship;
+    let shipB = other;
     let cost = 0;
     let elapsed = 0;
     let weight = 1;
     while (elapsed < horizon - HORIZON_EPSILON) {
       const dt = Math.min(elapsed < FINE_WINDOW ? FINE_STEP : COARSE_STEP, horizon - elapsed);
-      const targetCommand = this.reactiveSteering.computeVelocity(target, attacker, time + elapsed);
-      const attackerCommand = elapsed < REPLAN_INTERVAL
+      const shipBCommand = this.reactiveSteering.computeVelocity(shipB, shipA, time + elapsed);
+      const shipACommand = elapsed < REPLAN_INTERVAL
         ? command
-        : this.reactiveSteering.computeVelocity(attacker, target, time + elapsed);
-      attacker = move(attacker, attackerCommand, dt);
-      target = move(target, targetCommand, dt);
+        : this.reactiveSteering.computeVelocity(shipA, shipB, time + elapsed);
+      shipA = move(shipA, shipACommand, dt);
+      shipB = move(shipB, shipBCommand, dt);
       elapsed += dt;
       weight *= DISCOUNT_PER_SECOND ** dt;
-      const frame = this.kinematics.computeEngagement(attacker, target, time + elapsed);
+      const frame = this.kinematics.computeEngagement(shipA, shipB, time + elapsed);
       const rangeDeviation = (frame.distance - ship.desiredRange) / Math.max(ship.desiredRange, 1);
       const rangeCost = frame.angularVelocity * frame.angularVelocity +
         (REFERENCE_RANGE_WEIGHT / ship.aggressivity) * rangeDeviation * rangeDeviation;
@@ -143,6 +143,7 @@ function toShipConfig(ship: ShipState): ShipConfig {
   return {
     id: ship.id,
     maxSpeed: ship.maxSpeed,
+    baseMaxSpeed: ship.baseMaxSpeed,
     mass: ship.mass,
     inertiaModifier: ship.inertiaModifier,
     mode: ship.mode,
@@ -153,7 +154,7 @@ function toShipConfig(ship: ShipState): ShipConfig {
 }
 
 function shipConfigsEqual(a: ShipConfig, b: ShipConfig): boolean {
-  return a.id === b.id && a.maxSpeed === b.maxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
+  return a.id === b.id && a.maxSpeed === b.maxSpeed && a.baseMaxSpeed === b.baseMaxSpeed && a.mass === b.mass && a.inertiaModifier === b.inertiaModifier &&
     a.mode === b.mode && a.desiredRange === b.desiredRange && a.aggressivity === b.aggressivity && a.orbitDirection === b.orbitDirection;
 }
 

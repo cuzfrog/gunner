@@ -1,22 +1,23 @@
 [Chimera, Commandship Shield Chimera]
-Fighter Support Unit II
-Fighter Support Unit II
-Skirmish Command Burst I, Evasive Maneuvers Charge
-Shield Command Burst I, Shield Extension Charge
-Fighter Support Unit II
-
-Heavy Capacitor Booster II, Navy Cap Booster 400
-Capital Shield Extender II
-Dread Guristas Multispectrum Shield Hardener
-Capital Shield Extender II
-Dread Guristas Multispectrum Shield Hardener
-Capital Shield Extender II
-Dread Guristas Multispectrum Shield Hardener
 
 Drone Damage Amplifier II
 Damage Control II
 Drone Damage Amplifier II
 Drone Damage Amplifier II
+
+Capital Shield Extender II
+Capital Shield Extender II
+Capital Shield Extender II
+Heavy Capacitor Booster II, Navy Cap Booster 400
+Dread Guristas Multispectrum Shield Hardener
+Dread Guristas Multispectrum Shield Hardener
+Dread Guristas Multispectrum Shield Hardener
+
+Skirmish Command Burst I, Evasive Maneuvers Charge
+Shield Command Burst I, Shield Extension Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Capital Core Defense Field Extender I
 Capital Core Defense Field Extender I

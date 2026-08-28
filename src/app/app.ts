@@ -1,5 +1,5 @@
-import type { HitChance, Kinematics, Simulation } from "../sim";
-import type { Controls, Loop, Renderer } from "../ui";
+import type { EngagementFrameComposer, EngagementView, EwarResolver, ShipState, Side, Simulation } from "../sim";
+import type { Controls, EffectiveReadouts, Loop, Renderer } from "../ui";
 
 export interface App {
   start(): void;
@@ -9,23 +9,23 @@ export interface App {
 export class AppImpl implements App {
   private readonly controls: Controls;
   private readonly simulation: Simulation;
-  private readonly kinematics: Kinematics;
-  private readonly hitChance: HitChance;
+  private readonly engagementFrameComposer: EngagementFrameComposer;
+  private readonly ewarResolver: EwarResolver;
   private readonly renderer: Renderer;
   private readonly loop: Loop;
 
   constructor(deps: {
     controls: Controls;
     simulation: Simulation;
-    kinematics: Kinematics;
-    hitChance: HitChance;
+    engagementFrameComposer: EngagementFrameComposer;
+    ewarResolver: EwarResolver;
     renderer: Renderer;
     loop: Loop;
   }) {
     this.controls = deps.controls;
     this.simulation = deps.simulation;
-    this.kinematics = deps.kinematics;
-    this.hitChance = deps.hitChance;
+    this.engagementFrameComposer = deps.engagementFrameComposer;
+    this.ewarResolver = deps.ewarResolver;
     this.renderer = deps.renderer;
     this.loop = deps.loop;
   }
@@ -48,6 +48,10 @@ export class AppImpl implements App {
         this.loop.toggle();
         this.controls.setPlaying(this.loop.isRunning());
       },
+      onStop: () => {
+        this.loop.stop();
+        this.controls.setPlaying(false);
+      },
       onSpeedChange: (speed) => this.loop.setSpeed(speed),
     });
     this.renderFrame();
@@ -60,11 +64,40 @@ export class AppImpl implements App {
 
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
-    const frame = this.kinematics.computeEngagement(snapshot.attacker, snapshot.target, snapshot.time);
-    const turret = this.controls.getTurret();
-    const hit = this.hitChance.compute(frame, turret, this.controls.getTargetSig());
+    const input = {
+      turrets: { shipA: this.controls.getTurret("shipA"), shipB: this.controls.getTurret("shipB") },
+      sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
+    };
+    const view = this.engagementFrameComposer.compose(snapshot, input);
+    const effectiveReadouts: EffectiveReadouts = {
+      shipA: this.sideReadoutValues(snapshot.shipA, snapshot.shipB, view, "shipA"),
+      shipB: this.sideReadoutValues(snapshot.shipB, snapshot.shipA, view, "shipB"),
+    };
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
-    this.renderer.draw(snapshot, frame, hit, turret);
-    this.controls.update(frame, hit);
+    this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
+    this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
+    this.renderer.draw(snapshot, view.frame, view.effectiveTurrets, this.controls.getOverlays());
+    this.controls.update(view, effectiveReadouts);
+  }
+
+  private sideReadoutValues(ship: ShipState, opponent: ShipState, view: EngagementView, side: Side): EffectiveReadouts["shipA"] {
+    const attack = view.attacks[side];
+    const effectiveTurret = attack?.effectiveTurret ?? view.effectiveTurrets[side];
+    const boostedTurret = attack?.boostedTurret ?? effectiveTurret;
+    const disruption = this.ewarResolver.disruptionBreakdown(opponent.ewar, view.frame.distance);
+    return {
+      speed: ship.maxSpeed,
+      tracking: effectiveTurret.tracking,
+      optimal: effectiveTurret.optimal,
+      falloff: effectiveTurret.falloff,
+      boostedTracking: boostedTurret.tracking,
+      boostedOptimal: boostedTurret.optimal,
+      boostedFalloff: boostedTurret.falloff,
+      sigResolution: effectiveTurret.sigResolution,
+      speedBreakdown: this.ewarResolver.speedBreakdown(opponent.ewar, view.frame.distance),
+      trackingBreakdown: disruption,
+      optimalBreakdown: disruption,
+      falloffBreakdown: disruption,
+    };
   }
 }

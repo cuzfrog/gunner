@@ -1,4 +1,18 @@
 [Ferox Navy Issue, Kitetackle Blaster Shield Ferox Navy Issue]
+
+Damage Control II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Reactor Control Unit II
+
+X-Large Ancillary Shield Booster
+Multispectrum Shield Hardener II
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+50MN Microwarpdrive II
+Fleeting Compact Stasis Webifier
+Warp Scrambler II
+[Empty Med slot]
+
 Heavy Ion Blaster II, Void M
 Heavy Ion Blaster II, Void M
 Heavy Ion Blaster II, Void M
@@ -7,25 +21,11 @@ Heavy Ion Blaster II, Void M
 Heavy Ion Blaster II, Void M
 Small Energy Nosferatu II
 
-X-Large Ancillary Shield Booster
-Multispectrum Shield Hardener II
-Copasetic Compact Shield Boost Amplifier
-X-Large Ancillary Shield Booster, Navy Cap Booster 400
-50MN Microwarpdrive II
-Fleeting Compact Stasis Webifier
-Warp Scrambler II
-
-Damage Control II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Reactor Control Unit II
-
 Medium Thermal Shield Reinforcer II
 Medium EM Shield Reinforcer II
 Medium Processor Overclocking Unit I
 
 
-Agency 'Pyrolancea' DB5 Dose II x1
 Null M x1000
 Navy Cap Booster 400 x21
 Nanite Repair Paste x200

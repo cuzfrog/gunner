@@ -1,15 +1,4 @@
 [Hubris, Tackle Blaster Armor Hubris]
-Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
-Siege Module II
-'Sarissa' Thermal Disruptive Lance
-Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
-Corpus X-Type Heavy Energy Neutralizer
-Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
-
-Shadow Serpentis Heavy Stasis Grappler
-Federation Navy Tracking Computer, Tracking Speed Script
-True Sansha Warp Disruptor
-Capital Capacitor Booster II, Navy Cap Booster 3200
 
 Capital Armor Repairer II
 Centum B-Type Multispectrum Energized Membrane
@@ -20,17 +9,26 @@ Federation Navy Magnetic Field Stabilizer
 Federation Navy Magnetic Field Stabilizer
 Federation Navy Magnetic Field Stabilizer
 
-Capital Hybrid Burst Aerator I
+Shadow Serpentis Heavy Stasis Grappler
+Federation Navy Tracking Computer, Tracking Speed Script
+True Sansha Warp Disruptor
+Capital Capacitor Booster II, Navy Cap Booster 3200
+
+Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
+Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
+Corpus X-Type Heavy Energy Neutralizer
+Triple Neutron Blaster Cannon II, Shadow Antimatter Charge XL
+[Empty High slot]
+[Empty High slot]
+
 Capital Auxiliary Nano Pump II
+[Empty Rig slot]
 
 
-Antipharmakon Iokira x1
-Strong Exile Booster x1
 Null XL x2000
 Shadow Antimatter Charge XL x1856
 Void XL x1500
 Optimal Range Script x1
-Agency 'Hardshell' TB9 Dose IV x1
 Navy Cap Booster 3200 x27
 Strontium Clathrates x750
 Oxygen Isotopes x6956

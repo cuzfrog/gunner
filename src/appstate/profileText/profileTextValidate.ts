@@ -1,129 +1,152 @@
-import type { AutopilotMode, SigResolutionClass } from "../../sim";
 import {
+  PROPULSION_NONE,
   USER_SETTINGS_VERSION,
   type FittedHullSummary,
   type ProfileParamOverrides,
   type ProfileSettings,
+  type StoredBoosterActivation,
 } from "../userSettings";
+import type { SimValueParser } from "../../sim";
 import {
-  isAutopilotMode,
   isNonNegative,
+  isOptionalBoosterActivations,
   isOptionalFittedHullSummary,
   isPositive,
-  isSigResolutionClass,
   isSkillLevel,
 } from "../validators";
+import type { ChargeCatalog } from "../../fitting";
+import type { ShipId, TypeId } from "../../gamedata/ids";
+import type { Ships } from "../../ships";
+import { resolveAmmoId, resolveHullId } from "../settingsCompat";
 import type { ScalarField, ScalarValue } from "./profileTextFields";
 
-export function parseScalarValue(field: ScalarField, value: string): ScalarValue | undefined {
+const DEFAULT_TURRET_CHARGE_SIZE = 1;
+
+export function parseScalarValue(
+  field: ScalarField,
+  value: string,
+  simValueParser: SimValueParser,
+  ships: Ships,
+  chargeCatalog: ChargeCatalog,
+): ScalarValue | undefined {
   if (value === "") return undefined;
 
   if (field === "version") return value === String(USER_SETTINGS_VERSION) ? USER_SETTINGS_VERSION : undefined;
-  if (field === "attackerOverload" || field === "targetOverload") return value === "true" ? true : value === "false" ? false : undefined;
-  if (field === "attackerMode" || field === "targetMode") return isAutopilotMode(value) ? value : undefined;
-  if (field === "attackerSkillLevel" || field === "targetSkillLevel") {
+  if (field === "shipAOverload" || field === "shipBOverload") return value === "true" ? true : value === "false" ? false : undefined;
+  if (field === "shipAMode" || field === "shipBMode") return simValueParser.parseAutopilotMode(value);
+  if (field === "shipASkillLevel" || field === "shipBSkillLevel") {
     const num = Number(value);
     return isSkillLevel(num) ? num : undefined;
   }
-  if (field === "sigRes") return isSigResolutionClass(value) ? value : undefined;
-  if (field === "attackerFittedHull" || field === "targetFittedHull") return parseFittedHullSummary(value);
-  if (field === "attackerHull" || field === "attackerPropulsion" || field === "targetHull" || field === "targetPropulsion") return value;
-  if (field === "attackerAmmo") return value;
+  if (field === "shipASigRes" || field === "shipBSigRes") {
+    return simValueParser.parseSigResolutionClass(value);
+  }
+  if (field === "shipAFittedHull" || field === "shipBFittedHull") return parseFittedHullSummary(value);
+  if (field === "shipAHullId" || field === "shipBHullId") return resolveLegacyHullId(value, ships);
+  if (field === "shipAPropulsion" || field === "shipBPropulsion") {
+    if (value === PROPULSION_NONE) return value;
+    return ships.parsePropulsionId(value);
+  }
+  if (field === "shipAAmmo" || field === "shipBAmmo") return resolveLegacyAmmoId(value, chargeCatalog);
+
 
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (field === "initialDistance" || field === "targetSig") return isPositive(num) ? num : undefined;
-  if (field === "maneuverAggressivity") return isNonNegative(num) ? num : undefined;
+  if (field === "initialDistance" || field === "shipBSig" || field === "shipASig") return isPositive(num) ? num : undefined;
+  if (field === "shipAAggressivity" || field === "shipBAggressivity") return isNonNegative(num) ? simValueParser.normalizeAggressivity(num) : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 
 export function parseOverrideValue(
   key: keyof ProfileParamOverrides,
   value: string,
+  simValueParser: SimValueParser,
 ): ProfileParamOverrides[keyof ProfileParamOverrides] | undefined {
   if (value === "") return undefined;
-  if (key === "sigRes") return isSigResolutionClass(value) ? value : undefined;
+  if (key === "sigRes") return simValueParser.parseSigResolutionClass(value);
   const num = Number(value);
   if (!Number.isFinite(num)) return undefined;
-  if (key === "targetSig") return isPositive(num) ? num : undefined;
+  if (key === "shipASig" || key === "shipBSig") return isPositive(num) ? num : undefined;
   return isNonNegative(num) ? num : undefined;
 }
 
 export function profileSettingsFromRaw(raw: Partial<ProfileSettings>): ProfileSettings | undefined {
+  const shipATracking = raw.shipATracking;
+  const shipASigRes = raw.shipASigRes;
+  const shipAOptimal = raw.shipAOptimal;
+  const shipAFalloff = raw.shipAFalloff;
+  const shipBTracking = raw.shipBTracking;
+  const shipBSigRes = raw.shipBSigRes;
+  const shipBOptimal = raw.shipBOptimal;
+  const shipBFalloff = raw.shipBFalloff;
   const version = raw.version;
-  const tracking = raw.tracking;
-  const sigRes = raw.sigRes;
-  const optimal = raw.optimal;
-  const falloff = raw.falloff;
-  const attackerSpeed = raw.attackerSpeed;
-  const attackerMode = raw.attackerMode;
-  const attackerRange = raw.attackerRange;
-  const attackerMass = raw.attackerMass;
-  const attackerInertia = raw.attackerInertia;
+  const shipASpeed = raw.shipASpeed;
+  const shipAMode = raw.shipAMode;
+  const shipARange = raw.shipARange;
+  const shipAMass = raw.shipAMass;
+  const shipAInertia = raw.shipAInertia;
   const initialDistance = raw.initialDistance;
-  const targetSpeed = raw.targetSpeed;
-  const targetMode = raw.targetMode;
-  const targetRange = raw.targetRange;
-  const targetMass = raw.targetMass;
-  const targetInertia = raw.targetInertia;
-  const targetSig = raw.targetSig;
+  const shipBSpeed = raw.shipBSpeed;
+  const shipBMode = raw.shipBMode;
+  const shipBRange = raw.shipBRange;
+  const shipBMass = raw.shipBMass;
+  const shipBInertia = raw.shipBInertia;
+  const shipBSig = raw.shipBSig;
 
   if (
     version === undefined ||
-    tracking === undefined ||
-    sigRes === undefined ||
-    optimal === undefined ||
-    falloff === undefined ||
-    attackerSpeed === undefined ||
-    attackerMode === undefined ||
-    attackerRange === undefined ||
-    attackerMass === undefined ||
-    attackerInertia === undefined ||
+    shipATracking === undefined ||
+    shipASigRes === undefined ||
+    shipAOptimal === undefined ||
+    shipAFalloff === undefined ||
+    shipBTracking === undefined ||
+    shipBSigRes === undefined ||
+    shipBOptimal === undefined ||
+    shipBFalloff === undefined ||
+    shipASpeed === undefined ||
+    shipAMode === undefined ||
+    shipARange === undefined ||
+    shipAMass === undefined ||
+    shipAInertia === undefined ||
     initialDistance === undefined ||
-    targetSpeed === undefined ||
-    targetMode === undefined ||
-    targetRange === undefined ||
-    targetMass === undefined ||
-    targetInertia === undefined ||
-    targetSig === undefined
+    shipBSpeed === undefined ||
+    shipBMode === undefined ||
+    shipBRange === undefined ||
+    shipBMass === undefined ||
+    shipBInertia === undefined ||
+    shipBSig === undefined
   ) {
     return undefined;
   }
 
+  const shipAAggressivity = raw.shipAAggressivity ?? 1;
+  const shipBAggressivity = raw.shipBAggressivity ?? 1;
+
   return {
     version,
-    tracking,
-    sigRes,
-    optimal,
-    falloff,
-    attackerSpeed,
-    attackerMode,
-    attackerRange,
-    attackerMass,
-    attackerInertia,
+    shipATracking,
+    shipASigRes,
+    shipAOptimal,
+    shipAFalloff,
+    shipBTracking,
+    shipBSigRes,
+    shipBOptimal,
+    shipBFalloff,
+    shipASpeed,
+    shipAMode,
+    shipARange,
+    shipAAggressivity,
+    shipAMass,
+    shipAInertia,
     initialDistance,
-    targetSpeed,
-    targetMode,
-    targetRange,
-    targetMass,
-    targetInertia,
-    targetSig,
-    attackerSkillLevel: raw.attackerSkillLevel,
-    attackerOverload: raw.attackerOverload,
-    attackerHull: raw.attackerHull,
-    attackerPropulsion: raw.attackerPropulsion,
-    attackerFitting: raw.attackerFitting,
-    attackerOverrides: raw.attackerOverrides,
-    attackerFittedHull: raw.attackerFittedHull,
-    attackerAmmo: raw.attackerAmmo,
-    targetSkillLevel: raw.targetSkillLevel,
-    targetOverload: raw.targetOverload,
-    targetHull: raw.targetHull,
-    targetPropulsion: raw.targetPropulsion,
-    targetFitting: raw.targetFitting,
-    targetOverrides: raw.targetOverrides,
-    targetFittedHull: raw.targetFittedHull,
-    maneuverAggressivity: raw.maneuverAggressivity,
+    shipBSpeed,
+    shipBMode,
+    shipBRange,
+    shipBAggressivity,
+    shipBMass,
+    shipBInertia,
+    shipBSig,
+    ...definedOptionalFields(raw),
   };
 }
 
@@ -134,4 +157,43 @@ export function parseFittedHullSummary(value: string): FittedHullSummary | undef
   } catch {
     return undefined;
   }
+}
+
+function definedOptionalFields(raw: Partial<ProfileSettings>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {
+    shipASig: raw.shipASig,
+    shipASkillLevel: raw.shipASkillLevel,
+    shipAOverload: raw.shipAOverload,
+    shipAHullId: raw.shipAHullId,
+    shipAPropulsion: raw.shipAPropulsion,
+    shipAFitting: raw.shipAFitting,
+    shipAOverrides: raw.shipAOverrides,
+    shipAFittedHull: raw.shipAFittedHull,
+    shipAEwarActivation: raw.shipAEwarActivation,
+    shipABoosterActivation: raw.shipABoosterActivation,
+    shipAAmmo: raw.shipAAmmo,
+    shipBAmmo: raw.shipBAmmo,
+    shipBSkillLevel: raw.shipBSkillLevel,
+    shipBOverload: raw.shipBOverload,
+    shipBHullId: raw.shipBHullId,
+    shipBPropulsion: raw.shipBPropulsion,
+    shipBFitting: raw.shipBFitting,
+    shipBOverrides: raw.shipBOverrides,
+    shipBFittedHull: raw.shipBFittedHull,
+    shipBEwarActivation: raw.shipBEwarActivation,
+    shipBBoosterActivation: raw.shipBBoosterActivation,
+  };
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) result[key] = value;
+  }
+  return result;
+}
+
+function resolveLegacyHullId(value: string, ships: Ships): ShipId | undefined {
+  return resolveHullId(value, ships);
+}
+
+function resolveLegacyAmmoId(value: string, chargeCatalog: ChargeCatalog): TypeId {
+  return resolveAmmoId(value, chargeCatalog) ?? chargeCatalog.usualForChargeSize(DEFAULT_TURRET_CHARGE_SIZE);
 }

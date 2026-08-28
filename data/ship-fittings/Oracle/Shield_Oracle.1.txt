@@ -1,16 +1,4 @@
 [Oracle, Shield Oracle]
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
-
-Optical Compact Tracking Computer, Optimal Range Script
-Alumel-Wired Enduring Sensor Booster, Targeting Range Script
-10MN Y-S8 Compact Afterburner
 
 Heat Sink II
 Heat Sink II
@@ -19,9 +7,22 @@ Tracking Enhancer II
 Tracking Enhancer II
 Heat Sink II
 
-Medium Capacitor Control Circuit I
-Medium Capacitor Control Circuit I
-Medium Capacitor Control Circuit I
+Optical Compact Tracking Computer, Optimal Range Script
+Alumel-Wired Enduring Sensor Booster, Targeting Range Script
+10MN Y-S8 Compact Afterburner
+
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+Tachyon Modulated Energy Beam I, Imperial Navy Ultraviolet L
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Imperial Navy Standard L x16

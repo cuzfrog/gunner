@@ -1,10 +1,4 @@
 [Deacon, Logi Armor Deacon]
-Small Remote Armor Repairer II
-Small Remote Armor Repairer II
-Small Remote Armor Repairer II
-
-Republic Fleet Small Cap Battery
-1MN Afterburner II
 
 Type-D Restrained Capacitor Power Relay
 400mm Crystalline Carbonide Restrained Plates
@@ -12,5 +6,12 @@ Multispectrum Energized Membrane II
 Reactive Armor Hardener
 Domination Thermal Armor Hardener
 
-Small Capacitor Control Circuit II
-Small Capacitor Control Circuit II
+Republic Fleet Small Cap Battery
+1MN Afterburner II
+
+Small Remote Armor Repairer II
+Small Remote Armor Repairer II
+Small Remote Armor Repairer II
+
+[Empty Rig slot]
+[Empty Rig slot]

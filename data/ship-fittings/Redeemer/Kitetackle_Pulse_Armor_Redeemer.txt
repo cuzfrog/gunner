@@ -1,34 +1,32 @@
 [Redeemer, Kitetackle Pulse Armor Redeemer]
-Dual Heavy Pulse Laser II, Conflagration L
-Dual Heavy Pulse Laser II, Conflagration L
-Covert Cynosural Field Generator I
-Dual Heavy Pulse Laser II, Conflagration L
-Caldari Navy Cloaking Device
-Dual Heavy Pulse Laser II, Conflagration L
-Dual Heavy Pulse Laser II, Conflagration L
-Heavy Gremlin Compact Energy Neutralizer
 
-Large Micro Jump Drive
-Caldari Navy Warp Disruptor
-Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-500MN Y-T8 Compact Microwarpdrive
-
-Coreli A-Type Multispectrum Coating
-Coreli A-Type Multispectrum Coating
 Imperial Navy 1600mm Steel Plates
 Imperial Navy Heat Sink
 Imperial Navy 1600mm Steel Plates
 Imperial Navy Heat Sink
 IFFA Compact Damage Control
+[Empty Low slot]
+[Empty Low slot]
+
+Caldari Navy Warp Disruptor
+Heavy F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+500MN Y-T8 Compact Microwarpdrive
+[Empty Med slot]
+
+Dual Heavy Pulse Laser II, Conflagration L
+Dual Heavy Pulse Laser II, Conflagration L
+Dual Heavy Pulse Laser II, Conflagration L
+Dual Heavy Pulse Laser II, Conflagration L
+Dual Heavy Pulse Laser II, Conflagration L
+Heavy Gremlin Compact Energy Neutralizer
+[Empty High slot]
+[Empty High slot]
 
 Large Thermal Armor Reinforcer II
-Large Energy Collision Accelerator II
+[Empty Rig slot]
 
 
 Imperial Navy Standard L x5
-Standard Drop Booster x1
-Standard Exile Booster x2
-Agency 'Hardshell' TB5 Dose II x1
 Nanite Repair Paste x100
 Scorch L x2
 Scorch L x3

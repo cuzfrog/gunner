@@ -1,9 +1,10 @@
 [Cyclone, Tackle Missile Shield Cyclone]
-Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
-Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+
+Ballistic Control System II
+Power Diagnostic System II
+Damage Control II
+Co-Processor II
+Ballistic Control System II
 
 10MN Afterburner II
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
@@ -11,11 +12,13 @@ X-Large Ancillary Shield Booster, Navy Cap Booster 400
 X5 Enduring Stasis Webifier
 Faint Epsilon Scoped Warp Scrambler
 
-Ballistic Control System II
-Power Diagnostic System II
-Damage Control II
-Co-Processor II
-Ballistic Control System II
+Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+Heavy Assault Missile Launcher II, Nova Rage Heavy Assault Missile
+[Empty High slot]
+[Empty High slot]
 
 Medium Processor Overclocking Unit I
 Medium EM Shield Reinforcer II

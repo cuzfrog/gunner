@@ -1,23 +1,24 @@
 [Exequror, Logi Armor Exequror]
-Small Ancillary Remote Armor Repairer, Nanite Repair Paste
-Medium Remote Armor Repairer II
-Medium Remote Armor Repairer II
+
+Damage Control II
+Multispectrum Energized Membrane II
+Multispectrum Energized Membrane II
+1600mm Rolled Tungsten Compact Plates
+[Empty Low slot]
+[Empty Low slot]
 
 Sensor Booster II
 10MN Y-S8 Compact Afterburner
 Medium Compact Pb-Acid Cap Battery
 Medium Compact Pb-Acid Cap Battery
 
-Damage Control II
-Explosive Energized Membrane II
-Thermal Energized Membrane II
-Multispectrum Energized Membrane II
-Multispectrum Energized Membrane II
-1600mm Rolled Tungsten Compact Plates
+Small Ancillary Remote Armor Repairer, Nanite Repair Paste
+Medium Remote Armor Repairer II
+Medium Remote Armor Repairer II
 
 Medium Ancillary Current Router I
-Medium Capacitor Control Circuit I
 Medium Ancillary Current Router I
+[Empty Rig slot]
 
 
 Medium Armor Maintenance Bot I x2

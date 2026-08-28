@@ -1,23 +1,24 @@
 [Apostle, Commandship Armor Apostle]
-Capital I-ax Enduring Remote Armor Repairer
-Armor Command Burst II
-Triage Module II
-Capital I-ax Enduring Remote Armor Repairer
-Capital I-ax Enduring Remote Armor Repairer
-Armor Command Burst II
+
+Damage Control II
+Reactive Armor Hardener
+25000mm Rolled Tungsten Compact Plates
+25000mm Rolled Tungsten Compact Plates
+25000mm Rolled Tungsten Compact Plates
+[Empty Low slot]
+[Empty Low slot]
 
 Capital F-RX Compact Capacitor Booster, Cap Booster 3200
 Thukker Large Cap Battery
 Capital Cap Battery II
 Thukker Large Cap Battery
 
-Damage Control II
-Coreli A-Type Multispectrum Coating
-Reactive Armor Hardener
-25000mm Rolled Tungsten Compact Plates
-25000mm Rolled Tungsten Compact Plates
-25000mm Rolled Tungsten Compact Plates
-Coreli A-Type Multispectrum Coating
+Capital I-ax Enduring Remote Armor Repairer
+Capital I-ax Enduring Remote Armor Repairer
+Capital I-ax Enduring Remote Armor Repairer
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Armor Energizing Charge
+[Empty High slot]
 
 Capital Trimark Armor Pump I
 Capital Trimark Armor Pump I

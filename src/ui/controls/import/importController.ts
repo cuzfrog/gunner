@@ -1,11 +1,12 @@
-import { ClipboardUnavailableError, parseProfile, type ClipboardProvider, type SavedFittings, type UserSettings } from "../../../appstate";
+import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings } from "../../../appstate";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
+import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
-import type { Side, SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ProfileController } from "../profile";
+import type { Side } from "../side";
+import type { SidePanel } from "../sidePanel";
+import type { ShipATurret } from "./shipATurret";
 import { EftSideImporter } from "./eftSideImporter";
 import { ProfileTextImporter } from "./profileTextImporter";
 import type { ImportController, ImportEls } from "./importControllerContract";
@@ -18,18 +19,17 @@ export class ImportControllerImpl implements ImportController {
   private readonly savedFittings: SavedFittings;
   private readonly popupGroup: PopupGroup;
   private readonly els: ImportEls;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
-  private readonly preferences: PreferencesController;
+  private readonly shipASide: SidePanel;
+  private readonly shipBSide: SidePanel;
   private readonly profileController: ProfileController;
-  private readonly turret: AttackerTurret;
+  private readonly profileTextCodec: ProfileTextCodec;
+  private readonly turrets: Record<Side, ShipATurret>;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
+  private readonly events: UiEvents;
   private readonly popupValue: Popup;
   private pendingImportText?: string;
   private importSidePopupOpen = false;
-  private onConfigPersisted?: () => void;
-  private onProfileTextLoaded?: (settings: UserSettings) => void;
 
   constructor(deps: {
     clipboard: ClipboardProvider;
@@ -37,54 +37,51 @@ export class ImportControllerImpl implements ImportController {
     savedFittings: SavedFittings;
     popupGroup: PopupGroup;
     els: ImportEls;
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
-    turret: AttackerTurret;
-    preferences: PreferencesController;
+    shipASide: SidePanel;
+    shipBSide: SidePanel;
+    turrets: Record<Side, ShipATurret>;
     profileController: ProfileController;
+    profileTextCodec: ProfileTextCodec;
+    events: UiEvents;
   }) {
     this.clipboard = deps.clipboard;
     this.fittingImport = deps.fittingImport;
     this.savedFittings = deps.savedFittings;
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
-    this.turret = deps.turret;
-    this.preferences = deps.preferences;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
+    this.turrets = deps.turrets;
     this.profileController = deps.profileController;
+    this.profileTextCodec = deps.profileTextCodec;
+    this.events = deps.events;
     this.eftSideImporter = new EftSideImporter({
-      attackerSide: deps.attackerSide,
-      targetSide: deps.targetSide,
-      turret: deps.turret,
+      shipASide: deps.shipASide,
+      shipBSide: deps.shipBSide,
+      turrets: deps.turrets,
       fittingImport: deps.fittingImport,
-      onConfigPersisted: () => this.persistConfigChange(),
     });
     this.profileTextImporter = new ProfileTextImporter({
       fittingImport: deps.fittingImport,
-      turret: deps.turret,
-      preferences: deps.preferences,
+      turrets: deps.turrets,
+      profileTextCodec: deps.profileTextCodec,
     });
+    this.els.importProfile.addEventListener("click", () => void this.importProfileClicked());
+    this.els.importSideShipA.addEventListener("click", () => void this.onImportSideClick("shipA"));
+    this.els.importSideShipB.addEventListener("click", () => void this.onImportSideClick("shipB"));
     this.popupValue = {
       isOpen: () => this.importSidePopupOpen,
       open: () => this.openImportSidePopup(),
       close: () => this.closeImportSidePopup(),
       focusTrigger: () => this.els.importProfile.focus(),
-      contains: (target) => target instanceof Element && target.closest("#import-side-popup, #import-profile") !== null,
+      contains: (domTarget) => domTarget instanceof Element && domTarget.closest("#import-side-popup, #import-profile") !== null,
     };
   }
 
   get popup(): Popup { return this.popupValue; }
 
-  setOnConfigPersisted(onConfigPersisted: () => void): void { this.onConfigPersisted = onConfigPersisted; }
-  setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void { this.onProfileTextLoaded = onProfileTextLoaded; }
-
-  private persistConfigChange(): void {
-    this.onConfigPersisted?.();
-  }
-
   private panel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
   async importFromClipboard(side: Side): Promise<void> {
@@ -94,8 +91,8 @@ export class ImportControllerImpl implements ImportController {
       this.popupGroup.close(pastePopup);
       return;
     }
-    this.popupGroup.close(this.attackerSide.getPastePopup());
-    this.popupGroup.close(this.targetSide.getPastePopup());
+    this.popupGroup.close(this.shipASide.getPastePopup());
+    this.popupGroup.close(this.shipBSide.getPastePopup());
     let text: string;
     try {
       text = await this.clipboard.readText();
@@ -116,18 +113,17 @@ export class ImportControllerImpl implements ImportController {
     panel.sections.paste.clearImportHintTimeout();
     const trimmed = text.trimStart();
     if (this.profileTextImporter.isProfileText(trimmed)) {
-      const parsed = parseProfile(trimmed);
-      const fitting = parsed === undefined ? undefined : side === "attacker" ? parsed.attackerFitting : parsed.targetFitting;
+      const fitting = this.profileTextImporter.fittingFromProfileText(side, trimmed);
       if (fitting === undefined) {
         panel.sections.paste.showImportHint("status.fittingInvalid", true);
         return;
       }
       const imported = this.importEftFitting(side, fitting);
-      if (imported) this.recordSavedFitting(imported, fitting);
+      if (imported) this.recordSavedFitting(imported, panel.fittingText ?? fitting);
       return;
     }
     const imported = this.importEftFitting(side, text);
-    if (imported) this.recordSavedFitting(imported, text);
+    if (imported) this.recordSavedFitting(imported, panel.fittingText ?? text);
   }
 
   async importProfileClicked(): Promise<void> {
@@ -150,7 +146,7 @@ export class ImportControllerImpl implements ImportController {
         this.profileController.showStatus("status.importInvalid");
         return;
       }
-      this.onProfileTextLoaded?.(settings);
+      this.events.emitProfileTextLoaded(settings);
       return;
     }
     if (this.fittingImport.importFitting(text, NEUTRAL_STAT_CONDITIONS) === undefined) {
@@ -168,15 +164,21 @@ export class ImportControllerImpl implements ImportController {
     await this.importFromText(side, text);
   }
 
-  importEftFitting(side: Side, text: string, persist = true): ImportedFitting | undefined {
-    return this.eftSideImporter.importEftFitting(side, text, persist);
+  importEftFitting(side: Side, text: string, options: { readonly persist?: boolean; readonly showImportedHint?: boolean } | boolean = true): ImportedFitting | undefined {
+    const opts = typeof options === "boolean" ? { persist: options } : options;
+    const { persist = true, showImportedHint = true } = opts;
+    const imported = this.eftSideImporter.importEftFitting(side, text, { persist, showImportedHint });
+    if (!imported) return undefined;
+    this.events.emitFittingImported(side, imported);
+    if (persist) this.events.emitConfigInvalidated();
+    return imported;
   }
 
   private openImportSidePopup(): void {
     this.els.importSidePopup.hidden = false;
     this.els.importProfile.setAttribute("aria-expanded", "true");
     this.importSidePopupOpen = true;
-    this.els.importSideAttacker.focus();
+    this.els.importSideShipA.focus();
   }
 
   private closeImportSidePopup(): void {
@@ -187,6 +189,6 @@ export class ImportControllerImpl implements ImportController {
   }
 
   private recordSavedFitting(imported: ImportedFitting, text: string): void {
-    this.savedFittings.record({ hull: imported.profile.name, name: imported.fittingName, text });
+    this.savedFittings.record({ hullId: imported.profile.id, name: imported.fittingName, text });
   }
 }

@@ -1,13 +1,4 @@
 [Zealot, Pulse Armor Zealot]
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-
-Tracking Computer II, Tracking Speed Script
-10MN Monopropellant Enduring Afterburner
-Large Compact Pb-Acid Cap Battery
 
 Domination Thermal Armor Hardener
 True Sansha EM Armor Hardener
@@ -16,6 +7,16 @@ True Sansha EM Armor Hardener
 True Sansha Thermal Armor Hardener
 Medium Armor Repairer II
 Heat Sink II
+
+Tracking Computer II, Tracking Speed Script
+10MN Monopropellant Enduring Afterburner
+Large Compact Pb-Acid Cap Battery
+
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
 
 Medium Ancillary Current Router I
 Medium Ancillary Current Router II

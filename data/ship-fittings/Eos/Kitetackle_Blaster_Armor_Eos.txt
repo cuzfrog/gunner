@@ -1,0 +1,30 @@
+[Eos, Kitetackle Blaster Armor Eos]
+
+Corpum A-Type Medium Armor Repairer
+Damage Control II
+True Sansha Energized Adaptive Nano Membrane
+True Sansha Energized Adaptive Nano Membrane
+Energized Adaptive Nano Membrane II
+[Empty Low slot]
+[Empty Low slot]
+
+Medium Capacitor Booster II, Navy Cap Booster 800
+Warp Scrambler II
+50MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Heavy Neutron Blaster II, Void M
+Medium Ghoul Compact Energy Nosferatu
+
+Medium Auxiliary Nano Pump II
+Medium Auxiliary Nano Pump II
+
+
+Ogre II x5
+
+
+Navy Cap Booster 800 x30
+Nanite Repair Paste x100

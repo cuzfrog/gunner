@@ -1,2 +1,2 @@
-export { parseProfile, serializeProfile, PROFILE_TEXT_HEADER } from "./profileText";
+export type { ProfileTextCodec } from "./profileTextCodec";
 export { registerProfileTextModule } from "./module";

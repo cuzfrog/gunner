@@ -1,106 +1,145 @@
 #!/usr/bin/env bun
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { extname, join } from "node:path";
 import * as process from "node:process";
-import { CHARGES, SCRIPTS, TURRETS } from "../src/fitting/fittingDb";
-import { MODULE_SLOTS } from "../src/fitting/moduleSlots";
-import { PROPULSION_MODULES } from "../src/ships/propulsion";
+import { SHIP_PROFILES } from "../src/gamedata/shipProfiles/profiles";
+import type { ShipProfile } from "../src/ships";
 
-const OUTPUT_PATH = "src/ui/iconIds.ts";
-const NAME_TO_ID_PATH = "data/ship-modules/nameToId.json";
+const SDE_DIR = process.argv[2] ?? join(homedir(), "workspace", "Pyfa", "staticdata", "fsd_built");
+const TYPE_ICON_OUTPUT_PATH = "src/ui/icons/typeIconFiles.ts";
+const SHIP_IMAGE_OUTPUT_PATH = "src/ui/icons/shipImageIds.ts";
+const SHIP_IMAGES_SOURCE = "data/ship-images";
+const ICONS_SOURCE_DIRECTORY = "data/ship-modules";
 
-interface NameToId {
-  readonly byName: {
-    readonly iconID: Readonly<Record<string, ReadonlyArray<{ readonly id: number }>>>;
-  };
+const IN_SCOPE_CATEGORY_IDS = new Set([7, 8, 18, 32, 66, 87, 4, 22]);
+
+interface SdeType {
+  readonly typeID: number;
+  readonly groupID: number;
+  readonly published: number;
+  readonly iconID?: number;
 }
 
-export function generateIconIdsContent(
-  nameToId: NameToId,
-  chargeNames: readonly string[],
-  turretNames: readonly string[],
-  propulsionLabels: readonly string[],
-  moduleSlotNames: readonly string[],
-  scriptNames: readonly string[],
-): string {
+interface SdeGroup {
+  readonly groupID: number;
+  readonly categoryID: number;
+}
+
+export function buildTypeIconEntries(
+  types: Readonly<Record<string, SdeType>>,
+  groups: Readonly<Record<string, SdeGroup>>,
+  inScopeCategoryIds: ReadonlySet<number>,
+): Record<string, string> {
+  const inScopeGroupIds = new Set<string>();
+  for (const [gid, group] of Object.entries(groups)) {
+    if (inScopeCategoryIds.has(group.categoryID)) inScopeGroupIds.add(gid);
+  }
+  const entries: Record<string, string> = {};
+  for (const [tid, type] of Object.entries(types)) {
+    if (!inScopeGroupIds.has(String(type.groupID))) continue;
+    entries[tid] = type.iconID !== undefined ? `icons/${type.iconID}@1x.png` : `type-icons/${tid}@1x.png`;
+  }
+  return entries;
+}
+
+export function generateTypeIconFilesContent(entries: Readonly<Record<string, string>>): string {
+  const lines = Object.keys(entries)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((typeId) => `  [${JSON.stringify(typeId)} as TypeId]: ${JSON.stringify(entries[typeId])},`);
+  return `import type { TypeId } from "../../gamedata/ids";\n\nexport const TYPE_ICON_FILES: Readonly<Record<TypeId, string>> = {\n${lines.join("\n")}\n} as const;\n`;
+}
+
+export function findMissingIconFiles(entries: Readonly<Record<string, string>>, existingFiles: ReadonlySet<string>): string[] {
   const missing: string[] = [];
-  const ids: Record<string, number> = {};
+  for (const file of new Set(Object.values(entries))) {
+    if (!existingFiles.has(file)) missing.push(file);
+  }
+  return missing.sort();
+}
 
-  for (const name of chargeNames) collectIconId(name);
-  for (const name of turretNames) collectIconId(name);
-  for (const name of propulsionLabels) collectIconId(name);
-  for (const name of moduleSlotNames) collectIconId(name);
-  for (const name of scriptNames) collectIconId(name);
-
-  if (missing.length > 0) {
-    missing.sort();
-    throw new Error(`Missing icon ids for: ${missing.map((name) => JSON.stringify(name)).join(", ")}`);
+export function generateShipImageIdsContent(shipProfiles: readonly Pick<ShipProfile, "id" | "name">[], imageFileNames: readonly string[]): string {
+  const filesByName = new Map<string, string>();
+  for (const fileName of imageFileNames) {
+    const name = fileName.slice(0, fileName.length - extname(fileName).length).replaceAll("_", " ");
+    filesByName.set(name, fileName);
   }
 
-  const lines = Object.keys(ids)
-    .sort()
-    .map((name) => `  ${JSON.stringify(name)}: ${ids[name]},`);
+  const entries: { readonly id: ShipProfile["id"]; readonly fileName: string }[] = [];
+  for (const profile of shipProfiles) {
+    const fileName = filesByName.get(profile.name);
+    if (fileName) entries.push({ id: profile.id, fileName });
+  }
 
-  return `export const ITEM_ICON_IDS: Readonly<Record<string, number>> = {\n${lines.join("\n")}\n} as const;\n\nexport const DRONE_ICON_ID = 1084;\n`;
+  const lines = entries
+    .sort((a, b) => Number(a.id) - Number(b.id))
+    .map((entry) => `  [${JSON.stringify(entry.id)} as ShipId]: "images/ships/${entry.fileName}",`);
 
-  function collectIconId(name: string): void {
-    if (name in ids) return;
-    const entries = nameToId.byName.iconID[name];
-    if (entries === undefined || entries.length === 0) {
-      if (!missing.includes(name)) missing.push(name);
-      return;
+  return `import type { ShipId } from "../../gamedata/ids";\n\nexport const SHIP_IMAGE_FILES: Readonly<Record<ShipId, string>> = {\n${lines.join("\n")}\n} as const;\n`;
+}
+
+function readShipImageFileNames(): string[] {
+  return readdirSync(SHIP_IMAGES_SOURCE, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && extname(entry.name) === ".webp")
+    .map((entry) => entry.name);
+}
+
+function readSdeGroups(): Record<string, SdeGroup> {
+  return JSON.parse(readFileSync(join(SDE_DIR, "groups.0.json"), "utf8"));
+}
+
+function readSdeTypes(): Record<string, SdeType> {
+  const types: Record<string, SdeType> = {};
+  for (const file of readdirSync(SDE_DIR).filter((f) => f.startsWith("types.") && f.endsWith(".json")).sort()) {
+    const shard = JSON.parse(readFileSync(join(SDE_DIR, file), "utf8")) as Record<string, SdeType>;
+    for (const [tid, type] of Object.entries(shard)) types[tid] = type;
+  }
+  return types;
+}
+
+function collectExistingIconFiles(): Set<string> {
+  const files = new Set<string>();
+  for (const sub of ["icons", "type-icons"]) {
+    const dir = join(ICONS_SOURCE_DIRECTORY, sub);
+    if (!existsSync(dir)) continue;
+    for (const name of readdirSync(dir)) {
+      if (statSync(join(dir, name)).isFile()) files.add(`${sub}/${name}`);
     }
-    ids[name] = entries[0].id;
   }
+  return files;
 }
 
 function main(): void {
-  const raw: unknown = JSON.parse(readFileSync(NAME_TO_ID_PATH, "utf8"));
-  const nameToId = decodeNameToId(raw);
-  const content = generateIconIdsContent(
-    nameToId,
-    Object.keys(CHARGES),
-    Object.keys(TURRETS),
-    PROPULSION_MODULES.map((module) => module.label),
-    Object.keys(MODULE_SLOTS),
-    Object.keys(SCRIPTS),
-  );
-  writeFileSync(OUTPUT_PATH, content, "utf8");
-  console.log(`Wrote ${OUTPUT_PATH}`);
-}
+  const groups = readSdeGroups();
+  const types = readSdeTypes();
+  const allEntries = buildTypeIconEntries(types, groups, IN_SCOPE_CATEGORY_IDS);
+  const existingFiles = collectExistingIconFiles();
 
-function decodeNameToId(raw: unknown): NameToId {
-  if (!isRecord(raw)) throw new Error("Expected nameToId root to be an object");
-  const byName = raw["byName"];
-  if (!isRecord(byName)) throw new Error("Expected byName to be an object");
-  const iconID = byName["iconID"];
-  if (!isRecord(iconID)) throw new Error("Expected iconID to be an object");
-
-  const iconIDs: Record<string, ReadonlyArray<{ readonly id: number }>> = {};
-  for (const [name, entries] of Object.entries(iconID)) {
-    iconIDs[name] = decodeIconEntries(entries);
+  const entries = filterEntriesWithIcons(allEntries, existingFiles);
+  const droppedCount = Object.keys(allEntries).length - Object.keys(entries).length;
+  if (droppedCount > 0) {
+    console.warn(
+      `Excluded ${droppedCount} in-scope types with no icon on disk` +
+      ` (unpublished types without an SDE iconID or evetech icon).`,
+    );
   }
-  return { byName: { iconID: iconIDs } };
+
+  writeFileSync(TYPE_ICON_OUTPUT_PATH, generateTypeIconFilesContent(entries), "utf8");
+  console.log(`Wrote ${TYPE_ICON_OUTPUT_PATH} with ${Object.keys(entries).length} entries.`);
+
+  writeFileSync(SHIP_IMAGE_OUTPUT_PATH, generateShipImageIdsContent(SHIP_PROFILES, readShipImageFileNames()), "utf8");
+  console.log(`Wrote ${SHIP_IMAGE_OUTPUT_PATH}`);
 }
 
-function decodeIconEntries(raw: unknown): ReadonlyArray<{ readonly id: number }> {
-  if (!Array.isArray(raw)) throw new Error("Expected icon entries to be an array");
-  return raw.map((entry, index) => decodeIconEntry(entry, index));
+function filterEntriesWithIcons(entries: Readonly<Record<string, string>>, existingFiles: ReadonlySet<string>): Record<string, string> {
+  const filtered: Record<string, string> = {};
+  for (const [tid, file] of Object.entries(entries)) {
+    if (existingFiles.has(file)) filtered[tid] = file;
+  }
+  return filtered;
 }
 
-function decodeIconEntry(raw: unknown, index: number): { readonly id: number } {
-  if (!isRecord(raw)) throw new Error(`Expected icon entry ${index} to be an object`);
-  const id = raw["id"];
-  if (!isNumber(id)) throw new Error(`Expected icon entry ${index} id to be a number`);
-  return { id };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
-}
+export { filterEntriesWithIcons as _filterEntriesWithIcons };
 
 if (import.meta.main) {
   try {

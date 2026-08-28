@@ -1,10 +1,7 @@
 [Corax Navy Issue, Tackle Rocket Shield Corax Navy Issue]
-Rocket Launcher II, Scourge Rage Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
+
+Ballistic Control System II
+Damage Control II
 
 Medium Ancillary Shield Booster, Navy Cap Booster 50
 1MN Y-S8 Compact Afterburner
@@ -12,8 +9,12 @@ Medium Ancillary Shield Booster, Navy Cap Booster 50
 Fleeting Compact Stasis Webifier
 Faint Epsilon Scoped Warp Scrambler
 
-Ballistic Control System II
-Damage Control II
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
 
 Small Core Defense Operational Solidifier I
 Small Processor Overclocking Unit I

@@ -1,6 +1,9 @@
 import type { FittingSummary } from "../../../fitting";
+import type { Language } from "../../../appstate";
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { mockFittingImport } from "../testSupport";
 import { DomFittingPreview } from "./fittingPreview";
 
 interface Rect {
@@ -20,6 +23,7 @@ class FakeElement {
   tagName = "div";
   className = "";
   textContent = "";
+  title = "";
   hidden = false;
   src = "";
   alt = "";
@@ -88,11 +92,23 @@ function createI18n(): I18n {
 
 function createImageCatalog(): ImageCatalog {
   return {
-    shipImageUrl: (shipName: string) => `images/ships/${shipName}.webp`,
-    itemIconUrl: (itemName: string) => (itemName === "200mm AutoCannon I" ? "images/icons/1@1x.png" : undefined),
-    droneIconUrl: (name?: string) => (name === "Hobgoblin II" ? "images/icons/2456@1x.png" : "images/icons/1084@1x.png"),
+    shipImageUrl: (_shipId) => "images/ships/Rifter.webp",
+    itemIconUrl: vi.fn((id: TypeId) => {
+      if (id === AC_ID) return "images/icons/1@1x.png";
+      if (id === HAIL_ID) return "images/icons/hail_s.png";
+      if (id === DRONE_ID) return "images/type-icons/2456@1x.png";
+      if (id === SCRIPT_ID) return "images/icons/3344@1x.png";
+      return undefined;
+    }),
   };
 }
+
+const AC_ID: TypeId = toTypeId("486");
+const MWD_ID: TypeId = toTypeId("434");
+const PLATES_ID: TypeId = toTypeId("20349");
+const HAIL_ID: TypeId = toTypeId("12608");
+const DRONE_ID: TypeId = toTypeId("2456");
+const SCRIPT_ID: TypeId = toTypeId("29005");
 
 const SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -100,19 +116,19 @@ const SUMMARY: FittingSummary = {
   sections: [
     {
       kind: "high",
-      rows: [{ name: "200mm AutoCannon I", charge: "Hail S" }],
+      rows: [{ name: "200mm AutoCannon I", id: AC_ID, charge: "Hail S", chargeId: HAIL_ID }],
     },
     {
       kind: "mid",
-      rows: [{ name: "5MN Microwarpdrive I" }],
+      rows: [{ name: "5MN Microwarpdrive I", id: MWD_ID }],
     },
     {
       kind: "low",
-      rows: [{ name: "400mm Steel Plates II" }],
+      rows: [{ name: "400mm Steel Plates II", id: PLATES_ID }],
     },
     {
       kind: "cargo",
-      rows: [{ name: "Hail S", quantity: 1000 }],
+      rows: [{ name: "Hail S", id: HAIL_ID, quantity: 1000 }],
     },
   ],
 };
@@ -126,19 +142,40 @@ describe("DomFittingPreview", () => {
     globalThis.document = undefined as unknown as Document;
   });
 
-  function buildPreview(): { container: FakeElement; anchor: FakeElement; preview: DomFittingPreview } {
+  function buildPreview(language: Language = "en"): {
+    container: FakeElement;
+    anchor: FakeElement;
+    preview: DomFittingPreview;
+    fittingImport: ReturnType<typeof mockFittingImport>;
+    imageCatalog: ImageCatalog;
+  } {
     const container = new FakeElement();
     container.offsetWidth = 300;
     container.offsetHeight = 200;
     const anchor = new FakeElement();
     anchor.setBoundingClientRect(rect(100, 100, 150, 130, 50, 30));
+    const NAME_FOR_ID: Record<string, string> = {
+      "486": "200mm AutoCannon I",
+      "434": "5MN Microwarpdrive I",
+      "20349": "400mm Steel Plates II",
+      "12608": "Hail S",
+      "2456": "Hobgoblin II",
+      "29005": "Optimal Range Disruption Script",
+    };
+    const fittingImport = vi.mocked(mockFittingImport());
+    fittingImport.itemNameForId = vi.fn((id: TypeId, lang: string) => {
+      const name = NAME_FOR_ID[id] ?? id;
+      return lang === "en" ? name : `${name} (${lang})`;
+    });
+    const imageCatalog = createImageCatalog();
     const preview = new DomFittingPreview({
       container: container as unknown as HTMLElement,
-      i18n: createI18n(),
-      imageCatalog: createImageCatalog(),
+      i18n: { ...createI18n(), current: () => language },
+      imageCatalog,
+      fittingImport,
       viewport: () => ({ innerWidth: 1024, innerHeight: 768 }),
     });
-    return { container, anchor, preview };
+    return { container, anchor, preview, fittingImport, imageCatalog };
   }
 
   test("show renders header and sections", () => {
@@ -230,15 +267,29 @@ describe("DomFittingPreview", () => {
     const summary: FittingSummary = {
       hullName: "Rifter",
       fittingName: "Brawler",
-      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", quantity: 3 }] }],
+      sections: [{ kind: "drones", rows: [{ name: "Hobgoblin II", id: DRONE_ID, quantity: 3 }] }],
     };
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];
     expect(droneRow.children[0].tagName).toBe("img");
-    expect(droneRow.children[0].src).toBe("images/icons/2456@1x.png");
+    expect(droneRow.children[0].src).toBe("images/type-icons/2456@1x.png");
   });
 
-  test("drone rows fall back to the generic drone icon for unknown drones", () => {
+  test("non-drone items in the drones section resolve icons through itemIconUrl", () => {
+    const { container, anchor, preview, imageCatalog } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "drones", rows: [{ name: "Optimal Range Disruption Script", id: SCRIPT_ID, quantity: 2 }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const row = container.children[1].children[1];
+    expect(row.children[0].tagName).toBe("img");
+    expect(row.children[0].src).toBe("images/icons/3344@1x.png");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(SCRIPT_ID);
+  });
+
+  test("drone rows have no icon for unknown drones", () => {
     const { container, anchor, preview } = buildPreview();
     const summary: FittingSummary = {
       hullName: "Rifter",
@@ -248,7 +299,7 @@ describe("DomFittingPreview", () => {
     preview.show(anchor as unknown as HTMLElement, summary);
     const droneRow = container.children[1].children[1];
     expect(droneRow.children[0].tagName).toBe("img");
-    expect(droneRow.children[0].src).toBe("images/icons/1084@1x.png");
+    expect(droneRow.children[0].src).toBe("");
   });
 
   test("show hides the icon for items without an icon url", () => {
@@ -257,6 +308,52 @@ describe("DomFittingPreview", () => {
     const midSection = container.children[2];
     const row = midSection.children[1];
     expect(row.children[0].src).toBe("");
+  });
+
+  test("empty rows render with a muted style and no icon and do not call catalog", () => {
+    const { container, anchor, preview, fittingImport } = buildPreview();
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "high", rows: [{ name: "[Empty High slot]", empty: true }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const row = container.children[1].children[1];
+    expect(row.className).toBe("preview-row preview-row-empty");
+    expect(row.children[0].src).toBe("");
+    expect(row.children[1].children[0].textContent).toBe("[Empty High slot]");
+    expect(fittingImport.itemNameForId).not.toHaveBeenCalled();
+  });
+
+  test("show translates item and charge names and keeps icon inputs canonical", () => {
+    const { container, anchor, preview, fittingImport, imageCatalog } = buildPreview("zh");
+    preview.show(anchor as unknown as HTMLElement, SUMMARY);
+    const highSection = container.children[1];
+    const row = highSection.children[1];
+    expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I (zh)");
+    expect(row.children[1].children[0].title).toBe("200mm AutoCannon I (zh)");
+    expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(AC_ID, "zh");
+    expect(fittingImport.itemNameForId).toHaveBeenCalledWith(HAIL_ID, "zh");
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(AC_ID);
+    expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(HAIL_ID);
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("200mm AutoCannon I (zh)");
+    expect(imageCatalog.itemIconUrl).not.toHaveBeenCalledWith("Hail S (zh)");
+  });
+
+  test("rows without ids render raw names and do not call catalog", () => {
+    const { container, anchor, preview, fittingImport } = buildPreview("zh");
+    const summary: FittingSummary = {
+      hullName: "Rifter",
+      fittingName: "Brawler",
+      sections: [{ kind: "high", rows: [{ name: "Unknown Module", charge: "Unknown Charge" }] }],
+    };
+    preview.show(anchor as unknown as HTMLElement, summary);
+    const highSection = container.children[1];
+    const row = highSection.children[1];
+    expect(row.children[1].children[0].textContent).toBe("Unknown Module");
+    expect(row.children[1].children[2].textContent).toBe(", Unknown Charge");
+    expect(fittingImport.itemNameForId).not.toHaveBeenCalled();
   });
 
   test("hide clears and hides the container", () => {

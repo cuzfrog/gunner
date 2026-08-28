@@ -3,7 +3,7 @@ import type { I18n } from "../../i18n";
 import type { FittedHullSummary, ProfileParamOverrides } from "../../../appstate";
 import { num } from "../controlsDom";
 import { formatNumber } from "../controlsFormat";
-import type { Side } from "./side";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IStatsSection } from "./sidePanelSections";
 
@@ -12,7 +12,7 @@ export interface StatsSectionEls {
   readonly mass: HTMLInputElement;
   readonly inertia: HTMLInputElement;
   readonly alignTime: HTMLElement;
-  readonly targetSig?: HTMLInputElement;
+  readonly shipSig: HTMLInputElement;
 }
 
 export class StatsSection implements IStatsSection {
@@ -34,13 +34,18 @@ export class StatsSection implements IStatsSection {
     const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.panel.sections.propulsion.currentPropulsionModule();
     const hintModule = fitted ? this.currentFittedPropulsionModule(fitted) : this.panel.sections.propulsion.currentPropulsionModule();
     const conditions = this.panel.sections.skill.skillConditions();
-    const massKey: keyof ProfileParamOverrides = this.panel.side === "attacker" ? "attackerMass" : "targetMass";
-    const inertiaKey: keyof ProfileParamOverrides = this.panel.side === "attacker" ? "attackerInertia" : "targetInertia";
-    const speedKey: keyof ProfileParamOverrides = this.panel.side === "attacker" ? "attackerSpeed" : "targetSpeed";
+    const massKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipAMass" : "shipBMass";
+    const inertiaKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipAInertia" : "shipBInertia";
+    const speedKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASpeed" : "shipBSpeed";
+    const sigKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASig" : "shipBSig";
     let mass = num(this.els.mass);
 
-    if (updateMass || updateInertia || (this.panel.side === "target" && updateSig)) {
-      const stats = this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, conditions);
+    const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
+    if (updateMass || updateInertia || updateSig) {
+      const stats = this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, conditions, speedOverride);
+      if (fitted) {
+        this.panel.fittedHull = { ...fitted, baseMaxSpeed: stats.baseMaxSpeed };
+      }
       if (updateMass && !this.isOverridden(massKey)) {
         mass = stats.mass;
         this.els.mass.value = String(mass);
@@ -48,8 +53,8 @@ export class StatsSection implements IStatsSection {
       if (updateInertia && !this.isOverridden(inertiaKey)) {
         this.els.inertia.value = formatNumber(stats.inertiaModifier, 6);
       }
-      if (this.panel.side === "target" && updateSig && this.els.targetSig !== undefined && !this.isOverridden("targetSig")) {
-        this.els.targetSig.value = String(Math.max(1, stats.sigRadius));
+      if (updateSig && !this.isOverridden(sigKey)) {
+        this.els.shipSig.value = String(Math.max(1, stats.sigRadius));
       }
     }
 
@@ -62,7 +67,7 @@ export class StatsSection implements IStatsSection {
   }
 
   updateSpeedFromMass(): void {
-    const speedKey: keyof ProfileParamOverrides = this.panel.side === "attacker" ? "attackerSpeed" : "targetSpeed";
+    const speedKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASpeed" : "shipBSpeed";
     if (this.isOverridden(speedKey)) return;
     if (!this.panel.profile) return;
     const fitted = this.panel.fittedHull;
@@ -108,5 +113,14 @@ export class StatsSection implements IStatsSection {
     const currentId = this.panel.sections.propulsion.currentPropulsionId();
     if (currentId === undefined) return undefined;
     return this.ships.fittingOption(this.panel.profile, currentId);
+  }
+
+  currentBaseMaxSpeed(): number {
+    if (!this.panel.profile) return num(this.els.speed);
+    const fitted = this.panel.fittedHull;
+    const propulsion = fitted ? this.currentFittedPropulsion(fitted) : this.panel.sections.propulsion.currentPropulsionModule();
+    const speedKey: keyof ProfileParamOverrides = this.panel.side === "shipA" ? "shipASpeed" : "shipBSpeed";
+    const speedOverride = this.isOverridden(speedKey) ? num(this.els.speed) : undefined;
+    return this.ships.fittedStats(this.panel.profile, fitted?.fitted, propulsion, this.panel.sections.skill.skillConditions(), speedOverride).baseMaxSpeed;
   }
 }

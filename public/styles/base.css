@@ -1,0 +1,34 @@
+@layer base {
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:where(.popup, .trigger, .btn, .icon-button, .input-field) :focus-visible,
+:where(a, button, input, select):focus-visible {
+  outline: 1px solid var(--accent-teal);
+}
+
+.btn:focus-visible {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  outline-offset: 2px;
+}
+
+.trigger:focus-visible,
+.icon-button:focus-visible { outline-offset: 2px; }
+
+.input-field:focus-visible { outline-offset: -1px; }
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: "Saira", sans-serif;
+  font-size: 14px;
+}
+
+}

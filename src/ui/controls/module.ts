@@ -1,116 +1,89 @@
-import { asClass, asFunction, type AwilixContainer } from "awilix";
-import { SIG_RESOLUTIONS } from "../../sim";
+import { asClass, asFunction, asValue, type AwilixContainer } from "awilix";
+import type { PresetFittings } from "../../fitting";
 import type { SavedFittings } from "../../appstate";
+import type { ShipId } from "../../gamedata/ids";
 import type { ControlsCradle } from "./cradle";
-import { profileSettingsOf } from "./controlsFormat";
+import { combatantSidesOf, forEachSide, wireCombatantSide } from "./combatantSide";
 import { createControlsEls } from "./elements";
-import { collectPreferencesEls, collectProfileEls, collectReadoutEls } from "./elementCollectors";
-import { DomControls } from "./domControls";
-import { ChoiceGroupImpl } from "./choiceGroup";
-import { EngagementReadoutImpl } from "./engagementReadout";
-import { PreferencesControllerImpl } from "./preferencesController";
-import { ProfileControllerImpl } from "./profileController";
-import { TrackingInputImpl } from "./trackingInput";
+import { registerConfirmModule } from "./confirm";
+import { registerDomControlsModule } from "./domControls";
+import { registerEffectiveReadoutModule } from "./effectiveReadout";
+import { registerEngagementReadoutModule } from "./engagementReadout";
 import { registerHintsModule } from "./hints";
 import { registerImportModule, type ImportController } from "./import";
 import { registerPopupModule } from "./popup";
+import { registerPreferencesModule } from "./preferences";
+import { registerProfileModule } from "./profile";
 import { registerSessionModule } from "./session";
 import { registerShareModule } from "./share";
-import { registerSidePanelModule, type Side } from "./sidePanel";
+import type { Side } from "./side";
+import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
+import { registerEwarModule } from "./ewar";
+import { registerBoosterModule } from "./booster";
+import { registerRangeOverlayModule } from "./rangeOverlay";
+import { registerPortraitsModule } from "./portraits";
 
 export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
+  if (!cradle.hasRegistration("now")) {
+    cradle.register({ now: asValue(() => Date.now()) });
+  }
+  cradle.register({
+    els: asFunction(createControlsEls).singleton(),
+  });
   registerHintsModule(cradle);
   registerTurretModule(cradle);
   registerSidePanelModule(cradle);
+  registerEwarModule(cradle);
+  registerBoosterModule(cradle);
+  registerRangeOverlayModule(cradle);
+  registerPortraitsModule(cradle);
   registerPopupModule(cradle);
   registerImportModule(cradle);
   registerShareModule(cradle);
+  registerConfirmModule(cradle);
+  registerEngagementReadoutModule(cradle);
+  registerEffectiveReadoutModule(cradle);
+  registerPreferencesModule(cradle);
+  registerProfileModule(cradle);
   registerSessionModule(cradle);
-  cradle.register({
-    els: asFunction(createControlsEls).singleton(),
-    trackingInput: asClass(TrackingInputImpl).singleton(),
-    sigResChoice: asFunction(({ els }: ControlsCradle) => new ChoiceGroupImpl(els.sigResOptions, els.sigRes, ["S", "M", "L", "XL"])).singleton(),
-    engagementReadout: asFunction(({ els }: ControlsCradle) => new EngagementReadoutImpl(collectReadoutEls(els))).singleton(),
-    preferencesController: asFunction(({ els, i18n, settingsStore, trackingInput, turretController, uiEvents }: ControlsCradle) => new PreferencesControllerImpl({
-      els: collectPreferencesEls(els),
-      i18n,
-      settingsStore,
-      trackingInput,
-      sigResolution: () => SIG_RESOLUTIONS[turretController.currentSigResClass()],
-      events: uiEvents,
-    })).singleton(),
-    profileController: asFunction(({ els, settingsStore, timer, i18n, uiEvents }: ControlsCradle) => new ProfileControllerImpl({
-      els: collectProfileEls(els),
-      settingsStore,
-      timer,
-      i18n,
-      events: uiEvents,
-    })).singleton(),
-    controls: asFunction((proxy: ControlsCradle) => new DomControls({
-      hitChance: proxy.hitChance,
-      i18n: proxy.i18n,
-      settingsStore: proxy.settingsStore,
-      ships: proxy.ships,
-      fittingImport: proxy.fittingImport,
-      gunFamilies: proxy.gunFamilies,
-      presetFittings: proxy.presetFittings,
-      savedFittings: proxy.savedFittings,
-      clipboard: proxy.clipboard,
-      timer: proxy.timer,
-      chargeCatalog: proxy.chargeCatalog,
-      imageCatalog: proxy.imageCatalog,
-      events: proxy.uiEvents,
-      els: proxy.els,
-      popupGroup: proxy.popupGroup,
-      hintRotator: proxy.hintRotator,
-      hullDatalist: proxy.hullDatalist,
-      preferencesController: proxy.preferencesController,
-      profileController: proxy.profileController,
-      engagementReadout: proxy.engagementReadout,
-      sigResChoice: proxy.sigResChoice,
-      attackerSide: proxy.attackerSide,
-      targetSide: proxy.targetSide,
-      turretController: proxy.turretController,
-      sessionCodec: proxy.sessionCodec,
-      importController: proxy.importController,
-      shareController: proxy.shareController,
-      previewManager: proxy.previewManager,
-      attackerFittingPopup: proxy.attackerFittingPopup,
-      targetFittingPopup: proxy.targetFittingPopup,
-      eventRouter: proxy.eventRouter,
-    })).singleton(),
-  });
+  registerDomControlsModule(cradle);
   wire(cradle);
 }
 
 function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  c.attackerSide.setHost({ persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) });
-  c.targetSide.setHost({ persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify) });
-  c.attackerSide.setFittingPopup(c.attackerFittingPopup);
-  c.targetSide.setFittingPopup(c.targetFittingPopup);
-  c.attackerSide.setFittingPreview(c.previewManager);
-  c.targetSide.setFittingPreview(c.previewManager);
-  c.attackerSide.setImporter(sideImporterFor("attacker", c.importController, c.savedFittings));
-  c.targetSide.setImporter(sideImporterFor("target", c.importController, c.savedFittings));
-  c.importController.setOnConfigPersisted(() => c.controls.persistConfigChange(true));
-  c.importController.setOnProfileTextLoaded((settings) => c.controls.onProfileTextLoaded(settings));
-  c.profileController.setOnProfileLoaded((name) => c.controls.onProfileLoaded(name));
-  c.profileController.setSnapshotSource(() => profileSettingsOf(c.sessionCodec.capture()));
-  c.sessionCodec.setSessionControl(c.controls);
-  c.eventRouter.setHost(c.controls);
+  const sides = combatantSidesOf(c.shipASide, c.shipBSide);
+  const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
+  const host = {
+    persistConfigChange: (notify = true) => c.controls.persistConfigChange(notify),
+    onConfigChange: () => c.controls.onConfigChange(),
+    onDisplayChange: () => c.controls.onDisplayChange(),
+  };
+  forEachSide(sides, (combatant) =>
+    wireCombatantSide(combatant, {
+      fittingPopup: fittingPopups[combatant.side],
+      fittingPreview: c.previewManager,
+      popupGroup: c.popupGroup,
+      host,
+      importer: sideImporterFor(combatant.side, c.importController, c.savedFittings, c.presetFittings),
+    })
+  );
   c.controls.wireControls();
   c.sessionCodec.restoreStartup(c.settingsStore.loadStartupState());
-  c.attackerSide.sections.stats.updateAlignTime();
-  c.targetSide.sections.stats.updateAlignTime();
+  forEachSide(sides, (combatant) => combatant.panel.sections.stats.updateAlignTime());
 }
 
-function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings) {
+function sideImporterFor(side: Side, importer: ImportController, savedFittings: SavedFittings, presetFittings: PresetFittings) {
   return {
-    mostRecentFittingFor: (hullName: string) => savedFittings.mostRecentFor(hullName),
-    importEftFitting: (text: string, persist: boolean) => importer.importEftFitting(side, text, persist),
+    autoLoadFittingTextFor: (hullId: ShipId) => savedFittings.mostRecentFor(hullId)?.text ?? firstPresetText(presetFittings, hullId),
+    importEftFitting: (text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean }) => importer.importEftFitting(side, text, options),
     importFromText: (text: string) => importer.importFromText(side, text),
     importFromClipboard: () => importer.importFromClipboard(side),
   };
+}
+
+function firstPresetText(presetFittings: PresetFittings, hullId: ShipId): string | undefined {
+  const fit = presetFittings.fittingsFor(hullId)[0];
+  return fit ? presetFittings.eftText(hullId, fit) : undefined;
 }

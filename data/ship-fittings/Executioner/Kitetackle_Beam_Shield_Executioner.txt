@@ -1,15 +1,17 @@
 [Executioner, Kitetackle Beam Shield Executioner]
-Small Focused Beam Laser II, Imperial Navy Microwave S
-Small Focused Beam Laser II, Imperial Navy Microwave S
-Small Focused Beam Laser II, Imperial Navy Microwave S
+
+Extruded Compact Heat Sink
+Heat Sink II
+Nanofiber Internal Structure II
 
 Small F-S9 Regolith Compact Shield Extender
 Faint Scoped Warp Disruptor
 5MN Y-T8 Compact Microwarpdrive
 
-Extruded Compact Heat Sink
-Heat Sink II
-Nanofiber Internal Structure II
+Small Focused Beam Laser II, Imperial Navy Microwave S
+Small Focused Beam Laser II, Imperial Navy Microwave S
+Small Focused Beam Laser II, Imperial Navy Microwave S
+[Empty High slot]
 
 Small Ancillary Current Router I
 Small Polycarbon Engine Housing I

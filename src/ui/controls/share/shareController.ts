@@ -1,7 +1,6 @@
-import { serializeProfile, type ClipboardProvider, type SettingsStore } from "../../../appstate";
-import { profileSettingsOf } from "../controlsFormat";
+import { type ClipboardProvider, type ProfileTextCodec, type SettingsStore } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { SessionCodec } from "../session";
 import type { ShareController, ShareEls } from "./shareControllerContract";
 
@@ -14,6 +13,7 @@ export class ShareControllerImpl implements ShareController {
   private readonly popupGroup: PopupGroup;
   private readonly els: ShareEls;
   private readonly profileController: ProfileController;
+  private readonly profileTextCodec: ProfileTextCodec;
   private readonly popupValue: Popup;
   private sharePopupOpen = false;
 
@@ -24,6 +24,7 @@ export class ShareControllerImpl implements ShareController {
     popupGroup: PopupGroup;
     els: ShareEls;
     profileController: ProfileController;
+    profileTextCodec: ProfileTextCodec;
   }) {
     this.clipboard = deps.clipboard;
     this.settingsStore = deps.settingsStore;
@@ -31,25 +32,28 @@ export class ShareControllerImpl implements ShareController {
     this.popupGroup = deps.popupGroup;
     this.els = deps.els;
     this.profileController = deps.profileController;
+    this.profileTextCodec = deps.profileTextCodec;
     this.popupValue = {
       isOpen: () => this.sharePopupOpen,
       open: () => this.openSharePopup(),
       close: () => this.closeSharePopup(),
       focusTrigger: () => this.els.shareLink.focus(),
-      contains: (target) => target instanceof Element && target.closest("#share-popup, #share-link") !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest("#share-popup, #share-link") !== null,
     };
+    this.els.shareLink.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    this.els.shareCopyUrl.addEventListener("click", () => void this.onCopyUrlClicked());
+    this.els.shareCopyText.addEventListener("click", () => void this.onCopyTextClicked());
   }
 
   get popup(): Popup { return this.popupValue; }
 
   async onCopyUrlClicked(): Promise<void> {
-    const profile = profileSettingsOf(this.sessionCodec.capture());
-    const url = this.settingsStore.encodeUrl(profile);
+    const url = this.settingsStore.encodeUrl(this.sessionCodec.captureProfile());
     await this.writeAndClose(url);
   }
 
   async onCopyTextClicked(): Promise<void> {
-    const text = serializeProfile(profileSettingsOf(this.sessionCodec.capture()));
+    const text = this.profileTextCodec.serialize(this.sessionCodec.captureProfile());
     await this.writeAndClose(text);
   }
 

@@ -1,16 +1,4 @@
 [Gaia, Ewar Armor Gaia]
-Armor Command Burst II, Armor Energizing Charge
-Armor Command Burst II, Armor Reinforcement Charge
-Heavy Energy Neutralizer II
-Integrated Sensor Array
-Fighter Support Unit II
-Armor Command Burst II, Rapid Repair Charge
-
-10000MN Afterburner II
-Sentient Drone Navigation Computer
-Sensor Booster II, Scan Resolution Script
-Sensor Booster II, Scan Resolution Script
-Capital Capacitor Booster II
 
 Centus X-Type Explosive Armor Hardener
 Centus X-Type Thermal Armor Hardener
@@ -19,6 +7,19 @@ CONCORD 25000mm Steel Plates
 Centus X-Type EM Armor Hardener
 CONCORD 25000mm Steel Plates
 Centum B-Type Multispectrum Energized Membrane
+
+10000MN Afterburner II
+Sensor Booster II, Scan Resolution Script
+Sensor Booster II, Scan Resolution Script
+Capital Capacitor Booster II
+[Empty Med slot]
+
+Armor Command Burst II, Armor Energizing Charge
+Armor Command Burst II, Armor Reinforcement Charge
+Heavy Energy Neutralizer II
+Armor Command Burst II, Rapid Repair Charge
+[Empty High slot]
+[Empty High slot]
 
 Capital Trimark Armor Pump II
 Capital Trimark Armor Pump II

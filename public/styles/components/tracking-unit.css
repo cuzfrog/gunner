@@ -1,0 +1,24 @@
+@layer components {
+.tracking-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tracking-unit-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.tracking-unit-toggle > .btn {
+  padding: 2px 8px;
+  font-size: 10px;
+}
+
+.tracking-unit-toggle [aria-pressed="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+}

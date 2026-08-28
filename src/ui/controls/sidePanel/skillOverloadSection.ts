@@ -2,7 +2,8 @@ import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
-import type { Popup } from "./popup";
+import type { Popup, PopupGroup } from "../popup";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { ISkillOverloadSection } from "./sidePanelSections";
 
@@ -20,14 +21,20 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private readonly panel: SidePanel;
   private readonly els: SkillOverloadSectionEls;
   private readonly i18n: I18n;
+  private readonly popupGroup: PopupGroup;
   private skillPopupOpen = false;
   readonly popup: Popup;
 
-  constructor({ panel, els, i18n }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n }) {
+  constructor({ panel, els, i18n, popupGroup }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n; popupGroup: PopupGroup }) {
     this.panel = panel;
     this.els = els;
     this.i18n = i18n;
+    this.popupGroup = popupGroup;
     this.popup = this.createSkillPopup();
+    this.els.skills.addEventListener("change", () => this.onSkillOrOverloadChange(true));
+    this.els.overload.addEventListener("change", () => this.onSkillOrOverloadChange(false));
+    this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
+    this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));
   }
 
   skillConditions(): StatConditions {
@@ -40,7 +47,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   setOverloadDisabled(): void {
     const disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined;
     const active = !disabled && this.els.overload.checked;
-    this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));
     this.els.overload.disabled = disabled;
     this.els.overloadButton.disabled = disabled;
@@ -49,7 +55,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
 
   setOverloadActive(active: boolean): void {
     this.els.overload.checked = active;
-    this.els.overloadButton.classList.toggle("active", active);
     this.els.overloadButton.setAttribute("aria-pressed", String(active));
   }
 
@@ -85,7 +90,6 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     const value = String(level);
     for (const button of group.children) {
       const active = button.getAttribute("data-value") === value;
-      button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     }
     const summary = skillOptionLabel(this.i18n, level);
@@ -144,6 +148,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private createSkillButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "btn";
     button.setAttribute("data-value", value);
     button.setAttribute("aria-pressed", "false");
     button.textContent = text;
@@ -154,12 +159,17 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   }
 
   private createSkillPopup(): Popup {
+    const id = sideId(this.panel.side);
     return {
       isOpen: () => this.isSkillPopupOpen(),
       open: () => this.openSkillPopup(),
       close: () => this.closeSkillPopup(),
       focusTrigger: () => this.els.skillTrigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(`#${this.panel.side}-skill-field`) !== null,
+      contains: (domTarget) => domTarget instanceof Element && domTarget.closest(`#${id}-skill-field`) !== null,
     };
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

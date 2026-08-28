@@ -9,6 +9,8 @@
 - Do not reference doc in the code. Code should be agnostic of any external doc.
 - No emojis in commits, issues, PR comments, or code
 - Do not use newline to break sentences, no newline in the same paragraph. Let IDE wrap text.
+- Follow @doc/UI_STYLE_GUIDE.md and @doc/CSS_RULES.md whenever style/ui is touched.
+- Refer to @doc/EFT_FORMAT.md when dealing with ship fittings.
 
 ## Conversation style
 - Be concise, but must explain the reason and provide context information.
@@ -49,21 +51,17 @@
 - Do not add agent info into the commit message.
 - If there are dev branch/PRs, do not create new branch/PRs.
 
-### Web UI
-Follow @doc/UI_STYLE_GUIDE.md
-
 ### Coding Principles
 - Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes. Given a change, do not first attempt to insert into current code base. First look at it from a higher perspective, discover refactor opportunities.
 - Check node_modules for external API type definitions instead of guessing
 - NEVER remove or downgrade code to fix type errors from outdated dependencies; upgrade the dependency instead
 - Naming must reflect the abstraction level. If a newly introduced function violates this, consider renaming the existing function to maintain correct abstraction levels, no matter how many files need to be changed.
-- Avoid helper functions, helpers are bad, they are where code is coupled out of class hierarchy. helper functions are functions that are outside the abstraction hierarchy, containing domain logic, serving the only purpose of code reuse. ("utility/support" functions are not helpers, because they are purely technical without complex domain logic.)
+- Use OOP + DI. Avoid helper functions, helpers are bad, they are where code is coupled out of class hierarchy. helper functions are functions that are outside the abstraction hierarchy, containing domain logic, serving the only purpose of code reuse. ("utility/support" functions are not helpers, because they are purely technical without complex domain logic.)
 - A function's parameters should be data it consumes, parameters should not be its dependencies. A higher-order function should only be used for pure transformation; orchestration with side effects should be a regular function. Context and config types are exempted from this rule.
 - A responsibility should belong to an earlier performer. E.g. if type `Config` can parse the configuration into ready-to-use types, it shouldn't pass raw strings to its clients. A producer's return type is the one its consumer can use directly — no further parsing, validation, or normalization.
-- Logic should be put in pure functions as much as possible. A function is pure when it has no I/O, no state, no dependency on external data, and no side effect on its arguments. Any side effect, e.g. IO, should be limited to the edge layers with minimal logic. This makes the code easier to test where a module's dependencies are mockable in tests so that unit tests can be done with mocks without creating actual dependency.
+- Class logic should be extracted into private pure functions (at the file bottom) as much as possible. For complex logic, you can export the private function using `export {fun as _fun}` for unit testing. But do not export or share private functions.
 - A feature cannot ship by deferring an NFR(non-functional requirement); the NFR must be met in the same change. Do not be scared of change scopes, divide and conquer. Maintain good code architecture, follow context rules even if changes are big.
 - No cyclical dependencies.
-- LLM context is precious, whenever functions touch the chat/message, need to carefully check the context usage. Reduce unnecessary info in the context.
 
 #### Module visibility
 Minimal visibility or public surface of a type or a module. This ensures loose coupling and separation of concerns. If this is violated, e.g. a type or a module exposes multiple functions, it usually means the design is wrong. Do not add `export` unless it's proven neccessary.

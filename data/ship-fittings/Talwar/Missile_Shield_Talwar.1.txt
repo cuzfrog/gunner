@@ -1,20 +1,21 @@
 [Talwar, Missile Shield Talwar]
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
-Light Missile Launcher I, Caldari Navy Nova Light Missile
+
+Type-D Restrained Nanofiber Structure
+Type-D Restrained Nanofiber Structure
+[Empty Low slot]
 
 Alumel-Wired Enduring Sensor Booster, Targeting Range Script
-Missile Guidance Computer I, Missile Range Script
 5MN Quad LiF Restrained Microwarpdrive
+[Empty Med slot]
 
-Type-D Restrained Nanofiber Structure
-F-89 Compact Signal Amplifier
-Type-D Restrained Nanofiber Structure
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
+Light Missile Launcher I, Caldari Navy Nova Light Missile
 
-Small Hydraulic Bay Thrusters I
-Small Rocket Fuel Cache Partition I
-Small Ionic Field Projector I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]

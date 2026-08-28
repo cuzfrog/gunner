@@ -4,9 +4,11 @@ This guide defines the visual language of Gunner's web UI. Follow it when adding
 
 Sources of truth:
 
-- `public/styles.css` — all DOM styling (single stylesheet, no inline styles except the slider `--fill` custom property)
+- `public/styles/**/*.css` — all DOM styling, concatenated at build time into a hashed `dist/styles-*.css`
 - `public/index.html` — markup structure and class naming
+- `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
+- `public/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `popup-item`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 
@@ -45,7 +47,7 @@ Semantic color mapping (used consistently across CSS and canvas):
 
 - Attacker = teal, Target = orange.
 - Good/optimal = green, caution = yellow, warning = orange, danger = red.
-- Hit-chance color scale (see `hitChanceColor` in `controls.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red.
+- Hit-chance color scale (see `hitChanceClass` in `controlsFormat.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red.
 
 ### Alpha variants of accents
 
@@ -72,6 +74,7 @@ Label treatment pattern: uppercase + letter-spacing `0.05em` (labels) / `0.08em`
 - Popup shadow: `0 4px 16px rgba(0,0,0,.45)`; upward-opening popups flip to `0 -4px 16px ...`.
 - Z-index: popups overlay at `z-index: 30`; nothing else elevates.
 - Panel padding `12px`; grid gaps `8px` (inner fields) / `10px` (results) / `14px` (main columns).
+- Canvas overlays inset by `--canvas-overlay-inset` (24px): positions the range legend and combatant portraits inside the canvas frame.
 
 ### Control heights
 
@@ -96,34 +99,38 @@ Variants:
 
 - Toggle group buttons (`.lang-toggle`, `.segmented-control`, `.skill-tuner`, `.tracking-unit-toggle`): 10–12px uppercase; active = accent border + accent text (teal in header, orange for sim-state toggles).
 - Primary action (`.controls button.primary`): blue border/text.
-- Icon-only buttons (`.fitting-trigger`, `.import-fitting-button`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
+- Icon-only buttons (`.icon-button`, `.fitting-eye`, `.propulsion-gear`): transparent bg, no border until contextual, dim icon that turns teal on hover, `line-height: 0` for svg alignment.
 - Danger affordance (`.fitting-delete`): dim -> red on hover.
 
 State rules: hover swaps border/text to teal unless the control uses an orange active state (then hover stays teal, active is orange). Disabled = `opacity` + `cursor: not-allowed` (or `pointer-events: none` for groups).
 
 ### Inputs
 
-Panel inputs/selects: full width, inset bg, mono font 14px, centered text via `text-align-last` where appropriate. Number inputs hide spinners; unit suffixes use `.input-with-unit` + `.input-suffix` (absolute-positioned teal mono text). Selects replace native arrow with `--dropdown-arrow` SVG data-uri; disabled selects swap to `--dropdown-arrow-disabled`.
+All text, number, and select controls use the `.input-field` primitive: full width, inset bg, mono font 14px, centered text for selects via `text-align-last` where appropriate. Number inputs hide spinners; unit suffixes use `.input-with-unit` + `.input-suffix` (absolute-positioned teal mono text). Selects replace native arrow with `--dropdown-arrow` SVG data-uri; disabled selects swap to `--dropdown-arrow-disabled`.
 
-Validation: `.hull-invalid` / `.error` classes apply `--danger-red`.
+Validation: `.hull-invalid` / `.error` classes apply `--danger-red`. The `.effective-value` suffix is interactive: it receives pointer events and negative values get `cursor: help` so their hint tooltip is reachable; `.input-suffix` stays inert.
 
 ### Popups
 
-Anchored dropdowns (`.fitting-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.import-side-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
+Anchored dropdowns (`.ship-select-popup`, `.ammo-popup`, `.skill-popup`, `.paste-popup`, `.menu-popup`): absolute positioned `top: calc(100% + 4px)` relative to a `position: relative` parent, panel bg, 1px border, popup shadow, radius 2px, padding 6px, `z-index: 30`. Visibility is controlled by the `hidden` attribute plus the global `[hidden] { display: none }` rule. Scrollable lists style scrollbars: thin, teal-tinted thumb (`scrollbar-width: thin; scrollbar-color: rgba(92,203,203,.35) transparent` + webkit equivalents).
 
 List entries: transparent-bg buttons, hover fills `var(--bg-inset)`, selected entry gets `border-left: 2px solid var(--accent-teal)` + teal text. Group labels (`.fitting-group-label`) are 10px uppercase Chakra Petch.
 
 ### Sliders
 
-Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) ...)`; JS sets `--fill` percentage (see `controls.ts`). Thumb: 12x16px panel-colored box with teal border and subtle teal glow. Firefox uses `::-moz-range-progress`. Hover moves thumb border to blue. Disabled: dim track/thumb, no glow.
+Custom-styled `.form-slider` (range inputs): 4px track filled via `linear-gradient(90deg, var(--accent-teal) var(--fill, 0%), var(--bg-inset) ...)`; JS sets `--fill` percentage (see `preferencesController.ts`). Thumb: 12x16px panel-colored box with teal border and subtle teal glow. Firefox uses `::-moz-range-progress`. Hover moves thumb border to blue. Disabled: dim track/thumb, no glow.
 
 ### Result cards
 
-`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.hit-chance`) gets a teal border, larger value, and JS-driven semantic color.
+`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.result-card-hit-chance`) gets a teal border, larger value, and hit-chance color classes (`is-optimal`, `is-good`, `is-caution`, `is-warn`, `is-danger`) driven by `hitChanceClass`.
+
+### Canvas overlays
+
+`.range-overlay-legend` sits top-right inside the canvas frame at the overlay inset. `.combatant-portrait` anchors a side portrait at the same inset, `88px` above the canvas bottom (`152px` at ≤480px to clear the wrapped control bar). `.portrait-effects` is an absolutely positioned popover centered below the portrait (`top: calc(100% + 6px)`); effect icons are `.portrait-effect-icon` images that opt back into pointer events with a help cursor.
 
 ## Interaction & accessibility conventions
 
-- Focus: always visible, never removed. Inner controls use `outline: 1px solid var(--accent-teal); outline-offset: -1px`; standalone links/outer triggers use `outline-offset: 2px`. New interactive elements must be added to the matching `:focus-visible` selector group.
+- Focus: always visible, never removed. Layer 1 defines a single `:where(...)` focus policy that gives every interactive element an `outline: 1px solid var(--accent-teal)`. Per-component rules only adjust `outline-offset` (`-1px` for inputs and inset controls, `2px` for buttons, triggers, links, and icon buttons).
 - ARIA: popups follow the trigger pattern (`aria-haspopup`, `aria-expanded`, `aria-controls`); selection uses `aria-selected` / `aria-current="true"` (styled with the teal left-border treatment); toggles use `aria-pressed`.
 - All user-facing strings go through i18n (`data-i18n*` attributes), including `title` and `aria-label`.
 - Icons are inline `<svg><use href="icons.svg#...">` sprites with `fill="currentColor"` so they inherit text color; `display: block` inside buttons.
@@ -132,13 +139,17 @@ Custom-styled `input[type=range]`: 4px track filled via `linear-gradient(90deg, 
 
 Keep JS-side styling minimal and token-aligned:
 
-- Class toggling only (`active`, `unsaved`, `invalid`, `error`, `hidden`) — all visual states live in CSS.
-- Allowed exceptions: setting the `--fill` custom property on sliders, hit-chance semantic color, and canvas drawing colors from the `COLORS` const which must mirror the CSS tokens above.
+- Class toggling only (`hidden` and `is-*` state classes) — all visual states live in CSS.
+- Allowed inline-style exceptions:
+  - Setting `--fill` on `.form-slider` sliders.
+  - Measured `left`/`top` positioning for the fitting preview popup.
+- Canvas drawing colors come from `src/ui/renderer.ts` `COLORS`, which must mirror the CSS tokens above.
 
 ## Layout & responsive
 
 - Page: `.container` max-width 1400px centered. Main layout is a 3-column grid (attacker panel / canvas / target panel).
-- Breakpoints: `1100px` (narrower columns), `900px` (single column, results become horizontal scroller), `480px` (single-column field rows and controls, footer stacks).
+- Breakpoints: `1100px` (narrower columns), `900px` (single column, results become horizontal scroller), `480px` (footer stacks and portrait offset). At viewports `901px` and wider the control bar uses a three-column grid so the zoom group is centered exactly; below that it wraps with flex.
+- Fluid alternatives replace viewport-specific component rules where possible: `.form-field-row` collapses with `auto-fit`/`minmax(min(100%, 110px), 1fr)` so two columns survive the narrowest 1100px side-panel track, `.control-bar` wraps with flex, and the zoom slider shrinks with `min-width`; the remaining 480px rules only style the page-level footer and canvas overlays.
 - Footer: 5-column info grid collapsing progressively across breakpoints.
 
 ## Checklist for new UI work

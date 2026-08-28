@@ -1,14 +1,4 @@
 [Rabisu, Ewar Armor Rabisu]
-Large Coaxial Compact Remote Armor Repairer
-Medium Ghoul Compact Energy Nosferatu
-Large Coaxial Compact Remote Armor Repairer
-Large Coaxial Compact Remote Armor Repairer
-Large Coaxial Compact Remote Armor Repairer
-Large Coaxial Compact Remote Armor Repairer
-
-Small F-RX Compact Capacitor Booster
-10MN Afterburner II
-Small F-RX Compact Capacitor Booster
 
 Medium Ancillary Armor Repairer, Nanite Repair Paste
 Multispectrum Energized Membrane II
@@ -16,6 +6,17 @@ Multispectrum Energized Membrane II
 Thermal Armor Hardener II
 EM Armor Hardener II
 Reactive Armor Hardener
+
+Small F-RX Compact Capacitor Booster
+10MN Afterburner II
+Small F-RX Compact Capacitor Booster
+
+Large Coaxial Compact Remote Armor Repairer
+Large Coaxial Compact Remote Armor Repairer
+Large Coaxial Compact Remote Armor Repairer
+Large Coaxial Compact Remote Armor Repairer
+Large Coaxial Compact Remote Armor Repairer
+Medium Ghoul Compact Energy Nosferatu
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I

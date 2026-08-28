@@ -1,7 +1,7 @@
 [Griffin Navy Issue, Tackle Blaster Shield Griffin Navy Issue]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Small Infectious Scoped Energy Neutralizer
+
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Medium Shield Extender I
 1MN Monopropellant Enduring Afterburner
@@ -9,8 +9,9 @@ Warp Scrambler II
 Fleeting Compact Stasis Webifier
 Enduring Multispectrum Shield Hardener
 
-Micro Auxiliary Power Core I
-Magnetic Field Stabilizer II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Small Infectious Scoped Energy Neutralizer
 
 Small Core Defense Field Extender I
 Small Core Defense Field Extender I

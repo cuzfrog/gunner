@@ -1,20 +1,21 @@
 [Republic Fleet Firetail, Kitetackle AC Armor Republic Fleet Firetail]
-200mm AutoCannon II, Republic Fleet Phased Plasma S
-Small Knave Scoped Energy Nosferatu
-200mm AutoCannon II, Republic Fleet Phased Plasma S
+
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Gyrostabilizer II
+IFFA Compact Damage Control
 
 Warp Scrambler II
 5MN Y-T8 Compact Microwarpdrive
 Stasis Webifier II
 1MN Afterburner II
 
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Gyrostabilizer II
-IFFA Compact Damage Control
+200mm AutoCannon II, Republic Fleet Phased Plasma S
+Small Knave Scoped Energy Nosferatu
+200mm AutoCannon II, Republic Fleet Phased Plasma S
 
-Small Transverse Bulkhead I
-Small Projectile Burst Aerator II
-Small Transverse Bulkhead I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Barrage S x400

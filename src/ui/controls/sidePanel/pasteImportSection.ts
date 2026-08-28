@@ -1,8 +1,8 @@
 import type { I18n } from "../../i18n";
 import type { TimeoutId, Timer } from "../../timer";
 import { escapeHtml } from "../controlsFormat";
-import type { Popup } from "./popup";
-import type { Side } from "./side";
+import type { Popup } from "../popup";
+import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPasteImportSection } from "./sidePanelSections";
 
@@ -27,6 +27,8 @@ export class PasteImportSection implements IPasteImportSection {
     this.i18n = i18n;
     this.timer = timer;
     this.popup = this.createPastePopup();
+    this.els.importFitting.addEventListener("click", () => this.onImportFittingClick());
+    this.els.pastePopup.addEventListener("paste", (event: ClipboardEvent) => this.onPastePopupPaste(event));
   }
 
   onImportFittingClick(): void {
@@ -44,8 +46,8 @@ export class PasteImportSection implements IPasteImportSection {
   showImportHint(key: string, isError = false): void {
     this.clearImportHintTimeout();
     const element = this.els.fittingName;
-    element.classList.toggle("error", isError);
-    element.innerHTML = `<span class="fitting-name-value">${escapeHtml(this.i18n.t(key))}</span>`;
+    element.classList.toggle("is-error", isError);
+    element.innerHTML = `<span class="hull-fitting-name-value truncate">${escapeHtml(this.i18n.t(key))}</span>`;
     element.hidden = false;
     this.importHintTimeout = this.timer.setTimeout(() => {
       this.importHintTimeout = undefined;
@@ -56,7 +58,7 @@ export class PasteImportSection implements IPasteImportSection {
   clearImportHint(): void {
     this.clearImportHintTimeout();
     const element = this.els.fittingName;
-    element.classList.toggle("error", false);
+    element.classList.toggle("is-error", false);
     element.innerHTML = "";
     element.hidden = true;
   }
@@ -83,14 +85,19 @@ export class PasteImportSection implements IPasteImportSection {
   }
 
   private createPastePopup(): Popup {
+    const id = sideId(this.panel.side);
     return {
       isOpen: () => this.isPastePopupOpen(),
       open: () => this.openPastePopup(),
       close: () => this.closePastePopup(),
       focusTrigger: () => this.els.importFitting.focus(),
-      contains: (target) =>
-        target instanceof Element
-        && target.closest(`#${this.panel.side}-paste-popup, #${this.panel.side}-import-fitting`) !== null,
+      contains: (domTarget) =>
+        domTarget instanceof Element
+        && domTarget.closest(`#${id}-paste-popup, #${id}-import-fitting`) !== null,
     };
   }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
 }

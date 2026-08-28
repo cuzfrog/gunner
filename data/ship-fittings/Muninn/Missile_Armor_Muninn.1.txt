@@ -1,21 +1,22 @@
 [Muninn, Missile Armor Muninn]
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
-
-Missile Guidance Computer II, Missile Range Script
-Cap Recharger II
-Missile Guidance Computer II, Missile Range Script
-Medium Cap Battery II
 
 Damage Control II
 Reactive Armor Hardener
 1600mm Steel Plates II
-EM Energized Membrane II
-Corelum C-Type Thermal Energized Membrane
 Multispectrum Energized Membrane II
+[Empty Low slot]
+[Empty Low slot]
+
+Cap Recharger II
+Medium Cap Battery II
+[Empty Med slot]
+[Empty Med slot]
+
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Scourge Heavy Missile
 
 Medium Trimark Armor Pump I
 Medium Thermal Armor Reinforcer II

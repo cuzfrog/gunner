@@ -1,28 +1,30 @@
 import { FakeElement } from "./fakeElement";
 
-const SELECT_IDS = new Set(["sigRes", "attacker-mode", "target-mode", "attacker-skills", "target-skills", "attacker-propulsion", "target-propulsion", "sim-speed", "profile-select"]);
-const TEXTAREA_IDS = new Set(["attacker-paste-input", "target-paste-input"]);
-const IMAGE_IDS = new Set(["attacker-ship-image", "target-ship-image", "attacker-ammo-summary-icon"]);
-const BUTTON_IDS = new Set(["play", "reset", "profile-save", "profile-delete", "share-link", "share-copy-url", "share-copy-text", "import-profile", "import-side-attacker", "import-side-target", "attacker-import-fitting", "target-import-fitting", "attacker-fitting-trigger", "attacker-fitting-eye", "target-fitting-trigger", "target-fitting-eye", "attacker-ammo-trigger", "attacker-ammo-expand", "attacker-propulsion-gear", "target-propulsion-gear", "attacker-skill-trigger", "target-skill-trigger", "attacker-overload-button", "target-overload-button", "tracking-unit-rad", "tracking-unit-score", "lang-en", "lang-zh", "lang-ja"]);
+const SELECT_IDS = new Set(["ship-a-sigRes", "ship-b-sigRes", "ship-a-mode", "ship-b-mode", "ship-a-skills", "ship-b-skills", "ship-a-propulsion", "ship-b-propulsion", "sim-speed"]);
+const TEXTAREA_IDS = new Set(["ship-a-paste-input", "ship-b-paste-input"]);
+const IMAGE_IDS = new Set(["ship-a-ammo-summary-icon", "ship-b-ammo-summary-icon"]);
+const BUTTON_IDS = new Set(["play", "reset", "canvas-settings-trigger", "profile-save", "profile-select-trigger", "profile-delete", "profile-new", "new-profile-confirm", "new-profile-save-current", "new-profile-clear-session", "share-link", "share-copy-url", "share-copy-text", "import-profile", "import-side-ship-a", "import-side-ship-b", "ship-a-import-fitting", "ship-b-import-fitting", "ship-a-ship-select-trigger", "ship-a-fitting-eye", "ship-b-ship-select-trigger", "ship-b-fitting-eye", "ship-a-ammo-trigger", "ship-a-ammo-expand", "ship-b-ammo-trigger", "ship-b-ammo-expand", "ship-a-propulsion-gear", "ship-b-propulsion-gear", "ship-a-skill-trigger", "ship-b-skill-trigger", "ship-a-overload-button", "ship-b-overload-button", "ship-a-ewar-trigger", "ship-b-ewar-trigger", "ship-a-tracking-unit-rad", "ship-a-tracking-unit-score", "ship-b-tracking-unit-rad", "ship-b-tracking-unit-score", "lang-en", "lang-zh", "lang-ja", "confirm-ok", "confirm-cancel", "weapon-range-button"]);
 
 function tagForId(id: string): string {
   if (SELECT_IDS.has(id)) return "SELECT";
   if (TEXTAREA_IDS.has(id)) return "TEXTAREA";
   if (IMAGE_IDS.has(id)) return "IMG";
   if (BUTTON_IDS.has(id)) return "BUTTON";
-  if (id.endsWith("-input") || id === "tracking" || id === "optimal" || id === "falloff" || id === "attacker-hull" || id === "target-hull" || id === "attacker-speed" || id === "attacker-mass" || id === "attacker-inertia" || id === "attacker-range" || id === "target-speed" || id === "target-mass" || id === "target-inertia" || id === "target-range" || id === "target-sig" || id === "initial-distance" || id === "maneuver-aggressivity" || id === "maneuver-aggressivity-slider" || id === "grid-brightness-slider" || id === "profile-name" || id === "attacker-overload" || id === "target-overload") return "INPUT";
+  if (id.endsWith("-input") || id === "ship-a-tracking" || id === "ship-b-tracking" || id === "ship-a-optimal" || id === "ship-b-optimal" || id === "ship-a-falloff" || id === "ship-b-falloff" || id === "ship-a-hull" || id === "ship-b-hull" || id === "ship-a-speed" || id === "ship-a-mass" || id === "ship-a-inertia" || id === "ship-a-range" || id === "ship-a-aggressivity" || id === "ship-a-aggressivity-slider" || id === "ship-a-sig" || id === "ship-b-speed" || id === "ship-b-mass" || id === "ship-b-inertia" || id === "ship-b-range" || id === "ship-b-aggressivity" || id === "ship-b-aggressivity-slider" || id === "ship-b-sig" || id === "initial-distance" || id === "grid-brightness-slider" || id === "zoom-slider" || id === "auto-zoom" || id === "new-profile-name" || id === "ship-a-overload" || id === "ship-b-overload") return "INPUT";
   return "DIV";
 }
 
 export function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
   const docHandlers: Record<string, Array<(event?: unknown) => void>> = {};
+  globalThis.Element = FakeElement as unknown as typeof Element;
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
       if (!elements.has(id)) {
         const el = new FakeElement();
         el.tagName = tagForId(id);
+        el.id = id;
         elements.set(id, el);
       }
       return elements.get(id) as unknown as HTMLElement;
@@ -32,6 +34,11 @@ export function fakeDocument(): Document {
       const el = new FakeElement();
       el.tagName = tag.toUpperCase();
       return el as unknown as HTMLElement;
+    },
+    createDocumentFragment: () => {
+      const fragment = new FakeElement();
+      fragment.tagName = "DOCUMENT_FRAGMENT";
+      return fragment as unknown as DocumentFragment;
     },
     addEventListener: (event: string, handler: (event?: unknown) => void) => { (docHandlers[event] ??= []).push(handler); },
     removeEventListener: (event: string, handler: (event?: unknown) => void) => { const hs = docHandlers[event]; if (hs) docHandlers[event] = hs.filter((h) => h !== handler); },

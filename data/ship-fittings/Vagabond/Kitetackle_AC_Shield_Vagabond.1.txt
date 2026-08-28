@@ -1,21 +1,22 @@
 [Vagabond, Kitetackle AC Shield Vagabond]
-220mm Vulcan AutoCannon II, Hail M
-Medium Infectious Scoped Energy Neutralizer
-220mm Vulcan AutoCannon II, Hail M
-220mm Vulcan AutoCannon II, Hail M
-220mm Vulcan AutoCannon II, Hail M
-220mm Vulcan AutoCannon II, Hail M
-
-Dread Guristas Warp Disruptor
-Stasis Webifier II
-X-Large Ancillary Shield Booster, Navy Cap Booster 400
-50MN Quad LiF Restrained Microwarpdrive
 
 Assault Damage Control II
 Gyrostabilizer II
 Gyrostabilizer II
 Nanofiber Internal Structure II
 Gyrostabilizer II
+
+Dread Guristas Warp Disruptor
+Stasis Webifier II
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+50MN Quad LiF Restrained Microwarpdrive
+
+220mm Vulcan AutoCannon II, Hail M
+Medium Infectious Scoped Energy Neutralizer
+220mm Vulcan AutoCannon II, Hail M
+220mm Vulcan AutoCannon II, Hail M
+220mm Vulcan AutoCannon II, Hail M
+220mm Vulcan AutoCannon II, Hail M
 
 Medium Processor Overclocking Unit I
 Medium Ancillary Current Router II

@@ -1,14 +1,4 @@
 [Adrestia, Kitetackle Blaster Armor Adrestia]
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
-
-Conjunctive Magnetometric ECCM Scanning Array I
-Faint Epsilon Scoped Warp Scrambler
-Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
-50MN Cold-Gas Enduring Microwarpdrive
 
 Reactive Armor Hardener
 1600mm Rolled Tungsten Compact Plates
@@ -17,8 +7,19 @@ Damage Control II
 Explosive Armor Hardener II
 Multispectrum Energized Membrane II
 
-Medium Hybrid Collision Accelerator I
-Medium Hybrid Burst Aerator I
+Faint Epsilon Scoped Warp Scrambler
+Small F-RX Compact Capacitor Booster, Navy Cap Booster 400
+50MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+
+Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+Heavy Neutron Blaster II, Dread Guristas Antimatter Charge M
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 'Augmented' Hammerhead x5

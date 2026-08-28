@@ -1,4 +1,16 @@
 [Cerberus, Missile Shield Cerberus]
+
+Ballistic Control System II
+Ballistic Control System II
+Ballistic Control System II
+[Empty Low slot]
+
+Large Shield Extender II
+Large Shield Extender II
+10MN Afterburner II
+[Empty Med slot]
+[Empty Med slot]
+
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 Polarized Heavy Assault Missile Launcher, Scourge Javelin Heavy Assault Missile
@@ -6,19 +18,8 @@ Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Mis
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 Polarized Heavy Assault Missile Launcher, Caldari Navy Scourge Heavy Assault Missile
 
-Missile Guidance Computer II
-Missile Guidance Computer II, Missile Range Script
-10MN Afterburner II
-Large Shield Extender II
-Large Shield Extender II
-
-Ballistic Control System II
-Missile Guidance Enhancer II
-Ballistic Control System II
-Ballistic Control System II
-
-Medium Warhead Calefaction Catalyst II
 Medium Core Defense Field Extender II
+[Empty Rig slot]
 
 
 Hornet EC-300 x3

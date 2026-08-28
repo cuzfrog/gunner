@@ -3,6 +3,7 @@ import { registerProfileTextModule } from "./profileText";
 import { LocalSavedFittings } from "./savedFittings";
 import { LocalSettingsStore } from "./localSettingsStore";
 import { SettingsParser } from "./settingsParser";
+import { CanonicalProfileEquality } from "./profileEquality";
 import type { AppstateCradle } from "./cradle";
 
 export function registerAppstateModule<T extends AppstateCradle>(cradle: AwilixContainer<T>): void {
@@ -11,5 +12,6 @@ export function registerAppstateModule<T extends AppstateCradle>(cradle: AwilixC
     settingsStore: asClass(LocalSettingsStore).singleton(),
     parser: asClass(SettingsParser).singleton(),
     savedFittings: asClass(LocalSavedFittings).singleton(),
+    profileEquality: asClass(CanonicalProfileEquality).singleton(),
   });
 }

@@ -1,14 +1,4 @@
 [Stabber Fleet Issue, Kitetackle AC Shield Stabber Fleet Issue]
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-425mm AutoCannon II, Hail M
-
-Warp Disruptor II
-Large F-S9 Regolith Compact Shield Extender
-50MN Quad LiF Restrained Microwarpdrive
-Large F-S9 Regolith Compact Shield Extender
 
 Damage Control II
 Fourier Compact Tracking Enhancer
@@ -16,6 +6,17 @@ Gyrostabilizer II
 Gyrostabilizer II
 Tracking Enhancer II
 Gyrostabilizer II
+
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+Warp Disruptor II
+50MN Quad LiF Restrained Microwarpdrive
+
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I
@@ -28,7 +29,6 @@ Acolyte II x6
 
 Republic Fleet Phased Plasma M x1000
 Barrage M x2000
-Agency 'Overclocker' SB3 Dose I x1
 Nanite Repair Paste x30
 Republic Fleet EMP M x1000
 Hail M x2150

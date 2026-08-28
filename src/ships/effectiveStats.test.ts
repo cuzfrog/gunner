@@ -1,11 +1,13 @@
 import { alignTime, fittedStats, maxSpeedForFittedMass } from "./effectiveStats";
 import { fittingOptions } from "./fitting";
 import type { FittedHull, PropulsionModule, PropulsionStats, ShipProfile, SkillLevel, StatConditions } from "./types";
+import type { FactionId, HullTypeId, ShipId } from "../gamedata/ids";
 
 const frigate: ShipProfile = {
+  id: "test-frigate" as ShipId,
   name: "Test Frigate",
-  faction: "Test",
-  hullType: "Standard Frigates",
+  factionId: "test" as FactionId,
+  hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
   baseSpeed: 400,
@@ -13,19 +15,20 @@ const frigate: ShipProfile = {
 };
 
 const battleship: ShipProfile = {
+  id: "test-battleship" as ShipId,
   name: "Test Battleship",
-  faction: "Test",
-  hullType: "Standard Battleships",
+  factionId: "test" as FactionId,
+  hullTypeId: "27" as HullTypeId,
   mass: 100_000_000,
   inertiaModifier: 0.14,
   baseSpeed: 100,
   sigRadius: 470,
 };
 
-const mwd5 = fittingOptions(frigate).find((m) => m.id === "mwd-5mn")!;
-const ab1 = fittingOptions(frigate).find((m) => m.id === "ab-1mn")!;
-const ab10 = fittingOptions(frigate).find((m) => m.id === "ab-10mn")!;
-const mwd500 = fittingOptions(battleship).find((m) => m.id === "mwd-500mn")!;
+const mwd5 = fittingOptions("small").find((m) => m.id === "mwd-5mn")!;
+const ab1 = fittingOptions("small").find((m) => m.id === "ab-1mn")!;
+const ab10 = fittingOptions("small").find((m) => m.id === "ab-10mn")!;
+const mwd500 = fittingOptions("large").find((m) => m.id === "mwd-500mn")!;
 
 describe("naked hull", () => {
   test("returns base hull values and align time without a module", () => {
@@ -36,6 +39,7 @@ describe("naked hull", () => {
       maxSpeed: 400,
       sigRadius: 35,
     });
+    expect(stats.baseMaxSpeed).toBeCloseTo(400, 6);
     expect(stats.alignTime).toBeCloseTo(3 * Math.log(4), 6);
   });
 
@@ -74,9 +78,10 @@ describe("naked hull", () => {
 
   test("Thrasher with 10MN compact afterburner reaches the expected 1536 m/s", () => {
     const thrasher: ShipProfile = {
+      id: "16242" as ShipId,
       name: "Thrasher",
-      faction: "Minmatar Republic",
-      hullType: "Standard Destroyers",
+      factionId: "minmatar-republic" as FactionId,
+      hullTypeId: "420" as HullTypeId,
       mass: 1_600_000,
       inertiaModifier: 2.8,
       baseSpeed: 270,
@@ -110,9 +115,10 @@ describe("naked hull", () => {
 
   test("afterburner with max skills and overload uses the worked example", () => {
     const profile: ShipProfile = {
+      id: "worked-example" as ShipId,
       name: "Worked Example",
-      faction: "Test",
-      hullType: "Standard Frigates",
+      factionId: "test" as FactionId,
+      hullTypeId: "25" as HullTypeId,
       mass: 1_150_000,
       inertiaModifier: 3,
       baseSpeed: 340,
@@ -168,6 +174,7 @@ describe("fittedStats", () => {
     const stats = fittedStats(frigate, fitted, undefined, conditions(5));
     expect(stats.mass).toBe(1_250_000);
     expect(stats.maxSpeed).toBeCloseTo(550, 6);
+    expect(stats.baseMaxSpeed).toBeCloseTo(550, 6);
     expect(stats.inertiaModifier).toBeCloseTo(1.8225, 6);
     expect(stats.sigRadius).toBe(50);
     expect(stats.alignTime).toBeCloseTo(1.8225 * 1_250_000 * Math.log(4) * 1e-6, 6);
@@ -182,6 +189,7 @@ describe("fittedStats", () => {
   test("with propulsion adds active mass and applies the speed and align time", () => {
     const stats = fittedStats(frigate, fitted, ab1, conditions(0));
     expect(stats.mass).toBe(1_750_000);
+    expect(stats.baseMaxSpeed).toBeCloseTo(440, 6);
     expect(stats.maxSpeed).toBeCloseTo(873.714, 3);
     expect(stats.inertiaModifier).toBeCloseTo(2.7, 6);
     expect(stats.sigRadius).toBe(50);
@@ -193,6 +201,20 @@ describe("fittedStats", () => {
     expect(stats.mass).toBe(1_750_000);
     expect(stats.sigRadius).toBe(300);
     expect(stats.alignTime).toBeCloseTo(2.7 * 1_750_000 * Math.log(4) * 1e-6, 6);
+  });
+
+  test("speed override scales baseMaxSpeed proportionally while maxSpeed stays computed", () => {
+    const base = fittedStats(frigate, undefined, mwd5, conditions(0));
+    const scaled = fittedStats(frigate, undefined, mwd5, conditions(0), 1200);
+    expect(scaled.maxSpeed).toBeCloseTo(base.maxSpeed, 0);
+    expect(scaled.baseMaxSpeed).toBeCloseTo(400 * (1200 / base.maxSpeed), 6);
+  });
+
+  test("speed override with skills still applies the navigation factor to the scaled base", () => {
+    const base = fittedStats(frigate, undefined, mwd5, conditions(5));
+    const scaled = fittedStats(frigate, undefined, mwd5, conditions(5), 1812.5);
+    expect(scaled.baseMaxSpeed).toBeCloseTo(250, 6);
+    expect(scaled.maxSpeed).toBeCloseTo(base.maxSpeed, 0);
   });
 
   test("with overload and skills scales the propulsion speed bonus only, leaving align time unchanged", () => {

@@ -1,22 +1,23 @@
 [Broadsword, Ewar Shield Broadsword]
-Pitfall Compact Warp Disruption Field Generator
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Disruption Script
-Prototype Cloaking Device I
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Disruption Script
-Cynosural Field Generator I
-Medium Ghoul Compact Energy Nosferatu
-
-Medium F-RX Compact Capacitor Booster, Navy Cap Booster 400
-Large F-S9 Regolith Compact Shield Extender
-50MN Y-T8 Compact Microwarpdrive
-Explosive Shield Amplifier II
-Kinetic Shield Amplifier II
-Large F-S9 Regolith Compact Shield Extender
 
 Inertial Stabilizers II
 Damage Control II
 Inertial Stabilizers II
 Nanofiber Internal Structure II
+
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+Medium F-RX Compact Capacitor Booster, Navy Cap Booster 400
+50MN Y-T8 Compact Microwarpdrive
+Explosive Shield Amplifier II
+Kinetic Shield Amplifier II
+
+Medium Ghoul Compact Energy Nosferatu
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Hyperspatial Velocity Optimizer II
 Medium Hyperspatial Velocity Optimizer II

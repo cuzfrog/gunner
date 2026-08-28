@@ -1,4 +1,5 @@
 import type { FittingSummary } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import { FakeElement, RIFTER } from "../testSupport";
 import { FittingPreviewManagerImpl, type FittingPreviewManager } from "./fittingPreviewManager";
 import type { FittingPreview } from "./fittingPreview";
@@ -7,7 +8,8 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { FittingImport } from "../../../fitting";
 import type { ShipProfile } from "../../../ships";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../side";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 const PREVIEW_SUMMARY: FittingSummary = {
   hullName: "Rifter",
@@ -28,9 +30,8 @@ function createManager(options: {
   preview?: FittingPreview;
 } = {}) {
   const preview = options.preview ?? createPreview();
-  const attackerPreview = preview;
-  const targetPreview = createPreview();
-  const shipImage = new FakeElement();
+  const shipAPreview = preview;
+  const shipBPreview = createPreview();
   const eye = new FakeElement();
   eye.tagName = "BUTTON";
   const events = new UiEventsImpl();
@@ -38,34 +39,36 @@ function createManager(options: {
     importFitting: vi.fn(),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(() => options.summarize ?? PREVIEW_SUMMARY),
+    canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
   });
-  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(() => "images/ships/Rifter.webp"), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
+  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"), itemIconUrl: vi.fn() });
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): ReturnType<I18n["current"]> => "en"),
     setLanguage: vi.fn(),
     t: vi.fn((key) => key),
     translateDocument: vi.fn(),
   });
-  const attackerSide = {
+  const shipASide: FittingPopupHost = {
     profile: RIFTER,
-    get fittingText() { return options.fittingTextOf ? options.fittingTextOf("attacker") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
-  } as unknown as SidePanel;
-  const targetSide = { profile: undefined, fittingText: undefined } as unknown as SidePanel;
+    get fittingText() { return options.fittingTextOf ? options.fittingTextOf("shipA") : "[Rifter, Brawler]\n200mm AutoCannon I"; },
+    skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }),
+  };
+  const shipBSide: FittingPopupHost = { profile: undefined, fittingText: undefined, skillConditions: () => ({ skillLevel: 5 as const, overloaded: true }) };
   return {
     manager: new FittingPreviewManagerImpl({
       fittingImport,
       imageCatalog,
       i18n,
-      attackerSide,
-      targetSide,
-      previewsBySide: { attacker: attackerPreview, target: targetPreview } as const,
-      shipImageBySide: { attacker: shipImage as unknown as HTMLImageElement, target: shipImage as unknown as HTMLImageElement } as const,
-      eyeBySide: { attacker: eye as unknown as HTMLButtonElement, target: eye as unknown as HTMLButtonElement } as const,
+      shipASide,
+      shipBSide,
+      previewsBySide: { shipA: shipAPreview, shipB: shipBPreview } as const,
+      eyeBySide: { shipA: eye as unknown as HTMLButtonElement, shipB: eye as unknown as HTMLButtonElement } as const,
       events,
     }),
     preview,
-    shipImage,
     eye,
   };
 }
@@ -81,17 +84,17 @@ describe("FittingPreviewManager", () => {
     globalThis.Element = undefined as unknown as typeof Element;
   });
 
-  test("toggle shows the current fitting at the ship image and hides on second toggle", () => {
+  test("toggle shows the current fitting at the eye and hides on second toggle", () => {
     const { manager, preview } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.show).toHaveBeenCalled();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.hide).toHaveBeenCalled();
   });
 
   test("toggle is a no-op when the side has no fitting text", () => {
     const { manager, preview } = createManager({ fittingTextOf: () => undefined });
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     expect(preview.show).not.toHaveBeenCalled();
   });
 
@@ -100,43 +103,43 @@ describe("FittingPreviewManager", () => {
     const anchor = new FakeElement();
     const eye = new FakeElement();
     eye.tagName = "BUTTON";
-    manager.showInMenu("attacker", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
+    manager.showInMenu("shipA", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
     expect(preview.show).toHaveBeenCalledWith(anchor, PREVIEW_SUMMARY, "images/ships/Rifter.webp", expect.any(Function));
     expect(eye.getAttribute("aria-pressed")).toBe("true");
-    manager.showInMenu("attacker", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
+    manager.showInMenu("shipA", "eft", anchor as unknown as HTMLElement, eye as unknown as HTMLButtonElement);
     expect(eye.getAttribute("aria-pressed")).toBe("false");
   });
 
-  test("menu eye is unpressed when the ship image eye is toggled", () => {
+  test("menu eye is unpressed when the eye button is toggled", () => {
     const { manager, eye } = createManager();
     const menuEye = new FakeElement();
     menuEye.tagName = "BUTTON";
-    manager.showInMenu("attacker", "eft", menuEye as unknown as HTMLElement, menuEye as unknown as HTMLButtonElement);
-    manager.toggle("attacker");
+    manager.showInMenu("shipA", "eft", menuEye as unknown as HTMLElement, menuEye as unknown as HTMLButtonElement);
+    manager.toggle("shipA");
     expect(menuEye.getAttribute("aria-pressed")).toBe("false");
     expect(eye.getAttribute("aria-pressed")).toBe("true");
   });
 
   test("pointerdown outside the fitting area hides the preview", () => {
     const { manager, preview } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     const outside = new FakeElement();
     manager.handlePointerDown(outside as unknown as EventTarget);
     expect(preview.hide).toHaveBeenCalled();
   });
 
   test("pointerdown inside the fitting area keeps the preview", () => {
-    const { manager, preview, shipImage } = createManager();
-    manager.toggle("attacker");
+    const { manager, preview, eye } = createManager();
+    manager.toggle("shipA");
     const inside = new FakeElement();
-    inside.closest = () => shipImage;
+    inside.closest = () => eye;
     manager.handlePointerDown(inside as unknown as EventTarget);
     expect(preview.hide).not.toHaveBeenCalled();
   });
 
   test("Escape hides the preview and focuses the eye", () => {
     const { manager, preview, eye } = createManager();
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     manager.handleEscape();
     expect(preview.hide).toHaveBeenCalled();
     expect(eye.focus).toHaveBeenCalled();
@@ -144,15 +147,15 @@ describe("FittingPreviewManager", () => {
 
   test("refresh re-renders an open preview when the fitting text changes", () => {
     const { manager, preview } = createManager({ fittingTextOf: () => "first" });
-    manager.toggle("attacker");
+    manager.toggle("shipA");
     manager.refresh();
     expect(preview.show).toHaveBeenCalledTimes(2);
   });
 
   test("refresh hides the preview when the anchor is no longer connected", () => {
-    const { manager, preview, shipImage } = createManager();
-    manager.toggle("attacker");
-    shipImage.isConnected = false;
+    const { manager, preview, eye } = createManager();
+    manager.toggle("shipA");
+    eye.isConnected = false;
     manager.refresh();
     expect(preview.hide).toHaveBeenCalled();
   });

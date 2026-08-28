@@ -1,18 +1,4 @@
 [Cyclone Fleet Issue, Missile Shield Cyclone Fleet Issue]
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-Drone Link Augmentor I
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-Drone Link Augmentor I
-Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
-
-Multispectrum Shield Hardener II
-Large F-S9 Regolith Compact Shield Extender
-Multispectrum Shield Hardener II
-Large Shield Extender II
-100MN Monopropellant Enduring Afterburner
 
 Damage Control II
 Ballistic Control System II
@@ -20,9 +6,24 @@ Ballistic Control System II
 Nanofiber Internal Structure II
 Ballistic Control System II
 
-Medium Hydraulic Bay Thrusters I
+Large F-S9 Regolith Compact Shield Extender
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+100MN Monopropellant Enduring Afterburner
+
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+Heavy Missile Launcher II, Caldari Navy Mjolnir Heavy Missile
+[Empty High slot]
+[Empty High slot]
+
 Medium EM Shield Reinforcer II
 Medium Ancillary Current Router I
+[Empty Rig slot]
 
 
 Imperial Navy Infiltrator x2

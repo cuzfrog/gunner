@@ -1,15 +1,17 @@
 [Hyena, Kitetackle AC Shield Hyena]
-125mm Gatling AutoCannon II, Barrage S
-125mm Gatling AutoCannon II, Barrage S
+
+Inertial Stabilizers II
+Damage Control II
+Nanofiber Internal Structure II
 
 Republic Fleet Medium Shield Extender
 Stasis Webifier II
 Stasis Webifier II
 5MN Quad LiF Restrained Microwarpdrive
 
-Inertial Stabilizers II
-Damage Control II
-Nanofiber Internal Structure II
+125mm Gatling AutoCannon II, Barrage S
+125mm Gatling AutoCannon II, Barrage S
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer II
 Small Hyperspatial Velocity Optimizer II

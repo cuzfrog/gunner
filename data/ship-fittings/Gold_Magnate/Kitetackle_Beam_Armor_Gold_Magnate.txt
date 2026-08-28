@@ -1,12 +1,4 @@
 [Gold Magnate, Kitetackle Beam Armor Gold Magnate]
-Small Focused Beam Laser II, True Sanshas Multifrequency S
-Small Focused Beam Laser II, True Sanshas Multifrequency S
-Small Focused Beam Laser II, True Sanshas Multifrequency S
-
-Abyssal Stasis Webifier
-1MN Abyssal Afterburner
-5MN Abyssal Microwarpdrive
-Abyssal Stasis Webifier
 
 Small Abyssal Armor Repairer
 Corpum A-Type Multispectrum Energized Membrane
@@ -15,19 +7,24 @@ Chelm's Modified Heat Sink
 Domination Nanofiber Structure
 Syndicate Damage Control
 
+Abyssal Stasis Webifier
+1MN Abyssal Afterburner
+5MN Abyssal Microwarpdrive
+Abyssal Stasis Webifier
+
+Small Focused Beam Laser II, True Sanshas Multifrequency S
+Small Focused Beam Laser II, True Sanshas Multifrequency S
+Small Focused Beam Laser II, True Sanshas Multifrequency S
+
 Small Energy Locus Coordinator II
 Small Energy Locus Coordinator II
 Small Polycarbon Engine Housing I
 
 
-Agency 'Overclocker' SB9 Dose IV x2
-Strong Exile Booster x2
-Standard Drop Booster x1
 Imperial Navy Xray S x2
 Imperial Navy Xray S x1
 True Sanshas Radio S x1
 True Sanshas Radio S x2
-Agency 'Hardshell' TB5 Dose II x2
 Nanite Repair Paste x102
 Aurora S x2
 Aurora S x1

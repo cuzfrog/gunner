@@ -1,11 +1,9 @@
 [Ferox Navy Issue, Tackle Blaster Shield Ferox Navy Issue]
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
-Small Energy Nosferatu II
-Heavy Ion Blaster II, Void M
-Heavy Ion Blaster II, Void M
+
+Co-Processor II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
+Magnetic Field Stabilizer II
 
 Stasis Webifier II
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
@@ -15,10 +13,13 @@ X-Large Ancillary Shield Booster, Navy Cap Booster 400
 X-Large Ancillary Shield Booster, Navy Cap Booster 400
 Multispectrum Shield Hardener II
 
-Co-Processor II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
-Magnetic Field Stabilizer II
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
+Small Energy Nosferatu II
+Heavy Ion Blaster II, Void M
+Heavy Ion Blaster II, Void M
 
 Medium Ancillary Current Router I
 Medium Thermal Shield Reinforcer II

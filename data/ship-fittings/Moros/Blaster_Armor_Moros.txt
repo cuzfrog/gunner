@@ -1,13 +1,4 @@
 [Moros, Blaster Armor Moros]
-Ion Siege Blaster II, Guristas Antimatter Charge XL
-Ion Siege Blaster II, Guristas Antimatter Charge XL
-Ion Siege Blaster II, Guristas Antimatter Charge XL
-Siege Module II
-
-Capital Capacitor Booster I
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Sensor Booster II, Scan Resolution Script
-Small Abyssal Cap Battery
 
 Damage Control II
 Magnetic Field Stabilizer II
@@ -17,6 +8,17 @@ Capital I-a Enduring Armor Repairer
 Reactive Armor Hardener
 Capital I-a Enduring Armor Repairer
 True Sansha Multispectrum Energized Membrane
+
+Capital Capacitor Booster I, Navy Cap Booster 3200
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+[Empty Med slot]
+[Empty Med slot]
+
+Ion Siege Blaster II, Guristas Antimatter Charge XL
+Ion Siege Blaster II, Guristas Antimatter Charge XL
+Ion Siege Blaster II, Guristas Antimatter Charge XL
+[Empty High slot]
+[Empty High slot]
 
 Capital Ancillary Current Router I
 Capital Explosive Armor Reinforcer I
@@ -30,12 +32,9 @@ Cap Booster 3200 x5
 Cap Booster 3200 x24
 Navy Cap Booster 3200 x19
 Oxygen Isotopes x40115
-Expired State Damage Booster IV x1
 Null XL x1996
 Cap Booster 3200 x1
-Quafe Zero Classic x1
 Guristas Antimatter Charge XL x1760
 Void XL x1925
 Guristas Thorium Charge XL x2000
-Expired Federation Defense Booster IV x1
 Targeting Range Script x1

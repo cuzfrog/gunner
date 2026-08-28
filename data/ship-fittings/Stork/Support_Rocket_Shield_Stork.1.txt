@@ -1,26 +1,27 @@
 [Stork, Support Rocket Shield Stork]
-Sisters Expanded Probe Launcher, Sisters Combat Scanner Probe
-Information Command Burst II, Sensor Optimization Charge
-Rocket Launcher II, Mjolnir Rage Rocket
 
-Micro Jump Field Generator
+Co-Processor II
+Co-Processor II
+
+Caldari Navy Medium Shield Extender
 Caldari Navy Medium Shield Extender
 Sensor Booster II, Targeting Range Script
-Caldari Navy Medium Shield Extender
 Multispectrum Shield Hardener II
 5MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
 
-Co-Processor II
-Co-Processor II
+Information Command Burst II, Sensor Optimization Charge
+Rocket Launcher II, Mjolnir Rage Rocket
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Small EM Shield Reinforcer II
 Small Processor Overclocking Unit I
 
 
 Sisters Combat Scanner Probe x8
-Agency 'Overclocker' SB5 Dose II x2
 Sensor Optimization Charge x629
 Nanite Repair Paste x50
-Cladistic-5 'Krai Veles' Filament x27
-Cladistic-5 'Krai Veles' Filament x2
 Mjolnir Rage Rocket x4772

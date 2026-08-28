@@ -1,18 +1,21 @@
 [Flycatcher, Kitetackle Rocket Shield Flycatcher]
-Defender Launcher I, Defender Missile I
-'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
-Interdiction Sphere Launcher I, Warp Disrupt Probe
-'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
-Prototype Cloaking Device I
-'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
-
-5MN Quad LiF Restrained Microwarpdrive
-Medium Shield Extender II
-Faint Epsilon Scoped Warp Scrambler
-Medium Shield Extender II
-EM Shield Amplifier II
 
 Nanofiber Internal Structure II
+
+Medium Shield Extender II
+Medium Shield Extender II
+5MN Quad LiF Restrained Microwarpdrive
+Faint Epsilon Scoped Warp Scrambler
+EM Shield Amplifier II
+
+'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
+'Arbalest' Rocket Launcher I, Caldari Navy Scourge Rocket
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer II
 Small Hyperspatial Velocity Optimizer II

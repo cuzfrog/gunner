@@ -1,0 +1,49 @@
+@layer components {
+.skill-section { margin-top: auto; }
+
+.skill-select { position: relative; }
+
+.skill-popup { width: 100%; }
+
+.skill-summary-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-summary-value {
+  font-size: 11px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  max-width: 120px;
+}
+
+.skill-label {
+  display: block;
+  flex: 1 1 auto;
+  text-align: left;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skill-tuner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+
+.skill-tuner > .btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 0;
+  font-size: 11px;
+}
+
+.skill-tuner [aria-pressed="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+}

@@ -1,12 +1,4 @@
 [Devoter, Armor Devoter]
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-Pitfall Compact Warp Disruption Field Generator, Focused Warp Scrambling Script
-
-50MN Y-T8 Compact Microwarpdrive
-Sensor Booster II, Scan Resolution Script
-Small Capacitor Booster II, Navy Cap Booster 400
 
 Multispectrum Energized Membrane II
 Damage Control II
@@ -15,6 +7,17 @@ Multispectrum Energized Membrane II
 Dark Blood Thermal Armor Hardener
 Imperial Navy EM Armor Hardener
 1600mm Steel Plates II
+
+50MN Y-T8 Compact Microwarpdrive
+Sensor Booster II, Scan Resolution Script
+Small Capacitor Booster II, Navy Cap Booster 400
+
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Trimark Armor Pump II
 Medium Trimark Armor Pump II

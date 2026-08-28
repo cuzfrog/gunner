@@ -1,18 +1,20 @@
 [Blackbird, Missile Armor Blackbird]
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-Light Missile Launcher II, Caldari Navy Scourge Light Missile
-
-Multispectral ECM II
-10MN Afterburner II
-Multispectral ECM II
-Multispectral ECM II
-Multispectral ECM II
-Multispectral ECM II
 
 1600mm Steel Plates II
 Thermal Armor Hardener II
 Kinetic Armor Hardener II
+
+10MN Afterburner II
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+[Empty Med slot]
+
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+Light Missile Launcher II, Caldari Navy Scourge Light Missile
+[Empty High slot]
 
 Medium Trimark Armor Pump I
 Medium Kinetic Armor Reinforcer I
@@ -23,9 +25,5 @@ Hornet EC-300 x1
 Hornet EC-300 x1
 
 
-Noise-25 'Needlejack' Filament x1
 Caldari Navy Scourge Light Missile x318
-Agency 'Overclocker' SB5 Dose II x2
-Signal-5 'Needlejack' Filament x2
-Noise-5 'Needlejack' Filament x1
 Nanite Repair Paste x100

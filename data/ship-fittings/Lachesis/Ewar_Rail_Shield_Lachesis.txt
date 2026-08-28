@@ -1,21 +1,22 @@
 [Lachesis, Ewar Rail Shield Lachesis]
-Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
-Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
-Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
-Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
-
-100MN Y-S8 Compact Afterburner
-Remote Sensor Dampener II, Targeting Range Dampening Script
-Remote Sensor Dampener II, Scan Resolution Dampening Script
-Multispectrum Shield Hardener II
-Large F-S9 Regolith Compact Shield Extender
-Large F-S9 Regolith Compact Shield Extender
-Medium Compact Pb-Acid Cap Battery
 
 Damage Control II
 Nanofiber Internal Structure II
 Nanofiber Internal Structure II
 Power Diagnostic System II
+
+Large F-S9 Regolith Compact Shield Extender
+Large F-S9 Regolith Compact Shield Extender
+100MN Y-S8 Compact Afterburner
+Remote Sensor Dampener II, Targeting Range Dampening Script
+Remote Sensor Dampener II, Scan Resolution Dampening Script
+Multispectrum Shield Hardener II
+Medium Compact Pb-Acid Cap Battery
+
+Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
+Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
+Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
+Dual 150mm Railgun II, Caldari Navy Antimatter Charge M
 
 Medium EM Shield Reinforcer II
 Medium Core Defense Field Extender I

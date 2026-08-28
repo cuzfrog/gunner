@@ -1,21 +1,24 @@
 [Stork, Support Rocket Shield Stork]
-Shield Command Burst II, Shield Harmonizing Charge
-Information Command Burst II, Sensor Optimization Charge
-Shield Command Burst II, Shield Extension Charge
-'Malkuth' Rocket Launcher I
+
+Co-Processor II
+IFFA Compact Damage Control
 
 Medium Shield Extender II
 1MN Afterburner II
 Multispectrum Shield Hardener II
 EM Shield Amplifier II
 Kinetic Shield Amplifier II
-Micro Jump Field Generator
+[Empty Med slot]
 
-Co-Processor II
-IFFA Compact Damage Control
+Shield Command Burst II, Shield Harmonizing Charge
+Information Command Burst II, Sensor Optimization Charge
+Shield Command Burst II, Shield Extension Charge
+'Malkuth' Rocket Launcher I
+[Empty High slot]
+[Empty High slot]
 
-Small Command Processor I
-Small Command Processor I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Scourge Rocket x5000

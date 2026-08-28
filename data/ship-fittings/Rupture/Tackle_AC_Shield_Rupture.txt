@@ -1,0 +1,25 @@
+[Rupture, Tackle AC Shield Rupture]
+
+Gyrostabilizer II
+Gyrostabilizer II
+Damage Control II
+Co-Processor II
+Reactor Control Unit II
+
+Fleeting Compact Stasis Webifier
+X-Large Ancillary Shield Booster, Navy Cap Booster 400
+10MN Y-S8 Compact Afterburner
+Warp Scrambler II
+
+Medium Gremlin Compact Energy Neutralizer
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+425mm AutoCannon II, Hail M
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
+
+
+Acolyte II x5

@@ -1,15 +1,4 @@
 [Hubris, Ewar Blaster Shield Hubris]
-Ion Siege Blaster II, Void XL
-Ion Siege Blaster II, Void XL
-'Sarissa' Thermal Disruptive Lance
-Capital Energy Neutralizer II
-Ion Siege Blaster II, Void XL
-Siege Module II
-
-Tracking Computer II, Tracking Speed Script
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
-Tracking Computer II, Tracking Speed Script
-Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
 
 ORE Reinforced Bulkheads
 ORE Reinforced Bulkheads
@@ -20,8 +9,20 @@ Syndicate Damage Control
 ORE Reinforced Bulkheads
 ORE Reinforced Bulkheads
 
-Capital Transverse Bulkhead II
-Capital Transverse Bulkhead II
+Tracking Computer II, Tracking Speed Script
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+Tracking Computer II, Tracking Speed Script
+Capital F-RX Compact Capacitor Booster, Navy Cap Booster 3200
+
+Ion Siege Blaster II, Void XL
+Ion Siege Blaster II, Void XL
+Capital Energy Neutralizer II
+Ion Siege Blaster II, Void XL
+[Empty High slot]
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Strontium Clathrates x1875

@@ -1,8 +1,10 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedTurret, PresetFittings, TurretCatalog } from "../../fitting";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
+import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
 import type { HitChance, SigResolutionClass } from "../../sim";
 import type { Language } from "../i18n";
-import type { ClipboardProvider, SavedFittings, SettingsStore } from "../../appstate";
+import type { ClipboardProvider, SavedFittings, SessionSettings, SettingsParser, SettingsStore } from "../../appstate";
+import type { DisplayPreferences, ProfileSettings, UserSettings } from "../../appstate";
 import type { Timer } from "../timer";
 
 export function mockSettingsStore(): SettingsStore {
@@ -13,8 +15,9 @@ export function mockSettingsStore(): SettingsStore {
     loadProfile: vi.fn(() => null),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(() => ""),
-    loadPreferences: vi.fn(() => ({ language: "en" as const, trackingUnit: "rad" as const, simSpeed: 4, gridBrightness: 0.2 })),
+    loadPreferences: vi.fn(() => ({ language: "en" as const, shipATrackingUnit: "rad" as const, shipBTrackingUnit: "rad" as const, weaponRangeVisibility: "both" as const, simSpeed: 4, gridBrightness: 0.2 })),
     savePreferences: vi.fn(),
   };
 }
@@ -24,31 +27,52 @@ export function mockShips(): Ships {
     hulls: vi.fn(() => []),
     hullView: vi.fn((profile: ShipProfile, _language: Language): HullView => ({ name: profile.name, hullType: "Frigate", faction: "Unknown" })),
     findHull: vi.fn(() => undefined),
+    findHullById: vi.fn(() => undefined),
+    findHullByName: vi.fn(() => undefined),
     parsePropulsionId: vi.fn(() => undefined),
     fittingOptions: vi.fn(() => []),
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(() => undefined),
-    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, alignTime: 0 })),
+    turretSizeOptions: vi.fn(() => [] as const),
+    fittedStats: vi.fn(() => ({ mass: 0, inertiaModifier: 0, sigRadius: 0, maxSpeed: 0, baseMaxSpeed: 0, alignTime: 0 })),
     maxSpeedForFittedMass: vi.fn(() => 0),
     alignTime: vi.fn(() => 0),
   };
 }
+
+const NAME_FOR_ID: Record<string, string> = {
+  "12608": "Hail S",
+  "21898": "Republic Fleet EMP S",
+};
 
 export function mockFittingImport(): FittingImport {
   return {
     importFitting: vi.fn(() => undefined),
     propulsionVariantNames: vi.fn(() => []),
     propulsionStats: vi.fn(() => undefined),
+    propulsionStatsById: vi.fn(() => undefined),
     summarize: vi.fn(() => undefined),
+    canonicalEftText: vi.fn(() => undefined),
+    itemNameForId: vi.fn((id: TypeId, _language: string) => NAME_FOR_ID[id] ?? id),
   };
+}
+
+const HAIL: TypeId = "12608" as TypeId;
+
+export function mockTurretCatalog(): TurretCatalog {
+  return { resize: vi.fn(() => undefined) };
 }
 
 export function mockChargeCatalog(): ChargeCatalog {
   return {
-    usualForChargeSize: vi.fn(() => "Hail S"),
-    chargesForSize: vi.fn(() => []),
-    chargesForTurret: vi.fn(() => []),
-    withCharge: vi.fn((turret) => turret),
+    usualForChargeSize: vi.fn(() => HAIL),
+    usualForTurret: vi.fn(() => HAIL),
+    chargesForSize: vi.fn(() => CHARGE_OPTIONS),
+    chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
+    withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId })),
+    idForName: vi.fn((name: string) => CHARGE_OPTIONS.find((c) => c.name === name)?.id),
+    has: vi.fn((id: TypeId) => CHARGE_OPTIONS.some((c) => c.id === id)),
+    equivalentInSize: vi.fn(() => undefined),
   };
 }
 
@@ -72,26 +96,27 @@ export function mockHitChance(): HitChance {
   return { compute: vi.fn(() => ({ chance: 0, trackingTerm: 0, rangeTerm: 0 })), findBestDistance: vi.fn(() => 5000) };
 }
 
-const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, string>> = {
-  autocannon: { S: "200mm AutoCannon I", M: "425mm AutoCannon I", L: "800mm Repeating Cannon I", XL: "Quad 800mm Repeating Cannon I" },
-  artillery: { S: "280mm Howitzer Artillery I", M: "720mm Howitzer Artillery I", L: "1400mm Howitzer Artillery I", XL: "Quad 3500mm Siege Artillery I" },
-  pulseLaser: { S: "Gatling Pulse Laser I", M: "Heavy Pulse Laser I", L: "Mega Pulse Laser I", XL: "Dual Giga Pulse Laser I" },
-  beamLaser: { S: "Small Focused Beam Laser I", M: "Heavy Beam Laser I", L: "Tachyon Beam Laser I", XL: "Dual Giga Beam Laser I" },
-  blaster: { S: "Light Neutron Blaster I", M: "Heavy Neutron Blaster I", L: "Neutron Blaster Cannon I", XL: "Ion Siege Blaster I" },
-  railgun: { S: "150mm Railgun I", M: "250mm Railgun I", L: "425mm Railgun I", XL: "Dual 1000mm Railgun I" },
+const MOCK_REPRESENTATIVES: Record<GunFamily, Record<SigResolutionClass, TypeId>> = {
+  autocannon: { S: toTypeId("486"), M: toTypeId("491"), L: toTypeId("496"), XL: toTypeId("37289") },
+  artillery: { S: toTypeId("488"), M: toTypeId("493"), L: toTypeId("498"), XL: toTypeId("20454") },
+  pulseLaser: { S: toTypeId("450"), M: toTypeId("458"), L: toTypeId("462"), XL: toTypeId("20444") },
+  beamLaser: { S: toTypeId("454"), M: toTypeId("459"), L: toTypeId("464"), XL: toTypeId("20446") },
+  blaster: { S: toTypeId("564"), M: toTypeId("568"), L: toTypeId("573"), XL: toTypeId("20450") },
+  railgun: { S: toTypeId("565"), M: toTypeId("570"), L: toTypeId("574"), XL: toTypeId("20448") },
 };
 
 export function mockGunFamilies(): GunFamilies {
   return {
-    familyOf: vi.fn((moduleName: string) => (moduleName.includes("Howitzer") || moduleName.includes("Artillery") ? "artillery" : "autocannon")),
+    familyOf: vi.fn((moduleId: TypeId) => (String(moduleId).includes("Howitzer") || String(moduleId).includes("Artillery") ? "artillery" : "autocannon")),
     representativeOf: vi.fn((family: GunFamily, sigRes: SigResolutionClass) => MOCK_REPRESENTATIVES[family][sigRes]),
   };
 }
 
 export const RIFTER: ShipProfile = {
+  id: "587" as ShipId,
   name: "Rifter",
-  faction: "Minmatar Republic",
-  hullType: "Standard Frigates",
+  factionId: "minmatar-republic" as FactionId,
+  hullTypeId: "25" as HullTypeId,
   mass: 1_000_000,
   inertiaModifier: 3,
   baseSpeed: 365,
@@ -106,15 +131,37 @@ export const TURRET: ImportedTurret = {
   optimal: 600,
   falloff: 3000,
   chargeSize: 1,
-  charge: "Hail S",
+  chargeId: "12608" as TypeId,
   base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
-  moduleName: "200mm AutoCannon I",
+  moduleId: "486" as TypeId,
 };
 
-export const IMPORTED_RIFTER: ImportedFitting = { profile: RIFTER, fittingName: "Brawler", fitted: FITTED, propulsion: undefined, turret: TURRET, cargoCharges: [] };
-export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ name: "Republic Fleet EMP S", quantity: 2000 }] };
+export const IMPORTED_RIFTER: ImportedFitting = {
+  profile: RIFTER,
+  fittingName: "Brawler",
+  fitted: FITTED,
+  propulsion: undefined,
+  turret: TURRET,
+  cargoCharges: [],
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+  boosts: { computers: [], scripts: [] },
+};
+export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };
 
 export const CHARGE_OPTIONS = [
-  { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-  { name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+  { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+  { id: "21898" as TypeId, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
 ] as const;
+
+export function mockParser(): SettingsParser {
+  return {
+    parseUserSettings: vi.fn(() => null),
+    decodeUrlSettings: vi.fn(() => null),
+    fromWire: vi.fn((wire: UserSettings): SessionSettings => ({ version: wire.version, display: { language: wire.language, shipATrackingUnit: wire.shipATrackingUnit, shipBTrackingUnit: wire.shipBTrackingUnit, weaponRangeVisibility: wire.weaponRangeVisibility, simSpeed: wire.simSpeed, gridBrightness: wire.gridBrightness ?? 0.5, autoZoom: wire.autoZoom ?? true, zoomFactor: wire.zoomFactor ?? 1 }, shipA: { speed: wire.shipASpeed, mode: wire.shipAMode, range: wire.shipARange, mass: wire.shipAMass, inertia: wire.shipAInertia, aggressivity: wire.shipAAggressivity ?? 1, skillLevel: wire.shipASkillLevel, overload: wire.shipAOverload ?? true, hull: wire.shipAHullId, propulsion: wire.shipAPropulsion, fitting: wire.shipAFitting, overrides: wire.shipAOverrides ?? {}, fittedHull: wire.shipAFittedHull, ewarActivation: wire.shipAEwarActivation, boosterActivation: wire.shipABoosterActivation, sig: wire.shipASig, tracking: wire.shipATracking ?? 0, sigRes: wire.shipASigRes ?? "S", optimal: wire.shipAOptimal ?? 0, falloff: wire.shipAFalloff ?? 0, ammo: wire.shipAAmmo }, shipB: { speed: wire.shipBSpeed, mode: wire.shipBMode, range: wire.shipBRange, mass: wire.shipBMass, inertia: wire.shipBInertia, aggressivity: wire.shipBAggressivity ?? 1, skillLevel: wire.shipBSkillLevel, overload: wire.shipBOverload ?? true, hull: wire.shipBHullId, propulsion: wire.shipBPropulsion, fitting: wire.shipBFitting, overrides: wire.shipBOverrides ?? {}, fittedHull: wire.shipBFittedHull, ewarActivation: wire.shipBEwarActivation, boosterActivation: wire.shipBBoosterActivation, sig: wire.shipBSig, tracking: wire.shipBTracking ?? 0, sigRes: wire.shipBSigRes ?? "S", optimal: wire.shipBOptimal ?? 0, falloff: wire.shipBFalloff ?? 0, ammo: wire.shipBAmmo }, initialDistance: wire.initialDistance })),
+    toWire: vi.fn(),
+    fromProfile: vi.fn((profile: ProfileSettings, display: DisplayPreferences): SessionSettings => ({ version: profile.version, display, shipA: { speed: profile.shipASpeed, mode: profile.shipAMode, range: profile.shipARange, mass: profile.shipAMass, inertia: profile.shipAInertia, aggressivity: profile.shipAAggressivity ?? 1, skillLevel: profile.shipASkillLevel, overload: profile.shipAOverload ?? true, hull: profile.shipAHullId, propulsion: profile.shipAPropulsion, fitting: profile.shipAFitting, overrides: profile.shipAOverrides ?? {}, fittedHull: profile.shipAFittedHull, ewarActivation: undefined, boosterActivation: undefined, sig: profile.shipASig, tracking: profile.shipATracking ?? 0, sigRes: profile.shipASigRes ?? "S", optimal: profile.shipAOptimal ?? 0, falloff: profile.shipAFalloff ?? 0, ammo: profile.shipAAmmo ?? ("12608" as TypeId) }, shipB: { speed: profile.shipBSpeed, mode: profile.shipBMode, range: profile.shipBRange, mass: profile.shipBMass, inertia: profile.shipBInertia, aggressivity: profile.shipBAggressivity ?? 1, skillLevel: profile.shipBSkillLevel, overload: profile.shipBOverload ?? true, hull: profile.shipBHullId, propulsion: profile.shipBPropulsion, fitting: profile.shipBFitting, overrides: profile.shipBOverrides ?? {}, fittedHull: profile.shipBFittedHull, ewarActivation: undefined, boosterActivation: undefined, sig: profile.shipBSig, tracking: profile.shipBTracking ?? 0, sigRes: profile.shipBSigRes ?? "S", optimal: profile.shipBOptimal ?? 0, falloff: profile.shipBFalloff ?? 0, ammo: profile.shipBAmmo ?? ("12608" as TypeId) }, initialDistance: profile.initialDistance })),
+    parseProfiles: vi.fn(() => ({})),
+    profileFromUnknown: vi.fn(() => null),
+    serialize: vi.fn(() => ""),
+  } as unknown as SettingsParser;
+}

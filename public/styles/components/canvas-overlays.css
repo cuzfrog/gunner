@@ -1,0 +1,109 @@
+@layer components {
+.canvas-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.sim-canvas /* canvas */ {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+}
+
+.range-overlay-legend {
+  position: absolute;
+  top: var(--canvas-overlay-inset);
+  right: var(--canvas-overlay-inset);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: var(--z-canvas-overlay);
+  pointer-events: auto;
+}
+
+.combatant-portrait {
+  position: absolute;
+  bottom: 88px;
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-canvas-overlay);
+  pointer-events: none;
+}
+
+.combatant-portrait-ship-a { left: var(--canvas-overlay-inset); }
+.combatant-portrait-ship-b { right: var(--canvas-overlay-inset); }
+
+.portrait-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+}
+
+.portrait-image-ship-a { border-color: var(--accent-teal); }
+.portrait-image-ship-b { border-color: var(--accent-orange); }
+
+.portrait-effects {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+
+.portrait-effects[hidden] { display: none; }
+
+.portrait-effect-icon {
+  width: 16px;
+  height: 16px;
+  background: var(--bg-panel);
+  border-radius: 2px;
+  pointer-events: auto;
+  cursor: help;
+}
+
+.range-overlay-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  min-height: 22px;
+}
+
+.range-overlay-chip[aria-pressed="true"] {
+  background: var(--bg-inset);
+  border-color: currentColor;
+}
+
+.range-overlay-chip:hover { border-color: var(--accent-teal); }
+
+.range-overlay-chip:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 1px;
+}
+
+.range-overlay-chip.range-overlay-web { color: var(--overlay-web); }
+.range-overlay-chip.range-overlay-grappler { color: var(--overlay-grappler); }
+.range-overlay-chip.range-overlay-scrambler { color: var(--overlay-scrambler); }
+.range-overlay-chip.range-overlay-disruptor { color: var(--overlay-disruptor); }
+
+}

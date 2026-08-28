@@ -1,16 +1,33 @@
-import { Vec2, type EngagementFrame, type HitChanceBreakdown, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import { Vec2, type EngagementFrame, type ShipState, type SimSnapshot, type TurretSpec } from "../sim";
+import type { WeaponRangeVisibility } from "../appstate";
 import type { I18n } from "./i18n";
 import { PALETTE, withAlpha } from "./palette";
 
+export type RangeOverlayKind = "web" | "grappler" | "scrambler" | "disruptor";
+
+export interface RangeOverlay {
+  readonly side: "shipA" | "shipB";
+  readonly kind: RangeOverlayKind;
+  readonly radius: number;
+  readonly falloffRadius?: number;
+}
+
+export interface WeaponRangeTurrets {
+  readonly shipA: TurretSpec;
+  readonly shipB: TurretSpec;
+}
+
 export interface Renderer {
   setGridBrightness(brightness: number): void;
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void;
+  setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void;
+  setManualZoom(autoZoom: boolean, factor: number): void;
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turrets: WeaponRangeTurrets, overlays: readonly RangeOverlay[]): void;
 }
 
 const COLORS = {
   bg: PALETTE.bgDeep,
-  attacker: PALETTE.accentTeal,
-  target: PALETTE.accentOrange,
+  shipA: PALETTE.accentTeal,
+  shipB: PALETTE.accentOrange,
   command: PALETTE.textPrimary,
   transversal: PALETTE.warnYellow,
   los: withAlpha(PALETTE.accentTeal, 0.5),
@@ -18,10 +35,21 @@ const COLORS = {
   scrim: withAlpha(PALETTE.bgDeep, 0.7),
   optimalRing: PALETTE.optimalGreen,
   falloffRing: PALETTE.accentOrange,
+  overlayWeb: PALETTE.overlayWeb,
+  overlayGrappler: PALETTE.overlayGrappler,
+  overlayScrambler: PALETTE.overlayScrambler,
+  overlayDisruptor: PALETTE.overlayDisruptor,
 } as const;
 
+const OVERLAY_COLORS: { readonly [K in RangeOverlayKind]: string } = {
+  web: COLORS.overlayWeb,
+  grappler: COLORS.overlayGrappler,
+  scrambler: COLORS.overlayScrambler,
+  disruptor: COLORS.overlayDisruptor,
+};
+
 const GRID_MAX_ALPHA = 0.4;
-const DEFAULT_GRID_BRIGHTNESS = 0.2;
+const DEFAULT_GRID_BRIGHTNESS = 0.5;
 
 const VECTOR_SCALE = 0.5; // seconds of travel shown as an arrow
 const MIN_SEPARATION_PX = 140;
@@ -43,6 +71,9 @@ export class CanvasRenderer implements Renderer {
   private readonly i18n: I18n;
   private camera: Camera = { center: new Vec2(0, 0), scale: 1 };
   private gridBrightness = DEFAULT_GRID_BRIGHTNESS;
+  private weaponRangeVisibility: WeaponRangeVisibility = "both";
+  private autoZoom = true;
+  private zoomFactor = 1;
 
   constructor({ canvas, i18n }: { canvas: HTMLCanvasElement; i18n: I18n }) {
     this.canvas = canvas;
@@ -57,43 +88,58 @@ export class CanvasRenderer implements Renderer {
     this.gridBrightness = Math.max(0, Math.min(1, brightness));
   }
 
-  draw(snapshot: SimSnapshot, frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
-    this.syncBufferSize();
-    this.updateCamera(snapshot, turret);
-    this.clear();
-    this.drawGrid();
-    this.drawRangeRings(snapshot.attacker.position, turret);
-    this.drawLineOfSight(snapshot.attacker.position, snapshot.target.position, frame.distance);
-    this.drawWorldVector(snapshot.attacker.position, snapshot.attacker.velocity, COLORS.attacker);
-    this.drawWorldVector(snapshot.target.position, snapshot.target.velocity, COLORS.target);
-    this.drawIntendedDirection(snapshot.attacker.position, snapshot.commands.attacker);
-    this.drawIntendedDirection(snapshot.target.position, snapshot.commands.target);
-    this.drawWorldVector(snapshot.target.position, frame.transversalVelocity, COLORS.transversal);
-    this.drawShip(snapshot.attacker, COLORS.attacker);
-    this.drawShip(snapshot.target, COLORS.target);
-    this.drawSpeedLabel(snapshot.attacker, COLORS.attacker, -20);
-    this.drawSpeedLabel(snapshot.target, COLORS.target, 20);
-    this.drawReadouts(frame, hit, turret);
+  setWeaponRangeVisibility(visibility: WeaponRangeVisibility): void {
+    this.weaponRangeVisibility = visibility;
   }
 
-  private updateCamera(snapshot: SimSnapshot, turret: TurretSpec): void {
-    const { attacker, target } = snapshot;
-    const center = attacker.position.add(target.position).scale(0.5);
-    const distance = attacker.position.dist(target.position);
+  setManualZoom(autoZoom: boolean, factor: number): void {
+    this.autoZoom = autoZoom;
+    if (Number.isFinite(factor)) this.zoomFactor = Math.max(0.25, Math.min(4, factor));
+  }
+
+  draw(snapshot: SimSnapshot, frame: EngagementFrame, turrets: WeaponRangeTurrets, overlays: readonly RangeOverlay[]): void {
+    this.syncBufferSize();
+    this.updateCamera(snapshot, turrets);
+    this.clear();
+    this.drawGrid();
+    this.drawWeaponRangeRings(snapshot, turrets);
+    this.drawRangeOverlays(snapshot, overlays);
+    this.drawLineOfSight(snapshot.shipA.position, snapshot.shipB.position, frame.distance);
+    this.drawWorldVector(snapshot.shipA.position, snapshot.shipA.velocity, COLORS.shipA);
+    this.drawWorldVector(snapshot.shipB.position, snapshot.shipB.velocity, COLORS.shipB);
+    this.drawIntendedDirection(snapshot.shipA.position, snapshot.commands.shipA);
+    this.drawIntendedDirection(snapshot.shipB.position, snapshot.commands.shipB);
+    this.drawWorldVector(snapshot.shipB.position, frame.transversalVelocity, COLORS.transversal);
+    this.drawShip(snapshot.shipA, COLORS.shipA);
+    this.drawShip(snapshot.shipB, COLORS.shipB);
+    this.drawSpeedLabel(snapshot.shipA, COLORS.shipA, -20);
+    this.drawSpeedLabel(snapshot.shipB, COLORS.shipB, 20);
+    this.drawReadouts(frame);
+  }
+
+  private updateCamera(snapshot: SimSnapshot, turrets: WeaponRangeTurrets): void {
+    const { shipA, shipB } = snapshot;
+    const center = shipA.position.add(shipB.position).scale(0.5);
+    const distance = shipA.position.dist(shipB.position);
     const minDim = Math.min(this.canvas.width, this.canvas.height);
 
-    const farRadius = Math.max(turret.optimal + turret.falloff, attacker.desiredRange, target.desiredRange, 500);
+    const farRadius = Math.max(
+      turrets.shipA.optimal + turrets.shipA.falloff,
+      turrets.shipB.optimal + turrets.shipB.falloff,
+      shipA.desiredRange, shipB.desiredRange, 500,
+    );
     const farScale = minDim / (2 * farRadius * FAR_MARGIN);
 
     const closeRadius = Math.max((distance * minDim) / (2 * MIN_SEPARATION_PX), MIN_VIEW_RADIUS);
     const closeScale = minDim / (2 * closeRadius);
 
     const fitScale = distance > 0 ? (minDim - 2 * ZOOM_OUT_MARGIN_PX) / distance : farScale;
-    const cameraScale = Math.min(
+    const autoScale = Math.min(
       Math.max(closeScale, farScale / MAX_ZOOM_FACTOR, Math.min(farScale, fitScale)),
       farScale * MAX_ZOOM_FACTOR
     );
-    this.camera = { center, scale: cameraScale };
+    const zoom = this.autoZoom ? 1 : this.zoomFactor;
+    this.camera = { center, scale: autoScale * zoom };
   }
 
   private worldToScreen(p: Vec2): Vec2 {
@@ -143,24 +189,45 @@ export class CanvasRenderer implements Renderer {
     this.ctx.stroke();
   }
 
-  private drawRangeRings(center: Vec2, turret: TurretSpec): void {
-    const c = this.worldToScreen(center);
-    const drawRing = (radius: number, color: string, dash?: number[]) => {
-      if (radius <= 0) return;
-      const rPx = radius * this.camera.scale;
-      this.ctx.strokeStyle = color;
-      this.ctx.lineWidth = 1.5;
-      this.ctx.setLineDash(dash ?? []);
-      this.ctx.beginPath();
-      this.ctx.arc(c.x, c.y, rPx, 0, Math.PI * 2);
-      this.ctx.stroke();
-      this.ctx.setLineDash([]);
-    };
-
-    drawRing(turret.optimal, COLORS.optimalRing, [8, 6]);
-    if (turret.falloff > 0) {
-      drawRing(turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);
+  private drawWeaponRangeRings(snapshot: SimSnapshot, turrets: WeaponRangeTurrets): void {
+    if (this.weaponRangeVisibility === "none") return;
+    if (this.weaponRangeVisibility === "shipA" || this.weaponRangeVisibility === "both") {
+      this.drawRangeRings(snapshot.shipA.position, turrets.shipA);
     }
+    if (this.weaponRangeVisibility === "shipB" || this.weaponRangeVisibility === "both") {
+      this.drawRangeRings(snapshot.shipB.position, turrets.shipB);
+    }
+  }
+
+  private drawRangeRings(center: Vec2, turret: TurretSpec): void {
+    this.drawRingAt(center, turret.optimal, COLORS.optimalRing, [8, 6]);
+    if (turret.falloff > 0) {
+      this.drawRingAt(center, turret.optimal + turret.falloff, COLORS.falloffRing, [4, 6]);
+    }
+  }
+
+  private drawRangeOverlays(snapshot: SimSnapshot, overlays: readonly RangeOverlay[]): void {
+    for (const overlay of overlays) {
+      const center = overlay.side === "shipA" ? snapshot.shipA.position : snapshot.shipB.position;
+      const color = OVERLAY_COLORS[overlay.kind];
+      this.drawRingAt(center, overlay.radius, color, [2, 6]);
+      if (overlay.falloffRadius && overlay.falloffRadius > 0) {
+        this.drawRingAt(center, overlay.radius + overlay.falloffRadius, color, [2, 6]);
+      }
+    }
+  }
+
+  private drawRingAt(center: Vec2, radius: number, color: string, dash?: number[]): void {
+    if (radius <= 0) return;
+    const c = this.worldToScreen(center);
+    const rPx = radius * this.camera.scale;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1.5;
+    this.ctx.setLineDash(dash ?? []);
+    this.ctx.beginPath();
+    this.ctx.arc(c.x, c.y, rPx, 0, Math.PI * 2);
+    this.ctx.stroke();
+    this.ctx.setLineDash([]);
   }
 
   private drawLineOfSight(a: Vec2, b: Vec2, distance: number): void {
@@ -256,16 +323,13 @@ export class CanvasRenderer implements Renderer {
     this.drawTextAt(p.x, p.y + dy, `${formatWithCommas(speed)} m/s`, color, true, 11);
   }
 
-  private drawReadouts(frame: EngagementFrame, hit: HitChanceBreakdown, turret: TurretSpec): void {
+  private drawReadouts(frame: EngagementFrame): void {
     const lines = [
       `${this.i18n.t("readout.time")}${formatTime(frame.time)}`,
       `${this.i18n.t("readout.range")}${this.formatDistance(frame.distance)}`,
       `${this.i18n.t("readout.angular")}${formatWithCommas(frame.angularVelocity, 4)} rad/s`,
       `${this.i18n.t("readout.transversal")}${formatWithCommas(frame.transversalSpeed, 1)} m/s`,
       `${this.i18n.t("readout.radial")}${formatWithCommas(frame.radialVelocity, 1)} m/s`,
-      `${this.i18n.t("readout.optimal")}${this.formatDistance(turret.optimal)}`,
-      `${this.i18n.t("readout.falloff")}${turret.falloff > 0 ? this.formatDistance(turret.falloff) : this.i18n.t("readout.none")}`,
-      `${this.i18n.t("readout.hitChance")}${formatWithCommas(hit.chance * 100, 1)}%`,
     ];
 
     this.ctx.textAlign = "left";

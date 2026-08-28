@@ -4,7 +4,6 @@
 // content with same name → append .N suffix.
 import * as fsp from "node:fs/promises";
 
-import { parseEft } from "../src/fitting/eft";
 import { renameFittingText, summarizeFitting } from "./fittingSummary";
 
 const ROOT = process.cwd() + "/data/ship-fittings";
@@ -42,9 +41,8 @@ async function main(): Promise<void> {
 
   for (const fittingPath of files) {
     const raw = await fsp.readFile(fittingPath, "utf-8");
-    const parsed = parseEft(raw);
     const summary = summarizeFitting(raw);
-    if (!parsed || !summary) {
+    if (!summary) {
       failed++;
       console.error(`[FAIL] ${fittingPath}: could not parse or summarize`);
       continue;

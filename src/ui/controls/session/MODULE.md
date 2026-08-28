@@ -1,25 +1,23 @@
 ---
 no-new-exports:
-  - eventRouter.ts
   - hullDatalist.ts
   - sessionCodec.ts
-  - sessionControl.ts
   - sessionCodec.test.ts
   - module.ts
-  - eventRouter.test.ts
-  - index.ts
-  - inputHandlers.ts
   - startupDefaults.ts
   - module.test.ts
+  - simConfigSource.ts
+  - simConfigSource.test.ts
+  - index.ts
+  - hullDatalist.test.ts
 ---
+
 
 
 
 
 # session
 
-Session state, URL encoding, event routing, and hull datalist.
+Session state, URL encoding, and hull datalist.
 
-The public surface is the abstraction types: `SessionCodec`, `SessionControl`, `EventRouter`, `EventRouterHost`, and `HullDatalist`.
-
-`EventRouter` dispatches input events to the `turret`, `popup`, `sidePanel`, `hints`, and `import` sub-modules, so the sub-module may depend on their public indexes.
+The public surface is the abstraction types: `SessionCodec`, `HullDatalist`, and `SimConfigSource`. The module owns its DOM collection through a private `collectSessionCodecEls`; `HullDatalist` now receives only the `hullOptions` element it needs. `SessionCodec` depends on `SettingsParser` for wire/session conversion: `restore` operates on `SessionSettings`, `fromProfile` delegates to `parser.fromProfile`, and `applyShipState` reads `settings.shipA`/`settings.shipB` directly, projecting each `CombatantSettings` to a `SidePanelState` internally. `SessionCodec` subscribes to `UiEvents` profile events (`profileLoaded`, `newProfile`, `profileTextLoaded`) and emits `sessionRestored`, `sessionReset` and `startupDefaultsApplied` after restoring, resetting or applying defaults.

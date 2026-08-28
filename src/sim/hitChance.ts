@@ -1,18 +1,18 @@
 import type { EngagementFrame, HitChanceBreakdown, TurretSpec } from "./types";
 
 export interface HitChance {
-  compute(frame: EngagementFrame, turret: TurretSpec, targetSigRadius: number): HitChanceBreakdown;
-  findBestDistance(transversalSpeed: number, turret: TurretSpec, targetSigRadius: number): number;
+  compute(frame: EngagementFrame, turret: TurretSpec, opponentSigRadius: number): HitChanceBreakdown;
+  findBestDistance(transversalSpeed: number, turret: TurretSpec, opponentSigRadius: number): number;
 }
 
 export class HitChanceImpl implements HitChance {
-  compute(frame: EngagementFrame, turret: TurretSpec, targetSigRadius: number): HitChanceBreakdown {
+  compute(frame: EngagementFrame, turret: TurretSpec, opponentSigRadius: number): HitChanceBreakdown {
     const { angularVelocity, distance } = frame;
     const { tracking, sigResolution, optimal, falloff } = turret;
 
     let trackingTerm = 0;
-    if (tracking > 0 && targetSigRadius > 0) {
-      trackingTerm = ((angularVelocity * sigResolution) / (tracking * targetSigRadius)) ** 2;
+    if (tracking > 0 && opponentSigRadius > 0) {
+      trackingTerm = ((angularVelocity * sigResolution) / (tracking * opponentSigRadius)) ** 2;
     } else if (angularVelocity > 0) {
       trackingTerm = Number.POSITIVE_INFINITY;
     }
@@ -33,21 +33,21 @@ export class HitChanceImpl implements HitChance {
   }
 
   /**
-   * Find the distance that maximizes hit chance for a target orbiting at
+   * Find the distance that maximizes hit chance for an opponent orbiting at
    * transversal speed `transversalSpeed` (m/s) with the given turret and signature.
    *
    * The exponent being minimized is:
    *   E(d) = (A / d)^2 + ((max(0, d - optimal)) / falloff)^2
-   * where A = (transversalSpeed * sigRes) / (tracking * targetSig).
+   * where A = (transversalSpeed * sigRes) / (tracking * opponentSig).
    */
-  findBestDistance(transversalSpeed: number, turret: TurretSpec, targetSigRadius: number): number {
+  findBestDistance(transversalSpeed: number, turret: TurretSpec, opponentSigRadius: number): number {
     const { tracking, sigResolution, optimal, falloff } = turret;
 
-    if (transversalSpeed <= 0 || tracking <= 0 || targetSigRadius <= 0 || falloff <= 0) {
+    if (transversalSpeed <= 0 || tracking <= 0 || opponentSigRadius <= 0 || falloff <= 0) {
       return optimal;
     }
 
-    const a = (transversalSpeed * sigResolution) / (tracking * targetSigRadius);
+    const a = (transversalSpeed * sigResolution) / (tracking * opponentSigRadius);
     if (Math.abs(a) < 1e-12) return optimal;
 
     // Newton's method on the derivative of E(d) for d >= optimal.

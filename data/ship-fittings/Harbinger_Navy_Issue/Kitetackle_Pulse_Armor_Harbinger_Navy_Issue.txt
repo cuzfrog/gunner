@@ -1,17 +1,4 @@
 [Harbinger Navy Issue, Kitetackle Pulse Armor Harbinger Navy Issue]
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
-Medium Energy Neutralizer II
-
-X5 Enduring Stasis Webifier
-Warp Scrambler II
-Medium Capacitor Booster II, Navy Cap Booster 800
-Medium Micro Jump Drive
-50MN Cold-Gas Enduring Microwarpdrive
 
 Imperial Navy 1600mm Steel Plates
 Damage Control II
@@ -19,6 +6,20 @@ Heat Sink II
 Tracking Enhancer II
 Multispectrum Energized Membrane II
 Heat Sink II
+
+X5 Enduring Stasis Webifier
+Warp Scrambler II
+Medium Capacitor Booster II, Navy Cap Booster 800
+50MN Cold-Gas Enduring Microwarpdrive
+[Empty Med slot]
+
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Focused Medium Pulse Laser II, Imperial Navy Multifrequency M
+Medium Energy Neutralizer II
 
 Medium Trimark Armor Pump I
 Medium Kinetic Armor Reinforcer I

@@ -1,21 +1,43 @@
-import { Vec2, type EngagementFrame, type HitChance, type HitChanceBreakdown, type Kinematics, type ShipConfig, type ShipState, type SimConfig, type Simulation, type SimSnapshot, type TurretSpec } from "../sim";
+import {
+  Vec2,
+  type AttackAssessment,
+  type DisruptionBreakdown,
+  type EngagementFrame,
+  type EngagementFrameComposer,
+  type EngagementView,
+  type EwarProjection,
+  type EwarResolver,
+  type HitChanceBreakdown,
+  type ShipConfig,
+  type ShipState,
+  type SimConfig,
+  type Simulation,
+  type SimSnapshot,
+  type SpeedBreakdown,
+  type TurretSpec,
+} from "../sim";
+import { toTypeId } from "../gamedata/ids";
 import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
 const controls = vi.mocked<Controls>({
   getTurret: vi.fn(),
-  getTargetSig: vi.fn(),
+  getSig: vi.fn(),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
   getGridBrightness: vi.fn(),
+  getAutoZoom: vi.fn(),
+  getZoomFactor: vi.fn(),
+  getWeaponRangeVisibility: vi.fn(() => "both" as const),
+  getOverlays: vi.fn(() => []),
+  hasGuns: vi.fn(),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
 });
 const simulation = vi.mocked<Simulation>({ step: vi.fn(), snapshot: vi.fn(), reset: vi.fn(), update: vi.fn() });
-const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn() });
-const hitChance = vi.mocked<HitChance>({ compute: vi.fn(), findBestDistance: vi.fn() });
-const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn() });
+const engagementFrameComposer = vi.mocked<EngagementFrameComposer>({ compose: vi.fn() });
+const renderer = vi.mocked<Renderer>({ draw: vi.fn(), setGridBrightness: vi.fn(), setWeaponRangeVisibility: vi.fn(), setManualZoom: vi.fn() });
 const loop = vi.mocked<Loop>({
   setTickHandler: vi.fn(),
   start: vi.fn(),
@@ -25,9 +47,23 @@ const loop = vi.mocked<Loop>({
   setSpeed: vi.fn(),
   reset: vi.fn(),
 });
+const ewarResolver = vi.mocked<Required<EwarResolver>>({
+  speedMultiplier: vi.fn(() => 1),
+  speedMultiplierIgnoringRange: vi.fn(() => 1),
+  disruptedTurret: vi.fn((turret) => turret),
+  disruptedTurretIgnoringRange: vi.fn((turret) => turret),
+  propulsionSuppressed: vi.fn(() => false),
+  propulsionSuppressedIgnoringRange: vi.fn(() => false),
+  appliedEffects: vi.fn(() => []),
+  speedBreakdown: vi.fn(),
+  disruptionBreakdown: vi.fn(),
+});
+
+const emptySpeedBreakdown: SpeedBreakdown = { effects: [], propulsionSuppressed: false };
+const emptyDisruptionBreakdown: DisruptionBreakdown = { tracking: [], optimal: [], falloff: [] };
 
 const ship: ShipState = {
-  id: "attacker",
+  id: "shipA",
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
   maxSpeed: 0,
@@ -37,11 +73,11 @@ const ship: ShipState = {
   desiredRange: 5000,
   aggressivity: 1,
 };
-const snapshot: SimSnapshot = { time: 0, attacker: ship, target: ship, commands: { attacker: new Vec2(0, 0), target: new Vec2(0, 0) } };
+const snapshot: SimSnapshot = { time: 0, shipA: ship, shipB: ship, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 const frame: EngagementFrame = {
   time: 0,
-  attacker: ship,
-  target: ship,
+  shipA: ship,
+  shipB: ship,
   relPosition: new Vec2(0, 5000),
   distance: 5000,
   relVelocity: new Vec2(0, 0),
@@ -52,26 +88,49 @@ const frame: EngagementFrame = {
 };
 const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipConfig: ShipConfig = { id: "attacker", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
+const shipConfig: ShipConfig = { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
 const config: SimConfig = {
-  attacker: shipConfig,
-  target: { ...shipConfig, id: "target" },
+  shipA: shipConfig,
+  shipB: { ...shipConfig, id: "shipB" },
   initialDistance: 5000,
 };
+
+function baseView(): EngagementView {
+  const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+}
+
+function sideReadoutValues(
+  speed = 0,
+  tracking = 0.32,
+  optimal = 5000,
+  falloff = 5000,
+  boostedTracking = 0.32,
+  boostedOptimal = 5000,
+  boostedFalloff = 5000,
+  speedBreakdown: SpeedBreakdown | undefined = emptySpeedBreakdown,
+  trackingBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+  optimalBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+  falloffBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
+) {
+  return { speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
+}
 
 describe("AppImpl", () => {
   let app: AppImpl;
 
   beforeEach(() => {
     simulation.snapshot.mockReturnValue(snapshot);
-    kinematics.computeEngagement.mockReturnValue(frame);
-    hitChance.compute.mockReturnValue(hit);
+    engagementFrameComposer.compose.mockReturnValue(baseView());
     controls.getTurret.mockReturnValue(turret);
-    controls.getTargetSig.mockReturnValue(40);
+    controls.getSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
-    app = new AppImpl({ controls, simulation, kinematics, hitChance, renderer, loop });
+    controls.hasGuns.mockReturnValue(true);
+    ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
+    ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
   });
 
   function callbacks(): ControlsCallbacks {
@@ -85,14 +144,56 @@ describe("AppImpl", () => {
     expect(controls.setCallbacks).toHaveBeenCalled();
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, hit, turret);
-    expect(controls.update).toHaveBeenCalledWith(frame, hit);
+    expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turrets: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    expect(controls.update).toHaveBeenCalledWith(baseView(), {
+      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+    });
+  });
+
+  test("renderFrame passes per-side effective attribute values and boosted baselines from view", () => {
+    const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
+    const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
+    const boostedShipA = { ...ship, maxSpeed: 250 };
+    const boostedShipB = { ...ship, id: "shipB" as const, maxSpeed: 120 };
+    const boostedSnapshot = { ...snapshot, shipA: boostedShipA, shipB: boostedShipB };
+    const assessment: AttackAssessment = { boostedTurret, effectiveTurret, hit };
+    const view: EngagementView = {
+      frame,
+      attacks: { shipA: assessment, shipB: assessment },
+      effectiveTurrets: { shipA: effectiveTurret, shipB: effectiveTurret },
+      hits: { shipA: hit, shipB: hit },
+    };
+    simulation.snapshot.mockReturnValue(boostedSnapshot);
+    engagementFrameComposer.compose.mockReturnValue(view);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app.start();
+    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: effectiveTurret, shipB: effectiveTurret }, []);
+    expect(controls.update).toHaveBeenCalledWith(view, {
+      shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
+      shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
+    });
+  });
+
+  test("falls back to the view's effective turret when the composer returns no assessment", () => {
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+    engagementFrameComposer.compose.mockReturnValue(view);
+    app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
+    app.start();
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    expect(controls.update).toHaveBeenCalledWith(view, {
+      shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+      shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
+    });
   });
 
   test("tick steps the simulation and renders", () => {
     app.start();
     app.tick(0.1);
     expect(simulation.step).toHaveBeenCalledWith(0.1);
+    expect(engagementFrameComposer.compose).toHaveBeenCalledTimes(2);
     expect(renderer.draw).toHaveBeenCalledTimes(2);
   });
 
@@ -130,9 +231,59 @@ describe("AppImpl", () => {
     expect(controls.setPlaying).toHaveBeenCalledWith(true);
   });
 
+  test("stop halts the loop and sets playing to false", () => {
+    app.start();
+    callbacks().onStop();
+    expect(loop.stop).toHaveBeenCalled();
+    expect(controls.setPlaying).toHaveBeenCalledWith(false);
+  });
+
   test("speed change is forwarded to the loop", () => {
     app.start();
     callbacks().onSpeedChange(4);
     expect(loop.setSpeed).toHaveBeenCalledWith(4);
+  });
+
+  test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
+    const shipAEwar: EwarProjection = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    };
+    const shipBEwar: EwarProjection = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    };
+    const shipAShip: ShipState = { ...ship, ewar: shipAEwar };
+    const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };
+    simulation.snapshot.mockReturnValue({ ...snapshot, shipA: shipAShip, shipB: shipBShip });
+    const shipASpeed: SpeedBreakdown = {
+      effects: [{ family: "web" as const, moduleId: toTypeId("527"), multiplier: 0.45 }],
+      propulsionSuppressed: false,
+    };
+    const shipBSpeed: SpeedBreakdown = {
+      effects: [{ family: "scrambler" as const, moduleId: toTypeId("448"), multiplier: 1 }],
+      propulsionSuppressed: true,
+    };
+    const disruptionA: DisruptionBreakdown = {
+      tracking: [{ moduleId: toTypeId("2109"), scriptId: undefined, multiplier: 0.8281 }],
+      optimal: [],
+      falloff: [],
+    };
+    const disruptionB: DisruptionBreakdown = {
+      tracking: [],
+      optimal: [{ moduleId: toTypeId("2109"), scriptId: toTypeId("29005"), multiplier: 0.7 }],
+      falloff: [],
+    };
+    ewarResolver.speedBreakdown.mockReturnValueOnce(shipASpeed).mockReturnValueOnce(shipBSpeed);
+    ewarResolver.disruptionBreakdown.mockReturnValueOnce(disruptionA).mockReturnValueOnce(disruptionB);
+    app.start();
+    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
+    expect(ewarResolver.speedBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(1, shipBEwar, 5000);
+    expect(ewarResolver.disruptionBreakdown).toHaveBeenNthCalledWith(2, shipAEwar, 5000);
+    expect(controls.update).toHaveBeenCalledWith(baseView(), {
+      shipA: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipASpeed, trackingBreakdown: disruptionA, optimalBreakdown: disruptionA, falloffBreakdown: disruptionA },
+      shipB: { ...sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000), speedBreakdown: shipBSpeed, trackingBreakdown: disruptionB, optimalBreakdown: disruptionB, falloffBreakdown: disruptionB },
+    });
   });
 });

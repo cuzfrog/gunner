@@ -1,17 +1,4 @@
 [Gnosis, Kitetackle AC Shield Gnosis]
-425mm AutoCannon II, Republic Fleet EMP M
-Skirmish Command Burst I, Interdiction Maneuvers Charge
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
-425mm AutoCannon II, Republic Fleet EMP M
-
-Sensor Booster II, Scan Resolution Script
-Fleeting Compact Stasis Webifier
-Warp Disruptor II
-Tracking Computer II, Optimal Range Script
-50MN Cold-Gas Enduring Microwarpdrive
-Sensor Booster II, Scan Resolution Script
 
 Damage Control II
 Reinforced Bulkheads II
@@ -20,9 +7,23 @@ Reinforced Bulkheads II
 Tracking Enhancer II
 Gyrostabilizer II
 
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
-Medium Transverse Bulkhead II
+Sensor Booster II, Scan Resolution Script
+Fleeting Compact Stasis Webifier
+Warp Disruptor II
+Tracking Computer II, Optimal Range Script
+50MN Cold-Gas Enduring Microwarpdrive
+Sensor Booster II, Scan Resolution Script
+
+425mm AutoCannon II, Republic Fleet EMP M
+Skirmish Command Burst I, Interdiction Maneuvers Charge
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
+425mm AutoCannon II, Republic Fleet EMP M
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hornet EC-300 x2

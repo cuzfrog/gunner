@@ -1,0 +1,25 @@
+[Vexor, Drone Armor Vexor]
+
+Medium Armor Repairer II
+Drone Damage Amplifier II
+Drone Damage Amplifier II
+[Empty Low slot]
+[Empty Low slot]
+
+10MN Monopropellant Enduring Afterburner
+Cap Recharger II
+Cap Recharger II
+Medium Cap Battery II
+
+Dual 150mm Prototype Gauss Gun, Antimatter Charge M
+Dual 150mm Prototype Gauss Gun, Antimatter Charge M
+[Empty High slot]
+[Empty High slot]
+
+Medium Processor Overclocking Unit I
+[Empty Rig slot]
+[Empty Rig slot]
+
+
+Hammerhead I x5
+Hobgoblin I x5

@@ -1,15 +1,17 @@
 [Imperial Navy Slicer, Kitetackle Pulse Armor Imperial Navy Slicer]
-Small Focused Pulse Laser II, Imperial Navy Multifrequency S
-Small Focused Pulse Laser II, Imperial Navy Multifrequency S
-
-5MN Microwarpdrive II
-X5 Enduring Stasis Webifier
 
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Heat Sink II
 IFFA Compact Damage Control
-Multispectrum Coating II
 Heat Sink II
+[Empty Low slot]
+
+5MN Microwarpdrive II
+X5 Enduring Stasis Webifier
+
+Small Focused Pulse Laser II, Imperial Navy Multifrequency S
+Small Focused Pulse Laser II, Imperial Navy Multifrequency S
+[Empty High slot]
 
 Small Energy Locus Coordinator I
 Small Energy Locus Coordinator I

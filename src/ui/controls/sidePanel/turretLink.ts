@@ -1,19 +1,19 @@
-import type { StatConditions } from "../../../ships";
-import type { PopupGroup } from "./popup";
+import type { ShipProfile, StatConditions } from "../../../ships";
+import type { PopupGroup } from "../popup";
 import type { TurretController } from "../turret";
-import type { Side } from "./side";
+import type { Side } from "../side";
 
 export interface PanelTurretLink {
   clear(): void;
   restore(fittingText: string | undefined, conditions: StatConditions): void;
+  setHullProfile(profile: ShipProfile | undefined): void;
 }
 
-export function createPanelTurretLink(side: Side, turret: TurretController, popupGroup: PopupGroup): PanelTurretLink {
-  if (side === "attacker") return new AttackerPanelTurretLink(turret, popupGroup);
-  return new NoopPanelTurretLink();
+export function createPanelTurretLink(side: Side, turretControllers: Record<Side, TurretController>, popupGroup: PopupGroup): PanelTurretLink {
+  return new PanelTurretLinkImpl(turretControllers[side], popupGroup);
 }
 
-class AttackerPanelTurretLink implements PanelTurretLink {
+class PanelTurretLinkImpl implements PanelTurretLink {
   constructor(private readonly turret: TurretController, private readonly popupGroup: PopupGroup) {}
 
   clear(): void {
@@ -24,9 +24,8 @@ class AttackerPanelTurretLink implements PanelTurretLink {
   restore(fittingText: string | undefined, conditions: StatConditions): void {
     this.turret.restore(fittingText, conditions);
   }
-}
 
-class NoopPanelTurretLink implements PanelTurretLink {
-  clear(): void {}
-  restore(_fittingText: string | undefined, _conditions: StatConditions): void {}
+  setHullProfile(profile: ShipProfile | undefined): void {
+    this.turret.setHullProfile(profile);
+  }
 }

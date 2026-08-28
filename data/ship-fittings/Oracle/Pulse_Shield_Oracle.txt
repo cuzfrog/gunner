@@ -1,27 +1,28 @@
 [Oracle, Pulse Shield Oracle]
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
-Mega Pulse Laser II, Conflagration L
+
+Heat Sink II
+Capacitor Power Relay II
+Heat Sink II
+Capacitor Power Relay II
+Heat Sink II
+Heat Sink II
 
 Large F-S9 Regolith Compact Shield Extender
 50MN Cold-Gas Enduring Microwarpdrive
 Large Compact Pb-Acid Cap Battery
 
-Heat Sink II
-Capacitor Power Relay II
-Heat Sink II
-Capacitor Power Relay II
-Heat Sink II
-Heat Sink II
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
+Mega Pulse Laser II, Conflagration L
 
 Medium Low Friction Nozzle Joints I
 Medium Low Friction Nozzle Joints I
-Medium Energy Collision Accelerator II
+[Empty Rig slot]
 
 
 Conflagration L x18

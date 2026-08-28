@@ -1,6 +1,7 @@
-import { type AwilixContainer } from "awilix";
+import { asClass, type AwilixContainer } from "awilix";
 import type { AppstateCradle } from "..";
+import { LocalProfileTextCodec } from "./profileTextCodec";
 
-export function registerProfileTextModule<T extends AppstateCradle>(_cradle: AwilixContainer<T>): void {
-  // Pure functions (parseProfile, serializeProfile) are exported from index.ts; no DI wiring required.
+export function registerProfileTextModule<T extends AppstateCradle>(cradle: AwilixContainer<T>): void {
+  cradle.register({ profileTextCodec: asClass(LocalProfileTextCodec).singleton() });
 }

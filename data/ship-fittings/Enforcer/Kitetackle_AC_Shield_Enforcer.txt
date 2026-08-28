@@ -1,23 +1,24 @@
 [Enforcer, Kitetackle AC Shield Enforcer]
-Cynosural Field Generator I
-220mm Vulcan AutoCannon II, Arch Angel EMP M
-220mm Vulcan AutoCannon II, Arch Angel EMP M
-220mm Vulcan AutoCannon II, Arch Angel EMP M
-Covert Ops Cloaking Device II
-220mm Vulcan AutoCannon II, Arch Angel EMP M
-220mm Vulcan AutoCannon II, Arch Angel EMP M
-
-Large Shield Extender II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Warp Disruptor II
-50MN Cold-Gas Enduring Microwarpdrive
 
 Gyrostabilizer II
 Damage Control II
 Gyrostabilizer II
 Nanofiber Internal Structure II
 Gyrostabilizer II
+
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Warp Disruptor II
+50MN Cold-Gas Enduring Microwarpdrive
+
+220mm Vulcan AutoCannon II, Arch Angel EMP M
+220mm Vulcan AutoCannon II, Arch Angel EMP M
+220mm Vulcan AutoCannon II, Arch Angel EMP M
+Covert Ops Cloaking Device II
+220mm Vulcan AutoCannon II, Arch Angel EMP M
+220mm Vulcan AutoCannon II, Arch Angel EMP M
+[Empty High slot]
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

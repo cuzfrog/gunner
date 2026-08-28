@@ -1,4 +1,6 @@
-import type { SigResolutionClass } from "../sim";
+import type { TypeId } from "../gamedata/ids";
+import type { ChargeStats, FittingDb } from "../gamedata/fittingDb";
+import { FITTING_DB } from "../gamedata/fittingDb";
 import {
   ChargeCatalogImpl,
   _chargeFamilyOf,
@@ -9,26 +11,63 @@ import {
   type ImportedTurret,
 } from "./chargeCatalog";
 import { GunFamiliesImpl } from "./gunFamilies";
-import { CHARGES as FittingDbCharges } from "./fittingDb";
-import type { ChargeStats } from "./fittingDb";
 
-const TEST_CHARGES: Readonly<Record<string, ChargeStats>> = {
-  "Caldari Navy Antimatter Charge S": { trackingMultiplier: 0.75, rangeMultiplier: 0.4 },
-  "Federation Navy Antimatter Charge S": { trackingMultiplier: 0.75, rangeMultiplier: 0.4 },
-  "Imperial Navy Multifrequency S": { trackingMultiplier: 0.75, rangeMultiplier: 0.6 },
-  "Republic Fleet EMP S": { rangeMultiplier: 0.5 },
-  "Shadow Iron Charge S": { trackingMultiplier: 0.85, rangeMultiplier: 0.5 },
-  "Titanium Sabot S": { trackingMultiplier: 1.2, rangeMultiplier: 1 },
-  "Carbonized Lead M": { trackingMultiplier: 1.05, rangeMultiplier: 1.6 },
-  "Caldari Navy Scourge M": { trackingMultiplier: 0.75, rangeMultiplier: 0.5 },
-  "Republic Fleet Carbonized Lead XL": { trackingMultiplier: 1.05, rangeMultiplier: 1.6 },
-  "Nuclear L": { rangeMultiplier: 1.6 },
+function typeId(name: string): TypeId {
+  return `charge-${name.replace(/\s+/g, "-").toLowerCase()}` as TypeId;
+}
+
+function charge(name: string, multipliers: Partial<Pick<ChargeStats, "trackingMultiplier" | "rangeMultiplier" | "falloffMultiplier">> = {}): ChargeStats {
+  return { id: typeId(name), name, trackingMultiplier: 1, rangeMultiplier: 1, falloffMultiplier: 1, ...multipliers };
+}
+
+const CALDARI_NAVY_ANTIMATTER_CHARGE_S = charge("Caldari Navy Antimatter Charge S", { trackingMultiplier: 0.75, rangeMultiplier: 0.4 });
+const FEDERATION_NAVY_ANTIMATTER_CHARGE_S = charge("Federation Navy Antimatter Charge S", { trackingMultiplier: 0.75, rangeMultiplier: 0.4 });
+const IMPERIAL_NAVY_MULTIFREQUENCY_S = charge("Imperial Navy Multifrequency S", { trackingMultiplier: 0.75, rangeMultiplier: 0.6 });
+const REPUBLIC_FLEET_EMP_S = charge("Republic Fleet EMP S", { rangeMultiplier: 0.5 });
+const SHADOW_IRON_CHARGE_S = charge("Shadow Iron Charge S", { trackingMultiplier: 0.85, rangeMultiplier: 0.5 });
+const TITANIUM_SABOT_S = charge("Titanium Sabot S", { trackingMultiplier: 1.2, rangeMultiplier: 1 });
+const CARBONIZED_LEAD_M = charge("Carbonized Lead M", { trackingMultiplier: 1.05, rangeMultiplier: 1.6 });
+const CALDARI_NAVY_SCOURGE_M = charge("Caldari Navy Scourge M", { trackingMultiplier: 0.75, rangeMultiplier: 0.5 });
+const REPUBLIC_FLEET_CARBONIZED_LEAD_XL = charge("Republic Fleet Carbonized Lead XL", { trackingMultiplier: 1.05, rangeMultiplier: 1.6 });
+const NUCLEAR_L = charge("Nuclear L", { rangeMultiplier: 1.6 });
+const HAIL_S = charge("Hail S", { trackingMultiplier: 1, rangeMultiplier: 0.5 });
+const MISSING_CHARGE = typeId("Missing Charge S");
+
+const TEST_CHARGES: Record<string, ChargeStats> = {
+  [CALDARI_NAVY_ANTIMATTER_CHARGE_S.id]: CALDARI_NAVY_ANTIMATTER_CHARGE_S,
+  [FEDERATION_NAVY_ANTIMATTER_CHARGE_S.id]: FEDERATION_NAVY_ANTIMATTER_CHARGE_S,
+  [IMPERIAL_NAVY_MULTIFREQUENCY_S.id]: IMPERIAL_NAVY_MULTIFREQUENCY_S,
+  [REPUBLIC_FLEET_EMP_S.id]: REPUBLIC_FLEET_EMP_S,
+  [SHADOW_IRON_CHARGE_S.id]: SHADOW_IRON_CHARGE_S,
+  [TITANIUM_SABOT_S.id]: TITANIUM_SABOT_S,
+  [CARBONIZED_LEAD_M.id]: CARBONIZED_LEAD_M,
+  [CALDARI_NAVY_SCOURGE_M.id]: CALDARI_NAVY_SCOURGE_M,
+  [REPUBLIC_FLEET_CARBONIZED_LEAD_XL.id]: REPUBLIC_FLEET_CARBONIZED_LEAD_XL,
+  [NUCLEAR_L.id]: NUCLEAR_L,
 };
 
-const gunFamilies = new GunFamiliesImpl();
+function chargeByName(name: string): ChargeStats {
+  if (name === HAIL_S.name) return HAIL_S;
+  const found = Object.values(TEST_CHARGES).find((c) => c.name === name);
+  if (!found) throw new Error(`Missing charge ${name}`);
+  return found;
+}
+
+function turretIdForName(name: string): TypeId {
+  for (const stats of Object.values(FITTING_DB.turrets)) {
+    if (stats.name === name) return stats.id;
+  }
+  for (const stats of Object.values(FITTING_DB.modules)) {
+    if (stats.name === name) return stats.id;
+  }
+  throw new Error(`Missing module/turret ${name}`);
+}
+
+const gunFamilies = new GunFamiliesImpl({ fittingDb: FITTING_DB });
 
 function buildCatalog(charges = TEST_CHARGES): ChargeCatalogImpl {
-  return new ChargeCatalogImpl({ fittingDb: { charges }, gunFamilies });
+  const fittingDb: FittingDb = { ...FITTING_DB, charges };
+  return new ChargeCatalogImpl({ fittingDb, gunFamilies });
 }
 
 function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
@@ -38,9 +77,9 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     optimal: 600,
     falloff: 3000,
     chargeSize: 1,
-    charge: "Titanium Sabot S",
+    chargeId: TITANIUM_SABOT_S.id,
     base: { tracking: 0.315, optimal: 600, falloff: 3000 },
-    moduleName: "150mm Railgun I",
+    moduleId: turretIdForName("150mm Railgun I"),
     ...overrides,
   };
 }
@@ -65,17 +104,17 @@ describe("ChargeCatalogImpl", () => {
 
   test("usualForChargeSize prefers navy then shortest range then alphabetical", () => {
     const catalog = buildCatalog();
-    expect(catalog.usualForChargeSize(1)).toBe("Caldari Navy Antimatter Charge S");
+    expect(catalog.usualForChargeSize(1)).toBe(chargeByName("Caldari Navy Antimatter Charge S").id);
   });
 
   test("usualForChargeSize falls back to any charge when no navy exists for size", () => {
     const catalog = buildCatalog();
-    expect(catalog.usualForChargeSize(4)).toBe("Republic Fleet Carbonized Lead XL");
+    expect(catalog.usualForChargeSize(4)).toBe(chargeByName("Republic Fleet Carbonized Lead XL").id);
   });
 
   test("usualForChargeSize does not confuse XL with L", () => {
     const catalog = buildCatalog();
-    expect(catalog.usualForChargeSize(3)).toBe("Nuclear L");
+    expect(catalog.usualForChargeSize(3)).toBe(chargeByName("Nuclear L").id);
     expect(catalog.chargesForSize(4).some((c) => c.name.endsWith(" L"))).toBe(false);
   });
 
@@ -91,11 +130,12 @@ describe("ChargeCatalogImpl", () => {
       "Titanium Sabot S",
     ]);
     expect(s[0]).toEqual({
+      id: chargeByName("Caldari Navy Antimatter Charge S").id,
       name: "Caldari Navy Antimatter Charge S",
       trackingMultiplier: 0.75,
       rangeMultiplier: 0.4,
       falloffMultiplier: 1,
-    } as ChargeOption);
+    });
   });
 
   test("chargesForSize normalizes missing multipliers to 1", () => {
@@ -103,11 +143,12 @@ describe("ChargeCatalogImpl", () => {
     const s = catalog.chargesForSize(1);
     const republic = s.find((c) => c.name === "Republic Fleet EMP S");
     expect(republic).toEqual({
+      id: chargeByName("Republic Fleet EMP S").id,
       name: "Republic Fleet EMP S",
       trackingMultiplier: 1,
       rangeMultiplier: 0.5,
       falloffMultiplier: 1,
-    } as ChargeOption);
+    });
   });
 
   test("chargesForSize returns empty array for unknown size", () => {
@@ -120,30 +161,30 @@ describe("ChargeCatalogImpl", () => {
     const base: ImportedTurret = turret({
       base: { tracking: 0.4, optimal: 1000, falloff: 5000 },
     });
-    const next = catalog.withCharge(base, "Caldari Navy Antimatter Charge S");
-    expect(next.charge).toBe("Caldari Navy Antimatter Charge S");
+    const next = catalog.withCharge(base, chargeByName("Caldari Navy Antimatter Charge S").id);
+    expect(next.chargeId).toBe(chargeByName("Caldari Navy Antimatter Charge S").id);
     expect(next.tracking).toBeCloseTo(0.4 * 0.75, 6);
     expect(next.optimal).toBeCloseTo(1000 * 0.4, 6);
     expect(next.falloff).toBeCloseTo(5000 * 1, 6);
     expect(next.base).toEqual(base.base);
     expect(next.sigResolutionClass).toBe("S");
     expect(next.chargeSize).toBe(1);
-    expect(next.moduleName).toBe(base.moduleName);
+    expect(next.moduleId).toBe(base.moduleId);
   });
 
   test("withCharge returns input unchanged for unknown charge", () => {
     const catalog = buildCatalog();
     const base = turret();
-    expect(catalog.withCharge(base, "Unknown Charge S")).toBe(base);
+    expect(catalog.withCharge(base, MISSING_CHARGE)).toBe(base);
   });
 
   test("chargesForTurret filters by turret family and charge size", () => {
     const catalog = buildCatalog();
-    const autocannon = turret({ moduleName: "200mm AutoCannon I", chargeSize: 1, charge: "Hail S" });
+    const autocannon = turret({ moduleId: turretIdForName("200mm AutoCannon I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
     const projectileS = catalog.chargesForTurret(autocannon);
     expect(projectileS.map((c) => c.name)).toEqual(["Republic Fleet EMP S", "Titanium Sabot S"]);
 
-    const railgun = turret({ moduleName: "150mm Railgun I", chargeSize: 1, charge: "Titanium Sabot S" });
+    const railgun = turret({ moduleId: turretIdForName("150mm Railgun I"), chargeSize: 1, chargeId: chargeByName("Titanium Sabot S").id });
     const hybridS = catalog.chargesForTurret(railgun);
     expect(hybridS.map((c) => c.name)).toEqual([
       "Caldari Navy Antimatter Charge S",
@@ -151,14 +192,39 @@ describe("ChargeCatalogImpl", () => {
       "Shadow Iron Charge S",
     ]);
 
-    const pulse = turret({ moduleName: "Gatling Pulse Laser I", chargeSize: 1, charge: "Hail S" });
+    const pulse = turret({ moduleId: turretIdForName("Gatling Pulse Laser I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
     const laserS = catalog.chargesForTurret(pulse);
     expect(laserS.map((c) => c.name)).toEqual(["Imperial Navy Multifrequency S"]);
   });
 
+  test("usualForTurret prefers a navy charge from the turret's own family", () => {
+    const catalog = buildCatalog();
+    const autocannon = turret({ moduleId: turretIdForName("200mm AutoCannon I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
+    expect(catalog.usualForTurret(autocannon)).toBe(chargeByName("Republic Fleet EMP S").id);
+
+    const railgun = turret({ moduleId: turretIdForName("150mm Railgun I"), chargeSize: 1, chargeId: chargeByName("Titanium Sabot S").id });
+    expect(catalog.usualForTurret(railgun)).toBe(chargeByName("Caldari Navy Antimatter Charge S").id);
+
+    const pulse = turret({ moduleId: turretIdForName("Gatling Pulse Laser I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
+    expect(catalog.usualForTurret(pulse)).toBe(chargeByName("Imperial Navy Multifrequency S").id);
+  });
+
+  test("usualForTurret falls back to size-based usual for an unrecognized turret", () => {
+    const catalog = buildCatalog();
+    const unknown = turret({ moduleId: turretIdForName("5MN Microwarpdrive I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
+    expect(catalog.usualForTurret(unknown)).toBe(chargeByName("Caldari Navy Antimatter Charge S").id);
+  });
+
+  test("withCharge keeps the turret unchanged when the charge belongs to another family", () => {
+    const catalog = buildCatalog();
+    const autocannon = turret({ moduleId: turretIdForName("200mm AutoCannon I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
+    const unchanged = catalog.withCharge(autocannon, chargeByName("Caldari Navy Antimatter Charge S").id);
+    expect(unchanged).toBe(autocannon);
+  });
+
   test("chargesForTurret preserves all charges for turrets without a known family", () => {
     const catalog = buildCatalog();
-    const unknown = turret({ moduleName: "Unknown Turret I", chargeSize: 1, charge: "Hail S" });
+    const unknown = turret({ moduleId: turretIdForName("5MN Microwarpdrive I"), chargeSize: 1, chargeId: chargeByName("Hail S").id });
     expect(catalog.chargesForTurret(unknown).map((c) => c.name)).toEqual([
       "Caldari Navy Antimatter Charge S",
       "Federation Navy Antimatter Charge S",
@@ -171,10 +237,10 @@ describe("ChargeCatalogImpl", () => {
 
   test("chargeFamilyOf covers all charges in the generated fitting database", () => {
     const knownUnknowns = new Set(["Exotic Plasma", "Mystic", "Occult"]);
-    for (const name of Object.keys(FittingDbCharges)) {
-      const family = _chargeFamilyOf(name);
+    for (const stats of Object.values(FITTING_DB.charges)) {
+      const family = _chargeFamilyOf(stats.name);
       if (family !== undefined) continue;
-      const stem = name;
+      const stem = stats.name;
       const size = stem.match(/ (S|M|L|XL)$/)?.[0];
       const base = size ? stem.slice(0, -size.length) : stem;
       const tokens = base.split(/\s+/);
@@ -183,12 +249,61 @@ describe("ChargeCatalogImpl", () => {
     }
   });
 
+  test("has returns true for a known charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.has(chargeByName("Republic Fleet EMP S").id)).toBe(true);
+    expect(catalog.has(chargeByName("Titanium Sabot S").id)).toBe(true);
+  });
+
+  test("has returns false for an unknown charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.has(MISSING_CHARGE)).toBe(false);
+    expect(catalog.has("0" as TypeId)).toBe(false);
+  });
+
+  test("equivalentInSize returns undefined when the target size has no matching stem", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 2)).toBeUndefined();
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 2)).toBeUndefined();
+  });
+
+  test("equivalentInSize maps a charge to the same-stem charge in the target size with matching target", () => {
+    const titaniumSabotM = charge("Titanium Sabot M", { trackingMultiplier: 1.2, rangeMultiplier: 1 });
+    const republicFleetEmpM = charge("Republic Fleet EMP M", { rangeMultiplier: 0.5 });
+    const chargesWithM = { ...TEST_CHARGES, [titaniumSabotM.id]: titaniumSabotM, [republicFleetEmpM.id]: republicFleetEmpM };
+    const catalog = buildCatalog(chargesWithM);
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 2)).toBe(titaniumSabotM.id);
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 2)).toBe(republicFleetEmpM.id);
+  });
+
+  test("equivalentInSize maps navy charges across sizes", () => {
+    const republicFleetEmpXL = charge("Republic Fleet EMP XL", { rangeMultiplier: 0.5 });
+    const chargesWithXL = { ...TEST_CHARGES, [republicFleetEmpXL.id]: republicFleetEmpXL };
+    const catalog = buildCatalog(chargesWithXL);
+    expect(catalog.equivalentInSize(chargeByName("Republic Fleet EMP S").id, 4)).toBe(republicFleetEmpXL.id);
+  });
+
+  test("equivalentInSize returns undefined for an unknown charge id", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(MISSING_CHARGE, 2)).toBeUndefined();
+  });
+
+  test("equivalentInSize returns undefined when no same-stem charge exists in the target size", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 3)).toBeUndefined();
+  });
+
+  test("equivalentInSize returns the same id when the charge is already in the target size", () => {
+    const catalog = buildCatalog();
+    expect(catalog.equivalentInSize(chargeByName("Titanium Sabot S").id, 1)).toBe(chargeByName("Titanium Sabot S").id);
+  });
+
   test("turretChargeFamily maps turret families to charge families", () => {
-    expect(_turretChargeFamily("200mm AutoCannon I", gunFamilies)).toBe("projectile");
-    expect(_turretChargeFamily("280mm Howitzer Artillery I", gunFamilies)).toBe("projectile");
-    expect(_turretChargeFamily("150mm Railgun I", gunFamilies)).toBe("hybrid");
-    expect(_turretChargeFamily("Light Neutron Blaster I", gunFamilies)).toBe("hybrid");
-    expect(_turretChargeFamily("Gatling Pulse Laser I", gunFamilies)).toBe("laser");
-    expect(_turretChargeFamily("Small Focused Beam Laser I", gunFamilies)).toBe("laser");
+    expect(_turretChargeFamily(turretIdForName("200mm AutoCannon I"), gunFamilies)).toBe("projectile");
+    expect(_turretChargeFamily(turretIdForName("280mm Howitzer Artillery I"), gunFamilies)).toBe("projectile");
+    expect(_turretChargeFamily(turretIdForName("150mm Railgun I"), gunFamilies)).toBe("hybrid");
+    expect(_turretChargeFamily(turretIdForName("Light Neutron Blaster I"), gunFamilies)).toBe("hybrid");
+    expect(_turretChargeFamily(turretIdForName("Gatling Pulse Laser I"), gunFamilies)).toBe("laser");
+    expect(_turretChargeFamily(turretIdForName("Small Focused Beam Laser I"), gunFamilies)).toBe("laser");
   });
 });

@@ -1,8 +1,9 @@
 [Arazu, Tackle Armor Arazu]
-Covert Ops Cloaking Device II
-Covert Cynosural Field Generator I
-Cynosural Field Generator I
-Salvager I
+
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+Damage Control II
+Multispectrum Energized Membrane II
 
 Stasis Webifier II
 10MN Afterburner II
@@ -11,10 +12,10 @@ Stasis Webifier II
 Warp Disruptor II
 Sensor Booster II
 
-1600mm Steel Plates II
-Multispectrum Energized Membrane II
-Damage Control II
-Multispectrum Energized Membrane II
+Covert Ops Cloaking Device II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Trimark Armor Pump I
 Medium Trimark Armor Pump I

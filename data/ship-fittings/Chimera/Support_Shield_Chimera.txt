@@ -1,21 +1,23 @@
 [Chimera, Support Shield Chimera]
-Skirmish Command Burst I, Rapid Deployment Charge
-Skirmish Command Burst I, Evasive Maneuvers Charge
-Prototype Cloaking Device I
-Sisters Core Probe Launcher, Sisters Core Scanner Probe
+
+Nanofiber Internal Structure II
+Damage Control II
+25000mm Crystalline Carbonide Restrained Plates
+[Empty Low slot]
 
 10000MN Afterburner I
-Shield Boost Amplifier II
 Thermal Shield Hardener II
 Capital Capacitor Booster I, Cap Booster 800
 Capital C-5L Compact Shield Booster
 50000MN Microwarpdrive I
 EM Shield Hardener II
+[Empty Med slot]
 
-Nanofiber Internal Structure II
-Warp Core Stabilizer II
-Damage Control II
-25000mm Crystalline Carbonide Restrained Plates
+Skirmish Command Burst I, Rapid Deployment Charge
+Skirmish Command Burst I, Evasive Maneuvers Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Capital Polycarbon Engine Housing I
 Capital Polycarbon Engine Housing I

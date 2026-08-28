@@ -1,22 +1,23 @@
 [Pacifier, Kitetackle Blaster Shield Pacifier]
-Light Neutron Blaster II, Federation Navy Antimatter Charge S
-Covert Ops Cloaking Device II
-Compact Interdiction Nullifier
-Light Neutron Blaster II, Federation Navy Antimatter Charge S
-Sisters Core Probe Launcher, Sisters Core Scanner Probe
-
-Medium Ancillary Shield Booster, Navy Cap Booster 50
-Fleeting Compact Stasis Webifier
-Faint Epsilon Scoped Warp Scrambler
-5MN Y-T8 Compact Microwarpdrive
 
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Nanofiber Internal Structure II
 
-Small Targeting System Subcontroller II
+Medium Ancillary Shield Booster, Navy Cap Booster 50
+Fleeting Compact Stasis Webifier
+Faint Epsilon Scoped Warp Scrambler
+5MN Y-T8 Compact Microwarpdrive
+
+Light Neutron Blaster II, Federation Navy Antimatter Charge S
+Covert Ops Cloaking Device II
+Compact Interdiction Nullifier
+Light Neutron Blaster II, Federation Navy Antimatter Charge S
+[Empty High slot]
+
 Small Low Friction Nozzle Joints II
+[Empty Rig slot]
 
 
 Federation Navy Antimatter Charge S x1500

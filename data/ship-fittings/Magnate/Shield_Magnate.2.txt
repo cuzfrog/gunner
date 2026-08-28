@@ -1,16 +1,17 @@
 [Magnate, Shield Magnate]
-Salvager I
-Improved Cloaking Device II
-Salvager I
+
+Type-D Restrained Inertial Stabilizers
+Damage Control II
+Type-D Restrained Nanofiber Structure
+[Empty Low slot]
 
 5MN Microwarpdrive II
 Small Azeotropic Restrained Shield Extender
 Small Azeotropic Restrained Shield Extender
 
-'Stoic' Core Equalizer I
-Type-D Restrained Inertial Stabilizers
-Damage Control II
-Type-D Restrained Nanofiber Structure
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Small Hyperspatial Velocity Optimizer I
 Small Auxiliary Thrusters I

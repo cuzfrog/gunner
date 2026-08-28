@@ -1,19 +1,20 @@
 [Taranis, Kitetackle Blaster Shield Taranis]
-Light Neutron Blaster II, Null S
-Light Neutron Blaster II, Null S
-Light Neutron Blaster II, Null S
-Salvager II
-
-Fleeting Compact Stasis Webifier
-5MN Y-T8 Compact Microwarpdrive
-Initiated Compact Warp Scrambler
 
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 Damage Control II
 
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
+Fleeting Compact Stasis Webifier
+5MN Y-T8 Compact Microwarpdrive
+Initiated Compact Warp Scrambler
+
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+Light Neutron Blaster II, Null S
+[Empty High slot]
+
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Void S x1240

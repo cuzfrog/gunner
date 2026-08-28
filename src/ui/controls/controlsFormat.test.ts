@@ -1,70 +1,21 @@
+import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
+import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { PropulsionId, PropulsionModule } from "../../ships";
-import { PALETTE } from "../palette";
 import type { I18n } from "../i18n";
-import type { UserSettings } from "../../appstate";
 import {
-  AGGRESSIVITY_MAX,
-  AGGRESSIVITY_MIN,
-  aggressivityFromPosition,
   chargeStatSuffix,
   escapeHtml,
+  formatDistance,
   formatMultiplier,
   formatNumber,
   formatWithCommas,
-  hitChanceColor,
-  positionFromAggressivity,
-  profileSettingsOf,
   propulsionOptionLabel,
+  scriptStatSuffix,
+  boosterScriptStatSuffix,
   skillLevelFromString,
   skillOptionLabel,
 } from "./controlsFormat";
-
-function baseUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
-  return {
-    version: 6,
-    tracking: 0.32,
-    trackingUnit: "rad",
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: 1_000_000,
-    attackerInertia: 2,
-    initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 1_000_000,
-    targetInertia: 2,
-    targetSig: 40,
-    attackerAmmo: "Hail S",
-    simSpeed: 4,
-    language: "en",
-    ...overrides,
-  };
-}
-
-describe("aggressivity conversion", () => {
-  test("round-trips the minimum value through position", () => {
-    const pos = positionFromAggressivity(AGGRESSIVITY_MIN);
-    expect(pos).toBeCloseTo(0, 10);
-    expect(aggressivityFromPosition(pos)).toBeCloseTo(AGGRESSIVITY_MIN, 10);
-  });
-
-  test("round-trips the midpoint value through position", () => {
-    expect(aggressivityFromPosition(0.5)).toBeCloseTo(1, 10);
-    expect(positionFromAggressivity(1)).toBeCloseTo(0.5, 10);
-  });
-
-  test("round-trips the maximum value through position", () => {
-    const pos = positionFromAggressivity(AGGRESSIVITY_MAX);
-    expect(pos).toBeCloseTo(1, 10);
-    expect(aggressivityFromPosition(pos)).toBeCloseTo(AGGRESSIVITY_MAX, 10);
-  });
-});
 
 describe("formatting", () => {
   test("adds comma separators and respects decimals", () => {
@@ -84,29 +35,17 @@ describe("formatting", () => {
     expect(formatMultiplier(1.5)).toBe("1.5");
     expect(formatMultiplier(1.556)).toBe("1.56");
   });
-});
 
-describe("profile settings", () => {
-  test("strips display-only fields while keeping the rest", () => {
-    const settings = baseUserSettings({ attackerHull: "Rifter" });
-    const profile = profileSettingsOf(settings);
-    expect("language" in profile).toBe(false);
-    expect("trackingUnit" in profile).toBe(false);
-    expect("simSpeed" in profile).toBe(false);
-    expect("gridBrightness" in profile).toBe(false);
-    expect(profile.attackerHull).toBe("Rifter");
-    expect(profile.attackerAmmo).toBe("Hail S");
+  test("formats short distances in meters and long distances in kilometers", () => {
+    const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km" }[key] ?? key);
+    expect(formatDistance(1234.4, t)).toBe("1,234 m");
+    expect(formatDistance(12345, t)).toBe("12.3 km");
   });
 
-});
-
-describe("hit chance color", () => {
-  test("maps thresholds to the palette", () => {
-    expect(hitChanceColor(0.95)).toBe(PALETTE.optimalGreen);
-    expect(hitChanceColor(0.75)).toBe(PALETTE.accentTeal);
-    expect(hitChanceColor(0.3)).toBe(PALETTE.warnYellow);
-    expect(hitChanceColor(0.1)).toBe(PALETTE.accentOrange);
-    expect(hitChanceColor(0)).toBe(PALETTE.dangerRed);
+  test("switches to kilometers once rounded value reaches the threshold", () => {
+    const t = (key: string): string => ({ "unit.meter": "m", "unit.kilometer": "km" }[key] ?? key);
+    expect(formatDistance(9999.4, t)).toBe("9,999 m");
+    expect(formatDistance(9999.6, t)).toBe("10.0 km");
   });
 });
 
@@ -117,6 +56,8 @@ describe("propulsion label", () => {
       kind: "afterburner",
       sizeTier: "small",
       label: "1MN Afterburner I",
+      iconId: toTypeId("439"),
+      defaultModuleId: toTypeId("439"),
       thrust: 1.5e6,
       massAddition: 500_000,
       speedBonus: 1.15,
@@ -145,13 +86,39 @@ describe("skill level conversion", () => {
 
 describe("charge stat suffix", () => {
   test("omits falloff when the multiplier is one", () => {
-    const option: ChargeOption = { name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1 };
+    const option: ChargeOption = { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1 };
     expect(chargeStatSuffix(option)).toBe("range x0.5 · track x0.75");
   });
 
   test("includes falloff when it differs from one", () => {
-    const option: ChargeOption = { name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5 };
+    const option: ChargeOption = { id: "barrage-s" as TypeId, name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5 };
     expect(chargeStatSuffix(option)).toBe("range x0.5 · falloff x1.5 · track x0.75");
+  });
+});
+
+describe("script stat suffix", () => {
+  test("formats all three disruption multipliers", () => {
+    const script: DisruptionScriptSpec = {
+      moduleId: toTypeId("29005"),
+      name: "Optimal Range Disruption Script",
+      trackingMultiplier: 0,
+      optimalMultiplier: 2,
+      falloffMultiplier: 2,
+    };
+    expect(scriptStatSuffix(script)).toBe("optimal x2 · falloff x2 · track x0");
+  });
+});
+
+describe("booster script stat suffix", () => {
+  test("formats all three turret multipliers", () => {
+    const script: TurretScriptSpec = {
+      moduleId: toTypeId("28999"),
+      name: "Optimal Range Script",
+      trackingMultiplier: 0,
+      optimalMultiplier: 2,
+      falloffMultiplier: 2,
+    };
+    expect(boosterScriptStatSuffix(script)).toBe("track x0 · optimal x2 · falloff x2");
   });
 });
 

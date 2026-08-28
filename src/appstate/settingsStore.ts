@@ -1,4 +1,5 @@
-import type { UserSettings, ProfileSettings, DisplayPreferences, StartupState } from "./userSettings";
+import type { UserSettings, ProfileSettings, DisplayPreferences } from "./userSettings";
+import type { StartupState } from "./combatantSettings";
 
 export interface SettingsStore {
   loadStartupState(): StartupState;
@@ -7,6 +8,7 @@ export interface SettingsStore {
   loadProfile(name: string): ProfileSettings | null;
   deleteProfile(name: string): void;
   selectProfile(name: string): void;
+  clearSelectedProfile(): void;
   encodeUrl(settings: ProfileSettings): string;
   loadPreferences(): DisplayPreferences;
   savePreferences(preferences: DisplayPreferences): void;

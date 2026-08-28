@@ -1,23 +1,24 @@
 [Inner Zone Shipping Catalyst, Blaster Shield Inner Zone Shipping Catalyst]
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-Light Ion Blaster II, Void S
-
-Small Shield Booster II
-1MN Monopropellant Enduring Afterburner
 
 Damage Control II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
 
+Small Shield Booster II
+1MN Monopropellant Enduring Afterburner
+
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+Light Ion Blaster II, Void S
+
 Small Core Defense Field Extender I
-Small Capacitor Control Circuit I
 Small Core Defense Field Extender I
+[Empty Rig slot]
 
 
 Null S x2760

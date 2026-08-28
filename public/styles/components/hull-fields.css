@@ -1,0 +1,32 @@
+@layer components {
+.hull-ship-image {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.hull-fitting-name {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 0;
+}
+
+.hull-fitting-name-value {
+  flex: 1 1 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.hull-fitting-name.is-error, .hull-fitting-name.is-error .hull-fitting-name-value { color: var(--danger-red); }
+}

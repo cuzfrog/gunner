@@ -1,14 +1,16 @@
 [Nergal, Kitetackle Armor Nergal]
-Light Entropic Disintegrator II, Meson Exotic Plasma S
+
+Assault Damage Control II
+Centii A-Type Small Armor Repairer
+[Empty Low slot]
+[Empty Low slot]
 
 5MN Microwarpdrive II
 Small Capacitor Booster II, Navy Cap Booster 400
 Warp Disruptor II
 
-Multispectrum Coating II
-Assault Damage Control II
-Entropic Radiation Sink II
-Centii A-Type Small Armor Repairer
+[Empty High slot]
+[Empty High slot]
 
 Small Polycarbon Engine Housing II
 Small Polycarbon Engine Housing II

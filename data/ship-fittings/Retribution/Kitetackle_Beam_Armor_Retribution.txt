@@ -1,20 +1,22 @@
 [Retribution, Kitetackle Beam Armor Retribution]
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-Small Focused Beam Laser II, Imperial Navy Multifrequency S
-
-Dread Guristas Warp Disruptor
-5MN Cold-Gas Enduring Microwarpdrive
 
 Heat Sink II
 Nanofiber Internal Structure II
 Assault Damage Control II
 Small Ancillary Armor Repairer
-True Sansha Thermal Coating
+[Empty Low slot]
 
-Small Capacitor Control Circuit II
+Dread Guristas Warp Disruptor
+5MN Cold-Gas Enduring Microwarpdrive
+
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
+Small Focused Beam Laser II, Imperial Navy Multifrequency S
+[Empty High slot]
+
 Small Energy Locus Coordinator II
+[Empty Rig slot]
 
 
 Imperial Navy Infrared S x3
@@ -22,7 +24,6 @@ Imperial Navy Infrared S x1
 Imperial Navy Microwave S x4
 Imperial Navy Xray S x1
 Imperial Navy Xray S x3
-Expired Basic 'Brainfreeze' Cerebral Accelerator x1
 Nanite Repair Paste x52
 Aurora S x4
 Imperial Navy Gamma S x2

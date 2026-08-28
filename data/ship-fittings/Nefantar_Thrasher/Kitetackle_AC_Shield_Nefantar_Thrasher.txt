@@ -1,4 +1,12 @@
 [Nefantar Thrasher, Kitetackle AC Shield Nefantar Thrasher]
+
+Damage Control II
+Gyrostabilizer II
+
+Medium Shield Extender II
+Initiated Compact Warp Disruptor
+5MN Y-T8 Compact Microwarpdrive
+
 200mm AutoCannon II, Republic Fleet Titanium Sabot S
 200mm AutoCannon II, Republic Fleet Titanium Sabot S
 'Arbalest' Rocket Launcher I, Guristas Scourge Rocket
@@ -8,16 +16,9 @@
 200mm AutoCannon II, Republic Fleet Titanium Sabot S
 200mm AutoCannon II, Republic Fleet Titanium Sabot S
 
-Initiated Compact Warp Disruptor
-5MN Y-T8 Compact Microwarpdrive
-Medium Shield Extender II
-
-Damage Control II
-Gyrostabilizer II
-
-Small Projectile Collision Accelerator I
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit I
+[Empty Rig slot]
 
 
 Guristas Scourge Rocket x788

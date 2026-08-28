@@ -1,14 +1,4 @@
 [Archon, Ewar Armor Archon]
-Fighter Support Unit II
-Integrated Sensor Array
-Fighter Support Unit II
-Dark Blood Heavy Energy Neutralizer
-Armor Command Burst II
-
-Capital Capacitor Booster II, Navy Cap Booster 3200
-Drone Navigation Computer II
-Drone Navigation Computer II
-50000MN Microwarpdrive II
 
 Damage Control II
 Dread Guristas Drone Damage Amplifier
@@ -17,6 +7,17 @@ CONCORD 25000mm Steel Plates
 Dread Guristas Drone Damage Amplifier
 Corpum C-Type Multispectrum Energized Membrane
 CONCORD Capital Armor Repairer
+
+Capital Capacitor Booster II, Navy Cap Booster 3200
+50000MN Microwarpdrive II
+[Empty Med slot]
+[Empty Med slot]
+
+Dark Blood Heavy Energy Neutralizer
+Armor Command Burst II, Armor Energizing Charge
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Capital Explosive Armor Reinforcer I
 Capital Auxiliary Nano Pump I

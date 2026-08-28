@@ -1,3 +1,5 @@
+import type { FactionId, HullTypeId, ShipId, TypeId } from "../gamedata/ids";
+
 export type HullTier = "small" | "medium" | "large" | "capital";
 
 export type PropulsionKind = "afterburner" | "microwarpdrive";
@@ -13,9 +15,10 @@ export type PropulsionId =
   | "mwd-50000mn";
 
 export interface ShipProfile {
+  readonly id: ShipId;
   readonly name: string;
-  readonly faction: string;
-  readonly hullType: string;
+  readonly factionId: FactionId;
+  readonly hullTypeId: HullTypeId;
   readonly mass: number;
   readonly inertiaModifier: number;
   readonly baseSpeed: number;
@@ -41,6 +44,8 @@ export interface PropulsionModule extends PropulsionStats {
   readonly kind: PropulsionKind;
   readonly sizeTier: HullTier;
   readonly label: string;
+  readonly iconId: TypeId;
+  readonly defaultModuleId: TypeId;
 }
 
 export interface FittedHull {

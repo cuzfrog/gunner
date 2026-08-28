@@ -12,7 +12,7 @@ const defaultTurret: TurretSpec = {
 };
 
 const dummyShip: ShipState = {
-  id: "target",
+  id: "shipB",
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
   maxSpeed: 0,
@@ -26,8 +26,8 @@ const dummyShip: ShipState = {
 function frame(distance: number, angularVelocity: number): EngagementFrame {
   return {
     time: 0,
-    attacker: dummyShip,
-    target: dummyShip,
+    shipA: dummyShip,
+    shipB: dummyShip,
     relPosition: new Vec2(distance, 0),
     distance,
     relVelocity: new Vec2(0, 0),

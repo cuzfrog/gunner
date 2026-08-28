@@ -1,16 +1,4 @@
 [Hurricane, Tackle Drone Armor Hurricane]
-425mm Medium 'Scout' Autocannon I, EMP M
-425mm Medium 'Scout' Autocannon I, EMP M
-425mm Medium 'Scout' Autocannon I, EMP M
-Drone Link Augmentor I
-425mm Medium 'Scout' Autocannon I, EMP M
-425mm Medium 'Scout' Autocannon I, EMP M
-425mm Medium 'Scout' Autocannon I, EMP M
-
-10MN Monopropellant Enduring Afterburner
-Faint Epsilon Scoped Warp Scrambler
-Peripheral Compact Target Painter
-Fleeting Compact Stasis Webifier
 
 Damage Control II
 Gyrostabilizer II
@@ -18,6 +6,19 @@ Medium Ancillary Armor Repairer, Nanite Repair Paste
 Multispectrum Energized Membrane II
 Multispectrum Energized Membrane II
 Gyrostabilizer II
+
+10MN Monopropellant Enduring Afterburner
+Faint Epsilon Scoped Warp Scrambler
+Fleeting Compact Stasis Webifier
+[Empty Med slot]
+
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+425mm Medium 'Scout' Autocannon I, EMP M
+[Empty High slot]
 
 Medium Trimark Armor Pump I
 Medium Explosive Armor Reinforcer I

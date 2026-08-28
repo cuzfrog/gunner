@@ -1,22 +1,23 @@
 [Magus, Kitetackle Armor Magus]
-Armor Command Burst II, Armor Energizing Charge
-Prototype Cloaking Device I
-Core Probe Launcher I, Core Scanner Probe I
-Small Ghoul Compact Energy Nosferatu
-Armor Command Burst II, Rapid Repair Charge
 
-Initiated Compact Warp Scrambler
-Micro Jump Field Generator
-5MN Y-T8 Compact Microwarpdrive
-1MN Afterburner II
-
-Coreli A-Type Explosive Coating
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Imperial Navy 200mm Steel Plates
-Multispectrum Coating II
+[Empty Low slot]
+[Empty Low slot]
+
+Initiated Compact Warp Scrambler
+5MN Y-T8 Compact Microwarpdrive
+1MN Afterburner II
+[Empty Med slot]
+
+Armor Command Burst II, Armor Energizing Charge
+Small Ghoul Compact Energy Nosferatu
+Armor Command Burst II, Rapid Repair Charge
+[Empty High slot]
+[Empty High slot]
 
 Small Trimark Armor Pump II
-Small Command Processor I
+[Empty Rig slot]
 
 
 Hornet EC-300 x5

@@ -1,18 +1,19 @@
 [Cambion, Kitetackle Rocket Shield Cambion]
-Rocket Launcher II, Scourge Rage Rocket
-Rocket Launcher II, Scourge Rage Rocket
-Rocket Launcher II, Scourge Rage Rocket
-Rocket Launcher II, Scourge Rage Rocket
-
-Faint Epsilon Scoped Warp Scrambler
-Medium Shield Extender II
-EM Shield Amplifier II
-5MN Quad LiF Restrained Microwarpdrive
-Fleeting Compact Stasis Webifier
 
 IFFA Compact Damage Control
 Ballistic Control System II
 Ballistic Control System II
+
+Medium Shield Extender II
+Faint Epsilon Scoped Warp Scrambler
+EM Shield Amplifier II
+5MN Quad LiF Restrained Microwarpdrive
+Fleeting Compact Stasis Webifier
+
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
+Rocket Launcher II, Scourge Rage Rocket
 
 Small Core Defense Field Extender I
 Small EM Shield Reinforcer I

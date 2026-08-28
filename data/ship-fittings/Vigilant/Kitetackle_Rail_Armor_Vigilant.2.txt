@@ -1,21 +1,22 @@
 [Vigilant, Kitetackle Rail Armor Vigilant]
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
-250mm Railgun II, Caldari Navy Antimatter Charge M
+
+Multispectrum Energized Membrane II
+Magnetic Field Stabilizer II
+Damage Control II
+1600mm Steel Plates II
+Multispectrum Energized Membrane II
+[Empty Low slot]
 
 Caldari Navy Warp Disruptor
 50MN Cold-Gas Enduring Microwarpdrive
 Small Capacitor Booster II, Navy Cap Booster 400
 Caldari Navy Stasis Webifier
 
-Multispectrum Energized Membrane II
-Magnetic Field Stabilizer II
-Damage Control II
-1600mm Steel Plates II
-Centii A-Type Explosive Coating
-Multispectrum Energized Membrane II
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
+250mm Railgun II, Caldari Navy Antimatter Charge M
 
 Medium Trimark Armor Pump I
 Medium Ancillary Current Router II

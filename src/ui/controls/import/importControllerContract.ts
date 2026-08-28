@@ -1,15 +1,16 @@
 import type { FittingImport, ImportedFitting } from "../../../fitting";
-import type { ClipboardProvider, SavedFittings, UserSettings } from "../../../appstate";
+import type { ClipboardProvider, SavedFittings } from "../../../appstate";
 import type { Popup, PopupGroup } from "../popup";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
-import type { Side, SidePanel } from "../sidePanel";
+import type { PreferencesController } from "../preferences";
+import type { ProfileController } from "../profile";
+import type { Side } from "../side";
+import type { SidePanel } from "../sidePanel";
 
 export interface ImportEls {
   readonly importProfile: HTMLButtonElement;
   readonly importSidePopup: HTMLElement;
-  readonly importSideAttacker: HTMLButtonElement;
-  readonly importSideTarget: HTMLButtonElement;
+  readonly importSideShipA: HTMLButtonElement;
+  readonly importSideShipB: HTMLButtonElement;
 }
 
 export interface ImportController {
@@ -18,7 +19,5 @@ export interface ImportController {
   importFromText(side: Side, text: string): Promise<void>;
   importProfileClicked(): Promise<void>;
   onImportSideClick(side: Side): Promise<void>;
-  importEftFitting(side: Side, text: string, persist?: boolean): ImportedFitting | undefined;
-  setOnConfigPersisted(onConfigPersisted: () => void): void;
-  setOnProfileTextLoaded(onProfileTextLoaded: (settings: UserSettings) => void): void;
+  importEftFitting(side: Side, text: string, options?: { readonly persist?: boolean; readonly showImportedHint?: boolean } | boolean): ImportedFitting | undefined;
 }

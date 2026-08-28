@@ -4,17 +4,7 @@ import {
   resolveWeapon,
   summarizeFitting,
 } from "./fittingSummary";
-import type { ParsedFitting } from "../src/fitting/eft";
-
-function makeParsed(modules: ParsedFitting["modules"], drones: ParsedFitting["drones"] = []): ParsedFitting {
-  return {
-    hullName: "TestShip",
-    fittingName: "Killmail 12345",
-    modules,
-    drones,
-    cargo: [],
-  };
-}
+import type { EftModule, QuantityItem } from "../src/fitting/eft";
 
 describe("resolveWeapon", () => {
   test("returns Blaster for blaster-based fit", () => {
@@ -72,6 +62,45 @@ describe("resolveWeapon", () => {
     const modules = [{ name: "1MN Afterburner II", offline: false }];
     const drones = [{ name: "Infiltrator I", quantity: 5 }];
     expect(resolveWeapon(modules, drones)).toBe("Fighter");
+  });
+
+  test("returns Blaster for Particle Accelerator variant", () => {
+    const modules = [{ name: "Modal Light Neutron Particle Accelerator I", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("Blaster");
+  });
+
+  test("returns AC for Machine Gun autocannon variant", () => {
+    const modules = [{ name: "150mm Light Gallium Machine Gun", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("AC");
+  });
+
+  test("returns AC for Repeating Cannon autocannon variant", () => {
+    const modules = [{ name: "800mm Repeating Cannon I", offline: false }];
+    expect(resolveWeapon(modules, [])).toBe("AC");
+  });
+
+  test("returns Drone for faction-branded combat drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Republic Fleet Valkyrie", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Caldari Navy Wasp heavy drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Caldari Navy Wasp", quantity: 4 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Hornet light drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Hornet II", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
+  });
+
+  test("returns Drone for Bouncer sentry drone", () => {
+    const modules = [{ name: "1MN Afterburner II", offline: false }];
+    const drones = [{ name: "Bouncer II", quantity: 5 }];
+    expect(resolveWeapon(modules, drones)).toBe("Drone");
   });
 
   test("returns DPS for fit without identifiable weapon", () => {

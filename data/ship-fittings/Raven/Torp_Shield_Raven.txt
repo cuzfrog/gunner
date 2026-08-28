@@ -1,18 +1,4 @@
 [Raven, Torp Shield Raven]
-Prototype 'Arbalest' Torpedo Launcher
-'Noose' Cruise Missile Launcher, Scourge Cruise Missile
-Prototype 'Arbalest' Torpedo Launcher
-Prototype 'Arbalest' Torpedo Launcher
-Prototype 'Arbalest' Torpedo Launcher
-'Noose' Cruise Missile Launcher, Scourge Cruise Missile
-
-Large Cap Battery II
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Multispectrum Shield Hardener II
-X-Large C5-L Compact Shield Booster
-Large Shield Extender II
-500MN Cold-Gas Enduring Microwarpdrive
 
 Damage Control II
 Ballistic Control System II
@@ -20,8 +6,25 @@ Ballistic Control System II
 Ballistic Control System II
 Capacitor Flux Coil II
 
+Large Shield Extender II
+Large Shield Extender II
+Large Cap Battery II
+Multispectrum Shield Hardener II
+Multispectrum Shield Hardener II
+X-Large C5-L Compact Shield Booster
+500MN Cold-Gas Enduring Microwarpdrive
+
+Prototype 'Arbalest' Torpedo Launcher
+'Noose' Cruise Missile Launcher, Scourge Cruise Missile
+Prototype 'Arbalest' Torpedo Launcher
+Prototype 'Arbalest' Torpedo Launcher
+Prototype 'Arbalest' Torpedo Launcher
+'Noose' Cruise Missile Launcher, Scourge Cruise Missile
+[Empty High slot]
+
 Large Semiconductor Memory Cell I
 Large Semiconductor Memory Cell I
+[Empty Rig slot]
 
 
 Caldari Navy Nova Torpedo x48

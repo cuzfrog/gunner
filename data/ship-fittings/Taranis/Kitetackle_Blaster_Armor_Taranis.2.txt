@@ -1,19 +1,20 @@
 [Taranis, Kitetackle Blaster Armor Taranis]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Small Ghoul Compact Energy Nosferatu
+
+Damage Control II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+[Empty Low slot]
 
 Warp Scrambler II
 5MN Quad LiF Restrained Microwarpdrive
 1MN Y-S8 Compact Afterburner
 
-Damage Control II
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Micro Auxiliary Power Core II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Small Ghoul Compact Energy Nosferatu
 
 Small Ancillary Current Router I
-Small Hybrid Collision Accelerator II
+[Empty Rig slot]
 
 
 Hobgoblin II x1
@@ -23,5 +24,4 @@ Hobgoblin II x1
 Null S x1000
 Caldari Navy Antimatter Charge S x1000
 Nanite Repair Paste x96
-Cladistic-5 'Krai Veles' Filament x1
 Void S x922

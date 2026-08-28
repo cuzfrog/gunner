@@ -1,16 +1,17 @@
 [Tormentor, Tackle Pulse Armor Tormentor]
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
+
+Damage Control II
+Heat Sink II
+400mm Rolled Tungsten Compact Plates
+[Empty Low slot]
 
 X5 Enduring Stasis Webifier
 1MN Y-S8 Compact Afterburner
 X5 Enduring Stasis Webifier
 
-Multispectrum Coating II
-Damage Control II
-Heat Sink II
-400mm Rolled Tungsten Compact Plates
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
 
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I
@@ -23,6 +24,4 @@ Acolyte II x2
 Imperial Navy Multifrequency S x3
 Scorch S x2
 Scorch S x1
-Quafe x1
 Nanite Repair Paste x8
-Frozen Food x1

@@ -1,9 +1,10 @@
-import type { Els } from "../elementsContract";
-import type { Side } from "./side";
+import type { createControlsEls } from "../elements";
+import type { Side } from "../side";
+
+type ControlsElements = ReturnType<typeof createControlsEls>;
 
 export interface SidePanelElements {
   readonly hull: HTMLInputElement;
-  readonly shipImage: HTMLImageElement;
   readonly fittingName: HTMLElement;
   readonly hullHint: HTMLElement;
   readonly speed: HTMLInputElement;
@@ -12,7 +13,10 @@ export interface SidePanelElements {
   readonly alignTime: HTMLElement;
   readonly mode: HTMLSelectElement;
   readonly range: HTMLInputElement;
-  readonly targetSig?: HTMLInputElement;
+  readonly aggressivity: HTMLInputElement;
+  readonly aggressivitySlider: HTMLInputElement;
+  readonly aggressivityValue: HTMLElement;
+  readonly shipSig: HTMLInputElement;
   readonly skills: HTMLSelectElement;
   readonly skillOptions: HTMLElement;
   readonly skillSummary: HTMLElement;
@@ -29,60 +33,35 @@ export interface SidePanelElements {
   readonly propulsionVariants: HTMLElement;
 }
 
-export function collectSideEls(els: Els, side: Side): SidePanelElements {
-  if (side === "attacker") {
-    return {
-      hull: els.attackerHull,
-      shipImage: els.attackerShipImage,
-      fittingName: els.attackerFittingName,
-      hullHint: els.attackerHullHint,
-      speed: els.attackerSpeed,
-      mass: els.attackerMass,
-      inertia: els.attackerInertia,
-      alignTime: els.attackerAlignTime,
-      mode: els.attackerMode,
-      range: els.attackerRange,
-      skills: els.attackerSkills,
-      skillOptions: els.attackerSkillOptions,
-      skillSummary: els.attackerSkillSummary,
-      skillTrigger: els.attackerSkillTrigger,
-      skillPopup: els.attackerSkillPopup,
-      overload: els.attackerOverload,
-      overloadButton: els.attackerOverloadButton,
-      pastePopup: els.attackerPastePopup,
-      pasteInput: els.attackerPasteInput,
-      importFitting: els.attackerImportFitting,
-      propulsion: els.attackerPropulsion,
-      propulsionOptions: els.attackerPropulsionOptions,
-      propulsionGear: els.attackerPropulsionGear,
-      propulsionVariants: els.attackerPropulsionVariants,
-    };
-  }
+export function collectSideEls(els: ControlsElements, side: Side): SidePanelElements {
+  const combatant = els[side];
   return {
-    hull: els.targetHull,
-    shipImage: els.targetShipImage,
-    fittingName: els.targetFittingName,
-    hullHint: els.targetHullHint,
-    speed: els.targetSpeed,
-    mass: els.targetMass,
-    inertia: els.targetInertia,
-    alignTime: els.targetAlignTime,
-    mode: els.targetMode,
-    range: els.targetRange,
-    targetSig: els.targetSig,
-    skills: els.targetSkills,
-    skillOptions: els.targetSkillOptions,
-    skillSummary: els.targetSkillSummary,
-    skillTrigger: els.targetSkillTrigger,
-    skillPopup: els.targetSkillPopup,
-    overload: els.targetOverload,
-    overloadButton: els.targetOverloadButton,
-    pastePopup: els.targetPastePopup,
-    pasteInput: els.targetPasteInput,
-    importFitting: els.targetImportFitting,
-    propulsion: els.targetPropulsion,
-    propulsionOptions: els.targetPropulsionOptions,
-    propulsionGear: els.targetPropulsionGear,
-    propulsionVariants: els.targetPropulsionVariants,
+    hull: combatant.hull,
+    fittingName: combatant.fittingName,
+    hullHint: combatant.hullHint,
+    speed: combatant.speed,
+    mass: combatant.mass,
+    inertia: combatant.inertia,
+    alignTime: combatant.alignTime,
+    mode: combatant.mode,
+    range: combatant.range,
+    aggressivity: combatant.aggressivity,
+    aggressivitySlider: combatant.aggressivitySlider,
+    aggressivityValue: combatant.aggressivityValue,
+    shipSig: combatant.shipSig,
+    skills: combatant.skills,
+    skillOptions: combatant.skillOptions,
+    skillSummary: combatant.skillSummary,
+    skillTrigger: combatant.skillTrigger,
+    skillPopup: combatant.skillPopup,
+    overload: combatant.overload,
+    overloadButton: combatant.overloadButton,
+    pastePopup: combatant.pastePopup,
+    pasteInput: combatant.pasteInput,
+    importFitting: combatant.importFitting,
+    propulsion: combatant.propulsion,
+    propulsionOptions: combatant.propulsionOptions,
+    propulsionGear: combatant.propulsionGear,
+    propulsionVariants: combatant.propulsionVariants,
   };
 }

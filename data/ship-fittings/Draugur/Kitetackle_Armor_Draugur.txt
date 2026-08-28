@@ -1,21 +1,22 @@
 [Draugur, Kitetackle Armor Draugur]
-Skirmish Command Burst II, Evasive Maneuvers Charge
-Veles Light Entropic Disintegrator, Mystic S
-
-5MN Y-T8 Compact Microwarpdrive
-Micro Jump Field Generator
-Republic Fleet Warp Disruptor
 
 Syndicate 400mm Steel Plates
-Entropic Radiation Sink II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Federation Navy Multispectrum Energized Membrane
+[Empty Low slot]
+
+5MN Y-T8 Compact Microwarpdrive
+Republic Fleet Warp Disruptor
+[Empty Med slot]
+
+Skirmish Command Burst II, Evasive Maneuvers Charge
+[Empty High slot]
+[Empty High slot]
 
 Small Trimark Armor Pump II
-Small Capacitor Control Circuit II
+[Empty Rig slot]
 
 
-Orbweaver SW-300-I x2
 Hornet EC-300 x2
 
 

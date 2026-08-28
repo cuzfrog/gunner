@@ -1,45 +1,59 @@
-import { parseProfile, PROFILE_TEXT_HEADER, type ProfileSettings, type UserSettings } from "../../../appstate";
+import { type ProfileTextCodec, type ProfileSettings } from "../../../appstate";
+import type { TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import type { PreferencesController } from "../preferencesController";
-import type { AttackerTurret } from "./attackerTurret";
+import type { Side } from "../side";
+import type { ShipATurret } from "./shipATurret";
 
 interface ProfileTextImporterDeps {
   readonly fittingImport: FittingImport;
-  readonly turret: AttackerTurret;
-  readonly preferences: PreferencesController;
+  readonly turrets: Record<Side, ShipATurret>;
+  readonly profileTextCodec: ProfileTextCodec;
 }
 
 export class ProfileTextImporter {
   private readonly fittingImport: FittingImport;
-  private readonly turret: AttackerTurret;
-  private readonly preferences: PreferencesController;
+  private readonly turrets: Record<Side, ShipATurret>;
+  private readonly profileTextCodec: ProfileTextCodec;
 
   constructor(deps: ProfileTextImporterDeps) {
     this.fittingImport = deps.fittingImport;
-    this.turret = deps.turret;
-    this.preferences = deps.preferences;
+    this.turrets = deps.turrets;
+    this.profileTextCodec = deps.profileTextCodec;
   }
 
   isProfileText(text: string): boolean {
-    return text.trimStart().startsWith(PROFILE_TEXT_HEADER);
+    return this.profileTextCodec.hasHeader(text);
   }
 
-  profileFromText(text: string): UserSettings | undefined {
-    const parsed = parseProfile(text.trimStart());
+  profileFromText(text: string): ProfileSettings | undefined {
+    const parsed = this.profileTextCodec.parse(text.trimStart());
     if (!parsed) return undefined;
-    const ammo = this.resolveProfileAmmo(parsed);
-    return { ...parsed, attackerAmmo: ammo, ...this.preferences.capture() };
+    const shipAAmmo = this.resolveProfileAmmo(parsed, "shipA");
+    const shipBAmmo = this.resolveProfileAmmo(parsed, "shipB");
+    return { ...parsed, shipAAmmo, shipBAmmo };
   }
 
-  private resolveProfileAmmo(parsed: ProfileSettings): string {
-    if (parsed.attackerAmmo) return parsed.attackerAmmo;
-    if (parsed.attackerFitting) {
-      const imported = this.fittingImport.importFitting(parsed.attackerFitting, {
-        skillLevel: parsed.attackerSkillLevel ?? 5,
-        overloaded: parsed.attackerOverload ?? true,
+  fittingFromProfileText(side: Side, text: string): string | undefined {
+    const parsed = this.profileTextCodec.parse(text.trimStart());
+    if (!parsed) return undefined;
+    return side === "shipA" ? parsed.shipAFitting : parsed.shipBFitting;
+  }
+
+  private resolveProfileAmmo(parsed: ProfileSettings, side: Side): TypeId {
+    const ammoKey = side === "shipA" ? "shipAAmmo" : "shipBAmmo";
+    const existing = parsed[ammoKey];
+    if (existing) return existing;
+    const fittingKey = side === "shipA" ? "shipAFitting" : "shipBFitting";
+    const fitting = parsed[fittingKey];
+    if (fitting) {
+      const skillLevelKey = side === "shipA" ? "shipASkillLevel" : "shipBSkillLevel";
+      const overloadKey = side === "shipA" ? "shipAOverload" : "shipBOverload";
+      const imported = this.fittingImport.importFitting(fitting, {
+        skillLevel: parsed[skillLevelKey] ?? 5,
+        overloaded: parsed[overloadKey] ?? true,
       });
-      if (imported?.turret) return imported.turret.charge;
+      if (imported?.turret) return imported.turret.chargeId;
     }
-    return this.turret.ammo();
+    return this.turrets[side].ammoId();
   }
 }

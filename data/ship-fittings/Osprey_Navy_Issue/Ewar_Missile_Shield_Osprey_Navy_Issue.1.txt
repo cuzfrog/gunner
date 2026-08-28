@@ -1,25 +1,26 @@
 [Osprey Navy Issue, Ewar Missile Shield Osprey Navy Issue]
+
+Damage Control II
+Ballistic Control System II
+Ballistic Control System II
+[Empty Low slot]
+
+Large Shield Extender II
+50MN Y-T8 Compact Microwarpdrive
+Large Compact Pb-Acid Cap Battery
+Sensor Booster II, Targeting Range Script
+[Empty Med slot]
+[Empty Med slot]
+
 Small Energy Nosferatu II
 Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
 Small Energy Neutralizer II
 Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
 Heavy Missile Launcher II, Caldari Navy Nova Heavy Missile
 
-Large Shield Extender II
-Missile Guidance Computer II, Missile Range Script
-50MN Y-T8 Compact Microwarpdrive
-Large Compact Pb-Acid Cap Battery
-Sensor Booster II, Targeting Range Script
-Missile Guidance Computer II, Missile Range Script
-
-Signal Amplifier II
-Damage Control II
-Ballistic Control System II
-Ballistic Control System II
-
-Medium Hydraulic Bay Thrusters I
-Medium Rocket Fuel Cache Partition I
-Medium Hydraulic Bay Thrusters I
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Caldari Navy Nova Heavy Missile x850

@@ -1,26 +1,19 @@
-import { DRONE_ICON_ID, ITEM_ICON_IDS } from "./iconIds";
-import { DRONE_TYPE_IDS } from "./droneIconIds";
+import type { ShipId, TypeId } from "../../gamedata/ids";
+import { TYPE_ICON_FILES } from "./typeIconFiles";
+import { SHIP_IMAGE_FILES } from "./shipImageIds";
 
 export interface ImageCatalog {
-  shipImageUrl(shipName: string): string;
-  itemIconUrl(itemName: string): string | undefined;
-  droneIconUrl(droneName?: string): string;
+  shipImageUrl(shipId: ShipId): string | undefined;
+  itemIconUrl(typeId: TypeId): string | undefined;
 }
 
 export class StaticImageCatalog implements ImageCatalog {
-  shipImageUrl(shipName: string): string {
-    return `images/ships/${shipName.replaceAll(" ", "_")}.webp`;
+  shipImageUrl(shipId: ShipId): string | undefined {
+    return SHIP_IMAGE_FILES[shipId];
   }
 
-  itemIconUrl(itemName: string): string | undefined {
-    const id = ITEM_ICON_IDS[itemName];
-    if (id === undefined) return undefined;
-    return `images/icons/${id}@1x.png`;
-  }
-
-  droneIconUrl(droneName?: string): string {
-    const id = droneName !== undefined ? DRONE_TYPE_IDS[droneName] : undefined;
-    if (id === undefined) return `images/icons/${DRONE_ICON_ID}@1x.png`;
-    return `images/icons/${id}@1x.png`;
+  itemIconUrl(typeId: TypeId): string | undefined {
+    const file = TYPE_ICON_FILES[typeId];
+    return file !== undefined ? `images/${file}` : undefined;
   }
 }

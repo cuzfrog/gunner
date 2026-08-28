@@ -1,17 +1,19 @@
 import type { FittingImport, ImportedFitting, PresetFitting, PresetFittings } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import { UiEventsImpl } from "../../events";
 import type { PopupGroup } from "./popupGroup";
 import { FittingPopupControllerImpl, type FittingPopupController, type FittingPopupEls } from "./fittingPopupController";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FakeElement, IMPORTED_RIFTER, RIFTER, fakeDocument, getFake } from "../testSupport";
-import type { Side, SidePanel } from "../sidePanel";
+import type { ShipId } from "../../../gamedata/ids";
+import type { Side } from "../side";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 const SAVED_RIFTER: SavedFitting = {
-  id: "Rifter::Brawler",
-  hull: "Rifter",
+  id: `${RIFTER.id}::Brawler`,
+  hullId: RIFTER.id,
   name: "Brawler",
   text: "[Rifter, Brawler]\n200mm AutoCannon I, Hail S",
   savedAt: 0,
@@ -44,16 +46,16 @@ function makePopupGroup(): PopupGroup {
   };
 }
 
-function createController(options: { panel?: Partial<SidePanel>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
+function createController(options: { panel?: Partial<FittingPopupHost>; applyFitting?: ImportedFitting | undefined; invalid?: boolean } = {}) {
   const document = fakeDocument();
   globalThis.document = document as unknown as Document;
   globalThis.Element = FakeElement as unknown as typeof Element;
 
-  const panel = vi.mocked<SidePanel>({
+  const panel = vi.mocked<FittingPopupHost>({
     profile: options.panel?.profile ?? RIFTER,
     fittingText: options.panel?.fittingText,
-    skillConditions: options.panel?.skillConditions ?? vi.fn((): ReturnType<SidePanel["skillConditions"]> => ({ skillLevel: 5, overloaded: false })),
-  } as unknown as SidePanel);
+    skillConditions: options.panel?.skillConditions ?? vi.fn((): ReturnType<FittingPopupHost["skillConditions"]> => ({ skillLevel: 5, overloaded: false })),
+  });
 
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => [SAVED_RIFTER]),
@@ -65,17 +67,19 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
   const presetFittings = vi.mocked<PresetFittings>({
     listHulls: vi.fn(),
     fittingsFor: vi.fn(() => PRESETS),
-    eftText: vi.fn((hull, fit) => `[${hull}, ${fit.name}]\n${fit.body}`),
+    eftText: vi.fn((hullId: ShipId, fit) => `[${hullId === RIFTER.id ? "Rifter" : hullId}, ${fit.name}]\n${fit.body}`),
   });
 
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn(() => (options.invalid ? undefined : IMPORTED_RIFTER)),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(),
+    canonicalEftText: vi.fn(),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
   });
 
-  const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn(), itemIconUrl: vi.fn(), droneIconUrl: vi.fn() });
   const i18n = createI18n();
   const popupGroup = makePopupGroup();
   const applyFitting = vi.fn(() => options.applyFitting ?? IMPORTED_RIFTER);
@@ -92,24 +96,23 @@ function createController(options: { panel?: Partial<SidePanel>; applyFitting?: 
   } as unknown as FittingPreviewManager;
 
   const els: FittingPopupEls = {
-    trigger: getFake(document, "attacker-fitting-trigger") as unknown as HTMLButtonElement,
-    eye: getFake(document, "attacker-fitting-eye") as unknown as HTMLButtonElement,
-    popup: getFake(document, "attacker-fitting-popup") as unknown as HTMLElement,
-    savedList: getFake(document, "attacker-fitting-saved-list") as unknown as HTMLElement,
-    presetList: getFake(document, "attacker-fitting-preset-list") as unknown as HTMLElement,
-    savedLabel: getFake(document, "attacker-fitting-saved-label") as unknown as HTMLElement,
-    presetLabel: getFake(document, "attacker-fitting-preset-label") as unknown as HTMLElement,
-    empty: getFake(document, "attacker-fitting-empty") as unknown as HTMLElement,
-    shipImage: getFake(document, "attacker-ship-image") as unknown as HTMLImageElement,
+    trigger: getFake(document, "ship-a-ship-select-trigger") as unknown as HTMLButtonElement,
+    eye: getFake(document, "ship-a-fitting-eye") as unknown as HTMLButtonElement,
+    popup: getFake(document, "ship-a-ship-select-popup") as unknown as HTMLElement,
+    hull: getFake(document, "ship-a-hull") as unknown as HTMLInputElement,
+    savedList: getFake(document, "ship-a-fitting-saved-list") as unknown as HTMLElement,
+    presetList: getFake(document, "ship-a-fitting-preset-list") as unknown as HTMLElement,
+    savedLabel: getFake(document, "ship-a-fitting-saved-label") as unknown as HTMLElement,
+    presetLabel: getFake(document, "ship-a-fitting-preset-label") as unknown as HTMLElement,
+    empty: getFake(document, "ship-a-fitting-empty") as unknown as HTMLElement,
   };
 
   const controller = new FittingPopupControllerImpl({
-    side: "attacker" as Side,
+    side: "shipA" as Side,
     popupGroup,
     savedFittings,
     presetFittings,
     fittingImport,
-    imageCatalog,
     i18n,
     els,
     panel,
@@ -136,6 +139,17 @@ describe("FittingPopupController", () => {
     expect(els.savedList.children.length).toBe(1);
     expect(els.presetList.children.length).toBe(2);
     expect(els.empty.hidden).toBe(true);
+    expect(els.hull.focus).toHaveBeenCalled();
+  });
+
+  test("setFittingEyeEnabled only disables the fitting eye, not the trigger", () => {
+    const { controller, els } = createController();
+    controller.setFittingEyeEnabled(false);
+    expect(els.eye.disabled).toBe(true);
+    expect(els.trigger.disabled).toBe(false);
+    controller.setFittingEyeEnabled(true);
+    expect(els.eye.disabled).toBe(false);
+    expect(els.trigger.disabled).toBe(false);
   });
 
   test("invalid saved fittings are disabled and deletable", () => {
@@ -168,9 +182,31 @@ describe("FittingPopupController", () => {
     expect(item.getAttribute("aria-current")).toBe("true");
   });
 
+  test("canonical matching marks a saved item whose stored text normalizes to the current fitting", () => {
+    const canonicalText = "[Rifter, Brawler]\n200mm AutoCannon I, Hail S";
+    const rawText = "[rifter, brawler]\n200mm autocannon I, Hail S";
+    const { controller, els, fittingImport, savedFittings } = createController({ panel: { fittingText: canonicalText } });
+    fittingImport.canonicalEftText.mockImplementation((text) => (text === rawText || text === canonicalText ? canonicalText : undefined));
+    savedFittings.listForHull.mockReturnValue([{ ...SAVED_RIFTER, text: rawText }]);
+    controller.popup.open();
+    const item = els.savedList.children[0].children[0] as unknown as FakeElement;
+    expect(item.getAttribute("aria-current")).toBe("true");
+  });
+
+  test("no item is marked when the current fitting canonical form matches nothing", () => {
+    const otherText = "[Rifter, Kiter]\n150mm Light AutoCannon I, EMP S";
+    const { controller, els, fittingImport } = createController({ panel: { fittingText: otherText } });
+    fittingImport.canonicalEftText.mockImplementation((text) => (text === otherText ? otherText : SAVED_RIFTER.text));
+    controller.popup.open();
+    const savedItem = els.savedList.children[0].children[0] as unknown as FakeElement;
+    const presetItem = els.presetList.children[0].children[0] as unknown as FakeElement;
+    expect(savedItem.getAttribute("aria-current")).toBeNull();
+    expect(presetItem.getAttribute("aria-current")).toBeNull();
+  });
+
   test("clicking a fitting applies it, closes the popup, and refreshes the ship preview", () => {
     const { controller, els, applyFitting, previews } = createController();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(false);
     controller.popup.open();
     const item = els.savedList.children[0].children[0] as unknown as FakeElement;
@@ -183,7 +219,7 @@ describe("FittingPopupController", () => {
 
   test("clicking a fitting does not refresh a menu preview", () => {
     const { controller, els, applyFitting, previews } = createController();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(true);
     controller.popup.open();
     const item = els.savedList.children[0].children[0] as unknown as FakeElement;
@@ -203,10 +239,10 @@ describe("FittingPopupController", () => {
   test("closeIfOpen hides the popup and a menu-sourced preview", () => {
     const { controller, els, previews } = createController();
     controller.popup.open();
-    vi.mocked(previews.openSide).mockReturnValue("attacker");
+    vi.mocked(previews.openSide).mockReturnValue("shipA");
     vi.mocked(previews.isMenuPreview).mockReturnValue(true);
     controller.closeIfOpen();
     expect(els.popup.hidden).toBe(true);
-    expect(vi.mocked(previews.hide)).toHaveBeenCalledWith("attacker");
+    expect(vi.mocked(previews.hide)).toHaveBeenCalledWith("shipA");
   });
 });

@@ -1,16 +1,17 @@
 [Kestrel, Kitetackle Missile Shield Kestrel]
-Light Missile Launcher II, Caldari Navy Inferno Light Missile
-Light Missile Launcher II, Caldari Navy Inferno Light Missile
-Light Missile Launcher II, Caldari Navy Inferno Light Missile
-Light Missile Launcher II, Caldari Navy Inferno Light Missile
-
-J5 Enduring Warp Disruptor
-Small Shield Extender II
-Small Shield Extender II
-5MN Quad LiF Restrained Microwarpdrive
 
 Type-D Restrained Overdrive Injector
 Ballistic Control System II
+
+Small Shield Extender II
+Small Shield Extender II
+J5 Enduring Warp Disruptor
+5MN Quad LiF Restrained Microwarpdrive
+
+Light Missile Launcher II, Caldari Navy Inferno Light Missile
+Light Missile Launcher II, Caldari Navy Inferno Light Missile
+Light Missile Launcher II, Caldari Navy Inferno Light Missile
+Light Missile Launcher II, Caldari Navy Inferno Light Missile
 
 Small Core Defense Field Extender I
 Small Processor Overclocking Unit I

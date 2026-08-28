@@ -1,47 +1,56 @@
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
+import { type ClipboardProvider, type ProfileTextCodec, USER_SETTINGS_VERSION, type ProfileSettings, type SettingsStore, type UserSettings } from "../../../appstate";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
 import { FakeElement, fakeDocument, getFake } from "../testSupport";
 import type { Popup, PopupGroup } from "../popup";
-import type { ProfileController } from "../profileController";
+import type { ProfileController } from "../profile";
 import type { SessionCodec } from "../session";
 import { ShareControllerImpl } from "./shareController";
 
 function makeUserSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
     version: USER_SETTINGS_VERSION,
-    tracking: 0.32,
-    trackingUnit: "rad",
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    maneuverAggressivity: 1,
+    shipATrackingUnit: "rad",
+    shipBTrackingUnit: "rad",
+    weaponRangeVisibility: "both",
+    shipATracking: 0.32,
+    shipASigRes: "S",
+    shipAOptimal: 5000,
+    shipAFalloff: 5000,
+    shipBTracking: 0.32,
+    shipBSigRes: "S",
+    shipBOptimal: 5000,
+    shipBFalloff: 5000,
+    shipASpeed: 1000,
+    shipAMode: "keepAtRange",
+    shipARange: 5000,
+    shipAAggressivity: 1,
+    shipBAggressivity: 1,
     gridBrightness: 0.2,
-    attackerMass: 1_200_000,
-    attackerInertia: 3,
-    attackerSkillLevel: 5,
-    attackerOverload: true,
+    shipAMass: 1_200_000,
+    shipAInertia: 3,
+    shipASkillLevel: 5,
+    shipAOverload: true,
     initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 10_000_000,
-    targetInertia: 0.45,
-    targetSkillLevel: 5,
-    targetOverload: true,
-    targetSig: 40,
-    attackerHull: "Rifter",
-    attackerPropulsion: undefined,
-    targetHull: "Thrasher",
-    targetPropulsion: undefined,
-    attackerFitting: undefined,
-    attackerOverrides: {},
-    targetFitting: undefined,
-    targetOverrides: {},
-    attackerFittedHull: undefined,
-    targetFittedHull: undefined,
-    attackerAmmo: "Hail S",
+    shipBSpeed: 1000,
+    shipBMode: "orbit",
+    shipBRange: 5000,
+    shipBMass: 10_000_000,
+    shipBInertia: 0.45,
+    shipBSkillLevel: 5,
+    shipBOverload: true,
+    shipBSig: 40,
+    shipAHullId: "587" as ShipId,
+    shipAPropulsion: undefined,
+    shipBHullId: "16242" as ShipId,
+    shipBPropulsion: undefined,
+    shipAFitting: undefined,
+    shipAOverrides: {},
+    shipBFitting: undefined,
+    shipBOverrides: {},
+    shipAFittedHull: undefined,
+    shipBFittedHull: undefined,
+    shipAAmmo: "12608" as TypeId,
+    shipBAmmo: "12608" as TypeId,
     simSpeed: 4,
     language: "en",
     ...overrides,
@@ -54,6 +63,7 @@ interface ShareControllerOverrides {
   clipboard?: Partial<ClipboardProvider>;
   popupGroup?: Partial<PopupGroup>;
   profileController?: Partial<ProfileController>;
+  profileTextCodec?: Partial<ProfileTextCodec>;
 }
 
 function makeShareController(document: Document, overrides: ShareControllerOverrides = {}) {
@@ -66,6 +76,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     loadProfile: vi.fn(),
     deleteProfile: vi.fn(),
     selectProfile: vi.fn(),
+    clearSelectedProfile: vi.fn(),
     encodeUrl: vi.fn(() => "http://localhost/?c=shared"),
     loadPreferences: vi.fn(),
     savePreferences: vi.fn(),
@@ -73,11 +84,15 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
   });
   const sessionCodec = vi.mocked<SessionCodec>({
     capture: vi.fn(() => captured),
+    captureProfile: vi.fn((): ProfileSettings => {
+      const { language: _l, shipATrackingUnit: _tu, shipBTrackingUnit: _tbu, weaponRangeVisibility: _wrv, simSpeed: _s, gridBrightness: _g, ...profile } = captured;
+      return profile;
+    }),
     getInitialDistance: vi.fn(),
     restore: vi.fn(),
     fromProfile: vi.fn(),
     restoreStartup: vi.fn(),
-    setSessionControl: vi.fn(),
+    resetToDefaults: vi.fn(),
     ...overrides.sessionCodec,
   });
   const clipboard = vi.mocked<ClipboardProvider>({
@@ -100,15 +115,21 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     selectedName: vi.fn(),
     restoreFromStartup: vi.fn(),
     refresh: vi.fn(),
-    setSnapshotSource: vi.fn(),
-    setOnProfileLoaded: vi.fn(),
     markLoaded: vi.fn(),
-    updateDirtyState: vi.fn(),
+    updateActionBarState: vi.fn(),
+    toggleProfileSelector: vi.fn(),
+    toggleNewProfilePopup: vi.fn(),
     saveProfile: vi.fn(),
     loadProfile: vi.fn(),
     deleteProfile: vi.fn(),
     showStatus: vi.fn(),
     ...overrides.profileController,
+  });
+  const profileTextCodec = vi.mocked<ProfileTextCodec>({
+    parse: vi.fn(),
+    serialize: vi.fn(() => "serialized profile text"),
+    hasHeader: vi.fn(),
+    ...overrides.profileTextCodec,
   });
   const controller = new ShareControllerImpl({
     clipboard,
@@ -116,6 +137,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
     sessionCodec,
     popupGroup,
     profileController,
+    profileTextCodec,
     els: {
       shareLink: getFake(document, "share-link") as unknown as HTMLButtonElement,
       sharePopup: getFake(document, "share-popup") as unknown as HTMLElement,
@@ -123,7 +145,7 @@ function makeShareController(document: Document, overrides: ShareControllerOverr
       shareCopyText: getFake(document, "share-copy-text") as unknown as HTMLButtonElement,
     },
   });
-  return { controller, settingsStore, sessionCodec, clipboard, popupGroup, profileController, captured };
+  return { controller, settingsStore, sessionCodec, clipboard, popupGroup, profileController, profileTextCodec, captured };
 }
 
 beforeEach(() => {
@@ -146,9 +168,10 @@ describe("ShareController", () => {
   });
 
   test("copy text writes the serialized profile text and shows copied", async () => {
-    const { controller, clipboard, profileController, popupGroup, captured } = makeShareController(globalThis.document);
+    const { controller, clipboard, profileController, popupGroup, profileTextCodec, captured } = makeShareController(globalThis.document);
     await controller.onCopyTextClicked();
-    expect(clipboard.writeText).toHaveBeenCalledWith(serializeProfile(expectedProfileFor(captured)));
+    expect(profileTextCodec.serialize).toHaveBeenCalledWith(expectedProfileFor(captured));
+    expect(clipboard.writeText).toHaveBeenCalledWith("serialized profile text");
     expect(profileController.showStatus).toHaveBeenCalledWith("status.copied");
     expect(popupGroup.close).toHaveBeenCalledWith(controller.popup);
   });
@@ -179,19 +202,19 @@ describe("ShareController", () => {
 
   test("popup contains the trigger and popup", () => {
     const { controller } = makeShareController(globalThis.document);
-    const target = getFake(globalThis.document, "share-popup");
-    target.closest = vi.fn(() => target) as unknown as typeof target.closest;
-    expect(controller.popup.contains(target as unknown as EventTarget)).toBe(true);
+    const domTarget = getFake(globalThis.document, "share-popup");
+    domTarget.closest = vi.fn(() => domTarget) as unknown as typeof domTarget.closest;
+    expect(controller.popup.contains(domTarget as unknown as EventTarget)).toBe(true);
   });
 
-  test("popup does not contain an outside target", () => {
+  test("popup does not contain an outside shipB", () => {
     const { controller } = makeShareController(globalThis.document);
-    const target = getFake(globalThis.document, "tracking");
-    expect(controller.popup.contains(target as unknown as EventTarget)).toBe(false);
+    const domTarget = getFake(globalThis.document, "tracking");
+    expect(controller.popup.contains(domTarget as unknown as EventTarget)).toBe(false);
   });
 });
 
 function expectedProfileFor(captured: UserSettings): ProfileSettings {
-  const { language: _, trackingUnit: __, simSpeed: ___, gridBrightness: ____, ...rest } = captured;
+  const { language: _, shipATrackingUnit: __, shipBTrackingUnit: ___, weaponRangeVisibility: ____, simSpeed: _____, gridBrightness: ______, ...rest } = captured;
   return rest;
 }

@@ -1,20 +1,21 @@
 [Stork, Kitetackle Rocket Shield Stork]
-Core Probe Launcher I, Core Scanner Probe I
-Rocket Launcher II, Caldari Navy Inferno Rocket
-Rocket Launcher II, Caldari Navy Inferno Rocket
-Rocket Launcher II, Caldari Navy Inferno Rocket
-Rocket Launcher II, Caldari Navy Inferno Rocket
-Improved Cloaking Device II
-
-5MN Quad LiF Restrained Microwarpdrive
-Micro Jump Field Generator
-Multispectrum Shield Hardener II
-Medium F-S9 Regolith Compact Shield Extender
-Medium F-S9 Regolith Compact Shield Extender
-Faint Epsilon Scoped Warp Scrambler
 
 Damage Control II
 Nanofiber Internal Structure II
+
+Medium F-S9 Regolith Compact Shield Extender
+Medium F-S9 Regolith Compact Shield Extender
+5MN Quad LiF Restrained Microwarpdrive
+Multispectrum Shield Hardener II
+Faint Epsilon Scoped Warp Scrambler
+[Empty Med slot]
+
+Rocket Launcher II, Caldari Navy Inferno Rocket
+Rocket Launcher II, Caldari Navy Inferno Rocket
+Rocket Launcher II, Caldari Navy Inferno Rocket
+Rocket Launcher II, Caldari Navy Inferno Rocket
+[Empty High slot]
+[Empty High slot]
 
 Small EM Shield Reinforcer II
 Small Core Defense Field Extender II

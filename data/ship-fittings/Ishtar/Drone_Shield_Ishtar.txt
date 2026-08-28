@@ -1,10 +1,4 @@
 [Ishtar, Drone Shield Ishtar]
-Drone Link Augmentor I
-
-100MN Y-S8 Compact Afterburner
-Large Clarity Ward Enduring Shield Booster
-Multispectrum Shield Hardener II
-Large Compact Pb-Acid Cap Battery
 
 Drone Damage Amplifier II
 EFFA Compact Assault Damage Control
@@ -13,13 +7,19 @@ Power Diagnostic System II
 Drone Damage Amplifier II
 Power Diagnostic System II
 
+100MN Y-S8 Compact Afterburner
+Large Clarity Ward Enduring Shield Booster
+Multispectrum Shield Hardener II
+Large Compact Pb-Acid Cap Battery
+
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+
 Medium EM Shield Reinforcer II
 Medium EM Shield Reinforcer II
 
 
 Acolyte II x6
 Wasp II x2
-
-
-Agency 'Pyrolancea' DB3 Dose I x1
-Agency 'Hardshell' TB3 Dose I x2

@@ -1,20 +1,21 @@
 [Federation Navy Comet, Tackle Rail Armor Federation Navy Comet]
-Small Infectious Scoped Energy Neutralizer
-150mm Railgun II, Caldari Navy Iridium Charge S
-150mm Railgun II, Caldari Navy Iridium Charge S
-
-Warp Scrambler II
-Stasis Webifier II
-1MN Afterburner II
 
 Damage Control II
 Small Ancillary Armor Repairer, Nanite Repair Paste
 Magnetic Field Stabilizer II
 Overdrive Injector System II
 
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
+Warp Scrambler II
+Stasis Webifier II
+1MN Afterburner II
+
+Small Infectious Scoped Energy Neutralizer
+150mm Railgun II, Caldari Navy Iridium Charge S
+150mm Railgun II, Caldari Navy Iridium Charge S
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Hobgoblin II x2

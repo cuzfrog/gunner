@@ -1,25 +1,26 @@
 [Omen Navy Issue, Beam Shield Omen Navy Issue]
-Heavy Beam Laser II, Aurora M
-Heavy Beam Laser II, Aurora M
-Heavy Beam Laser II, Aurora M
-Drone Link Augmentor II
-Heavy Beam Laser II, Aurora M
 
-Tracking Computer II, Optimal Range Script
-50MN Quad LiF Restrained Microwarpdrive
-Small Capacitor Booster II
-
-Signal Amplifier II
 Damage Control II
 Nanofiber Internal Structure II
 Heat Sink II
 Heat Sink II
 Nanofiber Internal Structure II
 Heat Sink II
+[Empty Low slot]
+
+Tracking Computer II, Optimal Range Script
+50MN Quad LiF Restrained Microwarpdrive
+Small Capacitor Booster II
+
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+Heavy Beam Laser II, Aurora M
+[Empty High slot]
 
 Medium Energy Locus Coordinator II
 Medium Energy Locus Coordinator II
-Medium Ionic Field Projector I
+[Empty Rig slot]
 
 
 Warrior II x10
@@ -28,10 +29,8 @@ Warrior II x10
 Imperial Navy Multifrequency M x3
 Imperial Navy Multifrequency M x5
 Tracking Speed Script x1
-Agency 'Overclocker' SB5 Dose II x1
 Gleam M x2
 Gleam M x2
-Synth Frentix Booster x1
 Nanite Repair Paste x75
 Imperial Navy Standard M x2
 Imperial Navy Standard M x2

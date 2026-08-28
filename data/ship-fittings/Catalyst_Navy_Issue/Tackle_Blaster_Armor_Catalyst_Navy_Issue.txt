@@ -1,23 +1,24 @@
 [Catalyst Navy Issue, Tackle Blaster Armor Catalyst Navy Issue]
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Light Neutron Blaster II, Void S
-Small Remote Armor Repairer II
-Light Neutron Blaster II, Void S
-
-Small Capacitor Booster II, Navy Cap Booster 200
-Fleeting Compact Stasis Webifier
-1MN Monopropellant Enduring Afterburner
 
 Damage Control II
 Magnetic Field Stabilizer II
 400mm Rolled Tungsten Compact Plates
 
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
-Small Transverse Bulkhead I
+Small Capacitor Booster II, Navy Cap Booster 200
+Fleeting Compact Stasis Webifier
+1MN Monopropellant Enduring Afterburner
+
+Small Remote Armor Repairer II
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+Light Neutron Blaster II, Void S
+
+[Empty Rig slot]
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Null S x2000

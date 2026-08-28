@@ -1,20 +1,21 @@
 [Rapier, Kitetackle Shield Rapier]
-Covert Ops Cloaking Device II
-Sisters Expanded Probe Launcher
-Covert Cynosural Field Generator I
-Cynosural Field Generator I
-
-Warp Disruptor II
-Multispectrum Shield Hardener II
-Republic Fleet Large Shield Extender
-Fleeting Compact Stasis Webifier
-50MN Y-T8 Compact Microwarpdrive
-Republic Fleet Medium Shield Extender
 
 Damage Control II
 Power Diagnostic System II
 Nanofiber Internal Structure II
 Power Diagnostic System II
+
+Republic Fleet Large Shield Extender
+Republic Fleet Medium Shield Extender
+Warp Disruptor II
+Multispectrum Shield Hardener II
+Fleeting Compact Stasis Webifier
+50MN Y-T8 Compact Microwarpdrive
+
+Covert Ops Cloaking Device II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Core Defense Field Extender I
 Medium Core Defense Field Extender I

@@ -4,8 +4,8 @@ import { fittingAreaSelector, isEventTargetWithClosest } from "../controlsDom";
 import type { FittingPreview } from "./fittingPreview";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import type { Side } from "../sidePanel";
-import type { SidePanel } from "../sidePanel";
+import type { Side } from "../side";
+import type { FittingPopupHost } from "./fittingPopupHost";
 import type { UiEvents } from "../../events";
 
 export interface FittingPreviewManager {
@@ -15,7 +15,7 @@ export interface FittingPreviewManager {
   openSide(): Side | undefined;
   isMenuPreview(): boolean;
   refresh(): void;
-  handlePointerDown(target: EventTarget): void;
+  handlePointerDown(domTarget: EventTarget): void;
   handleEscape(): void;
 }
 
@@ -23,10 +23,9 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   private readonly fittingImport: FittingImport;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
-  private readonly attackerSide: SidePanel;
-  private readonly targetSide: SidePanel;
+  private readonly shipASide: FittingPopupHost;
+  private readonly shipBSide: FittingPopupHost;
   private readonly previewsBySide: Readonly<Record<Side, FittingPreview>>;
-  private readonly shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
   private readonly eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
   private openPreviewSide: Side | null = null;
   private currentPreviewAnchor?: HTMLElement;
@@ -38,20 +37,18 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     fittingImport: FittingImport;
     imageCatalog: ImageCatalog;
     i18n: I18n;
-    attackerSide: SidePanel;
-    targetSide: SidePanel;
+    shipASide: FittingPopupHost;
+    shipBSide: FittingPopupHost;
     previewsBySide: Readonly<Record<Side, FittingPreview>>;
-    shipImageBySide: Readonly<Record<Side, HTMLImageElement>>;
     eyeBySide: Readonly<Record<Side, HTMLButtonElement>>;
     events: UiEvents;
   }) {
     this.fittingImport = deps.fittingImport;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
-    this.attackerSide = deps.attackerSide;
-    this.targetSide = deps.targetSide;
+    this.shipASide = deps.shipASide;
+    this.shipBSide = deps.shipBSide;
     this.previewsBySide = deps.previewsBySide;
-    this.shipImageBySide = deps.shipImageBySide;
     this.eyeBySide = deps.eyeBySide;
     deps.events.onLanguageChanged(() => this.refresh());
   }
@@ -59,7 +56,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
   toggle(side: Side): void {
     const text = this.fittingTextOf(side);
     if (!text) return;
-    this.show(side, text, this.shipImageBySide[side], this.eyeBySide[side], false);
+    this.show(side, text, this.eyeBySide[side], this.eyeBySide[side], false);
   }
 
   showInMenu(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement): void {
@@ -104,10 +101,10 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     this.renderPreview(side, text, this.currentPreviewAnchor, eye);
   }
 
-  handlePointerDown(target: EventTarget): void {
+  handlePointerDown(domTarget: EventTarget): void {
     const side = this.openPreviewSide;
-    if (!side || !isEventTargetWithClosest(target)) return;
-    if (target.closest(fittingAreaSelector(side)) === null) this.hide(side);
+    if (!side || !isEventTargetWithClosest(domTarget)) return;
+    if (domTarget.closest(fittingAreaSelector(side)) === null) this.hide(side);
   }
 
   handleEscape(): void {
@@ -122,16 +119,16 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
     return this.previewsBySide[side];
   }
 
-  private sidePanel(side: Side): SidePanel {
-    return side === "attacker" ? this.attackerSide : this.targetSide;
+  private hostFor(side: Side): FittingPopupHost {
+    return side === "shipA" ? this.shipASide : this.shipBSide;
   }
 
   private profileOf(side: Side): ShipProfile | undefined {
-    return this.sidePanel(side).profile;
+    return this.hostFor(side).profile;
   }
 
   private fittingTextOf(side: Side): string | undefined {
-    return this.sidePanel(side).fittingText;
+    return this.hostFor(side).fittingText;
   }
 
   private show(side: Side, text: string, anchor: HTMLElement, eye: HTMLButtonElement, inMenu: boolean): void {
@@ -150,7 +147,7 @@ export class FittingPreviewManagerImpl implements FittingPreviewManager {
       return;
     }
     const profile = this.profileOf(side);
-    const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.name) : undefined;
+    const shipImageUrl = profile ? this.imageCatalog.shipImageUrl(profile.id) : undefined;
     this.currentPreviewEye?.setAttribute("aria-pressed", "false");
     this.currentPreviewAnchor = anchor;
     this.currentPreviewText = text;

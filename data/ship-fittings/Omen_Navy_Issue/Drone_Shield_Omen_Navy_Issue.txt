@@ -1,25 +1,26 @@
 [Omen Navy Issue, Drone Shield Omen Navy Issue]
-Drone Link Augmentor II
-Heavy Beam Laser II, Imperial Navy Radio M
-Heavy Beam Laser II, Imperial Navy Standard M
-Heavy Beam Laser II, Imperial Navy Standard M
-Heavy Beam Laser II, Imperial Navy Radio M
-
-Small Capacitor Booster II, Navy Cap Booster 400
-Tracking Computer II, Optimal Range Script
-50MN Quad LiF Restrained Microwarpdrive
 
 Nanofiber Internal Structure II
-Signal Amplifier II
 Heat Sink II
 Nanofiber Internal Structure II
 Heat Sink II
 Heat Sink II
 Damage Control II
+[Empty Low slot]
+
+Small Capacitor Booster II, Navy Cap Booster 400
+Tracking Computer II, Optimal Range Script
+50MN Quad LiF Restrained Microwarpdrive
+
+Heavy Beam Laser II, Imperial Navy Radio M
+Heavy Beam Laser II, Imperial Navy Standard M
+Heavy Beam Laser II, Imperial Navy Standard M
+Heavy Beam Laser II, Imperial Navy Radio M
+[Empty High slot]
 
 Medium Energy Locus Coordinator II
-Medium Ionic Field Projector I
 Medium Energy Locus Coordinator II
+[Empty Rig slot]
 
 
 Warrior II x2
@@ -32,13 +33,9 @@ Imperial Navy Multifrequency M x1
 Imperial Navy Multifrequency M x3
 Tracking Speed Script x1
 Nanite Repair Paste x48
-Synth Frentix Booster x1
 Gleam M x3
 Gleam M x1
 Navy Cap Booster 400 x25
 Imperial Navy Standard M x1
 Imperial Navy Standard M x1
 Imperial Navy Radio M x2
-Cladistic-5 'Krai Veles' Filament x3
-Agency 'Overclocker' SB5 Dose II x1
-Cladistic-5 'Krai Perun' Filament x4

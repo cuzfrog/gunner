@@ -1,12 +1,13 @@
 import type { FittingImport } from "../../../fitting";
-import { serializeProfile, USER_SETTINGS_VERSION, type ClipboardProvider, type SavedFittings } from "../../../appstate";
-import type { PreferencesController } from "../preferencesController";
-import type { ProfileController } from "../profileController";
+import type { ShipId, TypeId } from "../../../gamedata/ids";
+import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
+import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "../sidePanel";
-import type { AttackerTurret } from "./attackerTurret";
+import type { ShipATurret } from "./shipATurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
+import { UiEventsImpl } from "../../events";
 
 class FakePopupGroup implements PopupGroup {
   register(): void {}
@@ -19,37 +20,91 @@ class FakePopupGroup implements PopupGroup {
   onKeyDown(): void {}
 }
 
-export function gunnerProfileText(overrides: { attackerFitting?: string; targetFitting?: string } = {}): string {
-  return serializeProfile({
-    version: USER_SETTINGS_VERSION,
-    tracking: 0.32,
-    sigRes: "S",
-    optimal: 5000,
-    falloff: 5000,
-    attackerSpeed: 1000,
-    attackerMode: "keepAtRange",
-    attackerRange: 5000,
-    attackerMass: 1_200_000,
-    attackerInertia: 3,
-    attackerHull: "Rifter",
-    targetHull: "Thrasher",
-    initialDistance: 5000,
-    targetSpeed: 1000,
-    targetMode: "orbit",
-    targetRange: 5000,
-    targetMass: 10_000_000,
-    targetInertia: 0.45,
-    targetSig: 40,
-    attackerAmmo: "Hail S",
-    ...overrides,
-  });
+const GUNNER_PROFILE_BODY = `# gunner v1
+version=8
+shipA.tracking=0.32
+shipA.sigRes=S
+shipA.optimal=5000
+shipA.falloff=5000
+shipA.ammo=Hail S
+initialDistance=5000
+shipA.speed=1000
+shipA.mode=keepAtRange
+shipA.range=5000
+shipA.mass=1200000
+shipA.inertia=3
+shipA.hullId=Rifter
+shipB.speed=1000
+shipB.mode=orbit
+shipB.range=5000
+shipB.mass=10000000
+shipB.inertia=0.45
+shipB.sig=40
+shipB.hullId=Thrasher`;
+
+export function gunnerProfileText(overrides: { shipAFitting?: string; shipBFitting?: string } = {}): string {
+  let text = GUNNER_PROFILE_BODY;
+  if (overrides.shipAFitting !== undefined) {
+    text = `${text}\nshipA.fitting:\n${overrides.shipAFitting}\n---`;
+  }
+  if (overrides.shipBFitting !== undefined) {
+    text = `${text}\nshipB.fitting:\n${overrides.shipBFitting}\n---`;
+  }
+  return text;
+}
+
+function makeMockProfileTextCodec(): ProfileTextCodec {
+  function extractFitting(text: string, side: "shipA" | "shipB"): string | undefined {
+    const marker = `${side}.fitting:\n`;
+    const startIdx = text.indexOf(marker);
+    if (startIdx < 0) return undefined;
+    const bodyStart = startIdx + marker.length;
+    const endIdx = text.indexOf("\n---", bodyStart);
+    return endIdx < 0 ? text.slice(bodyStart).trim() : text.slice(bodyStart, endIdx);
+  }
+  return {
+    hasHeader: (text: string) => text.trimStart().startsWith("# gunner v1"),
+    parse: (text: string): ProfileSettings | undefined => {
+      const trimmed = text.trimStart();
+      if (!trimmed.startsWith("# gunner v1")) return undefined;
+      return {
+        version: 12,
+        shipATracking: 0.32,
+        shipASigRes: "S",
+        shipAOptimal: 5000,
+        shipAFalloff: 5000,
+        shipBTracking: 0.32,
+        shipBSigRes: "S",
+        shipBOptimal: 5000,
+        shipBFalloff: 5000,
+        shipASpeed: 1000,
+        shipAMode: "keepAtRange",
+        shipARange: 5000,
+        shipAMass: 1_200_000,
+        shipAInertia: 3,
+        initialDistance: 5000,
+        shipBSpeed: 1000,
+        shipBMode: "orbit",
+        shipBRange: 5000,
+        shipBMass: 10_000_000,
+        shipBInertia: 0.45,
+        shipBSig: 40,
+        shipAAmmo: "12608" as TypeId,
+        shipAHullId: "587" as ShipId,
+        shipBHullId: "16242" as ShipId,
+        shipAFitting: extractFitting(trimmed, "shipA"),
+        shipBFitting: extractFitting(trimmed, "shipB"),
+      };
+    },
+    serialize: () => "",
+  };
 }
 
 export class FakeSidePanel {
   clearOverrides = vi.fn();
   fittingText?: string;
   overrides: Record<string, unknown> = {};
-  lastCommittedHull?: string;
+  lastCommittedHull?: ShipId;
   skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true }));
   pastePopup = fakePopup();
   getPastePopup = () => this.pastePopup;
@@ -75,14 +130,17 @@ export function buildImportController(document: Document) {
   globalThis.Element = FakeElement as unknown as typeof Element;
   getFake(document, "import-side-popup").hidden = true;
   getFake(document, "import-profile").setAttribute("aria-expanded", "false");
-  const attackerPanel = new FakeSidePanel();
-  const targetPanel = new FakeSidePanel();
+  const shipAPanel = new FakeSidePanel();
+  const shipBPanel = new FakeSidePanel();
   const clipboard = { readText: vi.fn(async () => ""), writeText: vi.fn(async (text: string) => {}) };
   const fittingImport = vi.mocked<FittingImport>({
     importFitting: vi.fn((text: string) => (text.startsWith("[Rifter") ? IMPORTED_RIFTER : undefined)),
     propulsionVariantNames: vi.fn(),
     propulsionStats: vi.fn(),
+    propulsionStatsById: vi.fn(),
     summarize: vi.fn(),
+    canonicalEftText: vi.fn(),
+    itemNameForId: vi.fn((id: TypeId) => String(id)),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),
@@ -90,11 +148,16 @@ export function buildImportController(document: Document) {
     record: vi.fn(),
     remove: vi.fn(),
   });
-  const turret: AttackerTurret = { applyImported: vi.fn(), ammo: vi.fn(() => "Hail S") };
-  const preferences = { capture: vi.fn(() => ({ language: "en", trackingUnit: "rad", simSpeed: 4, gridBrightness: 0.2 })) };
+  const shipATurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
+  const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
+  const turrets = { shipA: shipATurret, shipB: shipBTurret };
   const profileController = { showStatus: vi.fn() };
+  const profileTextCodec = makeMockProfileTextCodec();
+  const events = new UiEventsImpl();
   const onConfigPersisted = vi.fn();
   const onProfileTextLoaded = vi.fn();
+  events.onConfigInvalidated(onConfigPersisted);
+  events.onProfileTextLoaded(onProfileTextLoaded);
   const popupGroup: PopupGroup = new FakePopupGroup();
   const controller = new ImportControllerImpl({
     clipboard,
@@ -104,19 +167,18 @@ export function buildImportController(document: Document) {
     els: {
       importProfile: getFake(document, "import-profile") as unknown as HTMLButtonElement,
       importSidePopup: getFake(document, "import-side-popup") as unknown as HTMLElement,
-      importSideAttacker: getFake(document, "import-side-attacker") as unknown as HTMLButtonElement,
-      importSideTarget: getFake(document, "import-side-target") as unknown as HTMLButtonElement,
+      importSideShipA: getFake(document, "import-side-ship-a") as unknown as HTMLButtonElement,
+      importSideShipB: getFake(document, "import-side-ship-b") as unknown as HTMLButtonElement,
     },
-    attackerSide: attackerPanel as unknown as SidePanel,
-    targetSide: targetPanel as unknown as SidePanel,
-    turret,
-    preferences: preferences as unknown as PreferencesController,
+    shipASide: shipAPanel as unknown as SidePanel,
+    shipBSide: shipBPanel as unknown as SidePanel,
+    turrets,
     profileController: profileController as unknown as ProfileController,
+    profileTextCodec,
+    events,
   });
-  controller.setOnConfigPersisted(onConfigPersisted);
-  controller.setOnProfileTextLoaded(onProfileTextLoaded);
   return {
-    controller, document, clipboard, fittingImport, savedFittings, attackerPanel, targetPanel, turret, preferences,
-    profileController, onConfigPersisted, onProfileTextLoaded,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets,
+    profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

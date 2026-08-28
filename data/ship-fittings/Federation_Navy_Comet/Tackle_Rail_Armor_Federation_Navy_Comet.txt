@@ -1,20 +1,21 @@
 [Federation Navy Comet, Tackle Rail Armor Federation Navy Comet]
-Small Energy Nosferatu II
-150mm Railgun II, Caldari Navy Antimatter Charge S
-150mm Railgun II, Caldari Navy Antimatter Charge S
+
+Damage Control II
+Small Ancillary Armor Repairer, Nanite Repair Paste
+Magnetic Field Stabilizer II
+[Empty Low slot]
 
 Warp Scrambler II
 1MN Y-S8 Compact Afterburner
 Stasis Webifier II
 
-Damage Control II
-Multispectrum Coating II
-Small Ancillary Armor Repairer, Nanite Repair Paste
-Magnetic Field Stabilizer II
+Small Energy Nosferatu II
+150mm Railgun II, Caldari Navy Antimatter Charge S
+150mm Railgun II, Caldari Navy Antimatter Charge S
 
-Small Transverse Bulkhead II
-Small Transverse Bulkhead II
 Small Polycarbon Engine Housing II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Warrior II x3
@@ -22,6 +23,5 @@ Warrior II x3
 
 Nanite Repair Paste x12
 Caldari Navy Antimatter Charge S x474
-Agency 'Overclocker' SB3 Dose I x1
 Javelin S x760
 Spike S x560

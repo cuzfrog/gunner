@@ -4,7 +4,6 @@ interface FakeButton {
   readonly value: string;
   getAttribute(name: string): string | null;
   setAttribute(name: string, value: string): void;
-  classList: { toggle(name: string, force: boolean): void };
   addEventListener(event: string, handler: () => void): void;
   handler?: () => void;
 }
@@ -14,7 +13,6 @@ function fakeButton(value: string): FakeButton {
     value,
     getAttribute: (name) => (name === "data-value" ? value : null),
     setAttribute: vi.fn(),
-    classList: { toggle: vi.fn() },
     addEventListener: (_event, handler) => {
       button.handler = handler;
     },
@@ -35,8 +33,6 @@ describe("ChoiceGroup", () => {
     const choice = new ChoiceGroupImpl(group, select, ["S", "M", "L", "XL"]);
     choice.set("L");
 
-    expect(buttons[0].classList.toggle).toHaveBeenCalledWith("active", false);
-    expect(buttons[2].classList.toggle).toHaveBeenCalledWith("active", true);
     expect(buttons[0].setAttribute).toHaveBeenCalledWith("aria-pressed", "false");
     expect(buttons[2].setAttribute).toHaveBeenCalledWith("aria-pressed", "true");
   });
@@ -51,8 +47,7 @@ describe("ChoiceGroup", () => {
     const event = (select as unknown as { dispatchEvent: ReturnType<typeof vi.fn> }).dispatchEvent.mock.calls[0][0];
     expect(event.type).toBe("input");
     expect(event.bubbles).toBe(true);
-    expect(buttons[0].classList.toggle).toHaveBeenCalledWith("active", false);
-    expect(buttons[1].classList.toggle).toHaveBeenCalledWith("active", true);
+    expect(buttons[0].setAttribute).toHaveBeenCalledWith("aria-pressed", "false");
     expect(buttons[1].setAttribute).toHaveBeenCalledWith("aria-pressed", "true");
   });
 

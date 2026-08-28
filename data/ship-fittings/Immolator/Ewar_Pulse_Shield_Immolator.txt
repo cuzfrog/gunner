@@ -1,13 +1,14 @@
 [Immolator, Ewar Pulse Shield Immolator]
-Dark Blood Small Focused Pulse Laser, Conflagration S
-Small Abyssal Energy Nosferatu
+
+Abyssal Heat Sink
+Syndicate Damage Control
 
 Small Abyssal Shield Booster
 Thon's Modified Multispectrum Shield Hardener
 1MN Abyssal Afterburner
 
-Abyssal Heat Sink
-Syndicate Damage Control
+Dark Blood Small Focused Pulse Laser, Conflagration S
+Small Abyssal Energy Nosferatu
 
 
 Conflagration S x19

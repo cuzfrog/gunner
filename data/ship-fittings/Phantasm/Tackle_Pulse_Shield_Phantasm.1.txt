@@ -1,15 +1,4 @@
 [Phantasm, Tackle Pulse Shield Phantasm]
-Heavy Pulse Laser II, Conflagration M
-Medium Energy Neutralizer II
-Heavy Pulse Laser II, Conflagration M
-Heavy Pulse Laser II, Conflagration M
-
-Multispectrum Shield Hardener II
-Dread Guristas Stasis Webifier
-Republic Fleet Large Shield Extender
-Federation Navy 10MN Afterburner
-Republic Fleet Large Shield Extender
-Dread Guristas Warp Disruptor
 
 Heat Sink II
 Damage Control II
@@ -17,9 +6,18 @@ Heat Sink II
 Nanofiber Internal Structure II
 Heat Sink II
 
-Medium Core Defense Field Extender II
-Medium Core Defense Field Extender II
-Medium Core Defense Field Extender II
+Republic Fleet Large Shield Extender
+Republic Fleet Large Shield Extender
+Multispectrum Shield Hardener II
+Dread Guristas Stasis Webifier
+Federation Navy 10MN Afterburner
+Dread Guristas Warp Disruptor
 
+Heavy Pulse Laser II, Conflagration M
+Medium Energy Neutralizer II
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
 
-Signal-25 'Needlejack' Filament x3
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II
+Medium Core Defense Field Extender II

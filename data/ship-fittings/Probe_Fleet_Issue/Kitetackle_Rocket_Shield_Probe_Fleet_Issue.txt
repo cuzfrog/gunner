@@ -1,22 +1,22 @@
 [Probe Fleet Issue, Kitetackle Rocket Shield Probe Fleet Issue]
-Rocket Launcher II, Guristas Scourge Rocket
-Salvager I
-Rocket Launcher II, Guristas Scourge Rocket
-Salvager I
-
-1MN Y-S8 Compact Afterburner
-Faint Epsilon Scoped Warp Scrambler
-Republic Fleet Medium Shield Extender
-5MN Y-T8 Compact Microwarpdrive
 
 Nanofiber Internal Structure II
 Ballistic Control System II
 Ballistic Control System II
 
+Republic Fleet Medium Shield Extender
+1MN Y-S8 Compact Afterburner
+Faint Epsilon Scoped Warp Scrambler
+5MN Y-T8 Compact Microwarpdrive
+
+Rocket Launcher II, Guristas Scourge Rocket
+Rocket Launcher II, Guristas Scourge Rocket
+[Empty High slot]
+[Empty High slot]
+
 Small Ancillary Current Router I
-Small Warhead Calefaction Catalyst I
 Small EM Shield Reinforcer I
+[Empty Rig slot]
 
 
 Guristas Scourge Rocket x399
-Small Standard Container x3

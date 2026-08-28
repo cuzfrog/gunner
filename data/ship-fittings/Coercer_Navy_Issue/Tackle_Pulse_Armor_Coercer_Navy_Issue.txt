@@ -1,22 +1,24 @@
 [Coercer Navy Issue, Tackle Pulse Armor Coercer Navy Issue]
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-Dual Light Pulse Laser II, Conflagration S
-
-1MN Y-S8 Compact Afterburner
-Warp Scrambler II
 
 Heat Sink II
 Damage Control II
 400mm Crystalline Carbonide Restrained Plates
 Multispectrum Energized Membrane II
 
-Small Energy Collision Accelerator II
+1MN Y-S8 Compact Afterburner
+Warp Scrambler II
+
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+Dual Light Pulse Laser II, Conflagration S
+[Empty High slot]
+
 Small Trimark Armor Pump I
 Small Trimark Armor Pump I
+[Empty Rig slot]
 
 
 Scorch S x2

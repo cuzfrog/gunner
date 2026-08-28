@@ -1,0 +1,364 @@
+import { toTypeId, type TypeId } from "../../../gamedata/ids";
+import type { BoostLoadout, TurretBoostProjection, TurretScriptSpec, TrackingBoosterSpec } from "../../../sim";
+import type { StoredBoosterActivation } from "../../../appstate";
+import type { FittingImport } from "../../../fitting";
+import type { I18n } from "../../i18n";
+import type { ImageCatalog } from "../../icons";
+import type { UiEvents } from "../../events";
+import { boosterScriptStatSuffix } from "../controlsFormat";
+import type { Popup, PopupGroup } from "../popup";
+import type { Side } from "../side";
+import type { BoosterController, BoosterEls } from "./boosterControllerContract";
+
+interface MutableBoosterActivation {
+  active: boolean;
+  script: TurretScriptSpec | undefined;
+}
+
+interface BoosterState {
+  loadout: BoostLoadout;
+  activation: MutableBoosterActivation[];
+}
+
+export class BoosterControllerImpl implements BoosterController {
+  private readonly els: BoosterEls;
+  private readonly popupGroup: PopupGroup;
+  private readonly imageCatalog: ImageCatalog;
+  private readonly fittingImport: FittingImport;
+  private readonly i18n: I18n;
+  private readonly events: UiEvents;
+  private readonly states = new Map<Side, BoosterState>();
+  private readonly scriptPopups: Record<Side, Popup>;
+  private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
+  private readonly scriptPopupEls = new Map<Side, HTMLElement>();
+  private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
+
+  constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
+    this.els = deps.els;
+    this.popupGroup = deps.popupGroup;
+    this.imageCatalog = deps.imageCatalog;
+    this.fittingImport = deps.fittingImport;
+    this.i18n = deps.i18n;
+    this.events = deps.events;
+    this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
+    this.popupGroup.register(this.scriptPopups.shipA);
+    this.popupGroup.register(this.scriptPopups.shipB);
+    this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
+    this.render();
+  }
+
+  setLoadout(side: Side, loadout: BoostLoadout): void {
+    if (loadout.computers.length === 0) {
+      this.states.delete(side);
+    } else {
+      this.states.set(side, { loadout, activation: this.clampActivation(loadout) });
+    }
+    this.renderSide(side);
+  }
+
+  restore(side: Side, loadout: BoostLoadout | undefined, saved?: readonly StoredBoosterActivation[]): void {
+    if (!loadout || loadout.computers.length === 0) {
+      this.states.delete(side);
+    } else {
+      this.states.set(side, { loadout, activation: this.clampActivation(loadout, saved) });
+    }
+    this.renderSide(side);
+  }
+
+  projection(side: Side): TurretBoostProjection | undefined {
+    const state = this.states.get(side);
+    if (!state || state.loadout.computers.length === 0) return undefined;
+    return { loadout: state.loadout, activation: { computers: state.activation } };
+  }
+
+  capture(side: Side): readonly StoredBoosterActivation[] | undefined {
+    const state = this.states.get(side);
+    if (!state || state.loadout.computers.length === 0) return undefined;
+    return state.activation.map((a) => ({
+      active: a.active,
+      script: a.script?.moduleId ?? "none",
+    }));
+  }
+
+  render(): void {
+    this.renderSide("shipA");
+    this.renderSide("shipB");
+  }
+
+  updateSummaries(): void {
+    this.updateSummary("shipA");
+    this.updateSummary("shipB");
+  }
+
+  private buildScriptPopup(side: Side): Popup {
+    const section = this.els.sections[side];
+    const popup = document.createElement("div");
+    popup.id = `${sideId(side)}-booster-script-popup`;
+    popup.className = "ewar-script-popup popup";
+    popup.setAttribute("role", "menu");
+    popup.hidden = true;
+    section.appendChild(popup);
+    this.scriptPopupEls.set(side, popup);
+    return {
+      isOpen: () => !popup.hidden,
+      open: () => { popup.hidden = false; },
+      close: () => {
+        popup.hidden = true;
+        const gear = this.scriptGears.get(side)?.gear;
+        if (gear) gear.setAttribute("aria-expanded", "false");
+      },
+      focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
+      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-popup`) !== null,
+    };
+  }
+
+  private renderSide(side: Side): void {
+    const section = this.els.sections[side];
+    const summary = this.els.summaries[side];
+    const state = this.states.get(side);
+    this.scriptPopups[side].close();
+    this.scriptGears.delete(side);
+    this.computerNameSpans.delete(side);
+    section.innerHTML = "";
+    section.appendChild(this.scriptPopupEls.get(side)!);
+    if (!state || state.loadout.computers.length === 0) {
+      section.hidden = true;
+      summary.innerHTML = "";
+      return;
+    }
+    section.hidden = false;
+    this.updateSummary(side);
+    const label = document.createElement("div");
+    label.className = "preview-section-label";
+    label.textContent = this.i18n.t("label.booster.computer");
+    section.appendChild(label);
+    this.renderComputers(side, state, section);
+  }
+
+  private updateSummary(side: Side): void {
+    const summary = this.els.summaries[side];
+    const state = this.states.get(side);
+    summary.innerHTML = "";
+    if (!state || state.loadout.computers.length === 0) {
+      summary.textContent = "";
+      return;
+    }
+    const active = state.activation.filter((a) => a.active).length;
+    const title = this.boosterDescription(state);
+    this.appendSummaryItem(summary, state.loadout.computers[0].moduleId, active, state.loadout.computers.length, title);
+  }
+
+  private boosterDescription(state: BoosterState): string {
+    const projection: TurretBoostProjection = { loadout: state.loadout, activation: { computers: state.activation } };
+    const tracking = this.bonusFor(projection, "trackingBonusPercent", "trackingMultiplier");
+    const optimal = this.bonusFor(projection, "optimalBonusPercent", "optimalMultiplier");
+    const falloff = this.bonusFor(projection, "falloffBonusPercent", "falloffMultiplier");
+    const parts: string[] = [];
+    if (tracking !== 0) parts.push(`${this.i18n.t("ewar.hover.tracking")} ${tracking > 0 ? "+" : ""}${tracking.toFixed(1)}%`);
+    if (optimal !== 0) parts.push(`${this.i18n.t("ewar.hover.optimal")} ${optimal > 0 ? "+" : ""}${optimal.toFixed(1)}%`);
+    if (falloff !== 0) parts.push(`${this.i18n.t("ewar.hover.falloff")} ${falloff > 0 ? "+" : ""}${falloff.toFixed(1)}%`);
+    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
+  }
+
+  private bonusFor(
+    projection: TurretBoostProjection,
+    bonusKey: "trackingBonusPercent" | "optimalBonusPercent" | "falloffBonusPercent",
+    multiplierKey: "trackingMultiplier" | "optimalMultiplier" | "falloffMultiplier",
+  ): number {
+    let total = 0;
+    for (let i = 0; i < projection.loadout.computers.length; i++) {
+      const spec = projection.loadout.computers[i];
+      const activation = projection.activation?.computers[i];
+      if (!activation || !activation.active) continue;
+      const multiplier = activation.script?.[multiplierKey] ?? 1;
+      total += spec[bonusKey] * multiplier;
+    }
+    return total;
+  }
+
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
+    const item = document.createElement("span");
+    item.className = "ewar-summary-item";
+    const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
+    const img = document.createElement("img");
+    img.className = "ewar-summary-icon";
+    img.alt = "";
+    if (iconUrl !== undefined) img.src = iconUrl;
+    img.hidden = iconUrl === undefined;
+    item.appendChild(img);
+    const count = document.createElement("span");
+    count.className = "ewar-summary-count mono";
+    count.textContent = `${active}/${total}`;
+    item.appendChild(count);
+    item.setAttribute("title", title);
+    summary.appendChild(item);
+  }
+
+  private clampActivation(loadout: BoostLoadout, saved?: readonly StoredBoosterActivation[]): MutableBoosterActivation[] {
+    return loadout.computers.map((spec, i) => {
+      const savedActivation = saved?.[i];
+      const savedScript = savedActivation?.script;
+      let script: TurretScriptSpec | undefined;
+      if (savedScript === undefined) {
+        script = spec.defaultScript;
+      } else if (savedScript === "none" || savedScript === "") {
+        script = undefined;
+      } else {
+        const byId = typeIdFromString(savedScript);
+        script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId === byId) : undefined;
+        if (script === undefined) script = spec.defaultScript;
+      }
+      return { active: savedActivation?.active ?? true, script };
+    });
+  }
+
+  private renderComputers(side: Side, state: BoosterState, section: HTMLElement): void {
+    const nameSpans: HTMLSpanElement[] = [];
+    for (let i = 0; i < state.loadout.computers.length; i++) {
+      const computer = state.loadout.computers[i];
+      const activation = state.activation[i];
+      const row = document.createElement("div");
+      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script);
+      nameSpans.push(nameSpan);
+      button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
+      row.appendChild(button);
+      const gear = this.createScriptGear(side, i, activation.script, activation.active);
+      row.appendChild(gear);
+      section.appendChild(row);
+    }
+    this.computerNameSpans.set(side, nameSpans);
+  }
+
+  private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
+    return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
+  }
+
+  private scriptDisplayName(script: TurretScriptSpec | undefined): string {
+    if (script === undefined) return this.i18n.t("ewar.script.none");
+    return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
+  }
+
+  private createModuleButton(active: boolean, computer: TrackingBoosterSpec, script: TurretScriptSpec | undefined): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
+    const displayName = this.moduleDisplayName(computer);
+    const effectTitle = this.boosterModuleEffect(computer, script);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ewar-module-toggle";
+    button.setAttribute("aria-pressed", String(active));
+    button.setAttribute("aria-label", displayName);
+    const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
+    const img = document.createElement("img");
+    if (iconUrl !== undefined) img.src = iconUrl;
+    img.alt = "";
+    img.hidden = iconUrl === undefined;
+    button.appendChild(img);
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "truncate";
+    nameSpan.textContent = displayName;
+    nameSpan.title = effectTitle;
+    button.appendChild(nameSpan);
+    return { button, nameSpan };
+  }
+
+  private boosterModuleEffect(spec: TrackingBoosterSpec, script: TurretScriptSpec | undefined): string {
+    const tracking = spec.trackingBonusPercent * (script?.trackingMultiplier ?? 1);
+    const optimal = spec.optimalBonusPercent * (script?.optimalMultiplier ?? 1);
+    const falloff = spec.falloffBonusPercent * (script?.falloffMultiplier ?? 1);
+    const parts: string[] = [];
+    if (tracking !== 0) parts.push(`${this.i18n.t("ewar.hover.tracking")} ${tracking > 0 ? "+" : ""}${tracking.toFixed(1)}%`);
+    if (optimal !== 0) parts.push(`${this.i18n.t("ewar.hover.optimal")} ${optimal > 0 ? "+" : ""}${optimal.toFixed(1)}%`);
+    if (falloff !== 0) parts.push(`${this.i18n.t("ewar.hover.falloff")} ${falloff > 0 ? "+" : ""}${falloff.toFixed(1)}%`);
+    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
+  }
+
+  private createScriptGear(side: Side, index: number, script: TurretScriptSpec | undefined, active: boolean): HTMLButtonElement {
+    const gear = document.createElement("button");
+    gear.type = "button";
+    gear.className = "ewar-script-gear btn icon-button";
+    gear.setAttribute("data-index", String(index));
+    gear.setAttribute("aria-haspopup", "menu");
+    gear.setAttribute("aria-expanded", "false");
+    gear.setAttribute("aria-controls", `${sideId(side)}-booster-script-popup`);
+    gear.innerHTML = (
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
+      '<use href="icons.svg#gear"></use></svg>'
+    );
+    this.updateGearTitle(gear, script);
+    gear.disabled = !active;
+    gear.addEventListener("click", () => this.openScriptPopup(side, index, gear));
+    return gear;
+  }
+
+  private updateGearTitle(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
+    const name = this.scriptDisplayName(script);
+    const title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
+    gear.setAttribute("title", title);
+    gear.setAttribute("aria-label", title);
+  }
+
+  private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    this.scriptGears.set(side, { index, gear });
+    const popup = this.scriptPopupEls.get(side);
+    if (!popup) return;
+    popup.innerHTML = "";
+    const current = state.activation[index].script;
+    const noneButton = this.createScriptOption(side, index, gear, undefined, current === undefined);
+    popup.appendChild(noneButton);
+    for (const script of state.loadout.scripts) {
+      popup.appendChild(this.createScriptOption(side, index, gear, script, this.isSameScript(current, script)));
+    }
+    gear.setAttribute("aria-expanded", "true");
+    this.scriptPopups[side].open();
+  }
+
+  private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
+    if (a === undefined || b === undefined) return a === b;
+    return a.moduleId === b.moduleId;
+  }
+
+  private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ewar-script-option";
+    if (selected) button.setAttribute("aria-current", "true");
+    button.setAttribute("role", "menuitem");
+    button.textContent = script ? `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
+    button.addEventListener("click", () => this.setScript(side, index, script, gear));
+    return button;
+  }
+
+  private setScript(side: Side, index: number, script: TurretScriptSpec | undefined, gear: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    state.activation[index].script = script;
+    this.updateGearTitle(gear, script);
+    const nameSpan = this.computerNameSpans.get(side)?.[index];
+    if (nameSpan) nameSpan.title = this.boosterModuleEffect(state.loadout.computers[index], script);
+    this.scriptPopups[side].close();
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private toggleComputer(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const activation = state.activation[index];
+    activation.active = !activation.active;
+    button.setAttribute("aria-pressed", String(activation.active));
+    row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    this.renderSide(side);
+    this.events.emitConfigInvalidated();
+  }
+}
+
+function sideId(side: Side): "ship-a" | "ship-b" {
+  return side === "shipA" ? "ship-a" : "ship-b";
+}
+
+function typeIdFromString(value: string): TypeId | undefined {
+  if (/^\d+$/.test(value)) return toTypeId(value);
+  return undefined;
+}

@@ -1,0 +1,27 @@
+[Blackbird, Ewar Missile Shield Blackbird]
+
+Damage Control II
+Mark I Compact Capacitor Flux Coil
+Mark I Compact Capacitor Flux Coil
+
+Medium F-S9 Regolith Compact Shield Extender
+50MN Microwarpdrive I
+Gravimetric ECM I
+Ladar ECM I
+Magnetometric ECM I
+Radar ECM I
+
+Experimental SV-2000 Rapid Light Missile Launcher
+Experimental SV-2000 Rapid Light Missile Launcher
+Experimental SV-2000 Rapid Light Missile Launcher
+Small Gremlin Compact Energy Neutralizer
+
+Medium Core Defense Field Extender I
+Medium Particle Dispersion Augmentor I
+Medium EM Shield Reinforcer I
+
+
+Hobgoblin II x2
+
+
+Mjolnir Light Missile x2114

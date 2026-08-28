@@ -1,16 +1,17 @@
 [Kirin, Shield Kirin]
-Small S95a Scoped Remote Shield Booster
-Small S95a Scoped Remote Shield Booster
-Small S95a Scoped Remote Shield Booster
-
-5MN Quad LiF Restrained Microwarpdrive
-Small Capacitor Booster II, Navy Cap Booster 400
-Medium Azeotropic Restrained Shield Extender
-Multispectrum Shield Hardener II
-EM Shield Amplifier II
 
 Mark I Compact Power Diagnostic System
 Damage Control II
+
+Medium Azeotropic Restrained Shield Extender
+5MN Quad LiF Restrained Microwarpdrive
+Small Capacitor Booster II, Navy Cap Booster 400
+Multispectrum Shield Hardener II
+EM Shield Amplifier II
+
+Small S95a Scoped Remote Shield Booster
+Small S95a Scoped Remote Shield Booster
+Small S95a Scoped Remote Shield Booster
 
 Small Core Defense Field Extender II
 Small EM Shield Reinforcer II

@@ -1,23 +1,24 @@
 [Ferox, Rail Shield Ferox]
-250mm Railgun II, Antimatter Charge M
-250mm Railgun II, Antimatter Charge M
-250mm Railgun II, Antimatter Charge M
-250mm Railgun II, Antimatter Charge M
-250mm Railgun II, Antimatter Charge M
-Large Ancillary Remote Shield Booster, Navy Cap Booster 150
-250mm Railgun II, Antimatter Charge M
-
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Sensor Booster II
-EM Shield Hardener II
-Tracking Computer II, Tracking Speed Script
-50MN Cold-Gas Enduring Microwarpdrive
 
 Damage Control II
 Tracking Enhancer II
 Magnetic Field Stabilizer II
 Magnetic Field Stabilizer II
+
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Sensor Booster II
+EM Shield Hardener II
+Tracking Computer II, Tracking Speed Script
+50MN Cold-Gas Enduring Microwarpdrive
+
+Large Ancillary Remote Shield Booster, Navy Cap Booster 150
+250mm Railgun II, Antimatter Charge M
+250mm Railgun II, Antimatter Charge M
+250mm Railgun II, Antimatter Charge M
+250mm Railgun II, Antimatter Charge M
+250mm Railgun II, Antimatter Charge M
+250mm Railgun II, Antimatter Charge M
 
 Medium Ancillary Current Router I
 Medium Ancillary Current Router I

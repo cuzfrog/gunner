@@ -2,29 +2,35 @@
 no-new-exports:
   - defaultPreferences.ts
   - fittingBasis.ts
+  - legacyScriptNames.ts
   - cradle.ts
-  - index.ts
-  - language.ts
-  - localSettingsStore.test.ts
-  - localSettingsStore.testSupport.ts
-  - localSettingsStore.ts
-  - module.ts
-  - providers.ts
-  - savedFittings.test.ts
   - savedFittings.ts
+  - validators.test.ts
   - settingsParser.test.ts
-  - settingsParser.ts
-  - settingsStore.ts
+  - module.ts
+  - localSettingsStore.test.ts
   - urlCodec.test.ts
   - urlCodec.ts
-  - userSettings.ts
-  - validators.test.ts
+  - language.ts
+  - localSettingsStore.testSupport.ts
+  - localSettingsStore.ts
+  - profileEquality.test.ts
+  - profileEquality.ts
+  - providers.ts
+  - savedFittings.test.ts
+  - settingsParser.ts
+  - settingsStore.ts
+  - combatantSettings.ts
   - validators.ts
+  - userSettings.ts
+  - index.ts
+  - settingsCompat.ts
 ---
+
 
 
 # appstate
 
 Application state persistence and serialization for user settings, profiles, saved fittings, URL sharing, and EFT profile text. Depends on ships/fitting/sim domain modules. Consumed by ui through its index.
 
-The public surface is the cross-boundary DTOs and provider interfaces plus the profile-text functions. Profile-text parsing and serialization lives in the `profileText` sub-module, which exposes `parseProfile`, `serializeProfile`, and `PROFILE_TEXT_HEADER` through its index. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.
+The public surface is the cross-boundary DTOs, provider interfaces, and the `ProfileTextCodec` abstraction type. `UserSettings` and `ProfileSettings` are the wire-format DTOs for persistence, URL encoding, and profile text. `SessionSettings` and `CombatantSettings` are the parsed per-side session DTOs consumed by the UI directly — no further parsing or normalization is needed. `SettingsParser` owns wire/session conversion (`fromWire`, `toWire`, `fromProfile`) and legacy migration; `parseUserSettings` and `decodeUrlSettings` return `SessionSettings | null`. `StartupState` carries `SessionSettings | null` plus the selected profile name. `UserSettings` and `ProfileSettings` carry optional per-side e-war activation (`shipAEwarActivation`, `shipBEwarActivation`) and turret-booster activation (`shipABoosterActivation`, `shipBBoosterActivation`) for persisting module on/off and script choices. Profile-text parsing and serialization lives in the `profileText` sub-module, exposed as the `ProfileTextCodec` interface implemented by `LocalProfileTextCodec` and registered as `profileTextCodec` in the DI container; raw parse/serialize functions are internal to the sub-module. `SettingsStore`, `SavedFittings`, and `SettingsParser` are registered by `module.ts`.

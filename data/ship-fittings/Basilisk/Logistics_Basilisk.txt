@@ -1,0 +1,23 @@
+[Basilisk, Logistics Basilisk]
+
+Capacitor Power Relay II
+Capacitor Power Relay II
+
+10MN Monopropellant Enduring Afterburner
+Small Shield Booster II
+Cap Recharger II
+Cap Recharger II
+Cap Recharger II
+
+Large Remote Armor Repairer II
+Large Remote Shield Booster II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
+
+Medium Ancillary Current Router II
+Medium Ancillary Current Router II
+
+
+Heavy Armor Maintenance Bot II x1

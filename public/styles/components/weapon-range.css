@@ -1,0 +1,3 @@
+@layer components {
+.weapon-range-chip { color: var(--accent-teal); }
+}

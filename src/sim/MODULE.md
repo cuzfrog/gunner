@@ -5,21 +5,36 @@ no-new-exports:
   - autopilot.ts
   - dynamics.test.ts
   - dynamics.ts
+  - fireControl.test.ts
+  - fireControl.ts
   - hitChance.test.ts
   - hitChance.ts
-  - index.ts
-  - cradle.ts
-  - kinematics.test.ts
-  - kinematics.ts
-  - module.ts
-  - predictiveAutopilot.test.ts
-  - predictiveAutopilot.ts
-  - simulation.test.ts
-  - simulation.ts
-  - types.ts
-  - vec2.test.ts
+  - ewarResolver.test.ts
   - vec2.ts
+  - cradle.ts
+  - ewarResolver.ts
+  - engagementFrameComposer.test.ts
+  - engagementFrameComposer.ts
+  - types.ts
+  - simValueParser.ts
+  - simValueParser.test.ts
+  - kinematics.ts
+  - predictiveAutopilot.test.ts
+  - simulation.ts
+  - stackingPenalty.test.ts
+  - module.ts
+  - vec2.test.ts
+  - simulation.test.ts
+  - stackingPenalty.ts
+  - predictiveAutopilot.ts
+  - kinematics.test.ts
+  - index.ts
+  - turretBoosterResolver.ts
+  - turretBoosterResolver.test.ts
 ---
+
+
+
 
 
 
@@ -28,4 +43,6 @@ no-new-exports:
 
 Engagement simulation domain: ship reactive and predictive autopilot steering, the EVE-style dynamics engine (mass/inertia exponential velocity tracking), two-body kinematics, the EVE-style hit chance model, and the fixed-state simulation stepper. `dynamics.ts` is module-internal: its `timeConstant` and `integrateShip` helpers have no cross-boundary exports.
 
-DI wiring: `module.ts` registers `attackerSteering` as the predictive autopilot, `targetSteering` as the reactive autopilot, `kinematics`, `hitChance` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.
+Cross-boundary contracts: `index.ts` exports the ewar domain types (`EwarLoadout`, `EwarProjection`, `CombatantConfig`, `DisruptionScriptSpec`, etc.), `EwarResolver`, `EngagementEvaluator`, `EngagementFrameComposer`, `AttackState`, `AttackAssessment`, `EngagementInput`, `EngagementView`, `StackingPenalty`, and `SimValueParser` for use by `fitting`, `app`, and `ui`. `types.ts` is ungated to host these shared DTOs.
+
+DI wiring: `module.ts` registers `simValueParser`, `shipASteering` and `shipBSteering` as separate singleton `PredictiveAutopilot` instances, `kinematics`, `hitChance`, `stackingPenalty`, `ewarResolver`, `engagementEvaluator`, `engagementFrameComposer` and `simulation` against the singleton `container` in `src/container.ts`. The `simConfig` consumed by `simulation` is provided by the composition root.

@@ -1,20 +1,21 @@
 [Ikitursa, Kitetackle Armor Ikitursa]
-Heavy Entropic Disintegrator II, Occult M
-Improved Cloaking Device II
-Core Probe Launcher I, Sisters Core Scanner Probe
-Small Energy Neutralizer II
+
+Medium Ancillary Armor Repairer, Nanite Repair Paste
+Syndicate 1600mm Steel Plates
+Caldari Navy Power Diagnostic System
+[Empty Low slot]
+[Empty Low slot]
+[Empty Low slot]
 
 Thukker Medium Cap Battery
 Federation Navy 50MN Microwarpdrive
 Caldari Navy Stasis Webifier
-Domination Target Painter
+[Empty Med slot]
 
-Entropic Radiation Sink II
-Centii A-Type Multispectrum Coating
-Medium Ancillary Armor Repairer, Nanite Repair Paste
-Syndicate 1600mm Steel Plates
-Caldari Navy Power Diagnostic System
-Centii A-Type Multispectrum Coating
+Small Energy Neutralizer II
+[Empty High slot]
+[Empty High slot]
+[Empty High slot]
 
 Medium Kinetic Armor Reinforcer II
 Medium Trimark Armor Pump II
@@ -23,7 +24,6 @@ Medium Trimark Armor Pump II
 Warrior II x4
 
 
-Mobile Tractor Unit x1
 Occult M x5463
 Mystic M x5402
 Nanite Repair Paste x3000

@@ -1,14 +1,14 @@
 import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fitting";
 import type { SavedFittings } from "../../../appstate";
 import type { I18n } from "../../i18n";
-import type { ImageCatalog } from "../../icons";
 import type { Popup, PopupGroup } from "./popupGroup";
 import type { UiEvents } from "../../events";
 import { fittingAreaSelector } from "../controlsDom";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import { FittingPopupRenderer } from "./fittingPopupRenderer";
 import type { FittingPopupEls } from "./fittingPopupEls";
-import type { Side, SidePanel } from "../sidePanel";
+import type { Side } from "../side";
+import type { FittingPopupHost } from "./fittingPopupHost";
 
 export type { FittingPopupEls } from "./fittingPopupEls";
 
@@ -18,10 +18,9 @@ interface FittingPopupControllerDeps {
   savedFittings: SavedFittings;
   presetFittings: PresetFittings;
   fittingImport: FittingImport;
-  imageCatalog: ImageCatalog;
   i18n: I18n;
   els: FittingPopupEls;
-  panel: SidePanel;
+  panel: FittingPopupHost;
   applyFitting: (text: string) => ImportedFitting | undefined;
   previews: FittingPreviewManager;
   events: UiEvents;
@@ -29,7 +28,7 @@ interface FittingPopupControllerDeps {
 
 export interface FittingPopupController {
   readonly popup: Popup;
-  setTriggerEnabled(enabled: boolean): void;
+  setFittingEyeEnabled(enabled: boolean): void;
   renderIfOpen(): void;
   closeIfOpen(): void;
 }
@@ -65,15 +64,16 @@ export class FittingPopupControllerImpl implements FittingPopupController {
       open: () => this.openPopup(),
       close: () => this.closePopup(),
       focusTrigger: () => deps.els.trigger.focus(),
-      contains: (target) => target instanceof Element && target.closest(fittingAreaSelector(this.side)) !== null,
+      contains: (shipB) => shipB instanceof Element && shipB.closest(fittingAreaSelector(this.side)) !== null,
     };
+    deps.els.trigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
+    deps.els.eye.addEventListener("click", () => this.previews.toggle(this.side));
     deps.events.onLanguageChanged(() => this.renderIfOpen());
   }
 
   get popup(): Popup { return this.popupValue; }
 
-  setTriggerEnabled(enabled: boolean): void {
-    this.renderer.fittingEls.trigger.disabled = !enabled;
+  setFittingEyeEnabled(enabled: boolean): void {
     this.renderer.fittingEls.eye.disabled = !enabled;
   }
 
@@ -86,9 +86,7 @@ export class FittingPopupControllerImpl implements FittingPopupController {
     els.popup.hidden = false;
     els.trigger.setAttribute("aria-expanded", "true");
     this.open = true;
-    const current = this.renderer.findFittingItem((item) => item.getAttribute("aria-current") === "true");
-    const first = current ?? this.renderer.findFittingItem((item) => !item.disabled);
-    first?.focus();
+    els.hull.focus();
   }
 
   private closePopup(): void {

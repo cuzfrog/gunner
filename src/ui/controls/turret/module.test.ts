@@ -2,15 +2,21 @@ import { buildDomControls } from "../testSupport";
 import { registerTurretModule } from "./module";
 
 describe("registerTurretModule", () => {
-  test("registers turret overrides and controller as singletons", () => {
+  test("registers per-side turret overrides and controllers as singletons", () => {
     const parent = buildDomControls().cradle;
     const cradle = parent.createScope();
     registerTurretModule(cradle);
-    const overrides = cradle.cradle.turretOverrides;
-    const controller = cradle.cradle.turretController;
-    expect(overrides).toBeDefined();
-    expect(controller).toBeDefined();
-    expect(cradle.cradle.turretOverrides).toBe(overrides);
-    expect(cradle.cradle.turretController).toBe(controller);
+    const shipA = cradle.cradle.shipATurretController;
+    const shipB = cradle.cradle.shipBTurretController;
+    const controllers = cradle.cradle.turretControllers;
+    const overridesBySide = cradle.cradle.turretOverridesBySide;
+    expect(shipA).toBeDefined();
+    expect(shipB).toBeDefined();
+    expect(controllers.shipA).toBe(shipA);
+    expect(controllers.shipB).toBe(shipB);
+    expect(overridesBySide.shipA).toBe(cradle.cradle.shipATurretOverrides);
+    expect(overridesBySide.shipB).toBe(cradle.cradle.shipBTurretOverrides);
+    expect(cradle.cradle.shipATurretController).toBe(shipA);
+    expect(cradle.cradle.shipBTurretController).toBe(shipB);
   });
 });

@@ -1,27 +1,28 @@
 [Tornado, Art Shield Tornado]
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-1400mm 'Scout' Artillery I, Republic Fleet Fusion L
-
-Tracking Computer II, Optimal Range Script
-Sensor Booster II, Targeting Range Script
-Tracking Computer II, Optimal Range Script
-Medium Micro Jump Drive
-Sensor Booster II, Targeting Range Script
 
 Inertial Stabilizers II
 Inertial Stabilizers II
 Gyrostabilizer II
 Reactor Control Unit II
 
-Medium Projectile Collision Accelerator I
-Medium Ionic Field Projector II
+Tracking Computer II, Optimal Range Script
+Sensor Booster II, Targeting Range Script
+Tracking Computer II, Optimal Range Script
+Sensor Booster II, Targeting Range Script
+[Empty Med slot]
+
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+1400mm 'Scout' Artillery I, Republic Fleet Fusion L
+
 Medium Hyperspatial Velocity Optimizer II
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Tracking Speed Script x2

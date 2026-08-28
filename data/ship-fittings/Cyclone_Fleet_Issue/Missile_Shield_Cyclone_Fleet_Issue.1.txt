@@ -1,16 +1,4 @@
 [Cyclone Fleet Issue, Missile Shield Cyclone Fleet Issue]
-Heavy Missile Launcher II
-Heavy Missile Launcher II
-Heavy Missile Launcher II
-Heavy Missile Launcher II
-Heavy Missile Launcher II
-Heavy Missile Launcher II
-
-Multispectrum Shield Hardener II
-Large Shield Extender II
-Large Shield Booster II
-Domination 100MN Afterburner
-Large Shield Extender II
 
 Power Diagnostic System II
 Damage Control II
@@ -18,12 +6,24 @@ Power Diagnostic System II
 Power Diagnostic System II
 Ballistic Control System II
 
+Large Shield Extender II
+Large Shield Extender II
+Multispectrum Shield Hardener II
+Large Shield Booster II
+Domination 100MN Afterburner
+
+Heavy Missile Launcher II
+Heavy Missile Launcher II
+Heavy Missile Launcher II
+Heavy Missile Launcher II
+Heavy Missile Launcher II
+Heavy Missile Launcher II
+[Empty High slot]
+[Empty High slot]
+
 Medium Core Defense Field Extender II
 Medium Ancillary Current Router II
 Medium Semiconductor Memory Cell II
 
 
 Hornet II x10
-
-
-Mobile Tractor Unit x1

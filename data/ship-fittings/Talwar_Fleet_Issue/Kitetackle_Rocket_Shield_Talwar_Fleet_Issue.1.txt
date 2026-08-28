@@ -1,22 +1,24 @@
 [Talwar Fleet Issue, Kitetackle Rocket Shield Talwar Fleet Issue]
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
-Rocket Launcher II, Scourge Javelin Rocket
+
+Ballistic Control System II
+Nanofiber Internal Structure II
+Ballistic Control System II
 
 5MN Quad LiF Restrained Microwarpdrive
 Medium Ancillary Shield Booster, Cap Booster 50
 Warp Disruptor II
 Small Compact Pb-Acid Cap Battery
 
-Ballistic Control System II
-Nanofiber Internal Structure II
-Ballistic Control System II
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+Rocket Launcher II, Scourge Javelin Rocket
+[Empty High slot]
 
-Small Capacitor Control Circuit I
-Small Bay Loading Accelerator I
 Small Polycarbon Engine Housing I
+[Empty Rig slot]
+[Empty Rig slot]
 
 
 Scourge Javelin Rocket x2250

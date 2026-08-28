@@ -7,6 +7,7 @@ export interface TrackingInput {
   setUnit(unit: TrackingUnit, sigResolution: number): number;
   setDisplayValue(displayValue: number, sigResolution: number): number;
   displayValue(sigResolution: number): number;
+  displayFor(rad: number, sigResolution: number): number;
 }
 
 export class TrackingInputImpl implements TrackingInput {
@@ -39,6 +40,10 @@ export class TrackingInputImpl implements TrackingInput {
 
   displayValue(sigResolution: number): number {
     return this.currentUnit === "score" ? toTrackingScore(this.radValue, sigResolution) : this.radValue;
+  }
+
+  displayFor(rad: number, sigResolution: number): number {
+    return this.currentUnit === "score" ? toTrackingScore(rad, sigResolution) : rad;
   }
 }
 
