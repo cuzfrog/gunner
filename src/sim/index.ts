@@ -48,7 +48,6 @@ export type {
 } from "./types";
 export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";
 export type { SimValueParser } from "./simValueParser";
-export { createSimValueParser } from "./simValueParser";
 export { Vec2 } from "./vec2";
 export type { SimCradle } from "./cradle";
 export { registerSimModule } from "./module";

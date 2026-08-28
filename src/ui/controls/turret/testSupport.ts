@@ -2,7 +2,8 @@ import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingImport, TurretCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
-import { createSimValueParser } from "../../../sim";
+import { registerSimModule, type SimCradle, type SimValueParser } from "../../../sim";
+import { createContainer, InjectionMode } from "awilix";
 import type { I18n, Language } from "../../i18n";
 import { UiEventsImpl } from "../../events";
 import { TurretControllerImpl } from "./turretController";
@@ -149,7 +150,7 @@ export function buildTurret(
     ships,
     events,
     popupGroup,
-    simValueParser: createSimValueParser(),
+    simValueParser: simValueParserFromContainer(),
   });
   return {
     document,
@@ -175,4 +176,10 @@ function addSigResOptions(document: Document, side: Side): void {
     option.value = value;
     select.appendChild(option);
   }
+}
+
+function simValueParserFromContainer(): SimValueParser {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
 }

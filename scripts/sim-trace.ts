@@ -1,34 +1,44 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
 import {
-  createSimValueParser,
   ReactiveAutopilot,
   registerSimModule,
   Vec2,
   type AutopilotMode,
   type CombatantConfig,
   type EwarProjection,
+  type Kinematics,
   type SimConfig,
   type SimCradle,
+  type Simulation,
+  type SimValueParser,
 } from "../src/sim";
 import { registerShipsModule, type ShipsCradle, type StatConditions } from "../src/ships";
 import { registerFittingModule, type FittingCradle, type FittingImport } from "../src/fitting";
+import { registerGameDataModule } from "../src/gamedata";
 import { readFileSync } from "node:fs";
 
 const FIXED_DT = 1 / 60;
 
-interface TraceCradle extends SimCradle, FittingCradle, ShipsCradle {}
-
 type MutableCombatantConfig = { -readonly [K in keyof SimConfig["shipA"]]: SimConfig["shipA"][K] };
 
 interface TraceParams {
-  durationSeconds: number;
-  sampleSeconds: number;
-  shipASteering: "predictive" | "reactive";
-  shipAEwarFile: string | undefined;
-  shipAEwarOverload: boolean;
-  shipBEwarFile: string | undefined;
-  shipBEwarOverload: boolean;
-  config: SimConfig;
+  readonly durationSeconds: number;
+  readonly sampleSeconds: number;
+  readonly shipASteering: "predictive" | "reactive";
+  readonly config: SimConfig;
+}
+
+interface TraceCradle extends SimCradle, FittingCradle, ShipsCradle {
+  readonly traceParamsParser: TraceParamsParser;
+  readonly simTrace: SimTrace;
+}
+
+export interface TraceParamsParser {
+  parse(args: string[]): TraceParams;
+}
+
+export interface SimTrace {
+  trace(params: TraceParams): void;
 }
 
 const AUTOPILOT_MODES: readonly AutopilotMode[] = ["orbit", "keepAtRange"];
@@ -57,110 +67,149 @@ const DEFAULT_SHIP_B: MutableCombatantConfig = {
   orbitDirection: "cw",
 };
 
-function parseParams(args: string[]): TraceParams {
-  const draft: {
-    durationSeconds: number;
-    sampleSeconds: number;
-    shipASteering: "predictive" | "reactive";
-    initialDistance: number;
-    shipA: MutableCombatantConfig;
-    shipB: MutableCombatantConfig;
-    shipAEwarFile: string | undefined;
-    shipAEwarOverload: boolean;
-    shipBEwarFile: string | undefined;
-    shipBEwarOverload: boolean;
-  } = {
-    durationSeconds: 120,
-    sampleSeconds: 1,
-    shipASteering: "predictive",
-    initialDistance: 5000,
-    shipA: { ...DEFAULT_SHIP_A },
-    shipB: { ...DEFAULT_SHIP_B },
-    shipAEwarFile: undefined,
-    shipAEwarOverload: false,
-    shipBEwarFile: undefined,
-    shipBEwarOverload: false,
-  };
-  for (let i = 0; i < args.length; i += 2) {
-    const flag = args[i];
-    const raw = args[i + 1];
-    if (raw === undefined) throw new Error(`Missing value for ${flag}\n${USAGE}`);
-    switch (flag) {
-      case "--duration":
-        draft.durationSeconds = parseNumber(flag, raw);
-        break;
-      case "--sample":
-        draft.sampleSeconds = parseNumber(flag, raw);
-        break;
-      case "--distance":
-        draft.initialDistance = parseNumber(flag, raw);
-        break;
-      case "--ship-a-speed":
-        draft.shipA.maxSpeed = parseNumber(flag, raw);
-        break;
-      case "--ship-a-mode":
-        draft.shipA.mode = parseMode(raw);
-        break;
-      case "--ship-a-range":
-        draft.shipA.desiredRange = parseNumber(flag, raw);
-        break;
-      case "--ship-a-mass":
-        draft.shipA.mass = parseNumber(flag, raw);
-        break;
-      case "--ship-a-inertia":
-        draft.shipA.inertiaModifier = parseNumber(flag, raw);
-        break;
-      case "--ship-a-aggressivity":
-        draft.shipA.aggressivity = parseAggressivity(flag, raw);
-        break;
-      case "--ship-a-steering":
-        draft.shipASteering = parseShipASteering(raw);
-        break;
-      case "--ship-a-ewar":
-        draft.shipAEwarFile = raw;
-        break;
-      case "--ship-a-ewar-overload":
-        draft.shipAEwarOverload = parseBoolean(flag, raw);
-        break;
-      case "--ship-b-speed":
-        draft.shipB.maxSpeed = parseNumber(flag, raw);
-        break;
-      case "--ship-b-mode":
-        draft.shipB.mode = parseMode(raw);
-        break;
-      case "--ship-b-range":
-        draft.shipB.desiredRange = parseNumber(flag, raw);
-        break;
-      case "--ship-b-mass":
-        draft.shipB.mass = parseNumber(flag, raw);
-        break;
-      case "--ship-b-inertia":
-        draft.shipB.inertiaModifier = parseNumber(flag, raw);
-        break;
-      case "--ship-b-ewar":
-        draft.shipBEwarFile = raw;
-        break;
-      case "--ship-b-ewar-overload":
-        draft.shipBEwarOverload = parseBoolean(flag, raw);
-        break;
-      default:
-        throw new Error(`Unknown flag ${flag}\n${USAGE}`);
+class TraceParamsParserImpl implements TraceParamsParser {
+  private readonly simValueParser: SimValueParser;
+  private readonly fittingImport: FittingImport;
+
+  constructor({ simValueParser, fittingImport }: { simValueParser: SimValueParser; fittingImport: FittingImport }) {
+    this.simValueParser = simValueParser;
+    this.fittingImport = fittingImport;
+  }
+
+  parse(args: string[]): TraceParams {
+    const draft = {
+      durationSeconds: 120,
+      sampleSeconds: 1,
+      shipASteering: "predictive" as "predictive" | "reactive",
+      initialDistance: 5000,
+      shipA: { ...DEFAULT_SHIP_A },
+      shipB: { ...DEFAULT_SHIP_B },
+      shipAEwarFile: undefined as string | undefined,
+      shipAEwarOverload: false,
+      shipBEwarFile: undefined as string | undefined,
+      shipBEwarOverload: false,
+    };
+    for (let i = 0; i < args.length; i += 2) {
+      const flag = args[i];
+      const raw = args[i + 1];
+      if (raw === undefined) throw new Error(`Missing value for ${flag}\n${USAGE}`);
+      switch (flag) {
+        case "--duration":
+          draft.durationSeconds = parseNumber(flag, raw);
+          break;
+        case "--sample":
+          draft.sampleSeconds = parseNumber(flag, raw);
+          break;
+        case "--distance":
+          draft.initialDistance = parseNumber(flag, raw);
+          break;
+        case "--ship-a-speed":
+          draft.shipA.maxSpeed = parseNumber(flag, raw);
+          break;
+        case "--ship-a-mode":
+          draft.shipA.mode = this.parseMode(raw);
+          break;
+        case "--ship-a-range":
+          draft.shipA.desiredRange = parseNumber(flag, raw);
+          break;
+        case "--ship-a-mass":
+          draft.shipA.mass = parseNumber(flag, raw);
+          break;
+        case "--ship-a-inertia":
+          draft.shipA.inertiaModifier = parseNumber(flag, raw);
+          break;
+        case "--ship-a-aggressivity":
+          draft.shipA.aggressivity = parseAggressivity(flag, raw);
+          break;
+        case "--ship-a-steering":
+          draft.shipASteering = parseShipASteering(raw);
+          break;
+        case "--ship-a-ewar":
+          draft.shipAEwarFile = raw;
+          break;
+        case "--ship-a-ewar-overload":
+          draft.shipAEwarOverload = parseBoolean(flag, raw);
+          break;
+        case "--ship-b-speed":
+          draft.shipB.maxSpeed = parseNumber(flag, raw);
+          break;
+        case "--ship-b-mode":
+          draft.shipB.mode = this.parseMode(raw);
+          break;
+        case "--ship-b-range":
+          draft.shipB.desiredRange = parseNumber(flag, raw);
+          break;
+        case "--ship-b-mass":
+          draft.shipB.mass = parseNumber(flag, raw);
+          break;
+        case "--ship-b-inertia":
+          draft.shipB.inertiaModifier = parseNumber(flag, raw);
+          break;
+        case "--ship-b-ewar":
+          draft.shipBEwarFile = raw;
+          break;
+        case "--ship-b-ewar-overload":
+          draft.shipBEwarOverload = parseBoolean(flag, raw);
+          break;
+        default:
+          throw new Error(`Unknown flag ${flag}\n${USAGE}`);
+      }
+    }
+    const shipA: CombatantConfig = draft.shipAEwarFile
+      ? { ...draft.shipA, ewar: this.loadEwarProjection(draft.shipAEwarFile, draft.shipAEwarOverload) }
+      : draft.shipA;
+    const shipB: CombatantConfig = draft.shipBEwarFile
+      ? { ...draft.shipB, ewar: this.loadEwarProjection(draft.shipBEwarFile, draft.shipBEwarOverload) }
+      : draft.shipB;
+    return {
+      durationSeconds: draft.durationSeconds,
+      sampleSeconds: draft.sampleSeconds,
+      shipASteering: draft.shipASteering,
+      config: { shipA, shipB, initialDistance: draft.initialDistance },
+    };
+  }
+
+  private parseMode(raw: string): AutopilotMode {
+    const parsed = this.simValueParser.parseAutopilotMode(raw);
+    if (parsed === undefined || !AUTOPILOT_MODES.includes(parsed)) {
+      throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
+    }
+    return parsed;
+  }
+
+  private loadEwarProjection(path: string, overloaded: boolean): EwarProjection {
+    const text = readFileSync(path, "utf-8");
+    const conditions: StatConditions = { skillLevel: 5, overloaded: false };
+    const imported = this.fittingImport.importFitting(text, conditions);
+    if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
+    return buildEwarProjection(imported.ewar, overloaded);
+  }
+}
+
+class SimTraceImpl implements SimTrace {
+  private readonly simulation: Simulation;
+  private readonly kinematics: Kinematics;
+
+  constructor({ simulation, kinematics }: { simulation: Simulation; kinematics: Kinematics }) {
+    this.simulation = simulation;
+    this.kinematics = kinematics;
+  }
+
+  trace(params: TraceParams): void {
+    console.error(scenarioSummary(params));
+    const columns = ["t", "dist", "radialVel", "angularVel", "aSpeed", "aCmd", "tSpeed", "tCmd", "tCmdRadial"];
+    console.log(columns.join("\t"));
+
+    const steps = Math.round(params.durationSeconds / FIXED_DT);
+    const sampleEvery = Math.max(1, Math.round(params.sampleSeconds / FIXED_DT));
+    for (let step = 0; step <= steps; step++) {
+      if (step > 0) this.simulation.step(FIXED_DT);
+      if (step % sampleEvery !== 0 && step !== steps) continue;
+      const snapshot = this.simulation.snapshot();
+      const frame = this.kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
+      console.log(traceRow(snapshot, frame).join("\t"));
     }
   }
-  return {
-    durationSeconds: draft.durationSeconds,
-    sampleSeconds: draft.sampleSeconds,
-    shipASteering: draft.shipASteering,
-    shipAEwarFile: draft.shipAEwarFile,
-    shipAEwarOverload: draft.shipAEwarOverload,
-    shipBEwarFile: draft.shipBEwarFile,
-    shipBEwarOverload: draft.shipBEwarOverload,
-    config: {
-      shipA: draft.shipA,
-      shipB: draft.shipB,
-      initialDistance: draft.initialDistance,
-    },
-  };
 }
 
 function parseNumber(flag: string, raw: string): number {
@@ -188,22 +237,10 @@ function parseShipASteering(raw: string): "predictive" | "reactive" {
   return raw;
 }
 
-function parseMode(raw: string): AutopilotMode {
-  const parsed = createSimValueParser().parseAutopilotMode(raw);
-  if (parsed === undefined || !AUTOPILOT_MODES.includes(parsed)) {
-    throw new Error(`Mode must be one of ${AUTOPILOT_MODES.join(", ")}, got "${raw}"`);
-  }
-  return parsed;
-}
-
-function loadEwarProjection(fittingImport: FittingImport, path: string, overloaded: boolean): EwarProjection {
-  const text = readFileSync(path, "utf-8");
-  const conditions: StatConditions = { skillLevel: 5, overloaded: false };
-  const imported = fittingImport.importFitting(text, conditions);
-  if (!imported) throw new Error(`Could not import ewar fitting from ${path}`);
-  const { webs, grapplers, disruptors, scramblers = [] } = imported.ewar;
+function buildEwarProjection(loadout: EwarProjection["loadout"], overloaded: boolean): EwarProjection {
+  const { webs, grapplers, disruptors, scramblers = [] } = loadout;
   return {
-    loadout: imported.ewar,
+    loadout,
     activation: {
       webs: webs.map(() => ({ active: true, overloaded })),
       grapplers: grapplers.map(() => ({ active: true, overloaded })),
@@ -213,54 +250,21 @@ function loadEwarProjection(fittingImport: FittingImport, path: string, overload
   };
 }
 
-function trace(params: TraceParams): void {
-  const container = createContainer<TraceCradle>({ injectionMode: InjectionMode.PROXY });
-  registerSimModule(container);
-  registerShipsModule(container);
-  registerFittingModule(container);
-  if (params.shipASteering === "reactive") {
-    container.register({ shipASteering: asClass(ReactiveAutopilot).singleton() });
-  }
-  const fittingImport = container.cradle.fittingImport;
-  const shipA: CombatantConfig = params.config.shipA;
-  const shipB: CombatantConfig = params.config.shipB;
-  const simConfig: SimConfig = {
-    initialDistance: params.config.initialDistance,
-    shipA: params.shipAEwarFile
-      ? { ...shipA, ewar: loadEwarProjection(fittingImport, params.shipAEwarFile, params.shipAEwarOverload) }
-      : shipA,
-    shipB: params.shipBEwarFile
-      ? { ...shipB, ewar: loadEwarProjection(fittingImport, params.shipBEwarFile, params.shipBEwarOverload) }
-      : shipB,
-  };
-  container.register({ simConfig: asValue(simConfig) });
-  const simulation = container.cradle.simulation;
-  const kinematics = container.cradle.kinematics;
-
-  console.error(scenarioSummary(params));
-  const columns = ["t", "dist", "radialVel", "angularVel", "aSpeed", "aCmd", "tSpeed", "tCmd", "tCmdRadial"];
-  console.log(columns.join("\t"));
-
-  const steps = Math.round(params.durationSeconds / FIXED_DT);
-  const sampleEvery = Math.max(1, Math.round(params.sampleSeconds / FIXED_DT));
-  for (let step = 0; step <= steps; step++) {
-    if (step > 0) simulation.step(FIXED_DT);
-    if (step % sampleEvery !== 0 && step !== steps) continue;
-    const snapshot = simulation.snapshot();
-    const frame = kinematics.computeEngagement(snapshot.shipA, snapshot.shipB, snapshot.time);
-    const row = [
-      frame.time.toFixed(1),
-      frame.distance.toFixed(0),
-      frame.radialVelocity.toFixed(1),
-      frame.angularVelocity.toFixed(4),
-      snapshot.shipA.velocity.len().toFixed(1),
-      snapshot.commands.shipA.len().toFixed(1),
-      snapshot.shipB.velocity.len().toFixed(1),
-      snapshot.commands.shipB.len().toFixed(1),
-      radialComponent(snapshot.commands.shipB, frame).toFixed(1),
-    ];
-    console.log(row.join("\t"));
-  }
+function traceRow(
+  snapshot: { shipA: { velocity: Vec2 }; shipB: { velocity: Vec2 }; commands: { shipA: Vec2; shipB: Vec2 } },
+  frame: { time: number; distance: number; radialVelocity: number; angularVelocity: number; relPosition: Vec2 },
+): string[] {
+  return [
+    frame.time.toFixed(1),
+    frame.distance.toFixed(0),
+    frame.radialVelocity.toFixed(1),
+    frame.angularVelocity.toFixed(4),
+    snapshot.shipA.velocity.len().toFixed(1),
+    snapshot.commands.shipA.len().toFixed(1),
+    snapshot.shipB.velocity.len().toFixed(1),
+    snapshot.commands.shipB.len().toFixed(1),
+    radialComponent(snapshot.commands.shipB, frame).toFixed(1),
+  ];
 }
 
 function radialComponent(command: Vec2, frame: { relPosition: Vec2; distance: number }): number {
@@ -297,11 +301,25 @@ const USAGE = `Usage: bun run scripts/sim-trace.ts -- [flags]
   --ship-b-ewar-overload <true|false>
 Modes: ${AUTOPILOT_MODES.join(", ")}`;
 
-export { parseParams, loadEwarProjection };
+export { TraceParamsParserImpl as _TraceParamsParserImpl };
 
 if (import.meta.main) {
   try {
-    trace(parseParams(process.argv.slice(2)));
+    const container = createContainer<TraceCradle>({ injectionMode: InjectionMode.PROXY });
+    registerGameDataModule(container);
+    registerSimModule(container);
+    registerShipsModule(container);
+    registerFittingModule(container);
+    container.register({
+      traceParamsParser: asClass(TraceParamsParserImpl).singleton(),
+      simTrace: asClass(SimTraceImpl).singleton(),
+    });
+    const params = container.cradle.traceParamsParser.parse(process.argv.slice(2));
+    if (params.shipASteering === "reactive") {
+      container.register({ shipASteering: asClass(ReactiveAutopilot).singleton() });
+    }
+    container.register({ simConfig: asValue(params.config) });
+    container.cradle.simTrace.trace(params);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

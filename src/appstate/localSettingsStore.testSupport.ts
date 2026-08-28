@@ -1,4 +1,5 @@
-import { createSimValueParser } from "../sim";
+import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
+import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
@@ -285,7 +286,13 @@ export function resetMocks(): void {
   chargeCatalog = makeChargeCatalog();
 }
 export function makeParser(): SettingsParser {
-  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), simValueParser: createSimValueParser() });
+  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), simValueParser: simValueParserFromContainer() });
+}
+
+function simValueParserFromContainer(): SimValueParser {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
 }
 
 export function fakeEquality(equal = true): ProfileEquality {

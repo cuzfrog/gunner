@@ -20,12 +20,6 @@ export class SimValueParserImpl implements SimValueParser {
   }
 }
 
-export function createSimValueParser(): SimValueParser {
-  return new SimValueParserImpl();
-}
-
-// Module-internal: shared by SimValueParserImpl and autopilot.ts. Never re-exported through index.ts
-// (same pattern as dynamics.ts module-internal helpers).
 export function normalizeAggressivity(value: number): number {
   if (!Number.isFinite(value)) return 1;
   return Math.max(AGGRESSIVITY_MIN, Math.min(AGGRESSIVITY_MAX, value));

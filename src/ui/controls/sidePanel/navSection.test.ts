@@ -1,9 +1,14 @@
-import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, createSimValueParser } from "../../../sim";
+import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, registerSimModule, type SimCradle, type SimValueParser } from "../../../sim";
+import { createContainer, InjectionMode } from "awilix";
 import { fakeDocument, getFake, FakeElement } from "../testSupport";
 import { NavSection, type NavSectionEls } from "./navSection";
 import type { SidePanel } from "./sidePanelContract";
 
-const simValueParser = createSimValueParser();
+const simValueParser: SimValueParser = (() => {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
+})();
 
 function mockPanel() {
   const host = { onConfigChange: vi.fn(), onDisplayChange: vi.fn() };

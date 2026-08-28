@@ -1,7 +1,7 @@
 import { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN } from "./types";
-import { createSimValueParser } from "./simValueParser";
+import { SimValueParserImpl } from "./simValueParser";
 
-const parser = createSimValueParser();
+const parser = new SimValueParserImpl();
 
 describe("parseSigResolutionClass", () => {
   test("returns the value for valid sig resolution classes", () => {

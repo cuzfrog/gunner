@@ -1,6 +1,6 @@
 import { createContainer, InjectionMode } from "awilix";
 import { registerGameDataModule } from "../gamedata";
-import { createSimValueParser } from "../sim";
+import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { registerShipsModule, type ShipsCradle } from "../ships";
 import { SettingsParser } from "./settingsParser";
 import {
@@ -26,7 +26,11 @@ import {
 import { toShipId, toTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { DisplayPreferences } from "./userSettings";
 
-const simValueParser = createSimValueParser();
+const simValueParser: SimValueParser = (() => {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
+})();
 
 beforeEach(() => resetMocks());
 

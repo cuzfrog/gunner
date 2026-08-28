@@ -1,5 +1,5 @@
 import { asClass, asFunction, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import { createSimValueParser, type SimValueParser } from "../../sim";
+import { registerSimModule, type SimCradle, type SimValueParser } from "../../sim";
 import { toTypeId } from "../../gamedata/ids";
 import { StaticItemNameResolver } from "../../gamedata/itemNames";
 import type { ChargeCatalog } from "../../fitting";
@@ -10,7 +10,11 @@ import { FULL_PROFILE, MINIMAL_PROFILE } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
 import { makeShips, makeChargeCatalog, RIFTER_PROFILE } from "../localSettingsStore.testSupport";
 
-const simValueParser = createSimValueParser();
+const simValueParser: SimValueParser = (() => {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
+})();
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();
@@ -155,16 +159,15 @@ shipB.sig=40`;
   });
 
   test("parses profile text when constructed through the DI container", () => {
-    interface RegressionCradle {
-      readonly simValueParser: SimValueParser;
+    interface RegressionCradle extends SimCradle {
       readonly ships: Ships;
       readonly chargeCatalog: ChargeCatalog;
       readonly itemNameResolver: ItemNameResolver;
       readonly profileTextCodec: ProfileTextCodec;
     }
     const container: AwilixContainer<RegressionCradle> = createContainer<RegressionCradle>({ injectionMode: InjectionMode.PROXY });
+    registerSimModule(container);
     container.register({
-      simValueParser: asFunction(createSimValueParser).singleton(),
       ships: asFunction(() => ships).singleton(),
       chargeCatalog: asFunction(() => chargeCatalog).singleton(),
       itemNameResolver: asFunction(() => itemNameResolver).singleton(),

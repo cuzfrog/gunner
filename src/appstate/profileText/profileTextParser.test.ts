@@ -1,13 +1,18 @@
 import { toShipId, toTypeId } from "../../gamedata/ids";
 import { StaticItemNameResolver } from "../../gamedata/itemNames";
-import { createSimValueParser } from "../../sim";
+import { registerSimModule, type SimCradle, type SimValueParser } from "../../sim";
+import { createContainer, InjectionMode } from "awilix";
 import { ProfileTextParser } from "./profileTextParser";
 import { ProfileTextSerializer } from "./profileTextSerializer";
 import { MINIMAL_PROFILE, SHIP_A_FITTED_HULL } from "./profileText.testSupport";
 import type { ProfileSettings } from "../userSettings";
 import { makeShips, makeChargeCatalog, RIFTER_PROFILE } from "../localSettingsStore.testSupport";
 
-const simValueParser = createSimValueParser();
+const simValueParser: SimValueParser = (() => {
+  const container = createContainer<SimCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(container);
+  return container.cradle.simValueParser;
+})();
 const ships = makeShips();
 ships.findHull = vi.fn((name: string) => (name === "Rifter" ? RIFTER_PROFILE : undefined));
 const chargeCatalog = makeChargeCatalog();

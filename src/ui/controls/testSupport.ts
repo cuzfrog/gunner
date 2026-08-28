@@ -2,7 +2,7 @@ import { asClass, asFunction, asValue, createContainer, InjectionMode, type Awil
 import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
-import { createSimValueParser, type EwarResolver, type HitChance } from "../../sim";
+import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
 import type { I18n, Language } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { ProfileEquality, ProfileParamOverrides, ProfileTextCodec, SavedFittings, SettingsStore, TrackingUnit } from "../../appstate";
@@ -157,16 +157,18 @@ function mockImageCatalog(): ImageCatalog {
   });
 }
 
-function buildControlsCradle(document: Document, options: BuildDomControlsOptions = {}): AwilixContainer<ControlsCradle> {
+type TestControlsCradle = ControlsCradle & SimCradle;
+
+function buildControlsCradle(document: Document, options: BuildDomControlsOptions = {}): AwilixContainer<TestControlsCradle> {
   globalThis.document = document;
   globalThis.Element = FakeElement as unknown as typeof Element;
-  const cradle = createContainer<ControlsCradle>({ injectionMode: InjectionMode.PROXY });
+  const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   cradle.register({ uiEvents: asClass(UiEventsImpl).singleton() });
+  registerSimModule(cradle);
   cradle.register({
     now: asValue(options.now ?? (() => Date.now())),
     i18n: asValue(vi.mocked<I18n>({ ...mockI18n(), ...options.i18n })),
     imageCatalog: asValue(mockImageCatalog()),
-    simValueParser: asValue(createSimValueParser()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
       speedMultiplier: vi.fn(() => 1),
       speedMultiplierIgnoringRange: vi.fn(() => 1),
@@ -300,13 +302,13 @@ export function buildSidePanel(
   const shipATurretController: TurretController = new StubTurretController("shipA");
   const shipBTurretController: TurretController = new StubTurretController("shipB");
 
-  const cradle = createContainer<ControlsCradle>({ injectionMode: InjectionMode.PROXY });
+  const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
+  registerSimModule(cradle);
   cradle.register({
     uiEvents: asValue(events),
     els: asFunction(createControlsEls).singleton(),
     i18n: asValue(i18n),
     imageCatalog: asValue(imageCatalog),
-    simValueParser: asValue(createSimValueParser()),
     timer: asValue(mockTimer()),
     popupGroup: asValue(popupGroup),
     ships: asValue(ships),
