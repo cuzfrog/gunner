@@ -1,7 +1,7 @@
 import { Vec2, type AttackAssessment, type EngagementView, type ShipState, type TurretSpec } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
-function fakeHitEls(): { resTrackPen: HTMLElement; resRangePen: HTMLElement; resHit: HTMLElement } {
+function fakeHitEls(): { resTrackPen: HTMLElement; resRangePen: HTMLElement; resHit: HTMLElement; resTrackPenLabel: HTMLElement; resRangePenLabel: HTMLElement; resHitLabel: HTMLElement } {
   const make = (): HTMLElement => {
     const classes: string[] = [];
     return {
@@ -19,7 +19,7 @@ function fakeHitEls(): { resTrackPen: HTMLElement; resRangePen: HTMLElement; res
       },
     } as unknown as HTMLElement;
   };
-  return { resTrackPen: make(), resRangePen: make(), resHit: make() };
+  return { resTrackPen: make(), resRangePen: make(), resHit: make(), resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make() };
 }
 
 function fakeReadoutEls(): ReadoutEls {

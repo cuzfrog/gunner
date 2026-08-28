@@ -21,11 +21,17 @@ function collectReadoutEls(els: ControlsElements): ReadoutEls {
       resTrackPen: els.resTrackPenA,
       resRangePen: els.resRangePenA,
       resHit: els.resHitA,
+      resTrackPenLabel: els.resTrackPenLabelA,
+      resRangePenLabel: els.resRangePenLabelA,
+      resHitLabel: els.resHitLabelA,
     },
     shipB: {
       resTrackPen: els.resTrackPenB,
       resRangePen: els.resRangePenB,
       resHit: els.resHitB,
+      resTrackPenLabel: els.resTrackPenLabelB,
+      resRangePenLabel: els.resRangePenLabelB,
+      resHitLabel: els.resHitLabelB,
     },
   };
 }

@@ -37,7 +37,7 @@ function mockCallbacks() {
 }
 
 function sideReadoutValues(speed: number, tracking: number, optimal: number, falloff: number, boostedTracking: number, boostedOptimal: number, boostedFalloff: number) {
-  return { speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40 };
+  return { kind: "turret" as const, speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40 };
 }
 
 function makeView(distance: number): EngagementView {
@@ -116,9 +116,10 @@ function baseSettings(): UserSettings {
 describe("DomControls", () => {
   test("facade reads turret, shipB sig, speed, grid brightness and config", () => {
     const { document, controls } = buildDomControls();
-    const shipATurret = controls.getTurret("shipA");
-    expect(shipATurret.optimal).toBe(1000);
-    expect(shipATurret.falloff).toBe(3000);
+    const shipAWeapon = controls.getWeapon("shipA");
+    if (shipAWeapon?.kind !== "turret") throw new Error("expected turret weapon for shipA");
+    expect(shipAWeapon.optimal).toBe(1000);
+    expect(shipAWeapon.falloff).toBe(3000);
     expect(controls.getSig("shipB")).toBe(36);
     expect(controls.getSpeed()).toBe(4);
     expect(controls.getGridBrightness()).toBe(0.2);
@@ -145,13 +146,13 @@ describe("DomControls", () => {
     expect(getFake(document, "play").disabled).toBe(true);
   });
 
-  test("hasGuns reflects whether the ship has a fitted turret on each side", () => {
+  test("hasWeapon reflects whether the ship has a fitted turret on each side", () => {
     const { controls, cradle } = buildDomControls();
-    expect(controls.hasGuns("shipA")).toBe(false);
-    expect(controls.hasGuns("shipB")).toBe(false);
+    expect(controls.hasWeapon("shipA")).toBe(false);
+    expect(controls.hasWeapon("shipB")).toBe(false);
     cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
-    expect(controls.hasGuns("shipA")).toBe(true);
-    expect(controls.hasGuns("shipB")).toBe(false);
+    expect(controls.hasWeapon("shipA")).toBe(true);
+    expect(controls.hasWeapon("shipB")).toBe(false);
   });
 
   test("config invalidation refreshes the profile action bar dirty state", () => {

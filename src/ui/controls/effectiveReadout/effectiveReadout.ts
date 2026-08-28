@@ -60,32 +60,33 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   }
 
   private writeSide(sideValues: SideReadoutValues, sideEls: SideReadoutEls, trackingDisplay: TrackingDisplay, t: (key: string) => string): void {
-    const language = this.i18n.current();
-    const trackingValue = trackingDisplay.displayFor(sideValues.tracking, sideValues.sigResolution);
-    const tracking = trackingDisplay.unit === "score"
-      ? `${formatNumber(trackingValue, 2)} ${t("label.trackingScore")}`
-      : `${formatNumber(trackingValue, 4)} rad/s`;
-    this.write(sideEls.trackingReadout, tracking, isTrackingNegative(sideValues.tracking, sideValues.boostedTracking), (t) =>
-      sideValues.trackingBreakdown === undefined
-        ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.trackingBreakdown.tracking, this.fittingImport, language, "label.trackingSpeed", t)
-    );
-    this.write(
-      sideEls.speedReadout,
-      formatSpeed(sideValues.speed),
-      isSpeedNegative(sideValues.speed, tryReadNumber(sideEls.speed)),
-      (t) => buildSpeedTitle(sideValues.speedBreakdown, this.fittingImport, t)
-    );
-    this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), isRangeNegative(sideValues.optimal, sideValues.boostedOptimal), (t) =>
-      sideValues.optimalBreakdown === undefined
-        ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.optimalBreakdown.optimal, this.fittingImport, language, "label.optimalRange", t)
-    );
-    this.write(sideEls.falloffReadout, formatDistance(sideValues.falloff, t), isRangeNegative(sideValues.falloff, sideValues.boostedFalloff), (t) =>
-      sideValues.falloffBreakdown === undefined
-        ? t("readout.effectiveAffected")
-        : buildStatTitle(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
-    );
+    this.write(sideEls.speedReadout, formatSpeed(sideValues.speed), isSpeedNegative(sideValues.speed, tryReadNumber(sideEls.speed)), (t) => buildSpeedTitle(sideValues.speedBreakdown, this.fittingImport, t));
+    if (sideValues.kind === "turret") {
+      const language = this.i18n.current();
+      const trackingValue = trackingDisplay.displayFor(sideValues.tracking, sideValues.sigResolution);
+      const tracking = trackingDisplay.unit === "score"
+        ? `${formatNumber(trackingValue, 2)} ${t("label.trackingScore")}`
+        : `${formatNumber(trackingValue, 4)} rad/s`;
+      this.write(sideEls.trackingReadout, tracking, isTrackingNegative(sideValues.tracking, sideValues.boostedTracking), (t) =>
+        sideValues.trackingBreakdown === undefined
+          ? t("readout.effectiveAffected")
+          : buildStatTitle(sideValues.trackingBreakdown.tracking, this.fittingImport, language, "label.trackingSpeed", t)
+      );
+      this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), isRangeNegative(sideValues.optimal, sideValues.boostedOptimal), (t) =>
+        sideValues.optimalBreakdown === undefined
+          ? t("readout.effectiveAffected")
+          : buildStatTitle(sideValues.optimalBreakdown.optimal, this.fittingImport, language, "label.optimalRange", t)
+      );
+      this.write(sideEls.falloffReadout, formatDistance(sideValues.falloff, t), isRangeNegative(sideValues.falloff, sideValues.boostedFalloff), (t) =>
+        sideValues.falloffBreakdown === undefined
+          ? t("readout.effectiveAffected")
+          : buildStatTitle(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
+      );
+    } else {
+      this.write(sideEls.trackingReadout, "-", false, () => "");
+      this.write(sideEls.optimalReadout, "-", false, () => "");
+      this.write(sideEls.falloffReadout, "-", false, () => "");
+    }
   }
 
   private write(readout: ReadoutLike, text: string, negative: boolean, buildTitle: (t: (key: string) => string) => string): void {

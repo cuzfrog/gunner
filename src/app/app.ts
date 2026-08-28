@@ -1,5 +1,5 @@
-import type { EngagementFrameComposer, EngagementView, EwarResolver, ShipState, Side, Simulation, TurretSpec, WeaponSpec } from "../sim";
-import type { Controls, EffectiveReadouts, Loop, Renderer } from "../ui";
+import type { EngagementFrameComposer, EngagementView, EwarResolver, MissileSpec, ShipState, Side, Simulation, TurretSpec, WeaponSpec } from "../sim";
+import type { Controls, EffectiveReadouts, Loop, Renderer, TurretRange, MissileRange, WeaponRange, WeaponRanges } from "../ui";
 
 export interface App {
   start(): void;
@@ -65,7 +65,7 @@ export class AppImpl implements App {
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
     const input = {
-      weapons: { shipA: this.controls.getTurret("shipA"), shipB: this.controls.getTurret("shipB") },
+      weapons: { shipA: this.controls.getWeapon("shipA"), shipB: this.controls.getWeapon("shipB") },
       sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
     };
     const view = this.engagementFrameComposer.compose(snapshot, input);
@@ -76,42 +76,61 @@ export class AppImpl implements App {
     this.renderer.setGridBrightness(this.controls.getGridBrightness());
     this.renderer.setWeaponRangeVisibility(this.controls.getWeaponRangeVisibility());
     this.renderer.setManualZoom(this.controls.getAutoZoom(), this.controls.getZoomFactor());
-    this.renderer.draw(snapshot, view.frame, this.rendererTurrets(view), this.controls.getOverlays());
+    this.renderer.draw(snapshot, view.frame, this.rendererWeaponRanges(view), this.controls.getOverlays());
     this.controls.update(view, effectiveReadouts);
   }
 
-  private rendererTurrets(view: EngagementView): { shipA: TurretSpec; shipB: TurretSpec } {
+  private rendererWeaponRanges(view: EngagementView): WeaponRanges {
     return {
-      shipA: this.turretForRenderer(view.effectiveWeapons.shipA, "shipA"),
-      shipB: this.turretForRenderer(view.effectiveWeapons.shipB, "shipB"),
+      shipA: this.weaponRangeForRenderer(view.effectiveWeapons.shipA, "shipA"),
+      shipB: this.weaponRangeForRenderer(view.effectiveWeapons.shipB, "shipB"),
     };
   }
 
-  private turretForRenderer(weapon: WeaponSpec | undefined, side: Side): TurretSpec {
-    if (weapon?.kind === "turret") return weapon;
-    return this.controls.getTurret(side);
+  private weaponRangeForRenderer(weapon: WeaponSpec | undefined, side: Side): WeaponRange {
+    if (weapon?.kind === "turret") return { kind: "turret", optimal: weapon.optimal, falloff: weapon.falloff };
+    if (weapon?.kind === "missile") return { kind: "missile", range: weapon.flightRange };
+    const fallback = this.controls.getWeapon(side);
+    if (fallback?.kind === "missile") return { kind: "missile", range: fallback.flightRange };
+    return { kind: "turret", optimal: 0, falloff: 0 };
   }
 
   private sideReadoutValues(ship: ShipState, opponent: ShipState, view: EngagementView, side: Side): EffectiveReadouts["shipA"] {
     const attack = view.attacks[side];
     const effectiveWeapon = attack?.effectiveWeapon ?? view.effectiveWeapons[side];
     const boostedWeapon = attack?.boostedWeapon ?? effectiveWeapon;
-    const disruption = this.ewarResolver.disruptionBreakdown(opponent.ewar, view.frame.distance);
-    const effectiveTurret = effectiveWeapon?.kind === "turret" ? effectiveWeapon : this.controls.getTurret(side);
-    const boostedTurret = boostedWeapon?.kind === "turret" ? boostedWeapon : effectiveTurret;
-    return {
-      speed: ship.maxSpeed,
-      tracking: effectiveTurret.tracking,
-      optimal: effectiveTurret.optimal,
-      falloff: effectiveTurret.falloff,
-      boostedTracking: boostedTurret.tracking,
-      boostedOptimal: boostedTurret.optimal,
-      boostedFalloff: boostedTurret.falloff,
-      sigResolution: effectiveTurret.sigResolution,
-      speedBreakdown: this.ewarResolver.speedBreakdown(opponent.ewar, view.frame.distance),
-      trackingBreakdown: disruption,
-      optimalBreakdown: disruption,
-      falloffBreakdown: disruption,
-    };
+    const speedBreakdown = this.ewarResolver.speedBreakdown(opponent.ewar, view.frame.distance);
+    if (effectiveWeapon?.kind === "missile") {
+      return {
+        kind: "missile",
+        speed: ship.maxSpeed,
+        explosionRadius: effectiveWeapon.explosionRadius,
+        explosionVelocity: effectiveWeapon.explosionVelocity,
+        maxVelocity: effectiveWeapon.maxVelocity,
+        flightTime: effectiveWeapon.flightTime,
+        flightRange: effectiveWeapon.flightRange,
+        speedBreakdown,
+      };
+    }
+    if (effectiveWeapon?.kind === "turret") {
+      const boostedTurret = boostedWeapon?.kind === "turret" ? boostedWeapon : effectiveWeapon;
+      const disruption = this.ewarResolver.disruptionBreakdown(opponent.ewar, view.frame.distance);
+      return {
+        kind: "turret",
+        speed: ship.maxSpeed,
+        tracking: effectiveWeapon.tracking,
+        optimal: effectiveWeapon.optimal,
+        falloff: effectiveWeapon.falloff,
+        boostedTracking: boostedTurret.tracking,
+        boostedOptimal: boostedTurret.optimal,
+        boostedFalloff: boostedTurret.falloff,
+        sigResolution: effectiveWeapon.sigResolution,
+        speedBreakdown,
+        trackingBreakdown: disruption,
+        optimalBreakdown: disruption,
+        falloffBreakdown: disruption,
+      };
+    }
+    return { kind: "none", speed: ship.maxSpeed, speedBreakdown };
   }
 }

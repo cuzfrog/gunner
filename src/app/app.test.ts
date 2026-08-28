@@ -21,7 +21,7 @@ import type { Controls, ControlsCallbacks, Loop, Renderer } from "../ui";
 import { AppImpl } from "./app";
 
 const controls = vi.mocked<Controls>({
-  getTurret: vi.fn(),
+  getWeapon: vi.fn(),
   getSig: vi.fn(),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
@@ -30,7 +30,7 @@ const controls = vi.mocked<Controls>({
   getZoomFactor: vi.fn(),
   getWeaponRangeVisibility: vi.fn(() => "both" as const),
   getOverlays: vi.fn(() => []),
-  hasGuns: vi.fn(),
+  hasWeapon: vi.fn(),
   update: vi.fn(),
   setPlaying: vi.fn(),
   setCallbacks: vi.fn(),
@@ -118,7 +118,7 @@ function sideReadoutValues(
   optimalBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
   falloffBreakdown: DisruptionBreakdown | undefined = emptyDisruptionBreakdown,
 ) {
-  return { speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
+  return { kind: "turret", speed, tracking, optimal, falloff, boostedTracking, boostedOptimal, boostedFalloff, sigResolution: 40, speedBreakdown, trackingBreakdown, optimalBreakdown, falloffBreakdown };
 }
 
 describe("AppImpl", () => {
@@ -127,12 +127,12 @@ describe("AppImpl", () => {
   beforeEach(() => {
     simulation.snapshot.mockReturnValue(snapshot);
     engagementFrameComposer.compose.mockReturnValue(baseView());
-    controls.getTurret.mockReturnValue(turret);
+    controls.getWeapon.mockReturnValue(turret);
     controls.getSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
     controls.getConfig.mockReturnValue(config);
-    controls.hasGuns.mockReturnValue(true);
+    controls.hasWeapon.mockReturnValue(true);
     ewarResolver.speedBreakdown.mockReturnValue(emptySpeedBreakdown);
     ewarResolver.disruptionBreakdown.mockReturnValue(emptyDisruptionBreakdown);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
@@ -151,7 +151,7 @@ describe("AppImpl", () => {
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
     expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -179,7 +179,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: effectiveTurret, shipB: effectiveTurret }, []);
+    expect(renderer.draw).toHaveBeenCalledWith(boostedSnapshot, frame, { shipA: { kind: "turret", optimal: 6000, falloff: 4000 }, shipB: { kind: "turret", optimal: 6000, falloff: 4000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(250, 0.5, 6000, 4000, 0.45, 5800, 3800),
       shipB: sideReadoutValues(120, 0.5, 6000, 4000, 0.45, 5800, 3800),
@@ -191,7 +191,7 @@ describe("AppImpl", () => {
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();
-    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
+    expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(view, {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
       shipB: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),

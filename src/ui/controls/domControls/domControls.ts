@@ -1,6 +1,7 @@
 import {
   type EngagementView,
   type SimConfig,
+  type WeaponSpec,
 } from "../../../sim";
 import { isEventTargetWithClosest, num } from "../controlsDom";
 import type { Controls, ControlsCallbacks, EffectiveReadouts } from "../controlsContract";
@@ -202,7 +203,9 @@ export class DomControls implements Controls, DomControlsHost {
     if (notify) this.callbacks?.onConfigChange();
   }
 
-  getTurret(side: Side) { return this.turretControllers[side].currentTurretSpec(); }
+  getWeapon(side: Side): WeaponSpec | undefined {
+    return this.turretControllers[side].currentTurretSpec();
+  }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }
@@ -211,7 +214,7 @@ export class DomControls implements Controls, DomControlsHost {
   getZoomFactor(): number { return this.preferencesController.getZoomFactor(); }
   getOverlays(): readonly RangeOverlay[] { return this.rangeOverlayController.overlays(); }
   getWeaponRangeVisibility(): WeaponRangeVisibility { return this.preferencesController.getWeaponRangeVisibility(); }
-  hasGuns(side: Side): boolean { return this.turretControllers[side].turret() !== undefined; }
+  hasWeapon(side: Side): boolean { return this.turretControllers[side].turret() !== undefined; }
   update(view: EngagementView, effective: EffectiveReadouts): void {
     this.currentDistanceValue = view.frame.distance;
     this.deps.events.emitDistanceChanged(this.currentDistanceValue);
