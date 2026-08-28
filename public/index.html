@@ -164,6 +164,14 @@
           <span class="result-card-label" id="res-time-to-impact-label-a" data-i18n="result.timeToImpact">Time to impact</span>
           <span class="result-card-value mono" id="res-time-to-impact-a">-</span>
         </div>
+        <div class="result-card result-card-ship-a">
+          <span class="result-card-label" id="res-sig-factor-label-a" data-i18n="result.signatureFactor">Sig. factor</span>
+          <span class="result-card-value mono" id="res-sig-factor-a">-</span>
+        </div>
+        <div class="result-card result-card-ship-a">
+          <span class="result-card-label" id="res-velocity-factor-label-a" data-i18n="result.velocityFactor">Velocity factor</span>
+          <span class="result-card-value mono" id="res-velocity-factor-a">-</span>
+        </div>
       </div>
       <div class="result-card">
         <span class="result-card-label" data-i18n="result.distance">Distance</span>
@@ -173,6 +181,14 @@
         <div class="result-card result-card-ship-b">
           <span class="result-card-label" id="res-time-to-impact-label-b" data-i18n="result.timeToImpact">Time to impact</span>
           <span class="result-card-value mono" id="res-time-to-impact-b">-</span>
+        </div>
+        <div class="result-card result-card-ship-b">
+          <span class="result-card-label" id="res-sig-factor-label-b" data-i18n="result.signatureFactor">Sig. factor</span>
+          <span class="result-card-value mono" id="res-sig-factor-b">-</span>
+        </div>
+        <div class="result-card result-card-ship-b">
+          <span class="result-card-label" id="res-velocity-factor-label-b" data-i18n="result.velocityFactor">Velocity factor</span>
+          <span class="result-card-value mono" id="res-velocity-factor-b">-</span>
         </div>
       </div>
       <div class="result-card-group" id="res-turret-cards-b">
@@ -246,11 +262,12 @@
           </div>
         </div>
 
-        <div class="weapon-system-switch is-hidden" id="ship-a-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+        <div class="segmented-control choice-selector weapon-system-switch" id="ship-a-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system" hidden>
           <button type="button" id="ship-a-weapon-system-turret" data-value="turret" class="btn" aria-pressed="true" data-i18n="label.turret">Turret</button>
           <button type="button" id="ship-a-weapon-system-missile" data-value="missile" class="btn" aria-pressed="false" data-i18n="label.launcher">Launcher</button>
         </div>
 
+        <div class="weapon-panel" id="ship-a-turret-panel">
         <label class="form-field">
           <span class="tracking-label-row">
             <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
@@ -330,8 +347,9 @@
             </div>
           </div>
         </div>
+        </div>
 
-        <div class="launcher-panel is-hidden" id="ship-a-launcher-panel">
+        <div class="launcher-panel" id="ship-a-launcher-panel" hidden>
           <div class="form-field-group ammo-group">
             <button type="button" id="ship-a-launcher-ammo-trigger" class="launcher-ammo-trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-a-launcher-ammo-popup"
@@ -599,11 +617,12 @@
           </div>
         </div>
 
-        <div class="weapon-system-switch is-hidden" id="ship-b-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+        <div class="segmented-control choice-selector weapon-system-switch" id="ship-b-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system" hidden>
           <button type="button" id="ship-b-weapon-system-turret" data-value="turret" class="btn" aria-pressed="true" data-i18n="label.turret">Turret</button>
           <button type="button" id="ship-b-weapon-system-missile" data-value="missile" class="btn" aria-pressed="false" data-i18n="label.launcher">Launcher</button>
         </div>
 
+        <div class="weapon-panel" id="ship-b-turret-panel">
         <label class="form-field">
           <span class="tracking-label-row">
             <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
@@ -683,8 +702,9 @@
             </div>
           </div>
         </div>
+        </div>
 
-        <div class="launcher-panel is-hidden" id="ship-b-launcher-panel">
+        <div class="launcher-panel" id="ship-b-launcher-panel" hidden>
           <div class="form-field-group ammo-group">
             <button type="button" id="ship-b-launcher-ammo-trigger" class="launcher-ammo-trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-b-launcher-ammo-popup"

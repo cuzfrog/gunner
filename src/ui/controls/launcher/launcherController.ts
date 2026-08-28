@@ -124,7 +124,6 @@ export class LauncherControllerImpl implements LauncherController {
   render(): void {
     const launcher = this.selectedLauncher;
     const hasLauncher = launcher !== undefined;
-    this.els.panel.classList.toggle("is-hidden", !hasLauncher);
     if (!hasLauncher) return;
     const t = (key: string): string => this.i18n.t(key);
     setText(this.els.ammoSummary, launcher.chargeName);

@@ -1,31 +1,8 @@
 @layer components {
-.weapon-system-switch {
-  display: flex;
-  gap: 2px;
-  padding: 2px 0;
-}
-
-.weapon-system-switch.is-hidden {
-  display: none;
-}
-
-.weapon-system-switch .btn {
-  flex: 1 1 0;
-  padding: 4px 8px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 .launcher-panel {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 8px 0;
-}
-
-.launcher-panel.is-hidden {
-  display: none;
 }
 
 .launcher-ammo-trigger {

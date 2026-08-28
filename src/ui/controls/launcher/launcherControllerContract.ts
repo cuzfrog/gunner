@@ -22,7 +22,6 @@ export interface LauncherControllerDeps {
 }
 
 export interface LauncherEls {
-  readonly panel: HTMLElement;
   readonly ammoTrigger: HTMLButtonElement;
   readonly ammoSummary: HTMLElement;
   readonly ammoPopup: HTMLElement;

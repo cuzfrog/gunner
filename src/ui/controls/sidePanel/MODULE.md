@@ -21,6 +21,7 @@ no-new-exports:
   - turretLink.ts
   - launcherLink.ts
   - weaponSystemSwitch.ts
+  - weaponSystemSwitch.test.ts
   - overrides.ts
   - module.test.ts
   - navSection.ts

@@ -16,10 +16,14 @@ interface SideDpsEls {
   readonly resAppliedDps: HTMLElement;
   readonly resApplication: HTMLElement;
   readonly resTimeToImpact: HTMLElement;
+  readonly resSigFactor: HTMLElement;
+  readonly resVelocityFactor: HTMLElement;
   readonly resNominalDpsLabel: HTMLElement;
   readonly resAppliedDpsLabel: HTMLElement;
   readonly resApplicationLabel: HTMLElement;
   readonly resTimeToImpactLabel: HTMLElement;
+  readonly resSigFactorLabel: HTMLElement;
+  readonly resVelocityFactorLabel: HTMLElement;
   readonly resTurretCards: HTMLElement;
   readonly resMissileCards: HTMLElement;
 }
@@ -49,7 +53,9 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   private updateSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment | undefined, t: (key: string) => string): void {
-    els.resHit.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger");
+    els.resHit.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
+    els.resTrackPen.classList.remove("is-dim");
+    els.resRangePen.classList.remove("is-dim");
     els.resAppliedDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resNominalDps.classList.remove("is-dim");
     els.resApplication.classList.remove("is-dim");
@@ -91,14 +97,19 @@ export class EngagementReadoutImpl implements EngagementReadout {
   private updateMissileSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, t: (key: string) => string): void {
     els.resTurretCards.hidden = true;
     els.resMissileCards.hidden = false;
+    const missile = attack.missile!;
     setText(els.resNominalDpsLabel, t("result.nominalDps"));
     setText(els.resAppliedDpsLabel, t("result.appliedDps"));
     setText(els.resApplicationLabel, t("result.application"));
     setText(els.resTimeToImpactLabel, t("result.timeToImpact"));
+    setText(els.resSigFactorLabel, t("result.signatureFactor"));
+    setText(els.resVelocityFactorLabel, t("result.velocityFactor"));
     setText(els.resNominalDps, formatWithCommas(attack.damage.nominalDps, 1));
     setText(els.resAppliedDps, formatWithCommas(attack.damage.appliedDps, 1));
     setText(els.resApplication, `${formatWithCommas(attack.damage.application * 100, 1)}%`);
-    setText(els.resTimeToImpact, `${formatWithCommas(attack.missile!.timeToImpact, 1)}s`);
+    setText(els.resTimeToImpact, `${formatWithCommas(missile.timeToImpact, 1)}s`);
+    setText(els.resSigFactor, `${formatWithCommas(Math.min(1, missile.signatureTerm) * 100, 1)}%`);
+    setText(els.resVelocityFactor, `${formatWithCommas(Math.min(1, missile.velocityTerm) * 100, 1)}%`);
     if (attack.damage.appliedDps <= 0) {
       els.resAppliedDps.classList.add("is-danger");
     } else {
@@ -107,11 +118,17 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   private updateNoWeaponSide(els: SideHitEls & SideDpsEls): void {
-    els.resTurretCards.hidden = true;
+    els.resTurretCards.hidden = false;
     els.resMissileCards.hidden = true;
+    setText(els.resHit, "-");
+    setText(els.resTrackPen, "-");
+    setText(els.resRangePen, "-");
     setText(els.resNominalDps, "-");
     setText(els.resAppliedDps, "-");
     setText(els.resApplication, "-");
+    els.resHit.classList.add("is-dim");
+    els.resTrackPen.classList.add("is-dim");
+    els.resRangePen.classList.add("is-dim");
     els.resNominalDps.classList.add("is-dim");
     els.resAppliedDps.classList.add("is-dim");
     els.resApplication.classList.add("is-dim");

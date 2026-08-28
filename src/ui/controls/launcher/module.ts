@@ -35,7 +35,6 @@ function createLauncherController(side: Side, deps: ControlsCradle): LauncherCon
 function collectLauncherEls(els: ControlsElements, side: Side): LauncherEls {
   const s = els[side];
   return {
-    panel: s.launcherPanel,
     ammoTrigger: s.launcherAmmoTrigger,
     ammoSummary: s.launcherAmmoSummary,
     ammoPopup: s.launcherAmmoPopup,

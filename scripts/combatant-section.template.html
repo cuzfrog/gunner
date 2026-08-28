@@ -39,11 +39,12 @@
           </div>
         </div>
 
-        <div class="weapon-system-switch is-hidden" id="{{ID_PREFIX}}-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
+        <div class="segmented-control choice-selector weapon-system-switch" id="{{ID_PREFIX}}-weapon-system" role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system" hidden>
           <button type="button" id="{{ID_PREFIX}}-weapon-system-turret" data-value="turret" class="btn" aria-pressed="true" data-i18n="label.turret">Turret</button>
           <button type="button" id="{{ID_PREFIX}}-weapon-system-missile" data-value="missile" class="btn" aria-pressed="false" data-i18n="label.launcher">Launcher</button>
         </div>
 
+        <div class="weapon-panel" id="{{ID_PREFIX}}-turret-panel">
         <label class="form-field">
           <span class="tracking-label-row">
             <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
@@ -123,8 +124,9 @@
             </div>
           </div>
         </div>
+        </div>
 
-        <div class="launcher-panel is-hidden" id="{{ID_PREFIX}}-launcher-panel">
+        <div class="launcher-panel" id="{{ID_PREFIX}}-launcher-panel" hidden>
           <div class="form-field-group ammo-group">
             <button type="button" id="{{ID_PREFIX}}-launcher-ammo-trigger" class="launcher-ammo-trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="{{ID_PREFIX}}-launcher-ammo-popup"

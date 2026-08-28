@@ -72,6 +72,8 @@ function buildSwitch(side: Side = "shipA"): { switch: WeaponSystemSwitch; docume
     container: document.getElementById(`${prefix}-weapon-system`)!,
     turretButton: document.getElementById(`${prefix}-weapon-system-turret`)! as HTMLButtonElement,
     missileButton: document.getElementById(`${prefix}-weapon-system-missile`)! as HTMLButtonElement,
+    turretPanel: document.getElementById(`${prefix}-turret-panel`)!,
+    launcherPanel: document.getElementById(`${prefix}-launcher-panel`)!,
     turretController,
     launcherController,
     events,
@@ -83,7 +85,7 @@ describe("WeaponSystemSwitchImpl", () => {
   test("initial state is hidden when neither weapon is fitted", () => {
     const { switch: sw, document } = buildSwitch();
     expect(sw.activeKind()).toBe("turret");
-    expect(getFake(document, "ship-a-weapon-system").classList.toggle).toHaveBeenCalledWith("is-hidden", true);
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(true);
   });
 
   test("refresh shows the switch when both turret and launcher are fitted", () => {
@@ -91,7 +93,7 @@ describe("WeaponSystemSwitchImpl", () => {
     turretController.turret.mockReturnValue({} as ImportedTurret);
     launcherController.launcher.mockReturnValue({} as never);
     sw.refresh();
-    expect(getFake(document, "ship-a-weapon-system").classList.toggle).toHaveBeenCalledWith("is-hidden", false);
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(false);
     expect(getFake(document, "ship-a-weapon-system-turret").getAttribute("aria-pressed")).toBe("true");
     expect(getFake(document, "ship-a-weapon-system-missile").getAttribute("aria-pressed")).toBe("false");
   });
@@ -125,5 +127,46 @@ describe("WeaponSystemSwitchImpl", () => {
     sw.setActiveKind("turret");
     sw.refresh();
     expect(sw.activeKind()).toBe("missile");
+  });
+
+  test("turret-only fit shows turret panel, hides launcher panel and switch", () => {
+    const { switch: sw, document, turretController } = buildSwitch();
+    turretController.turret.mockReturnValue({} as ImportedTurret);
+    sw.refresh();
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(true);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
+  });
+
+  test("launcher-only fit shows launcher panel, hides turret panel and switch", () => {
+    const { switch: sw, document, turretController, launcherController } = buildSwitch();
+    turretController.turret.mockReturnValue(undefined);
+    launcherController.launcher.mockReturnValue({} as never);
+    sw.refresh();
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(true);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(false);
+    expect(sw.activeKind()).toBe("missile");
+  });
+
+  test("mixed fit shows switch and only the active kind panel", () => {
+    const { switch: sw, document, turretController, launcherController } = buildSwitch();
+    turretController.turret.mockReturnValue({} as ImportedTurret);
+    launcherController.launcher.mockReturnValue({} as never);
+    sw.setActiveKind("missile");
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(false);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(false);
+    sw.setActiveKind("turret");
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
+  });
+
+  test("no-weapon fit hides both panels and the switch", () => {
+    const { switch: sw, document } = buildSwitch();
+    sw.refresh();
+    expect(getFake(document, "ship-a-weapon-system").hidden).toBe(true);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
 });

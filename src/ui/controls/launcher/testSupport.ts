@@ -20,7 +20,6 @@ function sideId(side: Side): "ship-a" | "ship-b" {
 export function collectLauncherEls(document: Document, side: Side): LauncherEls {
   const id = sideId(side);
   return {
-    panel: document.getElementById(`${id}-launcher-panel`)!,
     ammoTrigger: document.getElementById(`${id}-launcher-ammo-trigger`)! as HTMLButtonElement,
     ammoSummary: document.getElementById(`${id}-launcher-ammo-summary`)!,
     ammoPopup: document.getElementById(`${id}-launcher-ammo-popup`)!,

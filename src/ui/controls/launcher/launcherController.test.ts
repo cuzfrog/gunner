@@ -11,18 +11,16 @@ function importedWithLauncher(launcher: ReturnType<typeof importedLauncherFixtur
 }
 
 describe("LauncherController", () => {
-  test("initial state hides the panel and has no launcher", () => {
-    const { document, controller } = buildLauncher();
-    expect(getFake(document, "ship-a-launcher-panel").classList.toggle).toHaveBeenCalledWith("is-hidden", true);
+  test("initial state has no launcher", () => {
+    const { controller } = buildLauncher();
     expect(controller.launcher()).toBeUndefined();
     expect(controller.ammoId()).toBeUndefined();
   });
 
-  test("applyImported with a launcher shows the panel and renders telemetry", () => {
+  test("applyImported with a launcher renders telemetry", () => {
     const { document, controller } = buildLauncher();
     const launcher = importedLauncherFixture();
     controller.applyImported(importedWithLauncher(launcher), { skillLevel: 5, overloaded: false });
-    expect(getFake(document, "ship-a-launcher-panel").classList.toggle).toHaveBeenCalledWith("is-hidden", false);
     expect(controller.launcher()).toBeDefined();
     expect(controller.ammoId()).toBe(SCOURGE_LIGHT_ID);
     expect(getFake(document, "ship-a-launcher-ammo-summary").textContent).toBe("Scourge Light Missile");
@@ -34,18 +32,16 @@ describe("LauncherController", () => {
     expect(getFake(document, "ship-a-launcher-flight-time").textContent).toContain("5");
   });
 
-  test("applyImported without a launcher hides the panel", () => {
-    const { document, controller } = buildLauncher();
+  test("applyImported without a launcher leaves no launcher", () => {
+    const { controller } = buildLauncher();
     controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
-    expect(getFake(document, "ship-a-launcher-panel").classList.toggle).toHaveBeenCalledWith("is-hidden", true);
     expect(controller.launcher()).toBeUndefined();
   });
 
-  test("clear resets the launcher and hides the panel", () => {
-    const { document, controller, popupGroup } = buildLauncher();
+  test("clear resets the launcher", () => {
+    const { controller, popupGroup } = buildLauncher();
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
     controller.clear();
-    expect(getFake(document, "ship-a-launcher-panel").classList.toggle).toHaveBeenLastCalledWith("is-hidden", true);
     expect(controller.launcher()).toBeUndefined();
     expect(popupGroup.close).toHaveBeenCalled();
   });

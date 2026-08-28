@@ -33,6 +33,10 @@
     min-width: 80px;
   }
 
+  .result-card-group {
+    flex: 0 0 auto;
+  }
+
   .skill-section { margin-top: 0; }
 }
 

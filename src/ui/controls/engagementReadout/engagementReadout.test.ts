@@ -24,7 +24,9 @@ function fakeSideEls(): ReadoutEls["shipA"] {
     resTrackPen: make(), resRangePen: make(), resHit: make(),
     resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make(),
     resNominalDps: make(), resAppliedDps: make(), resApplication: make(), resTimeToImpact: make(),
+    resSigFactor: make(), resVelocityFactor: make(),
     resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resApplicationLabel: make(), resTimeToImpactLabel: make(),
+    resSigFactorLabel: make(), resVelocityFactorLabel: make(),
     resTurretCards: make(), resMissileCards: make(),
   };
 }
@@ -203,6 +205,8 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resAppliedDps.textContent).toBe("32.0");
     expect(els.shipA.resApplication.textContent).toBe("80.0%");
     expect(els.shipA.resTimeToImpact.textContent).toBe("2.5s");
+    expect(els.shipA.resSigFactor.textContent).toBe("100.0%");
+    expect(els.shipA.resVelocityFactor.textContent).toBe("80.0%");
   });
 
   test("missile side with zero applied DPS shows is-danger", () => {
@@ -212,17 +216,34 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
   });
 
-  test("no-weapon side hides turret and missile cards, shows em-dash with is-dim", () => {
+  test("no-weapon side shows turret placeholder cards with em-dash and is-dim", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeNoWeaponView(1000), T);
-    expect(els.shipA.resTurretCards.hidden).toBe(true);
+    expect(els.shipA.resTurretCards.hidden).toBe(false);
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDps.textContent).toBe("-");
     expect(els.shipA.resApplication.textContent).toBe("-");
+    expect(els.shipA.resHit.textContent).toBe("-");
+    expect(els.shipA.resTrackPen.textContent).toBe("-");
+    expect(els.shipA.resRangePen.textContent).toBe("-");
+    expect(els.shipA.resHit.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resTrackPen.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resNominalDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resApplication.classList.contains("is-dim")).toBe(true);
+  });
+
+  test("transition from no-weapon to turret clears is-dim from turret cards", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeNoWeaponView(1000), T);
+    expect(els.shipA.resHit.classList.contains("is-dim")).toBe(true);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.5, trackingTerm: 0, rangeTerm: 0 } }), T);
+    expect(els.shipA.resHit.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resTrackPen.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(false);
   });
 });

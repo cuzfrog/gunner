@@ -5,6 +5,16 @@
   row-gap: var(--gap-field);
 }
 
+.weapon-panel {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gap-field);
+}
+
+.weapon-system-switch {
+  padding: 2px 0;
+}
+
 .side-panel-heading-row {
   display: flex;
   align-items: center;

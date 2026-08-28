@@ -17,6 +17,8 @@ export interface WeaponSystemSwitchDeps {
   readonly container: HTMLElement;
   readonly turretButton: HTMLButtonElement;
   readonly missileButton: HTMLButtonElement;
+  readonly turretPanel: HTMLElement;
+  readonly launcherPanel: HTMLElement;
   readonly turretController: TurretController;
   readonly launcherController: LauncherController;
   readonly events: UiEvents;
@@ -27,6 +29,8 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
   private readonly container: HTMLElement;
   private readonly turretButton: HTMLButtonElement;
   private readonly missileButton: HTMLButtonElement;
+  private readonly turretPanel: HTMLElement;
+  private readonly launcherPanel: HTMLElement;
   private readonly turretController: TurretController;
   private readonly launcherController: LauncherController;
   private readonly events: UiEvents;
@@ -37,6 +41,8 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
     this.container = deps.container;
     this.turretButton = deps.turretButton;
     this.missileButton = deps.missileButton;
+    this.turretPanel = deps.turretPanel;
+    this.launcherPanel = deps.launcherPanel;
     this.turretController = deps.turretController;
     this.launcherController = deps.launcherController;
     this.events = deps.events;
@@ -57,14 +63,16 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
   refresh(): void {
     const hasTurret = this.turretController.turret() !== undefined;
     const hasLauncher = this.launcherController.launcher() !== undefined;
-    const showSwitch = hasTurret && hasLauncher;
-    this.container.classList.toggle("is-hidden", !showSwitch);
     if (!hasTurret && this.kind === "turret") {
       this.kind = hasLauncher ? "missile" : "turret";
     }
     if (!hasLauncher && this.kind === "missile") {
       this.kind = hasTurret ? "turret" : "missile";
     }
+    const showSwitch = hasTurret && hasLauncher;
+    this.container.hidden = !showSwitch;
+    this.turretPanel.hidden = !hasTurret || this.kind !== "turret";
+    this.launcherPanel.hidden = !hasLauncher || this.kind !== "missile";
     this.turretButton.setAttribute("aria-pressed", String(this.kind === "turret"));
     this.missileButton.setAttribute("aria-pressed", String(this.kind === "missile"));
   }

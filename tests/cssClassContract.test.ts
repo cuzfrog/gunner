@@ -42,6 +42,7 @@ const APPROVED_PREFIXES = [
   "ammo",
   "launcher",
   "weapon-system",
+  "weapon-panel",
   "turret-mode",
   "sigres",
   "overload-button",
