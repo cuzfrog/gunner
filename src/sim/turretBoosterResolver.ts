@@ -39,10 +39,10 @@ export class TurretBoosterResolverImpl implements TurretBoosterResolver {
     }
 
     return {
+      ...turret,
       tracking: turret.tracking * this.stacking.apply(tracking),
       optimal: turret.optimal * this.stacking.apply(optimal),
       falloff: turret.falloff * this.stacking.apply(falloff),
-      sigResolution: turret.sigResolution,
     };
   }
 }

@@ -107,7 +107,7 @@ const frame: EngagementFrame = {
   angularVelocity: 0,
 };
 
-const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
 
 function gridColorOf(renderer: CanvasRenderer, canvas: HTMLCanvasElement): string {
   renderer.draw(snapshot, frame, { shipA: turret, shipB: turret }, []);
@@ -303,8 +303,8 @@ describe("CanvasRenderer", () => {
       shipB: { ...ship, id: "shipB", position: shipBPos },
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const shipATurret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
-    const shipBTurret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000 };
+    const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+    const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 8000, falloff: 3000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
 
     function rendererWithVisibility(visibility: "shipA" | "shipB" | "both" | "none"): { renderer: CanvasRenderer; arcs: number[][] } {
       const canvas = fakeCanvas();

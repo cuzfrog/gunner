@@ -56,10 +56,50 @@ export interface SimSnapshot {
 }
 
 export interface TurretSpec {
+  readonly kind: "turret";
   readonly tracking: number; // rad/s (old-system tracking speed)
   readonly sigResolution: number; // m
   readonly optimal: number; // m
   readonly falloff: number; // m
+  readonly damagePerShot: number; // base damage of one turret shot
+  readonly cycleTime: number; // seconds
+  readonly turretCount: number;
+}
+
+export interface MissileSpec {
+  readonly kind: "missile";
+  readonly damagePerMissile: number;
+  readonly cycleTime: number; // seconds
+  readonly launcherCount: number;
+  readonly explosionRadius: number;
+  readonly explosionVelocity: number;
+  readonly damageReductionFactor: number;
+  readonly maxVelocity: number;
+  readonly flightTime: number; // seconds
+  readonly flightRange: number; // maxVelocity * flightTime, computed by the producer
+}
+
+export type WeaponSpec = TurretSpec | MissileSpec;
+export type WeaponKind = "turret" | "missile";
+
+export interface DamageAssessment {
+  readonly nominalDps: number;
+  readonly appliedDps: number;
+  readonly application: number; // 0..1, applied/nominal
+  readonly volley: number; // per cycle, all launchers/turrets
+}
+
+export interface TurretDamageBreakdown {
+  readonly hit: HitChanceBreakdown;
+  readonly expectedMultiplier: number;
+}
+
+export interface MissileDamageBreakdown {
+  readonly application: number;
+  readonly signatureTerm: number; // S/E
+  readonly velocityTerm: number; // (S/E * Ve/Vt)^drfNorm
+  readonly inRange: boolean; // distance <= flightRange
+  readonly timeToImpact: number; // seconds
 }
 
 export interface EngagementFrame {

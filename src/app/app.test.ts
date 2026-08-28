@@ -86,7 +86,7 @@ const frame: EngagementFrame = {
   transversalSpeed: 0,
   angularVelocity: 0,
 };
-const turret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
+const turret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
 const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
 const shipConfig: ShipConfig = { id: "shipA", maxSpeed: 0, mass: 1_200_000, inertiaModifier: 3, mode: "orbit", desiredRange: 5000, aggressivity: 1 };
 const config: SimConfig = {
@@ -96,8 +96,13 @@ const config: SimConfig = {
 };
 
 function baseView(): EngagementView {
-  const assessment: AttackAssessment = { boostedTurret: turret, effectiveTurret: turret, hit };
-  return { frame, attacks: { shipA: assessment, shipB: assessment }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+  const assessment: AttackAssessment = {
+    boostedWeapon: turret,
+    effectiveWeapon: turret,
+    damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0 },
+    turret: { hit, expectedMultiplier: 1 },
+  };
+  return { frame, attacks: { shipA: assessment, shipB: assessment }, effectiveWeapons: { shipA: turret, shipB: turret } };
 }
 
 function sideReadoutValues(
@@ -145,7 +150,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { turrets: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: turret, shipB: turret }, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),
@@ -154,17 +159,21 @@ describe("AppImpl", () => {
   });
 
   test("renderFrame passes per-side effective attribute values and boosted baselines from view", () => {
-    const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
-    const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
+    const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+    const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
     const boostedShipA = { ...ship, maxSpeed: 250 };
     const boostedShipB = { ...ship, id: "shipB" as const, maxSpeed: 120 };
     const boostedSnapshot = { ...snapshot, shipA: boostedShipA, shipB: boostedShipB };
-    const assessment: AttackAssessment = { boostedTurret, effectiveTurret, hit };
+    const assessment: AttackAssessment = {
+      boostedWeapon: boostedTurret,
+      effectiveWeapon: effectiveTurret,
+      damage: { nominalDps: 0, appliedDps: 0, application: 1, volley: 0 },
+      turret: { hit, expectedMultiplier: 1 },
+    };
     const view: EngagementView = {
       frame,
       attacks: { shipA: assessment, shipB: assessment },
-      effectiveTurrets: { shipA: effectiveTurret, shipB: effectiveTurret },
-      hits: { shipA: hit, shipB: hit },
+      effectiveWeapons: { shipA: effectiveTurret, shipB: effectiveTurret },
     };
     simulation.snapshot.mockReturnValue(boostedSnapshot);
     engagementFrameComposer.compose.mockReturnValue(view);
@@ -177,8 +186,8 @@ describe("AppImpl", () => {
     });
   });
 
-  test("falls back to the view's effective turret when the composer returns no assessment", () => {
-    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+  test("falls back to the view's effective weapon when the composer returns no assessment", () => {
+    const view: EngagementView = { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveWeapons: { shipA: turret, shipB: turret } };
     engagementFrameComposer.compose.mockReturnValue(view);
     app = new AppImpl({ controls, simulation, engagementFrameComposer, ewarResolver, renderer, loop });
     app.start();

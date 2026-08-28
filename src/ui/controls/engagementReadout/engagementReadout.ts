@@ -18,6 +18,8 @@ export interface EngagementReadout {
   update(view: EngagementView, t: (key: string) => string): void;
 }
 
+const DEFAULT_HIT: HitChanceBreakdown = { chance: 0, trackingTerm: 0, rangeTerm: 0 };
+
 export class EngagementReadoutImpl implements EngagementReadout {
   private readonly els: ReadoutEls;
 
@@ -26,10 +28,10 @@ export class EngagementReadoutImpl implements EngagementReadout {
   }
 
   update(view: EngagementView, t: (key: string) => string): void {
-    const { frame, hits } = view;
+    const { frame, attacks } = view;
     setText(this.els.resDistance, formatDistance(frame.distance, t));
-    this.updateSide(this.els.shipA, hits.shipA);
-    this.updateSide(this.els.shipB, hits.shipB);
+    this.updateSide(this.els.shipA, attacks.shipA?.turret?.hit ?? DEFAULT_HIT);
+    this.updateSide(this.els.shipB, attacks.shipB?.turret?.hit ?? DEFAULT_HIT);
   }
 
   private updateSide(els: SideHitEls, hit: HitChanceBreakdown): void {

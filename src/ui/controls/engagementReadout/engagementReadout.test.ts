@@ -1,4 +1,4 @@
-import { Vec2, type ShipState } from "../../../sim";
+import { Vec2, type AttackAssessment, type EngagementView, type ShipState, type TurretSpec } from "../../../sim";
 import { EngagementReadoutImpl, type EngagementReadout, type ReadoutEls } from "./engagementReadout";
 
 function fakeHitEls(): { resTrackPen: HTMLElement; resRangePen: HTMLElement; resHit: HTMLElement } {
@@ -79,11 +79,25 @@ function makeView(overrides: { distance?: number; transversalSpeed?: number; ang
     transversalSpeed: overrides.transversalSpeed ?? 0,
     angularVelocity: overrides.angularVelocity ?? 0,
   };
-  const hits = {
-    shipA: overrides.shipAHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 },
-    shipB: overrides.shipBHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 },
+  const shipAHit = overrides.shipAHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
+  const shipBHit = overrides.shipBHit ?? { chance: 0, trackingTerm: 0, rangeTerm: 0 };
+  const dummyTurret: TurretSpec = { kind: "turret", tracking: 0, sigResolution: 40, optimal: 0, falloff: 0, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
+  const shipAAttack: AttackAssessment = {
+    boostedWeapon: dummyTurret, effectiveWeapon: dummyTurret,
+    damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0 },
+    turret: { hit: shipAHit, expectedMultiplier: 0 },
   };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: { tracking: 0, sigResolution: 40, optimal: 0, falloff: 0 }, shipB: { tracking: 0, sigResolution: 40, optimal: 0, falloff: 0 } }, hits };
+  const shipBAttack: AttackAssessment = {
+    boostedWeapon: dummyTurret, effectiveWeapon: dummyTurret,
+    damage: { nominalDps: 0, appliedDps: 0, application: 0, volley: 0 },
+    turret: { hit: shipBHit, expectedMultiplier: 0 },
+  };
+  const view: EngagementView = {
+    frame,
+    attacks: { shipA: shipAAttack, shipB: shipBAttack },
+    effectiveWeapons: { shipA: dummyTurret, shipB: dummyTurret },
+  };
+  return view;
 }
 
 describe("EngagementReadout", () => {

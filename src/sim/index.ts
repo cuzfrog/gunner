@@ -7,6 +7,8 @@ export type { EwarResolver } from "./ewarResolver";
 export type { TurretBoosterResolver } from "./turretBoosterResolver";
 export type { EngagementFrameComposer, EngagementInput, EngagementView } from "./engagementFrameComposer";
 export type { EngagementEvaluator, AttackAssessment, AttackState } from "./fireControl";
+export type { MissileApplication } from "./missileApplication";
+export type { TurretDamage } from "./turretDamage";
 export type { StackingPenalty } from "./stackingPenalty";
 export type {
   AppliedEwarEffect,
@@ -15,6 +17,7 @@ export type {
   BoostActivation,
   BoostLoadout,
   CombatantConfig,
+  DamageAssessment,
   DisruptionBreakdown,
   DisruptionScriptSpec,
   DisruptorActivation,
@@ -25,6 +28,8 @@ export type {
   EwarProjection,
   GrapplerActivation,
   HitChanceBreakdown,
+  MissileDamageBreakdown,
+  MissileSpec,
   OrbitDirection,
   ScramblerActivation,
   ShipConfig,
@@ -41,10 +46,13 @@ export type {
   TrackingBoosterSpec,
   TrackingDisruptorSpec,
   TurretBoostProjection,
+  TurretDamageBreakdown,
   TurretScriptSpec,
   TurretSpec,
   WarpScramblerSpec,
   WebActivation,
+  WeaponKind,
+  WeaponSpec,
 } from "./types";
 export { AGGRESSIVITY_MAX, AGGRESSIVITY_MIN, EMPTY_BOOST_LOADOUT, EMPTY_EWAR_LOADOUT, SIG_RESOLUTIONS } from "./types";
 export type { SimValueParser } from "./simValueParser";

@@ -1,7 +1,7 @@
 import type { UserSettings, SavedFittings, SavedFitting } from "../../../appstate";
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import type { FittingImport } from "../../../fitting";
-import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type HitChanceBreakdown, type EngagementView } from "../../../sim";
+import { Vec2, type EwarLoadout, type WarpScramblerSpec, type EngagementFrame, type EngagementView } from "../../../sim";
 import type { Ships } from "../../../ships";
 import type { EffectiveReadouts } from "../controlsContract";
 import { USER_SETTINGS_VERSION } from "../../../appstate";
@@ -58,9 +58,7 @@ function makeView(distance: number): EngagementView {
     relPosition: new Vec2(0, distance), distance, relVelocity: new Vec2(0, 0),
     radialVelocity: 0, transversalVelocity: new Vec2(0, 0), transversalSpeed: 0, angularVelocity: 0,
   };
-  const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-  const turret = { tracking: 0, sigResolution: 40, optimal: 0, falloff: 0 };
-  return { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveTurrets: { shipA: turret, shipB: turret }, hits: { shipA: hit, shipB: hit } };
+  return { frame, attacks: { shipA: undefined, shipB: undefined }, effectiveWeapons: { shipA: undefined, shipB: undefined } };
 }
 
 function baseSettings(): UserSettings {

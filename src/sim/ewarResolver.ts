@@ -231,10 +231,10 @@ export class EwarResolverImpl implements EwarResolver {
 
   private applyDisruptorModifiers(turret: TurretSpec, modifiers: DisruptionBreakdown): TurretSpec {
     return {
+      ...turret,
       tracking: turret.tracking * this.stacking.apply(modifiers.tracking.map((entry) => entry.multiplier)),
       optimal: turret.optimal * this.stacking.apply(modifiers.optimal.map((entry) => entry.multiplier)),
       falloff: turret.falloff * this.stacking.apply(modifiers.falloff.map((entry) => entry.multiplier)),
-      sigResolution: turret.sigResolution,
     };
   }
 

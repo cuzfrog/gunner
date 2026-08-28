@@ -203,9 +203,13 @@ export class TurretControllerImpl implements TurretController {
 
   currentTurretSpec(trackingOverride?: number): TurretSpec {
     return {
+      kind: "turret",
       tracking: trackingOverride ?? this.trackingInput.rad,
       sigResolution: SIG_RESOLUTIONS[this.currentSigResClass()],
       optimal: num(this.els.optimal), falloff: num(this.els.falloff),
+      damagePerShot: 0,
+      cycleTime: 1,
+      turretCount: 1,
     };
   }
 

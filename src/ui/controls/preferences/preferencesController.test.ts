@@ -138,10 +138,14 @@ class FakeTurretController implements TurretController {
   restore(_arg1?: unknown, _arg2?: unknown, _arg3?: unknown, _arg4?: unknown): void {}
   clear = vi.fn();
   currentTurretSpec = vi.fn((): import("../../../sim").TurretSpec => ({
+    kind: "turret",
     tracking: this.trackingInput.rad,
     sigResolution: 40,
     optimal: 1000,
     falloff: 3000,
+    damagePerShot: 0,
+    cycleTime: 1,
+    turretCount: 1,
   }));
   currentSigResClass = vi.fn((): import("../../../sim").SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as import("../../../gamedata/ids").TypeId }));

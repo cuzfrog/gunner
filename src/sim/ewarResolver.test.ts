@@ -30,10 +30,14 @@ const FALLOFF_SCRIPT_ID = toTypeId("29009");
 const GRAPPLER_FAKE_ID = toTypeId("41041");
 
 const defaultTurret: TurretSpec = {
+  kind: "turret",
   tracking: 0.32,
   sigResolution: 40,
   optimal: 5000,
   falloff: 5000,
+  damagePerShot: 0,
+  cycleTime: 1,
+  turretCount: 1,
 };
 
 const OPTIMAL_SCRIPT: DisruptionScriptSpec = {
