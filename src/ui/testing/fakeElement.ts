@@ -52,6 +52,7 @@ export class FakeElement {
     else if (name === "checked") this.checked = true;
     else if (name === "title") this.title = value;
     else if (name === "src") this.src = value;
+    else if (name === "value") this.value = value;
     else if (name.startsWith("data-")) this.dataset[name.slice(5)] = value;
   }
   removeAttribute(name: string): void {

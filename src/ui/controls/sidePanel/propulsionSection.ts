@@ -8,6 +8,7 @@ import { propulsionOptionLabel } from "../controlsFormat";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
+import { html } from "../markup";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
 
@@ -105,9 +106,7 @@ export class PropulsionSection implements IPropulsionSection {
           : (modules[0]?.id ?? "");
     }
 
-    const noneOption = document.createElement("option");
-    noneOption.value = PROPULSION_NONE;
-    noneOption.hidden = true;
+    const noneOption = html`<option value=${PROPULSION_NONE} hidden></option>` as unknown as HTMLElement;
     select.appendChild(noneOption);
 
     select.value = selected;

@@ -6,6 +6,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
+import { html } from "../markup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
@@ -153,11 +154,7 @@ export class EwarControllerImpl implements EwarController {
 
   private buildScriptPopup(side: Side): Popup {
     const field = side === "shipA" ? this.els.shipAEwarField : this.els.shipBEwarField;
-    const popup = document.createElement("div");
-    popup.id = `${sideId(side)}-ewar-script-popup`;
-    popup.className = "ewar-script-popup popup";
-    popup.setAttribute("role", "menu");
-    popup.hidden = true;
+    const popup = html`<div id="${sideId(side)}-ewar-script-popup" class="ewar-script-popup popup" role="menu" hidden></div>` as unknown as HTMLDivElement;
     field.appendChild(popup);
     this.scriptPopupEls.set(side, popup);
     return {
@@ -198,9 +195,7 @@ export class EwarControllerImpl implements EwarController {
     trigger.disabled = false;
     trigger.title = "";
     this.updateSummary(side);
-    const heading = document.createElement("div");
-    heading.className = "preview-section-label";
-    heading.textContent = modulesLabel;
+    const heading = html`<div class="preview-section-label">${modulesLabel}</div>`;
     section.appendChild(heading);
     if (state.loadout.webs.length > 0) {
       this.renderSection(section, "label.ewar.web", (container) => this.renderWebs(side, state, container));
@@ -222,7 +217,7 @@ export class EwarControllerImpl implements EwarController {
     labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
     renderRows: (container: HTMLElement) => void,
   ): void {
-    const rowContainer = document.createElement("div");
+    const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
     renderRows(rowContainer);
     const rows = Array.from(rowContainer.children) as unknown as (Element | DocumentFragment)[];
     const section = this.sectionBlock.create(this.i18n.t(labelKey), rows);
@@ -256,20 +251,10 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
-    const item = document.createElement("span");
-    item.className = "ewar-summary-item";
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
-    const img = document.createElement("img");
-    img.className = "ewar-summary-icon";
-    img.alt = "";
-    if (iconUrl !== undefined) img.src = iconUrl;
-    img.hidden = iconUrl === undefined;
-    item.appendChild(img);
-    const count = document.createElement("span");
-    count.className = "ewar-summary-count mono";
-    count.textContent = `${active}/${total}`;
-    item.appendChild(count);
-    item.setAttribute("title", title);
+    const img = html`<img class="ewar-summary-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
+    if (iconUrl === undefined) img.hidden = true;
+    const item = html`<span class="ewar-summary-item" title=${title}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
     summary.appendChild(item);
   }
 
@@ -324,13 +309,10 @@ export class EwarControllerImpl implements EwarController {
       const web = state.loadout.webs[i];
       const active = state.activation.webs[i].active;
       const overloaded = state.activation.webs[i].overloaded;
-      const row = document.createElement("div");
-      row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const { button } = this.createModuleButton(active, web, this.ewarEffectDescriber.webModuleEffect(web));
       const overloadButton = this.createOverloadButton(active, overloaded, i, web, () => this.toggleWebOverload(side, i, overloadButton));
       button.addEventListener("click", () => this.toggleWeb(side, i, button, row));
-      row.appendChild(button);
-      row.appendChild(overloadButton);
+      const row = html`<div class=${active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
       section.appendChild(row);
     }
   }
@@ -339,14 +321,11 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.grapplers.length; i++) {
       const grappler: StasisGrapplerSpec = state.loadout.grapplers[i];
       const activation = state.activation.grapplers[i];
-      const row = document.createElement("div");
-      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const { button } = this.createModuleButton(activation.active, grappler, this.ewarEffectDescriber.grapplerModuleEffect(grappler));
       const onToggle = () => this.toggleGrapplerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, grappler, onToggle);
       button.addEventListener("click", () => this.toggleGrappler(side, i, button, row));
-      row.appendChild(button);
-      row.appendChild(overloadButton);
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
       section.appendChild(row);
     }
   }
@@ -356,17 +335,13 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.disruptors.length; i++) {
       const disruptor = state.loadout.disruptors[i];
       const activation = state.activation.disruptors[i];
-      const row = document.createElement("div");
-      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const { button, nameSpan } = this.createModuleButton(activation.active, disruptor, this.ewarEffectDescriber.disruptorModuleEffect(disruptor, activation.script));
       nameSpans.push(nameSpan);
       const onToggle = () => this.toggleDisruptorOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, disruptor, onToggle);
       button.addEventListener("click", () => this.toggleDisruptor(side, i, button, row));
-      row.appendChild(button);
-      row.appendChild(overloadButton);
       const gear = this.createScriptGear(side, i, activation.script, activation.active);
-      row.appendChild(gear);
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton, gear]}</div>` as unknown as HTMLDivElement;
       section.appendChild(row);
     }
     this.disruptorNameSpans.set(side, nameSpans);
@@ -376,14 +351,11 @@ export class EwarControllerImpl implements EwarController {
     for (let i = 0; i < state.loadout.scramblers.length; i++) {
       const scrambler: WarpScramblerSpec = state.loadout.scramblers[i];
       const activation = state.activation.scramblers[i];
-      const row = document.createElement("div");
-      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
       const { button } = this.createModuleButton(activation.active, scrambler, this.ewarEffectDescriber.scramblerModuleEffect());
       const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler, onToggle);
       button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
-      row.appendChild(button);
-      row.appendChild(overloadButton);
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
       section.appendChild(row);
     }
   }
@@ -394,23 +366,11 @@ export class EwarControllerImpl implements EwarController {
 
   private createModuleButton(active: boolean, spec: { readonly moduleId: TypeId }, effectTitle: string): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(spec);
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-module-toggle";
-    button.setAttribute("aria-pressed", String(active));
-    button.setAttribute("aria-label", displayName);
     const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
-    const img = document.createElement("img");
-    img.className = "ewar-module-icon";
-    if (iconUrl !== undefined) img.src = iconUrl;
-    img.alt = "";
-    img.hidden = iconUrl === undefined;
-    button.appendChild(img);
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "ewar-module-name truncate";
-    nameSpan.textContent = displayName;
-    nameSpan.title = effectTitle;
-    button.appendChild(nameSpan);
+    const img = html`<img class="ewar-module-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
+    if (iconUrl === undefined) img.hidden = true;
+    const nameSpan = html`<span class="ewar-module-name truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
+    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
     return { button, nameSpan };
   }
 
@@ -454,11 +414,9 @@ export class EwarControllerImpl implements EwarController {
     popup.innerHTML = "";
     const current = state.activation.disruptors[index].script;
     const disruptor = state.loadout.disruptors[index];
-    const label = document.createElement("div");
-    label.id = `${sideId(side)}-ewar-script-label`;
-    label.className = "ewar-script-popup-label";
-    label.textContent = this.moduleDisplayName(disruptor);
-    popup.setAttribute("aria-labelledby", label.id);
+    const labelId = `${sideId(side)}-ewar-script-label`;
+    const label = html`<div id="${labelId}" class="ewar-script-popup-label">${this.moduleDisplayName(disruptor)}</div>`;
+    popup.setAttribute("aria-labelledby", labelId);
     popup.appendChild(label);
 
     const noneButton = this.scriptOptionList.createButton({

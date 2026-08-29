@@ -3,6 +3,7 @@ import type { PresetHull } from "../../../gamedata/presets";
 import type { ShipNameLanguage, Ships } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { UiEvents } from "../../events";
+import { html } from "../markup";
 
 export interface HullDatalist {
   populate(): void;
@@ -30,9 +31,7 @@ export class HullDatalistImpl implements HullDatalist {
       .sort((a, b) => a.localeCompare(b));
     datalist.innerHTML = "";
     for (const label of labels) {
-      const el = document.createElement("option");
-      el.value = label;
-      el.textContent = label;
+      const el = html`<option value=${label}>${label}</option>` as unknown as HTMLElement;
       datalist.appendChild(el);
     }
   }

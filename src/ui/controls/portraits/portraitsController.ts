@@ -6,6 +6,7 @@ import type { UiEvents } from "../../events";
 import type { EwarController } from "../ewar";
 import type { Side } from "../side";
 import type { CombatantProfiles, PortraitsEls, PortraitsController } from "./portraitsControllerContract";
+import { html } from "../markup";
 
 interface SideState {
   lastKey: string;
@@ -85,11 +86,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     for (const effect of portraitEffects) {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
-      const img = document.createElement("img");
-      img.className = "portrait-effect-icon";
-      img.alt = "";
-      img.src = iconUrl;
-      img.title = effect.title;
+      const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" title=${effect.title}>` as unknown as HTMLImageElement;
       icons.appendChild(img);
     }
     effects.appendChild(icons);

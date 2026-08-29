@@ -3,6 +3,7 @@ import type { I18n } from "../../i18n";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import { SelectableListImpl, IconActionImpl, spriteIconStroked } from "../shared";
+import { html } from "../markup";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side } from "../side";
@@ -137,16 +138,12 @@ export class FittingPopupRenderer {
   }
 
   private createFittingEntry(text: string, item: HTMLButtonElement, onDelete?: () => void): HTMLElement {
-    const li = document.createElement("li");
-    li.className = "fitting-entry";
-    li.setAttribute("role", "presentation");
-    li.appendChild(item);
     const eye = this.eyeAction.create(() => this.previews.showInMenu(this.side, text, eye, eye));
-    li.appendChild(eye);
+    const children: (Element | DocumentFragment)[] = [item, eye];
     if (onDelete) {
       const del = this.deleteAction.create(() => onDelete());
-      li.appendChild(del);
+      children.push(del);
     }
-    return li;
+    return html`<li class="fitting-entry" role="presentation">${children}</li>` as unknown as HTMLElement;
   }
 }

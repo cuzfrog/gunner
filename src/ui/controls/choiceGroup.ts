@@ -55,9 +55,7 @@ export class ChoiceGroupImpl implements ChoiceGroup {
     if (this.select) this.select.innerHTML = "";
     for (const option of options) {
       if (this.select) {
-        const opt = document.createElement("option");
-        opt.value = option.value;
-        opt.textContent = option.label;
+        const opt = html`<option value=${option.value}>${option.label}</option>` as unknown as HTMLElement;
         this.select.appendChild(opt);
       }
       const button = buildChoiceButton(this.shape, option);
@@ -120,8 +118,7 @@ function buildChoiceButton(shape: ChoiceGroupShape, option: ChoiceGroupOption): 
 
   if (option.iconUrl && shape.iconClass) {
     const icon = html`<img class=${shape.iconClass} src=${option.iconUrl} alt="">`;
-    const label = document.createElement("span");
-    label.textContent = option.label;
+    const label = html`<span>${option.label}</span>`;
     const button = html`<button type="button" class=${classAttr} data-value=${option.value}>${icon}${label}</button>` as unknown as HTMLButtonElement;
     if (option.title) button.setAttribute("title", option.title);
     if (option.disabled) button.setAttribute("disabled", "");

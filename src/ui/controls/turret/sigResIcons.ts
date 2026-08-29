@@ -3,6 +3,7 @@ import type { FittingImport, GunFamilies, ImportedTurret } from "../../../fittin
 import type { ImageCatalog } from "../../icons";
 import type { I18n } from "../../i18n";
 import { isHtmlButtonElement, isHtmlImageElement } from "../controlsDom";
+import { html } from "../markup";
 
 export interface SigResIconEls {
   readonly sigResOptions: HTMLElement;
@@ -64,10 +65,7 @@ export class SigResIcons {
     for (const child of Array.from(button.children)) {
       if (isHtmlImageElement(child) && child.className === "sigres-icon") return child;
     }
-    const img = document.createElement("img");
-    img.className = "sigres-icon";
-    img.alt = "";
-    img.hidden = true;
+    const img = html`<img class="sigres-icon" alt="" hidden>` as unknown as HTMLImageElement;
     button.appendChild(img);
     return img;
   }
