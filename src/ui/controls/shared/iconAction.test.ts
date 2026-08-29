@@ -72,4 +72,24 @@ describe("IconActionImpl", () => {
     (button as unknown as FakeElement).trigger("click");
     expect(clicked).toBe(true);
   });
+
+  test("resolves title lazily from function", () => {
+    let currentTitle = "First";
+    const action = new IconActionImpl({ ...shape, title: () => currentTitle });
+    const button1 = action.create(() => {});
+    expect(button1.getAttribute("title")).toBe("First");
+    currentTitle = "Second";
+    const button2 = action.create(() => {});
+    expect(button2.getAttribute("title")).toBe("Second");
+  });
+
+  test("resolves ariaLabel lazily from function", () => {
+    let currentLabel = "Label A";
+    const action = new IconActionImpl({ ...shape, ariaLabel: () => currentLabel });
+    const button = action.create(() => {});
+    expect(button.getAttribute("aria-label")).toBe("Label A");
+    currentLabel = "Label B";
+    const button2 = action.create(() => {});
+    expect(button2.getAttribute("aria-label")).toBe("Label B");
+  });
 });

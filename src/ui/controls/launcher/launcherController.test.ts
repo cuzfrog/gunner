@@ -175,4 +175,17 @@ describe("LauncherController", () => {
     controller.closeAmmoPopup();
     expect(getFake(document, "ship-a-launcher-ammo-trigger").getAttribute("aria-expanded")).toBe("false");
   });
+
+  test("class selector renders translated launcher class labels", () => {
+    const { document, controller, i18n } = buildLauncher();
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    const classOptions = getFake(document, "ship-a-launcher-class-options");
+    const buttons = classOptions.children as unknown as FakeElement[];
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const button of buttons) {
+      const label = button.textContent;
+      expect(label).toMatch(/^label\.launcherClass\./);
+    }
+    expect(i18n.t).toHaveBeenCalledWith("label.launcherClass.light");
+  });
 });

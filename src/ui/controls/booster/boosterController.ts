@@ -148,7 +148,7 @@ export class BoosterControllerImpl implements BoosterController {
     this.updateSummary(side);
     const rowContainer = document.createElement("div");
     this.renderComputers(side, state, rowContainer);
-    const rows = Array.from(rowContainer.children) as unknown as (Element | DocumentFragment)[];
+    const rows = Array.from(rowContainer.children);
     const block = this.sectionBlock.create(this.i18n.t("label.booster.computer"), rows);
     section.appendChild(block);
   }

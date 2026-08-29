@@ -158,6 +158,7 @@ describe("BoosterController", () => {
     const popup = scriptPopupFor(section);
     expect(popup).toBeDefined();
     expect(popup?.parent).toBe(section);
+    expect(popup?.id).toBe("ship-a-booster-script-popup");
     expect(popupGroup.register).toHaveBeenCalled();
   });
 

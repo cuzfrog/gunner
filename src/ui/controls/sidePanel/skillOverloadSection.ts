@@ -38,8 +38,10 @@ export class SkillOverloadSection implements ISkillOverloadSection {
       shape: { buttonClass: "btn" },
     });
     this.popup = this.createSkillPopup();
-    this.els.skills.addEventListener("input", () => this.onSkillOrOverloadChange(true));
-    this.els.skillOptions.addEventListener("input", () => this.onSkillChoiceInput());
+    this.els.skills.addEventListener("input", () => {
+      this.onSkillOrOverloadChange(true);
+      this.onSkillChoiceInput();
+    });
     this.els.overload.addEventListener("change", () => this.onSkillOrOverloadChange(false));
     this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
     this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));

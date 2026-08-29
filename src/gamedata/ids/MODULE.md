@@ -3,16 +3,6 @@ sealed:
   - ids.ts
   - index.ts
 ---
-sealed:
-  - index.ts
-  - ids.test.ts
-  - ids.ts
----
-sealed:
-  - index.ts
-  - ids.test.ts
-  - ids.ts
----
 
 # ids
 

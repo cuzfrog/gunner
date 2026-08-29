@@ -169,7 +169,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.els.ammoTrigger.disabled = !hasLauncher;
     if (!hasLauncher) {
       this.ammoChip.render("-", undefined);
-      this.renderAttributesSummary(undefined);
+      this.attributesChip.render("-", undefined);
       this.renderClassSelector();
       return;
     }
@@ -186,10 +186,6 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
     this.renderAmmoList(launcher);
     this.renderClassSelector();
-  }
-
-  private renderAttributesSummary(launcher: ImportedLauncher | undefined): void {
-    this.attributesChip.render(launcher ? this.attributesSummaryText(launcher) : "-", launcher ? this.imageCatalog.itemIconUrl(launcher.moduleId) : undefined);
   }
 
   private attributesSummaryText(launcher: ImportedLauncher): string {
