@@ -14,6 +14,19 @@ const ALLOWED_ORPHAN = new Set<string>([
   "range-overlay-grappler",
   "range-overlay-scrambler",
   "range-overlay-disruptor",
+  // Astro components generate per-side class names from `prefix-${side}` at build time.
+  // The literal scanner sees only the prefix (ending with `-`, which is skipped); the
+  // full names appear only in dist/index.html which may not exist when the test runs in CI.
+  "combatant-portrait-ship-a",
+  "combatant-portrait-ship-b",
+  "portrait-image-ship-a",
+  "portrait-image-ship-b",
+  "result-side-a",
+  "result-side-b",
+  "side-panel-ship-a",
+  "side-panel-ship-b",
+  "popup-below",
+  "popup-above",
 ]);
 
 // Approved component / primitive prefixes. A class is valid if it equals one of these or starts with `<prefix>-`.
@@ -91,6 +104,48 @@ const APPROVED_PREFIXES = [
 
 type StringMap = Map<string, Set<string>>;
 
+function isApproved(className: string): boolean {
+  return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
+}
+
+function extractClassExpressions(text: string): string[] {
+  const expressions: string[] = [];
+  const pattern = /class=\{/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    const start = match.index + match[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < text.length && depth > 0) {
+      if (text[i] === "{") depth++;
+      else if (text[i] === "}") depth--;
+      i++;
+    }
+    if (depth === 0) expressions.push(text.slice(start, i - 1));
+  }
+  return expressions;
+}
+
+function extractFrontmatter(text: string): string | undefined {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  return match ? match[1] : undefined;
+}
+
+function extractFrontmatterClassStrings(frontmatter: string): Set<string> {
+  const tokens = new Set<string>();
+  for (const m of frontmatter.matchAll(/(?:const|let)\s+\w*class\w*\s*=\s*([\s\S]*?);/gi)) {
+    for (const t of extractStringLiteralTokens(m[1])) tokens.add(t);
+  }
+  for (const m of frontmatter.matchAll(/\.push\(\s*"([^"]*)"\s*\)/g)) {
+    for (const token of m[1].split(/\s+/)) if (token) tokens.add(token);
+  }
+  for (const m of frontmatter.matchAll(/\.push\(\s*`([^`]*)`\s*\)/g)) {
+    const cleaned = m[1].replace(/\$\{[^}]*\}/g, " ");
+    for (const token of cleaned.split(/\s+/)) if (token && !token.endsWith("-")) tokens.add(token);
+  }
+  return tokens;
+}
+
 async function astroClasses(): Promise<Set<string>> {
   const found = new Set<string>();
   const glob = new Bun.Glob(ASTRO_GLOB);
@@ -99,8 +154,15 @@ async function astroClasses(): Promise<Set<string>> {
     for (const m of text.matchAll(/class="([^"]*)"/g)) {
       for (const token of m[1].split(/\s+/)) if (token) found.add(token);
     }
-    for (const m of text.matchAll(/class=\{([^}]*)\}/g)) {
-      for (const t of extractStringLiteralTokens(m[1])) found.add(t);
+    for (const expr of extractClassExpressions(text)) {
+      for (const t of extractStringLiteralTokens(expr)) found.add(t);
+    }
+    for (const m of text.matchAll(/(?:extraClass|labelClass)\s*=\s*"([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
+    const frontmatter = extractFrontmatter(text);
+    if (frontmatter) {
+      for (const t of extractFrontmatterClassStrings(frontmatter)) found.add(t);
     }
   }
   if (await Bun.file("dist/index.html").exists()) {
@@ -243,10 +305,6 @@ test("every CSS class is referenced somewhere", async () => {
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
   expect(orphans).toEqual([]);
 });
-
-function isApproved(className: string): boolean {
-  return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
-}
 
 test("every CSS file starts with an @layer wrapper", async () => {
   const glob = new Bun.Glob(CSS_GLOB);
