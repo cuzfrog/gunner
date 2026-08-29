@@ -12,7 +12,7 @@ import { formatDistance, formatNumber, formatWithCommas } from "../controlsForma
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem } from "../shared";
+import { SelectableListImpl, type SelectableItem, createPopup } from "../shared";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
@@ -279,25 +279,25 @@ export class LauncherControllerImpl implements LauncherController {
   }
 
   private createAmmoPopup(): Popup {
-    const popup: Popup = {
-      open: () => { this.els.ammoPopup.hidden = false; this.openAmmoPopup(); },
-      close: () => { this.els.ammoPopup.hidden = true; this.closeAmmoPopup(); },
+    return createPopup({
+      popupEl: this.els.ammoPopup,
+      triggerEl: this.els.ammoTrigger,
+      fieldEl: this.els.ammoField,
+      onOpen: () => this.openAmmoPopup(),
+      onClose: () => this.closeAmmoPopup(),
       isOpen: () => this.ammoPopupOpen,
-      focusTrigger: () => this.els.ammoTrigger.focus(),
-      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.ammoField.contains(domTarget),
-    };
-    return popup;
+    });
   }
 
   private createAttributesPopup(): Popup {
-    const popup: Popup = {
-      open: () => { this.els.attributesPopup.hidden = false; this.attributesPopupOpen = true; this.els.attributesTrigger.setAttribute("aria-expanded", "true"); },
-      close: () => { this.els.attributesPopup.hidden = true; this.attributesPopupOpen = false; this.els.attributesTrigger.setAttribute("aria-expanded", "false"); },
+    return createPopup({
+      popupEl: this.els.attributesPopup,
+      triggerEl: this.els.attributesTrigger,
+      fieldEl: this.els.attributesField,
+      onOpen: () => { this.attributesPopupOpen = true; },
+      onClose: () => { this.attributesPopupOpen = false; },
       isOpen: () => this.attributesPopupOpen,
-      focusTrigger: () => this.els.attributesTrigger.focus(),
-      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.attributesField.contains(domTarget),
-    };
-    return popup;
+    });
   }
 }
 

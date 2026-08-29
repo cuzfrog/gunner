@@ -8,7 +8,7 @@ import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem } from "../shared";
+import { SelectableListImpl, type SelectableItem, IconActionImpl } from "../shared";
 import type { BoosterController, BoosterEls } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {
@@ -34,6 +34,7 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly scriptOptionList: SelectableListImpl;
+  private readonly gearAction: IconActionImpl;
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -46,6 +47,13 @@ export class BoosterControllerImpl implements BoosterController {
       itemClass: "ewar-script-option",
       nameClass: "",
       role: "menuitem",
+    });
+    this.gearAction = new IconActionImpl({
+      buttonClass: "ewar-script-gear btn icon-button",
+      iconSvg: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>',
+      title: "",
+      ariaHaspopup: "menu",
+      ariaExpanded: false,
     });
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
@@ -280,20 +288,11 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   private createScriptGear(side: Side, index: number, script: TurretScriptSpec | undefined, active: boolean): HTMLButtonElement {
-    const gear = document.createElement("button");
-    gear.type = "button";
-    gear.className = "ewar-script-gear btn icon-button";
+    const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
-    gear.setAttribute("aria-haspopup", "menu");
-    gear.setAttribute("aria-expanded", "false");
     gear.setAttribute("aria-controls", `${sideId(side)}-booster-script-popup`);
-    gear.innerHTML = (
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
-      '<use href="icons.svg#gear"></use></svg>'
-    );
     this.updateGearTitle(gear, script);
-    gear.disabled = !active;
-    gear.addEventListener("click", () => this.openScriptPopup(side, index, gear));
+    if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
 

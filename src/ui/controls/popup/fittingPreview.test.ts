@@ -28,6 +28,7 @@ class FakeElement {
   src = "";
   alt = "";
   type = "";
+  nodeType = 1;
   style: Record<string, string> = {};
   children: FakeElement[] = [];
   offsetParent: FakeElement | null = null;
@@ -67,6 +68,13 @@ class FakeElement {
   }
 
   appendChild(child: FakeElement): void {
+    if (child.nodeType === 11) {
+      for (const fragmentChild of child.children) {
+        this.children.push(fragmentChild);
+      }
+      child.children = [];
+      return;
+    }
     this.children.push(child);
   }
 }
@@ -77,6 +85,17 @@ function createDocument(): Document {
       const el = new FakeElement();
       el.tagName = tagName;
       return el as unknown as HTMLElement;
+    },
+    createDocumentFragment: () => {
+      const frag = new FakeElement();
+      frag.nodeType = 11;
+      return frag as unknown as DocumentFragment;
+    },
+    createTextNode: (text: string) => {
+      const node = new FakeElement();
+      node.textContent = text;
+      node.nodeType = 3;
+      return node as unknown as Text;
     },
   } as unknown as Document;
 }

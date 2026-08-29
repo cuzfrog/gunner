@@ -67,7 +67,6 @@ no-new-exports:
   - markup/MODULE.md
   - shared/selectableList.ts
   - shared/selectableList.test.ts
-  - shared/index.ts
   - shared/MODULE.md
 ---
 

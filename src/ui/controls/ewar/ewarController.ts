@@ -8,7 +8,7 @@ import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem } from "../shared";
+import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl } from "../shared";
 import type { EwarController, EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
@@ -39,6 +39,9 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly scriptOptionList: SelectableListImpl;
+  private readonly gearAction: IconActionImpl;
+  private readonly overloadAction: IconActionImpl;
+  private readonly sectionBlock: SectionBlockImpl;
 
   constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
@@ -54,6 +57,19 @@ export class EwarControllerImpl implements EwarController {
       iconClass: "ewar-script-icon",
       role: "menuitem",
     });
+    this.gearAction = new IconActionImpl({
+      buttonClass: "ewar-script-gear btn icon-button",
+      iconSvg: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>',
+      title: "",
+      ariaHaspopup: "menu",
+      ariaExpanded: false,
+    });
+    this.overloadAction = new IconActionImpl({
+      buttonClass: "ewar-overload-button btn icon-button",
+      iconSvg: '<svg class="overload-button-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>',
+      title: "",
+    });
+    this.sectionBlock = new SectionBlockImpl();
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
@@ -205,14 +221,11 @@ export class EwarControllerImpl implements EwarController {
     labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
     renderRows: (container: HTMLElement) => void,
   ): void {
-    const container = document.createElement("div");
-    container.className = "preview-section";
-    const label = document.createElement("div");
-    label.className = "preview-section-label";
-    label.textContent = this.i18n.t(labelKey);
-    container.appendChild(label);
-    renderRows(container);
-    parent.appendChild(container);
+    const rowContainer = document.createElement("div");
+    renderRows(rowContainer);
+    const rows = Array.from(rowContainer.children) as unknown as (Element | DocumentFragment)[];
+    const section = this.sectionBlock.create(this.i18n.t(labelKey), rows);
+    parent.appendChild(section);
   }
 
   private updateSummary(side: Side): void {
@@ -401,20 +414,11 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private createScriptGear(side: Side, index: number, script: DisruptionScriptSpec | undefined, active: boolean): HTMLButtonElement {
-    const gear = document.createElement("button");
-    gear.type = "button";
-    gear.className = "ewar-script-gear btn icon-button";
+    const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
-    gear.setAttribute("aria-haspopup", "menu");
-    gear.setAttribute("aria-expanded", "false");
     gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
-    gear.innerHTML = (
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
-      '<use href="icons.svg#gear"></use></svg>'
-    );
     this.updateGearTitle(gear, script);
-    gear.disabled = !active;
-    gear.addEventListener("click", () => this.openScriptPopup(side, index, gear));
+    if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
 
@@ -425,21 +429,13 @@ export class EwarControllerImpl implements EwarController {
     spec: { readonly moduleId: TypeId },
     onToggle: () => void,
   ): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-overload-button btn icon-button";
+    const label = `${this.i18n.t("label.overload")} ${this.moduleDisplayName(spec)}`;
+    const button = this.overloadAction.create(onToggle);
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
-    const label = `${this.i18n.t("label.overload")} ${this.moduleDisplayName(spec)}`;
-    button.title = label;
+    button.setAttribute("title", label);
     button.setAttribute("aria-label", label);
-    button.innerHTML = (
-      '<svg class="overload-button-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
-      '<use href="icons.svg#overload"></use></svg>'
-    );
-    button.disabled = !active;
-
-    button.addEventListener("click", onToggle);
+    if (!active) button.setAttribute("disabled", "");
     return button;
   }
 

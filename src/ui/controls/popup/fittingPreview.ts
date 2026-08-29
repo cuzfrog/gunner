@@ -1,6 +1,7 @@
 import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { IconActionImpl, SectionBlockImpl } from "../shared";
 
 export interface FittingPreview {
   show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string, onClose?: () => void): void;
@@ -79,13 +80,12 @@ function renderHeader(
 
   header.appendChild(titles);
 
-  const close = document.createElement("button");
-  close.type = "button";
-  close.className = "preview-close icon-button";
-  close.setAttribute("title", i18n.t("button.close"));
-  close.setAttribute("aria-label", i18n.t("button.close"));
-  close.innerHTML = CLOSE_ICON_SVG;
-  close.addEventListener("click", () => onClose?.());
+  const closeAction = new IconActionImpl({
+    buttonClass: "preview-close icon-button",
+    iconSvg: CLOSE_ICON_SVG,
+    title: i18n.t("button.close"),
+  });
+  const close = closeAction.create(() => onClose?.());
   header.appendChild(close);
   return header;
 }
@@ -95,18 +95,9 @@ const CLOSE_ICON_SVG =
   'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
 function renderSection(i18n: I18n, imageCatalog: ImageCatalog, fittingImport: FittingImport, section: FittingSection): HTMLElement {
-  const container = document.createElement("div");
-  container.className = "preview-section";
-
-  const label = document.createElement("div");
-  label.className = "preview-section-label";
-  label.textContent = i18n.t(`fitting.section.${section.kind}`);
-  container.appendChild(label);
-
-  for (const row of section.rows) {
-    container.appendChild(renderRow(i18n, imageCatalog, fittingImport, row));
-  }
-  return container;
+  const block = new SectionBlockImpl();
+  const rows = section.rows.map((row) => renderRow(i18n, imageCatalog, fittingImport, row));
+  return block.create(i18n.t(`fitting.section.${section.kind}`), rows);
 }
 
 function renderRow(

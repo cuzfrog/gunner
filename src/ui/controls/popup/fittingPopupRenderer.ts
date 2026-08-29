@@ -2,7 +2,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fi
 import type { I18n } from "../../i18n";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
-import { SelectableListImpl } from "../shared";
+import { SelectableListImpl, IconActionImpl } from "../shared";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side } from "../side";
@@ -34,6 +34,8 @@ export class FittingPopupRenderer {
   private readonly panel: FittingPopupHost;
   private readonly previews: FittingPreviewManager;
   private readonly fittingList: SelectableListImpl;
+  private readonly deleteAction: IconActionImpl;
+  private readonly eyeAction: IconActionImpl;
 
   constructor(deps: FittingPopupRendererDeps) {
     this.side = deps.side;
@@ -47,6 +49,17 @@ export class FittingPopupRenderer {
     this.fittingList = new SelectableListImpl({
       itemClass: "fitting-item",
       nameClass: "fitting-item-name",
+    });
+    this.deleteAction = new IconActionImpl({
+      buttonClass: "fitting-delete icon-button",
+      iconSvg: DELETE_ICON_SVG,
+      title: this.i18n.t("button.deleteFitting"),
+    });
+    this.eyeAction = new IconActionImpl({
+      buttonClass: "fitting-item-eye icon-button",
+      iconSvg: EYE_ICON_SVG,
+      title: this.i18n.t("button.fittingDetails"),
+      ariaPressed: false,
     });
   }
 
@@ -128,30 +141,13 @@ export class FittingPopupRenderer {
     li.className = "fitting-entry";
     li.setAttribute("role", "presentation");
     li.appendChild(item);
-    li.appendChild(this.createFittingItemEye(text));
+    const eye = this.eyeAction.create(() => this.previews.showInMenu(this.side, text, eye, eye));
+    li.appendChild(eye);
     if (onDelete) {
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "fitting-delete icon-button";
-      del.setAttribute("title", this.i18n.t("button.deleteFitting"));
-      del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
-      del.innerHTML = DELETE_ICON_SVG;
-      del.addEventListener("click", () => onDelete());
+      const del = this.deleteAction.create(() => onDelete());
       li.appendChild(del);
     }
     return li;
-  }
-
-  private createFittingItemEye(text: string): HTMLButtonElement {
-    const eye = document.createElement("button");
-    eye.type = "button";
-    eye.className = "fitting-item-eye icon-button";
-    eye.setAttribute("aria-pressed", "false");
-    eye.setAttribute("title", this.i18n.t("button.fittingDetails"));
-    eye.setAttribute("aria-label", this.i18n.t("button.fittingDetails"));
-    eye.innerHTML = EYE_ICON_SVG;
-    eye.addEventListener("click", () => this.previews.showInMenu(this.side, text, eye, eye));
-    return eye;
   }
 }
 
