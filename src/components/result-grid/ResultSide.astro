@@ -6,6 +6,23 @@ interface Props {
 }
 const { side } = Astro.props;
 const s = side;
+
+const SUPPORT_METRICS = [
+  { i18n: "result.nominalDps", text: "Nominal DPS", idSuffix: "nominal-dps", value: "-" },
+  { i18n: "result.application", text: "Application", idSuffix: "application", value: "-" },
+] as const;
+
+const TURRET_METRICS = [
+  { i18n: "result.hitChance", text: "Hit chance", idSuffix: "hit", value: "0%" },
+  { i18n: "result.trackingPenalty", text: "Tracking penalty", idSuffix: "track-pen", value: "0%" },
+  { i18n: "result.rangePenalty", text: "Range penalty", idSuffix: "range-pen", value: "0%" },
+] as const;
+
+const MISSILE_METRICS = [
+  { i18n: "result.timeToImpact", text: "Time to impact", idSuffix: "time-to-impact", value: "-" },
+  { i18n: "result.signatureFactor", text: "Sig. factor", idSuffix: "sig-factor", value: "-" },
+  { i18n: "result.velocityFactor", text: "Velocity factor", idSuffix: "velocity-factor", value: "-" },
+] as const;
 ---
 
 <div class={`result-side result-side-${s}`}>
@@ -14,41 +31,27 @@ const s = side;
     <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`}>-</span>
   </div>
   <div class="result-side-support">
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-nominal-dps-label-${s}`} data-i18n="result.nominalDps">Nominal DPS</span>
-      <span class="result-metric-value mono" id={`res-nominal-dps-${s}`}>-</span>
-    </div>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-application-label-${s}`} data-i18n="result.application">Application</span>
-      <span class="result-metric-value mono" id={`res-application-${s}`}>-</span>
-    </div>
+    {SUPPORT_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
   </div>
   <div class="result-side-weapon" id={`res-turret-cards-${s}`}>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-hit-label-${s}`} data-i18n="result.hitChance">Hit chance</span>
-      <span class="result-metric-value mono" id={`res-hit-${s}`}>0%</span>
-    </div>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-track-pen-label-${s}`} data-i18n="result.trackingPenalty">Tracking penalty</span>
-      <span class="result-metric-value mono" id={`res-track-pen-${s}`}>0%</span>
-    </div>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-range-pen-label-${s}`} data-i18n="result.rangePenalty">Range penalty</span>
-      <span class="result-metric-value mono" id={`res-range-pen-${s}`}>0%</span>
-    </div>
+    {TURRET_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
   </div>
   <div class="result-side-weapon" id={`res-missile-cards-${s}`} hidden>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-time-to-impact-label-${s}`} data-i18n="result.timeToImpact">Time to impact</span>
-      <span class="result-metric-value mono" id={`res-time-to-impact-${s}`}>-</span>
-    </div>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-sig-factor-label-${s}`} data-i18n="result.signatureFactor">Sig. factor</span>
-      <span class="result-metric-value mono" id={`res-sig-factor-${s}`}>-</span>
-    </div>
-    <div class="result-metric">
-      <span class="result-metric-label" id={`res-velocity-factor-label-${s}`} data-i18n="result.velocityFactor">Velocity factor</span>
-      <span class="result-metric-value mono" id={`res-velocity-factor-${s}`}>-</span>
-    </div>
+    {MISSILE_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
   </div>
 </div>

@@ -5,6 +5,17 @@ interface Props {
   readonly idPrefix: string;
 }
 const { idPrefix } = Astro.props;
+
+const TELEMETRY_ROWS = [
+  { i18n: "label.volleyDamage", text: "Volley", idSuffix: "launcher-volley-damage" },
+  { i18n: "label.rateOfFire", text: "ROF", idSuffix: "launcher-rate-of-fire" },
+  { i18n: "label.explosionRadius", text: "Exp. radius", idSuffix: "launcher-explosion-radius" },
+  { i18n: "label.explosionVelocity", text: "Exp. velocity", idSuffix: "launcher-explosion-velocity" },
+  { i18n: "label.damageReductionFactor", text: "DRF", idSuffix: "launcher-damage-reduction-factor" },
+  { i18n: "label.missileVelocity", text: "Missile velocity", idSuffix: "launcher-missile-velocity" },
+  { i18n: "label.flightTime", text: "Flight time", idSuffix: "launcher-flight-time" },
+  { i18n: "label.flightRange", text: "Flight range", idSuffix: "launcher-flight-range" },
+] as const;
 ---
 
 <div class="launcher-panel" id={`${idPrefix}-launcher-panel`} hidden>
@@ -28,38 +39,12 @@ const { idPrefix } = Astro.props;
       </span>
     </button>
     <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-attributes-popup`} hidden role="dialog" aria-modal="false">
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-volley-damage`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-rate-of-fire`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-explosion-radius`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-explosion-velocity`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.damageReductionFactor">DRF</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-damage-reduction-factor`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-missile-velocity`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-flight-time`}>-</span>
-      </div>
-      <div class="launcher-telemetry-row">
-        <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
-        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-flight-range`}>-</span>
-      </div>
+      {TELEMETRY_ROWS.map((row) => (
+        <div class="launcher-telemetry-row">
+          <span class="launcher-telemetry-label" data-i18n={row.i18n}>{row.text}</span>
+          <span class="launcher-telemetry-value mono" id={`${idPrefix}-${row.idSuffix}`}>-</span>
+        </div>
+      ))}
     </div>
   </div>
   <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
