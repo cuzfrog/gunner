@@ -22,8 +22,6 @@ function computeVelocityTerm(signatureTerm: number, missile: MissileSpec, target
   if (targetSpeed <= 0) return 1;
   if (missile.explosionVelocity <= 0) return 0;
   const ratio = (signatureTerm * missile.explosionVelocity) / targetSpeed;
-  const drfNorm = missile.damageReductionFactor > 0
-    ? Math.log(missile.damageReductionFactor) / Math.log(5.5)
-    : 1;
-  return ratio ** drfNorm;
+  const drf = missile.damageReductionFactor > 0 ? missile.damageReductionFactor : 1;
+  return ratio ** drf;
 }

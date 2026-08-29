@@ -55,14 +55,9 @@ export class MissileSkillModelImpl implements MissileSkillModel {
       cycleTime: launcher.rateOfFire * skillRofMultiplier * hullRofMultiplier,
       explosionRadius: missile.explosionRadius * skillExplosionRadiusMultiplier,
       explosionVelocity: missile.explosionVelocity * skillExplosionVelocityMultiplier,
-      damageReductionFactor: normalizedDamageReductionFactor(missile.damageReductionFactor),
+      damageReductionFactor: missile.damageReductionFactor,
       maxVelocity: missile.maxVelocity * skillMaxVelocityMultiplier,
       flightTime: missile.flightTime * skillFlightTimeMultiplier,
     };
   }
-}
-
-function normalizedDamageReductionFactor(drf: number): number {
-  if (drf > 0 && drf < 1) return 1 / drf;
-  return drf;
 }

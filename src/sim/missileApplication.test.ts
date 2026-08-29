@@ -9,7 +9,7 @@ const missile: MissileSpec = {
   launcherCount: 1,
   explosionRadius: 40,
   explosionVelocity: 170,
-  damageReductionFactor: 3.0,
+  damageReductionFactor: 0.604,
   maxVelocity: 3750,
   flightTime: 5,
   flightRange: 3750 * 5,
@@ -73,14 +73,13 @@ describe("MissileApplicationImpl", () => {
     expect(result.application).toBe(result.velocityTerm);
   });
 
-  test("drf exponent shape: application = min(1, S/E, (S/E * Ve/Vt)^drfNorm)", () => {
+  test("drf exponent shape: application = min(1, S/E, (S/E * Ve/Vt)^drf)", () => {
     const f = frame(1000, 340);
     const sigRadius = 40;
     const result = application.compute(f, missile, f.shipB, sigRadius);
     const sOverE = sigRadius / missile.explosionRadius;
     const veOverVt = missile.explosionVelocity / 340;
-    const drfNorm = Math.log(missile.damageReductionFactor) / Math.log(5.5);
-    const expected = Math.min(1, sOverE, (sOverE * veOverVt) ** drfNorm);
+    const expected = Math.min(1, sOverE, (sOverE * veOverVt) ** missile.damageReductionFactor);
     expect(result.application).toBeCloseTo(expected, 10);
   });
 
@@ -107,9 +106,8 @@ describe("MissileApplicationImpl", () => {
     const result = application.compute(f, missile, f.shipB, 20);
     const sOverE = 20 / 40;
     const veOverVt = 170 / 500;
-    const drfNorm = Math.log(missile.damageReductionFactor) / Math.log(5.5);
     const sigTerm = sOverE;
-    const velTerm = (sOverE * veOverVt) ** drfNorm;
+    const velTerm = (sOverE * veOverVt) ** missile.damageReductionFactor;
     const expected = Math.min(sigTerm, velTerm);
     expect(result.application).toBeCloseTo(expected, 10);
   });
