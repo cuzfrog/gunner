@@ -5,6 +5,7 @@ export interface ChoiceGroupOption {
   readonly label: string;
   readonly title?: string;
   readonly iconUrl?: string;
+  readonly valueText?: string;
   readonly disabled?: boolean;
 }
 
@@ -12,6 +13,7 @@ export interface ChoiceGroupShape {
   readonly buttonClass: string;
   readonly iconClass?: string;
   readonly labelClass?: string;
+  readonly valueClass?: string;
   readonly truncateButton?: boolean;
   readonly toggleNoneValue?: string;
 }
@@ -110,6 +112,9 @@ function buildChoiceButton(shape: ChoiceGroupShape, option: ChoiceGroupOption): 
       ? html`<span class=${shape.labelClass}>${option.label}</span>`
       : html`<span>${option.label}</span>`;
     children.push(labelSpan);
+    if (option.valueText !== undefined && shape.valueClass) {
+      children.push(html`<span class=${shape.valueClass}>${option.valueText}</span>`);
+    }
     const button = html`<button type="button" class=${classAttr} data-value=${option.value}>${children}</button>` as unknown as HTMLButtonElement;
     if (option.title) button.setAttribute("title", option.title);
     if (option.disabled) button.setAttribute("disabled", "");

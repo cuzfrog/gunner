@@ -68,7 +68,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.ammoChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
     this.classChoice = new ChoiceGroupImpl({
       group: deps.els.classOptions,
-      shape: { buttonClass: "btn", iconClass: "choice-icon", labelClass: "truncate" },
+      shape: { buttonClass: "btn", iconClass: "choice-icon", labelClass: "truncate", valueClass: "choice-value mono" },
     });
     this.els.classOptions.addEventListener("input", () => this.onClassChoiceInput());
     this.currentAmmoId = undefined;
@@ -189,13 +189,23 @@ export class LauncherControllerImpl implements LauncherController {
     const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) : undefined;
     const allowed = tier ? this.launcherClasses.classesForTiers([tier]) : this.launcherClasses.allClasses();
     const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
+    const t = (key: string): string => this.i18n.t(key);
     const options: ChoiceGroupOption[] = allowed.map((cls) => ({
       value: cls,
       label: this.i18n.t(`label.launcherClass.${cls}`),
       iconUrl: launcher ? this.imageCatalog.itemIconUrl(this.launcherClasses.representativeOf(cls)) : undefined,
+      valueText: `(${formatDistance(this.explosionRadiusForClass(cls), t)})`,
       disabled: !launcher,
     }));
     this.classChoice.render(options, currentClass ?? "");
+  }
+
+  private explosionRadiusForClass(cls: LauncherClass): number {
+    const launcherStats = this.fittingDb.launchers[this.launcherClasses.representativeOf(cls)];
+    if (!launcherStats) return 0;
+    const missileId = this.missileCatalog.usualForLauncher(launcherStats);
+    if (!missileId) return 0;
+    return this.fittingDb.missiles[missileId]?.explosionRadius ?? 0;
   }
 
   private onClassChoiceInput(): void {

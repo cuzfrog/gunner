@@ -13,12 +13,5 @@
   color: inherit;
 }
 
-.sigres-value {
-  font-size: 9px;
-  color: var(--text-dim);
-  flex-basis: 100%;
-  text-align: center;
-}
-
-.sigres-selector [aria-pressed="true"] .sigres-class, .sigres-selector .btn:hover:not(:disabled) .sigres-class, .sigres-selector [aria-pressed="true"] .sigres-value, .sigres-selector .btn:hover:not(:disabled) .sigres-value { color: inherit; }
+.sigres-selector [aria-pressed="true"] .sigres-class, .sigres-selector .btn:hover:not(:disabled) .sigres-class { color: inherit; }
 }

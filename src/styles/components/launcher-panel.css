@@ -12,6 +12,7 @@
 }
 
 .launcher-class-selector > .btn {
+  flex-wrap: wrap;
   font-size: 10px;
   padding: 2px 6px;
 }

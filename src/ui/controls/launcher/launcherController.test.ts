@@ -171,7 +171,7 @@ describe("LauncherController", () => {
     expect(getFake(document, "ship-a-launcher-ammo-trigger").getAttribute("aria-expanded")).toBe("false");
   });
 
-  test("class selector renders translated launcher class labels", () => {
+  test("class selector renders translated launcher class labels with explosion radius values", () => {
     const { document, controller, i18n } = buildLauncher();
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
     const classOptions = getFake(document, "ship-a-launcher-class-options");
@@ -181,6 +181,9 @@ describe("LauncherController", () => {
       const labelSpan = button.children.find((c) => c.className === "truncate");
       expect(labelSpan).toBeDefined();
       expect(labelSpan!.textContent).toMatch(/^label\.launcherClass\./);
+      const valueSpan = button.children.find((c) => c.className === "choice-value mono");
+      expect(valueSpan).toBeDefined();
+      expect(valueSpan!.textContent).toMatch(/^\(\d+ unit\.meter\)$/);
     }
     expect(i18n.t).toHaveBeenCalledWith("label.launcherClass.light");
   });

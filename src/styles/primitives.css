@@ -406,6 +406,16 @@ select.input-field:disabled {
   flex-shrink: 0;
 }
 
+.choice-value {
+  font-size: 9px;
+  color: var(--text-dim);
+  flex-basis: 100%;
+  text-align: center;
+}
+
+.segmented-control [aria-pressed="true"] .choice-value,
+.segmented-control .btn:hover:not(:disabled) .choice-value { color: inherit; }
+
 .segmented-control [aria-pressed="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
