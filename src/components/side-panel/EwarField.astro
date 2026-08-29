@@ -8,7 +8,7 @@ const { idPrefix } = Astro.props;
 <div class="form-field-group ewar-group" id={`${idPrefix}-ewar-field`}>
   <button type="button" id={`${idPrefix}-ewar-trigger`} class="trigger"
           aria-haspopup="dialog" aria-expanded="false" aria-controls={`${idPrefix}-ewar-popup`}
-          aria-describedby={`${idPrefix}-ewar-summary-row`} disabled>
+          aria-describedby={`${idPrefix}-ewar-summary-row`} data-i18n-aria-label="label.modules" disabled>
     <span class="ewar-label truncate" data-i18n="label.modules">Modules</span>
     <span class="ewar-summary-row" id={`${idPrefix}-ewar-summary-row`}>
       <span id={`${idPrefix}-ewar-summary`}></span>
@@ -16,7 +16,7 @@ const { idPrefix } = Astro.props;
     </span>
     <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
   </button>
-  <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-ewar-popup`} hidden role="dialog" aria-modal="false">
+  <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-ewar-popup`} hidden role="dialog" aria-modal="false" data-i18n-aria-label="label.modules">
     <div class="preview-section" id={`${idPrefix}-ewar-section`}></div>
     <div class="preview-section" id={`${idPrefix}-booster-section`} hidden></div>
   </div>

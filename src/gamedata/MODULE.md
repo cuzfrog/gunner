@@ -2,7 +2,9 @@
 no-new-exports:
   - cradle.ts
   - module.ts
+  - index.ts
 ---
+
 
 # gamedata
 

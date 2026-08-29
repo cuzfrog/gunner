@@ -101,6 +101,7 @@ export interface FittingImport {
   summarize(text: string): FittingSummary | undefined;
   canonicalEftText(text: string): string | undefined;
   itemNameForId(id: TypeId, language: ShipNameLanguage): string;
+  detectLanguageFromText(text: string): ShipNameLanguage | undefined;
 }
 
 export class FittingImportImpl implements FittingImport {
@@ -289,6 +290,12 @@ export class FittingImportImpl implements FittingImport {
       if (this.ships.findHullByName(document.hullName, language)) return language;
     }
     return undefined;
+  }
+
+  detectLanguageFromText(text: string): ShipNameLanguage | undefined {
+    const parsed = parseEft(text);
+    if (!parsed) return undefined;
+    return this.detectLanguage(parsed);
   }
 }
 

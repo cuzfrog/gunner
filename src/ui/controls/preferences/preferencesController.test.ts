@@ -220,7 +220,7 @@ function build() {
     shipBTurretController,
     events,
     rangeOverlayController,
-    itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true) },
+    itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
   });
   return { controller, els, i18n, popupGroup, settingsStore, events, rangeOverlayController, shipATurretController, shipBTurretController };
 }

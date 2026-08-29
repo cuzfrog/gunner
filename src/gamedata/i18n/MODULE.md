@@ -1,6 +1,3 @@
-sealed:
-  - index.ts
-  - language.ts
 ---
 sealed:
   - index.ts

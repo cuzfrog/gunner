@@ -125,6 +125,7 @@ export function buildLauncher(
     summarize: vi.fn(),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
+    detectLanguageFromText: vi.fn(() => undefined),
     ...options.fittingImport,
   });
   const missileCatalog = vi.mocked<MissileCatalog>({

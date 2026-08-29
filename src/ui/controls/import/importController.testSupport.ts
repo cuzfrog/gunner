@@ -141,6 +141,7 @@ export function buildImportController(document: Document) {
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
+    detectLanguageFromText: vi.fn(() => "en" as const),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),
@@ -180,6 +181,7 @@ export function buildImportController(document: Document) {
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
+    itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
   });
   return {
     controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets, launchers,

@@ -43,6 +43,7 @@ function createManager(options: {
     summarize: vi.fn(() => options.summarize ?? PREVIEW_SUMMARY),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
+    detectLanguageFromText: vi.fn(() => undefined),
   });
   const imageCatalog = vi.mocked<ImageCatalog>({ shipImageUrl: vi.fn((_shipId) => "images/ships/Rifter.webp"), itemIconUrl: vi.fn() });
   const i18n = vi.mocked<I18n>({

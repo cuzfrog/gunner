@@ -8,17 +8,40 @@ import { StaticPresetFitTexts } from "./presets";
 import { StaticShipProfileCatalog } from "./shipProfiles";
 import type { ShipNameLanguage } from "./i18n";
 
-export function registerGameDataModule<T extends GameDataCradle>(cradle: AwilixContainer<T>, onItemNamesLoaded: () => void = () => {}): void {
-  const onLoaded = (_language: ShipNameLanguage) => onItemNamesLoaded();
-  const catalog = new LazyItemNameCatalog(onLoaded);
-  const resolver = new LazyItemNameResolver(onLoaded);
+export function registerGameDataModule<T extends GameDataCradle>(cradle: AwilixContainer<T>, onItemNamesLoaded: () => void = noop): void {
+  const pendingLoads = new Map<ShipNameLanguage, number>();
+  const trackLoad = (language: ShipNameLanguage): void => {
+    const count = pendingLoads.get(language) ?? 0;
+    pendingLoads.set(language, count + 1);
+  };
+  const gateLoaded = (language: ShipNameLanguage): void => {
+    const count = pendingLoads.get(language);
+    if (count === undefined) return;
+    if (count <= 1) {
+      pendingLoads.delete(language);
+      onItemNamesLoaded();
+    } else {
+      pendingLoads.set(language, count - 1);
+    }
+  };
+  const catalog = new LazyItemNameCatalog(gateLoaded);
+  const resolver = new LazyItemNameResolver(gateLoaded);
   const loader: ItemNameLoader = {
     ensureLoaded(language: ShipNameLanguage) {
+      if (catalog.isLoaded(language) && resolver.isLoaded(language)) return;
+      if (!catalog.isLoaded(language)) trackLoad(language);
+      if (!resolver.isLoaded(language)) trackLoad(language);
       catalog.ensureLoaded(language);
       resolver.ensureLoaded(language);
     },
     isLoaded(language: ShipNameLanguage) {
       return catalog.isLoaded(language) && resolver.isLoaded(language);
+    },
+    load(language: ShipNameLanguage) {
+      if (catalog.isLoaded(language) && resolver.isLoaded(language)) return Promise.resolve();
+      if (!catalog.isLoaded(language)) trackLoad(language);
+      if (!resolver.isLoaded(language)) trackLoad(language);
+      return Promise.all([catalog.load(language), resolver.load(language)]).then(() => {});
     },
   };
   cradle.register({
@@ -32,3 +55,5 @@ export function registerGameDataModule<T extends GameDataCradle>(cradle: AwilixC
     presetFitTexts: asFunction(() => new StaticPresetFitTexts()).singleton(),
   });
 }
+
+function noop(): void {}

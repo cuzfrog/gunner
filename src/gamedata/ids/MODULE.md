@@ -1,7 +1,3 @@
-sealed:
-  - ids.test.ts
-  - ids.ts
-  - index.ts
 ---
 sealed:
   - ids.test.ts

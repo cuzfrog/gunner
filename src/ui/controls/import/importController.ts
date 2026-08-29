@@ -1,5 +1,6 @@
 import { ClipboardUnavailableError, type ClipboardProvider, type ProfileTextCodec, type SavedFittings } from "../../../appstate";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
+import type { ItemNameLoader } from "../../../gamedata";
 import { NEUTRAL_STAT_CONDITIONS } from "../controlsFormat";
 import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
@@ -29,6 +30,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly events: UiEvents;
+  private readonly itemNameLoader: ItemNameLoader;
   private readonly popupValue: Popup;
   private pendingImportText?: string;
   private importSidePopupOpen = false;
@@ -46,6 +48,7 @@ export class ImportControllerImpl implements ImportController {
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
+    itemNameLoader: ItemNameLoader;
   }) {
     this.clipboard = deps.clipboard;
     this.fittingImport = deps.fittingImport;
@@ -59,6 +62,7 @@ export class ImportControllerImpl implements ImportController {
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
+    this.itemNameLoader = deps.itemNameLoader;
     this.eftSideImporter = new EftSideImporter({
       shipASide: deps.shipASide,
       shipBSide: deps.shipBSide,
@@ -117,6 +121,8 @@ export class ImportControllerImpl implements ImportController {
     const panel = this.panel(side);
     panel.sections.paste.clearImportHintTimeout();
     const trimmed = text.trimStart();
+    const language = this.fittingImport.detectLanguageFromText(trimmed);
+    if (language) await this.itemNameLoader.load(language);
     if (this.profileTextImporter.isProfileText(trimmed)) {
       const fitting = this.profileTextImporter.fittingFromProfileText(side, trimmed);
       if (fitting === undefined) {
@@ -145,6 +151,8 @@ export class ImportControllerImpl implements ImportController {
       return;
     }
     const trimmed = text.trimStart();
+    const language = this.fittingImport.detectLanguageFromText(trimmed);
+    if (language) await this.itemNameLoader.load(language);
     if (this.profileTextImporter.isProfileText(trimmed)) {
       const settings = this.profileTextImporter.profileFromText(text);
       if (!settings) {
