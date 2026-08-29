@@ -6,6 +6,9 @@ no-new-exports:
   - canvas-frame/CanvasFrame.astro
   - canvas-frame/CanvasSettingsPopup.astro
   - controls/Icon.astro
+  - form/FormField.astro
+  - form/FormFieldRow.astro
+  - form/InputWithUnit.astro
   - profile-bar/ProfileBar.astro
   - result-grid/ResultGrid.astro
   - result-grid/ResultSide.astro

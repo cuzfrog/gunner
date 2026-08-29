@@ -1,0 +1,14 @@
+---
+interface Props {
+  readonly i18n?: string;
+  readonly text?: string;
+  readonly truncate?: boolean;
+}
+const { i18n, text, truncate = true } = Astro.props;
+const labelClass = truncate ? "field-label truncate" : "field-label";
+---
+
+<label class="form-field">
+  <span class={labelClass} data-i18n={i18n}>{text}</span>
+  <slot />
+</label>

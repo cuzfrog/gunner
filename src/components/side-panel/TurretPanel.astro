@@ -1,6 +1,9 @@
 ---
 import { DEFAULT_VALUES } from "../../ui/controls";
 import type { Side } from "../../ui/controls";
+import FormField from "../form/FormField.astro";
+import FormFieldRow from "../form/FormFieldRow.astro";
+import InputWithUnit from "../form/InputWithUnit.astro";
 
 interface Props {
   readonly idPrefix: string;
@@ -48,27 +51,16 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
       <button type="button" id={`${idPrefix}-tracking-unit-score`} data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
     </span>
   </span>
-  <span class="input-with-unit input-with-unit-has-effective">
-    <input type="number" class="input-field" id={`${idPrefix}-tracking`} value={tracking} step="any" min="0">
-    <span class="effective-value mono" id={`effective-${idPrefix}-tracking`}></span>
-  </span>
+  <InputWithUnit id={`${idPrefix}-tracking`} value={tracking} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-tracking`} />
 </label>
-<div class="form-field-row">
-  <label class="form-field">
-    <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
-    <span class="input-with-unit input-with-unit-has-effective">
-      <input type="number" class="input-field" id={`${idPrefix}-optimal`} value={optimal} step="any" min="0">
-      <span class="effective-value mono" id={`effective-${idPrefix}-optimal`}></span>
-    </span>
-  </label>
-  <label class="form-field">
-    <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
-    <span class="input-with-unit input-with-unit-has-effective">
-      <input type="number" class="input-field" id={`${idPrefix}-falloff`} value={falloff} step="any" min="0">
-      <span class="effective-value mono" id={`effective-${idPrefix}-falloff`}></span>
-    </span>
-  </label>
-</div>
+<FormFieldRow>
+  <FormField i18n="label.optimalRange" text="Optimal range">
+    <InputWithUnit id={`${idPrefix}-optimal`} value={optimal} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-optimal`} />
+  </FormField>
+  <FormField i18n="label.falloffRange" text="Falloff range">
+    <InputWithUnit id={`${idPrefix}-falloff`} value={falloff} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-falloff`} />
+  </FormField>
+</FormFieldRow>
 
 <div class="form-field-group ammo-group" id={`${idPrefix}-ammo-field`}>
   <button type="button" id={`${idPrefix}-ammo-trigger`} class="trigger"

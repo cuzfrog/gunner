@@ -1,0 +1,34 @@
+---
+interface Props {
+  readonly id: string;
+  readonly value?: string | number;
+  readonly min?: string | number;
+  readonly unit?: string;
+  readonly step?: string;
+  readonly extraClass?: string;
+  readonly effectiveId?: string;
+  readonly suffixId?: string;
+  readonly ariaLabel?: string;
+  readonly i18nAriaLabel?: string;
+}
+const {
+  id,
+  value,
+  min,
+  unit = "",
+  step = "any",
+  extraClass,
+  effectiveId,
+  suffixId,
+  ariaLabel,
+  i18nAriaLabel,
+} = Astro.props;
+const wrapperClass = extraClass ? `input-with-unit ${extraClass}` : "input-with-unit";
+---
+
+<span class={wrapperClass}>
+  <input type="number" class="input-field" id={id} value={value} step={step} min={min}
+    data-i18n-aria-label={i18nAriaLabel} aria-label={ariaLabel}>
+  {effectiveId && <span class="effective-value mono" id={effectiveId}></span>}
+  {unit && <span class="input-suffix mono" id={suffixId} aria-hidden="true">{unit}</span>}
+</span>

@@ -1,6 +1,7 @@
 ---
 import { DEFAULT_VALUES } from "../../ui/controls";
 import type { Side } from "../../ui/controls";
+import InputWithUnit from "../form/InputWithUnit.astro";
 
 interface Props {
   readonly idPrefix: string;
@@ -23,9 +24,6 @@ const speed = DEFAULT_VALUES[`${idPrefix}-speed`];
   <button type="button" id={`${idPrefix}-overload-button`} class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">
     <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
   </button>
-  <span class="input-with-unit input-with-unit-has-effective">
-    <input type="number" class="input-field" id={`${idPrefix}-speed`} value={speed} step="any" min="0" data-i18n-aria-label="label.maxSpeed" aria-label="Max speed">
-    <span class="effective-value mono" id={`effective-${idPrefix}-speed`}></span>
-  </span>
+  <InputWithUnit id={`${idPrefix}-speed`} value={speed} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-speed`} i18nAriaLabel="label.maxSpeed" ariaLabel="Max speed" />
   <input type="checkbox" id={`${idPrefix}-overload`} hidden checked>
 </div>
