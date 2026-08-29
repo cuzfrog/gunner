@@ -1,32 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gunner - EVE Tactic Simulator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Saira:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JFVYDV0Z8P"></script>
-<script>
-  if (location.hostname !== "localhost") {
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-JFVYDV0Z8P');
-  }
-</script>
-<body>
+---
+import Layout from "../layouts/Layout.astro";
+import pkg from "../../package.json";
+
+const version = pkg.version;
+---
+
+<Layout title="Gunner - EVE Tactic Simulator">
   <div class="app-container">
     <header class="app-header">
       <div class="app-header-left">
         <h1 class="app-title">Gunner</h1>
         <span class="app-subtitle" data-i18n="app.subtitle">EVE Online 2D tactical simulator</span>
-        <span class="app-version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v0.18.0</span>
+        <span class="app-version-text mono" id="app-version" data-i18n-aria-label="label.version" aria-label="Version">v{version}</span>
       </div>
       <div class="app-header-right">
         <nav class="app-lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="label.language">
@@ -997,7 +982,5 @@
   </div>
 
   <datalist id="hull-options"></datalist>
+</Layout>
 
-  <script type="module" src="./main.js"></script>
-</body>
-</html>

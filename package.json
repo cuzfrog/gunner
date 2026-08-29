@@ -4,24 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bun run scripts/build.ts",
+    "build": "astro build",
+    "dev": "astro dev",
+    "preview": "astro preview",
+    "postinstall": "astro sync",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "lint:css": "stylelint \"public/styles/**/*.css\"",
-
+    "test": "bun test src tests scripts",
+    "e2e": "playwright test",
+    "lint:css": "stylelint \"src/styles/**/*.css\"",
     "trace": "bun run scripts/sim-trace.ts",
-    "preview": "bun run scripts/preview.ts",
     "generate:icons": "bun run scripts/generate-icon-assets.ts",
     "generate:slots": "bun run scripts/generate-module-slots.ts",
-    "generate:name-i18n": "bun run scripts/generate-name-i18n.ts",
-    "generate:combatant-sections": "bun run scripts/generate-combatant-sections.ts",
-    "sync-html-version": "bun run scripts/sync-html-version.ts"
+    "generate:name-i18n": "bun run scripts/generate-name-i18n.ts"
   },
   "dependencies": {
     "awilix": "13.0.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@types/bun": "1.3.14",
+    "astro": "7.2.9",
     "stylelint": "17.14.1",
     "stylelint-config-standard": "40.0.0",
     "typescript": "7.0.2"

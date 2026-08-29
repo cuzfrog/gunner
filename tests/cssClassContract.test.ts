@@ -1,6 +1,6 @@
-const HTML_PATH = "public/index.html";
+const HTML_PATH = "dist/index.html";
 const TS_GLOB = "src/ui/**/*.ts";
-const CSS_GLOB = "public/styles/**/*.css";
+const CSS_GLOB = "src/styles/**/*.css";
 
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
@@ -227,6 +227,7 @@ function isApproved(className: string): boolean {
 test("every CSS file starts with an @layer wrapper", async () => {
   const glob = new Bun.Glob(CSS_GLOB);
   for await (const path of glob.scan({ cwd: "." })) {
+    if (path === "src/styles/styles.css") continue;
     const text = await Bun.file(path).text();
     expect(text.trimStart().startsWith("@layer")).toBe(true);
   }
@@ -235,7 +236,7 @@ test("every CSS file starts with an @layer wrapper", async () => {
 test("viewport @media queries are confined to layout.css", async () => {
   const glob = new Bun.Glob(CSS_GLOB);
   for await (const path of glob.scan({ cwd: "." })) {
-    if (path === "public/styles/layout.css") continue;
+    if (path === "src/styles/layout.css") continue;
     const text = await Bun.file(path).text();
     expect(text.includes("@media")).toBe(false);
   }

@@ -1,32 +1,42 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { toTypeId } from "../src/gamedata/ids";
 import { TYPE_ICON_FILES } from "../src/ui/icons/typeIconFiles";
 
 const DISTRIBUTION_DIRECTORY = "dist";
-const STYLES_LINK_PATTERN = /href="styles-[a-f0-9]{8}\.css"/;
-const SCRIPT_SRC_PATTERN = /src="\.\/main-[A-Za-z0-9_-]{8}\.js"/;
-const STYLES_FILE_PATTERN = /^styles-[a-f0-9]{8}\.css$/;
-const MAIN_FILE_PATTERN = /^main-[A-Za-z0-9_-]{8}\.js$/;
+const ASTRO_DIRECTORY = "_astro";
+const CSS_LINK_PATTERN = /href="\/_astro\/[^"]+\.css"/;
+const MODULE_SCRIPT_PATTERN = /src="\/_astro\/[^"]+\.js"/;
 
 describe("build", () => {
-  test("produces hashed main.js, hashed styles.css and updated index.html", async () => {
-    await import("./build");
+  beforeAll(() => {
+    if (!existsSync(DISTRIBUTION_DIRECTORY)) {
+      spawnSync("bun", ["run", "build"], { stdio: "inherit" });
+    }
+  });
 
+  test("produces hashed JS, hashed CSS and updated index.html", () => {
     const distFiles = readdirSync(DISTRIBUTION_DIRECTORY);
     const indexHtml = readFileSync(join(DISTRIBUTION_DIRECTORY, "index.html"), "utf-8");
 
-    const mainJs = distFiles.find((name) => MAIN_FILE_PATTERN.test(name));
-    const stylesCss = distFiles.find((name) => STYLES_FILE_PATTERN.test(name));
+    const astroDir = join(DISTRIBUTION_DIRECTORY, ASTRO_DIRECTORY);
+    const astroFiles = readdirSync(astroDir);
+    const jsFiles = astroFiles.filter((name) => name.endsWith(".js"));
+    const cssFiles = astroFiles.filter((name) => name.endsWith(".css"));
 
-    if (mainJs === undefined) throw new Error("No hashed main.js found in dist");
-    if (stylesCss === undefined) throw new Error("No hashed styles.css found in dist");
+    if (jsFiles.length === 0) throw new Error("No JS bundle found in dist/_astro");
+    if (cssFiles.length === 0) throw new Error("No CSS bundle found in dist/_astro");
 
-    expect(existsSync(join(DISTRIBUTION_DIRECTORY, mainJs))).toBe(true);
-    expect(existsSync(join(DISTRIBUTION_DIRECTORY, stylesCss))).toBe(true);
+    for (const js of jsFiles) {
+      expect(existsSync(join(astroDir, js))).toBe(true);
+    }
+    for (const css of cssFiles) {
+      expect(existsSync(join(astroDir, css))).toBe(true);
+    }
 
-    expect(indexHtml).toMatch(STYLES_LINK_PATTERN);
-    expect(indexHtml).toMatch(SCRIPT_SRC_PATTERN);
+    expect(indexHtml).toMatch(CSS_LINK_PATTERN);
+    expect(indexHtml).toMatch(MODULE_SCRIPT_PATTERN);
 
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "styles"))).toBe(false);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "styles.css"))).toBe(false);
@@ -34,7 +44,9 @@ describe("build", () => {
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "favicon.svg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "author-portrait.jpg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "corporation-emblem.png"))).toBe(true);
+    expect(existsSync(join(DISTRIBUTION_DIRECTORY, "icons.svg"))).toBe(true);
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", "ships", "Abaddon.webp"))).toBe(true);
+
     const hailIconFile = TYPE_ICON_FILES[toTypeId("12608")];
     if (hailIconFile === undefined) throw new Error("Hail S has no icon file");
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", hailIconFile))).toBe(true);
@@ -44,5 +56,14 @@ describe("build", () => {
     const waspIconFile = TYPE_ICON_FILES[toTypeId("1201")];
     if (waspIconFile === undefined) throw new Error("Wasp I has no icon file");
     expect(existsSync(join(DISTRIBUTION_DIRECTORY, "images", waspIconFile))).toBe(true);
+  });
+
+  test("JS bundle size is within +5% of the 2.58 MB baseline", () => {
+    const astroDir = join(DISTRIBUTION_DIRECTORY, ASTRO_DIRECTORY);
+    const jsFiles = readdirSync(astroDir).filter((name) => name.endsWith(".js"));
+    const totalJsSize = jsFiles.reduce((sum, name) => sum + statSync(join(astroDir, name)).size, 0);
+    const baseline = 2_576_913;
+    const limit = Math.ceil(baseline * 1.05);
+    expect(totalJsSize).toBeLessThanOrEqual(limit);
   });
 });
