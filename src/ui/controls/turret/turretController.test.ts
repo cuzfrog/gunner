@@ -347,7 +347,7 @@ describe("TurretController", () => {
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     buttonFor(document, "M").trigger("click");
-    expect(turretCatalog.resize).toHaveBeenCalledWith(TURRET, "M", 5);
+    expect(turretCatalog.resize).toHaveBeenCalledWith(TURRET, "M", 5, undefined);
     expect(controller.turret()).toBe(resizedTurret);
     expect(controller.ammoId()).toBe("21898" as TypeId);
     expect(emitConfigInvalidated).toHaveBeenCalled();

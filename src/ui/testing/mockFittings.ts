@@ -63,7 +63,7 @@ export function mockFittingImport(): FittingImport {
 const HAIL: TypeId = "12608" as TypeId;
 
 export function mockTurretCatalog(): TurretCatalog {
-  return { resize: vi.fn(() => undefined) };
+  return { resize: vi.fn(() => undefined), switchVariant: vi.fn(() => undefined) };
 }
 
 export function mockChargeCatalog(): ChargeCatalog {

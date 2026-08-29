@@ -74,17 +74,14 @@ export class PropulsionVariantSection {
     const propulsion = this.fittingImport.propulsionStatsById(id);
     const propulsionId = this.panel.sections.propulsion.currentPropulsionId();
     if (!profile || !propulsion || !propulsionId) return;
-    const module = this.panel.sections.propulsion.currentPropulsionModule();
-    const variants = module ? this.fittingImport.propulsionVariantNames(module) : [];
-    const variant = variants.find((v) => v.id === id);
-    const name = variant?.name ?? "";
+    const enName = this.fittingImport.itemNameForId(id, "en") ?? "";
     const fitted = this.panel.fittedHull;
     const updated: FittedHullSummary = {
       fittingName: fitted?.fittingName ?? "",
       fitted: fitted?.fitted ?? this.panel.sections.propulsion.nakedFitted(profile),
       propulsionId,
       propulsionModuleId: id,
-      propulsionName: name,
+      propulsionName: enName,
       propulsionKind: this.panel.sections.propulsion.currentPropulsionModule()?.kind,
       propulsion,
     };

@@ -8,6 +8,7 @@ import { applySkillMultipliers, sigResolutionClassFromChargeSize } from "./turre
 
 export interface TurretCatalog {
   resize(turret: ImportedTurret, target: SigResolutionClass, skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedTurret | undefined;
+  switchVariant(turret: ImportedTurret, targetModuleId: TypeId, skillLevel: SkillLevel): ImportedTurret | undefined;
 }
 
 interface TurretCatalogDeps {
@@ -45,6 +46,30 @@ export class TurretCatalogImpl implements TurretCatalog {
       chargeId,
       base,
       moduleId,
+      damageMultiplier: stats.damageMultiplier,
+      damagePerShot: stats.damageMultiplier * chargeDamage(this.db.charges[chargeId]),
+      cycleTime: stats.cycleTime,
+      turretCount: turret.turretCount,
+    };
+  }
+
+  switchVariant(turret: ImportedTurret, targetModuleId: TypeId, skillLevel: SkillLevel): ImportedTurret | undefined {
+    const stats = this.db.turrets[targetModuleId];
+    if (!stats) return undefined;
+    if (targetModuleId === turret.moduleId) return turret;
+    const target = sigResolutionClassFromChargeSize(stats.chargeSize);
+    const base = applySkillMultipliers(stats, target, skillLevel);
+    const chargeId = resolveCharge(this.chargeCatalog, turret.chargeId, stats);
+    const charge = this.db.charges[chargeId] ?? {};
+    return {
+      tracking: base.tracking * (charge.trackingMultiplier ?? 1),
+      sigResolutionClass: target,
+      optimal: base.optimal * (charge.rangeMultiplier ?? 1),
+      falloff: base.falloff * (charge.falloffMultiplier ?? 1),
+      chargeSize: stats.chargeSize,
+      chargeId,
+      base,
+      moduleId: targetModuleId,
       damageMultiplier: stats.damageMultiplier,
       damagePerShot: stats.damageMultiplier * chargeDamage(this.db.charges[chargeId]),
       cycleTime: stats.cycleTime,

@@ -61,6 +61,7 @@ export class TurretControllerImpl implements TurretController {
   private readonly simValueParser: SimValueParser;
   private selectedTurret?: ImportedTurret;
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
+  private readonly turretByFamilySigRes = new Map<string, { moduleId: TypeId; ammoId: TypeId }>();
   private cargoCharges: readonly CargoCharge[] = [];
   private currentAmmoId: TypeId;
   private skillLevel: SkillLevel = 5;
@@ -145,6 +146,7 @@ export class TurretControllerImpl implements TurretController {
     this.currentAmmoId = ammo;
     if (turret) {
       this.turretOverrides.clearTurret();
+      this.recordTurretForFamilySigRes(turret.moduleId, ammo);
       this.inputSet.set(turret);
     }
     this.render();
@@ -215,6 +217,7 @@ export class TurretControllerImpl implements TurretController {
     this.popupGroup.close(this.variantSection.popup);
     this.selectedTurret = undefined;
     this.cargoCharges = [];
+    this.turretByFamilySigRes.clear();
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.allExpanded = false;
     this.render();
@@ -251,12 +254,14 @@ export class TurretControllerImpl implements TurretController {
   private onSigResChange(): void {
     const sigRes = this.currentSigResClass();
     if (this.selectedTurret) {
-      const resized = this.turretCatalog.resize(this.selectedTurret, sigRes, this.skillLevel);
+      const remembered = this.turretByFamilySigRes.get(turretMemoryKey(this.gunFamilies.familyOf(this.selectedTurret.moduleId), sigRes));
+      const resized = this.turretCatalog.resize(this.selectedTurret, sigRes, this.skillLevel, remembered?.moduleId);
       if (resized) {
         this.selectedTurret = resized;
         this.currentAmmoId = resized.chargeId;
         this.cargoCharges = [];
         this.turretOverrides.clearTurret();
+        this.recordTurretForFamilySigRes(resized.moduleId, resized.chargeId);
         this.inputSet.set(resized);
         this.render();
         this.events.emitConfigInvalidated();
@@ -411,14 +416,24 @@ export class TurretControllerImpl implements TurretController {
   private onVariantSelect(moduleId: TypeId): void {
     const turret = this.selectedTurret;
     if (!turret) return;
-    const target = this.turretCatalog.resize(turret, this.currentSigResClass(), this.skillLevel, moduleId);
+    const target = this.turretCatalog.switchVariant(turret, moduleId, this.skillLevel);
     if (!target) return;
     this.selectedTurret = target;
     this.currentAmmoId = target.chargeId;
     this.turretOverrides.clearTurret();
+    this.recordTurretForFamilySigRes(target.moduleId, target.chargeId);
     this.inputSet.set(target);
     this.popupGroup.close(this.variantSection.popup);
     this.render();
     this.events.emitConfigInvalidated();
   }
+
+  private recordTurretForFamilySigRes(moduleId: TypeId, ammoId: TypeId): void {
+    const family = this.gunFamilies.familyOf(moduleId);
+    this.turretByFamilySigRes.set(turretMemoryKey(family, this.currentSigResClass()), { moduleId, ammoId });
+  }
+}
+
+function turretMemoryKey(family: string, sigRes: SigResolutionClass): string {
+  return `${family}:${sigRes}`;
 }

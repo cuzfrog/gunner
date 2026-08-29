@@ -138,4 +138,55 @@ describe("TurretCatalogImpl", () => {
     expect(resized!.moduleId).toBe(turretIdForName("Heavy Pulse Laser I"));
     expect(resized!.sigResolutionClass).toBe("M");
   });
+
+  test("resize uses preferredModuleId when provided", () => {
+    const small = makeTurret("200mm AutoCannon I", "EMP S");
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const resized = turretCatalog.resize(small, "S", 0, techIiId);
+    expect(resized).toBeDefined();
+    expect(resized!.moduleId).toBe(techIiId);
+  });
+});
+
+describe("TurretCatalogImpl.switchVariant", () => {
+  test("switches from Tech I to Tech II within the same family and size", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const result = turretCatalog.switchVariant(techI, techIiId, 0);
+    expect(result).toBeDefined();
+    expect(result!.moduleId).toBe(techIiId);
+    expect(result!.sigResolutionClass).toBe("S");
+    expect(result!.chargeSize).toBe(1);
+  });
+
+  test("returns the same turret when target module is the same", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const result = turretCatalog.switchVariant(techI, techI.moduleId, 0);
+    expect(result).toBe(techI);
+  });
+
+  test("returns undefined for an unknown target module id", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const result = turretCatalog.switchVariant(techI, toTypeId("999999"), 0);
+    expect(result).toBeUndefined();
+  });
+
+  test("preserves compatible charge when switching variants", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const result = turretCatalog.switchVariant(techI, techIiId, 0);
+    expect(result).toBeDefined();
+    expect(result!.chargeId).toBe(techI.chargeId);
+  });
+
+  test("recomputes stats with the target module's attributes", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const result = turretCatalog.switchVariant(techI, techIiId, 0);
+    const techIiStats = FITTING_DB.turrets[techIiId];
+    expect(result).toBeDefined();
+    expect(result!.base.optimal).toBeCloseTo(techIiStats.optimal, 6);
+    expect(result!.base.falloff).toBeCloseTo(techIiStats.falloff, 6);
+    expect(result!.cycleTime).toBe(techIiStats.cycleTime);
+  });
 });

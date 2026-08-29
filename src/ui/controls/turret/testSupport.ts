@@ -125,6 +125,7 @@ export function buildTurret(
   const resolver = new TurretStateResolver({ chargeCatalog, fittingImport });
   const turretCatalog = vi.mocked<TurretCatalog>({
     resize: vi.fn(() => undefined),
+    switchVariant: vi.fn(() => undefined),
     ...options.turretCatalog,
   });
   const events = new UiEventsImpl();
