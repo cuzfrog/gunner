@@ -163,6 +163,14 @@ describe("DomControls", () => {
     expect(updateActionBarState).toHaveBeenCalled();
   });
 
+  test("config invalidation triggers onConfigChange callback", () => {
+    const { controls, cradle } = buildDomControls();
+    const callbacks = mockCallbacks();
+    controls.setCallbacks(callbacks);
+    cradle.cradle.uiEvents.emitConfigInvalidated();
+    expect(callbacks.onConfigChange).toHaveBeenCalledTimes(1);
+  });
+
   test("callback routing", () => {
     const { document, controls } = buildDomControls();
     const callbacks = mockCallbacks();

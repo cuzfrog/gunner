@@ -98,6 +98,13 @@ const MISSILE_SIZE_SUFFIXES: readonly string[] = [
   "Light Missile", "XL Torpedo", "Torpedo", "Rocket",
 ] as const;
 
+const VARIANT_ALIASES: Readonly<Record<string, string>> = {
+  Rage: "Fury",
+  Javelin: "Precision",
+} as const;
+
+const VARIANT_NAMES: readonly string[] = ["Fury", "Precision", "Rage", "Javelin"];
+
 function _equivalentInGroups(
   missiles: Readonly<Record<string, MissileStats>>,
   missile: TypeId,
@@ -112,12 +119,34 @@ function _equivalentInGroups(
     if (!groupSet.has(candidate.chargeGroup)) continue;
     if (missileStem(candidate.name) === stem) return candidate.id;
   }
+  const base = baseStem(stem);
+  if (base !== stem) {
+    for (const candidate of Object.values(missiles)) {
+      if (!groupSet.has(candidate.chargeGroup)) continue;
+      if (missileStem(candidate.name) === base) return candidate.id;
+    }
+  }
   return undefined;
 }
 
 function missileStem(name: string): string | undefined {
   for (const suffix of MISSILE_SIZE_SUFFIXES) {
-    if (name.endsWith(suffix)) return name.slice(0, -suffix.length).trim();
+    if (!name.endsWith(suffix)) continue;
+    return normalizeVariant(name.slice(0, -suffix.length).trim());
   }
   return undefined;
+}
+
+function normalizeVariant(stem: string): string {
+  for (const [alias, canonical] of Object.entries(VARIANT_ALIASES)) {
+    if (stem.endsWith(alias)) return stem.slice(0, -alias.length) + canonical;
+  }
+  return stem;
+}
+
+function baseStem(stem: string): string {
+  for (const variant of VARIANT_NAMES) {
+    if (stem.endsWith(variant)) return stem.slice(0, -variant.length).trim();
+  }
+  return stem;
 }

@@ -122,5 +122,67 @@ describe("LauncherCatalog", () => {
       expect(result!.maxVelocity).toBeGreaterThan(0);
       expect(result!.flightTime).toBeGreaterThan(0);
     });
+
+    test("rocket -> light -> rocket round-trip preserves damage type", () => {
+      const catalog = createCatalog();
+      const rocketId = findLauncherId(507);
+      const rageRocketId = findMissileIdByName("Mjolnir Rage Rocket");
+      const launcher = makeLauncher(rocketId, rageRocketId, 4);
+      const originalMissile = FITTING_DB.missiles[launcher.chargeId];
+
+      const lightLauncher = catalog.switchClass(launcher, "light", [], 5)!;
+      const lightMissile = FITTING_DB.missiles[lightLauncher.chargeId];
+      expect(lightMissile.damageType).toBe(originalMissile.damageType);
+
+      const rocketLauncher = catalog.switchClass(lightLauncher, "rocket", [], 5)!;
+      const rocketMissile = FITTING_DB.missiles[rocketLauncher.chargeId];
+      expect(rocketMissile.damageType).toBe(originalMissile.damageType);
+    });
+
+    test("light -> rocket -> light round-trip preserves damage type", () => {
+      const catalog = createCatalog();
+      const lightId = findLauncherId(509);
+      const scourgeLightId = findMissileIdByName("Scourge Light Missile");
+      const launcher = makeLauncher(lightId, scourgeLightId, 3);
+      const originalMissile = FITTING_DB.missiles[launcher.chargeId];
+
+      const rocketLauncher = catalog.switchClass(launcher, "rocket", [], 5)!;
+      const rocketMissile = FITTING_DB.missiles[rocketLauncher.chargeId];
+      expect(rocketMissile.damageType).toBe(originalMissile.damageType);
+
+      const lightLauncher = catalog.switchClass(rocketLauncher, "light", [], 5)!;
+      const lightMissile = FITTING_DB.missiles[lightLauncher.chargeId];
+      expect(lightMissile.damageType).toBe(originalMissile.damageType);
+    });
+
+    test("rage rocket -> basic light missile when fury unavailable in tech I launcher", () => {
+      const catalog = createCatalog();
+      const rocketId = findLauncherId(507);
+      const rageRocketId = findMissileIdByName("Mjolnir Rage Rocket");
+      const launcher = makeLauncher(rocketId, rageRocketId, 2);
+
+      const lightLauncher = catalog.switchClass(launcher, "light", [], 5)!;
+      const lightMissile = FITTING_DB.missiles[lightLauncher.chargeId];
+      expect(lightMissile.damageType).toBe("em");
+      expect(lightMissile.name).toBe("Mjolnir Light Missile");
+    });
+
+    test("javelin rocket -> basic light missile when precision unavailable in tech I launcher", () => {
+      const catalog = createCatalog();
+      const rocketId = findLauncherId(507);
+      const javelinRocketId = findMissileIdByName("Inferno Javelin Rocket");
+      const launcher = makeLauncher(rocketId, javelinRocketId, 2);
+
+      const lightLauncher = catalog.switchClass(launcher, "light", [], 5)!;
+      const lightMissile = FITTING_DB.missiles[lightLauncher.chargeId];
+      expect(lightMissile.damageType).toBe("thermal");
+      expect(lightMissile.name).toBe("Inferno Light Missile");
+    });
   });
 });
+
+function findMissileIdByName(name: string): string {
+  const entry = Object.entries(FITTING_DB.missiles).find(([, s]) => s.name === name);
+  if (!entry) throw new Error(`No missile named ${name}`);
+  return entry[0];
+}

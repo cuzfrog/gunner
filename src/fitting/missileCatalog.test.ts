@@ -163,4 +163,49 @@ describe("MissileCatalogImpl", () => {
     const result = cat.equivalentInGroups(infernoRocket.id, [384, 394]);
     expect(result).toBe(INFERNO_LIGHT.id);
   });
+
+  test("equivalentInGroups maps Rage rocket to Fury light missile via variant alias", () => {
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
+      missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
+      launchers,
+    };
+    const cat = new MissileCatalogImpl({ fittingDb: dbWithRage, missileSkillModel: skillModel });
+    const result = cat.equivalentInGroups(scourgeRageRocket.id, [384, 394]);
+    expect(result).toBe(SCOURGE_FURY_LIGHT.id);
+  });
+
+  test("equivalentInGroups maps Javelin rocket to Precision light missile via variant alias", () => {
+    const scourgeJavelinRocket: MissileStats = { damage: 30, damageType: "kinetic", explosionRadius: 15, explosionVelocity: 300, damageReductionFactor: 1.2, maxVelocity: 9000, flightTime: 4, launcherGroup: 507, chargeGroup: 387, id: toTypeId("311"), name: "Scourge Javelin Rocket" };
+    const scourgePrecisionLight: MissileStats = { damage: 100, damageType: "kinetic", explosionRadius: 35, explosionVelocity: 250, damageReductionFactor: 1.8, maxVelocity: 5000, flightTime: 7, launcherGroup: 509, chargeGroup: 394, id: toTypeId("262"), name: "Scourge Precision Light Missile" };
+    const dbWithJavelin: Pick<FittingDb, "missiles" | "launchers"> = {
+      missiles: { ...missiles, [String(scourgeJavelinRocket.id)]: scourgeJavelinRocket, [String(scourgePrecisionLight.id)]: scourgePrecisionLight },
+      launchers,
+    };
+    const cat = new MissileCatalogImpl({ fittingDb: dbWithJavelin, missileSkillModel: skillModel });
+    const result = cat.equivalentInGroups(scourgeJavelinRocket.id, [384, 394]);
+    expect(result).toBe(scourgePrecisionLight.id);
+  });
+
+  test("equivalentInGroups maps Fury light missile back to Rage rocket via variant alias", () => {
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
+      missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
+      launchers,
+    };
+    const cat = new MissileCatalogImpl({ fittingDb: dbWithRage, missileSkillModel: skillModel });
+    const result = cat.equivalentInGroups(SCOURGE_FURY_LIGHT.id, [387]);
+    expect(result).toBe(scourgeRageRocket.id);
+  });
+
+  test("equivalentInGroups falls back to base stem when variant is unavailable in target groups", () => {
+    const scourgeRageRocket: MissileStats = { damage: 60, damageType: "kinetic", explosionRadius: 20, explosionVelocity: 180, damageReductionFactor: 1.8, maxVelocity: 6750, flightTime: 2, launcherGroup: 507, chargeGroup: 387, id: toTypeId("310"), name: "Scourge Rage Rocket" };
+    const dbWithRage: Pick<FittingDb, "missiles" | "launchers"> = {
+      missiles: { ...missiles, [String(scourgeRageRocket.id)]: scourgeRageRocket },
+      launchers,
+    };
+    const cat = new MissileCatalogImpl({ fittingDb: dbWithRage, missileSkillModel: skillModel });
+    const result = cat.equivalentInGroups(scourgeRageRocket.id, [384]);
+    expect(result).toBe(SCOURGE_LIGHT.id);
+  });
 });
