@@ -38,6 +38,20 @@ describe("LauncherController", () => {
     expect(controller.launcher()).toBeUndefined();
   });
 
+  test("triggers are disabled when no launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-attributes-trigger").disabled).toBe(true);
+    expect(getFake(document, "ship-a-launcher-ammo-trigger").disabled).toBe(true);
+  });
+
+  test("triggers are enabled when a launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-attributes-trigger").disabled).toBe(false);
+    expect(getFake(document, "ship-a-launcher-ammo-trigger").disabled).toBe(false);
+  });
+
   test("clear resets the launcher", () => {
     const { controller, popupGroup } = buildLauncher();
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });

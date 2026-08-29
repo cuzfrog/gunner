@@ -131,8 +131,6 @@ export class DomControls implements Controls, DomControlsHost {
     this.popupGroup.register(this.shareController.popup);
     this.popupGroup.register(this.turretControllers.shipA.popup);
     this.popupGroup.register(this.turretControllers.shipB.popup);
-    this.popupGroup.register(this.launcherControllers.shipA.popup);
-    this.popupGroup.register(this.launcherControllers.shipB.popup);
     this.popupGroup.register(this.preferencesController.popup);
     this.hullDatalist.populate();
     this.shipASide.sections.skill.renderSkillOptions();

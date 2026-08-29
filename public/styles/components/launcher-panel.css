@@ -16,6 +16,10 @@
   padding: 2px 6px;
 }
 
+.launcher-attributes-group {
+  position: relative;
+}
+
 .launcher-attributes-trigger {
   display: flex;
   align-items: center;
@@ -48,7 +52,7 @@
   position: absolute;
   z-index: var(--z-popup, 100);
   min-width: 200px;
-  background: var(--surface-panel);
+  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
   padding: 6px 8px;
   display: flex;
@@ -87,7 +91,7 @@
   z-index: var(--z-popup, 100);
   max-height: 240px;
   overflow-y: auto;
-  background: var(--surface-panel);
+  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
   padding: 4px;
 }
@@ -116,11 +120,11 @@
 }
 
 .launcher-ammo-item.is-selected {
-  background: var(--surface-active, rgba(255, 255, 255, 0.08));
+  background: var(--bg-inset);
 }
 
 .launcher-ammo-item:hover {
-  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+  background: var(--bg-inset);
 }
 
 .launcher-ammo-icon {

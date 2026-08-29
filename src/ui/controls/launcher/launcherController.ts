@@ -56,6 +56,8 @@ export class LauncherControllerImpl implements LauncherController {
     this.currentAmmoId = undefined;
     this.ammoPopupValue = this.createAmmoPopup();
     this.attributesPopupValue = this.createAttributesPopup();
+    this.popupGroup.register(this.ammoPopupValue);
+    this.popupGroup.register(this.attributesPopupValue);
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ammoPopupValue));
     this.els.attributesTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attributesPopupValue));
     this.events.onLanguageChanged(() => this.render());
@@ -141,9 +143,12 @@ export class LauncherControllerImpl implements LauncherController {
   render(): void {
     const launcher = this.selectedLauncher;
     const hasLauncher = launcher !== undefined;
+    this.els.attributesTrigger.disabled = !hasLauncher;
+    this.els.ammoTrigger.disabled = !hasLauncher;
     if (!hasLauncher) {
       this.renderClassSelector();
       this.renderAttributesSummary(undefined);
+      setText(this.els.ammoSummary, "-");
       return;
     }
     const t = (key: string): string => this.i18n.t(key);
