@@ -11,9 +11,7 @@ const MODULE_SCRIPT_PATTERN = /src="\/_astro\/[^"]+\.js"/;
 
 describe("build", () => {
   beforeAll(() => {
-    if (!existsSync(DISTRIBUTION_DIRECTORY)) {
-      spawnSync("bun", ["run", "build"], { stdio: "inherit" });
-    }
+    spawnSync("bun", ["run", "build"], { stdio: "inherit" });
   });
 
   test("produces hashed JS, hashed CSS and updated index.html", () => {

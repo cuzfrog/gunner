@@ -8,10 +8,10 @@ export default defineConfig({
     baseURL: "http://localhost:4321",
   },
   webServer: {
-    command: "bun run preview",
+    command: "bun run build && bun run preview",
     port: 4321,
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
   },
   projects: [
     {

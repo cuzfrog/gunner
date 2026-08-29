@@ -13,9 +13,7 @@ interface Baseline {
 }
 
 function ensureBuild(): void {
-  if (!existsSync(DIST_HTML)) {
-    spawnSync("bun", ["run", "build"], { stdio: "inherit" });
-  }
+  spawnSync("bun", ["run", "build"], { stdio: "inherit" });
 }
 
 function extractIds(html: string): Map<string, number> {

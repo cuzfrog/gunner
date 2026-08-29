@@ -2,6 +2,7 @@ import type { AstroIntegration } from "astro";
 import type { ServerResponse } from "node:http";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, extname, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
 import { TYPE_ICON_FILES } from "../../src/ui/icons/typeIconFiles";
 
 const SHIP_IMAGES_SOURCE = "data/ship-images";
@@ -50,8 +51,8 @@ export function copyGameAssets(): AstroIntegration {
   return {
     name: "copy-game-assets",
     hooks: {
-      "astro:build:done": ({ logger }) => {
-        copyAllAssets("dist");
+      "astro:build:done": ({ dir, logger }) => {
+        copyAllAssets(fileURLToPath(dir));
         logger.info("Copied game assets (ship images + type icons)");
       },
       "astro:server:setup": ({ server }) => {
