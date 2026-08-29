@@ -84,10 +84,10 @@ function buildSwitch(side: Side = "shipA"): { switch: WeaponSystemSwitch; docume
 }
 
 describe("WeaponSystemSwitchImpl", () => {
-  test("initial state defaults to turret kind with both panels hidden when no weapon is fitted", () => {
+  test("initial state defaults to turret kind, shows turret panel even when no weapon is fitted", () => {
     const { switch: sw, document } = buildSwitch();
     expect(sw.activeKind()).toBe("turret");
-    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
 
@@ -130,15 +130,6 @@ describe("WeaponSystemSwitchImpl", () => {
     expect(sw.activeKind()).toBe("turret");
   });
 
-  test("falls back to missile when turret becomes unavailable and only launcher is fitted", () => {
-    const { switch: sw, turretController, launcherController } = buildSwitch();
-    turretController.turret.mockReturnValue(undefined);
-    launcherController.launcher.mockReturnValue({} as never);
-    sw.setActiveKind("turret");
-    sw.refresh();
-    expect(sw.activeKind()).toBe("missile");
-  });
-
   test("turret-only fit shows turret panel, hides launcher panel", () => {
     const { switch: sw, document, turretController } = buildSwitch();
     turretController.turret.mockReturnValue({} as ImportedTurret);
@@ -147,11 +138,11 @@ describe("WeaponSystemSwitchImpl", () => {
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
 
-  test("launcher-only fit shows launcher panel, hides turret panel", () => {
+  test("launcher-only fit with missile kind shows launcher panel, hides turret panel", () => {
     const { switch: sw, document, turretController, launcherController } = buildSwitch();
     turretController.turret.mockReturnValue(undefined);
     launcherController.launcher.mockReturnValue({} as never);
-    sw.refresh();
+    sw.setActiveKind("missile");
     expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(false);
     expect(sw.activeKind()).toBe("missile");

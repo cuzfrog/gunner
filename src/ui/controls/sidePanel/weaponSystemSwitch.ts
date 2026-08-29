@@ -66,17 +66,11 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
   refresh(): void {
     const hasTurret = this.turretController.turret() !== undefined;
     const hasLauncher = this.launcherController.launcher() !== undefined;
-    if (!hasTurret && this.kind === "turret") {
-      this.kind = hasLauncher ? "missile" : "turret";
-    }
-    if (!hasLauncher && this.kind === "missile") {
-      this.kind = hasTurret ? "turret" : "missile";
-    }
     this.turretButton.disabled = !hasTurret;
     this.missileButton.disabled = !hasLauncher;
     this.droneButton.disabled = true;
-    this.turretPanel.hidden = !hasTurret || this.kind !== "turret";
-    this.launcherPanel.hidden = !hasLauncher || this.kind !== "missile";
+    this.turretPanel.hidden = this.kind !== "turret";
+    this.launcherPanel.hidden = this.kind !== "missile";
     this.turretButton.setAttribute("aria-pressed", String(this.kind === "turret"));
     this.missileButton.setAttribute("aria-pressed", String(this.kind === "missile"));
   }
