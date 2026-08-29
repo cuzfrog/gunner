@@ -62,6 +62,10 @@ no-new-exports:
   - module.test.ts
   - elementContract.ts
   - index.ts
+  - markup/html.ts
+  - markup/html.test.ts
+  - markup/index.ts
+  - markup/MODULE.md
 ---
 
 

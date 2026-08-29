@@ -38,7 +38,15 @@ export function fakeDocument(): Document {
     createDocumentFragment: () => {
       const fragment = new FakeElement();
       fragment.tagName = "DOCUMENT_FRAGMENT";
+      fragment.nodeType = 11;
       return fragment as unknown as DocumentFragment;
+    },
+    createTextNode: (data: string) => {
+      const node = new FakeElement();
+      node.tagName = "#text";
+      node.textContent = data;
+      node.nodeType = 3;
+      return node as unknown as Text;
     },
     addEventListener: (event: string, handler: (event?: unknown) => void) => { (docHandlers[event] ??= []).push(handler); },
     removeEventListener: (event: string, handler: (event?: unknown) => void) => { const hs = docHandlers[event]; if (hs) docHandlers[event] = hs.filter((h) => h !== handler); },

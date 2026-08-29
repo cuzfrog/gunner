@@ -10,6 +10,7 @@ export class FakeElement {
   id = "";
   disabled = false;
   isConnected = true;
+  nodeType = 1;
   dataset: Record<string, string> = {};
   children: FakeElement[] = [];
   parent: FakeElement | null = null;
@@ -38,12 +39,32 @@ export class FakeElement {
     this.children = [];
   }
 
-  get firstElementChild(): FakeElement | null { return this.children[0] ?? null; }
-  get childElementCount(): number { return this.children.length; }
+  get firstElementChild(): FakeElement | null { return this.children.find((c) => c.tagName !== "#text") ?? null; }
+  get childElementCount(): number { return this.children.filter((c) => c.tagName !== "#text").length; }
   get options(): FakeElement[] { return this.children; }
   getAttribute(name: string): string | null { return this.attributes[name] ?? null; }
-  setAttribute(name: string, value: string): void { this.attributes[name] = value; }
-  removeAttribute(name: string): void { delete this.attributes[name]; }
+  setAttribute(name: string, value: string): void {
+    this.attributes[name] = value;
+    if (name === "class") this.className = value;
+    else if (name === "id") this.id = value;
+    else if (name === "hidden") this.hidden = true;
+    else if (name === "disabled") this.disabled = true;
+    else if (name === "checked") this.checked = true;
+    else if (name === "title") this.title = value;
+    else if (name === "src") this.src = value;
+    else if (name.startsWith("data-")) this.dataset[name.slice(5)] = value;
+  }
+  removeAttribute(name: string): void {
+    delete this.attributes[name];
+    if (name === "class") this.className = "";
+    else if (name === "id") this.id = "";
+    else if (name === "hidden") this.hidden = false;
+    else if (name === "disabled") this.disabled = false;
+    else if (name === "checked") this.checked = false;
+    else if (name === "title") this.title = "";
+    else if (name === "src") this.src = "";
+    else if (name.startsWith("data-")) delete this.dataset[name.slice(5)];
+  }
   addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
