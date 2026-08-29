@@ -79,6 +79,7 @@ export class EwarControllerImpl implements EwarController {
     this.els.shipAEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipA));
     this.els.shipBEwarTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popups.shipB));
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.ewar));
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 

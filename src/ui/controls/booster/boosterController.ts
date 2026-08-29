@@ -59,6 +59,7 @@ export class BoosterControllerImpl implements BoosterController {
     this.popupGroup.register(this.scriptPopups.shipA);
     this.popupGroup.register(this.scriptPopups.shipB);
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 

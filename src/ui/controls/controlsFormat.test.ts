@@ -5,7 +5,6 @@ import type { PropulsionId, PropulsionModule } from "../../ships";
 import type { I18n } from "../i18n";
 import {
   chargeStatSuffix,
-  escapeHtml,
   formatDistance,
   formatMultiplier,
   formatNumber,
@@ -119,11 +118,5 @@ describe("booster script stat suffix", () => {
       falloffMultiplier: 2,
     };
     expect(boosterScriptStatSuffix(script)).toBe("track x0 · optimal x2 · falloff x2");
-  });
-});
-
-describe("escapeHtml", () => {
-  test("escapes special html characters", () => {
-    expect(escapeHtml("<tag> & \"quote\" 'apostrophe'")).toBe("&lt;tag&gt; &amp; &quot;quote&quot; &#39;apostrophe&#39;");
   });
 });

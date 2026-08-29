@@ -1,6 +1,6 @@
 import type { I18n } from "../../i18n";
 import type { TimeoutId, Timer } from "../../timer";
-import { escapeHtml } from "../controlsFormat";
+import { html } from "../markup";
 import type { Popup } from "../popup";
 import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
@@ -47,7 +47,9 @@ export class PasteImportSection implements IPasteImportSection {
     this.clearImportHintTimeout();
     const element = this.els.fittingName;
     element.classList.toggle("is-error", isError);
-    element.innerHTML = `<span class="hull-fitting-name-value truncate">${escapeHtml(this.i18n.t(key))}</span>`;
+    element.innerHTML = "";
+    const span = html`<span class="hull-fitting-name-value truncate">${this.i18n.t(key)}</span>` as unknown as HTMLElement;
+    element.appendChild(span);
     element.hidden = false;
     this.importHintTimeout = this.timer.setTimeout(() => {
       this.importHintTimeout = undefined;

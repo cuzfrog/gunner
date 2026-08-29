@@ -173,9 +173,6 @@ export class DomControls implements Controls, DomControlsHost {
 
   private onLanguageChanged(): void {
     this.deps.i18n.translateDocument();
-    this.ewarController.render();
-    this.boosterController.render();
-    this.rangeOverlayController.render();
     this.setPlaying(this.playing);
     this.notifyDisplayChange();
   }

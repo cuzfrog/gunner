@@ -33,6 +33,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.now = deps.now;
     for (const kind of ALL_KINDS) this.visibilityMap.set(kind, "none");
     this.events.onDistanceChanged((d) => { this.distance = d; });
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 
