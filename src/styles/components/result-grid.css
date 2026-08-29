@@ -28,6 +28,29 @@
   min-width: 0;
 }
 
+.result-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.result-hero-value {
+  font-size: 14px;
+  line-height: 17px;
+  font-family: "Chakra Petch", sans-serif;
+  text-align: right;
+  min-width: 5ch;
+}
+
+.result-hero-application {
+  font-size: 14px;
+  line-height: 17px;
+  font-family: "Chakra Petch", sans-serif;
+  text-align: left;
+  min-width: 8ch;
+}
+
 .result-side-support,
 .result-side-weapon {
   display: flex;
@@ -55,7 +78,7 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
-  min-width: 0;
+  min-width: 80px;
 }
 
 .result-card-label {
@@ -76,12 +99,6 @@
   line-height: 17px;
   color: var(--text-primary);
   white-space: nowrap;
-}
-
-.result-hero-value {
-  font-size: 14px;
-  line-height: 17px;
-  font-family: "Chakra Petch", sans-serif;
 }
 
 .result-metric-label {

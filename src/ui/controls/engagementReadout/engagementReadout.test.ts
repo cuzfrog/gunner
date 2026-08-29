@@ -23,7 +23,7 @@ function fakeSideEls(): ReadoutEls["shipA"] {
   return {
     resTrackPen: make(), resRangePen: make(), resHit: make(),
     resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make(),
-    resNominalDps: make(), resAppliedDps: make(), resTimeToImpact: make(),
+    resNominalDps: make(), resAppliedDps: make(), resAppliedDpsApplication: make(), resTimeToImpact: make(),
     resSigFactor: make(), resVelocityFactor: make(),
     resNominalDpsLabel: make(), resAppliedDpsLabel: make(),
     resTimeToImpactLabel: make(),
@@ -185,40 +185,43 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resRangePen.classList.contains("is-optimal")).toBe(true);
   });
 
-  test("turret side shows DPS with application percentage merged into Applied DPS", () => {
+  test("turret side shows DPS and application percentage in separate grid cells", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100 } }), T);
     expect(els.shipA.resTurretCards.hidden).toBe(false);
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("50.0");
-    expect(els.shipA.resAppliedDps.textContent).toBe("40.0 (80.0%)");
-    expect(els.shipA.resAppliedDps.classList.contains("is-good")).toBe(true);
+    expect(els.shipA.resAppliedDps.textContent).toBe("40.0");
+    expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-good")).toBe(true);
   });
 
   test("turret side with zero applied DPS shows is-danger", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 0, application: 0, volley: 100 } }), T);
-    expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 
   test("turret side with application > 1 (wrecking hits) shows is-optimal", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 100, appliedDps: 101.5, application: 1.015, volley: 100 } }), T);
-    expect(els.shipA.resAppliedDps.textContent).toBe("101.5 (101.5%)");
-    expect(els.shipA.resAppliedDps.classList.contains("is-optimal")).toBe(true);
+    expect(els.shipA.resAppliedDps.textContent).toBe("101.5");
+    expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(101.5%)");
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-optimal")).toBe(true);
   });
 
-  test("missile side shows DPS with application merged and missile factors", () => {
+  test("missile side shows DPS, application and missile factors in separate cells", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeMissileView({ distance: 5000 }), T);
     expect(els.shipA.resTurretCards.hidden).toBe(true);
     expect(els.shipA.resMissileCards.hidden).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("40.0");
-    expect(els.shipA.resAppliedDps.textContent).toBe("32.0 (80.0%)");
+    expect(els.shipA.resAppliedDps.textContent).toBe("32.0");
+    expect(els.shipA.resAppliedDpsApplication.textContent).toBe("(80.0%)");
     expect(els.shipA.resTimeToImpact.textContent).toBe("2.5s");
     expect(els.shipA.resSigFactor.textContent).toBe("100.0%");
     expect(els.shipA.resVelocityFactor.textContent).toBe("80.0%");
@@ -236,7 +239,7 @@ describe("EngagementReadout", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeMissileView({ distance: 5000, shipADamage: { nominalDps: 40, appliedDps: 0, application: 0, volley: 200 }, shipAMissile: { application: 0, signatureTerm: 0, velocityTerm: 0, inRange: false, timeToImpact: 2.5 } }), T);
-    expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-danger")).toBe(true);
   });
 
   test("no-weapon side shows em-dash and is-dim on all values", () => {
@@ -247,6 +250,7 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDps.textContent).toBe("-");
+    expect(els.shipA.resAppliedDpsApplication.textContent).toBe("-");
     expect(els.shipA.resHit.textContent).toBe("-");
     expect(els.shipA.resTrackPen.textContent).toBe("-");
     expect(els.shipA.resRangePen.textContent).toBe("-");
@@ -258,6 +262,7 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resNominalDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resAppliedDpsApplication.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(true);

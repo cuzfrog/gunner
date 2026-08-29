@@ -14,6 +14,7 @@ interface SideHitEls {
 interface SideDpsEls {
   readonly resNominalDps: HTMLElement;
   readonly resAppliedDps: HTMLElement;
+  readonly resAppliedDpsApplication: HTMLElement;
   readonly resTimeToImpact: HTMLElement;
   readonly resSigFactor: HTMLElement;
   readonly resVelocityFactor: HTMLElement;
@@ -66,6 +67,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resTrackPen.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resRangePen.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resAppliedDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
+    els.resAppliedDpsApplication.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resNominalDps.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resSigFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
     els.resVelocityFactor.classList.remove("is-optimal", "is-good", "is-caution", "is-warn", "is-danger", "is-dim");
@@ -90,8 +92,9 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(els.resNominalDpsLabel, t("result.nominalDps"));
     setText(els.resAppliedDpsLabel, t("result.appliedDps"));
     setText(els.resNominalDps, formatWithCommas(attack.damage.nominalDps, 1));
-    setText(els.resAppliedDps, formatAppliedDps(attack.damage.appliedDps, attack.damage.application));
-    els.resAppliedDps.classList.add(hitChanceClass(attack.damage.application));
+    setText(els.resAppliedDps, formatWithCommas(attack.damage.appliedDps, 1));
+    setText(els.resAppliedDpsApplication, `(${formatWithCommas(attack.damage.application * 100, 1)}%)`);
+    els.resAppliedDpsApplication.classList.add(hitChanceClass(attack.damage.application));
   }
 
   private updateMissileSide(els: SideHitEls & SideDpsEls, attack: AttackAssessment, t: (key: string) => string): void {
@@ -104,13 +107,14 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(els.resSigFactorLabel, t("result.signatureFactor"));
     setText(els.resVelocityFactorLabel, t("result.velocityFactor"));
     setText(els.resNominalDps, formatWithCommas(attack.damage.nominalDps, 1));
-    setText(els.resAppliedDps, formatAppliedDps(attack.damage.appliedDps, attack.damage.application));
+    setText(els.resAppliedDps, formatWithCommas(attack.damage.appliedDps, 1));
+    setText(els.resAppliedDpsApplication, `(${formatWithCommas(attack.damage.application * 100, 1)}%)`);
     setText(els.resTimeToImpact, `${formatWithCommas(missile.timeToImpact, 1)}s`);
     const sigPercent = Math.min(1, missile.signatureTerm) * 100;
     const velPercent = Math.min(1, missile.velocityTerm) * 100;
     setText(els.resSigFactor, `${formatWithCommas(sigPercent, 1)}%`);
     setText(els.resVelocityFactor, `${formatWithCommas(velPercent, 1)}%`);
-    els.resAppliedDps.classList.add(hitChanceClass(attack.damage.application));
+    els.resAppliedDpsApplication.classList.add(hitChanceClass(attack.damage.application));
     els.resSigFactor.classList.add(hitChanceClass(sigPercent / 100));
     els.resVelocityFactor.classList.add(hitChanceClass(velPercent / 100));
   }
@@ -123,6 +127,7 @@ export class EngagementReadoutImpl implements EngagementReadout {
     setText(els.resRangePen, "-");
     setText(els.resNominalDps, "-");
     setText(els.resAppliedDps, "-");
+    setText(els.resAppliedDpsApplication, "-");
     setText(els.resTimeToImpact, "-");
     setText(els.resSigFactor, "-");
     setText(els.resVelocityFactor, "-");
@@ -131,14 +136,9 @@ export class EngagementReadoutImpl implements EngagementReadout {
     els.resRangePen.classList.add("is-dim");
     els.resNominalDps.classList.add("is-dim");
     els.resAppliedDps.classList.add("is-dim");
+    els.resAppliedDpsApplication.classList.add("is-dim");
     els.resSigFactor.classList.add("is-dim");
     els.resVelocityFactor.classList.add("is-dim");
     els.resTimeToImpact.classList.add("is-dim");
   }
-}
-
-function formatAppliedDps(appliedDps: number, application: number): string {
-  const dps = formatWithCommas(appliedDps, 1);
-  const percent = formatWithCommas(application * 100, 1);
-  return `${dps} (${percent}%)`;
 }

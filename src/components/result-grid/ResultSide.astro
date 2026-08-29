@@ -27,7 +27,10 @@ const MISSILE_METRICS = [
 <div class={`result-side result-side-${s}`}>
   <div class="result-side-hero">
     <span class="result-card-label" id={`res-applied-dps-label-${s}`} data-i18n="result.appliedDps">Applied DPS</span>
-    <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`}>-</span>
+    <div class="result-hero-grid">
+      <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`}>-</span>
+      <span class="result-card-value result-hero-application mono" id={`res-applied-dps-application-${s}`}>-</span>
+    </div>
   </div>
   <div class="result-side-support">
     {SUPPORT_METRICS.map((m) => (
