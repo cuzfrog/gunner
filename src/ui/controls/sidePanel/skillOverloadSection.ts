@@ -2,6 +2,7 @@ import type { SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
+import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
@@ -23,6 +24,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   private readonly i18n: I18n;
   private readonly popupGroup: PopupGroup;
   private skillPopupOpen = false;
+  private readonly skillChoice: ChoiceGroupImpl;
   readonly popup: Popup;
 
   constructor({ panel, els, i18n, popupGroup }: { panel: SidePanel; els: SkillOverloadSectionEls; i18n: I18n; popupGroup: PopupGroup }) {
@@ -30,8 +32,13 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     this.els = els;
     this.i18n = i18n;
     this.popupGroup = popupGroup;
+    this.skillChoice = new ChoiceGroupImpl({
+      group: els.skillOptions,
+      select: els.skills,
+      shape: { buttonClass: "btn" },
+    });
     this.popup = this.createSkillPopup();
-    this.els.skills.addEventListener("change", () => this.onSkillOrOverloadChange(true));
+    this.els.skills.addEventListener("input", () => this.onSkillOrOverloadChange(true));
     this.els.overload.addEventListener("change", () => this.onSkillOrOverloadChange(false));
     this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
     this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));
@@ -87,34 +94,23 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   }
 
   setSkillActive(level: SkillLevel): void {
-    const group = this.els.skillOptions;
-    const value = String(level);
-    for (const button of group.children) {
-      const active = button.getAttribute("data-value") === value;
-      button.setAttribute("aria-pressed", String(active));
-    }
+    this.skillChoice.set(String(level));
     const summary = skillOptionLabel(this.i18n, level);
     this.els.skillSummary.textContent = summary;
   }
 
   renderSkillOptions(selectedValue: SkillLevel = this.currentSkillLevel() ?? 5): void {
-    const select = this.els.skills;
     const group = this.els.skillOptions;
-    const selected = String(selectedValue);
-    select.innerHTML = "";
-    group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.skillLevel"));
+    const options: ChoiceGroupOption[] = [];
     for (let level = 0; level <= 5; level++) {
       const skill = skillLevelFromString(String(level));
-      const option = document.createElement("option");
-      option.value = String(level);
-      option.textContent = skillOptionLabel(this.i18n, skill);
-      select.appendChild(option);
-      const button = this.createSkillButton(group, String(level), String(level), () => this.onSkillButtonClick(skill));
-      button.title = skillOptionLabel(this.i18n, skill);
+      const label = skillOptionLabel(this.i18n, skill);
+      options.push({ value: String(level), label: String(level), title: label });
     }
-    select.value = selected;
-    this.setSkillActive(skillLevelFromString(selected));
+    this.skillChoice.render(options, String(selectedValue));
+    const summary = skillOptionLabel(this.i18n, selectedValue);
+    this.els.skillSummary.textContent = summary;
   }
 
   openSkillPopup(): void {
@@ -141,22 +137,9 @@ export class SkillOverloadSection implements ISkillOverloadSection {
   onSkillButtonClick(level: SkillLevel): void {
     this.setSkillActive(level);
     this.els.skills.value = String(level);
-    this.els.skills.dispatchEvent(new Event("change"));
+    this.els.skills.dispatchEvent(new Event("input", { bubbles: true }));
     this.closeSkillPopup();
     this.els.skillTrigger.focus();
-  }
-
-  private createSkillButton(container: HTMLElement, value: string, text: string, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "btn";
-    button.setAttribute("data-value", value);
-    button.setAttribute("aria-pressed", "false");
-    button.textContent = text;
-    button.setAttribute("title", text);
-    button.addEventListener("click", onClick);
-    container.appendChild(button);
-    return button;
   }
 
   private createSkillPopup(): Popup {

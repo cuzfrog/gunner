@@ -163,6 +163,11 @@ async function tsClasses(): Promise<StringMap> {
       for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
     }
 
+    // ChoiceGroup shape class properties (buttonClass, iconClass, labelClass)
+    for (const m of text.matchAll(/(?:buttonClass|labelClass)\s*:\s*"([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
+    }
+
     if (hits.size > 0) perFile.set(path, hits);
   }
   return perFile;

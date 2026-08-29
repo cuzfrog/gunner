@@ -13,6 +13,7 @@ import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { SelectableListImpl, type SelectableItem } from "../shared";
+import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
 
@@ -41,6 +42,7 @@ export class LauncherControllerImpl implements LauncherController {
   private ammoPopupOpen = false;
   private attributesPopupOpen = false;
   private readonly ammoList: SelectableListImpl;
+  private readonly classChoice: ChoiceGroupImpl;
 
   constructor(deps: LauncherControllerDeps) {
     this.side = deps.side;
@@ -62,6 +64,11 @@ export class LauncherControllerImpl implements LauncherController {
       role: "option",
       wrapInListItem: true,
     });
+    this.classChoice = new ChoiceGroupImpl({
+      group: deps.els.classOptions,
+      shape: { buttonClass: "btn launcher-class-option" },
+    });
+    this.els.classOptions.addEventListener("input", () => this.onClassChoiceInput());
     this.currentAmmoId = undefined;
     this.ammoPopupValue = this.createAmmoPopup();
     this.attributesPopupValue = this.createAttributesPopup();
@@ -204,18 +211,24 @@ export class LauncherControllerImpl implements LauncherController {
     const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) : undefined;
     const allowed = tier ? this.launcherClasses.classesForTiers([tier]) : this.launcherClasses.allClasses();
     const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
-    this.els.classOptions.innerHTML = "";
-    for (const cls of allowed) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "btn launcher-class-option";
-      btn.dataset.value = cls;
-      btn.setAttribute("aria-pressed", String(cls === currentClass));
-      btn.textContent = launcherClassLabel(cls);
-      if (!launcher) btn.disabled = true;
-      btn.addEventListener("click", () => this.onClassSelect(cls));
-      this.els.classOptions.appendChild(btn);
+    const options: ChoiceGroupOption[] = allowed.map((cls) => ({
+      value: cls,
+      label: launcherClassLabel(cls),
+      disabled: !launcher,
+    }));
+    this.classChoice.render(options, currentClass ?? "");
+  }
+
+  private onClassChoiceInput(): void {
+    let target: LauncherClass | undefined;
+    for (const button of Array.from(this.els.classOptions.children)) {
+      if (button.getAttribute("aria-pressed") === "true") {
+        target = button.getAttribute("data-value") as LauncherClass | undefined;
+        break;
+      }
     }
+    if (!target) return;
+    this.onClassSelect(target);
   }
 
   private onClassSelect(target: LauncherClass): void {

@@ -92,7 +92,7 @@ export class TurretControllerImpl implements TurretController {
     this.inputSet = new TurretInputSet({
       els: this.els,
       trackingInput: this.trackingInput,
-      sigResChoice: new ChoiceGroupImpl(this.els.sigResOptions, this.els.sigRes, [...SIG_RESOLUTIONS_ORDER]),
+      sigResChoice: new ChoiceGroupImpl({ group: this.els.sigResOptions, select: this.els.sigRes, staticValues: [...SIG_RESOLUTIONS_ORDER] }),
       turretOverrides: this.turretOverrides,
       simValueParser: this.simValueParser,
     });
