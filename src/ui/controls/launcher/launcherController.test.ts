@@ -178,9 +178,35 @@ describe("LauncherController", () => {
     const buttons = classOptions.children as unknown as FakeElement[];
     expect(buttons.length).toBeGreaterThan(0);
     for (const button of buttons) {
-      const label = button.textContent;
-      expect(label).toMatch(/^label\.launcherClass\./);
+      const labelSpan = button.children.find((c) => c.className === "launcher-class-label");
+      expect(labelSpan).toBeDefined();
+      expect(labelSpan!.textContent).toMatch(/^label\.launcherClass\./);
     }
     expect(i18n.t).toHaveBeenCalledWith("label.launcherClass.light");
+  });
+
+  test("class selector renders launcher icons when imageCatalog returns a url", () => {
+    const { document, controller } = buildLauncher({
+      imageCatalog: { itemIconUrl: vi.fn(() => "images/launcher-light.png") },
+    });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    const classOptions = getFake(document, "ship-a-launcher-class-options");
+    const buttons = classOptions.children as unknown as FakeElement[];
+    for (const button of buttons) {
+      const icon = button.children.find((c) => c.className === "launcher-class-icon");
+      expect(icon).toBeDefined();
+      expect(icon!.src).toBe("images/launcher-light.png");
+    }
+  });
+
+  test("class selector does not render icons when no launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    const classOptions = getFake(document, "ship-a-launcher-class-options");
+    const buttons = classOptions.children as unknown as FakeElement[];
+    for (const button of buttons) {
+      const icon = button.children.find((c) => c.className === "launcher-class-icon");
+      expect(icon).toBeUndefined();
+    }
   });
 });

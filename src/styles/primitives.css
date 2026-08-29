@@ -158,6 +158,7 @@
 /* ---- chevron ---- */
 .chevron {
   color: var(--accent-teal);
+  flex-shrink: 0;
   transition: transform 0.15s ease;
 }
 

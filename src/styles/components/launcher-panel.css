@@ -16,6 +16,20 @@
   padding: 2px 6px;
 }
 
+.launcher-class-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.launcher-class-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .launcher-attributes-group {
   position: relative;
 }

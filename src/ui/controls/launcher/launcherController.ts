@@ -68,7 +68,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.ammoChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
     this.classChoice = new ChoiceGroupImpl({
       group: deps.els.classOptions,
-      shape: { buttonClass: "btn launcher-class-option" },
+      shape: { buttonClass: "btn launcher-class-option", iconClass: "launcher-class-icon", labelClass: "launcher-class-label" },
     });
     this.els.classOptions.addEventListener("input", () => this.onClassChoiceInput());
     this.currentAmmoId = undefined;
@@ -192,6 +192,7 @@ export class LauncherControllerImpl implements LauncherController {
     const options: ChoiceGroupOption[] = allowed.map((cls) => ({
       value: cls,
       label: this.i18n.t(`label.launcherClass.${cls}`),
+      iconUrl: launcher ? this.imageCatalog.itemIconUrl(this.launcherClasses.representativeOf(cls)) : undefined,
       disabled: !launcher,
     }));
     this.classChoice.render(options, currentClass ?? "");
