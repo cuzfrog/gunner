@@ -96,4 +96,17 @@ describe("markup parity", () => {
     if (m === null) throw new Error("#app-version span not found in dist/index.html");
     expect(m[1]).toBe(`v${pkg.version}`);
   });
+
+  test("side-panel ids are mirror-images modulo ship-a/ship-b prefix", () => {
+    const html = readFileSync(DIST_HTML, "utf-8");
+    const allIds = new Set(extractIds(html).keys());
+    const shipAIds = [...allIds].filter((id) => id.startsWith("ship-a-")).map((id) => id.slice("ship-a-".length));
+    const shipBIds = [...allIds].filter((id) => id.startsWith("ship-b-")).map((id) => id.slice("ship-b-".length));
+    const aSet = new Set(shipAIds);
+    const bSet = new Set(shipBIds);
+    const missingInB = shipAIds.filter((id) => !bSet.has(id));
+    const missingInA = shipBIds.filter((id) => !aSet.has(id));
+    expect(missingInB).toEqual([]);
+    expect(missingInA).toEqual([]);
+  });
 });
