@@ -65,6 +65,7 @@ const controlsCradleKeys = {
   confirmController: "confirmController",
   profileEquality: "profileEquality",
   profileChangeTracker: "profileChangeTracker",
+  itemNameLoader: "itemNameLoader",
   controls: "controls",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 

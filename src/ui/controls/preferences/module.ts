@@ -9,7 +9,7 @@ type ControlsElements = ReturnType<typeof createControlsEls>;
 export function registerPreferencesModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
     preferencesController: asFunction(({
-      els, i18n, popupGroup, settingsStore, shipATurretController, shipBTurretController, uiEvents, rangeOverlayController,
+      els, i18n, popupGroup, settingsStore, shipATurretController, shipBTurretController, uiEvents, rangeOverlayController, itemNameLoader,
     }: ControlsCradle) =>
       new PreferencesControllerImpl({
         els: collectPreferencesEls(els),
@@ -20,6 +20,7 @@ export function registerPreferencesModule<T extends ControlsCradle>(cradle: Awil
         shipBTurretController,
         events: uiEvents,
         rangeOverlayController,
+        itemNameLoader,
       })
     ).singleton(),
   });
