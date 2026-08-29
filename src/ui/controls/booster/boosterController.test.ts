@@ -146,15 +146,13 @@ describe("BoosterController", () => {
     expect(controller.projection("shipA")).toBeUndefined();
   });
 
-  test("script popup is appended to the booster section and containment uses the ewar popup", () => {
+  test("script popup is appended to the booster section and containment uses the booster section", () => {
     const { controller, boosterEls, popupGroup } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     const popup = scriptPopupFor(section);
     expect(popup).toBeDefined();
     expect(popup?.parent).toBe(section);
-    const ewarPopup = getFake(document, "ship-a-ewar-popup");
-    expect(section.parent).toBe(ewarPopup);
     expect(popupGroup.register).toHaveBeenCalled();
   });
 

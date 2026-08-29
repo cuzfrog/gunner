@@ -213,7 +213,7 @@ export class LauncherControllerImpl implements LauncherController {
     const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
     const options: ChoiceGroupOption[] = allowed.map((cls) => ({
       value: cls,
-      label: launcherClassLabel(cls),
+      label: this.i18n.t(`label.launcherClass.${cls}`),
       disabled: !launcher,
     }));
     this.classChoice.render(options, currentClass ?? "");
@@ -223,7 +223,7 @@ export class LauncherControllerImpl implements LauncherController {
     let target: LauncherClass | undefined;
     for (const button of Array.from(this.els.classOptions.children)) {
       if (button.getAttribute("aria-pressed") === "true") {
-        target = button.getAttribute("data-value") as LauncherClass | undefined;
+        target = parseLauncherClass(button.getAttribute("data-value"), this.launcherClasses.allClasses());
         break;
       }
     }
@@ -316,18 +316,7 @@ function importedLauncherToMissileSpec(launcher: ImportedLauncher): MissileSpec 
   };
 }
 
-function launcherClassLabel(cls: LauncherClass): string {
-  switch (cls) {
-    case "rocket": return "Rocket";
-    case "light": return "Light";
-    case "ham": return "HAM";
-    case "heavy": return "Heavy";
-    case "rapidLight": return "Rapid Light";
-    case "torpedo": return "Torpedo";
-    case "cruise": return "Cruise";
-    case "rapidHeavy": return "Rapid Heavy";
-    case "xlTorpedo": return "XL Torp";
-    case "xlCruise": return "XL Cruise";
-    case "rapidTorpedo": return "Rapid Torp";
-  }
+function parseLauncherClass(value: string | null, valid: readonly LauncherClass[]): LauncherClass | undefined {
+  if (!value) return undefined;
+  return valid.find((cls) => cls === value);
 }

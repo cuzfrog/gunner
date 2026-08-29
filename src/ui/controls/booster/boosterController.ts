@@ -124,7 +124,7 @@ export class BoosterControllerImpl implements BoosterController {
         if (gear) gear.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-popup`) !== null,
+      contains: (target) => target instanceof Element && target.closest(`#${sideId(side)}-booster-script-popup, #${sideId(side)}-booster-section`) !== null,
     };
   }
 
