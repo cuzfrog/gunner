@@ -4,11 +4,11 @@ This guide defines the visual language of Gunner's web UI. Follow it when adding
 
 Sources of truth:
 
-- `public/styles/**/*.css` — all DOM styling, concatenated at build time into a hashed `dist/styles-*.css`
-- `public/index.html` — markup structure and class naming
+- `src/styles/**/*.css` — all DOM styling, bundled by Vite/Astro into a hashed `dist/_astro/*.css`
+- `src/pages/index.astro` + `src/components/**/*.astro` — markup structure and class naming
 - `doc/CSS_RULES.md` — DOM styling conventions and class ownership rules
 - `src/ui/renderer.ts` `COLORS` — canvas palette (mirrors CSS tokens)
-- `public/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `popup-item`, `trigger`, `truncate`, `chevron`
+- `src/styles/primitives.css` — base primitives: `btn`, `icon-button`, `input-field`, `field-label`, `form-field`, `form-field-row`, `form-slider`, `input-with-unit`, `input-suffix`, `effective-value`, `segmented-control`, `choice-selector`, `overload-button`, `mono`, `popup`, `popup-item`, `trigger`, `truncate`, `chevron`
 
 ## Design identity
 
@@ -55,7 +55,7 @@ Where a translucent accent is needed (glows, dim borders, scrollbar thumbs), har
 
 ### Typography
 
-Three fonts, loaded once in `index.html`:
+Three fonts, loaded once in `src/layouts/Layout.astro`:
 
 | Font | Use |
 |---|---|

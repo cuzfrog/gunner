@@ -1,5 +1,6 @@
 import { LazyItemNameResolver } from "./lazyResolver";
 import type { ShipNameLanguage } from "../i18n";
+import type { TypeId } from "../ids";
 
 const MOCK_ZH_NAMES = { "204": "mock-zh-name" } as const;
 const MOCK_ZH_COLLISIONS = {} as const;
@@ -41,7 +42,7 @@ describe("LazyItemNameResolver", () => {
     await flushMicrotasks();
     const ids = resolver.idsForName("mock-ja-name", "ja");
     expect(ids.length).toBe(1);
-    expect(ids[0]).toBe("204");
+    expect(ids[0]).toBe("204" as TypeId);
   });
 
   test("load awaits the pack and resolves names", async () => {

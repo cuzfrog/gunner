@@ -9,8 +9,8 @@ EFT text line ("Optimal Range Disruption Script x2")
   3. Row carries row.id / row.chargeId into the view (src/ui/controls/popup/fittingPreview.ts renderRow)
   4. imageCatalog.itemIconUrl(typeId) looks up the generated icon table (src/ui/icons/typeIconFiles.ts)
   5. URL points at a file that exists on disk (data/ship-modules/icons/<iconId>@1x.png or data/ship-modules/type-icons/<typeId>@1x.png)
-  6. scripts/build.ts copies it into dist/images/...
-  7. CSS shows .preview-icon only when [src] is set (public/styles/components/fitting-preview.css)
+  6. scripts/astro/copyGameAssets.ts copies it into dist/images/...
+  7. CSS shows .preview-icon only when [src] is set (src/styles/components/fitting-preview.css)
 ```
 
 An icon going missing means exactly one hop is broken. Diagnose by walking from the top - each failure mode below names its symptom.

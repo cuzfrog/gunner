@@ -10,7 +10,15 @@
 - No emojis in commits, issues, PR comments, or code
 - Do not use newline to break sentences, no newline in the same paragraph. Let IDE wrap text.
 - Follow @doc/UI_STYLE_GUIDE.md and @doc/CSS_RULES.md whenever style/ui is touched.
+- Follow @doc/COMPONENT_PATTERN.md when adding UI components or controllers.
 - Refer to @doc/EFT_FORMAT.md when dealing with ship fittings.
+
+## Frontend pattern
+- Static UI belongs in `src/components/**/*.astro` (props from pure frontmatter data; ids declared in `elementContract.ts`).
+- Dynamic DOM uses the `html` helper and shared renderers (`SelectableList`, `ChoiceGroup`, `IconAction`, `SummaryChip`, `SectionBlock`, `createPopup`) — never hand-rolled `createElement` chains outside the markup module.
+- New controllers self-subscribe to `onLanguageChanged` and render synchronously.
+- CSS lives in `src/styles/**/*.css`, imported via `src/styles/styles.css`; `@layer` order in `tokens.css` is the cascade authority.
+- Lazy-loaded game data uses placeholder-then-rerender: synchronous lookup returns a placeholder on cache miss, `ensureLoaded` triggers async import, `onItemNamesLoaded` fires `emitLanguageChanged` when data arrives.
 
 ## Conversation style
 - Be concise, but must explain the reason and provide context information.
