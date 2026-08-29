@@ -1,0 +1,21 @@
+---
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+---
+
+<div class="form-field-group skill-section skill-select" id={`${idPrefix}-skill-field`}>
+  <button type="button" class="trigger" id={`${idPrefix}-skill-trigger`}
+          aria-haspopup="true" aria-expanded="false" aria-controls={`${idPrefix}-skill-popup`}>
+    <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
+    <span class="skill-summary-row">
+      <span class="skill-summary-value mono truncate" id={`${idPrefix}-skill-summary`}>Level 5</span>
+      <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+    </span>
+  </button>
+  <select class="input-field" id={`${idPrefix}-skills`} hidden></select>
+  <div class="skill-popup popup popup-above popup-left popup-right" id={`${idPrefix}-skill-popup`} hidden>
+    <div class="skill-tuner" id={`${idPrefix}-skill-options`} role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+---
+interface Props {
+  readonly id: string;
+  readonly class?: string;
+  readonly role?: string;
+  readonly ariaModal?: string;
+  readonly hidden?: boolean;
+  readonly i18nAriaLabel?: string;
+  readonly ariaLabel?: string;
+}
+const { id, class: className = "popup", role, ariaModal, hidden = true, i18nAriaLabel, ariaLabel } = Astro.props;
+const classes = className.split(" ").map((c) => c.trim()).filter(Boolean);
+---
+
+<div id={id} class={classes} hidden={hidden} role={role} aria-modal={ariaModal}
+  data-i18n-aria-label={i18nAriaLabel} aria-label={ariaLabel}>
+  <slot />
+</div>

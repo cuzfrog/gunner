@@ -1,0 +1,56 @@
+---
+import Icon from "../controls/Icon.astro";
+import CanvasSettingsPopup from "./CanvasSettingsPopup.astro";
+---
+
+<section class="canvas-frame surface-panel">
+  <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays">
+    <button type="button" id="weapon-range-button" class="range-overlay-chip weapon-range-chip"
+            data-weapon-range="both" aria-pressed="true"
+            data-i18n-title="label.weaponRange" data-i18n-aria-label="label.weaponRange"
+            title="Weapon range" aria-label="Weapon range">Weapon range</button>
+  </div>
+  <div id="ship-a-portrait" class="combatant-portrait combatant-portrait-ship-a" hidden>
+    <img class="portrait-image portrait-image-ship-a" alt="">
+    <div class="portrait-effects"></div>
+  </div>
+  <div id="ship-b-portrait" class="combatant-portrait combatant-portrait-ship-b" hidden>
+    <img class="portrait-image portrait-image-ship-b" alt="">
+    <div class="portrait-effects"></div>
+  </div>
+  <canvas id="scene" class="sim-canvas" width="800" height="600"></canvas>
+
+  <div class="control-bar">
+    <div class="control-bar-playback">
+      <button id="play" class="btn btn-primary-text">Start</button>
+      <button id="reset" class="btn" data-i18n="button.reset">Reset</button>
+      <button type="button" id="canvas-settings-trigger" class="icon-button"
+              aria-haspopup="true" aria-expanded="false" aria-controls="canvas-settings-popup"
+              data-i18n-title="label.canvasSettings" data-i18n-aria-label="label.canvasSettings">
+        <Icon name="gear" />
+      </button>
+    </div>
+
+    <div class="control-bar-field control-bar-initial-distance">
+      <label for="initial-distance" class="field-label truncate" data-i18n="label.initialDistance">Initial distance</label>
+      <span class="input-with-unit">
+        <input type="number" class="input-field" id="initial-distance" value="20000" step="any" min="1">
+        <span class="input-suffix mono" aria-hidden="true">m</span>
+      </span>
+    </div>
+
+    <div class="control-bar-field control-bar-speed">
+      <label for="sim-speed" class="field-label" data-i18n="label.simulationSpeed">Speed</label>
+      <select class="input-field" id="sim-speed">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="4" selected>4x</option>
+        <option value="8">8x</option>
+      </select>
+    </div>
+  </div>
+
+  <CanvasSettingsPopup id="canvas-settings-popup" triggerId="canvas-settings-trigger" />
+</section>

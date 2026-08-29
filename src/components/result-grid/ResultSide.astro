@@ -1,0 +1,54 @@
+---
+type Side = "a" | "b";
+
+interface Props {
+  readonly side: Side;
+}
+const { side } = Astro.props;
+const s = side;
+---
+
+<div class={`result-side result-side-${s}`}>
+  <div class="result-side-hero">
+    <span class="result-card-label" id={`res-applied-dps-label-${s}`} data-i18n="result.appliedDps">Applied DPS</span>
+    <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`}>-</span>
+  </div>
+  <div class="result-side-support">
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-nominal-dps-label-${s}`} data-i18n="result.nominalDps">Nominal DPS</span>
+      <span class="result-metric-value mono" id={`res-nominal-dps-${s}`}>-</span>
+    </div>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-application-label-${s}`} data-i18n="result.application">Application</span>
+      <span class="result-metric-value mono" id={`res-application-${s}`}>-</span>
+    </div>
+  </div>
+  <div class="result-side-weapon" id={`res-turret-cards-${s}`}>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-hit-label-${s}`} data-i18n="result.hitChance">Hit chance</span>
+      <span class="result-metric-value mono" id={`res-hit-${s}`}>0%</span>
+    </div>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-track-pen-label-${s}`} data-i18n="result.trackingPenalty">Tracking penalty</span>
+      <span class="result-metric-value mono" id={`res-track-pen-${s}`}>0%</span>
+    </div>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-range-pen-label-${s}`} data-i18n="result.rangePenalty">Range penalty</span>
+      <span class="result-metric-value mono" id={`res-range-pen-${s}`}>0%</span>
+    </div>
+  </div>
+  <div class="result-side-weapon" id={`res-missile-cards-${s}`} hidden>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-time-to-impact-label-${s}`} data-i18n="result.timeToImpact">Time to impact</span>
+      <span class="result-metric-value mono" id={`res-time-to-impact-${s}`}>-</span>
+    </div>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-sig-factor-label-${s}`} data-i18n="result.signatureFactor">Sig. factor</span>
+      <span class="result-metric-value mono" id={`res-sig-factor-${s}`}>-</span>
+    </div>
+    <div class="result-metric">
+      <span class="result-metric-label" id={`res-velocity-factor-label-${s}`} data-i18n="result.velocityFactor">Velocity factor</span>
+      <span class="result-metric-value mono" id={`res-velocity-factor-${s}`}>-</span>
+    </div>
+  </div>
+</div>

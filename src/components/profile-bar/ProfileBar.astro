@@ -1,0 +1,93 @@
+---
+import Icon from "../controls/Icon.astro";
+---
+
+<section class="profile-bar">
+  <div class="profile-select-field">
+    <button type="button" id="profile-select-trigger" class="btn btn-panel profile-select-trigger mono"
+            aria-haspopup="menu" aria-expanded="false" aria-controls="profile-popup">
+      <span class="profile-select-label truncate" id="profile-select-label">Select profile...</span>
+      <Icon name="chevron" />
+    </button>
+    <div id="profile-popup" class="profile-popup popup popup-below popup-left popup-scroll" hidden role="menu"></div>
+    <div class="confirm-popup popup popup-below popup-left" id="confirm-popup" hidden role="dialog" aria-modal="true">
+      <span id="confirm-message" class="confirm-message" aria-live="polite"></span>
+      <div class="confirm-buttons">
+        <button type="button" id="confirm-ok" class="btn" data-i18n="button.confirm">Confirm</button>
+        <button type="button" id="confirm-cancel" class="btn" data-i18n="button.cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <button type="button" id="profile-save" class="btn btn-panel icon-button"
+          data-i18n-title="button.save" data-i18n-aria-label="button.save"
+          title="Save profile" aria-label="Save">
+    <Icon name="save" />
+  </button>
+  <button type="button" id="profile-delete" class="btn btn-panel icon-button"
+          data-i18n-title="button.delete" data-i18n-aria-label="button.delete"
+          title="Delete profile" aria-label="Delete">
+    <Icon name="trash" />
+  </button>
+  <div class="profile-new-field">
+    <button type="button" id="profile-new" class="btn btn-panel icon-button"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls="new-profile-popup"
+            data-i18n-title="button.newProfile" data-i18n-aria-label="button.newProfile"
+            title="New profile" aria-label="New profile">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="new-profile-popup popup popup-below popup-left" id="new-profile-popup" hidden
+         role="dialog" aria-modal="true"
+         data-i18n-aria-label="dialog.profileActions" aria-label="Profile actions">
+      <span class="new-profile-dirty-note" id="new-profile-dirty-note"
+            data-i18n="label.unsavedChanges" hidden>Unsaved changes</span>
+      <div class="new-profile-section" id="new-profile-current-section" hidden>
+        <span class="new-profile-group-label" data-i18n="profile.currentGroup">Current profile</span>
+        <button type="button" id="new-profile-save-current" class="btn new-profile-save-current">
+          <span data-i18n="button.saveToProfile">Save to:</span>
+          <span class="new-profile-current-name mono truncate" id="new-profile-current-name"></span>
+        </button>
+      </div>
+      <div class="new-profile-section">
+        <span class="new-profile-group-label" data-i18n="profile.saveAsGroup">Save as new profile</span>
+        <input type="text" id="new-profile-name" class="new-profile-name input-field mono" placeholder="Profile name"
+               data-i18n-placeholder="label.profileName" maxlength="32"
+               autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="confirm-buttons">
+          <button type="button" id="new-profile-clear-session" class="btn"
+                  data-i18n="button.clearSession">Clear session</button>
+          <button type="button" id="new-profile-confirm" class="btn btn-primary-text" data-i18n="button.save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="profile-share-field">
+    <button type="button" id="share-link" class="btn btn-panel icon-button"
+            aria-haspopup="menu" aria-expanded="false" aria-controls="share-popup"
+            data-i18n-title="title.shareProfile" data-i18n-aria-label="button.copyProfile"
+            title="Share current profile" aria-label="Copy">
+      <Icon name="copy" />
+    </button>
+    <div class="menu-popup popup popup-below popup-left" id="share-popup" hidden role="menu"
+         data-i18n-aria-label="menu.share" aria-label="Copy profile as">
+      <button type="button" id="share-copy-url" class="popup-item" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
+      <button type="button" id="share-copy-text" class="popup-item" role="menuitem" data-i18n="menu.copyAsText">Copy as Text</button>
+    </div>
+  </div>
+  <div class="profile-import-field">
+    <button type="button" id="import-profile" class="btn btn-panel icon-button"
+            aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"
+            data-i18n-title="title.importProfile" data-i18n-aria-label="button.importProfile"
+            title="Import profile or fitting from clipboard" aria-label="Import">
+      <Icon name="import" />
+    </button>
+    <div class="menu-popup popup popup-below popup-left" id="import-side-popup" hidden role="menu"
+         data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
+      <button type="button" id="import-side-ship-a" class="popup-item" role="menuitem" data-i18n="label.shipA">Ship A</button>
+      <button type="button" id="import-side-ship-b" class="popup-item" role="menuitem" data-i18n="label.shipB">Ship B</button>
+    </div>
+  </div>
+  <span id="share-status" class="profile-share-status" aria-live="polite"></span>
+  <span id="slide-hints" class="hints-slide truncate" aria-live="polite">You can import a ship fitting from clipboard.</span>
+</section>

@@ -1,0 +1,95 @@
+---
+import { DEFAULT_VALUES } from "../../ui/controls";
+import type { Side } from "../../ui/controls";
+
+interface Props {
+  readonly idPrefix: string;
+  readonly side: Side;
+}
+const { idPrefix, side } = Astro.props;
+const tracking = DEFAULT_VALUES[`${idPrefix}-tracking`];
+const optimal = DEFAULT_VALUES[`${idPrefix}-optimal`];
+const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
+---
+
+<div class="weapon-panel" id={`${idPrefix}-turret-panel`}>
+<div class="form-field-group">
+  <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+
+  <select class="input-field" id={`${idPrefix}-sigRes`} hidden>
+    <option value="S" selected>S (40 m)</option>
+    <option value="M">M (125 m)</option>
+    <option value="L">L (400 m)</option>
+    <option value="XL">XL (2000 m)</option>
+  </select>
+
+  <div class="segmented-control choice-selector sigres-selector"
+       id={`${idPrefix}-sig-res-options`} role="group"
+       data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+    <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
+      <img class="sigres-icon" alt="" hidden><span class="sigres-class">S</span><span class="sigres-value mono">(40 m)</span>
+    </button>
+    <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
+      <img class="sigres-icon" alt="" hidden><span class="sigres-class">M</span><span class="sigres-value mono">(125 m)</span>
+    </button>
+    <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
+      <img class="sigres-icon" alt="" hidden><span class="sigres-class">L</span><span class="sigres-value mono">(400 m)</span>
+    </button>
+    <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
+      <img class="sigres-icon" alt="" hidden><span class="sigres-class">XL</span><span class="sigres-value mono">(2000 m)</span>
+    </button>
+  </div>
+</div>
+<label class="form-field">
+  <span class="tracking-label-row">
+    <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+    <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+      <button type="button" id={`${idPrefix}-tracking-unit-rad`} data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+      <button type="button" id={`${idPrefix}-tracking-unit-score`} data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+    </span>
+  </span>
+  <span class="input-with-unit input-with-unit-has-effective">
+    <input type="number" class="input-field" id={`${idPrefix}-tracking`} value={tracking} step="any" min="0">
+    <span class="effective-value mono" id={`effective-${idPrefix}-tracking`}></span>
+  </span>
+</label>
+<div class="form-field-row">
+  <label class="form-field">
+    <span class="field-label truncate" data-i18n="label.optimalRange">Optimal range</span>
+    <span class="input-with-unit input-with-unit-has-effective">
+      <input type="number" class="input-field" id={`${idPrefix}-optimal`} value={optimal} step="any" min="0">
+      <span class="effective-value mono" id={`effective-${idPrefix}-optimal`}></span>
+    </span>
+  </label>
+  <label class="form-field">
+    <span class="field-label truncate" data-i18n="label.falloffRange">Falloff range</span>
+    <span class="input-with-unit input-with-unit-has-effective">
+      <input type="number" class="input-field" id={`${idPrefix}-falloff`} value={falloff} step="any" min="0">
+      <span class="effective-value mono" id={`effective-${idPrefix}-falloff`}></span>
+    </span>
+  </label>
+</div>
+
+<div class="form-field-group ammo-group" id={`${idPrefix}-ammo-field`}>
+  <button type="button" id={`${idPrefix}-ammo-trigger`} class="trigger"
+          aria-haspopup="true" aria-expanded="false" aria-controls={`${idPrefix}-ammo-popup`}
+          data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+          title="Select ammunition" aria-label="Select ammunition">
+    <span class="ammo-label truncate" data-i18n="label.ammo">Ammo</span>
+    <span class="ammo-summary-row">
+      <img id={`${idPrefix}-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
+      <span class="ammo-summary-value mono truncate" id={`${idPrefix}-ammo-summary`}></span>
+      <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+    </span>
+  </button>
+  <div class="ammo-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-ammo-popup`} hidden>
+    <span class="fitting-group-label" id={`${idPrefix}-ammo-cargo-label`} data-i18n="ammo.cargoGroup">In cargo</span>
+    <ul class="ammo-list" id={`${idPrefix}-ammo-cargo-list`} role="listbox"></ul>
+    <button type="button" class="ammo-expand" id={`${idPrefix}-ammo-expand`} data-i18n="ammo.showAll">Show all</button>
+    <div id={`${idPrefix}-ammo-all-section`} hidden>
+      <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
+      <ul class="ammo-list" id={`${idPrefix}-ammo-all-list`} role="listbox"></ul>
+    </div>
+  </div>
+</div>
+</div>

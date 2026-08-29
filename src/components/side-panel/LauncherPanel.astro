@@ -1,0 +1,79 @@
+---
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+---
+
+<div class="launcher-panel" id={`${idPrefix}-launcher-panel`} hidden>
+  <div class="form-field-group">
+    <span class="field-label truncate" data-i18n="label.launcherClass">Launcher class</span>
+    <div class="segmented-control choice-selector launcher-class-selector"
+         id={`${idPrefix}-launcher-class-options`} role="group"
+         data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
+    </div>
+  </div>
+  <div class="form-field-group launcher-attributes-group" id={`${idPrefix}-launcher-attributes-field`}>
+    <button type="button" id={`${idPrefix}-launcher-attributes-trigger`} class="trigger"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls={`${idPrefix}-launcher-attributes-popup`}
+            data-i18n-title="button.missileAttributes" data-i18n-aria-label="button.missileAttributes"
+            title="Missile attributes" aria-label="Missile attributes">
+      <span class="ammo-label truncate" data-i18n="label.missileAttributes">Missile</span>
+      <span class="ammo-summary-row">
+        <img id={`${idPrefix}-launcher-attributes-icon`} class="ammo-summary-icon" alt="" hidden>
+        <span class="launcher-attributes-summary mono truncate" id={`${idPrefix}-launcher-attributes-summary`}></span>
+        <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+      </span>
+    </button>
+    <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-attributes-popup`} hidden role="dialog" aria-modal="false">
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.volleyDamage">Volley</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-volley-damage`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.rateOfFire">ROF</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-rate-of-fire`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.explosionRadius">Exp. radius</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-explosion-radius`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.explosionVelocity">Exp. velocity</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-explosion-velocity`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.damageReductionFactor">DRF</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-damage-reduction-factor`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.missileVelocity">Missile velocity</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-missile-velocity`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.flightTime">Flight time</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-flight-time`}>-</span>
+      </div>
+      <div class="launcher-telemetry-row">
+        <span class="launcher-telemetry-label" data-i18n="label.flightRange">Flight range</span>
+        <span class="launcher-telemetry-value mono" id={`${idPrefix}-launcher-flight-range`}>-</span>
+      </div>
+    </div>
+  </div>
+  <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
+    <button type="button" id={`${idPrefix}-launcher-ammo-trigger`} class="trigger"
+            aria-haspopup="listbox" aria-expanded="false" aria-controls={`${idPrefix}-launcher-ammo-popup`}
+            data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
+            title="Select missile" aria-label="Select missile">
+      <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
+      <span class="ammo-summary-row">
+        <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
+        <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
+        <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+      </span>
+    </button>
+    <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-ammo-popup`} hidden>
+      <ul class="launcher-ammo-list" id={`${idPrefix}-launcher-ammo-list`} role="listbox"></ul>
+    </div>
+  </div>
+</div>

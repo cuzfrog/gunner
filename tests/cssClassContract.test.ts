@@ -1,4 +1,4 @@
-const HTML_PATH = "dist/index.html";
+const ASTRO_GLOB = "src/**/*.astro";
 const TS_GLOB = "src/ui/**/*.ts";
 const CSS_GLOB = "src/styles/**/*.css";
 
@@ -88,10 +88,23 @@ const APPROVED_PREFIXES = [
 
 type StringMap = Map<string, Set<string>>;
 
-function htmlClasses(html: string): Set<string> {
+async function astroClasses(): Promise<Set<string>> {
   const found = new Set<string>();
-  for (const m of html.matchAll(/class="([^"]*)"/g)) {
-    for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+  const glob = new Bun.Glob(ASTRO_GLOB);
+  for await (const path of glob.scan({ cwd: "." })) {
+    const text = await Bun.file(path).text();
+    for (const m of text.matchAll(/class="([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
+    for (const m of text.matchAll(/class=\{([^}]*)\}/g)) {
+      for (const t of extractStringLiteralTokens(m[1])) found.add(t);
+    }
+  }
+  if (await Bun.file("dist/index.html").exists()) {
+    const html = await Bun.file("dist/index.html").text();
+    for (const m of html.matchAll(/class="([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
   }
   return found;
 }
@@ -203,8 +216,7 @@ function cssClasses(cssText: string): Set<string> {
 }
 
 test("every used class has a CSS definition", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const defined = cssClasses(await cssText());
   const missing = [...used].filter((c) => !defined.has(c) && !ALLOWED_UNDEFINED.has(c));
@@ -212,8 +224,7 @@ test("every used class has a CSS definition", async () => {
 });
 
 test("every CSS class is referenced somewhere", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const defined = cssClasses(await cssText());
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
@@ -243,8 +254,7 @@ test("viewport @media queries are confined to layout.css", async () => {
 });
 
 test("every used class is an approved component or primitive prefix", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const bad = [...used].filter((c) => !isApproved(c));
   expect(bad).toEqual([]);

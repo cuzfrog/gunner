@@ -1,0 +1,23 @@
+---
+interface Props {
+  readonly id: string;
+  readonly value: string;
+  readonly step?: string;
+  readonly min?: string;
+  readonly suffix?: string;
+  readonly suffixId?: string;
+  readonly effectiveId?: string;
+  readonly i18nAriaLabel?: string;
+  readonly ariaLabel?: string;
+}
+const { id, value, step = "any", min, suffix, suffixId, effectiveId, i18nAriaLabel, ariaLabel } = Astro.props;
+const hasEffective = effectiveId !== undefined;
+const hasSuffix = suffix !== undefined;
+---
+
+<span class={`input-with-unit${hasEffective ? " input-with-unit-has-effective" : ""}`}>
+  <input type="number" class="input-field" id={id} value={value} step={step} min={min}
+    data-i18n-aria-label={i18nAriaLabel} aria-label={ariaLabel} />
+  {hasSuffix && <span class="input-suffix mono" id={suffixId} aria-hidden="true">{suffix}</span>}
+  {hasEffective && <span class="effective-value mono" id={effectiveId}></span>}
+</span>
