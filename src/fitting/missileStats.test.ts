@@ -124,9 +124,19 @@ describe("MissileSkillModelImpl", () => {
     expect(result.cycleTime).toBeCloseTo(16 * skillRof, 6);
   });
 
-  test("damageReductionFactor is passed through unchanged", () => {
+  test("damageReductionFactor is passed through unchanged when already >= 1", () => {
     const result = model().compute(launcher(16, 509), missile({ damageReductionFactor: 3.2 }), [], 5);
     expect(result.damageReductionFactor).toBe(3.2);
+  });
+
+  test("damageReductionFactor is inverted when game data stores it < 1", () => {
+    const result = model().compute(launcher(16, 509), missile({ damageReductionFactor: 0.604 }), [], 5);
+    expect(result.damageReductionFactor).toBeCloseTo(1 / 0.604, 10);
+  });
+
+  test("damageReductionFactor of 1 stays 1 (no reduction)", () => {
+    const result = model().compute(launcher(16, 509), missile({ damageReductionFactor: 1 }), [], 5);
+    expect(result.damageReductionFactor).toBe(1);
   });
 
   test("skill level 3 applies partial bonuses", () => {
