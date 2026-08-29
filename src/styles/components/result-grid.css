@@ -51,7 +51,13 @@
   min-width: 8ch;
 }
 
-.result-side-support,
+.result-side-support {
+  display: flex;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .result-side-weapon {
   display: flex;
   gap: 8px;
