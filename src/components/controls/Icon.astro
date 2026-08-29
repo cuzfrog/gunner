@@ -1,0 +1,14 @@
+---
+interface Props {
+  readonly name: string;
+  readonly size?: number;
+  readonly fill?: string;
+  readonly stroke?: string;
+  readonly strokeWidth?: number;
+  readonly viewBox?: string;
+  readonly class?: string;
+}
+const { name, size = 14, fill = "currentColor", stroke, strokeWidth = 2, viewBox = "0 0 24 24", class: className } = Astro.props;
+---
+
+<svg class={className} viewBox={viewBox} width={size} height={size} fill={fill} stroke={stroke} stroke-width={stroke ? strokeWidth : undefined} aria-hidden="true"><use href={`icons.svg#${name}`}></use></svg>

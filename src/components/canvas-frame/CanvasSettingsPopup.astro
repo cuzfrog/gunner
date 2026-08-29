@@ -1,0 +1,30 @@
+---
+import FormSliderField from "../form/FormSliderField.astro";
+import PopupBox from "../popup/PopupBox.astro";
+
+interface Props {
+  readonly id: string;
+  readonly triggerId: string;
+}
+const { id, triggerId } = Astro.props;
+---
+
+<PopupBox id={id} extraClass="control-bar-canvas-settings-popup" role="dialog"
+     i18nAriaLabel="label.canvasSettings" ariaLabel="Canvas settings">
+  <div class="control-bar-field control-bar-zoom">
+    <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
+    <FormSliderField sliderId="zoom-slider" valueId="zoom-value" valueText="1.00x"
+           min="0.25" max="4" step="0.05" value="1" fill="20%" disabled
+           i18nAriaLabel="label.zoom" ariaLabel="Zoom" />
+    <label class="zoom-auto-option">
+      <input type="checkbox" id="auto-zoom" class="zoom-auto-checkbox" checked>
+      <span data-i18n="label.autoZoom">Auto-zoom</span>
+    </label>
+  </div>
+  <div class="control-bar-field">
+    <label for="grid-brightness-slider" class="field-label" data-i18n="label.gridBrightness">Grid brightness</label>
+    <FormSliderField sliderId="grid-brightness-slider" valueId="grid-brightness-value" valueText="50%"
+           min="0" max="1" step="0.01" value="0.5" fill="50%"
+           i18nAriaLabel="label.gridBrightness" ariaLabel="Grid brightness" />
+  </div>
+</PopupBox>

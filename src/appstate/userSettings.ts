@@ -1,9 +1,9 @@
-import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
 import type { FittedHull, PropulsionId, PropulsionKind, PropulsionStats, SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import type { Language } from "./language";
 
-export const USER_SETTINGS_VERSION = 12 as const;
+export const USER_SETTINGS_VERSION = 13 as const;
 export const PROPULSION_NONE = "none" as const;
 export type TrackingUnit = "rad" | "score";
 export type WeaponRangeVisibility = "shipA" | "shipB" | "both" | "none";
@@ -104,6 +104,10 @@ export interface UserSettings {
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
   shipAAmmo: TypeId;
   shipBAmmo: TypeId;
+  shipAWeaponKind?: WeaponKind;
+  shipBWeaponKind?: WeaponKind;
+  shipAMissileAmmo?: TypeId;
+  shipBMissileAmmo?: TypeId;
   simSpeed: number;
   language: Language;
 }

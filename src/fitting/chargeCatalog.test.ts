@@ -80,6 +80,10 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     chargeId: TITANIUM_SABOT_S.id,
     base: { tracking: 0.315, optimal: 600, falloff: 3000 },
     moduleId: turretIdForName("150mm Railgun I"),
+    damageMultiplier: 3,
+    damagePerShot: 12,
+    cycleTime: 5,
+    turretCount: 1,
     ...overrides,
   };
 }

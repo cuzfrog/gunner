@@ -42,4 +42,22 @@
     <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
     <path d="M16 16l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
   </symbol>
+  <symbol id="turret" viewBox="0 0 24 24">
+    <circle cx="12" cy="14" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M12 10V4M9 4h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M6 20h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="missile" viewBox="0 0 24 24">
+    <path d="M12 2L9 8h2v10h2V8h2L12 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M9 20l3 2 3-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M8 12l-2 3M16 12l2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="drone" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M12 9V4M12 15v5M9 12H4M15 12h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="4" cy="4" r="1.5" fill="currentColor"/>
+    <circle cx="20" cy="4" r="1.5" fill="currentColor"/>
+    <circle cx="4" cy="20" r="1.5" fill="currentColor"/>
+    <circle cx="20" cy="20" r="1.5" fill="currentColor"/>
+  </symbol>
 </svg>

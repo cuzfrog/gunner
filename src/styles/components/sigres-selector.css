@@ -1,0 +1,17 @@
+@layer components {
+.sigres-selector > .btn {
+  flex-wrap: wrap;
+  column-gap: 4px;
+  row-gap: 1px;
+  padding: 3px 2px 4px;
+  line-height: 1.2;
+}
+
+.sigres-class {
+  font-family: "Chakra Petch", sans-serif;
+  font-size: 11px;
+  color: inherit;
+}
+
+.sigres-selector [aria-pressed="true"] .sigres-class, .sigres-selector .btn:hover:not(:disabled) .sigres-class { color: inherit; }
+}

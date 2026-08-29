@@ -53,6 +53,11 @@ describe("profileTextCodec", () => {
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("round-trips a profile with weaponKind and missileAmmo", () => {
+    const profile: ProfileSettings = { ...MINIMAL_PROFILE, shipAWeaponKind: "missile", shipAMissileAmmo: toTypeId("202") };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
   test("fitting body preserves blank lines and empty slot stubs", () => {
     const fitting = `[Rifter, Brawler]
 5MN Y-T8 Compact Microwarpdrive
@@ -120,7 +125,7 @@ describe("profileTextCodec", () => {
 
   test("a profile without ewar activations parses with defaults", () => {
     const text = `# gunner v1
-version=12
+version=13
 shipA.tracking=0.32
 shipA.sigRes=S
 shipA.optimal=5000

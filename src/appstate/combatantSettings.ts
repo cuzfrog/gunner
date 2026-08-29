@@ -1,4 +1,4 @@
-import type { AutopilotMode, SigResolutionClass } from "../sim";
+import type { AutopilotMode, SigResolutionClass, WeaponKind } from "../sim";
 import type { SkillLevel } from "../ships";
 import type { ShipId, TypeId } from "../gamedata/ids";
 import {
@@ -33,6 +33,8 @@ export interface CombatantSettings {
   readonly optimal: number;
   readonly falloff: number;
   readonly ammo: TypeId;
+  readonly weaponKind?: WeaponKind;
+  readonly missileAmmo?: TypeId;
 }
 
 export interface SessionSettings {

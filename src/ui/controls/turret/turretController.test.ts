@@ -1,5 +1,5 @@
 import { buildTurret } from "./testSupport";
-import { CHARGE_OPTIONS, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
+import { CHARGE_OPTIONS, FakeElement, getFake, IMPORTED_RIFTER, IMPORTED_RIFTER_WITH_CARGO, RIFTER, TURRET } from "../testSupport";
 import { TurretControllerImpl } from "./turretController";
 import { toTypeId } from "../../../gamedata/ids";
 import type { ShipProfile } from "../../../ships";
@@ -122,10 +122,12 @@ describe("TurretController", () => {
 
     const cargoList = getFake(document, "ship-a-ammo-cargo-list");
     expect(cargoList.children.length).toBe(2);
-    expect(cargoList.children[0].getAttribute("aria-selected")).toBe("true");
-    expect(cargoList.children[0].children[0].textContent).toBe("Hail S");
-    expect(cargoList.children[1].children[0].textContent).toBe("Republic Fleet EMP S");
-    expect(cargoList.children[1].children[1].textContent).toBe("x2000");
+    const firstButton = cargoList.children[0].firstElementChild as unknown as FakeElement;
+    expect(firstButton.getAttribute("aria-current")).toBe("true");
+    expect(firstButton.children[0].textContent).toBe("Hail S");
+    const secondButton = cargoList.children[1].firstElementChild as unknown as FakeElement;
+    expect(secondButton.children[0].textContent).toBe("Republic Fleet EMP S");
+    expect(secondButton.children[1].textContent).toBe("x2000");
   });
 
   test("selecting a different charge updates turret inputs and clears overrides", () => {
@@ -141,7 +143,7 @@ describe("TurretController", () => {
     getFake(document, "ship-a-optimal").value = "12345";
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.openAmmoPopup();
-    getFake(document, "ship-a-ammo-all-list").children[1].trigger("click");
+    (getFake(document, "ship-a-ammo-all-list").children[1].firstElementChild as unknown as FakeElement).trigger("click");
 
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Republic Fleet EMP S");
@@ -186,12 +188,18 @@ describe("TurretController", () => {
   test("currentTurretSpec reads inputs and uses the provided tracking override", () => {
     const { controller, trackingInput } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
-    const spec = controller.currentTurretSpec(0.5);
+    const spec = controller.currentTurretSpec(0.5)!;
     expect(spec.tracking).toBe(0.5);
     expect(spec.sigResolution).toBe(40);
     expect(spec.optimal).toBe(600);
     expect(spec.falloff).toBe(3000);
-    expect(controller.currentTurretSpec().tracking).toBe(trackingInput.rad);
+    expect(controller.currentTurretSpec()!.tracking).toBe(trackingInput.rad);
+  });
+
+  test("currentTurretSpec returns undefined when no turret is fitted", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined })) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
   test("capture returns the current turret inputs and ammo", () => {
@@ -229,8 +237,10 @@ describe("TurretController", () => {
 
     const cargoList = getFake(document, "ship-a-ammo-cargo-list");
     expect(cargoList.children.length).toBe(2);
-    expect(cargoList.children[0].children[1].textContent).toBe("海怪 S");
-    expect(cargoList.children[1].children[1].textContent).toBe("Republic Fleet EMP S");
+    const firstButton = cargoList.children[0].firstElementChild as unknown as FakeElement;
+    expect(firstButton.children[1].textContent).toBe("海怪 S");
+    const secondButton = cargoList.children[1].firstElementChild as unknown as FakeElement;
+    expect(secondButton.children[1].textContent).toBe("Republic Fleet EMP S");
     expect(controller.ammo()).toBe("Hail S");
   });
 

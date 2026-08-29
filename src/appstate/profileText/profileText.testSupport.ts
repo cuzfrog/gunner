@@ -26,7 +26,7 @@ export const SHIP_B_FITTED_HULL: FittedHullSummary = {
 };
 
 export const FULL_PROFILE: ProfileSettings = {
-  version: 12,
+  version: 13,
   shipATracking: 0.315,
   shipASigRes: "S",
   shipAOptimal: 600,
@@ -79,7 +79,7 @@ export const FULL_PROFILE: ProfileSettings = {
 };
 
 export const MINIMAL_PROFILE: ProfileSettings = {
-  version: 12,
+  version: 13,
   shipATracking: 0.32,
   shipASigRes: "S",
   shipAOptimal: 5000,

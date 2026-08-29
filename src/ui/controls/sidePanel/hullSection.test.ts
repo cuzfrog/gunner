@@ -71,7 +71,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       openSkillPopup: vi.fn(),
       closeSkillPopup: vi.fn(),
       isSkillPopupOpen: vi.fn(),
-      onSkillButtonClick: vi.fn(),
+      onSkillChoiceInput: vi.fn(),
       popup: {} as unknown as Popup,
     } as unknown as ISidePanelSections["skill"],
     propulsion: {
@@ -122,6 +122,9 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
     clearTurret: vi.fn(),
     restoreTurret: vi.fn(),
     setTurretProfile: vi.fn(),
+    clearLauncher: vi.fn(),
+    restoreLauncher: vi.fn(),
+    setLauncherProfile: vi.fn(),
   } as unknown as SidePanel);
 
   const section = new HullSection({ panel, els, ships, i18n });

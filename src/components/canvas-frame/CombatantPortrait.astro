@@ -1,0 +1,14 @@
+---
+interface Props {
+  readonly id: string;
+  readonly side: "ship-a" | "ship-b";
+}
+const { id, side } = Astro.props;
+const portraitClass = `combatant-portrait combatant-portrait-${side}`;
+const imageClass = `portrait-image portrait-image-${side}`;
+---
+
+<div id={id} class={portraitClass} hidden>
+  <img class={imageClass} alt="">
+  <div class="portrait-effects"></div>
+</div>

@@ -74,7 +74,9 @@ describe("PasteImportSection", () => {
     section.showImportHint("status.fittingImported");
     const name = getFake(document, "ship-a-fitting-name");
     expect(name.hidden).toBe(false);
-    expect(name.innerHTML).toContain("status.fittingImported");
+    expect(name.childElementCount).toBe(1);
+    expect(name.children[0].className).toContain("hull-fitting-name-value");
+    expect(name.children[0].textContent).toBe("status.fittingImported");
   });
 
   test("clearImportHint hides the hint and cancels the timeout", () => {

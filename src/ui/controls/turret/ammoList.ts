@@ -4,6 +4,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { chargeStatSuffix } from "../controlsFormat";
 import { isHtmlButtonElement, setText } from "../controlsDom";
+import { SelectableListImpl, type SelectableItem, SummaryChipImpl } from "../shared";
 
 export interface AmmoListEls {
   readonly ammoTrigger: HTMLButtonElement;
@@ -32,6 +33,8 @@ export class AmmoList {
   private readonly i18n: I18n;
   private readonly onSelect: (id: TypeId) => void;
   private readonly onExpand: () => void;
+  private readonly itemList: SelectableListImpl;
+  private readonly summaryChip: SummaryChipImpl;
 
   constructor(deps: {
     els: AmmoListEls;
@@ -49,6 +52,15 @@ export class AmmoList {
     this.i18n = deps.i18n;
     this.onSelect = deps.onSelect;
     this.onExpand = deps.onExpand;
+    this.itemList = new SelectableListImpl({
+      itemClass: "ammo-item btn",
+      nameClass: "ammo-item-name",
+      iconClass: "ammo-item-icon",
+      quantityClass: "ammo-item-quantity mono",
+      role: "option",
+      wrapInListItem: true,
+    });
+    this.summaryChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
     this.els.ammoExpand.addEventListener("click", () => this.onExpand());
   }
 
@@ -59,31 +71,23 @@ export class AmmoList {
 
   focusSelectedOrFirst(): void {
     const selected =
-      this.findButton(this.els.ammoCargoList, '[aria-selected="true"]') ??
-      this.findButton(this.els.ammoAllList, '[aria-selected="true"]') ??
-      this.els.ammoCargoList.firstElementChild;
+      this.findSelectedButton(this.els.ammoCargoList) ??
+      this.findSelectedButton(this.els.ammoAllList) ??
+      this.els.ammoCargoList.firstElementChild?.firstElementChild;
     if (selected && isHtmlButtonElement(selected)) selected.focus();
   }
 
   render(state: AmmoListState): void {
     const hasTurret = state.turret !== undefined;
     this.els.ammoTrigger.disabled = !hasTurret;
-    setText(this.els.ammoSummary, hasTurret ? this.fittingImport.itemNameForId(state.ammo, this.i18n.current()) : "—");
-    this.renderIcon(state.ammo, hasTurret);
+    if (hasTurret) {
+      this.summaryChip.render(this.fittingImport.itemNameForId(state.ammo, this.i18n.current()), this.imageCatalog.itemIconUrl(state.ammo));
+    } else {
+      this.summaryChip.render("—", undefined);
+    }
     this.renderCargoList(state);
     this.renderAllList(state);
     this.renderExpand(state.allExpanded);
-  }
-
-  private renderIcon(ammo: TypeId, hasTurret: boolean): void {
-    const icon = this.els.ammoSummaryIcon;
-    if (!hasTurret) {
-      icon.hidden = true;
-      return;
-    }
-    const url = this.imageCatalog.itemIconUrl(ammo);
-    icon.src = url ?? "";
-    icon.hidden = !url;
   }
 
   private renderCargoList(state: AmmoListState): void {
@@ -103,16 +107,18 @@ export class AmmoList {
     }
     list.hidden = false;
     label.hidden = false;
-    for (const entry of entries) {
-      const item = this.createItem(entry.id, entry.id === state.ammo, this.i18n.t("button.selectAmmo"));
-      if (entry.quantity !== undefined) {
-        const quantity = document.createElement("span");
-        quantity.className = "ammo-item-quantity mono";
-        quantity.textContent = `x${entry.quantity}`;
-        item.appendChild(quantity);
-      }
-      item.addEventListener("click", () => this.onSelect(entry.id));
-      list.appendChild(item);
+    const items: SelectableItem[] = entries.map((entry) => ({
+      value: entry.id,
+      label: this.fittingImport.itemNameForId(entry.id, this.i18n.current()),
+      title: this.i18n.t("button.selectAmmo"),
+      iconUrl: this.imageCatalog.itemIconUrl(entry.id),
+      selected: entry.id === state.ammo,
+      quantity: entry.quantity !== undefined ? `x${entry.quantity}` : undefined,
+    }));
+    const buttons = this.itemList.render(list, items);
+    for (let i = 0; i < entries.length; i++) {
+      const id = entries[i].id;
+      buttons[i].addEventListener("click", () => this.onSelect(id));
     }
   }
 
@@ -143,36 +149,19 @@ export class AmmoList {
       return;
     }
     list.hidden = false;
-    for (const option of options) {
-      const item = this.createItem(option.id, option.id === state.ammo, chargeStatSuffix(option));
-      item.addEventListener("click", () => this.onSelect(option.id));
-      list.appendChild(item);
+    const items: SelectableItem[] = options.map((option) => ({
+      value: option.id,
+      label: this.fittingImport.itemNameForId(option.id, this.i18n.current()),
+      title: chargeStatSuffix(option),
+      iconUrl: this.imageCatalog.itemIconUrl(option.id),
+      selected: option.id === state.ammo,
+    }));
+    const buttons = this.itemList.render(list, items);
+    for (let i = 0; i < options.length; i++) {
+      const id = options[i].id;
+      buttons[i].addEventListener("click", () => this.onSelect(id));
     }
     section.hidden = !state.allExpanded;
-  }
-
-  private createItem(id: TypeId, selected: boolean, title: string): HTMLButtonElement {
-    const item = document.createElement("button");
-    item.type = "button";
-    item.className = "ammo-item btn";
-    item.setAttribute("role", "option");
-    item.setAttribute("aria-selected", String(selected));
-    item.title = title;
-    const iconUrl = this.imageCatalog.itemIconUrl(id);
-    if (iconUrl) {
-      const icon = document.createElement("img");
-      icon.className = "ammo-item-icon";
-      icon.src = iconUrl;
-      icon.alt = "";
-      item.appendChild(icon);
-    }
-    const displayName = this.fittingImport.itemNameForId(id, this.i18n.current());
-    const label = document.createElement("span");
-    label.className = "ammo-item-name truncate";
-    label.textContent = displayName;
-    label.title = displayName;
-    item.appendChild(label);
-    return item;
   }
 
   private renderExpand(expanded: boolean): void {
@@ -181,8 +170,11 @@ export class AmmoList {
     setText(this.els.ammoExpand, this.i18n.t(key));
   }
 
-  private findButton(list: HTMLElement, selector: string): Element | null {
-    const found = list.querySelector(selector);
-    return found && isHtmlButtonElement(found) ? found : null;
+  private findSelectedButton(list: HTMLElement): Element | null {
+    for (const child of list.children) {
+      const button = child.firstElementChild;
+      if (button && button.getAttribute("aria-current") === "true") return button;
+    }
+    return null;
   }
 }

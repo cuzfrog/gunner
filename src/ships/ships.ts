@@ -39,6 +39,7 @@ export interface Ships {
   allFittingOptions(): readonly PropulsionModule[];
   fittingOption(profile: ShipProfile, id: PropulsionId): PropulsionModule | undefined;
   turretSizeOptions(profile: ShipProfile): readonly HullTier[];
+  shipTier(profile: ShipProfile): HullTier | undefined;
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions, maxSpeedOverride?: number): ShipStats;
   maxSpeedForFittedMass(
     profile: ShipProfile, fitted: FittedHull | undefined, mass: number, module?: PropulsionStats, conditions?: StatConditions,
@@ -115,6 +116,10 @@ export class ShipsImpl implements Ships {
     const tier = this.shipTierFor(profile);
     if (!tier) return [];
     return turretSizeOptionsFor(tier);
+  }
+
+  shipTier(profile: ShipProfile): HullTier | undefined {
+    return this.shipTierFor(profile) ?? undefined;
   }
 
   fittedStats(profile: ShipProfile, fitted?: FittedHull, module?: PropulsionStats, conditions?: StatConditions, maxSpeedOverride?: number): ShipStats {

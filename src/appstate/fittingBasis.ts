@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport } from "../fitting";
+import type { ChargeCatalog, FittingImport, MissileCatalog } from "../fitting";
 import type { TypeId } from "../gamedata/ids";
 import type { PropulsionId, PropulsionStats, Ships } from "../ships";
 import { PROPULSION_NONE, type FittedHullSummary, type UserSettings } from "./userSettings";
@@ -7,11 +7,13 @@ export class FittingBasis {
   private readonly ships: Ships;
   private readonly fittingImport: FittingImport;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly missileCatalog: MissileCatalog;
 
-  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog }) {
+  constructor(deps: { ships: Ships; fittingImport: FittingImport; chargeCatalog: ChargeCatalog; missileCatalog: MissileCatalog }) {
     this.ships = deps.ships;
     this.fittingImport = deps.fittingImport;
     this.chargeCatalog = deps.chargeCatalog;
+    this.missileCatalog = deps.missileCatalog;
   }
 
   rebuild(settings: UserSettings, side: "shipA" | "shipB"): Partial<UserSettings> {
@@ -136,6 +138,17 @@ export class FittingBasis {
         result.shipBOptimal = override.optimal ?? turret.optimal;
         result.shipBFalloff = override.falloff ?? turret.falloff;
         result.shipBAmmo = turret.chargeId;
+      }
+    }
+    if (imported.launcher) {
+      const storedMissileAmmo = side === "shipA" ? settings.shipAMissileAmmo : settings.shipBMissileAmmo;
+      const launcher = storedMissileAmmo && this.missileCatalog.has(storedMissileAmmo)
+        ? this.missileCatalog.withCharge(imported.launcher, storedMissileAmmo, imported.hullBonuses, skillLevel)
+        : imported.launcher;
+      if (side === "shipA") {
+        result.shipAMissileAmmo = launcher.chargeId;
+      } else {
+        result.shipBMissileAmmo = launcher.chargeId;
       }
     }
     return result;

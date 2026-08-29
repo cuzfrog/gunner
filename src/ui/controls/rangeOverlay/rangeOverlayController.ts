@@ -6,6 +6,7 @@ import type { EwarController, EwarEffectDescriber } from "../ewar";
 import type { Side } from "../side";
 import type { UiEvents } from "../../events";
 import type { RangeOverlayController, RangeOverlayEls } from "./rangeOverlayControllerContract";
+import { html } from "../markup";
 
 const ALL_KINDS: readonly RangeOverlayKind[] = ["web", "grappler", "scrambler", "disruptor"];
 const SIDES: readonly Side[] = ["shipA", "shipB"];
@@ -33,6 +34,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     this.now = deps.now;
     for (const kind of ALL_KINDS) this.visibilityMap.set(kind, "none");
     this.events.onDistanceChanged((d) => { this.distance = d; });
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 
@@ -238,10 +240,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
   }
 
   private createChip(kind: RangeOverlayKind): HTMLButtonElement {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = `range-overlay-chip range-overlay-${kind}`;
-    chip.textContent = this.i18n.t(`label.ewar.${kind}`);
+    const chip = html`<button type="button" class=${`range-overlay-chip range-overlay-${kind}`}>${this.i18n.t(`label.ewar.${kind}`)}</button>` as unknown as HTMLButtonElement;
     chip.addEventListener("click", () => this.toggle(kind));
     return chip;
   }

@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import pkg from "../../package.json";
+import AppHeader from "../components/app-shell/AppHeader.astro";
+import AppFooter from "../components/app-shell/AppFooter.astro";
+import ProfileBar from "../components/profile-bar/ProfileBar.astro";
+import ResultGrid from "../components/result-grid/ResultGrid.astro";
+import ShipPanel from "../components/side-panel/ShipPanel.astro";
+import CanvasFrame from "../components/canvas-frame/CanvasFrame.astro";
+
+const version = pkg.version;
+---
+
+<Layout title="Gunner - EVE Tactic Simulator">
+  <div class="app-container">
+    <AppHeader version={version} />
+    <ProfileBar />
+    <ResultGrid />
+    <main class="app-main">
+      <ShipPanel side="shipA" />
+      <CanvasFrame />
+      <ShipPanel side="shipB" />
+    </main>
+    <AppFooter />
+  </div>
+
+  <datalist id="hull-options"></datalist>
+</Layout>

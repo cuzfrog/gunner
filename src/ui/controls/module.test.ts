@@ -38,6 +38,14 @@ const controlsCradleKeys = {
   shipATurretController: "shipATurretController",
   shipBTurretController: "shipBTurretController",
   turretControllers: "turretControllers",
+  shipALauncherController: "shipALauncherController",
+  shipBLauncherController: "shipBLauncherController",
+  launcherControllers: "launcherControllers",
+  weaponSystemSwitches: "weaponSystemSwitches",
+  fittingDb: "fittingDb",
+  missileCatalog: "missileCatalog",
+  launcherCatalog: "launcherCatalog",
+  launcherClasses: "launcherClasses",
   shipASide: "shipASide",
   shipBSide: "shipBSide",
   shipAFittingPreview: "shipAFittingPreview",
@@ -57,6 +65,7 @@ const controlsCradleKeys = {
   confirmController: "confirmController",
   profileEquality: "profileEquality",
   profileChangeTracker: "profileChangeTracker",
+  itemNameLoader: "itemNameLoader",
   controls: "controls",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 

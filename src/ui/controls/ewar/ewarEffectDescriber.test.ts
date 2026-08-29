@@ -1,8 +1,10 @@
 import { toTypeId } from "../../../gamedata/ids";
-import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "../../../sim";
 import type { EwarResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
+
+const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, optimal: 1, falloff: 1, damagePerShot: 0, cycleTime: 1, turretCount: 1 };
 
 const resolver = vi.mocked<EwarResolver>({
   speedMultiplier: vi.fn(),
@@ -42,8 +44,8 @@ const distance = 5000;
 beforeEach(() => {
   resolver.speedMultiplier.mockReturnValue(1);
   resolver.speedMultiplierIgnoringRange.mockReturnValue(1);
-  resolver.disruptedTurret.mockReturnValue({ tracking: 1, sigResolution: 1, optimal: 1, falloff: 1 });
-  resolver.disruptedTurretIgnoringRange.mockReturnValue({ tracking: 1, sigResolution: 1, optimal: 1, falloff: 1 });
+  resolver.disruptedTurret.mockReturnValue(unitTurret);
+  resolver.disruptedTurretIgnoringRange.mockReturnValue(unitTurret);
   resolver.propulsionSuppressed.mockReturnValue(false);
   resolver.propulsionSuppressedIgnoringRange.mockReturnValue(false);
   i18n.t.mockImplementation((key) => LABELS[key] ?? key);
@@ -73,13 +75,13 @@ describe("EwarEffectDescriber", () => {
   });
 
   test("disruptorDescription composes per-channel percentages for a disrupted unit turret", () => {
-    resolver.disruptedTurret.mockReturnValue({ tracking: 0.7, sigResolution: 1, optimal: 0.55, falloff: 0.55 });
+    resolver.disruptedTurret.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
     expect(describer.disruptorDescription(projection, distance)).toBe("Tracking -30% · Optimal -45% · Falloff -45%");
-    expect(resolver.disruptedTurret).toHaveBeenCalledWith({ tracking: 1, sigResolution: 1, optimal: 1, falloff: 1 }, projection, distance);
+    expect(resolver.disruptedTurret).toHaveBeenCalledWith(unitTurret, projection, distance);
   });
 
   test("disruptorDescription reports out-of-range text when all channels round to 0", () => {
-    resolver.disruptedTurret.mockReturnValue({ tracking: 0.999, sigResolution: 1, optimal: 0.999, falloff: 0.999 });
+    resolver.disruptedTurret.mockReturnValue({ ...unitTurret, tracking: 0.999, optimal: 0.999, falloff: 0.999 });
     expect(describer.disruptorDescription(projection, distance)).toBe("No effect at this range");
   });
 
@@ -108,9 +110,9 @@ describe("EwarEffectDescriber", () => {
   });
 
   test("disruptorHint reports percentages and ignores the current distance", () => {
-    resolver.disruptedTurretIgnoringRange.mockReturnValue({ tracking: 0.7, sigResolution: 1, optimal: 0.55, falloff: 0.55 });
+    resolver.disruptedTurretIgnoringRange.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
     expect(describer.disruptorHint(projection)).toBe("Tracking -30% · Optimal -45% · Falloff -45% · range 0 m");
-    expect(resolver.disruptedTurretIgnoringRange).toHaveBeenCalledWith({ tracking: 1, sigResolution: 1, optimal: 1, falloff: 1 }, projection);
+    expect(resolver.disruptedTurretIgnoringRange).toHaveBeenCalledWith(unitTurret, projection);
   });
 
   test("scramblerHint reports MWD disabled ignoring the current distance", () => {
@@ -145,7 +147,7 @@ describe("EwarEffectDescriber", () => {
       },
       activation: { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: true, script: undefined }], scramblers: [] },
     } as EwarProjection;
-    resolver.disruptedTurretIgnoringRange.mockReturnValue({ tracking: 0.7, sigResolution: 1, optimal: 0.55, falloff: 0.55 });
+    resolver.disruptedTurretIgnoringRange.mockReturnValue({ ...unitTurret, tracking: 0.7, optimal: 0.55, falloff: 0.55 });
     expect(describer.disruptorHint(disruptorProjection)).toBe("Tracking -30% · Optimal -45% · Falloff -45% · range 72.0 km");
   });
 

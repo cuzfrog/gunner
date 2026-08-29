@@ -78,6 +78,7 @@ function createController(options: { panel?: Partial<FittingPopupHost>; applyFit
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
+    detectLanguageFromText: vi.fn(() => undefined),
   });
 
   const i18n = createI18n();

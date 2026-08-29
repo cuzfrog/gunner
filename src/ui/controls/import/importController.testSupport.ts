@@ -3,7 +3,8 @@ import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
 import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
+import type { Side } from "../side";
 import type { ShipATurret } from "./shipATurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
@@ -68,7 +69,7 @@ function makeMockProfileTextCodec(): ProfileTextCodec {
       const trimmed = text.trimStart();
       if (!trimmed.startsWith("# gunner v1")) return undefined;
       return {
-        version: 12,
+        version: 13,
         shipATracking: 0.32,
         shipASigRes: "S",
         shipAOptimal: 5000,
@@ -141,6 +142,7 @@ export function buildImportController(document: Document) {
     summarize: vi.fn(),
     canonicalEftText: vi.fn(),
     itemNameForId: vi.fn((id: TypeId) => String(id)),
+    detectLanguageFromText: vi.fn(() => "en" as const),
   });
   const savedFittings = vi.mocked<SavedFittings>({
     listForHull: vi.fn(() => []),
@@ -151,6 +153,13 @@ export function buildImportController(document: Document) {
   const shipATurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
   const shipBTurret: ShipATurret = { applyImported: vi.fn(), ammoId: vi.fn(() => "12608" as TypeId) };
   const turrets = { shipA: shipATurret, shipB: shipBTurret };
+  const shipALauncher = { applyImported: vi.fn() };
+  const shipBLauncher = { applyImported: vi.fn() };
+  const launchers = { shipA: shipALauncher, shipB: shipBLauncher };
+  const weaponSystemSwitches: Record<Side, WeaponSystemSwitch> = {
+    shipA: { side: "shipA", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+    shipB: { side: "shipB", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+  };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -173,12 +182,15 @@ export function buildImportController(document: Document) {
     shipASide: shipAPanel as unknown as SidePanel,
     shipBSide: shipBPanel as unknown as SidePanel,
     turrets,
+    launchers,
+    weaponSystemSwitches,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
+    itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets, launchers, weaponSystemSwitches,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }

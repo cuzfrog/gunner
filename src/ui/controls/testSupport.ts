@@ -13,9 +13,13 @@ import {
   getFake,
   mockChargeCatalog,
   mockClipboard,
+  mockFittingDb,
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
+  mockLauncherCatalog,
+  mockLauncherClasses,
+  mockMissileCatalog,
   mockParser,
   mockPresetFittings,
   mockTurretCatalog,
@@ -25,7 +29,7 @@ import {
   mockTimer,
 } from "../testing";
 import type { StatConditions } from "../../ships";
-import type { SigResolutionClass } from "../../sim";
+import type { SigResolutionClass, TurretSpec } from "../../sim";
 import { TrackingInputImpl, type TrackingInput } from "./trackingInput";
 import { DomControls } from "./domControls";
 import type { ConfirmController } from "./confirm";
@@ -36,6 +40,7 @@ import type { Popup, PopupGroup } from "./popup";
 import type { Side } from "./side";
 import { registerSidePanelModule, type SidePanel, type SidePanelHost } from "./sidePanel";
 import type { TurretController, TurretOverrides } from "./turret";
+import type { LauncherController } from "./launcher";
 
 export { createControlsEls } from "./elements";
 export * from "../testing";
@@ -193,7 +198,12 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     clipboard: asValue(mockClipboard()),
     timer: asValue(mockTimer()),
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
+    fittingDb: asValue(mockFittingDb()),
+    missileCatalog: asValue(mockMissileCatalog()),
+    launcherCatalog: asValue(mockLauncherCatalog()),
+    launcherClasses: asValue(mockLauncherClasses()),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
+    itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
   });
   return cradle;
 }
@@ -249,7 +259,7 @@ class StubTurretController implements TurretController {
   restore(fittingText?: string, conditions?: StatConditions, ammo?: string, tracking?: number, sigRes?: SigResolutionClass, optimal?: number, falloff?: number): void;
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
-  currentTurretSpec = vi.fn(() => ({ tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000 }));
+  currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 }));
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();
@@ -260,6 +270,27 @@ class StubTurretController implements TurretController {
   private currentUnit: TrackingUnit = "rad";
   setTrackingUnit = vi.fn((unit: TrackingUnit) => { this.currentUnit = unit; });
   trackingUnit = vi.fn((): TrackingUnit => this.currentUnit);
+
+  constructor(side: Side) {
+    this.side = side;
+  }
+}
+
+class StubLauncherController implements LauncherController {
+  readonly side: Side;
+  popup: Popup = new StubPopup();
+  launcher = vi.fn(() => undefined);
+  ammoId = vi.fn(() => undefined);
+  currentMissileSpec = vi.fn(() => undefined);
+  applyImported = vi.fn();
+  restore = vi.fn();
+  setHullProfile = vi.fn();
+  clear = vi.fn();
+  capture = vi.fn(() => ({ ammo: undefined }));
+  isAmmoPopupOpen = vi.fn();
+  openAmmoPopup = vi.fn();
+  closeAmmoPopup = vi.fn();
+  render = vi.fn();
 
   constructor(side: Side) {
     this.side = side;
@@ -301,6 +332,8 @@ export function buildSidePanel(
   const shipBTurretOverrides: TurretOverrides = new StubTurretOverrides();
   const shipATurretController: TurretController = new StubTurretController("shipA");
   const shipBTurretController: TurretController = new StubTurretController("shipB");
+  const shipALauncherController: LauncherController = new StubLauncherController("shipA");
+  const shipBLauncherController: LauncherController = new StubLauncherController("shipB");
 
   const cradle = createContainer<TestControlsCradle>({ injectionMode: InjectionMode.PROXY });
   registerSimModule(cradle);
@@ -316,9 +349,11 @@ export function buildSidePanel(
     shipATurretController: asValue(shipATurretController),
     shipBTurretController: asValue(shipBTurretController),
     turretControllers: asValue({ shipA: shipATurretController, shipB: shipBTurretController }),
+    launcherControllers: asValue({ shipA: shipALauncherController, shipB: shipBLauncherController }),
     shipATurretOverrides: asValue(shipATurretOverrides),
     shipBTurretOverrides: asValue(shipBTurretOverrides),
     turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),
+    itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
   });
   registerSidePanelModule(cradle);
 

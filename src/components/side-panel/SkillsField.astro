@@ -1,0 +1,25 @@
+---
+import Chevron from "../controls/Chevron.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
+
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+---
+
+<div class="form-field-group skill-section skill-select" id={`${idPrefix}-skill-field`}>
+  <TriggerButton id={`${idPrefix}-skill-trigger`} popupId={`${idPrefix}-skill-popup`}
+          labelClass="skill-label truncate" labelI18n="label.skillLevel" labelText="Pilot skills"
+          ariaHaspopup="true">
+    <span class="skill-summary-row">
+      <span class="skill-summary-value mono truncate" id={`${idPrefix}-skill-summary`}>Level 5</span>
+      <Chevron />
+    </span>
+  </TriggerButton>
+  <select class="input-field" id={`${idPrefix}-skills`} hidden></select>
+  <PopupBox id={`${idPrefix}-skill-popup`} extraClass="skill-popup" position="above" align="both">
+    <div class="skill-tuner" id={`${idPrefix}-skill-options`} role="group" data-i18n-aria-label="label.skillLevel" aria-label="Pilot skills"></div>
+  </PopupBox>
+</div>

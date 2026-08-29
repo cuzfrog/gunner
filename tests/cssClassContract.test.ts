@@ -1,6 +1,6 @@
-const HTML_PATH = "public/index.html";
+const ASTRO_GLOB = "src/**/*.astro";
 const TS_GLOB = "src/ui/**/*.ts";
-const CSS_GLOB = "public/styles/**/*.css";
+const CSS_GLOB = "src/styles/**/*.css";
 
 // Classes used in HTML/TS that have no matching CSS rule yet.
 // Each entry must name the phase that removes it.
@@ -14,12 +14,26 @@ const ALLOWED_ORPHAN = new Set<string>([
   "range-overlay-grappler",
   "range-overlay-scrambler",
   "range-overlay-disruptor",
+  // Astro components generate per-side class names from `prefix-${side}` at build time.
+  // The literal scanner sees only the prefix (ending with `-`, which is skipped); the
+  // full names appear only in dist/index.html which may not exist when the test runs in CI.
+  "combatant-portrait-ship-a",
+  "combatant-portrait-ship-b",
+  "portrait-image-ship-a",
+  "portrait-image-ship-b",
+  "result-side-a",
+  "result-side-b",
+  "side-panel-ship-a",
+  "side-panel-ship-b",
+  "popup-below",
+  "popup-above",
 ]);
 
 // Approved component / primitive prefixes. A class is valid if it equals one of these or starts with `<prefix>-`.
 const APPROVED_PREFIXES = [
   "app",
   "side-panel",
+  "side-panel-weapon-area",
   "hull",
   "canvas-frame",
   "control-bar",
@@ -40,6 +54,10 @@ const APPROVED_PREFIXES = [
   "skill-tuner",
   "skill",
   "ammo",
+  "launcher",
+  "weapon-system",
+  "weapon-kind",
+  "weapon-panel",
   "turret-mode",
   "sigres",
   "overload-button",
@@ -58,6 +76,10 @@ const APPROVED_PREFIXES = [
   "preview",
   "result-grid",
   "result-card",
+  "result-side",
+  "result-range",
+  "result-hero",
+  "result-metric",
   "range-overlay",
   "combatant-portrait",
   "portrait",
@@ -76,14 +98,78 @@ const APPROVED_PREFIXES = [
   "mono",
   "truncate",
   "chevron",
+  "choice-icon",
+  "choice-value",
 ];
 
 type StringMap = Map<string, Set<string>>;
 
-function htmlClasses(html: string): Set<string> {
+function isApproved(className: string): boolean {
+  return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
+}
+
+function extractClassExpressions(text: string): string[] {
+  const expressions: string[] = [];
+  const pattern = /class=\{/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    const start = match.index + match[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < text.length && depth > 0) {
+      if (text[i] === "{") depth++;
+      else if (text[i] === "}") depth--;
+      i++;
+    }
+    if (depth === 0) expressions.push(text.slice(start, i - 1));
+  }
+  return expressions;
+}
+
+function extractFrontmatter(text: string): string | undefined {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  return match ? match[1] : undefined;
+}
+
+function extractFrontmatterClassStrings(frontmatter: string): Set<string> {
+  const tokens = new Set<string>();
+  for (const m of frontmatter.matchAll(/(?:const|let)\s+\w*class\w*\s*=\s*([\s\S]*?);/gi)) {
+    for (const t of extractStringLiteralTokens(m[1])) tokens.add(t);
+  }
+  for (const m of frontmatter.matchAll(/\.push\(\s*"([^"]*)"\s*\)/g)) {
+    for (const token of m[1].split(/\s+/)) if (token) tokens.add(token);
+  }
+  for (const m of frontmatter.matchAll(/\.push\(\s*`([^`]*)`\s*\)/g)) {
+    const cleaned = m[1].replace(/\$\{[^}]*\}/g, " ");
+    for (const token of cleaned.split(/\s+/)) if (token && !token.endsWith("-")) tokens.add(token);
+  }
+  return tokens;
+}
+
+async function astroClasses(): Promise<Set<string>> {
   const found = new Set<string>();
-  for (const m of html.matchAll(/class="([^"]*)"/g)) {
-    for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+  const glob = new Bun.Glob(ASTRO_GLOB);
+  for await (const path of glob.scan({ cwd: "." })) {
+    const text = await Bun.file(path).text();
+    for (const m of text.matchAll(/class="([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
+    for (const expr of extractClassExpressions(text)) {
+      for (const t of extractStringLiteralTokens(expr)) found.add(t);
+    }
+    for (const m of text.matchAll(/(?:extraClass|labelClass)\s*=\s*"([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
+    const frontmatter = extractFrontmatter(text);
+    if (frontmatter) {
+      for (const t of extractFrontmatterClassStrings(frontmatter)) found.add(t);
+    }
+  }
+  if (await Bun.file("dist/index.html").exists()) {
+    const html = await Bun.file("dist/index.html").text();
+    for (const m of html.matchAll(/class="([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) found.add(token);
+    }
   }
   return found;
 }
@@ -134,6 +220,16 @@ async function tsClasses(): Promise<StringMap> {
 
     // innerHTML/template strings containing class="..."
     for (const m of text.matchAll(/class="([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
+    }
+
+    // SelectableList shape class properties (itemClass, nameClass, iconClass, quantityClass, extraButtonClass)
+    for (const m of text.matchAll(/(?:itemClass|nameClass|iconClass|quantityClass|extraButtonClass)\s*:\s*"([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
+    }
+
+    // ChoiceGroup shape class properties (buttonClass, iconClass, labelClass)
+    for (const m of text.matchAll(/(?:buttonClass|labelClass)\s*:\s*"([^"]*)"/g)) {
       for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
     }
 
@@ -195,8 +291,7 @@ function cssClasses(cssText: string): Set<string> {
 }
 
 test("every used class has a CSS definition", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const defined = cssClasses(await cssText());
   const missing = [...used].filter((c) => !defined.has(c) && !ALLOWED_UNDEFINED.has(c));
@@ -204,21 +299,17 @@ test("every used class has a CSS definition", async () => {
 });
 
 test("every CSS class is referenced somewhere", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const defined = cssClasses(await cssText());
   const orphans = [...defined].filter((c) => !used.has(c) && !ALLOWED_ORPHAN.has(c));
   expect(orphans).toEqual([]);
 });
 
-function isApproved(className: string): boolean {
-  return APPROVED_PREFIXES.some((prefix) => className === prefix || className.startsWith(`${prefix}-`));
-}
-
 test("every CSS file starts with an @layer wrapper", async () => {
   const glob = new Bun.Glob(CSS_GLOB);
   for await (const path of glob.scan({ cwd: "." })) {
+    if (path === "src/styles/styles.css") continue;
     const text = await Bun.file(path).text();
     expect(text.trimStart().startsWith("@layer")).toBe(true);
   }
@@ -227,15 +318,14 @@ test("every CSS file starts with an @layer wrapper", async () => {
 test("viewport @media queries are confined to layout.css", async () => {
   const glob = new Bun.Glob(CSS_GLOB);
   for await (const path of glob.scan({ cwd: "." })) {
-    if (path === "public/styles/layout.css") continue;
+    if (path === "src/styles/layout.css") continue;
     const text = await Bun.file(path).text();
     expect(text.includes("@media")).toBe(false);
   }
 });
 
 test("every used class is an approved component or primitive prefix", async () => {
-  const html = await Bun.file(HTML_PATH).text();
-  const used = htmlClasses(html);
+  const used = await astroClasses();
   for (const hits of (await tsClasses()).values()) for (const c of hits) used.add(c);
   const bad = [...used].filter((c) => !isApproved(c));
   expect(bad).toEqual([]);

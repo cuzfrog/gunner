@@ -27,7 +27,7 @@ function main(): void {
     }),
     now: asValue(() => performance.now()),
   });
-  registerGameDataModule(container);
+  registerGameDataModule(container, () => container.cradle.uiEvents.emitLanguageChanged());
   registerShipsModule(container);
   registerFittingModule(container);
   // sim before ui: controls wiring resolves sessionCodec eagerly, which needs hitChance.

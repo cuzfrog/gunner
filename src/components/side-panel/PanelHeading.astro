@@ -1,0 +1,52 @@
+---
+import { COMBATANT_SIDES } from "../../ui/controls";
+import type { Side } from "../../ui/controls";
+import IconButton from "../controls/IconButton.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import WeaponKindSwitch from "./WeaponKindSwitch.astro";
+
+interface Props {
+  readonly idPrefix: string;
+  readonly side: Side;
+}
+const { idPrefix, side } = Astro.props;
+const config = COMBATANT_SIDES.find((s) => s.key === side)!;
+const headingI18n = `label.${config.i18nKey}`;
+const headingText = config.label;
+---
+
+<div class="side-panel-heading-row">
+  <h2 class="side-panel-heading" data-i18n={headingI18n}>{headingText}</h2>
+  <div class="side-panel-heading-actions">
+    <IconButton id={`${idPrefix}-import-fitting`} iconName="import"
+            titleI18n="button.importFitting" ariaLabelI18n="button.importFitting"
+            title="Import from clipboard" ariaLabel="Import from clipboard" />
+    <PopupBox id={`${idPrefix}-paste-popup`} extraClass="paste-popup" position="below" align="left">
+      <textarea id={`${idPrefix}-paste-input`} class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
+      <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
+    </PopupBox>
+    <IconButton id={`${idPrefix}-ship-select-trigger`} iconName="search"
+            ariaHaspopup="dialog" ariaExpanded={false} ariaControls={`${idPrefix}-ship-select-popup`}
+            titleI18n="button.selectShip" ariaLabelI18n="button.selectShip"
+            title="Select ship & fitting" ariaLabel="Select ship & fitting" />
+    <PopupBox id={`${idPrefix}-ship-select-popup`} extraClass="ship-select-popup" position="below" align="both" scroll role="dialog" ariaModal={true}
+         i18nAriaLabel="button.selectShip" ariaLabel="Select ship & fitting">
+      <input type="text" class="input-field ship-select-hull" id={`${idPrefix}-hull`} list="hull-options"
+             autocomplete="off" autocapitalize="off" spellcheck="false"
+             data-i18n-placeholder="hint.hullSearch" placeholder="Type ship name...">
+      <span class="fitting-group-label" id={`${idPrefix}-fitting-saved-label`} data-i18n="fitting.savedGroup" aria-hidden="true" hidden>Saved</span>
+      <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.savedGroup" aria-label="Saved" id={`${idPrefix}-fitting-saved-list`}></ul>
+      <span class="fitting-group-label" id={`${idPrefix}-fitting-preset-label`} data-i18n="fitting.presetGroup" aria-hidden="true" hidden>Presets</span>
+      <ul class="fitting-list" role="group" data-i18n-aria-label="fitting.presetGroup" aria-label="Presets" id={`${idPrefix}-fitting-preset-list`}></ul>
+      <p class="fitting-empty" id={`${idPrefix}-fitting-empty`} data-i18n="fitting.empty" hidden>No fittings for this ship.</p>
+      <span class="ship-select-hint" id={`${idPrefix}-hull-hint`}></span>
+    </PopupBox>
+    <IconButton id={`${idPrefix}-fitting-eye`} iconName="eye" iconFill="none" iconStroke="currentColor" extraClass="fitting-eye"
+            pressed={false} disabled
+            titleI18n="button.fittingDetails" ariaLabelI18n="button.fittingDetails"
+            title="Show fitting details" ariaLabel="Show fitting details" />
+    <span class="hull-fitting-name" id={`${idPrefix}-fitting-name`} hidden></span>
+    <PopupBox id={`${idPrefix}-fitting-preview`} extraClass="fitting-preview" scroll ariaHidden={true} />
+  </div>
+  <WeaponKindSwitch idPrefix={idPrefix} />
+</div>

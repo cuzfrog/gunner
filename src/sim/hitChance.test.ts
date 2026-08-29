@@ -5,10 +5,14 @@ import type { EngagementFrame, ShipState, TurretSpec } from "./types";
 const hitChance = new HitChanceImpl();
 
 const defaultTurret: TurretSpec = {
+  kind: "turret",
   tracking: 0.32,
   sigResolution: 40,
   optimal: 5000,
   falloff: 5000,
+  damagePerShot: 0,
+  cycleTime: 1,
+  turretCount: 1,
 };
 
 const dummyShip: ShipState = {

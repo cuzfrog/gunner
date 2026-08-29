@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -183,6 +183,124 @@ describe("buildDisruptionScriptStats", () => {
       rangeDeltaBonus: 0,
       falloffDeltaBonus: 0,
     });
+  });
+});
+
+describe("buildLauncherStats", () => {
+  test("returns undefined when speed attribute is missing", () => {
+    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509)).toBeUndefined();
+  });
+
+  test("returns undefined when speed is non-positive", () => {
+    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509)).toBeUndefined();
+  });
+
+  test("returns undefined when no charge groups are present", () => {
+    expect(buildLauncherStats(values({ speed: 13600 }), 509)).toBeUndefined();
+  });
+
+  test("converts cycle time from milliseconds to seconds and preserves launcher group with charge groups", () => {
+    // Arbalest Compact Light Missile Launcher: speed=13600ms, group 509, chargeGroup1=384, chargeGroup2=394
+    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509)).toEqual({
+      rateOfFire: 13.6,
+      launcherGroup: 509,
+      chargeGroups: [384, 394],
+    });
+  });
+
+  test("collects charge groups from chargeGroup1 through chargeGroup5", () => {
+    expect(buildLauncherStats(values({
+      speed: 18000, chargeGroup1: 657, chargeGroup3: 89,
+    }), 508)).toEqual({
+      rateOfFire: 18,
+      launcherGroup: 508,
+      chargeGroups: [657, 89],
+    });
+  });
+
+  test("preserves torpedo launcher group (508) with chargeGroup3", () => {
+    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508);
+    expect(stats?.launcherGroup).toBe(508);
+    expect(stats?.chargeGroups).toEqual([89]);
+  });
+});
+
+describe("buildMissileStats", () => {
+  test("returns undefined when all damage attributes are zero or missing", () => {
+    expect(buildMissileStats(values({
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3000, explosionDelay: 5000, launcherGroup: 509,
+    }), 384)).toBeUndefined();
+  });
+
+  test("returns undefined when application attributes are missing", () => {
+    expect(buildMissileStats(values({ kineticDamage: 100 }), 384)).toBeUndefined();
+  });
+
+  test("builds a kinetic light missile from SDE attributes", () => {
+    // Mjolnir Light Missile is EM, but we test with kinetic here
+    expect(buildMissileStats(values({
+      emDamage: 0, thermalDamage: 0, kineticDamage: 113, explosiveDamage: 0,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384)).toEqual({
+      damage: 113,
+      damageType: "kinetic",
+      explosionRadius: 50,
+      explosionVelocity: 170,
+      damageReductionFactor: 2.7,
+      maxVelocity: 3750,
+      flightTime: 5,
+      launcherGroup: 509,
+      chargeGroup: 384,
+    });
+  });
+
+  test("classifies EM damage type when emDamage is present", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 113, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 0,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384);
+    expect(stats?.damageType).toBe("em");
+    expect(stats?.damage).toBe(113);
+  });
+
+  test("classifies thermal damage type when thermalDamage is present", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 0, thermalDamage: 113, kineticDamage: 0, explosiveDamage: 0,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384);
+    expect(stats?.damageType).toBe("thermal");
+  });
+
+  test("classifies explosive damage type when only explosiveDamage is present", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 0, thermalDamage: 0, kineticDamage: 0, explosiveDamage: 113,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384);
+    expect(stats?.damageType).toBe("explosive");
+  });
+
+  test("converts flight time from milliseconds to seconds", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 0, thermalDamage: 0, kineticDamage: 100, explosiveDamage: 0,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 10000, launcherGroup: 509,
+    }), 384);
+    expect(stats?.flightTime).toBe(10);
+  });
+
+  test("sums multi-type damage into total damage", () => {
+    const stats = buildMissileStats(values({
+      emDamage: 30, thermalDamage: 30, kineticDamage: 30, explosiveDamage: 30,
+      aoeCloudSize: 50, aoeVelocity: 170, aoeDamageReductionFactor: 2.7,
+      maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
+    }), 384);
+    expect(stats?.damage).toBe(120);
   });
 });
 

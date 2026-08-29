@@ -1,6 +1,5 @@
 ---
 no-new-exports:
-  - choiceGroup.ts
   - combatantSide.ts
   - controlsDom.ts
   - domControls/domControls.ts
@@ -62,7 +61,16 @@ no-new-exports:
   - module.test.ts
   - elementContract.ts
   - index.ts
+  - markup/html.ts
+  - markup/html.test.ts
+  - markup/index.ts
+  - markup/MODULE.md
+  - shared/selectableList.ts
+  - shared/selectableList.test.ts
+  - shared/MODULE.md
+  - choiceGroup.ts
 ---
+
 
 
 

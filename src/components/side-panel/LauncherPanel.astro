@@ -1,0 +1,72 @@
+---
+import Chevron from "../controls/Chevron.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
+
+interface Props {
+  readonly idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+
+const DEFAULT_ROWS = [
+  { i18n: "label.volleyDamage", text: "Volley damage", idSuffix: "launcher-volley-damage" },
+  { i18n: "label.rateOfFire", text: "Rate of fire", idSuffix: "launcher-rate-of-fire" },
+  { i18n: "label.flightRange", text: "Flight range", idSuffix: "launcher-flight-range" },
+  { i18n: "label.explosionRadius", text: "Explosion radius", idSuffix: "launcher-explosion-radius" },
+  { i18n: "label.explosionVelocity", text: "Explosion velocity", idSuffix: "launcher-explosion-velocity" },
+] as const;
+
+const ADVANCED_ROWS = [
+  { i18n: "label.damageReductionFactor", text: "Damage reduction factor", idSuffix: "launcher-damage-reduction-factor" },
+  { i18n: "label.missileVelocity", text: "Missile velocity", idSuffix: "launcher-missile-velocity" },
+  { i18n: "label.flightTime", text: "Flight time", idSuffix: "launcher-flight-time" },
+] as const;
+---
+
+<div class="launcher-panel" id={`${idPrefix}-launcher-panel`} hidden>
+  <div class="form-field-group">
+    <span class="field-label truncate" data-i18n="label.launcherClass">Launcher class</span>
+    <div class="segmented-control choice-selector launcher-class-selector"
+         id={`${idPrefix}-launcher-class-options`} role="group"
+         data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
+    </div>
+  </div>
+  <div class="form-field-group launcher-attributes-group" id={`${idPrefix}-launcher-attributes-field`}>
+    <div class="launcher-attributes-default">
+      {DEFAULT_ROWS.map((row) => (
+        <div class="launcher-telemetry-row">
+          <span class="launcher-telemetry-label" data-i18n={row.i18n}>{row.text}</span>
+          <span class="launcher-telemetry-value mono" id={`${idPrefix}-${row.idSuffix}`}>-</span>
+        </div>
+      ))}
+    </div>
+    <TriggerButton id={`${idPrefix}-launcher-attributes-trigger`} popupId={`${idPrefix}-launcher-attributes-popup`}
+            labelClass="ammo-label truncate" labelI18n="label.moreAttributes" labelText="More attributes"
+            titleI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
+            title="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
+      <Chevron />
+    </TriggerButton>
+    <PopupBox id={`${idPrefix}-launcher-attributes-popup`} extraClass="launcher-attributes-popup" position="below" align="both" scroll role="dialog" ariaModal={false}>
+      {ADVANCED_ROWS.map((row) => (
+        <div class="launcher-telemetry-row">
+          <span class="launcher-telemetry-label" data-i18n={row.i18n}>{row.text}</span>
+          <span class="launcher-telemetry-value mono" id={`${idPrefix}-${row.idSuffix}`}>-</span>
+        </div>
+      ))}
+    </PopupBox>
+  </div>
+  <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
+    <TriggerButton id={`${idPrefix}-launcher-ammo-trigger`} popupId={`${idPrefix}-launcher-ammo-popup`}
+            titleI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
+            title="Select missile" ariaLabel="Select missile" ariaHaspopup="listbox">
+      <span class="ammo-summary-row">
+        <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
+        <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
+        <Chevron />
+      </span>
+    </TriggerButton>
+    <PopupBox id={`${idPrefix}-launcher-ammo-popup`} extraClass="launcher-ammo-popup" position="below" align="both" scroll>
+      <ul class="launcher-ammo-list" id={`${idPrefix}-launcher-ammo-list`} role="listbox"></ul>
+    </PopupBox>
+  </div>
+</div>

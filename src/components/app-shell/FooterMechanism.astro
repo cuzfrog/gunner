@@ -1,0 +1,24 @@
+---
+import Icon from "../controls/Icon.astro";
+
+interface Props {
+  readonly accent: string;
+  readonly headingI18n: string;
+  readonly heading: string;
+  readonly textI18n: string;
+  readonly text: string;
+  readonly linkI18n: string;
+  readonly linkText: string;
+  readonly href: string;
+}
+const { accent, headingI18n, heading, textI18n, text, linkI18n, linkText, href } = Astro.props;
+---
+
+<div class="app-footer-mechanism" data-accent={accent}>
+  <h3 class="footer-heading" data-i18n={headingI18n}>{heading}</h3>
+  <p class="footer-text" data-i18n={textI18n}>{text}</p>
+  <a class="app-footer-ref" href={href} target="_blank" rel="noopener noreferrer">
+    <span data-i18n={linkI18n}>{linkText}</span>
+    <Icon name="external" size={10} fill="none" stroke="currentColor" class="icon-ext" />
+  </a>
+</div>

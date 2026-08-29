@@ -4,3 +4,5 @@ dist/
 .devin/
 .env
 tmp/
+.astro/
+test-results/

@@ -1,10 +1,11 @@
 ---
 no-new-exports:
-  - fittingDb.ts
-  - catalog.ts
   - fittingDb.test.ts
+  - catalog.ts
+  - fittingDb.ts
   - index.ts
 ---
+
 
 
 # fittingDb

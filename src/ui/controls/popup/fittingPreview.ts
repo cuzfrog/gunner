@@ -1,6 +1,8 @@
 import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
+import { html } from "../markup";
+import { IconActionImpl, SectionBlockImpl, spriteIconStroked } from "../shared";
 
 export interface FittingPreview {
   show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string, onClose?: () => void): void;
@@ -54,59 +56,28 @@ function renderHeader(
   shipImageUrl: string | undefined,
   onClose: (() => void) | undefined,
 ): HTMLElement {
-  const header = document.createElement("div");
-  header.className = "preview-header";
+  const image = shipImageUrl
+    ? html`<img class="hull-ship-image" alt="" src=${shipImageUrl}>` as unknown as HTMLImageElement
+    : html`<img class="hull-ship-image" alt="" hidden>` as unknown as HTMLImageElement;
 
-  const image = document.createElement("img");
-  image.className = "hull-ship-image";
-  image.alt = "";
-  if (shipImageUrl) image.src = shipImageUrl;
-  else image.hidden = true;
-  header.appendChild(image);
+  const hull = html`<span class="preview-hull truncate">${summary.hullName}</span>`;
+  const fitting = html`<span class="preview-fitting truncate">${summary.fittingName}</span>`;
+  const titles = html`<div class="preview-titles">${hull}${fitting}</div>`;
 
-  const titles = document.createElement("div");
-  titles.className = "preview-titles";
+  const closeAction = new IconActionImpl({
+    buttonClass: "preview-close icon-button",
+    iconSvg: spriteIconStroked("delete", 12),
+    title: () => i18n.t("button.close"),
+  });
+  const close = closeAction.create(() => onClose?.());
 
-  const hull = document.createElement("span");
-  hull.className = "preview-hull truncate";
-  hull.textContent = summary.hullName;
-  titles.appendChild(hull);
-
-  const fitting = document.createElement("span");
-  fitting.className = "preview-fitting truncate";
-  fitting.textContent = summary.fittingName;
-  titles.appendChild(fitting);
-
-  header.appendChild(titles);
-
-  const close = document.createElement("button");
-  close.type = "button";
-  close.className = "preview-close icon-button";
-  close.setAttribute("title", i18n.t("button.close"));
-  close.setAttribute("aria-label", i18n.t("button.close"));
-  close.innerHTML = CLOSE_ICON_SVG;
-  close.addEventListener("click", () => onClose?.());
-  header.appendChild(close);
-  return header;
+  return html`<div class="preview-header">${image}${titles}${close}</div>` as unknown as HTMLElement;
 }
 
-const CLOSE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
-
 function renderSection(i18n: I18n, imageCatalog: ImageCatalog, fittingImport: FittingImport, section: FittingSection): HTMLElement {
-  const container = document.createElement("div");
-  container.className = "preview-section";
-
-  const label = document.createElement("div");
-  label.className = "preview-section-label";
-  label.textContent = i18n.t(`fitting.section.${section.kind}`);
-  container.appendChild(label);
-
-  for (const row of section.rows) {
-    container.appendChild(renderRow(i18n, imageCatalog, fittingImport, row));
-  }
-  return container;
+  const block = new SectionBlockImpl();
+  const rows = section.rows.map((row) => renderRow(i18n, imageCatalog, fittingImport, row));
+  return block.create(i18n.t(`fitting.section.${section.kind}`), rows);
 }
 
 function renderRow(
@@ -115,51 +86,25 @@ function renderRow(
   fittingImport: FittingImport,
   row: FittingRow,
 ): HTMLElement {
-  const rowEl = document.createElement("div");
-  rowEl.className = row.empty ? "preview-row preview-row-empty" : "preview-row";
-
-  const iconUrl = row.empty ? undefined : (row.id ? imageCatalog.itemIconUrl(row.id) : undefined);
-  const icon = document.createElement("img");
-  icon.className = "preview-icon";
-  icon.alt = "";
-  if (iconUrl) icon.src = iconUrl;
-  rowEl.appendChild(icon);
-
-  const main = document.createElement("div");
-  main.className = "preview-row-main";
-
   const language = i18n.current();
   const displayName = row.id !== undefined ? fittingImport.itemNameForId(row.id, language) : row.name;
-  const name = document.createElement("span");
-  name.className = "preview-name truncate";
-  name.textContent = displayName;
-  name.title = row.empty ? row.name : displayName;
-  main.appendChild(name);
+  const iconUrl = row.empty ? undefined : (row.id ? imageCatalog.itemIconUrl(row.id) : undefined);
+  const chargeIconUrl = row.charge ? (row.chargeId ? imageCatalog.itemIconUrl(row.chargeId) : undefined) : undefined;
+  const chargeName = row.charge ? (row.chargeId !== undefined ? fittingImport.itemNameForId(row.chargeId, language) : row.charge) : undefined;
 
-  if (row.charge) {
-    const chargeIcon = document.createElement("img");
-    chargeIcon.className = "preview-charge-icon";
-    chargeIcon.alt = "";
-    const chargeIconUrl = row.chargeId ? imageCatalog.itemIconUrl(row.chargeId) : undefined;
-    if (chargeIconUrl) chargeIcon.src = chargeIconUrl;
-    main.appendChild(chargeIcon);
+  const chargeChildren = row.charge
+    ? [html`<img class="preview-charge-icon" alt="" src=${chargeIconUrl}>` as unknown as HTMLImageElement,
+       html`<span class="preview-charge">, ${chargeName}</span>`]
+    : null;
 
-    const charge = document.createElement("span");
-    charge.className = "preview-charge";
-    const chargeName = row.chargeId !== undefined ? fittingImport.itemNameForId(row.chargeId, language) : row.charge;
-    charge.textContent = `, ${chargeName}`;
-    main.appendChild(charge);
-  }
+  const name = html`<span class="preview-name truncate" title=${row.empty ? row.name : displayName}>${displayName}</span>`;
+  const main = html`<div class="preview-row-main">${name}${chargeChildren}</div>`;
 
-  rowEl.appendChild(main);
+  const quantity = row.quantity !== undefined ? html`<span class="preview-quantity mono">x${row.quantity}</span>` : null;
 
-  if (row.quantity !== undefined) {
-    const quantity = document.createElement("span");
-    quantity.className = "preview-quantity mono";
-    quantity.textContent = `x${row.quantity}`;
-    rowEl.appendChild(quantity);
-  }
-
+  const icon = html`<img class="preview-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
+  const rowEl = html`<div class="preview-row">${icon}${main}${quantity}</div>` as unknown as HTMLElement;
+  if (row.empty) rowEl.classList.add("preview-row-empty");
   return rowEl;
 }
 

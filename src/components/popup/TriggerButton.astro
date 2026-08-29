@@ -1,0 +1,39 @@
+---
+interface Props {
+  readonly id: string;
+  readonly popupId: string;
+  readonly labelClass: string;
+  readonly labelI18n?: string;
+  readonly labelText?: string;
+  readonly titleI18n?: string;
+  readonly ariaLabelI18n?: string;
+  readonly title?: string;
+  readonly ariaLabel?: string;
+  readonly ariaHaspopup?: string;
+  readonly disabled?: boolean;
+  readonly ariaDescribedby?: string;
+}
+const {
+  id,
+  popupId,
+  labelClass,
+  labelI18n,
+  labelText,
+  titleI18n,
+  ariaLabelI18n,
+  title,
+  ariaLabel,
+  ariaHaspopup,
+  disabled,
+  ariaDescribedby,
+} = Astro.props;
+---
+
+<button type="button" id={id} class="trigger"
+  aria-haspopup={ariaHaspopup} aria-expanded="false" aria-controls={popupId}
+  aria-describedby={ariaDescribedby} disabled={disabled}
+  data-i18n-title={titleI18n} data-i18n-aria-label={ariaLabelI18n}
+  title={title} aria-label={ariaLabel}>
+  {labelI18n || labelText ? <span class={labelClass} data-i18n={labelI18n}>{labelText}</span> : null}
+  <slot />
+</button>

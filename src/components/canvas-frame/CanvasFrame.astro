@@ -1,0 +1,47 @@
+---
+import IconButton from "../controls/IconButton.astro";
+import InputWithUnit from "../form/InputWithUnit.astro";
+import CanvasSettingsPopup from "./CanvasSettingsPopup.astro";
+import CombatantPortrait from "./CombatantPortrait.astro";
+---
+
+<section class="canvas-frame surface-panel">
+  <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays">
+    <button type="button" id="weapon-range-button" class="range-overlay-chip weapon-range-chip"
+            data-weapon-range="both" aria-pressed="true"
+            data-i18n-title="label.weaponRange" data-i18n-aria-label="label.weaponRange"
+            title="Weapon range" aria-label="Weapon range">Weapon range</button>
+  </div>
+  <CombatantPortrait id="ship-a-portrait" side="ship-a" />
+  <CombatantPortrait id="ship-b-portrait" side="ship-b" />
+  <canvas id="scene" class="sim-canvas" width="800" height="600"></canvas>
+
+  <div class="control-bar">
+    <div class="control-bar-playback">
+      <button id="play" class="btn btn-primary-text" data-i18n="button.play">Start</button>
+      <button id="reset" class="btn" data-i18n="button.reset">Reset</button>
+      <IconButton id="canvas-settings-trigger" iconName="gear"
+              ariaHaspopup="true" ariaExpanded={false} ariaControls="canvas-settings-popup"
+              titleI18n="label.canvasSettings" ariaLabelI18n="label.canvasSettings" />
+    </div>
+
+    <div class="control-bar-field control-bar-initial-distance">
+      <label for="initial-distance" class="field-label truncate" data-i18n="label.initialDistance">Initial distance</label>
+      <InputWithUnit id="initial-distance" value="20000" min="1" unit="m" />
+    </div>
+
+    <div class="control-bar-field control-bar-speed">
+      <label for="sim-speed" class="field-label" data-i18n="label.simulationSpeed">Speed</label>
+      <select class="input-field" id="sim-speed">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="4" selected>4x</option>
+        <option value="8">8x</option>
+      </select>
+    </div>
+  </div>
+
+  <CanvasSettingsPopup id="canvas-settings-popup" triggerId="canvas-settings-trigger" />
+</section>

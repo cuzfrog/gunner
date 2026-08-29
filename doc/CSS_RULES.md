@@ -1,6 +1,6 @@
 # CSS Rules
 
-Rules for writing and changing DOM styling in Gunner. Derived from jareware/css-architecture, adapted to this repo: plain CSS (native nesting allowed, no preprocessor), stylesheets split under `public/styles/` and concatenated at build time, markup in `public/index.html` and TS-built DOM in `src/ui/controls/`.
+Rules for writing and changing DOM styling in Gunner. Derived from jareware/css-architecture, adapted to this repo: plain CSS (native nesting allowed, no preprocessor), stylesheets split under `src/styles/` and bundled by Vite/Astro, markup in `src/pages/index.astro` + `src/components/**/*.astro` and TS-built DOM in `src/ui/controls/`.
 
 Goals: component-oriented, sandboxed (local by default, global only by exception), convenient, safe.
 
@@ -15,13 +15,13 @@ Exception: `label[for=...]` associations and `input[type="range"]` pseudo-elemen
 CSS has one global namespace. Every class name must start with its owning component's name, in kebab-case: `ammo-popup`, `ammo-item`, `ammo-item-name`. The component name maps strictly to its source location:
 
 - Page shell regions (header, main grid, footer): `app-header`, `app-main`, `app-footer`, ...
-- Controls: the directory under `src/ui/controls/<component>/` that builds them, e.g. `fitting-preview` belongs to `src/ui/controls/popup/`.
+- Controls: the directory under `src/ui/controls/<component>/` that builds them, e.g. `fitting-preview` belongs to `src/ui/controls/popup/`. Markup owner is `src/components/<component>/` alongside the controls.
 
 Just by reading a class in DevTools you must know which source owns it. A class with no obvious owner is a bug.
 
 ## 3. One component, its styles stay in its file
 
-All rules for a component live in one file `public/styles/components/<component>.css`; shared base classes live in `public/styles/primitives.css`. File order matches DOM order in `index.html`. Do not scatter a component's rules across files, and do not sneak another component's styles into a file. If something deserves its own name (`ammo-item` inside the ammo popup), it is part of the `ammo` component's namespace, styled in that component's file.
+All rules for a component live in one file `src/styles/components/<component>.css`; shared base classes live in `src/styles/primitives.css`. CSS files are imported via the single ordered entry `src/styles/styles.css`; `@layer` order in `tokens.css` is the cascade authority, so new component CSS files must wrap in their layer and be appended to the entry import list. Do not scatter a component's rules across files, and do not sneak another component's styles into a file. If something deserves its own name (`ammo-item` inside the ammo popup), it is part of the `ammo` component's namespace, styled in that component's file.
 
 ## 4. States: ARIA first, then `is-` classes
 
@@ -73,7 +73,7 @@ Keep selectors short: one or two classes, plus at most one state. Never use `!im
 
 ## 11. Responsive: page concern first
 
-Viewport breakpoints (1100px, 900px, 480px) belong to the page: their rules live in `public/styles/layout.css`, keeping the whole reflow map readable in one place. A rule describing how a component behaves when it itself runs out of room (hide its own label, floor its own slider width) belongs in that component's file instead — keyed off its container rather than the viewport where possible. Before adding any responsive rule, first attempt elimination with intrinsically adaptive CSS: flex wrapping and shrinking, grid `auto-fit`/`minmax()`, `clamp()`. Accept a responsive rule only when no fluid equivalent exists.
+Viewport breakpoints (1100px, 900px, 480px) belong to the page: their rules live in `src/styles/layout.css`, keeping the whole reflow map readable in one place. A rule describing how a component behaves when it itself runs out of room (hide its own label, floor its own slider width) belongs in that component's file instead — keyed off its container rather than the viewport where possible. Before adding any responsive rule, first attempt elimination with intrinsically adaptive CSS: flex wrapping and shrinking, grid `auto-fit`/`minmax()`, `clamp()`. Accept a responsive rule only when no fluid equivalent exists.
 
 ## Violations to watch for (agent checklist)
 

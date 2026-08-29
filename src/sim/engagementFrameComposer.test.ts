@@ -1,17 +1,19 @@
 import { Vec2 } from "./vec2";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import type { EngagementEvaluator } from "./fireControl";
-import type { HitChance } from "./hitChance";
 import type { Kinematics } from "./kinematics";
-import type { EngagementFrame, HitChanceBreakdown, ShipState, SimSnapshot, TurretSpec } from "./types";
+import type { AttackAssessment } from "./fireControl";
+import type { EngagementFrame, ShipState, SimSnapshot, TurretSpec } from "./types";
 
-const shipATurret: TurretSpec = { tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000 };
-const shipBTurret: TurretSpec = { tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000 };
-const boostedTurret: TurretSpec = { tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800 };
-const effectiveTurret: TurretSpec = { tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000 };
-const shipBEffectiveTurret: TurretSpec = { tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000 };
-const hit: HitChanceBreakdown = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
-const shipBHit: HitChanceBreakdown = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
+const shipATurret: TurretSpec = { kind: "turret", tracking: 0.32, sigResolution: 40, optimal: 5000, falloff: 5000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const shipBTurret: TurretSpec = { kind: "turret", tracking: 0.28, sigResolution: 125, optimal: 8000, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const boostedTurret: TurretSpec = { kind: "turret", tracking: 0.45, sigResolution: 40, optimal: 5800, falloff: 3800, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const effectiveTurret: TurretSpec = { kind: "turret", tracking: 0.5, sigResolution: 40, optimal: 6000, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const shipBEffectiveTurret: TurretSpec = { kind: "turret", tracking: 0.3, sigResolution: 125, optimal: 8500, falloff: 4000, damagePerShot: 100, cycleTime: 5, turretCount: 1 };
+const hit = { chance: 1, trackingTerm: 0, rangeTerm: 0 };
+const shipBHit = { chance: 0.7, trackingTerm: 0.2, rangeTerm: 0.3 };
+const shipADamage = { nominalDps: 20, appliedDps: 20, application: 1, volley: 100 };
+const shipBDamage = { nominalDps: 20, appliedDps: 14, application: 0.7, volley: 100 };
 
 const shipA: ShipState = {
   id: "shipA",
@@ -52,19 +54,28 @@ const frame: EngagementFrame = {
 
 const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
-const input = { turrets: { shipA: shipATurret, shipB: shipBTurret }, sigRadii: { shipA: 30, shipB: 40 } };
+const input = { weapons: { shipA: shipATurret, shipB: shipBTurret } as const, sigRadii: { shipA: 30, shipB: 40 } };
+
+const shipAAssessment: AttackAssessment = {
+  boostedWeapon: boostedTurret,
+  effectiveWeapon: effectiveTurret,
+  damage: shipADamage,
+  turret: { hit, expectedMultiplier: 1 },
+};
+const shipBAssessment: AttackAssessment = {
+  boostedWeapon: boostedTurret,
+  effectiveWeapon: shipBEffectiveTurret,
+  damage: shipBDamage,
+  turret: { hit: shipBHit, expectedMultiplier: 0.7 },
+};
 
 function makeComposer() {
   const kinematics = vi.mocked<Kinematics>({ computeEngagement: vi.fn(() => frame) });
-  const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
   const engagementEvaluator = vi.mocked<EngagementEvaluator>({
-    evaluate: vi.fn(() => ({
-      shipA: { boostedTurret, effectiveTurret, hit },
-      shipB: { boostedTurret, effectiveTurret: shipBEffectiveTurret, hit: shipBHit },
-    })),
+    evaluate: vi.fn(() => ({ shipA: shipAAssessment, shipB: shipBAssessment })),
   });
-  const composer = new EngagementFrameComposerImpl({ kinematics, hitChance, engagementEvaluator });
-  return { kinematics, hitChance, engagementEvaluator, composer };
+  const composer = new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
+  return { kinematics, engagementEvaluator, composer };
 }
 
 describe("EngagementFrameComposerImpl", () => {
@@ -72,38 +83,39 @@ describe("EngagementFrameComposerImpl", () => {
     const { kinematics, engagementEvaluator, composer } = makeComposer();
     const view = composer.compose(snapshot, input);
     expect(view.frame).toBe(frame);
-    expect(view.attacks.shipA).toEqual({ boostedTurret, effectiveTurret, hit });
-    expect(view.attacks.shipB).toEqual({ boostedTurret, effectiveTurret: shipBEffectiveTurret, hit: shipBHit });
-    expect(view.effectiveTurrets.shipA).toBe(effectiveTurret);
-    expect(view.effectiveTurrets.shipB).toBe(shipBEffectiveTurret);
-    expect(view.hits.shipA).toBe(hit);
-    expect(view.hits.shipB).toBe(shipBHit);
+    expect(view.attacks.shipA).toEqual(shipAAssessment);
+    expect(view.attacks.shipB).toEqual(shipBAssessment);
+    expect(view.effectiveWeapons.shipA).toBe(effectiveTurret);
+    expect(view.effectiveWeapons.shipB).toBe(shipBEffectiveTurret);
     expect(kinematics.computeEngagement).toHaveBeenCalledWith(shipA, shipB, 1);
     expect(kinematics.computeEngagement).toHaveBeenCalledTimes(1);
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: { turret: shipATurret, opponentSigRadius: 40 },
-      shipB: { turret: shipBTurret, opponentSigRadius: 30 },
+      shipA: { weapon: shipATurret, opponentSigRadius: 40 },
+      shipB: { weapon: shipBTurret, opponentSigRadius: 30 },
     });
   });
 
-  test("falls back to raw hitChance and the base turret when the evaluator returns no assessment", () => {
-    const { hitChance, engagementEvaluator, composer } = makeComposer();
-    const fallbackHitA: HitChanceBreakdown = { chance: 0.5, trackingTerm: 0.25, rangeTerm: 0.5 };
-    const fallbackHitB: HitChanceBreakdown = { chance: 0.4, trackingTerm: 0.3, rangeTerm: 0.4 };
+  test("effectiveWeapons falls back to input weapons when evaluator returns no assessment", () => {
+    const { engagementEvaluator, composer } = makeComposer();
     engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
-    hitChance.compute.mockReturnValueOnce(fallbackHitA).mockReturnValueOnce(fallbackHitB);
     const view = composer.compose(snapshot, input);
     expect(view.attacks.shipA).toBeUndefined();
     expect(view.attacks.shipB).toBeUndefined();
-    expect(view.effectiveTurrets.shipA).toEqual(shipATurret);
-    expect(view.effectiveTurrets.shipB).toEqual(shipBTurret);
-    expect(view.hits.shipA).toBe(fallbackHitA);
-    expect(view.hits.shipB).toBe(fallbackHitB);
-    expect(hitChance.compute).toHaveBeenNthCalledWith(1, frame, shipATurret, 40);
-    expect(hitChance.compute).toHaveBeenNthCalledWith(2, frame, shipBTurret, 30);
+    expect(view.effectiveWeapons.shipA).toBe(shipATurret);
+    expect(view.effectiveWeapons.shipB).toBe(shipBTurret);
+  });
+
+  test("undefined weapon yields undefined attack and undefined effective weapon", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
+    const view = composer.compose(snapshot, { weapons: { shipA: undefined, shipB: undefined }, sigRadii: { shipA: 30, shipB: 40 } });
+    expect(view.attacks.shipA).toBeUndefined();
+    expect(view.attacks.shipB).toBeUndefined();
+    expect(view.effectiveWeapons.shipA).toBeUndefined();
+    expect(view.effectiveWeapons.shipB).toBeUndefined();
     expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: { turret: shipATurret, opponentSigRadius: 40 },
-      shipB: { turret: shipBTurret, opponentSigRadius: 30 },
+      shipA: undefined,
+      shipB: undefined,
     });
   });
 });

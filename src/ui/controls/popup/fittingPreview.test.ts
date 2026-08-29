@@ -28,11 +28,37 @@ class FakeElement {
   src = "";
   alt = "";
   type = "";
+  nodeType = 1;
   style: Record<string, string> = {};
   children: FakeElement[] = [];
   offsetParent: FakeElement | null = null;
   offsetWidth = 0;
   offsetHeight = 0;
+  classList = {
+    add: (...tokens: string[]) => {
+      for (const token of tokens) {
+        const current = this.className.split(/\s+/).filter(Boolean);
+        if (!current.includes(token)) current.push(token);
+        this.className = current.join(" ");
+      }
+    },
+    remove: (...tokens: string[]) => {
+      for (const token of tokens) {
+        const current = this.className.split(/\s+/).filter(Boolean);
+        this.className = current.filter((c) => c !== token).join(" ");
+      }
+    },
+    toggle: (token: string, force?: boolean) => {
+      const current = this.className.split(/\s+/).filter(Boolean);
+      const has = current.includes(token);
+      const should = force ?? !has;
+      if (should && !has) current.push(token);
+      else if (!should && has) current.splice(current.indexOf(token), 1);
+      this.className = current.join(" ");
+      return should;
+    },
+    contains: (token: string) => this.className.split(/\s+/).includes(token),
+  };
   private readonly attributes: Record<string, string> = {};
   private readonly handlers: Record<string, Array<() => void>> = {};
   private rect: Rect = { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
@@ -60,6 +86,10 @@ class FakeElement {
 
   setAttribute(name: string, value: string): void {
     this.attributes[name] = value;
+    if (name === "class") this.className = value;
+    else if (name === "hidden") this.hidden = true;
+    else if (name === "title") this.title = value;
+    else if (name === "src") this.src = value;
   }
 
   set innerHTML(_value: string) {
@@ -67,6 +97,13 @@ class FakeElement {
   }
 
   appendChild(child: FakeElement): void {
+    if (child.nodeType === 11) {
+      for (const fragmentChild of child.children) {
+        this.children.push(fragmentChild);
+      }
+      child.children = [];
+      return;
+    }
     this.children.push(child);
   }
 }
@@ -77,6 +114,17 @@ function createDocument(): Document {
       const el = new FakeElement();
       el.tagName = tagName;
       return el as unknown as HTMLElement;
+    },
+    createDocumentFragment: () => {
+      const frag = new FakeElement();
+      frag.nodeType = 11;
+      return frag as unknown as DocumentFragment;
+    },
+    createTextNode: (text: string) => {
+      const node = new FakeElement();
+      node.textContent = text;
+      node.nodeType = 3;
+      return node as unknown as Text;
     },
   } as unknown as Document;
 }

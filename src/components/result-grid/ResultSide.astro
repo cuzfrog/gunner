@@ -1,0 +1,59 @@
+---
+type Side = "a" | "b";
+
+interface Props {
+  readonly side: Side;
+}
+const { side } = Astro.props;
+const s = side;
+
+const SUPPORT_METRICS = [
+  { i18n: "result.nominalDps", text: "Nominal DPS", idSuffix: "nominal-dps", value: "-" },
+] as const;
+
+const TURRET_METRICS = [
+  { i18n: "result.hitChance", text: "Hit chance", idSuffix: "hit", value: "0%" },
+  { i18n: "result.trackingPenalty", text: "Tracking penalty", idSuffix: "track-pen", value: "0%" },
+  { i18n: "result.rangePenalty", text: "Range penalty", idSuffix: "range-pen", value: "0%" },
+] as const;
+
+const MISSILE_METRICS = [
+  { i18n: "result.timeToImpact", text: "Time to impact", idSuffix: "time-to-impact", value: "-" },
+  { i18n: "result.signatureFactor", text: "Sig. factor", idSuffix: "sig-factor", value: "-" },
+  { i18n: "result.velocityFactor", text: "Velocity factor", idSuffix: "velocity-factor", value: "-" },
+] as const;
+---
+
+<div class={`result-side result-side-${s}`}>
+  <div class="result-side-hero">
+    <span class="result-card-label" id={`res-applied-dps-label-${s}`} data-i18n="result.appliedDps">Applied DPS</span>
+    <div class="result-hero-grid">
+      <span class="result-card-value result-hero-value mono" id={`res-applied-dps-${s}`}>-</span>
+      <span class="result-card-value result-hero-application mono" id={`res-applied-dps-application-${s}`}>-</span>
+    </div>
+  </div>
+  <div class="result-side-support">
+    {SUPPORT_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
+  </div>
+  <div class="result-side-weapon" id={`res-turret-cards-${s}`}>
+    {TURRET_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
+  </div>
+  <div class="result-side-weapon" id={`res-missile-cards-${s}`} hidden>
+    {MISSILE_METRICS.map((m) => (
+      <div class="result-metric">
+        <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+      </div>
+    ))}
+  </div>
+</div>

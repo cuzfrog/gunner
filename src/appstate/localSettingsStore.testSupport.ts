@@ -2,7 +2,7 @@ import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
-import type { ChargeCatalog, FittingImport, ImportedFitting } from "../fitting";
+import type { ChargeCatalog, FittingImport, ImportedFitting, MissileCatalog } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
@@ -204,10 +204,15 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     chargeId: toTypeId("12608"),
     base: { tracking: 0.42, optimal: 1200, falloff: 3000 },
     moduleId: toTypeId("486"),
+    damageMultiplier: 3,
+    damagePerShot: 12,
+    cycleTime: 5,
+    turretCount: 1,
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
   boosts: { computers: [], scripts: [] },
+  hullBonuses: [],
 };
 export function fakeStorage(): StorageProvider {
   const data = new Map<string, string>();
@@ -242,6 +247,7 @@ export function makeFittingImport() {
     summarize: vi.fn(() => undefined),
     canonicalEftText: vi.fn(() => undefined),
     itemNameForId: vi.fn((id) => NAME_FOR_ID[id] ?? id),
+    detectLanguageFromText: vi.fn(() => undefined),
   });
 }
 export function makeChargeCatalog(): ChargeCatalog {
@@ -275,6 +281,7 @@ export function makeShips() {
     allFittingOptions: vi.fn(() => []),
     fittingOption: vi.fn(),
     turretSizeOptions: vi.fn(),
+    shipTier: vi.fn(),
     fittedStats: vi.fn(),
     maxSpeedForFittedMass: vi.fn(),
     alignTime: vi.fn(),
@@ -286,7 +293,7 @@ export function resetMocks(): void {
   chargeCatalog = makeChargeCatalog();
 }
 export function makeParser(): SettingsParser {
-  return new SettingsParser({ ships, fittingImport, chargeCatalog, itemNameResolver: new StaticItemNameResolver(), simValueParser: simValueParserFromContainer() });
+  return new SettingsParser({ ships, fittingImport, chargeCatalog, missileCatalog: mockMissileCatalog(), itemNameResolver: new StaticItemNameResolver(), simValueParser: simValueParserFromContainer() });
 }
 
 function simValueParserFromContainer(): SimValueParser {
@@ -313,4 +320,15 @@ export function makeStore(options: {
     profileEquality: options.equality ?? fakeEquality(true),
     navigatorLanguage: options.navigatorLanguage,
   });
+}
+
+function mockMissileCatalog(): MissileCatalog {
+  return {
+    missilesForLauncher: vi.fn(() => []),
+    usualForLauncher: vi.fn(() => undefined),
+    withCharge: vi.fn(),
+    has: vi.fn(() => false),
+    idForName: vi.fn(() => undefined),
+    equivalentInGroups: vi.fn(() => undefined),
+  };
 }

@@ -42,6 +42,10 @@ function makeTurret(moduleName: string, chargeName?: string, skillLevel: number 
     chargeId,
     base: { tracking: baseTracking, optimal: baseOptimal, falloff: baseFalloff },
     moduleId,
+    damageMultiplier: 3,
+    damagePerShot: 12,
+    cycleTime: 5,
+    turretCount: 1,
   };
 }
 
@@ -88,7 +92,7 @@ describe("TurretCatalogImpl", () => {
     const mediumTurret: ImportedTurret = {
       tracking: 0, sigResolutionClass: "M", optimal: 0, falloff: 0,
       chargeSize: 2, chargeId: toTypeId("0"), base: { tracking: 0, optimal: 0, falloff: 0 },
-      moduleId: mediumModuleId,
+      moduleId: mediumModuleId, damageMultiplier: 3, damagePerShot: 12, cycleTime: 5, turretCount: 1,
     };
     expect(resized!.chargeId).toBe(chargeCatalog.usualForTurret(mediumTurret));
   });
@@ -115,7 +119,7 @@ describe("TurretCatalogImpl", () => {
     const unknown: ImportedTurret = {
       tracking: 0, sigResolutionClass: "S", optimal: 0, falloff: 0,
       chargeSize: 1, chargeId: toTypeId("0"), base: { tracking: 0, optimal: 0, falloff: 0 },
-      moduleId: toTypeId("999999"),
+      moduleId: toTypeId("999999"), damageMultiplier: 3, damagePerShot: 12, cycleTime: 5, turretCount: 1,
     };
     expect(turretCatalog.resize(unknown, "M", 0)).toBeUndefined();
   });

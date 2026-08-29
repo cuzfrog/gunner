@@ -6,10 +6,12 @@ import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
+import { MissileApplicationImpl } from "./missileApplication";
 import { PredictiveAutopilot } from "./predictiveAutopilot";
 import { SimulationImpl } from "./simulation";
 import { StackingPenaltyImpl } from "./stackingPenalty";
 import { SimValueParserImpl } from "./simValueParser";
+import { TurretDamageImpl } from "./turretDamage";
 import type { SimCradle } from "./cradle";
 
 export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T>): void {
@@ -20,6 +22,8 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     turretBoosterResolver: asClass(TurretBoosterResolverImpl).singleton(),
     kinematics: asClass(KinematicsImpl).singleton(),
     hitChance: asClass(HitChanceImpl).singleton(),
+    missileApplication: asClass(MissileApplicationImpl).singleton(),
+    turretDamage: asClass(TurretDamageImpl).singleton(),
     reactiveSteering: asClass(ReactiveAutopilot).singleton(),
     shipBSteering: asClass(PredictiveAutopilot).singleton(),
     shipASteering: asClass(PredictiveAutopilot).singleton(),

@@ -7,6 +7,7 @@ import type { Popup, PopupGroup } from "../popup";
 import type { RangeOverlayController } from "../rangeOverlay";
 import type { TurretController } from "../turret";
 import type { Side } from "../side";
+import type { ItemNameLoader } from "../../../gamedata";
 
 export interface PreferencesEls {
   readonly trackingUnit: Readonly<Record<Side, { readonly rad: HTMLButtonElement; readonly score: HTMLButtonElement }>>;
@@ -59,6 +60,7 @@ export class PreferencesControllerImpl implements PreferencesController {
   private readonly events: UiEvents;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly popupGroup: PopupGroup;
+  private readonly itemNameLoader: ItemNameLoader;
   private readonly canvasSettingsPopupValue: Popup;
   private canvasSettingsOpen = false;
   private weaponRangeVisibility: WeaponRangeVisibility = "both";
@@ -72,6 +74,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     events: UiEvents;
     rangeOverlayController: RangeOverlayController;
     popupGroup: PopupGroup;
+    itemNameLoader: ItemNameLoader;
   }) {
     this.els = deps.els;
     this.i18n = deps.i18n;
@@ -81,6 +84,7 @@ export class PreferencesControllerImpl implements PreferencesController {
     this.events = deps.events;
     this.rangeOverlayController = deps.rangeOverlayController;
     this.popupGroup = deps.popupGroup;
+    this.itemNameLoader = deps.itemNameLoader;
     this.canvasSettingsPopupValue = {
       isOpen: () => this.canvasSettingsOpen,
       open: () => this.openCanvasSettings(),
@@ -232,8 +236,9 @@ export class PreferencesControllerImpl implements PreferencesController {
     if (preferences.language !== "en") this.loadPackAndRefresh(preferences.language);
   }
 
-  private loadPackAndRefresh(_language: Language): void {
+  private loadPackAndRefresh(language: Language): void {
     this.events.emitLanguageChanged();
+    this.itemNameLoader.ensureLoaded(language);
   }
 
   private updateUnitToggle(side: Side): void {

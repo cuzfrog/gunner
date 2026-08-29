@@ -1,0 +1,92 @@
+---
+import { COMBATANT_SIDES, DEFAULT_VALUES } from "../../ui/controls";
+import type { Side } from "../../ui/controls";
+import FormField from "../form/FormField.astro";
+import FormFieldRow from "../form/FormFieldRow.astro";
+import InputWithUnit from "../form/InputWithUnit.astro";
+import PanelHeading from "./PanelHeading.astro";
+import TurretPanel from "./TurretPanel.astro";
+import LauncherPanel from "./LauncherPanel.astro";
+import EwarField from "./EwarField.astro";
+import PropulsionGroup from "./PropulsionGroup.astro";
+import SkillsField from "./SkillsField.astro";
+
+interface Props {
+  readonly side: Side;
+}
+const { side } = Astro.props;
+const config = COMBATANT_SIDES.find((s) => s.key === side)!;
+const idPrefix = config.idPrefix;
+const sideClass = `side-panel-${idPrefix}`;
+const mass = DEFAULT_VALUES[`${idPrefix}-mass`];
+const inertia = DEFAULT_VALUES[`${idPrefix}-inertia`];
+const sig = DEFAULT_VALUES[`${idPrefix}-sig`];
+const range = DEFAULT_VALUES[`${idPrefix}-range`];
+const aggressivity = DEFAULT_VALUES[`${idPrefix}-aggressivity`];
+const aggressivitySlider = DEFAULT_VALUES[`${idPrefix}-aggressivity-slider`];
+const alignTime = side === "shipA" ? "5.0s" : "6.2s";
+const modeFirst = side === "shipA"
+  ? { value: "keepAtRange", i18n: "mode.keepAtRange", text: "Keep at range" }
+  : { value: "orbit", i18n: "mode.orbit", text: "Orbit" };
+const modeSecond = side === "shipA"
+  ? { value: "orbit", i18n: "mode.orbit", text: "Orbit" }
+  : { value: "keepAtRange", i18n: "mode.keepAtRange", text: "Keep at range" };
+---
+
+<section class={`side-panel ${sideClass} surface-panel`}>
+  <div class="side-panel-weapon-area">
+    <PanelHeading idPrefix={idPrefix} side={side} />
+
+    <TurretPanel idPrefix={idPrefix} side={side} />
+
+    <LauncherPanel idPrefix={idPrefix} />
+
+    <EwarField idPrefix={idPrefix} />
+  </div>
+
+  <hr class="side-panel-divider">
+
+  <FormField i18n="label.signatureRadius" text="Signature radius">
+    <InputWithUnit id={`${idPrefix}-sig`} value={sig} min="1" unit="m" />
+  </FormField>
+
+  <PropulsionGroup idPrefix={idPrefix} side={side} />
+
+  <FormFieldRow>
+    <FormField i18n="label.mass" text="Mass">
+      <InputWithUnit id={`${idPrefix}-mass`} value={mass} min="0" unit="kg" />
+    </FormField>
+    <FormField i18n="label.inertiaModifier" text="Inertia modifier">
+      <InputWithUnit id={`${idPrefix}-inertia`} value={inertia} min="0" unit={alignTime} suffixId={`${idPrefix}-align-time`} />
+    </FormField>
+  </FormFieldRow>
+  <FormFieldRow>
+    <div class="form-field-group">
+      <span class="field-label truncate" data-i18n="label.mode">Mode</span>
+      <select id={`${idPrefix}-mode`} class="turret-mode-select input-field"
+              data-i18n-aria-label="label.mode" aria-label="Mode">
+        <option value={modeFirst.value} selected data-i18n={modeFirst.i18n}>{modeFirst.text}</option>
+        <option value={modeSecond.value} data-i18n={modeSecond.i18n}>{modeSecond.text}</option>
+        <option value="midships" data-i18n="mode.midships">Midships</option>
+        <option value="maneuver" data-i18n="mode.maneuver">Maneuver</option>
+      </select>
+    </div>
+    <FormField i18n="label.desiredRange" text="Desired range">
+      <InputWithUnit id={`${idPrefix}-range`} value={range} min="0" unit="m" />
+    </FormField>
+  </FormFieldRow>
+  <div class="form-slider-field form-maneuver-field" id={`${idPrefix}-aggressivity-field`}>
+    <span class="form-slider-label-row">
+      <span class="field-label truncate" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
+      <button type="button" class="info-hint"
+              data-i18n-title="hint.maneuverAggressivity"
+              data-i18n-aria-label="hint.maneuverAggressivity"
+              title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
+              aria-label="About maneuver aggressivity">?</button>
+      <output class="form-slider-value mono" id={`${idPrefix}-aggressivity-value`} for={`${idPrefix}-aggressivity-slider`}>1.00</output>
+    </span>
+    <input type="hidden" id={`${idPrefix}-aggressivity`} value={aggressivity}>
+    <input type="range" id={`${idPrefix}-aggressivity-slider`} class="form-slider" min="0" max="1" step="0.001" value={aggressivitySlider} style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
+  </div>
+  <SkillsField idPrefix={idPrefix} />
+</section>

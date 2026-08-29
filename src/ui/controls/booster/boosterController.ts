@@ -6,8 +6,10 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
+import { html } from "../markup";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
+import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { BoosterController, BoosterEls } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {
@@ -32,6 +34,9 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
+  private readonly scriptOptionList: SelectableListImpl;
+  private readonly gearAction: IconActionImpl;
+  private readonly sectionBlock: SectionBlockImpl;
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -40,10 +45,24 @@ export class BoosterControllerImpl implements BoosterController {
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.events = deps.events;
+    this.scriptOptionList = new SelectableListImpl({
+      itemClass: "ewar-script-option",
+      nameClass: "",
+      role: "menuitem",
+    });
+    this.gearAction = new IconActionImpl({
+      buttonClass: "ewar-script-gear btn icon-button",
+      iconSvg: spriteIcon("gear"),
+      title: "",
+      ariaHaspopup: "menu",
+      ariaExpanded: false,
+    });
+    this.sectionBlock = new SectionBlockImpl();
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
     this.popupGroup.register(this.scriptPopups.shipB);
     this.events.onFittingImported((side, imported) => this.setLoadout(side, imported.boosts));
+    this.events.onLanguageChanged(() => this.render());
     this.render();
   }
 
@@ -92,11 +111,7 @@ export class BoosterControllerImpl implements BoosterController {
 
   private buildScriptPopup(side: Side): Popup {
     const section = this.els.sections[side];
-    const popup = document.createElement("div");
-    popup.id = `${sideId(side)}-booster-script-popup`;
-    popup.className = "ewar-script-popup popup";
-    popup.setAttribute("role", "menu");
-    popup.hidden = true;
+    const popup = html`<div id="${sideId(side)}-booster-script-popup" class="ewar-script-popup popup" role="menu" hidden></div>` as unknown as HTMLElement;
     section.appendChild(popup);
     this.scriptPopupEls.set(side, popup);
     return {
@@ -108,7 +123,7 @@ export class BoosterControllerImpl implements BoosterController {
         if (gear) gear.setAttribute("aria-expanded", "false");
       },
       focusTrigger: () => this.scriptGears.get(side)?.gear?.focus(),
-      contains: (shipB) => shipB instanceof Element && shipB.closest(`#${sideId(side)}-ewar-popup`) !== null,
+      contains: (target) => target instanceof Element && target.closest(`#${sideId(side)}-booster-script-popup, #${sideId(side)}-booster-section`) !== null,
     };
   }
 
@@ -128,11 +143,11 @@ export class BoosterControllerImpl implements BoosterController {
     }
     section.hidden = false;
     this.updateSummary(side);
-    const label = document.createElement("div");
-    label.className = "preview-section-label";
-    label.textContent = this.i18n.t("label.booster.computer");
-    section.appendChild(label);
-    this.renderComputers(side, state, section);
+    const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
+    this.renderComputers(side, state, rowContainer);
+    const rows = Array.from(rowContainer.children);
+    const block = this.sectionBlock.create(this.i18n.t("label.booster.computer"), rows);
+    section.appendChild(block);
   }
 
   private updateSummary(side: Side): void {
@@ -177,20 +192,8 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
-    const item = document.createElement("span");
-    item.className = "ewar-summary-item";
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
-    const img = document.createElement("img");
-    img.className = "ewar-summary-icon";
-    img.alt = "";
-    if (iconUrl !== undefined) img.src = iconUrl;
-    img.hidden = iconUrl === undefined;
-    item.appendChild(img);
-    const count = document.createElement("span");
-    count.className = "ewar-summary-count mono";
-    count.textContent = `${active}/${total}`;
-    item.appendChild(count);
-    item.setAttribute("title", title);
+    const item = html`<span class="ewar-summary-item" title=${title}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="ewar-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
     summary.appendChild(item);
   }
 
@@ -217,8 +220,7 @@ export class BoosterControllerImpl implements BoosterController {
     for (let i = 0; i < state.loadout.computers.length; i++) {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
-      const row = document.createElement("div");
-      row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}></div>` as unknown as HTMLDivElement;
       const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script);
       nameSpans.push(nameSpan);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
@@ -242,22 +244,9 @@ export class BoosterControllerImpl implements BoosterController {
   private createModuleButton(active: boolean, computer: TrackingBoosterSpec, script: TurretScriptSpec | undefined): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(computer);
     const effectTitle = this.boosterModuleEffect(computer, script);
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-module-toggle";
-    button.setAttribute("aria-pressed", String(active));
-    button.setAttribute("aria-label", displayName);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
-    const img = document.createElement("img");
-    if (iconUrl !== undefined) img.src = iconUrl;
-    img.alt = "";
-    img.hidden = iconUrl === undefined;
-    button.appendChild(img);
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "truncate";
-    nameSpan.textContent = displayName;
-    nameSpan.title = effectTitle;
-    button.appendChild(nameSpan);
+    const nameSpan = html`<span class="truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
+    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
     return { button, nameSpan };
   }
 
@@ -273,20 +262,11 @@ export class BoosterControllerImpl implements BoosterController {
   }
 
   private createScriptGear(side: Side, index: number, script: TurretScriptSpec | undefined, active: boolean): HTMLButtonElement {
-    const gear = document.createElement("button");
-    gear.type = "button";
-    gear.className = "ewar-script-gear btn icon-button";
+    const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
-    gear.setAttribute("aria-haspopup", "menu");
-    gear.setAttribute("aria-expanded", "false");
     gear.setAttribute("aria-controls", `${sideId(side)}-booster-script-popup`);
-    gear.innerHTML = (
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">' +
-      '<use href="icons.svg#gear"></use></svg>'
-    );
     this.updateGearTitle(gear, script);
-    gear.disabled = !active;
-    gear.addEventListener("click", () => this.openScriptPopup(side, index, gear));
+    if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
 
@@ -303,12 +283,20 @@ export class BoosterControllerImpl implements BoosterController {
     this.scriptGears.set(side, { index, gear });
     const popup = this.scriptPopupEls.get(side);
     if (!popup) return;
-    popup.innerHTML = "";
     const current = state.activation[index].script;
-    const noneButton = this.createScriptOption(side, index, gear, undefined, current === undefined);
-    popup.appendChild(noneButton);
-    for (const script of state.loadout.scripts) {
-      popup.appendChild(this.createScriptOption(side, index, gear, script, this.isSameScript(current, script)));
+    const items: SelectableItem[] = [
+      { value: "none", label: this.i18n.t("ewar.script.none"), selected: current === undefined },
+      ...state.loadout.scripts.map((script) => ({
+        value: script.moduleId,
+        label: `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}`,
+        selected: this.isSameScript(current, script),
+      })),
+    ];
+    const buttons = this.scriptOptionList.render(popup, items);
+    buttons[0].addEventListener("click", () => this.setScript(side, index, undefined, gear));
+    for (let i = 0; i < state.loadout.scripts.length; i++) {
+      const script = state.loadout.scripts[i];
+      buttons[i + 1].addEventListener("click", () => this.setScript(side, index, script, gear));
     }
     gear.setAttribute("aria-expanded", "true");
     this.scriptPopups[side].open();
@@ -317,17 +305,6 @@ export class BoosterControllerImpl implements BoosterController {
   private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
     return a.moduleId === b.moduleId;
-  }
-
-  private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-script-option";
-    if (selected) button.setAttribute("aria-current", "true");
-    button.setAttribute("role", "menuitem");
-    button.textContent = script ? `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
-    button.addEventListener("click", () => this.setScript(side, index, script, gear));
-    return button;
   }
 
   private setScript(side: Side, index: number, script: TurretScriptSpec | undefined, gear: HTMLButtonElement): void {

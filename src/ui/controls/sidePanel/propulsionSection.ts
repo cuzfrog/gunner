@@ -5,8 +5,10 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { PROPULSION_NONE, type FittedHullSummary, type PropulsionSelection } from "../../../appstate";
 import { propulsionOptionLabel } from "../controlsFormat";
+import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { Popup, PopupGroup } from "../popup";
 import type { SidePanel } from "./sidePanelContract";
+import { html } from "../markup";
 import type { IPropulsionSection } from "./sidePanelSections";
 import { PropulsionVariantSection, type PropulsionVariantSectionEls } from "./propulsionVariantSection";
 
@@ -24,6 +26,7 @@ export class PropulsionSection implements IPropulsionSection {
   private readonly i18n: I18n;
   private readonly popupGroup: PopupGroup;
   private readonly variants: PropulsionVariantSection;
+  private readonly propulsionChoice: ChoiceGroupImpl;
 
   constructor({
     panel, els, ships, fittingImport, imageCatalog, i18n, popupGroup,
@@ -35,11 +38,16 @@ export class PropulsionSection implements IPropulsionSection {
     this.imageCatalog = imageCatalog;
     this.i18n = i18n;
     this.popupGroup = popupGroup;
+    this.propulsionChoice = new ChoiceGroupImpl({
+      group: els.propulsionOptions,
+      select: els.propulsion,
+      shape: { buttonClass: "btn", iconClass: "choice-icon", labelClass: "", truncateButton: true, toggleNoneValue: PROPULSION_NONE },
+    });
     this.variants = new PropulsionVariantSection({
       panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants },
       fittingImport, i18n, imageCatalog,
     });
-    this.els.propulsion.addEventListener("change", () => this.onPropulsionChange());
+    this.els.propulsion.addEventListener("input", () => this.onPropulsionChange());
     this.els.propulsionGear.addEventListener("click", () => this.popupGroup.toggle(this.variants.popup));
   }
 
@@ -70,8 +78,6 @@ export class PropulsionSection implements IPropulsionSection {
     const select = this.els.propulsion;
     const group = this.els.propulsionOptions;
     const gear = this.els.propulsionGear;
-    select.innerHTML = "";
-    group.innerHTML = "";
     group.setAttribute("aria-label", this.i18n.t("label.propulsion"));
     select.disabled = !profile;
 
@@ -82,20 +88,15 @@ export class PropulsionSection implements IPropulsionSection {
     const requestedId = noneRequested || selectedId === undefined ? undefined : selectedId;
     let selected = "";
 
-    for (const module of modules) {
-      const option = document.createElement("option");
-      option.value = module.id;
-      option.textContent = propulsionOptionLabel(module);
-      select.appendChild(option);
-      const button = this.createPropulsionButton(group, module, () => this.onPropulsionButtonClick(module.id));
-      button.disabled = !profile;
-      button.setAttribute("aria-disabled", String(!profile));
-    }
+    const options: ChoiceGroupOption[] = modules.map((module) => ({
+      value: module.id,
+      label: propulsionOptionLabel(module),
+      title: propulsionOptionLabel(module),
+      iconUrl: this.imageCatalog.itemIconUrl(module.iconId),
+      disabled: !profile,
+    }));
 
-    const noneOption = document.createElement("option");
-    noneOption.value = PROPULSION_NONE;
-    noneOption.hidden = true;
-    select.appendChild(noneOption);
+    this.propulsionChoice.render(options, "");
 
     if (profile) {
       selected = noneRequested
@@ -104,6 +105,9 @@ export class PropulsionSection implements IPropulsionSection {
           ? requestedId
           : (modules[0]?.id ?? "");
     }
+
+    const noneOption = html`<option value=${PROPULSION_NONE} hidden></option>` as unknown as HTMLElement;
+    select.appendChild(noneOption);
 
     select.value = selected;
     this.setPropulsionActive(selected);
@@ -150,23 +154,8 @@ export class PropulsionSection implements IPropulsionSection {
 
   setPropulsionActive(propulsionId: string): void {
     const select = this.els.propulsion;
-    const group = this.els.propulsionOptions;
     select.value = propulsionId;
-    for (const button of group.children) {
-      const active = button.getAttribute("data-value") === propulsionId;
-      button.setAttribute("aria-pressed", String(active));
-    }
-  }
-
-  private onPropulsionButtonClick(propulsionId: string): void {
-    const profile = this.panel.profile;
-    if (!profile) return;
-    const id = this.ships.parsePropulsionId(propulsionId);
-    if (!id || !this.ships.fittingOption(profile, id)) return;
-    const currentId = this.currentPropulsionId();
-    const next = currentId === id ? PROPULSION_NONE : id;
-    this.setPropulsionActive(next);
-    this.els.propulsion.dispatchEvent(new Event("change"));
+    this.propulsionChoice.set(propulsionId);
   }
 
   defaultPropulsionVariant(module: PropulsionModule): { readonly id: TypeId; readonly name: string } | undefined {
@@ -195,27 +184,4 @@ export class PropulsionSection implements IPropulsionSection {
     return { mass: profile.mass, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 };
   }
 
-  private createPropulsionButton(container: HTMLElement, module: PropulsionModule, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "btn truncate";
-    button.setAttribute("data-value", module.id);
-    button.setAttribute("aria-pressed", "false");
-    const text = propulsionOptionLabel(module);
-    button.setAttribute("title", text);
-    const iconUrl = this.imageCatalog.itemIconUrl(module.iconId);
-    if (iconUrl) {
-      const icon = document.createElement("img");
-      icon.className = "propulsion-icon";
-      icon.src = iconUrl;
-      icon.alt = "";
-      button.appendChild(icon);
-    }
-    const label = document.createElement("span");
-    label.textContent = text;
-    button.appendChild(label);
-    button.addEventListener("click", onClick);
-    container.appendChild(button);
-    return button;
-  }
 }

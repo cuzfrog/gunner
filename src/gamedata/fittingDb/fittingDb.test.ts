@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../ids";
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -209,5 +209,129 @@ describe("fittingDb", () => {
     });
     expect(moduleByName("Heavy Stasis Grappler I")?.stasisGrappler).toMatchObject(baseStats(stasisGrappler!));
     expect(rowByName(STASIS_WEBS, "Heavy Stasis Grappler I")).toBeUndefined();
+  });
+
+  test("includes light missile launchers with cycle time in seconds and launcher group", () => {
+    expect(rowByName(LAUNCHERS, "Arbalest Compact Light Missile Launcher")).toMatchObject({
+      rateOfFire: 13.6,
+      launcherGroup: 509,
+      chargeGroups: [384, 394],
+    });
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")).toMatchObject({
+      launcherGroup: 509,
+    });
+    expect(rowByName(LAUNCHERS, "Light Missile Launcher II")?.chargeGroups).toContain(653);
+  });
+
+  test("includes torpedo launchers with group 508 and chargeGroup3 for standard torpedoes", () => {
+    expect(rowByName(LAUNCHERS, "Torpedo Launcher I")).toMatchObject({
+      rateOfFire: 18,
+      launcherGroup: 508,
+    });
+    expect(rowByName(LAUNCHERS, "Torpedo Launcher I")?.chargeGroups).toContain(89);
+  });
+
+  test("includes rapid light missile launchers with group 511 and light missile charge groups", () => {
+    const launcher = rowByName(LAUNCHERS, "Rapid Light Missile Launcher II");
+    expect(launcher?.launcherGroup).toBe(511);
+    expect(launcher?.chargeGroups).toContain(384);
+  });
+
+  test("includes heavy assault missile launchers with group 771", () => {
+    expect(rowByName(LAUNCHERS, "Heavy Assault Missile Launcher II")).toMatchObject({
+      launcherGroup: 771,
+    });
+  });
+
+  test("includes cruise missile launchers with group 506", () => {
+    expect(rowByName(LAUNCHERS, "Cruise Missile Launcher I")).toMatchObject({
+      launcherGroup: 506,
+    });
+  });
+
+  test("excludes defender, bomb, and probe launchers", () => {
+    expect(rowByName(LAUNCHERS, "Defender Missile Launcher I")).toBeUndefined();
+    expect(rowByName(LAUNCHERS, "Bomb Launcher I")).toBeUndefined();
+    expect(rowByName(LAUNCHERS, "Expanded Probe Launcher II")).toBeUndefined();
+  });
+
+  test("includes Mjolnir Light Missile with EM damage and light launcher group", () => {
+    expect(rowByName(MISSILES, "Mjolnir Light Missile")).toMatchObject({
+      damage: 83,
+      damageType: "em",
+      explosionRadius: 40,
+      explosionVelocity: 170,
+      damageReductionFactor: 0.604,
+      maxVelocity: 3750,
+      flightTime: 5,
+      launcherGroup: 509,
+      chargeGroup: 384,
+    });
+  });
+
+  test("includes Scourge Light Missile with kinetic damage type", () => {
+    expect(rowByName(MISSILES, "Scourge Light Missile")?.damageType).toBe("kinetic");
+  });
+
+  test("includes Inferno Light Missile with thermal damage type", () => {
+    expect(rowByName(MISSILES, "Inferno Light Missile")?.damageType).toBe("thermal");
+  });
+
+  test("includes Nova Light Missile with explosive damage type", () => {
+    expect(rowByName(MISSILES, "Nova Light Missile")?.damageType).toBe("explosive");
+  });
+
+  test("includes cruise missiles with launcher group 506", () => {
+    expect(rowByName(MISSILES, "Mjolnir Cruise Missile")).toMatchObject({
+      damage: 375,
+      damageType: "em",
+      explosionRadius: 330,
+      explosionVelocity: 69,
+      launcherGroup: 506,
+    });
+  });
+
+  test("includes heavy missiles with launcher group 510", () => {
+    expect(rowByName(MISSILES, "Scourge Heavy Missile")).toMatchObject({
+      damage: 149,
+      launcherGroup: 510,
+    });
+  });
+
+  test("includes rockets with launcher group 507", () => {
+    expect(rowByName(MISSILES, "Mjolnir Rocket")?.launcherGroup).toBe(507);
+  });
+
+  test("includes advanced missile variants (Fury, Rage, Javelin, Precision)", () => {
+    expect(rowByName(MISSILES, "Scourge Fury Light Missile")).toBeDefined();
+    expect(rowByName(MISSILES, "Inferno Rage Heavy Assault Missile")).toBeDefined();
+    expect(rowByName(MISSILES, "Mjolnir Javelin Rocket")).toBeDefined();
+    expect(rowByName(MISSILES, "Scourge Precision Cruise Missile")).toBeDefined();
+  });
+
+  test("advanced missiles share the same launcher group as their base variant", () => {
+    expect(rowByName(MISSILES, "Scourge Fury Light Missile")?.launcherGroup).toBe(509);
+    expect(rowByName(MISSILES, "Inferno Rage Heavy Assault Missile")?.launcherGroup).toBe(771);
+  });
+
+  test("includes Kestrel missile damage hull bonus for light missiles", () => {
+    expect(HULL_BONUSES["602" as ShipId]).toEqual([
+      { attribute: "missileDamage", magnitude: 5, skill: "Caldari Frigate", launcherGroup: 509 },
+    ]);
+  });
+
+  test("includes Raven missile ROF hull bonuses for cruise, torpedo, and rapid heavy launchers", () => {
+    expect(HULL_BONUSES["638" as ShipId]).toEqual([
+      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 506 },
+      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 508 },
+      { attribute: "missileRoF", magnitude: -5, skill: "Caldari Battleship", launcherGroup: 1245 },
+    ]);
+  });
+
+  test("includes Drake missile damage hull bonuses for heavy and heavy assault missiles", () => {
+    expect(HULL_BONUSES["24698" as ShipId]).toEqual([
+      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 771 },
+      { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 510 },
+    ]);
   });
 });

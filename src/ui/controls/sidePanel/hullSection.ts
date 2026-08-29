@@ -84,6 +84,7 @@ export class HullSection implements IHullSection {
     this.panel.setFittingEyeEnabled(true);
     this.panel.setConfigInputsEnabled(true);
     this.panel.setTurretProfile(profile);
+    this.panel.setLauncherProfile(profile);
     this.panel.renderFittingPopupIfOpen();
     this.panel.sections.propulsion.renderPropulsionOptions(propulsionId);
     if (updateStats) {
@@ -117,6 +118,7 @@ export class HullSection implements IHullSection {
     this.panel.setFittingEyeEnabled(false);
     this.panel.setConfigInputsEnabled(false);
     this.panel.setTurretProfile(undefined);
+    this.panel.setLauncherProfile(undefined);
     this.panel.closeFittingPopupIfOpen();
     this.updateHullHint();
     this.panel.sections.propulsion.renderPropulsionOptions();
@@ -128,6 +130,7 @@ export class HullSection implements IHullSection {
     this.panel.fittingText = undefined;
     this.panel.clearOverrides();
     this.panel.clearTurret();
+    this.panel.clearLauncher();
     this.panel.hideFittingPreview();
     this.panel.sections.paste.clearImportHint();
   }

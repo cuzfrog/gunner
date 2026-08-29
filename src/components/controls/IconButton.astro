@@ -1,0 +1,51 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  readonly id?: string;
+  readonly iconName: string;
+  readonly iconSize?: number;
+  readonly iconFill?: string;
+  readonly iconStroke?: string;
+  readonly iconClass?: string;
+  readonly extraClass?: string;
+  readonly pressed?: boolean;
+  readonly disabled?: boolean;
+  readonly titleI18n?: string;
+  readonly ariaLabelI18n?: string;
+  readonly title?: string;
+  readonly ariaLabel?: string;
+  readonly dataValue?: string;
+  readonly ariaHaspopup?: string;
+  readonly ariaControls?: string;
+  readonly ariaExpanded?: boolean;
+}
+const {
+  id,
+  iconName,
+  iconSize,
+  iconFill,
+  iconStroke,
+  iconClass,
+  extraClass,
+  pressed,
+  disabled,
+  titleI18n,
+  ariaLabelI18n,
+  title,
+  ariaLabel,
+  dataValue,
+  ariaHaspopup,
+  ariaControls,
+  ariaExpanded,
+} = Astro.props;
+const buttonClass = extraClass ? `icon-button ${extraClass}` : "icon-button";
+---
+
+<button type="button" id={id} class={buttonClass}
+  data-value={dataValue} aria-pressed={pressed} disabled={disabled}
+  aria-haspopup={ariaHaspopup} aria-expanded={ariaExpanded} aria-controls={ariaControls}
+  data-i18n-title={titleI18n} data-i18n-aria-label={ariaLabelI18n}
+  title={title} aria-label={ariaLabel}>
+  <Icon name={iconName} size={iconSize} fill={iconFill} stroke={iconStroke} class={iconClass} />
+</button>

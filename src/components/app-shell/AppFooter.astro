@@ -1,0 +1,43 @@
+---
+import FooterMechanism from "./FooterMechanism.astro";
+---
+
+<footer class="app-footer">
+  <div>
+    <h3 class="footer-heading" data-i18n="footer.about.heading">About Gunner</h3>
+    <p class="footer-text" data-i18n="footer.about.text">I wrote this tool to help me understand the dynamics of ship fighting and boost my confidence in a fight. Just like you, I love this game.</p>
+  </div>
+
+  <FooterMechanism accent="teal"
+    headingI18n="footer.mech.kinematics.heading" heading="Kinematics"
+    textI18n="footer.mech.kinematics.text" text="Ships move with mass and inertia. Transversal, radial, and angular velocity describe ship motion. Acceleration is exponential."
+    linkI18n="footer.mech.kinematics.link" linkText="Velocity"
+    href="https://wiki.eveuniversity.org/Velocity" />
+
+  <FooterMechanism accent="blue"
+    headingI18n="footer.mech.speed.heading" heading="Speed"
+    textI18n="footer.mech.speed.text" text="Max velocity is hull base speed × propulsion bonus (afterburner / MWD) × skill modifiers; overloading boosts it further."
+    linkI18n="footer.mech.speed.link" linkText="Propulsion"
+    href="https://wiki.eveuniversity.org/Propulsion_equipment" />
+
+  <FooterMechanism accent="orange"
+    headingI18n="footer.mech.hitChance.heading" heading="Hit chance"
+    textI18n="footer.mech.hitChance.text" text="Hit chance is 0.5^(tracking term + range term), using angular velocity, turret tracking, signature, and distance past optimal over falloff."
+    linkI18n="footer.mech.hitChance.link" linkText="Turret mechanics"
+    href="https://wiki.eveuniversity.org/Turret_mechanics" />
+
+  <div class="footer-author">
+    <div class="footer-author-emblems">
+      <img src="author-portrait.jpg" alt="Keos Cuzi" class="footer-author-portrait" width="36" height="36">
+      <img src="corporation-emblem.png" alt="Ascendance Rising" class="footer-corporation-emblem" width="36" height="36">
+    </div>
+    <span class="footer-author-line">
+      <span class="footer-author-label" data-i18n="label.author">Author:</span>
+      <span class="footer-author-name">Keos Cuzi</span>
+    </span>
+    <span class="footer-author-line">
+      <span class="footer-corp-label" data-i18n="label.corp">Corp:</span>
+      <span class="footer-corp-name">Ascendance Rising</span>
+    </span>
+  </div>
+</footer>

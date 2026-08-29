@@ -1,0 +1,89 @@
+---
+import { DEFAULT_VALUES } from "../../ui/controls";
+import type { Side } from "../../ui/controls";
+import Chevron from "../controls/Chevron.astro";
+import FormField from "../form/FormField.astro";
+import FormFieldRow from "../form/FormFieldRow.astro";
+import InputWithUnit from "../form/InputWithUnit.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
+
+interface Props {
+  readonly idPrefix: string;
+  readonly side: Side;
+}
+const { idPrefix, side } = Astro.props;
+const tracking = DEFAULT_VALUES[`${idPrefix}-tracking`];
+const optimal = DEFAULT_VALUES[`${idPrefix}-optimal`];
+const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
+---
+
+<div class="weapon-panel" id={`${idPrefix}-turret-panel`}>
+<div class="form-field-group">
+  <span class="field-label truncate" data-i18n="label.turretSigResolution">Turret sig. resolution</span>
+
+  <select class="input-field" id={`${idPrefix}-sigRes`} hidden>
+    <option value="S" selected>S (40 m)</option>
+    <option value="M">M (125 m)</option>
+    <option value="L">L (400 m)</option>
+    <option value="XL">XL (2000 m)</option>
+  </select>
+
+  <div class="segmented-control choice-selector sigres-selector"
+       id={`${idPrefix}-sig-res-options`} role="group"
+       data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+    <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
+      <img class="choice-icon" alt="" hidden><span class="sigres-class">S</span><span class="choice-value mono">(40 m)</span>
+    </button>
+    <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
+      <img class="choice-icon" alt="" hidden><span class="sigres-class">M</span><span class="choice-value mono">(125 m)</span>
+    </button>
+    <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
+      <img class="choice-icon" alt="" hidden><span class="sigres-class">L</span><span class="choice-value mono">(400 m)</span>
+    </button>
+    <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
+      <img class="choice-icon" alt="" hidden><span class="sigres-class">XL</span><span class="choice-value mono">(2000 m)</span>
+    </button>
+  </div>
+</div>
+<label class="form-field">
+  <span class="tracking-label-row">
+    <span class="field-label" data-i18n="label.trackingSpeed">Tracking speed</span>
+    <span class="tracking-unit-toggle" role="group" aria-label="Tracking unit">
+      <button type="button" id={`${idPrefix}-tracking-unit-rad`} data-tracking-unit="rad" class="btn" aria-pressed="true">rad/s</button>
+      <button type="button" id={`${idPrefix}-tracking-unit-score`} data-tracking-unit="score" class="btn" aria-pressed="false" data-i18n="label.trackingScore">Score</button>
+    </span>
+  </span>
+  <InputWithUnit id={`${idPrefix}-tracking`} value={tracking} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-tracking`} />
+</label>
+<FormFieldRow>
+  <FormField i18n="label.optimalRange" text="Optimal range">
+    <InputWithUnit id={`${idPrefix}-optimal`} value={optimal} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-optimal`} />
+  </FormField>
+  <FormField i18n="label.falloffRange" text="Falloff range">
+    <InputWithUnit id={`${idPrefix}-falloff`} value={falloff} min="0" extraClass="input-with-unit-has-effective" effectiveId={`effective-${idPrefix}-falloff`} />
+  </FormField>
+</FormFieldRow>
+
+<div class="form-field-group ammo-group" id={`${idPrefix}-ammo-field`}>
+  <TriggerButton id={`${idPrefix}-ammo-trigger`} popupId={`${idPrefix}-ammo-popup`}
+          labelClass="ammo-label truncate" labelI18n="label.ammo" labelText="Ammo"
+          titleI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
+          title="Select ammunition" ariaLabel="Select ammunition" ariaHaspopup="true">
+    <span class="ammo-summary-row">
+      <img id={`${idPrefix}-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
+      <span class="ammo-summary-value mono truncate" id={`${idPrefix}-ammo-summary`}></span>
+      <Chevron />
+    </span>
+  </TriggerButton>
+  <PopupBox id={`${idPrefix}-ammo-popup`} extraClass="ammo-popup" position="below" align="both" scroll>
+    <span class="fitting-group-label" id={`${idPrefix}-ammo-cargo-label`} data-i18n="ammo.cargoGroup">In cargo</span>
+    <ul class="ammo-list" id={`${idPrefix}-ammo-cargo-list`} role="listbox"></ul>
+    <button type="button" class="ammo-expand" id={`${idPrefix}-ammo-expand`} data-i18n="ammo.showAll">Show all</button>
+    <div id={`${idPrefix}-ammo-all-section`} hidden>
+      <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
+      <ul class="ammo-list" id={`${idPrefix}-ammo-all-list`} role="listbox"></ul>
+    </div>
+  </PopupBox>
+</div>
+</div>

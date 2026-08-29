@@ -2,6 +2,8 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fi
 import type { I18n } from "../../i18n";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
+import { SelectableListImpl, IconActionImpl, spriteIconStroked } from "../shared";
+import { html } from "../markup";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side } from "../side";
@@ -32,6 +34,9 @@ export class FittingPopupRenderer {
   private readonly els: FittingPopupEls;
   private readonly panel: FittingPopupHost;
   private readonly previews: FittingPreviewManager;
+  private readonly fittingList: SelectableListImpl;
+  private readonly deleteAction: IconActionImpl;
+  private readonly eyeAction: IconActionImpl;
 
   constructor(deps: FittingPopupRendererDeps) {
     this.side = deps.side;
@@ -42,6 +47,21 @@ export class FittingPopupRenderer {
     this.els = deps.els;
     this.panel = deps.panel;
     this.previews = deps.previews;
+    this.fittingList = new SelectableListImpl({
+      itemClass: "fitting-item",
+      nameClass: "fitting-item-name",
+    });
+    this.deleteAction = new IconActionImpl({
+      buttonClass: "fitting-delete icon-button",
+      iconSvg: spriteIconStroked("delete", 12),
+      title: () => this.i18n.t("button.deleteFitting"),
+    });
+    this.eyeAction = new IconActionImpl({
+      buttonClass: "fitting-item-eye icon-button",
+      iconSvg: spriteIconStroked("eye", 14),
+      title: () => this.i18n.t("button.fittingDetails"),
+      ariaPressed: false,
+    });
   }
 
   get fittingEls(): FittingPopupEls { return this.els; }
@@ -107,57 +127,23 @@ export class FittingPopupRenderer {
   }
 
   private createFittingItem(name: string, text: string, currentKey: string | undefined, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "fitting-item";
-    if (currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey)) {
-      button.setAttribute("aria-current", "true");
-    }
-    const span = document.createElement("span");
-    span.className = "fitting-item-name truncate";
-    span.textContent = name;
-    span.title = name;
-    button.appendChild(span);
+    const selected = currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey);
+    const button = this.fittingList.createButton({
+      value: text,
+      label: name,
+      selected,
+    });
     button.addEventListener("click", onClick);
     return button;
   }
 
   private createFittingEntry(text: string, item: HTMLButtonElement, onDelete?: () => void): HTMLElement {
-    const li = document.createElement("li");
-    li.className = "fitting-entry";
-    li.setAttribute("role", "presentation");
-    li.appendChild(item);
-    li.appendChild(this.createFittingItemEye(text));
+    const eye = this.eyeAction.create(() => this.previews.showInMenu(this.side, text, eye, eye));
+    const children: (Element | DocumentFragment)[] = [item, eye];
     if (onDelete) {
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "fitting-delete icon-button";
-      del.setAttribute("title", this.i18n.t("button.deleteFitting"));
-      del.setAttribute("aria-label", this.i18n.t("button.deleteFitting"));
-      del.innerHTML = DELETE_ICON_SVG;
-      del.addEventListener("click", () => onDelete());
-      li.appendChild(del);
+      const del = this.deleteAction.create(() => onDelete());
+      children.push(del);
     }
-    return li;
-  }
-
-  private createFittingItemEye(text: string): HTMLButtonElement {
-    const eye = document.createElement("button");
-    eye.type = "button";
-    eye.className = "fitting-item-eye icon-button";
-    eye.setAttribute("aria-pressed", "false");
-    eye.setAttribute("title", this.i18n.t("button.fittingDetails"));
-    eye.setAttribute("aria-label", this.i18n.t("button.fittingDetails"));
-    eye.innerHTML = EYE_ICON_SVG;
-    eye.addEventListener("click", () => this.previews.showInMenu(this.side, text, eye, eye));
-    return eye;
+    return html`<li class="fitting-entry" role="presentation">${children}</li>` as unknown as HTMLElement;
   }
 }
-
-const DELETE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
-
-const EYE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#eye"></use></svg>';

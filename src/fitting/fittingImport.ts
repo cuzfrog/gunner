@@ -9,6 +9,7 @@ import type {
   ShipNameLanguage,
   ShipProfile,
   Ships,
+  SkillLevel,
   StatConditions,
 } from "../ships";
 import {
@@ -28,7 +29,9 @@ import { moduleLines, parseEft, type BankKind, type EftDocument, type EftLine, t
 
 import type { ItemNameCatalog, ItemNameResolver } from "../gamedata/itemNames";
 import type { ModuleSlotCatalog } from "../gamedata/moduleSlots";
-import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase } from "./chargeCatalog";
+import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase, ImportedLauncher } from "./chargeCatalog";
+import type { MissileCatalog } from "./missileCatalog";
+import type { MissileSkillModel } from "./missileStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
 import type {
   FittingDb,
@@ -36,6 +39,8 @@ import type {
   DisruptionScriptStats,
   FittingModuleStats,
   HullBonus,
+  LauncherStats,
+  MissileStats,
   StasisGrapplerStats,
   StasisWebStats,
   TrackingComputerStats,
@@ -46,7 +51,7 @@ import type {
 } from "../gamedata/fittingDb";
 
 export type { FittingDb } from "../gamedata/fittingDb";
-export type { ImportedTurret, ImportedTurretBase, CargoCharge } from "./chargeCatalog";
+export type { ImportedTurret, ImportedTurretBase, ImportedLauncher, CargoCharge } from "./chargeCatalog";
 
 export interface FittingRow {
   readonly name: string;
@@ -76,9 +81,11 @@ export interface ImportedFitting {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
+  readonly launcher?: ImportedLauncher;
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
   readonly boosts: BoostLoadout;
+  readonly hullBonuses: readonly HullBonus[];
 }
 
 export interface PropulsionVariant {
@@ -94,12 +101,15 @@ export interface FittingImport {
   summarize(text: string): FittingSummary | undefined;
   canonicalEftText(text: string): string | undefined;
   itemNameForId(id: TypeId, language: ShipNameLanguage): string;
+  detectLanguageFromText(text: string): ShipNameLanguage | undefined;
 }
 
 export class FittingImportImpl implements FittingImport {
   private readonly ships: Ships;
   private readonly db: FittingDb;
   private readonly chargeCatalog: ChargeCatalog;
+  private readonly missileCatalog: MissileCatalog;
+  private readonly missileSkillModel: MissileSkillModel;
   private readonly stacking: StackingPenalty;
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly itemNameResolver: ItemNameResolver;
@@ -109,6 +119,8 @@ export class FittingImportImpl implements FittingImport {
     ships,
     fittingDb,
     chargeCatalog,
+    missileCatalog,
+    missileSkillModel,
     stackingPenalty,
     itemNameCatalog,
     itemNameResolver,
@@ -117,6 +129,8 @@ export class FittingImportImpl implements FittingImport {
     ships: Ships;
     fittingDb: FittingDb;
     chargeCatalog: ChargeCatalog;
+    missileCatalog: MissileCatalog;
+    missileSkillModel: MissileSkillModel;
     stackingPenalty: StackingPenalty;
     itemNameCatalog: ItemNameCatalog;
     itemNameResolver: ItemNameResolver;
@@ -125,6 +139,8 @@ export class FittingImportImpl implements FittingImport {
     this.ships = ships;
     this.db = fittingDb;
     this.chargeCatalog = chargeCatalog;
+    this.missileCatalog = missileCatalog;
+    this.missileSkillModel = missileSkillModel;
     this.stacking = stackingPenalty;
     this.itemNameCatalog = itemNameCatalog;
     this.itemNameResolver = itemNameResolver;
@@ -172,6 +188,7 @@ export class FittingImportImpl implements FittingImport {
     const hullSide = aggregateHullSide(resolved, this.db, hullBonuses, conditions.skillLevel, this.stacking);
     const propulsion = resolvePropulsion(resolved, this.ships, this.db, hullSide.propulsionId);
     const turret = resolveTurret(this.db, this.chargeCatalog, resolved, conditions.skillLevel, hullBonuses, this.stacking);
+    const launcher = resolveLauncher(this.db, this.missileCatalog, this.missileSkillModel, resolved, conditions.skillLevel, hullBonuses);
     const cargoCharges = resolveCargoCharges(this.db, resolved);
     const ewar = resolveEwar(this.db, resolved, this.itemNameCatalog);
     const boosts = resolveBoosts(this.db, resolved, this.itemNameCatalog);
@@ -182,9 +199,11 @@ export class FittingImportImpl implements FittingImport {
       fitted: hullSide.fitted,
       propulsion,
       turret,
+      launcher,
       cargoCharges,
       ewar,
       boosts,
+      hullBonuses,
     };
   }
 
@@ -272,6 +291,12 @@ export class FittingImportImpl implements FittingImport {
     }
     return undefined;
   }
+
+  detectLanguageFromText(text: string): ShipNameLanguage | undefined {
+    const parsed = parseEft(text);
+    if (!parsed) return undefined;
+    return this.detectLanguage(parsed);
+  }
 }
 
 interface ResolvedEft {
@@ -337,6 +362,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
   return (
     db.modules[id] !== undefined ||
     db.turrets[id] !== undefined ||
+    db.launchers[id] !== undefined ||
     db.stasisWebs[id] !== undefined ||
     db.stasisGrapplers[id] !== undefined ||
     db.trackingComputers[id] !== undefined ||
@@ -346,7 +372,7 @@ function isModuleRole(id: TypeId, db: FittingDb): boolean {
 }
 
 function isChargeRole(id: TypeId, db: FittingDb): boolean {
-  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined;
+  return db.charges[id] !== undefined || db.scripts[id] !== undefined || db.disruptionScripts[id] !== undefined || db.missiles[id] !== undefined;
 }
 
 function moduleByName(db: FittingDb, name: string): FittingModuleStats | undefined {
@@ -466,19 +492,22 @@ function resolveTurret(
   const trackingPercents: number[] = [];
   const optimalPercents: number[] = [];
   const falloffPercents: number[] = [];
-  let turret: TurretStats | undefined;
-  let chargeId: TypeId | undefined;
-  let moduleId: TypeId | undefined;
+  const counts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
+  let order = 0;
 
   for (const bank of resolved.banks) {
     for (const line of bank.lines) {
       if (line.kind !== "module" || line.offline) continue;
 
       const lineTurret = db.turrets[line.moduleId];
-      if (lineTurret && !turret) {
-        turret = lineTurret;
-        chargeId = line.chargeId;
-        moduleId = line.moduleId;
+      if (lineTurret) {
+        const existing = counts.get(line.moduleId);
+        if (existing) {
+          existing.count++;
+          if (existing.chargeId === undefined && line.chargeId !== undefined) existing.chargeId = line.chargeId;
+        } else {
+          counts.set(line.moduleId, { count: 1, chargeId: line.chargeId, order: order++ });
+        }
         continue;
       }
 
@@ -489,7 +518,23 @@ function resolveTurret(
     }
   }
 
-  if (!turret || !moduleId) return undefined;
+  if (counts.size === 0) return undefined;
+
+  let bestModuleId: TypeId | undefined;
+  let bestCount = 0;
+  let bestOrder = Infinity;
+  for (const [moduleId, entry] of counts) {
+    if (entry.count > bestCount || (entry.count === bestCount && entry.order < bestOrder)) {
+      bestModuleId = moduleId;
+      bestCount = entry.count;
+      bestOrder = entry.order;
+    }
+  }
+  if (!bestModuleId) return undefined;
+
+  const turret = db.turrets[bestModuleId];
+  if (!turret) return undefined;
+  const chargeId = counts.get(bestModuleId)?.chargeId;
 
   for (const bonus of hullBonuses) {
     if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
@@ -527,10 +572,15 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     chargeId: chargeId ?? chargeCatalog.usualForChargeSize(turret.chargeSize),
     base,
-    moduleId,
+    moduleId: bestModuleId,
+    damageMultiplier: turret.damageMultiplier,
+    damagePerShot: 0,
+    cycleTime: turret.cycleTime,
+    turretCount: bestCount,
   };
   const selectedCharge = chargeId && db.charges[chargeId] ? chargeId : chargeCatalog.usualForTurret(turretForChargeSelection);
   const charge = db.charges[selectedCharge] ?? {};
+  const chargeDamage = (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
 
   return {
     tracking: base.tracking * (charge.trackingMultiplier ?? 1),
@@ -540,17 +590,92 @@ function resolveTurret(
     chargeSize: turret.chargeSize,
     chargeId: selectedCharge,
     base,
-    moduleId,
+    moduleId: bestModuleId,
+    damageMultiplier: turret.damageMultiplier,
+    damagePerShot: turret.damageMultiplier * chargeDamage,
+    cycleTime: turret.cycleTime,
+    turretCount: bestCount,
   };
+}
+
+function resolveLauncher(
+  db: FittingDb,
+  missileCatalog: MissileCatalog,
+  missileSkillModel: MissileSkillModel,
+  resolved: ResolvedEft,
+  skillLevel: SkillLevel,
+  hullBonuses: readonly HullBonus[],
+): ImportedLauncher | undefined {
+  const counts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
+  let order = 0;
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module" || line.offline) continue;
+      const launcherStats = db.launchers[line.moduleId];
+      if (!launcherStats) continue;
+      const existing = counts.get(line.moduleId);
+      if (existing) {
+        existing.count++;
+        if (existing.chargeId === undefined && line.chargeId !== undefined) existing.chargeId = line.chargeId;
+      } else {
+        counts.set(line.moduleId, { count: 1, chargeId: line.chargeId, order: order++ });
+      }
+    }
+  }
+  if (counts.size === 0) return undefined;
+
+  let bestModuleId: TypeId | undefined;
+  let bestCount = 0;
+  let bestOrder = Infinity;
+  for (const [moduleId, entry] of counts) {
+    if (entry.count > bestCount || (entry.count === bestCount && entry.order < bestOrder)) {
+      bestModuleId = moduleId;
+      bestCount = entry.count;
+      bestOrder = entry.order;
+    }
+  }
+  if (!bestModuleId) return undefined;
+
+  const launcherStats = db.launchers[bestModuleId];
+  if (!launcherStats) return undefined;
+
+  const chargeId = resolveMissileChargeId(db, missileCatalog, launcherStats, counts.get(bestModuleId)?.chargeId);
+  if (!chargeId) return undefined;
+
+  const missileStats = db.missiles[chargeId];
+  if (!missileStats) return undefined;
+
+  const output = missileSkillModel.compute(launcherStats, missileStats, hullBonuses, skillLevel);
+  return {
+    moduleId: bestModuleId,
+    name: launcherStats.name,
+    count: bestCount,
+    chargeId,
+    chargeName: missileStats.name,
+    damagePerMissile: output.damagePerMissile,
+    cycleTime: output.cycleTime,
+    explosionRadius: output.explosionRadius,
+    explosionVelocity: output.explosionVelocity,
+    damageReductionFactor: output.damageReductionFactor,
+    maxVelocity: output.maxVelocity,
+    flightTime: output.flightTime,
+  };
+}
+
+function resolveMissileChargeId(db: FittingDb, missileCatalog: MissileCatalog, launcher: LauncherStats, loadedChargeId: TypeId | undefined): TypeId | undefined {
+  if (loadedChargeId && db.missiles[loadedChargeId] && launcher.chargeGroups.includes(db.missiles[loadedChargeId].chargeGroup)) {
+    return loadedChargeId;
+  }
+  return missileCatalog.usualForLauncher(launcher);
 }
 
 function resolveCargoCharges(db: FittingDb, resolved: ResolvedEft): readonly CargoCharge[] {
   const charges: CargoCharge[] = [];
   for (const item of resolved.drones) {
-    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
+    if (item.kind === "resolved" && (db.charges[item.id] || db.missiles[item.id])) charges.push({ id: item.id, quantity: item.quantity });
   }
   for (const item of resolved.cargo) {
-    if (item.kind === "resolved" && db.charges[item.id]) charges.push({ id: item.id, quantity: item.quantity });
+    if (item.kind === "resolved" && (db.charges[item.id] || db.missiles[item.id])) charges.push({ id: item.id, quantity: item.quantity });
   }
   return charges;
 }

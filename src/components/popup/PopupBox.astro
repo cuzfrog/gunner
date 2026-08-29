@@ -1,0 +1,37 @@
+---
+interface Props {
+  readonly id: string;
+  readonly extraClass?: string;
+  readonly position?: "below" | "above";
+  readonly align?: "left" | "right" | "both";
+  readonly scroll?: boolean;
+  readonly role?: "dialog" | "menu";
+  readonly ariaModal?: boolean;
+  readonly ariaHidden?: boolean;
+  readonly i18nAriaLabel?: string;
+  readonly ariaLabel?: string;
+}
+const {
+  id,
+  extraClass,
+  position,
+  align,
+  scroll,
+  role,
+  ariaModal,
+  ariaHidden,
+  i18nAriaLabel,
+  ariaLabel,
+} = Astro.props;
+const classes = [extraClass, "popup"];
+if (position) classes.push(`popup-${position}`);
+if (align === "both") { classes.push("popup-left"); classes.push("popup-right"); }
+else if (align) classes.push(`popup-${align}`);
+if (scroll) classes.push("popup-scroll");
+const classString = classes.filter(Boolean).join(" ");
+---
+
+<div id={id} class={classString} hidden role={role} aria-modal={ariaModal} aria-hidden={ariaHidden}
+  data-i18n-aria-label={i18nAriaLabel} aria-label={ariaLabel}>
+  <slot />
+</div>
