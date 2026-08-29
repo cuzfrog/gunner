@@ -120,7 +120,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.launcherClass.xlCruise": { zh: "XL巡航" },
   "label.launcherClass.rapidTorpedo": { zh: "快速鱼雷" },
   "label.missileAttributes": { zh: "导弹" },
-  "label.advancedAttributes": { zh: "高级属性" },
+  "label.moreAttributes": { zh: "更多属性" },
   "button.missileAttributes": { zh: "导弹属性" },
   "label.damageReductionFactor": { zh: "衰减系数" },
   "ammo.cargoGroup": { zh: "货舱内" },

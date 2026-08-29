@@ -13,10 +13,10 @@ const DEFAULT_ROWS = [
   { i18n: "label.rateOfFire", text: "Rate of fire", idSuffix: "launcher-rate-of-fire" },
   { i18n: "label.flightRange", text: "Flight range", idSuffix: "launcher-flight-range" },
   { i18n: "label.explosionRadius", text: "Explosion radius", idSuffix: "launcher-explosion-radius" },
+  { i18n: "label.explosionVelocity", text: "Explosion velocity", idSuffix: "launcher-explosion-velocity" },
 ] as const;
 
 const ADVANCED_ROWS = [
-  { i18n: "label.explosionVelocity", text: "Explosion velocity", idSuffix: "launcher-explosion-velocity" },
   { i18n: "label.damageReductionFactor", text: "Damage reduction factor", idSuffix: "launcher-damage-reduction-factor" },
   { i18n: "label.missileVelocity", text: "Missile velocity", idSuffix: "launcher-missile-velocity" },
   { i18n: "label.flightTime", text: "Flight time", idSuffix: "launcher-flight-time" },
@@ -41,7 +41,7 @@ const ADVANCED_ROWS = [
       ))}
     </div>
     <TriggerButton id={`${idPrefix}-launcher-attributes-trigger`} popupId={`${idPrefix}-launcher-attributes-popup`}
-            labelClass="ammo-label truncate" labelI18n="label.advancedAttributes" labelText="Advanced attributes"
+            labelClass="ammo-label truncate" labelI18n="label.moreAttributes" labelText="More attributes"
             titleI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
             title="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
       <Chevron />

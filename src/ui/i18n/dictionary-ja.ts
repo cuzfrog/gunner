@@ -119,7 +119,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.launcherClass.xlCruise": { ja: "XLクルーズ" },
   "label.launcherClass.rapidTorpedo": { ja: "ラピッドトルピード" },
   "label.missileAttributes": { ja: "ミサイル" },
-  "label.advancedAttributes": { ja: "詳細属性" },
+  "label.moreAttributes": { ja: "その他の属性" },
   "button.missileAttributes": { ja: "ミサイル属性" },
   "label.damageReductionFactor": { ja: "ダメージ減衰係数" },
   "ammo.cargoGroup": { ja: "カーゴ内" },
