@@ -6,6 +6,7 @@ export interface WeaponSystemSwitch {
   readonly side: Side;
   activeKind(): WeaponKind;
   setActiveKind(kind: WeaponKind): void;
+  autoToggle(hasTurret: boolean, hasLauncher: boolean): void;
   refresh(): void;
   clear(): void;
 }
@@ -49,6 +50,12 @@ export class WeaponSystemSwitchImpl implements WeaponSystemSwitch {
 
   setActiveKind(kind: WeaponKind): void {
     this.kind = kind;
+    this.refresh();
+  }
+
+  autoToggle(hasTurret: boolean, hasLauncher: boolean): void {
+    if (hasLauncher && !hasTurret) this.kind = "missile";
+    else if (hasTurret && !hasLauncher) this.kind = "turret";
     this.refresh();
   }
 

@@ -251,6 +251,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreLauncher("shipB", settings.shipB.fitting, settings.shipB.missileAmmo);
     this.weaponSystemSwitches.shipA.setActiveKind(settings.shipA.weaponKind ?? "turret");
     this.weaponSystemSwitches.shipB.setActiveKind(settings.shipB.weaponKind ?? "turret");
+    this.weaponSystemSwitches.shipA.autoToggle(this.turretControllers.shipA.turret() !== undefined, this.launcherControllers.shipA.launcher() !== undefined);
+    this.weaponSystemSwitches.shipB.autoToggle(this.turretControllers.shipB.turret() !== undefined, this.launcherControllers.shipB.launcher() !== undefined);
     this.restoreEwar("shipA", settings.shipA.fitting, settings.shipA.ewarActivation);
     this.restoreEwar("shipB", settings.shipB.fitting, settings.shipB.ewarActivation);
     this.restoreBooster("shipA", settings.shipA.fitting, settings.shipA.boosterActivation);

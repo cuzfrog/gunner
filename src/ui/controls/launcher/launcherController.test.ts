@@ -137,7 +137,6 @@ describe("LauncherController", () => {
   test("icons are hidden when no launcher is fitted", () => {
     const { document, controller } = buildLauncher();
     controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
-    expect(getFake(document, "ship-a-launcher-attributes-icon").hidden).toBe(true);
     expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
   });
 
@@ -146,10 +145,7 @@ describe("LauncherController", () => {
       imageCatalog: { itemIconUrl: vi.fn(() => "images/launcher.png") },
     });
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
-    const attributesIcon = getFake(document, "ship-a-launcher-attributes-icon");
     const ammoIcon = getFake(document, "ship-a-launcher-ammo-summary-icon");
-    expect(attributesIcon.hidden).toBe(false);
-    expect(attributesIcon.src).toBe("images/launcher.png");
     expect(ammoIcon.hidden).toBe(false);
     expect(ammoIcon.src).toBe("images/launcher.png");
   });
@@ -159,7 +155,6 @@ describe("LauncherController", () => {
       imageCatalog: { itemIconUrl: vi.fn(() => undefined) },
     });
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
-    expect(getFake(document, "ship-a-launcher-attributes-icon").hidden).toBe(true);
     expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
   });
 

@@ -34,6 +34,6 @@ const {
   aria-describedby={ariaDescribedby} disabled={disabled}
   data-i18n-title={titleI18n} data-i18n-aria-label={ariaLabelI18n}
   title={title} aria-label={ariaLabel}>
-  <span class={labelClass} data-i18n={labelI18n}>{labelText}</span>
+  {labelI18n || labelText ? <span class={labelClass} data-i18n={labelI18n}>{labelText}</span> : null}
   <slot />
 </button>

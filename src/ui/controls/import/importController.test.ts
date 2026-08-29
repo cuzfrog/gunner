@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("ImportController", () => {
   test("importFromClipboard reads a valid EFT fitting and applies it to the side", async () => {
-    const { controller, clipboard, fittingImport, shipAPanel, turrets, launchers, onConfigPersisted, savedFittings } =
+    const { controller, clipboard, fittingImport, shipAPanel, turrets, launchers, weaponSystemSwitches, onConfigPersisted, savedFittings } =
       buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     clipboard.readText.mockResolvedValue(text);
@@ -22,6 +22,7 @@ describe("ImportController", () => {
     expect(shipAPanel.fittingText).toBe(text);
     expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
     expect(launchers.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
+    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(true, false);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));

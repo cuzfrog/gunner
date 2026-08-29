@@ -85,4 +85,34 @@ describe("WeaponSystemSwitchImpl", () => {
     expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
     expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
   });
+
+  test("autoToggle switches to missile when only launcher is available", () => {
+    const { switch: sw, document } = buildSwitch();
+    sw.autoToggle(false, true);
+    expect(sw.activeKind()).toBe("missile");
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(false);
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(true);
+  });
+
+  test("autoToggle switches to turret when only turret is available", () => {
+    const { switch: sw, document } = buildSwitch();
+    sw.setActiveKind("missile");
+    sw.autoToggle(true, false);
+    expect(sw.activeKind()).toBe("turret");
+    expect(getFake(document, "ship-a-turret-panel").hidden).toBe(false);
+    expect(getFake(document, "ship-a-launcher-panel").hidden).toBe(true);
+  });
+
+  test("autoToggle keeps current kind when both weapon types are available", () => {
+    const { switch: sw } = buildSwitch();
+    sw.setActiveKind("missile");
+    sw.autoToggle(true, true);
+    expect(sw.activeKind()).toBe("missile");
+  });
+
+  test("autoToggle keeps current kind when neither weapon type is available", () => {
+    const { switch: sw } = buildSwitch();
+    sw.autoToggle(false, false);
+    expect(sw.activeKind()).toBe("turret");
+  });
 });

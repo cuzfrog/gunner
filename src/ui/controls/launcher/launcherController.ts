@@ -43,7 +43,6 @@ export class LauncherControllerImpl implements LauncherController {
   private attributesPopupOpen = false;
   private readonly ammoList: SelectableListImpl;
   private readonly ammoChip: SummaryChipImpl;
-  private readonly attributesChip: SummaryChipImpl;
   private readonly classChoice: ChoiceGroupImpl;
 
   constructor(deps: LauncherControllerDeps) {
@@ -67,7 +66,6 @@ export class LauncherControllerImpl implements LauncherController {
       wrapInListItem: true,
     });
     this.ammoChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
-    this.attributesChip = new SummaryChipImpl(this.els.attributesSummary, this.els.attributesIcon);
     this.classChoice = new ChoiceGroupImpl({
       group: deps.els.classOptions,
       shape: { buttonClass: "btn launcher-class-option" },
@@ -169,12 +167,10 @@ export class LauncherControllerImpl implements LauncherController {
     this.els.ammoTrigger.disabled = !hasLauncher;
     if (!hasLauncher) {
       this.ammoChip.render("-", undefined);
-      this.attributesChip.render("-", undefined);
       this.renderClassSelector();
       return;
     }
     this.ammoChip.render(launcher.chargeName, this.imageCatalog.itemIconUrl(launcher.chargeId));
-    this.attributesChip.render(this.attributesSummaryText(launcher), this.imageCatalog.itemIconUrl(launcher.moduleId));
     const t = (key: string): string => this.i18n.t(key);
     setText(this.els.volleyDamage, formatWithCommas(launcher.damagePerMissile * launcher.count, 1));
     setText(this.els.rateOfFire, `${formatNumber(launcher.cycleTime, 2)} s`);
@@ -186,14 +182,6 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
     this.renderAmmoList(launcher);
     this.renderClassSelector();
-  }
-
-  private attributesSummaryText(launcher: ImportedLauncher): string {
-    const t = (key: string): string => this.i18n.t(key);
-    const range = formatDistance(launcher.maxVelocity * launcher.flightTime, t);
-    const speed = `${formatWithCommas(launcher.maxVelocity, 0)} m/s`;
-    const flight = `${formatNumber(launcher.flightTime, 1)}s`;
-    return `${range} / ${speed} / ${flight}`;
   }
 
   private renderClassSelector(): void {

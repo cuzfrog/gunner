@@ -33,8 +33,6 @@ export interface LauncherEls {
   readonly ammoField: HTMLElement;
   readonly classOptions: HTMLElement;
   readonly attributesTrigger: HTMLButtonElement;
-  readonly attributesSummary: HTMLElement;
-  readonly attributesIcon: HTMLImageElement;
   readonly attributesPopup: HTMLElement;
   readonly attributesField: HTMLElement;
   readonly volleyDamage: HTMLElement;

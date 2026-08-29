@@ -246,8 +246,6 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   launcherAmmoField: { tag: "DIV" as const, baseId: "launcher-ammo-field", defaultValue: undefined },
   launcherClassOptions: { tag: "DIV" as const, baseId: "launcher-class-options", defaultValue: undefined },
   launcherAttributesTrigger: { tag: "BUTTON" as const, baseId: "launcher-attributes-trigger", defaultValue: undefined },
-  launcherAttributesSummary: { tag: "SPAN" as const, baseId: "launcher-attributes-summary", defaultValue: undefined },
-  launcherAttributesIcon: { tag: "IMG" as const, baseId: "launcher-attributes-icon", defaultValue: undefined },
   launcherAttributesPopup: { tag: "DIV" as const, baseId: "launcher-attributes-popup", defaultValue: undefined },
   launcherAttributesField: { tag: "DIV" as const, baseId: "launcher-attributes-field", defaultValue: undefined },
   launcherVolleyDamage: { tag: "SPAN" as const, baseId: "launcher-volley-damage", defaultValue: undefined },

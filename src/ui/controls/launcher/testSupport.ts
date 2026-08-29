@@ -29,8 +29,6 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
     ammoField: document.getElementById(`${id}-launcher-ammo-field`)!,
     classOptions: document.getElementById(`${id}-launcher-class-options`)!,
     attributesTrigger: document.getElementById(`${id}-launcher-attributes-trigger`)! as HTMLButtonElement,
-    attributesSummary: document.getElementById(`${id}-launcher-attributes-summary`)!,
-    attributesIcon: document.getElementById(`${id}-launcher-attributes-icon`)! as HTMLImageElement,
     attributesPopup: document.getElementById(`${id}-launcher-attributes-popup`)!,
     attributesField: document.getElementById(`${id}-launcher-attributes-field`)!,
     volleyDamage: document.getElementById(`${id}-launcher-volley-damage`)!,

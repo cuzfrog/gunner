@@ -120,6 +120,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.launcherClass.xlCruise": { en: "XL Cruise" },
   "label.launcherClass.rapidTorpedo": { en: "Rapid Torp" },
   "label.missileAttributes": { en: "Missile" },
+  "label.advancedAttributes": { en: "Advanced attributes" },
   "button.missileAttributes": { en: "Missile attributes" },
   "label.damageReductionFactor": { en: "DRF" },
   "ammo.cargoGroup": { en: "In cargo" },

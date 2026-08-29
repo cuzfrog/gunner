@@ -263,6 +263,7 @@ function mockWeaponSystemSwitches(): Record<Side, WeaponSystemSwitch> {
     side: "shipA",
     activeKind: vi.fn(() => "turret" as const),
     setActiveKind: vi.fn(),
+    autoToggle: vi.fn(),
     refresh: vi.fn(),
     clear: vi.fn(),
   });
@@ -542,6 +543,8 @@ describe("SessionCodec", () => {
     expect(launcherControllers.shipB.restore).toHaveBeenCalledWith(settings.shipBFitting, { skillLevel: 5, overloaded: true }, undefined);
     expect(weaponSystemSwitches.shipA.setActiveKind).toHaveBeenCalledWith("missile");
     expect(weaponSystemSwitches.shipB.setActiveKind).toHaveBeenCalledWith("turret");
+    expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(false, false);
+    expect(weaponSystemSwitches.shipB.autoToggle).toHaveBeenCalledWith(false, false);
   });
 
   test("restore defaults absent weapon kind to turret", () => {

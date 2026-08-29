@@ -214,8 +214,6 @@ function createCombatantEls(side: Side): CombatantEls {
     launcherAmmoField: el(combatantElementId("launcherAmmoField", side)),
     launcherClassOptions: el(combatantElementId("launcherClassOptions", side)),
     launcherAttributesTrigger: elOf(combatantElementId("launcherAttributesTrigger", side), isHtmlButtonElement),
-    launcherAttributesSummary: el(combatantElementId("launcherAttributesSummary", side)),
-    launcherAttributesIcon: elOf(combatantElementId("launcherAttributesIcon", side), isHtmlImageElement),
     launcherAttributesPopup: el(combatantElementId("launcherAttributesPopup", side)),
     launcherAttributesField: el(combatantElementId("launcherAttributesField", side)),
     launcherVolleyDamage: el(combatantElementId("launcherVolleyDamage", side)),

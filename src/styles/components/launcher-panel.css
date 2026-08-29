@@ -20,11 +20,11 @@
   position: relative;
 }
 
-.launcher-attributes-summary {
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
+.launcher-attributes-default {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 4px;
 }
 
 .launcher-attributes-popup {

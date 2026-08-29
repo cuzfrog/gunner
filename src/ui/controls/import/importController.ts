@@ -6,7 +6,7 @@ import type { UiEvents } from "../../events";
 import type { Popup, PopupGroup } from "../popup";
 import type { ProfileController } from "../profile";
 import type { Side } from "../side";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
 import type { ShipATurret } from "./shipATurret";
 import type { ShipALauncher } from "./shipALauncher";
 import { EftSideImporter } from "./eftSideImporter";
@@ -27,6 +27,7 @@ export class ImportControllerImpl implements ImportController {
   private readonly profileTextCodec: ProfileTextCodec;
   private readonly turrets: Record<Side, ShipATurret>;
   private readonly launchers: Record<Side, ShipALauncher>;
+  private readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   private readonly eftSideImporter: EftSideImporter;
   private readonly profileTextImporter: ProfileTextImporter;
   private readonly events: UiEvents;
@@ -45,6 +46,7 @@ export class ImportControllerImpl implements ImportController {
     shipBSide: SidePanel;
     turrets: Record<Side, ShipATurret>;
     launchers: Record<Side, ShipALauncher>;
+    weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
     profileController: ProfileController;
     profileTextCodec: ProfileTextCodec;
     events: UiEvents;
@@ -59,6 +61,7 @@ export class ImportControllerImpl implements ImportController {
     this.shipBSide = deps.shipBSide;
     this.turrets = deps.turrets;
     this.launchers = deps.launchers;
+    this.weaponSystemSwitches = deps.weaponSystemSwitches;
     this.profileController = deps.profileController;
     this.profileTextCodec = deps.profileTextCodec;
     this.events = deps.events;
@@ -68,6 +71,7 @@ export class ImportControllerImpl implements ImportController {
       shipBSide: deps.shipBSide,
       turrets: deps.turrets,
       launchers: deps.launchers,
+      weaponSystemSwitches: deps.weaponSystemSwitches,
       fittingImport: deps.fittingImport,
     });
     this.profileTextImporter = new ProfileTextImporter({

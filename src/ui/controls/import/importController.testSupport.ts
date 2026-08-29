@@ -3,7 +3,8 @@ import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { ClipboardProvider, ProfileTextCodec, ProfileSettings, SavedFittings } from "../../../appstate";
 import type { ProfileController } from "../profile";
 import type { Popup, PopupGroup } from "../popup";
-import type { SidePanel } from "../sidePanel";
+import type { SidePanel, WeaponSystemSwitch } from "../sidePanel";
+import type { Side } from "../side";
 import type { ShipATurret } from "./shipATurret";
 import { ImportControllerImpl } from "./importController";
 import { FakeElement, fakeDocument, getFake, IMPORTED_RIFTER } from "../testSupport";
@@ -155,6 +156,10 @@ export function buildImportController(document: Document) {
   const shipALauncher = { applyImported: vi.fn() };
   const shipBLauncher = { applyImported: vi.fn() };
   const launchers = { shipA: shipALauncher, shipB: shipBLauncher };
+  const weaponSystemSwitches: Record<Side, WeaponSystemSwitch> = {
+    shipA: { side: "shipA", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+    shipB: { side: "shipB", activeKind: vi.fn(() => "turret" as const), setActiveKind: vi.fn(), autoToggle: vi.fn(), refresh: vi.fn(), clear: vi.fn() },
+  };
   const profileController = { showStatus: vi.fn() };
   const profileTextCodec = makeMockProfileTextCodec();
   const events = new UiEventsImpl();
@@ -178,13 +183,14 @@ export function buildImportController(document: Document) {
     shipBSide: shipBPanel as unknown as SidePanel,
     turrets,
     launchers,
+    weaponSystemSwitches,
     profileController: profileController as unknown as ProfileController,
     profileTextCodec,
     events,
     itemNameLoader: { ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) },
   });
   return {
-    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets, launchers,
+    controller, document, clipboard, fittingImport, savedFittings, shipAPanel, shipBPanel, turrets, launchers, weaponSystemSwitches,
     profileController, events, onConfigPersisted, onProfileTextLoaded,
   };
 }
