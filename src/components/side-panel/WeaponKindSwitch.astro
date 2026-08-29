@@ -1,4 +1,6 @@
 ---
+import IconButton from "../controls/IconButton.astro";
+
 interface Props {
   readonly idPrefix: string;
 }
@@ -6,16 +8,10 @@ const { idPrefix } = Astro.props;
 ---
 
 <div class="weapon-kind-switch" id={`${idPrefix}-weapon-system`} role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
-  <button type="button" id={`${idPrefix}-weapon-system-turret`} class="weapon-kind-button icon-button" data-value="turret" aria-pressed="true"
-          data-i18n-title="label.turret" data-i18n-aria-label="label.turret" title="Turret" aria-label="Turret">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#turret"></use></svg>
-  </button>
-  <button type="button" id={`${idPrefix}-weapon-system-missile`} class="weapon-kind-button icon-button" data-value="missile" aria-pressed="false"
-          data-i18n-title="label.launcher" data-i18n-aria-label="label.launcher" title="Missile" aria-label="Missile">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#missile"></use></svg>
-  </button>
-  <button type="button" id={`${idPrefix}-weapon-system-drone`} class="weapon-kind-button icon-button" data-value="drone" aria-pressed="false" disabled
-          data-i18n-title="label.drone" data-i18n-aria-label="label.drone" title="Drone (not implemented)" aria-label="Drone (not implemented)">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#drone"></use></svg>
-  </button>
+  <IconButton id={`${idPrefix}-weapon-system-turret`} iconName="turret" iconSize={16} iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="turret" pressed={true}
+          titleI18n="label.turret" ariaLabelI18n="label.turret" title="Turret" ariaLabel="Turret" />
+  <IconButton id={`${idPrefix}-weapon-system-missile`} iconName="missile" iconSize={16} iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="missile" pressed={false}
+          titleI18n="label.launcher" ariaLabelI18n="label.launcher" title="Missile" ariaLabel="Missile" />
+  <IconButton id={`${idPrefix}-weapon-system-drone`} iconName="drone" iconSize={16} iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="drone" pressed={false} disabled
+          titleI18n="label.drone" ariaLabelI18n="label.drone" title="Drone (not implemented)" ariaLabel="Drone (not implemented)" />
 </div>

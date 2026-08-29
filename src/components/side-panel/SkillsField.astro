@@ -1,4 +1,6 @@
 ---
+import Chevron from "../controls/Chevron.astro";
+
 interface Props {
   readonly idPrefix: string;
 }
@@ -11,7 +13,7 @@ const { idPrefix } = Astro.props;
     <span class="skill-label truncate" data-i18n="label.skillLevel">Pilot skills</span>
     <span class="skill-summary-row">
       <span class="skill-summary-value mono truncate" id={`${idPrefix}-skill-summary`}>Level 5</span>
-      <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+      <Chevron />
     </span>
   </button>
   <select class="input-field" id={`${idPrefix}-skills`} hidden></select>

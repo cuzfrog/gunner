@@ -1,6 +1,7 @@
 ---
 import { DEFAULT_VALUES } from "../../ui/controls";
 import type { Side } from "../../ui/controls";
+import IconButton from "../controls/IconButton.astro";
 import InputWithUnit from "../form/InputWithUnit.astro";
 
 interface Props {
@@ -16,9 +17,9 @@ const speed = DEFAULT_VALUES[`${idPrefix}-speed`];
   <select class="input-field" id={`${idPrefix}-propulsion`} hidden disabled></select>
   <div class="propulsion-selector-wrapper">
     <div class="segmented-control propulsion-selector" id={`${idPrefix}-propulsion-options`} role="group" data-i18n-aria-label="label.propulsion" aria-label="Propulsion"></div>
-    <button type="button" id={`${idPrefix}-propulsion-gear`} class="propulsion-gear btn icon-button" data-i18n-title="label.propulsionVariant" data-i18n-aria-label="label.propulsionVariant" aria-haspopup="menu" aria-expanded="false" aria-controls={`${idPrefix}-propulsion-variants`} disabled>
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>
-    </button>
+    <IconButton id={`${idPrefix}-propulsion-gear`} iconName="gear" extraClass="propulsion-gear btn"
+            titleI18n="label.propulsionVariant" ariaLabelI18n="label.propulsionVariant"
+            ariaHaspopup="menu" ariaExpanded={false} ariaControls={`${idPrefix}-propulsion-variants`} disabled />
     <div class="fitting-popup propulsion-variants-popup popup popup-below popup-right popup-scroll" id={`${idPrefix}-propulsion-variants`} role="menu" hidden data-i18n-aria-label="label.propulsionVariant" aria-label="Select propulsion variant"></div>
   </div>
   <button type="button" id={`${idPrefix}-overload-button`} class="overload-button btn" data-i18n-aria-label="label.overload" data-i18n-title="label.overload" aria-pressed="true">

@@ -1,4 +1,6 @@
 ---
+import Chevron from "../controls/Chevron.astro";
+
 interface Props {
   readonly idPrefix: string;
 }
@@ -22,7 +24,7 @@ const { idPrefix } = Astro.props;
       <span class="ammo-summary-row">
         <img id={`${idPrefix}-launcher-attributes-icon`} class="ammo-summary-icon" alt="" hidden>
         <span class="launcher-attributes-summary mono truncate" id={`${idPrefix}-launcher-attributes-summary`}></span>
-        <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+        <Chevron />
       </span>
     </button>
     <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-attributes-popup`} hidden role="dialog" aria-modal="false">
@@ -69,7 +71,7 @@ const { idPrefix } = Astro.props;
       <span class="ammo-summary-row">
         <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
         <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
-        <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+        <Chevron />
       </span>
     </button>
     <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-ammo-popup`} hidden>

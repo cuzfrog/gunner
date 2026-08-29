@@ -1,5 +1,5 @@
 ---
-import Icon from "../controls/Icon.astro";
+import IconButton from "../controls/IconButton.astro";
 ---
 
 <section class="profile-bar">
@@ -7,7 +7,7 @@ import Icon from "../controls/Icon.astro";
     <button type="button" id="profile-select-trigger" class="btn btn-panel profile-select-trigger mono"
             aria-haspopup="menu" aria-expanded="false" aria-controls="profile-popup">
       <span class="profile-select-label truncate" id="profile-select-label">Select profile...</span>
-      <Icon name="chevron" class="chevron" />
+      <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
     </button>
     <div id="profile-popup" class="profile-popup popup popup-below popup-left popup-scroll" hidden role="menu"></div>
     <div class="confirm-popup popup popup-below popup-left" id="confirm-popup" hidden role="dialog" aria-modal="true">
@@ -18,16 +18,12 @@ import Icon from "../controls/Icon.astro";
       </div>
     </div>
   </div>
-  <button type="button" id="profile-save" class="btn btn-panel icon-button"
-          data-i18n-title="button.save" data-i18n-aria-label="button.save"
-          title="Save profile" aria-label="Save">
-    <Icon name="save" />
-  </button>
-  <button type="button" id="profile-delete" class="btn btn-panel icon-button"
-          data-i18n-title="button.delete" data-i18n-aria-label="button.delete"
-          title="Delete profile" aria-label="Delete">
-    <Icon name="trash" />
-  </button>
+  <IconButton id="profile-save" iconName="save" extraClass="btn btn-panel"
+          titleI18n="button.save" ariaLabelI18n="button.save"
+          title="Save profile" ariaLabel="Save" />
+  <IconButton id="profile-delete" iconName="trash" extraClass="btn btn-panel"
+          titleI18n="button.delete" ariaLabelI18n="button.delete"
+          title="Delete profile" ariaLabel="Delete" />
   <div class="profile-new-field">
     <button type="button" id="profile-new" class="btn btn-panel icon-button"
             aria-haspopup="dialog" aria-expanded="false" aria-controls="new-profile-popup"
@@ -63,12 +59,10 @@ import Icon from "../controls/Icon.astro";
     </div>
   </div>
   <div class="profile-share-field">
-    <button type="button" id="share-link" class="btn btn-panel icon-button"
-            aria-haspopup="menu" aria-expanded="false" aria-controls="share-popup"
-            data-i18n-title="title.shareProfile" data-i18n-aria-label="button.copyProfile"
-            title="Share current profile" aria-label="Copy">
-      <Icon name="copy" />
-    </button>
+    <IconButton id="share-link" iconName="copy" extraClass="btn btn-panel"
+            ariaHaspopup="menu" ariaExpanded={false} ariaControls="share-popup"
+            titleI18n="title.shareProfile" ariaLabelI18n="button.copyProfile"
+            title="Share current profile" ariaLabel="Copy" />
     <div class="menu-popup popup popup-below popup-left" id="share-popup" hidden role="menu"
          data-i18n-aria-label="menu.share" aria-label="Copy profile as">
       <button type="button" id="share-copy-url" class="popup-item" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
@@ -76,12 +70,10 @@ import Icon from "../controls/Icon.astro";
     </div>
   </div>
   <div class="profile-import-field">
-    <button type="button" id="import-profile" class="btn btn-panel icon-button"
-            aria-haspopup="menu" aria-expanded="false" aria-controls="import-side-popup"
-            data-i18n-title="title.importProfile" data-i18n-aria-label="button.importProfile"
-            title="Import profile or fitting from clipboard" aria-label="Import">
-      <Icon name="import" />
-    </button>
+    <IconButton id="import-profile" iconName="import" extraClass="btn btn-panel"
+            ariaHaspopup="menu" ariaExpanded={false} ariaControls="import-side-popup"
+            titleI18n="title.importProfile" ariaLabelI18n="button.importProfile"
+            title="Import profile or fitting from clipboard" ariaLabel="Import" />
     <div class="menu-popup popup popup-below popup-left" id="import-side-popup" hidden role="menu"
          data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
       <button type="button" id="import-side-ship-a" class="popup-item" role="menuitem" data-i18n="label.shipA">Ship A</button>

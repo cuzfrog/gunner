@@ -5,7 +5,9 @@ no-new-exports:
   - app-shell/FooterMechanism.astro
   - canvas-frame/CanvasFrame.astro
   - canvas-frame/CanvasSettingsPopup.astro
+  - controls/Chevron.astro
   - controls/Icon.astro
+  - controls/IconButton.astro
   - form/FormField.astro
   - form/FormFieldRow.astro
   - form/InputWithUnit.astro

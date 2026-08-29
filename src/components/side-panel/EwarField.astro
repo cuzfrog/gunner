@@ -1,4 +1,6 @@
 ---
+import Chevron from "../controls/Chevron.astro";
+
 interface Props {
   readonly idPrefix: string;
 }
@@ -14,7 +16,7 @@ const { idPrefix } = Astro.props;
       <span id={`${idPrefix}-ewar-summary`}></span>
       <span id={`${idPrefix}-booster-summary`}></span>
     </span>
-    <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+    <Chevron />
   </button>
   <div class="ewar-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-ewar-popup`} hidden role="dialog" aria-modal="false" data-i18n-aria-label="label.modules">
     <div class="preview-section" id={`${idPrefix}-ewar-section`}></div>
