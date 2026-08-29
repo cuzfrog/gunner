@@ -11,6 +11,8 @@ no-new-exports:
   - form/FormField.astro
   - form/FormFieldRow.astro
   - form/InputWithUnit.astro
+  - popup/PopupBox.astro
+  - popup/TriggerButton.astro
   - profile-bar/ProfileBar.astro
   - result-grid/ResultGrid.astro
   - result-grid/ResultSide.astro

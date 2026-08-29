@@ -1,4 +1,6 @@
 ---
+import PopupBox from "../popup/PopupBox.astro";
+
 interface Props {
   readonly id: string;
   readonly triggerId: string;
@@ -6,8 +8,8 @@ interface Props {
 const { id, triggerId } = Astro.props;
 ---
 
-<div id={id} class="control-bar-canvas-settings-popup popup" hidden role="dialog"
-     data-i18n-aria-label="label.canvasSettings" aria-label="Canvas settings">
+<PopupBox id={id} extraClass="control-bar-canvas-settings-popup" role="dialog"
+     i18nAriaLabel="label.canvasSettings" ariaLabel="Canvas settings">
   <div class="control-bar-field control-bar-zoom">
     <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
     <input type="range" id="zoom-slider" class="form-slider" min="0.25" max="4" step="0.05" value="1"
@@ -24,4 +26,4 @@ const { id, triggerId } = Astro.props;
            style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
     <output class="form-slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
   </div>
-</div>
+</PopupBox>

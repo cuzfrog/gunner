@@ -1,5 +1,7 @@
 ---
 import Chevron from "../controls/Chevron.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
 
 interface Props {
   readonly idPrefix: string;
@@ -27,40 +29,38 @@ const TELEMETRY_ROWS = [
     </div>
   </div>
   <div class="form-field-group launcher-attributes-group" id={`${idPrefix}-launcher-attributes-field`}>
-    <button type="button" id={`${idPrefix}-launcher-attributes-trigger`} class="trigger"
-            aria-haspopup="dialog" aria-expanded="false" aria-controls={`${idPrefix}-launcher-attributes-popup`}
-            data-i18n-title="button.missileAttributes" data-i18n-aria-label="button.missileAttributes"
-            title="Missile attributes" aria-label="Missile attributes">
-      <span class="ammo-label truncate" data-i18n="label.missileAttributes">Missile</span>
+    <TriggerButton id={`${idPrefix}-launcher-attributes-trigger`} popupId={`${idPrefix}-launcher-attributes-popup`}
+            labelClass="ammo-label truncate" labelI18n="label.missileAttributes" labelText="Missile"
+            titleI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
+            title="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
       <span class="ammo-summary-row">
         <img id={`${idPrefix}-launcher-attributes-icon`} class="ammo-summary-icon" alt="" hidden>
         <span class="launcher-attributes-summary mono truncate" id={`${idPrefix}-launcher-attributes-summary`}></span>
         <Chevron />
       </span>
-    </button>
-    <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-attributes-popup`} hidden role="dialog" aria-modal="false">
+    </TriggerButton>
+    <PopupBox id={`${idPrefix}-launcher-attributes-popup`} extraClass="launcher-attributes-popup" position="below" align="both" scroll role="dialog" ariaModal={false}>
       {TELEMETRY_ROWS.map((row) => (
         <div class="launcher-telemetry-row">
           <span class="launcher-telemetry-label" data-i18n={row.i18n}>{row.text}</span>
           <span class="launcher-telemetry-value mono" id={`${idPrefix}-${row.idSuffix}`}>-</span>
         </div>
       ))}
-    </div>
+    </PopupBox>
   </div>
   <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
-    <button type="button" id={`${idPrefix}-launcher-ammo-trigger`} class="trigger"
-            aria-haspopup="listbox" aria-expanded="false" aria-controls={`${idPrefix}-launcher-ammo-popup`}
-            data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
-            title="Select missile" aria-label="Select missile">
-      <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
+    <TriggerButton id={`${idPrefix}-launcher-ammo-trigger`} popupId={`${idPrefix}-launcher-ammo-popup`}
+            labelClass="ammo-label truncate" labelI18n="label.missile" labelText="Missile"
+            titleI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
+            title="Select missile" ariaLabel="Select missile" ariaHaspopup="listbox">
       <span class="ammo-summary-row">
         <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
         <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>
         <Chevron />
       </span>
-    </button>
-    <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-launcher-ammo-popup`} hidden>
+    </TriggerButton>
+    <PopupBox id={`${idPrefix}-launcher-ammo-popup`} extraClass="launcher-ammo-popup" position="below" align="both" scroll>
       <ul class="launcher-ammo-list" id={`${idPrefix}-launcher-ammo-list`} role="listbox"></ul>
-    </div>
+    </PopupBox>
   </div>
 </div>

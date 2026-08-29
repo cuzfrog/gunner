@@ -1,5 +1,6 @@
 ---
 import IconButton from "../controls/IconButton.astro";
+import PopupBox from "../popup/PopupBox.astro";
 ---
 
 <section class="profile-bar">
@@ -9,14 +10,14 @@ import IconButton from "../controls/IconButton.astro";
       <span class="profile-select-label truncate" id="profile-select-label">Select profile...</span>
       <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
     </button>
-    <div id="profile-popup" class="profile-popup popup popup-below popup-left popup-scroll" hidden role="menu"></div>
-    <div class="confirm-popup popup popup-below popup-left" id="confirm-popup" hidden role="dialog" aria-modal="true">
+    <PopupBox id="profile-popup" extraClass="profile-popup" position="below" align="left" scroll role="menu" />
+    <PopupBox id="confirm-popup" extraClass="confirm-popup" position="below" align="left" role="dialog" ariaModal={true}>
       <span id="confirm-message" class="confirm-message" aria-live="polite"></span>
       <div class="confirm-buttons">
         <button type="button" id="confirm-ok" class="btn" data-i18n="button.confirm">Confirm</button>
         <button type="button" id="confirm-cancel" class="btn" data-i18n="button.cancel">Cancel</button>
       </div>
-    </div>
+    </PopupBox>
   </div>
   <IconButton id="profile-save" iconName="save" extraClass="btn btn-panel"
           titleI18n="button.save" ariaLabelI18n="button.save"
@@ -33,9 +34,9 @@ import IconButton from "../controls/IconButton.astro";
         <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <div class="new-profile-popup popup popup-below popup-left" id="new-profile-popup" hidden
-         role="dialog" aria-modal="true"
-         data-i18n-aria-label="dialog.profileActions" aria-label="Profile actions">
+    <PopupBox id="new-profile-popup" extraClass="new-profile-popup" position="below" align="left"
+         role="dialog" ariaModal={true}
+         i18nAriaLabel="dialog.profileActions" ariaLabel="Profile actions">
       <span class="new-profile-dirty-note" id="new-profile-dirty-note"
             data-i18n="label.unsavedChanges" hidden>Unsaved changes</span>
       <div class="new-profile-section" id="new-profile-current-section" hidden>
@@ -56,29 +57,29 @@ import IconButton from "../controls/IconButton.astro";
           <button type="button" id="new-profile-confirm" class="btn btn-primary-text" data-i18n="button.save">Save</button>
         </div>
       </div>
-    </div>
+    </PopupBox>
   </div>
   <div class="profile-share-field">
     <IconButton id="share-link" iconName="copy" extraClass="btn btn-panel"
             ariaHaspopup="menu" ariaExpanded={false} ariaControls="share-popup"
             titleI18n="title.shareProfile" ariaLabelI18n="button.copyProfile"
             title="Share current profile" ariaLabel="Copy" />
-    <div class="menu-popup popup popup-below popup-left" id="share-popup" hidden role="menu"
-         data-i18n-aria-label="menu.share" aria-label="Copy profile as">
+    <PopupBox id="share-popup" extraClass="menu-popup" position="below" align="left" role="menu"
+         i18nAriaLabel="menu.share" ariaLabel="Copy profile as">
       <button type="button" id="share-copy-url" class="popup-item" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
       <button type="button" id="share-copy-text" class="popup-item" role="menuitem" data-i18n="menu.copyAsText">Copy as Text</button>
-    </div>
+    </PopupBox>
   </div>
   <div class="profile-import-field">
     <IconButton id="import-profile" iconName="import" extraClass="btn btn-panel"
             ariaHaspopup="menu" ariaExpanded={false} ariaControls="import-side-popup"
             titleI18n="title.importProfile" ariaLabelI18n="button.importProfile"
             title="Import profile or fitting from clipboard" ariaLabel="Import" />
-    <div class="menu-popup popup popup-below popup-left" id="import-side-popup" hidden role="menu"
-         data-i18n-aria-label="menu.importSide" aria-label="Import fitting as">
+    <PopupBox id="import-side-popup" extraClass="menu-popup" position="below" align="left" role="menu"
+         i18nAriaLabel="menu.importSide" ariaLabel="Import fitting as">
       <button type="button" id="import-side-ship-a" class="popup-item" role="menuitem" data-i18n="label.shipA">Ship A</button>
       <button type="button" id="import-side-ship-b" class="popup-item" role="menuitem" data-i18n="label.shipB">Ship B</button>
-    </div>
+    </PopupBox>
   </div>
   <span id="share-status" class="profile-share-status" aria-live="polite"></span>
   <span id="slide-hints" class="hints-slide truncate" aria-live="polite">You can import a ship fitting from clipboard.</span>

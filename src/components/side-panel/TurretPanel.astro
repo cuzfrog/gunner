@@ -5,6 +5,8 @@ import Chevron from "../controls/Chevron.astro";
 import FormField from "../form/FormField.astro";
 import FormFieldRow from "../form/FormFieldRow.astro";
 import InputWithUnit from "../form/InputWithUnit.astro";
+import PopupBox from "../popup/PopupBox.astro";
+import TriggerButton from "../popup/TriggerButton.astro";
 
 interface Props {
   readonly idPrefix: string;
@@ -64,18 +66,17 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
 </FormFieldRow>
 
 <div class="form-field-group ammo-group" id={`${idPrefix}-ammo-field`}>
-  <button type="button" id={`${idPrefix}-ammo-trigger`} class="trigger"
-          aria-haspopup="true" aria-expanded="false" aria-controls={`${idPrefix}-ammo-popup`}
-          data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
-          title="Select ammunition" aria-label="Select ammunition">
-    <span class="ammo-label truncate" data-i18n="label.ammo">Ammo</span>
+  <TriggerButton id={`${idPrefix}-ammo-trigger`} popupId={`${idPrefix}-ammo-popup`}
+          labelClass="ammo-label truncate" labelI18n="label.ammo" labelText="Ammo"
+          titleI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
+          title="Select ammunition" ariaLabel="Select ammunition" ariaHaspopup="true">
     <span class="ammo-summary-row">
       <img id={`${idPrefix}-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
       <span class="ammo-summary-value mono truncate" id={`${idPrefix}-ammo-summary`}></span>
       <Chevron />
     </span>
-  </button>
-  <div class="ammo-popup popup popup-below popup-left popup-right popup-scroll" id={`${idPrefix}-ammo-popup`} hidden>
+  </TriggerButton>
+  <PopupBox id={`${idPrefix}-ammo-popup`} extraClass="ammo-popup" position="below" align="both" scroll>
     <span class="fitting-group-label" id={`${idPrefix}-ammo-cargo-label`} data-i18n="ammo.cargoGroup">In cargo</span>
     <ul class="ammo-list" id={`${idPrefix}-ammo-cargo-list`} role="listbox"></ul>
     <button type="button" class="ammo-expand" id={`${idPrefix}-ammo-expand`} data-i18n="ammo.showAll">Show all</button>
@@ -83,6 +84,6 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
       <span class="fitting-group-label" data-i18n="ammo.allGroup">All charges</span>
       <ul class="ammo-list" id={`${idPrefix}-ammo-all-list`} role="listbox"></ul>
     </div>
-  </div>
+  </PopupBox>
 </div>
 </div>
