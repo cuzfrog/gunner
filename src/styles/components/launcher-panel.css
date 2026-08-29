@@ -12,6 +12,10 @@
 }
 
 .launcher-class-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   font-size: 10px;
   padding: 2px 6px;
 }

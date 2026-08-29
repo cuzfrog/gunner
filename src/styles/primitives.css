@@ -162,6 +162,8 @@
   transition: transform 0.15s ease;
 }
 
+.trigger > .chevron { margin-left: auto; }
+
 [aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
 /* ---- field-label ---- */
