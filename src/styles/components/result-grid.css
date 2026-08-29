@@ -61,7 +61,7 @@
 .result-side-weapon {
   display: flex;
   gap: 8px;
-  flex: 2 1 0;
+  flex: 1.5 1 0;
   min-width: 0;
 }
 
