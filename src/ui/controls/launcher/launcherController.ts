@@ -186,7 +186,7 @@ export class LauncherControllerImpl implements LauncherController {
 
   private renderClassSelector(): void {
     const launcher = this.selectedLauncher;
-    const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) : "small";
+    const tier = this.hullProfile ? this.ships.shipTier(this.hullProfile) ?? "small" : "small";
     const allowed = this.launcherClasses.classesForTiers([tier]);
     const currentClass = launcher ? this.launcherClasses.classOf(launcher.moduleId) : undefined;
     const t = (key: string): string => this.i18n.t(key);

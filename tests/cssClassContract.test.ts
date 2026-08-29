@@ -20,6 +20,7 @@ const ALLOWED_ORPHAN = new Set<string>([
 const APPROVED_PREFIXES = [
   "app",
   "side-panel",
+  "side-panel-weapon-area",
   "hull",
   "canvas-frame",
   "control-bar",

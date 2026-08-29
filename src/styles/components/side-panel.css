@@ -5,6 +5,13 @@
   row-gap: var(--gap-field);
 }
 
+.side-panel-weapon-area {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gap-field);
+  min-height: 282px;
+}
+
 .weapon-panel {
   display: flex;
   flex-direction: column;

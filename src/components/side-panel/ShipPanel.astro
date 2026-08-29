@@ -34,13 +34,15 @@ const modeSecond = side === "shipA"
 ---
 
 <section class={`side-panel ${sideClass} surface-panel`}>
-  <PanelHeading idPrefix={idPrefix} side={side} />
+  <div class="side-panel-weapon-area">
+    <PanelHeading idPrefix={idPrefix} side={side} />
 
-  <TurretPanel idPrefix={idPrefix} side={side} />
+    <TurretPanel idPrefix={idPrefix} side={side} />
 
-  <LauncherPanel idPrefix={idPrefix} />
+    <LauncherPanel idPrefix={idPrefix} />
 
-  <EwarField idPrefix={idPrefix} />
+    <EwarField idPrefix={idPrefix} />
+  </div>
 
   <hr class="side-panel-divider">
 
