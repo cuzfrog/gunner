@@ -374,14 +374,17 @@
                  data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
             </div>
           </div>
-          <div class="form-field-group launcher-attributes-group">
-            <button type="button" id="ship-a-launcher-attributes-trigger" class="trigger launcher-attributes-trigger"
+          <div class="form-field-group launcher-attributes-group" id="ship-a-launcher-attributes-field">
+            <button type="button" id="ship-a-launcher-attributes-trigger" class="trigger"
                     aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-a-launcher-attributes-popup"
                     data-i18n-title="button.missileAttributes" data-i18n-aria-label="button.missileAttributes"
                     title="Missile attributes" aria-label="Missile attributes">
-              <span class="launcher-attributes-label truncate" data-i18n="label.missileAttributes">Missile</span>
-              <span class="launcher-attributes-summary mono truncate" id="ship-a-launcher-attributes-summary"></span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              <span class="ammo-label truncate" data-i18n="label.missileAttributes">Missile</span>
+              <span class="ammo-summary-row">
+                <img id="ship-a-launcher-attributes-icon" class="ammo-summary-icon" alt="" hidden>
+                <span class="launcher-attributes-summary mono truncate" id="ship-a-launcher-attributes-summary"></span>
+                <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              </span>
             </button>
             <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-launcher-attributes-popup" hidden role="dialog" aria-modal="false">
               <div class="launcher-telemetry-row">
@@ -418,14 +421,17 @@
               </div>
             </div>
           </div>
-          <div class="form-field-group ammo-group">
-            <button type="button" id="ship-a-launcher-ammo-trigger" class="launcher-ammo-trigger"
+          <div class="form-field-group ammo-group" id="ship-a-launcher-ammo-field">
+            <button type="button" id="ship-a-launcher-ammo-trigger" class="trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-a-launcher-ammo-popup"
                     data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
                     title="Select missile" aria-label="Select missile">
               <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
-              <span class="launcher-ammo-summary truncate" id="ship-a-launcher-ammo-summary"></span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              <span class="ammo-summary-row">
+                <img id="ship-a-launcher-ammo-summary-icon" class="ammo-summary-icon" alt="" hidden>
+                <span class="ammo-summary-value mono truncate" id="ship-a-launcher-ammo-summary"></span>
+                <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              </span>
             </button>
             <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id="ship-a-launcher-ammo-popup" hidden>
               <ul class="launcher-ammo-list" id="ship-a-launcher-ammo-list" role="listbox"></ul>
@@ -761,14 +767,17 @@
                  data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
             </div>
           </div>
-          <div class="form-field-group launcher-attributes-group">
-            <button type="button" id="ship-b-launcher-attributes-trigger" class="trigger launcher-attributes-trigger"
+          <div class="form-field-group launcher-attributes-group" id="ship-b-launcher-attributes-field">
+            <button type="button" id="ship-b-launcher-attributes-trigger" class="trigger"
                     aria-haspopup="dialog" aria-expanded="false" aria-controls="ship-b-launcher-attributes-popup"
                     data-i18n-title="button.missileAttributes" data-i18n-aria-label="button.missileAttributes"
                     title="Missile attributes" aria-label="Missile attributes">
-              <span class="launcher-attributes-label truncate" data-i18n="label.missileAttributes">Missile</span>
-              <span class="launcher-attributes-summary mono truncate" id="ship-b-launcher-attributes-summary"></span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              <span class="ammo-label truncate" data-i18n="label.missileAttributes">Missile</span>
+              <span class="ammo-summary-row">
+                <img id="ship-b-launcher-attributes-icon" class="ammo-summary-icon" alt="" hidden>
+                <span class="launcher-attributes-summary mono truncate" id="ship-b-launcher-attributes-summary"></span>
+                <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              </span>
             </button>
             <div class="launcher-attributes-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-launcher-attributes-popup" hidden role="dialog" aria-modal="false">
               <div class="launcher-telemetry-row">
@@ -805,14 +814,17 @@
               </div>
             </div>
           </div>
-          <div class="form-field-group ammo-group">
-            <button type="button" id="ship-b-launcher-ammo-trigger" class="launcher-ammo-trigger"
+          <div class="form-field-group ammo-group" id="ship-b-launcher-ammo-field">
+            <button type="button" id="ship-b-launcher-ammo-trigger" class="trigger"
                     aria-haspopup="listbox" aria-expanded="false" aria-controls="ship-b-launcher-ammo-popup"
                     data-i18n-title="button.selectAmmo" data-i18n-aria-label="button.selectAmmo"
                     title="Select missile" aria-label="Select missile">
               <span class="ammo-label truncate" data-i18n="label.missile">Missile</span>
-              <span class="launcher-ammo-summary truncate" id="ship-b-launcher-ammo-summary"></span>
-              <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              <span class="ammo-summary-row">
+                <img id="ship-b-launcher-ammo-summary-icon" class="ammo-summary-icon" alt="" hidden>
+                <span class="ammo-summary-value mono truncate" id="ship-b-launcher-ammo-summary"></span>
+                <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="icons.svg#chevron"></use></svg>
+              </span>
             </button>
             <div class="launcher-ammo-popup popup popup-below popup-left popup-right popup-scroll" id="ship-b-launcher-ammo-popup" hidden>
               <ul class="launcher-ammo-list" id="ship-b-launcher-ammo-list" role="listbox"></ul>

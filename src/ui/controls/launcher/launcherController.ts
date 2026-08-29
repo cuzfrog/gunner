@@ -134,10 +134,12 @@ export class LauncherControllerImpl implements LauncherController {
 
   openAmmoPopup(): void {
     this.ammoPopupOpen = true;
+    this.els.ammoTrigger.setAttribute("aria-expanded", "true");
   }
 
   closeAmmoPopup(): void {
     this.ammoPopupOpen = false;
+    this.els.ammoTrigger.setAttribute("aria-expanded", "false");
   }
 
   render(): void {
@@ -146,11 +148,15 @@ export class LauncherControllerImpl implements LauncherController {
     this.els.attributesTrigger.disabled = !hasLauncher;
     this.els.ammoTrigger.disabled = !hasLauncher;
     if (!hasLauncher) {
+      this.els.attributesIcon.hidden = true;
+      this.els.ammoSummaryIcon.hidden = true;
       this.renderClassSelector();
       this.renderAttributesSummary(undefined);
       setText(this.els.ammoSummary, "-");
       return;
     }
+    this.renderIcon(this.els.attributesIcon, launcher.moduleId);
+    this.renderIcon(this.els.ammoSummaryIcon, launcher.chargeId);
     const t = (key: string): string => this.i18n.t(key);
     setText(this.els.ammoSummary, launcher.chargeName);
     setText(this.els.volleyDamage, formatWithCommas(launcher.damagePerMissile * launcher.count, 1));
@@ -176,6 +182,12 @@ export class LauncherControllerImpl implements LauncherController {
     const speed = `${formatWithCommas(launcher.maxVelocity, 0)} m/s`;
     const flight = `${formatNumber(launcher.flightTime, 1)}s`;
     setText(this.els.attributesSummary, `${range} / ${speed} / ${flight}`);
+  }
+
+  private renderIcon(icon: HTMLImageElement, typeId: TypeId): void {
+    const url = this.imageCatalog.itemIconUrl(typeId);
+    icon.src = url ?? "";
+    icon.hidden = !url;
   }
 
   private renderClassSelector(): void {
@@ -260,18 +272,18 @@ export class LauncherControllerImpl implements LauncherController {
       close: () => { this.els.ammoPopup.hidden = true; this.closeAmmoPopup(); },
       isOpen: () => this.ammoPopupOpen,
       focusTrigger: () => this.els.ammoTrigger.focus(),
-      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.ammoPopup.contains(domTarget),
+      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.ammoField.contains(domTarget),
     };
     return popup;
   }
 
   private createAttributesPopup(): Popup {
     const popup: Popup = {
-      open: () => { this.els.attributesPopup.hidden = false; this.attributesPopupOpen = true; },
-      close: () => { this.els.attributesPopup.hidden = true; this.attributesPopupOpen = false; },
+      open: () => { this.els.attributesPopup.hidden = false; this.attributesPopupOpen = true; this.els.attributesTrigger.setAttribute("aria-expanded", "true"); },
+      close: () => { this.els.attributesPopup.hidden = true; this.attributesPopupOpen = false; this.els.attributesTrigger.setAttribute("aria-expanded", "false"); },
       isOpen: () => this.attributesPopupOpen,
       focusTrigger: () => this.els.attributesTrigger.focus(),
-      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.attributesPopup.contains(domTarget),
+      contains: (domTarget: EventTarget) => domTarget instanceof Element && this.els.attributesField.contains(domTarget),
     };
     return popup;
   }

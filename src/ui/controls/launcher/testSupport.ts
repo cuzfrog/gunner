@@ -23,12 +23,16 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
   return {
     ammoTrigger: document.getElementById(`${id}-launcher-ammo-trigger`)! as HTMLButtonElement,
     ammoSummary: document.getElementById(`${id}-launcher-ammo-summary`)!,
+    ammoSummaryIcon: document.getElementById(`${id}-launcher-ammo-summary-icon`)! as HTMLImageElement,
     ammoPopup: document.getElementById(`${id}-launcher-ammo-popup`)!,
     ammoList: document.getElementById(`${id}-launcher-ammo-list`)!,
+    ammoField: document.getElementById(`${id}-launcher-ammo-field`)!,
     classOptions: document.getElementById(`${id}-launcher-class-options`)!,
     attributesTrigger: document.getElementById(`${id}-launcher-attributes-trigger`)! as HTMLButtonElement,
     attributesSummary: document.getElementById(`${id}-launcher-attributes-summary`)!,
+    attributesIcon: document.getElementById(`${id}-launcher-attributes-icon`)! as HTMLImageElement,
     attributesPopup: document.getElementById(`${id}-launcher-attributes-popup`)!,
+    attributesField: document.getElementById(`${id}-launcher-attributes-field`)!,
     volleyDamage: document.getElementById(`${id}-launcher-volley-damage`)!,
     rateOfFire: document.getElementById(`${id}-launcher-rate-of-fire`)!,
     explosionRadius: document.getElementById(`${id}-launcher-explosion-radius`)!,
@@ -97,6 +101,10 @@ export function buildLauncher(
   const document = fakeDocument();
   globalThis.document = document;
   const els = collectLauncherEls(document, side);
+  els.ammoField.appendChild(els.ammoTrigger);
+  els.ammoField.appendChild(els.ammoPopup);
+  els.attributesField.appendChild(els.attributesTrigger);
+  els.attributesField.appendChild(els.attributesPopup);
   const i18n = vi.mocked<I18n>({
     current: vi.fn((): Language => "en"),
     setLanguage: vi.fn(),

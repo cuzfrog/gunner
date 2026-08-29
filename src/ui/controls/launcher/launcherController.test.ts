@@ -119,4 +119,60 @@ describe("LauncherController", () => {
     controller.closeAmmoPopup();
     expect(controller.isAmmoPopupOpen()).toBe(false);
   });
+
+  test("ammo popup contains() returns true for the ammo trigger and popup", () => {
+    const { document, controller } = buildLauncher();
+    const trigger = getFake(document, "ship-a-launcher-ammo-trigger") as unknown as EventTarget;
+    const popup = getFake(document, "ship-a-launcher-ammo-popup") as unknown as EventTarget;
+    expect(controller.popup.contains(trigger)).toBe(true);
+    expect(controller.popup.contains(popup)).toBe(true);
+  });
+
+  test("ammo popup contains() returns false for an outside element", () => {
+    const { document, controller } = buildLauncher();
+    const outside = getFake(document, "ship-a-hull") as unknown as EventTarget;
+    expect(controller.popup.contains(outside)).toBe(false);
+  });
+
+  test("icons are hidden when no launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-attributes-icon").hidden).toBe(true);
+    expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
+  });
+
+  test("icons are shown when a launcher is fitted and imageCatalog returns a url", () => {
+    const { document, controller } = buildLauncher({
+      imageCatalog: { itemIconUrl: vi.fn(() => "images/launcher.png") },
+    });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    const attributesIcon = getFake(document, "ship-a-launcher-attributes-icon");
+    const ammoIcon = getFake(document, "ship-a-launcher-ammo-summary-icon");
+    expect(attributesIcon.hidden).toBe(false);
+    expect(attributesIcon.src).toBe("images/launcher.png");
+    expect(ammoIcon.hidden).toBe(false);
+    expect(ammoIcon.src).toBe("images/launcher.png");
+  });
+
+  test("icons are hidden when imageCatalog returns no url", () => {
+    const { document, controller } = buildLauncher({
+      imageCatalog: { itemIconUrl: vi.fn(() => undefined) },
+    });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-attributes-icon").hidden).toBe(true);
+    expect(getFake(document, "ship-a-launcher-ammo-summary-icon").hidden).toBe(true);
+  });
+
+  test("openAmmoPopup sets aria-expanded to true on the ammo trigger", () => {
+    const { document, controller } = buildLauncher();
+    controller.openAmmoPopup();
+    expect(getFake(document, "ship-a-launcher-ammo-trigger").getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("closeAmmoPopup sets aria-expanded to false on the ammo trigger", () => {
+    const { document, controller } = buildLauncher();
+    controller.openAmmoPopup();
+    controller.closeAmmoPopup();
+    expect(getFake(document, "ship-a-launcher-ammo-trigger").getAttribute("aria-expanded")).toBe("false");
+  });
 });
