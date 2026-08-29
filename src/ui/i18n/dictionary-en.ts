@@ -16,6 +16,8 @@ export const EN: LanguageSlice<"en"> = {
   "label.falloffRange": { en: "Falloff range" },
   "label.propulsion": { en: "Propulsion" },
   "label.propulsionVariant": { en: "Propulsion variant" },
+  "label.launcherVariant": { en: "Launcher variant" },
+  "label.turretVariant": { en: "Turret variant" },
   "label.skillLevel": { en: "Pilot skills" },
   "skill.level": { en: "Level" },
   "label.overload": { en: "Overload" },

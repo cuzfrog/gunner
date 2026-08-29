@@ -45,6 +45,8 @@ function collectLauncherEls(els: ControlsElements, side: Side): LauncherEls {
     ammoList: s.launcherAmmoList,
     ammoField: s.launcherAmmoField,
     classOptions: s.launcherClassOptions,
+    variantGear: s.launcherVariantGear,
+    variants: s.launcherVariants,
     attributesTrigger: s.launcherAttributesTrigger,
     attributesPopup: s.launcherAttributesPopup,
     attributesField: s.launcherAttributesField,

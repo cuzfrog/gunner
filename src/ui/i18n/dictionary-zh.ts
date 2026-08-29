@@ -16,6 +16,8 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.falloffRange": { zh: "衰减射程" },
   "label.propulsion": { zh: "推进模块" },
   "label.propulsionVariant": { zh: "推进模块型号" },
+  "label.launcherVariant": { zh: "发射器型号" },
+  "label.turretVariant": { zh: "炮台型号" },
   "label.skillLevel": { zh: "飞行员技能" },
   "skill.level": { zh: "等级" },
   "label.overload": { zh: "超载" },

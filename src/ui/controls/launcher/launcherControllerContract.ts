@@ -32,6 +32,8 @@ export interface LauncherEls {
   readonly ammoList: HTMLElement;
   readonly ammoField: HTMLElement;
   readonly classOptions: HTMLElement;
+  readonly variantGear: HTMLButtonElement;
+  readonly variants: HTMLElement;
   readonly attributesTrigger: HTMLButtonElement;
   readonly attributesPopup: HTMLElement;
   readonly attributesField: HTMLElement;

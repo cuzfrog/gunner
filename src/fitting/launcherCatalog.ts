@@ -7,6 +7,7 @@ import type { MissileCatalog } from "./missileCatalog";
 
 export interface LauncherCatalog {
   switchClass(launcher: ImportedLauncher, target: LauncherClass, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedLauncher | undefined;
+  switchVariant(launcher: ImportedLauncher, targetModuleId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher | undefined;
 }
 
 interface LauncherCatalogDeps {
@@ -38,6 +39,17 @@ export class LauncherCatalogImpl implements LauncherCatalog {
     const missileId = resolveMissile(this.missiles, this.missileCatalog, launcher.chargeId, targetStats);
     return this.missileCatalog.withCharge(
       { moduleId, name: targetStats.name, count: launcher.count, chargeId: missileId, chargeName: "", damagePerMissile: 0, cycleTime: 0, explosionRadius: 0, explosionVelocity: 0, damageReductionFactor: 0, maxVelocity: 0, flightTime: 0 },
+      missileId, hullBonuses, skillLevel,
+    );
+  }
+
+  switchVariant(launcher: ImportedLauncher, targetModuleId: TypeId, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher | undefined {
+    const targetStats = this.launchers[targetModuleId];
+    if (!targetStats) return undefined;
+    if (targetModuleId === launcher.moduleId) return launcher;
+    const missileId = resolveMissile(this.missiles, this.missileCatalog, launcher.chargeId, targetStats);
+    return this.missileCatalog.withCharge(
+      { moduleId: targetModuleId, name: targetStats.name, count: launcher.count, chargeId: missileId, chargeName: "", damagePerMissile: 0, cycleTime: 0, explosionRadius: 0, explosionVelocity: 0, damageReductionFactor: 0, maxVelocity: 0, flightTime: 0 },
       missileId, hullBonuses, skillLevel,
     );
   }

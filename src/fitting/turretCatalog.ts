@@ -7,7 +7,7 @@ import type { GunFamilies } from "./gunFamilies";
 import { applySkillMultipliers, sigResolutionClassFromChargeSize } from "./turretStats";
 
 export interface TurretCatalog {
-  resize(turret: ImportedTurret, target: SigResolutionClass, skillLevel: SkillLevel): ImportedTurret | undefined;
+  resize(turret: ImportedTurret, target: SigResolutionClass, skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedTurret | undefined;
 }
 
 interface TurretCatalogDeps {
@@ -27,10 +27,10 @@ export class TurretCatalogImpl implements TurretCatalog {
     this.chargeCatalog = deps.chargeCatalog;
   }
 
-  resize(turret: ImportedTurret, target: SigResolutionClass, skillLevel: SkillLevel): ImportedTurret | undefined {
+  resize(turret: ImportedTurret, target: SigResolutionClass, skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedTurret | undefined {
     if (!this.db.turrets[turret.moduleId]) return undefined;
     const family = this.gunFamilies.familyOf(turret.moduleId);
-    const moduleId = this.gunFamilies.representativeOf(family, target);
+    const moduleId = preferredModuleId && this.db.turrets[preferredModuleId] ? preferredModuleId : this.gunFamilies.representativeOf(family, target);
     const stats = this.db.turrets[moduleId];
     if (!stats) return undefined;
     const base = applySkillMultipliers(stats, target, skillLevel);

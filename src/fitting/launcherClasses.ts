@@ -13,6 +13,7 @@ export interface LauncherClasses {
   representativeOf(launcherClass: LauncherClass): TypeId;
   classesForTiers(tiers: readonly HullTier[]): readonly LauncherClass[];
   allClasses(): readonly LauncherClass[];
+  variantsForClass(launcherClass: LauncherClass): readonly LauncherStats[];
 }
 
 interface LauncherClassesDeps {
@@ -72,6 +73,13 @@ export class LauncherClassesImpl implements LauncherClasses {
   allClasses(): readonly LauncherClass[] {
     return LAUNCHER_CLASS_ORDER;
   }
+
+  variantsForClass(launcherClass: LauncherClass): readonly LauncherStats[] {
+    const group = LAUNCHER_CLASS_GROUPS[launcherClass];
+    return Object.values(this.launchers)
+      .filter((stats) => stats.launcherGroup === group)
+      .sort(sortByMetaThenName);
+  }
 }
 
 function invertClassGroups(): ReadonlyMap<number, LauncherClass> {
@@ -106,3 +114,9 @@ function assertLauncherClasses(
 }
 
 export { LAUNCHER_CLASS_GROUPS as _launcherClassGroups, LAUNCHER_CLASS_TIERS as _launcherClassTiers, LAUNCHER_CLASS_ORDER as _launcherClassOrder };
+
+function sortByMetaThenName(a: LauncherStats, b: LauncherStats): number {
+  if (a.metaGroupID !== b.metaGroupID) return a.metaGroupID - b.metaGroupID;
+  if (a.metaLevel !== b.metaLevel) return a.metaLevel - b.metaLevel;
+  return a.name.localeCompare(b.name);
+}

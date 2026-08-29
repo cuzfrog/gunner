@@ -7,6 +7,10 @@ function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
 }
 
+function sdeType(metaLevel = 0, metaGroupID = 1): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number } {
+  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID };
+}
+
 describe("buildStasisWebStats", () => {
   test("returns undefined when required attributes are missing", () => {
     expect(buildStasisWebStats(values({ maxRange: 10000 }))).toBeUndefined();
@@ -188,41 +192,55 @@ describe("buildDisruptionScriptStats", () => {
 
 describe("buildLauncherStats", () => {
   test("returns undefined when speed attribute is missing", () => {
-    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
   });
 
   test("returns undefined when speed is non-positive", () => {
-    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509)).toBeUndefined();
-    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
   });
 
   test("returns undefined when no charge groups are present", () => {
-    expect(buildLauncherStats(values({ speed: 13600 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType())).toBeUndefined();
   });
 
   test("converts cycle time from milliseconds to seconds and preserves launcher group with charge groups", () => {
     // Arbalest Compact Light Missile Launcher: speed=13600ms, group 509, chargeGroup1=384, chargeGroup2=394
-    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509)).toEqual({
+    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType())).toEqual({
       rateOfFire: 13.6,
       launcherGroup: 509,
       chargeGroups: [384, 394],
+      metaLevel: 0,
+      metaGroupID: 1,
     });
   });
 
   test("collects charge groups from chargeGroup1 through chargeGroup5", () => {
     expect(buildLauncherStats(values({
       speed: 18000, chargeGroup1: 657, chargeGroup3: 89,
-    }), 508)).toEqual({
+    }), 508, sdeType())).toEqual({
       rateOfFire: 18,
       launcherGroup: 508,
       chargeGroups: [657, 89],
+      metaLevel: 0,
+      metaGroupID: 1,
     });
   });
 
   test("preserves torpedo launcher group (508) with chargeGroup3", () => {
-    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508);
+    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType());
     expect(stats?.launcherGroup).toBe(508);
     expect(stats?.chargeGroups).toEqual([89]);
+  });
+
+  test("preserves metaLevel and metaGroupID from SDE type", () => {
+    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2))).toEqual({
+      rateOfFire: 12.8,
+      launcherGroup: 509,
+      chargeGroups: [384],
+      metaLevel: 5,
+      metaGroupID: 2,
+    });
   });
 });
 

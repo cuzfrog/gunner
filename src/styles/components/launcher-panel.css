@@ -5,6 +5,44 @@
   gap: 4px;
 }
 
+.weapon-selector-wrapper {
+  display: flex;
+  gap: 2px;
+  position: relative;
+}
+
+.weapon-selector-wrapper > .choice-selector {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  min-height: 22px;
+}
+
+.weapon-variant-gear {
+  flex: 0 0 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+}
+
+.weapon-variant-gear[aria-expanded="true"] {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.launcher-variants-popup.fitting-popup,
+.turret-variants-popup.fitting-popup {
+  left: auto;
+  right: 0;
+  min-width: 220px;
+}
+
+.launcher-variants-popup .launcher-variant-icon,
+.turret-variants-popup .turret-variant-icon {
+  margin-right: 6px;
+}
+
 .launcher-class-selector {
   display: flex;
   flex-wrap: wrap;

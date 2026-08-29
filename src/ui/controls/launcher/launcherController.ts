@@ -12,7 +12,7 @@ import { formatDistance, formatNumber, formatWithCommas } from "../controlsForma
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl } from "../shared";
+import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl, VariantSection, type VariantItem } from "../shared";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
@@ -44,6 +44,7 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly ammoList: SelectableListImpl;
   private readonly ammoChip: SummaryChipImpl;
   private readonly classChoice: ChoiceGroupImpl;
+  private readonly variantSection: VariantSection;
   private readonly launcherByClass = new Map<LauncherClass, { moduleId: TypeId; ammoId: TypeId }>();
 
   constructor(deps: LauncherControllerDeps) {
@@ -79,6 +80,17 @@ export class LauncherControllerImpl implements LauncherController {
     this.popupGroup.register(this.attributesPopupValue);
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ammoPopupValue));
     this.els.attributesTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attributesPopupValue));
+    this.variantSection = new VariantSection({
+      gear: this.els.variantGear,
+      popupEl: this.els.variants,
+      listShape: { itemClass: "fitting-item btn", nameClass: "fitting-item-name", iconClass: "launcher-variant-icon", role: "menuitem" },
+      variants: () => this.discoverLauncherVariants(),
+      currentId: () => this.selectedLauncher?.moduleId,
+      onSelect: (id) => this.onVariantSelect(id),
+      isEnabled: () => this.selectedLauncher !== undefined,
+    });
+    this.popupGroup.register(this.variantSection.popup);
+    this.els.variantGear.addEventListener("click", () => this.popupGroup.toggle(this.variantSection.popup));
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
@@ -140,6 +152,7 @@ export class LauncherControllerImpl implements LauncherController {
   clear(): void {
     this.popupGroup.close(this.ammoPopupValue);
     this.popupGroup.close(this.attributesPopupValue);
+    this.popupGroup.close(this.variantSection.popup);
     this.selectedLauncher = undefined;
     this.currentAmmoId = undefined;
     this.launcherByClass.clear();
@@ -186,6 +199,7 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
     this.renderAmmoList(launcher);
     this.renderClassSelector();
+    this.variantSection.updateUI();
   }
 
   private renderClassSelector(): void {
@@ -303,6 +317,31 @@ export class LauncherControllerImpl implements LauncherController {
   private recordLauncherForClass(moduleId: TypeId, ammoId: TypeId): void {
     const cls = this.launcherClasses.classOf(moduleId);
     this.launcherByClass.set(cls, { moduleId, ammoId });
+  }
+
+  private discoverLauncherVariants(): readonly VariantItem[] {
+    const launcher = this.selectedLauncher;
+    if (!launcher) return [];
+    const cls = this.launcherClasses.classOf(launcher.moduleId);
+    const language = this.i18n.current();
+    return this.launcherClasses.variantsForClass(cls).map((stats) => ({
+      id: stats.id,
+      name: this.fittingImport.itemNameForId(stats.id, language) ?? stats.name,
+      iconUrl: this.imageCatalog.itemIconUrl(stats.id),
+    }));
+  }
+
+  private onVariantSelect(moduleId: TypeId): void {
+    const launcher = this.selectedLauncher;
+    if (!launcher) return;
+    const next = this.launcherCatalog.switchVariant(launcher, moduleId, this.hullBonuses, this.skillLevel);
+    if (!next) return;
+    this.selectedLauncher = next;
+    this.currentAmmoId = next.chargeId;
+    this.recordLauncherForClass(next.moduleId, next.chargeId);
+    this.popupGroup.close(this.variantSection.popup);
+    this.render();
+    this.events.emitConfigInvalidated();
   }
 }
 

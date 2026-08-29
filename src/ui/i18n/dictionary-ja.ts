@@ -16,6 +16,8 @@ export const JA: LanguageSlice<"ja"> = {
   "label.falloffRange": { ja: "フォールオフ射程" },
   "label.propulsion": { ja: "推進モジュール" },
   "label.propulsionVariant": { ja: "推進モジュール型" },
+  "label.launcherVariant": { ja: "ランチャー型" },
+  "label.turretVariant": { ja: "タレット型" },
   "label.skillLevel": { ja: "パイロットスキル" },
   "skill.level": { ja: "レベル" },
   "label.overload": { ja: "オーバーヒート" },

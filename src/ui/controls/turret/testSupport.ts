@@ -29,6 +29,8 @@ export function collectTurretEls(document: Document, side: Side): TurretEls {
     tracking: document.getElementById(`${id}-tracking`)! as HTMLInputElement,
     sigRes: document.getElementById(`${id}-sigRes`)! as HTMLSelectElement,
     sigResOptions: document.getElementById(`${id}-sig-res-options`)!,
+    variantGear: document.getElementById(`${id}-turret-variant-gear`)! as HTMLButtonElement,
+    variants: document.getElementById(`${id}-turret-variants`)!,
     optimal: document.getElementById(`${id}-optimal`)! as HTMLInputElement,
     falloff: document.getElementById(`${id}-falloff`)! as HTMLInputElement,
     ammoField: document.getElementById(`${id}-ammo-field`)!,

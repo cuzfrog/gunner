@@ -216,6 +216,62 @@ describe("LauncherCatalog", () => {
       expect(FITTING_DB.launchers[rocketIiId].chargeGroups).toContain(resolvedMissile.chargeGroup);
     });
   });
+
+  describe("switchVariant", () => {
+    test("switches from Tech I to Tech II light missile launcher", () => {
+      const catalog = createCatalog();
+      const lightIId = findLauncherId(509);
+      const lightIiId = findLauncherIdByName("Light Missile Launcher II");
+      const missileId = findMissileId(384, "kinetic");
+      const launcher = makeLauncher(lightIId, missileId, 2);
+      const result = catalog.switchVariant(launcher, toTypeId(lightIiId), [], 5);
+      expect(result).toBeDefined();
+      expect(result!.moduleId).toBe(toTypeId(lightIiId));
+      expect(result!.name).toBe("Light Missile Launcher II");
+      expect(result!.count).toBe(2);
+    });
+
+    test("returns the same launcher when target module is the same", () => {
+      const catalog = createCatalog();
+      const lightId = findLauncherId(509);
+      const missileId = findMissileId(384, "kinetic");
+      const launcher = makeLauncher(lightId, missileId, 2);
+      const result = catalog.switchVariant(launcher, toTypeId(lightId), [], 5);
+      expect(result).toBe(launcher);
+    });
+
+    test("returns undefined for an unknown target module id", () => {
+      const catalog = createCatalog();
+      const lightId = findLauncherId(509);
+      const missileId = findMissileId(384, "kinetic");
+      const launcher = makeLauncher(lightId, missileId, 2);
+      const result = catalog.switchVariant(launcher, toTypeId("999999"), [], 5);
+      expect(result).toBeUndefined();
+    });
+
+    test("preserves compatible missile when switching to a variant that supports the charge group", () => {
+      const catalog = createCatalog();
+      const lightIId = findLauncherId(509);
+      const lightIiId = findLauncherIdByName("Light Missile Launcher II");
+      const scourgeLightId = findMissileIdByName("Scourge Light Missile");
+      const launcher = makeLauncher(lightIId, scourgeLightId, 3);
+      const result = catalog.switchVariant(launcher, toTypeId(lightIiId), [], 5);
+      expect(result).toBeDefined();
+      expect(result!.chargeId).toBe(launcher.chargeId);
+    });
+
+    test("recomputes stats with skills on variant switch", () => {
+      const catalog = createCatalog();
+      const lightIId = findLauncherId(509);
+      const lightIiId = findLauncherIdByName("Light Missile Launcher II");
+      const missileId = findMissileId(384, "kinetic");
+      const launcher = makeLauncher(lightIId, missileId, 2);
+      const result = catalog.switchVariant(launcher, toTypeId(lightIiId), [], 5);
+      expect(result).toBeDefined();
+      expect(result!.damagePerMissile).toBeGreaterThan(0);
+      expect(result!.cycleTime).toBeGreaterThan(0);
+    });
+  });
 });
 
 function findLauncherIdByName(name: string): string {

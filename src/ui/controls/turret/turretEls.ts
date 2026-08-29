@@ -7,6 +7,8 @@ export interface TurretEls {
   readonly tracking: HTMLInputElement;
   readonly sigRes: HTMLSelectElement;
   readonly sigResOptions: HTMLElement;
+  readonly variantGear: HTMLButtonElement;
+  readonly variants: HTMLElement;
   readonly optimal: HTMLInputElement;
   readonly falloff: HTMLInputElement;
   readonly ammoField: HTMLElement;
@@ -27,6 +29,8 @@ export function collectTurretEls(els: ControlsElements, side: Side): TurretEls {
     tracking: combatant.tracking,
     sigRes: combatant.sigRes,
     sigResOptions: combatant.sigResOptions,
+    variantGear: combatant.turretVariantGear,
+    variants: combatant.turretVariants,
     optimal: combatant.optimal,
     falloff: combatant.falloff,
     ammoField: combatant.ammoField,

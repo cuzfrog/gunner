@@ -28,6 +28,8 @@ export function collectLauncherEls(document: Document, side: Side): LauncherEls 
     ammoList: document.getElementById(`${id}-launcher-ammo-list`)!,
     ammoField: document.getElementById(`${id}-launcher-ammo-field`)!,
     classOptions: document.getElementById(`${id}-launcher-class-options`)!,
+    variantGear: document.getElementById(`${id}-launcher-variant-gear`)! as HTMLButtonElement,
+    variants: document.getElementById(`${id}-launcher-variants`)!,
     attributesTrigger: document.getElementById(`${id}-launcher-attributes-trigger`)! as HTMLButtonElement,
     attributesPopup: document.getElementById(`${id}-launcher-attributes-popup`)!,
     attributesField: document.getElementById(`${id}-launcher-attributes-field`)!,
@@ -55,7 +57,7 @@ const NOVA_LIGHT: MissileStats = {
 };
 
 const LIGHT_MISSILE_LAUNCHER: LauncherStats = {
-  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394],
+  rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1,
   id: "499" as TypeId, name: "Light Missile Launcher I",
 };
 
@@ -137,6 +139,7 @@ export function buildLauncher(
   });
   const launcherCatalog = vi.mocked<LauncherCatalog>({
     switchClass: vi.fn(() => undefined),
+    switchVariant: vi.fn(() => undefined),
     ...options.launcherCatalog,
   });
   const launcherClasses = vi.mocked<LauncherClasses>({
@@ -144,6 +147,7 @@ export function buildLauncher(
     representativeOf: vi.fn(() => "499" as TypeId),
     classesForTiers: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
     allClasses: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
+    variantsForClass: vi.fn(() => [] as readonly LauncherStats[]),
     ...options.launcherClasses,
   });
   const ships = vi.mocked<Ships>({ ...mockShips(), ...options.ships });

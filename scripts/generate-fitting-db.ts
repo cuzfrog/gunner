@@ -34,6 +34,8 @@ interface SdeType {
   typeName_ja?: string;
   groupID: number;
   published: number;
+  metaLevel?: number;
+  metaGroupID?: number;
 }
 
 type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
@@ -502,6 +504,8 @@ interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
 }
 
 interface ChargeStats {
@@ -518,6 +522,8 @@ interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
 }
 
 interface MissileStats {
@@ -749,7 +755,7 @@ function turretSkillFromRequired(
   return undefined;
 }
 
-export function buildLauncherStats(values: Map<string, number>, groupID: number): LauncherStats | undefined {
+export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType): LauncherStats | undefined {
   const speed = values.get("speed");
   if (speed === undefined || speed <= 0) return undefined;
   const chargeGroups: number[] = [];
@@ -758,7 +764,7 @@ export function buildLauncherStats(values: Map<string, number>, groupID: number)
     if (group !== undefined && group > 0) chargeGroups.push(group);
   }
   if (chargeGroups.length === 0) return undefined;
-  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups };
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
 }
 
 export function buildMissileStats(values: Map<string, number>, groupID: number): MissileStats | undefined {
@@ -855,6 +861,8 @@ async function main() {
           damageMultiplier,
           cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
+          metaLevel: type.metaLevel ?? 0,
+          metaGroupID: type.metaGroupID ?? 1,
         };
         addItemName(itemNames, id, type);
       }
@@ -879,7 +887,7 @@ async function main() {
     }
 
     if (LAUNCHER_GROUPS.has(type.groupID)) {
-      const stats = buildLauncherStats(values, type.groupID);
+      const stats = buildLauncherStats(values, type.groupID, type);
       if (stats) {
         launchers[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -1040,6 +1048,8 @@ export interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -1070,6 +1080,8 @@ export interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
   readonly id: TypeId;
   readonly name: string;
 }

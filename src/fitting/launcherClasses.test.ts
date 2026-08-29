@@ -92,6 +92,44 @@ describe("LauncherClasses", () => {
     });
   });
 
+  describe("variantsForClass", () => {
+    test("returns all launchers in the light missile class (group 509)", () => {
+      const cls = createClasses();
+      const variants = cls.variantsForClass("light");
+      expect(variants.length).toBeGreaterThan(0);
+      for (const stats of variants) expect(stats.launcherGroup).toBe(509);
+    });
+
+    test("includes both Tech I and Tech II light missile launchers", () => {
+      const cls = createClasses();
+      const variants = cls.variantsForClass("light");
+      const names = variants.map((v) => v.name);
+      expect(names).toContain("Light Missile Launcher I");
+      expect(names).toContain("Light Missile Launcher II");
+    });
+
+    test("sorts by meta group then meta level then name", () => {
+      const cls = createClasses();
+      const variants = cls.variantsForClass("light");
+      const techI = variants.find((v) => v.name === "Light Missile Launcher I");
+      const techII = variants.find((v) => v.name === "Light Missile Launcher II");
+      expect(techI).toBeDefined();
+      expect(techII).toBeDefined();
+      const techIIndex = variants.indexOf(techI!);
+      const techIIIndex = variants.indexOf(techII!);
+      expect(techIIndex).toBeLessThan(techIIIndex);
+    });
+
+    test("returns only launchers for the requested class", () => {
+      const cls = createClasses();
+      const lightVariants = cls.variantsForClass("light");
+      const rocketVariants = cls.variantsForClass("rocket");
+      const lightIds = new Set(lightVariants.map((v) => v.id));
+      const rocketIds = new Set(rocketVariants.map((v) => v.id));
+      for (const id of lightIds) expect(rocketIds.has(id)).toBe(false);
+    });
+  });
+
   describe("data integrity", () => {
     test("every launcher class has a group mapping", () => {
       for (const cls of _launcherClassOrder) {
