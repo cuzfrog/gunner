@@ -63,9 +63,9 @@ export class SigResIcons {
 
   private iconFor(button: HTMLButtonElement): HTMLImageElement {
     for (const child of Array.from(button.children)) {
-      if (isHtmlImageElement(child) && child.className === "sigres-icon") return child;
+      if (isHtmlImageElement(child) && child.className === "choice-icon") return child;
     }
-    const img = html`<img class="sigres-icon" alt="" hidden>` as unknown as HTMLImageElement;
+    const img = html`<img class="choice-icon" alt="" hidden>` as unknown as HTMLImageElement;
     button.appendChild(img);
     return img;
   }

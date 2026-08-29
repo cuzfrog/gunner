@@ -68,7 +68,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.ammoChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
     this.classChoice = new ChoiceGroupImpl({
       group: deps.els.classOptions,
-      shape: { buttonClass: "btn launcher-class-option", iconClass: "launcher-class-icon", labelClass: "launcher-class-label" },
+      shape: { buttonClass: "btn", iconClass: "choice-icon", labelClass: "truncate" },
     });
     this.els.classOptions.addEventListener("input", () => this.onClassChoiceInput());
     this.currentAmmoId = undefined;

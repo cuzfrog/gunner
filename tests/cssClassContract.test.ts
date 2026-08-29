@@ -84,6 +84,7 @@ const APPROVED_PREFIXES = [
   "mono",
   "truncate",
   "chevron",
+  "choice-icon",
 ];
 
 type StringMap = Map<string, Set<string>>;

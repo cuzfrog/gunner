@@ -57,15 +57,6 @@
 }
 
 .segmented-control.propulsion-selector > .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 6px;
-}
-
-.propulsion-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
 }
 }

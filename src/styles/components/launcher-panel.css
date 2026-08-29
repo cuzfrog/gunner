@@ -11,27 +11,9 @@
   gap: 2px;
 }
 
-.launcher-class-option {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+.launcher-class-selector > .btn {
   font-size: 10px;
   padding: 2px 6px;
-}
-
-.launcher-class-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.launcher-class-label {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .launcher-attributes-group {

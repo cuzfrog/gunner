@@ -178,7 +178,7 @@ describe("LauncherController", () => {
     const buttons = classOptions.children as unknown as FakeElement[];
     expect(buttons.length).toBeGreaterThan(0);
     for (const button of buttons) {
-      const labelSpan = button.children.find((c) => c.className === "launcher-class-label");
+      const labelSpan = button.children.find((c) => c.className === "truncate");
       expect(labelSpan).toBeDefined();
       expect(labelSpan!.textContent).toMatch(/^label\.launcherClass\./);
     }
@@ -193,7 +193,7 @@ describe("LauncherController", () => {
     const classOptions = getFake(document, "ship-a-launcher-class-options");
     const buttons = classOptions.children as unknown as FakeElement[];
     for (const button of buttons) {
-      const icon = button.children.find((c) => c.className === "launcher-class-icon");
+      const icon = button.children.find((c) => c.className === "choice-icon");
       expect(icon).toBeDefined();
       expect(icon!.src).toBe("images/launcher-light.png");
     }
@@ -205,7 +205,7 @@ describe("LauncherController", () => {
     const classOptions = getFake(document, "ship-a-launcher-class-options");
     const buttons = classOptions.children as unknown as FakeElement[];
     for (const button of buttons) {
-      const icon = button.children.find((c) => c.className === "launcher-class-icon");
+      const icon = button.children.find((c) => c.className === "choice-icon");
       expect(icon).toBeUndefined();
     }
   });

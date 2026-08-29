@@ -1,21 +1,10 @@
 @layer components {
 .sigres-selector > .btn {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
   column-gap: 4px;
   row-gap: 1px;
   padding: 3px 2px 4px;
   line-height: 1.2;
-}
-
-.sigres-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
 }
 
 .sigres-class {

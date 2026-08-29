@@ -41,7 +41,7 @@ export class PropulsionSection implements IPropulsionSection {
     this.propulsionChoice = new ChoiceGroupImpl({
       group: els.propulsionOptions,
       select: els.propulsion,
-      shape: { buttonClass: "btn", iconClass: "propulsion-icon", labelClass: "", truncateButton: true, toggleNoneValue: PROPULSION_NONE },
+      shape: { buttonClass: "btn", iconClass: "choice-icon", labelClass: "", truncateButton: true, toggleNoneValue: PROPULSION_NONE },
     });
     this.variants = new PropulsionVariantSection({
       panel, els: { propulsionGear: els.propulsionGear, propulsionVariants: els.propulsionVariants },
