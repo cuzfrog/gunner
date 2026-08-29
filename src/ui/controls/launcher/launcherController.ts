@@ -185,6 +185,7 @@ export class LauncherControllerImpl implements LauncherController {
     if (!hasLauncher) {
       this.ammoChip.render("-", undefined);
       this.renderClassSelector();
+      this.variantSection.updateUI();
       return;
     }
     this.ammoChip.render(launcher.chargeName, this.imageCatalog.itemIconUrl(launcher.chargeId));

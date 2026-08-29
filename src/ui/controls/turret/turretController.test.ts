@@ -414,6 +414,79 @@ describe("TurretController", () => {
     expect(turretOverrides.get().falloff).toBe(54321);
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
+
+  test("variant gear is disabled when no turret is fitted", () => {
+    const { document } = buildTurret();
+    expect(getFake(document, "ship-a-turret-variant-gear").disabled).toBe(true);
+  });
+
+  test("variant gear is enabled when a turret is fitted", () => {
+    const { document, controller } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+    });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-turret-variant-gear").disabled).toBe(false);
+  });
+
+  test("clicking variant gear toggles the popup via popupGroup", () => {
+    const { document, controller, popupGroup } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+    });
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    getFake(document, "ship-a-turret-variant-gear").trigger("click");
+    expect(popupGroup.toggle).toHaveBeenCalled();
+  });
+
+  test("selecting a turret variant calls switchVariant, updates the turret, closes the popup, and emits configInvalidated", () => {
+    const variantTurret = { ...TURRET, moduleId: "491" as TypeId, damagePerShot: 20 };
+    const { document, controller, gunFamilies, turretCatalog, events, popupGroup } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+      turretCatalog: { switchVariant: vi.fn(() => variantTurret) },
+    });
+    vi.mocked(gunFamilies.variantsForFamily).mockReturnValue([
+      { id: "486" as TypeId, name: "200mm AutoCannon I", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 0, metaGroupID: 1 } as never,
+      { id: "491" as TypeId, name: "220mm Vulcan AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
+    ]);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    const list = getFake(document, "ship-a-turret-variants");
+    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "491");
+    expect(buttons.length).toBe(1);
+    (buttons[0] as unknown as FakeElement).trigger("click");
+    expect(turretCatalog.switchVariant).toHaveBeenCalledWith(TURRET, "491" as TypeId, 5);
+    expect(controller.turret()).toBe(variantTurret);
+    expect(popupGroup.close).toHaveBeenCalled();
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
+
+  test("variant selection remembers the module per sig-res class and restores it on sig-res round-trip", () => {
+    const techIiTurret = { ...TURRET, moduleId: "491" as TypeId };
+    const resizedToTechIi = { ...TURRET, sigResolutionClass: "M" as const, chargeSize: 2, moduleId: "491" as TypeId, chargeId: "21898" as TypeId };
+    const resizedBackToTechIi = { ...TURRET, sigResolutionClass: "S" as const, chargeSize: 1, moduleId: "491" as TypeId, chargeId: "12608" as TypeId };
+    const { document, controller, gunFamilies, turretCatalog } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
+      turretCatalog: {
+        switchVariant: vi.fn(() => techIiTurret),
+        resize: vi.fn(() => resizedToTechIi),
+      },
+    });
+    vi.mocked(gunFamilies.variantsForFamily).mockReturnValue([
+      { id: "486" as TypeId, name: "200mm AutoCannon I", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 0, metaGroupID: 1 } as never,
+      { id: "491" as TypeId, name: "220mm Vulcan AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
+    ]);
+    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    const list = getFake(document, "ship-a-turret-variants");
+    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "491");
+    expect(buttons.length).toBe(1);
+    (buttons[0] as unknown as FakeElement).trigger("click");
+    expect(controller.turret()?.moduleId).toBe("491" as TypeId);
+    buttonFor(document, "M").trigger("click");
+    expect(turretCatalog.resize).toHaveBeenCalledWith(techIiTurret, "M", 5, undefined);
+    expect(controller.turret()?.moduleId).toBe("491" as TypeId);
+    vi.mocked(turretCatalog.resize).mockReturnValue(resizedBackToTechIi);
+    buttonFor(document, "S").trigger("click");
+    expect(turretCatalog.resize).toHaveBeenCalledWith(resizedToTechIi, "S", 5, "491" as TypeId);
+  });
 });
 
 function buttonFor(document: Document, value: string) {

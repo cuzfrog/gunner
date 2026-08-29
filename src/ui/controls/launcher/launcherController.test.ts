@@ -212,4 +212,45 @@ describe("LauncherController", () => {
       expect(icon).toBeUndefined();
     }
   });
+
+  test("variant gear is disabled when no launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined, launcher: undefined }, { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-variant-gear").disabled).toBe(true);
+  });
+
+  test("variant gear is enabled when a launcher is fitted", () => {
+    const { document, controller } = buildLauncher();
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    expect(getFake(document, "ship-a-launcher-variant-gear").disabled).toBe(false);
+  });
+
+  test("clicking variant gear toggles the popup via popupGroup", () => {
+    const { document, controller, popupGroup } = buildLauncher();
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    getFake(document, "ship-a-launcher-variant-gear").trigger("click");
+    expect(popupGroup.toggle).toHaveBeenCalled();
+  });
+
+  test("selecting a launcher variant calls switchVariant, updates the launcher, closes the popup, and emits configInvalidated", () => {
+    const baseLauncher = importedLauncherFixture();
+    const variantLauncher = { ...baseLauncher, moduleId: "2404" as TypeId, name: "Light Missile Launcher II" };
+    const { document, controller, launcherClasses, launcherCatalog, events, popupGroup } = buildLauncher({
+      launcherCatalog: { switchVariant: vi.fn(() => variantLauncher) },
+    });
+    vi.mocked(launcherClasses.variantsForClass).mockReturnValue([
+      { id: "499" as TypeId, name: "Light Missile Launcher I", launcherGroup: 509, chargeGroups: [384, 394], rateOfFire: 16, metaLevel: 0, metaGroupID: 1 } as never,
+      { id: "2404" as TypeId, name: "Light Missile Launcher II", launcherGroup: 509, chargeGroups: [384, 394, 653], rateOfFire: 12.8, metaLevel: 5, metaGroupID: 2 } as never,
+    ]);
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
+    controller.applyImported(importedWithLauncher(baseLauncher), { skillLevel: 5, overloaded: false });
+    const list = getFake(document, "ship-a-launcher-variants");
+    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "2404");
+    expect(buttons.length).toBe(1);
+    (buttons[0] as unknown as FakeElement).trigger("click");
+    expect(launcherCatalog.switchVariant).toHaveBeenCalledWith(expect.objectContaining({ moduleId: baseLauncher.moduleId }), "2404" as TypeId, [], 5);
+    expect(controller.launcher()?.moduleId).toBe("2404" as TypeId);
+    expect(popupGroup.close).toHaveBeenCalled();
+    expect(emitConfigInvalidated).toHaveBeenCalled();
+  });
 });
