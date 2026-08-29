@@ -1,4 +1,5 @@
 ---
+import FormSliderField from "../form/FormSliderField.astro";
 import PopupBox from "../popup/PopupBox.astro";
 
 interface Props {
@@ -12,9 +13,9 @@ const { id, triggerId } = Astro.props;
      i18nAriaLabel="label.canvasSettings" ariaLabel="Canvas settings">
   <div class="control-bar-field control-bar-zoom">
     <label for="zoom-slider" class="field-label" data-i18n="label.zoom">Zoom</label>
-    <input type="range" id="zoom-slider" class="form-slider" min="0.25" max="4" step="0.05" value="1"
-           style="--fill: 20%" data-i18n-aria-label="label.zoom" aria-label="Zoom" disabled>
-    <output class="form-slider-value mono" id="zoom-value" for="zoom-slider">1.00x</output>
+    <FormSliderField sliderId="zoom-slider" valueId="zoom-value" valueText="1.00x"
+           min="0.25" max="4" step="0.05" value="1" fill="20%" disabled
+           i18nAriaLabel="label.zoom" ariaLabel="Zoom" />
     <label class="zoom-auto-option">
       <input type="checkbox" id="auto-zoom" class="zoom-auto-checkbox" checked>
       <span data-i18n="label.autoZoom">Auto-zoom</span>
@@ -22,8 +23,8 @@ const { id, triggerId } = Astro.props;
   </div>
   <div class="control-bar-field">
     <label for="grid-brightness-slider" class="field-label" data-i18n="label.gridBrightness">Grid brightness</label>
-    <input type="range" id="grid-brightness-slider" class="form-slider" min="0" max="1" step="0.01" value="0.5"
-           style="--fill: 50%" data-i18n-aria-label="label.gridBrightness" aria-label="Grid brightness">
-    <output class="form-slider-value mono" id="grid-brightness-value" for="grid-brightness-slider">50%</output>
+    <FormSliderField sliderId="grid-brightness-slider" valueId="grid-brightness-value" valueText="50%"
+           min="0" max="1" step="0.01" value="0.5" fill="50%"
+           i18nAriaLabel="label.gridBrightness" ariaLabel="Grid brightness" />
   </div>
 </PopupBox>

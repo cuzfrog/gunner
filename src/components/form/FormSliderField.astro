@@ -1,0 +1,33 @@
+---
+interface Props {
+  readonly sliderId: string;
+  readonly valueId: string;
+  readonly valueText: string;
+  readonly min: string | number;
+  readonly max: string | number;
+  readonly step: string;
+  readonly value: string | number;
+  readonly fill: string;
+  readonly disabled?: boolean;
+  readonly ariaLabel?: string;
+  readonly i18nAriaLabel?: string;
+}
+const {
+  sliderId,
+  valueId,
+  valueText,
+  min,
+  max,
+  step,
+  value,
+  fill,
+  disabled,
+  ariaLabel,
+  i18nAriaLabel,
+} = Astro.props;
+const fillStyle = `--fill: ${fill}`;
+---
+
+<input type="range" id={sliderId} class="form-slider" min={min} max={max} step={step} value={value}
+       style={fillStyle} disabled={disabled} data-i18n-aria-label={i18nAriaLabel} aria-label={ariaLabel}>
+<output class="form-slider-value mono" id={valueId} for={sliderId}>{valueText}</output>

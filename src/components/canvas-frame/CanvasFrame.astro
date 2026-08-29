@@ -2,6 +2,7 @@
 import IconButton from "../controls/IconButton.astro";
 import InputWithUnit from "../form/InputWithUnit.astro";
 import CanvasSettingsPopup from "./CanvasSettingsPopup.astro";
+import CombatantPortrait from "./CombatantPortrait.astro";
 ---
 
 <section class="canvas-frame surface-panel">
@@ -11,14 +12,8 @@ import CanvasSettingsPopup from "./CanvasSettingsPopup.astro";
             data-i18n-title="label.weaponRange" data-i18n-aria-label="label.weaponRange"
             title="Weapon range" aria-label="Weapon range">Weapon range</button>
   </div>
-  <div id="ship-a-portrait" class="combatant-portrait combatant-portrait-ship-a" hidden>
-    <img class="portrait-image portrait-image-ship-a" alt="">
-    <div class="portrait-effects"></div>
-  </div>
-  <div id="ship-b-portrait" class="combatant-portrait combatant-portrait-ship-b" hidden>
-    <img class="portrait-image portrait-image-ship-b" alt="">
-    <div class="portrait-effects"></div>
-  </div>
+  <CombatantPortrait id="ship-a-portrait" side="ship-a" />
+  <CombatantPortrait id="ship-b-portrait" side="ship-b" />
   <canvas id="scene" class="sim-canvas" width="800" height="600"></canvas>
 
   <div class="control-bar">

@@ -3,6 +3,7 @@ import { COMBATANT_SIDES, DEFAULT_VALUES } from "../../ui/controls";
 import type { Side } from "../../ui/controls";
 import FormField from "../form/FormField.astro";
 import FormFieldRow from "../form/FormFieldRow.astro";
+import FormSliderField from "../form/FormSliderField.astro";
 import InputWithUnit from "../form/InputWithUnit.astro";
 import PanelHeading from "./PanelHeading.astro";
 import TurretPanel from "./TurretPanel.astro";
@@ -81,10 +82,11 @@ const modeSecond = side === "shipA"
               data-i18n-aria-label="hint.maneuverAggressivity"
               title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
               aria-label="About maneuver aggressivity">?</button>
-      <output class="form-slider-value mono" id={`${idPrefix}-aggressivity-value`} for={`${idPrefix}-aggressivity-slider`}>1.00</output>
+      <FormSliderField sliderId={`${idPrefix}-aggressivity-slider`} valueId={`${idPrefix}-aggressivity-value`} valueText="1.00"
+              min="0" max="1" step="0.001" value={aggressivitySlider} fill="50%"
+              i18nAriaLabel="label.maneuverAggressivity" ariaLabel="Maneuver aggressivity" />
     </span>
     <input type="hidden" id={`${idPrefix}-aggressivity`} value={aggressivity}>
-    <input type="range" id={`${idPrefix}-aggressivity-slider`} class="form-slider" min="0" max="1" step="0.001" value={aggressivitySlider} style="--fill: 50%" data-i18n-aria-label="label.maneuverAggressivity" aria-label="Maneuver aggressivity">
   </div>
   <SkillsField idPrefix={idPrefix} />
 </section>
