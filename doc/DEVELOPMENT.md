@@ -21,6 +21,12 @@ bun test
 bun run typecheck
 ```
 
+## CSS lint
+
+```bash
+bun run lint:css
+```
+
 ## Dev server
 
 ```bash
