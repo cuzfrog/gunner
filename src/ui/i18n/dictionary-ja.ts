@@ -121,7 +121,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.missileAttributes": { ja: "ミサイル" },
   "label.advancedAttributes": { ja: "詳細属性" },
   "button.missileAttributes": { ja: "ミサイル属性" },
-  "label.damageReductionFactor": { ja: "DRF" },
+  "label.damageReductionFactor": { ja: "ダメージ減衰係数" },
   "ammo.cargoGroup": { ja: "カーゴ内" },
   "ammo.allGroup": { ja: "全弾薬" },
   "ammo.showAll": { ja: "すべて表示" },
