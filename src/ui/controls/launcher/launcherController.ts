@@ -44,6 +44,7 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly ammoList: SelectableListImpl;
   private readonly ammoChip: SummaryChipImpl;
   private readonly classChoice: ChoiceGroupImpl;
+  private readonly launcherByClass = new Map<LauncherClass, { moduleId: TypeId; ammoId: TypeId }>();
 
   constructor(deps: LauncherControllerDeps) {
     this.side = deps.side;
@@ -103,6 +104,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
     this.selectedLauncher = imported.launcher;
     this.currentAmmoId = imported.launcher?.chargeId;
+    if (imported.launcher) this.recordLauncherForClass(imported.launcher.moduleId, imported.launcher.chargeId);
     this.render();
   }
 
@@ -118,6 +120,7 @@ export class LauncherControllerImpl implements LauncherController {
           this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, ammoId, this.hullBonuses, this.skillLevel);
           this.currentAmmoId = ammoId;
         }
+        this.recordLauncherForClass(this.selectedLauncher.moduleId, this.currentAmmoId);
       } else {
         this.selectedLauncher = undefined;
         this.currentAmmoId = undefined;
@@ -139,6 +142,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.popupGroup.close(this.attributesPopupValue);
     this.selectedLauncher = undefined;
     this.currentAmmoId = undefined;
+    this.launcherByClass.clear();
     this.render();
   }
 
@@ -225,10 +229,16 @@ export class LauncherControllerImpl implements LauncherController {
     if (!launcher) return;
     const currentClass = this.launcherClasses.classOf(launcher.moduleId);
     if (currentClass === target) return;
-    const next = this.launcherCatalog.switchClass(launcher, target, this.hullBonuses, this.skillLevel);
+    this.recordLauncherForClass(launcher.moduleId, launcher.chargeId);
+    const remembered = this.launcherByClass.get(target);
+    const next = this.launcherCatalog.switchClass(launcher, target, this.hullBonuses, this.skillLevel, remembered?.moduleId);
     if (!next) return;
-    this.selectedLauncher = next;
-    this.currentAmmoId = next.chargeId;
+    const finalLauncher = remembered && this.missileCatalog.has(remembered.ammoId)
+      ? this.missileCatalog.withCharge(next, remembered.ammoId, this.hullBonuses, this.skillLevel)
+      : next;
+    this.selectedLauncher = finalLauncher;
+    this.currentAmmoId = finalLauncher.chargeId;
+    this.recordLauncherForClass(finalLauncher.moduleId, finalLauncher.chargeId);
     this.render();
     this.events.emitConfigInvalidated();
   }
@@ -252,6 +262,7 @@ export class LauncherControllerImpl implements LauncherController {
     if (!this.selectedLauncher) return;
     this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, missileId, this.hullBonuses, this.skillLevel);
     this.currentAmmoId = missileId;
+    this.recordLauncherForClass(this.selectedLauncher.moduleId, missileId);
     this.popupGroup.close(this.ammoPopupValue);
     this.render();
     this.events.emitConfigInvalidated();
@@ -287,6 +298,11 @@ export class LauncherControllerImpl implements LauncherController {
       onClose: () => { this.attributesPopupOpen = false; },
       isOpen: () => this.attributesPopupOpen,
     });
+  }
+
+  private recordLauncherForClass(moduleId: TypeId, ammoId: TypeId): void {
+    const cls = this.launcherClasses.classOf(moduleId);
+    this.launcherByClass.set(cls, { moduleId, ammoId });
   }
 }
 

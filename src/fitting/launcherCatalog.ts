@@ -6,7 +6,7 @@ import type { LauncherClass, LauncherClasses } from "./launcherClasses";
 import type { MissileCatalog } from "./missileCatalog";
 
 export interface LauncherCatalog {
-  switchClass(launcher: ImportedLauncher, target: LauncherClass, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher | undefined;
+  switchClass(launcher: ImportedLauncher, target: LauncherClass, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedLauncher | undefined;
 }
 
 interface LauncherCatalogDeps {
@@ -28,11 +28,11 @@ export class LauncherCatalogImpl implements LauncherCatalog {
     this.missileCatalog = deps.missileCatalog;
   }
 
-  switchClass(launcher: ImportedLauncher, target: LauncherClass, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel): ImportedLauncher | undefined {
+  switchClass(launcher: ImportedLauncher, target: LauncherClass, hullBonuses: readonly HullBonus[], skillLevel: SkillLevel, preferredModuleId?: TypeId): ImportedLauncher | undefined {
     if (!this.launchers[launcher.moduleId]) return undefined;
     const currentClass = this.launcherClasses.classOf(launcher.moduleId);
     if (currentClass === target) return launcher;
-    const moduleId = this.launcherClasses.representativeOf(target);
+    const moduleId = preferredModuleId && this.launchers[preferredModuleId] ? preferredModuleId : this.launcherClasses.representativeOf(target);
     const targetStats = this.launchers[moduleId];
     if (!targetStats) return undefined;
     const missileId = resolveMissile(this.missiles, this.missileCatalog, launcher.chargeId, targetStats);

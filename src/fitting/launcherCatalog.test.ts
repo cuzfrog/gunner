@@ -178,8 +178,51 @@ describe("LauncherCatalog", () => {
       expect(lightMissile.damageType).toBe("thermal");
       expect(lightMissile.name).toBe("Inferno Light Missile");
     });
+
+    test("uses preferredModuleId instead of the representative when provided", () => {
+      const catalog = createCatalog();
+      const lightId = findLauncherId(509);
+      const rocketIiId = findLauncherIdByName("Rocket Launcher II");
+      const missileId = findMissileId(384, "em");
+      const launcher = makeLauncher(lightId, missileId, 2);
+      const result = catalog.switchClass(launcher, "rocket", [], 5, toTypeId(rocketIiId));
+      expect(result).toBeDefined();
+      expect(result!.moduleId).toBe(toTypeId(rocketIiId));
+      expect(result!.name).toBe("Rocket Launcher II");
+    });
+
+    test("falls back to representative when preferredModuleId is unknown", () => {
+      const catalog = createCatalog();
+      const lightId = findLauncherId(509);
+      const missileId = findMissileId(384, "em");
+      const launcher = makeLauncher(lightId, missileId, 2);
+      const result = catalog.switchClass(launcher, "rocket", [], 5, toTypeId("999999"));
+      expect(result).toBeDefined();
+      expect(result!.moduleId).toBe(toTypeId(findLauncherId(507)));
+    });
+
+    test("rocket -> light -> rocket round-trip with preferredModuleId restores Tech II launcher and T2 ammo charge group", () => {
+      const catalog = createCatalog();
+      const rocketIiId = findLauncherIdByName("Rocket Launcher II");
+      const rageRocketId = findMissileIdByName("Mjolnir Rage Rocket");
+      const launcher = makeLauncher(rocketIiId, rageRocketId, 4);
+
+      const lightLauncher = catalog.switchClass(launcher, "light", [], 5)!;
+      expect(lightLauncher).toBeDefined();
+
+      const rocketLauncher = catalog.switchClass(lightLauncher, "rocket", [], 5, toTypeId(rocketIiId))!;
+      expect(rocketLauncher.moduleId).toBe(toTypeId(rocketIiId));
+      const resolvedMissile = FITTING_DB.missiles[rocketLauncher.chargeId];
+      expect(FITTING_DB.launchers[rocketIiId].chargeGroups).toContain(resolvedMissile.chargeGroup);
+    });
   });
 });
+
+function findLauncherIdByName(name: string): string {
+  const entry = Object.entries(FITTING_DB.launchers).find(([, s]) => s.name === name);
+  if (!entry) throw new Error(`No launcher named ${name}`);
+  return entry[0];
+}
 
 function findMissileIdByName(name: string): string {
   const entry = Object.entries(FITTING_DB.missiles).find(([, s]) => s.name === name);
