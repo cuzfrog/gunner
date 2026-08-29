@@ -70,13 +70,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   padding: 4px 6px;
-  cursor: pointer;
-  font-size: 11px;
+  background: transparent;
+  border: none;
   color: var(--text-primary);
+  font-family: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
 }
 
-.launcher-ammo-item.is-selected {
+.launcher-ammo-item[aria-current="true"] {
   background: var(--bg-inset);
 }
 

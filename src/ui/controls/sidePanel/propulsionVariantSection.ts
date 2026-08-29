@@ -7,6 +7,7 @@ import type { FittedHullSummary } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
 import type { Popup } from "../popup";
 import type { Side } from "../side";
+import { SelectableListImpl } from "../shared";
 import type { SidePanel } from "./sidePanelContract";
 import type { IPropulsionSection } from "./sidePanelSections";
 
@@ -22,6 +23,7 @@ export class PropulsionVariantSection {
   private readonly i18n: I18n;
   private readonly imageCatalog: ImageCatalog;
   private propulsionVariantPopupOpen = false;
+  private readonly variantList: SelectableListImpl;
   readonly popup: Popup;
 
   constructor({
@@ -32,6 +34,12 @@ export class PropulsionVariantSection {
     this.fittingImport = fittingImport;
     this.i18n = i18n;
     this.imageCatalog = imageCatalog;
+    this.variantList = new SelectableListImpl({
+      itemClass: "fitting-item btn",
+      nameClass: "fitting-item-name",
+      iconClass: "propulsion-icon",
+      role: "menuitem",
+    });
     this.popup = this.createPropulsionVariantPopup();
   }
 
@@ -89,47 +97,24 @@ export class PropulsionVariantSection {
     const fitted = this.panel.fittedHull;
     const currentVariant = this.panel.sections.propulsion.resolvePropulsionVariant(module, fitted);
     const currentId = currentVariant?.id;
-    for (const variant of this.fittingImport.propulsionVariantNames(module)) {
-      const iconUrl = this.imageCatalog.itemIconUrl(variant.id);
-      const displayName = this.fittingImport.itemNameForId(variant.id, this.i18n.current());
-      const item = this.createVariantButton(variant.id, currentId, iconUrl, displayName, () => this.onPropulsionVariantClick(variant.id, variant.name));
-      item.setAttribute("data-value", variant.id);
-      item.setAttribute("title", displayName);
-      popup.appendChild(item);
+    const variants = this.fittingImport.propulsionVariantNames(module);
+    const items = variants.map((variant) => ({
+      value: variant.id,
+      label: this.fittingImport.itemNameForId(variant.id, this.i18n.current()),
+      title: this.fittingImport.itemNameForId(variant.id, this.i18n.current()),
+      iconUrl: this.imageCatalog.itemIconUrl(variant.id),
+      selected: currentId === variant.id,
+    }));
+    const buttons = this.variantList.render(popup, items);
+    for (let i = 0; i < variants.length; i++) {
+      const variant = variants[i];
+      buttons[i].addEventListener("click", () => this.onPropulsionVariantClick(variant.id, variant.name));
     }
   }
 
   updateUI(): void {
     this.els.propulsionGear.disabled = this.panel.sections.propulsion.currentPropulsionId() === undefined;
     this.renderPropulsionVariants();
-  }
-
-  private createVariantButton(
-    id: TypeId,
-    currentId: TypeId | undefined,
-    iconUrl: string | undefined,
-    displayName: string,
-    onClick: () => void,
-  ): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "fitting-item btn";
-    button.setAttribute("role", "menuitem");
-    if (currentId === id) button.setAttribute("aria-current", "true");
-    if (iconUrl) {
-      const icon = document.createElement("img");
-      icon.className = "propulsion-icon";
-      icon.src = iconUrl;
-      icon.alt = "";
-      button.appendChild(icon);
-    }
-    const span = document.createElement("span");
-    span.className = "fitting-item-name truncate";
-    span.textContent = displayName;
-    span.title = displayName;
-    button.appendChild(span);
-    button.addEventListener("click", onClick);
-    return button;
   }
 
   private createPropulsionVariantPopup(): Popup {

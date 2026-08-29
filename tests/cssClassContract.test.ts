@@ -158,6 +158,11 @@ async function tsClasses(): Promise<StringMap> {
       for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
     }
 
+    // SelectableList shape class properties (itemClass, nameClass, iconClass, quantityClass, extraButtonClass)
+    for (const m of text.matchAll(/(?:itemClass|nameClass|iconClass|quantityClass|extraButtonClass)\s*:\s*"([^"]*)"/g)) {
+      for (const token of m[1].split(/\s+/)) if (token) hits.add(token);
+    }
+
     if (hits.size > 0) perFile.set(path, hits);
   }
   return perFile;

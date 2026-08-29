@@ -12,6 +12,7 @@ import { formatDistance, formatNumber, formatWithCommas } from "../controlsForma
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
+import { SelectableListImpl, type SelectableItem } from "../shared";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
 
@@ -39,6 +40,7 @@ export class LauncherControllerImpl implements LauncherController {
   private skillLevel: SkillLevel = 5;
   private ammoPopupOpen = false;
   private attributesPopupOpen = false;
+  private readonly ammoList: SelectableListImpl;
 
   constructor(deps: LauncherControllerDeps) {
     this.side = deps.side;
@@ -53,6 +55,13 @@ export class LauncherControllerImpl implements LauncherController {
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
+    this.ammoList = new SelectableListImpl({
+      itemClass: "launcher-ammo-item",
+      nameClass: "launcher-ammo-name",
+      iconClass: "launcher-ammo-icon",
+      role: "option",
+      wrapInListItem: true,
+    });
     this.currentAmmoId = undefined;
     this.ammoPopupValue = this.createAmmoPopup();
     this.attributesPopupValue = this.createAttributesPopup();
@@ -224,26 +233,16 @@ export class LauncherControllerImpl implements LauncherController {
 
   private renderAmmoList(launcher: ImportedLauncher): void {
     const options = this.missileOptionsForLauncher(launcher);
-    this.els.ammoList.innerHTML = "";
-    for (const option of options) {
-      const li = document.createElement("li");
-      li.setAttribute("role", "option");
-      li.classList.add("launcher-ammo-item");
-      if (option.id === this.currentAmmoId) li.classList.add("is-selected");
-      const iconUrl = this.imageCatalog.itemIconUrl(option.id);
-      if (iconUrl) {
-        const img = document.createElement("img");
-        img.classList.add("launcher-ammo-icon");
-        img.src = iconUrl;
-        img.alt = "";
-        li.appendChild(img);
-      }
-      const nameSpan = document.createElement("span");
-      nameSpan.classList.add("launcher-ammo-name", "truncate");
-      nameSpan.textContent = option.name;
-      li.appendChild(nameSpan);
-      li.addEventListener("click", () => this.onAmmoSelect(option.id));
-      this.els.ammoList.appendChild(li);
+    const items: SelectableItem[] = options.map((option) => ({
+      value: option.id,
+      label: option.name,
+      iconUrl: this.imageCatalog.itemIconUrl(option.id),
+      selected: option.id === this.currentAmmoId,
+    }));
+    const buttons = this.ammoList.render(this.els.ammoList, items);
+    for (let i = 0; i < options.length; i++) {
+      const id = options[i].id;
+      buttons[i].addEventListener("click", () => this.onAmmoSelect(id));
     }
   }
 

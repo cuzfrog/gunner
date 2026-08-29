@@ -8,6 +8,7 @@ import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
+import { SelectableListImpl, type SelectableItem } from "../shared";
 import type { BoosterController, BoosterEls } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {
@@ -32,6 +33,7 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
+  private readonly scriptOptionList: SelectableListImpl;
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -40,6 +42,11 @@ export class BoosterControllerImpl implements BoosterController {
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.events = deps.events;
+    this.scriptOptionList = new SelectableListImpl({
+      itemClass: "ewar-script-option",
+      nameClass: "",
+      role: "menuitem",
+    });
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
     this.popupGroup.register(this.scriptPopups.shipB);
@@ -303,12 +310,20 @@ export class BoosterControllerImpl implements BoosterController {
     this.scriptGears.set(side, { index, gear });
     const popup = this.scriptPopupEls.get(side);
     if (!popup) return;
-    popup.innerHTML = "";
     const current = state.activation[index].script;
-    const noneButton = this.createScriptOption(side, index, gear, undefined, current === undefined);
-    popup.appendChild(noneButton);
-    for (const script of state.loadout.scripts) {
-      popup.appendChild(this.createScriptOption(side, index, gear, script, this.isSameScript(current, script)));
+    const items: SelectableItem[] = [
+      { value: "none", label: this.i18n.t("ewar.script.none"), selected: current === undefined },
+      ...state.loadout.scripts.map((script) => ({
+        value: script.moduleId,
+        label: `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}`,
+        selected: this.isSameScript(current, script),
+      })),
+    ];
+    const buttons = this.scriptOptionList.render(popup, items);
+    buttons[0].addEventListener("click", () => this.setScript(side, index, undefined, gear));
+    for (let i = 0; i < state.loadout.scripts.length; i++) {
+      const script = state.loadout.scripts[i];
+      buttons[i + 1].addEventListener("click", () => this.setScript(side, index, script, gear));
     }
     gear.setAttribute("aria-expanded", "true");
     this.scriptPopups[side].open();
@@ -317,17 +332,6 @@ export class BoosterControllerImpl implements BoosterController {
   private isSameScript(a: TurretScriptSpec | undefined, b: TurretScriptSpec | undefined): boolean {
     if (a === undefined || b === undefined) return a === b;
     return a.moduleId === b.moduleId;
-  }
-
-  private createScriptOption(side: Side, index: number, gear: HTMLButtonElement, script: TurretScriptSpec | undefined, selected: boolean): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-script-option";
-    if (selected) button.setAttribute("aria-current", "true");
-    button.setAttribute("role", "menuitem");
-    button.textContent = script ? `${this.scriptDisplayName(script)} · ${boosterScriptStatSuffix(script)}` : this.i18n.t("ewar.script.none");
-    button.addEventListener("click", () => this.setScript(side, index, script, gear));
-    return button;
   }
 
   private setScript(side: Side, index: number, script: TurretScriptSpec | undefined, gear: HTMLButtonElement): void {

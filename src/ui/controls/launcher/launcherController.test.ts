@@ -1,5 +1,5 @@
 import { buildLauncher, importedLauncherFixture } from "./testSupport";
-import { getFake, IMPORTED_RIFTER } from "../testSupport";
+import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import type { ImportedFitting } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 
@@ -83,7 +83,7 @@ describe("LauncherController", () => {
     controller.openAmmoPopup();
     const list = getFake(document, "ship-a-launcher-ammo-list");
     expect(list.children.length).toBe(2);
-    list.children[1].trigger("click");
+    (list.children[1].firstElementChild as unknown as FakeElement).trigger("click");
     expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
     expect(missileCatalog.withCharge).toHaveBeenCalledWith(expect.anything(), NOVA_LIGHT_ID, [], 5);
     expect(popupGroup.close).toHaveBeenCalled();

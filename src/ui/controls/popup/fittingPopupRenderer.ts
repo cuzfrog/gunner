@@ -2,6 +2,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fi
 import type { I18n } from "../../i18n";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
+import { SelectableListImpl } from "../shared";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side } from "../side";
@@ -32,6 +33,7 @@ export class FittingPopupRenderer {
   private readonly els: FittingPopupEls;
   private readonly panel: FittingPopupHost;
   private readonly previews: FittingPreviewManager;
+  private readonly fittingList: SelectableListImpl;
 
   constructor(deps: FittingPopupRendererDeps) {
     this.side = deps.side;
@@ -42,6 +44,10 @@ export class FittingPopupRenderer {
     this.els = deps.els;
     this.panel = deps.panel;
     this.previews = deps.previews;
+    this.fittingList = new SelectableListImpl({
+      itemClass: "fitting-item",
+      nameClass: "fitting-item-name",
+    });
   }
 
   get fittingEls(): FittingPopupEls { return this.els; }
@@ -107,17 +113,12 @@ export class FittingPopupRenderer {
   }
 
   private createFittingItem(name: string, text: string, currentKey: string | undefined, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "fitting-item";
-    if (currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey)) {
-      button.setAttribute("aria-current", "true");
-    }
-    const span = document.createElement("span");
-    span.className = "fitting-item-name truncate";
-    span.textContent = name;
-    span.title = name;
-    button.appendChild(span);
+    const selected = currentKey !== undefined && (text === currentKey || this.fittingImport.canonicalEftText(text) === currentKey);
+    const button = this.fittingList.createButton({
+      value: text,
+      label: name,
+      selected,
+    });
     button.addEventListener("click", onClick);
     return button;
   }

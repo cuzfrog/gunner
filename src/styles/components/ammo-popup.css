@@ -84,7 +84,7 @@
 
 .ammo-item:hover { background: var(--bg-inset); }
 
-.ammo-item[aria-selected="true"] {
+.ammo-item[aria-current="true"] {
   border-left: 2px solid var(--accent-teal);
   color: var(--accent-teal);
   padding-left: 4px;

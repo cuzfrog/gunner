@@ -6,6 +6,7 @@ import type { I18n } from "../../i18n";
 import type { Popup, PopupGroup } from "../popup";
 import type { TimeoutId, Timer } from "../../timer";
 import type { UiEvents } from "../../events";
+import { SelectableListImpl, type SelectableItem } from "../shared";
 
 export interface ProfileEls {
   readonly profileSave: HTMLButtonElement;
@@ -67,6 +68,7 @@ export class ProfileControllerImpl implements ProfileController {
   private lastAppliedSelection = "";
   private selectedNameValue = "";
   private profileMenuItems: HTMLButtonElement[] = [];
+  private readonly profileList: SelectableListImpl;
   private selectorOpen = false;
   private newProfileOpen = false;
   private popupInvoker: HTMLButtonElement;
@@ -82,6 +84,11 @@ export class ProfileControllerImpl implements ProfileController {
     this.changeTracker = deps.changeTracker;
     this.snapshotSource = deps.snapshotSource;
     this.popupInvoker = this.els.profileNew;
+    this.profileList = new SelectableListImpl({
+      itemClass: "popup-item profile-menu-item",
+      nameClass: "",
+      role: "menuitem",
+    });
     this.selectorPopupValue = {
       isOpen: () => this.selectorOpen,
       open: () => this.openProfileSelector(),
@@ -132,19 +139,13 @@ export class ProfileControllerImpl implements ProfileController {
 
   refresh(selected = ""): void {
     const names = this.settingsStore.listProfiles();
-    const popup = this.els.profilePopup;
-    popup.innerHTML = "";
+    const items: SelectableItem[] = names.map((name) => ({ value: name, label: name, selected: name === selected }));
+    const buttons = this.profileList.render(this.els.profilePopup, items);
     this.profileMenuItems = [];
-    for (const name of names) {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "popup-item profile-menu-item";
-      item.setAttribute("role", "menuitem");
-      item.textContent = name;
-      item.addEventListener("click", () => void this.loadProfile(name));
-      if (name === selected) item.setAttribute("aria-current", "true");
-      popup.appendChild(item);
-      this.profileMenuItems.push(item);
+    for (let i = 0; i < buttons.length; i++) {
+      const name = names[i];
+      buttons[i].addEventListener("click", () => void this.loadProfile(name));
+      this.profileMenuItems.push(buttons[i]);
     }
     this.selectedNameValue = names.includes(selected) ? selected : "";
     this.els.profileSelectLabel.textContent = this.selectedNameValue || this.i18n.t("select.profile");

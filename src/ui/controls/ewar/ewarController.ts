@@ -8,6 +8,7 @@ import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
+import { SelectableListImpl, type SelectableItem } from "../shared";
 import type { EwarController, EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
@@ -37,6 +38,7 @@ export class EwarControllerImpl implements EwarController {
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
   private readonly scriptPopupEls = new Map<Side, HTMLElement>();
   private readonly disruptorNameSpans = new Map<Side, HTMLSpanElement[]>();
+  private readonly scriptOptionList: SelectableListImpl;
 
   constructor(deps: { els: EwarEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; ewarEffectDescriber: EwarEffectDescriber; events: UiEvents }) {
     this.els = deps.els;
@@ -46,6 +48,12 @@ export class EwarControllerImpl implements EwarController {
     this.i18n = deps.i18n;
     this.ewarEffectDescriber = deps.ewarEffectDescriber;
     this.events = deps.events;
+    this.scriptOptionList = new SelectableListImpl({
+      itemClass: "ewar-script-option",
+      nameClass: "ewar-script-name",
+      iconClass: "ewar-script-icon",
+      role: "menuitem",
+    });
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popups = { shipA: this.buildPopup("shipA"), shipB: this.buildPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
@@ -456,60 +464,26 @@ export class EwarControllerImpl implements EwarController {
     popup.setAttribute("aria-labelledby", label.id);
     popup.appendChild(label);
 
-    const noneHint = this.i18n.t("ewar.script.none.hint");
-    const noneButton = this.createScriptOptionButton(
-      "none",
-      this.i18n.t("ewar.script.none"),
-      noneHint,
-      undefined,
-      current === undefined,
-    );
+    const noneButton = this.scriptOptionList.createButton({
+      value: "none",
+      label: this.i18n.t("ewar.script.none"),
+      title: this.i18n.t("ewar.script.none.hint"),
+      selected: current === undefined,
+    });
     noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
     popup.appendChild(noneButton);
 
     for (const script of state.loadout.scripts) {
-      const name = this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
-      const iconUrl = this.imageCatalog.itemIconUrl(script.moduleId);
-      const value = script.moduleId;
-      const button = this.createScriptOptionButton(
-        value,
-        name,
-        scriptStatSuffix(script),
-        iconUrl,
-        this.isSameScript(current, script),
-      );
-      button.addEventListener("click", () => this.onScriptSelected(side, index, value));
+      const button = this.scriptOptionList.createButton({
+        value: script.moduleId,
+        label: this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()),
+        title: scriptStatSuffix(script),
+        iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
+        selected: this.isSameScript(current, script),
+      });
+      button.addEventListener("click", () => this.onScriptSelected(side, index, script.moduleId));
       popup.appendChild(button);
     }
-  }
-
-  private createScriptOptionButton(
-    value: string,
-    text: string,
-    title: string,
-    iconUrl: string | undefined,
-    selected: boolean,
-  ): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "ewar-script-option";
-    button.setAttribute("role", "menuitem");
-    button.setAttribute("data-value", value);
-    if (selected) button.setAttribute("aria-current", "true");
-    button.title = title;
-    if (iconUrl !== undefined) {
-      const img = document.createElement("img");
-      img.className = "ewar-script-icon";
-      img.src = iconUrl;
-      img.alt = "";
-      button.appendChild(img);
-    }
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "ewar-script-name truncate";
-    nameSpan.textContent = text;
-    nameSpan.title = text;
-    button.appendChild(nameSpan);
-    return button;
   }
 
   private onScriptSelected(side: Side, index: number, value: string): void {
