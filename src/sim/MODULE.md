@@ -33,7 +33,10 @@ no-new-exports:
   - turretDamage.test.ts
   - turretBoosterResolver.ts
   - turretBoosterResolver.test.ts
+  - index.ts
+  - types.ts
 ---
+
 
 
 

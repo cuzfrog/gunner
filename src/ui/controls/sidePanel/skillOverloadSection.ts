@@ -3,7 +3,6 @@ import type { I18n } from "../../i18n";
 import { isHtmlButtonElement } from "../controlsDom";
 import { skillLevelFromString, skillOptionLabel } from "../controlsFormat";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
-import { createPopup } from "../shared";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
 import type { SidePanel } from "./sidePanelContract";
@@ -40,6 +39,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     });
     this.popup = this.createSkillPopup();
     this.els.skills.addEventListener("input", () => this.onSkillOrOverloadChange(true));
+    this.els.skillOptions.addEventListener("input", () => this.onSkillChoiceInput());
     this.els.overload.addEventListener("change", () => this.onSkillOrOverloadChange(false));
     this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
     this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));
@@ -135,10 +135,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     return this.skillPopupOpen;
   }
 
-  onSkillButtonClick(level: SkillLevel): void {
-    this.setSkillActive(level);
-    this.els.skills.value = String(level);
-    this.els.skills.dispatchEvent(new Event("input", { bubbles: true }));
+  onSkillChoiceInput(): void {
     this.closeSkillPopup();
     this.els.skillTrigger.focus();
   }

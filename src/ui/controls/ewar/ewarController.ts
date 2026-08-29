@@ -8,7 +8,7 @@ import type { UiEvents } from "../../events";
 import { scriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl } from "../shared";
+import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { EwarController, EwarEls } from "./ewarControllerContract";
 import type { EwarEffectDescriber } from "./ewarEffectDescriber";
 
@@ -59,14 +59,14 @@ export class EwarControllerImpl implements EwarController {
     });
     this.gearAction = new IconActionImpl({
       buttonClass: "ewar-script-gear btn icon-button",
-      iconSvg: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>',
+      iconSvg: spriteIcon("gear"),
       title: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
     this.overloadAction = new IconActionImpl({
       buttonClass: "ewar-overload-button btn icon-button",
-      iconSvg: '<svg class="overload-button-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>',
+      iconSvg: spriteIcon("overload", 14, "currentColor", "overload-button-icon"),
       title: "",
     });
     this.sectionBlock = new SectionBlockImpl();

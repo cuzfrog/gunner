@@ -71,7 +71,7 @@ function buildHullSection(ships: Ships = shipsWithHull()) {
       openSkillPopup: vi.fn(),
       closeSkillPopup: vi.fn(),
       isSkillPopupOpen: vi.fn(),
-      onSkillButtonClick: vi.fn(),
+      onSkillChoiceInput: vi.fn(),
       popup: {} as unknown as Popup,
     } as unknown as ISidePanelSections["skill"],
     propulsion: {

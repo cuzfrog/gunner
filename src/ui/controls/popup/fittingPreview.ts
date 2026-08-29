@@ -1,7 +1,7 @@
 import type { FittingImport, FittingRow, FittingSection, FittingSummary } from "../../../fitting";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { IconActionImpl, SectionBlockImpl } from "../shared";
+import { IconActionImpl, SectionBlockImpl, spriteIconStroked } from "../shared";
 
 export interface FittingPreview {
   show(anchor: HTMLElement, summary: FittingSummary, shipImageUrl?: string, onClose?: () => void): void;
@@ -82,17 +82,13 @@ function renderHeader(
 
   const closeAction = new IconActionImpl({
     buttonClass: "preview-close icon-button",
-    iconSvg: CLOSE_ICON_SVG,
-    title: i18n.t("button.close"),
+    iconSvg: spriteIconStroked("delete", 12),
+    title: () => i18n.t("button.close"),
   });
   const close = closeAction.create(() => onClose?.());
   header.appendChild(close);
   return header;
 }
-
-const CLOSE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
 
 function renderSection(i18n: I18n, imageCatalog: ImageCatalog, fittingImport: FittingImport, section: FittingSection): HTMLElement {
   const block = new SectionBlockImpl();

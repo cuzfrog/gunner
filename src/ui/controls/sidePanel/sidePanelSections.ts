@@ -54,7 +54,7 @@ export interface ISkillOverloadSection {
   openSkillPopup(): void;
   closeSkillPopup(): void;
   isSkillPopupOpen(): boolean;
-  onSkillButtonClick(level: SkillLevel): void;
+  onSkillChoiceInput(): void;
 }
 
 export interface IPropulsionSection {

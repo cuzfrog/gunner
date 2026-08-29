@@ -78,7 +78,9 @@ function scriptPopupFor(section: FakeElement): FakeElement | undefined {
 }
 
 function firstRow(section: FakeElement): FakeElement | undefined {
-  return section.children.find((child) => child.className.split(" ").includes("ewar-row"));
+  const block = section.children.find((child) => child.className === "preview-section") as FakeElement | undefined;
+  const children = block?.children ?? section.children;
+  return children.find((child) => child.className.split(" ").includes("ewar-row"));
 }
 
 describe("BoosterController", () => {
@@ -88,8 +90,10 @@ describe("BoosterController", () => {
     const section = boosterEls.sections.shipA as unknown as FakeElement;
     expect(section.hidden).toBe(false);
     expect(section.children[0]?.id).toBe("ship-a-booster-script-popup");
-    expect(section.children[1]?.textContent).toBe("label.booster.computer");
-    const rows = section.children.filter((child) => child.className.split(" ").includes("ewar-row"));
+    const block = section.children[1] as unknown as FakeElement;
+    expect(block.className).toBe("preview-section");
+    expect(block.children[0]?.textContent).toBe("label.booster.computer");
+    const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     expect(rows).toHaveLength(2);
     expect(rows[0]?.children[0]?.getAttribute("aria-pressed")).toBe("true");
   });
@@ -98,7 +102,8 @@ describe("BoosterController", () => {
     const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
-    const rows = section.children.filter((child) => child.className.split(" ").includes("ewar-row"));
+    const block = section.children[1] as unknown as FakeElement;
+    const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     const firstButton = rows[0]?.children[0] as unknown as FakeElement;
     const nameSpan = firstButton.children[1] as unknown as FakeElement;
     expect(nameSpan.title).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
@@ -116,11 +121,11 @@ describe("BoosterController", () => {
     const { controller, boosterEls } = buildBoosterController();
     controller.setLoadout("shipA", LOADOUT);
     const section = boosterEls.sections.shipA as unknown as FakeElement;
-    const firstRow = section.children.find((child) => child.className.split(" ").includes("ewar-row"))!;
-    const button = firstRow.children[0] as FakeElement;
+    const row = firstRow(section)!;
+    const button = row.children[0] as FakeElement;
     button.trigger("click");
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    expect(firstRow.className).toBe("ewar-row ewar-row-inactive");
+    expect(row.className).toBe("ewar-row ewar-row-inactive");
   });
 
   test("capture and restore round-trip activations and selected scripts", () => {

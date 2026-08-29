@@ -12,7 +12,7 @@ import { formatDistance, formatNumber, formatWithCommas } from "../controlsForma
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, createPopup } from "../shared";
+import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl } from "../shared";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
@@ -42,6 +42,8 @@ export class LauncherControllerImpl implements LauncherController {
   private ammoPopupOpen = false;
   private attributesPopupOpen = false;
   private readonly ammoList: SelectableListImpl;
+  private readonly ammoChip: SummaryChipImpl;
+  private readonly attributesChip: SummaryChipImpl;
   private readonly classChoice: ChoiceGroupImpl;
 
   constructor(deps: LauncherControllerDeps) {
@@ -64,6 +66,8 @@ export class LauncherControllerImpl implements LauncherController {
       role: "option",
       wrapInListItem: true,
     });
+    this.ammoChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
+    this.attributesChip = new SummaryChipImpl(this.els.attributesSummary, this.els.attributesIcon);
     this.classChoice = new ChoiceGroupImpl({
       group: deps.els.classOptions,
       shape: { buttonClass: "btn launcher-class-option" },
@@ -164,17 +168,14 @@ export class LauncherControllerImpl implements LauncherController {
     this.els.attributesTrigger.disabled = !hasLauncher;
     this.els.ammoTrigger.disabled = !hasLauncher;
     if (!hasLauncher) {
-      this.els.attributesIcon.hidden = true;
-      this.els.ammoSummaryIcon.hidden = true;
-      this.renderClassSelector();
+      this.ammoChip.render("-", undefined);
       this.renderAttributesSummary(undefined);
-      setText(this.els.ammoSummary, "-");
+      this.renderClassSelector();
       return;
     }
-    this.renderIcon(this.els.attributesIcon, launcher.moduleId);
-    this.renderIcon(this.els.ammoSummaryIcon, launcher.chargeId);
+    this.ammoChip.render(launcher.chargeName, this.imageCatalog.itemIconUrl(launcher.chargeId));
+    this.attributesChip.render(this.attributesSummaryText(launcher), this.imageCatalog.itemIconUrl(launcher.moduleId));
     const t = (key: string): string => this.i18n.t(key);
-    setText(this.els.ammoSummary, launcher.chargeName);
     setText(this.els.volleyDamage, formatWithCommas(launcher.damagePerMissile * launcher.count, 1));
     setText(this.els.rateOfFire, `${formatNumber(launcher.cycleTime, 2)} s`);
     setText(this.els.explosionRadius, formatDistance(launcher.explosionRadius, t));
@@ -183,27 +184,20 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.flightTime, `${formatNumber(launcher.flightTime, 1)} s`);
     setText(this.els.flightRange, formatDistance(launcher.maxVelocity * launcher.flightTime, t));
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
-    this.renderAttributesSummary(launcher);
     this.renderAmmoList(launcher);
     this.renderClassSelector();
   }
 
   private renderAttributesSummary(launcher: ImportedLauncher | undefined): void {
-    if (!launcher) {
-      setText(this.els.attributesSummary, "-");
-      return;
-    }
+    this.attributesChip.render(launcher ? this.attributesSummaryText(launcher) : "-", launcher ? this.imageCatalog.itemIconUrl(launcher.moduleId) : undefined);
+  }
+
+  private attributesSummaryText(launcher: ImportedLauncher): string {
     const t = (key: string): string => this.i18n.t(key);
     const range = formatDistance(launcher.maxVelocity * launcher.flightTime, t);
     const speed = `${formatWithCommas(launcher.maxVelocity, 0)} m/s`;
     const flight = `${formatNumber(launcher.flightTime, 1)}s`;
-    setText(this.els.attributesSummary, `${range} / ${speed} / ${flight}`);
-  }
-
-  private renderIcon(icon: HTMLImageElement, typeId: TypeId): void {
-    const url = this.imageCatalog.itemIconUrl(typeId);
-    icon.src = url ?? "";
-    icon.hidden = !url;
+    return `${range} / ${speed} / ${flight}`;
   }
 
   private renderClassSelector(): void {

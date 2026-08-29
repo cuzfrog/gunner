@@ -3,3 +3,4 @@ export { IconActionImpl, type IconActionShape, type IconAction } from "./iconAct
 export { SummaryChipImpl, type SummaryChip } from "./summaryChip";
 export { SectionBlockImpl, type SectionBlock } from "./sectionBlock";
 export { createPopup, type PopupConfig } from "./createPopup";
+export { spriteIcon, spriteIconStroked } from "./spriteIcon";

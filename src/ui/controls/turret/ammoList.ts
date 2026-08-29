@@ -4,7 +4,7 @@ import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import { chargeStatSuffix } from "../controlsFormat";
 import { isHtmlButtonElement, setText } from "../controlsDom";
-import { SelectableListImpl, type SelectableItem } from "../shared";
+import { SelectableListImpl, type SelectableItem, SummaryChipImpl } from "../shared";
 
 export interface AmmoListEls {
   readonly ammoTrigger: HTMLButtonElement;
@@ -34,6 +34,7 @@ export class AmmoList {
   private readonly onSelect: (id: TypeId) => void;
   private readonly onExpand: () => void;
   private readonly itemList: SelectableListImpl;
+  private readonly summaryChip: SummaryChipImpl;
 
   constructor(deps: {
     els: AmmoListEls;
@@ -59,6 +60,7 @@ export class AmmoList {
       role: "option",
       wrapInListItem: true,
     });
+    this.summaryChip = new SummaryChipImpl(this.els.ammoSummary, this.els.ammoSummaryIcon);
     this.els.ammoExpand.addEventListener("click", () => this.onExpand());
   }
 
@@ -78,22 +80,14 @@ export class AmmoList {
   render(state: AmmoListState): void {
     const hasTurret = state.turret !== undefined;
     this.els.ammoTrigger.disabled = !hasTurret;
-    setText(this.els.ammoSummary, hasTurret ? this.fittingImport.itemNameForId(state.ammo, this.i18n.current()) : "—");
-    this.renderIcon(state.ammo, hasTurret);
+    if (hasTurret) {
+      this.summaryChip.render(this.fittingImport.itemNameForId(state.ammo, this.i18n.current()), this.imageCatalog.itemIconUrl(state.ammo));
+    } else {
+      this.summaryChip.render("—", undefined);
+    }
     this.renderCargoList(state);
     this.renderAllList(state);
     this.renderExpand(state.allExpanded);
-  }
-
-  private renderIcon(ammo: TypeId, hasTurret: boolean): void {
-    const icon = this.els.ammoSummaryIcon;
-    if (!hasTurret) {
-      icon.hidden = true;
-      return;
-    }
-    const url = this.imageCatalog.itemIconUrl(ammo);
-    icon.src = url ?? "";
-    icon.hidden = !url;
   }
 
   private renderCargoList(state: AmmoListState): void {

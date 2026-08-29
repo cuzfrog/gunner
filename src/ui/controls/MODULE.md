@@ -68,7 +68,9 @@ no-new-exports:
   - shared/selectableList.ts
   - shared/selectableList.test.ts
   - shared/MODULE.md
+  - choiceGroup.ts
 ---
+
 
 
 

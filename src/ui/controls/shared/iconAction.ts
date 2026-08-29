@@ -1,8 +1,8 @@
 export interface IconActionShape {
   readonly buttonClass: string;
   readonly iconSvg: string;
-  readonly title: string;
-  readonly ariaLabel?: string;
+  readonly title: string | (() => string);
+  readonly ariaLabel?: string | (() => string);
   readonly ariaPressed?: boolean;
   readonly disabled?: boolean;
   readonly dataIndex?: number | string;
@@ -26,8 +26,9 @@ export class IconActionImpl implements IconAction {
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.className = this.shape.buttonClass;
-    button.setAttribute("title", this.shape.title);
-    button.setAttribute("aria-label", this.shape.ariaLabel ?? this.shape.title);
+    const title = resolveText(this.shape.title) ?? "";
+    button.setAttribute("title", title);
+    button.setAttribute("aria-label", resolveText(this.shape.ariaLabel) ?? title);
     button.innerHTML = this.shape.iconSvg;
     if (this.shape.ariaPressed !== undefined) button.setAttribute("aria-pressed", String(this.shape.ariaPressed));
     if (this.shape.disabled) button.setAttribute("disabled", "");
@@ -38,4 +39,9 @@ export class IconActionImpl implements IconAction {
     button.addEventListener("click", onClick);
     return button;
   }
+}
+
+function resolveText(value: string | (() => string) | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  return typeof value === "function" ? value() : value;
 }

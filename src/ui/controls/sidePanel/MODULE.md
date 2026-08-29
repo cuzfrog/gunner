@@ -26,7 +26,9 @@ no-new-exports:
   - module.test.ts
   - navSection.ts
   - navSection.test.ts
+  - index.ts
 ---
+
 
 
 

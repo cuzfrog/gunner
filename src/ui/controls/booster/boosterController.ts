@@ -8,7 +8,7 @@ import type { UiEvents } from "../../events";
 import { boosterScriptStatSuffix } from "../controlsFormat";
 import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, IconActionImpl } from "../shared";
+import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { BoosterController, BoosterEls } from "./boosterControllerContract";
 
 interface MutableBoosterActivation {
@@ -35,6 +35,7 @@ export class BoosterControllerImpl implements BoosterController {
   private readonly computerNameSpans = new Map<Side, HTMLSpanElement[]>();
   private readonly scriptOptionList: SelectableListImpl;
   private readonly gearAction: IconActionImpl;
+  private readonly sectionBlock: SectionBlockImpl;
 
   constructor(deps: { els: BoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
     this.els = deps.els;
@@ -50,11 +51,12 @@ export class BoosterControllerImpl implements BoosterController {
     });
     this.gearAction = new IconActionImpl({
       buttonClass: "ewar-script-gear btn icon-button",
-      iconSvg: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><use href="icons.svg#gear"></use></svg>',
+      iconSvg: spriteIcon("gear"),
       title: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
+    this.sectionBlock = new SectionBlockImpl();
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
     this.popupGroup.register(this.scriptPopups.shipA);
     this.popupGroup.register(this.scriptPopups.shipB);
@@ -144,11 +146,11 @@ export class BoosterControllerImpl implements BoosterController {
     }
     section.hidden = false;
     this.updateSummary(side);
-    const label = document.createElement("div");
-    label.className = "preview-section-label";
-    label.textContent = this.i18n.t("label.booster.computer");
-    section.appendChild(label);
-    this.renderComputers(side, state, section);
+    const rowContainer = document.createElement("div");
+    this.renderComputers(side, state, rowContainer);
+    const rows = Array.from(rowContainer.children) as unknown as (Element | DocumentFragment)[];
+    const block = this.sectionBlock.create(this.i18n.t("label.booster.computer"), rows);
+    section.appendChild(block);
   }
 
   private updateSummary(side: Side): void {

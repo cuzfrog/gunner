@@ -2,7 +2,9 @@
 no-new-exports:
   - html.ts
   - index.ts
+  - html.test.ts
 ---
+
 
 # markup
 

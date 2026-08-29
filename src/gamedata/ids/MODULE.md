@@ -1,4 +1,9 @@
 sealed:
+  - ids.test.ts
+  - ids.ts
+  - index.ts
+---
+sealed:
   - index.ts
   - ids.test.ts
   - ids.ts

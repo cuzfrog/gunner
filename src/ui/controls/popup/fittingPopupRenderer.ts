@@ -2,7 +2,7 @@ import type { FittingImport, ImportedFitting, PresetFittings } from "../../../fi
 import type { I18n } from "../../i18n";
 import type { SavedFitting, SavedFittings } from "../../../appstate";
 import { isHtmlButtonElement } from "../controlsDom";
-import { SelectableListImpl, IconActionImpl } from "../shared";
+import { SelectableListImpl, IconActionImpl, spriteIconStroked } from "../shared";
 import type { FittingPopupEls } from "./fittingPopupEls";
 import type { FittingPreviewManager } from "./fittingPreviewManager";
 import type { Side } from "../side";
@@ -52,13 +52,13 @@ export class FittingPopupRenderer {
     });
     this.deleteAction = new IconActionImpl({
       buttonClass: "fitting-delete icon-button",
-      iconSvg: DELETE_ICON_SVG,
-      title: this.i18n.t("button.deleteFitting"),
+      iconSvg: spriteIconStroked("delete", 12),
+      title: () => this.i18n.t("button.deleteFitting"),
     });
     this.eyeAction = new IconActionImpl({
       buttonClass: "fitting-item-eye icon-button",
-      iconSvg: EYE_ICON_SVG,
-      title: this.i18n.t("button.fittingDetails"),
+      iconSvg: spriteIconStroked("eye", 14),
+      title: () => this.i18n.t("button.fittingDetails"),
       ariaPressed: false,
     });
   }
@@ -150,11 +150,3 @@ export class FittingPopupRenderer {
     return li;
   }
 }
-
-const DELETE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#delete"></use></svg>';
-
-const EYE_ICON_SVG =
-  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" ' +
-  'aria-hidden="true"><use href="icons.svg#eye"></use></svg>';
