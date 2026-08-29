@@ -54,15 +54,15 @@
 .result-side-support {
   display: flex;
   gap: 8px;
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .result-side-weapon {
   display: flex;
   gap: 8px;
-  flex: 1.5 1 0;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 300px;
 }
 
 .result-side-weapon[hidden] { display: none; }
