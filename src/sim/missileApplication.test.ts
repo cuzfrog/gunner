@@ -15,23 +15,23 @@ const missile: MissileSpec = {
   flightRange: 3750 * 5,
 };
 
-function shipState(maxSpeed: number): ShipState {
+function shipState(velocity: Vec2): ShipState {
   return {
     id: "shipB",
-    maxSpeed,
+    maxSpeed: 1000,
     mass: 1_000_000,
     inertiaModifier: 1,
     mode: "orbit",
     desiredRange: 5000,
     aggressivity: 1,
     position: new Vec2(0, 0),
-    velocity: new Vec2(0, 0),
+    velocity,
   };
 }
 
-function frame(distance: number, targetMaxSpeed: number): EngagementFrame {
-  const shipA = shipState(0);
-  const shipB = shipState(targetMaxSpeed);
+function frame(distance: number, targetVelocity: Vec2): EngagementFrame {
+  const shipA = shipState(new Vec2(0, 0));
+  const shipB = shipState(targetVelocity);
   return {
     time: 0,
     shipA,
@@ -49,8 +49,8 @@ function frame(distance: number, targetMaxSpeed: number): EngagementFrame {
 const application = new MissileApplicationImpl();
 
 describe("MissileApplicationImpl", () => {
-  test("full damage when sig >= explosion radius and target is slow", () => {
-    const f = frame(1000, 0);
+  test("full damage when sig >= explosion radius and target is stationary", () => {
+    const f = frame(1000, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 100);
     expect(result.application).toBeCloseTo(1, 10);
     expect(result.signatureTerm).toBeCloseTo(100 / 40, 10);
@@ -59,14 +59,14 @@ describe("MissileApplicationImpl", () => {
   });
 
   test("signature-limited when target sig < explosion radius", () => {
-    const f = frame(1000, 0);
+    const f = frame(1000, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 20);
     expect(result.signatureTerm).toBeCloseTo(20 / 40, 10);
     expect(result.application).toBeCloseTo(0.5, 10);
   });
 
   test("velocity-limited when target is fast", () => {
-    const f = frame(1000, 500);
+    const f = frame(1000, new Vec2(0, 500));
     const result = application.compute(f, missile, f.shipB, 40);
     expect(result.velocityTerm).toBeLessThan(1);
     expect(result.application).toBeLessThan(1);
@@ -74,7 +74,7 @@ describe("MissileApplicationImpl", () => {
   });
 
   test("drf exponent shape: application = min(1, S/E, (S/E * Ve/Vt)^drf)", () => {
-    const f = frame(1000, 340);
+    const f = frame(1000, new Vec2(0, 340));
     const sigRadius = 40;
     const result = application.compute(f, missile, f.shipB, sigRadius);
     const sOverE = sigRadius / missile.explosionRadius;
@@ -84,25 +84,25 @@ describe("MissileApplicationImpl", () => {
   });
 
   test("out-of-range flag when distance exceeds flight range", () => {
-    const f = frame(missile.flightRange + 1000, 0);
+    const f = frame(missile.flightRange + 1000, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 100);
     expect(result.inRange).toBe(false);
   });
 
   test("in-range flag when distance equals flight range exactly", () => {
-    const f = frame(missile.flightRange, 0);
+    const f = frame(missile.flightRange, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 100);
     expect(result.inRange).toBe(true);
   });
 
   test("timeToImpact = distance / maxVelocity", () => {
-    const f = frame(7500, 0);
+    const f = frame(7500, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 100);
     expect(result.timeToImpact).toBeCloseTo(7500 / 3750, 10);
   });
 
   test("application is min of signature and velocity terms when both < 1", () => {
-    const f = frame(1000, 500);
+    const f = frame(1000, new Vec2(0, 500));
     const result = application.compute(f, missile, f.shipB, 20);
     const sOverE = 20 / 40;
     const veOverVt = 170 / 500;
@@ -112,27 +112,28 @@ describe("MissileApplicationImpl", () => {
     expect(result.application).toBeCloseTo(expected, 10);
   });
 
-  test("zero target max speed yields velocity term of 1 (no velocity penalty)", () => {
-    const f = frame(1000, 0);
+  test("zero target velocity yields velocity term of 1 (no velocity penalty)", () => {
+    const f = frame(1000, new Vec2(0, 0));
     const result = application.compute(f, missile, f.shipB, 40);
     expect(result.velocityTerm).toBeCloseTo(1, 10);
   });
 
-  test("uses opponent maxSpeed, not frame.shipB maxSpeed, when shipA is the target", () => {
-    const f = frame(1000, 0);
-    const fastShipA = { ...f.shipA, maxSpeed: 500 };
-    const result = application.compute(f, missile, fastShipA, 40);
+  test("uses opponent real-time velocity, not projected maxSpeed", () => {
+    const f = frame(1000, new Vec2(0, 0));
+    const movingTarget = { ...f.shipB, velocity: new Vec2(0, 500), maxSpeed: 2000 };
+    const result = application.compute(f, missile, movingTarget, 40);
     expect(result.velocityTerm).toBeLessThan(1);
     expect(result.application).toBeLessThan(1);
+    const ratio = (1 * 170) / 500;
+    const expected = ratio ** 0.604;
+    expect(result.velocityTerm).toBeCloseTo(expected, 10);
   });
 
-  test("scrammed MWD target (low effective maxSpeed) has higher velocity factor than unscrammed", () => {
-    const f = frame(1000, 0);
-    const unscrammed = shipState(2000);
-    const scrammed = shipState(150);
-    const resultUnscrammed = application.compute(f, missile, unscrammed, 40);
-    const resultScrammed = application.compute(f, missile, scrammed, 40);
-    expect(resultScrammed.velocityTerm).toBeGreaterThan(resultUnscrammed.velocityTerm);
-    expect(resultScrammed.application).toBeGreaterThan(resultUnscrammed.application);
+  test("stationary target with high maxSpeed still gets 100% velocity factor", () => {
+    const f = frame(1000, new Vec2(0, 0));
+    const fastButStationary = { ...f.shipB, maxSpeed: 5000, velocity: new Vec2(0, 0) };
+    const result = application.compute(f, missile, fastButStationary, 40);
+    expect(result.velocityTerm).toBeCloseTo(1, 10);
+    expect(result.application).toBeCloseTo(1, 10);
   });
 });

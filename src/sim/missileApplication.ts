@@ -6,7 +6,7 @@ export interface MissileApplication {
 
 export class MissileApplicationImpl implements MissileApplication {
   compute(frame: EngagementFrame, missile: MissileSpec, opponent: ShipState, opponentSigRadius: number): MissileDamageBreakdown {
-    const targetSpeed = opponent.maxSpeed;
+    const targetSpeed = opponent.velocity.len();
     const inRange = frame.distance <= missile.flightRange;
     const timeToImpact = missile.maxVelocity > 0 ? frame.distance / missile.maxVelocity : 0;
     const signatureTerm = opponentSigRadius > 0 && missile.explosionRadius > 0
