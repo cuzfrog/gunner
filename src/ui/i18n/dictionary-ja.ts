@@ -167,7 +167,6 @@ export const JA: LanguageSlice<"ja"> = {
   "result.hitChance": { ja: "命中確率" },
   "result.appliedDps": { ja: "適用 DPS" },
   "result.nominalDps": { ja: "理論 DPS" },
-  "result.application": { ja: "適用率" },
   "result.timeToImpact": { ja: "着弾時間" },
   "result.signatureFactor": { ja: "シグネチャ係数" },
   "result.velocityFactor": { ja: "速度係数" },

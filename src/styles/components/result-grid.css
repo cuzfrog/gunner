@@ -104,11 +104,17 @@
   white-space: nowrap;
 }
 
-.result-card-value.is-dim { color: var(--text-dim); }
-.result-card-value.is-optimal { color: var(--optimal-green); }
-.result-card-value.is-good { color: var(--accent-teal); }
-.result-card-value.is-caution { color: var(--warn-yellow); }
-.result-card-value.is-warn { color: var(--accent-orange); }
-.result-card-value.is-danger { color: var(--danger-red); }
+.result-card-value.is-dim,
+.result-metric-value.is-dim { color: var(--text-dim); }
+.result-card-value.is-optimal,
+.result-metric-value.is-optimal { color: var(--optimal-green); }
+.result-card-value.is-good,
+.result-metric-value.is-good { color: var(--accent-teal); }
+.result-card-value.is-caution,
+.result-metric-value.is-caution { color: var(--warn-yellow); }
+.result-card-value.is-warn,
+.result-metric-value.is-warn { color: var(--accent-orange); }
+.result-card-value.is-danger,
+.result-metric-value.is-danger { color: var(--danger-red); }
 
 }

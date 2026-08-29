@@ -23,9 +23,10 @@ function fakeSideEls(): ReadoutEls["shipA"] {
   return {
     resTrackPen: make(), resRangePen: make(), resHit: make(),
     resTrackPenLabel: make(), resRangePenLabel: make(), resHitLabel: make(),
-    resNominalDps: make(), resAppliedDps: make(), resApplication: make(), resTimeToImpact: make(),
+    resNominalDps: make(), resAppliedDps: make(), resTimeToImpact: make(),
     resSigFactor: make(), resVelocityFactor: make(),
-    resNominalDpsLabel: make(), resAppliedDpsLabel: make(), resApplicationLabel: make(), resTimeToImpactLabel: make(),
+    resNominalDpsLabel: make(), resAppliedDpsLabel: make(),
+    resTimeToImpactLabel: make(),
     resSigFactorLabel: make(), resVelocityFactorLabel: make(),
     resTurretCards: make(), resMissileCards: make(),
   };
@@ -176,15 +177,22 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resHit.classList.contains("is-caution")).toBe(true);
   });
 
-  test("turret side shows DPS cards and turret cards, hides missile cards", () => {
+  test("colors tracking and range penalties by their ratio", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipAHit: { chance: 0.95, trackingTerm: 0, rangeTerm: 0 } }), T);
+    expect(els.shipA.resTrackPen.classList.contains("is-optimal")).toBe(true);
+    expect(els.shipA.resRangePen.classList.contains("is-optimal")).toBe(true);
+  });
+
+  test("turret side shows DPS with application percentage merged into Applied DPS", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 50, appliedDps: 40, application: 0.8, volley: 100 } }), T);
     expect(els.shipA.resTurretCards.hidden).toBe(false);
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("50.0");
-    expect(els.shipA.resAppliedDps.textContent).toBe("40.0");
-    expect(els.shipA.resApplication.textContent).toBe("80.0%");
+    expect(els.shipA.resAppliedDps.textContent).toBe("40.0 (80.0%)");
     expect(els.shipA.resAppliedDps.classList.contains("is-good")).toBe(true);
   });
 
@@ -195,18 +203,33 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
   });
 
-  test("missile side shows DPS cards and missile cards, hides turret cards", () => {
+  test("turret side with application > 1 (wrecking hits) shows is-optimal", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeTurretView({ distance: 1000, shipADamage: { nominalDps: 100, appliedDps: 101.5, application: 1.015, volley: 100 } }), T);
+    expect(els.shipA.resAppliedDps.textContent).toBe("101.5 (101.5%)");
+    expect(els.shipA.resAppliedDps.classList.contains("is-optimal")).toBe(true);
+  });
+
+  test("missile side shows DPS with application merged and missile factors", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeMissileView({ distance: 5000 }), T);
     expect(els.shipA.resTurretCards.hidden).toBe(true);
     expect(els.shipA.resMissileCards.hidden).toBe(false);
     expect(els.shipA.resNominalDps.textContent).toBe("40.0");
-    expect(els.shipA.resAppliedDps.textContent).toBe("32.0");
-    expect(els.shipA.resApplication.textContent).toBe("80.0%");
+    expect(els.shipA.resAppliedDps.textContent).toBe("32.0 (80.0%)");
     expect(els.shipA.resTimeToImpact.textContent).toBe("2.5s");
     expect(els.shipA.resSigFactor.textContent).toBe("100.0%");
     expect(els.shipA.resVelocityFactor.textContent).toBe("80.0%");
+  });
+
+  test("missile side colors sig and velocity factors by ratio", () => {
+    const els = fakeReadoutEls();
+    const readout = new EngagementReadoutImpl(els);
+    readout.update(makeMissileView({ distance: 5000 }), T);
+    expect(els.shipA.resSigFactor.classList.contains("is-optimal")).toBe(true);
+    expect(els.shipA.resVelocityFactor.classList.contains("is-good")).toBe(true);
   });
 
   test("missile side with zero applied DPS shows is-danger", () => {
@@ -216,7 +239,7 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resAppliedDps.classList.contains("is-danger")).toBe(true);
   });
 
-  test("no-weapon side shows turret placeholder cards with em-dash and is-dim", () => {
+  test("no-weapon side shows em-dash and is-dim on all values", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeNoWeaponView(1000), T);
@@ -224,19 +247,23 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resMissileCards.hidden).toBe(true);
     expect(els.shipA.resNominalDps.textContent).toBe("-");
     expect(els.shipA.resAppliedDps.textContent).toBe("-");
-    expect(els.shipA.resApplication.textContent).toBe("-");
     expect(els.shipA.resHit.textContent).toBe("-");
     expect(els.shipA.resTrackPen.textContent).toBe("-");
     expect(els.shipA.resRangePen.textContent).toBe("-");
+    expect(els.shipA.resSigFactor.textContent).toBe("-");
+    expect(els.shipA.resVelocityFactor.textContent).toBe("-");
+    expect(els.shipA.resTimeToImpact.textContent).toBe("-");
     expect(els.shipA.resHit.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resTrackPen.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resNominalDps.classList.contains("is-dim")).toBe(true);
     expect(els.shipA.resAppliedDps.classList.contains("is-dim")).toBe(true);
-    expect(els.shipA.resApplication.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(true);
+    expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(true);
   });
 
-  test("transition from no-weapon to turret clears is-dim from turret cards", () => {
+  test("transition from no-weapon to turret clears is-dim from all values", () => {
     const els = fakeReadoutEls();
     const readout = new EngagementReadoutImpl(els);
     readout.update(makeNoWeaponView(1000), T);
@@ -245,5 +272,8 @@ describe("EngagementReadout", () => {
     expect(els.shipA.resHit.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resTrackPen.classList.contains("is-dim")).toBe(false);
     expect(els.shipA.resRangePen.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resSigFactor.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resVelocityFactor.classList.contains("is-dim")).toBe(false);
+    expect(els.shipA.resTimeToImpact.classList.contains("is-dim")).toBe(false);
   });
 });

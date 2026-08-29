@@ -47,7 +47,7 @@ Semantic color mapping (used consistently across CSS and canvas):
 
 - Attacker = teal, Target = orange.
 - Good/optimal = green, caution = yellow, warning = orange, danger = red.
-- Hit-chance color scale (see `hitChanceClass` in `controlsFormat.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red.
+- Hit-chance color scale (see `hitChanceClass` in `controlsFormat.ts`): >=90% green, >=50% teal, >=25% yellow, >=5% orange, else red. Applied to all ratio-based result values (hit chance, tracking/range penalty, sig/velocity factor, application).
 
 ### Alpha variants of accents
 
@@ -122,7 +122,7 @@ Custom-styled `.form-slider` (range inputs): 4px track filled via `linear-gradie
 
 ### Result cards
 
-`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.result-card-hit-chance`) gets a teal border, larger value, and hit-chance color classes (`is-optimal`, `is-good`, `is-caution`, `is-warn`, `is-danger`) driven by `hitChanceClass`.
+`.result-card`: panel surface, centered, 10px uppercase label + mono value. The emphasized card (`.result-card-hit-chance`) gets a teal border, larger value, and hit-chance color classes (`is-optimal`, `is-good`, `is-caution`, `is-warn`, `is-danger`) driven by `hitChanceClass`. All result values (hero and metric) receive color classes based on their ratio. The Application percentage is merged into the Applied DPS hero value as `dps (percent%)`.
 
 ### Canvas overlays
 

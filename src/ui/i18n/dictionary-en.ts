@@ -167,7 +167,6 @@ export const EN: LanguageSlice<"en"> = {
   "result.hitChance": { en: "Hit chance" },
   "result.appliedDps": { en: "Applied DPS" },
   "result.nominalDps": { en: "Nominal DPS" },
-  "result.application": { en: "Application" },
   "result.timeToImpact": { en: "Time to impact" },
   "result.signatureFactor": { en: "Sig. factor" },
   "result.velocityFactor": { en: "Velocity factor" },
