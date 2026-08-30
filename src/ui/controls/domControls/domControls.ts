@@ -220,6 +220,10 @@ export class DomControls implements Controls, DomControlsHost {
     if (turret) return turret;
     return this.launcherControllers[side].currentMissileSpec();
   }
+  getWeapons(side: Side): readonly WeaponSpec[] {
+    const weapon = this.getWeapon(side);
+    return weapon ? [weapon] : [];
+  }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
   getSpeed(): number { return this.preferencesController.getSpeed(); }

@@ -22,6 +22,7 @@ import { AppImpl } from "./app";
 
 const controls = vi.mocked<Controls>({
   getWeapon: vi.fn(),
+  getWeapons: vi.fn(),
   getSig: vi.fn(),
   getConfig: vi.fn(),
   getSpeed: vi.fn(),
@@ -128,6 +129,7 @@ describe("AppImpl", () => {
     simulation.snapshot.mockReturnValue(snapshot);
     engagementFrameComposer.compose.mockReturnValue(baseView());
     controls.getWeapon.mockReturnValue(turret);
+    controls.getWeapons.mockReturnValue([turret]);
     controls.getSig.mockReturnValue(40);
     controls.getSpeed.mockReturnValue(1);
     controls.getGridBrightness.mockReturnValue(0.2);
@@ -150,7 +152,7 @@ describe("AppImpl", () => {
     expect(controls.getGridBrightness).toHaveBeenCalled();
     expect(renderer.setGridBrightness).toHaveBeenCalledWith(0.2);
     expect(renderer.setWeaponRangeVisibility).toHaveBeenCalledWith("both");
-    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
+    expect(engagementFrameComposer.compose).toHaveBeenCalledWith(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
     expect(renderer.draw).toHaveBeenCalledWith(snapshot, frame, { shipA: { kind: "turret", optimal: 5000, falloff: 5000 }, shipB: { kind: "turret", optimal: 5000, falloff: 5000 } }, []);
     expect(controls.update).toHaveBeenCalledWith(baseView(), {
       shipA: sideReadoutValues(0, 0.32, 5000, 5000, 0.32, 5000, 5000),

@@ -97,7 +97,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
     expect(view.attacks.shipA?.turret?.hit.chance).toBe(view.attacks.shipB?.turret?.hit.chance);
     expect(view.frame.shipA.maxSpeed).toBe(view.frame.shipB.maxSpeed);
   });
@@ -112,7 +112,7 @@ describe("symmetric mutual engagement", () => {
       shipB,
       commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) },
     };
-    const view = composer.compose(snapshot, { weapons: { shipA: turret, shipB: turret }, sigRadii: { shipA: 40, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [turret], shipB: [turret] }, sigRadii: { shipA: 40, shipB: 40 } });
     expect(view.attacks.shipA?.turret?.hit.chance!).toBeLessThan(view.attacks.shipB?.turret?.hit.chance!);
     expect((view.attacks.shipA?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking * 0.5);
     expect((view.attacks.shipB?.effectiveWeapon as TurretSpec).tracking).toBe(turret.tracking);
