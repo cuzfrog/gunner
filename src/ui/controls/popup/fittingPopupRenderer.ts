@@ -54,12 +54,12 @@ export class FittingPopupRenderer {
     this.deleteAction = new IconActionImpl({
       buttonClass: "fitting-delete icon-button",
       iconSvg: spriteIconStroked("delete", 12),
-      title: () => this.i18n.t("button.deleteFitting"),
+      hint: () => this.i18n.t("button.deleteFitting"),
     });
     this.eyeAction = new IconActionImpl({
       buttonClass: "fitting-item-eye icon-button",
       iconSvg: spriteIconStroked("eye", 14),
-      title: () => this.i18n.t("button.fittingDetails"),
+      hint: () => this.i18n.t("button.fittingDetails"),
       ariaPressed: false,
     });
   }
@@ -95,7 +95,7 @@ export class FittingPopupRenderer {
       if (!imported) {
         item.classList.toggle("is-invalid", true);
         const invalidText = this.i18n.t("fitting.invalid");
-        item.title = invalidText;
+        item.setAttribute("data-hint", invalidText);
         item.disabled = true;
         item.setAttribute("aria-disabled", "true");
       }

@@ -41,7 +41,7 @@ describe("TurretController", () => {
     expect(getFake(document, "ship-a-ammo-cargo-list").children.length).toBe(2);
     expect(getFake(document, "ship-a-ammo-all-list").children.length).toBe(2);
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(toTypeId("486"));
-    expect(getFake(document, "ship-a-sig-res-options").children[0].title).toContain("Original S");
+    expect(getFake(document, "ship-a-sig-res-options").children[0].getAttribute("data-hint")).toContain("Original S");
     expect(getFake(document, "ship-a-tracking").disabled).toBe(false);
     expect(getFake(document, "ship-a-sigRes").disabled).toBe(false);
     expect(getFake(document, "ship-a-optimal").disabled).toBe(false);
@@ -175,12 +175,12 @@ describe("TurretController", () => {
       imageCatalog: { itemIconUrl: vi.fn((name: string) => `images/icons/${name.replaceAll(" ", "_")}.png`) },
     });
     const button = getFake(document, "ship-a-sig-res-options").children[0];
-    const original = button.title;
+    const original = button.getAttribute("data-hint");
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true, weaponOverloaded: false });
 
-    expect(button.title).not.toBe(original);
+    expect(button.getAttribute("data-hint")).not.toBe(original);
     controller.clear();
-    expect(button.title).toBe(original);
+    expect(button.getAttribute("data-hint")).toBe(original);
     expect(button.children[0].hidden).toBe(true);
   });
 
@@ -312,7 +312,7 @@ describe("TurretController", () => {
     const buttons = Array.from(getFake(document, "ship-a-sig-res-options").children);
     for (const button of buttons) {
       expect(button.disabled).toBe(true);
-      expect(button.title).not.toBe("turret.notFittable");
+      expect(button.getAttribute("data-hint")).not.toBe("turret.notFittable");
     }
     for (const option of getFake(document, "ship-a-sigRes").options) {
       expect(option.disabled).toBe(true);
@@ -331,7 +331,7 @@ describe("TurretController", () => {
     expect(buttonFor(document, "M").disabled).toBe(false);
     expect(buttonFor(document, "L").disabled).toBe(true);
     expect(buttonFor(document, "XL").disabled).toBe(true);
-    expect(buttonFor(document, "L").title).toBe("turret.notFittable");
+    expect(buttonFor(document, "L").getAttribute("data-hint")).toBe("turret.notFittable");
     expect(optionFor(document, "S").disabled).toBe(false);
     expect(optionFor(document, "XL").disabled).toBe(true);
     expect(getFake(document, "ship-a-tracking").disabled).toBe(false);

@@ -5,9 +5,9 @@ interface Props {
   readonly labelClass: string;
   readonly labelI18n?: string;
   readonly labelText?: string;
-  readonly titleI18n?: string;
+  readonly hintI18n?: string;
   readonly ariaLabelI18n?: string;
-  readonly title?: string;
+  readonly hint?: string;
   readonly ariaLabel?: string;
   readonly ariaHaspopup?: string;
   readonly disabled?: boolean;
@@ -19,9 +19,9 @@ const {
   labelClass,
   labelI18n,
   labelText,
-  titleI18n,
+  hintI18n,
   ariaLabelI18n,
-  title,
+  hint,
   ariaLabel,
   ariaHaspopup,
   disabled,
@@ -32,8 +32,8 @@ const {
 <button type="button" id={id} class="trigger"
   aria-haspopup={ariaHaspopup} aria-expanded="false" aria-controls={popupId}
   aria-describedby={ariaDescribedby} disabled={disabled}
-  data-i18n-title={titleI18n} data-i18n-aria-label={ariaLabelI18n}
-  title={title} aria-label={ariaLabel}>
+  data-i18n-hint={hintI18n} data-i18n-aria-label={ariaLabelI18n}
+  data-hint={hint} aria-label={ariaLabel}>
   {labelI18n || labelText ? <span class={labelClass} data-i18n={labelI18n}>{labelText}</span> : null}
   <slot />
 </button>

@@ -62,14 +62,14 @@ export class EwarControllerImpl implements EwarController {
     this.gearAction = new IconActionImpl({
       buttonClass: "ewar-script-gear btn icon-button",
       iconSvg: spriteIcon("gear"),
-      title: "",
+      hint: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
     this.overloadAction = new IconActionImpl({
       buttonClass: "ewar-overload-button btn icon-button",
       iconSvg: spriteIcon("overload", 14, "currentColor", "overload-button-icon"),
-      title: "",
+      hint: "",
     });
     this.sectionBlock = new SectionBlockImpl();
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
@@ -189,13 +189,13 @@ export class EwarControllerImpl implements EwarController {
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       trigger.disabled = true;
-      trigger.title = this.i18n.t("title.ewar.empty");
+      trigger.setAttribute("data-hint", this.i18n.t("title.ewar.empty"));
       summary.innerHTML = "";
       this.popups[side].close();
       return;
     }
     trigger.disabled = false;
-    trigger.title = "";
+    trigger.setAttribute("data-hint", "");
     this.updateSummary(side);
     const heading = html`<div class="preview-section-label">${modulesLabel}</div>`;
     section.appendChild(heading);
@@ -258,11 +258,11 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.painters.length > 0) this.appendSummaryItem(summary, state.loadout.painters[0].moduleId, painterActive, state.loadout.painters.length, painterTitle);
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
     const img = html`<img class="ewar-summary-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const item = html`<span class="ewar-summary-item" title=${title}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
+    const item = html`<span class="ewar-summary-item" data-hint=${hint}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
     summary.appendChild(item);
   }
 
@@ -396,7 +396,7 @@ export class EwarControllerImpl implements EwarController {
     const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
     const img = html`<img class="ewar-module-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const nameSpan = html`<span class="ewar-module-name truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
+    const nameSpan = html`<span class="ewar-module-name truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
     const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
     return { button, nameSpan };
   }
@@ -405,7 +405,7 @@ export class EwarControllerImpl implements EwarController {
     const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
-    this.updateGearTitle(gear, script);
+    this.updateGearHint(gear, script);
     if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
@@ -421,7 +421,7 @@ export class EwarControllerImpl implements EwarController {
     const button = this.overloadAction.create(onToggle);
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
-    button.setAttribute("title", label);
+    button.setAttribute("data-hint", label);
     button.setAttribute("aria-label", label);
     if (!active) button.setAttribute("disabled", "");
     return button;
@@ -449,7 +449,7 @@ export class EwarControllerImpl implements EwarController {
     const noneButton = this.scriptOptionList.createButton({
       value: "none",
       label: this.i18n.t("ewar.script.none"),
-      title: this.i18n.t("ewar.script.none.hint"),
+      hint: this.i18n.t("ewar.script.none.hint"),
       selected: current === undefined,
     });
     noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
@@ -459,7 +459,7 @@ export class EwarControllerImpl implements EwarController {
       const button = this.scriptOptionList.createButton({
         value: script.moduleId,
         label: this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()),
-        title: scriptStatSuffix(script),
+        hint: scriptStatSuffix(script),
         iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
         selected: this.isSameScript(current, script),
       });
@@ -490,9 +490,9 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     state.activation.disruptors[index].script = script;
     const gear = this.findGearFor(side, index);
-    if (gear) this.updateGearTitle(gear, script);
+    if (gear) this.updateGearHint(gear, script);
     const nameSpan = this.disruptorNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.title = this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script);
+    if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script));
     this.events.emitConfigInvalidated();
   }
 
@@ -506,10 +506,10 @@ export class EwarControllerImpl implements EwarController {
     return gearState?.index === index ? gearState.gear : undefined;
   }
 
-  private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
-    const title = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
-    gear.setAttribute("title", title);
-    gear.setAttribute("aria-label", title);
+  private updateGearHint(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
+    const hint = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
+    gear.setAttribute("data-hint", hint);
+    gear.setAttribute("aria-label", hint);
   }
 
   private toggleWeb(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {

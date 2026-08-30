@@ -1,0 +1,45 @@
+@layer components {
+.hover-hint {
+  position: absolute;
+  position-anchor: --hover-hint-anchor;
+  left: anchor(center);
+  top: anchor(bottom);
+  translate: -50% 4px;
+  position-try-fallbacks: --hover-hint-above, shift-inline;
+  z-index: var(--z-popup);
+  max-width: 280px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: 2px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  color: var(--text-primary);
+  font-family: "Saira", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: normal;
+  pointer-events: none;
+}
+
+.hover-hint[hidden] { display: none; }
+
+@position-try --hover-hint-above {
+  top: anchor(top);
+  translate: -50% calc(-100% - 4px);
+}
+
+.hover-hint-anchor {
+  anchor-name: --hover-hint-anchor;
+}
+
+@supports not (anchor-name: --hover-hint-anchor) {
+  .hover-hint {
+    position: fixed;
+    translate: -50% 0;
+    position-anchor: none;
+    position-try-fallbacks: none;
+  }
+}
+}

@@ -206,7 +206,7 @@ describe("EwarController", () => {
     const popup = getFake(document, "ship-a-ewar-popup");
     expect(trigger.disabled).toBe(false);
     expect(trigger.getAttribute("aria-label")).toBe("label.modules");
-    expect(trigger.title).toBe("");
+    expect(trigger.getAttribute("data-hint")).toBe("");
     expect(popup.getAttribute("aria-label")).toBe("label.modules");
     expect(summary.children.length).toBe(2);
 
@@ -240,7 +240,7 @@ describe("EwarController", () => {
     expect(webButton.children[0].tagName).toBe("IMG");
     expect(webButton.children[0].hidden).toBe(false);
     expect(webButton.children[1].textContent).toBe(WEB2.moduleName);
-    expect(webButton.children[1].title).toBe("web-effect");
+    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
 
     const disruptors = disruptorSection(document, "shipA")!;
     expect(disruptors.className).toBe("preview-section");
@@ -259,20 +259,20 @@ describe("EwarController", () => {
     expect(firstGear.getAttribute("aria-haspopup")).toBe("menu");
     expect(firstGear.getAttribute("aria-expanded")).toBe("false");
     expect(firstGear.getAttribute("aria-controls")).toBe("ship-a-ewar-script-popup");
-    expect(firstGear.getAttribute("title")).toBe("ewar.script.none");
+    expect(firstGear.getAttribute("data-hint")).toBe("ewar.script.none");
     expect(firstGear.getAttribute("aria-label")).toBe("ewar.script.none");
     expect(firstGear.disabled).toBe(false);
 
     const secondRow = disruptors.children[2];
     const secondGear = gearFor(secondRow);
-    expect(secondGear.getAttribute("title")).toBe("Optimal Range Disruption Script");
+    expect(secondGear.getAttribute("data-hint")).toBe("Optimal Range Disruption Script");
     expect(secondGear.getAttribute("aria-label")).toBe("Optimal Range Disruption Script");
     expect(secondGear.disabled).toBe(false);
 
     controller.setLoadout("shipB", EMPTY_EWAR_LOADOUT);
     const shipBTrigger = getFake(document, "ship-b-ewar-trigger");
     expect(shipBTrigger.disabled).toBe(true);
-    expect(shipBTrigger.title).toBe("title.ewar.empty");
+    expect(shipBTrigger.getAttribute("data-hint")).toBe("title.ewar.empty");
     expect(getFake(document, "ship-b-ewar-summary").children.length).toBe(0);
     expect(ewarSection(document, "shipB").children.length).toBe(0);
   });
@@ -285,7 +285,7 @@ describe("EwarController", () => {
     const summary = getFake(document, "ship-a-ewar-summary");
     expect(summary.children.length).toBe(1);
     expect(summary.children[0].children[1].textContent).toBe("1/1");
-    expect(summary.children[0].getAttribute("title")).toBe("grappler-hint");
+    expect(summary.children[0].getAttribute("data-hint")).toBe("grappler-hint");
     expect(ewarEffectDescriber.grapplerHint).toHaveBeenCalled();
 
     const grapplers = grapplerSection(document, "shipA")!;
@@ -312,7 +312,7 @@ describe("EwarController", () => {
     const summary = getFake(document, "ship-a-ewar-summary");
     expect(trigger.disabled).toBe(false);
     expect(summary.children.length).toBe(1);
-    expect(summary.children[0].getAttribute("title")).toBe("scrambler-hint");
+    expect(summary.children[0].getAttribute("data-hint")).toBe("scrambler-hint");
     expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(1);
     expect(scramblerSection(document, "shipA")!.children[0].textContent).toBe("label.ewar.scrambler");
     expect(controller.projection("shipA")).toEqual({
@@ -423,7 +423,7 @@ describe("EwarController", () => {
     expect(firstScriptPopup.hidden).toBe(false);
     scriptOptionFor(firstScriptPopup, String(OPTIMAL_SCRIPT.moduleId))!.trigger("click");
     expect(controller.capture("shipB")?.disruptors?.[0]?.script).toBe(OPTIMAL_SCRIPT.moduleId);
-    expect(firstGear.getAttribute("title")).toBe("Optimal Range Disruption Script");
+    expect(firstGear.getAttribute("data-hint")).toBe("Optimal Range Disruption Script");
 
     const secondRow = section.children[2];
     const secondGear = gearFor(secondRow);
@@ -448,8 +448,8 @@ describe("EwarController", () => {
     expect(restored).toEqual(captured);
 
     const restoredSection = disruptorSection(document, "shipB")!;
-    expect(gearFor(restoredSection.children[1]).getAttribute("title")).toBe("Optimal Range Disruption Script");
-    expect(gearFor(restoredSection.children[2]).getAttribute("title")).toBe("Tracking Speed Disruption Script");
+    expect(gearFor(restoredSection.children[1]).getAttribute("data-hint")).toBe("Optimal Range Disruption Script");
+    expect(gearFor(restoredSection.children[2]).getAttribute("data-hint")).toBe("Tracking Speed Disruption Script");
   });
 
   test("stale saved activation is clamped to a shorter loadout", () => {
@@ -564,7 +564,7 @@ describe("EwarController", () => {
     scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
     expect(scriptPopup.hidden).toBe(true);
     expect(gear.getAttribute("aria-expanded")).toBe("false");
-    expect(gear.getAttribute("title")).toBe("Tracking Speed Disruption Script");
+    expect(gear.getAttribute("data-hint")).toBe("Tracking Speed Disruption Script");
     expect(gear.getAttribute("aria-label")).toBe("Tracking Speed Disruption Script");
     expect(emitConfigInvalidated).toHaveBeenCalled();
     expect(controller.capture("shipA")).toEqual({
@@ -585,12 +585,12 @@ describe("EwarController", () => {
     const row = section.children[1];
     const button = row.children[0];
     const gear = gearFor(row);
-    expect(button.children[1].title).toBe("disruptor-effect");
+    expect(button.children[1].getAttribute("data-hint")).toBe("disruptor-effect");
     gear.trigger("click");
     const scriptPopup = scriptPopupFor(document, "shipA");
     ewarEffectDescriber.disruptorModuleEffect.mockReturnValue("disruptor-with-tracking");
     scriptOptionFor(scriptPopup, String(TRACKING_SCRIPT.moduleId))!.trigger("click");
-    expect(button.children[1].title).toBe("disruptor-with-tracking");
+    expect(button.children[1].getAttribute("data-hint")).toBe("disruptor-with-tracking");
     expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR2, TRACKING_SCRIPT);
   });
 
@@ -601,7 +601,7 @@ describe("EwarController", () => {
     const webButton = webSectionEl.children[1].children[0];
     const overloadButton = overloadFor(webSectionEl.children[1]);
     expect(webButton.children[1].textContent).toBe(`${WEB.moduleName} (zh)`);
-    expect(webButton.children[1].title).toBe("web-effect");
+    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
     expect(webButton.getAttribute("aria-label")).toBe(`${WEB.moduleName} (zh)`);
     expect(overloadButton.getAttribute("aria-label")).toContain(`${WEB.moduleName} (zh)`);
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(WEB.moduleId, "zh");
@@ -613,16 +613,16 @@ describe("EwarController", () => {
     const { controller, document, ewarEffectDescriber } = buildEwarController();
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [GRAPPLER], scramblers: [SCRAMBLER], painters: [], scripts: SCRIPTS });
     const webButton = webSection(document, "shipA")!.children[1].children[0];
-    expect(webButton.children[1].title).toBe("web-effect");
+    expect(webButton.children[1].getAttribute("data-hint")).toBe("web-effect");
     expect(ewarEffectDescriber.webModuleEffect).toHaveBeenCalledWith(WEB);
     const grapplerButton = grapplerSection(document, "shipA")!.children[1].children[0];
-    expect(grapplerButton.children[1].title).toBe("grappler-effect");
+    expect(grapplerButton.children[1].getAttribute("data-hint")).toBe("grappler-effect");
     expect(ewarEffectDescriber.grapplerModuleEffect).toHaveBeenCalledWith(GRAPPLER);
     const disruptorButton = disruptorSection(document, "shipA")!.children[1].children[0];
-    expect(disruptorButton.children[1].title).toBe("disruptor-effect");
+    expect(disruptorButton.children[1].getAttribute("data-hint")).toBe("disruptor-effect");
     expect(ewarEffectDescriber.disruptorModuleEffect).toHaveBeenCalledWith(DISRUPTOR, undefined);
     const scramblerButton = scramblerSection(document, "shipA")!.children[1].children[0];
-    expect(scramblerButton.children[1].title).toBe("scrambler-effect");
+    expect(scramblerButton.children[1].getAttribute("data-hint")).toBe("scrambler-effect");
     expect(ewarEffectDescriber.scramblerModuleEffect).toHaveBeenCalled();
   });
 
@@ -654,10 +654,10 @@ describe("EwarController", () => {
     const scriptPopup = scriptPopupFor(document, "shipA");
     scriptOptionFor(scriptPopup, "none")!.trigger("click");
     expect(controller.capture("shipA")?.disruptors?.[0]?.script).toBe("none");
-    expect(gear.getAttribute("title")).toBe("ewar.script.none");
+    expect(gear.getAttribute("data-hint")).toBe("ewar.script.none");
 
     controller.restore("shipA", loadout, controller.capture("shipA"));
-    expect(gearFor(disruptorSection(document, "shipA")!.children[1]).getAttribute("title")).toBe("ewar.script.none");
+    expect(gearFor(disruptorSection(document, "shipA")!.children[1]).getAttribute("data-hint")).toBe("ewar.script.none");
     expect(controller.capture("shipA")?.disruptors?.[0]?.script).toBe("none");
   });
 
@@ -674,14 +674,14 @@ describe("EwarController", () => {
     const noneOption = scriptOptionFor(scriptPopup, "none")!;
     expect(noneOption.children.length).toBe(1);
     expect(noneOption.children[0].textContent).toBe("ewar.script.none");
-    expect(noneOption.title).toBe("ewar.script.none.hint");
+    expect(noneOption.getAttribute("data-hint")).toBe("ewar.script.none.hint");
 
     const optimalOption = scriptOptionFor(scriptPopup, String(OPTIMAL_SCRIPT.moduleId))!;
     expect(optimalOption.children[0].tagName).toBe("IMG");
     expect(optimalOption.children[0].src).toBe("icons/29005.png");
     expect(optimalOption.children[1].textContent).toBe("Optimal Range Disruption Script (zh)");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(OPTIMAL_SCRIPT.moduleId, "zh");
-    expect(optimalOption.title).toBe("optimal x2 · falloff x2 · track x0");
+    expect(optimalOption.getAttribute("data-hint")).toBe("optimal x2 · falloff x2 · track x0");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(OPTIMAL_SCRIPT.moduleId);
   });
 
@@ -766,7 +766,7 @@ describe("EwarController", () => {
     const webRow = webSection(document, "shipA")!.children[1];
     const webOverload = overloadFor(webRow);
     expect(webOverload.getAttribute("aria-label")).toBe(`label.overload ${WEB.moduleName}`);
-    expect(webOverload.title).toBe(`label.overload ${WEB.moduleName}`);
+    expect(webOverload.getAttribute("data-hint")).toBe(`label.overload ${WEB.moduleName}`);
 
     const disruptorRow = disruptorSection(document, "shipA")!.children[1];
     const disruptorOverload = overloadFor(disruptorRow);
@@ -792,8 +792,8 @@ describe("EwarController", () => {
     controller.setLoadout("shipA", { webs: [WEB], disruptors: [DISRUPTOR], grapplers: [], scramblers: [], painters: [], scripts: SCRIPTS });
 
     const summary = getFake(document, "ship-a-ewar-summary");
-    expect(summary.children[0].getAttribute("title")).toBe("web-hint");
-    expect(summary.children[1].getAttribute("title")).toBe("disruptor-hint");
+    expect(summary.children[0].getAttribute("data-hint")).toBe("web-hint");
+    expect(summary.children[1].getAttribute("data-hint")).toBe("disruptor-hint");
     expect(ewarEffectDescriber.webHint).toHaveBeenCalled();
     expect(ewarEffectDescriber.disruptorHint).toHaveBeenCalled();
   });
@@ -807,7 +807,7 @@ describe("EwarController", () => {
     ewarEffectDescriber.webHint.mockReturnValue("web-active");
     const section = webSection(document, "shipA")!;
     section.children[1].children[0].trigger("click");
-    expect(getFake(document, "ship-a-ewar-summary").children[0].getAttribute("title")).toBe("web-active");
+    expect(getFake(document, "ship-a-ewar-summary").children[0].getAttribute("data-hint")).toBe("web-active");
   });
 
   test("updateSummaries refreshes both sides", () => {

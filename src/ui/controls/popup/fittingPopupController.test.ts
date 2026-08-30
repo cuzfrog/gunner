@@ -158,7 +158,7 @@ describe("FittingPopupController", () => {
     controller.popup.open();
     const item = els.savedList.children[0].children[0] as unknown as FakeElement;
     expect(item.disabled).toBe(true);
-    expect(item.title).toBe("fitting.invalid");
+    expect(item.getAttribute("data-hint")).toBe("fitting.invalid");
     expect(item.getAttribute("aria-disabled")).toBe("true");
     const del = els.savedList.children[0].children[2] as unknown as FakeElement;
     del.trigger("click");

@@ -9,9 +9,9 @@ const { idPrefix } = Astro.props;
 
 <div class="weapon-kind-switch" id={`${idPrefix}-weapon-system`} role="group" data-i18n-aria-label="label.weaponSystem" aria-label="Weapon system">
   <IconButton id={`${idPrefix}-weapon-system-turret`} iconName="turret" iconSize={16} iconFill="none" iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="turret" pressed={true}
-          titleI18n="label.turret" ariaLabelI18n="label.turret" title="Turret" ariaLabel="Turret" />
+          hintI18n="label.turret" ariaLabelI18n="label.turret" data-hint="Turret" ariaLabel="Turret" />
   <IconButton id={`${idPrefix}-weapon-system-missile`} iconName="missile" iconSize={16} iconFill="none" iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="missile" pressed={false}
-          titleI18n="label.launcher" ariaLabelI18n="label.launcher" title="Missile" ariaLabel="Missile" />
+          hintI18n="label.launcher" ariaLabelI18n="label.launcher" data-hint="Missile" ariaLabel="Missile" />
   <IconButton id={`${idPrefix}-weapon-system-drone`} iconName="drone" iconSize={16} iconFill="none" iconStroke="currentColor" extraClass="weapon-kind-button" dataValue="drone" pressed={false} disabled
-          titleI18n="label.drone" ariaLabelI18n="label.drone" title="Drone (not implemented)" ariaLabel="Drone (not implemented)" />
+          hintI18n="label.drone" ariaLabelI18n="label.drone" data-hint="Drone (not implemented)" ariaLabel="Drone (not implemented)" />
 </div>

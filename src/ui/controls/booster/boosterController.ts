@@ -54,7 +54,7 @@ export class BoosterControllerImpl implements BoosterController {
     this.gearAction = new IconActionImpl({
       buttonClass: "ewar-script-gear btn icon-button",
       iconSvg: spriteIcon("gear"),
-      title: "",
+      hint: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
@@ -160,8 +160,8 @@ export class BoosterControllerImpl implements BoosterController {
       return;
     }
     const active = state.activation.filter((a) => a.active).length;
-    const title = this.boosterDescription(state);
-    this.appendSummaryItem(summary, state.loadout.computers[0].moduleId, active, state.loadout.computers.length, title);
+    const hint = this.boosterDescription(state);
+    this.appendSummaryItem(summary, state.loadout.computers[0].moduleId, active, state.loadout.computers.length, hint);
   }
 
   private boosterDescription(state: BoosterState): string {
@@ -192,9 +192,9 @@ export class BoosterControllerImpl implements BoosterController {
     return total;
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
-    const item = html`<span class="ewar-summary-item" title=${title}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="ewar-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
+    const item = html`<span class="ewar-summary-item" data-hint=${hint}><img class="ewar-summary-icon" alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="ewar-summary-count mono">${active}/${total}</span></span>` as unknown as HTMLSpanElement;
     summary.appendChild(item);
   }
 
@@ -246,7 +246,7 @@ export class BoosterControllerImpl implements BoosterController {
     const displayName = this.moduleDisplayName(computer);
     const effectTitle = this.boosterModuleEffect(computer, script);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
-    const nameSpan = html`<span class="truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
+    const nameSpan = html`<span class="truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
     const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
     return { button, nameSpan };
   }
@@ -266,16 +266,16 @@ export class BoosterControllerImpl implements BoosterController {
     const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-controls", `${sideId(side)}-booster-script-popup`);
-    this.updateGearTitle(gear, script);
+    this.updateGearHint(gear, script);
     if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
 
-  private updateGearTitle(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
+  private updateGearHint(gear: HTMLButtonElement, script: TurretScriptSpec | undefined): void {
     const name = this.scriptDisplayName(script);
-    const title = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
-    gear.setAttribute("title", title);
-    gear.setAttribute("aria-label", title);
+    const hint = `${name}${script ? ` · ${boosterScriptStatSuffix(script)}` : ""}`;
+    gear.setAttribute("data-hint", hint);
+    gear.setAttribute("aria-label", hint);
   }
 
   private openScriptPopup(side: Side, index: number, gear: HTMLButtonElement): void {
@@ -312,9 +312,9 @@ export class BoosterControllerImpl implements BoosterController {
     const state = this.states.get(side);
     if (!state) return;
     state.activation[index].script = script;
-    this.updateGearTitle(gear, script);
+    this.updateGearHint(gear, script);
     const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.title = this.boosterModuleEffect(state.loadout.computers[index], script);
+    if (nameSpan) nameSpan.setAttribute("data-hint", this.boosterModuleEffect(state.loadout.computers[index], script));
     this.scriptPopups[side].close();
     this.updateSummary(side);
     this.events.emitConfigInvalidated();

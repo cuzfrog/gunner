@@ -28,6 +28,7 @@ import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
+import type { HoverHintController } from "./hoverHint";
 import type { ProfileEquality } from "../../appstate";
 import type { Side } from "./side";
 import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
@@ -102,4 +103,5 @@ export interface ControlsCradle {
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
+  readonly hoverHintController: HoverHintController;
 }

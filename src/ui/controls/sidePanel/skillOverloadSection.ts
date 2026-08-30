@@ -134,7 +134,7 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     for (let level = 0; level <= 5; level++) {
       const skill = skillLevelFromString(String(level));
       const label = skillOptionLabel(this.i18n, skill);
-      options.push({ value: String(level), label: String(level), title: label });
+      options.push({ value: String(level), label: String(level), hint: label });
     }
     this.skillChoice.render(options, String(selectedValue));
     const summary = skillOptionLabel(this.i18n, selectedValue);

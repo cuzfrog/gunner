@@ -106,7 +106,7 @@ describe("BoosterController", () => {
     const rows = block.children.filter((child) => child.className.split(" ").includes("ewar-row"));
     const firstButton = rows[0]?.children[0] as unknown as FakeElement;
     const nameSpan = firstButton.children[1] as unknown as FakeElement;
-    expect(nameSpan.title).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
+    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
   });
 
   test("setLoadout with empty loadout hides section and clears summary", () => {
@@ -174,7 +174,7 @@ describe("BoosterController", () => {
     expect(optimalOption).toBeDefined();
     optimalOption!.trigger("click");
     expect(controller.capture("shipA")?.[0]?.script).toBe(OPTIMAL_SCRIPT.moduleId);
-    expect(gear.getAttribute("title")).toContain(OPTIMAL_SCRIPT.name);
+    expect(gear.getAttribute("data-hint")).toContain(OPTIMAL_SCRIPT.name);
   });
 
   test("selecting a script updates the module button title to reflect the script multipliers", () => {
@@ -184,12 +184,12 @@ describe("BoosterController", () => {
     const row = firstRow(section)!;
     const button = row.children[0] as unknown as FakeElement;
     const nameSpan = button.children[1] as unknown as FakeElement;
-    expect(nameSpan.title).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
+    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.tracking +10.0% · ewar.hover.optimal +5.0% · ewar.hover.falloff +10.0%");
     const gear = row.children.find((child) => child.className.split(" ").includes("ewar-script-gear"))!;
     gear.trigger("click");
     const popup = scriptPopupFor(section)!;
     const optimalOption = popup.children.find((child) => child.textContent?.includes(OPTIMAL_SCRIPT.name));
     optimalOption!.trigger("click");
-    expect(nameSpan.title).toBe("ewar.hover.optimal +10.0% · ewar.hover.falloff +20.0%");
+    expect(nameSpan.getAttribute("data-hint")).toBe("ewar.hover.optimal +10.0% · ewar.hover.falloff +20.0%");
   });
 });

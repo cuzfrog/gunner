@@ -130,7 +130,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         this.chips.delete(kind);
       }
     }
-    this.refreshTitles();
+    this.refreshHints();
     this.lastTitleRefresh = now;
   }
 
@@ -143,7 +143,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     }
     if (now - this.lastTitleRefresh < TITLE_REFRESH_INTERVAL_MS) return;
     this.lastTitleRefresh = now;
-    this.refreshTitles();
+    this.refreshHints();
   }
 
   private isSideVisible(kind: RangeOverlayKind, side: Side): boolean {
@@ -250,10 +250,10 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     if (chip) chip.setAttribute("aria-pressed", String(this.visibilityFor(kind) !== "none"));
   }
 
-  private refreshTitles(): void {
+  private refreshHints(): void {
     for (const kind of this.chips.keys()) {
       const chip = this.chips.get(kind);
-      if (chip) chip.title = this.describe(kind);
+      if (chip) chip.setAttribute("data-hint", this.describe(kind));
     }
   }
 

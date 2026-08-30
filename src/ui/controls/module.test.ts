@@ -73,6 +73,7 @@ const controlsCradleKeys = {
   profileChangeTracker: "profileChangeTracker",
   itemNameLoader: "itemNameLoader",
   controls: "controls",
+  hoverHintController: "hoverHintController",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

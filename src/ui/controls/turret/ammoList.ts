@@ -110,7 +110,7 @@ export class AmmoList {
     const items: SelectableItem[] = entries.map((entry) => ({
       value: entry.id,
       label: this.fittingImport.itemNameForId(entry.id, this.i18n.current()),
-      title: this.i18n.t("button.selectAmmo"),
+      hint: this.i18n.t("button.selectAmmo"),
       iconUrl: this.imageCatalog.itemIconUrl(entry.id),
       selected: entry.id === state.ammo,
       quantity: entry.quantity !== undefined ? `x${entry.quantity}` : undefined,
@@ -152,7 +152,7 @@ export class AmmoList {
     const items: SelectableItem[] = options.map((option) => ({
       value: option.id,
       label: this.fittingImport.itemNameForId(option.id, this.i18n.current()),
-      title: chargeStatSuffix(option),
+      hint: chargeStatSuffix(option),
       iconUrl: this.imageCatalog.itemIconUrl(option.id),
       selected: option.id === state.ammo,
     }));

@@ -133,11 +133,11 @@ describe("ChoiceGroup.render", () => {
     expect(group.children[0].childElementCount).toBe(0);
   });
 
-  test("sets title on button when provided", () => {
+  test("sets data-hint on button when provided", () => {
     const group = document.createElement("div") as unknown as HTMLElement;
     const choice = new ChoiceGroupImpl({ group, shape });
-    choice.render([{ value: "a", label: "Alpha", title: "Hint" }], "a");
-    expect(group.children[0].getAttribute("title")).toBe("Hint");
+    choice.render([{ value: "a", label: "Alpha", hint: "Hint" }], "a");
+    expect(group.children[0].getAttribute("data-hint")).toBe("Hint");
   });
 
   test("disables button when disabled is true", () => {

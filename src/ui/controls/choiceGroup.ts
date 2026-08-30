@@ -3,7 +3,7 @@ import { html } from "./markup";
 export interface ChoiceGroupOption {
   readonly value: string;
   readonly label: string;
-  readonly title?: string;
+  readonly hint?: string;
   readonly iconUrl?: string;
   readonly valueText?: string;
   readonly disabled?: boolean;
@@ -116,7 +116,7 @@ function buildChoiceButton(shape: ChoiceGroupShape, option: ChoiceGroupOption): 
       children.push(html`<span class=${shape.valueClass}>${option.valueText}</span>`);
     }
     const button = html`<button type="button" class=${classAttr} data-value=${option.value}>${children}</button>` as unknown as HTMLButtonElement;
-    if (option.title) button.setAttribute("title", option.title);
+    if (option.hint) button.setAttribute("data-hint", option.hint);
     if (option.disabled) button.setAttribute("disabled", "");
     return button;
   }
@@ -125,13 +125,13 @@ function buildChoiceButton(shape: ChoiceGroupShape, option: ChoiceGroupOption): 
     const icon = html`<img class=${shape.iconClass} src=${option.iconUrl} alt="">`;
     const label = html`<span>${option.label}</span>`;
     const button = html`<button type="button" class=${classAttr} data-value=${option.value}>${icon}${label}</button>` as unknown as HTMLButtonElement;
-    if (option.title) button.setAttribute("title", option.title);
+    if (option.hint) button.setAttribute("data-hint", option.hint);
     if (option.disabled) button.setAttribute("disabled", "");
     return button;
   }
 
   const button = html`<button type="button" class=${classAttr} data-value=${option.value}>${option.label}</button>` as unknown as HTMLButtonElement;
-  if (option.title) button.setAttribute("title", option.title);
+  if (option.hint) button.setAttribute("data-hint", option.hint);
   if (option.disabled) button.setAttribute("disabled", "");
   return button;
 }

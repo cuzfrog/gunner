@@ -20,16 +20,16 @@ import PopupBox from "../popup/PopupBox.astro";
     </PopupBox>
   </div>
   <IconButton id="profile-save" iconName="save" extraClass="btn btn-panel"
-          titleI18n="button.save" ariaLabelI18n="button.save"
-          title="Save profile" ariaLabel="Save" />
+          hintI18n="button.save" ariaLabelI18n="button.save"
+          data-hint="Save profile" ariaLabel="Save" />
   <IconButton id="profile-delete" iconName="trash" extraClass="btn btn-panel"
-          titleI18n="button.delete" ariaLabelI18n="button.delete"
-          title="Delete profile" ariaLabel="Delete" />
+          hintI18n="button.delete" ariaLabelI18n="button.delete"
+          data-hint="Delete profile" ariaLabel="Delete" />
   <div class="profile-new-field">
     <button type="button" id="profile-new" class="btn btn-panel icon-button"
             aria-haspopup="dialog" aria-expanded="false" aria-controls="new-profile-popup"
-            data-i18n-title="button.newProfile" data-i18n-aria-label="button.newProfile"
-            title="New profile" aria-label="New profile">
+            data-i18n-hint="button.newProfile" data-i18n-aria-label="button.newProfile"
+            data-hint="New profile" aria-label="New profile">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
         <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -62,8 +62,8 @@ import PopupBox from "../popup/PopupBox.astro";
   <div class="profile-share-field">
     <IconButton id="share-link" iconName="copy" extraClass="btn btn-panel"
             ariaHaspopup="menu" ariaExpanded={false} ariaControls="share-popup"
-            titleI18n="title.shareProfile" ariaLabelI18n="button.copyProfile"
-            title="Share current profile" ariaLabel="Copy" />
+            hintI18n="title.shareProfile" ariaLabelI18n="button.copyProfile"
+            data-hint="Share current profile" ariaLabel="Copy" />
     <PopupBox id="share-popup" extraClass="menu-popup" position="below" align="left" role="menu"
          i18nAriaLabel="menu.share" ariaLabel="Copy profile as">
       <button type="button" id="share-copy-url" class="popup-item" role="menuitem" data-i18n="menu.copyAsUrl">Copy as URL</button>
@@ -73,8 +73,8 @@ import PopupBox from "../popup/PopupBox.astro";
   <div class="profile-import-field">
     <IconButton id="import-profile" iconName="import" extraClass="btn btn-panel"
             ariaHaspopup="menu" ariaExpanded={false} ariaControls="import-side-popup"
-            titleI18n="title.importProfile" ariaLabelI18n="button.importProfile"
-            title="Import profile or fitting from clipboard" ariaLabel="Import" />
+            hintI18n="title.importProfile" ariaLabelI18n="button.importProfile"
+            data-hint="Import profile or fitting from clipboard" ariaLabel="Import" />
     <PopupBox id="import-side-popup" extraClass="menu-popup" position="below" align="left" role="menu"
          i18nAriaLabel="menu.importSide" ariaLabel="Import fitting as">
       <button type="button" id="import-side-ship-a" class="popup-item" role="menuitem" data-i18n="label.shipA">Ship A</button>

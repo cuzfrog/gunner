@@ -15,7 +15,7 @@ interface SideState {
 
 interface PortraitEffect {
   readonly moduleId: TypeId;
-  readonly title: string;
+  readonly hint: string;
 }
 
 export class PortraitsControllerImpl implements PortraitsController {
@@ -86,7 +86,7 @@ export class PortraitsControllerImpl implements PortraitsController {
     for (const effect of portraitEffects) {
       const iconUrl = this.imageCatalog.itemIconUrl(effect.moduleId);
       if (iconUrl === undefined) continue;
-      const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" title=${effect.title}>` as unknown as HTMLImageElement;
+      const img = html`<img class="portrait-effect-icon" src=${iconUrl} alt="" data-hint=${effect.hint}>` as unknown as HTMLImageElement;
       icons.appendChild(img);
     }
     effects.appendChild(icons);
@@ -99,17 +99,17 @@ function sideStateFor(side: Side, shipAState: SideState, shipBState: SideState):
 }
 
 function buildDiffKey(id: ShipId, effects: readonly PortraitEffect[]): string {
-  return `${id}|${effects.map((e) => `${e.moduleId}:${e.title}`).join(",")}`;
+  return `${id}|${effects.map((e) => `${e.moduleId}:${e.hint}`).join(",")}`;
 }
 
 function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreakdown, i18n: I18n): PortraitEffect[] {
   const effects: PortraitEffect[] = [];
   for (const effect of speed.effects) {
     if (effect.family === "scrambler") {
-      effects.push({ moduleId: effect.moduleId, title: i18n.t("ewar.hover.scrambler") });
+      effects.push({ moduleId: effect.moduleId, hint: i18n.t("ewar.hover.scrambler") });
     } else {
       const percent = Math.round((1 - effect.multiplier) * 100);
-      effects.push({ moduleId: effect.moduleId, title: `${i18n.t("ewar.hover.web")} ${percent}%` });
+      effects.push({ moduleId: effect.moduleId, hint: `${i18n.t("ewar.hover.web")} ${percent}%` });
     }
   }
   const disruptorMap = new Map<TypeId, { tracking: number; optimal: number; falloff: number }>();
@@ -121,7 +121,7 @@ function buildPortraitEffects(speed: SpeedBreakdown, disruption: DisruptionBreak
     if (channels.tracking < 1) parts.push(`${i18n.t("ewar.hover.tracking")} -${Math.round((1 - channels.tracking) * 100)}%`);
     if (channels.optimal < 1) parts.push(`${i18n.t("ewar.hover.optimal")} -${Math.round((1 - channels.optimal) * 100)}%`);
     if (channels.falloff < 1) parts.push(`${i18n.t("ewar.hover.falloff")} -${Math.round((1 - channels.falloff) * 100)}%`);
-    if (parts.length > 0) effects.push({ moduleId, title: parts.join(" · ") });
+    if (parts.length > 0) effects.push({ moduleId, hint: parts.join(" · ") });
   }
   return effects;
 }

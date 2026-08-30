@@ -184,12 +184,12 @@ describe("MissileBoosterController", () => {
     controller.setLoadout("shipA", LOADOUT);
     const summary = getFake(document, "ship-a-missile-booster-summary");
     const computerSummaryBefore = summary.children[0];
-    const titleBefore = computerSummaryBefore.getAttribute("title") ?? "";
+    const titleBefore = computerSummaryBefore.getAttribute("data-hint") ?? "";
     const row = computerRows(missileBoosterSection(document, "shipA"))[0];
     const overloadButton = row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))!;
     overloadButton.dispatchEvent(new Event("click"));
     const computerSummaryAfter = getFake(document, "ship-a-missile-booster-summary").children[0];
-    const titleAfter = computerSummaryAfter.getAttribute("title") ?? "";
+    const titleAfter = computerSummaryAfter.getAttribute("data-hint") ?? "";
     expect(titleBefore).not.toBe(titleAfter);
     expect(titleAfter).toContain("missileBooster.hover.explosionRadius");
   });

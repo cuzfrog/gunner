@@ -67,7 +67,7 @@ function renderHeader(
   const closeAction = new IconActionImpl({
     buttonClass: "preview-close icon-button",
     iconSvg: spriteIconStroked("delete", 12),
-    title: () => i18n.t("button.close"),
+    hint: () => i18n.t("button.close"),
   });
   const close = closeAction.create(() => onClose?.());
 
@@ -97,7 +97,7 @@ function renderRow(
        html`<span class="preview-charge">, ${chargeName}</span>`]
     : null;
 
-  const name = html`<span class="preview-name truncate" title=${row.empty ? row.name : displayName}>${displayName}</span>`;
+  const name = html`<span class="preview-name truncate" data-hint=${row.empty ? row.name : displayName}>${displayName}</span>`;
   const main = html`<div class="preview-row-main">${name}${chargeChildren}</div>`;
 
   const quantity = row.quantity !== undefined ? html`<span class="preview-quantity mono">x${row.quantity}</span>` : null;

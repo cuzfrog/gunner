@@ -125,6 +125,7 @@ function createGlobalControlsEls(): GlobalControlsEls {
     rangeOverlayLegend: el(globalElementId("rangeOverlayLegend")),
     slideHints: el(globalElementId("slideHints")),
     scene: el(globalElementId("scene")),
+    hoverHint: el(globalElementId("hoverHint")),
   };
 }
 

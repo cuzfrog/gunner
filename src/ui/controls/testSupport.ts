@@ -68,7 +68,7 @@ export function addSigResButtons(document: Document): void {
       button.tagName = "BUTTON";
       button.setAttribute("data-value", value);
       button.setAttribute("aria-pressed", String(value === "S"));
-      button.title = `Original ${value}`;
+      button.setAttribute("data-hint", `Original ${value}`);
       group.appendChild(button);
     }
   }

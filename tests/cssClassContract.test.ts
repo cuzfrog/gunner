@@ -50,6 +50,7 @@ const APPROVED_PREFIXES = [
   "input-suffix",
   "effective-value",
   "info-hint",
+  "hover-hint",
   "segmented-control",
   "skill-tuner",
   "skill",

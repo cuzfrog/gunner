@@ -51,17 +51,17 @@ describe("SelectableList.createButton", () => {
     expect(button.getAttribute("data-value")).toBe("missile-1");
   });
 
-  test("sets title on button", () => {
+  test("sets data-hint on button", () => {
     const list = new SelectableListImpl(shape());
-    const button = list.createButton(item({ title: "Some hint" }));
-    expect(button.getAttribute("title")).toBe("Some hint");
+    const button = list.createButton(item({ hint: "Some hint" }));
+    expect(button.getAttribute("data-hint")).toBe("Some hint");
   });
 
-  test("sets title on name span matching label", () => {
+  test("sets data-hint on name span matching label", () => {
     const list = new SelectableListImpl(shape());
     const button = list.createButton(item({ label: "Long Name" }));
     const span = button.firstElementChild as HTMLElement;
-    expect(span.getAttribute("title")).toBe("Long Name");
+    expect(span.getAttribute("data-hint")).toBe("Long Name");
   });
 
   test("adds icon img when iconUrl provided", () => {

@@ -240,7 +240,7 @@ describe("PropulsionSection", () => {
     const variants = getFake(document, "ship-a-propulsion-variants");
     const button = variants.children[0] as unknown as HTMLElement;
     expect(button.getAttribute("data-value")).toBe(AB_DEFAULT_ID);
-    expect(button.getAttribute("title")).toBe("1MN加力燃烧器 I");
+    expect(button.getAttribute("data-hint")).toBe("1MN加力燃烧器 I");
     expect(button.children[1].textContent).toBe("1MN加力燃烧器 I");
     expect(imageCatalog.itemIconUrl).toHaveBeenCalledWith(AB_DEFAULT_ID);
   });

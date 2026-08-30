@@ -137,6 +137,7 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   rangeOverlayLegend: { id: "range-overlay-legend", tag: "DIV" as const, defaultValue: undefined },
   slideHints: { id: "slide-hints", tag: "SPAN" as const, defaultValue: undefined },
   scene: { id: "scene", tag: "CANVAS" as const, defaultValue: undefined },
+  hoverHint: { id: "hover-hint", tag: "DIV" as const, defaultValue: undefined },
 } as const satisfies { readonly [K: string]: GlobalElementDefinition };
 
 interface CombatantElementDefinition<T extends HtmlTag = HtmlTag> {

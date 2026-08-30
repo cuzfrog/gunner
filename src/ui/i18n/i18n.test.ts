@@ -136,7 +136,7 @@ describe("I18nImpl", () => {
     expect(i18n.t("hint.initialDistance")).toContain("リセット");
   });
 
-  test("translateDocument sets text, placeholder, aria-label and title from data attributes", () => {
+  test("translateDocument sets text, placeholder, aria-label and hint from data attributes", () => {
     const label = new FakeElement();
     label.setAttribute("data-i18n", "label.overload");
     const input = new FakeElement();
@@ -144,7 +144,7 @@ describe("I18nImpl", () => {
     const group = new FakeElement();
     group.setAttribute("data-i18n-aria-label", "label.propulsion");
     const button = new FakeElement();
-    button.setAttribute("data-i18n-title", "label.overload");
+    button.setAttribute("data-i18n-hint", "label.overload");
     globalThis.document = fakeDocument([label, input, group, button]) as unknown as Document;
 
     const i18n = new I18nImpl();
@@ -153,6 +153,6 @@ describe("I18nImpl", () => {
     expect(label.textContent).toBe("Overload");
     expect(input.placeholder).toBe("Type ship name…");
     expect(group.getAttribute("aria-label")).toBe("Propulsion");
-    expect(button.title).toBe("Overload");
+    expect(button.getAttribute("data-hint")).toBe("Overload");
   });
 });

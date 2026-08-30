@@ -3,7 +3,7 @@ import { html } from "../markup";
 export interface SelectableItem {
   readonly value: string;
   readonly label: string;
-  readonly title?: string;
+  readonly hint?: string;
   readonly iconUrl?: string;
   readonly selected: boolean;
   readonly quantity?: string;
@@ -32,7 +32,7 @@ export class SelectableListImpl implements SelectableList {
     const button = buildButton(this.shape, item);
     if (this.shape.role) button.setAttribute("role", this.shape.role);
     if (item.selected) button.setAttribute("aria-current", "true");
-    if (item.title) button.setAttribute("title", item.title);
+    if (item.hint) button.setAttribute("data-hint", item.hint);
     if (item.disabled) button.setAttribute("disabled", "");
     return button;
   }
@@ -69,7 +69,7 @@ function buildButton(shape: SelectableListShape, item: SelectableItem): HTMLButt
     children.push(html`<img class=${shape.iconClass} src=${item.iconUrl} alt="">`);
   }
   const nameClassAttr = `${shape.nameClass} truncate`;
-  children.push(html`<span class=${nameClassAttr} title=${item.label}>${item.label}</span>`);
+  children.push(html`<span class=${nameClassAttr} data-hint=${item.label}>${item.label}</span>`);
   if (item.quantity && shape.quantityClass) {
     children.push(html`<span class=${shape.quantityClass}>${item.quantity}</span>`);
   }
