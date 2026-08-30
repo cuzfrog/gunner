@@ -1,0 +1,1 @@
+export { registerDpsHintModule } from "./module";

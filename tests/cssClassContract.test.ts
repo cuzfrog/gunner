@@ -51,6 +51,7 @@ const APPROVED_PREFIXES = [
   "effective-value",
   "info-hint",
   "hover-hint",
+  "dps-hint",
   "segmented-control",
   "skill-tuner",
   "skill",

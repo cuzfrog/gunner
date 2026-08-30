@@ -72,6 +72,7 @@ const controlsCradleKeys = {
   profileEquality: "profileEquality",
   profileChangeTracker: "profileChangeTracker",
   itemNameLoader: "itemNameLoader",
+  itemNameCatalog: "itemNameCatalog",
   controls: "controls",
   hoverHintController: "hoverHintController",
 } as const satisfies { [K in keyof ControlsCradle]: K };

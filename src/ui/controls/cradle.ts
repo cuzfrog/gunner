@@ -2,7 +2,7 @@ import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser
 import type { ChargeCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
-import type { ItemNameLoader } from "../../gamedata";
+import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
@@ -53,6 +53,7 @@ export interface ControlsCradle {
   readonly imageCatalog: ImageCatalog;
   readonly uiEvents: UiEvents;
   readonly itemNameLoader: ItemNameLoader;
+  readonly itemNameCatalog: ItemNameCatalog;
   readonly shipATurretOverrides: TurretOverrides;
   readonly shipBTurretOverrides: TurretOverrides;
   readonly turretOverridesBySide: Record<Side, TurretOverrides>;
