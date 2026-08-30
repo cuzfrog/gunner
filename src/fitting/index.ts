@@ -8,5 +8,6 @@ export type { GunFamilies, GunFamily } from "./gunFamilies";
 export type { TurretCatalog } from "./turretCatalog";
 export type { LauncherClass, LauncherClasses } from "./launcherClasses";
 export type { LauncherCatalog } from "./launcherCatalog";
+export type { FittingState, FittedModule, TurretGroup, LauncherGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCradle } from "./cradle";
 export { registerFittingModule } from "./module";

@@ -1635,7 +1635,9 @@ describe("FittingImportImpl identity resolution", () => {
     const withDamageMod = importer.importFitting(`[Rifter, Stats]\n200mm AutoCannon I, Hail S\nMagnetic Field Stabilizer II\n`, conditions);
     expect(withDamageMod).toBeDefined();
     expect(without).toBeDefined();
-    expect(withDamageMod).toEqual(without);
+    const { fittingState: _withoutState, ...withoutComputed } = without!;
+    const { fittingState: _withState, ...withComputed } = withDamageMod!;
+    expect(withComputed).toEqual(withoutComputed);
   });
 
   test("a db turret keeps a charge identity even when the charge is not in db.charges", () => {

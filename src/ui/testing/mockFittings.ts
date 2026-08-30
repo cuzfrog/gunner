@@ -1,4 +1,4 @@
-import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, FittingState, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
 import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fittingDb";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
@@ -144,10 +144,24 @@ export const TURRET: ImportedTurret = {
   turretCount: 1,
 };
 
+const EMPTY_FITTING_STATE: FittingState = {
+  profile: RIFTER,
+  hullBonuses: [],
+  supportModules: [],
+  turretGroups: [],
+  launcherGroups: [],
+  propulsionModule: undefined,
+  ewarModules: [],
+  boosterModules: [],
+  drones: [],
+  cargo: [],
+};
+
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
   fitted: FITTED,
+  fittingState: EMPTY_FITTING_STATE,
   propulsion: undefined,
   turret: TURRET,
   cargoCharges: [],

@@ -2,7 +2,7 @@ import { registerSimModule, type SimCradle, type SimValueParser } from "../sim";
 import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
-import type { ChargeCatalog, FittingImport, ImportedFitting, MissileCatalog } from "../fitting";
+import type { ChargeCatalog, FittingImport, FittingState, ImportedFitting, MissileCatalog } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
@@ -190,10 +190,24 @@ export const RIFTER_MWD_STATS: ShipStats = {
   sigRadius: 210,
   alignTime: Math.log(4) * 3,
 };
+const EMPTY_FITTING_STATE: FittingState = {
+  profile: RIFTER_PROFILE,
+  hullBonuses: [],
+  supportModules: [],
+  turretGroups: [],
+  launcherGroups: [],
+  propulsionModule: undefined,
+  ewarModules: [],
+  boosterModules: [],
+  drones: [],
+  cargo: [],
+};
+
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER_PROFILE,
   fittingName: "Brawler",
   fitted: RIFTER_FITTED,
+  fittingState: EMPTY_FITTING_STATE,
   propulsion: RIFTER_PROPULSION,
   turret: {
     tracking: 0.315,

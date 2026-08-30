@@ -33,6 +33,7 @@ import type { ChargeCatalog, CargoCharge, ImportedTurret, ImportedTurretBase, Im
 import type { MissileCatalog } from "./missileCatalog";
 import type { MissileSkillModel } from "./missileStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
+import { FittingStateFactory, type FittingState, type FittingModuleEntry, type CargoEntry } from "./fittingState";
 import type {
   FittingDb,
   ChargeStats,
@@ -81,6 +82,7 @@ export interface ImportedFitting {
   readonly profile: ShipProfile;
   readonly fittingName: string;
   readonly fitted: FittedHull;
+  readonly fittingState: FittingState;
   readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
   readonly turrets?: readonly ImportedTurret[];
@@ -117,6 +119,7 @@ export class FittingImportImpl implements FittingImport {
   private readonly itemNameCatalog: ItemNameCatalog;
   private readonly itemNameResolver: ItemNameResolver;
   private readonly moduleSlotCatalog: ModuleSlotCatalog;
+  private readonly fittingStateFactory: FittingStateFactory;
 
   constructor({
     ships,
@@ -148,6 +151,7 @@ export class FittingImportImpl implements FittingImport {
     this.itemNameCatalog = itemNameCatalog;
     this.itemNameResolver = itemNameResolver;
     this.moduleSlotCatalog = moduleSlotCatalog;
+    this.fittingStateFactory = new FittingStateFactory(fittingDb);
   }
 
   propulsionVariantNames(module: PropulsionModule): readonly PropulsionVariant[] {
@@ -196,11 +200,13 @@ export class FittingImportImpl implements FittingImport {
     const cargoCharges = resolveCargoCharges(this.db, resolved);
     const ewar = resolveEwar(this.db, resolved, this.itemNameCatalog);
     const boosts = resolveBoosts(this.db, resolved, this.itemNameCatalog);
+    const fittingState = this.fittingStateFactory.create(resolved.profile, hullBonuses, collectModuleEntries(resolved), collectCargoEntries(resolved.drones), collectCargoEntries(resolved.cargo));
 
     return {
       profile: resolved.profile,
       fittingName: resolved.fittingName,
       fitted: hullSide.fitted,
+      fittingState,
       propulsion,
       turret,
       turrets: turrets.length > 0 ? turrets : undefined,
@@ -1034,4 +1040,23 @@ function hasKana(text: string): boolean {
 
 function hasCjk(text: string): boolean {
   return CJK_PATTERN.test(text);
+}
+
+function collectModuleEntries(resolved: ResolvedEft): readonly FittingModuleEntry[] {
+  const entries: FittingModuleEntry[] = [];
+  for (const bank of resolved.banks) {
+    for (const line of bank.lines) {
+      if (line.kind !== "module") continue;
+      entries.push({ moduleId: line.moduleId, chargeId: line.chargeId, offline: line.offline });
+    }
+  }
+  return entries;
+}
+
+function collectCargoEntries(items: readonly ResolvedQuantity[]): readonly CargoEntry[] {
+  const entries: CargoEntry[] = [];
+  for (const item of items) {
+    if (item.kind === "resolved") entries.push({ id: item.id, quantity: item.quantity });
+  }
+  return entries;
 }

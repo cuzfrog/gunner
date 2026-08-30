@@ -7,6 +7,8 @@ no-new-exports:
   - eft.ts
   - fittingImport.test.ts
   - fittingImport.ts
+  - fittingState.test.ts
+  - fittingState.ts
   - gunFamilies.test.ts
   - gunFamilies.ts
   - index.ts
@@ -39,9 +41,15 @@ The public boundary is `index.ts`, which exports the `FittingImport`,
 `GunFamilies`, `TurretCatalog`, `LauncherClasses`, and `LauncherCatalog`
 abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
 `CargoCharge`, `ChargeOption`, `MissileOption`, `PresetFitting`,
-`FittingRow`, `FittingSection`, `FittingSummary`, `LauncherClass`, and
-the module registration. `ChargeCatalog` adds
-`has(charge)` so persistence modules can existence-check stored charge
+`FittingRow`, `FittingSection`, `FittingSummary`, `LauncherClass`,
+`FittingState`, `FittedModule`, `TurretGroup`, `LauncherGroup`,
+`CargoEntry`, `FittingModuleEntry`, and the module registration.
+`FittingState` represents the equipped fitting basis (hull, support
+modules, turret groups, launcher groups, propulsion, ewar, boosters,
+drones, cargo) without computed values. `FittingStateFactory` builds
+`FittingState` from resolved module entries and `FittingDb`.
+`ImportedFitting.fittingState` carries the basis for later recomputation.
+`ChargeCatalog` adds `has(charge)` so persistence modules can existence-check stored charge
 ids without reaching into the catalog's internal record.
 `ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` so
 `TurretCatalog` can preserve the user's ammo selection when switching
