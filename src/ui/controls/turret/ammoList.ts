@@ -2,7 +2,6 @@ import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedT
 import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
-import { chargeStatSuffix } from "../controlsFormat";
 import { isHtmlButtonElement, setText } from "../controlsDom";
 import { SelectableListImpl, type SelectableItem, SummaryChipImpl } from "../shared";
 
@@ -86,13 +85,12 @@ export class AmmoList {
       this.summaryChip.render("—", undefined);
     }
     const options = hasTurret ? this.chargeCatalog.chargesForTurret(state.turret!) : [];
-    const hintMap = this.chargeHintMap(options);
-    this.renderCargoList(state, hintMap);
+    this.renderCargoList(state);
     this.renderAllList(state, options);
     this.renderExpand(state.allExpanded);
   }
 
-  private renderCargoList(state: AmmoListState, hintMap: Map<string, string>): void {
+  private renderCargoList(state: AmmoListState): void {
     const list = this.els.ammoCargoList;
     const label = this.els.ammoCargoLabel;
     list.innerHTML = "";
@@ -112,7 +110,7 @@ export class AmmoList {
     const items: SelectableItem[] = entries.map((entry) => ({
       value: entry.id,
       label: this.fittingImport.itemNameForId(entry.id, this.i18n.current()),
-      hint: hintMap.get(entry.id) ?? this.i18n.t("button.selectAmmo"),
+      hintContent: "ammo-hint",
       iconUrl: this.imageCatalog.itemIconUrl(entry.id),
       selected: entry.id === state.ammo,
       quantity: entry.quantity !== undefined ? `x${entry.quantity}` : undefined,
@@ -135,14 +133,6 @@ export class AmmoList {
     return entries;
   }
 
-  private chargeHintMap(options: readonly ChargeOption[]): Map<string, string> {
-    const map = new Map<string, string>();
-    for (const option of options) {
-      map.set(option.id, chargeStatSuffix(option));
-    }
-    return map;
-  }
-
   private renderAllList(state: AmmoListState, options: readonly ChargeOption[]): void {
     const list = this.els.ammoAllList;
     const section = this.els.ammoAllSection;
@@ -161,7 +151,7 @@ export class AmmoList {
     const items: SelectableItem[] = options.map((option) => ({
       value: option.id,
       label: this.fittingImport.itemNameForId(option.id, this.i18n.current()),
-      hint: chargeStatSuffix(option),
+      hintContent: "ammo-hint",
       iconUrl: this.imageCatalog.itemIconUrl(option.id),
       selected: option.id === state.ammo,
     }));

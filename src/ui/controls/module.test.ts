@@ -77,6 +77,8 @@ const controlsCradleKeys = {
   hoverHintController: "hoverHintController",
   dpsHintRenderer: "dpsHintRenderer",
   dpsHintProvider: "dpsHintProvider",
+  ammoHintRenderer: "ammoHintRenderer",
+  ammoHintProvider: "ammoHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

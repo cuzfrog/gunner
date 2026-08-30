@@ -4,6 +4,7 @@ export interface SelectableItem {
   readonly value: string;
   readonly label: string;
   readonly hint?: string;
+  readonly hintContent?: string;
   readonly iconUrl?: string;
   readonly selected: boolean;
   readonly quantity?: string;
@@ -33,6 +34,7 @@ export class SelectableListImpl implements SelectableList {
     if (this.shape.role) button.setAttribute("role", this.shape.role);
     if (item.selected) button.setAttribute("aria-current", "true");
     if (item.hint) button.setAttribute("data-hint", item.hint);
+    if (item.hintContent) button.setAttribute("data-hint-content", item.hintContent);
     if (item.disabled) button.setAttribute("disabled", "");
     return button;
   }

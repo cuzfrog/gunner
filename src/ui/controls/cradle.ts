@@ -34,6 +34,8 @@ import type { Side } from "./side";
 import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
 import type { DpsHintProvider } from "./dpsHint";
 import type { DpsHintRenderer } from "./dpsHint";
+import type { AmmoHintProvider } from "./ammoHint";
+import type { AmmoHintRenderer } from "./ammoHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -109,4 +111,6 @@ export interface ControlsCradle {
   readonly hoverHintController: HoverHintController;
   readonly dpsHintRenderer: DpsHintRenderer;
   readonly dpsHintProvider: DpsHintProvider;
+  readonly ammoHintRenderer: AmmoHintRenderer;
+  readonly ammoHintProvider: AmmoHintProvider;
 }

@@ -1,0 +1,53 @@
+@layer components {
+.ammo-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+
+.ammo-hint-row {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ammo-hint-type-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.ammo-hint-label {
+  color: var(--text-secondary);
+}
+
+.ammo-hint-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.ammo-hint-total-row {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.ammo-hint-total-row .ammo-hint-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ammo-hint-total-row .ammo-hint-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ammo-hint-modifiers {
+  color: var(--text-dim);
+  font-size: 11px;
+  margin-top: 1px;
+}
+}
