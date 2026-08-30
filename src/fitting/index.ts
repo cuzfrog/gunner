@@ -1,5 +1,7 @@
 export type { FittingDb, FittingImport, FittingRow, FittingSection, FittingSummary, ImportedFitting, ImportedTurret, ImportedLauncher } from "./fittingImport";
 export type { CargoCharge, ChargeCatalog, ChargeOption, ImportedTurretBase } from "./chargeCatalog";
+export type { DamageType, DamageFactor, DamageFactorKind, DamageBreakdown } from "./damageBreakdown";
+export { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 export type { MissileCatalog, MissileOption } from "./missileCatalog";
 export type { MissileSkillModel } from "./missileStats";
 export type { PresetFitting, PresetFittings } from "./presetFittings";

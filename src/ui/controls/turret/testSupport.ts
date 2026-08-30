@@ -1,6 +1,6 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesStore } from "../../../fitting";
-import { FittingOverridesStoreImpl } from "../../../fitting";
+import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
 import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser } from "../../../sim";

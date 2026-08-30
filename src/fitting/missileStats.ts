@@ -10,6 +10,9 @@ export interface MissileSkillOutput {
   readonly damageReductionFactor: number;
   readonly maxVelocity: number;
   readonly flightTime: number;
+  readonly skillDamageMultiplier: number;
+  readonly skillDamageName: string;
+  readonly hullDamageMultiplier: number;
 }
 
 export interface MissileSkillModel {
@@ -19,6 +22,7 @@ export interface MissileSkillModel {
 const MLO_ROF_BONUS = 0.02;
 const RAPID_LAUNCH_ROF_BONUS = 0.03;
 const WARHEAD_DAMAGE_BONUS = 0.02;
+const WARHEAD_DAMAGE_SKILL_NAME = "Warhead Upgrades";
 const MISSILE_BOMBARDMENT_FLIGHT_BONUS = 0.10;
 const MISSILE_PROJECTION_VELOCITY_BONUS = 0.10;
 const GUIDED_PRECISION_RADIUS_BONUS = 0.05;
@@ -58,6 +62,9 @@ export class MissileSkillModelImpl implements MissileSkillModel {
       damageReductionFactor: missile.damageReductionFactor,
       maxVelocity: missile.maxVelocity * skillMaxVelocityMultiplier,
       flightTime: missile.flightTime * skillFlightTimeMultiplier,
+      skillDamageMultiplier,
+      skillDamageName: WARHEAD_DAMAGE_SKILL_NAME,
+      hullDamageMultiplier,
     };
   }
 }

@@ -3,6 +3,7 @@ import { buildLauncher, importedLauncherFixture } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
 import type { ImportedFitting, LauncherClass, LauncherClasses } from "../../../fitting";
 import type { ImportedLauncher } from "../../../fitting";
+import { EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 
 function importedWithLauncher(launcher: ReturnType<typeof importedLauncherFixture>): ImportedFitting {
   return {
@@ -36,6 +37,7 @@ function rocketLauncherFixture(count: number): ImportedLauncher {
     damageReductionFactor: 0.5,
     maxVelocity: 4500,
     flightTime: 4,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   };
 }
 
@@ -53,6 +55,7 @@ function lightLauncherFixture(count: number): ImportedLauncher {
     damageReductionFactor: 0.5,
     maxVelocity: 3750,
     flightTime: 5,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   };
 }
 

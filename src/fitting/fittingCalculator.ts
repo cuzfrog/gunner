@@ -10,6 +10,7 @@ import type { MissileSkillModel } from "./missileStats";
 import { TRACKING_SKILL_BONUS, OPTIMAL_SKILL_BONUS, FALLOFF_SKILL_BONUS, STANDARD_SIGNATURE_RESOLUTION, sigResolutionClassFromChargeSize } from "./turretStats";
 import type { FittingState } from "./fittingState";
 import type { ItemNameCatalog } from "../gamedata/itemNames";
+import { type DamageBreakdown, type DamageFactor, chargeDamageByType, missileDamageByType } from "./damageBreakdown";
 
 export interface PropulsionResult extends PropulsionStats {
   readonly propulsionId: PropulsionId;
@@ -69,7 +70,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const sharedTrackingPercents: number[] = [];
     const sharedOptimalPercents: number[] = [];
     const sharedFalloffPercents: number[] = [];
-    const damageMultipliersByGroup = new Map<TurretWeaponGroup, number[]>();
+    const damageModifiersByGroup = new Map<TurretWeaponGroup, TurretDamageModifier[]>();
     const speedMultipliersByGroup = new Map<TurretWeaponGroup, number[]>();
 
     for (const mod of fitting.supportModules) {
@@ -77,7 +78,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       if (!stats) continue;
       const script = mod.chargeId ? this.db.scripts[mod.chargeId] : undefined;
       collectTurretPercents(stats, script, sharedTrackingPercents, sharedOptimalPercents, sharedFalloffPercents);
-      collectDamageModuleModifiers(stats, damageMultipliersByGroup, speedMultipliersByGroup);
+      collectDamageModuleModifiers(mod.moduleId, stats, damageModifiersByGroup, speedMultipliersByGroup);
     }
 
     if (fitting.turretGroups.length === 0) return [];
@@ -112,9 +113,9 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const optimalBonus = this.stacking.apply([...sharedOptimalPercents, ...hullOptimalPercents].map((p) => 1 + p / 100));
       const falloffBonus = this.stacking.apply([...sharedFalloffPercents, ...hullFalloffPercents].map((p) => 1 + p / 100));
 
-      const moduleDamageMultipliers = weaponGroup ? (damageMultipliersByGroup.get(weaponGroup) ?? []) : [];
+      const moduleDamageModifiers = weaponGroup ? (damageModifiersByGroup.get(weaponGroup) ?? []) : [];
       const moduleSpeedMultipliers = weaponGroup ? (speedMultipliersByGroup.get(weaponGroup) ?? []) : [];
-      const moduleDamageBonus = this.stacking.apply(moduleDamageMultipliers);
+      const moduleDamageBonus = this.stacking.apply(moduleDamageModifiers.map((m) => m.multiplier));
       const moduleSpeedBonus = this.stacking.apply(moduleSpeedMultipliers);
       const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
@@ -127,6 +128,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const [overloadDamage, overloadCycle] = weaponOverloadMultipliers(this.gunFamilies.familyOf(group.moduleId), conditions.weaponOverloaded);
       const finalDamageMultiplier = modifiedDamageMultiplier * overloadDamage;
       const finalCycleTime = modifiedCycleTime * overloadCycle;
+
+      const factors = buildTurretDamageFactors(turret.damageMultiplier, moduleDamageBonus, moduleDamageModifiers, skillDamageMultiplier, turret.turretSkill, hullDamageMultiplier, fitting.profile.name, overloadDamage);
 
       const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
       const sigRes = SIG_RESOLUTIONS[sigResClass];
@@ -157,6 +160,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         damagePerShot: 0,
         cycleTime: finalCycleTime,
         turretCount: group.count,
+        damageBreakdown: { damageByType: {}, factors },
       };
       const selectedCharge = chargeId && this.db.charges[chargeId] ? chargeId : this.chargeCatalog.usualForTurret(turretForChargeSelection);
       const charge = this.db.charges[selectedCharge] ?? {};
@@ -175,6 +179,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
         damagePerShot: finalDamageMultiplier * chargeDamage,
         cycleTime: finalCycleTime,
         turretCount: group.count,
+        damageBreakdown: { damageByType: chargeDamageByType(charge), factors },
       });
     }
 
@@ -203,19 +208,20 @@ export class FittingCalculatorImpl implements FittingCalculator {
     const missileStats = this.db.missiles[chargeId];
     if (!missileStats) return undefined;
 
-    const bcsDamageMultipliers: number[] = [];
+    const bcsDamageModifiers: { moduleId: TypeId; multiplier: number }[] = [];
     const bcsCycleTimeMultipliers: number[] = [];
     for (const mod of fitting.supportModules) {
       const stats = this.db.modules[mod.moduleId];
       if (!stats) continue;
-      if (stats.missileDamageMultiplier && stats.missileDamageMultiplier !== 1) bcsDamageMultipliers.push(stats.missileDamageMultiplier);
+      if (stats.missileDamageMultiplier && stats.missileDamageMultiplier !== 1) bcsDamageModifiers.push({ moduleId: mod.moduleId, multiplier: stats.missileDamageMultiplier });
       if (stats.missileCycleTimeMultiplier && stats.missileCycleTimeMultiplier !== 1) bcsCycleTimeMultipliers.push(stats.missileCycleTimeMultiplier);
     }
-    const bcsDamageBonus = this.stacking.apply(bcsDamageMultipliers);
+    const bcsDamageBonus = this.stacking.apply(bcsDamageModifiers.map((m) => m.multiplier));
     const bcsCycleTimeBonus = this.stacking.apply(bcsCycleTimeMultipliers);
 
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
+    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageName, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -229,6 +235,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       damageReductionFactor: output.damageReductionFactor,
       maxVelocity: output.maxVelocity,
       flightTime: output.flightTime,
+      damageBreakdown: { damageByType: missileDamageByType(missileStats), factors: missileFactors },
     };
   }
 
@@ -442,13 +449,13 @@ function collectTurretPercents(stats: FittingModuleStats, script: TurretScriptSt
   }
 }
 
-function collectDamageModuleModifiers(stats: FittingModuleStats, damageMultipliersByGroup: Map<TurretWeaponGroup, number[]>, speedMultipliersByGroup: Map<TurretWeaponGroup, number[]>): void {
+function collectDamageModuleModifiers(moduleId: TypeId, stats: FittingModuleStats, damageModifiersByGroup: Map<TurretWeaponGroup, TurretDamageModifier[]>, speedMultipliersByGroup: Map<TurretWeaponGroup, number[]>): void {
   if (!stats.turretWeaponGroup) return;
   const group = stats.turretWeaponGroup;
   if (stats.turretDamageMultiplier && stats.turretDamageMultiplier !== 1) {
-    const list = damageMultipliersByGroup.get(group) ?? [];
-    list.push(stats.turretDamageMultiplier);
-    damageMultipliersByGroup.set(group, list);
+    const list = damageModifiersByGroup.get(group) ?? [];
+    list.push({ moduleId, multiplier: stats.turretDamageMultiplier });
+    damageModifiersByGroup.set(group, list);
   }
   if (stats.turretSpeedMultiplier && stats.turretSpeedMultiplier !== 1) {
     const list = speedMultipliersByGroup.get(group) ?? [];
@@ -498,4 +505,26 @@ function weaponOverloadMultipliers(family: GunFamily, weaponOverloaded: boolean)
   if (!weaponOverloaded) return [1, 1] as const;
   if (SHORT_RANGE_GUN_FAMILIES.has(family)) return [WEAPON_OVERLOAD_DAMAGE_MULTIPLIER, 1] as const;
   return [1, WEAPON_OVERLOAD_ROF_MULTIPLIER] as const;
+}
+
+interface TurretDamageModifier {
+  readonly moduleId: TypeId;
+  readonly multiplier: number;
+}
+
+function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], skillDamageMultiplier: number, skillName: string | undefined, hullDamageMultiplier: number, hullName: string, overloadDamage: number): readonly DamageFactor[] {
+  const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
+  if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
+  if (skillDamageMultiplier !== 1 && skillName !== undefined) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillName });
+  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  if (overloadDamage !== 1) factors.push({ kind: "overload", multiplier: overloadDamage });
+  return factors;
+}
+
+function buildMissileDamageFactors(skillDamageMultiplier: number, skillName: string, hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
+  const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
+  if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillName });
+  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  return factors;
 }

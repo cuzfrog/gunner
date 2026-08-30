@@ -10,6 +10,7 @@ import {
   type ChargeOption,
   type ImportedTurret,
 } from "./chargeCatalog";
+import { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 import { GunFamiliesImpl } from "./gunFamilies";
 
 function typeId(name: string): TypeId {
@@ -84,6 +85,7 @@ function turret(overrides: Partial<ImportedTurret> = {}): ImportedTurret {
     damagePerShot: 12,
     cycleTime: 5,
     turretCount: 1,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
     ...overrides,
   };
 }

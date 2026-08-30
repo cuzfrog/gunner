@@ -3,6 +3,7 @@ import { createContainer, InjectionMode } from "awilix";
 import type { FittedHull, PropulsionId, PropulsionModule, PropulsionStats, ShipProfile, ShipStats, Ships } from "../ships";
 import { toShipId, toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../gamedata/ids";
 import type { ChargeCatalog, FittingImport, FittingState, ImportedFitting, MissileCatalog } from "../fitting";
+import { EMPTY_DAMAGE_BREAKDOWN } from "../fitting";
 import type { ItemNameResolver } from "../gamedata/itemNames";
 import { StaticItemNameResolver } from "../gamedata/itemNames";
 import { LocalSettingsStore } from "./localSettingsStore";
@@ -224,6 +225,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     damagePerShot: 12,
     cycleTime: 5,
     turretCount: 1,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
   },
   cargoCharges: [],
   ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },

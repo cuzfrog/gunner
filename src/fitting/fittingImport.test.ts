@@ -1159,6 +1159,122 @@ Ballistic Control System I`,
     expect(withBcs!.launcher!.cycleTime).toBeCloseTo(baseCycle * bcsCycleMultiplier, 6);
   });
 
+  test("launcher damage breakdown records per-type damage and BCS module factor", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const withBcs = importer.importFitting(
+      `[Rifter, BCS]
+Heavy Missile Launcher II, Scourge Heavy Missile
+Ballistic Control System I
+Ballistic Control System I`,
+      conditions,
+    );
+    const breakdown = withBcs!.launcher!.damageBreakdown;
+    expect(breakdown.damageByType).toEqual({ kinetic: expect.any(Number) });
+    const moduleFactor = breakdown.factors.find((f) => f.kind === "module");
+    expect(moduleFactor).toBeDefined();
+    expect(moduleFactor!.multiplier).toBeCloseTo(stackingPenalty.apply([1.07, 1.07]), 6);
+    expect(moduleFactor!.moduleIds).toHaveLength(2);
+    const baseFactor = breakdown.factors.find((f) => f.kind === "base");
+    expect(baseFactor).toBeDefined();
+    expect(baseFactor!.multiplier).toBe(1);
+  });
+
+  test("launcher damage breakdown omits module factor when no BCS fitted", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, NoBCS]
+Heavy Missile Launcher II, Scourge Heavy Missile`,
+      conditions,
+    );
+    const breakdown = result!.launcher!.damageBreakdown;
+    expect(breakdown.factors.find((f) => f.kind === "module")).toBeUndefined();
+  });
+
+  test("turret damage breakdown records per-type damage from charge", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Turret]
+150mm Railgun I, Antimatter Charge S`,
+      conditions,
+    );
+    const breakdown = result!.turret!.damageBreakdown;
+    expect(Object.keys(breakdown.damageByType).length).toBeGreaterThan(0);
+    const baseFactor = breakdown.factors.find((f) => f.kind === "base");
+    expect(baseFactor).toBeDefined();
+    expect(baseFactor!.multiplier).toBe(result!.turret!.damageMultiplier);
+  });
+
+  test("turret damage breakdown includes overload factor only when weapon overloaded", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const normal = importer.importFitting(
+      `[Rifter, Turret]
+125mm Gatling AutoCannon I, EMP S`,
+      { skillLevel: 5, overloaded: false, weaponOverloaded: false },
+    );
+    const overloaded = importer.importFitting(
+      `[Rifter, Turret]
+125mm Gatling AutoCannon I, EMP S`,
+      { skillLevel: 5, overloaded: false, weaponOverloaded: true },
+    );
+    expect(normal!.turret!.damageBreakdown.factors.find((f) => f.kind === "overload")).toBeUndefined();
+    const overloadFactor = overloaded!.turret!.damageBreakdown.factors.find((f) => f.kind === "overload");
+    expect(overloadFactor).toBeDefined();
+    expect(overloadFactor!.multiplier).toBeCloseTo(1.15, 6);
+  });
+
+  test("turret damage breakdown includes skill factor when skill damage bonus applies", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Turret]
+125mm Gatling AutoCannon I, EMP S`,
+      { skillLevel: 5, overloaded: false, weaponOverloaded: false },
+    );
+    const skillFactor = result!.turret!.damageBreakdown.factors.find((f) => f.kind === "skill");
+    expect(skillFactor).toBeDefined();
+    expect(skillFactor!.skillName).toBeDefined();
+  });
+
+  test("turret damage breakdown includes hull factor when hull damage bonus applies", () => {
+    ships.findHullByName.mockReturnValue(kestrelProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Kestrel, Missile]
+Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile`,
+      { skillLevel: 5, overloaded: false, weaponOverloaded: false },
+    );
+    const hullFactor = result!.launcher!.damageBreakdown.factors.find((f) => f.kind === "hull");
+    expect(hullFactor).toBeDefined();
+    expect(hullFactor!.hullName).toBeDefined();
+  });
+
+  test("turret damage breakdown includes module factor when Heat Sink fitted", () => {
+    ships.findHullByName.mockReturnValue(abaddonProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Abaddon, Pulse]
+Heavy Pulse Laser II, Conflagration Heavy M
+Heat Sink II
+Heat Sink II`,
+      { skillLevel: 5, overloaded: false, weaponOverloaded: false },
+    );
+    const breakdown = result!.turret!.damageBreakdown;
+    const moduleFactor = breakdown.factors.find((f) => f.kind === "module");
+    expect(moduleFactor).toBeDefined();
+    expect(moduleFactor!.moduleIds).toHaveLength(2);
+  });
+
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
     const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Abaddon", "Pulse_Armor_Abaddon.txt");
     const text = await Bun.file(path).text();

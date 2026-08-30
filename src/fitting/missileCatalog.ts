@@ -3,6 +3,7 @@ import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../gamed
 import type { SkillLevel } from "../ships";
 import type { ImportedLauncher } from "./chargeCatalog";
 import type { MissileSkillModel } from "./missileStats";
+import { type DamageFactor, missileDamageByType } from "./damageBreakdown";
 
 export interface MissileOption {
   readonly id: TypeId;
@@ -51,6 +52,7 @@ export class MissileCatalogImpl implements MissileCatalog {
     const launcherStats = this.launchers[launcher.moduleId];
     if (!launcherStats || !launcherStats.chargeGroups.includes(missile.chargeGroup)) return launcher;
     const output = this.skillModel.compute(launcherStats, missile, hullBonuses, skillLevel);
+    const factors = rebuildMissileFactors(output.skillDamageMultiplier, output.skillDamageName, output.hullDamageMultiplier, launcher.name);
     return {
       moduleId: launcher.moduleId,
       name: launcher.name,
@@ -64,6 +66,7 @@ export class MissileCatalogImpl implements MissileCatalog {
       damageReductionFactor: output.damageReductionFactor,
       maxVelocity: output.maxVelocity,
       flightTime: output.flightTime,
+      damageBreakdown: { damageByType: missileDamageByType(missile), factors },
     };
   }
 
@@ -149,4 +152,11 @@ function baseStem(stem: string): string {
     if (stem.endsWith(variant)) return stem.slice(0, -variant.length).trim();
   }
   return stem;
+}
+
+function rebuildMissileFactors(skillDamageMultiplier: number, skillName: string, hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
+  const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillName });
+  if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
+  return factors;
 }

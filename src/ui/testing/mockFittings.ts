@@ -1,4 +1,5 @@
 import type { ChargeCatalog, FittingImport, GunFamily, GunFamilies, FittingState, ImportedFitting, ImportedLauncher, ImportedTurret, LauncherClass, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
+import { EMPTY_DAMAGE_BREAKDOWN } from "../../fitting";
 import type { FittingDb, LauncherStats, TurretStats } from "../../gamedata/fittingDb";
 import type { FittedHull, HullView, ShipProfile, Ships } from "../../ships";
 import { toTypeId, type FactionId, type HullTypeId, type ShipId, type TypeId } from "../../gamedata/ids";
@@ -138,6 +139,7 @@ export const TURRET: ImportedTurret = {
   damagePerShot: 12,
   cycleTime: 5,
   turretCount: 1,
+  damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
 };
 
 const EMPTY_FITTING_STATE: FittingState = {

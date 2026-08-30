@@ -1,6 +1,6 @@
 import type { ImageCatalog } from "../../icons";
 import type { FittingCalculator, FittingImport, FittingOverridesStore, ImportedLauncher, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
-import { FittingOverridesStoreImpl } from "../../../fitting";
+import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
 import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { Ships, SkillLevel } from "../../../ships";
@@ -82,6 +82,7 @@ export function importedLauncherFixture(overrides: Partial<ImportedLauncher> = {
     damageReductionFactor: 0.5,
     maxVelocity: 3750,
     flightTime: 5,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
     ...overrides,
   };
 }
