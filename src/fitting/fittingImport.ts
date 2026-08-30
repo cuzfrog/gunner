@@ -569,7 +569,7 @@ function resolveTurrets(
     const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
     const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
 
-    const skillDamageMultiplier = computeSkillDamageMultiplier(db.skillBonuses, turret.turretSkill, weaponGroup, skillLevel);
+    const skillDamageMultiplier = computeSkillDamageMultiplier(db.skillBonuses, turret.turretSkill, weaponGroup, turret.specializationSkill, skillLevel);
 
     const modifiedDamageMultiplier = turret.damageMultiplier * moduleDamageBonus * hullDamageMultiplier * skillDamageMultiplier;
     const modifiedCycleTime = turret.cycleTime * moduleSpeedBonus * hullRoFMultiplier * skillRoFMultiplier;
@@ -886,6 +886,7 @@ function computeSkillDamageMultiplier(
   skillBonuses: readonly SkillBonus[],
   turretSkill: string | undefined,
   weaponGroup: TurretWeaponGroup | undefined,
+  specializationSkill: string | undefined,
   skillLevel: number,
 ): number {
   let multiplier = 1;
@@ -893,6 +894,7 @@ function computeSkillDamageMultiplier(
     if (bonus.bonusType !== "turretDamage") continue;
     if (bonus.weaponGroup && bonus.weaponGroup !== weaponGroup) continue;
     if (bonus.turretSkill && bonus.turretSkill !== turretSkill) continue;
+    if (bonus.specializationSkill && bonus.specializationSkill !== specializationSkill) continue;
     multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
   }
   return multiplier;

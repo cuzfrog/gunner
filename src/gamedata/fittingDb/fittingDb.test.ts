@@ -424,4 +424,36 @@ describe("fittingDb", () => {
       "Capital Energy Turret", "Capital Hybrid Turret", "Capital Projectile Turret",
     ]));
   });
+
+  test("includes Medium Pulse Laser Specialization damage bonus", () => {
+    const medPulseSpec = SKILL_BONUSES.find((b) => b.specializationSkill === "Medium Pulse Laser Specialization");
+    expect(medPulseSpec).toBeDefined();
+    expect(medPulseSpec!.bonusType).toBe("turretDamage");
+    expect(medPulseSpec!.magnitudePerLevel).toBe(2);
+  });
+
+  test("includes all 24 turret specialization skills", () => {
+    const specSkills = SKILL_BONUSES.filter((b) => b.specializationSkill !== undefined).map((b) => b.specializationSkill);
+    expect(specSkills.length).toBe(24);
+    expect(specSkills).toEqual(expect.arrayContaining([
+      "Small Beam Laser Specialization", "Small Pulse Laser Specialization",
+      "Medium Beam Laser Specialization", "Medium Pulse Laser Specialization",
+      "Large Beam Laser Specialization", "Large Pulse Laser Specialization",
+      "Capital Beam Laser Specialization", "Capital Pulse Laser Specialization",
+      "Small Railgun Specialization", "Small Blaster Specialization",
+      "Medium Railgun Specialization", "Medium Blaster Specialization",
+      "Large Railgun Specialization", "Large Blaster Specialization",
+      "Capital Railgun Specialization", "Capital Blaster Specialization",
+      "Small Autocannon Specialization", "Small Artillery Specialization",
+      "Medium Autocannon Specialization", "Medium Artillery Specialization",
+      "Large Autocannon Specialization", "Large Artillery Specialization",
+      "Capital Autocannon Specialization", "Capital Artillery Specialization",
+    ]));
+  });
+
+  test("Heavy Pulse Laser II has Medium Pulse Laser Specialization", () => {
+    const hpl2 = Object.values(TURRETS).find((t) => t.name === "Heavy Pulse Laser II");
+    expect(hpl2).toBeDefined();
+    expect(hpl2!.specializationSkill).toBe("Medium Pulse Laser Specialization");
+  });
 });

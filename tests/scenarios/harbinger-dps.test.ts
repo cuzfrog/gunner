@@ -96,13 +96,13 @@ describe("Harbinger DPS cross-check (all skills 5, no overload)", () => {
     expect(result!.turret!.turretCount).toBe(6);
 
     const nominalDps = (result!.turret!.damagePerShot * result!.turret!.turretCount) / result!.turret!.cycleTime;
-    expect(nominalDps).toBeCloseTo(641.19, 0);
+    expect(nominalDps).toBeCloseTo(705.31, 1);
   });
 
-  test("damage multiplier includes hull, skill, and stacking-penalized module bonuses", () => {
+  test("damage multiplier includes hull, skill, specialization, and stacking-penalized module bonuses", () => {
     const result = importer.importFitting(HARBINGER_FIT, { skillLevel: 5, overloaded: false });
     const heatSinkStacking = stacking.apply([1.1, 1.1]);
-    const expectedDamageMultiplier = 3.6 * heatSinkStacking * 1.5 * 1.15 * 1.25;
+    const expectedDamageMultiplier = 3.6 * heatSinkStacking * 1.5 * 1.15 * 1.25 * 1.1;
     expect(result!.turret!.damageMultiplier).toBeCloseTo(expectedDamageMultiplier, 6);
   });
 

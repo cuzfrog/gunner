@@ -215,7 +215,7 @@ const db: FittingDb = {
     "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
-    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", metaLevel: 5, metaGroupID: 2 }),
+    "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", specializationSkill: "Medium Pulse Laser Specialization", metaLevel: 5, metaGroupID: 2 }),
     "200mm AutoCannon II": row("200mm AutoCannon II", "200mm AutoCannon II", { tracking: 315, optimal: 1_200, falloff: 5_160, chargeSize: 1, damageMultiplier: 3, cycleTime: 5, turretSkill: "Small Projectile Turret", metaLevel: 5, metaGroupID: 2 }),
   },
   charges: {
@@ -275,6 +275,7 @@ const mockSkillBonuses: readonly SkillBonus[] = [
   { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Energy Turret" },
   { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Projectile Turret" },
   { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Small Projectile Turret" },
+  { skillId: "12214" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 2, specializationSkill: "Medium Pulse Laser Specialization" },
 ];
 
 const skillBonusDb: FittingDb = {
@@ -779,7 +780,7 @@ Heavy Pulse Laser II, Conflagration M`,
     expect(result!.turret!.damageMultiplier).toBe(3);
   });
 
-  test("skill damage bonuses apply to matching turret skill", () => {
+  test("skill damage bonuses apply to matching turret skill and specialization", () => {
     const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
     const result = importer.importFitting(
       `[Harbinger, Skills]
@@ -787,7 +788,7 @@ Heavy Pulse Laser II, Conflagration M`,
       skillConditions,
     );
     expect(result!.turret).toBeDefined();
-    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.12 * 1.20, 6);
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.12 * 1.20 * 1.08, 6);
   });
 
   test("skill RoF bonuses apply to all turrets", () => {

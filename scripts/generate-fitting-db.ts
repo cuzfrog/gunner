@@ -512,6 +512,7 @@ interface SkillBonusRule {
   readonly bonusAttr: string;
   readonly weaponGroup?: TurretWeaponGroup;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
 }
 
 const SKILL_BONUS_RULES: readonly SkillBonusRule[] = [
@@ -532,6 +533,30 @@ const SKILL_BONUS_RULES: readonly SkillBonusRule[] = [
   { skillId: 20327, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Energy Turret" },
   { skillId: 21666, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Hybrid Turret" },
   { skillId: 21667, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Projectile Turret" },
+  { skillId: 11082, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Railgun Specialization" },
+  { skillId: 11083, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Beam Laser Specialization" },
+  { skillId: 11084, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Autocannon Specialization" },
+  { skillId: 12201, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Artillery Specialization" },
+  { skillId: 12202, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Artillery Specialization" },
+  { skillId: 12203, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Artillery Specialization" },
+  { skillId: 12204, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Beam Laser Specialization" },
+  { skillId: 12205, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Beam Laser Specialization" },
+  { skillId: 12206, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Railgun Specialization" },
+  { skillId: 12207, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Railgun Specialization" },
+  { skillId: 12208, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Autocannon Specialization" },
+  { skillId: 12209, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Autocannon Specialization" },
+  { skillId: 12210, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Blaster Specialization" },
+  { skillId: 12211, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Blaster Specialization" },
+  { skillId: 12212, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Blaster Specialization" },
+  { skillId: 12213, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Pulse Laser Specialization" },
+  { skillId: 12214, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Pulse Laser Specialization" },
+  { skillId: 12215, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Pulse Laser Specialization" },
+  { skillId: 41403, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Autocannon Specialization" },
+  { skillId: 41404, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Artillery Specialization" },
+  { skillId: 41405, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Blaster Specialization" },
+  { skillId: 41406, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Railgun Specialization" },
+  { skillId: 41407, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Pulse Laser Specialization" },
+  { skillId: 41408, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Beam Laser Specialization" },
 ];
 
 function stringifyWithTypeIds<T>(value: T): string {
@@ -557,6 +582,7 @@ function stringifySkillBonuses(skillMagnitudes: ReadonlyMap<number, ReadonlyMap<
     };
     if (rule.weaponGroup !== undefined) obj.weaponGroup = rule.weaponGroup;
     if (rule.turretSkill !== undefined) obj.turretSkill = rule.turretSkill;
+    if (rule.specializationSkill !== undefined) obj.specializationSkill = rule.specializationSkill;
     return JSON.stringify(obj).replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId');
   }).filter((entry): entry is string => entry !== null);
   return `[${entries.join(",")}]`;
@@ -682,6 +708,7 @@ interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
   readonly metaLevel: number;
   readonly metaGroupID: number;
 }
@@ -952,6 +979,20 @@ function turretSkillFromRequired(
   return undefined;
 }
 
+function specializationSkillFromRequired(
+  types: Record<string, SdeType>,
+  requiredSkills: Record<string, Record<string, number>>,
+  typeID: number,
+): string | undefined {
+  const skills = requiredSkills[String(typeID)];
+  if (!skills) return undefined;
+  for (const skillTypeID of Object.keys(skills)) {
+    const name = types[skillTypeID]?.["typeName_en-us"];
+    if (name?.includes("Specialization")) return name;
+  }
+  return undefined;
+}
+
 export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType): LauncherStats | undefined {
   const speed = values.get("speed");
   if (speed === undefined || speed <= 0) return undefined;
@@ -1058,6 +1099,7 @@ async function main() {
           damageMultiplier,
           cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
+          specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
           metaLevel: type.metaLevel ?? 0,
           metaGroupID: type.metaGroupID ?? 1,
         };
@@ -1252,6 +1294,7 @@ export interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
   readonly metaLevel: number;
   readonly metaGroupID: number;
   readonly id: TypeId;
@@ -1276,6 +1319,7 @@ export interface SkillBonus {
   readonly magnitudePerLevel: number;
   readonly weaponGroup?: TurretWeaponGroup;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
 }
 
 export interface ChargeStats {
