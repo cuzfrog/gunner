@@ -16,10 +16,14 @@ import {
   HULL_BONUSES,
   LAUNCHERS,
   MISSILES,
+  MISSILE_GUIDANCE_COMPUTERS,
+  MISSILE_GUIDANCE_ENHANCERS,
+  MISSILE_SCRIPTS,
   SCRIPTS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
+  TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
   TURRETS,
@@ -234,6 +238,10 @@ const db: FittingDb = {
   trackingDisruptors: {},
   warpScramblers: {},
   disruptionScripts: {},
+  targetPainters: {},
+  missileGuidanceComputers: {},
+  missileGuidanceEnhancers: {},
+  missileScripts: {},
   hullBonuses: {},
   skillBonuses: [],
   drones: {},
@@ -296,6 +304,10 @@ const fullFittingDb: FittingDb = {
   trackingDisruptors: TRACKING_DISRUPTORS,
   warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
+  targetPainters: TARGET_PAINTERS,
+  missileGuidanceComputers: MISSILE_GUIDANCE_COMPUTERS,
+  missileGuidanceEnhancers: MISSILE_GUIDANCE_ENHANCERS,
+  missileScripts: MISSILE_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,
@@ -1290,7 +1302,7 @@ const INVALID_TEXT = `not a fitting
 some line`;
 
 function summarizeDb(): FittingDb {
-  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES };
+  return { modules: {}, turrets: {}, charges: CHARGES, launchers: {}, missiles: {}, scripts: {}, stasisWebs: {}, stasisGrapplers: {}, trackingComputers: {}, trackingDisruptors: {}, warpScramblers: {}, disruptionScripts: {}, targetPainters: {}, missileGuidanceComputers: {}, missileGuidanceEnhancers: {}, missileScripts: {}, hullBonuses: {}, skillBonuses: [], drones: DRONES };
 }
 
 describe("FittingImportImpl.summarize", () => {
