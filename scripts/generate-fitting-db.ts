@@ -513,6 +513,8 @@ const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
+// WARHEAD_UPGRADES_SKILL_ID is the missile damage skill, not in SKILL_BONUS_RULES (turret-only).
+const WARHEAD_UPGRADES_SKILL_ID = "20315";
 interface SkillBonusRule {
   readonly skillId: number;
   readonly bonusType: "turretDamage" | "turretRoF";
@@ -1717,11 +1719,15 @@ function addInScopeItemNames(
   }
 }
 
+function relevantSkillIds(): readonly string[] {
+  const ids = new Set<string>();
+  for (const rule of SKILL_BONUS_RULES) ids.add(String(rule.skillId));
+  ids.add(WARHEAD_UPGRADES_SKILL_ID);
+  return [...ids];
+}
+
 function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
-  const skillIds = new Set<string>();
-  for (const rule of SKILL_BONUS_RULES) skillIds.add(String(rule.skillId));
-  skillIds.add("20315");
-  for (const id of skillIds) {
+  for (const id of relevantSkillIds()) {
     if (id in itemNames) continue;
     const type = types[id];
     if (type) addItemName(itemNames, id, type);
@@ -1765,8 +1771,7 @@ function collectDbTableNames(
     ...Object.keys(missileGuidanceEnhancers),
     ...Object.keys(missileScripts),
     ...Object.keys(drones),
-    ...SKILL_BONUS_RULES.map((rule) => String(rule.skillId)),
-    "20315",
+    ...relevantSkillIds(),
   ]);
 }
 

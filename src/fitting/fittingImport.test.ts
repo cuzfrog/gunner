@@ -1239,9 +1239,10 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
 125mm Gatling AutoCannon I, EMP S`,
       { skillLevel: 5, overloaded: false, weaponOverloaded: false },
     );
-    const skillFactor = result!.turret!.damageBreakdown.factors.find((f) => f.kind === "skill");
-    expect(skillFactor).toBeDefined();
-    expect(skillFactor!.skillIds).toBeDefined();
+    const skillFactors = result!.turret!.damageBreakdown.factors.filter((f) => f.kind === "skill");
+    expect(skillFactors.length).toBe(1);
+    expect(skillFactors[0].skillIds).toBeDefined();
+    expect(skillFactors[0].skillIds!.length).toBeGreaterThan(0);
   });
 
   test("turret damage breakdown includes hull factor when hull damage bonus applies", () => {
