@@ -111,10 +111,12 @@ describe("DpsHintRendererImpl", () => {
     const groupChildren = elementChildren(group);
     const baseFactor = groupChildren[4];
     expect(baseFactor.className).toBe("dps-hint-factor-row");
-    const factorChildren = elementChildren(baseFactor);
-    expect(factorChildren[0].textContent).toBe("dpsHint.factor.base");
-    expect(factorChildren[1].textContent).toBe("x3");
-    expect(factorChildren[2].textContent).toBe("(x3)");
+    const mainRow = elementChildren(baseFactor)[0];
+    expect(mainRow.className).toBe("dps-hint-factor-main");
+    const mainChildren = elementChildren(mainRow);
+    expect(mainChildren[0].textContent).toBe("dpsHint.factor.base");
+    expect(mainChildren[1].textContent).toBe("x3");
+    expect(mainChildren[2].textContent).toBe("(x3)");
   });
 
   test("renders module factor with source name", () => {
@@ -126,10 +128,11 @@ describe("DpsHintRendererImpl", () => {
     const groupChildren = elementChildren(group);
     const moduleFactor = groupChildren[5];
     const factorChildren = elementChildren(moduleFactor);
-    expect(factorChildren[0].textContent).toBe("dpsHint.factor.module");
-    expect(factorChildren[1].textContent).toBe("x1.3");
-    expect(factorChildren[2].textContent).toBe("(x3.9)");
-    const source = factorChildren[3];
+    const mainRow = elementChildren(factorChildren[0]);
+    expect(mainRow[0].textContent).toBe("dpsHint.factor.module");
+    expect(mainRow[1].textContent).toBe("x1.3");
+    expect(mainRow[2].textContent).toBe("(x3.9)");
+    const source = factorChildren[1];
     expect(source.className).toBe("dps-hint-factor-source");
     expect(source.textContent).toBe("Heat Sink");
   });
@@ -151,8 +154,8 @@ describe("DpsHintRendererImpl", () => {
     const group = elementChildren(root)[0];
     const factorRow = elementChildren(group)[2];
     const factorChildren = elementChildren(factorRow);
-    expect(factorChildren[3].textContent).toBe("Heat Sink II x2");
-    expect(factorChildren[4].textContent).toBe("Damage Control II");
+    expect(factorChildren[1].textContent).toBe("Heat Sink II x2");
+    expect(factorChildren[2].textContent).toBe("Damage Control II");
   });
 
   test("renders summary with volley, cycle time, and DPS", () => {

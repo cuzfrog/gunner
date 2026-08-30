@@ -94,9 +94,11 @@ function renderAmmoRow(ammo: number, t: (key: string) => string): HTMLElement {
 function renderFactorRow(factor: DpsHintFactorRow, t: (key: string) => string): HTMLElement {
   const kindLabel = t(`dpsHint.factor.${factor.kind}`);
   const el = html`<div class="dps-hint-factor-row">
-    <span class="dps-hint-factor-kind">${kindLabel}</span>
-    <span class="dps-hint-factor-multi">x${formatMultiplier(factor.multiplier)}</span>
-    <span class="dps-hint-factor-cumulative">(x${formatMultiplier(factor.cumulative)})</span>
+    <div class="dps-hint-factor-main">
+      <span class="dps-hint-factor-kind">${kindLabel}</span>
+      <span class="dps-hint-factor-multi">x${formatMultiplier(factor.multiplier)}</span>
+      <span class="dps-hint-factor-cumulative">(x${formatMultiplier(factor.cumulative)})</span>
+    </div>
   </div>` as unknown as HTMLElement;
   for (const source of factor.sources) {
     el.appendChild(renderFactorSource(source));
@@ -105,7 +107,7 @@ function renderFactorRow(factor: DpsHintFactorRow, t: (key: string) => string): 
 }
 
 function renderFactorSource(source: string): HTMLElement {
-  return html`<span class="dps-hint-factor-source">${source}</span>` as unknown as HTMLElement;
+  return html`<div class="dps-hint-factor-source">${source}</div>` as unknown as HTMLElement;
 }
 
 function renderSummary(summary: DpsHintSummary, t: (key: string) => string): HTMLElement {

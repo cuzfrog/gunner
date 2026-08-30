@@ -64,11 +64,17 @@
 }
 
 .dps-hint-factor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dps-hint-factor-main {
   display: grid;
   grid-template-columns: 64px 1fr auto auto;
   align-items: center;
   gap: 4px;
-  font-variant-numeric: tabular-nums;
 }
 
 .dps-hint-factor-kind {
@@ -90,9 +96,6 @@
 .dps-hint-factor-source {
   color: var(--text-dim);
   font-size: 11px;
-  grid-column: 2 / 5;
-  justify-self: start;
-  text-align: left;
   padding-left: 12px;
   overflow: hidden;
   text-overflow: ellipsis;

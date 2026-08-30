@@ -260,7 +260,7 @@ describe("DpsHintProviderImpl", () => {
     const groupChildren = elementChildren(group);
     const moduleFactor = groupChildren[4];
     const factorChildren = elementChildren(moduleFactor);
-    const source = factorChildren[3];
+    const source = factorChildren[1];
     expect(source.textContent).toBe("Item-123 x2");
   });
 
