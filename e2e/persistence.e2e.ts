@@ -1,4 +1,4 @@
-import { test, expect, loadFittingText, FITTING_THRASHER, getClipboardText } from "./fixtures";
+import { test, expect, loadFittingText, FITTING_THRASHER, getClipboardText, importFittingViaClipboard } from "./fixtures";
 
 test.describe("persistence", () => {
   test("profile persists across page reload", async ({ cleanPage: page }) => {
@@ -83,6 +83,20 @@ test.describe("persistence", () => {
     await newPage.goto(shareUrl);
     const lang = await newPage.locator("html").getAttribute("lang");
     expect(lang).not.toBe("zh");
+    await newPage.close();
+  });
+
+  test("weapon overload state persists across page reload via share URL", async ({ cleanPage: page }) => {
+    const eftText = loadFittingText(FITTING_THRASHER);
+    await importFittingViaClipboard(page, "ship-a", eftText);
+    await page.locator("#ship-a-turret-weapon-overload-button").click();
+    await expect(page.locator("#ship-a-turret-weapon-overload-button")).toHaveAttribute("aria-pressed", "true");
+    await page.locator("#share-link").click();
+    await page.locator("#share-copy-url").click();
+    const shareUrl = await getClipboardText(page);
+    const newPage = await page.context().newPage();
+    await newPage.goto(shareUrl);
+    await expect(newPage.locator("#ship-a-turret-weapon-overload-button")).toHaveAttribute("aria-pressed", "true");
     await newPage.close();
   });
 });

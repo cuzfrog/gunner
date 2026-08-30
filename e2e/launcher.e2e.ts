@@ -78,4 +78,17 @@ test.describe("launcher configuration", () => {
   test("drone button is disabled", async ({ cleanPage: page }) => {
     await expect(page.locator("#ship-a-weapon-system-drone")).toBeDisabled();
   });
+
+  test("weapon overload button toggles and increases launcher DPS", async ({ cleanPage: page }) => {
+    await loadCerberus(page);
+    const overloadButton = page.locator("#ship-a-launcher-weapon-overload-button");
+    await expect(overloadButton).toHaveAttribute("aria-pressed", "false");
+    const nominalDpsBefore = await page.locator("#res-nominal-dps-a").textContent();
+    expect(nominalDpsBefore).not.toBe("-");
+    await overloadButton.click();
+    await expect(overloadButton).toHaveAttribute("aria-pressed", "true");
+    const nominalDpsAfter = await page.locator("#res-nominal-dps-a").textContent();
+    expect(nominalDpsAfter).not.toBe("-");
+    expect(Number(nominalDpsAfter)).toBeGreaterThan(Number(nominalDpsBefore));
+  });
 });

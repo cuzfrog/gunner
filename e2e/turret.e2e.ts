@@ -103,4 +103,21 @@ test.describe("turret configuration", () => {
     const summary = await page.locator("#ship-a-ammo-summary").textContent();
     expect(summary).toBeTruthy();
   });
+
+  test("weapon overload button toggles and increases DPS for long-range turrets", async ({ cleanPage: page }) => {
+    await loadThrasher(page);
+    const overloadButton = page.locator("#ship-a-turret-weapon-overload-button");
+    await expect(overloadButton).toHaveAttribute("aria-pressed", "false");
+    const nominalDpsBefore = await page.locator("#res-nominal-dps-a").textContent();
+    expect(nominalDpsBefore).not.toBe("-");
+    await overloadButton.click();
+    await expect(overloadButton).toHaveAttribute("aria-pressed", "true");
+    const nominalDpsAfter = await page.locator("#res-nominal-dps-a").textContent();
+    expect(nominalDpsAfter).not.toBe("-");
+    expect(Number(nominalDpsAfter)).toBeGreaterThan(Number(nominalDpsBefore));
+    await overloadButton.click();
+    await expect(overloadButton).toHaveAttribute("aria-pressed", "false");
+    const nominalDpsOff = await page.locator("#res-nominal-dps-a").textContent();
+    expect(Number(nominalDpsOff)).toBeCloseTo(Number(nominalDpsBefore), 1);
+  });
 });
