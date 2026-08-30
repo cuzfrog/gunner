@@ -2,7 +2,6 @@ import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../cradle";
 import { DpsHintProviderImpl } from "./dpsHintProvider";
 import { DpsHintRendererImpl } from "./dpsHintRenderer";
-import type { HintContentProvider } from "../hoverHint";
 
 export function registerDpsHintModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
@@ -13,5 +12,5 @@ export function registerDpsHintModule<T extends ControlsCradle>(cradle: AwilixCo
 
 export function wireDpsHintProvider<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  c.hoverHintController.registerContentProvider("dps", c.dpsHintProvider as HintContentProvider);
+  c.hoverHintController.registerContentProvider("dps", c.dpsHintProvider);
 }

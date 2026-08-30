@@ -63,6 +63,8 @@ export class DpsHintProviderImpl implements HintContentProvider {
 function sideFromAnchor(anchor: HTMLElement): Side | undefined {
   const side = anchor.dataset.side;
   if (side === "shipA" || side === "shipB") return side;
+  if (side === "a") return "shipA";
+  if (side === "b") return "shipB";
   return undefined;
 }
 

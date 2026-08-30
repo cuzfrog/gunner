@@ -137,6 +137,17 @@ describe("DpsHintProviderImpl", () => {
     expect(container.children.length).toBe(0);
   });
 
+  test("accepts short side names (a/b) from the Astro component", () => {
+    const turret = makeTurret();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+    }));
+    const anchor = makeAnchor("a");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(container.children.length).toBe(1);
+  });
+
   test("renders turret group for ship A", () => {
     const turret = makeTurret();
     const provider = new DpsHintProviderImpl(makeDeps({

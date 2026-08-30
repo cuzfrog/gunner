@@ -61,7 +61,6 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
 
 function wire<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   const c = cradle.cradle;
-  c.hoverHintController;
   wireDpsHintProvider(cradle);
   const sides = combatantSidesOf(c.shipASide, c.shipBSide);
   const fittingPopups = { shipA: c.shipAFittingPopup, shipB: c.shipBFittingPopup } as const;
