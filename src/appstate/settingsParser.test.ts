@@ -756,4 +756,21 @@ describe("SettingsParser", () => {
     expect(session.shipA.optimal).toBe(0);
     expect(session.shipA.falloff).toBe(0);
   });
+
+  test("fromWire and toWire round-trip preserves weaponOverload", () => {
+    const parser = makeParser();
+    const settings: UserSettings = { ...DEFAULT_SETTINGS, shipAWeaponOverload: true, shipBWeaponOverload: true };
+    const session = parser.fromWire(settings);
+    expect(session.shipA.weaponOverload).toBe(true);
+    expect(session.shipB.weaponOverload).toBe(true);
+    expect(parser.toWire(session)).toEqual(settings);
+  });
+
+  test("fromWire defaults weaponOverload to false when absent", () => {
+    const parser = makeParser();
+    const { shipAWeaponOverload: _, shipBWeaponOverload: __, ...withoutWeaponOverload } = DEFAULT_SETTINGS;
+    const session = parser.fromWire(withoutWeaponOverload as UserSettings);
+    expect(session.shipA.weaponOverload).toBe(false);
+    expect(session.shipB.weaponOverload).toBe(false);
+  });
 });

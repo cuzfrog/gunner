@@ -1190,6 +1190,67 @@ Arbalest Compact Light Missile Launcher, Caldari Navy Inferno Light Missile
     expect(result!.launcher!.count).toBe(2);
     expect(result!.launcher!.name).toBe("Arbalest Compact Light Missile Launcher");
   });
+
+  test("weapon overload increases short-range turret damage multiplier", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
+    const result = importer.importFitting(
+      `[Rifter, AC]
+200mm AutoCannon II, EMP S`,
+      weaponOverloadConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.15, 6);
+    expect(result!.turret!.cycleTime).toBe(5);
+  });
+
+  test("weapon overload decreases long-range turret cycle time", () => {
+    ships.findHullByName.mockReturnValue(abaddonProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const normalConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
+    const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
+    const normal = importer.importFitting(`[Abaddon, Beams]\nHeavy Beam Laser II, Aurora M`, normalConditions);
+    const overloaded = importer.importFitting(`[Abaddon, Beams]\nHeavy Beam Laser II, Aurora M`, weaponOverloadConditions);
+    expect(normal!.turret).toBeDefined();
+    expect(overloaded!.turret).toBeDefined();
+    expect(overloaded!.turret!.cycleTime).toBeCloseTo(normal!.turret!.cycleTime * 0.85, 6);
+    expect(overloaded!.turret!.damageMultiplier).toBeCloseTo(normal!.turret!.damageMultiplier, 6);
+  });
+
+  test("weapon overload decreases launcher cycle time", () => {
+    ships.findHullByName.mockReturnValue(kestrelProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const normalConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: false };
+    const weaponOverloadConditions: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
+    const normal = importer.importFitting(
+      `[Kestrel, Lights]
+Light Missile Launcher I, Caldari Navy Inferno Light Missile
+1MN Afterburner II`,
+      normalConditions,
+    );
+    const overloaded = importer.importFitting(
+      `[Kestrel, Lights]
+Light Missile Launcher I, Caldari Navy Inferno Light Missile
+1MN Afterburner II`,
+      weaponOverloadConditions,
+    );
+    expect(normal!.launcher).toBeDefined();
+    expect(overloaded!.launcher).toBeDefined();
+    expect(overloaded!.launcher!.cycleTime).toBeCloseTo(normal!.launcher!.cycleTime * 0.85, 6);
+  });
+
+  test("weapon overload is independent from propulsion overload for turrets", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, gunFamilies, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const propulsionOnly: StatConditions = { skillLevel: 0, overloaded: true, weaponOverloaded: false };
+    const weaponOnly: StatConditions = { skillLevel: 0, overloaded: false, weaponOverloaded: true };
+    const propulsionResult = importer.importFitting(`[Rifter, AC]\n200mm AutoCannon II, EMP S`, propulsionOnly);
+    const weaponResult = importer.importFitting(`[Rifter, AC]\n200mm AutoCannon II, EMP S`, weaponOnly);
+    expect(propulsionResult!.turret!.damageMultiplier).toBe(3);
+    expect(weaponResult!.turret!.damageMultiplier).toBeCloseTo(3 * 1.15, 6);
+  });
 });
 
 const RIFTER_BRAWLER = `[Rifter, Brawler]
