@@ -107,10 +107,11 @@ export class AmmoList {
     }
     list.hidden = false;
     label.hidden = false;
+    const optionMap = this.chargeOptionMap(state.turret);
     const items: SelectableItem[] = entries.map((entry) => ({
       value: entry.id,
       label: this.fittingImport.itemNameForId(entry.id, this.i18n.current()),
-      hint: this.i18n.t("button.selectAmmo"),
+      hint: optionMap.get(entry.id) ?? this.i18n.t("button.selectAmmo"),
       iconUrl: this.imageCatalog.itemIconUrl(entry.id),
       selected: entry.id === state.ammo,
       quantity: entry.quantity !== undefined ? `x${entry.quantity}` : undefined,
@@ -131,6 +132,15 @@ export class AmmoList {
       entries.push({ id: charge.id, quantity: charge.quantity });
     }
     return entries;
+  }
+
+  private chargeOptionMap(turret: ImportedTurret): Map<string, string> {
+    const options = this.chargeCatalog.chargesForTurret(turret);
+    const map = new Map<string, string>();
+    for (const option of options) {
+      map.set(option.id, chargeStatSuffix(option));
+    }
+    return map;
   }
 
   private renderAllList(state: AmmoListState): void {

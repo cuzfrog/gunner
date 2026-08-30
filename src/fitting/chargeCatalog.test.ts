@@ -141,6 +141,7 @@ describe("ChargeCatalogImpl", () => {
       trackingMultiplier: 0.75,
       rangeMultiplier: 0.4,
       falloffMultiplier: 1,
+      damageByType: {},
     });
   });
 
@@ -154,6 +155,7 @@ describe("ChargeCatalogImpl", () => {
       trackingMultiplier: 1,
       rangeMultiplier: 0.5,
       falloffMultiplier: 1,
+      damageByType: {},
     });
   });
 

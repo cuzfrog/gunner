@@ -175,8 +175,8 @@ export const IMPORTED_RIFTER: ImportedFitting = {
 export const IMPORTED_RIFTER_WITH_CARGO: ImportedFitting = { ...IMPORTED_RIFTER, cargoCharges: [{ id: "21898" as TypeId, quantity: 2000 }] };
 
 export const CHARGE_OPTIONS = [
-  { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-  { id: "21898" as TypeId, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+  { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75, damageByType: { explosive: 15 } as const },
+  { id: "21898" as TypeId, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1, damageByType: { em: 10, explosive: 5 } as const },
 ] as const;
 
 export function mockParser(): SettingsParser {

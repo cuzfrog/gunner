@@ -10,7 +10,7 @@ import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
 import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
 import { setText } from "../controlsDom";
-import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
+import { formatDistance, formatNumber, formatWithCommas, missileDamageHint } from "../controlsFormat";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
@@ -286,6 +286,7 @@ export class LauncherControllerImpl implements LauncherController {
     const items: SelectableItem[] = options.map((option) => ({
       value: option.id,
       label: option.name,
+      hint: missileDamageHint(option),
       iconUrl: this.imageCatalog.itemIconUrl(option.id),
       selected: option.id === this.currentAmmoId,
     }));

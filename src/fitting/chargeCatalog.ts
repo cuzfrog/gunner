@@ -2,7 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 import { FITTING_DB, type ChargeStats, type FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
-import { type DamageBreakdown, chargeDamageByType } from "./damageBreakdown";
+import { type DamageBreakdown, type DamageType, chargeDamageByType } from "./damageBreakdown";
 
 export interface ImportedTurretBase {
   readonly tracking: number;
@@ -53,6 +53,7 @@ export interface ChargeOption {
   readonly trackingMultiplier: number;
   readonly rangeMultiplier: number;
   readonly falloffMultiplier: number;
+  readonly damageByType: Readonly<Partial<Record<DamageType, number>>>;
 }
 
 export type ChargeFamily = "projectile" | "hybrid" | "laser";
@@ -169,6 +170,7 @@ function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeS
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
+      damageByType: chargeDamageByType(stats),
     });
   }
   result.sort((a, b) => {
@@ -187,6 +189,7 @@ function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): Char
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
+      damageByType: chargeDamageByType(stats),
     });
   }
   result.sort((a, b) => {

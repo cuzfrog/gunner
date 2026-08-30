@@ -1,5 +1,5 @@
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
-import type { ChargeOption } from "../../fitting";
+import type { ChargeOption, MissileOption } from "../../fitting";
 import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import type { I18n } from "../i18n";
@@ -9,6 +9,7 @@ import {
   formatMultiplier,
   formatNumber,
   formatWithCommas,
+  missileDamageHint,
   propulsionOptionLabel,
   scriptStatSuffix,
   boosterScriptStatSuffix,
@@ -85,13 +86,25 @@ describe("skill level conversion", () => {
 
 describe("charge stat suffix", () => {
   test("omits falloff when the multiplier is one", () => {
-    const option: ChargeOption = { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1 };
-    expect(chargeStatSuffix(option)).toBe("range x0.5 · track x0.75");
+    const option: ChargeOption = { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1, damageByType: { explosive: 15 } };
+    expect(chargeStatSuffix(option)).toBe("DMG 15 (explosive 15) · range x0.5 · track x0.75");
   });
 
   test("includes falloff when it differs from one", () => {
-    const option: ChargeOption = { id: "barrage-s" as TypeId, name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5 };
-    expect(chargeStatSuffix(option)).toBe("range x0.5 · falloff x1.5 · track x0.75");
+    const option: ChargeOption = { id: "barrage-s" as TypeId, name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5, damageByType: { kinetic: 10, explosive: 5 } };
+    expect(chargeStatSuffix(option)).toBe("DMG 15 (kinetic 10 · explosive 5) · range x0.5 · falloff x1.5 · track x0.75");
+  });
+
+  test("omits damage when damageByType is empty", () => {
+    const option: ChargeOption = { id: "laser-s" as TypeId, name: "Scorch S", trackingMultiplier: 0.75, rangeMultiplier: 1.4, falloffMultiplier: 1, damageByType: {} };
+    expect(chargeStatSuffix(option)).toBe("range x1.4 · track x0.75");
+  });
+});
+
+describe("missile damage hint", () => {
+  test("formats damage value and type", () => {
+    const option: MissileOption = { id: "missile-1" as TypeId, name: "Inferno Light Missile", damage: 83.3, damageType: "thermal" };
+    expect(missileDamageHint(option)).toBe("DMG 83.3 (thermal)");
   });
 });
 
