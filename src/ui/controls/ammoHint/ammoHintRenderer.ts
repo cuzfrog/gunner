@@ -8,10 +8,15 @@ export interface AmmoHintTypeRow {
   readonly value: number;
 }
 
+export interface AmmoHintAttributeRow {
+  readonly label: string;
+  readonly value: string;
+}
+
 export interface AmmoHintModel {
   readonly typeRows: readonly AmmoHintTypeRow[];
   readonly totalDamage: number;
-  readonly modifiers: readonly string[];
+  readonly attributes: readonly AmmoHintAttributeRow[];
 }
 
 export interface AmmoHintRendererDeps {
@@ -36,8 +41,11 @@ export class AmmoHintRendererImpl implements AmmoHintRenderer {
     for (const row of model.typeRows) {
       root.appendChild(renderTypeRow(row, this.t));
     }
-    if (model.modifiers.length > 0) {
-      root.appendChild(renderModifiersRow(model.modifiers));
+    if (model.attributes.length > 0) {
+      root.appendChild(renderDivider());
+      for (const attr of model.attributes) {
+        root.appendChild(renderAttributeRow(attr));
+      }
     }
     container.appendChild(root);
   }
@@ -59,6 +67,13 @@ function renderTypeRow(row: AmmoHintTypeRow, t: (key: string) => string): HTMLEl
   </div>` as unknown as HTMLElement;
 }
 
-function renderModifiersRow(modifiers: readonly string[]): HTMLElement {
-  return html`<div class="ammo-hint-modifiers">${modifiers.join(" · ")}</div>` as unknown as HTMLElement;
+function renderDivider(): HTMLElement {
+  return html`<div class="ammo-hint-divider"></div>` as unknown as HTMLElement;
+}
+
+function renderAttributeRow(attr: AmmoHintAttributeRow): HTMLElement {
+  return html`<div class="ammo-hint-row ammo-hint-attribute-row">
+    <span class="ammo-hint-label">${attr.label}</span>
+    <span class="ammo-hint-value">${attr.value}</span>
+  </div>` as unknown as HTMLElement;
 }

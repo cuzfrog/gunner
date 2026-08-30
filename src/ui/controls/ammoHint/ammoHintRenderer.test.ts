@@ -6,11 +6,11 @@ function elementChildren(el: FakeElement): FakeElement[] {
   return el.children.filter((c) => c.tagName !== "#text");
 }
 
-function makeModel(typeRows: { type: "em" | "thermal" | "kinetic" | "explosive"; value: number }[] = [], totalDamage = 0, modifiers: string[] = []): AmmoHintModel {
+function makeModel(typeRows: { type: "em" | "thermal" | "kinetic" | "explosive"; value: number }[] = [], totalDamage = 0, attributes: { label: string; value: string }[] = []): AmmoHintModel {
   return {
     typeRows: typeRows.map((r) => ({ type: r.type, iconUrl: `images/icons/damage-${r.type}.png`, value: r.value })),
     totalDamage,
-    modifiers,
+    attributes,
   };
 }
 
@@ -69,18 +69,24 @@ describe("AmmoHintRendererImpl", () => {
     expect(totalChildren[1].textContent).toBe("83");
   });
 
-  test("renders modifiers row when modifiers are present", () => {
+  test("renders divider and attribute rows when attributes are present", () => {
     const renderer = new AmmoHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
-    renderer.render(makeModel([{ type: "em", value: 10 }], 10, ["range x0.5", "track x1"]), container as unknown as HTMLElement);
+    renderer.render(makeModel([{ type: "em", value: 10 }], 10, [{ label: "range", value: "x0.5" }, { label: "track", value: "x1" }]), container as unknown as HTMLElement);
     const root = elementChildren(container)[0];
     const rows = elementChildren(root);
-    const modifiersRow = rows[2];
-    expect(modifiersRow.className).toBe("ammo-hint-modifiers");
-    expect(modifiersRow.textContent).toBe("range x0.5 · track x1");
+    expect(rows.length).toBe(5);
+    expect(rows[2].className).toBe("ammo-hint-divider");
+    const attrRow1 = elementChildren(rows[3]);
+    expect(rows[3].className).toContain("ammo-hint-attribute-row");
+    expect(attrRow1[0].textContent).toBe("range");
+    expect(attrRow1[1].textContent).toBe("x0.5");
+    const attrRow2 = elementChildren(rows[4]);
+    expect(attrRow2[0].textContent).toBe("track");
+    expect(attrRow2[1].textContent).toBe("x1");
   });
 
-  test("omits modifiers row when no modifiers", () => {
+  test("omits divider and attribute rows when no attributes", () => {
     const renderer = new AmmoHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel([{ type: "em", value: 10 }], 10), container as unknown as HTMLElement);

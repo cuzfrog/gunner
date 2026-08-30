@@ -50,7 +50,7 @@ describe("AmmoHintProviderImpl", () => {
     expect(models.length).toBe(0);
   });
 
-  test("builds charge model with damage types and modifiers", () => {
+  test("builds charge model with damage types and range attribute", () => {
     const { renderer, models } = makeRenderer();
     const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor("185"), {} as HTMLElement);
@@ -64,10 +64,10 @@ describe("AmmoHintProviderImpl", () => {
     expect(model.typeRows[2].type).toBe("explosive");
     expect(model.typeRows[2].value).toBe(2);
     expect(model.totalDamage).toBe(12);
-    expect(model.modifiers).toEqual(["range x0.5"]);
+    expect(model.attributes).toEqual([{ label: "range", value: "x0.5" }]);
   });
 
-  test("builds missile model with single damage type", () => {
+  test("builds missile model with single damage type and missile attributes", () => {
     const { renderer, models } = makeRenderer();
     const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor("202"), {} as HTMLElement);
@@ -77,6 +77,10 @@ describe("AmmoHintProviderImpl", () => {
     expect(model.typeRows[0].type).toBe("em");
     expect(model.typeRows[0].value).toBe(375);
     expect(model.totalDamage).toBe(375);
-    expect(model.modifiers.length).toBe(0);
+    expect(model.attributes.length).toBe(4);
+    expect(model.attributes[0]).toEqual({ label: "explosion radius", value: "330" });
+    expect(model.attributes[1]).toEqual({ label: "explosion velocity", value: "69" });
+    expect(model.attributes[2]).toEqual({ label: "missile velocity", value: "4700" });
+    expect(model.attributes[3]).toEqual({ label: "flight time", value: "14s" });
   });
 });

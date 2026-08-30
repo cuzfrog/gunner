@@ -52,7 +52,7 @@ export class AmmoList {
     this.onSelect = deps.onSelect;
     this.onExpand = deps.onExpand;
     this.itemList = new SelectableListImpl({
-      itemClass: "ammo-item btn",
+      itemClass: "ammo-item btn selectable-item",
       nameClass: "ammo-item-name",
       iconClass: "ammo-item-icon",
       quantityClass: "ammo-item-quantity mono",

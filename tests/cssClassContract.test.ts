@@ -57,6 +57,7 @@ const APPROVED_PREFIXES = [
   "skill",
   "ammo",
   "launcher",
+  "selectable-item",
   "weapon-system",
   "weapon-kind",
   "weapon-panel",

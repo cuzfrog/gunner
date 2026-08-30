@@ -50,6 +50,13 @@
 
 .popup-item:focus-visible { outline-offset: -1px; }
 
+/* ---- selectable-item (shared selected state for popup lists) ---- */
+.selectable-item[aria-current="true"] {
+  border-left: 2px solid var(--accent-teal);
+  color: var(--accent-teal);
+  padding-left: 4px;
+}
+
 /* ---- menu-popup (composition of popup for small popup-item lists) ---- */
 .menu-popup {
   display: flex;

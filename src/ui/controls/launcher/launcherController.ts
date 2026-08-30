@@ -69,7 +69,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.fittingOverrides = deps.fittingOverrides;
     this.panelMemory = deps.panelMemory;
     this.ammoList = new SelectableListImpl({
-      itemClass: "launcher-ammo-item",
+      itemClass: "launcher-ammo-item selectable-item",
       nameClass: "launcher-ammo-name",
       iconClass: "launcher-ammo-icon",
       role: "option",

@@ -1,9 +1,9 @@
 import type { DamageType } from "../../../fitting";
 import type { ChargeStats, FittingDb, MissileStats } from "../../../gamedata/fittingDb";
 import type { HintContentProvider } from "../hoverHint";
-import { formatMultiplier } from "../controlsFormat";
+import { formatMultiplier, formatNumber } from "../controlsFormat";
 import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
-import type { AmmoHintModel, AmmoHintRenderer, AmmoHintTypeRow } from "./ammoHintRenderer";
+import type { AmmoHintAttributeRow, AmmoHintModel, AmmoHintRenderer, AmmoHintTypeRow } from "./ammoHintRenderer";
 
 export type AmmoHintProvider = HintContentProvider;
 
@@ -45,14 +45,14 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
       if (value) typeRows.push({ type, iconUrl: DAMAGE_ICON_URLS[type], value });
     }
     const totalDamage = typeRows.reduce((sum, row) => sum + row.value, 0);
-    const modifiers: string[] = [];
+    const attributes: AmmoHintAttributeRow[] = [];
     const rangeMultiplier = stats.rangeMultiplier ?? 1;
     const trackingMultiplier = stats.trackingMultiplier ?? 1;
     const falloffMultiplier = stats.falloffMultiplier ?? 1;
-    if (rangeMultiplier !== 1) modifiers.push(`range x${formatMultiplier(rangeMultiplier)}`);
-    if (falloffMultiplier !== 1) modifiers.push(`falloff x${formatMultiplier(falloffMultiplier)}`);
-    if (trackingMultiplier !== 1) modifiers.push(`track x${formatMultiplier(trackingMultiplier)}`);
-    return { typeRows, totalDamage, modifiers };
+    if (rangeMultiplier !== 1) attributes.push({ label: "range", value: `x${formatMultiplier(rangeMultiplier)}` });
+    if (falloffMultiplier !== 1) attributes.push({ label: "falloff", value: `x${formatMultiplier(falloffMultiplier)}` });
+    if (trackingMultiplier !== 1) attributes.push({ label: "track", value: `x${formatMultiplier(trackingMultiplier)}` });
+    return { typeRows, totalDamage, attributes };
   }
 
   private buildMissileModel(stats: MissileStats): AmmoHintModel {
@@ -60,7 +60,12 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
     return {
       typeRows: [{ type, iconUrl: DAMAGE_ICON_URLS[type], value: stats.damage }],
       totalDamage: stats.damage,
-      modifiers: [],
+      attributes: [
+        { label: "explosion radius", value: formatNumber(stats.explosionRadius, 0) },
+        { label: "explosion velocity", value: formatNumber(stats.explosionVelocity, 0) },
+        { label: "missile velocity", value: formatNumber(stats.maxVelocity, 0) },
+        { label: "flight time", value: `${formatNumber(stats.flightTime, 1)}s` },
+      ],
     };
   }
 }

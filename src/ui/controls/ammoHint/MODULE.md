@@ -1,7 +1,6 @@
 ---
 no-new-exports:
   - ammoHintProvider.ts
-  - ammoHintRenderer.ts
   - module.ts
   - ammoHintProvider.test.ts
   - ammoHintRenderer.test.ts
