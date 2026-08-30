@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../ids";
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, SCRIPTS, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -93,6 +93,7 @@ describe("fittingDb", () => {
   test("includes hull bonuses for turret, velocity and agility attributes", () => {
     expect(HULL_BONUSES["16242" as ShipId]).toEqual([
       { attribute: "turretOptimal", magnitude: 50, turretSkill: "Small Projectile Turret" },
+      { attribute: "turretDamage", magnitude: 5, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
       { attribute: "turretTracking", magnitude: 10, skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" },
     ]);
     expect(HULL_BONUSES["23917" as ShipId]).toEqual([{ attribute: "agility", magnitude: -5, skill: "Advanced Spaceship Command" }]);
@@ -333,5 +334,94 @@ describe("fittingDb", () => {
       { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 771 },
       { attribute: "missileDamage", magnitude: 10, skill: "Caldari Battlecruiser", launcherGroup: 510 },
     ]);
+  });
+
+  test("includes Heat Sink II with damage and speed multipliers for energy weapons", () => {
+    expect(moduleByName("Heat Sink II")).toMatchObject({
+      turretDamageMultiplier: 1.1,
+      turretSpeedMultiplier: 0.895,
+      turretWeaponGroup: "Energy Weapon",
+    });
+  });
+
+  test("includes Gyrostabilizer II with damage and speed multipliers for projectile weapons", () => {
+    expect(moduleByName("Gyrostabilizer II")).toMatchObject({
+      turretWeaponGroup: "Projectile Weapon",
+    });
+    expect(moduleByName("Gyrostabilizer II")?.turretDamageMultiplier).toBeGreaterThan(1);
+    expect(moduleByName("Gyrostabilizer II")?.turretSpeedMultiplier).toBeLessThan(1);
+  });
+
+  test("includes Magnetic Field Stabilizer II with damage and speed multipliers for hybrid weapons", () => {
+    expect(moduleByName("Magnetic Field Stabilizer II")).toMatchObject({
+      turretWeaponGroup: "Hybrid Weapon",
+    });
+    expect(moduleByName("Magnetic Field Stabilizer II")?.turretDamageMultiplier).toBeGreaterThan(1);
+    expect(moduleByName("Magnetic Field Stabilizer II")?.turretSpeedMultiplier).toBeLessThan(1);
+  });
+
+  test("includes Harbinger turret damage hull bonus for medium energy turrets", () => {
+    expect(HULL_BONUSES["24696" as ShipId]).toContainEqual({
+      attribute: "turretDamage",
+      magnitude: 10,
+      skill: "Amarr Battlecruiser",
+      turretSkill: "Medium Energy Turret",
+    });
+  });
+
+  test("includes Gunnery skill RoF bonus", () => {
+    const gunnery = SKILL_BONUSES.find((b) => b.skillId === "3300" as TypeId);
+    expect(gunnery).toBeDefined();
+    expect(gunnery!.bonusType).toBe("turretRoF");
+    expect(gunnery!.magnitudePerLevel).toBe(-2);
+  });
+
+  test("includes Rapid Firing skill RoF bonus", () => {
+    const rapidFiring = SKILL_BONUSES.find((b) => b.skillId === "3310" as TypeId);
+    expect(rapidFiring).toBeDefined();
+    expect(rapidFiring!.bonusType).toBe("turretRoF");
+    expect(rapidFiring!.magnitudePerLevel).toBe(-4);
+  });
+
+  test("includes Surgical Strike damage bonus for all weapon groups", () => {
+    const energy = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Energy Weapon");
+    const projectile = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Projectile Weapon");
+    const hybrid = SKILL_BONUSES.find((b) => b.skillId === "3315" as TypeId && b.weaponGroup === "Hybrid Weapon");
+    expect(energy).toBeDefined();
+    expect(energy!.bonusType).toBe("turretDamage");
+    expect(energy!.magnitudePerLevel).toBe(3);
+    expect(projectile).toBeDefined();
+    expect(hybrid).toBeDefined();
+  });
+
+  test("includes Medium Energy Turret damage bonus", () => {
+    const mediumEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Medium Energy Turret");
+    expect(mediumEnergy).toBeDefined();
+    expect(mediumEnergy!.bonusType).toBe("turretDamage");
+    expect(mediumEnergy!.magnitudePerLevel).toBe(5);
+  });
+
+  test("includes Large Hybrid Turret damage bonus", () => {
+    const largeHybrid = SKILL_BONUSES.find((b) => b.turretSkill === "Large Hybrid Turret");
+    expect(largeHybrid).toBeDefined();
+    expect(largeHybrid!.bonusType).toBe("turretDamage");
+    expect(largeHybrid!.magnitudePerLevel).toBe(5);
+  });
+
+  test("includes Capital Energy Turret damage bonus", () => {
+    const capitalEnergy = SKILL_BONUSES.find((b) => b.turretSkill === "Capital Energy Turret");
+    expect(capitalEnergy).toBeDefined();
+    expect(capitalEnergy!.bonusType).toBe("turretDamage");
+    expect(capitalEnergy!.magnitudePerLevel).toBe(5);
+  });
+
+  test("includes all 12 turret size skills", () => {
+    const turretSkills = SKILL_BONUSES.filter((b) => b.turretSkill !== undefined).map((b) => b.turretSkill);
+    expect(turretSkills).toEqual(expect.arrayContaining([
+      "Small Energy Turret", "Small Hybrid Turret", "Small Projectile Turret",
+      "Medium Energy Turret", "Medium Hybrid Turret", "Medium Projectile Turret",
+      "Large Energy Turret", "Large Hybrid Turret", "Large Projectile Turret",
+      "Capital Energy Turret", "Capital Hybrid Turret", "Capital Projectile Turret",
+    ]));
   });
 });

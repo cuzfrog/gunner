@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -186,6 +186,78 @@ describe("buildDisruptionScriptStats", () => {
       trackingDeltaBonus: 0,
       rangeDeltaBonus: 0,
       falloffDeltaBonus: 0,
+    });
+  });
+});
+
+describe("_buildModuleStats", () => {
+  function effects(...ids: number[]): Set<number> {
+    return new Set(ids);
+  }
+
+  test("returns undefined when no stats are present", () => {
+    expect(_buildModuleStats(values({}), effects())).toBeUndefined();
+  });
+
+  test("extracts mass and agility stats without damage effects", () => {
+    expect(_buildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), effects())).toEqual({
+      massAddition: 500000,
+      agilityMultiplier: 0.9,
+    });
+  });
+
+  test("extracts Heat Sink damage and speed multipliers with energy weapon effect", () => {
+    // Heat Sink II: effect 91 (energyWeaponDamageMultiply), effect 95 (energyWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects(91, 95));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.1,
+      turretSpeedMultiplier: 0.895,
+      turretWeaponGroup: "Energy Weapon",
+    });
+  });
+
+  test("extracts Gyrostabilizer damage and speed with projectile weapon effect", () => {
+    // Gyrostabilizer II: effect 92 (projectileWeaponDamageMultiply), effect 89 (projectileWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), effects(92, 89));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.89,
+      turretWeaponGroup: "Projectile Weapon",
+    });
+  });
+
+  test("extracts Magnetic Field Stabilizer with hybrid weapon effect", () => {
+    // Magnetic Field Stabilizer II: effect 93 (hybridWeaponDamageMultiply), effect 96 (hybridWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), effects(93, 96));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.905,
+      turretWeaponGroup: "Hybrid Weapon",
+    });
+  });
+
+  test("does not extract damage stats when no damage effect is present", () => {
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects());
+    expect(stats).toBeUndefined();
+  });
+
+  test("preserves damage stats alongside tracking stats", () => {
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), effects(91, 95));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.1,
+      turretSpeedMultiplier: 0.895,
+      turretWeaponGroup: "Energy Weapon",
+      turretTrackingPercent: 10,
+    });
+  });
+
+  test("extracts rig damage effects for projectile weapon", () => {
+    // Projectile rig: effect 2798 (projectileWeaponDamageMultiplyPassive), effect 2799 (projectileWeaponSpeedMultiplyPassive)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.93 }), effects(2798, 2799));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.93,
+      turretWeaponGroup: "Projectile Weapon",
     });
   });
 });
