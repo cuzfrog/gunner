@@ -29,6 +29,7 @@ import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { ProfileEquality } from "../../appstate";
 import type { Side } from "./side";
+import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -54,6 +55,9 @@ export interface ControlsCradle {
   readonly shipATurretOverrides: TurretOverrides;
   readonly shipBTurretOverrides: TurretOverrides;
   readonly turretOverridesBySide: Record<Side, TurretOverrides>;
+  readonly shipAPanelMemory: PanelConfigurationMemory;
+  readonly shipBPanelMemory: PanelConfigurationMemory;
+  readonly panelMemoryBySide: Record<Side, PanelConfigurationMemory>;
   readonly popupGroup: PopupGroup;
   readonly els: ControlsElements;
   readonly engagementReadout: EngagementReadout;

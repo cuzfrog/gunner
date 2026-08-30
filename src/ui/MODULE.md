@@ -4,6 +4,8 @@ no-new-exports:
   - module.ts
   - palette.ts
   - palette.test.ts
+  - panelConfigurationMemory.test.ts
+  - panelConfigurationMemory.ts
   - renderer.test.ts
   - timer.ts
   - timer.test.ts
@@ -26,4 +28,4 @@ Browser presentation and input: DOM form controls, canvas renderer, requestAnima
 
 The `appstate` module owns persistence (`LocalSettingsStore`), saved fittings (`LocalSavedFittings`), and profile sharing (`profileText`). The `i18n/` sub-module owns language switching, the dictionary, and localized hint/lore content data. The `icons/` sub-module owns the static image catalog; `iconIds.ts` and `droneIconIds.ts` are generated data files internal to that module.
 
-DI wiring: `module.ts` composes the `controls`, `i18n`, `appstate`, and `icons` modules and registers `renderer`, `loop`, and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root.
+DI wiring: `module.ts` composes the `controls`, `i18n`, `appstate`, and `icons` modules and registers `renderer`, `loop`, and `timer` against the singleton `container` in `src/container.ts`. The `canvas` consumed by `renderer` and the `Ships` domain service are provided by the composition root. `PanelConfigurationMemory` is a per-side in-memory store (registered as `shipAPanelMemory`/`shipBPanelMemory` in the turret module alongside other per-side stores) that remembers the last turret, launcher, and propulsion selection per dimension, separate from calculation and overrides.

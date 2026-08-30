@@ -7,6 +7,7 @@ import { TurretControllerImpl } from "./turretController";
 import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
 import { collectTurretEls } from "./turretEls";
+import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
 
 type TurretControllerFactoryDeps = Pick<
   ControlsCradle,
@@ -31,6 +32,12 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
     turretOverridesBySide: asFunction(({ shipATurretOverrides, shipBTurretOverrides }) => ({
       shipA: shipATurretOverrides,
       shipB: shipBTurretOverrides,
+    })).singleton(),
+    shipAPanelMemory: asClass(PanelConfigurationMemoryImpl).singleton(),
+    shipBPanelMemory: asClass(PanelConfigurationMemoryImpl).singleton(),
+    panelMemoryBySide: asFunction(({ shipAPanelMemory, shipBPanelMemory }) => ({
+      shipA: shipAPanelMemory,
+      shipB: shipBPanelMemory,
     })).singleton(),
     shipATurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipA", deps)).singleton(),
     shipBTurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipB", deps)).singleton(),
