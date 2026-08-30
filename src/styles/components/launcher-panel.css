@@ -26,6 +26,13 @@
   padding: 0;
 }
 
+.weapon-overload-button {
+  flex: 0 0 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+}
+
 .weapon-variant-gear[aria-expanded="true"] {
   border-color: var(--accent-orange);
   color: var(--accent-orange);

@@ -16,6 +16,8 @@ export interface SkillOverloadSectionEls {
   readonly skillPopup: HTMLElement;
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
+  readonly turretWeaponOverloadButton: HTMLButtonElement;
+  readonly launcherWeaponOverloadButton: HTMLButtonElement;
 }
 
 export class SkillOverloadSection implements ISkillOverloadSection {
@@ -45,6 +47,8 @@ export class SkillOverloadSection implements ISkillOverloadSection {
     });
     this.els.overload.addEventListener("change", () => this.onSkillOrOverloadChange(false));
     this.els.overloadButton.addEventListener("click", () => this.onOverloadButtonClick());
+    this.els.turretWeaponOverloadButton.addEventListener("click", () => this.onWeaponOverloadButtonClick());
+    this.els.launcherWeaponOverloadButton.addEventListener("click", () => this.onWeaponOverloadButtonClick());
     this.els.skillTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popup));
   }
 
@@ -58,10 +62,21 @@ export class SkillOverloadSection implements ISkillOverloadSection {
 
   setWeaponOverloaded(overloaded: boolean): void {
     this.weaponOverloaded = overloaded;
+    this.setWeaponOverloadActive(overloaded);
   }
 
   isWeaponOverloaded(): boolean {
     return this.weaponOverloaded;
+  }
+
+  setWeaponOverloadActive(active: boolean): void {
+    this.els.turretWeaponOverloadButton.setAttribute("aria-pressed", String(active));
+    this.els.launcherWeaponOverloadButton.setAttribute("aria-pressed", String(active));
+  }
+
+  onWeaponOverloadButtonClick(): void {
+    this.setWeaponOverloaded(!this.weaponOverloaded);
+    this.onSkillOrOverloadChange(false);
   }
 
   setOverloadDisabled(): void {

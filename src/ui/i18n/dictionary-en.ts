@@ -21,6 +21,7 @@ export const EN: LanguageSlice<"en"> = {
   "label.skillLevel": { en: "Pilot skills" },
   "skill.level": { en: "Level" },
   "label.overload": { en: "Overload" },
+  "label.weaponOverload": { en: "Weapon Overload" },
   "label.modules": { en: "Modules" },
   "label.ewar.web": { en: "Stasis Webifiers" },
   "label.ewar.grappler": { en: "Stasis Grapplers" },

@@ -21,6 +21,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "label.skillLevel": { zh: "飞行员技能" },
   "skill.level": { zh: "等级" },
   "label.overload": { zh: "超载" },
+  "label.weaponOverload": { zh: "武器超载" },
   "label.modules": { zh: "模块" },
   "label.ewar.web": { zh: "停滞缠绕网" },
   "label.ewar.grappler": { zh: "重型停滞缠绕牵引器" },

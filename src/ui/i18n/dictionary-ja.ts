@@ -21,6 +21,7 @@ export const JA: LanguageSlice<"ja"> = {
   "label.skillLevel": { ja: "パイロットスキル" },
   "skill.level": { ja: "レベル" },
   "label.overload": { ja: "オーバーヒート" },
+  "label.weaponOverload": { ja: "武器オーバーヒート" },
   "label.modules": { ja: "モジュール" },
   "label.ewar.web": { ja: "スタシスウェブ" },
   "label.ewar.grappler": { ja: "スタシスグラップラー" },

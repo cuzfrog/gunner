@@ -50,6 +50,9 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
     <IconButton id={`${idPrefix}-turret-variant-gear`} iconName="gear" extraClass="weapon-variant-gear btn"
             titleI18n="label.turretVariant" ariaLabelI18n="label.turretVariant"
             ariaHaspopup="menu" ariaExpanded={false} ariaControls={`${idPrefix}-turret-variants`} disabled />
+    <button type="button" id={`${idPrefix}-turret-weapon-overload-button`} class="overload-button weapon-overload-button btn" data-i18n-aria-label="label.weaponOverload" data-i18n-title="label.weaponOverload" aria-pressed="false">
+      <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
+    </button>
     <PopupBox id={`${idPrefix}-turret-variants`} extraClass="fitting-popup turret-variants-popup" position="below" align="right" scroll role="menu" i18nAriaLabel="label.turretVariant" ariaLabel="Select turret variant" />
   </div>
 </div>

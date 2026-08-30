@@ -60,6 +60,7 @@ const APPROVED_PREFIXES = [
   "weapon-panel",
   "weapon-selector",
   "weapon-variant",
+  "weapon-overload",
   "turret-variants",
   "turret-variant",
   "turret-mode",

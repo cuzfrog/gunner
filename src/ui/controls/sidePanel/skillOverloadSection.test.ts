@@ -27,6 +27,8 @@ function buildSkillSection() {
     skillPopup: getFake(document, "ship-a-skill-popup") as unknown as HTMLElement,
     overload: getFake(document, "ship-a-overload") as unknown as HTMLInputElement,
     overloadButton: getFake(document, "ship-a-overload-button") as unknown as HTMLButtonElement,
+    turretWeaponOverloadButton: getFake(document, "ship-a-turret-weapon-overload-button") as unknown as HTMLButtonElement,
+    launcherWeaponOverloadButton: getFake(document, "ship-a-launcher-weapon-overload-button") as unknown as HTMLButtonElement,
   };
 
   const sections = vi.mocked<ISidePanelSections>({

@@ -24,6 +24,8 @@ export interface SidePanelElements {
   readonly skillPopup: HTMLElement;
   readonly overload: HTMLInputElement;
   readonly overloadButton: HTMLButtonElement;
+  readonly turretWeaponOverloadButton: HTMLButtonElement;
+  readonly launcherWeaponOverloadButton: HTMLButtonElement;
   readonly pastePopup: HTMLElement;
   readonly pasteInput: HTMLTextAreaElement;
   readonly importFitting: HTMLButtonElement;
@@ -56,6 +58,8 @@ export function collectSideEls(els: ControlsElements, side: Side): SidePanelElem
     skillPopup: combatant.skillPopup,
     overload: combatant.overload,
     overloadButton: combatant.overloadButton,
+    turretWeaponOverloadButton: combatant.turretWeaponOverloadButton,
+    launcherWeaponOverloadButton: combatant.launcherWeaponOverloadButton,
     pastePopup: combatant.pastePopup,
     pasteInput: combatant.pasteInput,
     importFitting: combatant.importFitting,
