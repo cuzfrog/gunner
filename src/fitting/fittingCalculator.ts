@@ -325,7 +325,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       }
     }
 
-    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && painters.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
     return { webs, grapplers, disruptors, scramblers, painters, scripts };
   }
 
@@ -365,7 +365,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       }
     }
 
-    if (computers.length === 0 && enhancers.length === 0 && scripts.length === 0) return EMPTY_MISSILE_BOOSTER_LOADOUT;
+    if (computers.length === 0 && enhancers.length === 0) return EMPTY_MISSILE_BOOSTER_LOADOUT;
     return { computers, enhancers, scripts };
   }
 

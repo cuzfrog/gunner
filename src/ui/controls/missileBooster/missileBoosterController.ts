@@ -11,6 +11,7 @@ import type { Popup, PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { SelectableListImpl, type SelectableItem, IconActionImpl, SectionBlockImpl, spriteIcon } from "../shared";
 import type { MissileBoosterController, MissileBoosterEls } from "./missileBoosterControllerContract";
+import type { MissileBoosterEffectDescriber } from "./missileBoosterEffectDescriber";
 
 interface MutableMissileBoosterActivation {
   active: boolean;
@@ -30,6 +31,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   private readonly fittingImport: FittingImport;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
+  private readonly describer: MissileBoosterEffectDescriber;
   private readonly states = new Map<Side, MissileBoosterState>();
   private readonly scriptPopups: Record<Side, Popup>;
   private readonly scriptGears = new Map<Side, { index: number; gear: HTMLButtonElement }>();
@@ -40,13 +42,14 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
   private readonly overloadAction: IconActionImpl;
   private readonly sectionBlock: SectionBlockImpl;
 
-  constructor(deps: { els: MissileBoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents }) {
+  constructor(deps: { els: MissileBoosterEls; popupGroup: PopupGroup; imageCatalog: ImageCatalog; fittingImport: FittingImport; i18n: I18n; events: UiEvents; describer: MissileBoosterEffectDescriber }) {
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.imageCatalog = deps.imageCatalog;
     this.fittingImport = deps.fittingImport;
     this.i18n = deps.i18n;
     this.events = deps.events;
+    this.describer = deps.describer;
     this.scriptOptionList = new SelectableListImpl({
       itemClass: "ewar-script-option",
       nameClass: "",
@@ -187,58 +190,12 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
 
   private computerDescription(state: MissileBoosterState): string {
     const projection: MissileBoosterProjection = { loadout: state.loadout, activation: { computers: state.activation } };
-    const explosionRadius = this.bonusFor(projection, "explosionRadiusBonusPercent", "explosionRadiusMultiplier");
-    const explosionVelocity = this.bonusFor(projection, "explosionVelocityBonusPercent", "explosionVelocityMultiplier");
-    const missileVelocity = this.bonusFor(projection, "missileVelocityBonusPercent", "missileVelocityMultiplier");
-    const flightTime = this.bonusFor(projection, "flightTimeBonusPercent", "flightTimeMultiplier");
-    const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
-    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
+    return this.describer.computerHint(projection);
   }
 
   private enhancerDescription(state: MissileBoosterState): string {
     const projection: MissileBoosterProjection = { loadout: state.loadout, activation: { computers: state.activation } };
-    const explosionRadius = this.enhancerBonusFor(projection, "explosionRadiusBonusPercent");
-    const explosionVelocity = this.enhancerBonusFor(projection, "explosionVelocityBonusPercent");
-    const missileVelocity = this.enhancerBonusFor(projection, "missileVelocityBonusPercent");
-    const flightTime = this.enhancerBonusFor(projection, "flightTimeBonusPercent");
-    const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
-    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
-  }
-
-  private bonusFor(
-    projection: MissileBoosterProjection,
-    bonusKey: "explosionRadiusBonusPercent" | "explosionVelocityBonusPercent" | "missileVelocityBonusPercent" | "flightTimeBonusPercent",
-    multiplierKey: "explosionRadiusMultiplier" | "explosionVelocityMultiplier" | "missileVelocityMultiplier" | "flightTimeMultiplier",
-  ): number {
-    let total = 0;
-    for (let i = 0; i < projection.loadout.computers.length; i++) {
-      const spec = projection.loadout.computers[i];
-      const activation = projection.activation?.computers[i];
-      if (!activation || !activation.active) continue;
-      const overloadFactor = activation.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-      const multiplier = activation.script?.[multiplierKey] ?? 1;
-      total += spec[bonusKey] * overloadFactor * multiplier;
-    }
-    return total;
-  }
-
-  private enhancerBonusFor(
-    projection: MissileBoosterProjection,
-    bonusKey: "explosionRadiusBonusPercent" | "explosionVelocityBonusPercent" | "missileVelocityBonusPercent" | "flightTimeBonusPercent",
-  ): number {
-    let total = 0;
-    for (const enhancer of projection.loadout.enhancers) {
-      total += enhancer[bonusKey];
-    }
-    return total;
+    return this.describer.enhancerHint(projection);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
@@ -308,7 +265,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
 
   private createModuleButton(active: boolean, computer: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(computer);
-    const effectTitle = this.computerModuleEffect(computer, script, overloaded);
+    const effectTitle = this.describer.computerModuleEffect(computer, script, overloaded);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
     const nameSpan = html`<span class="truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
     const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
@@ -317,33 +274,10 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
 
   private createEnhancerButton(enhancer: MissileEnhancerSpec): { button: HTMLButtonElement } {
     const displayName = this.moduleDisplayName(enhancer);
-    const effectTitle = this.enhancerModuleEffect(enhancer);
+    const effectTitle = this.describer.enhancerModuleEffect(enhancer);
     const iconUrl = this.imageCatalog.itemIconUrl(enhancer.moduleId);
     const button = html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="truncate" title=${effectTitle}>${displayName}</span></button>` as unknown as HTMLButtonElement;
     return { button };
-  }
-
-  private computerModuleEffect(spec: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): string {
-    const overloadFactor = overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
-    const explosionRadius = spec.explosionRadiusBonusPercent * overloadFactor * (script?.explosionRadiusMultiplier ?? 1);
-    const explosionVelocity = spec.explosionVelocityBonusPercent * overloadFactor * (script?.explosionVelocityMultiplier ?? 1);
-    const missileVelocity = spec.missileVelocityBonusPercent * overloadFactor * (script?.missileVelocityMultiplier ?? 1);
-    const flightTime = spec.flightTimeBonusPercent * overloadFactor * (script?.flightTimeMultiplier ?? 1);
-    const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
-    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
-  }
-
-  private enhancerModuleEffect(spec: MissileEnhancerSpec): string {
-    const parts: string[] = [];
-    if (spec.explosionRadiusBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${spec.explosionRadiusBonusPercent > 0 ? "+" : ""}${spec.explosionRadiusBonusPercent.toFixed(1)}%`);
-    if (spec.explosionVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${spec.explosionVelocityBonusPercent > 0 ? "+" : ""}${spec.explosionVelocityBonusPercent.toFixed(1)}%`);
-    if (spec.missileVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${spec.missileVelocityBonusPercent > 0 ? "+" : ""}${spec.missileVelocityBonusPercent.toFixed(1)}%`);
-    if (spec.flightTimeBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${spec.flightTimeBonusPercent > 0 ? "+" : ""}${spec.flightTimeBonusPercent.toFixed(1)}%`);
-    return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
   private createOverloadButton(active: boolean, overloaded: boolean, index: number, spec: { readonly moduleId: TypeId }, onToggle: () => void): HTMLButtonElement {
@@ -409,7 +343,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     state.activation[index].script = script;
     this.updateGearTitle(gear, script);
     const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.title = this.computerModuleEffect(state.loadout.computers[index], script, state.activation[index].overloaded);
+    if (nameSpan) nameSpan.title = this.describer.computerModuleEffect(state.loadout.computers[index], script, state.activation[index].overloaded);
     this.scriptPopups[side].close();
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
@@ -422,7 +356,15 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     activation.active = !activation.active;
     button.setAttribute("aria-pressed", String(activation.active));
     row.className = activation.active ? "ewar-row" : "ewar-row ewar-row-inactive";
-    this.renderSide(side);
+    for (const child of row.children) {
+      if (child instanceof HTMLButtonElement && child.getAttribute("data-index") === String(index)) {
+        if (activation.active) child.removeAttribute("disabled");
+        else child.setAttribute("disabled", "");
+      }
+    }
+    const nameSpan = this.computerNameSpans.get(side)?.[index];
+    if (nameSpan) nameSpan.title = this.describer.computerModuleEffect(state.loadout.computers[index], activation.script, activation.overloaded);
+    this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }
 
@@ -432,6 +374,8 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const overloaded = !state.activation[index].overloaded;
     state.activation[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
+    const nameSpan = this.computerNameSpans.get(side)?.[index];
+    if (nameSpan) nameSpan.title = this.describer.computerModuleEffect(state.loadout.computers[index], state.activation[index].script, overloaded);
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
   }

@@ -9,6 +9,7 @@ import type { PopupGroup } from "../popup";
 import { FakeElement, fakeDocument, getFake, mockFittingImport } from "../../testing";
 import { UiEventsImpl } from "../../events";
 import { MissileBoosterControllerImpl } from "./missileBoosterController";
+import { MissileBoosterEffectDescriberImpl } from "./missileBoosterEffectDescriber";
 import type { MissileBoosterEls } from "./missileBoosterControllerContract";
 
 const PRECISION_SCRIPT: MissileScriptSpec & { readonly moduleId: TypeId } = {
@@ -102,7 +103,8 @@ function buildMissileBoosterController() {
   });
   const events = new UiEventsImpl();
   const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
-  const controller = new MissileBoosterControllerImpl({ els: missileBoosterEls, popupGroup, imageCatalog, fittingImport, i18n, events });
+  const describer = new MissileBoosterEffectDescriberImpl({ i18n });
+  const controller = new MissileBoosterControllerImpl({ els: missileBoosterEls, popupGroup, imageCatalog, fittingImport, i18n, events, describer });
   return { document, controller, els, missileBoosterEls, i18n, imageCatalog, popupGroup, fittingImport, events, emitConfigInvalidated };
 }
 
