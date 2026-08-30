@@ -44,8 +44,8 @@ export function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
 
 export function chargeStatSuffix(option: ChargeOption): string {
   const parts: string[] = [];
-  const damageParts = damageTypeParts(option.damageByType);
-  if (damageParts.length > 0) parts.push(`DMG ${formatBaseDamage(option.damageByType)} (${damageParts.join(" · ")})`);
+  const damagePrefix = damageHintPrefix(option.damageByType);
+  if (damagePrefix) parts.push(damagePrefix);
   parts.push(`range x${formatMultiplier(option.rangeMultiplier)}`, `track x${formatMultiplier(option.trackingMultiplier)}`);
   if (option.falloffMultiplier !== 1) {
     parts.splice(parts.length - 1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
@@ -54,7 +54,13 @@ export function chargeStatSuffix(option: ChargeOption): string {
 }
 
 export function missileDamageHint(option: MissileOption): string {
-  return `DMG ${formatNumber(option.damage, 1)} (${option.damageType})`;
+  return damageHintPrefix({ [option.damageType]: option.damage }) ?? "";
+}
+
+function damageHintPrefix(damageByType: Readonly<Partial<Record<DamageType, number>>>): string | undefined {
+  const parts = damageTypeParts(damageByType);
+  if (parts.length === 0) return undefined;
+  return `DMG ${formatBaseDamage(damageByType)} (${parts.join(" · ")})`;
 }
 
 function damageTypeParts(damageByType: Readonly<Partial<Record<DamageType, number>>>): string[] {

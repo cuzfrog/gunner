@@ -104,7 +104,7 @@ describe("charge stat suffix", () => {
 describe("missile damage hint", () => {
   test("formats damage value and type", () => {
     const option: MissileOption = { id: "missile-1" as TypeId, name: "Inferno Light Missile", damage: 83.3, damageType: "thermal" };
-    expect(missileDamageHint(option)).toBe("DMG 83.3 (thermal)");
+    expect(missileDamageHint(option)).toBe("DMG 83.3 (thermal 83.3)");
   });
 });
 

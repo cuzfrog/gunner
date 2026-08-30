@@ -1,4 +1,4 @@
-import type { CargoCharge, ChargeCatalog, FittingImport, ImportedTurret } from "../../../fitting";
+import type { CargoCharge, ChargeCatalog, ChargeOption, FittingImport, ImportedTurret } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -85,12 +85,14 @@ export class AmmoList {
     } else {
       this.summaryChip.render("—", undefined);
     }
-    this.renderCargoList(state);
-    this.renderAllList(state);
+    const options = hasTurret ? this.chargeCatalog.chargesForTurret(state.turret!) : [];
+    const hintMap = this.chargeHintMap(options);
+    this.renderCargoList(state, hintMap);
+    this.renderAllList(state, options);
     this.renderExpand(state.allExpanded);
   }
 
-  private renderCargoList(state: AmmoListState): void {
+  private renderCargoList(state: AmmoListState, hintMap: Map<string, string>): void {
     const list = this.els.ammoCargoList;
     const label = this.els.ammoCargoLabel;
     list.innerHTML = "";
@@ -107,11 +109,10 @@ export class AmmoList {
     }
     list.hidden = false;
     label.hidden = false;
-    const optionMap = this.chargeOptionMap(state.turret);
     const items: SelectableItem[] = entries.map((entry) => ({
       value: entry.id,
       label: this.fittingImport.itemNameForId(entry.id, this.i18n.current()),
-      hint: optionMap.get(entry.id) ?? this.i18n.t("button.selectAmmo"),
+      hint: hintMap.get(entry.id) ?? this.i18n.t("button.selectAmmo"),
       iconUrl: this.imageCatalog.itemIconUrl(entry.id),
       selected: entry.id === state.ammo,
       quantity: entry.quantity !== undefined ? `x${entry.quantity}` : undefined,
@@ -134,8 +135,7 @@ export class AmmoList {
     return entries;
   }
 
-  private chargeOptionMap(turret: ImportedTurret): Map<string, string> {
-    const options = this.chargeCatalog.chargesForTurret(turret);
+  private chargeHintMap(options: readonly ChargeOption[]): Map<string, string> {
     const map = new Map<string, string>();
     for (const option of options) {
       map.set(option.id, chargeStatSuffix(option));
@@ -143,7 +143,7 @@ export class AmmoList {
     return map;
   }
 
-  private renderAllList(state: AmmoListState): void {
+  private renderAllList(state: AmmoListState, options: readonly ChargeOption[]): void {
     const list = this.els.ammoAllList;
     const section = this.els.ammoAllSection;
     list.innerHTML = "";
@@ -152,7 +152,6 @@ export class AmmoList {
       section.hidden = true;
       return;
     }
-    const options = this.chargeCatalog.chargesForTurret(state.turret);
     if (options.length === 0) {
       list.hidden = true;
       section.hidden = !state.allExpanded;
