@@ -10,5 +10,7 @@ export type { LauncherClass, LauncherClasses } from "./launcherClasses";
 export type { LauncherCatalog } from "./launcherCatalog";
 export type { FittingState, FittedModule, TurretGroup, LauncherGroup, CargoEntry, FittingModuleEntry } from "./fittingState";
 export type { FittingCalculator, HullSideAggregation, PropulsionResult } from "./fittingCalculator";
+export type { FittingOverrides, FittingOverridesStore } from "./fittingOverrides";
+export { applyFittingOverrides } from "./fittingOverrides";
 export type { FittingCradle } from "./cradle";
 export { registerFittingModule } from "./module";

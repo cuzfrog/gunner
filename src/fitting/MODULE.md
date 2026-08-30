@@ -8,6 +8,8 @@ no-new-exports:
   - fittingImport.test.ts
   - fittingImport.ts
   - fittingCalculator.ts
+  - fittingOverrides.test.ts
+  - fittingOverrides.ts
   - fittingState.test.ts
   - fittingState.ts
   - gunFamilies.test.ts
@@ -51,8 +53,11 @@ drones, cargo) without computed values. `FittingStateFactory` builds
 `FittingState` from resolved module entries and `FittingDb`.
 `FittingCalculator` computes turrets, launchers, hull, propulsion,
 ewar, boosts, and cargo charges from a `FittingState` plus
-`StatConditions`. `ImportedFitting.fittingState` carries the basis
-for later recomputation.
+`StatConditions`. `FittingOverrides` and `FittingOverridesStore`
+represent user fitting-level changes (replacing equipped turret/launcher
+modules, charges, or propulsion). `applyFittingOverrides` patches a
+`FittingState` with overrides, producing a new state for the calculator.
+`ImportedFitting.fittingState` carries the basis for later recomputation.
 `ChargeCatalog` adds `has(charge)` so persistence modules can existence-check stored charge
 ids without reaching into the catalog's internal record.
 `ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` so
