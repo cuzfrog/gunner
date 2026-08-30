@@ -2,6 +2,7 @@ import type { TypeId } from "../gamedata/ids";
 import type { SigResolutionClass } from "../sim";
 import { FITTING_DB, type ChargeStats, type FittingDb } from "../gamedata/fittingDb";
 import type { GunFamilies, GunFamily } from "./gunFamilies";
+import { type DamageBreakdown, type DamageType, chargeDamageByType } from "./damageBreakdown";
 
 export interface ImportedTurretBase {
   readonly tracking: number;
@@ -22,6 +23,7 @@ export interface ImportedTurret {
   readonly damagePerShot: number;
   readonly cycleTime: number;
   readonly turretCount: number;
+  readonly damageBreakdown: DamageBreakdown;
 }
 
 export interface ImportedLauncher {
@@ -37,6 +39,7 @@ export interface ImportedLauncher {
   readonly damageReductionFactor: number;
   readonly maxVelocity: number;
   readonly flightTime: number;
+  readonly damageBreakdown: DamageBreakdown;
 }
 
 export interface CargoCharge {
@@ -50,6 +53,7 @@ export interface ChargeOption {
   readonly trackingMultiplier: number;
   readonly rangeMultiplier: number;
   readonly falloffMultiplier: number;
+  readonly damageByType: Readonly<Partial<Record<DamageType, number>>>;
 }
 
 export type ChargeFamily = "projectile" | "hybrid" | "laser";
@@ -115,6 +119,7 @@ export class ChargeCatalogImpl implements ChargeCatalog {
       optimal: turret.base.optimal * (stats.rangeMultiplier ?? 1),
       falloff: turret.base.falloff * (stats.falloffMultiplier ?? 1),
       damagePerShot: turret.damageMultiplier * chargeDamage,
+      damageBreakdown: { ...turret.damageBreakdown, damageByType: chargeDamageByType(stats) },
     };
   }
 
@@ -165,6 +170,7 @@ function _chargesForSize(charges: Readonly<Record<string, ChargeStats>>, chargeS
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
+      damageByType: chargeDamageByType(stats),
     });
   }
   result.sort((a, b) => {
@@ -183,6 +189,7 @@ function _allChargeOptions(charges: Readonly<Record<string, ChargeStats>>): Char
       trackingMultiplier: stats.trackingMultiplier ?? 1,
       rangeMultiplier: stats.rangeMultiplier ?? 1,
       falloffMultiplier: stats.falloffMultiplier ?? 1,
+      damageByType: chargeDamageByType(stats),
     });
   }
   result.sort((a, b) => {

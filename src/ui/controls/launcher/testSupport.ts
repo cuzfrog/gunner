@@ -1,6 +1,6 @@
 import type { ImageCatalog } from "../../icons";
 import type { FittingCalculator, FittingImport, FittingOverridesStore, ImportedLauncher, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
-import { FittingOverridesStoreImpl } from "../../../fitting";
+import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
 import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { Ships, SkillLevel } from "../../../ships";
@@ -82,6 +82,7 @@ export function importedLauncherFixture(overrides: Partial<ImportedLauncher> = {
     damageReductionFactor: 0.5,
     maxVelocity: 3750,
     flightTime: 5,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
     ...overrides,
   };
 }
@@ -178,9 +179,9 @@ export function buildLauncher(
     }),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveCargoCharges: vi.fn(() => []),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
   });
   const controller = new LauncherControllerImpl({
     side,

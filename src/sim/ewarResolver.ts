@@ -15,6 +15,8 @@ import type {
 export interface EwarResolver {
   speedMultiplier(projection: EwarProjection | undefined, distance: number): number;
   speedMultiplierIgnoringRange(projection: EwarProjection | undefined): number;
+  sigMultiplier(projection: EwarProjection | undefined, distance: number): number;
+  sigMultiplierIgnoringRange(projection: EwarProjection | undefined): number;
   disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec;
   disruptedTurretIgnoringRange(turret: TurretSpec, projection: EwarProjection | undefined): TurretSpec;
   propulsionSuppressed(projection: EwarProjection | undefined, distance: number): boolean;
@@ -39,6 +41,14 @@ export class EwarResolverImpl implements EwarResolver {
 
   speedMultiplierIgnoringRange(projection: EwarProjection | undefined): number {
     return this.stacking.apply(this.speedMultipliers(projection, 0, true));
+  }
+
+  sigMultiplier(projection: EwarProjection | undefined, distance: number): number {
+    return this.stacking.apply(this.sigMultipliers(projection, distance, false));
+  }
+
+  sigMultiplierIgnoringRange(projection: EwarProjection | undefined): number {
+    return this.stacking.apply(this.sigMultipliers(projection, 0, true));
   }
 
   disruptedTurret(turret: TurretSpec, projection: EwarProjection | undefined, distance: number): TurretSpec {
@@ -192,6 +202,21 @@ export class EwarResolverImpl implements EwarResolver {
       const optimal = spec.optimal * overloadBonus;
       const effectiveness = ignoreRange ? 1 : this.falloffEffectiveness(distance, optimal, spec.falloff);
       if (effectiveness > 0) multipliers.push(1 - spec.speedFactor * effectiveness);
+    }
+    return multipliers;
+  }
+
+  private sigMultipliers(projection: EwarProjection | undefined, distance: number, ignoreRange: boolean): number[] {
+    if (!projection) return [];
+    const multipliers: number[] = [];
+    for (let i = 0; i < projection.loadout.painters.length; i++) {
+      const spec = projection.loadout.painters[i];
+      const activation = projection.activation?.painters[i];
+      if (activation && !activation.active) continue;
+      const overloadBonus = activation?.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+      const strength = spec.signatureRadiusBonusPercent * overloadBonus;
+      const effectiveness = ignoreRange ? 1 : this.falloffEffectiveness(distance, spec.maxRange, spec.falloff);
+      if (effectiveness > 0) multipliers.push(1 + (strength / 100) * effectiveness);
     }
     return multipliers;
   }

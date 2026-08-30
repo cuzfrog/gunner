@@ -130,7 +130,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
         this.chips.delete(kind);
       }
     }
-    this.refreshTitles();
+    this.refreshHints();
     this.lastTitleRefresh = now;
   }
 
@@ -143,7 +143,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     }
     if (now - this.lastTitleRefresh < TITLE_REFRESH_INTERVAL_MS) return;
     this.lastTitleRefresh = now;
-    this.refreshTitles();
+    this.refreshHints();
   }
 
   private isSideVisible(kind: RangeOverlayKind, side: Side): boolean {
@@ -250,10 +250,10 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
     if (chip) chip.setAttribute("aria-pressed", String(this.visibilityFor(kind) !== "none"));
   }
 
-  private refreshTitles(): void {
+  private refreshHints(): void {
     for (const kind of this.chips.keys()) {
       const chip = this.chips.get(kind);
-      if (chip) chip.title = this.describe(kind);
+      if (chip) chip.setAttribute("data-hint", this.describe(kind));
     }
   }
 
@@ -266,6 +266,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       grapplers: [...(shipA?.loadout.grapplers ?? []), ...(shipB?.loadout.grapplers ?? [])],
       disruptors: [...(shipA?.loadout.disruptors ?? []), ...(shipB?.loadout.disruptors ?? [])],
       scramblers: [...(shipA?.loadout.scramblers ?? []), ...(shipB?.loadout.scramblers ?? [])],
+      painters: [...(shipA?.loadout.painters ?? []), ...(shipB?.loadout.painters ?? [])],
       scripts: [...(shipA?.loadout.scripts ?? []), ...(shipB?.loadout.scripts ?? [])],
     };
     const activation: EwarActivation | undefined = (shipA?.activation || shipB?.activation) ? {
@@ -273,6 +274,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       grapplers: [...(shipA?.activation?.grapplers ?? []), ...(shipB?.activation?.grapplers ?? [])],
       disruptors: [...(shipA?.activation?.disruptors ?? []), ...(shipB?.activation?.disruptors ?? [])],
       scramblers: [...(shipA?.activation?.scramblers ?? []), ...(shipB?.activation?.scramblers ?? [])],
+      painters: [...(shipA?.activation?.painters ?? []), ...(shipB?.activation?.painters ?? [])],
     } : undefined;
     return { loadout, activation };
   }

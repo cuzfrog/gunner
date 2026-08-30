@@ -34,6 +34,7 @@ import {
   isOptionalFittedHullSummary,
   isFiniteNumber,
   isOptionalFittingText,
+  isOptionalMissileBoosterActivations,
   isOptionalNonEmptyString,
   isOptionalNonNegative,
   isOptionalPositive,
@@ -218,6 +219,7 @@ export class SettingsParser {
       isOptionalFittedHullSummary(s[`${p}FittedHull`]) &&
       isOptionalEwarActivation(s[`${p}EwarActivation`]) &&
       isOptionalBoosterActivations(s[`${p}BoosterActivation`]) &&
+      isOptionalMissileBoosterActivations(s[`${p}MissileBoosterActivation`]) &&
       isOptionalWeaponKind(s[`${p}WeaponKind`]) &&
       isOptionalNonEmptyString(s[`${p}MissileAmmo`]) &&
       (side === "shipA" ? isOptionalPositive(s[`${p}Sig`]) : isPositive(s[`${p}Sig`]))
@@ -286,6 +288,8 @@ export class SettingsParser {
   private migrateBoosterActivation(value: Record<string, unknown>): void {
     this.migrateSideBoosterActivation(value, "shipABoosterActivation");
     this.migrateSideBoosterActivation(value, "shipBBoosterActivation");
+    this.migrateSideMissileBoosterActivation(value, "shipAMissileBoosterActivation");
+    this.migrateSideMissileBoosterActivation(value, "shipBMissileBoosterActivation");
   }
 
   private migrateSideBoosterActivation(value: Record<string, unknown>, key: string): void {
@@ -302,6 +306,22 @@ export class SettingsParser {
     if (record.script === undefined) return { active, script: "none" };
     if (typeof record.script !== "string") return item;
     return { active, script: resolveBoosterScript(record.script, this.itemNameResolver) };
+  }
+
+  private migrateSideMissileBoosterActivation(value: Record<string, unknown>, key: string): void {
+    const saved = value[key];
+    if (!Array.isArray(saved)) return;
+    value[key] = saved.map((item) => this.migrateMissileBoosterEntry(item));
+  }
+
+  private migrateMissileBoosterEntry(item: unknown): unknown {
+    if (!isRecord(item)) return item;
+    const record = { ...item };
+    const active = typeof record.active === "boolean" ? record.active : false;
+    const overloaded = typeof record.overloaded === "boolean" ? record.overloaded : false;
+    if (record.script === undefined) return { active, overloaded, script: "none" };
+    if (typeof record.script !== "string") return item;
+    return { active, overloaded, script: resolveBoosterScript(record.script, this.itemNameResolver) };
   }
 
   private migrateEwarActivation(value: Record<string, unknown>): void {
@@ -458,6 +478,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   if (combatant.fittedHull !== undefined) wire[`${p}FittedHull` as const] = combatant.fittedHull;
   if (combatant.ewarActivation !== undefined) wire[`${p}EwarActivation` as const] = combatant.ewarActivation;
   if (combatant.boosterActivation !== undefined) wire[`${p}BoosterActivation` as const] = combatant.boosterActivation;
+  if (combatant.missileBoosterActivation !== undefined) wire[`${p}MissileBoosterActivation` as const] = combatant.missileBoosterActivation;
   if (combatant.weaponKind !== undefined) wire[`${p}WeaponKind` as const] = combatant.weaponKind;
   if (combatant.missileAmmo !== undefined) wire[`${p}MissileAmmo` as const] = combatant.missileAmmo;
   if (combatant.sig !== undefined && side === "shipA") wire.shipASig = combatant.sig;
@@ -484,6 +505,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     fittedHull: sideValue(side, settings.shipAFittedHull, settings.shipBFittedHull),
     ewarActivation: sideValue(side, settings.shipAEwarActivation, settings.shipBEwarActivation),
     boosterActivation: sideValue(side, settings.shipABoosterActivation, settings.shipBBoosterActivation),
+    missileBoosterActivation: sideValue(side, settings.shipAMissileBoosterActivation, settings.shipBMissileBoosterActivation),
     sig,
     tracking: sideValue(side, settings.shipATracking, settings.shipBTracking) ?? settings.tracking ?? 0,
     sigRes: sideValue(side, settings.shipASigRes, settings.shipBSigRes) ?? settings.sigRes ?? "S",

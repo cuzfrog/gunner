@@ -1,0 +1,136 @@
+@layer components {
+.dps-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 220px;
+}
+
+.dps-hint-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dps-hint-group + .dps-hint-group {
+  margin-top: 4px;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 4px;
+}
+
+.dps-hint-group-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1px;
+}
+
+.dps-hint-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dps-hint-type-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.dps-hint-label {
+  color: var(--text-secondary);
+}
+
+.dps-hint-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.dps-hint-percent {
+  text-align: right;
+  color: var(--text-dim);
+  min-width: 3ch;
+}
+
+.dps-hint-sum-row {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.dps-hint-sum-row .dps-hint-value {
+  font-weight: 600;
+}
+
+.dps-hint-factor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dps-hint-factor-main {
+  display: grid;
+  grid-template-columns: 64px 1fr auto auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.dps-hint-factor-kind {
+  color: var(--text-secondary);
+}
+
+.dps-hint-factor-multi {
+  text-align: right;
+  color: var(--text-primary);
+  min-width: 5ch;
+}
+
+.dps-hint-factor-cumulative {
+  text-align: right;
+  color: var(--text-dim);
+  min-width: 5ch;
+}
+
+.dps-hint-factor-source {
+  color: var(--text-dim);
+  font-size: 11px;
+  padding-left: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dps-hint-summary {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.dps-hint-summary-row .dps-hint-label {
+  color: var(--text-secondary);
+}
+
+.dps-hint-summary-row .dps-hint-value {
+  color: var(--text-primary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dps-hint-dps-row {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 1px;
+}
+
+.dps-hint-dps-row .dps-hint-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dps-hint-dps-row .dps-hint-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+}

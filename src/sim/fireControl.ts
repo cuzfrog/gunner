@@ -1,6 +1,7 @@
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { MissileApplication } from "./missileApplication";
+import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { TurretDamage } from "./turretDamage";
 import type {
@@ -37,19 +38,22 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   private readonly hitChance: HitChance;
   private readonly ewarResolver: EwarResolver;
   private readonly boosters: TurretBoosterResolver;
+  private readonly missileBoosters: MissileBoosterResolver;
   private readonly turretDamage: TurretDamage;
   private readonly missileApplication: MissileApplication;
 
-  constructor({ hitChance, ewarResolver, turretBoosterResolver, turretDamage, missileApplication }: {
+  constructor({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication }: {
     hitChance: HitChance;
     ewarResolver: EwarResolver;
     turretBoosterResolver: TurretBoosterResolver;
+    missileBoosterResolver: MissileBoosterResolver;
     turretDamage: TurretDamage;
     missileApplication: MissileApplication;
   }) {
     this.hitChance = hitChance;
     this.ewarResolver = ewarResolver;
     this.boosters = turretBoosterResolver;
+    this.missileBoosters = missileBoosterResolver;
     this.turretDamage = turretDamage;
     this.missileApplication = missileApplication;
   }
@@ -62,10 +66,11 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
   }
 
   private assess(frame: EngagementFrame, ship: ShipState, opponent: ShipState, attack: AttackState): AttackAssessment {
+    const paintedSig = attack.opponentSigRadius * this.ewarResolver.sigMultiplier(ship.ewar, frame.distance);
     if (attack.weapon.kind === "turret") {
-      return this.assessTurret(frame, ship, opponent, attack.weapon, attack.opponentSigRadius);
+      return this.assessTurret(frame, ship, opponent, attack.weapon, paintedSig);
     }
-    return this.assessMissile(frame, opponent, attack.weapon, attack.opponentSigRadius);
+    return this.assessMissile(frame, ship, opponent, attack.weapon, paintedSig);
   }
 
   private assessTurret(frame: EngagementFrame, ship: ShipState, opponent: ShipState, turret: TurretSpec, opponentSigRadius: number): AttackAssessment {
@@ -76,17 +81,18 @@ export class EngagementEvaluatorImpl implements EngagementEvaluator {
     return { boostedWeapon: boosted, effectiveWeapon: effectiveTurret, damage, turret: { hit, expectedMultiplier: damage.application } };
   }
 
-  private assessMissile(frame: EngagementFrame, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number): AttackAssessment {
-    const breakdown = this.missileApplication.compute(frame, missile, opponent, opponentSigRadius);
-    const nominalDps = missile.cycleTime > 0 ? (missile.damagePerMissile * missile.launcherCount) / missile.cycleTime : 0;
+  private assessMissile(frame: EngagementFrame, ship: ShipState, opponent: ShipState, missile: MissileSpec, opponentSigRadius: number): AttackAssessment {
+    const boosted = this.missileBoosters.boostedMissile(missile, ship.missileBoosts);
+    const breakdown = this.missileApplication.compute(frame, boosted, opponent, opponentSigRadius);
+    const nominalDps = boosted.cycleTime > 0 ? (boosted.damagePerMissile * boosted.launcherCount) / boosted.cycleTime : 0;
     const appliedDps = breakdown.inRange ? nominalDps * breakdown.application : 0;
-    const volley = missile.damagePerMissile * missile.launcherCount;
+    const volley = boosted.damagePerMissile * boosted.launcherCount;
     const damage: DamageAssessment = {
       nominalDps,
       appliedDps,
       application: breakdown.inRange ? breakdown.application : 0,
       volley,
     };
-    return { boostedWeapon: missile, effectiveWeapon: missile, damage, missile: breakdown };
+    return { boostedWeapon: boosted, effectiveWeapon: boosted, damage, missile: breakdown };
   }
 }

@@ -91,7 +91,7 @@ export class PropulsionSection implements IPropulsionSection {
     const options: ChoiceGroupOption[] = modules.map((module) => ({
       value: module.id,
       label: propulsionOptionLabel(module),
-      title: propulsionOptionLabel(module),
+      hint: propulsionOptionLabel(module),
       iconUrl: this.imageCatalog.itemIconUrl(module.iconId),
       disabled: !profile,
     }));

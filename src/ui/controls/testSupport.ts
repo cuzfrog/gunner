@@ -68,7 +68,7 @@ export function addSigResButtons(document: Document): void {
       button.tagName = "BUTTON";
       button.setAttribute("data-value", value);
       button.setAttribute("aria-pressed", String(value === "S"));
-      button.title = `Original ${value}`;
+      button.setAttribute("data-hint", `Original ${value}`);
       group.appendChild(button);
     }
   }
@@ -174,7 +174,7 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     imageCatalog: asValue(mockImageCatalog()),
     ewarResolver: asValue(vi.mocked<EwarResolver>({
       speedMultiplier: vi.fn(() => 1),
-      speedMultiplierIgnoringRange: vi.fn(() => 1),
+      speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
       disruptedTurret: vi.fn((turret) => turret),
       disruptedTurretIgnoringRange: vi.fn((turret) => turret),
       propulsionSuppressed: vi.fn(() => false),
@@ -203,12 +203,15 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
       resolveLauncher: vi.fn(() => undefined),
       resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
       resolvePropulsion: vi.fn(() => undefined),
-      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
       resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-      resolveCargoCharges: vi.fn(() => []),
+      resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
     })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
+    itemNameCatalog: asValue({ nameForId: vi.fn((id: string) => id) }),
+    dpsHintRenderer: asValue({ render: vi.fn() }),
+    dpsHintProvider: asValue({ render: vi.fn() }),
   });
   return cradle;
 }
@@ -360,6 +363,9 @@ export function buildSidePanel(
     shipBTurretOverrides: asValue(shipBTurretOverrides),
     turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
+    itemNameCatalog: asValue({ nameForId: vi.fn((id: string) => id) }),
+    dpsHintRenderer: asValue({ render: vi.fn() }),
+    dpsHintProvider: asValue({ render: vi.fn() }),
   });
   registerSidePanelModule(cradle);
 

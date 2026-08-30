@@ -38,6 +38,7 @@ export interface ShipState extends ShipConfig {
   velocity: Vec2;
   ewar?: EwarProjection;
   boosts?: TurretBoostProjection;
+  missileBoosts?: MissileBoosterProjection;
 }
 
 export interface SimConfig {
@@ -171,6 +172,15 @@ export interface WarpScramblerSpec {
   readonly overloadRangeBonusPercent: number;
 }
 
+export interface TargetPainterSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly maxRange: number;
+  readonly falloff: number;
+  readonly signatureRadiusBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
 export interface TrackingBoosterSpec {
   readonly moduleName: string;
   readonly moduleId: TypeId;
@@ -180,6 +190,35 @@ export interface TrackingBoosterSpec {
   readonly defaultScript: TurretScriptSpec | undefined;
 }
 
+export interface MissileScriptSpec {
+  readonly name: string;
+  readonly moduleId: TypeId;
+  readonly explosionRadiusMultiplier: number;
+  readonly explosionVelocityMultiplier: number;
+  readonly missileVelocityMultiplier: number;
+  readonly flightTimeMultiplier: number;
+}
+
+export interface MissileBoosterSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly defaultScript: MissileScriptSpec | undefined;
+}
+
+export interface MissileEnhancerSpec {
+  readonly moduleName: string;
+  readonly moduleId: TypeId;
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+}
+
 export interface BoostLoadout {
   readonly computers: readonly TrackingBoosterSpec[];
   readonly scripts: readonly TurretScriptSpec[];
@@ -187,15 +226,24 @@ export interface BoostLoadout {
 
 export const EMPTY_BOOST_LOADOUT: BoostLoadout = { computers: [], scripts: [] };
 
+export interface MissileBoosterLoadout {
+  readonly computers: readonly MissileBoosterSpec[];
+  readonly enhancers: readonly MissileEnhancerSpec[];
+  readonly scripts: readonly MissileScriptSpec[];
+}
+
+export const EMPTY_MISSILE_BOOSTER_LOADOUT: MissileBoosterLoadout = { computers: [], enhancers: [], scripts: [] };
+
 export interface EwarLoadout {
   readonly webs: readonly StasisWebSpec[];
   readonly grapplers: readonly StasisGrapplerSpec[];
   readonly disruptors: readonly TrackingDisruptorSpec[];
   readonly scramblers: readonly WarpScramblerSpec[];
+  readonly painters: readonly TargetPainterSpec[];
   readonly scripts: readonly DisruptionScriptSpec[];
 }
 
-export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
+export const EMPTY_EWAR_LOADOUT: EwarLoadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
 
 export interface WebActivation {
   readonly active: boolean;
@@ -218,11 +266,17 @@ export interface ScramblerActivation {
   readonly overloaded: boolean;
 }
 
+export interface PainterActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+}
+
 export interface EwarActivation {
   readonly webs: readonly WebActivation[];
   readonly grapplers: readonly GrapplerActivation[];
   readonly disruptors: readonly DisruptorActivation[];
   readonly scramblers: readonly ScramblerActivation[];
+  readonly painters: readonly PainterActivation[];
 }
 
 export interface EwarProjection {
@@ -262,6 +316,7 @@ export interface DisruptionBreakdown {
 
 export interface BoosterActivation {
   readonly active: boolean;
+  readonly overloaded: boolean;
   readonly script: TurretScriptSpec | undefined;
 }
 
@@ -274,7 +329,23 @@ export interface TurretBoostProjection {
   readonly activation?: BoostActivation;
 }
 
+export interface MissileBoosterActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly script: MissileScriptSpec | undefined;
+}
+
+export interface MissileBoostActivation {
+  readonly computers: readonly MissileBoosterActivation[];
+}
+
+export interface MissileBoosterProjection {
+  readonly loadout: MissileBoosterLoadout;
+  readonly activation?: MissileBoostActivation;
+}
+
 export interface CombatantConfig extends ShipConfig {
   readonly ewar?: EwarProjection;
   readonly boosts?: TurretBoostProjection;
+  readonly missileBoosts?: MissileBoosterProjection;
 }

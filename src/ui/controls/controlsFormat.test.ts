@@ -1,10 +1,8 @@
 import type { DisruptionScriptSpec, TurretScriptSpec } from "../../sim";
-import type { ChargeOption } from "../../fitting";
 import { toTypeId, type TypeId } from "../../gamedata/ids";
 import type { PropulsionId, PropulsionModule } from "../../ships";
 import type { I18n } from "../i18n";
 import {
-  chargeStatSuffix,
   formatDistance,
   formatMultiplier,
   formatNumber,
@@ -80,18 +78,6 @@ describe("skill level conversion", () => {
   test("labels a skill level through the i18n t function", () => {
     const i18n: I18n = { current: () => "en", setLanguage: () => {}, t: (key) => key, translateDocument: () => {} };
     expect(skillOptionLabel(i18n, 5)).toBe("skill.level 5");
-  });
-});
-
-describe("charge stat suffix", () => {
-  test("omits falloff when the multiplier is one", () => {
-    const option: ChargeOption = { id: "12608" as TypeId, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1 };
-    expect(chargeStatSuffix(option)).toBe("range x0.5 · track x0.75");
-  });
-
-  test("includes falloff when it differs from one", () => {
-    const option: ChargeOption = { id: "barrage-s" as TypeId, name: "Barrage S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 1.5 };
-    expect(chargeStatSuffix(option)).toBe("range x0.5 · falloff x1.5 · track x0.75");
   });
 });
 

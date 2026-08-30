@@ -9,6 +9,7 @@ import {
   type PropulsionSelection,
   type StoredBoosterActivation,
   type StoredEwarActivation,
+  type StoredMissileBoosterActivation,
 } from "./userSettings";
 
 export interface CombatantSettings {
@@ -28,6 +29,7 @@ export interface CombatantSettings {
   readonly fittedHull?: FittedHullSummary;
   readonly ewarActivation?: StoredEwarActivation;
   readonly boosterActivation?: readonly StoredBoosterActivation[];
+  readonly missileBoosterActivation?: readonly StoredMissileBoosterActivation[];
   readonly sig?: number;
   readonly tracking: number;
   readonly sigRes: SigResolutionClass;

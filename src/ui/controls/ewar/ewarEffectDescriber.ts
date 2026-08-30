@@ -1,5 +1,5 @@
 import type { EwarResolver } from "../../../sim";
-import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TurretSpec, TrackingDisruptorSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 
 export interface EwarEffectDescriber {
@@ -11,6 +11,8 @@ export interface EwarEffectDescriber {
   disruptorHint(projection: EwarProjection): string;
   scramblerDescription(projection: EwarProjection, distance: number): string;
   scramblerHint(projection: EwarProjection): string;
+  painterHint(projection: EwarProjection): string;
+  painterModuleEffect(spec: TargetPainterSpec): string;
   webModuleEffect(spec: StasisWebSpec): string;
   grapplerModuleEffect(spec: StasisGrapplerSpec): string;
   disruptorModuleEffect(spec: TrackingDisruptorSpec, script: DisruptionScriptSpec | undefined): string;
@@ -160,5 +162,32 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
 
   scramblerModuleEffect(): string {
     return this.i18n.t("ewar.hover.scrambler");
+  }
+
+  painterHint(projection: EwarProjection): string {
+    const multiplier = this.resolver.sigMultiplierIgnoringRange(projection);
+    const reach = this.painterReach(projection);
+    return `${this.sigDescription(multiplier)} · ${this.formatRange(reach)}`;
+  }
+
+  painterModuleEffect(spec: TargetPainterSpec): string {
+    return this.sigDescription(1 + spec.signatureRadiusBonusPercent / 100);
+  }
+
+  private sigDescription(multiplier: number): string {
+    if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
+    const percent = Math.round((multiplier - 1) * 100);
+    return `${this.i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%`;
+  }
+
+  private painterReach(projection: EwarProjection): number {
+    let reach = 0;
+    for (let i = 0; i < projection.loadout.painters.length; i++) {
+      const activation = projection.activation?.painters[i];
+      if (activation && !activation.active) continue;
+      const spec = projection.loadout.painters[i];
+      reach = Math.max(reach, spec.maxRange + spec.falloff);
+    }
+    return reach;
   }
 }

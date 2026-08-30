@@ -30,6 +30,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       events: proxy.uiEvents,
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
+      missileBoosterController: proxy.missileBoosterController,
       fittingImport: proxy.fittingImport,
       parser: proxy.parser,
     })).singleton(),
@@ -38,6 +39,7 @@ export function registerSessionModule<T extends ControlsCradle>(cradle: AwilixCo
       shipBSide: proxy.shipBSide,
       ewarController: proxy.ewarController,
       boosterController: proxy.boosterController,
+      missileBoosterController: proxy.missileBoosterController,
       distanceSource: proxy.sessionCodec,
     })).singleton(),
   });

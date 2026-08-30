@@ -5,6 +5,7 @@ import type { StackingPenalty } from "../sim";
 import type { SkillLevel } from "../ships";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { ImportedLauncher } from "./chargeCatalog";
+import { EMPTY_DAMAGE_BREAKDOWN } from "./damageBreakdown";
 
 const LIGHT_MISSILE_LAUNCHER: LauncherStats = { rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1, id: toTypeId("499"), name: "Light Missile Launcher I" };
 const ROCKET_LAUNCHER: LauncherStats = { rateOfFire: 4, launcherGroup: 507, chargeGroups: [387], metaLevel: 0, metaGroupID: 1, id: toTypeId("510"), name: "Rocket Launcher I" };
@@ -53,6 +54,7 @@ function importedLauncher(overrides: Partial<ImportedLauncher> = {}): ImportedLa
     damageReductionFactor: 2.0,
     maxVelocity: 3750,
     flightTime: 5,
+    damageBreakdown: EMPTY_DAMAGE_BREAKDOWN,
     ...overrides,
   };
 }

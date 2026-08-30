@@ -15,7 +15,10 @@ export class FakeElement {
   children: FakeElement[] = [];
   parent: FakeElement | null = null;
   classList = { add: vi.fn(), remove: vi.fn(), toggle: vi.fn(), contains: vi.fn(() => false) };
-  style: Record<string, string | number> & { setProperty(this: Record<string, string | number>, name: string, value: string): void } = Object.assign(Object.create(null), { setProperty(this: Record<string, string | number>, name: string, value: string) { this[name] = value; } });
+  style: Record<string, string | number> & { setProperty(this: Record<string, string | number>, name: string, value: string): void; removeProperty(this: Record<string, string | number>, name: string): string } = Object.assign(Object.create(null), {
+    setProperty(this: Record<string, string | number>, name: string, value: string) { this[name] = value; },
+    removeProperty(this: Record<string, string | number>, name: string) { const v = this[name]; delete this[name]; return String(v ?? ""); },
+  });
   offsetParent: FakeElement | null = null;
   offsetWidth = 0;
   offsetHeight = 0;
@@ -66,7 +69,10 @@ export class FakeElement {
     else if (name === "src") this.src = "";
     else if (name.startsWith("data-")) delete this.dataset[name.slice(5)];
   }
-  addEventListener(event: string, handler: (event?: unknown) => void): void { (this.handlers[event] ??= []).push(handler); }
+  addEventListener(event: string, handler: (event?: unknown) => void, options?: { readonly signal?: AbortSignal }): void {
+    if (options?.signal?.aborted) return;
+    (this.handlers[event] ??= []).push(handler);
+  }
   dispatchEvent(event: { type: string }): void { this.handlers[event.type]?.forEach((h) => h(event)); }
   trigger(event: string, data?: unknown): void { this.handlers[event]?.forEach((h) => h(data)); }
   appendChild(child: unknown): void {
@@ -95,12 +101,21 @@ export class FakeElement {
   closest(selector?: string): FakeElement | null {
     if (!selector) return null;
     const ids = selector.split(",").map((s) => s.trim()).filter((s) => s.startsWith("#")).map((s) => s.slice(1));
+    const attrs = selector.split(",").map((s) => s.trim()).filter((s) => s.startsWith("[")).map((s) => parseAttrSelector(s));
     let current: FakeElement | null = this;
     while (current) {
-      if (ids.includes(current.id)) return current;
+      const node = current;
+      if (ids.includes(node.id)) return node;
+      if (attrs.some((a) => a !== undefined && node.matchesAttr(a.name, a.value))) return node;
       current = current.parent;
     }
     return null;
+  }
+
+  private matchesAttr(name: string, value: string | undefined): boolean {
+    const actual = this.getAttribute(name);
+    if (actual === null) return false;
+    return value === undefined || actual === value;
   }
   querySelector(selector: string): FakeElement | null {
     if (selector.startsWith('[aria-selected="true"]')) {
@@ -112,4 +127,10 @@ export class FakeElement {
     }
     return this.children[0] ?? null;
   }
+}
+
+function parseAttrSelector(token: string): { name: string; value: string | undefined } | undefined {
+  const match = /^\[([^\]=]+)(?:="([^"]*)")?\]$/.exec(token);
+  if (match === null) return undefined;
+  return { name: match[1], value: match[2] };
 }

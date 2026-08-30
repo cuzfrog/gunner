@@ -72,7 +72,7 @@ function buildController() {
   });
   const ewarResolver = vi.mocked<EwarResolver>({
     speedMultiplier: vi.fn(() => 1),
-    speedMultiplierIgnoringRange: vi.fn(() => 1),
+    speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
     disruptedTurret: vi.fn((turret) => turret),
     disruptedTurretIgnoringRange: vi.fn((turret) => turret),
     propulsionSuppressed: vi.fn(() => false),
@@ -158,7 +158,7 @@ describe("PortraitsController", () => {
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.tagName).toBe("IMG");
     expect(icon.src).toBe("images/icons/1234@1x.png");
-    expect(icon.title).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
   });
 
   test("shipB projection web at current distance shows icon under shipA portrait", () => {
@@ -191,7 +191,7 @@ describe("PortraitsController", () => {
     expect(els.shipBEffects.children.length).toBe(1);
     const icon = els.shipBEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/5678@1x.png");
-    expect(icon.title).toBe("ewar.hover.scrambler");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.scrambler");
   });
 
   test("out-of-range projection leaves effect rows empty while portraits stay visible", () => {
@@ -289,11 +289,12 @@ describe("PortraitsController", () => {
     projections.shipB = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
-        grapplers: [], disruptors: [], scramblers: [], scripts: [],
+        grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [],
       },
       activation: {
         webs: [{ active: true, overloaded: false }],
         grapplers: [], disruptors: [], scramblers: [],
+      painters: [],
       },
     };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));
@@ -310,7 +311,7 @@ describe("PortraitsController", () => {
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
     expect(icon.src).toBe("images/icons/1234@1x.png");
-    expect(icon.title).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
   });
 
   test("distance changes that do not change the applied set do not create new img elements", () => {
@@ -393,7 +394,7 @@ describe("PortraitsController", () => {
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.title).toBe("ewar.hover.web 60%");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.web 60%");
   });
 
   test("scrambler effect title shows scrambler hover label", () => {
@@ -407,7 +408,7 @@ describe("PortraitsController", () => {
     controller.update();
     expect(els.shipBEffects.children.length).toBe(1);
     const icon = els.shipBEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.title).toBe("ewar.hover.scrambler");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.scrambler");
   });
 
   test("disruptor effect title shows tracking and optimal range reductions", () => {
@@ -423,6 +424,6 @@ describe("PortraitsController", () => {
     controller.update();
     expect(els.shipAEffects.children.length).toBe(1);
     const icon = els.shipAEffects.children[0] as unknown as HTMLImageElement;
-    expect(icon.title).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
+    expect(icon.getAttribute("data-hint")).toBe("ewar.hover.tracking -45% · ewar.hover.optimal -17%");
   });
 });

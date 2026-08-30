@@ -16,6 +16,7 @@ import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameCompos
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
+import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
 import { Vec2 } from "../../src/sim/vec2";
 import { SIG_RESOLUTIONS, type ShipState, type SimSnapshot, type TurretSpec, type MissileSpec } from "../../src/sim/types";
@@ -60,8 +61,7 @@ Heavy Pulse Laser II, Conflagration M`;
 
 const turretBoosterResolver: TurretBoosterResolver = { boostedTurret: (t) => t };
 const noEwarResolver: EwarResolver = {
-  speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1,
-  disruptedTurret: (t) => t, disruptedTurretIgnoringRange: (t) => t,
+  speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (t) => t, disruptedTurretIgnoringRange: (t) => t,
   propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false,
   appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }),
   disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }),
@@ -72,7 +72,7 @@ function makeComposer() {
   const kinematics = new KinematicsImpl();
   const turretDamage = new TurretDamageImpl();
   const missileApplication = new MissileApplicationImpl();
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, turretDamage, missileApplication });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver: noEwarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: stacking }), turretDamage, missileApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
 }
 

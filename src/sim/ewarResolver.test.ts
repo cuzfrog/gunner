@@ -7,9 +7,11 @@ import {
   type DisruptionBreakdown,
   type DisruptionScriptSpec,
   type EwarProjection,
+  type PainterActivation,
   type SpeedBreakdown,
   type StasisGrapplerSpec,
   type StasisWebSpec,
+  type TargetPainterSpec,
   type TrackingDisruptorSpec,
   type TurretSpec,
   type WarpScramblerSpec,
@@ -28,6 +30,7 @@ const OPTIMAL_SCRIPT_ID = toTypeId("29005");
 const TRACKING_SCRIPT_ID = toTypeId("29007");
 const FALLOFF_SCRIPT_ID = toTypeId("29009");
 const GRAPPLER_FAKE_ID = toTypeId("41041");
+const PAINTER_II_ID = toTypeId("19806");
 
 const defaultTurret: TurretSpec = {
   kind: "turret",
@@ -58,28 +61,43 @@ const TD: TrackingDisruptorSpec = {
 };
 
 function webProjection(specs: readonly StasisWebSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: specs, grapplers: [], disruptors: [], scramblers: [], scripts: [] };
-  const activation = { webs: specs.map(() => ({ active: true, overloaded })), grapplers: [], disruptors: [], scramblers: [] };
+  const loadout = { webs: specs, grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+  const activation = { webs: specs.map(() => ({ active: true, overloaded })), grapplers: [], disruptors: [], scramblers: [], painters: [] };
   return { loadout, activation };
 }
 
 function grapplerProjection(specs: readonly StasisGrapplerSpec[], overloaded = false): EwarProjection {
-  const loadout = { webs: [], grapplers: specs, disruptors: [], scramblers: [], scripts: [] };
-  const activation = { webs: [], grapplers: specs.map(() => ({ active: true, overloaded })), disruptors: [], scramblers: [] };
+  const loadout = { webs: [], grapplers: specs, disruptors: [], scramblers: [], painters: [], scripts: [] };
+  const activation = { webs: [], grapplers: specs.map(() => ({ active: true, overloaded })), disruptors: [], scramblers: [], painters: [] };
   return { loadout, activation };
 }
 
 function disruptorProjection(specs: readonly TrackingDisruptorSpec[], overloaded = false, script?: DisruptionScriptSpec): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: specs, scramblers: [], scripts: [] };
-  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script })), scramblers: [] };
+  const loadout = { webs: [], grapplers: [], disruptors: specs, scramblers: [], painters: [], scripts: [] };
+  const activation = { webs: [], grapplers: [], disruptors: specs.map(() => ({ active: true, overloaded, script })), scramblers: [], painters: [] };
   return { loadout, activation };
 }
 
 function scramblerProjection(specs: readonly WarpScramblerSpec[], overloaded = false, active = true): EwarProjection {
-  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: specs, scripts: [] };
-  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })) };
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: specs, painters: [], scripts: [] };
+  const activation = { webs: [], grapplers: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })), painters: [] };
   return { loadout, activation };
 }
+
+function painterProjection(specs: readonly TargetPainterSpec[], activations?: readonly PainterActivation[]): EwarProjection {
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: specs, scripts: [] };
+  const activation = activations ? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: activations } : undefined;
+  return { loadout, activation };
+}
+
+const PAINTER_II: TargetPainterSpec = {
+  moduleName: "Target Painter II",
+  moduleId: PAINTER_II_ID,
+  maxRange: 36000,
+  falloff: 90000,
+  signatureRadiusBonusPercent: 30,
+  overloadStrengthBonusPercent: 20,
+};
 
 describe("EwarResolverImpl", () => {
   describe("speedMultiplier", () => {
@@ -98,8 +116,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one web extends only that web's range", () => {
       const baseWeb: StasisWebSpec = { moduleName: "Stasis Webifier I", moduleId: WEB_I_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const heatedWeb: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [baseWeb, heatedWeb], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
-      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: [] };
+      const loadout = { webs: [baseWeb, heatedWeb], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+      const activation = { webs: [{ active: true, overloaded: false }, { active: true, overloaded: true }], grapplers: [], disruptors: [], scramblers: []  , painters: [] };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.speedMultiplier(projection, 11000)).toBeCloseTo(0.4, 10);
       expect(resolver.speedMultiplier(projection, 13001)).toBe(1);
@@ -132,13 +150,13 @@ describe("EwarResolverImpl", () => {
 
     test("a web missing from a partial activation array is treated as active", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] } };
       expect(resolver.speedMultiplier(projection, 5000)).toBeCloseTo(0.4, 10);
     });
 
     test("explicit active false still disables a web", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [] } };
       expect(resolver.speedMultiplier(projection, 5000)).toBe(1);
     });
 
@@ -162,8 +180,8 @@ describe("EwarResolverImpl", () => {
 
     test("grappler and web stack-penalize", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] };
-      const activation = { webs: [{ active: true, overloaded: false }], grapplers: [{ active: true, overloaded: false }], disruptors: [], scramblers: [] };
+      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] };
+      const activation = { webs: [{ active: true, overloaded: false }], grapplers: [{ active: true, overloaded: false }], disruptors: [], scramblers: []  , painters: [] };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.speedMultiplier(projection, 500)).toBeLessThan(0.2);
     });
@@ -175,7 +193,7 @@ describe("EwarResolverImpl", () => {
     });
 
     test("inactive grappler is skipped", () => {
-      const projection = { loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [] } };
+      const projection = { loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] }, activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [], painters: [] } };
       expect(resolver.speedMultiplier(projection, 500)).toBe(1);
     });
   });
@@ -212,7 +230,7 @@ describe("EwarResolverImpl", () => {
 
     test("disruptor without activation defaults to its spec script", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [{ ...TD, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], scripts: [] },
+        loadout: { webs: [], grapplers: [], disruptors: [{ ...TD, defaultScript: OPTIMAL_SCRIPT }], scramblers: [], painters: [], scripts: [] },
       };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const rangeFactor = 1 - 2 * 0.1719;
@@ -263,8 +281,8 @@ describe("EwarResolverImpl", () => {
     test("overloading one disruptor applies the strength bonus only to that module", () => {
       const base: TrackingDisruptorSpec = { ...TD, disruption: 0.15 };
       const heated: TrackingDisruptorSpec = TD;
-      const loadout = { webs: [], grapplers: [], disruptors: [base, heated], scramblers: [], scripts: [] };
-      const activation = { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: [] };
+      const loadout = { webs: [], grapplers: [], disruptors: [base, heated], scramblers: [], painters: [], scripts: [] };
+      const activation = { webs: [], grapplers: [], disruptors: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: true, script: undefined }], scramblers: []  , painters: [] };
       const projection: EwarProjection = { loadout, activation };
       const turret = resolver.disruptedTurret(defaultTurret, projection, 10000);
       const baseFactor = 1 - 0.15;
@@ -321,7 +339,7 @@ describe("EwarResolverImpl", () => {
 
     test("skips inactive modules", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 };
-      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] } };
+      const projection = { loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] }, activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [] } };
       expect(resolver.speedMultiplierIgnoringRange(projection)).toBe(1);
     });
 
@@ -345,8 +363,8 @@ describe("EwarResolverImpl", () => {
 
     test("skips inactive disruptors", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], scripts: [] },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: [] },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [] },
       };
       expect(resolver.disruptedTurretIgnoringRange(defaultTurret, projection)).toEqual(defaultTurret);
     });
@@ -396,7 +414,7 @@ describe("EwarResolverImpl", () => {
 
     test("a scrambler missing from a partial activation array is treated as active", () => {
       const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 9000, overloadRangeBonusPercent: 20 };
-      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [scrambler], scripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] } };
+      const projection: EwarProjection = { loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], scripts: [] }, activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] } };
       expect(resolver.propulsionSuppressed(projection, 5000)).toBe(true);
     });
   });
@@ -416,8 +434,8 @@ describe("EwarResolverImpl", () => {
     test("inactive web is skipped", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection: EwarProjection = {
-        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
+        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
       };
       expect(resolver.appliedEffects(projection, 5000)).toEqual([]);
     });
@@ -459,8 +477,8 @@ describe("EwarResolverImpl", () => {
     test("inactive grappler is skipped", () => {
       const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] },
-        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [] },
+        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [] },
       };
       expect(resolver.appliedEffects(projection, 500)).toEqual([]);
     });
@@ -494,8 +512,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive disruptor is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], scripts: [] },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: [] },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [] },
       };
       expect(resolver.appliedEffects(projection, 10000)).toEqual([]);
     });
@@ -513,12 +531,13 @@ describe("EwarResolverImpl", () => {
       const grappler: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: GRAPPLER_I_ID, optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
       const scrambler: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: SCRAM_II_ID, maxRange: 50000, overloadRangeBonusPercent: 20 };
       const disruptor: TrackingDisruptorSpec = { moduleName: "Tracking Disruptor II", moduleId: TD_II_ID, optimal: 48000, falloff: 24000, disruption: 0.1719, defaultScript: undefined, overloadStrengthBonusPercent: 20 };
-      const loadout = { webs: [web], grapplers: [grappler], disruptors: [disruptor], scramblers: [scrambler], scripts: [] };
+      const loadout = { webs: [web], grapplers: [grappler], disruptors: [disruptor], scramblers: [scrambler], painters: [], scripts: [] };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [{ active: true, overloaded: false }],
         disruptors: [{ active: true, overloaded: false, script: undefined }],
         scramblers: [{ active: true, overloaded: false }],
+        painters: [],
       };
       const projection: EwarProjection = { loadout, activation };
       expect(resolver.appliedEffects(projection, 1000)).toEqual([
@@ -557,8 +576,8 @@ describe("EwarResolverImpl", () => {
     test("inactive web is skipped", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
       const projection: EwarProjection = {
-        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] },
+        loadout: { webs: [web], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [{ active: false, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
       };
       expect(resolver.speedBreakdown(projection, 5000)).toEqual({ effects: [], propulsionSuppressed: false });
     });
@@ -623,8 +642,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive grappler is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] },
-        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: [] },
+        loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [], grapplers: [{ active: false, overloaded: false }], disruptors: [], scramblers: []  , painters: [] },
       };
       expect(resolver.speedBreakdown(projection, 500)).toEqual({ effects: [], propulsionSuppressed: false });
     });
@@ -638,12 +657,13 @@ describe("EwarResolverImpl", () => {
 
     test("speed effects are emitted in web, grappler order", () => {
       const web: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 50000, speedFactor: 0.6, overloadRangeBonusPercent: 30 };
-      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] };
+      const loadout = { webs: [web], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [{ active: true, overloaded: false }],
         disruptors: [],
         scramblers: [],
+      painters: [],
       };
       const projection: EwarProjection = { loadout, activation };
       const effects = resolver.speedBreakdown(projection, 500).effects;
@@ -665,12 +685,13 @@ describe("EwarResolverImpl", () => {
         maxRange: 9000,
         overloadRangeBonusPercent: 20,
       };
-      const loadout = { webs: [web], grapplers: [], disruptors: [], scramblers: [scrambler], scripts: [] };
+      const loadout = { webs: [web], grapplers: [], disruptors: [], scramblers: [scrambler], painters: [], scripts: [] };
       const activation = {
         webs: [{ active: true, overloaded: false }],
         grapplers: [],
         disruptors: [],
         scramblers: [{ active: true, overloaded: false }],
+        painters: [],
       };
       const projection: EwarProjection = { loadout, activation };
       const breakdown = resolver.speedBreakdown(projection, 5000);
@@ -729,8 +750,8 @@ describe("EwarResolverImpl", () => {
 
     test("inactive disruptor is skipped", () => {
       const projection: EwarProjection = {
-        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], scripts: [] },
-        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: [] },
+        loadout: { webs: [], grapplers: [], disruptors: [TD], scramblers: [], painters: [], scripts: [] },
+        activation: { webs: [], grapplers: [], disruptors: [{ active: false, overloaded: false, script: undefined }], scramblers: []  , painters: [] },
       };
       expect(resolver.disruptionBreakdown(projection, 10000)).toEqual({ tracking: [], optimal: [], falloff: [] });
     });
@@ -741,6 +762,58 @@ describe("EwarResolverImpl", () => {
       const projection = disruptorProjection([first, second]);
       const breakdown = resolver.disruptionBreakdown(projection, 10000);
       expect(breakdown.tracking.map((entry) => entry.moduleId)).toEqual([TD_I_ID, TD_II_ID]);
+    });
+  });
+
+  describe("sigMultiplier", () => {
+    test("returns 1 for undefined projection", () => {
+      expect(resolver.sigMultiplier(undefined, 5000)).toBe(1);
+    });
+
+    test("returns 1 when no painters are present", () => {
+      const projection = webProjection([{ moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBe(1);
+    });
+
+    test("single T2 painter at 5 km multiplies sig by 1.30", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBeCloseTo(1.30, 10);
+    });
+
+    test("painter beyond optimal applies falloff effectiveness", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 60000);
+      expect(result).toBeGreaterThan(1);
+      expect(result).toBeLessThan(1.30);
+    });
+
+    test("painter at optimal boundary applies full bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 36000)).toBeCloseTo(1.30, 10);
+    });
+
+    test("inactive painter contributes no bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: false, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBe(1);
+    });
+
+    test("overloaded painter applies overload strength bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: true }]);
+      const expected = 1 + (30 * 1.2) / 100;
+      expect(resolver.sigMultiplier(projection, 5000)).toBeCloseTo(expected, 10);
+    });
+
+    test("multiple painters apply stacking penalties", () => {
+      const projection = painterProjection([PAINTER_II, PAINTER_II], [{ active: true, overloaded: false }, { active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 5000);
+      const secondPenalty = Math.exp(-(1 * 1) / 7.1289);
+      const expected = 1.30 * (1 + 0.30 * secondPenalty);
+      expect(result).toBeCloseTo(expected, 6);
+    });
+
+    test("sigMultiplierIgnoringRange ignores falloff", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplierIgnoringRange(projection)).toBeCloseTo(1.30, 10);
     });
   });
 });

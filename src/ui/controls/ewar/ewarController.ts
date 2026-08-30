@@ -1,5 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -18,6 +18,7 @@ interface MutableEwarActivation {
   grapplers: { active: boolean; overloaded: boolean }[];
   disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
   scramblers: { active: boolean; overloaded: boolean }[];
+  painters: { active: boolean; overloaded: boolean }[];
 }
 
 interface EwarState {
@@ -61,14 +62,14 @@ export class EwarControllerImpl implements EwarController {
     this.gearAction = new IconActionImpl({
       buttonClass: "ewar-script-gear btn icon-button",
       iconSvg: spriteIcon("gear"),
-      title: "",
+      hint: "",
       ariaHaspopup: "menu",
       ariaExpanded: false,
     });
     this.overloadAction = new IconActionImpl({
       buttonClass: "ewar-overload-button btn icon-button",
       iconSvg: spriteIcon("overload", 14, "currentColor", "overload-button-icon"),
-      title: "",
+      hint: "",
     });
     this.sectionBlock = new SectionBlockImpl();
     this.scriptPopups = { shipA: this.buildScriptPopup("shipA"), shipB: this.buildScriptPopup("shipB") };
@@ -123,6 +124,7 @@ export class EwarControllerImpl implements EwarController {
         script: d.script?.moduleId ?? "none",
       })),
       ...(storedScramblers !== undefined ? { scramblers: storedScramblers } : {}),
+      painters: state.activation.painters.map((p) => ({ active: p.active, overloaded: p.overloaded })),
     };
   }
 
@@ -187,13 +189,13 @@ export class EwarControllerImpl implements EwarController {
     section.innerHTML = "";
     if (!state || this.isEmpty(state.loadout)) {
       trigger.disabled = true;
-      trigger.title = this.i18n.t("title.ewar.empty");
+      trigger.setAttribute("data-hint", this.i18n.t("title.ewar.empty"));
       summary.innerHTML = "";
       this.popups[side].close();
       return;
     }
     trigger.disabled = false;
-    trigger.title = "";
+    trigger.setAttribute("data-hint", "");
     this.updateSummary(side);
     const heading = html`<div class="preview-section-label">${modulesLabel}</div>`;
     section.appendChild(heading);
@@ -209,12 +211,15 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.scramblers.length > 0) {
       this.renderSection(section, "label.ewar.scrambler", (container) => this.renderScramblers(side, state, container));
     }
+    if (state.loadout.painters.length > 0) {
+      this.renderSection(section, "label.ewar.painter", (container) => this.renderPainters(side, state, container));
+    }
     this.popups[side].close();
   }
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -248,18 +253,21 @@ export class EwarControllerImpl implements EwarController {
     const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
     const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
     if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleId, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
+    const painterActive = state.activation.painters.filter((p) => p.active).length;
+    const painterTitle = state.loadout.painters.length > 0 ? this.ewarEffectDescriber.painterHint(projection) : "";
+    if (state.loadout.painters.length > 0) this.appendSummaryItem(summary, state.loadout.painters[0].moduleId, painterActive, state.loadout.painters.length, painterTitle);
   }
 
-  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
+  private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, hint: string): void {
     const iconUrl = this.imageCatalog.itemIconUrl(moduleId);
     const img = html`<img class="ewar-summary-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const item = html`<span class="ewar-summary-item" title=${title}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
+    const item = html`<span class="ewar-summary-item" data-hint=${hint}>${img}<span class="ewar-summary-count mono">${active}/${total}</span></span>`;
     summary.appendChild(item);
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -299,6 +307,12 @@ export class EwarControllerImpl implements EwarController {
         const savedScrambler = saved?.scramblers?.[i];
         const active = typeof savedScrambler === "boolean" ? savedScrambler : savedScrambler?.active ?? true;
         const overloaded = typeof savedScrambler === "boolean" ? false : savedScrambler?.overloaded ?? false;
+        return { active, overloaded };
+      }),
+      painters: loadout.painters.map((_, i) => {
+        const savedPainter = saved?.painters?.[i];
+        const active = typeof savedPainter === "boolean" ? savedPainter : savedPainter?.active ?? true;
+        const overloaded = typeof savedPainter === "boolean" ? false : savedPainter?.overloaded ?? false;
         return { active, overloaded };
       }),
     };
@@ -360,6 +374,19 @@ export class EwarControllerImpl implements EwarController {
     }
   }
 
+  private renderPainters(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.painters.length; i++) {
+      const painter: TargetPainterSpec = state.loadout.painters[i];
+      const activation = state.activation.painters[i];
+      const { button } = this.createModuleButton(activation.active, painter, this.ewarEffectDescriber.painterModuleEffect(painter));
+      const onToggle = () => this.togglePainterOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, painter, onToggle);
+      button.addEventListener("click", () => this.togglePainter(side, i, button, row));
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
+      section.appendChild(row);
+    }
+  }
+
   private moduleDisplayName(spec: { readonly moduleId: TypeId }): string {
     return this.fittingImport.itemNameForId(spec.moduleId, this.i18n.current());
   }
@@ -369,7 +396,7 @@ export class EwarControllerImpl implements EwarController {
     const iconUrl = this.imageCatalog.itemIconUrl(spec.moduleId);
     const img = html`<img class="ewar-module-icon" alt="" src=${iconUrl}>` as unknown as HTMLImageElement;
     if (iconUrl === undefined) img.hidden = true;
-    const nameSpan = html`<span class="ewar-module-name truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
+    const nameSpan = html`<span class="ewar-module-name truncate" data-hint=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
     const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}>${img}${nameSpan}</button>` as unknown as HTMLButtonElement;
     return { button, nameSpan };
   }
@@ -378,7 +405,7 @@ export class EwarControllerImpl implements EwarController {
     const gear = this.gearAction.create(() => this.openScriptPopup(side, index, gear));
     gear.setAttribute("data-index", String(index));
     gear.setAttribute("aria-controls", `${sideId(side)}-ewar-script-popup`);
-    this.updateGearTitle(gear, script);
+    this.updateGearHint(gear, script);
     if (!active) gear.setAttribute("disabled", "");
     return gear;
   }
@@ -394,7 +421,7 @@ export class EwarControllerImpl implements EwarController {
     const button = this.overloadAction.create(onToggle);
     button.setAttribute("data-index", String(index));
     button.setAttribute("aria-pressed", String(overloaded));
-    button.setAttribute("title", label);
+    button.setAttribute("data-hint", label);
     button.setAttribute("aria-label", label);
     if (!active) button.setAttribute("disabled", "");
     return button;
@@ -422,7 +449,7 @@ export class EwarControllerImpl implements EwarController {
     const noneButton = this.scriptOptionList.createButton({
       value: "none",
       label: this.i18n.t("ewar.script.none"),
-      title: this.i18n.t("ewar.script.none.hint"),
+      hint: this.i18n.t("ewar.script.none.hint"),
       selected: current === undefined,
     });
     noneButton.addEventListener("click", () => this.onScriptSelected(side, index, "none"));
@@ -432,7 +459,7 @@ export class EwarControllerImpl implements EwarController {
       const button = this.scriptOptionList.createButton({
         value: script.moduleId,
         label: this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()),
-        title: scriptStatSuffix(script),
+        hint: scriptStatSuffix(script),
         iconUrl: this.imageCatalog.itemIconUrl(script.moduleId),
         selected: this.isSameScript(current, script),
       });
@@ -463,9 +490,9 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     state.activation.disruptors[index].script = script;
     const gear = this.findGearFor(side, index);
-    if (gear) this.updateGearTitle(gear, script);
+    if (gear) this.updateGearHint(gear, script);
     const nameSpan = this.disruptorNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.title = this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script);
+    if (nameSpan) nameSpan.setAttribute("data-hint", this.ewarEffectDescriber.disruptorModuleEffect(state.loadout.disruptors[index], script));
     this.events.emitConfigInvalidated();
   }
 
@@ -479,10 +506,10 @@ export class EwarControllerImpl implements EwarController {
     return gearState?.index === index ? gearState.gear : undefined;
   }
 
-  private updateGearTitle(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
-    const title = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
-    gear.setAttribute("title", title);
-    gear.setAttribute("aria-label", title);
+  private updateGearHint(gear: HTMLButtonElement, script: DisruptionScriptSpec | undefined): void {
+    const hint = script ? this.fittingImport.itemNameForId(script.moduleId, this.i18n.current()) : this.i18n.t("ewar.script.none");
+    gear.setAttribute("data-hint", hint);
+    gear.setAttribute("aria-label", hint);
   }
 
   private toggleWeb(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
@@ -587,6 +614,33 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     const overloaded = !state.activation.grapplers[index].overloaded;
     state.activation.grapplers[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private togglePainter(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.painters[index].active;
+    state.activation.painters[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private togglePainterOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.painters[index].overloaded;
+    state.activation.painters[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);

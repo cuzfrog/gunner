@@ -1,5 +1,5 @@
 import type { ShipId, TypeId } from "../ids";
-import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
+import { CHARGES, DISRUPTION_SCRIPTS, DRONES, FITTING_MODULES, HULL_BONUSES, LAUNCHERS, MISSILES, MISSILE_GUIDANCE_COMPUTERS, MISSILE_GUIDANCE_ENHANCERS, MISSILE_SCRIPTS, SCRIPTS, SKILL_BONUSES, STASIS_GRAPPLERS, STASIS_WEBS, TARGET_PAINTERS, TRACKING_COMPUTERS, TRACKING_DISRUPTORS, TURRETS, WARP_SCRAMBLERS, type FittingModuleStats } from "./fittingDb";
 
 function moduleByName(name: string): FittingModuleStats | undefined {
   return Object.values(FITTING_MODULES).find((m) => m.name === name);
@@ -455,5 +455,61 @@ describe("fittingDb", () => {
     const hpl2 = Object.values(TURRETS).find((t) => t.name === "Heavy Pulse Laser II");
     expect(hpl2).toBeDefined();
     expect(hpl2!.specializationSkill).toBe("Medium Pulse Laser Specialization");
+  });
+
+  test("includes target painters with signature radius bonus, range and falloff", () => {
+    const painter = rowByName(TARGET_PAINTERS, "Target Painter II");
+    expect(painter).toMatchObject({
+      maxRange: 36000,
+      falloff: 90000,
+      signatureRadiusBonusPercent: 30,
+      overloadStrengthBonusPercent: 20,
+    });
+    expect(moduleByName("Target Painter II")?.targetPainter).toMatchObject(baseStats(painter!));
+  });
+
+  test("includes missile guidance computers with application and range bonuses", () => {
+    const mgc = rowByName(MISSILE_GUIDANCE_COMPUTERS, "Missile Guidance Computer II");
+    expect(mgc).toMatchObject({
+      explosionRadiusBonusPercent: -8.25,
+      explosionVelocityBonusPercent: 8.25,
+      missileVelocityBonusPercent: 5.5,
+      flightTimeBonusPercent: 5.5,
+      overloadStrengthBonusPercent: 15,
+    });
+  });
+
+  test("includes missile guidance enhancers with passive application and range bonuses", () => {
+    const mge = rowByName(MISSILE_GUIDANCE_ENHANCERS, "Missile Guidance Enhancer II");
+    expect(mge).toMatchObject({
+      explosionRadiusBonusPercent: -6,
+      explosionVelocityBonusPercent: 6,
+      missileVelocityBonusPercent: 6,
+      flightTimeBonusPercent: 6,
+    });
+  });
+
+  test("includes missile guidance scripts with precision and range multipliers", () => {
+    const precision = rowByName(MISSILE_SCRIPTS, "Missile Precision Script");
+    expect(precision).toMatchObject({
+      explosionRadiusMultiplier: 2,
+      explosionVelocityMultiplier: 2,
+      missileVelocityMultiplier: 0,
+      flightTimeMultiplier: 0,
+    });
+    const range = rowByName(MISSILE_SCRIPTS, "Missile Range Script");
+    expect(range).toMatchObject({
+      explosionRadiusMultiplier: 0,
+      explosionVelocityMultiplier: 0,
+      missileVelocityMultiplier: 2,
+      flightTimeMultiplier: 2,
+    });
+  });
+
+  test("includes ballistic control systems with missile damage and cycle time multipliers", () => {
+    expect(moduleByName("Ballistic Control System II")).toMatchObject({
+      missileDamageMultiplier: 1.1,
+      missileCycleTimeMultiplier: 0.895,
+    });
   });
 });

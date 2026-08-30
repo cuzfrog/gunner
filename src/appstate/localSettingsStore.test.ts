@@ -800,8 +800,8 @@ describe("LocalSettingsStore", () => {
     const hail: TypeId = "12608" as TypeId;
     const emp: TypeId = "21898" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75, damageByType: { explosive: 15 } },
+      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1, damageByType: { em: 10, explosive: 5 } },
     ]);
     chargeCatalog.withCharge = vi.fn((turret, charge) => ({
       ...turret, chargeId: charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff,
@@ -835,7 +835,7 @@ describe("LocalSettingsStore", () => {
     ships.maxSpeedForFittedMass = vi.fn(() => 4_649.72);
     const hail2: TypeId = "12608" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { id: hail2, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
+      { id: hail2, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75, damageByType: { explosive: 15 } },
     ]);
     chargeCatalog.withCharge = vi.fn((turret) => turret);
 

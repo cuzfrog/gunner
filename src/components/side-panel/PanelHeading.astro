@@ -19,16 +19,16 @@ const headingText = config.label;
   <h2 class="side-panel-heading" data-i18n={headingI18n}>{headingText}</h2>
   <div class="side-panel-heading-actions">
     <IconButton id={`${idPrefix}-import-fitting`} iconName="import"
-            titleI18n="button.importFitting" ariaLabelI18n="button.importFitting"
-            title="Import from clipboard" ariaLabel="Import from clipboard" />
+            hintI18n="button.importFitting" ariaLabelI18n="button.importFitting"
+            data-hint="Import from clipboard" ariaLabel="Import from clipboard" />
     <PopupBox id={`${idPrefix}-paste-popup`} extraClass="paste-popup" position="below" align="left">
       <textarea id={`${idPrefix}-paste-input`} class="paste-input" tabindex="-1" rows="1" data-i18n-aria-label="hint.pasteFitting" aria-label="Clipboard blocked. Press Ctrl+V to paste fitting."></textarea>
       <span class="paste-hint" data-i18n="hint.pasteFitting">Clipboard blocked. Press Ctrl+V to paste fitting.</span>
     </PopupBox>
     <IconButton id={`${idPrefix}-ship-select-trigger`} iconName="search"
             ariaHaspopup="dialog" ariaExpanded={false} ariaControls={`${idPrefix}-ship-select-popup`}
-            titleI18n="button.selectShip" ariaLabelI18n="button.selectShip"
-            title="Select ship & fitting" ariaLabel="Select ship & fitting" />
+            hintI18n="button.selectShip" ariaLabelI18n="button.selectShip"
+            data-hint="Select ship & fitting" ariaLabel="Select ship & fitting" />
     <PopupBox id={`${idPrefix}-ship-select-popup`} extraClass="ship-select-popup" position="below" align="both" scroll role="dialog" ariaModal={true}
          i18nAriaLabel="button.selectShip" ariaLabel="Select ship & fitting">
       <input type="text" class="input-field ship-select-hull" id={`${idPrefix}-hull`} list="hull-options"
@@ -43,8 +43,8 @@ const headingText = config.label;
     </PopupBox>
     <IconButton id={`${idPrefix}-fitting-eye`} iconName="eye" iconFill="none" iconStroke="currentColor" extraClass="fitting-eye"
             pressed={false} disabled
-            titleI18n="button.fittingDetails" ariaLabelI18n="button.fittingDetails"
-            title="Show fitting details" ariaLabel="Show fitting details" />
+            hintI18n="button.fittingDetails" ariaLabelI18n="button.fittingDetails"
+            data-hint="Show fitting details" ariaLabel="Show fitting details" />
     <span class="hull-fitting-name" id={`${idPrefix}-fitting-name`} hidden></span>
     <PopupBox id={`${idPrefix}-fitting-preview`} extraClass="fitting-preview" scroll ariaHidden={true} />
   </div>

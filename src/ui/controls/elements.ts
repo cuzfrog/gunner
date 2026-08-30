@@ -125,6 +125,7 @@ function createGlobalControlsEls(): GlobalControlsEls {
     rangeOverlayLegend: el(globalElementId("rangeOverlayLegend")),
     slideHints: el(globalElementId("slideHints")),
     scene: el(globalElementId("scene")),
+    hoverHint: el(globalElementId("hoverHint")),
   };
 }
 
@@ -189,6 +190,8 @@ function createCombatantEls(side: Side): CombatantEls {
     ewarSummary: el(combatantElementId("ewarSummary", side)),
     boosterSection: el(combatantElementId("boosterSection", side)),
     boosterSummary: el(combatantElementId("boosterSummary", side)),
+    missileBoosterSection: el(combatantElementId("missileBoosterSection", side)),
+    missileBoosterSummary: el(combatantElementId("missileBoosterSummary", side)),
     speed: elOf(combatantElementId("speed", side), isHtmlInputElement),
     mass: elOf(combatantElementId("mass", side), isHtmlInputElement),
     inertia: elOf(combatantElementId("inertia", side), isHtmlInputElement),

@@ -69,7 +69,7 @@ export class VariantSection {
     const items = variants.map((variant) => ({
       value: variant.id,
       label: variant.name,
-      title: variant.name,
+      hint: variant.name,
       iconUrl: variant.iconUrl,
       selected: currentId === variant.id,
     }));

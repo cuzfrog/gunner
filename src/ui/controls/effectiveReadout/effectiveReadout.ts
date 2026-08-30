@@ -11,7 +11,7 @@ interface InputLike { readonly value: string; }
 interface ReadoutLike {
   textContent: string | null;
   classList: { add(className: string): void; remove(className: string): void; };
-  title: string;
+  setAttribute(name: string, value: string): void;
 }
 
 interface SideReadoutEls {
@@ -44,7 +44,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   private readonly i18n: I18n;
   private readonly trackingDisplays: Readonly<Record<Side, TrackingDisplay>>;
   private readonly fittingImport: FittingImport;
-  private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; title: string }>();
+  private readonly lastByReadout = new Map<ReadoutLike, { text: string; negative: boolean; hint: string }>();
 
   constructor(deps: { els: EffectiveReadoutEls; i18n: I18n; trackingDisplays: Readonly<Record<Side, TrackingDisplay>>; fittingImport: FittingImport }) {
     this.els = deps.els;
@@ -60,7 +60,7 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
   }
 
   private writeSide(sideValues: SideReadoutValues, sideEls: SideReadoutEls, trackingDisplay: TrackingDisplay, t: (key: string) => string): void {
-    this.write(sideEls.speedReadout, formatSpeed(sideValues.speed), isSpeedNegative(sideValues.speed, tryReadNumber(sideEls.speed)), (t) => buildSpeedTitle(sideValues.speedBreakdown, this.fittingImport, t));
+    this.write(sideEls.speedReadout, formatSpeed(sideValues.speed), isSpeedNegative(sideValues.speed, tryReadNumber(sideEls.speed)), (t) => buildSpeedHint(sideValues.speedBreakdown, this.fittingImport, t));
     if (sideValues.kind === "turret") {
       const language = this.i18n.current();
       const trackingValue = trackingDisplay.displayFor(sideValues.tracking, sideValues.sigResolution);
@@ -70,17 +70,17 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
       this.write(sideEls.trackingReadout, tracking, isTrackingNegative(sideValues.tracking, sideValues.boostedTracking), (t) =>
         sideValues.trackingBreakdown === undefined
           ? t("readout.effectiveAffected")
-          : buildStatTitle(sideValues.trackingBreakdown.tracking, this.fittingImport, language, "label.trackingSpeed", t)
+          : buildStatHint(sideValues.trackingBreakdown.tracking, this.fittingImport, language, "label.trackingSpeed", t)
       );
       this.write(sideEls.optimalReadout, formatDistance(sideValues.optimal, t), isRangeNegative(sideValues.optimal, sideValues.boostedOptimal), (t) =>
         sideValues.optimalBreakdown === undefined
           ? t("readout.effectiveAffected")
-          : buildStatTitle(sideValues.optimalBreakdown.optimal, this.fittingImport, language, "label.optimalRange", t)
+          : buildStatHint(sideValues.optimalBreakdown.optimal, this.fittingImport, language, "label.optimalRange", t)
       );
       this.write(sideEls.falloffReadout, formatDistance(sideValues.falloff, t), isRangeNegative(sideValues.falloff, sideValues.boostedFalloff), (t) =>
         sideValues.falloffBreakdown === undefined
           ? t("readout.effectiveAffected")
-          : buildStatTitle(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
+          : buildStatHint(sideValues.falloffBreakdown.falloff, this.fittingImport, language, "label.falloffRange", t)
       );
     } else if (sideValues.kind === "missile") {
       this.write(sideEls.trackingReadout, formatDistance(sideValues.explosionRadius, t), false, () => "");
@@ -93,19 +93,19 @@ export class EffectiveReadoutImpl implements EffectiveReadout {
     }
   }
 
-  private write(readout: ReadoutLike, text: string, negative: boolean, buildTitle: (t: (key: string) => string) => string): void {
-    const title = negative ? buildTitle((key) => this.i18n.t(key)) : "";
+  private write(readout: ReadoutLike, text: string, negative: boolean, buildHint: (t: (key: string) => string) => string): void {
+    const hint = negative ? buildHint((key) => this.i18n.t(key)) : "";
     const previous = this.lastByReadout.get(readout);
-    if (previous && previous.text === text && previous.negative === negative && previous.title === title) return;
+    if (previous && previous.text === text && previous.negative === negative && previous.hint === hint) return;
     readout.textContent = text;
     if (negative) {
       readout.classList.add("is-negative");
-      readout.title = title;
+      readout.setAttribute("data-hint", hint);
     } else {
       readout.classList.remove("is-negative");
-      readout.title = "";
+      readout.setAttribute("data-hint", "");
     }
-    this.lastByReadout.set(readout, { text, negative, title });
+    this.lastByReadout.set(readout, { text, negative, hint });
   }
 }
 
@@ -142,7 +142,7 @@ function isNegative(effective: number, baseline: number, epsilon: { readonly abs
   return effective < baseline - threshold;
 }
 
-function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, fittingImport: FittingImport, t: (key: string) => string): string {
+function buildSpeedHint(breakdown: SpeedBreakdown | undefined, fittingImport: FittingImport, t: (key: string) => string): string {
   if (breakdown === undefined) return t("readout.effectiveAffected");
   const entries: string[] = [];
   for (const effect of breakdown.effects) {
@@ -156,7 +156,7 @@ function buildSpeedTitle(breakdown: SpeedBreakdown | undefined, fittingImport: F
   return entries.join("; ");
 }
 
-function buildStatTitle(entries: readonly StatEffectAttribution[], fittingImport: FittingImport, language: Language, statKey: string, t: (key: string) => string): string {
+function buildStatHint(entries: readonly StatEffectAttribution[], fittingImport: FittingImport, language: Language, statKey: string, t: (key: string) => string): string {
   if (entries.length === 0) return "";
   return entries.map((entry) => {
     const moduleName = fittingImport.itemNameForId(entry.moduleId, language);

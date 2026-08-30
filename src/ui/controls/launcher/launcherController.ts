@@ -69,7 +69,7 @@ export class LauncherControllerImpl implements LauncherController {
     this.fittingOverrides = deps.fittingOverrides;
     this.panelMemory = deps.panelMemory;
     this.ammoList = new SelectableListImpl({
-      itemClass: "launcher-ammo-item",
+      itemClass: "launcher-ammo-item selectable-item",
       nameClass: "launcher-ammo-name",
       iconClass: "launcher-ammo-icon",
       role: "option",
@@ -286,6 +286,7 @@ export class LauncherControllerImpl implements LauncherController {
     const items: SelectableItem[] = options.map((option) => ({
       value: option.id,
       label: option.name,
+      hintContent: "ammo-hint",
       iconUrl: this.imageCatalog.itemIconUrl(option.id),
       selected: option.id === this.currentAmmoId,
     }));

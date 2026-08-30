@@ -163,6 +163,15 @@ shipB.sig=40`;
     expect(codec.parse(codec.serialize(profile))).toEqual(profile);
   });
 
+  test("round-trips missile booster activations with overload and script", () => {
+    const profile: ProfileSettings = {
+      ...MINIMAL_PROFILE,
+      shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("35795") }, { active: false, overloaded: false, script: "none" }],
+      shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: toTypeId("35794") }],
+    };
+    expect(codec.parse(codec.serialize(profile))).toEqual(profile);
+  });
+
   test("parses profile text when constructed through the DI container", () => {
     interface RegressionCradle extends SimCradle {
       readonly ships: Ships;

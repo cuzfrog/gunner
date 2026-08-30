@@ -181,6 +181,57 @@ describe("SettingsParser", () => {
     expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
   });
 
+  test("parseUserSettings parses missile booster activation with script and overload", () => {
+    const v13 = {
+      ...DEFAULT_SETTINGS,
+      version: 13,
+      shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: "Missile Precision Script" }, { active: false, overloaded: false, script: "none" }],
+      shipBMissileBoosterActivation: [{ active: true, overloaded: false, script: "Missile Range Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v13));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.missileBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("35795") }, { active: false, overloaded: false, script: "none" }]);
+    expect(parsed!.shipB.missileBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("35794") }]);
+  });
+
+  test("parseUserSettings leaves absent missile booster activation undefined", () => {
+    const parsed = makeParser().parseUserSettings(JSON.stringify(DEFAULT_SETTINGS));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.missileBoosterActivation).toBeUndefined();
+    expect(parsed!.shipB.missileBoosterActivation).toBeUndefined();
+  });
+
+  test("parseUserSettings defaults missing overloaded field to false in missile booster entries", () => {
+    const v13 = {
+      ...DEFAULT_SETTINGS,
+      version: 13,
+      shipAMissileBoosterActivation: [{ active: true, script: "Missile Precision Script" }],
+    };
+    const parsed = makeParser().parseUserSettings(JSON.stringify(v13));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.shipA.missileBoosterActivation).toEqual([{ active: true, overloaded: false, script: toTypeId("35795") }]);
+  });
+
+  test("parseUserSettings rejects malformed missile booster activations", () => {
+    const bad = {
+      ...DEFAULT_SETTINGS,
+      shipAMissileBoosterActivation: [{ active: true, overloaded: false, script: 123 }],
+    };
+    expect(makeParser().parseUserSettings(JSON.stringify(bad))).toBeNull();
+  });
+
+  test("toWire round-trips missile booster activation", () => {
+    const parser = makeParser();
+    const session = parser.fromWire({
+      ...DEFAULT_SETTINGS,
+      shipAMissileBoosterActivation: [{ active: true, overloaded: true, script: toTypeId("35795") }],
+      shipBMissileBoosterActivation: [{ active: false, overloaded: false, script: "none" }],
+    });
+    const wire = parser.toWire(session);
+    expect(wire.shipAMissileBoosterActivation).toEqual([{ active: true, overloaded: true, script: toTypeId("35795") }]);
+    expect(wire.shipBMissileBoosterActivation).toEqual([{ active: false, overloaded: false, script: "none" }]);
+  });
+
   test("parseUserSettings migrates v6 enum disruptor scripts to item names and adds per-module overload", () => {
     const v6 = {
       ...DEFAULT_SETTINGS,
@@ -501,8 +552,8 @@ describe("SettingsParser", () => {
     const hail: TypeId = "12608" as TypeId;
     const emp: TypeId = "21898" as TypeId;
     chargeCatalog.chargesForSize = vi.fn(() => [
-      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75 },
-      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1 },
+      { id: hail, name: "Hail S", trackingMultiplier: 0.75, rangeMultiplier: 0.5, falloffMultiplier: 0.75, damageByType: { explosive: 15 } },
+      { id: emp, name: "Republic Fleet EMP S", trackingMultiplier: 1, rangeMultiplier: 0.5, falloffMultiplier: 1, damageByType: { em: 10, explosive: 5 } },
     ]);
     chargeCatalog.withCharge = vi.fn((turret, charge) => ({ ...turret, chargeId: charge, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff }));
 

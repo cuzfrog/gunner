@@ -79,9 +79,9 @@ const modeSecond = side === "shipA"
     <span class="form-slider-label-row">
       <span class="field-label truncate" data-i18n="label.maneuverAggressivity">Maneuver aggressivity</span>
       <button type="button" class="info-hint"
-              data-i18n-title="hint.maneuverAggressivity"
+              data-i18n-hint="hint.maneuverAggressivity"
               data-i18n-aria-label="hint.maneuverAggressivity"
-              title="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
+              data-hint="Controls reactive braking as the ship approaches its set range. Higher values maneuver more aggressively, brake later, and tolerate more overshoot; lower values hold the range more strictly."
               aria-label="About maneuver aggressivity">?</button>
       <output class="form-slider-value mono" id={`${idPrefix}-aggressivity-value`} for={`${idPrefix}-aggressivity-slider`}>1.00</output>
     </span>

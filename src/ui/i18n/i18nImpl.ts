@@ -46,9 +46,9 @@ export class I18nImpl implements I18n {
       const key = element.getAttribute("data-i18n-aria-label");
       if (key) element.setAttribute("aria-label", this.t(key));
     }
-    for (const element of this.document.querySelectorAll("[data-i18n-title]")) {
-      const key = element.getAttribute("data-i18n-title");
-      if (key) element.setAttribute("title", this.t(key));
+    for (const element of this.document.querySelectorAll("[data-i18n-hint]")) {
+      const key = element.getAttribute("data-i18n-hint");
+      if (key) element.setAttribute("data-hint", this.t(key));
     }
   }
 }

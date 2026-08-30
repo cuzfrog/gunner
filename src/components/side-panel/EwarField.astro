@@ -17,11 +17,13 @@ const { idPrefix } = Astro.props;
     <span class="ewar-summary-row" id={`${idPrefix}-ewar-summary-row`}>
       <span id={`${idPrefix}-ewar-summary`}></span>
       <span id={`${idPrefix}-booster-summary`}></span>
+      <span id={`${idPrefix}-missile-booster-summary`}></span>
     </span>
     <Chevron />
   </TriggerButton>
   <PopupBox id={`${idPrefix}-ewar-popup`} extraClass="ewar-popup" position="below" align="both" scroll role="dialog" ariaModal={false} i18nAriaLabel="label.modules">
     <div class="preview-section" id={`${idPrefix}-ewar-section`}></div>
     <div class="preview-section" id={`${idPrefix}-booster-section`} hidden></div>
+    <div class="preview-section" id={`${idPrefix}-missile-booster-section`} hidden></div>
   </PopupBox>
 </div>

@@ -7,11 +7,15 @@ import {
   type HullBonus,
   type HullBonusAttribute,
   type LauncherStats,
+  type MissileGuidanceComputerStats,
+  type MissileGuidanceEnhancerStats,
+  type MissileScriptStats,
   type MissileStats,
   type SkillBonus,
   type SkillBonusType,
   type StasisGrapplerStats,
   type StasisWebStats,
+  type TargetPainterStats,
   type TrackingComputerStats,
   type TrackingDisruptorStats,
   type TurretScriptStats,
@@ -25,10 +29,14 @@ import {
   HULL_BONUSES,
   LAUNCHERS,
   MISSILES,
+  MISSILE_GUIDANCE_COMPUTERS,
+  MISSILE_GUIDANCE_ENHANCERS,
+  MISSILE_SCRIPTS,
   SCRIPTS,
   SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
+  TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
   TURRETS,
@@ -43,11 +51,15 @@ export type {
   HullBonus,
   HullBonusAttribute,
   LauncherStats,
+  MissileGuidanceComputerStats,
+  MissileGuidanceEnhancerStats,
+  MissileScriptStats,
   MissileStats,
   SkillBonus,
   SkillBonusType,
   StasisGrapplerStats,
   StasisWebStats,
+  TargetPainterStats,
   TrackingComputerStats,
   TrackingDisruptorStats,
   TurretScriptStats,
@@ -72,6 +84,10 @@ export interface FittingDbData {
   readonly trackingDisruptors: Readonly<Record<string, Row<TrackingDisruptorStats>>>;
   readonly warpScramblers: Readonly<Record<string, Row<WarpScramblerStats>>>;
   readonly disruptionScripts: Readonly<Record<string, Row<DisruptionScriptStats>>>;
+  readonly targetPainters: Readonly<Record<string, Row<TargetPainterStats>>>;
+  readonly missileGuidanceComputers: Readonly<Record<string, Row<MissileGuidanceComputerStats>>>;
+  readonly missileGuidanceEnhancers: Readonly<Record<string, Row<MissileGuidanceEnhancerStats>>>;
+  readonly missileScripts: Readonly<Record<string, Row<MissileScriptStats>>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
   readonly skillBonuses: readonly SkillBonus[];
   readonly drones: Readonly<Record<string, DroneEntry>>;
@@ -92,6 +108,10 @@ export const FITTING_DB: FittingDbData = {
   trackingDisruptors: TRACKING_DISRUPTORS,
   warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
+  targetPainters: TARGET_PAINTERS,
+  missileGuidanceComputers: MISSILE_GUIDANCE_COMPUTERS,
+  missileGuidanceEnhancers: MISSILE_GUIDANCE_ENHANCERS,
+  missileScripts: MISSILE_SCRIPTS,
   hullBonuses: HULL_BONUSES,
   skillBonuses: SKILL_BONUSES,
   drones: DRONES,

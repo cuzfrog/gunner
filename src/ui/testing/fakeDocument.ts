@@ -18,6 +18,7 @@ export function fakeDocument(): Document {
   const elements = new Map<string, FakeElement>();
   const docHandlers: Record<string, Array<(event?: unknown) => void>> = {};
   globalThis.Element = FakeElement as unknown as typeof Element;
+  globalThis.HTMLElement = FakeElement as unknown as typeof HTMLElement;
   return {
     documentElement: { lang: "en" } as unknown as HTMLElement,
     getElementById: (id: string) => {
@@ -48,7 +49,16 @@ export function fakeDocument(): Document {
       node.nodeType = 3;
       return node as unknown as Text;
     },
-    addEventListener: (event: string, handler: (event?: unknown) => void) => { (docHandlers[event] ??= []).push(handler); },
+    addEventListener: (event: string, handler: (event?: unknown) => void, options?: { readonly signal?: AbortSignal }) => {
+      if (options?.signal?.aborted) return;
+      (docHandlers[event] ??= []).push(handler);
+      if (options?.signal) {
+        options.signal.addEventListener("abort", () => {
+          const hs = docHandlers[event];
+          if (hs) docHandlers[event] = hs.filter((h) => h !== handler);
+        });
+      }
+    },
     removeEventListener: (event: string, handler: (event?: unknown) => void) => { const hs = docHandlers[event]; if (hs) docHandlers[event] = hs.filter((h) => h !== handler); },
     dispatchEvent: (event: Event) => { docHandlers[event.type]?.forEach((h) => h(event)); },
   } as unknown as Document;

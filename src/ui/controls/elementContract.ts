@@ -137,6 +137,7 @@ const GLOBAL_ELEMENT_DEFINITIONS = {
   rangeOverlayLegend: { id: "range-overlay-legend", tag: "DIV" as const, defaultValue: undefined },
   slideHints: { id: "slide-hints", tag: "SPAN" as const, defaultValue: undefined },
   scene: { id: "scene", tag: "CANVAS" as const, defaultValue: undefined },
+  hoverHint: { id: "hover-hint", tag: "DIV" as const, defaultValue: undefined },
 } as const satisfies { readonly [K: string]: GlobalElementDefinition };
 
 interface CombatantElementDefinition<T extends HtmlTag = HtmlTag> {
@@ -205,6 +206,8 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   ewarSummary: { tag: "SPAN" as const, baseId: "ewar-summary", defaultValue: undefined },
   boosterSection: { tag: "DIV" as const, baseId: "booster-section", defaultValue: undefined },
   boosterSummary: { tag: "SPAN" as const, baseId: "booster-summary", defaultValue: undefined },
+  missileBoosterSection: { tag: "DIV" as const, baseId: "missile-booster-section", defaultValue: undefined },
+  missileBoosterSummary: { tag: "SPAN" as const, baseId: "missile-booster-summary", defaultValue: undefined },
   speed: {
     tag: "INPUT" as const,
     baseId: "speed",

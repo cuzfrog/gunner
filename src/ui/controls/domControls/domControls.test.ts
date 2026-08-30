@@ -274,13 +274,14 @@ describe("DomControls", () => {
       grapplers: [],
       disruptors: [],
       scramblers: [],
+      painters: [],
       scripts: [],
     };
     cradle.cradle.ewarController.setLoadout("shipA", shipAEwar);
     const config = controls.getConfig();
     expect(config.shipA.ewar?.loadout.webs).toHaveLength(1);
     expect(config.shipA.ewar).not.toHaveProperty("overloaded");
-    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] });
+    expect(config.shipA.ewar?.activation).toEqual({ webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [] , painters: [] });
     expect(config.shipB.ewar).toBeUndefined();
   });
 
@@ -294,6 +295,7 @@ describe("DomControls", () => {
         defaultScript: undefined, overloadStrengthBonusPercent: 0,
       }],
       scramblers: [],
+      painters: [],
       scripts: [],
     };
     cradle.cradle.ewarController.setLoadout("shipB", shipBEwar);
@@ -336,7 +338,7 @@ describe("DomControls", () => {
     shipBSide.profile = RIFTER;
     shipBSide.sections.propulsion.setPropulsionActive("mwd-5mn");
     shipBSide.sections.stats.updateShipStats({ updateInertia: true, updateMass: true, updateSig: true });
-    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] });
+    cradle.cradle.ewarController.setLoadout("shipB", { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], scripts: [] });
 
     const config = controls.getConfig();
     expect(config.shipB.maxSpeed).toBe(1800);

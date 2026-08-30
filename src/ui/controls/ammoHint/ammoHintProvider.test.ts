@@ -1,0 +1,86 @@
+import type { FittingDb } from "../../../gamedata/fittingDb";
+import type { AmmoHintModel, AmmoHintRenderer } from "./ammoHintRenderer";
+import { AmmoHintProviderImpl } from "./ammoHintProvider";
+
+interface FakeElement {
+  readonly tagName: string;
+  getAttribute(name: string): string | null;
+}
+
+function fakeAnchor(value: string | null): HTMLElement {
+  const attrs = new Map<string, string>();
+  if (value !== null) attrs.set("data-value", value);
+  return {
+    tagName: "button",
+    getAttribute: (name: string) => attrs.get(name) ?? null,
+  } as unknown as HTMLElement;
+}
+
+function makeFittingDb(): FittingDb {
+  return {
+    charges: {
+      "185": { id: "185" as never, name: "EMP S", rangeMultiplier: 0.5, emDamage: 9, thermalDamage: 0, kineticDamage: 1, explosiveDamage: 2 },
+    },
+    missiles: {
+      "202": { damage: 375, damageType: "em", explosionRadius: 330, explosionVelocity: 69, damageReductionFactor: 0.882, maxVelocity: 4700, flightTime: 14, launcherGroup: 506, chargeGroup: 386, id: "202" as never, name: "Mjolnir Cruise Missile" },
+    },
+  } as unknown as FittingDb;
+}
+
+function makeRenderer(): { renderer: AmmoHintRenderer; models: AmmoHintModel[] } {
+  const models: AmmoHintModel[] = [];
+  const renderer: AmmoHintRenderer = {
+    render: (model: AmmoHintModel, _container: HTMLElement) => { models.push(model); },
+  };
+  return { renderer, models };
+}
+
+describe("AmmoHintProviderImpl", () => {
+  test("renders nothing when anchor has no data-value", () => {
+    const { renderer, models } = makeRenderer();
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
+    provider.render(fakeAnchor(null), {} as HTMLElement);
+    expect(models.length).toBe(0);
+  });
+
+  test("renders nothing when id is not in charges or missiles", () => {
+    const { renderer, models } = makeRenderer();
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
+    provider.render(fakeAnchor("unknown"), {} as HTMLElement);
+    expect(models.length).toBe(0);
+  });
+
+  test("builds charge model with damage types and range attribute", () => {
+    const { renderer, models } = makeRenderer();
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
+    provider.render(fakeAnchor("185"), {} as HTMLElement);
+    expect(models.length).toBe(1);
+    const model = models[0];
+    expect(model.typeRows.length).toBe(3);
+    expect(model.typeRows[0].type).toBe("em");
+    expect(model.typeRows[0].value).toBe(9);
+    expect(model.typeRows[1].type).toBe("kinetic");
+    expect(model.typeRows[1].value).toBe(1);
+    expect(model.typeRows[2].type).toBe("explosive");
+    expect(model.typeRows[2].value).toBe(2);
+    expect(model.totalDamage).toBe(12);
+    expect(model.attributes).toEqual([{ label: "range", value: "x0.5" }]);
+  });
+
+  test("builds missile model with single damage type and missile attributes", () => {
+    const { renderer, models } = makeRenderer();
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
+    provider.render(fakeAnchor("202"), {} as HTMLElement);
+    expect(models.length).toBe(1);
+    const model = models[0];
+    expect(model.typeRows.length).toBe(1);
+    expect(model.typeRows[0].type).toBe("em");
+    expect(model.typeRows[0].value).toBe(375);
+    expect(model.totalDamage).toBe(375);
+    expect(model.attributes.length).toBe(4);
+    expect(model.attributes[0]).toEqual({ label: "explosion radius", value: "330" });
+    expect(model.attributes[1]).toEqual({ label: "explosion velocity", value: "69" });
+    expect(model.attributes[2]).toEqual({ label: "missile velocity", value: "4700" });
+    expect(model.attributes[3]).toEqual({ label: "flight time", value: "14s" });
+  });
+});

@@ -12,8 +12,9 @@ import { mockFittingImport } from "../../testing";
 
 interface FakeReadout {
   textContent: string | null;
-  title: string;
+  dataHint: string;
   classList: { add(className: string): void; remove(className: string): void; };
+  setAttribute(name: string, value: string): void;
 }
 
 interface FakeInput { value: string; }
@@ -37,7 +38,8 @@ interface FakeEls {
 function fakeInput(value: string): FakeInput { return { value }; }
 
 function fakeReadout(): FakeReadout {
-  return { textContent: null, title: "", classList: { add: vi.fn(), remove: vi.fn() } };
+  const readout: FakeReadout = { textContent: null, dataHint: "", classList: { add: vi.fn(), remove: vi.fn() }, setAttribute: vi.fn((name: string, value: string) => { if (name === "data-hint") readout.dataHint = value; }) };
+  return readout;
 }
 
 function fakeSideEls(speed = "400", tracking = "0.32", optimal = "5000", falloff = "3000"): FakeSideEls {
@@ -147,7 +149,7 @@ describe("EffectiveReadoutImpl", () => {
       shipB: { speed: 125, tracking: 0.2, optimal: 4000, falloff: 2500, boostedTracking: 0.2, boostedOptimal: 5000, boostedFalloff: 2500, sigResolution: 40, kind: "turret" },
     });
     expect(els.shipB.speedReadout.classList.add).toHaveBeenCalledWith("is-negative");
-    expect(els.shipB.speedReadout.title).toBe("Affected");
+    expect(els.shipB.speedReadout.dataHint).toBe("Affected");
     expect(els.shipB.optimalReadout.classList.add).toHaveBeenCalledWith("is-negative");
     expect(els.shipB.optimalReadout.textContent).toBe("4,000 m");
     expect(els.shipA.speedReadout.classList.remove).toHaveBeenCalledWith("is-negative");
@@ -256,7 +258,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
       shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, kind: "turret", speedBreakdown: shipASpeedBreakdown },
       shipB: sideValues(),
     });
-    expect(els.shipA.speedReadout.title).toBe("Stasis Webifier II -55%; Warp Scrambler II stopped MWD");
+    expect(els.shipA.speedReadout.dataHint).toBe("Stasis Webifier II -55%; Warp Scrambler II stopped MWD");
   });
 
   test("uses the generic attribution title when a speed breakdown is undefined", () => {
@@ -268,7 +270,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
       shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, kind: "turret" },
       shipB: sideValues(),
     });
-    expect(els.shipA.speedReadout.title).toBe("Affected");
+    expect(els.shipA.speedReadout.dataHint).toBe("Affected");
   });
 
   test("leaves the speed tooltip empty when the breakdown has no effects", () => {
@@ -281,7 +283,7 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
       shipA: { speed: 225, tracking: 0.32, optimal: 5000, falloff: 3000, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, kind: "turret", speedBreakdown: shipASpeedBreakdown },
       shipB: sideValues(),
     });
-    expect(els.shipA.speedReadout.title).toBe("");
+    expect(els.shipA.speedReadout.dataHint).toBe("");
   });
 
   test("builds stat tooltips including script names for disruptors", () => {
@@ -298,9 +300,9 @@ describe("EffectiveReadoutImpl hover tooltips", () => {
       shipA: { speed: 400, tracking: 0.16, optimal: 4000, falloff: 2500, boostedTracking: 0.32, boostedOptimal: 5000, boostedFalloff: 3000, sigResolution: 40, kind: "turret", trackingBreakdown: disruptionBreakdown, optimalBreakdown: disruptionBreakdown, falloffBreakdown: disruptionBreakdown },
       shipB: sideValues(),
     });
-    expect(els.shipA.trackingReadout.title).toBe("Tracking Disruptor II (Tracking Speed Disruption Script) -34% Tracking speed");
-    expect(els.shipA.optimalReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Optimal range");
-    expect(els.shipA.falloffReadout.title).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Falloff range");
+    expect(els.shipA.trackingReadout.dataHint).toBe("Tracking Disruptor II (Tracking Speed Disruption Script) -34% Tracking speed");
+    expect(els.shipA.optimalReadout.dataHint).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Optimal range");
+    expect(els.shipA.falloffReadout.dataHint).toBe("Tracking Disruptor II (Optimal Range Disruption Script) -34% Falloff range");
   });
 });
 

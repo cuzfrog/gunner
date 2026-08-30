@@ -33,9 +33,9 @@ const ADVANCED_ROWS = [
            data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
       </div>
       <IconButton id={`${idPrefix}-launcher-variant-gear`} iconName="gear" extraClass="weapon-variant-gear btn"
-              titleI18n="label.launcherVariant" ariaLabelI18n="label.launcherVariant"
+              hintI18n="label.launcherVariant" ariaLabelI18n="label.launcherVariant"
               ariaHaspopup="menu" ariaExpanded={false} ariaControls={`${idPrefix}-launcher-variants`} disabled />
-      <button type="button" id={`${idPrefix}-launcher-weapon-overload-button`} class="overload-button weapon-overload-button btn" data-i18n-aria-label="label.weaponOverload" data-i18n-title="label.weaponOverload" aria-pressed="false">
+      <button type="button" id={`${idPrefix}-launcher-weapon-overload-button`} class="overload-button weapon-overload-button btn" data-i18n-aria-label="label.weaponOverload" data-i18n-hint="label.weaponOverload" aria-pressed="false">
         <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
       </button>
       <PopupBox id={`${idPrefix}-launcher-variants`} extraClass="fitting-popup launcher-variants-popup" position="below" align="right" scroll role="menu" i18nAriaLabel="label.launcherVariant" ariaLabel="Select launcher variant" />
@@ -52,8 +52,8 @@ const ADVANCED_ROWS = [
     </div>
     <TriggerButton id={`${idPrefix}-launcher-attributes-trigger`} popupId={`${idPrefix}-launcher-attributes-popup`}
             labelClass="ammo-label truncate" labelI18n="label.moreAttributes" labelText="More attributes"
-            titleI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
-            title="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
+            hintI18n="button.missileAttributes" ariaLabelI18n="button.missileAttributes"
+            data-hint="Missile attributes" ariaLabel="Missile attributes" ariaHaspopup="dialog">
       <Chevron />
     </TriggerButton>
     <PopupBox id={`${idPrefix}-launcher-attributes-popup`} extraClass="launcher-attributes-popup" position="below" align="both" scroll role="dialog" ariaModal={false}>
@@ -67,8 +67,8 @@ const ADVANCED_ROWS = [
   </div>
   <div class="form-field-group ammo-group" id={`${idPrefix}-launcher-ammo-field`}>
     <TriggerButton id={`${idPrefix}-launcher-ammo-trigger`} popupId={`${idPrefix}-launcher-ammo-popup`}
-            titleI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
-            title="Select missile" ariaLabel="Select missile" ariaHaspopup="listbox">
+            hintI18n="button.selectAmmo" ariaLabelI18n="button.selectAmmo"
+            data-hint="Select missile" ariaLabel="Select missile" ariaHaspopup="listbox">
       <span class="ammo-summary-row">
         <img id={`${idPrefix}-launcher-ammo-summary-icon`} class="ammo-summary-icon" alt="" hidden>
         <span class="ammo-summary-value mono truncate" id={`${idPrefix}-launcher-ammo-summary`}></span>

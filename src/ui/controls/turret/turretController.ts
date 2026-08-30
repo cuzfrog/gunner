@@ -376,7 +376,7 @@ export class TurretControllerImpl implements TurretController {
     const hasGuns = this.selectedTurret !== undefined;
     this.inputSet.setEnabled(hasGuns);
     this.els.ammoTrigger.disabled = !hasGuns;
-    this.els.ammoTrigger.title = hasGuns ? "" : this.i18n.t("turret.noGuns");
+    this.els.ammoTrigger.setAttribute("data-hint", hasGuns ? "" : this.i18n.t("turret.noGuns"));
     this.ammoList.render({
       turret: this.selectedTurret, ammo: this.currentAmmoId,
       cargo: this.cargoCharges, allExpanded: this.allExpanded,
@@ -436,7 +436,7 @@ export class TurretControllerImpl implements TurretController {
       const sigRes = this.simValueParser.parseSigResolutionClass(button.getAttribute("data-value") ?? "");
       if (sigRes === undefined) continue;
       button.disabled = !hasGuns || !allowed.has(sigRes);
-      if (hasGuns && button.disabled) button.title = notFittable;
+      if (hasGuns && button.disabled) button.setAttribute("data-hint", notFittable);
     }
     for (const option of Array.from(this.els.sigRes.options)) {
       const sigRes = this.simValueParser.parseSigResolutionClass(option.value);

@@ -2,7 +2,7 @@ import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser
 import type { ChargeCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
-import type { ItemNameLoader } from "../../gamedata";
+import type { ItemNameCatalog, ItemNameLoader } from "../../gamedata";
 import type { I18n } from "../i18n";
 import type { ImageCatalog } from "../icons";
 import type { Timer } from "../timer";
@@ -14,6 +14,7 @@ import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
+import type { MissileBoosterController } from "./missileBooster";
 import type { EwarController } from "./ewar";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
@@ -27,9 +28,14 @@ import type { TurretController, TurretOverrides } from "./turret";
 import type { LauncherController } from "./launcher";
 import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
+import type { HoverHintController } from "./hoverHint";
 import type { ProfileEquality } from "../../appstate";
 import type { Side } from "./side";
 import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
+import type { DpsHintProvider } from "./dpsHint";
+import type { DpsHintRenderer } from "./dpsHint";
+import type { AmmoHintProvider } from "./ammoHint";
+import type { AmmoHintRenderer } from "./ammoHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -51,6 +57,7 @@ export interface ControlsCradle {
   readonly imageCatalog: ImageCatalog;
   readonly uiEvents: UiEvents;
   readonly itemNameLoader: ItemNameLoader;
+  readonly itemNameCatalog: ItemNameCatalog;
   readonly shipATurretOverrides: TurretOverrides;
   readonly shipBTurretOverrides: TurretOverrides;
   readonly turretOverridesBySide: Record<Side, TurretOverrides>;
@@ -89,6 +96,7 @@ export interface ControlsCradle {
   readonly shipBFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
+  readonly missileBoosterController: MissileBoosterController;
   readonly portraitsController: PortraitsController;
   readonly ewarResolver: EwarResolver;
   readonly sessionCodec: SessionCodec;
@@ -100,4 +108,9 @@ export interface ControlsCradle {
   readonly confirmController: ConfirmController;
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
+  readonly hoverHintController: HoverHintController;
+  readonly dpsHintRenderer: DpsHintRenderer;
+  readonly dpsHintProvider: DpsHintProvider;
+  readonly ammoHintRenderer: AmmoHintRenderer;
+  readonly ammoHintProvider: AmmoHintProvider;
 }

@@ -51,6 +51,7 @@ describe("MissileSkillModelImpl", () => {
   test("skill level 5 applies damage bonus from Warhead Upgrades (2%/lvl)", () => {
     const result = model().compute(launcher(16, 509), missile(), [], 5);
     expect(result.damagePerMissile).toBeCloseTo(83 * (1 + 0.02 * 5), 6);
+    expect(result.skillDamageId).toBe(toTypeId("20315"));
   });
 
   test("skill level 5 applies ROF bonus from Missile Launcher Operation + Rapid Launch (multiplicative)", () => {

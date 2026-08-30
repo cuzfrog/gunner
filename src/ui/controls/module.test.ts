@@ -63,6 +63,7 @@ const controlsCradleKeys = {
   importController: "importController",
   ewarController: "ewarController",
   boosterController: "boosterController",
+  missileBoosterController: "missileBoosterController",
   portraitsController: "portraitsController",
   ewarResolver: "ewarResolver",
   shareController: "shareController",
@@ -71,7 +72,13 @@ const controlsCradleKeys = {
   profileEquality: "profileEquality",
   profileChangeTracker: "profileChangeTracker",
   itemNameLoader: "itemNameLoader",
+  itemNameCatalog: "itemNameCatalog",
   controls: "controls",
+  hoverHintController: "hoverHintController",
+  dpsHintRenderer: "dpsHintRenderer",
+  dpsHintProvider: "dpsHintProvider",
+  ammoHintRenderer: "ammoHintRenderer",
+  ammoHintProvider: "ammoHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

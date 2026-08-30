@@ -1,6 +1,6 @@
 import type { ImageCatalog } from "../../icons";
 import type { ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesStore } from "../../../fitting";
-import { FittingOverridesStoreImpl } from "../../../fitting";
+import { FittingOverridesStoreImpl, EMPTY_DAMAGE_BREAKDOWN } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { Ships } from "../../../ships";
 import { registerSimModule, type SigResolutionClass, type SimCradle, type SimValueParser } from "../../../sim";
@@ -171,9 +171,9 @@ export function buildTurret(
     resolveLauncher: vi.fn(() => undefined),
     resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
     resolvePropulsion: vi.fn(() => undefined),
-    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] })),
     resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
-    resolveCargoCharges: vi.fn(() => []),
+    resolveMissileBoosts: vi.fn(() => ({ computers: [], enhancers: [], scripts: [] })), resolveCargoCharges: vi.fn(() => []),
   });
   const controller = new TurretControllerImpl({
     side,

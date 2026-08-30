@@ -440,6 +440,7 @@ const MODULE_GROUPS = new Set([
   211, // Tracking Enhancer
   // 213 Tracking Computer is handled explicitly below
   302, // Magnetic Field Stabilizer
+  367, // Ballistic Control System
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
@@ -465,6 +466,12 @@ const STASIS_WEB_GROUP = 65;
 const STASIS_GRAPPLER_GROUP = 1672;
 const TRACKING_COMPUTER_GROUP = 213;
 const WEAPON_DISRUPTOR_GROUP = 291;
+const TARGET_PAINTER_GROUP = 379;
+const MISSILE_GUIDANCE_COMPUTER_GROUP = 1396;
+const MISSILE_GUIDANCE_ENHANCER_GROUP = 1395;
+const MISSILE_SCRIPT_GROUP = 1400;
+const MISSILE_DAMAGE_EFFECT = 763;
+const MISSILE_ROF_EFFECT = 889;
 
 const TURRET_GROUPS = new Set([53, 55, 74]);
 
@@ -506,6 +513,8 @@ const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
 
 // Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
 // on the skill item is a percentage per level; it is applied as an unpenalized boost.
+// WARHEAD_UPGRADES_SKILL_ID is the missile damage skill, not in SKILL_BONUS_RULES (turret-only).
+const WARHEAD_UPGRADES_SKILL_ID = "20315";
 interface SkillBonusRule {
   readonly skillId: number;
   readonly bonusType: "turretDamage" | "turretRoF";
@@ -696,6 +705,9 @@ interface FittingModuleStats {
   readonly stasisGrappler?: StasisGrapplerStats;
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
+  readonly targetPainter?: TargetPainterStats;
+  readonly missileDamageMultiplier?: number;
+  readonly missileCycleTimeMultiplier?: number;
 }
 
 type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
@@ -786,6 +798,35 @@ export interface TrackingComputerStats {
   readonly falloffBonusPercent: number;
 }
 
+export interface TargetPainterStats {
+  readonly maxRange: number;
+  readonly falloff: number;
+  readonly signatureRadiusBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+export interface MissileGuidanceComputerStats {
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+}
+
+export interface MissileGuidanceEnhancerStats {
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+}
+
+export interface MissileScriptStats {
+  readonly explosionRadiusMultiplier: number;
+  readonly explosionVelocityMultiplier: number;
+  readonly missileVelocityMultiplier: number;
+  readonly flightTimeMultiplier: number;
+}
+
 function optionalNumber(value: number | undefined): number | undefined {
   if (value === undefined || !Number.isFinite(value) || value === 0) return undefined;
   return value;
@@ -861,6 +902,13 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
     }
   }
 
+  if (effects.has(MISSILE_DAMAGE_EFFECT) || effects.has(MISSILE_ROF_EFFECT)) {
+    const missileDamageMultiplier = optionalNumber(values.get("missileDamageMultiplierBonus"));
+    const missileCycleTimeMultiplier = optionalNumber(values.get("speedMultiplier"));
+    if (missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = missileDamageMultiplier;
+    if (missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = missileCycleTimeMultiplier;
+  }
+
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
 }
@@ -903,6 +951,52 @@ export function buildTrackingComputerStats(values: Map<string, number>): Trackin
     trackingBonusPercent: trackingBonus,
     optimalBonusPercent: values.get("maxRangeBonus") ?? 0,
     falloffBonusPercent: values.get("falloffBonus") ?? 0,
+  };
+}
+
+export function buildTargetPainterStats(values: Map<string, number>): TargetPainterStats | undefined {
+  const signatureRadiusBonus = values.get("signatureRadiusBonus");
+  const maxRange = values.get("maxRange");
+  if (signatureRadiusBonus === undefined || maxRange === undefined) return undefined;
+  return {
+    maxRange,
+    falloff: values.get("falloffEffectiveness") ?? 0,
+    signatureRadiusBonusPercent: signatureRadiusBonus,
+    overloadStrengthBonusPercent: values.get("overloadPainterStrengthBonus") ?? 0,
+  };
+}
+
+export function buildMissileGuidanceComputerStats(values: Map<string, number>): MissileGuidanceComputerStats | undefined {
+  const explosionRadiusBonus = values.get("aoeCloudSizeBonus");
+  if (explosionRadiusBonus === undefined) return undefined;
+  return {
+    explosionRadiusBonusPercent: explosionRadiusBonus,
+    explosionVelocityBonusPercent: values.get("aoeVelocityBonus") ?? 0,
+    missileVelocityBonusPercent: values.get("missileVelocityBonus") ?? 0,
+    flightTimeBonusPercent: values.get("explosionDelayBonus") ?? 0,
+    overloadStrengthBonusPercent: values.get("overloadTrackingModuleStrengthBonus") ?? 0,
+  };
+}
+
+export function buildMissileGuidanceEnhancerStats(values: Map<string, number>): MissileGuidanceEnhancerStats | undefined {
+  const explosionRadiusBonus = values.get("aoeCloudSizeBonus");
+  if (explosionRadiusBonus === undefined) return undefined;
+  return {
+    explosionRadiusBonusPercent: explosionRadiusBonus,
+    explosionVelocityBonusPercent: values.get("aoeVelocityBonus") ?? 0,
+    missileVelocityBonusPercent: values.get("missileVelocityBonus") ?? 0,
+    flightTimeBonusPercent: values.get("explosionDelayBonus") ?? 0,
+  };
+}
+
+export function buildMissileScriptStats(values: Map<string, number>): MissileScriptStats | undefined {
+  const explosionRadiusBonusBonus = values.get("aoeCloudSizeBonusBonus");
+  if (explosionRadiusBonusBonus === undefined) return undefined;
+  return {
+    explosionRadiusMultiplier: 1 + explosionRadiusBonusBonus / 100,
+    explosionVelocityMultiplier: 1 + (values.get("aoeVelocityBonusBonus") ?? 0) / 100,
+    missileVelocityMultiplier: 1 + (values.get("missileVelocityBonusBonus") ?? 0) / 100,
+    flightTimeMultiplier: 1 + (values.get("explosionDelayBonusBonus") ?? 0) / 100,
   };
 }
 
@@ -1062,6 +1156,10 @@ async function main() {
   const trackingDisruptors: Record<string, Row<TrackingDisruptorStats>> = {};
   const warpScramblers: Record<string, Row<WarpScramblerStats>> = {};
   const disruptionScripts: Record<string, Row<DisruptionScriptStats>> = {};
+  const targetPainters: Record<string, Row<TargetPainterStats>> = {};
+  const missileGuidanceComputers: Record<string, Row<MissileGuidanceComputerStats>> = {};
+  const missileGuidanceEnhancers: Record<string, Row<MissileGuidanceEnhancerStats>> = {};
+  const missileScripts: Record<string, Row<MissileScriptStats>> = {};
   const hullBonuses: Record<ShipId, readonly HullBonus[]> = {};
   const drones: Record<string, DroneEntry> = {};
   const itemNames: Record<string, LocalizedName> = {};
@@ -1224,6 +1322,43 @@ async function main() {
       continue;
     }
 
+    if (type.groupID === TARGET_PAINTER_GROUP) {
+      const stats = buildTargetPainterStats(values);
+      if (stats) {
+        targetPainters[id] = { ...stats, id, name: enName };
+        fittingModules[id] = { targetPainter: stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === MISSILE_GUIDANCE_COMPUTER_GROUP) {
+      const stats = buildMissileGuidanceComputerStats(values);
+      if (stats) {
+        missileGuidanceComputers[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === MISSILE_GUIDANCE_ENHANCER_GROUP) {
+      const stats = buildMissileGuidanceEnhancerStats(values);
+      if (stats) {
+        missileGuidanceEnhancers[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
+    if (type.groupID === MISSILE_SCRIPT_GROUP) {
+      const stats = buildMissileScriptStats(values);
+      if (stats) {
+        missileScripts[id] = { ...stats, id, name: enName };
+        addItemName(itemNames, id, type);
+      }
+      continue;
+    }
+
     if (MODULE_GROUPS.has(type.groupID)) {
       const effects = buildEffectSet(typeDogma);
       if (type.groupID === 46) {
@@ -1280,6 +1415,9 @@ export interface FittingModuleStats {
   readonly stasisGrappler?: Omit<StasisGrapplerStats, "id" | "name">;
   readonly trackingDisruptor?: Omit<TrackingDisruptorStats, "id" | "name">;
   readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
+  readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
+  readonly missileDamageMultiplier?: number;
+  readonly missileCycleTimeMultiplier?: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -1415,6 +1553,43 @@ export interface TrackingComputerStats {
   readonly name: string;
 }
 
+export interface TargetPainterStats {
+  readonly maxRange: number;
+  readonly falloff: number;
+  readonly signatureRadiusBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface MissileGuidanceComputerStats {
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+  readonly overloadStrengthBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface MissileGuidanceEnhancerStats {
+  readonly explosionRadiusBonusPercent: number;
+  readonly explosionVelocityBonusPercent: number;
+  readonly missileVelocityBonusPercent: number;
+  readonly flightTimeBonusPercent: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
+export interface MissileScriptStats {
+  readonly explosionRadiusMultiplier: number;
+  readonly explosionVelocityMultiplier: number;
+  readonly missileVelocityMultiplier: number;
+  readonly flightTimeMultiplier: number;
+  readonly id: TypeId;
+  readonly name: string;
+}
+
 `;
 
   const scriptDefinitions = `export const SCRIPTS: Readonly<Record<string, TurretScriptStats>> = ${stringifyWithTypeIds(scripts)};
@@ -1430,6 +1605,14 @@ export const TRACKING_DISRUPTORS: Readonly<Record<string, TrackingDisruptorStats
 export const WARP_SCRAMBLERS: Readonly<Record<string, WarpScramblerStats>> = ${stringifyWithTypeIds(warpScramblers)};
 
 export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>> = ${stringifyWithTypeIds(disruptionScripts)};
+
+export const TARGET_PAINTERS: Readonly<Record<string, TargetPainterStats>> = ${stringifyWithTypeIds(targetPainters)};
+
+export const MISSILE_GUIDANCE_COMPUTERS: Readonly<Record<string, MissileGuidanceComputerStats>> = ${stringifyWithTypeIds(missileGuidanceComputers)};
+
+export const MISSILE_GUIDANCE_ENHANCERS: Readonly<Record<string, MissileGuidanceEnhancerStats>> = ${stringifyWithTypeIds(missileGuidanceEnhancers)};
+
+export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${stringifyWithTypeIds(missileScripts)};
 
 `;
 
@@ -1456,6 +1639,7 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
   ];
 
   addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
+  addSkillNames(itemNames, types);
 
   const dbTableNames = collectDbTableNames(
     fittingModules,
@@ -1470,6 +1654,10 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     trackingDisruptors,
     warpScramblers,
     disruptionScripts,
+    targetPainters,
+    missileGuidanceComputers,
+    missileGuidanceEnhancers,
+    missileScripts,
     drones,
   );
   const filteredItemNames = filterItemNames(itemNames, idToType, groups, dbTableNames);
@@ -1490,6 +1678,10 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     `${Object.keys(trackingDisruptors).length} tracking disruptors`,
     `${Object.keys(warpScramblers).length} warp scramblers`,
     `${Object.keys(disruptionScripts).length} disruption scripts`,
+    `${Object.keys(targetPainters).length} target painters`,
+    `${Object.keys(missileGuidanceComputers).length} missile guidance computers`,
+    `${Object.keys(missileGuidanceEnhancers).length} missile guidance enhancers`,
+    `${Object.keys(missileScripts).length} missile scripts`,
     `${Object.keys(hullBonuses).length} hull bonus sets`,
     `${Object.keys(sortedDrones).length} drones`,
   ];
@@ -1527,6 +1719,21 @@ function addInScopeItemNames(
   }
 }
 
+function relevantSkillIds(): readonly string[] {
+  const ids = new Set<string>();
+  for (const rule of SKILL_BONUS_RULES) ids.add(String(rule.skillId));
+  ids.add(WARHEAD_UPGRADES_SKILL_ID);
+  return [...ids];
+}
+
+function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
+  for (const id of relevantSkillIds()) {
+    if (id in itemNames) continue;
+    const type = types[id];
+    if (type) addItemName(itemNames, id, type);
+  }
+}
+
 function collectDbTableNames(
   fittingModules: Record<string, FittingModuleStats>,
   turrets: Record<string, TurretStats>,
@@ -1540,6 +1747,10 @@ function collectDbTableNames(
   trackingDisruptors: Record<string, TrackingDisruptorStats>,
   warpScramblers: Record<string, WarpScramblerStats>,
   disruptionScripts: Record<string, DisruptionScriptStats>,
+  targetPainters: Record<string, TargetPainterStats>,
+  missileGuidanceComputers: Record<string, MissileGuidanceComputerStats>,
+  missileGuidanceEnhancers: Record<string, MissileGuidanceEnhancerStats>,
+  missileScripts: Record<string, MissileScriptStats>,
   drones: Record<string, DroneEntry>,
 ): Set<string> {
   return new Set([
@@ -1555,7 +1766,12 @@ function collectDbTableNames(
     ...Object.keys(trackingDisruptors),
     ...Object.keys(warpScramblers),
     ...Object.keys(disruptionScripts),
+    ...Object.keys(targetPainters),
+    ...Object.keys(missileGuidanceComputers),
+    ...Object.keys(missileGuidanceEnhancers),
+    ...Object.keys(missileScripts),
     ...Object.keys(drones),
+    ...relevantSkillIds(),
   ]);
 }
 
@@ -1708,7 +1924,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats, buildTargetPainterStats as _buildTargetPainterStats, buildMissileGuidanceComputerStats as _buildMissileGuidanceComputerStats, buildMissileGuidanceEnhancerStats as _buildMissileGuidanceEnhancerStats, buildMissileScriptStats as _buildMissileScriptStats };
 
 if (import.meta.main) {
   main().catch((error) => {

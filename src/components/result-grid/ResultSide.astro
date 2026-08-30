@@ -8,7 +8,7 @@ const { side } = Astro.props;
 const s = side;
 
 const SUPPORT_METRICS = [
-  { i18n: "result.nominalDps", text: "Nominal DPS", idSuffix: "nominal-dps", value: "-" },
+  { i18n: "result.nominalDps", text: "Nominal DPS", idSuffix: "nominal-dps", value: "-", hint: "dps", side: s },
 ] as const;
 
 const TURRET_METRICS = [
@@ -36,7 +36,7 @@ const MISSILE_METRICS = [
     {SUPPORT_METRICS.map((m) => (
       <div class="result-metric">
         <span class="result-metric-label" id={`res-${m.idSuffix}-label-${s}`} data-i18n={m.i18n}>{m.text}</span>
-        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`}>{m.value}</span>
+        <span class="result-metric-value mono" id={`res-${m.idSuffix}-${s}`} data-hint-content={m.hint} data-side={m.side}>{m.value}</span>
       </div>
     ))}
   </div>

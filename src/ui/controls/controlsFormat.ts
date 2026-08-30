@@ -1,5 +1,4 @@
-import { type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
-import type { ChargeOption } from "../../fitting";
+import { type DisruptionScriptSpec, type MissileScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
@@ -42,14 +41,6 @@ export function skillOptionLabel(i18n: I18n, level: SkillLevel): string {
   return `${i18n.t("skill.level")} ${level}`;
 }
 
-export function chargeStatSuffix(option: ChargeOption): string {
-  const parts = [`range x${formatMultiplier(option.rangeMultiplier)}`, `track x${formatMultiplier(option.trackingMultiplier)}`];
-  if (option.falloffMultiplier !== 1) {
-    parts.splice(1, 0, `falloff x${formatMultiplier(option.falloffMultiplier)}`);
-  }
-  return parts.join(" · ");
-}
-
 export function scriptStatSuffix(script: DisruptionScriptSpec): string {
   const parts = [
     `optimal x${formatMultiplier(script.optimalMultiplier)}`,
@@ -64,6 +55,16 @@ export function boosterScriptStatSuffix(script: TurretScriptSpec): string {
     `track x${formatMultiplier(script.trackingMultiplier)}`,
     `optimal x${formatMultiplier(script.optimalMultiplier)}`,
     `falloff x${formatMultiplier(script.falloffMultiplier)}`,
+  ];
+  return parts.join(" · ");
+}
+
+export function missileScriptStatSuffix(script: MissileScriptSpec): string {
+  const parts = [
+    `explosion radius x${formatMultiplier(script.explosionRadiusMultiplier)}`,
+    `explosion velocity x${formatMultiplier(script.explosionVelocityMultiplier)}`,
+    `missile velocity x${formatMultiplier(script.missileVelocityMultiplier)}`,
+    `flight time x${formatMultiplier(script.flightTimeMultiplier)}`,
   ];
   return parts.join(" · ");
 }

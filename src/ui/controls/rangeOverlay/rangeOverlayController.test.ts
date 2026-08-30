@@ -52,6 +52,8 @@ function buildController(now: () => number = () => 0): {
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    painterHint: vi.fn(() => "painter-hint"),
+    painterModuleEffect: vi.fn(() => "painter-effect"),
     webModuleEffect: vi.fn(() => "web-effect"),
     grapplerModuleEffect: vi.fn(() => "grappler-effect"),
     disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
@@ -73,29 +75,29 @@ function buildController(now: () => number = () => 0): {
 
 function projectionWithWeb(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: [] },
+    loadout: { webs: [WEB], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+    activation: { webs: [{ active, overloaded }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
   };
 }
 
 function projectionWithGrappler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], scripts: [] },
-    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: [] },
+    loadout: { webs: [], grapplers: [GRAPPLER], disruptors: [], scramblers: [], painters: [], scripts: [] },
+    activation: { webs: [], grapplers: [{ active, overloaded }], disruptors: [], scramblers: []  , painters: [] },
   };
 }
 
 function projectionWithScrambler(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded }] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [SCRAMBLER], painters: [], scripts: [] },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [{ active, overloaded  }], painters: [] },
   };
 }
 
 function projectionWithDisruptor(active = true, overloaded = false): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [DISRUPTOR], scramblers: [], painters: [], scripts: [] },
+    activation: { webs: [], grapplers: [], disruptors: [{ active, overloaded, script: undefined }], scramblers: []  , painters: [] },
   };
 }
 

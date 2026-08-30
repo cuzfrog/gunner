@@ -88,10 +88,10 @@ export class StatsSection implements IStatsSection {
     if (Number.isFinite(t) && t > 0) {
       const value = `${t.toFixed(1)}${this.i18n.t("unit.second")}`;
       suffix.textContent = value;
-      input.title = `${this.i18n.t("label.alignTime")}: ${value}`;
+      input.setAttribute("data-hint", `${this.i18n.t("label.alignTime")}: ${value}`);
     } else {
       suffix.textContent = "";
-      input.title = "";
+      input.setAttribute("data-hint", "");
     }
   }
 

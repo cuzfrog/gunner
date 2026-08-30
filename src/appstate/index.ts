@@ -9,6 +9,7 @@ export type {
   StoredBoosterActivation,
   StoredDisruptionScript,
   StoredEwarActivation,
+  StoredMissileBoosterActivation,
   TrackingUnit,
   UserSettings,
   WeaponRangeVisibility,

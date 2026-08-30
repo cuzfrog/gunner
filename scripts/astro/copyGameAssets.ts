@@ -29,9 +29,22 @@ function copyTypeIcons(distDir: string): void {
   }
 }
 
+const DAMAGE_ICON_FILES = ["damage-em.png", "damage-thermal.png", "damage-kinetic.png", "damage-explosive.png"];
+
+function copyDamageIcons(distDir: string): void {
+  const dstDir = join(distDir, IMAGES_DIRECTORY, "icons");
+  mkdirSync(dstDir, { recursive: true });
+  for (const file of DAMAGE_ICON_FILES) {
+    const src = join(ICONS_SOURCE_DIRECTORY, "icons", file);
+    if (!existsSync(src)) throw new Error(`Missing damage icon source: ${src}`);
+    cpSync(src, join(dstDir, file));
+  }
+}
+
 function copyAllAssets(distDir: string): void {
   copyShipImages(distDir);
   copyTypeIcons(distDir);
+  copyDamageIcons(distDir);
 }
 
 function serveFile(filePath: string, res: ServerResponse): void {

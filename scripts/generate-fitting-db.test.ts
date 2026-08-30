@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _buildTargetPainterStats, _buildMissileGuidanceComputerStats, _buildMissileGuidanceEnhancerStats, _buildMissileScriptStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
@@ -391,6 +391,144 @@ describe("buildMissileStats", () => {
       maxVelocity: 3750, explosionDelay: 5000, launcherGroup: 509,
     }), 384);
     expect(stats?.damage).toBe(120);
+  });
+});
+
+describe("_buildTargetPainterStats", () => {
+  test("returns undefined when signatureRadiusBonus is missing", () => {
+    expect(_buildTargetPainterStats(values({ maxRange: 36000 }))).toBeUndefined();
+  });
+
+  test("returns undefined when maxRange is missing", () => {
+    expect(_buildTargetPainterStats(values({ signatureRadiusBonus: 30 }))).toBeUndefined();
+  });
+
+  test("builds a target painter from SDE attributes", () => {
+    expect(_buildTargetPainterStats(values({
+      maxRange: 36000,
+      falloffEffectiveness: 90000,
+      signatureRadiusBonus: 30,
+      overloadPainterStrengthBonus: 20,
+    }))).toEqual({
+      maxRange: 36000,
+      falloff: 90000,
+      signatureRadiusBonusPercent: 30,
+      overloadStrengthBonusPercent: 20,
+    });
+  });
+
+  test("defaults falloff and overload bonus to zero when missing", () => {
+    expect(_buildTargetPainterStats(values({ maxRange: 30000, signatureRadiusBonus: 25 }))).toEqual({
+      maxRange: 30000,
+      falloff: 0,
+      signatureRadiusBonusPercent: 25,
+      overloadStrengthBonusPercent: 0,
+    });
+  });
+});
+
+describe("_buildMissileGuidanceComputerStats", () => {
+  test("returns undefined when aoeCloudSizeBonus is missing", () => {
+    expect(_buildMissileGuidanceComputerStats(values({ aoeVelocityBonus: 8.25 }))).toBeUndefined();
+  });
+
+  test("builds an MGC II from SDE attributes", () => {
+    expect(_buildMissileGuidanceComputerStats(values({
+      aoeCloudSizeBonus: -8.25,
+      aoeVelocityBonus: 8.25,
+      missileVelocityBonus: 5.5,
+      explosionDelayBonus: 5.5,
+      overloadTrackingModuleStrengthBonus: 15,
+    }))).toEqual({
+      explosionRadiusBonusPercent: -8.25,
+      explosionVelocityBonusPercent: 8.25,
+      missileVelocityBonusPercent: 5.5,
+      flightTimeBonusPercent: 5.5,
+      overloadStrengthBonusPercent: 15,
+    });
+  });
+
+  test("defaults missing bonuses to zero", () => {
+    expect(_buildMissileGuidanceComputerStats(values({ aoeCloudSizeBonus: -5.5 }))).toEqual({
+      explosionRadiusBonusPercent: -5.5,
+      explosionVelocityBonusPercent: 0,
+      missileVelocityBonusPercent: 0,
+      flightTimeBonusPercent: 0,
+      overloadStrengthBonusPercent: 0,
+    });
+  });
+});
+
+describe("_buildMissileGuidanceEnhancerStats", () => {
+  test("returns undefined when aoeCloudSizeBonus is missing", () => {
+    expect(_buildMissileGuidanceEnhancerStats(values({ aoeVelocityBonus: 6 }))).toBeUndefined();
+  });
+
+  test("builds an MGE II from SDE attributes", () => {
+    expect(_buildMissileGuidanceEnhancerStats(values({
+      aoeCloudSizeBonus: -6,
+      aoeVelocityBonus: 6,
+      missileVelocityBonus: 6,
+      explosionDelayBonus: 6,
+    }))).toEqual({
+      explosionRadiusBonusPercent: -6,
+      explosionVelocityBonusPercent: 6,
+      missileVelocityBonusPercent: 6,
+      flightTimeBonusPercent: 6,
+    });
+  });
+});
+
+describe("_buildMissileScriptStats", () => {
+  test("returns undefined when aoeCloudSizeBonusBonus is missing", () => {
+    expect(_buildMissileScriptStats(values({ aoeVelocityBonusBonus: 100 }))).toBeUndefined();
+  });
+
+  test("builds a precision script from SDE attributes", () => {
+    expect(_buildMissileScriptStats(values({
+      aoeCloudSizeBonusBonus: 100,
+      aoeVelocityBonusBonus: 100,
+      missileVelocityBonusBonus: -100,
+      explosionDelayBonusBonus: -100,
+    }))).toEqual({
+      explosionRadiusMultiplier: 2,
+      explosionVelocityMultiplier: 2,
+      missileVelocityMultiplier: 0,
+      flightTimeMultiplier: 0,
+    });
+  });
+
+  test("builds a range script from SDE attributes", () => {
+    expect(_buildMissileScriptStats(values({
+      aoeCloudSizeBonusBonus: -100,
+      aoeVelocityBonusBonus: -100,
+      missileVelocityBonusBonus: 100,
+      explosionDelayBonusBonus: 100,
+    }))).toEqual({
+      explosionRadiusMultiplier: 0,
+      explosionVelocityMultiplier: 0,
+      missileVelocityMultiplier: 2,
+      flightTimeMultiplier: 2,
+    });
+  });
+});
+
+describe("Ballistic Control System in _buildModuleStats", () => {
+  function effects(...ids: number[]): Set<number> {
+    return new Set(ids);
+  }
+
+  test("extracts BCS damage and cycle time multipliers with missile damage effects", () => {
+    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects(763, 889));
+    expect(stats).toEqual({
+      missileDamageMultiplier: 1.1,
+      missileCycleTimeMultiplier: 0.895,
+    });
+  });
+
+  test("does not extract missile damage stats when no missile effect is present", () => {
+    const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects());
+    expect(stats).toBeUndefined();
   });
 });
 

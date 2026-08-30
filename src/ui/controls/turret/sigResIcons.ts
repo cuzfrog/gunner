@@ -15,7 +15,7 @@ export class SigResIcons {
   private readonly i18n: I18n;
   private readonly fittingImport: FittingImport;
   private readonly simValueParser: SimValueParser;
-  private readonly originalTitles: Partial<Record<SigResolutionClass, string>> = {};
+  private readonly originalHints: Partial<Record<SigResolutionClass, string>> = {};
 
   constructor(deps: { gunFamilies: GunFamilies; imageCatalog: ImageCatalog; i18n: I18n; fittingImport: FittingImport; simValueParser: SimValueParser }) {
     this.gunFamilies = deps.gunFamilies;
@@ -31,7 +31,7 @@ export class SigResIcons {
       const sigRes = this.simValueParser.parseSigResolutionClass(button.getAttribute("data-value") ?? "");
       if (sigRes === undefined) continue;
       const img = this.iconFor(button);
-      const original = this.originalTitle(sigRes, button);
+      const original = this.originalHint(sigRes, button);
       if (turret) {
         const family = this.gunFamilies.familyOf(turret.moduleId);
         const representative = this.gunFamilies.representativeOf(family, sigRes);
@@ -40,12 +40,12 @@ export class SigResIcons {
           img.src = url;
           img.hidden = false;
           const name = this.fittingImport.itemNameForId(representative, this.i18n.current());
-          button.title = `${name} · ${original}`;
+          button.setAttribute("data-hint", `${name} · ${original}`);
           continue;
         }
       }
       img.hidden = true;
-      button.title = original;
+      button.setAttribute("data-hint", original);
     }
   }
 
@@ -56,8 +56,8 @@ export class SigResIcons {
       if (sigRes === undefined) continue;
       const img = this.iconFor(button);
       img.hidden = true;
-      const original = this.originalTitles[sigRes];
-      if (original !== undefined) button.title = original;
+      const original = this.originalHints[sigRes];
+      if (original !== undefined) button.setAttribute("data-hint", original);
     }
   }
 
@@ -70,12 +70,12 @@ export class SigResIcons {
     return img;
   }
 
-  private originalTitle(value: SigResolutionClass, button: HTMLButtonElement): string {
-    let title = this.originalTitles[value];
-    if (title === undefined) {
-      title = button.title;
-      this.originalTitles[value] = title;
+  private originalHint(value: SigResolutionClass, button: HTMLButtonElement): string {
+    let hint = this.originalHints[value];
+    if (hint === undefined) {
+      hint = button.getAttribute("data-hint") ?? "";
+      this.originalHints[value] = hint;
     }
-    return title;
+    return hint;
   }
 }

@@ -5,8 +5,11 @@ import * as process from "node:process";
 import type { TypeId } from "../src/gamedata/ids";
 import {
   FITTING_MODULES,
+  MISSILE_GUIDANCE_COMPUTERS,
+  MISSILE_GUIDANCE_ENHANCERS,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
+  TARGET_PAINTERS,
   TRACKING_COMPUTERS,
   TRACKING_DISRUPTORS,
   TURRETS,
@@ -39,6 +42,10 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Stasis Grappler": "mid",
   "Warp Scrambler": "mid",
   "Weapon Disruptor": "mid",
+  "Target Painter": "mid",
+  "Missile Guidance Computer": "mid",
+  "Missile Guidance Enhancer": "low",
+  "Ballistic Control System": "low",
   "Armor Plate": "low",
   "Inertial Stabilizer": "low",
   "Nanofiber Internal Structure": "low",
@@ -46,6 +53,9 @@ const GROUP_SLOTS: Readonly<Record<string, ModuleSlot>> = {
   "Reinforced Bulkhead": "low",
   "Shield Extender": "mid",
   "Tracking Enhancer": "low",
+  "Gyrostabilizer": "low",
+  "Heat Sink": "low",
+  "Magnetic Field Stabilizer": "low",
   "Energized Armor Membrane": "low",
   "Rig Anchor": "rig",
   "Rig Armor": "rig",
@@ -131,6 +141,9 @@ function main(): void {
   for (const stats of Object.values(TRACKING_COMPUTERS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(TRACKING_DISRUPTORS)) modulesByName.set(stats.name, stats.id);
   for (const stats of Object.values(WARP_SCRAMBLERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(TARGET_PAINTERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(MISSILE_GUIDANCE_COMPUTERS)) modulesByName.set(stats.name, stats.id);
+  for (const stats of Object.values(MISSILE_GUIDANCE_ENHANCERS)) modulesByName.set(stats.name, stats.id);
   const modules: NamedTypeId[] = [...modulesByName.entries()].map(([name, id]) => ({ name, id })).sort((a, b) => a.name.localeCompare(b.name));
   const turrets: NamedTypeId[] = Object.values(TURRETS)
     .map((stats) => ({ name: stats.name, id: stats.id }))

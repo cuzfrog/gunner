@@ -6,6 +6,7 @@ import type {
   HitChance,
   Kinematics,
   MissileApplication,
+  MissileBoosterResolver,
   SimValueParser,
   Simulation,
   StackingPenalty,
@@ -19,6 +20,7 @@ export interface SimCradle {
   readonly stackingPenalty: StackingPenalty;
   readonly ewarResolver: EwarResolver;
   readonly turretBoosterResolver: TurretBoosterResolver;
+  readonly missileBoosterResolver: MissileBoosterResolver;
   readonly kinematics: Kinematics;
   readonly hitChance: HitChance;
   readonly missileApplication: MissileApplication;

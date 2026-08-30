@@ -379,7 +379,7 @@ describe("DomFittingPreview", () => {
     const highSection = container.children[1];
     const row = highSection.children[1];
     expect(row.children[1].children[0].textContent).toBe("200mm AutoCannon I (zh)");
-    expect(row.children[1].children[0].title).toBe("200mm AutoCannon I (zh)");
+    expect(row.children[1].children[0].getAttribute("data-hint")).toBe("200mm AutoCannon I (zh)");
     expect(row.children[1].children[2].textContent).toBe(", Hail S (zh)");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(AC_ID, "zh");
     expect(fittingImport.itemNameForId).toHaveBeenCalledWith(HAIL_ID, "zh");

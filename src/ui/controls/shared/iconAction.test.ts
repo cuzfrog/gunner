@@ -9,16 +9,16 @@ describe("IconActionImpl", () => {
   const shape = {
     buttonClass: "icon-button",
     iconSvg: '<svg aria-hidden="true"><use href="icons.svg#delete"></use></svg>',
-    title: "Delete",
+    hint: "Delete",
   };
 
-  test("creates a button with type, class, title, and aria-label", () => {
+  test("creates a button with type, class, hint, and aria-label", () => {
     const action = new IconActionImpl(shape);
     const button = action.create(() => {});
     expect(button.tagName).toBe("BUTTON");
     expect(button.getAttribute("type")).toBe("button");
     expect(button.className).toBe("icon-button");
-    expect(button.getAttribute("title")).toBe("Delete");
+    expect(button.getAttribute("data-hint")).toBe("Delete");
     expect(button.getAttribute("aria-label")).toBe("Delete");
   });
 
@@ -28,7 +28,7 @@ describe("IconActionImpl", () => {
     expect(button.innerHTML).toBe(shape.iconSvg);
   });
 
-  test("uses ariaLabel when provided instead of title", () => {
+  test("uses ariaLabel when provided instead of hint", () => {
     const action = new IconActionImpl({ ...shape, ariaLabel: "Remove fitting" });
     const button = action.create(() => {});
     expect(button.getAttribute("aria-label")).toBe("Remove fitting");
@@ -73,14 +73,14 @@ describe("IconActionImpl", () => {
     expect(clicked).toBe(true);
   });
 
-  test("resolves title lazily from function", () => {
-    let currentTitle = "First";
-    const action = new IconActionImpl({ ...shape, title: () => currentTitle });
+  test("resolves hint lazily from function", () => {
+    let currentHint = "First";
+    const action = new IconActionImpl({ ...shape, hint: () => currentHint });
     const button1 = action.create(() => {});
-    expect(button1.getAttribute("title")).toBe("First");
-    currentTitle = "Second";
+    expect(button1.getAttribute("data-hint")).toBe("First");
+    currentHint = "Second";
     const button2 = action.create(() => {});
-    expect(button2.getAttribute("title")).toBe("Second");
+    expect(button2.getAttribute("data-hint")).toBe("Second");
   });
 
   test("resolves ariaLabel lazily from function", () => {

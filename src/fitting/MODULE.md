@@ -3,6 +3,8 @@ no-new-exports:
   - chargeCatalog.test.ts
   - chargeCatalog.ts
   - cradle.ts
+  - damageBreakdown.test.ts
+  - damageBreakdown.ts
   - eft.test.ts
   - eft.ts
   - fittingImport.test.ts
@@ -41,8 +43,11 @@ The public boundary is `index.ts`, which exports the `FittingImport`,
 `ImportedTurret`, `ImportedLauncher`, `CargoCharge`, `ChargeOption`,
 `MissileOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
 `FittingSummary`, `LauncherClass`, `FittingState`, `FittedModule`,
-`TurretGroup`, `LauncherGroup`, `CargoEntry`, `FittingModuleEntry`, and
-the module registration. `FittingState` represents the equipped fitting
+`TurretGroup`, `LauncherGroup`, `CargoEntry`, `FittingModuleEntry`,
+`DamageType`, `DamageFactor`, `DamageFactorKind`, `DamageBreakdown`,
+`EMPTY_DAMAGE_BREAKDOWN`, and the module registration.
+`chargeDamageByType` and `missileDamageByType` are sibling-only helpers
+used within the fitting module and are not re-exported through `index.ts`. `FittingState` represents the equipped fitting
 basis (hull, support modules, turret groups, launcher groups, propulsion,
 ewar, boosters, drones, cargo) without computed values.
 `FittingStateFactory` builds `FittingState` from resolved module entries

@@ -9,8 +9,8 @@ import CombatantPortrait from "./CombatantPortrait.astro";
   <div id="range-overlay-legend" class="range-overlay-legend" role="group" data-i18n-aria-label="label.rangeOverlays" aria-label="EWAR range overlays">
     <button type="button" id="weapon-range-button" class="range-overlay-chip weapon-range-chip"
             data-weapon-range="both" aria-pressed="true"
-            data-i18n-title="label.weaponRange" data-i18n-aria-label="label.weaponRange"
-            title="Weapon range" aria-label="Weapon range">Weapon range</button>
+            data-i18n-hint="label.weaponRange" data-i18n-aria-label="label.weaponRange"
+            data-hint="Weapon range" aria-label="Weapon range">Weapon range</button>
   </div>
   <CombatantPortrait id="ship-a-portrait" side="ship-a" />
   <CombatantPortrait id="ship-b-portrait" side="ship-b" />
@@ -22,7 +22,7 @@ import CombatantPortrait from "./CombatantPortrait.astro";
       <button id="reset" class="btn" data-i18n="button.reset">Reset</button>
       <IconButton id="canvas-settings-trigger" iconName="gear"
               ariaHaspopup="true" ariaExpanded={false} ariaControls="canvas-settings-popup"
-              titleI18n="label.canvasSettings" ariaLabelI18n="label.canvasSettings" />
+              hintI18n="label.canvasSettings" ariaLabelI18n="label.canvasSettings" />
     </div>
 
     <div class="control-bar-field control-bar-initial-distance">

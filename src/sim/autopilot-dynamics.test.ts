@@ -6,8 +6,7 @@ import type { SimConfig } from "./types";
 
 const ewarResolver: EwarResolver = {
   speedMultiplier: () => 1,
-  speedMultiplierIgnoringRange: () => 1,
-  disruptedTurret: (turret) => turret,
+  speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
   disruptedTurretIgnoringRange: (turret) => turret,
   propulsionSuppressed: () => false,
   propulsionSuppressedIgnoringRange: () => false,

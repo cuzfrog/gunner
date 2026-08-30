@@ -50,7 +50,7 @@ const loop = vi.mocked<Loop>({
 });
 const ewarResolver = vi.mocked<Required<EwarResolver>>({
   speedMultiplier: vi.fn(() => 1),
-  speedMultiplierIgnoringRange: vi.fn(() => 1),
+  speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
   disruptedTurret: vi.fn((turret) => turret),
   disruptedTurretIgnoringRange: vi.fn((turret) => turret),
   propulsionSuppressed: vi.fn(() => false),
@@ -257,12 +257,12 @@ describe("AppImpl", () => {
 
   test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
     const shipAEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
     };
     const shipBEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
     };
     const shipAShip: ShipState = { ...ship, ewar: shipAEwar };
     const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };

@@ -34,6 +34,7 @@ export interface FittingState {
   readonly propulsionModule?: FittedModule;
   readonly ewarModules: readonly FittedModule[];
   readonly boosterModules: readonly FittedModule[];
+  readonly missileBoosterModules: readonly FittedModule[];
   readonly drones: readonly CargoEntry[];
   readonly cargo: readonly CargoEntry[];
 }
@@ -53,6 +54,7 @@ export class FittingStateFactory {
     const supportModules: FittedModule[] = [];
     const ewarModules: FittedModule[] = [];
     const boosterModules: FittedModule[] = [];
+    const missileBoosterModules: FittedModule[] = [];
     let propulsionModule: FittedModule | undefined;
     let order = 0;
 
@@ -86,6 +88,11 @@ export class FittingStateFactory {
         continue;
       }
 
+      if (this.db.missileGuidanceComputers[mod.moduleId] || this.db.missileGuidanceEnhancers[mod.moduleId]) {
+        missileBoosterModules.push(mod);
+        continue;
+      }
+
       const stats = this.db.modules[mod.moduleId];
       if (!stats) continue;
 
@@ -111,13 +118,14 @@ export class FittingStateFactory {
       propulsionModule,
       ewarModules,
       boosterModules,
+      missileBoosterModules,
       drones,
       cargo,
     };
   }
 
   private isEwarModule(moduleId: TypeId): boolean {
-    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined;
+    return this.db.stasisWebs[moduleId] !== undefined || this.db.stasisGrapplers[moduleId] !== undefined || this.db.trackingDisruptors[moduleId] !== undefined || this.db.warpScramblers[moduleId] !== undefined || this.db.targetPainters[moduleId] !== undefined;
   }
 }
 
