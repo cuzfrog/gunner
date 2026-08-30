@@ -470,7 +470,6 @@ const TARGET_PAINTER_GROUP = 379;
 const MISSILE_GUIDANCE_COMPUTER_GROUP = 1396;
 const MISSILE_GUIDANCE_ENHANCER_GROUP = 1395;
 const MISSILE_SCRIPT_GROUP = 1400;
-const BALLISTIC_CONTROL_GROUP = 367;
 const MISSILE_DAMAGE_EFFECT = 763;
 const MISSILE_ROF_EFFECT = 889;
 
@@ -706,7 +705,7 @@ interface FittingModuleStats {
   readonly warpScrambler?: WarpScramblerStats;
   readonly targetPainter?: TargetPainterStats;
   readonly missileDamageMultiplier?: number;
-  readonly missileSpeedMultiplier?: number;
+  readonly missileCycleTimeMultiplier?: number;
 }
 
 type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
@@ -903,9 +902,9 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
 
   if (effects.has(MISSILE_DAMAGE_EFFECT) || effects.has(MISSILE_ROF_EFFECT)) {
     const missileDamageMultiplier = optionalNumber(values.get("missileDamageMultiplierBonus"));
-    const missileSpeedMultiplier = optionalNumber(values.get("speedMultiplier"));
+    const missileCycleTimeMultiplier = optionalNumber(values.get("speedMultiplier"));
     if (missileDamageMultiplier !== undefined) stats.missileDamageMultiplier = missileDamageMultiplier;
-    if (missileSpeedMultiplier !== undefined) stats.missileSpeedMultiplier = missileSpeedMultiplier;
+    if (missileCycleTimeMultiplier !== undefined) stats.missileCycleTimeMultiplier = missileCycleTimeMultiplier;
   }
 
   if (Object.keys(stats).length === 0) return undefined;
@@ -1416,7 +1415,7 @@ export interface FittingModuleStats {
   readonly warpScrambler?: Omit<WarpScramblerStats, "id" | "name">;
   readonly targetPainter?: Omit<TargetPainterStats, "id" | "name">;
   readonly missileDamageMultiplier?: number;
-  readonly missileSpeedMultiplier?: number;
+  readonly missileCycleTimeMultiplier?: number;
   readonly id: TypeId;
   readonly name: string;
 }

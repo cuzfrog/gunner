@@ -266,6 +266,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       grapplers: [...(shipA?.loadout.grapplers ?? []), ...(shipB?.loadout.grapplers ?? [])],
       disruptors: [...(shipA?.loadout.disruptors ?? []), ...(shipB?.loadout.disruptors ?? [])],
       scramblers: [...(shipA?.loadout.scramblers ?? []), ...(shipB?.loadout.scramblers ?? [])],
+      painters: [...(shipA?.loadout.painters ?? []), ...(shipB?.loadout.painters ?? [])],
       scripts: [...(shipA?.loadout.scripts ?? []), ...(shipB?.loadout.scripts ?? [])],
     };
     const activation: EwarActivation | undefined = (shipA?.activation || shipB?.activation) ? {
@@ -273,6 +274,7 @@ export class RangeOverlayControllerImpl implements RangeOverlayController {
       grapplers: [...(shipA?.activation?.grapplers ?? []), ...(shipB?.activation?.grapplers ?? [])],
       disruptors: [...(shipA?.activation?.disruptors ?? []), ...(shipB?.activation?.disruptors ?? [])],
       scramblers: [...(shipA?.activation?.scramblers ?? []), ...(shipB?.activation?.scramblers ?? [])],
+      painters: [...(shipA?.activation?.painters ?? []), ...(shipB?.activation?.painters ?? [])],
     } : undefined;
     return { loadout, activation };
   }

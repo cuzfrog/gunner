@@ -166,7 +166,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
   propulsion: undefined,
   turret: TURRET,
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] },
   hullBonuses: [],
 };

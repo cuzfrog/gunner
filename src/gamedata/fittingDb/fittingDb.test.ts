@@ -506,10 +506,10 @@ describe("fittingDb", () => {
     });
   });
 
-  test("includes ballistic control systems with missile damage and speed multipliers", () => {
+  test("includes ballistic control systems with missile damage and cycle time multipliers", () => {
     expect(moduleByName("Ballistic Control System II")).toMatchObject({
       missileDamageMultiplier: 1.1,
-      missileSpeedMultiplier: 0.895,
+      missileCycleTimeMultiplier: 0.895,
     });
   });
 });

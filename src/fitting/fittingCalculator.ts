@@ -307,8 +307,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       }
     }
 
-    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] };
-    return { webs, grapplers, disruptors, scramblers, scripts };
+    if (webs.length === 0 && grapplers.length === 0 && disruptors.length === 0 && scramblers.length === 0 && scripts.length === 0) return { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] };
+    return { webs, grapplers, disruptors, scramblers, painters: [], scripts };
   }
 
   resolveBoosts(fitting: FittingState): BoostLoadout {

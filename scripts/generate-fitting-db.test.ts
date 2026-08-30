@@ -518,11 +518,11 @@ describe("Ballistic Control System in _buildModuleStats", () => {
     return new Set(ids);
   }
 
-  test("extracts BCS damage and speed multipliers with missile damage effects", () => {
+  test("extracts BCS damage and cycle time multipliers with missile damage effects", () => {
     const stats = _buildModuleStats(values({ missileDamageMultiplierBonus: 1.1, speedMultiplier: 0.895 }), effects(763, 889));
     expect(stats).toEqual({
       missileDamageMultiplier: 1.1,
-      missileSpeedMultiplier: 0.895,
+      missileCycleTimeMultiplier: 0.895,
     });
   });
 

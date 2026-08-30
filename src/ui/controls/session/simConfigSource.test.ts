@@ -47,8 +47,8 @@ function baseShipBState(): SidePanelState {
 
 function ewarProjection(): EwarProjection {
   return {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
   };
 }
 

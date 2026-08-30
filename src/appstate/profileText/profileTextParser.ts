@@ -149,6 +149,7 @@ export class ProfileTextParser {
       const webs = this.migrateToggleableArray(parsed.webs, sideOverload);
       const grapplers = this.migrateToggleableArray(parsed.grapplers, sideOverload);
       const scramblers = this.migrateToggleableArray(parsed.scramblers, sideOverload);
+      const painters = this.migrateToggleableArray(parsed.painters, sideOverload);
       const disruptors = parsed.disruptors !== undefined ? this.migrateDisruptorArray(parsed.disruptors, sideOverload) : undefined;
       if (disruptors === undefined && parsed.disruptors !== undefined) return undefined;
       const result: StoredEwarActivation = {
@@ -156,6 +157,7 @@ export class ProfileTextParser {
         ...(grapplers !== undefined ? { grapplers } : {}),
         ...(disruptors !== undefined ? { disruptors } : {}),
         ...(scramblers !== undefined ? { scramblers } : {}),
+        ...(painters !== undefined ? { painters } : {}),
       };
       return isOptionalEwarActivation(result) ? result : undefined;
     } catch {

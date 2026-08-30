@@ -18,6 +18,7 @@ interface MutableEwarActivation {
   grapplers: { active: boolean; overloaded: boolean }[];
   disruptors: { active: boolean; overloaded: boolean; script: DisruptionScriptSpec | undefined }[];
   scramblers: { active: boolean; overloaded: boolean }[];
+  painters: { active: boolean; overloaded: boolean }[];
 }
 
 interface EwarState {
@@ -123,6 +124,7 @@ export class EwarControllerImpl implements EwarController {
         script: d.script?.moduleId ?? "none",
       })),
       ...(storedScramblers !== undefined ? { scramblers: storedScramblers } : {}),
+      painters: state.activation.painters.map((p) => ({ active: p.active, overloaded: p.overloaded })),
     };
   }
 
@@ -259,7 +261,7 @@ export class EwarControllerImpl implements EwarController {
   }
 
   private isEmpty(loadout: EwarLoadout): boolean {
-    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0;
+    return loadout.webs.length === 0 && loadout.grapplers.length === 0 && loadout.disruptors.length === 0 && loadout.scramblers.length === 0 && loadout.painters.length === 0;
   }
 
   private clampActivation(loadout: EwarLoadout, saved?: StoredEwarActivation): MutableEwarActivation {
@@ -299,6 +301,12 @@ export class EwarControllerImpl implements EwarController {
         const savedScrambler = saved?.scramblers?.[i];
         const active = typeof savedScrambler === "boolean" ? savedScrambler : savedScrambler?.active ?? true;
         const overloaded = typeof savedScrambler === "boolean" ? false : savedScrambler?.overloaded ?? false;
+        return { active, overloaded };
+      }),
+      painters: loadout.painters.map((_, i) => {
+        const savedPainter = saved?.painters?.[i];
+        const active = typeof savedPainter === "boolean" ? savedPainter : savedPainter?.active ?? true;
+        const overloaded = typeof savedPainter === "boolean" ? false : savedPainter?.overloaded ?? false;
         return { active, overloaded };
       }),
     };

@@ -33,6 +33,7 @@ const disruptorEwar: EwarProjection = {
     grapplers: [],
     disruptors: [{ moduleName: "Tracking Disruptor I", moduleId: toTypeId("2108"), optimal: 1, falloff: 1, disruption: 0.5, defaultScript: undefined, overloadStrengthBonusPercent: 0 }],
     scramblers: [],
+    painters: [],
     scripts: [],
   },
   activation: {
@@ -40,6 +41,7 @@ const disruptorEwar: EwarProjection = {
     grapplers: [],
     disruptors: [{ active: true, overloaded: false, script: undefined }],
     scramblers: [],
+  painters: [],
   },
 };
 

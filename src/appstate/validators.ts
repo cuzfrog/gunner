@@ -21,6 +21,7 @@ export function isOptionalEwarActivation(value: unknown): boolean {
     }
   }
   if (s.scramblers !== undefined && (!Array.isArray(s.scramblers) || !s.scramblers.every(isStoredScramblerActivation))) return false;
+  if (s.painters !== undefined && (!Array.isArray(s.painters) || !s.painters.every(isStoredWebActivation))) return false;
   return true;
 }
 

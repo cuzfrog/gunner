@@ -257,12 +257,12 @@ describe("AppImpl", () => {
 
   test("passes per-side ewar breakdowns from the resolver into effective readouts", () => {
     const shipAEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
     };
     const shipBEwar: EwarProjection = {
-      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
     };
     const shipAShip: ShipState = { ...ship, ewar: shipAEwar };
     const shipBShip: ShipState = { ...ship, id: "shipB", ewar: shipBEwar };

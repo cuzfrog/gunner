@@ -20,6 +20,7 @@ export interface StoredEwarActivation {
   readonly grapplers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
   readonly disruptors?: readonly { readonly active: boolean; readonly overloaded: boolean; readonly script: StoredDisruptionScript }[];
   readonly scramblers?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
+  readonly painters?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
 }
 
 export interface FittedHullSummary {

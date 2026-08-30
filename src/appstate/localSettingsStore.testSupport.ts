@@ -226,7 +226,7 @@ export const IMPORTED_RIFTER: ImportedFitting = {
     turretCount: 1,
   },
   cargoCharges: [],
-  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
+  ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
   boosts: { computers: [], scripts: [] },
   hullBonuses: [],
 };

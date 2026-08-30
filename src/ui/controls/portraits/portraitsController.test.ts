@@ -289,11 +289,12 @@ describe("PortraitsController", () => {
     projections.shipB = {
       loadout: {
         webs: [{ moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 0 }],
-        grapplers: [], disruptors: [], scramblers: [], scripts: [],
+        grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [],
       },
       activation: {
         webs: [{ active: true, overloaded: false }],
         grapplers: [], disruptors: [], scramblers: [],
+      painters: [],
       },
     };
     imageCatalog.itemIconUrl.mockImplementation((name) => (name === toTypeId("527") ? "images/icons/1234@1x.png" : undefined));

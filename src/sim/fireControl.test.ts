@@ -24,8 +24,8 @@ const shipA: ShipState = {
   position: new Vec2(0, 0),
   velocity: new Vec2(0, 0),
   ewar: {
-    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] },
-    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [] },
+    loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+    activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [] },
   },
 };
 
