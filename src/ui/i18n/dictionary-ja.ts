@@ -225,4 +225,7 @@ export const JA: LanguageSlice<"ja"> = {
   "dpsHint.factor.skill": { ja: "スキル" },
   "dpsHint.factor.hull": { ja: "船体" },
   "dpsHint.factor.overload": { ja: "オーバーロード" },
+  "dpsHint.volley": { ja: "ボレー" },
+  "dpsHint.cycleTime": { ja: "サイクル" },
+  "dpsHint.dps": { ja: "DPS" },
 } as const;

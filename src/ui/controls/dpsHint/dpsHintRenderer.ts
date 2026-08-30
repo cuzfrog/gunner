@@ -15,11 +15,18 @@ export interface DpsHintFactorRow {
   readonly source: string | undefined;
 }
 
+export interface DpsHintSummary {
+  readonly volley: number;
+  readonly cycleTime: number;
+  readonly dps: number;
+}
+
 export interface DpsHintGroup {
   readonly name: string;
   readonly types: readonly DpsHintTypeRow[];
   readonly sum: number;
   readonly factors: readonly DpsHintFactorRow[];
+  readonly summary: DpsHintSummary;
 }
 
 export interface DpsHintModel {
@@ -60,6 +67,7 @@ function renderGroup(group: DpsHintGroup, t: (key: string) => string): HTMLEleme
   for (const factor of group.factors) {
     el.appendChild(renderFactorRow(factor, t));
   }
+  el.appendChild(renderSummary(group.summary, t));
   return el;
 }
 
@@ -93,6 +101,23 @@ function renderFactorRow(factor: DpsHintFactorRow, t: (key: string) => string): 
 
 function renderFactorSource(source: string): HTMLElement {
   return html`<span class="dps-hint-factor-source">${source}</span>` as unknown as HTMLElement;
+}
+
+function renderSummary(summary: DpsHintSummary, t: (key: string) => string): HTMLElement {
+  return html`<div class="dps-hint-summary">
+    <div class="dps-hint-row dps-hint-summary-row">
+      <span class="dps-hint-label">${t("dpsHint.volley")}</span>
+      <span class="dps-hint-value">${formatWithCommas(summary.volley, 1)}</span>
+    </div>
+    <div class="dps-hint-row dps-hint-summary-row">
+      <span class="dps-hint-label">${t("dpsHint.cycleTime")}</span>
+      <span class="dps-hint-value">${formatWithCommas(summary.cycleTime, 2)}s</span>
+    </div>
+    <div class="dps-hint-row dps-hint-dps-row">
+      <span class="dps-hint-label">${t("dpsHint.dps")}</span>
+      <span class="dps-hint-value">${formatWithCommas(summary.dps, 1)}</span>
+    </div>
+  </div>` as unknown as HTMLElement;
 }
 
 function formatWithCommas(value: number, decimals = 0): string {

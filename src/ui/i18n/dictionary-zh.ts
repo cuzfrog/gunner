@@ -227,4 +227,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "dpsHint.factor.skill": { zh: "技能" },
   "dpsHint.factor.hull": { zh: "船体" },
   "dpsHint.factor.overload": { zh: "过载" },
+  "dpsHint.volley": { zh: "齐射" },
+  "dpsHint.cycleTime": { zh: "周期" },
+  "dpsHint.dps": { zh: "DPS" },
 } as const;

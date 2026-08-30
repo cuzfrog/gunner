@@ -6,7 +6,7 @@ import type { HintContentProvider } from "../hoverHint";
 import type { LauncherController } from "../launcher";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
-import type { DpsHintFactorRow, DpsHintGroup, DpsHintModel, DpsHintRenderer, DpsHintTypeRow } from "./dpsHintRenderer";
+import type { DpsHintFactorRow, DpsHintGroup, DpsHintModel, DpsHintRenderer, DpsHintSummary, DpsHintTypeRow } from "./dpsHintRenderer";
 
 const DAMAGE_TYPE_ORDER: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 const DAMAGE_ICON_URLS: Readonly<Record<DamageType, string>> = {
@@ -72,14 +72,22 @@ function buildTurretGroup(turret: ImportedTurret, itemNameCatalog: ItemNameCatal
   const name = `${itemNameCatalog.nameForId(turret.moduleId, language)} x${turret.turretCount}`;
   const { types, sum } = buildTypeRows(turret.damageBreakdown.damageByType);
   const factors = buildFactorRows(turret.damageBreakdown.factors, itemNameCatalog, language);
-  return { name, types, sum, factors };
+  const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
+  const volley = sum * cumulative * turret.turretCount;
+  const dps = turret.cycleTime > 0 ? volley / turret.cycleTime : 0;
+  const summary: DpsHintSummary = { volley, cycleTime: turret.cycleTime, dps };
+  return { name, types, sum, factors, summary };
 }
 
 function buildLauncherGroup(launcher: ImportedLauncher, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
   const name = `${itemNameCatalog.nameForId(launcher.moduleId, language)} x${launcher.count}`;
   const { types, sum } = buildTypeRows(launcher.damageBreakdown.damageByType);
   const factors = buildFactorRows(launcher.damageBreakdown.factors, itemNameCatalog, language);
-  return { name, types, sum, factors };
+  const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
+  const volley = sum * cumulative * launcher.count;
+  const dps = launcher.cycleTime > 0 ? volley / launcher.cycleTime : 0;
+  const summary: DpsHintSummary = { volley, cycleTime: launcher.cycleTime, dps };
+  return { name, types, sum, factors, summary };
 }
 
 function buildTypeRows(damageByType: Readonly<Partial<Record<DamageType, number>>>): { types: readonly DpsHintTypeRow[]; sum: number } {

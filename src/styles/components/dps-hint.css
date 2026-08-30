@@ -95,4 +95,34 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.dps-hint-summary {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.dps-hint-summary-row .dps-hint-label {
+  color: var(--text-secondary);
+}
+
+.dps-hint-summary-row .dps-hint-value {
+  color: var(--text-primary);
+}
+
+.dps-hint-dps-row {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 2px;
+  margin-top: 1px;
+}
+
+.dps-hint-dps-row .dps-hint-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dps-hint-dps-row .dps-hint-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
 }
