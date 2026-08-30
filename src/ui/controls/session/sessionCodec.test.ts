@@ -27,6 +27,7 @@ import type { TurretOverrides } from "../turret";
 import type { TrackingInput } from "../trackingInput";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { MissileBoosterController } from "../missileBooster";
 import type { LauncherController } from "../launcher";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import type { FittingImport, ImportedFitting } from "../../../fitting";
@@ -174,6 +175,17 @@ function mockBoosterController(): BoosterController {
   } as unknown as BoosterController;
 }
 
+function mockMissileBoosterController(): MissileBoosterController {
+  return {
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn(),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  } as unknown as MissileBoosterController;
+}
+
 function mockFittingImport(): FittingImport {
   return { importFitting: vi.fn(), moduleNameFor: vi.fn() } as unknown as FittingImport;
 }
@@ -289,6 +301,7 @@ function buildCodec(options: {
   hintRotator?: Partial<HintRotator>;
   ewarController?: Partial<EwarController>;
   boosterController?: Partial<BoosterController>;
+  missileBoosterController?: Partial<MissileBoosterController>;
   fittingImport?: Partial<FittingImport>;
   parser?: Partial<SettingsParser>;
   events?: UiEvents;
@@ -325,6 +338,7 @@ function buildCodec(options: {
   const hintRotator = { refresh: vi.fn(), ...options.hintRotator } as unknown as HintRotator;
   const ewarController = { ...mockEwarController(), ...options.ewarController } as unknown as EwarController;
   const boosterController = { ...mockBoosterController(), ...options.boosterController } as unknown as BoosterController;
+  const missileBoosterController = { ...mockMissileBoosterController(), ...options.missileBoosterController } as unknown as MissileBoosterController;
   const fittingImport = { ...mockFittingImport(), ...options.fittingImport } as unknown as FittingImport;
   const parser = { ...mockParser(), ...options.parser } as unknown as SettingsParser;
   const events = options.events ?? new UiEventsImpl();
@@ -347,10 +361,11 @@ function buildCodec(options: {
     events,
     ewarController,
     boosterController,
+    missileBoosterController,
     fittingImport,
     parser,
   });
-  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, fittingImport, parser };
+  return { codec, els, shipA, shipB, turretControllers, turretOverridesBySide, launcherControllers, weaponSystemSwitches, preferences, profileController, settingsStore, i18n, chargeCatalog, hintRotator, events, ewarController, boosterController, missileBoosterController, fittingImport, parser };
 }
 
 function makeProfile(): ProfileSettings {

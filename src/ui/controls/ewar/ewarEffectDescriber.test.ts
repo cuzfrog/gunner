@@ -1,5 +1,5 @@
 import { toTypeId } from "../../../gamedata/ids";
-import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, TurretSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarProjection, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, TurretSpec } from "../../../sim";
 import type { EwarResolver } from "../../../sim";
 import type { I18n } from "../../i18n";
 import { EwarEffectDescriberImpl } from "./ewarEffectDescriber";
@@ -26,6 +26,7 @@ const LABELS: Record<string, string> = {
   "ewar.hover.optimal": "Optimal",
   "ewar.hover.falloff": "Falloff",
   "ewar.hover.scrambler": "Disables MWD",
+  "ewar.hover.sigRadius": "Signature radius",
   "ewar.hover.outOfRange": "No effect at this range",
   "ewar.hint.range": "range {0}",
   "unit.meter": "m",
@@ -201,10 +202,33 @@ describe("EwarEffectDescriber", () => {
     const webSpec: StasisWebSpec = { moduleName: "Stasis Webifier II", moduleId: toTypeId("527"), maxRange: 10000, speedFactor, overloadRangeBonusPercent: 30 };
     const webProj = {
       loadout: { webs: [webSpec], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
-      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: []  , painters: [] },
+      activation: { webs: [{ active: true, overloaded: false }], grapplers: [], disruptors: [], scramblers: [], painters: [] },
     } as EwarProjection;
     resolver.speedMultiplierIgnoringRange.mockReturnValue(1 - speedFactor);
     const hintEffect = describer.webHint(webProj).split(" · ")[0];
     expect(describer.webModuleEffect(webSpec)).toBe(hintEffect);
+  });
+
+  test("painterHint reports signature bonus and range", () => {
+    const painterSpec: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
+    const painterProj = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [painterSpec], scripts: [] },
+      activation: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [{ active: true, overloaded: false }] },
+    } as EwarProjection;
+    resolver.sigMultiplierIgnoringRange.mockReturnValue(1.3);
+    expect(describer.painterHint(painterProj)).toBe("Signature radius +30% · range 126.0 km");
+  });
+
+  test("painterHint reports out of range when no active painter", () => {
+    const painterProj = {
+      loadout: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+    } as EwarProjection;
+    resolver.sigMultiplierIgnoringRange.mockReturnValue(1);
+    expect(describer.painterHint(painterProj)).toBe("No effect at this range · range 0 m");
+  });
+
+  test("painterModuleEffect reports signature bonus percentage", () => {
+    const painterSpec: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
+    expect(describer.painterModuleEffect(painterSpec)).toBe("Signature radius +30%");
   });
 });

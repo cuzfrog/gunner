@@ -1,6 +1,6 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { EMPTY_EWAR_LOADOUT } from "../../../sim";
-import type { DisruptionScriptSpec, EwarLoadout, StasisGrapplerSpec, StasisWebSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
+import type { DisruptionScriptSpec, EwarLoadout, StasisGrapplerSpec, StasisWebSpec, TargetPainterSpec, TrackingDisruptorSpec, WarpScramblerSpec } from "../../../sim";
 import type { StoredEwarActivation } from "../../../appstate";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -33,6 +33,7 @@ const DISRUPTOR2: TrackingDisruptorSpec = {
 };
 const SCRAMBLER: WarpScramblerSpec = { moduleName: "Warp Scrambler II", moduleId: toTypeId("448"), maxRange: 9000, overloadRangeBonusPercent: 20 };
 const GRAPPLER: StasisGrapplerSpec = { moduleName: "Heavy Stasis Grappler I", moduleId: toTypeId("41040"), optimal: 1000, falloff: 8000, speedFactor: 0.8, overloadOptimalBonusPercent: 300 };
+const PAINTER: TargetPainterSpec = { moduleName: "Target Painter II", moduleId: toTypeId("12275"), maxRange: 36000, falloff: 90000, signatureRadiusBonusPercent: 30, overloadStrengthBonusPercent: 20 };
 
 class FakePopupGroup implements PopupGroup {
   private readonly popups: Popup[] = [];
@@ -115,6 +116,7 @@ function buildEwarController(
     "2109": "Tracking Disruptor II",
     "448": "Warp Scrambler II",
     "41040": "Heavy Stasis Grappler I",
+    "12275": "Target Painter II",
     "29005": "Optimal Range Disruption Script",
     "29007": "Tracking Speed Disruption Script",
   };
@@ -132,6 +134,8 @@ function buildEwarController(
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    painterHint: vi.fn(() => "painter-hint"),
+    painterModuleEffect: vi.fn(() => "painter-effect"),
     webModuleEffect: vi.fn(() => "web-effect"),
     grapplerModuleEffect: vi.fn(() => "grappler-effect"),
     disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
@@ -833,5 +837,71 @@ describe("EwarController", () => {
     expect(ewarSection(document, "shipA").children.filter((c) => c.className === "preview-section").length).toBe(1);
     expect(getFake(document, "ship-a-booster-section").children.length).toBe(1);
     expect(getFake(document, "ship-a-booster-section").children[0]).toBe(sentinelHolder.el!);
+  });
+
+  test("painter section renders rows with toggle and overload buttons", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [PAINTER], scripts: [] };
+    controller.setLoadout("shipA", loadout);
+
+    const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
+    expect(section).toBeDefined();
+    const rows = section!.children.filter((c) => c.className.includes("ewar-row"));
+    expect(rows.length).toBe(1);
+    const row = rows[0];
+    expect(row.children.find((c) => c.className === "ewar-module-toggle")).toBeDefined();
+    expect(row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))).toBeDefined();
+  });
+
+  test("painter toggle deactivates the row and updates the summary", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [PAINTER], scripts: [] };
+    controller.setLoadout("shipA", loadout);
+
+    const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
+    const row = section!.children.find((c) => c.className.includes("ewar-row"))!;
+    const button = row.children.find((c) => c.className === "ewar-module-toggle")!;
+    button.dispatchEvent(new Event("click"));
+
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    expect(row.className).toContain("ewar-row-inactive");
+    expect(ewarEffectDescriber.painterHint).toHaveBeenCalled();
+  });
+
+  test("painter overload toggle flips aria-pressed", () => {
+    const { controller, document } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [PAINTER], scripts: [] };
+    controller.setLoadout("shipA", loadout);
+
+    const section = ewarSection(document, "shipA").children.find((s) => s.children[0]?.textContent === "label.ewar.painter");
+    const row = section!.children.find((c) => c.className.includes("ewar-row"))!;
+    const overloadButton = overloadFor(row);
+    expect(overloadButton.getAttribute("aria-pressed")).toBe("false");
+    overloadButton.dispatchEvent(new Event("click"));
+    expect(overloadButton.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("painter capture and restore round-trips activation", () => {
+    const { controller } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [PAINTER, PAINTER], scripts: [] };
+    controller.setLoadout("shipA", loadout);
+    const captured = controller.capture("shipA");
+    expect(captured?.painters).toEqual([{ active: true, overloaded: false }, { active: true, overloaded: false }]);
+
+    controller.restore("shipA", loadout, { webs: [], grapplers: [], disruptors: [], painters: [{ active: false, overloaded: true }, { active: true, overloaded: false }] });
+    const restored = controller.capture("shipA");
+    expect(restored?.painters).toEqual([{ active: false, overloaded: true }, { active: true, overloaded: false }]);
+  });
+
+  test("painter summary shows active count and hint", () => {
+    const { controller, document, ewarEffectDescriber } = buildEwarController();
+    const loadout: EwarLoadout = { webs: [], disruptors: [], grapplers: [], scramblers: [], painters: [PAINTER, PAINTER], scripts: [] };
+    controller.setLoadout("shipA", loadout);
+
+    const summary = getFake(document, "ship-a-ewar-summary");
+    const painterSummary = summary.children.find((c) => c.children[0]?.src === "icons/12275.png");
+    expect(painterSummary).toBeDefined();
+    expect(painterSummary!.children[1].textContent).toBe("2/2");
+    expect(ewarEffectDescriber.painterHint).toHaveBeenCalled();
   });
 });

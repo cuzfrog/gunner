@@ -22,6 +22,7 @@ import { registerSidePanelModule } from "./sidePanel";
 import { registerTurretModule } from "./turret";
 import { registerEwarModule } from "./ewar";
 import { registerBoosterModule } from "./booster";
+import { registerMissileBoosterModule } from "./missileBooster";
 import { registerRangeOverlayModule } from "./rangeOverlay";
 import { registerPortraitsModule } from "./portraits";
 
@@ -38,6 +39,7 @@ export function registerControlsModule<T extends ControlsCradle>(cradle: AwilixC
   registerSidePanelModule(cradle);
   registerEwarModule(cradle);
   registerBoosterModule(cradle);
+  registerMissileBoosterModule(cradle);
   registerRangeOverlayModule(cradle);
   registerPortraitsModule(cradle);
   registerPopupModule(cradle);

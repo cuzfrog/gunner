@@ -205,6 +205,8 @@ const COMBATANT_ELEMENT_DEFINITIONS = {
   ewarSummary: { tag: "SPAN" as const, baseId: "ewar-summary", defaultValue: undefined },
   boosterSection: { tag: "DIV" as const, baseId: "booster-section", defaultValue: undefined },
   boosterSummary: { tag: "SPAN" as const, baseId: "booster-summary", defaultValue: undefined },
+  missileBoosterSection: { tag: "DIV" as const, baseId: "missile-booster-section", defaultValue: undefined },
+  missileBoosterSummary: { tag: "SPAN" as const, baseId: "missile-booster-summary", defaultValue: undefined },
   speed: {
     tag: "INPUT" as const,
     baseId: "speed",

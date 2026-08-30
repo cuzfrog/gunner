@@ -14,6 +14,7 @@ import type { EffectiveReadout } from "./effectiveReadout";
 import type { EngagementReadout } from "./engagementReadout";
 import type { HintRotator } from "./hints";
 import type { BoosterController } from "./booster";
+import type { MissileBoosterController } from "./missileBooster";
 import type { EwarController } from "./ewar";
 import type { ImportController } from "./import";
 import type { ConfirmController } from "./confirm";
@@ -89,6 +90,7 @@ export interface ControlsCradle {
   readonly shipBFittingPopup: FittingPopupController;
   readonly ewarController: EwarController;
   readonly boosterController: BoosterController;
+  readonly missileBoosterController: MissileBoosterController;
   readonly portraitsController: PortraitsController;
   readonly ewarResolver: EwarResolver;
   readonly sessionCodec: SessionCodec;

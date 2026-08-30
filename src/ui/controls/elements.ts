@@ -189,6 +189,8 @@ function createCombatantEls(side: Side): CombatantEls {
     ewarSummary: el(combatantElementId("ewarSummary", side)),
     boosterSection: el(combatantElementId("boosterSection", side)),
     boosterSummary: el(combatantElementId("boosterSummary", side)),
+    missileBoosterSection: el(combatantElementId("missileBoosterSection", side)),
+    missileBoosterSummary: el(combatantElementId("missileBoosterSummary", side)),
     speed: elOf(combatantElementId("speed", side), isHtmlInputElement),
     mass: elOf(combatantElementId("mass", side), isHtmlInputElement),
     inertia: elOf(combatantElementId("inertia", side), isHtmlInputElement),

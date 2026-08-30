@@ -51,7 +51,6 @@ no-new-exports:
   - turret/turretController.ts
   - turret/turretControllerContract.ts
   - choiceGroup.test.ts
-  - controlsFormat.ts
   - trackingInput.ts
   - controlsContract.ts
   - testSupport.ts

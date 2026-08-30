@@ -63,6 +63,7 @@ const controlsCradleKeys = {
   importController: "importController",
   ewarController: "ewarController",
   boosterController: "boosterController",
+  missileBoosterController: "missileBoosterController",
   portraitsController: "portraitsController",
   ewarResolver: "ewarResolver",
   shareController: "shareController",

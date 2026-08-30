@@ -12,10 +12,12 @@ import {
   type StartupState,
   type StoredBoosterActivation,
   type StoredEwarActivation,
+  type StoredMissileBoosterActivation,
   type UserSettings,
 } from "../../../appstate";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { MissileBoosterController } from "../missileBooster";
 import type { LauncherController } from "../launcher";
 import type { WeaponSystemSwitch } from "../sidePanel";
 import { num } from "../controlsDom";
@@ -58,6 +60,7 @@ export class SessionCodecImpl implements SessionCodec {
   private readonly events: UiEvents;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
+  private readonly missileBoosterController: MissileBoosterController;
   private readonly fittingImport: FittingImport;
   private readonly parser: SettingsParser;
   private readonly pristineSettings: SessionSettings;
@@ -79,6 +82,7 @@ export class SessionCodecImpl implements SessionCodec {
     events: UiEvents;
     ewarController: EwarController;
     boosterController: BoosterController;
+    missileBoosterController: MissileBoosterController;
     fittingImport: FittingImport;
     parser: SettingsParser;
   }) {
@@ -98,6 +102,7 @@ export class SessionCodecImpl implements SessionCodec {
     this.events = deps.events;
     this.ewarController = deps.ewarController;
     this.boosterController = deps.boosterController;
+    this.missileBoosterController = deps.missileBoosterController;
     this.fittingImport = deps.fittingImport;
     this.parser = deps.parser;
     this.pristineSettings = this.parser.fromWire(this.capture());
@@ -169,6 +174,8 @@ export class SessionCodecImpl implements SessionCodec {
       shipBEwarActivation: this.ewarController.capture("shipB"),
       shipABoosterActivation: this.boosterController.capture("shipA"),
       shipBBoosterActivation: this.boosterController.capture("shipB"),
+      shipAMissileBoosterActivation: this.missileBoosterController.capture("shipA"),
+      shipBMissileBoosterActivation: this.missileBoosterController.capture("shipB"),
     };
   }
 
@@ -212,6 +219,12 @@ export class SessionCodecImpl implements SessionCodec {
     const panel = side === "shipA" ? this.shipASide : this.shipBSide;
     const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.boosts : undefined;
     this.boosterController.restore(side, loadout, activation);
+  }
+
+  private restoreMissileBooster(side: Side, fitting: string | undefined, activation: readonly StoredMissileBoosterActivation[] | undefined): void {
+    const panel = side === "shipA" ? this.shipASide : this.shipBSide;
+    const loadout = fitting ? this.fittingImport.importFitting(fitting, panel.skillConditions())?.missileBoosts : undefined;
+    this.missileBoosterController.restore(side, loadout, activation);
   }
 
   private restoreLauncher(side: Side, fitting: string | undefined, ammoId: TypeId | undefined): void {
@@ -259,6 +272,8 @@ export class SessionCodecImpl implements SessionCodec {
     this.restoreEwar("shipB", settings.shipB.fitting, settings.shipB.ewarActivation);
     this.restoreBooster("shipA", settings.shipA.fitting, settings.shipA.boosterActivation);
     this.restoreBooster("shipB", settings.shipB.fitting, settings.shipB.boosterActivation);
+    this.restoreMissileBooster("shipA", settings.shipA.fitting, settings.shipA.missileBoosterActivation);
+    this.restoreMissileBooster("shipB", settings.shipB.fitting, settings.shipB.missileBoosterActivation);
   }
 
   restoreStartup(startup: StartupState): void {

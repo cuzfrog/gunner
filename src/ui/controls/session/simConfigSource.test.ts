@@ -1,8 +1,9 @@
-import type { EwarProjection, TurretBoostProjection } from "../../../sim";
+import type { EwarProjection, MissileBoosterProjection, TurretBoostProjection } from "../../../sim";
 import type { FittedHullSummary } from "../../../appstate";
 import type { SidePanelState } from "../sidePanel";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { MissileBoosterController } from "../missileBooster";
 import { SimConfigSourceImpl } from "./simConfigSource";
 
 function baseShipAState(): SidePanelState {
@@ -85,10 +86,19 @@ function build() {
     render: vi.fn(),
     updateSummaries: vi.fn(),
   });
+  const missileBoost: MissileBoosterProjection | undefined = undefined;
+  const missileBoosterController = vi.mocked<MissileBoosterController>({
+    setLoadout: vi.fn(),
+    restore: vi.fn(),
+    projection: vi.fn((side: "shipA" | "shipB") => (side === "shipA" ? missileBoost : undefined)),
+    capture: vi.fn(),
+    render: vi.fn(),
+    updateSummaries: vi.fn(),
+  });
   const shipASide = { capture: vi.fn(() => shipAState) };
   const shipBSide = { capture: vi.fn(() => shipBState) };
   const distanceSource = { getInitialDistance: vi.fn(() => 6000) };
-  return { shipASide, shipBSide, ewarController, boosterController, distanceSource, ewar, boost };
+  return { shipASide, shipBSide, ewarController, boosterController, missileBoosterController, distanceSource, ewar, boost, missileBoost };
 }
 
 describe("SimConfigSourceImpl", () => {
@@ -99,6 +109,7 @@ describe("SimConfigSourceImpl", () => {
       shipBSide: deps.shipBSide,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
+      missileBoosterController: deps.missileBoosterController,
       distanceSource: deps.distanceSource,
     });
     const config = source.getConfig();
@@ -132,6 +143,7 @@ describe("SimConfigSourceImpl", () => {
       shipBSide: deps.shipBSide,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
+      missileBoosterController: deps.missileBoosterController,
       distanceSource: deps.distanceSource,
     });
     const config = source.getConfig();
@@ -146,6 +158,7 @@ describe("SimConfigSourceImpl", () => {
       shipBSide: deps.shipBSide,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
+      missileBoosterController: deps.missileBoosterController,
       distanceSource: deps.distanceSource,
     });
     const config = source.getConfig();
@@ -160,6 +173,7 @@ describe("SimConfigSourceImpl", () => {
       shipBSide: deps.shipBSide,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
+      missileBoosterController: deps.missileBoosterController,
       distanceSource: deps.distanceSource,
     });
     const config = source.getConfig();
@@ -173,6 +187,7 @@ describe("SimConfigSourceImpl", () => {
       shipBSide: deps.shipBSide,
       ewarController: deps.ewarController,
       boosterController: deps.boosterController,
+      missileBoosterController: deps.missileBoosterController,
       distanceSource: deps.distanceSource,
     });
     const config = source.getConfig();

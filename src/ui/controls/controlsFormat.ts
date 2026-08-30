@@ -1,4 +1,4 @@
-import { type DisruptionScriptSpec, type TurretScriptSpec } from "../../sim";
+import { type DisruptionScriptSpec, type MissileScriptSpec, type TurretScriptSpec } from "../../sim";
 import type { ChargeOption } from "../../fitting";
 import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
@@ -64,6 +64,16 @@ export function boosterScriptStatSuffix(script: TurretScriptSpec): string {
     `track x${formatMultiplier(script.trackingMultiplier)}`,
     `optimal x${formatMultiplier(script.optimalMultiplier)}`,
     `falloff x${formatMultiplier(script.falloffMultiplier)}`,
+  ];
+  return parts.join(" · ");
+}
+
+export function missileScriptStatSuffix(script: MissileScriptSpec): string {
+  const parts = [
+    `explosion radius x${formatMultiplier(script.explosionRadiusMultiplier)}`,
+    `explosion velocity x${formatMultiplier(script.explosionVelocityMultiplier)}`,
+    `missile velocity x${formatMultiplier(script.missileVelocityMultiplier)}`,
+    `flight time x${formatMultiplier(script.flightTimeMultiplier)}`,
   ];
   return parts.join(" · ");
 }

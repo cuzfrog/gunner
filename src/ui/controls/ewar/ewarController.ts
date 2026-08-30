@@ -1,5 +1,5 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
-import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type WarpScramblerSpec } from "../../../sim";
+import { type DisruptionScriptSpec, type EwarActivation, type EwarLoadout, type EwarProjection, type StasisGrapplerSpec, type TargetPainterSpec, type WarpScramblerSpec } from "../../../sim";
 import type { StoredDisruptionScript, StoredEwarActivation } from "../../../appstate";
 import type { FittingImport } from "../../../fitting";
 import type { I18n } from "../../i18n";
@@ -211,12 +211,15 @@ export class EwarControllerImpl implements EwarController {
     if (state.loadout.scramblers.length > 0) {
       this.renderSection(section, "label.ewar.scrambler", (container) => this.renderScramblers(side, state, container));
     }
+    if (state.loadout.painters.length > 0) {
+      this.renderSection(section, "label.ewar.painter", (container) => this.renderPainters(side, state, container));
+    }
     this.popups[side].close();
   }
 
   private renderSection(
     parent: HTMLElement,
-    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler",
+    labelKey: "label.ewar.web" | "label.ewar.grappler" | "label.ewar.disruptor" | "label.ewar.scrambler" | "label.ewar.painter",
     renderRows: (container: HTMLElement) => void,
   ): void {
     const rowContainer = html`<div></div>` as unknown as HTMLDivElement;
@@ -250,6 +253,9 @@ export class EwarControllerImpl implements EwarController {
     const scramblerActive = state.activation.scramblers.filter((s) => s.active).length;
     const scramblerTitle = state.loadout.scramblers.length > 0 ? this.ewarEffectDescriber.scramblerHint(projection) : "";
     if (state.loadout.scramblers.length > 0) this.appendSummaryItem(summary, state.loadout.scramblers[0].moduleId, scramblerActive, state.loadout.scramblers.length, scramblerTitle);
+    const painterActive = state.activation.painters.filter((p) => p.active).length;
+    const painterTitle = state.loadout.painters.length > 0 ? this.ewarEffectDescriber.painterHint(projection) : "";
+    if (state.loadout.painters.length > 0) this.appendSummaryItem(summary, state.loadout.painters[0].moduleId, painterActive, state.loadout.painters.length, painterTitle);
   }
 
   private appendSummaryItem(summary: HTMLElement, moduleId: TypeId, active: number, total: number, title: string): void {
@@ -363,6 +369,19 @@ export class EwarControllerImpl implements EwarController {
       const onToggle = () => this.toggleScramblerOverload(side, i, overloadButton);
       const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, scrambler, onToggle);
       button.addEventListener("click", () => this.toggleScrambler(side, i, button, row));
+      const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
+      section.appendChild(row);
+    }
+  }
+
+  private renderPainters(side: Side, state: EwarState, section: HTMLElement): void {
+    for (let i = 0; i < state.loadout.painters.length; i++) {
+      const painter: TargetPainterSpec = state.loadout.painters[i];
+      const activation = state.activation.painters[i];
+      const { button } = this.createModuleButton(activation.active, painter, this.ewarEffectDescriber.painterModuleEffect(painter));
+      const onToggle = () => this.togglePainterOverload(side, i, overloadButton);
+      const overloadButton = this.createOverloadButton(activation.active, activation.overloaded, i, painter, onToggle);
+      button.addEventListener("click", () => this.togglePainter(side, i, button, row));
       const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}>${[button, overloadButton]}</div>` as unknown as HTMLDivElement;
       section.appendChild(row);
     }
@@ -595,6 +614,33 @@ export class EwarControllerImpl implements EwarController {
     if (!state) return;
     const overloaded = !state.activation.grapplers[index].overloaded;
     state.activation.grapplers[index].overloaded = overloaded;
+    button.setAttribute("aria-pressed", String(overloaded));
+
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private togglePainter(side: Side, index: number, button: HTMLButtonElement, row: HTMLElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const active = !state.activation.painters[index].active;
+    state.activation.painters[index].active = active;
+    button.setAttribute("aria-pressed", String(active));
+    row.className = active ? "ewar-row" : "ewar-row ewar-row-inactive";
+    for (const child of row.children) {
+      if (child.getAttribute("data-index") === String(index) && child instanceof HTMLButtonElement) {
+        child.disabled = !active;
+      }
+    }
+    this.updateSummary(side);
+    this.events.emitConfigInvalidated();
+  }
+
+  private togglePainterOverload(side: Side, index: number, button: HTMLButtonElement): void {
+    const state = this.states.get(side);
+    if (!state) return;
+    const overloaded = !state.activation.painters[index].overloaded;
+    state.activation.painters[index].overloaded = overloaded;
     button.setAttribute("aria-pressed", String(overloaded));
 
     this.updateSummary(side);

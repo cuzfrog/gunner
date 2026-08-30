@@ -52,6 +52,8 @@ function buildController(now: () => number = () => 0): {
     disruptorHint: vi.fn(() => "disruptor-hint"),
     scramblerDescription: vi.fn(() => "scrambler-title"),
     scramblerHint: vi.fn(() => "scrambler-hint"),
+    painterHint: vi.fn(() => "painter-hint"),
+    painterModuleEffect: vi.fn(() => "painter-effect"),
     webModuleEffect: vi.fn(() => "web-effect"),
     grapplerModuleEffect: vi.fn(() => "grappler-effect"),
     disruptorModuleEffect: vi.fn(() => "disruptor-effect"),
