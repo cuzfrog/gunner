@@ -41,12 +41,14 @@ import type {
   HullBonus,
   LauncherStats,
   MissileStats,
+  SkillBonus,
   StasisGrapplerStats,
   StasisWebStats,
   TrackingComputerStats,
   TrackingDisruptorStats,
   TurretScriptStats,
   TurretStats,
+  TurretWeaponGroup,
   WarpScramblerStats,
 } from "../gamedata/fittingDb";
 
@@ -81,6 +83,7 @@ export interface ImportedFitting {
   readonly fitted: FittedHull;
   readonly propulsion?: PropulsionStats & { readonly propulsionId: PropulsionId; readonly propulsionModuleId: TypeId; readonly propulsionName?: string };
   readonly turret?: ImportedTurret;
+  readonly turrets?: readonly ImportedTurret[];
   readonly launcher?: ImportedLauncher;
   readonly cargoCharges: readonly CargoCharge[];
   readonly ewar: EwarLoadout;
@@ -187,7 +190,8 @@ export class FittingImportImpl implements FittingImport {
     const hullBonuses = this.db.hullBonuses[resolved.profile.id] ?? [];
     const hullSide = aggregateHullSide(resolved, this.db, hullBonuses, conditions.skillLevel, this.stacking);
     const propulsion = resolvePropulsion(resolved, this.ships, this.db, hullSide.propulsionId);
-    const turret = resolveTurret(this.db, this.chargeCatalog, resolved, conditions.skillLevel, hullBonuses, this.stacking);
+    const turrets = resolveTurrets(this.db, this.chargeCatalog, resolved, conditions.skillLevel, hullBonuses, this.stacking);
+    const turret = turrets.length > 0 ? turrets[0] : undefined;
     const launcher = resolveLauncher(this.db, this.missileCatalog, this.missileSkillModel, resolved, conditions.skillLevel, hullBonuses);
     const cargoCharges = resolveCargoCharges(this.db, resolved);
     const ewar = resolveEwar(this.db, resolved, this.itemNameCatalog);
@@ -199,6 +203,7 @@ export class FittingImportImpl implements FittingImport {
       fitted: hullSide.fitted,
       propulsion,
       turret,
+      turrets: turrets.length > 0 ? turrets : undefined,
       launcher,
       cargoCharges,
       ewar,
@@ -481,17 +486,19 @@ function findGenericPropulsionId(
   return option?.id;
 }
 
-function resolveTurret(
+function resolveTurrets(
   db: FittingDb,
   chargeCatalog: ChargeCatalog,
   resolved: ResolvedEft,
   skillLevel: number,
   hullBonuses: readonly HullBonus[],
   stacking: StackingPenalty,
-): ImportedTurret | undefined {
-  const trackingPercents: number[] = [];
-  const optimalPercents: number[] = [];
-  const falloffPercents: number[] = [];
+): readonly ImportedTurret[] {
+  const sharedTrackingPercents: number[] = [];
+  const sharedOptimalPercents: number[] = [];
+  const sharedFalloffPercents: number[] = [];
+  const damageMultipliersByGroup = new Map<TurretWeaponGroup, number[]>();
+  const speedMultipliersByGroup = new Map<TurretWeaponGroup, number[]>();
   const counts = new Map<TypeId, { count: number; chargeId?: TypeId; order: number }>();
   let order = 0;
 
@@ -514,88 +521,110 @@ function resolveTurret(
       const stats = db.modules[line.moduleId];
       if (!stats) continue;
       const script = line.chargeId ? db.scripts[line.chargeId] : undefined;
-      collectTurretPercents(stats, script, trackingPercents, optimalPercents, falloffPercents);
+      collectTurretPercents(stats, script, sharedTrackingPercents, sharedOptimalPercents, sharedFalloffPercents);
+      collectDamageModuleModifiers(stats, damageMultipliersByGroup, speedMultipliersByGroup);
     }
   }
 
-  if (counts.size === 0) return undefined;
+  if (counts.size === 0) return [];
 
-  let bestModuleId: TypeId | undefined;
-  let bestCount = 0;
-  let bestOrder = Infinity;
-  for (const [moduleId, entry] of counts) {
-    if (entry.count > bestCount || (entry.count === bestCount && entry.order < bestOrder)) {
-      bestModuleId = moduleId;
-      bestCount = entry.count;
-      bestOrder = entry.order;
+  const skillRoFMultiplier = computeSkillRoFMultiplier(db.skillBonuses, skillLevel);
+
+  const entries = [...counts.entries()].sort((a, b) => {
+    if (b[1].count !== a[1].count) return b[1].count - a[1].count;
+    return a[1].order - b[1].order;
+  });
+
+  const result: ImportedTurret[] = [];
+  for (const [moduleId, entry] of entries) {
+    const turret = db.turrets[moduleId];
+    if (!turret) continue;
+    const weaponGroup = turretWeaponGroupFromSkill(turret.turretSkill);
+    const chargeId = entry.chargeId;
+
+    const hullTrackingPercents: number[] = [];
+    const hullOptimalPercents: number[] = [];
+    const hullFalloffPercents: number[] = [];
+    const hullDamagePercents: number[] = [];
+    const hullRoFPercents: number[] = [];
+
+    for (const bonus of hullBonuses) {
+      if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
+      const percent = hullBonusPercent(bonus, skillLevel);
+      if (bonus.attribute === "turretTracking") hullTrackingPercents.push(percent);
+      if (bonus.attribute === "turretOptimal") hullOptimalPercents.push(percent);
+      if (bonus.attribute === "turretFalloff") hullFalloffPercents.push(percent);
+      if (bonus.attribute === "turretDamage") hullDamagePercents.push(percent);
+      if (bonus.attribute === "turretRoF") hullRoFPercents.push(percent);
     }
+
+    const trackingBonus = stacking.apply([...sharedTrackingPercents, ...hullTrackingPercents].map((p) => 1 + p / 100));
+    const optimalBonus = stacking.apply([...sharedOptimalPercents, ...hullOptimalPercents].map((p) => 1 + p / 100));
+    const falloffBonus = stacking.apply([...sharedFalloffPercents, ...hullFalloffPercents].map((p) => 1 + p / 100));
+
+    const moduleDamageMultipliers = weaponGroup ? (damageMultipliersByGroup.get(weaponGroup) ?? []) : [];
+    const moduleSpeedMultipliers = weaponGroup ? (speedMultipliersByGroup.get(weaponGroup) ?? []) : [];
+    const moduleDamageBonus = stacking.apply(moduleDamageMultipliers);
+    const moduleSpeedBonus = stacking.apply(moduleSpeedMultipliers);
+    const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
+    const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
+
+    const skillDamageMultiplier = computeSkillDamageMultiplier(db.skillBonuses, turret.turretSkill, weaponGroup, skillLevel);
+
+    const modifiedDamageMultiplier = turret.damageMultiplier * moduleDamageBonus * hullDamageMultiplier * skillDamageMultiplier;
+    const modifiedCycleTime = turret.cycleTime * moduleSpeedBonus * hullRoFMultiplier * skillRoFMultiplier;
+
+    const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
+    const sigRes = SIG_RESOLUTIONS[sigResClass];
+    const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
+    const skillOptimalMultiplier = 1 + OPTIMAL_SKILL_BONUS * skillLevel;
+    const skillFalloffMultiplier = 1 + FALLOFF_SKILL_BONUS * skillLevel;
+
+    const trackingScore = turret.tracking * skillTrackingMultiplier * trackingBonus;
+    const optimalScore = turret.optimal * skillOptimalMultiplier * optimalBonus;
+    const falloffScore = turret.falloff * skillFalloffMultiplier * falloffBonus;
+
+    const base: ImportedTurretBase = {
+      tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
+      optimal: optimalScore,
+      falloff: falloffScore,
+    };
+
+    const turretForChargeSelection: ImportedTurret = {
+      tracking: base.tracking,
+      sigResolutionClass: sigResClass,
+      optimal: base.optimal,
+      falloff: base.falloff,
+      chargeSize: turret.chargeSize,
+      chargeId: chargeId ?? chargeCatalog.usualForChargeSize(turret.chargeSize),
+      base,
+      moduleId,
+      damageMultiplier: modifiedDamageMultiplier,
+      damagePerShot: 0,
+      cycleTime: modifiedCycleTime,
+      turretCount: entry.count,
+    };
+    const selectedCharge = chargeId && db.charges[chargeId] ? chargeId : chargeCatalog.usualForTurret(turretForChargeSelection);
+    const charge = db.charges[selectedCharge] ?? {};
+    const chargeDamage = (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
+
+    result.push({
+      tracking: base.tracking * (charge.trackingMultiplier ?? 1),
+      sigResolutionClass: sigResClass,
+      optimal: base.optimal * (charge.rangeMultiplier ?? 1),
+      falloff: base.falloff * (charge.falloffMultiplier ?? 1),
+      chargeSize: turret.chargeSize,
+      chargeId: selectedCharge,
+      base,
+      moduleId,
+      damageMultiplier: modifiedDamageMultiplier,
+      damagePerShot: modifiedDamageMultiplier * chargeDamage,
+      cycleTime: modifiedCycleTime,
+      turretCount: entry.count,
+    });
   }
-  if (!bestModuleId) return undefined;
 
-  const turret = db.turrets[bestModuleId];
-  if (!turret) return undefined;
-  const chargeId = counts.get(bestModuleId)?.chargeId;
-
-  for (const bonus of hullBonuses) {
-    if (bonus.turretSkill && turret.turretSkill !== bonus.turretSkill) continue;
-    const percent = hullBonusPercent(bonus, skillLevel);
-    if (bonus.attribute === "turretTracking") trackingPercents.push(percent);
-    if (bonus.attribute === "turretOptimal") optimalPercents.push(percent);
-    if (bonus.attribute === "turretFalloff") falloffPercents.push(percent);
-  }
-
-  const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
-  const sigRes = SIG_RESOLUTIONS[sigResClass];
-  const skillTrackingMultiplier = 1 + TRACKING_SKILL_BONUS * skillLevel;
-  const skillOptimalMultiplier = 1 + OPTIMAL_SKILL_BONUS * skillLevel;
-  const skillFalloffMultiplier = 1 + FALLOFF_SKILL_BONUS * skillLevel;
-
-  const trackingBonus = stacking.apply(trackingPercents.map((p) => 1 + p / 100));
-  const optimalBonus = stacking.apply(optimalPercents.map((p) => 1 + p / 100));
-  const falloffBonus = stacking.apply(falloffPercents.map((p) => 1 + p / 100));
-
-  const trackingScore = turret.tracking * skillTrackingMultiplier * trackingBonus;
-  const optimalScore = turret.optimal * skillOptimalMultiplier * optimalBonus;
-  const falloffScore = turret.falloff * skillFalloffMultiplier * falloffBonus;
-
-  const base: ImportedTurretBase = {
-    tracking: (trackingScore * sigRes) / STANDARD_SIGNATURE_RESOLUTION,
-    optimal: optimalScore,
-    falloff: falloffScore,
-  };
-
-  const turretForChargeSelection: ImportedTurret = {
-    tracking: base.tracking,
-    sigResolutionClass: sigResClass,
-    optimal: base.optimal,
-    falloff: base.falloff,
-    chargeSize: turret.chargeSize,
-    chargeId: chargeId ?? chargeCatalog.usualForChargeSize(turret.chargeSize),
-    base,
-    moduleId: bestModuleId,
-    damageMultiplier: turret.damageMultiplier,
-    damagePerShot: 0,
-    cycleTime: turret.cycleTime,
-    turretCount: bestCount,
-  };
-  const selectedCharge = chargeId && db.charges[chargeId] ? chargeId : chargeCatalog.usualForTurret(turretForChargeSelection);
-  const charge = db.charges[selectedCharge] ?? {};
-  const chargeDamage = (charge.emDamage ?? 0) + (charge.thermalDamage ?? 0) + (charge.kineticDamage ?? 0) + (charge.explosiveDamage ?? 0);
-
-  return {
-    tracking: base.tracking * (charge.trackingMultiplier ?? 1),
-    sigResolutionClass: sigResClass,
-    optimal: base.optimal * (charge.rangeMultiplier ?? 1),
-    falloff: base.falloff * (charge.falloffMultiplier ?? 1),
-    chargeSize: turret.chargeSize,
-    chargeId: selectedCharge,
-    base,
-    moduleId: bestModuleId,
-    damageMultiplier: turret.damageMultiplier,
-    damagePerShot: turret.damageMultiplier * chargeDamage,
-    cycleTime: turret.cycleTime,
-    turretCount: bestCount,
-  };
+  return result;
 }
 
 function resolveLauncher(
@@ -824,6 +853,58 @@ function collectTurretPercents(
     const percent = stats.turretFalloffPercent * (script?.falloffMultiplier ?? 1);
     if (percent !== 0) falloffPercents.push(percent);
   }
+}
+
+function collectDamageModuleModifiers(
+  stats: FittingModuleStats,
+  damageMultipliersByGroup: Map<TurretWeaponGroup, number[]>,
+  speedMultipliersByGroup: Map<TurretWeaponGroup, number[]>,
+): void {
+  if (!stats.turretWeaponGroup) return;
+  const group = stats.turretWeaponGroup;
+  if (stats.turretDamageMultiplier && stats.turretDamageMultiplier !== 1) {
+    const list = damageMultipliersByGroup.get(group) ?? [];
+    list.push(stats.turretDamageMultiplier);
+    damageMultipliersByGroup.set(group, list);
+  }
+  if (stats.turretSpeedMultiplier && stats.turretSpeedMultiplier !== 1) {
+    const list = speedMultipliersByGroup.get(group) ?? [];
+    list.push(stats.turretSpeedMultiplier);
+    speedMultipliersByGroup.set(group, list);
+  }
+}
+
+function turretWeaponGroupFromSkill(turretSkill: string | undefined): TurretWeaponGroup | undefined {
+  if (!turretSkill) return undefined;
+  if (turretSkill.includes("Energy")) return "Energy Weapon";
+  if (turretSkill.includes("Hybrid")) return "Hybrid Weapon";
+  if (turretSkill.includes("Projectile")) return "Projectile Weapon";
+  return undefined;
+}
+
+function computeSkillDamageMultiplier(
+  skillBonuses: readonly SkillBonus[],
+  turretSkill: string | undefined,
+  weaponGroup: TurretWeaponGroup | undefined,
+  skillLevel: number,
+): number {
+  let multiplier = 1;
+  for (const bonus of skillBonuses) {
+    if (bonus.bonusType !== "turretDamage") continue;
+    if (bonus.weaponGroup && bonus.weaponGroup !== weaponGroup) continue;
+    if (bonus.turretSkill && bonus.turretSkill !== turretSkill) continue;
+    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+  }
+  return multiplier;
+}
+
+function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], skillLevel: number): number {
+  let multiplier = 1;
+  for (const bonus of skillBonuses) {
+    if (bonus.bonusType !== "turretRoF") continue;
+    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+  }
+  return multiplier;
 }
 
 function hullBonusPercent(bonus: HullBonus, skillLevel: number): number {

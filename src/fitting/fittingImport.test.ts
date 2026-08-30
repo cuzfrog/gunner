@@ -25,6 +25,7 @@ import {
   TURRETS,
   WARP_SCRAMBLERS,
   type FittingDb,
+  type SkillBonus,
 } from "../gamedata/fittingDb";
 import { MODULE_SLOTS_BY_NAME, MODULE_SLOT_CATALOG } from "../gamedata/moduleSlots";
 import { moduleLines, parseEft, type EftDocument } from "./eft";
@@ -210,6 +211,8 @@ const db: FittingDb = {
     "Tracking Enhancer II": row("Tracking Enhancer II", "Tracking Enhancer II", { turretTrackingPercent: 9.5, turretOptimalPercent: 10, turretFalloffPercent: 20 }),
     "Caldari Navy Tracking Enhancer": row("Caldari Navy Tracking Enhancer", "Caldari Navy Tracking Enhancer", { turretTrackingPercent: 12, turretOptimalPercent: 7.5, turretFalloffPercent: 15 }),
     "Medium Energy Metastasis Adjuster II": row("Medium Energy Metastasis Adjuster II", "Medium Energy Metastasis Adjuster II", { turretTrackingPercent: 20 }),
+    "Heat Sink II": row("Heat Sink II", "Heat Sink II", { turretDamageMultiplier: 1.1, turretSpeedMultiplier: 0.895, turretWeaponGroup: "Energy Weapon" }),
+    "Gyrostabilizer II": row("Gyrostabilizer II", "Gyrostabilizer II", { turretDamageMultiplier: 1.15, turretSpeedMultiplier: 0.89, turretWeaponGroup: "Projectile Weapon" }),
   },
   turrets: {
     "Heavy Pulse Laser II": row("Heavy Pulse Laser II", "Heavy Pulse Laser II", { tracking: 26, optimal: 12_600, falloff: 5_000, chargeSize: 2, damageMultiplier: 3, cycleTime: 5, turretSkill: "Medium Energy Turret", metaLevel: 5, metaGroupID: 2 }),
@@ -250,6 +253,9 @@ const hullBonusDb: FittingDb = {
       { attribute: "maxVelocity", magnitude: 50 },
       { attribute: "agility", magnitude: -5 },
     ],
+    [profile.id]: [
+      { attribute: "turretDamage", magnitude: 10, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+    ],
   },
   skillBonuses: [],
 };
@@ -259,6 +265,22 @@ const gunFamilies = new GunFamiliesImpl({ fittingDb: db });
 const chargeCatalog = new ChargeCatalogImpl({ fittingDb: db, gunFamilies });
 const missileSkillModel = new MissileSkillModelImpl({ stackingPenalty });
 const missileCatalog = new MissileCatalogImpl({ fittingDb: db, missileSkillModel });
+
+const mockSkillBonuses: readonly SkillBonus[] = [
+  { skillId: "3300" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -2 },
+  { skillId: "3310" as TypeId, bonusType: "turretRoF", magnitudePerLevel: -4 },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Energy Weapon" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Projectile Weapon" },
+  { skillId: "3315" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 3, weaponGroup: "Hybrid Weapon" },
+  { skillId: "3306" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Energy Turret" },
+  { skillId: "3305" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Medium Projectile Turret" },
+  { skillId: "3302" as TypeId, bonusType: "turretDamage", magnitudePerLevel: 5, turretSkill: "Small Projectile Turret" },
+];
+
+const skillBonusDb: FittingDb = {
+  ...db,
+  skillBonuses: mockSkillBonuses,
+};
 
 const fullFittingDb: FittingDb = {
   modules: FITTING_MODULES,
@@ -661,6 +683,199 @@ Tracking Enhancer II`,
     const falloffBonus = stackingPenalty.apply([1.2, 1.1]);
     expect(result!.turret!.falloff).toBeCloseTo(5_160 * 1.2 * falloffBonus, 3);
     expect(result!.turret!.optimal).toBeCloseTo(1_200 * 0.5 * 1.2 * 1.1, 3);
+  });
+
+  test("Heat Sink damage and RoF modifiers apply to energy turrets", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Lasers]
+Heavy Pulse Laser II, Conflagration M
+Heat Sink II`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.1, 6);
+    expect(result!.turret!.cycleTime).toBeCloseTo(5 * 0.895, 6);
+  });
+
+  test("Heat Sink does not affect projectile turrets", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, AC]
+200mm AutoCannon II, EMP S
+Heat Sink II`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBe(3);
+    expect(result!.turret!.cycleTime).toBe(5);
+  });
+
+  test("Gyrostabilizer damage and RoF modifiers apply to projectile turrets", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, AC]
+200mm AutoCannon II, EMP S
+Gyrostabilizer II`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.15, 6);
+    expect(result!.turret!.cycleTime).toBeCloseTo(5 * 0.89, 6);
+  });
+
+  test("multiple turret groups are retained in turrets array", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Mixed]
+200mm AutoCannon II, EMP S
+Heavy Pulse Laser II, Conflagration M`,
+      conditions,
+    );
+    expect(result!.turrets).toBeDefined();
+    expect(result!.turrets!.length).toBe(2);
+    const moduleIds = result!.turrets!.map((t) => t.moduleId);
+    expect(moduleIds).toContain("Heavy Pulse Laser II" as TypeId);
+    expect(moduleIds).toContain("200mm AutoCannon II" as TypeId);
+  });
+
+  test("turret field points to the most-counted group", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Mixed]
+Heavy Pulse Laser II, Conflagration M
+Heavy Pulse Laser II, Conflagration M
+200mm AutoCannon II, EMP S`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.moduleId).toBe("Heavy Pulse Laser II" as TypeId);
+    expect(result!.turret!.turretCount).toBe(2);
+  });
+
+  test("hull turret damage bonus applies to matching turret skill", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Damage]
+Heavy Pulse Laser II, Conflagration M`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.4, 6);
+  });
+
+  test("hull turret damage bonus does not apply to non-matching hull", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Damage]
+200mm AutoCannon II, EMP S`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBe(3);
+  });
+
+  test("skill damage bonuses apply to matching turret skill", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Skills]
+Heavy Pulse Laser II, Conflagration M`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.12 * 1.20, 6);
+  });
+
+  test("skill RoF bonuses apply to all turrets", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: skillBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Skills]
+Heavy Pulse Laser II, Conflagration M`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    expect(result!.turret!.cycleTime).toBeCloseTo(5 * 0.92 * 0.84, 6);
+  });
+
+  test("multiple Heat Sinks are stacking-penalized for damage", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Lasers]
+Heavy Pulse Laser II, Conflagration M
+Heat Sink II
+Heat Sink II
+Heat Sink II`,
+      conditions,
+    );
+    expect(result!.turret).toBeDefined();
+    const damageBonus = stackingPenalty.apply([1.1, 1.1, 1.1]);
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * damageBonus, 6);
+  });
+
+  test("Heat Sink and hull damage bonus apply as separate unpenalized multipliers", () => {
+    const importer = new FittingImportImpl({ ships, fittingDb: hullBonusDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, Damage]
+Heavy Pulse Laser II, Conflagration M
+Heat Sink II`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    // Hull bonus at skillLevel 4: +40% → 1.4 (unpenalized flat multiplier)
+    // Heat Sink: 1.1 (single module, no stacking penalty)
+    // damageMultiplier = 3 * 1.1 * 1.4 = 4.62
+    expect(result!.turret!.damageMultiplier).toBeCloseTo(3 * 1.1 * 1.4, 6);
+  });
+
+  test("hull turret RoF bonus applies as unpenalized multiplier to cycle time", () => {
+    const hullRoFDb: FittingDb = {
+      ...db,
+      hullBonuses: {
+        [profile.id]: [
+          { attribute: "turretRoF", magnitude: -5, skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" },
+        ],
+      },
+      skillBonuses: [],
+    };
+    const importer = new FittingImportImpl({ ships, fittingDb: hullRoFDb, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Harbinger, RoF]
+Heavy Pulse Laser II, Conflagration M`,
+      skillConditions,
+    );
+    expect(result!.turret).toBeDefined();
+    // Hull RoF bonus at skillLevel 4: -20% → 0.8 (unpenalized flat multiplier)
+    // cycleTime = 5 * 0.8 = 4.0
+    expect(result!.turret!.cycleTime).toBeCloseTo(5 * 0.8, 6);
+  });
+
+  test("mixed weapon groups with mixed damage mods apply per-group", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    const importer = new FittingImportImpl({ ships, fittingDb: db, chargeCatalog, missileCatalog, missileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: testResolver, moduleSlotCatalog });
+    const result = importer.importFitting(
+      `[Rifter, Mixed]
+200mm AutoCannon II, EMP S
+Heavy Pulse Laser II, Conflagration M
+Heat Sink II
+Gyrostabilizer II`,
+      conditions,
+    );
+    expect(result!.turrets).toBeDefined();
+    expect(result!.turrets!.length).toBe(2);
+    const laser = result!.turrets!.find((t) => t.moduleId === "Heavy Pulse Laser II" as TypeId);
+    const autocannon = result!.turrets!.find((t) => t.moduleId === "200mm AutoCannon II" as TypeId);
+    expect(laser).toBeDefined();
+    expect(autocannon).toBeDefined();
+    // Laser gets Heat Sink (1.1) but not Gyrostabilizer
+    expect(laser!.damageMultiplier).toBeCloseTo(3 * 1.1, 6);
+    expect(laser!.cycleTime).toBeCloseTo(5 * 0.895, 6);
+    // Autocannon gets Gyrostabilizer (1.15) but not Heat Sink
+    expect(autocannon!.damageMultiplier).toBeCloseTo(3 * 1.15, 6);
+    expect(autocannon!.cycleTime).toBeCloseTo(5 * 0.89, 6);
   });
 
   test("resolves stasis webs and tracking disruptors with converted fractions and scripts", () => {
