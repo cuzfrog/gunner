@@ -32,6 +32,8 @@ import type { HoverHintController } from "./hoverHint";
 import type { ProfileEquality } from "../../appstate";
 import type { Side } from "./side";
 import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
+import type { DpsHintProvider } from "./dpsHint";
+import type { DpsHintRenderer } from "./dpsHint";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -105,4 +107,6 @@ export interface ControlsCradle {
   readonly profileEquality: ProfileEquality;
   readonly profileChangeTracker: ProfileChangeTracker;
   readonly hoverHintController: HoverHintController;
+  readonly dpsHintRenderer: DpsHintRenderer;
+  readonly dpsHintProvider: DpsHintProvider;
 }

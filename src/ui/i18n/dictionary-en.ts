@@ -225,5 +225,4 @@ export const EN: LanguageSlice<"en"> = {
   "dpsHint.factor.skill": { en: "Skill" },
   "dpsHint.factor.hull": { en: "Hull" },
   "dpsHint.factor.overload": { en: "Overload" },
-  "dpsHint.overloadActive": { en: "active" },
 } as const;

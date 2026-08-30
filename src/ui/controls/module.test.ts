@@ -75,6 +75,8 @@ const controlsCradleKeys = {
   itemNameCatalog: "itemNameCatalog",
   controls: "controls",
   hoverHintController: "hoverHintController",
+  dpsHintRenderer: "dpsHintRenderer",
+  dpsHintProvider: "dpsHintProvider",
 } as const satisfies { [K in keyof ControlsCradle]: K };
 
 describe("registerControlsModule", () => {

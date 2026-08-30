@@ -1,12 +1,17 @@
-import { asFunction, type AwilixContainer } from "awilix";
+import { asClass, asFunction, type AwilixContainer } from "awilix";
 import type { ControlsCradle } from "../cradle";
-import { registerDpsHintProvider } from "./dpsHintProvider";
+import { DpsHintProviderImpl } from "./dpsHintProvider";
+import { DpsHintRendererImpl } from "./dpsHintRenderer";
+import type { HintContentProvider } from "../hoverHint";
 
 export function registerDpsHintModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
   cradle.register({
-    dpsHintProvider: asFunction(({ i18n, turretControllers, launcherControllers, itemNameCatalog, hoverHintController }) => {
-      registerDpsHintProvider(hoverHintController, { i18n, turretControllers, launcherControllers, itemNameCatalog });
-      return { registered: true };
-    }).singleton(),
+    dpsHintRenderer: asFunction(({ i18n }) => new DpsHintRendererImpl({ t: (key) => i18n.t(key) })).singleton(),
+    dpsHintProvider: asClass(DpsHintProviderImpl).singleton(),
   });
+}
+
+export function wireDpsHintProvider<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
+  const c = cradle.cradle;
+  c.hoverHintController.registerContentProvider("dps", c.dpsHintProvider as HintContentProvider);
 }

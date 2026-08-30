@@ -210,6 +210,8 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
     itemNameCatalog: asValue({ nameForId: vi.fn((id: string) => id) }),
+    dpsHintRenderer: asValue({ render: vi.fn() }),
+    dpsHintProvider: asValue({ render: vi.fn() }),
   });
   return cradle;
 }
@@ -362,6 +364,8 @@ export function buildSidePanel(
     turretOverridesBySide: asValue({ shipA: shipATurretOverrides, shipB: shipBTurretOverrides }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
     itemNameCatalog: asValue({ nameForId: vi.fn((id: string) => id) }),
+    dpsHintRenderer: asValue({ render: vi.fn() }),
+    dpsHintProvider: asValue({ render: vi.fn() }),
   });
   registerSidePanelModule(cradle);
 
