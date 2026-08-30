@@ -202,6 +202,62 @@ describe("TurretController", () => {
     expect(controller.currentTurretSpec()).toBeUndefined();
   });
 
+  test("currentTurretSpecs returns single-element array for single turret", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    const specs = controller.currentTurretSpecs();
+    expect(specs.length).toBe(1);
+    expect(specs[0].kind).toBe("turret");
+  });
+
+  test("currentTurretSpecs returns all imported turret groups", () => {
+    const multiTurretImport = {
+      ...IMPORTED_RIFTER,
+      turrets: [
+        IMPORTED_RIFTER.turret!,
+        { ...IMPORTED_RIFTER.turret!, moduleId: "21076" as TypeId, damagePerShot: 20, cycleTime: 4, turretCount: 2 },
+      ],
+    };
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => multiTurretImport) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    const specs = controller.currentTurretSpecs();
+    expect(specs.length).toBe(2);
+    expect(specs[0].damagePerShot).toBe(IMPORTED_RIFTER.turret!.damagePerShot);
+    expect(specs[1].damagePerShot).toBe(20);
+    expect(specs[1].cycleTime).toBe(4);
+    expect(specs[1].turretCount).toBe(2);
+  });
+
+  test("currentTurretSpecs primary reflects ammo change for multi-turret fits", () => {
+    const multiTurretImport = {
+      ...IMPORTED_RIFTER,
+      turrets: [
+        IMPORTED_RIFTER.turret!,
+        { ...IMPORTED_RIFTER.turret!, moduleId: "21076" as TypeId, damagePerShot: 20, cycleTime: 4, turretCount: 2 },
+      ],
+    };
+    const { document, controller } = buildTurret({
+      fittingImport: { importFitting: vi.fn(() => multiTurretImport) },
+      chargeCatalog: {
+        chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
+        withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, damagePerShot: 999 })),
+      },
+    });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    controller.openAmmoPopup();
+    (getFake(document, "ship-a-ammo-all-list").children[1].firstElementChild as unknown as FakeElement).trigger("click");
+    const specs = controller.currentTurretSpecs();
+    expect(specs.length).toBe(2);
+    expect(specs[0].damagePerShot).toBe(999);
+    expect(specs[1].damagePerShot).toBe(20);
+  });
+
+  test("currentTurretSpecs returns empty array when no turret is fitted", () => {
+    const { controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined, turrets: undefined })) } });
+    controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
+    expect(controller.currentTurretSpecs()).toEqual([]);
+  });
+
   test("capture returns the current turret inputs and ammo", () => {
     const { document, controller } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });

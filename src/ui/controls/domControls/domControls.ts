@@ -221,8 +221,16 @@ export class DomControls implements Controls, DomControlsHost {
     return this.launcherControllers[side].currentMissileSpec();
   }
   getWeapons(side: Side): readonly WeaponSpec[] {
-    const weapon = this.getWeapon(side);
-    return weapon ? [weapon] : [];
+    const activeKind = this.weaponSystemSwitches[side].activeKind();
+    if (activeKind === "missile") {
+      const missile = this.launcherControllers[side].currentMissileSpec();
+      if (missile) return [missile];
+      return this.turretControllers[side].currentTurretSpecs();
+    }
+    const turrets = this.turretControllers[side].currentTurretSpecs();
+    if (turrets.length > 0) return turrets;
+    const missile = this.launcherControllers[side].currentMissileSpec();
+    return missile ? [missile] : [];
   }
   getSig(side: Side): number { return this.sideFor(side).capture().sig ?? 1; }
   getConfig(): SimConfig { return this.simConfigSource.getConfig(); }
