@@ -618,6 +618,36 @@ describe("SessionCodec", () => {
     expect(onSessionRestored).toHaveBeenCalled();
   });
 
+  test("capture and restore include missile booster activations", () => {
+    const missileBoosterController = mockMissileBoosterController();
+    const fittingImport = mockFittingImport();
+    const shipA = mockSidePanel("shipA", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: "[Rifter, Brawler]\nMissile Guidance Computer I", overrides: {}, fittedHull: undefined });
+    const shipB = mockSidePanel("shipB", { speed: 300, mass: 1_000_000, inertia: 3, mode: "orbit", range: 5000, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 36 });
+    vi.mocked(missileBoosterController.capture).mockReturnValue([{ active: true, overloaded: false, script: "none" }]);
+    vi.mocked(fittingImport.importFitting).mockReturnValue({
+      profile: {} as unknown,
+      fittingName: "Brawler",
+      ewar: { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: [], scripts: [] },
+      boosts: { computers: [], scripts: [] },
+      missileBoosts: { computers: [{ moduleName: "Missile Guidance Computer I", moduleId: toTypeId("0"), explosionRadiusBonusPercent: -15, explosionVelocityBonusPercent: 15, missileVelocityBonusPercent: 15, flightTimeBonusPercent: 15, overloadStrengthBonusPercent: 15 }], enhancers: [], scripts: [] },
+      weapon: undefined,
+      defense: undefined,
+      modules: [],
+    } as unknown as ImportedFitting);
+    const events = new UiEventsImpl();
+    const onSessionRestored = vi.fn();
+    events.onSessionRestored(onSessionRestored);
+    const { codec } = buildCodec({ shipA, shipB, missileBoosterController, fittingImport, events });
+
+    const settings = codec.capture();
+    expect(settings.shipAMissileBoosterActivation).toEqual([{ active: true, overloaded: false, script: "none" }]);
+
+    codec.restore(sessionFromWire(settings));
+    expect(missileBoosterController.restore).toHaveBeenCalledWith("shipA", expect.any(Object), settings.shipAMissileBoosterActivation);
+    expect(missileBoosterController.restore).toHaveBeenCalledWith("shipB", undefined, settings.shipBMissileBoosterActivation);
+    expect(onSessionRestored).toHaveBeenCalled();
+  });
+
   test("corrupt startup data falls back to defaults", () => {
     const shipA = mockSidePanel("shipA", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined });
     const shipB = mockSidePanel("shipB", { speed: 0, mass: 0, inertia: 0, mode: "orbit", range: 0, skillLevel: 5, overload: true, weaponOverload: false, hull: undefined, propulsion: undefined, fitting: undefined, overrides: {}, fittedHull: undefined, sig: 1 });

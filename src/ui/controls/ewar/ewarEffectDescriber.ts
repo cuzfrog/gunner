@@ -177,7 +177,7 @@ export class EwarEffectDescriberImpl implements EwarEffectDescriber {
   private sigDescription(multiplier: number): string {
     if (multiplier === 1) return this.i18n.t("ewar.hover.outOfRange");
     const percent = Math.round((multiplier - 1) * 100);
-    return `${this.i18n.t("ewar.hover.sigRadius")} +${percent}%`;
+    return `${this.i18n.t("ewar.hover.sigRadius")} ${percent > 0 ? "+" : ""}${percent}%`;
   }
 
   private painterReach(projection: EwarProjection): number {

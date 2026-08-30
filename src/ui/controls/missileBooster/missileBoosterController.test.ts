@@ -177,6 +177,21 @@ describe("MissileBoosterController", () => {
     expect(overloadButton.getAttribute("aria-pressed")).toBe("true");
   });
 
+  test("overload toggle updates summary tooltip to reflect overload bonus", () => {
+    const { controller, document } = buildMissileBoosterController();
+    controller.setLoadout("shipA", LOADOUT);
+    const summary = getFake(document, "ship-a-missile-booster-summary");
+    const computerSummaryBefore = summary.children[0];
+    const titleBefore = computerSummaryBefore.getAttribute("title") ?? "";
+    const row = computerRows(missileBoosterSection(document, "shipA"))[0];
+    const overloadButton = row.children.find((c) => c.className.split(" ").includes("ewar-overload-button"))!;
+    overloadButton.dispatchEvent(new Event("click"));
+    const computerSummaryAfter = getFake(document, "ship-a-missile-booster-summary").children[0];
+    const titleAfter = computerSummaryAfter.getAttribute("title") ?? "";
+    expect(titleBefore).not.toBe(titleAfter);
+    expect(titleAfter).toContain("missileBooster.hover.explosionRadius");
+  });
+
   test("capture and restore round-trips activation with script and overload", () => {
     const { controller } = buildMissileBoosterController();
     controller.setLoadout("shipA", LOADOUT);

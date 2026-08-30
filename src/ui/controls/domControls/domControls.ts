@@ -19,6 +19,7 @@ import type { TurretController } from "../turret";
 import type { LauncherController } from "../launcher";
 import type { EwarController } from "../ewar";
 import type { BoosterController } from "../booster";
+import type { MissileBoosterController } from "../missileBooster";
 import type { ImportController } from "../import";
 import type { ShareController } from "../share";
 import type { RangeOverlay } from "../../renderer";
@@ -52,6 +53,7 @@ interface DomControlsAllDeps extends DomControlsDeps {
   importController: ImportController;
   ewarController: EwarController;
   boosterController: BoosterController;
+  missileBoosterController: MissileBoosterController;
   shareController: ShareController;
   rangeOverlayController: RangeOverlayController;
   portraitsController: PortraitsController;
@@ -79,6 +81,7 @@ export class DomControls implements Controls, DomControlsHost {
   private readonly importController: ImportController;
   private readonly ewarController: EwarController;
   private readonly boosterController: BoosterController;
+  private readonly missileBoosterController: MissileBoosterController;
   private readonly shareController: ShareController;
   private readonly rangeOverlayController: RangeOverlayController;
   private readonly portraitsController: PortraitsController;
@@ -110,6 +113,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.importController = all.importController;
     this.ewarController = all.ewarController;
     this.boosterController = all.boosterController;
+    this.missileBoosterController = all.missileBoosterController;
     this.shareController = all.shareController;
     this.rangeOverlayController = all.rangeOverlayController;
     this.portraitsController = all.portraitsController;
@@ -152,6 +156,7 @@ export class DomControls implements Controls, DomControlsHost {
     this.shipBSide.sections.skill.setOverloadDisabled();
     this.ewarController.updateSummaries();
     this.boosterController.updateSummaries();
+    this.missileBoosterController.updateSummaries();
     this.rangeOverlayController.render();
     this.portraitsController.update();
     this.weaponSystemSwitches.shipA.refresh();

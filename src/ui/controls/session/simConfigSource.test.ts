@@ -123,12 +123,14 @@ describe("SimConfigSourceImpl", () => {
     expect(config.shipA.aggressivity).toBe(1.5);
     expect(config.shipA.ewar).toBe(deps.ewar);
     expect(config.shipA.boosts).toBe(deps.boost);
+    expect(config.shipA.missileBoosts).toBe(deps.missileBoost);
     expect(config.shipB.id).toBe("shipB");
     expect(config.shipB.maxSpeed).toBe(250);
     expect(config.shipB.baseMaxSpeed).toBe(250);
     expect(config.shipB.aggressivity).toBe(1);
     expect(config.shipB.ewar).toBeUndefined();
     expect(config.shipB.boosts).toBeUndefined();
+    expect(config.shipB.missileBoosts).toBeUndefined();
     expect(config.initialDistance).toBe(6000);
     expect(deps.shipASide.capture).toHaveBeenCalled();
     expect(deps.shipBSide.capture).toHaveBeenCalled();

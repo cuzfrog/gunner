@@ -1,8 +1,8 @@
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation } from "../userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation } from "../userSettings";
 
 export type Side = "shipA" | "shipB";
 export type ScalarField = keyof Omit<ProfileSettings, "shipAFitting" | "shipBFitting" | "shipAOverrides" | "shipBOverrides">;
-export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[];
+export type ScalarValue = string | number | boolean | FittedHullSummary | StoredEwarActivation | readonly StoredBoosterActivation[] | readonly StoredMissileBoosterActivation[];
 
 export const GLOBAL_FIELDS: readonly ScalarField[] = [
   "version",
@@ -24,6 +24,7 @@ export const SHIP_A_FIELDS: readonly ScalarField[] = [
   "shipAFittedHull",
   "shipAEwarActivation",
   "shipABoosterActivation",
+  "shipAMissileBoosterActivation",
   "shipATracking",
   "shipASigRes",
   "shipAOptimal",
@@ -48,6 +49,7 @@ export const SHIP_B_FIELDS: readonly ScalarField[] = [
   "shipBFittedHull",
   "shipBEwarActivation",
   "shipBBoosterActivation",
+  "shipBMissileBoosterActivation",
   "shipBTracking",
   "shipBSigRes",
   "shipBOptimal",

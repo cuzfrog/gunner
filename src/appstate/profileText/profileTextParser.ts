@@ -1,10 +1,10 @@
-import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation } from "../userSettings";
+import type { ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredDisruptionScript, StoredEwarActivation, StoredMissileBoosterActivation } from "../userSettings";
 import type { ChargeCatalog } from "../../fitting";
 import type { ItemNameResolver } from "../../gamedata/itemNames";
 import type { SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import { resolveBoosterScript, resolveDisruptionScript } from "../settingsCompat";
-import { isOptionalBoosterActivations, isOptionalEwarActivation } from "../validators";
+import { isOptionalBoosterActivations, isOptionalEwarActivation, isOptionalMissileBoosterActivations } from "../validators";
 import { DOT_KEY_TO_FIELD, OVERRIDE_DOT_KEY_TO_FULL, sideFromFittingDotKey, type ScalarField } from "./profileTextFields";
 import { parseFittedHullSummary, parseOverrideValue, parseScalarValue, profileSettingsFromRaw } from "./profileTextValidate";
 import { PROFILE_TEXT_HEADER, stripCarriageReturn } from "./profileTextFormat";
@@ -46,6 +46,8 @@ export class ProfileTextParser {
     let shipBEwarActivationRaw: string | undefined;
     let shipABoosterActivationRaw: string | undefined;
     let shipBBoosterActivationRaw: string | undefined;
+    let shipAMissileBoosterActivationRaw: string | undefined;
+    let shipBMissileBoosterActivationRaw: string | undefined;
 
     let i = firstLine + 1;
     while (i < rawLines.length) {
@@ -101,6 +103,14 @@ export class ProfileTextParser {
         shipBBoosterActivationRaw = value;
         continue;
       }
+      if (field === "shipAMissileBoosterActivation") {
+        shipAMissileBoosterActivationRaw = value;
+        continue;
+      }
+      if (field === "shipBMissileBoosterActivation") {
+        shipBMissileBoosterActivationRaw = value;
+        continue;
+      }
       const parsed = parseScalarValue(field, value, this.simValueParser, this.ships, this.chargeCatalog);
       if (parsed === undefined) {
         if (DEGRADABLE_FIELDS.has(field)) continue;
@@ -119,6 +129,15 @@ export class ProfileTextParser {
     if (shipBBoosterActivationRaw !== undefined) {
       const activation = this.parseBoosterActivation(shipBBoosterActivationRaw);
       if (activation !== undefined) raw = { ...raw, shipBBoosterActivation: activation };
+    }
+
+    if (shipAMissileBoosterActivationRaw !== undefined) {
+      const activation = this.parseMissileBoosterActivation(shipAMissileBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipAMissileBoosterActivation: activation };
+    }
+    if (shipBMissileBoosterActivationRaw !== undefined) {
+      const activation = this.parseMissileBoosterActivation(shipBMissileBoosterActivationRaw);
+      if (activation !== undefined) raw = { ...raw, shipBMissileBoosterActivation: activation };
     }
 
     if (shipAEwarActivationRaw !== undefined) {
@@ -181,6 +200,22 @@ export class ProfileTextParser {
     }
   }
 
+  private parseMissileBoosterActivation(raw: string): readonly StoredMissileBoosterActivation[] | undefined {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return undefined;
+      const result: StoredMissileBoosterActivation[] = [];
+      for (const item of parsed) {
+        const row = this.parseMissileBoosterRow(item);
+        if (row === undefined) return undefined;
+        result.push(row);
+      }
+      return isOptionalMissileBoosterActivations(result) ? result : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private migrateToggleableArray(value: unknown, sideOverload: boolean): readonly { active: boolean; overloaded: boolean }[] | undefined {
     if (value === undefined) return undefined;
     if (!Array.isArray(value)) return undefined;
@@ -230,6 +265,16 @@ export class ProfileTextParser {
     if (item.script === undefined) return { active, script: "none" };
     if (typeof item.script !== "string") return undefined;
     return { active, script: resolveBoosterScript(item.script, this.itemNameResolver) };
+  }
+
+  private parseMissileBoosterRow(item: unknown): StoredMissileBoosterActivation | undefined {
+    if (typeof item === "boolean") return { active: item, overloaded: false, script: "none" };
+    if (!isRecord(item)) return undefined;
+    const active = typeof item.active === "boolean" ? item.active : false;
+    const overloaded = typeof item.overloaded === "boolean" ? item.overloaded : false;
+    if (item.script === undefined) return { active, overloaded, script: "none" };
+    if (typeof item.script !== "string") return undefined;
+    return { active, overloaded, script: resolveDisruptionScript(item.script, this.itemNameResolver) };
   }
 }
 

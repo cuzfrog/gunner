@@ -192,10 +192,10 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const missileVelocity = this.bonusFor(projection, "missileVelocityBonusPercent", "missileVelocityMultiplier");
     const flightTime = this.bonusFor(projection, "flightTimeBonusPercent", "flightTimeMultiplier");
     const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("ewar.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
+    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
+    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
+    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
+    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
     return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
@@ -206,10 +206,10 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const missileVelocity = this.enhancerBonusFor(projection, "missileVelocityBonusPercent");
     const flightTime = this.enhancerBonusFor(projection, "flightTimeBonusPercent");
     const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("ewar.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
+    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
+    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
+    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
+    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
     return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
@@ -223,8 +223,9 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       const spec = projection.loadout.computers[i];
       const activation = projection.activation?.computers[i];
       if (!activation || !activation.active) continue;
+      const overloadFactor = activation.overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
       const multiplier = activation.script?.[multiplierKey] ?? 1;
-      total += spec[bonusKey] * multiplier;
+      total += spec[bonusKey] * overloadFactor * multiplier;
     }
     return total;
   }
@@ -274,7 +275,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
       const computer = state.loadout.computers[i];
       const activation = state.activation[i];
       const row = html`<div class=${activation.active ? "ewar-row" : "ewar-row ewar-row-inactive"}></div>` as unknown as HTMLDivElement;
-      const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script);
+      const { button, nameSpan } = this.createModuleButton(activation.active, computer, activation.script, activation.overloaded);
       nameSpans.push(nameSpan);
       button.addEventListener("click", () => this.toggleComputer(side, i, button, row));
       row.appendChild(button);
@@ -305,9 +306,9 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     return this.fittingImport.itemNameForId(script.moduleId, this.i18n.current());
   }
 
-  private createModuleButton(active: boolean, computer: MissileBoosterSpec, script: MissileScriptSpec | undefined): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
+  private createModuleButton(active: boolean, computer: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): { button: HTMLButtonElement; nameSpan: HTMLSpanElement } {
     const displayName = this.moduleDisplayName(computer);
-    const effectTitle = this.computerModuleEffect(computer, script);
+    const effectTitle = this.computerModuleEffect(computer, script, overloaded);
     const iconUrl = this.imageCatalog.itemIconUrl(computer.moduleId);
     const nameSpan = html`<span class="truncate" title=${effectTitle}>${displayName}</span>` as unknown as HTMLSpanElement;
     const button = html`<button type="button" class="ewar-module-toggle" aria-pressed=${String(active)} aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}>${nameSpan}</button>` as unknown as HTMLButtonElement;
@@ -318,29 +319,30 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     const displayName = this.moduleDisplayName(enhancer);
     const effectTitle = this.enhancerModuleEffect(enhancer);
     const iconUrl = this.imageCatalog.itemIconUrl(enhancer.moduleId);
-    const button = html`<button type="button" class="ewar-module-toggle" aria-pressed="true" aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="truncate" title=${effectTitle}>${displayName}</span></button>` as unknown as HTMLButtonElement;
+    const button = html`<button type="button" class="ewar-module-toggle" aria-disabled="true" aria-label=${displayName}><img alt="" src=${iconUrl} hidden=${iconUrl === undefined ? "" : false}><span class="truncate" title=${effectTitle}>${displayName}</span></button>` as unknown as HTMLButtonElement;
     return { button };
   }
 
-  private computerModuleEffect(spec: MissileBoosterSpec, script: MissileScriptSpec | undefined): string {
-    const explosionRadius = spec.explosionRadiusBonusPercent * (script?.explosionRadiusMultiplier ?? 1);
-    const explosionVelocity = spec.explosionVelocityBonusPercent * (script?.explosionVelocityMultiplier ?? 1);
-    const missileVelocity = spec.missileVelocityBonusPercent * (script?.missileVelocityMultiplier ?? 1);
-    const flightTime = spec.flightTimeBonusPercent * (script?.flightTimeMultiplier ?? 1);
+  private computerModuleEffect(spec: MissileBoosterSpec, script: MissileScriptSpec | undefined, overloaded: boolean): string {
+    const overloadFactor = overloaded ? 1 + spec.overloadStrengthBonusPercent / 100 : 1;
+    const explosionRadius = spec.explosionRadiusBonusPercent * overloadFactor * (script?.explosionRadiusMultiplier ?? 1);
+    const explosionVelocity = spec.explosionVelocityBonusPercent * overloadFactor * (script?.explosionVelocityMultiplier ?? 1);
+    const missileVelocity = spec.missileVelocityBonusPercent * overloadFactor * (script?.missileVelocityMultiplier ?? 1);
+    const flightTime = spec.flightTimeBonusPercent * overloadFactor * (script?.flightTimeMultiplier ?? 1);
     const parts: string[] = [];
-    if (explosionRadius !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
-    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
-    if (missileVelocity !== 0) parts.push(`${this.i18n.t("ewar.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
-    if (flightTime !== 0) parts.push(`${this.i18n.t("ewar.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
+    if (explosionRadius !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${explosionRadius > 0 ? "+" : ""}${explosionRadius.toFixed(1)}%`);
+    if (explosionVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${explosionVelocity > 0 ? "+" : ""}${explosionVelocity.toFixed(1)}%`);
+    if (missileVelocity !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${missileVelocity > 0 ? "+" : ""}${missileVelocity.toFixed(1)}%`);
+    if (flightTime !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${flightTime > 0 ? "+" : ""}${flightTime.toFixed(1)}%`);
     return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
   private enhancerModuleEffect(spec: MissileEnhancerSpec): string {
     const parts: string[] = [];
-    if (spec.explosionRadiusBonusPercent !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionRadius")} ${spec.explosionRadiusBonusPercent > 0 ? "+" : ""}${spec.explosionRadiusBonusPercent.toFixed(1)}%`);
-    if (spec.explosionVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("ewar.hover.explosionVelocity")} ${spec.explosionVelocityBonusPercent > 0 ? "+" : ""}${spec.explosionVelocityBonusPercent.toFixed(1)}%`);
-    if (spec.missileVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("ewar.hover.missileVelocity")} ${spec.missileVelocityBonusPercent > 0 ? "+" : ""}${spec.missileVelocityBonusPercent.toFixed(1)}%`);
-    if (spec.flightTimeBonusPercent !== 0) parts.push(`${this.i18n.t("ewar.hover.flightTime")} ${spec.flightTimeBonusPercent > 0 ? "+" : ""}${spec.flightTimeBonusPercent.toFixed(1)}%`);
+    if (spec.explosionRadiusBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionRadius")} ${spec.explosionRadiusBonusPercent > 0 ? "+" : ""}${spec.explosionRadiusBonusPercent.toFixed(1)}%`);
+    if (spec.explosionVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.explosionVelocity")} ${spec.explosionVelocityBonusPercent > 0 ? "+" : ""}${spec.explosionVelocityBonusPercent.toFixed(1)}%`);
+    if (spec.missileVelocityBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.missileVelocity")} ${spec.missileVelocityBonusPercent > 0 ? "+" : ""}${spec.missileVelocityBonusPercent.toFixed(1)}%`);
+    if (spec.flightTimeBonusPercent !== 0) parts.push(`${this.i18n.t("missileBooster.hover.flightTime")} ${spec.flightTimeBonusPercent > 0 ? "+" : ""}${spec.flightTimeBonusPercent.toFixed(1)}%`);
     return parts.length > 0 ? parts.join(" · ") : this.i18n.t("ewar.hover.outOfRange");
   }
 
@@ -407,7 +409,7 @@ export class MissileBoosterControllerImpl implements MissileBoosterController {
     state.activation[index].script = script;
     this.updateGearTitle(gear, script);
     const nameSpan = this.computerNameSpans.get(side)?.[index];
-    if (nameSpan) nameSpan.title = this.computerModuleEffect(state.loadout.computers[index], script);
+    if (nameSpan) nameSpan.title = this.computerModuleEffect(state.loadout.computers[index], script, state.activation[index].overloaded);
     this.scriptPopups[side].close();
     this.updateSummary(side);
     this.events.emitConfigInvalidated();
