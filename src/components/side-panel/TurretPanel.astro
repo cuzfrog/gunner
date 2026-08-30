@@ -4,6 +4,7 @@ import type { Side } from "../../ui/controls";
 import Chevron from "../controls/Chevron.astro";
 import FormField from "../form/FormField.astro";
 import FormFieldRow from "../form/FormFieldRow.astro";
+import IconButton from "../controls/IconButton.astro";
 import InputWithUnit from "../form/InputWithUnit.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
@@ -29,21 +30,30 @@ const falloff = DEFAULT_VALUES[`${idPrefix}-falloff`];
     <option value="XL">XL (2000 m)</option>
   </select>
 
-  <div class="segmented-control choice-selector sigres-selector"
-       id={`${idPrefix}-sig-res-options`} role="group"
-       data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
-    <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
-      <img class="choice-icon" alt="" hidden><span class="sigres-class">S</span><span class="choice-value mono">(40 m)</span>
+  <div class="weapon-selector-wrapper">
+    <div class="segmented-control choice-selector sigres-selector"
+         id={`${idPrefix}-sig-res-options`} role="group"
+         data-i18n-aria-label="label.turretSigResolution" aria-label="Turret sig. resolution">
+      <button type="button" data-value="S"  class="btn" aria-pressed="true"  title="S (40 m)">
+        <img class="choice-icon" alt="" hidden><span class="sigres-class">S</span><span class="choice-value mono">(40 m)</span>
+      </button>
+      <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
+        <img class="choice-icon" alt="" hidden><span class="sigres-class">M</span><span class="choice-value mono">(125 m)</span>
+      </button>
+      <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
+        <img class="choice-icon" alt="" hidden><span class="sigres-class">L</span><span class="choice-value mono">(400 m)</span>
+      </button>
+      <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
+        <img class="choice-icon" alt="" hidden><span class="sigres-class">XL</span><span class="choice-value mono">(2000 m)</span>
+      </button>
+    </div>
+    <IconButton id={`${idPrefix}-turret-variant-gear`} iconName="gear" extraClass="weapon-variant-gear btn"
+            titleI18n="label.turretVariant" ariaLabelI18n="label.turretVariant"
+            ariaHaspopup="menu" ariaExpanded={false} ariaControls={`${idPrefix}-turret-variants`} disabled />
+    <button type="button" id={`${idPrefix}-turret-weapon-overload-button`} class="overload-button weapon-overload-button btn" data-i18n-aria-label="label.weaponOverload" data-i18n-title="label.weaponOverload" aria-pressed="false">
+      <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
     </button>
-    <button type="button" data-value="M"  class="btn" aria-pressed="false" title="M (125 m)">
-      <img class="choice-icon" alt="" hidden><span class="sigres-class">M</span><span class="choice-value mono">(125 m)</span>
-    </button>
-    <button type="button" data-value="L"  class="btn" aria-pressed="false" title="L (400 m)">
-      <img class="choice-icon" alt="" hidden><span class="sigres-class">L</span><span class="choice-value mono">(400 m)</span>
-    </button>
-    <button type="button" data-value="XL" class="btn" aria-pressed="false" title="XL (2000 m)">
-      <img class="choice-icon" alt="" hidden><span class="sigres-class">XL</span><span class="choice-value mono">(2000 m)</span>
-    </button>
+    <PopupBox id={`${idPrefix}-turret-variants`} extraClass="fitting-popup turret-variants-popup" position="below" align="right" scroll role="menu" i18nAriaLabel="label.turretVariant" ariaLabel="Select turret variant" />
   </div>
 </div>
 <label class="form-field">

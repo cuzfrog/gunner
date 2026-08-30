@@ -1,10 +1,14 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
+import { buildDisruptionScriptStats, buildLauncherStats, buildMissileStats, buildStasisWebStats, buildTrackingComputerStats, buildTrackingDisruptorStats, buildWarpScramblerStats, _buildModuleStats, _filterItemNames, _writeI18nFiles } from "./generate-fitting-db";
 
 function values(entries: Record<string, number>): Map<string, number> {
   return new Map(Object.entries(entries));
+}
+
+function sdeType(metaLevel = 0, metaGroupID = 1): { typeID: number; "typeName_en-us": string; groupID: number; published: number; metaLevel: number; metaGroupID: number } {
+  return { typeID: 0, "typeName_en-us": "", groupID: 0, published: 1, metaLevel, metaGroupID };
 }
 
 describe("buildStasisWebStats", () => {
@@ -186,43 +190,129 @@ describe("buildDisruptionScriptStats", () => {
   });
 });
 
+describe("_buildModuleStats", () => {
+  function effects(...ids: number[]): Set<number> {
+    return new Set(ids);
+  }
+
+  test("returns undefined when no stats are present", () => {
+    expect(_buildModuleStats(values({}), effects())).toBeUndefined();
+  });
+
+  test("extracts mass and agility stats without damage effects", () => {
+    expect(_buildModuleStats(values({ massAddition: 500000, agilityMultiplier: -10 }), effects())).toEqual({
+      massAddition: 500000,
+      agilityMultiplier: 0.9,
+    });
+  });
+
+  test("extracts Heat Sink damage and speed multipliers with energy weapon effect", () => {
+    // Heat Sink II: effect 91 (energyWeaponDamageMultiply), effect 95 (energyWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects(91, 95));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.1,
+      turretSpeedMultiplier: 0.895,
+      turretWeaponGroup: "Energy Weapon",
+    });
+  });
+
+  test("extracts Gyrostabilizer damage and speed with projectile weapon effect", () => {
+    // Gyrostabilizer II: effect 92 (projectileWeaponDamageMultiply), effect 89 (projectileWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.89 }), effects(92, 89));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.89,
+      turretWeaponGroup: "Projectile Weapon",
+    });
+  });
+
+  test("extracts Magnetic Field Stabilizer with hybrid weapon effect", () => {
+    // Magnetic Field Stabilizer II: effect 93 (hybridWeaponDamageMultiply), effect 96 (hybridWeaponSpeedMultiply)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.905 }), effects(93, 96));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.905,
+      turretWeaponGroup: "Hybrid Weapon",
+    });
+  });
+
+  test("does not extract damage stats when no damage effect is present", () => {
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895 }), effects());
+    expect(stats).toBeUndefined();
+  });
+
+  test("preserves damage stats alongside tracking stats", () => {
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.1, speedMultiplier: 0.895, trackingSpeedBonus: 10 }), effects(91, 95));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.1,
+      turretSpeedMultiplier: 0.895,
+      turretWeaponGroup: "Energy Weapon",
+      turretTrackingPercent: 10,
+    });
+  });
+
+  test("extracts rig damage effects for projectile weapon", () => {
+    // Projectile rig: effect 2798 (projectileWeaponDamageMultiplyPassive), effect 2799 (projectileWeaponSpeedMultiplyPassive)
+    const stats = _buildModuleStats(values({ damageMultiplier: 1.15, speedMultiplier: 0.93 }), effects(2798, 2799));
+    expect(stats).toEqual({
+      turretDamageMultiplier: 1.15,
+      turretSpeedMultiplier: 0.93,
+      turretWeaponGroup: "Projectile Weapon",
+    });
+  });
+});
+
 describe("buildLauncherStats", () => {
   test("returns undefined when speed attribute is missing", () => {
-    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
   });
 
   test("returns undefined when speed is non-positive", () => {
-    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509)).toBeUndefined();
-    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 0, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: -100, chargeGroup1: 384 }), 509, sdeType())).toBeUndefined();
   });
 
   test("returns undefined when no charge groups are present", () => {
-    expect(buildLauncherStats(values({ speed: 13600 }), 509)).toBeUndefined();
+    expect(buildLauncherStats(values({ speed: 13600 }), 509, sdeType())).toBeUndefined();
   });
 
   test("converts cycle time from milliseconds to seconds and preserves launcher group with charge groups", () => {
     // Arbalest Compact Light Missile Launcher: speed=13600ms, group 509, chargeGroup1=384, chargeGroup2=394
-    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509)).toEqual({
+    expect(buildLauncherStats(values({ speed: 13600, chargeGroup1: 384, chargeGroup2: 394 }), 509, sdeType())).toEqual({
       rateOfFire: 13.6,
       launcherGroup: 509,
       chargeGroups: [384, 394],
+      metaLevel: 0,
+      metaGroupID: 1,
     });
   });
 
   test("collects charge groups from chargeGroup1 through chargeGroup5", () => {
     expect(buildLauncherStats(values({
       speed: 18000, chargeGroup1: 657, chargeGroup3: 89,
-    }), 508)).toEqual({
+    }), 508, sdeType())).toEqual({
       rateOfFire: 18,
       launcherGroup: 508,
       chargeGroups: [657, 89],
+      metaLevel: 0,
+      metaGroupID: 1,
     });
   });
 
   test("preserves torpedo launcher group (508) with chargeGroup3", () => {
-    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508);
+    const stats = buildLauncherStats(values({ speed: 18000, chargeGroup3: 89 }), 508, sdeType());
     expect(stats?.launcherGroup).toBe(508);
     expect(stats?.chargeGroups).toEqual([89]);
+  });
+
+  test("preserves metaLevel and metaGroupID from SDE type", () => {
+    expect(buildLauncherStats(values({ speed: 12800, chargeGroup1: 384 }), 509, sdeType(5, 2))).toEqual({
+      rateOfFire: 12.8,
+      launcherGroup: 509,
+      chargeGroups: [384],
+      metaLevel: 5,
+      metaGroupID: 2,
+    });
   });
 });
 

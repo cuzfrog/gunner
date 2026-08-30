@@ -54,7 +54,7 @@ const frame: EngagementFrame = {
 
 const snapshot: SimSnapshot = { time: 1, shipA, shipB, commands: { shipA: new Vec2(0, 0), shipB: new Vec2(0, 0) } };
 
-const input = { weapons: { shipA: shipATurret, shipB: shipBTurret } as const, sigRadii: { shipA: 30, shipB: 40 } };
+const input = { weapons: { shipA: [shipATurret] as const, shipB: [shipBTurret] as const }, sigRadii: { shipA: 30, shipB: 40 } };
 
 const shipAAssessment: AttackAssessment = {
   boostedWeapon: boostedTurret,
@@ -108,14 +108,35 @@ describe("EngagementFrameComposerImpl", () => {
   test("undefined weapon yields undefined attack and undefined effective weapon", () => {
     const { engagementEvaluator, composer } = makeComposer();
     engagementEvaluator.evaluate.mockReturnValue({ shipA: undefined, shipB: undefined });
-    const view = composer.compose(snapshot, { weapons: { shipA: undefined, shipB: undefined }, sigRadii: { shipA: 30, shipB: 40 } });
+    const view = composer.compose(snapshot, { weapons: { shipA: [], shipB: [] }, sigRadii: { shipA: 30, shipB: 40 } });
     expect(view.attacks.shipA).toBeUndefined();
     expect(view.attacks.shipB).toBeUndefined();
     expect(view.effectiveWeapons.shipA).toBeUndefined();
     expect(view.effectiveWeapons.shipB).toBeUndefined();
-    expect(engagementEvaluator.evaluate).toHaveBeenCalledWith(frame, {
-      shipA: undefined,
-      shipB: undefined,
+  });
+
+  test("multiple weapons on one side sum DPS while keeping primary weapon details", () => {
+    const { engagementEvaluator, composer } = makeComposer();
+    const secondTurret: TurretSpec = { kind: "turret", tracking: 0.2, sigResolution: 125, optimal: 7000, falloff: 3000, damagePerShot: 50, cycleTime: 4, turretCount: 2 };
+    const secondDamage = { nominalDps: 25, appliedDps: 20, application: 0.8, volley: 100 };
+    const secondAssessment: AttackAssessment = {
+      boostedWeapon: secondTurret,
+      effectiveWeapon: secondTurret,
+      damage: secondDamage,
+      turret: { hit: { chance: 0.8, trackingTerm: 0.1, rangeTerm: 0.1 }, expectedMultiplier: 0.8 },
+    };
+    engagementEvaluator.evaluate.mockImplementation((_frame, attacks) => {
+      if (attacks.shipA?.weapon === shipATurret) return { shipA: shipAAssessment, shipB: undefined };
+      if (attacks.shipA?.weapon === secondTurret) return { shipA: secondAssessment, shipB: undefined };
+      return { shipA: undefined, shipB: undefined };
     });
+    const multiInput = { weapons: { shipA: [shipATurret, secondTurret] as const, shipB: [] as const }, sigRadii: { shipA: 30, shipB: 40 } };
+    const view = composer.compose(snapshot, multiInput);
+    expect(view.attacks.shipA).toBeDefined();
+    expect(view.attacks.shipA!.damage.nominalDps).toBe(shipADamage.nominalDps + secondDamage.nominalDps);
+    expect(view.attacks.shipA!.damage.appliedDps).toBe(shipADamage.appliedDps + secondDamage.appliedDps);
+    expect(view.attacks.shipA!.damage.volley).toBe(shipADamage.volley + secondDamage.volley);
+    expect(view.attacks.shipA!.effectiveWeapon).toBe(effectiveTurret);
+    expect(view.attacks.shipB).toBeUndefined();
   });
 });

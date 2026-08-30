@@ -128,7 +128,7 @@ describe("SidePanel", () => {
     const { document, panel } = buildSidePanel("shipA");
     getFake(document, "ship-a-skills").value = "4";
     getFake(document, "ship-a-overload").checked = true;
-    expect(panel.skillConditions()).toEqual({ skillLevel: 4, overloaded: true });
+    expect(panel.skillConditions()).toEqual({ skillLevel: 4, overloaded: true, weaponOverloaded: false });
   });
 
   test("onHullChange delegates to the hull section", () => {
@@ -177,7 +177,7 @@ describe("SidePanel", () => {
     panel.sections.propulsion.onPropulsionChange();
 
     const state = panel.capture();
-    const base = ships.fittedStats(rifter, undefined, undefined, { skillLevel: state.skillLevel ?? 5, overloaded: state.overload }).baseMaxSpeed;
+    const base = ships.fittedStats(rifter, undefined, undefined, { skillLevel: state.skillLevel ?? 5, overloaded: state.overload, weaponOverloaded: false }).baseMaxSpeed;
     expect(state.baseMaxSpeed).toBeCloseTo(base, 6);
     expect(state.baseMaxSpeed).toBeLessThan(state.speed);
   });

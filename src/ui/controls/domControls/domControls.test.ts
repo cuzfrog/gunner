@@ -116,7 +116,7 @@ function baseSettings(): UserSettings {
 describe("DomControls", () => {
   test("facade reads turret, shipB sig, speed, grid brightness and config", () => {
     const { document, controls, cradle } = buildDomControls();
-    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     const shipAWeapon = controls.getWeapon("shipA");
     if (shipAWeapon?.kind !== "turret") throw new Error("expected turret weapon for shipA");
     expect(shipAWeapon.optimal).toBe(600);
@@ -151,7 +151,7 @@ describe("DomControls", () => {
     const { controls, cradle } = buildDomControls();
     expect(controls.hasWeapon("shipA")).toBe(false);
     expect(controls.hasWeapon("shipB")).toBe(false);
-    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    cradle.cradle.shipATurretController.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false, weaponOverloaded: false });
     expect(controls.hasWeapon("shipA")).toBe(true);
     expect(controls.hasWeapon("shipB")).toBe(false);
   });

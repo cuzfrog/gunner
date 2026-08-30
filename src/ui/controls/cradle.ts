@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherClasses, MissileCatalog, PresetFittings } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameLoader } from "../../gamedata";
@@ -29,6 +29,7 @@ import type { RangeOverlayController } from "./rangeOverlay";
 import type { PortraitsController } from "./portraits";
 import type { ProfileEquality } from "../../appstate";
 import type { Side } from "./side";
+import type { PanelConfigurationMemory } from "../panelConfigurationMemory";
 
 type ControlsElements = ReturnType<typeof createControlsEls>;
 
@@ -41,7 +42,6 @@ export interface ControlsCradle {
   readonly ships: Ships;
   readonly fittingImport: FittingImport;
   readonly gunFamilies: GunFamilies;
-  readonly turretCatalog: TurretCatalog;
   readonly presetFittings: PresetFittings;
   readonly savedFittings: SavedFittings;
   readonly clipboard: ClipboardProvider;
@@ -54,6 +54,13 @@ export interface ControlsCradle {
   readonly shipATurretOverrides: TurretOverrides;
   readonly shipBTurretOverrides: TurretOverrides;
   readonly turretOverridesBySide: Record<Side, TurretOverrides>;
+  readonly shipAPanelMemory: PanelConfigurationMemory;
+  readonly shipBPanelMemory: PanelConfigurationMemory;
+  readonly panelMemoryBySide: Record<Side, PanelConfigurationMemory>;
+  readonly fittingCalculator: FittingCalculator;
+  readonly shipAFittingOverrides: FittingOverridesStore;
+  readonly shipBFittingOverrides: FittingOverridesStore;
+  readonly fittingOverridesBySide: Record<Side, FittingOverridesStore>;
   readonly popupGroup: PopupGroup;
   readonly els: ControlsElements;
   readonly engagementReadout: EngagementReadout;
@@ -72,7 +79,6 @@ export interface ControlsCradle {
   readonly weaponSystemSwitches: Record<Side, WeaponSystemSwitch>;
   readonly fittingDb: FittingDb;
   readonly missileCatalog: MissileCatalog;
-  readonly launcherCatalog: LauncherCatalog;
   readonly launcherClasses: LauncherClasses;
   readonly shipASide: SidePanel;
   readonly shipBSide: SidePanel;

@@ -65,7 +65,7 @@ export class AppImpl implements App {
   private renderFrame(): void {
     const snapshot = this.simulation.snapshot();
     const input = {
-      weapons: { shipA: this.controls.getWeapon("shipA"), shipB: this.controls.getWeapon("shipB") },
+      weapons: { shipA: this.controls.getWeapons("shipA"), shipB: this.controls.getWeapons("shipB") },
       sigRadii: { shipA: this.controls.getSig("shipA"), shipB: this.controls.getSig("shipB") },
     };
     const view = this.engagementFrameComposer.compose(snapshot, input);

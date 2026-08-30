@@ -6,8 +6,8 @@ import type { SkillLevel } from "../ships";
 import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { ImportedLauncher } from "./chargeCatalog";
 
-const LIGHT_MISSILE_LAUNCHER: LauncherStats = { rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], id: toTypeId("499"), name: "Light Missile Launcher I" };
-const ROCKET_LAUNCHER: LauncherStats = { rateOfFire: 4, launcherGroup: 507, chargeGroups: [387], id: toTypeId("510"), name: "Rocket Launcher I" };
+const LIGHT_MISSILE_LAUNCHER: LauncherStats = { rateOfFire: 16, launcherGroup: 509, chargeGroups: [384, 394], metaLevel: 0, metaGroupID: 1, id: toTypeId("499"), name: "Light Missile Launcher I" };
+const ROCKET_LAUNCHER: LauncherStats = { rateOfFire: 4, launcherGroup: 507, chargeGroups: [387], metaLevel: 0, metaGroupID: 1, id: toTypeId("510"), name: "Rocket Launcher I" };
 
 const SCOURGE_LIGHT: MissileStats = { damage: 83, damageType: "kinetic", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, id: toTypeId("258"), name: "Scourge Light Missile" };
 const INFERNO_LIGHT: MissileStats = { damage: 83, damageType: "thermal", explosionRadius: 50, explosionVelocity: 202, damageReductionFactor: 2.0, maxVelocity: 3750, flightTime: 5, launcherGroup: 509, chargeGroup: 384, id: toTypeId("257"), name: "Inferno Light Missile" };
@@ -68,7 +68,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("missilesForLauncher returns empty for a launcher with no matching missiles", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().missilesForLauncher(emptyLauncher)).toEqual([]);
   });
 
@@ -79,7 +79,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("usualForLauncher returns undefined when no missiles match", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().usualForLauncher(emptyLauncher)).toBeUndefined();
   });
 
@@ -145,7 +145,7 @@ describe("MissileCatalogImpl", () => {
   });
 
   test("equivalentInGroups returns undefined when no stem match exists in the target groups", () => {
-    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], id: toTypeId("999"), name: "Empty" };
+    const emptyLauncher: LauncherStats = { rateOfFire: 10, launcherGroup: 999, chargeGroups: [999], metaLevel: 0, metaGroupID: 1, id: toTypeId("999"), name: "Empty" };
     expect(catalog().equivalentInGroups(SCOURGE_ROCKET.id, emptyLauncher.chargeGroups)).toBeUndefined();
   });
 

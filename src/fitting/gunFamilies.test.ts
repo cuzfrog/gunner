@@ -93,4 +93,44 @@ describe("GunFamiliesImpl", () => {
       });
     }
   });
+
+  describe("variantsForFamily", () => {
+    test("returns all turrets matching the pulseLaser family at charge size 1 (S)", () => {
+      const variants = gunFamilies.variantsForFamily("pulseLaser", 1);
+      expect(variants.length).toBeGreaterThan(0);
+      for (const stats of variants) {
+        expect(stats.chargeSize).toBe(1);
+        expect(gunFamilies.familyOf(stats.id)).toBe("pulseLaser");
+      }
+    });
+
+    test("includes both Tech I and Tech II variants for pulseLaser S", () => {
+      const variants = gunFamilies.variantsForFamily("pulseLaser", 1);
+      const names = variants.map((v) => v.name);
+      expect(names).toContain("Gatling Pulse Laser I");
+      expect(names).toContain("Gatling Pulse Laser II");
+    });
+
+    test("sorts Tech I before Tech II", () => {
+      const variants = gunFamilies.variantsForFamily("pulseLaser", 1);
+      const techI = variants.find((v) => v.name === "Gatling Pulse Laser I");
+      const techII = variants.find((v) => v.name === "Gatling Pulse Laser II");
+      expect(techI).toBeDefined();
+      expect(techII).toBeDefined();
+      expect(variants.indexOf(techI!)).toBeLessThan(variants.indexOf(techII!));
+    });
+
+    test("returns different variants for different charge sizes", () => {
+      const small = gunFamilies.variantsForFamily("pulseLaser", 1);
+      const medium = gunFamilies.variantsForFamily("pulseLaser", 2);
+      const smallIds = new Set(small.map((v) => v.id));
+      const mediumIds = new Set(medium.map((v) => v.id));
+      for (const id of smallIds) expect(mediumIds.has(id)).toBe(false);
+    });
+
+    test("returns empty for a non-existent charge size", () => {
+      const variants = gunFamilies.variantsForFamily("pulseLaser", 99);
+      expect(variants).toEqual([]);
+    });
+  });
 });

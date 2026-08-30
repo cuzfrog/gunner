@@ -34,6 +34,8 @@ interface SdeType {
   typeName_ja?: string;
   groupID: number;
   published: number;
+  metaLevel?: number;
+  metaGroupID?: number;
 }
 
 type LocalizedName = { readonly en: string; readonly zh?: string; readonly ja?: string };
@@ -64,7 +66,7 @@ interface SdeTypeDogma {
   dogmaEffects: readonly SdeDogmaEffect[];
 }
 
-type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF";
+type BonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF";
 
 interface HullBonusRule {
   readonly attribute: BonusAttribute;
@@ -336,14 +338,108 @@ const BONUS_EFFECTS: Readonly<Record<number, readonly HullBonusRule[]>> = {
   11068: [{ attribute: "missileRoF", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", launcherGroup: 509 }],
   11512: [{ attribute: "missileRoF", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", launcherGroup: 509 }],
   12817: [{ attribute: "missileRoF", bonusAttr: "shipBonusMD3", skill: "Minmatar Destroyer" }],
+  // Turret damage bonuses (ship hull effects that boost damageMultiplier)
+  508: [{ attribute: "turretDamage", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  512: [{ attribute: "turretDamage", bonusAttr: "shipBonusGF", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  514: [{ attribute: "turretDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", turretSkill: "Small Energy Turret" }],
+  549: [{ attribute: "turretDamage", bonusAttr: "shipBonusMB", skill: "Minmatar Battleship", turretSkill: "Large Projectile Turret" }],
+  550: [{ attribute: "turretDamage", bonusAttr: "shipBonusGB", skill: "Gallente Battleship", turretSkill: "Large Hybrid Turret" }],
+  562: [{ attribute: "turretDamage", bonusAttr: "shipBonusGC", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  754: [{ attribute: "turretDamage", bonusAttr: "shipBonusCF", skill: "Caldari Frigate", turretSkill: "Small Hybrid Turret" }],
+  757: [{ attribute: "turretDamage", bonusAttr: "shipBonusAF", skill: "Amarr Frigate", turretSkill: "Small Energy Turret" }],
+  968: [{ attribute: "turretDamage", bonusAttr: "shipBonusMC2", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  1021: [{ attribute: "turretDamage", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Hybrid Turret" }],
+  1061: [{ attribute: "turretDamage", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", turretSkill: "Medium Hybrid Turret" }],
+  1062: [{ attribute: "turretDamage", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", turretSkill: "Medium Energy Turret" }],
+  1087: [{ attribute: "turretDamage", bonusAttr: "eliteBonusHeavyGunship2", skill: "Heavy Assault Cruisers", turretSkill: "Medium Projectile Turret" }],
+  1179: [{ attribute: "turretDamage", bonusAttr: "eliteBonusGunship2", skill: "Assault Frigates", turretSkill: "Small Energy Turret" }],
+  1218: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Small Hybrid Turret" }],
+  1233: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Medium Hybrid Turret" }],
+  1240: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Large Hybrid Turret" }],
+  2155: [{ attribute: "turretDamage", bonusAttr: "eliteBonusCommandShips1", skill: "Command Ships", turretSkill: "Medium Projectile Turret" }],
+  2157: [{ attribute: "turretDamage", bonusAttr: "eliteBonusCommandShips1", skill: "Command Ships", turretSkill: "Medium Energy Turret" }],
+  2215: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Small Projectile Turret" }],
+  2611: [{ attribute: "turretDamage", bonusAttr: "eliteBonusGunship1", skill: "Assault Frigates", turretSkill: "Small Projectile Turret" }],
+  2805: [{ attribute: "turretDamage", bonusAttr: "shipBonusAB2", skill: "Amarr Battleship", turretSkill: "Large Energy Turret" }],
+  3415: [{ attribute: "turretDamage", bonusAttr: "eliteBonusViolatorsRole1", turretSkill: "Large Energy Turret" }],
+  3416: [{ attribute: "turretDamage", bonusAttr: "eliteBonusViolatorsRole1", turretSkill: "Large Hybrid Turret" }],
+  3417: [{ attribute: "turretDamage", bonusAttr: "eliteBonusViolatorsRole1", turretSkill: "Large Projectile Turret" }],
+  3478: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Large Energy Turret" }],
+  3483: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Medium Energy Turret" }],
+  3487: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Small Energy Turret" }],
+  3649: [{ attribute: "turretDamage", bonusAttr: "eliteBonusViolators1", skill: "Marauders", turretSkill: "Large Energy Turret" }],
+  4366: [{ attribute: "turretDamage", bonusAttr: "shipBonusCC2", skill: "Caldari Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  4472: [{ attribute: "turretDamage", bonusAttr: "shipBonusMC", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  4789: [{ attribute: "turretDamage", bonusAttr: "shipBonusATF1", turretSkill: "Small Energy Turret" }],
+  4941: [{ attribute: "turretDamage", bonusAttr: "shipBonusCF2", skill: "Caldari Frigate", turretSkill: "Small Hybrid Turret" }],
+  4991: [{ attribute: "turretDamage", bonusAttr: "rookieSETDamageBonus", turretSkill: "Small Energy Turret" }],
+  5013: [{ attribute: "turretDamage", bonusAttr: "rookieSHTDamageBonus", turretSkill: "Small Hybrid Turret" }],
+  5020: [{ attribute: "turretDamage", bonusAttr: "rookieSPTDamageBonus", turretSkill: "Small Projectile Turret" }],
+  5133: [{ attribute: "turretDamage", bonusAttr: "shipBonusCC", skill: "Caldari Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  5136: [{ attribute: "turretDamage", bonusAttr: "shipBonusAC", skill: "Amarr Cruiser", turretSkill: "Medium Energy Turret" }],
+  5220: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Medium Projectile Turret" }],
+  5317: [{ attribute: "turretDamage", bonusAttr: "shipBonusMD1", skill: "Minmatar Destroyer", turretSkill: "Small Projectile Turret" }],
+  5333: [{ attribute: "turretDamage", bonusAttr: "shipBonusABC2", skill: "Amarr Battlecruiser", turretSkill: "Medium Energy Turret" }],
+  5341: [{ attribute: "turretDamage", bonusAttr: "shipBonusGBC1", skill: "Gallente Battlecruiser", turretSkill: "Medium Hybrid Turret" }],
+  5352: [{ attribute: "turretDamage", bonusAttr: "shipBonusMBC1", skill: "Minmatar Battlecruiser", turretSkill: "Medium Projectile Turret" }],
+  5355: [{ attribute: "turretDamage", bonusAttr: "shipBonusABC2", skill: "Amarr Battlecruiser", turretSkill: "Large Energy Turret" }],
+  5357: [{ attribute: "turretDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", turretSkill: "Large Hybrid Turret" }],
+  5359: [{ attribute: "turretDamage", bonusAttr: "shipBonusGBC2", skill: "Gallente Battlecruiser", turretSkill: "Large Hybrid Turret" }],
+  5486: [{ attribute: "turretDamage", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", turretSkill: "Medium Projectile Turret" }],
+  5501: [{ attribute: "turretDamage", bonusAttr: "eliteBonusCommandShips2", skill: "Command Ships", turretSkill: "Medium Hybrid Turret" }],
+  5673: [{ attribute: "turretDamage", bonusAttr: "eliteBonusInterceptor2", skill: "Interceptors", turretSkill: "Small Projectile Turret" }],
+  5956: [{ attribute: "turretDamage", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser", turretSkill: "Medium Energy Turret" }],
+  6006: [{ attribute: "turretDamage", bonusAttr: "shipBonusTacticalDestroyerAmarr1", skill: "Amarr Tactical Destroyer", turretSkill: "Small Energy Turret" }],
+  6027: [{ attribute: "turretDamage", bonusAttr: "eliteBonusReconShip1", skill: "Recon Ships", turretSkill: "Medium Projectile Turret" }],
+  6037: [{ attribute: "turretDamage", bonusAttr: "shipBonusTacticalDestroyerMinmatar1", skill: "Minmatar Tactical Destroyer", turretSkill: "Small Projectile Turret" }],
+  6177: [{ attribute: "turretDamage", bonusAttr: "shipBonusCBC2", skill: "Caldari Battlecruiser", turretSkill: "Medium Hybrid Turret" }],
+  6501: [{ attribute: "turretDamage", bonusAttr: "shipBonusDreadnoughtA1", skill: "Amarr Dreadnought", turretSkill: "Capital Energy Turret" }],
+  6506: [{ attribute: "turretDamage", bonusAttr: "shipBonusDreadnoughtG1", skill: "Gallente Dreadnought", turretSkill: "Capital Hybrid Turret" }],
+  6509: [{ attribute: "turretDamage", bonusAttr: "shipBonusDreadnoughtM1", skill: "Minmatar Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  6634: [{ attribute: "turretDamage", bonusAttr: "shipBonusTitanA1", skill: "Amarr Titan", turretSkill: "Capital Energy Turret" }],
+  6636: [{ attribute: "turretDamage", bonusAttr: "shipBonusTitanG1", skill: "Gallente Titan", turretSkill: "Capital Hybrid Turret" }],
+  6637: [{ attribute: "turretDamage", bonusAttr: "shipBonusTitanM1", skill: "Minmatar Titan", turretSkill: "Capital Projectile Turret" }],
+  6709: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole1", turretSkill: "Capital Hybrid Turret" }],
+  6711: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole3", turretSkill: "Capital Hybrid Turret" }],
+  6851: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole3", turretSkill: "Capital Energy Turret" }],
+  6992: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole1", turretSkill: "Medium Hybrid Turret" }],
+  6994: [{ attribute: "turretDamage", bonusAttr: "eliteBonusReconShip1", skill: "Recon Ships", turretSkill: "Medium Hybrid Turret" }],
+  7003: [{ attribute: "turretDamage", bonusAttr: "eliteBonusCovertOps3", skill: "Covert Ops", turretSkill: "Small Hybrid Turret" }],
+  7055: [{ attribute: "turretDamage", bonusAttr: "shipBonusRole7", turretSkill: "Large Hybrid Turret" }],
+  8106: [{ attribute: "turretDamage", bonusAttr: "shipBonusMB2", skill: "Minmatar Battleship", turretSkill: "Large Projectile Turret" }],
+  11072: [{ attribute: "turretDamage", bonusAttr: "shipBonusGF2", skill: "Gallente Frigate", turretSkill: "Small Hybrid Turret" }],
+  // Turret rate-of-fire bonuses (ship hull effects that boost speed/cycle time)
+  602: [{ attribute: "turretRoF", bonusAttr: "shipBonusMC", skill: "Minmatar Cruiser", turretSkill: "Medium Projectile Turret" }],
+  604: [{ attribute: "turretRoF", bonusAttr: "shipBonusMB2", skill: "Minmatar Battleship", turretSkill: "Large Projectile Turret" }],
+  887: [{ attribute: "turretRoF", bonusAttr: "shipBonusAB2", skill: "Amarr Battleship", turretSkill: "Large Energy Turret" }],
+  907: [{ attribute: "turretRoF", bonusAttr: "shipBonusAC2", skill: "Amarr Cruiser", turretSkill: "Medium Energy Turret" }],
+  1232: [{ attribute: "turretRoF", bonusAttr: "shipBonusRole7", turretSkill: "Medium Projectile Turret" }],
+  1239: [{ attribute: "turretRoF", bonusAttr: "shipBonusRole7", turretSkill: "Large Projectile Turret" }],
+  3705: [{ attribute: "turretRoF", bonusAttr: "shipBonusGC2", skill: "Gallente Cruiser", turretSkill: "Medium Hybrid Turret" }],
+  4464: [{ attribute: "turretRoF", bonusAttr: "shipBonusMF", turretSkill: "Small Projectile Turret" }],
+  5353: [{ attribute: "turretRoF", bonusAttr: "shipBonusMBC2", skill: "Minmatar Battlecruiser", turretSkill: "Medium Projectile Turret" }],
+  5360: [{ attribute: "turretRoF", bonusAttr: "shipBonusMBC1", skill: "Minmatar Battlecruiser", turretSkill: "Large Projectile Turret" }],
+  5424: [{ attribute: "turretRoF", bonusAttr: "shipBonusGB", skill: "Gallente Battleship", turretSkill: "Large Hybrid Turret" }],
+  6149: [{ attribute: "turretRoF", bonusAttr: "shipBonusTacticalDestroyerGallente1", skill: "Gallente Tactical Destroyer", turretSkill: "Small Hybrid Turret" }],
+  6507: [{ attribute: "turretRoF", bonusAttr: "shipBonusDreadnoughtG2", skill: "Gallente Dreadnought", turretSkill: "Capital Hybrid Turret" }],
+  6510: [{ attribute: "turretRoF", bonusAttr: "shipBonusDreadnoughtM2", skill: "Minmatar Dreadnought", turretSkill: "Capital Projectile Turret" }],
+  6654: [{ attribute: "turretRoF", bonusAttr: "shipBonusTitanG2", skill: "Gallente Titan", turretSkill: "Capital Hybrid Turret" }],
+  6655: [{ attribute: "turretRoF", bonusAttr: "shipBonusTitanM2", skill: "Minmatar Titan", turretSkill: "Capital Projectile Turret" }],
+  6867: [{ attribute: "turretRoF", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  7018: [{ attribute: "turretRoF", bonusAttr: "shipBonusAF", turretSkill: "Small Energy Turret" }],
+  7248: [{ attribute: "turretRoF", bonusAttr: "shipBonusMF", skill: "Minmatar Frigate", turretSkill: "Small Projectile Turret" }],
+  8094: [{ attribute: "turretRoF", bonusAttr: "shipBonusGD1", skill: "Gallente Destroyer", turretSkill: "Small Hybrid Turret" }],
 };
 
 const MODULE_GROUPS = new Set([
   38, // Shield Extender
   46, // Propulsion Module
   78, // Reinforced Bulkhead
+  59, // Gyrostabilizer
+  205, // Heat Sink
   211, // Tracking Enhancer
   // 213 Tracking Computer is handled explicitly below
+  302, // Magnetic Field Stabilizer
   329, // Armor Plate
   762, // Inertial Stabilizer
   763, // Nanofiber Internal Structure
@@ -390,6 +486,79 @@ const RIG_SIG_DRAWBACK_EFFECT = 2716;
 const RIG_AGILITY_DRAWBACK_EFFECT = 2717;
 const SHIP_CATEGORY_ID = 6;
 
+// Maps module dogma effectIDs to the weapon group they modify. These are damage/RoF
+// multiplier effects from Heat Sinks, Gyrostabilizers, Magnetic Field Stabilizers, and
+// their rig/booster variants. The module's damageMultiplier and speedMultiplier attributes
+// are applied to turret modules of the matching weapon group with stacking penalties.
+const DAMAGE_MODULE_EFFECTS: Readonly<Record<number, TurretWeaponGroup>> = {
+  89: "Projectile Weapon",
+  91: "Energy Weapon",
+  92: "Projectile Weapon",
+  93: "Hybrid Weapon",
+  95: "Energy Weapon",
+  96: "Hybrid Weapon",
+  2798: "Projectile Weapon",
+  2799: "Projectile Weapon",
+  2802: "Hybrid Weapon",
+  2803: "Energy Weapon",
+  2804: "Hybrid Weapon",
+};
+
+// Skill typeIDs that provide turret damage or rate-of-fire bonuses. The bonus attribute
+// on the skill item is a percentage per level; it is applied as an unpenalized boost.
+interface SkillBonusRule {
+  readonly skillId: number;
+  readonly bonusType: "turretDamage" | "turretRoF";
+  readonly bonusAttr: string;
+  readonly weaponGroup?: TurretWeaponGroup;
+  readonly turretSkill?: string;
+  readonly specializationSkill?: string;
+}
+
+const SKILL_BONUS_RULES: readonly SkillBonusRule[] = [
+  { skillId: 3300, bonusType: "turretRoF", bonusAttr: "turretSpeeBonus" },
+  { skillId: 3310, bonusType: "turretRoF", bonusAttr: "rofBonus" },
+  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Energy Weapon" },
+  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Projectile Weapon" },
+  { skillId: 3315, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", weaponGroup: "Hybrid Weapon" },
+  { skillId: 3301, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Hybrid Turret" },
+  { skillId: 3302, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Projectile Turret" },
+  { skillId: 3303, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Small Energy Turret" },
+  { skillId: 3304, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Hybrid Turret" },
+  { skillId: 3305, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Projectile Turret" },
+  { skillId: 3306, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Medium Energy Turret" },
+  { skillId: 3307, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Hybrid Turret" },
+  { skillId: 3308, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Projectile Turret" },
+  { skillId: 3309, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Large Energy Turret" },
+  { skillId: 20327, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Energy Turret" },
+  { skillId: 21666, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Hybrid Turret" },
+  { skillId: 21667, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", turretSkill: "Capital Projectile Turret" },
+  { skillId: 11082, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Railgun Specialization" },
+  { skillId: 11083, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Beam Laser Specialization" },
+  { skillId: 11084, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Autocannon Specialization" },
+  { skillId: 12201, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Artillery Specialization" },
+  { skillId: 12202, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Artillery Specialization" },
+  { skillId: 12203, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Artillery Specialization" },
+  { skillId: 12204, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Beam Laser Specialization" },
+  { skillId: 12205, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Beam Laser Specialization" },
+  { skillId: 12206, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Railgun Specialization" },
+  { skillId: 12207, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Railgun Specialization" },
+  { skillId: 12208, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Autocannon Specialization" },
+  { skillId: 12209, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Autocannon Specialization" },
+  { skillId: 12210, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Blaster Specialization" },
+  { skillId: 12211, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Blaster Specialization" },
+  { skillId: 12212, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Blaster Specialization" },
+  { skillId: 12213, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Small Pulse Laser Specialization" },
+  { skillId: 12214, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Medium Pulse Laser Specialization" },
+  { skillId: 12215, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Large Pulse Laser Specialization" },
+  { skillId: 41403, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Autocannon Specialization" },
+  { skillId: 41404, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Artillery Specialization" },
+  { skillId: 41405, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Blaster Specialization" },
+  { skillId: 41406, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Railgun Specialization" },
+  { skillId: 41407, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Pulse Laser Specialization" },
+  { skillId: 41408, bonusType: "turretDamage", bonusAttr: "damageMultiplierBonus", specializationSkill: "Capital Beam Laser Specialization" },
+];
+
 function stringifyWithTypeIds<T>(value: T): string {
   return JSON.stringify(value).replace(/"id":"(\d+)"/g, '"id":"$1" as TypeId');
 }
@@ -399,6 +568,24 @@ function stringifyHullBonuses(value: Record<ShipId, readonly HullBonus[]>): stri
     .map(([shipId, bonuses]) => `[${JSON.stringify(shipId)} as ShipId]:${JSON.stringify(bonuses)}`)
     .join(",");
   return `{${entries}}`;
+}
+
+function stringifySkillBonuses(skillMagnitudes: ReadonlyMap<number, ReadonlyMap<string, number>>): string {
+  const entries = SKILL_BONUS_RULES.map((rule) => {
+    const attrs = skillMagnitudes.get(rule.skillId);
+    const magnitude = attrs?.get(rule.bonusAttr);
+    if (magnitude === undefined) return null;
+    const obj: Record<string, unknown> = {
+      skillId: String(rule.skillId),
+      bonusType: rule.bonusType,
+      magnitudePerLevel: magnitude,
+    };
+    if (rule.weaponGroup !== undefined) obj.weaponGroup = rule.weaponGroup;
+    if (rule.turretSkill !== undefined) obj.turretSkill = rule.turretSkill;
+    if (rule.specializationSkill !== undefined) obj.specializationSkill = rule.specializationSkill;
+    return JSON.stringify(obj).replace(/"skillId":"(\d+)"/, '"skillId":"$1" as TypeId');
+  }).filter((entry): entry is string => entry !== null);
+  return `[${entries.join(",")}]`;
 }
 
 function buildShipNameToId(): ReadonlyMap<string, ShipId> {
@@ -455,6 +642,20 @@ function buildEffectSet(typeDogma: SdeTypeDogma | undefined): Set<number> {
   return effects;
 }
 
+function buildSkillMagnitudes(
+  attributeNames: Map<number, string>,
+  typedogmas: Record<string, SdeTypeDogma>,
+): ReadonlyMap<number, ReadonlyMap<string, number>> {
+  const result = new Map<number, ReadonlyMap<string, number>>();
+  const skillIds = new Set(SKILL_BONUS_RULES.map((rule) => rule.skillId));
+  for (const skillId of skillIds) {
+    const typeDogma = typedogmas[String(skillId)];
+    const values = buildAttributeValues(attributeNames, typeDogma);
+    result.set(skillId, values);
+  }
+  return result;
+}
+
 function sizeTierFromPropulsionName(name: string): "small" | "medium" | "large" | "capital" {
   if (/10000MN|50000MN/.test(name)) return "capital";
   if (/100MN|500MN/.test(name)) return "large";
@@ -487,12 +688,17 @@ interface FittingModuleStats {
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
+  readonly turretDamageMultiplier?: number;
+  readonly turretSpeedMultiplier?: number;
+  readonly turretWeaponGroup?: TurretWeaponGroup;
   readonly propulsion?: FittingPropulsionStats;
   readonly stasisWeb?: StasisWebStats;
   readonly stasisGrappler?: StasisGrapplerStats;
   readonly trackingDisruptor?: TrackingDisruptorStats;
   readonly warpScrambler?: WarpScramblerStats;
 }
+
+type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
 
 interface TurretStats {
   readonly tracking: number;
@@ -502,6 +708,9 @@ interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
 }
 
 interface ChargeStats {
@@ -518,6 +727,8 @@ interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
 }
 
 interface MissileStats {
@@ -599,7 +810,7 @@ function buildPropulsionStats(values: Map<string, number>, type: SdeType): Fitti
 }
 
 function buildModuleStats(values: Map<string, number>, effects: Set<number>): FittingModuleStats | undefined {
-  const stats: Record<string, number> = {};
+  const stats: { -readonly [K in keyof FittingModuleStats]?: FittingModuleStats[K] } = {};
 
   const massAddition = optionalNumber(values.get("massAddition"));
   if (massAddition !== undefined) stats.massAddition = massAddition;
@@ -639,8 +850,27 @@ function buildModuleStats(values: Map<string, number>, effects: Set<number>): Fi
     stats.agilityDrawbackPercent = drawback;
   }
 
+  const damageGroup = resolveDamageModuleGroup(effects);
+  if (damageGroup !== undefined) {
+    const damageMultiplier = optionalNumber(values.get("damageMultiplier"));
+    const speedMultiplier = optionalNumber(values.get("speedMultiplier"));
+    if ((damageMultiplier !== undefined && damageMultiplier !== 0) || (speedMultiplier !== undefined && speedMultiplier !== 0)) {
+      stats.turretWeaponGroup = damageGroup;
+      if (damageMultiplier !== undefined && damageMultiplier !== 0) stats.turretDamageMultiplier = damageMultiplier;
+      if (speedMultiplier !== undefined && speedMultiplier !== 0) stats.turretSpeedMultiplier = speedMultiplier;
+    }
+  }
+
   if (Object.keys(stats).length === 0) return undefined;
   return { ...stats };
+}
+
+function resolveDamageModuleGroup(effects: Set<number>): TurretWeaponGroup | undefined {
+  for (const effectId of effects) {
+    const group = DAMAGE_MODULE_EFFECTS[effectId];
+    if (group !== undefined) return group;
+  }
+  return undefined;
 }
 
 export function buildStasisWebStats(values: Map<string, number>): StasisWebStats | undefined {
@@ -749,7 +979,21 @@ function turretSkillFromRequired(
   return undefined;
 }
 
-export function buildLauncherStats(values: Map<string, number>, groupID: number): LauncherStats | undefined {
+function specializationSkillFromRequired(
+  types: Record<string, SdeType>,
+  requiredSkills: Record<string, Record<string, number>>,
+  typeID: number,
+): string | undefined {
+  const skills = requiredSkills[String(typeID)];
+  if (!skills) return undefined;
+  for (const skillTypeID of Object.keys(skills)) {
+    const name = types[skillTypeID]?.["typeName_en-us"];
+    if (name?.includes("Specialization")) return name;
+  }
+  return undefined;
+}
+
+export function buildLauncherStats(values: Map<string, number>, groupID: number, type: SdeType): LauncherStats | undefined {
   const speed = values.get("speed");
   if (speed === undefined || speed <= 0) return undefined;
   const chargeGroups: number[] = [];
@@ -758,7 +1002,7 @@ export function buildLauncherStats(values: Map<string, number>, groupID: number)
     if (group !== undefined && group > 0) chargeGroups.push(group);
   }
   if (chargeGroups.length === 0) return undefined;
-  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups };
+  return { rateOfFire: speed / 1000, launcherGroup: groupID, chargeGroups, metaLevel: type.metaLevel ?? 0, metaGroupID: type.metaGroupID ?? 1 };
 }
 
 export function buildMissileStats(values: Map<string, number>, groupID: number): MissileStats | undefined {
@@ -855,6 +1099,9 @@ async function main() {
           damageMultiplier,
           cycleTime: speed / 1000,
           turretSkill: turretSkillFromRequired(types, requiredSkills, type.typeID),
+          specializationSkill: specializationSkillFromRequired(types, requiredSkills, type.typeID),
+          metaLevel: type.metaLevel ?? 0,
+          metaGroupID: type.metaGroupID ?? 1,
         };
         addItemName(itemNames, id, type);
       }
@@ -879,7 +1126,7 @@ async function main() {
     }
 
     if (LAUNCHER_GROUPS.has(type.groupID)) {
-      const stats = buildLauncherStats(values, type.groupID);
+      const stats = buildLauncherStats(values, type.groupID, type);
       if (stats) {
         launchers[id] = { ...stats, id, name: enName };
         addItemName(itemNames, id, type);
@@ -996,6 +1243,8 @@ async function main() {
     Object.entries(drones).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, entry]) => [id, entry]),
   );
 
+  const skillMagnitudes = buildSkillMagnitudes(attributeNames, typedogmas);
+
   const date = new Date().toISOString().split("T")[0];
   const header =
     `// Generated from EVE Online SDE via Pyfa staticdata (${date}). Do not edit by hand.\n` +
@@ -1023,6 +1272,9 @@ export interface FittingModuleStats {
   readonly turretTrackingPercent?: number;
   readonly turretOptimalPercent?: number;
   readonly turretFalloffPercent?: number;
+  readonly turretDamageMultiplier?: number;
+  readonly turretSpeedMultiplier?: number;
+  readonly turretWeaponGroup?: TurretWeaponGroup;
   readonly propulsion?: FittingPropulsionStats;
   readonly stasisWeb?: Omit<StasisWebStats, "id" | "name">;
   readonly stasisGrappler?: Omit<StasisGrapplerStats, "id" | "name">;
@@ -1032,6 +1284,8 @@ export interface FittingModuleStats {
   readonly name: string;
 }
 
+export type TurretWeaponGroup = "Energy Weapon" | "Hybrid Weapon" | "Projectile Weapon";
+
 export interface TurretStats {
   readonly tracking: number;
   readonly optimal: number;
@@ -1040,11 +1294,14 @@ export interface TurretStats {
   readonly damageMultiplier: number;
   readonly cycleTime: number;
   readonly turretSkill?: string;
+  readonly specializationSkill?: string;
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
   readonly id: TypeId;
   readonly name: string;
 }
 
-export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF";
+export type HullBonusAttribute = "turretTracking" | "turretOptimal" | "turretFalloff" | "maxVelocity" | "agility" | "missileDamage" | "missileRoF" | "turretDamage" | "turretRoF";
 
 export interface HullBonus {
   readonly attribute: HullBonusAttribute;
@@ -1052,6 +1309,17 @@ export interface HullBonus {
   readonly skill?: string;
   readonly turretSkill?: string;
   readonly launcherGroup?: number;
+}
+
+export type SkillBonusType = "turretDamage" | "turretRoF";
+
+export interface SkillBonus {
+  readonly skillId: TypeId;
+  readonly bonusType: SkillBonusType;
+  readonly magnitudePerLevel: number;
+  readonly weaponGroup?: TurretWeaponGroup;
+  readonly turretSkill?: string;
+  readonly specializationSkill?: string;
 }
 
 export interface ChargeStats {
@@ -1070,6 +1338,8 @@ export interface LauncherStats {
   readonly rateOfFire: number;
   readonly launcherGroup: number;
   readonly chargeGroups: readonly number[];
+  readonly metaLevel: number;
+  readonly metaGroupID: number;
   readonly id: TypeId;
   readonly name: string;
 }
@@ -1178,6 +1448,8 @@ export const DISRUPTION_SCRIPTS: Readonly<Record<string, DisruptionScriptStats>>
     `export const MISSILES: Readonly<Record<string, MissileStats>> = ${stringifyWithTypeIds(missiles)};`,
     ``,
     `export const HULL_BONUSES: Readonly<Record<ShipId, readonly HullBonus[]>> = ${stringifyHullBonuses(hullBonuses)};`,
+    ``,
+    `export const SKILL_BONUSES: readonly SkillBonus[] = ${stringifySkillBonuses(skillMagnitudes)};`,
     ``,
     `export const DRONES: Readonly<Record<string, { readonly id: TypeId; readonly name: string }>> = ${stringifyWithTypeIds(sortedDrones)};`,
     ``,
@@ -1436,7 +1708,7 @@ async function writeI18nFiles(
   await writeFile(collisionJaFile, collisionJaContent);
 }
 
-export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles };
+export { filterItemNames as _filterItemNames, writeI18nFiles as _writeI18nFiles, buildModuleStats as _buildModuleStats };
 
 if (import.meta.main) {
   main().catch((error) => {

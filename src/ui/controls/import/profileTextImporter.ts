@@ -48,9 +48,11 @@ export class ProfileTextImporter {
     if (fitting) {
       const skillLevelKey = side === "shipA" ? "shipASkillLevel" : "shipBSkillLevel";
       const overloadKey = side === "shipA" ? "shipAOverload" : "shipBOverload";
+      const weaponOverloadKey = side === "shipA" ? "shipAWeaponOverload" : "shipBWeaponOverload";
       const imported = this.fittingImport.importFitting(fitting, {
         skillLevel: parsed[skillLevelKey] ?? 5,
         overloaded: parsed[overloadKey] ?? true,
+        weaponOverloaded: parsed[weaponOverloadKey] ?? false,
       });
       if (imported?.turret) return imported.turret.chargeId;
     }

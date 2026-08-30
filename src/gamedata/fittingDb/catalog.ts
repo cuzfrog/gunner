@@ -5,14 +5,18 @@ import {
   type FittingModuleStats,
   type FittingPropulsionStats,
   type HullBonus,
+  type HullBonusAttribute,
   type LauncherStats,
   type MissileStats,
+  type SkillBonus,
+  type SkillBonusType,
   type StasisGrapplerStats,
   type StasisWebStats,
   type TrackingComputerStats,
   type TrackingDisruptorStats,
   type TurretScriptStats,
   type TurretStats,
+  type TurretWeaponGroup,
   type WarpScramblerStats,
   CHARGES,
   DISRUPTION_SCRIPTS,
@@ -22,6 +26,7 @@ import {
   LAUNCHERS,
   MISSILES,
   SCRIPTS,
+  SKILL_BONUSES,
   STASIS_GRAPPLERS,
   STASIS_WEBS,
   TRACKING_COMPUTERS,
@@ -36,14 +41,18 @@ export type {
   FittingModuleStats,
   FittingPropulsionStats,
   HullBonus,
+  HullBonusAttribute,
   LauncherStats,
   MissileStats,
+  SkillBonus,
+  SkillBonusType,
   StasisGrapplerStats,
   StasisWebStats,
   TrackingComputerStats,
   TrackingDisruptorStats,
   TurretScriptStats,
   TurretStats,
+  TurretWeaponGroup,
   WarpScramblerStats,
 } from "./fittingDb";
 
@@ -64,6 +73,7 @@ export interface FittingDbData {
   readonly warpScramblers: Readonly<Record<string, Row<WarpScramblerStats>>>;
   readonly disruptionScripts: Readonly<Record<string, Row<DisruptionScriptStats>>>;
   readonly hullBonuses: Readonly<Record<ShipId, readonly HullBonus[]>>;
+  readonly skillBonuses: readonly SkillBonus[];
   readonly drones: Readonly<Record<string, DroneEntry>>;
 }
 
@@ -83,5 +93,6 @@ export const FITTING_DB: FittingDbData = {
   warpScramblers: WARP_SCRAMBLERS,
   disruptionScripts: DISRUPTION_SCRIPTS,
   hullBonuses: HULL_BONUSES,
+  skillBonuses: SKILL_BONUSES,
   drones: DRONES,
 };

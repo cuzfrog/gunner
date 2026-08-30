@@ -210,6 +210,7 @@ export class SettingsParser {
       isOptionalNonNegative(s[`${p}Aggressivity`]) &&
       isOptionalSkillLevel(s[`${p}SkillLevel`]) &&
       isOptionalBoolean(s[`${p}Overload`]) &&
+      isOptionalBoolean(s[`${p}WeaponOverload`]) &&
       isOptionalNonEmptyString(s[`${p}HullId`]) &&
       this.isOptionalPropulsionSelection(s[`${p}Propulsion`]) &&
       isOptionalFittingText(s[`${p}Fitting`]) &&
@@ -449,6 +450,7 @@ function setOptionalShipFields(wire: UserSettingsWire, combatant: CombatantSetti
   const p = side;
   if (combatant.skillLevel !== undefined) wire[`${p}SkillLevel` as const] = combatant.skillLevel;
   wire[`${p}Overload` as const] = combatant.overload;
+  wire[`${p}WeaponOverload` as const] = combatant.weaponOverload;
   if (combatant.hull !== undefined) wire[`${p}HullId` as const] = combatant.hull;
   if (combatant.propulsion !== undefined) wire[`${p}Propulsion` as const] = combatant.propulsion;
   if (combatant.fitting !== undefined) wire[`${p}Fitting` as const] = combatant.fitting;
@@ -474,6 +476,7 @@ function toCombatantSettings(settings: UserSettingsWire, side: "shipA" | "shipB"
     aggressivity: sideValue(side, settings.shipAAggressivity, settings.shipBAggressivity) ?? 1,
     skillLevel: sideValue(side, settings.shipASkillLevel, settings.shipBSkillLevel),
     overload: sideValue(side, settings.shipAOverload, settings.shipBOverload) ?? true,
+    weaponOverload: sideValue(side, settings.shipAWeaponOverload, settings.shipBWeaponOverload) ?? false,
     hull: sideValue(side, settings.shipAHullId, settings.shipBHullId),
     propulsion: sideValue(side, settings.shipAPropulsion, settings.shipBPropulsion),
     fitting: sideValue(side, settings.shipAFitting, settings.shipBFitting),

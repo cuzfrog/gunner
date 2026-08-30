@@ -4,7 +4,7 @@ import type { PropulsionModule, SkillLevel, StatConditions } from "../../ships";
 import type { I18n } from "../i18n";
 
 export const DEFAULT_GRID_BRIGHTNESS = 0.5;
-export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true };
+export const NEUTRAL_STAT_CONDITIONS: StatConditions = { skillLevel: 5, overloaded: true, weaponOverloaded: false };
 
 export function formatWithCommas(value: number, decimals = 0): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });

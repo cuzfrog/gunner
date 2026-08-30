@@ -48,7 +48,7 @@ function buildStatsSection(ships: Ships = shipsWithStats()) {
     shipSig: getFake(document, "ship-a-sig") as unknown as HTMLInputElement,
   };
 
-  const skillConditions: StatConditions = { skillLevel: 5, overloaded: true };
+  const skillConditions: StatConditions = { skillLevel: 5, overloaded: true, weaponOverloaded: false };
 
   const sections = vi.mocked<ISidePanelSections>({
     hull: {
@@ -142,7 +142,7 @@ describe("StatsSection", () => {
 
       const displayed = Number(getFake(document, "ship-a-speed").value);
       const base = section.currentBaseMaxSpeed();
-      const naked = ships.fittedStats(rifter, undefined, undefined, { skillLevel: 5, overloaded: true }).baseMaxSpeed;
+      const naked = ships.fittedStats(rifter, undefined, undefined, { skillLevel: 5, overloaded: true, weaponOverloaded: false }).baseMaxSpeed;
       expect(base).toBeCloseTo(naked, 6);
       expect(base).toBeLessThan(displayed);
     });
@@ -158,7 +158,7 @@ describe("StatsSection", () => {
       overrides.shipASpeed = override;
       getFake(document, "ship-a-speed").value = String(override);
 
-      const expected = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true }, override).baseMaxSpeed;
+      const expected = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true, weaponOverloaded: false }, override).baseMaxSpeed;
       expect(section.currentBaseMaxSpeed()).toBeCloseTo(expected, 6);
     });
 
@@ -171,7 +171,7 @@ describe("StatsSection", () => {
       panel.sections.propulsion.currentPropulsionModule = vi.fn(() => mwd5);
       getFake(document, "ship-a-speed").value = "99999";
 
-      const expected = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true }).baseMaxSpeed;
+      const expected = ships.fittedStats(rifter, undefined, mwd5, { skillLevel: 5, overloaded: true, weaponOverloaded: false }).baseMaxSpeed;
       expect(section.currentBaseMaxSpeed()).toBeCloseTo(expected, 6);
     });
   });

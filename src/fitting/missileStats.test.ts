@@ -5,7 +5,7 @@ import type { SkillLevel } from "../ships";
 import { toTypeId } from "../gamedata/ids";
 
 function launcher(rateOfFire: number, launcherGroup: number, chargeGroups: readonly number[] = [384]): LauncherStats {
-  return { rateOfFire, launcherGroup, chargeGroups, id: toTypeId("499"), name: "Light Missile Launcher I" };
+  return { rateOfFire, launcherGroup, chargeGroups, metaLevel: 0, metaGroupID: 1, id: toTypeId("499"), name: "Light Missile Launcher I" };
 }
 
 function missile(overrides: Partial<MissileStats> = {}): MissileStats {

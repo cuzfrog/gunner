@@ -7,13 +7,16 @@ export type GunFamily = "pulseLaser" | "beamLaser" | "railgun" | "blaster" | "au
 export interface GunFamilies {
   familyOf(moduleId: TypeId): GunFamily;
   representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId;
+  variantsForFamily(family: GunFamily, chargeSize: number): readonly TurretStats[];
 }
 
 export class GunFamiliesImpl implements GunFamilies {
   private readonly turretLookup: (id: TypeId) => TurretStats | undefined;
+  private readonly allTurrets: readonly TurretStats[];
 
   constructor({ fittingDb }: { fittingDb: FittingDb }) {
     this.turretLookup = (id) => fittingDb.turrets[id] ?? fittingDb.modules[id];
+    this.allTurrets = Object.values(fittingDb.turrets);
     if (fittingDb.turrets === FITTING_DB.turrets || fittingDb.modules === FITTING_DB.modules) assertOverridesExist(fittingDb);
   }
 
@@ -24,6 +27,12 @@ export class GunFamiliesImpl implements GunFamilies {
 
   representativeOf(family: GunFamily, sigResolutionClass: SigResolutionClass): TypeId {
     return GUN_FAMILY_REPRESENTATIVES[family][sigResolutionClass];
+  }
+
+  variantsForFamily(family: GunFamily, chargeSize: number): readonly TurretStats[] {
+    return this.allTurrets
+      .filter((stats) => stats.chargeSize === chargeSize && gunFamilyOf(stats.name) === family)
+      .sort(sortByMetaThenName);
   }
 }
 
@@ -226,4 +235,10 @@ function assertOverridesExist(fittingDb: FittingDb): void {
   for (const stats of Object.values(fittingDb.modules)) names.add(stats.name);
   const missing = Object.keys(FAMILY_OVERRIDES).filter((name) => !names.has(name));
   if (missing.length > 0) throw new Error(`FAMILY_OVERRIDES keys have no matching turret/module: ${missing.join(", ")}`);
+}
+
+function sortByMetaThenName(a: TurretStats, b: TurretStats): number {
+  if (a.metaGroupID !== b.metaGroupID) return a.metaGroupID - b.metaGroupID;
+  if (a.metaLevel !== b.metaLevel) return a.metaLevel - b.metaLevel;
+  return a.name.localeCompare(b.name);
 }

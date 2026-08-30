@@ -175,6 +175,7 @@ export class SidePanelImpl implements SidePanel {
       ...nav,
       skillLevel: this.sections.skill.currentSkillLevel(),
       overload: this.els.overload.checked,
+      weaponOverload: this.sections.skill.isWeaponOverloaded(),
       hull: this.profile?.id,
       propulsion: this.sections.propulsion.currentPropulsionSelection(),
       fitting: this.fittingText,
@@ -194,6 +195,7 @@ export class SidePanelImpl implements SidePanel {
     this.sections.hull.loadHull(state.hull, state.propulsion);
     this.sections.skill.setSkillLevel(state.skillLevel ?? 5);
     this.sections.skill.setOverloadActive(state.overload);
+    this.sections.skill.setWeaponOverloaded(state.weaponOverload);
     this.sections.skill.setOverloadDisabled();
     if (state.fittedHull) this.sections.hull.restoreFittingSummary(state.fittedHull);
     if (state.sig !== undefined) this.els.shipSig.value = String(state.sig);

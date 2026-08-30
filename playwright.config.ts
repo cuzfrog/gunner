@@ -5,14 +5,11 @@ export default defineConfig({
   testMatch: /.*\.e2e\.ts$/,
   fullyParallel: false,
   workers: 1,
+  globalSetup: "./e2e/globalSetup.ts",
+  globalTeardown: "./e2e/globalTeardown.ts",
   use: {
     baseURL: "http://localhost:4321",
-  },
-  webServer: {
-    command: "bun run build && bun run preview",
-    port: 4321,
-    reuseExistingServer: !process.env.CI,
-    timeout: 60000,
+    permissions: ["clipboard-read", "clipboard-write"],
   },
   projects: [
     {

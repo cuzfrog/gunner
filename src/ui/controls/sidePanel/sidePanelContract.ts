@@ -65,6 +65,7 @@ export interface SidePanelState {
   readonly aggressivity: number;
   readonly skillLevel: SkillLevel | undefined;
   readonly overload: boolean;
+  readonly weaponOverload: boolean;
   readonly hull: ShipId | undefined;
   readonly propulsion: PropulsionSelection | undefined;
   readonly fitting: string | undefined;

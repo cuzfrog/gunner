@@ -1,11 +1,20 @@
 import { toTypeId, type TypeId } from "../../../gamedata/ids";
 import { buildLauncher, importedLauncherFixture } from "./testSupport";
 import { FakeElement, getFake, IMPORTED_RIFTER } from "../testSupport";
-import type { ImportedFitting, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog } from "../../../fitting";
+import type { ImportedFitting, LauncherClass, LauncherClasses } from "../../../fitting";
 import type { ImportedLauncher } from "../../../fitting";
 
 function importedWithLauncher(launcher: ReturnType<typeof importedLauncherFixture>): ImportedFitting {
-  return { ...IMPORTED_RIFTER, turret: undefined, launcher };
+  return {
+    ...IMPORTED_RIFTER,
+    turret: undefined,
+    launcher,
+    fittingState: {
+      ...IMPORTED_RIFTER.fittingState!,
+      turretGroups: [],
+      launcherGroups: [{ moduleId: launcher.moduleId, chargeId: launcher.chargeId, count: launcher.count }],
+    },
+  };
 }
 
 const ROCKET_MODULE_ID = "10629" as TypeId;
@@ -64,7 +73,7 @@ function classAwareLauncherClasses(): Partial<LauncherClasses> {
       if (moduleId === ROCKET_MODULE_ID) return "rocket";
       return "light";
     }),
-    representativeOf: vi.fn(() => LIGHT_MODULE_ID),
+    representativeOf: vi.fn((cls: LauncherClass): TypeId => cls === "rocket" ? ROCKET_MODULE_ID : LIGHT_MODULE_ID),
     classesForTiers: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
     allClasses: vi.fn(() => ["rocket", "light"] as readonly LauncherClass[]),
   };
@@ -73,11 +82,11 @@ function classAwareLauncherClasses(): Partial<LauncherClasses> {
 describe("LauncherController class switch", () => {
   test("switching from light to rocket updates currentMissileSpec and emits configInvalidated", () => {
     const rocketLauncher = rocketLauncherFixture(2);
-    const launcherCatalog: Partial<LauncherCatalog> = {
-      switchClass: vi.fn(() => rocketLauncher),
-    };
-    const { document, controller, events } = buildLauncher({ launcherCatalog });
-    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
+    const { document, controller, events } = buildLauncher({
+      launcherClasses: classAwareLauncherClasses(),
+      launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher },
+    });
+    controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     const specBefore = controller.currentMissileSpec()!;
     expect(specBefore).toBeDefined();
@@ -99,50 +108,33 @@ describe("LauncherController class switch", () => {
   test("rocket -> light -> rocket restores the original launcher module and ammo", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
-    const switchClassMock = vi.fn<(launcher: ImportedLauncher, target: LauncherClass, bonuses: readonly unknown[], skill: number, preferred: TypeId | undefined) => ImportedLauncher | undefined>(
-      (_launcher, target) => target === "light" ? lightLauncher : rocketLauncher,
-    );
-    const launcherCatalog: Partial<LauncherCatalog> = { switchClass: switchClassMock };
-    const missileCatalog: Partial<MissileCatalog> = {
-      withCharge: vi.fn((launcher: ImportedLauncher, missileId: TypeId) => ({ ...launcher, chargeId: missileId, chargeName: `missile-${missileId}` })),
-      has: vi.fn(() => true),
-    };
-    const { document, controller } = buildLauncher({
-      launcherCatalog,
-      missileCatalog,
+    const { document, controller, panelMemory } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
+      launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     clickClassButton(document, "ship-a", "light");
-    expect(switchClassMock).toHaveBeenNthCalledWith(1, rocketLauncher, "light", [], 5, undefined);
+    expect(controller.launcher()?.moduleId).toBe(LIGHT_MODULE_ID);
 
     clickClassButton(document, "ship-a", "rocket");
-    expect(switchClassMock).toHaveBeenNthCalledWith(2, lightLauncher, "rocket", [], 5, ROCKET_MODULE_ID);
+    expect(controller.launcher()?.moduleId).toBe(ROCKET_MODULE_ID);
 
     const spec = controller.currentMissileSpec()!;
     expect(spec.damagePerMissile).toBe(45);
     expect(controller.ammoId()).toBe(SCOURGE_ROCKET_ID);
+    expect(panelMemory.recallLauncher("rocket")?.moduleId).toBe(ROCKET_MODULE_ID);
   });
 
   test("user-changed ammo is remembered when switching back to the original class", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
     const userRocketAmmoId = "267" as TypeId;
-    const switchClassMock = vi.fn<(launcher: ImportedLauncher, target: LauncherClass, bonuses: readonly unknown[], skill: number, preferred: TypeId | undefined) => ImportedLauncher | undefined>(
-      (_launcher, target) => target === "light" ? lightLauncher : rocketLauncher,
-    );
-    const launcherCatalog: Partial<LauncherCatalog> = { switchClass: switchClassMock };
-    const missileCatalog: Partial<MissileCatalog> = {
-      withCharge: vi.fn((launcher: ImportedLauncher, missileId: TypeId) => ({ ...launcher, chargeId: missileId, chargeName: `missile-${missileId}` })),
-      has: vi.fn(() => true),
-    };
-    const { document, controller } = buildLauncher({
-      launcherCatalog,
-      missileCatalog,
+    const { document, controller, panelMemory } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
+      launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
 
     clickClassButton(document, "ship-a", "light");
     clickClassButton(document, "ship-a", "rocket");
@@ -150,39 +142,28 @@ describe("LauncherController class switch", () => {
 
     controller["onAmmoSelect"](userRocketAmmoId);
     expect(controller.ammoId()).toBe(userRocketAmmoId);
+    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(userRocketAmmoId);
 
     clickClassButton(document, "ship-a", "light");
     clickClassButton(document, "ship-a", "rocket");
-    expect(switchClassMock).toHaveBeenLastCalledWith(expect.anything(), "rocket", [], 5, ROCKET_MODULE_ID);
     expect(controller.ammoId()).toBe(userRocketAmmoId);
   });
 
   test("clear resets the remembered launcher and ammo state", () => {
     const rocketLauncher = rocketLauncherFixture(2);
     const lightLauncher = lightLauncherFixture(2);
-    const switchClassMock = vi.fn<(launcher: ImportedLauncher, target: LauncherClass, bonuses: readonly unknown[], skill: number, preferred: TypeId | undefined) => ImportedLauncher | undefined>(
-      (_launcher, target) => target === "light" ? lightLauncher : rocketLauncher,
-    );
-    const launcherCatalog: Partial<LauncherCatalog> = { switchClass: switchClassMock };
-    const missileCatalog: Partial<MissileCatalog> = {
-      withCharge: vi.fn((launcher: ImportedLauncher, missileId: TypeId) => ({ ...launcher, chargeId: missileId, chargeName: `missile-${missileId}` })),
-      has: vi.fn(() => true),
-    };
-    const { document, controller } = buildLauncher({
-      launcherCatalog,
-      missileCatalog,
+    const userRocketAmmoId = "267" as TypeId;
+    const { document, controller, panelMemory } = buildLauncher({
       launcherClasses: classAwareLauncherClasses(),
+      launchersByModuleId: { [String(ROCKET_MODULE_ID)]: rocketLauncher, [String(LIGHT_MODULE_ID)]: lightLauncher },
     });
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
-    clickClassButton(document, "ship-a", "light");
-    clickClassButton(document, "ship-a", "rocket");
-    expect(switchClassMock).toHaveBeenNthCalledWith(2, expect.anything(), "rocket", [], 5, ROCKET_MODULE_ID);
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    controller["onAmmoSelect"](userRocketAmmoId);
+    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(userRocketAmmoId);
 
     controller.clear();
-    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false });
-    clickClassButton(document, "ship-a", "light");
-    const lastCall = switchClassMock.mock.calls.at(-1)!;
-    expect(lastCall[1]).toBe("light");
-    expect(lastCall[4]).toBeUndefined();
+    expect(panelMemory.recallLauncher("rocket")).toBeUndefined();
+    controller.applyImported(importedWithLauncher(rocketLauncher), { skillLevel: 5, overloaded: false, weaponOverloaded: false });
+    expect(panelMemory.recallLauncher("rocket")?.ammoId).toBe(SCOURGE_ROCKET_ID);
   });
 });

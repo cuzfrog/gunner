@@ -18,10 +18,10 @@ describe("ImportController", () => {
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     clipboard.readText.mockResolvedValue(text);
     await controller.importFromClipboard("shipA");
-    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(shipAPanel.fittingText).toBe(text);
-    expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
-    expect(launchers.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
+    expect(turrets.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    expect(launchers.shipA.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(weaponSystemSwitches.shipA.autoToggle).toHaveBeenCalledWith(true, false);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(onConfigPersisted).toHaveBeenCalled();
@@ -34,9 +34,9 @@ describe("ImportController", () => {
     clipboard.readText.mockResolvedValue(text);
     fittingImport.importFitting.mockReturnValue(IMPORTED_RIFTER);
     await controller.importFromClipboard("shipB");
-    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(shipBPanel.fittingText).toBe(text);
-    expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true });
+    expect(turrets.shipB.applyImported).toHaveBeenCalledWith(IMPORTED_RIFTER, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
   });
 
@@ -68,7 +68,7 @@ describe("ImportController", () => {
     const { controller, fittingImport, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     await controller.importFromText("shipA", text);
-    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(shipAPanel.fittingText).toBe(text);
     expect(shipAPanel.sections.paste.showImportHint).toHaveBeenCalledWith("status.fittingImported");
     expect(savedFittings.record).toHaveBeenCalledWith(expect.objectContaining({ hullId: IMPORTED_RIFTER.profile.id, name: "Brawler" }));
@@ -78,7 +78,7 @@ describe("ImportController", () => {
     const { controller, fittingImport, shipAPanel, savedFittings } = buildImportController(globalThis.document);
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     controller.importEftFitting("shipA", text, { persist: false, showImportedHint: false });
-    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(shipAPanel.sections.paste.showImportHint).not.toHaveBeenCalledWith("status.fittingImported");
     expect(savedFittings.record).not.toHaveBeenCalled();
   });
@@ -89,7 +89,7 @@ describe("ImportController", () => {
     const text = "[Rifter, Brawler]\n5MN Y-T8 Compact Microwarpdrive";
     events.onFittingImported(onFittingImported);
     await controller.importFromText("shipA", text);
-    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true });
+    expect(fittingImport.importFitting).toHaveBeenCalledWith(text, { skillLevel: 5, overloaded: true, weaponOverloaded: false });
     expect(onFittingImported).toHaveBeenCalledWith("shipA", IMPORTED_RIFTER);
   });
 

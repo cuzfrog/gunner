@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
@@ -17,12 +17,10 @@ import {
   mockFittingImport,
   mockGunFamilies,
   mockHitChance,
-  mockLauncherCatalog,
   mockLauncherClasses,
   mockMissileCatalog,
   mockParser,
   mockPresetFittings,
-  mockTurretCatalog,
   mockSavedFittings,
   mockSettingsStore,
   mockShips,
@@ -192,7 +190,6 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     profileTextCodec: asValue(vi.mocked<ProfileTextCodec>({ parse: vi.fn(() => undefined), serialize: vi.fn(() => ""), hasHeader: vi.fn(() => false) })),
     fittingImport: asValue(vi.mocked<FittingImport>({ ...mockFittingImport(), ...options.fittingImport })),
     gunFamilies: asValue(mockGunFamilies()),
-    turretCatalog: asValue(mockTurretCatalog()),
     presetFittings: asValue(vi.mocked<PresetFittings>({ ...mockPresetFittings(), ...options.presetFittings })),
     savedFittings: asValue(vi.mocked<SavedFittings>({ ...mockSavedFittings(), ...options.savedFittings })),
     clipboard: asValue(mockClipboard()),
@@ -200,8 +197,16 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     chargeCatalog: asValue(vi.mocked<ChargeCatalog>({ ...mockChargeCatalog(), ...options.chargeCatalog })),
     fittingDb: asValue(mockFittingDb()),
     missileCatalog: asValue(mockMissileCatalog()),
-    launcherCatalog: asValue(mockLauncherCatalog()),
     launcherClasses: asValue(mockLauncherClasses()),
+    fittingCalculator: asValue(vi.mocked<FittingCalculator>({
+      resolveTurrets: vi.fn(() => []),
+      resolveLauncher: vi.fn(() => undefined),
+      resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+      resolvePropulsion: vi.fn(() => undefined),
+      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+      resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
+      resolveCargoCharges: vi.fn(() => []),
+    })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
   });
@@ -260,6 +265,7 @@ class StubTurretController implements TurretController {
   restore(..._args: unknown[]): void {}
   clear = vi.fn();
   currentTurretSpec = vi.fn((): TurretSpec | undefined => ({ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 }));
+  currentTurretSpecs = vi.fn((): readonly TurretSpec[] => [{ kind: "turret" as const, tracking: 0.32, sigResolution: 40, optimal: 1000, falloff: 3000, damagePerShot: 12, cycleTime: 5, turretCount: 1 }]);
   currentSigResClass = vi.fn((): SigResolutionClass => "S");
   capture = vi.fn(() => ({ tracking: 0.32, sigRes: "S" as const, optimal: 1000, falloff: 3000, ammo: "12608" as TypeId }));
   isAmmoPopupOpen = vi.fn();

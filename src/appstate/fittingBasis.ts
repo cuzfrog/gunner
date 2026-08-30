@@ -23,10 +23,11 @@ export class FittingBasis {
 
     const skillLevel = side === "shipA" ? settings.shipASkillLevel ?? 5 : settings.shipBSkillLevel ?? 5;
     const overloaded = side === "shipA" ? settings.shipAOverload ?? true : settings.shipBOverload ?? true;
-    const imported = this.fittingImport.importFitting(text, { skillLevel, overloaded });
+    const weaponOverloaded = side === "shipA" ? settings.shipAWeaponOverload ?? false : settings.shipBWeaponOverload ?? false;
+    const imported = this.fittingImport.importFitting(text, { skillLevel, overloaded, weaponOverloaded });
     if (!imported) return {};
 
-    const conditions = { skillLevel, overloaded };
+    const conditions = { skillLevel, overloaded, weaponOverloaded };
     const profile = imported.profile;
     const propulsionKey = side === "shipA" ? "shipAPropulsion" : "shipBPropulsion";
     const storedPropulsionId = settings[propulsionKey];

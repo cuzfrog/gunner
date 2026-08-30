@@ -1,4 +1,4 @@
-// Generated from EVE Online SDE via Pyfa staticdata (2026-08-28). Do not edit by hand.
+// Generated from EVE Online SDE via Pyfa staticdata (2026-08-30). Do not edit by hand.
 /* eslint-disable */
 
 export const ITEM_NAME_COLLISIONS_JA: Readonly<Record<string, string>> = {"中型重力子スマートボムII":"3943","デュアルアフォーカルパルスレーザーI":"5217","トゥルーサンシャEMコーティング":"14019","ドミネーション炭化鉛弾XL":"20801","大型エクスプローシブ・アーマーレインフォーサーII":"26288","大型キネティック・アーマーレインフォーサーI":"25890","民間人仕様データアナライザー":"27014","シャドウインフェルノ自動索敵クルーズミサイルI":"27469","共和国海軍仕様炭化鉛弾S":"28328","スタンドアップ中型標準小型艦製造資源効率I":"37154","大型T1サブシステム研究II":"37208","超大型装置研究I":"37210","スタンドアップ大型ミサイル航行プロセッサII":"37248","スタンドアップ中型ME研究加速器I":"43882","アップウェルM3R-Oアウトポストリグ":"47989"};

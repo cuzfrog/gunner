@@ -106,7 +106,7 @@ export class FakeSidePanel {
   fittingText?: string;
   overrides: Record<string, unknown> = {};
   lastCommittedHull?: ShipId;
-  skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true }));
+  skillConditions = vi.fn(() => ({ skillLevel: 5 as const, overloaded: true, weaponOverloaded: false }));
   pastePopup = fakePopup();
   getPastePopup = () => this.pastePopup;
   sections = {

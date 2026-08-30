@@ -27,6 +27,8 @@ function buildSkillSection() {
     skillPopup: getFake(document, "ship-a-skill-popup") as unknown as HTMLElement,
     overload: getFake(document, "ship-a-overload") as unknown as HTMLInputElement,
     overloadButton: getFake(document, "ship-a-overload-button") as unknown as HTMLButtonElement,
+    turretWeaponOverloadButton: getFake(document, "ship-a-turret-weapon-overload-button") as unknown as HTMLButtonElement,
+    launcherWeaponOverloadButton: getFake(document, "ship-a-launcher-weapon-overload-button") as unknown as HTMLButtonElement,
   };
 
   const sections = vi.mocked<ISidePanelSections>({
@@ -84,7 +86,7 @@ describe("SkillOverloadSection", () => {
     const { document, section } = buildSkillSection();
     getFake(document, "ship-a-skills").value = "2";
     getFake(document, "ship-a-overload").checked = true;
-    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true });
+    expect(section.skillConditions()).toEqual({ skillLevel: 2, overloaded: true, weaponOverloaded: false });
   });
 
   test("setOverloadActive toggles the overload input and button", () => {
@@ -141,5 +143,49 @@ describe("SkillOverloadSection", () => {
     const { document, section } = buildSkillSection();
     const outside = getFake(document, "ship-a-overload");
     expect(section.popup.contains(outside as unknown as EventTarget)).toBe(false);
+  });
+
+  test("setWeaponOverloaded updates both weapon overload button aria-pressed states", () => {
+    const { document, section } = buildSkillSection();
+    section.setWeaponOverloaded(true);
+    expect(getFake(document, "ship-a-turret-weapon-overload-button").getAttribute("aria-pressed")).toBe("true");
+    expect(getFake(document, "ship-a-launcher-weapon-overload-button").getAttribute("aria-pressed")).toBe("true");
+    section.setWeaponOverloaded(false);
+    expect(getFake(document, "ship-a-turret-weapon-overload-button").getAttribute("aria-pressed")).toBe("false");
+    expect(getFake(document, "ship-a-launcher-weapon-overload-button").getAttribute("aria-pressed")).toBe("false");
+  });
+
+  test("skillConditions reflects weaponOverloaded state", () => {
+    const { section } = buildSkillSection();
+    section.setWeaponOverloaded(true);
+    expect(section.skillConditions().weaponOverloaded).toBe(true);
+    section.setWeaponOverloaded(false);
+    expect(section.skillConditions().weaponOverloaded).toBe(false);
+  });
+
+  test("onWeaponOverloadButtonClick toggles weapon overload and triggers recalculation", () => {
+    const { document, panel, section } = buildSkillSection();
+    getFake(document, "ship-a-skills").value = "5";
+    panel.profile = {} as unknown as SidePanel["profile"];
+    panel.fittingText = "[Rifter, Test]";
+    expect(section.isWeaponOverloaded()).toBe(false);
+    section.onWeaponOverloadButtonClick();
+    expect(section.isWeaponOverloaded()).toBe(true);
+    expect(panel.restoreTurret).toHaveBeenCalled();
+    expect(panel.restoreLauncher).toHaveBeenCalled();
+    expect(panel.host.persistConfigChange).toHaveBeenCalled();
+    section.onWeaponOverloadButtonClick();
+    expect(section.isWeaponOverloaded()).toBe(false);
+  });
+
+  test("weapon overload is independent from propulsion overload", () => {
+    const { document, section } = buildSkillSection();
+    getFake(document, "ship-a-skills").value = "5";
+    getFake(document, "ship-a-overload").checked = true;
+    section.setWeaponOverloaded(false);
+    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: true, weaponOverloaded: false });
+    section.setWeaponOverloaded(true);
+    getFake(document, "ship-a-overload").checked = false;
+    expect(section.skillConditions()).toEqual({ skillLevel: 5, overloaded: false, weaponOverloaded: true });
   });
 });

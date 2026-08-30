@@ -1,5 +1,6 @@
 ---
 import Chevron from "../controls/Chevron.astro";
+import IconButton from "../controls/IconButton.astro";
 import PopupBox from "../popup/PopupBox.astro";
 import TriggerButton from "../popup/TriggerButton.astro";
 
@@ -26,9 +27,18 @@ const ADVANCED_ROWS = [
 <div class="launcher-panel" id={`${idPrefix}-launcher-panel`} hidden>
   <div class="form-field-group">
     <span class="field-label truncate" data-i18n="label.launcherClass">Launcher class</span>
-    <div class="segmented-control choice-selector launcher-class-selector"
-         id={`${idPrefix}-launcher-class-options`} role="group"
-         data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
+    <div class="weapon-selector-wrapper">
+      <div class="segmented-control choice-selector launcher-class-selector"
+           id={`${idPrefix}-launcher-class-options`} role="group"
+           data-i18n-aria-label="label.launcherClass" aria-label="Launcher class">
+      </div>
+      <IconButton id={`${idPrefix}-launcher-variant-gear`} iconName="gear" extraClass="weapon-variant-gear btn"
+              titleI18n="label.launcherVariant" ariaLabelI18n="label.launcherVariant"
+              ariaHaspopup="menu" ariaExpanded={false} ariaControls={`${idPrefix}-launcher-variants`} disabled />
+      <button type="button" id={`${idPrefix}-launcher-weapon-overload-button`} class="overload-button weapon-overload-button btn" data-i18n-aria-label="label.weaponOverload" data-i18n-title="label.weaponOverload" aria-pressed="false">
+        <svg class="overload-button-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><use href="icons.svg#overload"></use></svg>
+      </button>
+      <PopupBox id={`${idPrefix}-launcher-variants`} extraClass="fitting-popup launcher-variants-popup" position="below" align="right" scroll role="menu" i18nAriaLabel="label.launcherVariant" ariaLabel="Select launcher variant" />
     </div>
   </div>
   <div class="form-field-group launcher-attributes-group" id={`${idPrefix}-launcher-attributes-field`}>

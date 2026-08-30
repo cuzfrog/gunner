@@ -1,11 +1,14 @@
 import { SIG_RESOLUTIONS, type SigResolutionClass, type SimValueParser, type TurretSpec } from "../../../sim";
-import type { CargoCharge, ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret, TurretCatalog } from "../../../fitting";
+import type { CargoCharge, ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesStore, FittingState, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
+import { applyFittingOverrides } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { HullTier, ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { TrackingUnit } from "../../../appstate";
 import type { TrackingInput } from "../trackingInput";
 import type { I18n } from "../../i18n";
+import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
+import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
 import { isHtmlButtonElement, num } from "../controlsDom";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
@@ -15,6 +18,7 @@ import { ChoiceGroupImpl } from "../choiceGroup";
 import { SigResIcons } from "./sigResIcons";
 import { TurretInputSet } from "./turretInputSet";
 import { TurretStateResolver } from "./turretStateResolver";
+import { VariantSection, type VariantItem } from "../shared";
 import type { TurretController, TurretControllerDeps } from "./turretControllerContract";
 import type { TurretEls } from "./turretEls";
 import type { TurretOverrides } from "./turretOverrides";
@@ -42,7 +46,6 @@ export class TurretControllerImpl implements TurretController {
   private readonly popupValue: Popup;
   private readonly popupGroup: PopupGroup;
   private readonly chargeCatalog: ChargeCatalog;
-  private readonly turretCatalog: TurretCatalog;
   private readonly fittingImport: FittingImport;
   private readonly trackingInput: TrackingInput;
   private readonly i18n: I18n;
@@ -51,23 +54,32 @@ export class TurretControllerImpl implements TurretController {
   private readonly sigResIcons: SigResIcons;
   private readonly inputSet: TurretInputSet;
   private readonly resolver: TurretStateResolver;
+  private readonly variantSection: VariantSection;
+  private readonly gunFamilies: GunFamilies;
+  private readonly imageCatalog: ImageCatalog;
   private readonly ships: Ships;
   private readonly events: UiEvents;
   private readonly simValueParser: SimValueParser;
+  private readonly calculator: FittingCalculator;
+  private readonly fittingOverrides: FittingOverridesStore;
+  private readonly panelMemory: PanelConfigurationMemory;
   private selectedTurret?: ImportedTurret;
+  private importedTurrets: readonly ImportedTurret[] = [];
   private allowedSigResClasses: readonly SigResolutionClass[] = SIG_RESOLUTIONS_ORDER;
   private cargoCharges: readonly CargoCharge[] = [];
   private currentAmmoId: TypeId;
   private skillLevel: SkillLevel = 5;
   private allExpanded = false;
   private ammoPopupOpen = false;
+  private fittingState?: FittingState;
+  private conditions?: StatConditions;
+  private originalTurretModuleId?: TypeId;
 
   constructor(deps: TurretControllerDeps) {
     this.side = deps.side;
     this.els = deps.els;
     this.popupGroup = deps.popupGroup;
     this.chargeCatalog = deps.chargeCatalog;
-    this.turretCatalog = deps.turretCatalog;
     this.fittingImport = deps.fittingImport;
     this.trackingInput = deps.trackingInput;
     this.i18n = deps.i18n;
@@ -76,6 +88,9 @@ export class TurretControllerImpl implements TurretController {
     this.ships = deps.ships;
     this.events = deps.events;
     this.simValueParser = deps.simValueParser;
+    this.calculator = deps.fittingCalculator;
+    this.fittingOverrides = deps.fittingOverrides;
+    this.panelMemory = deps.panelMemory;
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.popupValue = this.createAmmoPopup();
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.popupValue));
@@ -89,6 +104,19 @@ export class TurretControllerImpl implements TurretController {
       onExpand: () => this.onAmmoExpandClick(),
     });
     this.sigResIcons = new SigResIcons({ gunFamilies: deps.gunFamilies, imageCatalog: deps.imageCatalog, i18n: deps.i18n, fittingImport: this.fittingImport, simValueParser: this.simValueParser });
+    this.gunFamilies = deps.gunFamilies;
+    this.imageCatalog = deps.imageCatalog;
+    this.variantSection = new VariantSection({
+      gear: this.els.variantGear,
+      popupEl: this.els.variants,
+      listShape: { itemClass: "fitting-item btn", nameClass: "fitting-item-name", iconClass: "turret-variant-icon", role: "menuitem" },
+      variants: () => this.discoverTurretVariants(),
+      currentId: () => this.selectedTurret?.moduleId,
+      onSelect: (id) => this.onVariantSelect(id),
+      isEnabled: () => this.selectedTurret !== undefined,
+    });
+    this.popupGroup.register(this.variantSection.popup);
+    this.els.variantGear.addEventListener("click", () => this.popupGroup.toggle(this.variantSection.popup));
     this.inputSet = new TurretInputSet({
       els: this.els,
       trackingInput: this.trackingInput,
@@ -121,12 +149,19 @@ export class TurretControllerImpl implements TurretController {
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.allExpanded = false;
     this.skillLevel = conditions.skillLevel;
-    const { turret, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
+    this.conditions = conditions;
+    this.fittingState = imported.fittingState;
+    this.fittingOverrides.clear();
+    this.panelMemory.clear();
+    const { turret, turrets, cargoCharges, ammo } = this.resolver.resolveFromImported(imported);
     this.cargoCharges = cargoCharges;
     this.selectedTurret = turret;
+    this.importedTurrets = turrets;
     this.currentAmmoId = ammo;
     if (turret) {
+      this.originalTurretModuleId = turret.moduleId;
       this.turretOverrides.clearTurret();
+      this.panelMemory.rememberTurret(this.gunFamilies.familyOf(turret.moduleId), turret.sigResolutionClass, { moduleId: turret.moduleId, ammoId: ammo });
       this.inputSet.set(turret);
     }
     this.render();
@@ -158,17 +193,29 @@ export class TurretControllerImpl implements TurretController {
     this.allExpanded = false;
     if (settings.conditions) this.skillLevel = settings.conditions.skillLevel;
     if (settings.fitting && settings.conditions) {
-      const { turret, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
+      const imported = this.fittingImport.importFitting(settings.fitting, settings.conditions);
+      this.conditions = settings.conditions;
+      this.fittingState = imported?.fittingState;
+      this.fittingOverrides.clear();
+      this.panelMemory.clear();
+      const { turret, turrets, cargoCharges, ammo: resolvedAmmo } = this.resolver.resolveFromFitting(
         settings.fitting,
         settings.conditions,
         settings.ammo,
       );
       this.selectedTurret = turret;
+      this.importedTurrets = turrets;
       this.cargoCharges = cargoCharges;
       this.currentAmmoId = resolvedAmmo;
-      if (turret) this.inputSet.set(turret);
+      if (turret) {
+        this.originalTurretModuleId = turret.moduleId;
+        if (settings.ammo) this.fittingOverrides.setTurretCharge(turret.moduleId, resolvedAmmo);
+        this.panelMemory.rememberTurret(this.gunFamilies.familyOf(turret.moduleId), turret.sigResolutionClass, { moduleId: turret.moduleId, ammoId: resolvedAmmo });
+        this.inputSet.set(turret);
+      }
     } else {
       this.selectedTurret = undefined;
+      this.importedTurrets = [];
       this.cargoCharges = [];
       this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     }
@@ -194,8 +241,15 @@ export class TurretControllerImpl implements TurretController {
   }
 
   clear(): void {
+    this.popupGroup.close(this.variantSection.popup);
     this.selectedTurret = undefined;
+    this.importedTurrets = [];
     this.cargoCharges = [];
+    this.fittingState = undefined;
+    this.conditions = undefined;
+    this.originalTurretModuleId = undefined;
+    this.fittingOverrides.clear();
+    this.panelMemory.clear();
     this.currentAmmoId = this.chargeCatalog.usualForChargeSize(1);
     this.allExpanded = false;
     this.render();
@@ -212,6 +266,26 @@ export class TurretControllerImpl implements TurretController {
       cycleTime: this.selectedTurret.cycleTime,
       turretCount: this.selectedTurret.turretCount,
     };
+  }
+  currentTurretSpecs(trackingOverride?: number): readonly TurretSpec[] {
+    if (this.importedTurrets.length <= 1) {
+      const spec = this.currentTurretSpec(trackingOverride);
+      return spec ? [spec] : [];
+    }
+    const tracking = trackingOverride ?? this.trackingInput.rad;
+    const sigResolution = SIG_RESOLUTIONS[this.currentSigResClass()];
+    const optimal = num(this.els.optimal);
+    const falloff = num(this.els.falloff);
+    return this.importedTurrets.map((turret) => ({
+      kind: "turret" as const,
+      tracking,
+      sigResolution,
+      optimal,
+      falloff,
+      damagePerShot: turret.damagePerShot,
+      cycleTime: turret.cycleTime,
+      turretCount: turret.turretCount,
+    }));
   }
 
   currentSigResClass(): SigResolutionClass {
@@ -231,18 +305,18 @@ export class TurretControllerImpl implements TurretController {
 
   private onSigResChange(): void {
     const sigRes = this.currentSigResClass();
-    if (this.selectedTurret) {
-      const resized = this.turretCatalog.resize(this.selectedTurret, sigRes, this.skillLevel);
-      if (resized) {
-        this.selectedTurret = resized;
-        this.currentAmmoId = resized.chargeId;
-        this.cargoCharges = [];
-        this.turretOverrides.clearTurret();
-        this.inputSet.set(resized);
-        this.render();
-        this.events.emitConfigInvalidated();
-        return;
-      }
+    if (this.selectedTurret && this.originalTurretModuleId) {
+      const family = this.gunFamilies.familyOf(this.selectedTurret.moduleId);
+      const remembered = this.panelMemory.recallTurret(family, sigRes);
+      const targetModuleId = remembered?.moduleId ?? this.gunFamilies.representativeOf(family, sigRes);
+      const targetAmmoId = remembered?.ammoId ?? this.currentAmmoId;
+      this.cargoCharges = [];
+      this.fittingOverrides.clearTurret();
+      this.fittingOverrides.setTurretModule(this.originalTurretModuleId, targetModuleId);
+      this.fittingOverrides.setTurretCharge(targetModuleId, targetAmmoId);
+      this.recompute();
+      this.rememberCurrentSelection();
+      return;
     }
     this.inputSet.setSigRes(sigRes);
     this.turretOverrides.set({ sigRes });
@@ -309,18 +383,14 @@ export class TurretControllerImpl implements TurretController {
     });
     this.sigResIcons.render({ sigResOptions: this.els.sigResOptions }, this.selectedTurret);
     this.renderSigResState();
+    this.variantSection.updateUI();
   }
 
   private applyAmmo(id: TypeId): boolean {
     if (!this.selectedTurret) return false;
-    const updated = this.chargeCatalog.withCharge(this.selectedTurret, id);
-    if (updated === this.selectedTurret) return false;
-    this.selectedTurret = updated;
-    this.currentAmmoId = updated.chargeId;
-    this.turretOverrides.clearTurret();
-    this.inputSet.set(updated);
-    this.render();
-    this.events.emitConfigInvalidated();
+    this.fittingOverrides.setTurretCharge(this.selectedTurret.moduleId, id);
+    this.recompute();
+    this.rememberCurrentSelection();
     return true;
   }
 
@@ -373,5 +443,52 @@ export class TurretControllerImpl implements TurretController {
       if (sigRes === undefined) continue;
       option.disabled = !hasGuns || !allowed.has(sigRes);
     }
+  }
+
+  private discoverTurretVariants(): readonly VariantItem[] {
+    const turret = this.selectedTurret;
+    if (!turret) return [];
+    const family = this.gunFamilies.familyOf(turret.moduleId);
+    const chargeSize = turret.chargeSize;
+    const language = this.i18n.current();
+    return this.gunFamilies.variantsForFamily(family, chargeSize).map((stats) => ({
+      id: stats.id,
+      name: this.fittingImport.itemNameForId(stats.id, language) ?? stats.name,
+      iconUrl: this.imageCatalog.itemIconUrl(stats.id),
+    }));
+  }
+
+  private onVariantSelect(moduleId: TypeId): void {
+    const turret = this.selectedTurret;
+    if (!turret || !this.originalTurretModuleId) return;
+    this.fittingOverrides.clearTurret();
+    this.fittingOverrides.setTurretModule(this.originalTurretModuleId, moduleId);
+    this.popupGroup.close(this.variantSection.popup);
+    this.recompute();
+    this.rememberCurrentSelection();
+  }
+
+  private recompute(): void {
+    if (!this.fittingState || !this.conditions) return;
+    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
+    const turrets = this.calculator.resolveTurrets(patched, this.conditions);
+    this.importedTurrets = turrets;
+    this.selectedTurret = turrets[0];
+    if (this.selectedTurret) {
+      this.currentAmmoId = this.selectedTurret.chargeId;
+      this.turretOverrides.clearTurret();
+      this.inputSet.set(this.selectedTurret);
+    }
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private rememberCurrentSelection(): void {
+    if (!this.selectedTurret) return;
+    this.panelMemory.rememberTurret(
+      this.gunFamilies.familyOf(this.selectedTurret.moduleId),
+      this.selectedTurret.sigResolutionClass,
+      { moduleId: this.selectedTurret.moduleId, ammoId: this.currentAmmoId },
+    );
   }
 }

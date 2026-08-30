@@ -54,6 +54,7 @@ export interface EffectiveReadouts {
 
 export interface Controls {
   getWeapon(side: Side): WeaponSpec | undefined;
+  getWeapons(side: Side): readonly WeaponSpec[];
   getSig(side: Side): number;
   getConfig(): SimConfig;
   getSpeed(): number;

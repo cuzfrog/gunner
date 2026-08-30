@@ -20,6 +20,7 @@ export interface CombatantSettings {
   readonly aggressivity: number;
   readonly skillLevel?: SkillLevel;
   readonly overload: boolean;
+  readonly weaponOverload: boolean;
   readonly hull?: ShipId;
   readonly propulsion?: PropulsionSelection;
   readonly fitting?: string;

@@ -1,4 +1,5 @@
-import type { FittingDb, FittingImport, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
+import type { FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, FittingState, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
+import { applyFittingOverrides } from "../../../fitting";
 import type { ImportedFitting, ImportedLauncher } from "../../../fitting";
 import type { HullBonus } from "../../../gamedata/fittingDb";
 import type { TypeId } from "../../../gamedata/ids";
@@ -7,12 +8,13 @@ import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../sh
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
+import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
 import { setText } from "../controlsDom";
 import { formatDistance, formatNumber, formatWithCommas } from "../controlsFormat";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
-import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl } from "../shared";
+import { SelectableListImpl, type SelectableItem, createPopup, SummaryChipImpl, VariantSection, type VariantItem } from "../shared";
 import { ChoiceGroupImpl, type ChoiceGroupOption } from "../choiceGroup";
 import type { LauncherController, LauncherControllerDeps } from "./launcherControllerContract";
 import type { LauncherEls } from "./launcherControllerContract";
@@ -25,13 +27,15 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly fittingDb: FittingDb;
   private readonly fittingImport: FittingImport;
   private readonly missileCatalog: MissileCatalog;
-  private readonly launcherCatalog: LauncherCatalog;
   private readonly launcherClasses: LauncherClasses;
   private readonly ships: Ships;
   private readonly imageCatalog: ImageCatalog;
   private readonly i18n: I18n;
   private readonly events: UiEvents;
   private readonly popupGroup: PopupGroup;
+  private readonly calculator: FittingCalculator;
+  private readonly fittingOverrides: FittingOverridesStore;
+  private readonly panelMemory: PanelConfigurationMemory;
   private readonly ammoPopupValue: Popup;
   private readonly attributesPopupValue: Popup;
   private selectedLauncher?: ImportedLauncher;
@@ -44,7 +48,10 @@ export class LauncherControllerImpl implements LauncherController {
   private readonly ammoList: SelectableListImpl;
   private readonly ammoChip: SummaryChipImpl;
   private readonly classChoice: ChoiceGroupImpl;
-  private readonly launcherByClass = new Map<LauncherClass, { moduleId: TypeId; ammoId: TypeId }>();
+  private readonly variantSection: VariantSection;
+  private fittingState?: FittingState;
+  private conditions?: StatConditions;
+  private originalLauncherModuleId?: TypeId;
 
   constructor(deps: LauncherControllerDeps) {
     this.side = deps.side;
@@ -52,13 +59,15 @@ export class LauncherControllerImpl implements LauncherController {
     this.fittingDb = deps.fittingDb;
     this.fittingImport = deps.fittingImport;
     this.missileCatalog = deps.missileCatalog;
-    this.launcherCatalog = deps.launcherCatalog;
     this.launcherClasses = deps.launcherClasses;
     this.ships = deps.ships;
     this.imageCatalog = deps.imageCatalog;
     this.i18n = deps.i18n;
     this.events = deps.events;
     this.popupGroup = deps.popupGroup;
+    this.calculator = deps.fittingCalculator;
+    this.fittingOverrides = deps.fittingOverrides;
+    this.panelMemory = deps.panelMemory;
     this.ammoList = new SelectableListImpl({
       itemClass: "launcher-ammo-item",
       nameClass: "launcher-ammo-name",
@@ -79,6 +88,17 @@ export class LauncherControllerImpl implements LauncherController {
     this.popupGroup.register(this.attributesPopupValue);
     this.els.ammoTrigger.addEventListener("click", () => this.popupGroup.toggle(this.ammoPopupValue));
     this.els.attributesTrigger.addEventListener("click", () => this.popupGroup.toggle(this.attributesPopupValue));
+    this.variantSection = new VariantSection({
+      gear: this.els.variantGear,
+      popupEl: this.els.variants,
+      listShape: { itemClass: "fitting-item btn", nameClass: "fitting-item-name", iconClass: "launcher-variant-icon", role: "menuitem" },
+      variants: () => this.discoverLauncherVariants(),
+      currentId: () => this.selectedLauncher?.moduleId,
+      onSelect: (id) => this.onVariantSelect(id),
+      isEnabled: () => this.selectedLauncher !== undefined,
+    });
+    this.popupGroup.register(this.variantSection.popup);
+    this.els.variantGear.addEventListener("click", () => this.popupGroup.toggle(this.variantSection.popup));
     this.events.onLanguageChanged(() => this.render());
     this.render();
   }
@@ -101,10 +121,17 @@ export class LauncherControllerImpl implements LauncherController {
 
   applyImported(imported: ImportedFitting, conditions: StatConditions): void {
     this.skillLevel = conditions.skillLevel;
+    this.conditions = conditions;
     this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
+    this.fittingState = imported.fittingState;
+    this.fittingOverrides.clear();
+    this.panelMemory.clear();
     this.selectedLauncher = imported.launcher;
     this.currentAmmoId = imported.launcher?.chargeId;
-    if (imported.launcher) this.recordLauncherForClass(imported.launcher.moduleId, imported.launcher.chargeId);
+    if (imported.launcher) {
+      this.originalLauncherModuleId = imported.launcher.moduleId;
+      this.panelMemory.rememberLauncher(this.launcherClasses.classOf(imported.launcher.moduleId), { moduleId: imported.launcher.moduleId, ammoId: imported.launcher.chargeId });
+    }
     this.render();
   }
 
@@ -113,14 +140,21 @@ export class LauncherControllerImpl implements LauncherController {
     if (fitting && conditions) {
       const imported = this.resolveFitting(fitting, conditions);
       if (imported?.launcher) {
+        this.conditions = conditions;
+        this.fittingState = imported.fittingState;
         this.hullBonuses = this.fittingDb.hullBonuses[imported.profile.id] ?? [];
+        this.fittingOverrides.clear();
+        this.panelMemory.clear();
         this.selectedLauncher = imported.launcher;
         this.currentAmmoId = imported.launcher.chargeId;
+        this.originalLauncherModuleId = imported.launcher.moduleId;
         if (ammoId && this.missileCatalog.has(ammoId)) {
-          this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, ammoId, this.hullBonuses, this.skillLevel);
-          this.currentAmmoId = ammoId;
+          this.fittingOverrides.setLauncherCharge(this.selectedLauncher.moduleId, ammoId);
+          const patched = applyFittingOverrides(this.fittingState!, this.fittingOverrides.get());
+          this.selectedLauncher = this.calculator.resolveLauncher(patched, conditions)!;
+          this.currentAmmoId = this.selectedLauncher.chargeId;
         }
-        this.recordLauncherForClass(this.selectedLauncher.moduleId, this.currentAmmoId);
+        this.panelMemory.rememberLauncher(this.launcherClasses.classOf(this.selectedLauncher.moduleId), { moduleId: this.selectedLauncher.moduleId, ammoId: this.currentAmmoId });
       } else {
         this.selectedLauncher = undefined;
         this.currentAmmoId = undefined;
@@ -140,9 +174,14 @@ export class LauncherControllerImpl implements LauncherController {
   clear(): void {
     this.popupGroup.close(this.ammoPopupValue);
     this.popupGroup.close(this.attributesPopupValue);
+    this.popupGroup.close(this.variantSection.popup);
     this.selectedLauncher = undefined;
     this.currentAmmoId = undefined;
-    this.launcherByClass.clear();
+    this.fittingState = undefined;
+    this.conditions = undefined;
+    this.originalLauncherModuleId = undefined;
+    this.fittingOverrides.clear();
+    this.panelMemory.clear();
     this.render();
   }
 
@@ -172,6 +211,7 @@ export class LauncherControllerImpl implements LauncherController {
     if (!hasLauncher) {
       this.ammoChip.render("-", undefined);
       this.renderClassSelector();
+      this.variantSection.updateUI();
       return;
     }
     this.ammoChip.render(launcher.chargeName, this.imageCatalog.itemIconUrl(launcher.chargeId));
@@ -186,6 +226,7 @@ export class LauncherControllerImpl implements LauncherController {
     setText(this.els.damageReductionFactor, formatNumber(launcher.damageReductionFactor, 2));
     this.renderAmmoList(launcher);
     this.renderClassSelector();
+    this.variantSection.updateUI();
   }
 
   private renderClassSelector(): void {
@@ -226,21 +267,18 @@ export class LauncherControllerImpl implements LauncherController {
 
   private onClassSelect(target: LauncherClass): void {
     const launcher = this.selectedLauncher;
-    if (!launcher) return;
+    if (!launcher || !this.originalLauncherModuleId) return;
     const currentClass = this.launcherClasses.classOf(launcher.moduleId);
     if (currentClass === target) return;
-    this.recordLauncherForClass(launcher.moduleId, launcher.chargeId);
-    const remembered = this.launcherByClass.get(target);
-    const next = this.launcherCatalog.switchClass(launcher, target, this.hullBonuses, this.skillLevel, remembered?.moduleId);
-    if (!next) return;
-    const finalLauncher = remembered && this.missileCatalog.has(remembered.ammoId)
-      ? this.missileCatalog.withCharge(next, remembered.ammoId, this.hullBonuses, this.skillLevel)
-      : next;
-    this.selectedLauncher = finalLauncher;
-    this.currentAmmoId = finalLauncher.chargeId;
-    this.recordLauncherForClass(finalLauncher.moduleId, finalLauncher.chargeId);
-    this.render();
-    this.events.emitConfigInvalidated();
+    const remembered = this.panelMemory.recallLauncher(target);
+    const targetModuleId = remembered?.moduleId ?? this.launcherClasses.representativeOf(target);
+    const targetLauncherStats = this.fittingDb.launchers[targetModuleId];
+    const targetAmmoId = remembered?.ammoId ?? (targetLauncherStats ? this.missileCatalog.usualForLauncher(targetLauncherStats) : undefined);
+    this.fittingOverrides.clearLauncher();
+    this.fittingOverrides.setLauncherModule(this.originalLauncherModuleId, targetModuleId);
+    if (targetAmmoId) this.fittingOverrides.setLauncherCharge(targetModuleId, targetAmmoId);
+    this.recompute();
+    this.rememberCurrentLauncherSelection();
   }
 
   private renderAmmoList(launcher: ImportedLauncher): void {
@@ -260,12 +298,10 @@ export class LauncherControllerImpl implements LauncherController {
 
   private onAmmoSelect(missileId: TypeId): void {
     if (!this.selectedLauncher) return;
-    this.selectedLauncher = this.missileCatalog.withCharge(this.selectedLauncher, missileId, this.hullBonuses, this.skillLevel);
-    this.currentAmmoId = missileId;
-    this.recordLauncherForClass(this.selectedLauncher.moduleId, missileId);
+    this.fittingOverrides.setLauncherCharge(this.selectedLauncher.moduleId, missileId);
     this.popupGroup.close(this.ammoPopupValue);
-    this.render();
-    this.events.emitConfigInvalidated();
+    this.recompute();
+    this.rememberCurrentLauncherSelection();
   }
 
   private missileOptionsForLauncher(launcher: ImportedLauncher): readonly MissileOption[] {
@@ -300,9 +336,44 @@ export class LauncherControllerImpl implements LauncherController {
     });
   }
 
-  private recordLauncherForClass(moduleId: TypeId, ammoId: TypeId): void {
-    const cls = this.launcherClasses.classOf(moduleId);
-    this.launcherByClass.set(cls, { moduleId, ammoId });
+  private discoverLauncherVariants(): readonly VariantItem[] {
+    const launcher = this.selectedLauncher;
+    if (!launcher) return [];
+    const cls = this.launcherClasses.classOf(launcher.moduleId);
+    const language = this.i18n.current();
+    return this.launcherClasses.variantsForClass(cls).map((stats) => ({
+      id: stats.id,
+      name: this.fittingImport.itemNameForId(stats.id, language) ?? stats.name,
+      iconUrl: this.imageCatalog.itemIconUrl(stats.id),
+    }));
+  }
+
+  private onVariantSelect(moduleId: TypeId): void {
+    const launcher = this.selectedLauncher;
+    if (!launcher || !this.originalLauncherModuleId) return;
+    this.fittingOverrides.clearLauncher();
+    this.fittingOverrides.setLauncherModule(this.originalLauncherModuleId, moduleId);
+    this.popupGroup.close(this.variantSection.popup);
+    this.recompute();
+    this.rememberCurrentLauncherSelection();
+  }
+
+  private recompute(): void {
+    if (!this.fittingState || !this.conditions) return;
+    const patched = applyFittingOverrides(this.fittingState, this.fittingOverrides.get());
+    const launcher = this.calculator.resolveLauncher(patched, this.conditions);
+    this.selectedLauncher = launcher;
+    this.currentAmmoId = launcher?.chargeId;
+    this.render();
+    this.events.emitConfigInvalidated();
+  }
+
+  private rememberCurrentLauncherSelection(): void {
+    if (!this.selectedLauncher || this.currentAmmoId === undefined) return;
+    this.panelMemory.rememberLauncher(
+      this.launcherClasses.classOf(this.selectedLauncher.moduleId),
+      { moduleId: this.selectedLauncher.moduleId, ammoId: this.currentAmmoId },
+    );
   }
 }
 
