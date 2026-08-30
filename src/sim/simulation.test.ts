@@ -10,7 +10,7 @@ import type { CombatantConfig, EwarProjection, ShipConfig, SimConfig } from "./t
 
 const shipASteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
 const shipBSteering = vi.mocked<Autopilot>({ computeVelocity: vi.fn() });
-const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }) };
+const ewarResolver: EwarResolver = { speedMultiplier: () => 1, speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret, disruptedTurretIgnoringRange: (turret) => turret, propulsionSuppressed: () => false, propulsionSuppressedIgnoringRange: () => false, appliedEffects: () => [], speedBreakdown: () => ({ effects: [], propulsionSuppressed: false }), disruptionBreakdown: () => ({ tracking: [], optimal: [], falloff: [] }) };
 
 const scram: EwarProjection = {
   loadout: {
@@ -144,8 +144,7 @@ describe("SimulationImpl", () => {
   test("applies an active opponent web to reduce the ship's effective max speed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
@@ -164,8 +163,7 @@ describe("SimulationImpl", () => {
   test("snapshot exposes the shipB's effective max speed under an in-range web", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => projection?.loadout.webs.length ? (distance <= 5000 ? 0.4 : 1) : 1,
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
@@ -195,8 +193,7 @@ describe("SimulationImpl", () => {
   test("snapshot swaps to base max speed while propulsion is suppressed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
@@ -218,8 +215,7 @@ describe("SimulationImpl", () => {
   test("snapshot leaves max speed unchanged when the projection is out of range", () => {
     const resolver: EwarResolver = {
       speedMultiplier: (projection, distance) => (distance <= 5000 ? 0.4 : 1),
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => false,
       propulsionSuppressedIgnoringRange: () => false,
@@ -335,8 +331,7 @@ describe("SimulationImpl", () => {
   test("an active scrambler keeps an afterburner-boosted speed using suppressedMaxSpeed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
@@ -358,8 +353,7 @@ describe("SimulationImpl", () => {
   test("an active scrambler drops a microwarpdrive-boosted speed to suppressedMaxSpeed", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,
@@ -381,8 +375,7 @@ describe("SimulationImpl", () => {
   test("an active scrambler falls back to baseMaxSpeed when suppressedMaxSpeed is absent", () => {
     const resolver: EwarResolver = {
       speedMultiplier: () => 1,
-      speedMultiplierIgnoringRange: () => 1,
-      disruptedTurret: (turret) => turret,
+      speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turret) => turret,
       disruptedTurretIgnoringRange: (turret) => turret,
       propulsionSuppressed: () => true,
       propulsionSuppressedIgnoringRange: () => true,

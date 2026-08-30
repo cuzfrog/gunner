@@ -38,6 +38,7 @@ export interface ShipState extends ShipConfig {
   velocity: Vec2;
   ewar?: EwarProjection;
   boosts?: TurretBoostProjection;
+  missileBoosts?: MissileBoosterProjection;
 }
 
 export interface SimConfig {
@@ -190,7 +191,7 @@ export interface TrackingBoosterSpec {
 }
 
 export interface MissileScriptSpec {
-  readonly moduleName: string;
+  readonly name: string;
   readonly moduleId: TypeId;
   readonly explosionRadiusMultiplier: number;
   readonly explosionVelocityMultiplier: number;
@@ -315,6 +316,7 @@ export interface DisruptionBreakdown {
 
 export interface BoosterActivation {
   readonly active: boolean;
+  readonly overloaded: boolean;
   readonly script: TurretScriptSpec | undefined;
 }
 
@@ -333,13 +335,13 @@ export interface MissileBoosterActivation {
   readonly script: MissileScriptSpec | undefined;
 }
 
-export interface MissileBoosterActivationState {
+export interface MissileBoostActivation {
   readonly computers: readonly MissileBoosterActivation[];
 }
 
 export interface MissileBoosterProjection {
   readonly loadout: MissileBoosterLoadout;
-  readonly activation?: MissileBoosterActivationState;
+  readonly activation?: MissileBoostActivation;
 }
 
 export interface CombatantConfig extends ShipConfig {

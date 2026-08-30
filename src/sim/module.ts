@@ -3,6 +3,7 @@ import { ReactiveAutopilot } from "./autopilot";
 import { EwarResolverImpl } from "./ewarResolver";
 import { EngagementEvaluatorImpl } from "./fireControl";
 import { EngagementFrameComposerImpl } from "./engagementFrameComposer";
+import { MissileBoosterResolverImpl } from "./missileBoosterResolver";
 import { TurretBoosterResolverImpl } from "./turretBoosterResolver";
 import { HitChanceImpl } from "./hitChance";
 import { KinematicsImpl } from "./kinematics";
@@ -20,6 +21,7 @@ export function registerSimModule<T extends SimCradle>(cradle: AwilixContainer<T
     stackingPenalty: asClass(StackingPenaltyImpl).singleton(),
     ewarResolver: asClass(EwarResolverImpl).singleton(),
     turretBoosterResolver: asClass(TurretBoosterResolverImpl).singleton(),
+    missileBoosterResolver: asClass(MissileBoosterResolverImpl).singleton(),
     kinematics: asClass(KinematicsImpl).singleton(),
     hitChance: asClass(HitChanceImpl).singleton(),
     missileApplication: asClass(MissileApplicationImpl).singleton(),

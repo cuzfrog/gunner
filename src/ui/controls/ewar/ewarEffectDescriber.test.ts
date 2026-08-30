@@ -9,6 +9,8 @@ const unitTurret: TurretSpec = { kind: "turret", tracking: 1, sigResolution: 1, 
 const resolver = vi.mocked<EwarResolver>({
   speedMultiplier: vi.fn(),
   speedMultiplierIgnoringRange: vi.fn(),
+  sigMultiplier: vi.fn(),
+  sigMultiplierIgnoringRange: vi.fn(),
   disruptedTurret: vi.fn(),
   disruptedTurretIgnoringRange: vi.fn(),
   propulsionSuppressed: vi.fn(),

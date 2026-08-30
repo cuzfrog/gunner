@@ -14,6 +14,7 @@ import type { BoosterController, BoosterEls } from "./boosterControllerContract"
 
 interface MutableBoosterActivation {
   active: boolean;
+  overloaded: boolean;
   script: TurretScriptSpec | undefined;
 }
 
@@ -211,7 +212,7 @@ export class BoosterControllerImpl implements BoosterController {
         script = byId !== undefined ? loadout.scripts.find((s) => s.moduleId === byId) : undefined;
         if (script === undefined) script = spec.defaultScript;
       }
-      return { active: savedActivation?.active ?? true, script };
+      return { active: savedActivation?.active ?? true, overloaded: false, script };
     });
   }
 

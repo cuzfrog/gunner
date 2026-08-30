@@ -7,9 +7,11 @@ import {
   type DisruptionBreakdown,
   type DisruptionScriptSpec,
   type EwarProjection,
+  type PainterActivation,
   type SpeedBreakdown,
   type StasisGrapplerSpec,
   type StasisWebSpec,
+  type TargetPainterSpec,
   type TrackingDisruptorSpec,
   type TurretSpec,
   type WarpScramblerSpec,
@@ -28,6 +30,7 @@ const OPTIMAL_SCRIPT_ID = toTypeId("29005");
 const TRACKING_SCRIPT_ID = toTypeId("29007");
 const FALLOFF_SCRIPT_ID = toTypeId("29009");
 const GRAPPLER_FAKE_ID = toTypeId("41041");
+const PAINTER_II_ID = toTypeId("19806");
 
 const defaultTurret: TurretSpec = {
   kind: "turret",
@@ -80,6 +83,21 @@ function scramblerProjection(specs: readonly WarpScramblerSpec[], overloaded = f
   const activation = { webs: [], grapplers: [], disruptors: [], scramblers: specs.map(() => ({ active, overloaded })), painters: [] };
   return { loadout, activation };
 }
+
+function painterProjection(specs: readonly TargetPainterSpec[], activations?: readonly PainterActivation[]): EwarProjection {
+  const loadout = { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: specs, scripts: [] };
+  const activation = activations ? { webs: [], grapplers: [], disruptors: [], scramblers: [], painters: activations } : undefined;
+  return { loadout, activation };
+}
+
+const PAINTER_II: TargetPainterSpec = {
+  moduleName: "Target Painter II",
+  moduleId: PAINTER_II_ID,
+  maxRange: 36000,
+  falloff: 90000,
+  signatureRadiusBonusPercent: 30,
+  overloadStrengthBonusPercent: 20,
+};
 
 describe("EwarResolverImpl", () => {
   describe("speedMultiplier", () => {
@@ -744,6 +762,58 @@ describe("EwarResolverImpl", () => {
       const projection = disruptorProjection([first, second]);
       const breakdown = resolver.disruptionBreakdown(projection, 10000);
       expect(breakdown.tracking.map((entry) => entry.moduleId)).toEqual([TD_I_ID, TD_II_ID]);
+    });
+  });
+
+  describe("sigMultiplier", () => {
+    test("returns 1 for undefined projection", () => {
+      expect(resolver.sigMultiplier(undefined, 5000)).toBe(1);
+    });
+
+    test("returns 1 when no painters are present", () => {
+      const projection = webProjection([{ moduleName: "Stasis Webifier II", moduleId: WEB_II_ID, maxRange: 10000, speedFactor: 0.6, overloadRangeBonusPercent: 30 }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBe(1);
+    });
+
+    test("single T2 painter at 5 km multiplies sig by 1.30", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBeCloseTo(1.30, 10);
+    });
+
+    test("painter beyond optimal applies falloff effectiveness", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 60000);
+      expect(result).toBeGreaterThan(1);
+      expect(result).toBeLessThan(1.30);
+    });
+
+    test("painter at optimal boundary applies full bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 36000)).toBeCloseTo(1.30, 10);
+    });
+
+    test("inactive painter contributes no bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: false, overloaded: false }]);
+      expect(resolver.sigMultiplier(projection, 5000)).toBe(1);
+    });
+
+    test("overloaded painter applies overload strength bonus", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: true }]);
+      const expected = 1 + (30 * 1.2) / 100;
+      expect(resolver.sigMultiplier(projection, 5000)).toBeCloseTo(expected, 10);
+    });
+
+    test("multiple painters apply stacking penalties", () => {
+      const projection = painterProjection([PAINTER_II, PAINTER_II], [{ active: true, overloaded: false }, { active: true, overloaded: false }]);
+      const result = resolver.sigMultiplier(projection, 5000);
+      const secondPenalty = Math.exp(-(1 * 1) / 7.1289);
+      const expected = 1.30 * (1 + 0.30 * secondPenalty);
+      expect(result).toBeCloseTo(expected, 6);
+    });
+
+    test("sigMultiplierIgnoringRange ignores falloff", () => {
+      const projection = painterProjection([PAINTER_II], [{ active: true, overloaded: false }]);
+      expect(resolver.sigMultiplierIgnoringRange(projection)).toBeCloseTo(1.30, 10);
     });
   });
 });

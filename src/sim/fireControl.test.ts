@@ -3,6 +3,7 @@ import { EngagementEvaluatorImpl } from "./fireControl";
 import type { EwarResolver } from "./ewarResolver";
 import type { HitChance } from "./hitChance";
 import type { MissileApplication } from "./missileApplication";
+import type { MissileBoosterResolver } from "./missileBoosterResolver";
 import type { TurretBoosterResolver } from "./turretBoosterResolver";
 import type { TurretDamage } from "./turretDamage";
 import type { DamageAssessment, EngagementFrame, HitChanceBreakdown, MissileDamageBreakdown, MissileSpec, ShipState, TurretSpec } from "./types";
@@ -79,6 +80,7 @@ function makeEvaluator(): {
   hitChance: HitChance;
   ewarResolver: EwarResolver;
   turretBoosterResolver: TurretBoosterResolver;
+  missileBoosterResolver: MissileBoosterResolver;
   turretDamage: TurretDamage;
   missileApplication: MissileApplication;
   evaluator: EngagementEvaluatorImpl;
@@ -86,7 +88,7 @@ function makeEvaluator(): {
   const hitChance = vi.mocked<HitChance>({ compute: vi.fn(() => hit), findBestDistance: vi.fn() });
   const ewarResolver = vi.mocked<EwarResolver>({
     speedMultiplier: vi.fn(() => 1),
-    speedMultiplierIgnoringRange: vi.fn(() => 1),
+    speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
     appliedEffects: vi.fn(() => []),
     disruptedTurret: vi.fn(() => effectiveTurret),
     disruptedTurretIgnoringRange: vi.fn(() => effectiveTurret),
@@ -96,10 +98,11 @@ function makeEvaluator(): {
     disruptionBreakdown: vi.fn(() => ({ tracking: [], optimal: [], falloff: [] })),
   });
   const turretBoosterResolver = vi.mocked<TurretBoosterResolver>({ boostedTurret: vi.fn(() => boostedTurret) });
+  const missileBoosterResolver = vi.mocked<MissileBoosterResolver>({ boostedMissile: vi.fn((m) => m) });
   const turretDamage = vi.mocked<TurretDamage>({ compute: vi.fn(() => ({ hit, expectedMultiplier: 0.8, ...turretDamageResult })) });
   const missileApplication = vi.mocked<MissileApplication>({ compute: vi.fn(() => missileBreakdown) });
-  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, turretDamage, missileApplication });
-  return { hitChance, ewarResolver, turretBoosterResolver, turretDamage, missileApplication, evaluator };
+  const evaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication });
+  return { hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver, turretDamage, missileApplication, evaluator };
 }
 
 describe("EngagementEvaluatorImpl", () => {
@@ -142,7 +145,7 @@ describe("EngagementEvaluatorImpl", () => {
   });
 
   test("evaluates missile attack without boost or ewar", () => {
-    const { missileApplication, ewarResolver, turretBoosterResolver, evaluator } = makeEvaluator();
+    const { missileApplication, ewarResolver, turretBoosterResolver, missileBoosterResolver, evaluator } = makeEvaluator();
     const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 40 } });
     expect(result.shipA?.effectiveWeapon).toBe(missile);
     expect(result.shipA?.boostedWeapon).toBe(missile);
@@ -154,6 +157,30 @@ describe("EngagementEvaluatorImpl", () => {
     expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, frame.shipB, 40);
     expect(ewarResolver.disruptedTurret).not.toHaveBeenCalled();
     expect(turretBoosterResolver.boostedTurret).not.toHaveBeenCalled();
+    expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, undefined);
+  });
+
+  test("applies painter sig multiplier to opponentSigRadius for turret assessment", () => {
+    const { ewarResolver, hitChance, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.sigMultiplier).mockReturnValue(1.3);
+    const result = evaluator.evaluate(frame, { shipA: { weapon: turret, opponentSigRadius: 100 } });
+    expect(hitChance.compute).toHaveBeenCalledWith(frame, effectiveTurret, 130);
+  });
+
+  test("applies painter sig multiplier to opponentSigRadius for missile assessment", () => {
+    const { ewarResolver, missileApplication, evaluator } = makeEvaluator();
+    vi.mocked(ewarResolver.sigMultiplier).mockReturnValue(1.3);
+    const result = evaluator.evaluate(frame, { shipA: { weapon: missile, opponentSigRadius: 100 } });
+    expect(missileApplication.compute).toHaveBeenCalledWith(frame, missile, frame.shipB, 130);
+  });
+
+  test("passes ship missileBoosts to missileBoosterResolver", () => {
+    const { missileBoosterResolver, evaluator } = makeEvaluator();
+    const projection = { loadout: { computers: [], enhancers: [], scripts: [] } };
+    const shipAWithMissileBoosts = { ...shipA, missileBoosts: projection };
+    const frameWithBoosts = { ...frame, shipA: shipAWithMissileBoosts };
+    evaluator.evaluate(frameWithBoosts, { shipA: { weapon: missile, opponentSigRadius: 40 } });
+    expect(missileBoosterResolver.boostedMissile).toHaveBeenCalledWith(missile, projection);
   });
 
   test("zeros missile applied DPS when out of range", () => {

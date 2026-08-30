@@ -31,7 +31,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("inactive computer is skipped", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10 })], scripts: [] },
-      activation: { computers: [{ active: false, script: undefined }] },
+      activation: { computers: [{ active: false, overloaded: false, script: undefined  }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual(baseTurret);
   });
@@ -39,7 +39,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("unscripted TC I adds tracking, optimal, and falloff percentages", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 })], scripts: [] },
-      activation: { computers: [{ active: true, script: undefined }] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined  }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       ...baseTurret,
@@ -52,7 +52,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("Optimal Range Script doubles optimal and falloff bonuses, removes tracking", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
-      activation: { computers: [{ active: true, script: optimalRangeScript }] },
+      activation: { computers: [{ active: true, overloaded: false, script: optimalRangeScript  }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       ...baseTurret,
@@ -65,7 +65,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("Tracking Speed Script doubles tracking bonus, removes range", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, trackingSpeedScript)], scripts: [trackingSpeedScript] },
-      activation: { computers: [{ active: true, script: trackingSpeedScript }] },
+      activation: { computers: [{ active: true, overloaded: false, script: trackingSpeedScript  }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       ...baseTurret,
@@ -78,7 +78,7 @@ describe("TurretBoosterResolverImpl", () => {
   test("selecting no script falls back to base bonuses", () => {
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
-      activation: { computers: [{ active: true, script: undefined }] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined  }] },
     };
     expect(resolver().boostedTurret(baseTurret, projection)).toEqual({
       ...baseTurret,
@@ -92,7 +92,7 @@ describe("TurretBoosterResolverImpl", () => {
     const penalty = new StackingPenaltyImpl();
     const projection = {
       loadout: { computers: [spec({ tracking: 10 }), spec({ tracking: 10 })], scripts: [] },
-      activation: { computers: [{ active: true, script: undefined }, { active: true, script: undefined }] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined  }, { active: true, overloaded: false, script: undefined  }] },
     };
     const result = resolver().boostedTurret(baseTurret, projection);
     expect(result.tracking).toBeCloseTo(baseTurret.tracking * penalty.apply([1.1, 1.1]), 10);
@@ -104,7 +104,7 @@ describe("TurretBoosterResolverImpl", () => {
     const faction = spec({ tracking: 12, optimal: 6, falloff: 12 });
     const projection = {
       loadout: { computers: [tc2, faction], scripts: [] },
-      activation: { computers: [{ active: true, script: undefined }, { active: true, script: undefined }] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined  }, { active: true, overloaded: false, script: undefined  }] },
     };
     const result = resolver().boostedTurret(baseTurret, projection);
     expect(result.tracking).toBeCloseTo(baseTurret.tracking * penalty.apply([1.15, 1.12]), 10);
@@ -116,7 +116,7 @@ describe("TurretBoosterResolverImpl", () => {
     const penalty = new StackingPenaltyImpl();
     const projection = {
       loadout: { computers: [spec({ tracking: 10, optimal: 5, falloff: 10 }, optimalRangeScript)], scripts: [optimalRangeScript] },
-      activation: { computers: [{ active: true, script: optimalRangeScript }] },
+      activation: { computers: [{ active: true, overloaded: false, script: optimalRangeScript  }] },
     };
     const result = resolver().boostedTurret(baseTurret, projection);
     expect(result.tracking).toBeCloseTo(baseTurret.tracking, 10);

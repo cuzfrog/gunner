@@ -50,7 +50,7 @@ const loop = vi.mocked<Loop>({
 });
 const ewarResolver = vi.mocked<Required<EwarResolver>>({
   speedMultiplier: vi.fn(() => 1),
-  speedMultiplierIgnoringRange: vi.fn(() => 1),
+  speedMultiplierIgnoringRange: vi.fn(() => 1), sigMultiplier: vi.fn(() => 1), sigMultiplierIgnoringRange: vi.fn(() => 1),
   disruptedTurret: vi.fn((turret) => turret),
   disruptedTurretIgnoringRange: vi.fn((turret) => turret),
   propulsionSuppressed: vi.fn(() => false),

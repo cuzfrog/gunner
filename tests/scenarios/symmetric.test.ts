@@ -3,6 +3,8 @@ import { EngagementFrameComposerImpl } from "../../src/sim/engagementFrameCompos
 import { HitChanceImpl } from "../../src/sim/hitChance";
 import { KinematicsImpl } from "../../src/sim/kinematics";
 import { MissileApplicationImpl } from "../../src/sim/missileApplication";
+import { MissileBoosterResolverImpl } from "../../src/sim/missileBoosterResolver";
+import { StackingPenaltyImpl } from "../../src/sim/stackingPenalty";
 import { TurretDamageImpl } from "../../src/sim/turretDamage";
 import { Vec2 } from "../../src/sim/vec2";
 import { toTypeId } from "../../src/gamedata/ids";
@@ -52,8 +54,7 @@ const turretBoosterResolver: TurretBoosterResolver = {
 function fakeEwarResolver(): EwarResolver {
   return {
     speedMultiplier: () => 1,
-    speedMultiplierIgnoringRange: () => 1,
-    disruptedTurret: (turretValue, projection) => {
+    speedMultiplierIgnoringRange: () => 1, sigMultiplier: () => 1, sigMultiplierIgnoringRange: () => 1, disruptedTurret: (turretValue, projection) => {
       if (!projection) return turretValue;
       for (let i = 0; i < projection.loadout.disruptors.length; i++) {
         const spec = projection.loadout.disruptors[i];
@@ -84,7 +85,7 @@ function makeComposer() {
   const ewarResolver = fakeEwarResolver();
   const turretDamage = new TurretDamageImpl();
   const missileApplication = new MissileApplicationImpl();
-  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, turretDamage, missileApplication });
+  const engagementEvaluator = new EngagementEvaluatorImpl({ hitChance, ewarResolver, turretBoosterResolver, missileBoosterResolver: new MissileBoosterResolverImpl({ stackingPenalty: new StackingPenaltyImpl() }), turretDamage, missileApplication });
   return new EngagementFrameComposerImpl({ kinematics, engagementEvaluator });
 }
 
