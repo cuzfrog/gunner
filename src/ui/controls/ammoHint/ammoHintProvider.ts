@@ -1,34 +1,23 @@
 import type { DamageType } from "../../../fitting";
-import type { FittingDb } from "../../../gamedata/fittingDb";
-import type { I18n } from "../../i18n";
+import type { ChargeStats, FittingDb, MissileStats } from "../../../gamedata/fittingDb";
 import type { HintContentProvider } from "../hoverHint";
+import { formatMultiplier } from "../controlsFormat";
+import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import type { AmmoHintModel, AmmoHintRenderer, AmmoHintTypeRow } from "./ammoHintRenderer";
-
-const DAMAGE_ICON_URLS: Readonly<Record<DamageType, string>> = {
-  em: "images/icons/damage-em.png",
-  thermal: "images/icons/damage-thermal.png",
-  kinetic: "images/icons/damage-kinetic.png",
-  explosive: "images/icons/damage-explosive.png",
-};
-
-const DAMAGE_TYPE_ORDER: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
 
 export type AmmoHintProvider = HintContentProvider;
 
 export interface AmmoHintProviderDeps {
   readonly fittingDb: FittingDb;
-  readonly i18n: I18n;
   readonly ammoHintRenderer: AmmoHintRenderer;
 }
 
 export class AmmoHintProviderImpl implements AmmoHintProvider {
   private readonly fittingDb: FittingDb;
-  private readonly i18n: I18n;
   private readonly renderer: AmmoHintRenderer;
 
   constructor(deps: AmmoHintProviderDeps) {
     this.fittingDb = deps.fittingDb;
-    this.i18n = deps.i18n;
     this.renderer = deps.ammoHintRenderer;
   }
 
@@ -37,6 +26,7 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
     if (id === null) return;
     const model = this.buildModel(id);
     if (model === undefined) return;
+    if (model.typeRows.length === 0) return;
     this.renderer.render(model, container);
   }
 
@@ -48,7 +38,7 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
     return undefined;
   }
 
-  private buildChargeModel(stats: NonNullable<FittingDb["charges"][string]>): AmmoHintModel {
+  private buildChargeModel(stats: ChargeStats): AmmoHintModel {
     const typeRows: AmmoHintTypeRow[] = [];
     for (const type of DAMAGE_TYPE_ORDER) {
       const value = damageValue(stats, type);
@@ -65,8 +55,8 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
     return { typeRows, totalDamage, modifiers };
   }
 
-  private buildMissileModel(stats: NonNullable<FittingDb["missiles"][string]>): AmmoHintModel {
-    const type = stats.damageType as DamageType;
+  private buildMissileModel(stats: MissileStats): AmmoHintModel {
+    const type = stats.damageType;
     return {
       typeRows: [{ type, iconUrl: DAMAGE_ICON_URLS[type], value: stats.damage }],
       totalDamage: stats.damage,
@@ -75,13 +65,9 @@ export class AmmoHintProviderImpl implements AmmoHintProvider {
   }
 }
 
-function damageValue(stats: { readonly emDamage?: number; readonly thermalDamage?: number; readonly kineticDamage?: number; readonly explosiveDamage?: number }, type: DamageType): number | undefined {
+function damageValue(stats: ChargeStats, type: DamageType): number | undefined {
   if (type === "em") return stats.emDamage;
   if (type === "thermal") return stats.thermalDamage;
   if (type === "kinetic") return stats.kineticDamage;
   return stats.explosiveDamage;
-}
-
-function formatMultiplier(value: number): string {
-  return String(Number(value.toFixed(2)));
 }

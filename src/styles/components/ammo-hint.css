@@ -36,6 +36,10 @@
 }
 
 .ammo-hint-total-row .ammo-hint-label {
+  grid-column: 1 / 3;
+}
+
+.ammo-hint-total-row .ammo-hint-label {
   font-weight: 600;
   color: var(--text-primary);
 }

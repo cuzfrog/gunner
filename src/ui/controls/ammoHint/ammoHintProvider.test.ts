@@ -1,5 +1,4 @@
 import type { FittingDb } from "../../../gamedata/fittingDb";
-import type { I18n } from "../../i18n";
 import type { AmmoHintModel, AmmoHintRenderer } from "./ammoHintRenderer";
 import { AmmoHintProviderImpl } from "./ammoHintProvider";
 
@@ -28,10 +27,6 @@ function makeFittingDb(): FittingDb {
   } as unknown as FittingDb;
 }
 
-function makeI18n(): I18n {
-  return { current: () => "en", setLanguage: () => {}, t: (key) => key, translateDocument: () => {} };
-}
-
 function makeRenderer(): { renderer: AmmoHintRenderer; models: AmmoHintModel[] } {
   const models: AmmoHintModel[] = [];
   const renderer: AmmoHintRenderer = {
@@ -43,21 +38,21 @@ function makeRenderer(): { renderer: AmmoHintRenderer; models: AmmoHintModel[] }
 describe("AmmoHintProviderImpl", () => {
   test("renders nothing when anchor has no data-value", () => {
     const { renderer, models } = makeRenderer();
-    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), i18n: makeI18n(), ammoHintRenderer: renderer });
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor(null), {} as HTMLElement);
     expect(models.length).toBe(0);
   });
 
   test("renders nothing when id is not in charges or missiles", () => {
     const { renderer, models } = makeRenderer();
-    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), i18n: makeI18n(), ammoHintRenderer: renderer });
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor("unknown"), {} as HTMLElement);
     expect(models.length).toBe(0);
   });
 
   test("builds charge model with damage types and modifiers", () => {
     const { renderer, models } = makeRenderer();
-    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), i18n: makeI18n(), ammoHintRenderer: renderer });
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor("185"), {} as HTMLElement);
     expect(models.length).toBe(1);
     const model = models[0];
@@ -74,7 +69,7 @@ describe("AmmoHintProviderImpl", () => {
 
   test("builds missile model with single damage type", () => {
     const { renderer, models } = makeRenderer();
-    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), i18n: makeI18n(), ammoHintRenderer: renderer });
+    const provider = new AmmoHintProviderImpl({ fittingDb: makeFittingDb(), ammoHintRenderer: renderer });
     provider.render(fakeAnchor("202"), {} as HTMLElement);
     expect(models.length).toBe(1);
     const model = models[0];

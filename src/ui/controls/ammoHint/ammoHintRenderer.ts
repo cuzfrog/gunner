@@ -1,4 +1,5 @@
 import type { DamageType } from "../../../fitting";
+import { formatNumber } from "../controlsFormat";
 import { html } from "../markup";
 
 export interface AmmoHintTypeRow {
@@ -60,8 +61,4 @@ function renderTotalRow(totalDamage: number, t: (key: string) => string): HTMLEl
 
 function renderModifiersRow(modifiers: readonly string[]): HTMLElement {
   return html`<div class="ammo-hint-modifiers">${modifiers.join(" · ")}</div>` as unknown as HTMLElement;
-}
-
-function formatNumber(value: number, decimals: number): string {
-  return String(Number(value.toFixed(decimals)));
 }

@@ -4,18 +4,11 @@ import type { ItemNameCatalog } from "../../../gamedata";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
 import type { HintContentProvider } from "../hoverHint";
+import { DAMAGE_ICON_URLS, DAMAGE_TYPE_ORDER } from "../damageTypeIcons";
 import type { LauncherController } from "../launcher";
 import type { Side } from "../side";
 import type { TurretController } from "../turret";
 import type { DpsHintFactorRow, DpsHintGroup, DpsHintModel, DpsHintRenderer, DpsHintSummary, DpsHintTypeRow } from "./dpsHintRenderer";
-
-const DAMAGE_TYPE_ORDER: readonly DamageType[] = ["em", "thermal", "kinetic", "explosive"];
-const DAMAGE_ICON_URLS: Readonly<Record<DamageType, string>> = {
-  em: "images/icons/damage-em.png",
-  thermal: "images/icons/damage-thermal.png",
-  kinetic: "images/icons/damage-kinetic.png",
-  explosive: "images/icons/damage-explosive.png",
-};
 
 export type DpsHintProvider = HintContentProvider;
 

@@ -57,6 +57,12 @@ describe("SelectableList.createButton", () => {
     expect(button.getAttribute("data-hint")).toBe("Some hint");
   });
 
+  test("sets data-hint-content on button", () => {
+    const list = new SelectableListImpl(shape());
+    const button = list.createButton(item({ hintContent: "ammo-hint" }));
+    expect(button.getAttribute("data-hint-content")).toBe("ammo-hint");
+  });
+
   test("sets data-hint on name span matching label", () => {
     const list = new SelectableListImpl(shape());
     const button = list.createButton(item({ label: "Long Name" }));
