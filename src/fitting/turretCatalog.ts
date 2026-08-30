@@ -1,5 +1,5 @@
 import type { TypeId } from "../gamedata/ids";
-import type { FittingDb, TurretStats } from "../gamedata/fittingDb";
+import type { FittingDb, SkillBonus, TurretStats } from "../gamedata/fittingDb";
 import type { SigResolutionClass } from "../sim";
 import type { SkillLevel } from "../ships";
 import type { ChargeCatalog, ImportedTurret } from "./chargeCatalog";
@@ -34,23 +34,7 @@ export class TurretCatalogImpl implements TurretCatalog {
     const moduleId = preferredModuleId && this.db.turrets[preferredModuleId] ? preferredModuleId : this.gunFamilies.representativeOf(family, target);
     const stats = this.db.turrets[moduleId];
     if (!stats) return undefined;
-    const base = applySkillMultipliers(stats, target, skillLevel);
-    const chargeId = resolveCharge(this.chargeCatalog, turret.chargeId, stats);
-    const charge = this.db.charges[chargeId] ?? {};
-    return {
-      tracking: base.tracking * (charge.trackingMultiplier ?? 1),
-      sigResolutionClass: target,
-      optimal: base.optimal * (charge.rangeMultiplier ?? 1),
-      falloff: base.falloff * (charge.falloffMultiplier ?? 1),
-      chargeSize: stats.chargeSize,
-      chargeId,
-      base,
-      moduleId,
-      damageMultiplier: stats.damageMultiplier,
-      damagePerShot: stats.damageMultiplier * chargeDamage(this.db.charges[chargeId]),
-      cycleTime: stats.cycleTime,
-      turretCount: turret.turretCount,
-    };
+    return this.buildTurret(turret, stats, target, skillLevel);
   }
 
   switchVariant(turret: ImportedTurret, targetModuleId: TypeId, skillLevel: SkillLevel): ImportedTurret | undefined {
@@ -58,9 +42,21 @@ export class TurretCatalogImpl implements TurretCatalog {
     if (!stats) return undefined;
     if (targetModuleId === turret.moduleId) return turret;
     const target = sigResolutionClassFromChargeSize(stats.chargeSize);
+    return this.buildTurret(turret, stats, target, skillLevel);
+  }
+
+  private buildTurret(turret: ImportedTurret, stats: TurretStats, target: SigResolutionClass, skillLevel: SkillLevel): ImportedTurret {
     const base = applySkillMultipliers(stats, target, skillLevel);
     const chargeId = resolveCharge(this.chargeCatalog, turret.chargeId, stats);
     const charge = this.db.charges[chargeId] ?? {};
+    const sourceStats = this.db.turrets[turret.moduleId];
+    const damageRatio = sourceStats ? turret.damageMultiplier / sourceStats.damageMultiplier : 1;
+    const cycleRatio = sourceStats ? turret.cycleTime / sourceStats.cycleTime : 1;
+    const sourceSpec = specializationMultiplier(this.db.skillBonuses, sourceStats?.specializationSkill, skillLevel);
+    const targetSpec = specializationMultiplier(this.db.skillBonuses, stats.specializationSkill, skillLevel);
+    const adjustedDamageRatio = damageRatio * targetSpec / sourceSpec;
+    const damageMultiplier = stats.damageMultiplier * adjustedDamageRatio;
+    const cycleTime = stats.cycleTime * cycleRatio;
     return {
       tracking: base.tracking * (charge.trackingMultiplier ?? 1),
       sigResolutionClass: target,
@@ -69,13 +65,22 @@ export class TurretCatalogImpl implements TurretCatalog {
       chargeSize: stats.chargeSize,
       chargeId,
       base,
-      moduleId: targetModuleId,
-      damageMultiplier: stats.damageMultiplier,
-      damagePerShot: stats.damageMultiplier * chargeDamage(this.db.charges[chargeId]),
-      cycleTime: stats.cycleTime,
+      moduleId: stats.id,
+      damageMultiplier,
+      damagePerShot: damageMultiplier * chargeDamage(this.db.charges[chargeId]),
+      cycleTime,
       turretCount: turret.turretCount,
     };
   }
+}
+
+function specializationMultiplier(skillBonuses: readonly SkillBonus[], specializationSkill: string | undefined, skillLevel: SkillLevel): number {
+  if (!specializationSkill) return 1;
+  for (const bonus of skillBonuses) {
+    if (bonus.specializationSkill !== specializationSkill) continue;
+    return 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+  }
+  return 1;
 }
 
 function chargeDamage(charge: { readonly emDamage?: number; readonly thermalDamage?: number; readonly kineticDamage?: number; readonly explosiveDamage?: number } | undefined): number {

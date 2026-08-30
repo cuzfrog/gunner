@@ -187,6 +187,55 @@ describe("TurretCatalogImpl.switchVariant", () => {
     expect(result).toBeDefined();
     expect(result!.base.optimal).toBeCloseTo(techIiStats.optimal, 6);
     expect(result!.base.falloff).toBeCloseTo(techIiStats.falloff, 6);
-    expect(result!.cycleTime).toBe(techIiStats.cycleTime);
+  });
+
+  test("preserves damage multiplier ratio from the source turret", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const boostedTurret: ImportedTurret = { ...techI, damageMultiplier: techI.damageMultiplier * 2, damagePerShot: techI.damagePerShot * 2 };
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const result = turretCatalog.switchVariant(boostedTurret, techIiId, 0);
+    const techIStats = FITTING_DB.turrets[techI.moduleId];
+    const techIiStats = FITTING_DB.turrets[techIiId];
+    expect(result).toBeDefined();
+    const expectedRatio = boostedTurret.damageMultiplier / techIStats.damageMultiplier;
+    expect(result!.damageMultiplier).toBeCloseTo(techIiStats.damageMultiplier * expectedRatio, 6);
+  });
+
+  test("preserves cycle time ratio from the source turret", () => {
+    const techI = makeTurret("200mm AutoCannon I", "EMP S");
+    const boostedTurret: ImportedTurret = { ...techI, cycleTime: techI.cycleTime * 0.5 };
+    const techIiId = turretIdForName("200mm AutoCannon II");
+    const result = turretCatalog.switchVariant(boostedTurret, techIiId, 0);
+    const techIStats = FITTING_DB.turrets[techI.moduleId];
+    const techIiStats = FITTING_DB.turrets[techIiId];
+    expect(result).toBeDefined();
+    const expectedRatio = boostedTurret.cycleTime / techIStats.cycleTime;
+    expect(result!.cycleTime).toBeCloseTo(techIiStats.cycleTime * expectedRatio, 6);
+  });
+
+  test("removes specialization bonus when switching from T2 to T1", () => {
+    const techIi = makeTurret("Heavy Pulse Laser II", "Conflagration M", 5);
+    const techIiStats = FITTING_DB.turrets[techIi.moduleId];
+    const specBonus = 1 + 2 * 5 / 100;
+    const boostedTurret: ImportedTurret = { ...techIi, damageMultiplier: techIiStats.damageMultiplier * 2 * specBonus, damagePerShot: 0 };
+    const techIId = turretIdForName("Heavy Pulse Laser I");
+    const result = turretCatalog.switchVariant(boostedTurret, techIId, 5);
+    const techIStats = FITTING_DB.turrets[techIId];
+    expect(result).toBeDefined();
+    const expectedRatio = (boostedTurret.damageMultiplier / techIiStats.damageMultiplier) / specBonus;
+    expect(result!.damageMultiplier).toBeCloseTo(techIStats.damageMultiplier * expectedRatio, 6);
+  });
+
+  test("adds specialization bonus when switching from T1 to T2", () => {
+    const techI = makeTurret("Heavy Pulse Laser I", "Conflagration M", 5);
+    const techIStats = FITTING_DB.turrets[techI.moduleId];
+    const boostedTurret: ImportedTurret = { ...techI, damageMultiplier: techIStats.damageMultiplier * 2, damagePerShot: 0 };
+    const techIiId = turretIdForName("Heavy Pulse Laser II");
+    const result = turretCatalog.switchVariant(boostedTurret, techIiId, 5);
+    const techIiStats = FITTING_DB.turrets[techIiId];
+    expect(result).toBeDefined();
+    const specBonus = 1 + 2 * 5 / 100;
+    const expectedRatio = (boostedTurret.damageMultiplier / techIStats.damageMultiplier) * specBonus;
+    expect(result!.damageMultiplier).toBeCloseTo(techIiStats.damageMultiplier * expectedRatio, 6);
   });
 });
