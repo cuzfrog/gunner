@@ -1,10 +1,11 @@
 import type { GameDataCradle } from "../gamedata";
-import type { ChargeCatalog, FittingImport, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, MissileSkillModel, PresetFittings, TurretCatalog } from "./index";
+import type { ChargeCatalog, FittingCalculator, FittingImport, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, MissileSkillModel, PresetFittings, TurretCatalog } from "./index";
 import type { Ships } from "../ships";
 import type { StackingPenalty } from "../sim";
 
 export interface FittingCradle extends GameDataCradle {
   readonly chargeCatalog: ChargeCatalog;
+  readonly fittingCalculator: FittingCalculator;
   readonly fittingImport: FittingImport;
   readonly gunFamilies: GunFamilies;
   readonly launcherCatalog: LauncherCatalog;

@@ -7,6 +7,7 @@ no-new-exports:
   - eft.ts
   - fittingImport.test.ts
   - fittingImport.ts
+  - fittingCalculator.ts
   - fittingState.test.ts
   - fittingState.ts
   - gunFamilies.test.ts
@@ -48,7 +49,10 @@ abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
 modules, turret groups, launcher groups, propulsion, ewar, boosters,
 drones, cargo) without computed values. `FittingStateFactory` builds
 `FittingState` from resolved module entries and `FittingDb`.
-`ImportedFitting.fittingState` carries the basis for later recomputation.
+`FittingCalculator` computes turrets, launchers, hull, propulsion,
+ewar, boosts, and cargo charges from a `FittingState` plus
+`StatConditions`. `ImportedFitting.fittingState` carries the basis
+for later recomputation.
 `ChargeCatalog` adds `has(charge)` so persistence modules can existence-check stored charge
 ids without reaching into the catalog's internal record.
 `ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` so
