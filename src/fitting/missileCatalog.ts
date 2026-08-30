@@ -156,7 +156,7 @@ function baseStem(stem: string): string {
 
 function rebuildMissileFactors(skillDamageMultiplier: number, skillId: TypeId, hullDamageMultiplier: number, hullName: string): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
-  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillId });
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: [skillId] });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

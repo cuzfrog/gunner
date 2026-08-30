@@ -9,7 +9,7 @@ export interface DamageFactor {
   readonly kind: DamageFactorKind;
   readonly multiplier: number;
   readonly moduleIds?: readonly TypeId[];
-  readonly skillId?: TypeId;
+  readonly skillIds?: readonly TypeId[];
   readonly hullName?: string;
 }
 

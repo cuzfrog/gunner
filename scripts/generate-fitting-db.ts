@@ -1637,6 +1637,7 @@ export const MISSILE_SCRIPTS: Readonly<Record<string, MissileScriptStats>> = ${s
   ];
 
   addInScopeItemNames(itemNames, types, groups, IN_SCOPE_CATEGORY_IDS);
+  addSkillNames(itemNames, types);
 
   const dbTableNames = collectDbTableNames(
     fittingModules,
@@ -1716,6 +1717,17 @@ function addInScopeItemNames(
   }
 }
 
+function addSkillNames(itemNames: Record<string, LocalizedName>, types: Readonly<Record<string, SdeType>>): void {
+  const skillIds = new Set<string>();
+  for (const rule of SKILL_BONUS_RULES) skillIds.add(String(rule.skillId));
+  skillIds.add("20315");
+  for (const id of skillIds) {
+    if (id in itemNames) continue;
+    const type = types[id];
+    if (type) addItemName(itemNames, id, type);
+  }
+}
+
 function collectDbTableNames(
   fittingModules: Record<string, FittingModuleStats>,
   turrets: Record<string, TurretStats>,
@@ -1753,6 +1765,8 @@ function collectDbTableNames(
     ...Object.keys(missileGuidanceEnhancers),
     ...Object.keys(missileScripts),
     ...Object.keys(drones),
+    ...SKILL_BONUS_RULES.map((rule) => String(rule.skillId)),
+    "20315",
   ]);
 }
 

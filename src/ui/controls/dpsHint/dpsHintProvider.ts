@@ -122,7 +122,9 @@ function factorSources(factor: DamageFactor, itemNameCatalog: ItemNameCatalog, l
   if (factor.moduleIds !== undefined && factor.moduleIds.length > 0) {
     return deduplicatedModuleNames(factor.moduleIds, itemNameCatalog, language);
   }
-  if (factor.skillId !== undefined) return [itemNameCatalog.nameForId(factor.skillId, language)];
+  if (factor.skillIds !== undefined && factor.skillIds.length > 0) {
+    return factor.skillIds.map((id) => itemNameCatalog.nameForId(id, language));
+  }
   if (factor.hullName !== undefined) return [factor.hullName];
   return [];
 }

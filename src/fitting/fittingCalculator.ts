@@ -521,8 +521,10 @@ interface TurretDamageModifier {
 function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], skillEntries: readonly SkillDamageEntry[], hullDamageMultiplier: number, hullName: string, overloadDamage: number): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  for (const entry of skillEntries) {
-    if (entry.multiplier !== 1) factors.push({ kind: "skill", multiplier: entry.multiplier, skillId: entry.skillId });
+  const activeSkillEntries = skillEntries.filter((e) => e.multiplier !== 1);
+  if (activeSkillEntries.length > 0) {
+    const skillMultiplier = activeSkillEntries.reduce((acc, e) => acc * e.multiplier, 1);
+    factors.push({ kind: "skill", multiplier: skillMultiplier, skillIds: activeSkillEntries.map((e) => e.skillId) });
   }
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   if (overloadDamage !== 1) factors.push({ kind: "overload", multiplier: overloadDamage });
@@ -532,7 +534,7 @@ function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: num
 function buildMissileDamageFactors(skillDamageMultiplier: number, skillId: TypeId, hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillId });
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillIds: [skillId] });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

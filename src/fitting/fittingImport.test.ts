@@ -1241,7 +1241,7 @@ Heavy Missile Launcher II, Scourge Heavy Missile`,
     );
     const skillFactor = result!.turret!.damageBreakdown.factors.find((f) => f.kind === "skill");
     expect(skillFactor).toBeDefined();
-    expect(skillFactor!.skillId).toBeDefined();
+    expect(skillFactor!.skillIds).toBeDefined();
   });
 
   test("turret damage breakdown includes hull factor when hull damage bonus applies", () => {

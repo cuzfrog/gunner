@@ -17,7 +17,7 @@ const TURRET_BREAKDOWN: DamageBreakdown = {
   factors: [
     { kind: "base", multiplier: 3 },
     { kind: "module", multiplier: 1.3, moduleIds: ["123" as never] },
-    { kind: "skill", multiplier: 1.1, skillId: "3315" as never },
+    { kind: "skill", multiplier: 1.1, skillIds: ["3315" as never, "3306" as never] },
   ],
 };
 
@@ -25,7 +25,7 @@ const LAUNCHER_BREAKDOWN: DamageBreakdown = {
   damageByType: { kinetic: 100 },
   factors: [
     { kind: "base", multiplier: 1 },
-    { kind: "skill", multiplier: 1.1, skillId: "20315" as never },
+    { kind: "skill", multiplier: 1.1, skillIds: ["20315" as never] },
   ],
 };
 
@@ -264,7 +264,7 @@ describe("DpsHintProviderImpl", () => {
     expect(source.textContent).toBe("Item-123 x2");
   });
 
-  test("resolves skill factor source via itemNameCatalog", () => {
+  test("resolves skill factor sources via itemNameCatalog", () => {
     const turret = makeTurret();
     const catalog = makeItemNameCatalog();
     const provider = new DpsHintProviderImpl(makeDeps({
@@ -275,6 +275,7 @@ describe("DpsHintProviderImpl", () => {
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     expect(catalog.nameForId).toHaveBeenCalledWith("3315", "en");
+    expect(catalog.nameForId).toHaveBeenCalledWith("3306", "en");
   });
 
   test("resolves launcher skill factor source via itemNameCatalog", () => {
