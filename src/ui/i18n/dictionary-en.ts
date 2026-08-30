@@ -220,6 +220,7 @@ export const EN: LanguageSlice<"en"> = {
   "dpsHint.damageType.kinetic": { en: "Kinetic" },
   "dpsHint.damageType.explosive": { en: "Explosive" },
   "dpsHint.ammo": { en: "Ammo" },
+  "dpsHint.damage": { en: "Damage" },
   "dpsHint.factor.base": { en: "Base" },
   "dpsHint.factor.module": { en: "Module" },
   "dpsHint.factor.skill": { en: "Skill" },

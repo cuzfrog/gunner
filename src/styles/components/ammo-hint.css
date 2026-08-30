@@ -30,16 +30,13 @@
 }
 
 .ammo-hint-total-row {
-  border-top: 1px solid var(--border-dim);
-  padding-top: 2px;
-  margin-top: 2px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 2px;
+  margin-bottom: 2px;
 }
 
 .ammo-hint-total-row .ammo-hint-label {
   grid-column: 1 / 3;
-}
-
-.ammo-hint-total-row .ammo-hint-label {
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -50,7 +47,7 @@
 }
 
 .ammo-hint-modifiers {
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-size: 11px;
   margin-top: 1px;
 }

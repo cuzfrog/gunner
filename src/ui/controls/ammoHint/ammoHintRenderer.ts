@@ -32,15 +32,22 @@ export class AmmoHintRendererImpl implements AmmoHintRenderer {
   render(model: AmmoHintModel, container: HTMLElement): void {
     if (model.typeRows.length === 0) return;
     const root = html`<div class="ammo-hint"></div>` as unknown as HTMLElement;
+    root.appendChild(renderTotalRow(model.totalDamage, this.t));
     for (const row of model.typeRows) {
       root.appendChild(renderTypeRow(row, this.t));
     }
-    root.appendChild(renderTotalRow(model.totalDamage, this.t));
     if (model.modifiers.length > 0) {
       root.appendChild(renderModifiersRow(model.modifiers));
     }
     container.appendChild(root);
   }
+}
+
+function renderTotalRow(totalDamage: number, t: (key: string) => string): HTMLElement {
+  return html`<div class="ammo-hint-row ammo-hint-total-row">
+    <span class="ammo-hint-label">${t("dpsHint.damage")}</span>
+    <span class="ammo-hint-value">${formatNumber(totalDamage, 1)}</span>
+  </div>` as unknown as HTMLElement;
 }
 
 function renderTypeRow(row: AmmoHintTypeRow, t: (key: string) => string): HTMLElement {
@@ -49,13 +56,6 @@ function renderTypeRow(row: AmmoHintTypeRow, t: (key: string) => string): HTMLEl
     <img class="ammo-hint-type-icon" src=${row.iconUrl} alt="">
     <span class="ammo-hint-label">${label}</span>
     <span class="ammo-hint-value">${formatNumber(row.value, 1)}</span>
-  </div>` as unknown as HTMLElement;
-}
-
-function renderTotalRow(totalDamage: number, t: (key: string) => string): HTMLElement {
-  return html`<div class="ammo-hint-row ammo-hint-total-row">
-    <span class="ammo-hint-label">${t("dpsHint.ammo")}</span>
-    <span class="ammo-hint-value">${formatNumber(totalDamage, 1)}</span>
   </div>` as unknown as HTMLElement;
 }
 

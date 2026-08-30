@@ -37,7 +37,7 @@ describe("AmmoHintRendererImpl", () => {
     expect(elementChildren(container).length).toBe(0);
   });
 
-  test("renders type rows with icons, labels, and values", () => {
+  test("renders total row first with damage label, then type rows", () => {
     const renderer = new AmmoHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel([{ type: "em", value: 10 }, { type: "explosive", value: 5 }], 15), container as unknown as HTMLElement);
@@ -45,23 +45,27 @@ describe("AmmoHintRendererImpl", () => {
     expect(root.className).toBe("ammo-hint");
     const rows = elementChildren(root);
     expect(rows.length).toBe(3);
-    const emRow = elementChildren(rows[0]);
+    const totalRow = elementChildren(rows[0]);
+    expect(rows[0].className).toContain("ammo-hint-total-row");
+    expect(totalRow[0].textContent).toBe("dpsHint.damage");
+    expect(totalRow[1].textContent).toBe("15");
+    const emRow = elementChildren(rows[1]);
     expect(emRow[0].tagName).toBe("IMG");
     expect(emRow[0].getAttribute("src")).toBe("images/icons/damage-em.png");
     expect(emRow[1].textContent).toBe("dpsHint.damageType.em");
     expect(emRow[2].textContent).toBe("10");
   });
 
-  test("renders total row with ammo label", () => {
+  test("renders total row with damage label", () => {
     const renderer = new AmmoHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel([{ type: "kinetic", value: 83 }], 83), container as unknown as HTMLElement);
     const root = elementChildren(container)[0];
     const rows = elementChildren(root);
-    const totalRow = rows[1];
+    const totalRow = rows[0];
     expect(totalRow.className).toContain("ammo-hint-total-row");
     const totalChildren = elementChildren(totalRow);
-    expect(totalChildren[0].textContent).toBe("dpsHint.ammo");
+    expect(totalChildren[0].textContent).toBe("dpsHint.damage");
     expect(totalChildren[1].textContent).toBe("83");
   });
 

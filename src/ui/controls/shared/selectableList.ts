@@ -71,7 +71,10 @@ function buildButton(shape: SelectableListShape, item: SelectableItem): HTMLButt
     children.push(html`<img class=${shape.iconClass} src=${item.iconUrl} alt="">`);
   }
   const nameClassAttr = `${shape.nameClass} truncate`;
-  children.push(html`<span class=${nameClassAttr} data-hint=${item.label}>${item.label}</span>`);
+  const nameSpan = item.hintContent
+    ? html`<span class=${nameClassAttr}>${item.label}</span>`
+    : html`<span class=${nameClassAttr} data-hint=${item.label}>${item.label}</span>`;
+  children.push(nameSpan);
   if (item.quantity && shape.quantityClass) {
     children.push(html`<span class=${shape.quantityClass}>${item.quantity}</span>`);
   }
