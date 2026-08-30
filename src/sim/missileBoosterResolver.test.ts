@@ -168,4 +168,39 @@ describe("MissileBoosterResolverImpl", () => {
     const result = resolver.boostedMissile(BASE_MISSILE, projection);
     expect(result.flightRange).toBeCloseTo(result.maxVelocity * result.flightTime, 6);
   });
+
+  test("MGC falls back to spec defaultScript when activation script is undefined", () => {
+    const mgcWithDefault: MissileBoosterSpec = { ...MGC_II, defaultScript: PRECISION_SCRIPT };
+    const projection: MissileBoosterProjection = {
+      loadout: { computers: [mgcWithDefault], enhancers: [], scripts: [PRECISION_SCRIPT] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined }] },
+    };
+    const result = resolver.boostedMissile(BASE_MISSILE, projection);
+    expect(result.explosionRadius).toBeCloseTo(50 * (1 + (-8.25 * 2) / 100), 10);
+    expect(result.explosionVelocity).toBeCloseTo(100 * (1 + (8.25 * 2) / 100), 10);
+    expect(result.maxVelocity).toBeCloseTo(5000, 10);
+    expect(result.flightTime).toBeCloseTo(10, 10);
+  });
+
+  test("overloaded MGC with precision script applies both overload and script multipliers", () => {
+    const projection: MissileBoosterProjection = {
+      loadout: { computers: [MGC_II], enhancers: [], scripts: [PRECISION_SCRIPT] },
+      activation: { computers: [{ active: true, overloaded: true, script: PRECISION_SCRIPT }] },
+    };
+    const result = resolver.boostedMissile(BASE_MISSILE, projection);
+    const overloadFactor = 1.15;
+    expect(result.explosionRadius).toBeCloseTo(50 * (1 + (-8.25 * overloadFactor * 2) / 100), 10);
+    expect(result.explosionVelocity).toBeCloseTo(100 * (1 + (8.25 * overloadFactor * 2) / 100), 10);
+  });
+
+  test("multiple MGCs apply stacking penalties", () => {
+    const projection: MissileBoosterProjection = {
+      loadout: { computers: [MGC_II, MGC_II], enhancers: [], scripts: [] },
+      activation: { computers: [{ active: true, overloaded: false, script: undefined }, { active: true, overloaded: false, script: undefined }] },
+    };
+    const result = resolver.boostedMissile(BASE_MISSILE, projection);
+    const secondPenalty = Math.exp(-(1 * 1) / 7.1289);
+    const expectedExplosionRadius = 50 * (1 - 0.0825) * (1 + (-0.0825) * secondPenalty);
+    expect(result.explosionRadius).toBeCloseTo(expectedExplosionRadius, 6);
+  });
 });

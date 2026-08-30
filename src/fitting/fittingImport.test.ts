@@ -1131,6 +1131,34 @@ Heat Sink II`,
     expect(result!.missileBoosts.enhancers).toEqual([]);
   });
 
+  test("applies Ballistic Control System damage and cycle time modifiers to launcher stats", () => {
+    ships.findHullByName.mockReturnValue(frigateProfile);
+    ships.fittingOptions.mockReturnValue(propulsionModules);
+    const importer = new FittingImportImpl({ ships, fittingDb: fullFittingDb, chargeCatalog: fullChargeCatalog, gunFamilies: fullGunFamilies, missileCatalog: fullMissileCatalog, missileSkillModel: fullMissileSkillModel, stackingPenalty, itemNameCatalog, itemNameResolver: fullResolver, moduleSlotCatalog });
+    const withoutBcs = importer.importFitting(
+      `[Rifter, NoBCS]
+Heavy Missile Launcher II, Scourge Heavy Missile`,
+      conditions,
+    );
+    const withBcs = importer.importFitting(
+      `[Rifter, BCS]
+Heavy Missile Launcher II, Scourge Heavy Missile
+Ballistic Control System I
+Ballistic Control System I`,
+      conditions,
+    );
+    expect(withoutBcs).toBeDefined();
+    expect(withBcs).toBeDefined();
+    expect(withBcs!.launcher).toBeDefined();
+    expect(withoutBcs!.launcher).toBeDefined();
+    const baseDamage = withoutBcs!.launcher!.damagePerMissile;
+    const baseCycle = withoutBcs!.launcher!.cycleTime;
+    const bcsDamageMultiplier = stackingPenalty.apply([1.07, 1.07]);
+    const bcsCycleMultiplier = stackingPenalty.apply([0.92, 0.92]);
+    expect(withBcs!.launcher!.damagePerMissile).toBeCloseTo(baseDamage * bcsDamageMultiplier, 6);
+    expect(withBcs!.launcher!.cycleTime).toBeCloseTo(baseCycle * bcsCycleMultiplier, 6);
+  });
+
   test("imports a real preset and resolves cargo charges with drones before cargo", async () => {
     const path = join(import.meta.dir, "..", "..", "data", "ship-fittings", "Abaddon", "Pulse_Armor_Abaddon.txt");
     const text = await Bun.file(path).text();

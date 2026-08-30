@@ -2,7 +2,7 @@ import type { FittedHull, PropulsionKind, PropulsionStats, SkillLevel } from "..
 import { toTypeId } from "../gamedata/ids";
 import type { Language } from "./language";
 import type { SimValueParser } from "../sim";
-import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
+import type { FittedHullSummary, ProfileParamOverrides, ProfileSettings, StoredBoosterActivation, StoredEwarActivation, StoredMissileBoosterActivation, UserSettings, WeaponRangeVisibility } from "./userSettings";
 
 export function isLanguage(value: unknown): value is Language {
   return value === "en" || value === "zh" || value === "ja";
@@ -36,6 +36,18 @@ export function isOptionalBoosterActivations(value: unknown): boolean {
   if (value === undefined) return true;
   if (!Array.isArray(value)) return false;
   return value.every(isOptionalBoosterActivation);
+}
+
+export function isOptionalMissileBoosterActivations(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(isStoredMissileBoosterActivation);
+}
+
+function isStoredMissileBoosterActivation(value: unknown): value is StoredMissileBoosterActivation {
+  if (!isRecord(value)) return false;
+  const item = value;
+  return typeof item.active === "boolean" && (item.overloaded === undefined || typeof item.overloaded === "boolean") && isStoredBoosterScript(item.script);
 }
 
 function isTypeIdString(value: string): boolean {

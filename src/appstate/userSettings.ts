@@ -23,6 +23,12 @@ export interface StoredEwarActivation {
   readonly painters?: readonly { readonly active: boolean; readonly overloaded: boolean }[];
 }
 
+export interface StoredMissileBoosterActivation {
+  readonly active: boolean;
+  readonly overloaded: boolean;
+  readonly script: StoredDisruptionScript;
+}
+
 export interface FittedHullSummary {
   readonly fittingName: string;
   readonly propulsionId?: PropulsionId;
@@ -105,6 +111,8 @@ export interface UserSettings {
   shipBEwarActivation?: StoredEwarActivation;
   shipABoosterActivation?: readonly StoredBoosterActivation[];
   shipBBoosterActivation?: readonly StoredBoosterActivation[];
+  shipAMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
+  shipBMissileBoosterActivation?: readonly StoredMissileBoosterActivation[];
   shipAAmmo: TypeId;
   shipBAmmo: TypeId;
   shipAWeaponKind?: WeaponKind;
