@@ -17,7 +17,7 @@ const TURRET_BREAKDOWN: DamageBreakdown = {
   factors: [
     { kind: "base", multiplier: 3 },
     { kind: "module", multiplier: 1.3, moduleIds: ["123" as never] },
-    { kind: "skill", multiplier: 1.1, skillName: "Surgical Strike" },
+    { kind: "skill", multiplier: 1.1, skillId: "3315" as never },
   ],
 };
 
@@ -25,7 +25,7 @@ const LAUNCHER_BREAKDOWN: DamageBreakdown = {
   damageByType: { kinetic: 100 },
   factors: [
     { kind: "base", multiplier: 1 },
-    { kind: "skill", multiplier: 1.1, skillName: "Warhead Upgrades" },
+    { kind: "skill", multiplier: 1.1, skillId: "20315" as never },
   ],
 };
 
@@ -236,5 +236,44 @@ describe("DpsHintProviderImpl", () => {
     const container = globalThis.document.createElement("div");
     provider.render(anchor, container);
     expect(catalog.nameForId).toHaveBeenCalledWith("123", "en");
+  });
+
+  test("deduplicates duplicate modules with xN suffix", () => {
+    const breakdown: DamageBreakdown = {
+      damageByType: { em: 30 },
+      factors: [
+        { kind: "base", multiplier: 1 },
+        { kind: "module", multiplier: 1.3, moduleIds: ["123" as never, "123" as never] },
+      ],
+    };
+    const turret = makeTurret(breakdown);
+    const catalog = makeItemNameCatalog();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+      itemNameCatalog: catalog,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    provider.render(anchor, container as unknown as HTMLElement);
+    const root = container.children[0] as unknown as FakeElement;
+    const group = elementChildren(root)[0];
+    const groupChildren = elementChildren(group);
+    const moduleFactor = groupChildren[4];
+    const factorChildren = elementChildren(moduleFactor);
+    const source = factorChildren[3];
+    expect(source.textContent).toBe("Item-123 x2");
+  });
+
+  test("resolves skill factor source via itemNameCatalog", () => {
+    const turret = makeTurret();
+    const catalog = makeItemNameCatalog();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      turretControllers: { shipA: makeTurretController(turret), shipB: makeTurretController() },
+      itemNameCatalog: catalog,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(catalog.nameForId).toHaveBeenCalledWith("3315", "en");
   });
 });

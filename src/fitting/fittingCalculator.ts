@@ -120,7 +120,8 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullDamageMultiplier = hullDamagePercents.reduce((acc, p) => acc * (1 + p / 100), 1);
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
 
-      const skillDamageMultiplier = computeSkillDamageMultiplier(this.db.skillBonuses, turret.turretSkill, weaponGroup, turret.specializationSkill, skillLevel);
+      const skillEntries = computeSkillDamageEntries(this.db.skillBonuses, turret.turretSkill, weaponGroup, turret.specializationSkill, skillLevel);
+      const skillDamageMultiplier = productOfSkillEntries(skillEntries);
 
       const modifiedDamageMultiplier = turret.damageMultiplier * moduleDamageBonus * hullDamageMultiplier * skillDamageMultiplier;
       const modifiedCycleTime = turret.cycleTime * moduleSpeedBonus * hullRoFMultiplier * skillRoFMultiplier;
@@ -129,7 +130,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const finalDamageMultiplier = modifiedDamageMultiplier * overloadDamage;
       const finalCycleTime = modifiedCycleTime * overloadCycle;
 
-      const factors = buildTurretDamageFactors(turret.damageMultiplier, moduleDamageBonus, moduleDamageModifiers, skillDamageMultiplier, turret.turretSkill, hullDamageMultiplier, fitting.profile.name, overloadDamage);
+      const factors = buildTurretDamageFactors(turret.damageMultiplier, moduleDamageBonus, moduleDamageModifiers, skillEntries, hullDamageMultiplier, fitting.profile.name, overloadDamage);
 
       const sigResClass = sigResolutionClassFromChargeSize(turret.chargeSize);
       const sigRes = SIG_RESOLUTIONS[sigResClass];
@@ -221,7 +222,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
 
     const output = this.missileSkillModel.compute(launcherStats, missileStats, fitting.hullBonuses, conditions.skillLevel);
     const launcherOverloadCycle = conditions.weaponOverloaded ? WEAPON_OVERLOAD_ROF_MULTIPLIER : 1;
-    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageName, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
+    const missileFactors = buildMissileDamageFactors(output.skillDamageMultiplier, output.skillDamageId, output.hullDamageMultiplier, fitting.profile.name, bcsDamageBonus, bcsDamageModifiers);
     return {
       moduleId: bestGroup.moduleId,
       name: launcherStats.name,
@@ -472,15 +473,26 @@ function turretWeaponGroupFromSkill(turretSkill: string | undefined): TurretWeap
   return undefined;
 }
 
-function computeSkillDamageMultiplier(skillBonuses: readonly SkillBonus[], turretSkill: string | undefined, weaponGroup: TurretWeaponGroup | undefined, specializationSkill: string | undefined, skillLevel: number): number {
-  let multiplier = 1;
+interface SkillDamageEntry {
+  readonly skillId: TypeId;
+  readonly multiplier: number;
+}
+
+function computeSkillDamageEntries(skillBonuses: readonly SkillBonus[], turretSkill: string | undefined, weaponGroup: TurretWeaponGroup | undefined, specializationSkill: string | undefined, skillLevel: number): readonly SkillDamageEntry[] {
+  const entries: SkillDamageEntry[] = [];
   for (const bonus of skillBonuses) {
     if (bonus.bonusType !== "turretDamage") continue;
     if (bonus.weaponGroup && bonus.weaponGroup !== weaponGroup) continue;
     if (bonus.turretSkill && bonus.turretSkill !== turretSkill) continue;
     if (bonus.specializationSkill && bonus.specializationSkill !== specializationSkill) continue;
-    multiplier *= 1 + (bonus.magnitudePerLevel * skillLevel) / 100;
+    entries.push({ skillId: bonus.skillId, multiplier: 1 + (bonus.magnitudePerLevel * skillLevel) / 100 });
   }
+  return entries;
+}
+
+function productOfSkillEntries(entries: readonly SkillDamageEntry[]): number {
+  let multiplier = 1;
+  for (const entry of entries) multiplier *= entry.multiplier;
   return multiplier;
 }
 
@@ -512,19 +524,21 @@ interface TurretDamageModifier {
   readonly multiplier: number;
 }
 
-function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], skillDamageMultiplier: number, skillName: string | undefined, hullDamageMultiplier: number, hullName: string, overloadDamage: number): readonly DamageFactor[] {
+function buildTurretDamageFactors(baseMultiplier: number, moduleDamageBonus: number, moduleModifiers: readonly TurretDamageModifier[], skillEntries: readonly SkillDamageEntry[], hullDamageMultiplier: number, hullName: string, overloadDamage: number): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: baseMultiplier }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  if (skillDamageMultiplier !== 1 && skillName !== undefined) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillName });
+  for (const entry of skillEntries) {
+    if (entry.multiplier !== 1) factors.push({ kind: "skill", multiplier: entry.multiplier, skillId: entry.skillId });
+  }
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   if (overloadDamage !== 1) factors.push({ kind: "overload", multiplier: overloadDamage });
   return factors;
 }
 
-function buildMissileDamageFactors(skillDamageMultiplier: number, skillName: string, hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
+function buildMissileDamageFactors(skillDamageMultiplier: number, skillId: TypeId, hullDamageMultiplier: number, hullName: string, moduleDamageBonus: number, moduleModifiers: readonly { moduleId: TypeId; multiplier: number }[]): readonly DamageFactor[] {
   const factors: DamageFactor[] = [{ kind: "base", multiplier: 1 }];
   if (moduleDamageBonus !== 1) factors.push({ kind: "module", multiplier: moduleDamageBonus, moduleIds: moduleModifiers.map((m) => m.moduleId) });
-  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillName });
+  if (skillDamageMultiplier !== 1) factors.push({ kind: "skill", multiplier: skillDamageMultiplier, skillId });
   if (hullDamageMultiplier !== 1) factors.push({ kind: "hull", multiplier: hullDamageMultiplier, hullName });
   return factors;
 }

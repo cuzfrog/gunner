@@ -65,7 +65,7 @@
 
 .dps-hint-factor-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: 64px 1fr auto auto;
   align-items: center;
   gap: 4px;
   font-variant-numeric: tabular-nums;
@@ -91,6 +91,7 @@
   color: var(--text-dim);
   font-size: 11px;
   grid-column: 2 / 5;
+  padding-left: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -12,7 +12,7 @@ export interface DpsHintFactorRow {
   readonly kind: DamageFactorKind;
   readonly multiplier: number;
   readonly cumulative: number;
-  readonly source: string | undefined;
+  readonly sources: readonly string[];
 }
 
 export interface DpsHintSummary {
@@ -93,13 +93,15 @@ function renderAmmoRow(ammo: number, t: (key: string) => string): HTMLElement {
 
 function renderFactorRow(factor: DpsHintFactorRow, t: (key: string) => string): HTMLElement {
   const kindLabel = t(`dpsHint.factor.${factor.kind}`);
-  const source = factor.source !== undefined ? renderFactorSource(factor.source) : null;
-  return html`<div class="dps-hint-factor-row">
+  const el = html`<div class="dps-hint-factor-row">
     <span class="dps-hint-factor-kind">${kindLabel}</span>
     <span class="dps-hint-factor-multi">x${formatMultiplier(factor.multiplier)}</span>
     <span class="dps-hint-factor-cumulative">(x${formatMultiplier(factor.cumulative)})</span>
-    ${source}
   </div>` as unknown as HTMLElement;
+  for (const source of factor.sources) {
+    el.appendChild(renderFactorSource(source));
+  }
+  return el;
 }
 
 function renderFactorSource(source: string): HTMLElement {

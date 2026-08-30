@@ -1,4 +1,5 @@
 import type { DamageFactor, DamageType, ImportedLauncher, ImportedTurret } from "../../../fitting";
+import type { TypeId } from "../../../gamedata/ids";
 import type { ItemNameCatalog } from "../../../gamedata";
 import type { Language } from "../../../appstate";
 import type { I18n } from "../../i18n";
@@ -112,14 +113,31 @@ function buildFactorRows(factors: readonly DamageFactor[], itemNameCatalog: Item
   let cumulative = 1;
   for (const factor of factors) {
     cumulative *= factor.multiplier;
-    rows.push({ kind: factor.kind, multiplier: factor.multiplier, cumulative, source: factorSource(factor, itemNameCatalog, language) });
+    rows.push({ kind: factor.kind, multiplier: factor.multiplier, cumulative, sources: factorSources(factor, itemNameCatalog, language) });
   }
   return rows;
 }
 
-function factorSource(factor: DamageFactor, itemNameCatalog: ItemNameCatalog, language: Language): string | undefined {
+function factorSources(factor: DamageFactor, itemNameCatalog: ItemNameCatalog, language: Language): readonly string[] {
   if (factor.moduleIds !== undefined && factor.moduleIds.length > 0) {
-    return factor.moduleIds.map((id) => itemNameCatalog.nameForId(id, language)).join(", ");
+    return deduplicatedModuleNames(factor.moduleIds, itemNameCatalog, language);
   }
-  return factor.skillName ?? factor.hullName;
+  if (factor.skillId !== undefined) return [itemNameCatalog.nameForId(factor.skillId, language)];
+  if (factor.hullName !== undefined) return [factor.hullName];
+  return [];
+}
+
+function deduplicatedModuleNames(moduleIds: readonly TypeId[], itemNameCatalog: ItemNameCatalog, language: Language): readonly string[] {
+  const counts = new Map<string, { id: TypeId; count: number }>();
+  for (const id of moduleIds) {
+    const existing = counts.get(id);
+    if (existing) existing.count++;
+    else counts.set(id, { id, count: 1 });
+  }
+  const result: string[] = [];
+  for (const { id, count } of counts.values()) {
+    const name = itemNameCatalog.nameForId(id, language);
+    result.push(count > 1 ? `${name} x${count}` : name);
+  }
+  return result;
 }

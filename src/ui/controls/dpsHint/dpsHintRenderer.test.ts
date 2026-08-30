@@ -13,9 +13,9 @@ function makeModel(): DpsHintModel {
         ],
         ammo: 50,
         factors: [
-          { kind: "base", multiplier: 3, cumulative: 3, source: undefined },
-          { kind: "module", multiplier: 1.3, cumulative: 3.9, source: "Heat Sink" },
-          { kind: "skill", multiplier: 1.1, cumulative: 4.29, source: "Surgical Strike" },
+          { kind: "base", multiplier: 3, cumulative: 3, sources: [] },
+          { kind: "module", multiplier: 1.3, cumulative: 3.9, sources: ["Heat Sink"] },
+          { kind: "skill", multiplier: 1.1, cumulative: 4.29, sources: ["Surgical Strike"] },
         ],
         summary: { ammo: 50, multiplier: 4.29, count: 4, volley: 858, cycleTime: 3.5, dps: 245.1 },
       },
@@ -132,6 +132,27 @@ describe("DpsHintRendererImpl", () => {
     const source = factorChildren[3];
     expect(source.className).toBe("dps-hint-factor-source");
     expect(source.textContent).toBe("Heat Sink");
+  });
+
+  test("renders multiple module sources on separate rows", () => {
+    const model: DpsHintModel = {
+      groups: [{
+        name: "Group",
+        types: [],
+        ammo: 10,
+        factors: [{ kind: "module", multiplier: 1.5, cumulative: 1.5, sources: ["Heat Sink II x2", "Damage Control II"] }],
+        summary: { ammo: 10, multiplier: 1.5, count: 1, volley: 15, cycleTime: 5, dps: 3 },
+      }],
+    };
+    const renderer = new DpsHintRendererImpl({ t: (key) => key });
+    const container = globalThis.document.createElement("div") as unknown as FakeElement;
+    renderer.render(model, container as unknown as HTMLElement);
+    const root = container.children[0] as FakeElement;
+    const group = elementChildren(root)[0];
+    const factorRow = elementChildren(group)[2];
+    const factorChildren = elementChildren(factorRow);
+    expect(factorChildren[3].textContent).toBe("Heat Sink II x2");
+    expect(factorChildren[4].textContent).toBe("Damage Control II");
   });
 
   test("renders summary with volley, cycle time, and DPS", () => {
