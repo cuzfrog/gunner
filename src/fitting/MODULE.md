@@ -15,8 +15,6 @@ no-new-exports:
   - gunFamilies.test.ts
   - gunFamilies.ts
   - index.ts
-  - launcherCatalog.test.ts
-  - launcherCatalog.ts
   - launcherClasses.test.ts
   - launcherClasses.ts
   - missileCatalog.test.ts
@@ -26,8 +24,6 @@ no-new-exports:
   - module.ts
   - presetFittings.test.ts
   - presetFittings.ts
-  - turretCatalog.test.ts
-  - turretCatalog.ts
   - turretStats.ts
 ---
 
@@ -41,18 +37,17 @@ scripts) for the `sim` module.
 
 The public boundary is `index.ts`, which exports the `FittingImport`,
 `ChargeCatalog`, `MissileCatalog`, `MissileSkillModel`, `PresetFittings`,
-`GunFamilies`, `TurretCatalog`, `LauncherClasses`, and `LauncherCatalog`
-abstractions, `ImportedFitting`, `ImportedTurret`, `ImportedLauncher`,
-`CargoCharge`, `ChargeOption`, `MissileOption`, `PresetFitting`,
-`FittingRow`, `FittingSection`, `FittingSummary`, `LauncherClass`,
-`FittingState`, `FittedModule`, `TurretGroup`, `LauncherGroup`,
-`CargoEntry`, `FittingModuleEntry`, and the module registration.
-`FittingState` represents the equipped fitting basis (hull, support
-modules, turret groups, launcher groups, propulsion, ewar, boosters,
-drones, cargo) without computed values. `FittingStateFactory` builds
-`FittingState` from resolved module entries and `FittingDb`.
-`FittingCalculator` computes turrets, launchers, hull, propulsion,
-ewar, boosts, and cargo charges from a `FittingState` plus
+`GunFamilies`, and `LauncherClasses` abstractions, `ImportedFitting`,
+`ImportedTurret`, `ImportedLauncher`, `CargoCharge`, `ChargeOption`,
+`MissileOption`, `PresetFitting`, `FittingRow`, `FittingSection`,
+`FittingSummary`, `LauncherClass`, `FittingState`, `FittedModule`,
+`TurretGroup`, `LauncherGroup`, `CargoEntry`, `FittingModuleEntry`, and
+the module registration. `FittingState` represents the equipped fitting
+basis (hull, support modules, turret groups, launcher groups, propulsion,
+ewar, boosters, drones, cargo) without computed values.
+`FittingStateFactory` builds `FittingState` from resolved module entries
+and `FittingDb`. `FittingCalculator` computes turrets, launchers, hull,
+propulsion, ewar, boosts, and cargo charges from a `FittingState` plus
 `StatConditions`. `FittingOverrides` and `FittingOverridesStore`
 represent user fitting-level changes (replacing equipped turret/launcher
 modules, charges, or propulsion). `applyFittingOverrides` patches a
@@ -60,29 +55,22 @@ modules, charges, or propulsion). `applyFittingOverrides` patches a
 `ImportedFitting.fittingState` carries the basis for later recomputation.
 `ChargeCatalog` adds `has(charge)` so persistence modules can existence-check stored charge
 ids without reaching into the catalog's internal record.
-`ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` so
-`TurretCatalog` can preserve the user's ammo selection when switching
-weapon size class. `TurretCatalog` resizes a fitted turret to a
-different signature-resolution class by swapping to the same-family
-representative module and recomputing stats with skill multipliers.
-`MissileCatalog` lists missile charges compatible with a launcher and
-re-derives effective values via `MissileSkillModel` when switching
-ammunition. `MissileCatalog` adds `equivalentInGroups(missile, chargeGroups)`
-so `LauncherCatalog` can preserve the user's missile selection when
-switching launcher class. `LauncherClasses` maps launcher module IDs to
-`LauncherClass` values and provides representative modules per class.
-`LauncherCatalog` switches a fitted launcher to a different class by
-swapping to the representative module and recomputing stats via
-`MissileCatalog.withCharge`. `ImportedFitting.launcher` is an optional
-`ImportedLauncher` parallel to `turret`. `ImportedFitting.ewar` is an
-`EwarLoadout` from the `sim` boundary. `FittingImport` consumes a
-`StackingPenalty` from the `sim` boundary via DI. `FittingImport.summarize`
-produces a structural fitting summary for UI previews. Icon and drone
-image identifiers have moved to the `src/ui` module because they are
-presentational data. Generated game data (fitting database, module slots,
-item names, and fitting presets) lives in `src/gamedata` and is consumed
-through typed DI accessors. Internal files such as `eft.ts`,
-`fittingImport.ts`, `chargeCatalog.ts`, `gunFamilies.ts`,
-`launcherClasses.ts`, `launcherCatalog.ts`, `missileCatalog.ts`,
+`ChargeCatalog` adds `equivalentInSize(charge, chargeSize)` for
+charge-size equivalence checks. `MissileCatalog` lists missile charges
+compatible with a launcher and re-derives effective values via
+`MissileSkillModel` when switching ammunition. `MissileCatalog` adds
+`equivalentInGroups(missile, chargeGroups)` for charge-group equivalence
+checks. `LauncherClasses` maps launcher module IDs to `LauncherClass`
+values and provides representative modules per class.
+`ImportedFitting.launcher` is an optional `ImportedLauncher` parallel to
+`turret`. `ImportedFitting.ewar` is an `EwarLoadout` from the `sim`
+boundary. `FittingImport` consumes a `StackingPenalty` from the `sim`
+boundary via DI. `FittingImport.summarize` produces a structural fitting
+summary for UI previews. Icon and drone image identifiers have moved to
+the `src/ui` module because they are presentational data. Generated game
+data (fitting database, module slots, item names, and fitting presets)
+lives in `src/gamedata` and is consumed through typed DI accessors.
+Internal files such as `eft.ts`, `fittingImport.ts`, `chargeCatalog.ts`,
+`gunFamilies.ts`, `launcherClasses.ts`, `missileCatalog.ts`,
 `missileStats.ts`, and `presetFittings.ts` and their sibling tests are
 reached only by their sibling tests and by `module.ts`.
