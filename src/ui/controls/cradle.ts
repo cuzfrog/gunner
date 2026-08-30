@@ -1,5 +1,5 @@
 import type { ClipboardProvider, ProfileTextCodec, SavedFittings, SettingsParser, SettingsStore } from "../../appstate";
-import type { ChargeCatalog, FittingDb, FittingImport, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
+import type { ChargeCatalog, FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, GunFamilies, LauncherCatalog, LauncherClasses, MissileCatalog, PresetFittings, TurretCatalog } from "../../fitting";
 import type { EwarResolver, HitChance, SimValueParser } from "../../sim";
 import type { Ships } from "../../ships";
 import type { ItemNameLoader } from "../../gamedata";
@@ -58,6 +58,10 @@ export interface ControlsCradle {
   readonly shipAPanelMemory: PanelConfigurationMemory;
   readonly shipBPanelMemory: PanelConfigurationMemory;
   readonly panelMemoryBySide: Record<Side, PanelConfigurationMemory>;
+  readonly fittingCalculator: FittingCalculator;
+  readonly shipAFittingOverrides: FittingOverridesStore;
+  readonly shipBFittingOverrides: FittingOverridesStore;
+  readonly fittingOverridesBySide: Record<Side, FittingOverridesStore>;
   readonly popupGroup: PopupGroup;
   readonly els: ControlsElements;
   readonly engagementReadout: EngagementReadout;

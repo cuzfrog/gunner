@@ -7,7 +7,16 @@ const SCOURGE_LIGHT_ID = "206" as TypeId;
 const NOVA_LIGHT_ID = "202" as TypeId;
 
 function importedWithLauncher(launcher: ReturnType<typeof importedLauncherFixture>): ImportedFitting {
-  return { ...IMPORTED_RIFTER, turret: undefined, launcher };
+  return {
+    ...IMPORTED_RIFTER,
+    turret: undefined,
+    launcher,
+    fittingState: {
+      ...IMPORTED_RIFTER.fittingState!,
+      turretGroups: [],
+      launcherGroups: [{ moduleId: launcher.moduleId, chargeId: launcher.chargeId, count: launcher.count }],
+    },
+  };
 }
 
 describe("LauncherController", () => {
@@ -61,13 +70,13 @@ describe("LauncherController", () => {
   });
 
   test("restore imports the fitting and applies the stored ammo", () => {
-    const { controller, fittingImport, missileCatalog } = buildLauncher({
+    const { controller, fittingImport, fittingOverrides } = buildLauncher({
       fittingImport: { importFitting: vi.fn(() => importedWithLauncher(importedLauncherFixture())) },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true }, NOVA_LIGHT_ID);
     expect(fittingImport.importFitting).toHaveBeenCalledWith("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
     expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
-    expect(missileCatalog.withCharge).toHaveBeenCalledWith(expect.anything(), NOVA_LIGHT_ID, [], 5);
+    expect(fittingOverrides.get().launcherChargeReplacements.get(importedLauncherFixture().moduleId)).toBe(NOVA_LIGHT_ID);
   });
 
   test("restore with no fitting text clears the launcher", () => {
@@ -78,14 +87,13 @@ describe("LauncherController", () => {
   });
 
   test("selecting a different missile updates the launcher and closes the popup", () => {
-    const { document, controller, missileCatalog, popupGroup } = buildLauncher();
+    const { document, controller, popupGroup } = buildLauncher();
     controller.applyImported(importedWithLauncher(importedLauncherFixture()), { skillLevel: 5, overloaded: false });
     controller.openAmmoPopup();
     const list = getFake(document, "ship-a-launcher-ammo-list");
     expect(list.children.length).toBe(2);
     (list.children[1].firstElementChild as unknown as FakeElement).trigger("click");
     expect(controller.ammoId()).toBe(NOVA_LIGHT_ID);
-    expect(missileCatalog.withCharge).toHaveBeenCalledWith(expect.anything(), NOVA_LIGHT_ID, [], 5);
     expect(popupGroup.close).toHaveBeenCalled();
   });
 
@@ -232,11 +240,11 @@ describe("LauncherController", () => {
     expect(popupGroup.toggle).toHaveBeenCalled();
   });
 
-  test("selecting a launcher variant calls switchVariant, updates the launcher, closes the popup, and emits configInvalidated", () => {
+  test("selecting a launcher variant sets the module override, updates the launcher, closes the popup, and emits configInvalidated", () => {
     const baseLauncher = importedLauncherFixture();
     const variantLauncher = { ...baseLauncher, moduleId: "2404" as TypeId, name: "Light Missile Launcher II" };
-    const { document, controller, launcherClasses, launcherCatalog, events, popupGroup } = buildLauncher({
-      launcherCatalog: { switchVariant: vi.fn(() => variantLauncher) },
+    const { document, controller, launcherClasses, fittingOverrides, events, popupGroup } = buildLauncher({
+      launchersByModuleId: { "2404": variantLauncher },
     });
     vi.mocked(launcherClasses.variantsForClass).mockReturnValue([
       { id: "499" as TypeId, name: "Light Missile Launcher I", launcherGroup: 509, chargeGroups: [384, 394], rateOfFire: 16, metaLevel: 0, metaGroupID: 1 } as never,
@@ -248,7 +256,7 @@ describe("LauncherController", () => {
     const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "2404");
     expect(buttons.length).toBe(1);
     (buttons[0] as unknown as FakeElement).trigger("click");
-    expect(launcherCatalog.switchVariant).toHaveBeenCalledWith(expect.objectContaining({ moduleId: baseLauncher.moduleId }), "2404" as TypeId, [], 5);
+    expect(fittingOverrides.get().launcherModuleReplacements.get(baseLauncher.moduleId)).toBe("2404" as TypeId);
     expect(controller.launcher()?.moduleId).toBe("2404" as TypeId);
     expect(popupGroup.close).toHaveBeenCalled();
     expect(emitConfigInvalidated).toHaveBeenCalled();

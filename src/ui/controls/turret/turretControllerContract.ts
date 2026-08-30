@@ -1,6 +1,6 @@
 import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { TypeId } from "../../../gamedata/ids";
-import type { ChargeCatalog, FittingImport, GunFamilies, ImportedFitting, ImportedTurret, TurretCatalog } from "../../../fitting";
+import type { ChargeCatalog, FittingCalculator, FittingImport, FittingOverridesStore, GunFamilies, ImportedFitting, ImportedTurret } from "../../../fitting";
 import type { SigResolutionClass, SimValueParser, TurretSpec } from "../../../sim";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
@@ -13,13 +13,13 @@ import type { UiEvents } from "../../events";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import type { TrackingInput } from "../trackingInput";
+import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
 
 export interface TurretControllerDeps {
   readonly side: Side;
   readonly els: TurretEls;
   readonly chargeCatalog: ChargeCatalog;
   readonly gunFamilies: GunFamilies;
-  readonly turretCatalog: TurretCatalog;
   readonly imageCatalog: ImageCatalog;
   readonly trackingInput: TrackingInput;
   readonly i18n: I18n;
@@ -30,6 +30,9 @@ export interface TurretControllerDeps {
   readonly events: UiEvents;
   readonly popupGroup: PopupGroup;
   readonly simValueParser: SimValueParser;
+  readonly fittingCalculator: FittingCalculator;
+  readonly fittingOverrides: FittingOverridesStore;
+  readonly panelMemory: PanelConfigurationMemory;
 }
 
 export interface TurretController {

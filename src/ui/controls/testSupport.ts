@@ -1,5 +1,5 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from "awilix";
-import type { ChargeCatalog, FittingImport, PresetFittings } from "../../fitting";
+import type { ChargeCatalog, FittingCalculator, FittingImport, PresetFittings } from "../../fitting";
 import type { TypeId } from "../../gamedata/ids";
 import type { Ships } from "../../ships";
 import { registerSimModule, type EwarResolver, type HitChance, type SimCradle } from "../../sim";
@@ -202,6 +202,15 @@ function buildControlsCradle(document: Document, options: BuildDomControlsOption
     missileCatalog: asValue(mockMissileCatalog()),
     launcherCatalog: asValue(mockLauncherCatalog()),
     launcherClasses: asValue(mockLauncherClasses()),
+    fittingCalculator: asValue(vi.mocked<FittingCalculator>({
+      resolveTurrets: vi.fn(() => []),
+      resolveLauncher: vi.fn(() => undefined),
+      resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+      resolvePropulsion: vi.fn(() => undefined),
+      resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+      resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
+      resolveCargoCharges: vi.fn(() => []),
+    })),
     profileEquality: asValue<ProfileEquality>({ equal() { return true; } }),
     itemNameLoader: asValue({ ensureLoaded: vi.fn(), isLoaded: vi.fn(() => true), load: vi.fn(() => Promise.resolve()) }),
   });

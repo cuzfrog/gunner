@@ -1,10 +1,12 @@
 import type { ImageCatalog } from "../../icons";
-import type { FittingImport, ImportedLauncher, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
+import type { FittingCalculator, FittingImport, FittingOverridesStore, ImportedLauncher, LauncherClass, LauncherClasses, MissileCatalog, MissileOption } from "../../../fitting";
+import { FittingOverridesStoreImpl } from "../../../fitting";
 import type { FittingDb, HullBonus, LauncherStats, MissileStats } from "../../../gamedata/fittingDb";
 import type { ShipId, TypeId } from "../../../gamedata/ids";
 import type { Ships, SkillLevel } from "../../../ships";
 import { UiEventsImpl } from "../../events";
 import type { I18n, Language } from "../../i18n";
+import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
 import { fakeDocument } from "../testSupport";
@@ -90,11 +92,11 @@ export function buildLauncher(
     imageCatalog?: Partial<ImageCatalog>;
     fittingImport?: Partial<FittingImport>;
     missileCatalog?: Partial<MissileCatalog>;
-    launcherCatalog?: Partial<LauncherCatalog>;
     launcherClasses?: Partial<LauncherClasses>;
     ships?: Partial<Ships>;
     fittingDb?: Partial<FittingDb>;
     i18n?: Partial<I18n>;
+    launchersByModuleId?: Readonly<Record<string, ImportedLauncher>>;
   } = {},
 ) {
   const side = options.side ?? "shipA";
@@ -137,11 +139,6 @@ export function buildLauncher(
     equivalentInGroups: vi.fn(() => undefined),
     ...options.missileCatalog,
   });
-  const launcherCatalog = vi.mocked<LauncherCatalog>({
-    switchClass: vi.fn(() => undefined),
-    switchVariant: vi.fn(() => undefined),
-    ...options.launcherCatalog,
-  });
   const launcherClasses = vi.mocked<LauncherClasses>({
     classOf: vi.fn(() => "light" as LauncherClass),
     representativeOf: vi.fn(() => "499" as TypeId),
@@ -168,19 +165,38 @@ export function buildLauncher(
     onPointerDown: vi.fn(),
     onKeyDown: vi.fn(),
   });
+  const launchersByModuleId: Readonly<Record<string, ImportedLauncher>> = options.launchersByModuleId ?? {};
+  const fittingOverrides = new FittingOverridesStoreImpl();
+  const panelMemory = new PanelConfigurationMemoryImpl();
+  const fittingCalculator = vi.mocked<FittingCalculator>({
+    resolveTurrets: vi.fn(() => []),
+    resolveLauncher: vi.fn((state) => {
+      const group = state.launcherGroups[0];
+      if (!group) return undefined;
+      const template = launchersByModuleId[String(group.moduleId)] ?? importedLauncherFixture();
+      return { ...template, moduleId: group.moduleId, chargeId: group.chargeId ?? template.chargeId, count: group.count };
+    }),
+    resolveHull: vi.fn(() => ({ fitted: { mass: 0, massMultiplier: 1, speedMultiplier: 1, inertiaMultiplier: 1, sigMultiplier: 1, sigRadiusAdd: 0 } })),
+    resolvePropulsion: vi.fn(() => undefined),
+    resolveEwar: vi.fn(() => ({ webs: [], grapplers: [], disruptors: [], scramblers: [], scripts: [] })),
+    resolveBoosts: vi.fn(() => ({ computers: [], scripts: [] })),
+    resolveCargoCharges: vi.fn(() => []),
+  });
   const controller = new LauncherControllerImpl({
     side,
     els,
     fittingDb,
     fittingImport,
     missileCatalog,
-    launcherCatalog,
     launcherClasses,
     ships,
     imageCatalog,
     i18n,
     events,
     popupGroup,
+    fittingCalculator,
+    fittingOverrides,
+    panelMemory,
   });
-  return { document, controller, missileCatalog, launcherCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup };
+  return { document, controller, missileCatalog, launcherClasses, ships, imageCatalog, fittingImport, fittingDb, i18n, events, popupGroup, fittingOverrides, panelMemory, fittingCalculator };
 }

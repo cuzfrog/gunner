@@ -8,6 +8,7 @@ import { TurretStateResolver } from "./turretStateResolver";
 import { TurretOverridesStore } from "./turretOverrides";
 import { collectTurretEls } from "./turretEls";
 import { PanelConfigurationMemoryImpl } from "../../panelConfigurationMemory";
+import { FittingOverridesStoreImpl } from "../../../fitting";
 
 type TurretControllerFactoryDeps = Pick<
   ControlsCradle,
@@ -15,7 +16,6 @@ type TurretControllerFactoryDeps = Pick<
   | "chargeCatalog"
   | "fittingImport"
   | "gunFamilies"
-  | "turretCatalog"
   | "imageCatalog"
   | "i18n"
   | "ships"
@@ -23,6 +23,9 @@ type TurretControllerFactoryDeps = Pick<
   | "popupGroup"
   | "turretOverridesBySide"
   | "simValueParser"
+  | "fittingCalculator"
+  | "fittingOverridesBySide"
+  | "panelMemoryBySide"
 >;
 
 export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixContainer<T>): void {
@@ -38,6 +41,12 @@ export function registerTurretModule<T extends ControlsCradle>(cradle: AwilixCon
     panelMemoryBySide: asFunction(({ shipAPanelMemory, shipBPanelMemory }) => ({
       shipA: shipAPanelMemory,
       shipB: shipBPanelMemory,
+    })).singleton(),
+    shipAFittingOverrides: asClass(FittingOverridesStoreImpl).singleton(),
+    shipBFittingOverrides: asClass(FittingOverridesStoreImpl).singleton(),
+    fittingOverridesBySide: asFunction(({ shipAFittingOverrides, shipBFittingOverrides }) => ({
+      shipA: shipAFittingOverrides,
+      shipB: shipBFittingOverrides,
     })).singleton(),
     shipATurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipA", deps)).singleton(),
     shipBTurretController: asFunction((deps: TurretControllerFactoryDeps) => createTurretController("shipB", deps)).singleton(),
@@ -55,7 +64,6 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     els: collectTurretEls(deps.els, side),
     chargeCatalog: deps.chargeCatalog,
     gunFamilies: deps.gunFamilies,
-    turretCatalog: deps.turretCatalog,
     imageCatalog: deps.imageCatalog,
     trackingInput: new TrackingInputImpl(),
     i18n: deps.i18n,
@@ -66,5 +74,8 @@ function createTurretController(side: Side, deps: TurretControllerFactoryDeps): 
     events: deps.uiEvents,
     popupGroup: deps.popupGroup,
     simValueParser: deps.simValueParser,
+    fittingCalculator: deps.fittingCalculator,
+    fittingOverrides: deps.fittingOverridesBySide[side],
+    panelMemory: deps.panelMemoryBySide[side],
   });
 }

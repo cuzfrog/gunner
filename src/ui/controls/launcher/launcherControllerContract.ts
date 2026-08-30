@@ -1,10 +1,11 @@
-import type { FittingDb, FittingImport, ImportedFitting, ImportedLauncher, LauncherCatalog, LauncherClass, LauncherClasses, MissileCatalog } from "../../../fitting";
+import type { FittingCalculator, FittingDb, FittingImport, FittingOverridesStore, ImportedFitting, ImportedLauncher, LauncherClass, LauncherClasses, MissileCatalog } from "../../../fitting";
 import type { TypeId } from "../../../gamedata/ids";
 import type { MissileSpec } from "../../../sim";
 import type { ShipProfile, Ships, SkillLevel, StatConditions } from "../../../ships";
 import type { I18n } from "../../i18n";
 import type { ImageCatalog } from "../../icons";
 import type { UiEvents } from "../../events";
+import type { PanelConfigurationMemory } from "../../panelConfigurationMemory";
 import type { Popup } from "../popup";
 import type { PopupGroup } from "../popup";
 import type { Side } from "../side";
@@ -15,13 +16,15 @@ export interface LauncherControllerDeps {
   readonly fittingDb: FittingDb;
   readonly fittingImport: FittingImport;
   readonly missileCatalog: MissileCatalog;
-  readonly launcherCatalog: LauncherCatalog;
   readonly launcherClasses: LauncherClasses;
   readonly ships: Ships;
   readonly imageCatalog: ImageCatalog;
   readonly i18n: I18n;
   readonly events: UiEvents;
   readonly popupGroup: PopupGroup;
+  readonly fittingCalculator: FittingCalculator;
+  readonly fittingOverrides: FittingOverridesStore;
+  readonly panelMemory: PanelConfigurationMemory;
 }
 
 export interface LauncherEls {

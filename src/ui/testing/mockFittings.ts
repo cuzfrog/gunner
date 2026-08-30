@@ -157,11 +157,16 @@ const EMPTY_FITTING_STATE: FittingState = {
   cargo: [],
 };
 
+const RIFTER_FITTING_STATE: FittingState = {
+  ...EMPTY_FITTING_STATE,
+  turretGroups: [{ moduleId: "486" as TypeId, chargeId: "12608" as TypeId, count: 1 }],
+};
+
 export const IMPORTED_RIFTER: ImportedFitting = {
   profile: RIFTER,
   fittingName: "Brawler",
   fitted: FITTED,
-  fittingState: EMPTY_FITTING_STATE,
+  fittingState: RIFTER_FITTING_STATE,
   propulsion: undefined,
   turret: TURRET,
   cargoCharges: [],

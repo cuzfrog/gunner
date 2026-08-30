@@ -131,11 +131,10 @@ describe("TurretController", () => {
   });
 
   test("selecting a different charge updates turret inputs and clears overrides", () => {
-    const { document, controller, chargeCatalog, turretOverrides, events } = buildTurret({
+    const { document, controller, fittingOverrides, turretOverrides, events } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
       chargeCatalog: {
         chargesForTurret: vi.fn(() => CHARGE_OPTIONS),
-        withCharge: vi.fn((turret, chargeId) => ({ ...turret, chargeId, tracking: turret.base.tracking, optimal: turret.base.optimal, falloff: turret.base.falloff })),
       },
     });
     controller.restore("[Rifter, Brawler]", { skillLevel: 5, overloaded: true });
@@ -147,11 +146,11 @@ describe("TurretController", () => {
 
     expect(controller.ammo()).toBe("Republic Fleet EMP S");
     expect(getFake(document, "ship-a-ammo-summary").textContent).toBe("Republic Fleet EMP S");
-    expect(chargeCatalog.withCharge).toHaveBeenLastCalledWith(expect.objectContaining({ chargeId: CHARGE_OPTIONS[0].id }), CHARGE_OPTIONS[1].id);
+    expect(fittingOverrides.get().turretChargeReplacements.get("486" as TypeId)).toBe(CHARGE_OPTIONS[1].id);
     expect(turretOverrides.get()).toEqual({ shipAMass: 1234 });
     expect(emitConfigInvalidated).toHaveBeenCalled();
     expect(getFake(document, "ship-a-tracking").value).toBe("0.42");
-    expect(getFake(document, "ship-a-optimal").value).toBe("1200");
+    expect(getFake(document, "ship-a-optimal").value).toBe("600");
     expect(getFake(document, "ship-a-falloff").value).toBe("3000");
   });
 
@@ -235,6 +234,13 @@ describe("TurretController", () => {
         IMPORTED_RIFTER.turret!,
         { ...IMPORTED_RIFTER.turret!, moduleId: "21076" as TypeId, damagePerShot: 20, cycleTime: 4, turretCount: 2 },
       ],
+      fittingState: {
+        ...IMPORTED_RIFTER.fittingState!,
+        turretGroups: [
+          { moduleId: "486" as TypeId, chargeId: "12608" as TypeId, count: 1 },
+          { moduleId: "21076" as TypeId, chargeId: "12608" as TypeId, count: 2 },
+        ],
+      },
     };
     const { document, controller } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => multiTurretImport) },
@@ -248,8 +254,8 @@ describe("TurretController", () => {
     (getFake(document, "ship-a-ammo-all-list").children[1].firstElementChild as unknown as FakeElement).trigger("click");
     const specs = controller.currentTurretSpecs();
     expect(specs.length).toBe(2);
-    expect(specs[0].damagePerShot).toBe(999);
-    expect(specs[1].damagePerShot).toBe(20);
+    expect(specs[0].damagePerShot).toBe(60);
+    expect(specs[1].damagePerShot).toBe(60);
   });
 
   test("currentTurretSpecs returns empty array when no turret is fitted", () => {
@@ -382,38 +388,33 @@ describe("TurretController", () => {
     expect(emitDisplayInvalidated).toHaveBeenCalled();
   });
 
-  test("clicking a sig-res button changes the class, records the override and emits displayInvalidated", () => {
-    const { document, controller, turretOverrides, events } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
-    const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
+  test("clicking a sig-res button with a fitted turret switches module and emits configInvalidated", () => {
+    const { document, controller, events } = buildTurret({ fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) } });
+    const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     buttonFor(document, "M").trigger("click");
     expect(getFake(document, "ship-a-sigRes").value).toBe("M");
-    expect(turretOverrides.get().sigRes).toBe("M");
-    expect(emitDisplayInvalidated).toHaveBeenCalled();
+    expect(emitConfigInvalidated).toHaveBeenCalled();
     expect(buttonFor(document, "M").getAttribute("aria-pressed")).toBe("true");
     expect(buttonFor(document, "S").getAttribute("aria-pressed")).toBe("false");
   });
 
   test("clicking a sig-res button with a fitted turret resizes the turret and emits configInvalidated", () => {
-    const resizedTurret = { ...TURRET, sigResolutionClass: "M" as const, chargeSize: 2, chargeId: "21898" as TypeId, moduleId: "491" as TypeId };
-    const { document, controller, turretCatalog, events } = buildTurret({
+    const { document, controller, fittingOverrides, events } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      turretCatalog: { resize: vi.fn(() => resizedTurret) },
     });
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     buttonFor(document, "M").trigger("click");
-    expect(turretCatalog.resize).toHaveBeenCalledWith(TURRET, "M", 5, undefined);
-    expect(controller.turret()).toBe(resizedTurret);
-    expect(controller.ammoId()).toBe("21898" as TypeId);
+    expect(controller.turret()?.moduleId).toBe("491" as TypeId);
+    expect(controller.turret()?.sigResolutionClass).toBe("M");
+    expect(fittingOverrides.get().turretModuleReplacements.get("486" as TypeId)).toBe("491" as TypeId);
     expect(emitConfigInvalidated).toHaveBeenCalled();
   });
 
   test("clicking a sig-res button with a fitted turret clears turret overrides on resize", () => {
-    const resizedTurret = { ...TURRET, sigResolutionClass: "M" as const, chargeSize: 2, chargeId: "21898" as TypeId, moduleId: "491" as TypeId };
     const { document, controller, turretOverrides, events } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      turretCatalog: { resize: vi.fn(() => resizedTurret) },
     });
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     getFake(document, "ship-a-tracking").value = "0.5";
@@ -427,11 +428,9 @@ describe("TurretController", () => {
   });
 
   test("clicking a sig-res button with a fitted turret clears cargo charges on resize", () => {
-    const resizedTurret = { ...TURRET, sigResolutionClass: "M" as const, chargeSize: 2, chargeId: "21898" as TypeId, moduleId: "491" as TypeId };
     const { document, controller, chargeCatalog } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER_WITH_CARGO) },
       chargeCatalog: { chargesForTurret: vi.fn(() => CHARGE_OPTIONS), chargesForSize: vi.fn(() => CHARGE_OPTIONS) },
-      turretCatalog: { resize: vi.fn(() => resizedTurret) },
     });
     controller.applyImported(IMPORTED_RIFTER_WITH_CARGO, { skillLevel: 5, overloaded: false });
     controller.openAmmoPopup();
@@ -441,13 +440,12 @@ describe("TurretController", () => {
     expect(cargoList.children.length).toBe(1);
   });
 
-  test("clicking a sig-res button falls back to label-only when resize returns undefined", () => {
+  test("clicking a sig-res button without a fitted turret sets the label only", () => {
     const { document, controller, turretOverrides, events } = buildTurret({
-      fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      turretCatalog: { resize: vi.fn(() => undefined) },
+      fittingImport: { importFitting: vi.fn(() => ({ ...IMPORTED_RIFTER, turret: undefined })) },
     });
     const emitDisplayInvalidated = vi.spyOn(events, "emitDisplayInvalidated");
-    controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
+    controller.applyImported({ ...IMPORTED_RIFTER, turret: undefined }, { skillLevel: 5, overloaded: false });
     buttonFor(document, "M").trigger("click");
     expect(turretOverrides.get().sigRes).toBe("M");
     expect(emitDisplayInvalidated).toHaveBeenCalled();
@@ -493,55 +491,48 @@ describe("TurretController", () => {
     expect(popupGroup.toggle).toHaveBeenCalled();
   });
 
-  test("selecting a turret variant calls switchVariant, updates the turret, closes the popup, and emits configInvalidated", () => {
-    const variantTurret = { ...TURRET, moduleId: "491" as TypeId, damagePerShot: 20 };
-    const { document, controller, gunFamilies, turretCatalog, events, popupGroup } = buildTurret({
+  test("selecting a turret variant sets the module override, updates the turret, closes the popup, and emits configInvalidated", () => {
+    const { document, controller, gunFamilies, fittingOverrides, events, popupGroup } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      turretCatalog: { switchVariant: vi.fn(() => variantTurret) },
     });
     vi.mocked(gunFamilies.variantsForFamily).mockReturnValue([
       { id: "486" as TypeId, name: "200mm AutoCannon I", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 0, metaGroupID: 1 } as never,
-      { id: "491" as TypeId, name: "220mm Vulcan AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
+      { id: "21076" as TypeId, name: "125mm Gatling AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
     ]);
     const emitConfigInvalidated = vi.spyOn(events, "emitConfigInvalidated");
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     const list = getFake(document, "ship-a-turret-variants");
-    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "491");
+    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "21076");
     expect(buttons.length).toBe(1);
     (buttons[0] as unknown as FakeElement).trigger("click");
-    expect(turretCatalog.switchVariant).toHaveBeenCalledWith(TURRET, "491" as TypeId, 5);
-    expect(controller.turret()).toBe(variantTurret);
+    expect(fittingOverrides.get().turretModuleReplacements.get("486" as TypeId)).toBe("21076" as TypeId);
+    expect(controller.turret()?.moduleId).toBe("21076" as TypeId);
     expect(popupGroup.close).toHaveBeenCalled();
     expect(emitConfigInvalidated).toHaveBeenCalled();
   });
 
   test("variant selection remembers the module per sig-res class and restores it on sig-res round-trip", () => {
-    const techIiTurret = { ...TURRET, moduleId: "491" as TypeId };
-    const resizedToTechIi = { ...TURRET, sigResolutionClass: "M" as const, chargeSize: 2, moduleId: "491" as TypeId, chargeId: "21898" as TypeId };
-    const resizedBackToTechIi = { ...TURRET, sigResolutionClass: "S" as const, chargeSize: 1, moduleId: "491" as TypeId, chargeId: "12608" as TypeId };
-    const { document, controller, gunFamilies, turretCatalog } = buildTurret({
+    const { document, controller, gunFamilies, panelMemory } = buildTurret({
       fittingImport: { importFitting: vi.fn(() => IMPORTED_RIFTER) },
-      turretCatalog: {
-        switchVariant: vi.fn(() => techIiTurret),
-        resize: vi.fn(() => resizedToTechIi),
-      },
     });
     vi.mocked(gunFamilies.variantsForFamily).mockReturnValue([
       { id: "486" as TypeId, name: "200mm AutoCannon I", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 0, metaGroupID: 1 } as never,
-      { id: "491" as TypeId, name: "220mm Vulcan AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
+      { id: "21076" as TypeId, name: "125mm Gatling AutoCannon II", chargeSize: 1, damageMultiplier: 3, tracking: 0.3, optimal: 1000, falloff: 2000, cycleTime: 5, metaLevel: 5, metaGroupID: 2 } as never,
     ]);
     controller.applyImported(IMPORTED_RIFTER, { skillLevel: 5, overloaded: false });
     const list = getFake(document, "ship-a-turret-variants");
-    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "491");
+    const buttons = Array.from(list.children).filter((c) => c.getAttribute("data-value") === "21076");
     expect(buttons.length).toBe(1);
     (buttons[0] as unknown as FakeElement).trigger("click");
-    expect(controller.turret()?.moduleId).toBe("491" as TypeId);
+    expect(controller.turret()?.moduleId).toBe("21076" as TypeId);
+    expect(controller.turret()?.sigResolutionClass).toBe("S");
     buttonFor(document, "M").trigger("click");
-    expect(turretCatalog.resize).toHaveBeenCalledWith(techIiTurret, "M", 5, undefined);
     expect(controller.turret()?.moduleId).toBe("491" as TypeId);
-    vi.mocked(turretCatalog.resize).mockReturnValue(resizedBackToTechIi);
+    expect(controller.turret()?.sigResolutionClass).toBe("M");
+    expect(panelMemory.recallTurret("autocannon", "M")?.moduleId).toBe("491" as TypeId);
     buttonFor(document, "S").trigger("click");
-    expect(turretCatalog.resize).toHaveBeenCalledWith(resizedToTechIi, "S", 5, "491" as TypeId);
+    expect(controller.turret()?.moduleId).toBe("21076" as TypeId);
+    expect(controller.turret()?.sigResolutionClass).toBe("S");
   });
 });
 

@@ -25,13 +25,15 @@ function createLauncherController(side: Side, deps: ControlsCradle): LauncherCon
     fittingDb: deps.fittingDb,
     fittingImport: deps.fittingImport,
     missileCatalog: deps.missileCatalog,
-    launcherCatalog: deps.launcherCatalog,
     launcherClasses: deps.launcherClasses,
     ships: deps.ships,
     imageCatalog: deps.imageCatalog,
     i18n: deps.i18n,
     events: deps.uiEvents,
     popupGroup: deps.popupGroup,
+    fittingCalculator: deps.fittingCalculator,
+    fittingOverrides: deps.fittingOverridesBySide[side],
+    panelMemory: deps.panelMemoryBySide[side],
   });
 }
 
