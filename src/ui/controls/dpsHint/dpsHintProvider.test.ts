@@ -276,4 +276,17 @@ describe("DpsHintProviderImpl", () => {
     provider.render(anchor, container);
     expect(catalog.nameForId).toHaveBeenCalledWith("3315", "en");
   });
+
+  test("resolves launcher skill factor source via itemNameCatalog", () => {
+    const launcher = makeLauncher();
+    const catalog = makeItemNameCatalog();
+    const provider = new DpsHintProviderImpl(makeDeps({
+      launcherControllers: { shipA: makeLauncherController(launcher), shipB: makeLauncherController() },
+      itemNameCatalog: catalog,
+    }));
+    const anchor = makeAnchor("shipA");
+    const container = globalThis.document.createElement("div");
+    provider.render(anchor, container);
+    expect(catalog.nameForId).toHaveBeenCalledWith("20315", "en");
+  });
 });

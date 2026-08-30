@@ -121,7 +121,7 @@ export class FittingCalculatorImpl implements FittingCalculator {
       const hullRoFMultiplier = hullRoFPercents.reduce((acc, p) => acc * (1 + p / 100), 1);
 
       const skillEntries = computeSkillDamageEntries(this.db.skillBonuses, turret.turretSkill, weaponGroup, turret.specializationSkill, skillLevel);
-      const skillDamageMultiplier = productOfSkillEntries(skillEntries);
+      const skillDamageMultiplier = skillEntries.reduce((acc, e) => acc * e.multiplier, 1);
 
       const modifiedDamageMultiplier = turret.damageMultiplier * moduleDamageBonus * hullDamageMultiplier * skillDamageMultiplier;
       const modifiedCycleTime = turret.cycleTime * moduleSpeedBonus * hullRoFMultiplier * skillRoFMultiplier;
@@ -488,12 +488,6 @@ function computeSkillDamageEntries(skillBonuses: readonly SkillBonus[], turretSk
     entries.push({ skillId: bonus.skillId, multiplier: 1 + (bonus.magnitudePerLevel * skillLevel) / 100 });
   }
   return entries;
-}
-
-function productOfSkillEntries(entries: readonly SkillDamageEntry[]): number {
-  let multiplier = 1;
-  for (const entry of entries) multiplier *= entry.multiplier;
-  return multiplier;
 }
 
 function computeSkillRoFMultiplier(skillBonuses: readonly SkillBonus[], skillLevel: number): number {

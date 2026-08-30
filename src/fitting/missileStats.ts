@@ -1,5 +1,5 @@
 import type { HullBonus, LauncherStats, MissileStats } from "../gamedata/fittingDb";
-import type { TypeId } from "../gamedata/ids";
+import { toTypeId, type TypeId } from "../gamedata/ids";
 import type { StackingPenalty } from "../sim";
 import type { SkillLevel } from "../ships";
 
@@ -23,7 +23,7 @@ export interface MissileSkillModel {
 const MLO_ROF_BONUS = 0.02;
 const RAPID_LAUNCH_ROF_BONUS = 0.03;
 const WARHEAD_DAMAGE_BONUS = 0.02;
-const WARHEAD_UPGRADES_ID = "20315" as TypeId;
+const WARHEAD_UPGRADES_ID = toTypeId("20315");
 const MISSILE_BOMBARDMENT_FLIGHT_BONUS = 0.10;
 const MISSILE_PROJECTION_VELOCITY_BONUS = 0.10;
 const GUIDED_PRECISION_RADIUS_BONUS = 0.05;
