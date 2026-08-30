@@ -16,6 +16,9 @@ export interface DpsHintFactorRow {
 }
 
 export interface DpsHintSummary {
+  readonly ammo: number;
+  readonly multiplier: number;
+  readonly count: number;
   readonly volley: number;
   readonly cycleTime: number;
   readonly dps: number;
@@ -24,7 +27,7 @@ export interface DpsHintSummary {
 export interface DpsHintGroup {
   readonly name: string;
   readonly types: readonly DpsHintTypeRow[];
-  readonly sum: number;
+  readonly ammo: number;
   readonly factors: readonly DpsHintFactorRow[];
   readonly summary: DpsHintSummary;
 }
@@ -63,7 +66,7 @@ function renderGroup(group: DpsHintGroup, t: (key: string) => string): HTMLEleme
   for (const row of group.types) {
     el.appendChild(renderTypeRow(row, t));
   }
-  el.appendChild(renderSumRow(group.sum, t));
+  el.appendChild(renderAmmoRow(group.ammo, t));
   for (const factor of group.factors) {
     el.appendChild(renderFactorRow(factor, t));
   }
@@ -81,10 +84,10 @@ function renderTypeRow(row: DpsHintTypeRow, t: (key: string) => string): HTMLEle
   </div>` as unknown as HTMLElement;
 }
 
-function renderSumRow(sum: number, t: (key: string) => string): HTMLElement {
+function renderAmmoRow(ammo: number, t: (key: string) => string): HTMLElement {
   return html`<div class="dps-hint-row dps-hint-sum-row">
-    <span class="dps-hint-label">${t("dpsHint.sum")}</span>
-    <span class="dps-hint-value">${formatWithCommas(sum, 1)}</span>
+    <span class="dps-hint-label">${t("dpsHint.ammo")}</span>
+    <span class="dps-hint-value">${formatWithCommas(ammo, 1)}</span>
   </div>` as unknown as HTMLElement;
 }
 
@@ -104,10 +107,11 @@ function renderFactorSource(source: string): HTMLElement {
 }
 
 function renderSummary(summary: DpsHintSummary, t: (key: string) => string): HTMLElement {
+  const volleyFormula = `${formatWithCommas(summary.ammo, 1)} × ${formatMultiplier(summary.multiplier)} × ${summary.count} = ${formatWithCommas(summary.volley, 1)}`;
   return html`<div class="dps-hint-summary">
     <div class="dps-hint-row dps-hint-summary-row">
       <span class="dps-hint-label">${t("dpsHint.volley")}</span>
-      <span class="dps-hint-value">${formatWithCommas(summary.volley, 1)}</span>
+      <span class="dps-hint-value">${volleyFormula}</span>
     </div>
     <div class="dps-hint-row dps-hint-summary-row">
       <span class="dps-hint-label">${t("dpsHint.cycleTime")}</span>

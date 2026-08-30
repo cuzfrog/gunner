@@ -219,7 +219,7 @@ export const JA: LanguageSlice<"ja"> = {
   "dpsHint.damageType.thermal": { ja: "サーマル" },
   "dpsHint.damageType.kinetic": { ja: "キネティック" },
   "dpsHint.damageType.explosive": { ja: "エクスプローシブ" },
-  "dpsHint.sum": { ja: "合計" },
+  "dpsHint.ammo": { ja: "弾薬" },
   "dpsHint.factor.base": { ja: "ベース" },
   "dpsHint.factor.module": { ja: "モジュール" },
   "dpsHint.factor.skill": { ja: "スキル" },

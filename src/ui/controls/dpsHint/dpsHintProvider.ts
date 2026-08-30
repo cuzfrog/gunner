@@ -70,41 +70,41 @@ function sideFromAnchor(anchor: HTMLElement): Side | undefined {
 
 function buildTurretGroup(turret: ImportedTurret, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
   const name = `${itemNameCatalog.nameForId(turret.moduleId, language)} x${turret.turretCount}`;
-  const { types, sum } = buildTypeRows(turret.damageBreakdown.damageByType);
+  const { types, ammo } = buildTypeRows(turret.damageBreakdown.damageByType);
   const factors = buildFactorRows(turret.damageBreakdown.factors, itemNameCatalog, language);
   const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
-  const volley = sum * cumulative * turret.turretCount;
+  const volley = ammo * cumulative * turret.turretCount;
   const dps = turret.cycleTime > 0 ? volley / turret.cycleTime : 0;
-  const summary: DpsHintSummary = { volley, cycleTime: turret.cycleTime, dps };
-  return { name, types, sum, factors, summary };
+  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: turret.turretCount, volley, cycleTime: turret.cycleTime, dps };
+  return { name, types, ammo, factors, summary };
 }
 
 function buildLauncherGroup(launcher: ImportedLauncher, itemNameCatalog: ItemNameCatalog, language: Language): DpsHintGroup {
   const name = `${itemNameCatalog.nameForId(launcher.moduleId, language)} x${launcher.count}`;
-  const { types, sum } = buildTypeRows(launcher.damageBreakdown.damageByType);
+  const { types, ammo } = buildTypeRows(launcher.damageBreakdown.damageByType);
   const factors = buildFactorRows(launcher.damageBreakdown.factors, itemNameCatalog, language);
   const cumulative = factors.length > 0 ? factors[factors.length - 1].cumulative : 1;
-  const volley = sum * cumulative * launcher.count;
+  const volley = ammo * cumulative * launcher.count;
   const dps = launcher.cycleTime > 0 ? volley / launcher.cycleTime : 0;
-  const summary: DpsHintSummary = { volley, cycleTime: launcher.cycleTime, dps };
-  return { name, types, sum, factors, summary };
+  const summary: DpsHintSummary = { ammo, multiplier: cumulative, count: launcher.count, volley, cycleTime: launcher.cycleTime, dps };
+  return { name, types, ammo, factors, summary };
 }
 
-function buildTypeRows(damageByType: Readonly<Partial<Record<DamageType, number>>>): { types: readonly DpsHintTypeRow[]; sum: number } {
+function buildTypeRows(damageByType: Readonly<Partial<Record<DamageType, number>>>): { types: readonly DpsHintTypeRow[]; ammo: number } {
   const types: DpsHintTypeRow[] = [];
-  let sum = 0;
+  let ammo = 0;
   for (const dt of DAMAGE_TYPE_ORDER) {
     const value = damageByType[dt];
     if (value === undefined || value === 0) continue;
-    sum += value;
+    ammo += value;
   }
   for (const dt of DAMAGE_TYPE_ORDER) {
     const value = damageByType[dt];
     if (value === undefined || value === 0) continue;
-    const percent = sum > 0 ? value / sum : 0;
+    const percent = ammo > 0 ? value / ammo : 0;
     types.push({ type: dt, iconUrl: DAMAGE_ICON_URLS[dt], damage: value, percent });
   }
-  return { types, sum };
+  return { types, ammo };
 }
 
 function buildFactorRows(factors: readonly DamageFactor[], itemNameCatalog: ItemNameCatalog, language: Language): readonly DpsHintFactorRow[] {

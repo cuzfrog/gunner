@@ -221,7 +221,7 @@ export const ZH: LanguageSlice<"zh"> = {
   "dpsHint.damageType.thermal": { zh: "热能" },
   "dpsHint.damageType.kinetic": { zh: "动能" },
   "dpsHint.damageType.explosive": { zh: "爆炸" },
-  "dpsHint.sum": { zh: "合计" },
+  "dpsHint.ammo": { zh: "弹药" },
   "dpsHint.factor.base": { zh: "基础" },
   "dpsHint.factor.module": { zh: "装备" },
   "dpsHint.factor.skill": { zh: "技能" },

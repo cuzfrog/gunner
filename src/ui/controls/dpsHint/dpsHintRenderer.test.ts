@@ -11,13 +11,13 @@ function makeModel(): DpsHintModel {
           { type: "em", iconUrl: "images/icons/damage-em.png", damage: 30, percent: 0.6 },
           { type: "thermal", iconUrl: "images/icons/damage-thermal.png", damage: 20, percent: 0.4 },
         ],
-        sum: 50,
+        ammo: 50,
         factors: [
           { kind: "base", multiplier: 3, cumulative: 3, source: undefined },
           { kind: "module", multiplier: 1.3, cumulative: 3.9, source: "Heat Sink" },
           { kind: "skill", multiplier: 1.1, cumulative: 4.29, source: "Surgical Strike" },
         ],
-        summary: { volley: 858, cycleTime: 3.5, dps: 245.1 },
+        summary: { ammo: 50, multiplier: 4.29, count: 4, volley: 858, cycleTime: 3.5, dps: 245.1 },
       },
     ],
   };
@@ -88,18 +88,18 @@ describe("DpsHintRendererImpl", () => {
     expect(emChildren[3].textContent).toBe("60%");
   });
 
-  test("renders sum row with label and value", () => {
+  test("renders ammo row with label and value", () => {
     const renderer = new DpsHintRendererImpl({ t: (key) => key });
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     renderer.render(makeModel(), container as unknown as HTMLElement);
     const root = container.children[0] as FakeElement;
     const group = elementChildren(root)[0];
     const groupChildren = elementChildren(group);
-    const sumRow = groupChildren[3];
-    expect(sumRow.className).toContain("dps-hint-sum-row");
-    const sumChildren = elementChildren(sumRow);
-    expect(sumChildren[0].textContent).toBe("dpsHint.sum");
-    expect(sumChildren[1].textContent).toBe("50.0");
+    const ammoRow = groupChildren[3];
+    expect(ammoRow.className).toContain("dps-hint-sum-row");
+    const ammoChildren = elementChildren(ammoRow);
+    expect(ammoChildren[0].textContent).toBe("dpsHint.ammo");
+    expect(ammoChildren[1].textContent).toBe("50.0");
   });
 
   test("renders factor rows with kind, multiplier, cumulative, and source", () => {
@@ -146,7 +146,7 @@ describe("DpsHintRendererImpl", () => {
     const summaryChildren = elementChildren(summaryEl);
     const volleyRow = summaryChildren[0];
     expect(elementChildren(volleyRow)[0].textContent).toBe("dpsHint.volley");
-    expect(elementChildren(volleyRow)[1].textContent).toBe("858.0");
+    expect(elementChildren(volleyRow)[1].textContent).toBe("50.0 × 4.29 × 4 = 858.0");
     const cycleRow = summaryChildren[1];
     expect(elementChildren(cycleRow)[0].textContent).toBe("dpsHint.cycleTime");
     expect(elementChildren(cycleRow)[1].textContent).toBe("3.50s");
@@ -161,8 +161,8 @@ describe("DpsHintRendererImpl", () => {
     const container = globalThis.document.createElement("div") as unknown as FakeElement;
     const model: DpsHintModel = {
       groups: [
-        { name: "Group A", types: [], sum: 0, factors: [], summary: { volley: 0, cycleTime: 1, dps: 0 } },
-        { name: "Group B", types: [], sum: 0, factors: [], summary: { volley: 0, cycleTime: 1, dps: 0 } },
+        { name: "Group A", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
+        { name: "Group B", types: [], ammo: 0, factors: [], summary: { ammo: 0, multiplier: 1, count: 0, volley: 0, cycleTime: 1, dps: 0 } },
       ],
     };
     renderer.render(model, container as unknown as HTMLElement);

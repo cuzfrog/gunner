@@ -108,6 +108,8 @@
 
 .dps-hint-summary-row .dps-hint-value {
   color: var(--text-primary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .dps-hint-dps-row {
